@@ -8,6 +8,11 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
+// Commercial Module
+import ClientsPage from "./pages/comercial/Clients";
+import SalesPage from "./pages/comercial/Sales";
+import OrdersPage from "./pages/comercial/Orders";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -20,8 +25,14 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            
+            {/* Commercial Module */}
+            <Route path="/comercial/clientes" element={<ClientsPage />} />
+            <Route path="/comercial/vendas" element={<SalesPage />} />
+            <Route path="/comercial/pedidos" element={<OrdersPage />} />
+            <Route path="/comercial/orcamentos" element={<PlaceholderPage title="Orçamentos" />} />
+            
             {/* ERP Modules - Placeholder routes */}
-            <Route path="/comercial/*" element={<PlaceholderPage title="Comercial" />} />
             <Route path="/financeiro/*" element={<PlaceholderPage title="Financeiro" />} />
             <Route path="/fiscal/*" element={<PlaceholderPage title="Fiscal" />} />
             <Route path="/estoque/*" element={<PlaceholderPage title="Estoque" />} />
