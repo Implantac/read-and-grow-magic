@@ -13,6 +13,11 @@ import ClientsPage from "./pages/comercial/Clients";
 import SalesPage from "./pages/comercial/Sales";
 import OrdersPage from "./pages/comercial/Orders";
 
+// Financial Module
+import AccountsPayable from "./pages/financeiro/AccountsPayable";
+import AccountsReceivable from "./pages/financeiro/AccountsReceivable";
+import CashFlow from "./pages/financeiro/CashFlow";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -32,8 +37,13 @@ const App = () => (
             <Route path="/comercial/pedidos" element={<OrdersPage />} />
             <Route path="/comercial/orcamentos" element={<PlaceholderPage title="Orçamentos" />} />
             
+            {/* Financial Module */}
+            <Route path="/financeiro/pagar" element={<AccountsPayable />} />
+            <Route path="/financeiro/receber" element={<AccountsReceivable />} />
+            <Route path="/financeiro/fluxo" element={<CashFlow />} />
+            <Route path="/financeiro/conciliacao" element={<PlaceholderPage title="Conciliação Bancária" />} />
+            
             {/* ERP Modules - Placeholder routes */}
-            <Route path="/financeiro/*" element={<PlaceholderPage title="Financeiro" />} />
             <Route path="/fiscal/*" element={<PlaceholderPage title="Fiscal" />} />
             <Route path="/estoque/*" element={<PlaceholderPage title="Estoque" />} />
             <Route path="/compras/*" element={<PlaceholderPage title="Compras" />} />
