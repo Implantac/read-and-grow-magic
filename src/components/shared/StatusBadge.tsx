@@ -1,6 +1,7 @@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { OrderStatus, SaleStatus } from '@/types/commercial';
+import type { PaymentStatus } from '@/types/financial';
 
 type StatusVariant = 'default' | 'success' | 'warning' | 'destructive' | 'info' | 'secondary';
 
@@ -39,6 +40,13 @@ const priorityConfig: Record<string, StatusConfig> = {
   urgent: { label: 'Urgente', variant: 'destructive' },
 };
 
+const paymentStatusConfig: Record<PaymentStatus, StatusConfig> = {
+  paid: { label: 'Pago', variant: 'success' },
+  pending: { label: 'Pendente', variant: 'warning' },
+  overdue: { label: 'Vencido', variant: 'destructive' },
+  cancelled: { label: 'Cancelado', variant: 'secondary' },
+};
+
 const variantStyles: Record<StatusVariant, string> = {
   default: 'bg-primary/10 text-primary border-primary/20',
   success: 'bg-success/10 text-success border-success/20',
@@ -48,8 +56,8 @@ const variantStyles: Record<StatusVariant, string> = {
   secondary: 'bg-muted text-muted-foreground border-border',
 };
 
-interface StatusBadgeProps {
-  type: 'order' | 'sale' | 'client' | 'priority';
+export interface StatusBadgeProps {
+  type: 'order' | 'sale' | 'client' | 'priority' | 'payment';
   status: string;
   className?: string;
 }
@@ -69,6 +77,9 @@ export function StatusBadge({ type, status, className }: StatusBadgeProps) {
       break;
     case 'priority':
       config = priorityConfig[status] || { label: status, variant: 'default' };
+      break;
+    case 'payment':
+      config = paymentStatusConfig[status as PaymentStatus] || { label: status, variant: 'default' };
       break;
     default:
       config = { label: status, variant: 'default' };
