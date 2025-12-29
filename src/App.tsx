@@ -18,6 +18,11 @@ import AccountsPayable from "./pages/financeiro/AccountsPayable";
 import AccountsReceivable from "./pages/financeiro/AccountsReceivable";
 import CashFlow from "./pages/financeiro/CashFlow";
 
+// Fiscal Module
+import NFePage from "./pages/fiscal/NFe";
+import NFCePage from "./pages/fiscal/NFCe";
+import FiscalReportsPage from "./pages/fiscal/FiscalReports";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -43,8 +48,12 @@ const App = () => (
             <Route path="/financeiro/fluxo" element={<CashFlow />} />
             <Route path="/financeiro/conciliacao" element={<PlaceholderPage title="Conciliação Bancária" />} />
             
+            {/* Fiscal Module */}
+            <Route path="/fiscal/nfe" element={<NFePage />} />
+            <Route path="/fiscal/nfce" element={<NFCePage />} />
+            <Route path="/fiscal/relatorios" element={<FiscalReportsPage />} />
+
             {/* ERP Modules - Placeholder routes */}
-            <Route path="/fiscal/*" element={<PlaceholderPage title="Fiscal" />} />
             <Route path="/estoque/*" element={<PlaceholderPage title="Estoque" />} />
             <Route path="/compras/*" element={<PlaceholderPage title="Compras" />} />
             <Route path="/producao/*" element={<PlaceholderPage title="Produção" />} />
