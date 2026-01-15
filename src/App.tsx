@@ -23,6 +23,13 @@ import NFePage from "./pages/fiscal/NFe";
 import NFCePage from "./pages/fiscal/NFCe";
 import FiscalReportsPage from "./pages/fiscal/FiscalReports";
 
+// WMS Module
+import ReceivingPage from "./pages/wms/Receiving";
+import StoragePage from "./pages/wms/Storage";
+import PickingPage from "./pages/wms/Picking";
+import PackingPage from "./pages/wms/Packing";
+import InventoryPage from "./pages/wms/Inventory";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -57,8 +64,14 @@ const App = () => (
             <Route path="/estoque/*" element={<PlaceholderPage title="Estoque" />} />
             <Route path="/compras/*" element={<PlaceholderPage title="Compras" />} />
             <Route path="/producao/*" element={<PlaceholderPage title="Produção" />} />
-            {/* WMS Modules - Placeholder routes */}
-            <Route path="/wms/*" element={<PlaceholderPage title="WMS" />} />
+            
+            {/* WMS Module */}
+            <Route path="/wms/recebimento" element={<ReceivingPage />} />
+            <Route path="/wms/enderecamento" element={<StoragePage />} />
+            <Route path="/wms/picking" element={<PickingPage />} />
+            <Route path="/wms/packing" element={<PackingPage />} />
+            <Route path="/wms/inventario" element={<InventoryPage />} />
+            <Route path="/wms/movimentacoes" element={<PlaceholderPage title="Movimentações WMS" />} />
             {/* Config - Placeholder routes */}
             <Route path="/config/*" element={<PlaceholderPage title="Configurações" />} />
           </Route>
