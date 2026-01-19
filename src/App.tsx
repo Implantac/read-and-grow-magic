@@ -30,6 +30,11 @@ import PickingPage from "./pages/wms/Picking";
 import PackingPage from "./pages/wms/Packing";
 import InventoryPage from "./pages/wms/Inventory";
 
+// Production Module
+import ProductionOrdersPage from "./pages/producao/ProductionOrders";
+import MaterialConsumptionPage from "./pages/producao/MaterialConsumption";
+import TimeEntriesPage from "./pages/producao/TimeEntries";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -63,7 +68,11 @@ const App = () => (
             {/* ERP Modules - Placeholder routes */}
             <Route path="/estoque/*" element={<PlaceholderPage title="Estoque" />} />
             <Route path="/compras/*" element={<PlaceholderPage title="Compras" />} />
-            <Route path="/producao/*" element={<PlaceholderPage title="Produção" />} />
+            
+            {/* Production Module */}
+            <Route path="/producao/ordens" element={<ProductionOrdersPage />} />
+            <Route path="/producao/consumo" element={<MaterialConsumptionPage />} />
+            <Route path="/producao/apontamentos" element={<TimeEntriesPage />} />
             
             {/* WMS Module */}
             <Route path="/wms/recebimento" element={<ReceivingPage />} />
