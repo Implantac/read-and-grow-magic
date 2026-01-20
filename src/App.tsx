@@ -35,6 +35,11 @@ import ProductionOrdersPage from "./pages/producao/ProductionOrders";
 import MaterialConsumptionPage from "./pages/producao/MaterialConsumption";
 import TimeEntriesPage from "./pages/producao/TimeEntries";
 
+// Purchasing Module
+import SuppliersPage from "./pages/compras/Suppliers";
+import PurchaseOrdersPage from "./pages/compras/PurchaseOrders";
+import QuotationsPage from "./pages/compras/Quotations";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -67,7 +72,11 @@ const App = () => (
 
             {/* ERP Modules - Placeholder routes */}
             <Route path="/estoque/*" element={<PlaceholderPage title="Estoque" />} />
-            <Route path="/compras/*" element={<PlaceholderPage title="Compras" />} />
+            
+            {/* Purchasing Module */}
+            <Route path="/compras/fornecedores" element={<SuppliersPage />} />
+            <Route path="/compras/pedidos" element={<PurchaseOrdersPage />} />
+            <Route path="/compras/cotacoes" element={<QuotationsPage />} />
             
             {/* Production Module */}
             <Route path="/producao/ordens" element={<ProductionOrdersPage />} />
