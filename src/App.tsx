@@ -40,6 +40,11 @@ import SuppliersPage from "./pages/compras/Suppliers";
 import PurchaseOrdersPage from "./pages/compras/PurchaseOrders";
 import QuotationsPage from "./pages/compras/Quotations";
 
+// Administration Module
+import UsersPage from "./pages/admin/Users";
+import CompaniesPage from "./pages/admin/Companies";
+import ParametersPage from "./pages/admin/Parameters";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -90,6 +95,12 @@ const App = () => (
             <Route path="/wms/packing" element={<PackingPage />} />
             <Route path="/wms/inventario" element={<InventoryPage />} />
             <Route path="/wms/movimentacoes" element={<PlaceholderPage title="Movimentações WMS" />} />
+            
+            {/* Administration Module */}
+            <Route path="/admin/usuarios" element={<UsersPage />} />
+            <Route path="/admin/empresas" element={<CompaniesPage />} />
+            <Route path="/admin/parametros" element={<ParametersPage />} />
+            
             {/* Config - Placeholder routes */}
             <Route path="/config/*" element={<PlaceholderPage title="Configurações" />} />
           </Route>
