@@ -23,6 +23,12 @@ import NFePage from "./pages/fiscal/NFe";
 import NFCePage from "./pages/fiscal/NFCe";
 import FiscalReportsPage from "./pages/fiscal/FiscalReports";
 
+// ERP Inventory Module
+import InventoryProductsPage from "./pages/estoque/Products";
+import InventoryMovementsPage from "./pages/estoque/Movements";
+import KardexPage from "./pages/estoque/Kardex";
+import StockLevelsPage from "./pages/estoque/StockLevels";
+
 // WMS Module
 import ReceivingPage from "./pages/wms/Receiving";
 import StoragePage from "./pages/wms/Storage";
@@ -75,8 +81,12 @@ const App = () => (
             <Route path="/fiscal/nfce" element={<NFCePage />} />
             <Route path="/fiscal/relatorios" element={<FiscalReportsPage />} />
 
-            {/* ERP Modules - Placeholder routes */}
-            <Route path="/estoque/*" element={<PlaceholderPage title="Estoque" />} />
+            {/* Inventory Module */}
+            <Route path="/estoque/produtos" element={<InventoryProductsPage />} />
+            <Route path="/estoque/movimentacoes" element={<InventoryMovementsPage />} />
+            <Route path="/estoque/kardex" element={<KardexPage />} />
+            <Route path="/estoque/saldos" element={<StockLevelsPage />} />
+            <Route path="/estoque/categorias" element={<PlaceholderPage title="Categorias" />} />
             
             {/* Purchasing Module */}
             <Route path="/compras/fornecedores" element={<SuppliersPage />} />
