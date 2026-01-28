@@ -40,6 +40,8 @@ import {
   AlertCircle,
   CheckCircle,
   ShoppingCart,
+  BarChart3,
+  RefreshCcw,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -49,6 +51,8 @@ import {
   categories,
   stockLevelStatusConfig,
 } from '@/data/inventoryMockData';
+import { ABCCurveChart } from '@/components/estoque/ABCCurveChart';
+import { InventoryTurnoverChart } from '@/components/estoque/InventoryTurnoverChart';
 import type { StockLevel, StockLevelStatus, StockLevelFilters } from '@/types/inventory';
 
 export default function StockLevelsPage() {
@@ -191,9 +195,9 @@ export default function StockLevelsPage() {
 
       {/* Tabs for different views */}
       <Tabs defaultValue="all" className="space-y-4">
-        <TabsList>
+        <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="all">Todos ({stockLevels.length})</TabsTrigger>
-          <TabsTrigger value="critical" className="text-red-600">
+          <TabsTrigger value="critical" className="text-destructive">
             Críticos ({criticalItems.length})
           </TabsTrigger>
           <TabsTrigger value="low" className="text-amber-600">
@@ -201,6 +205,14 @@ export default function StockLevelsPage() {
           </TabsTrigger>
           <TabsTrigger value="excess" className="text-blue-600">
             Excesso ({excessItems.length})
+          </TabsTrigger>
+          <TabsTrigger value="abc" className="gap-1">
+            <BarChart3 className="h-4 w-4" />
+            Curva ABC
+          </TabsTrigger>
+          <TabsTrigger value="turnover" className="gap-1">
+            <RefreshCcw className="h-4 w-4" />
+            Giro de Estoque
           </TabsTrigger>
         </TabsList>
 
@@ -306,6 +318,14 @@ export default function StockLevelsPage() {
             formatNumber={formatNumber}
             formatCurrency={formatCurrency}
           />
+        </TabsContent>
+
+        <TabsContent value="abc">
+          <ABCCurveChart stockLevels={stockLevels} />
+        </TabsContent>
+
+        <TabsContent value="turnover">
+          <InventoryTurnoverChart stockLevels={stockLevels} />
         </TabsContent>
 
         <TabsContent value="excess">
