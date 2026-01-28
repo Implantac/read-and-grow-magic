@@ -30,11 +30,13 @@ import KardexPage from "./pages/estoque/Kardex";
 import StockLevelsPage from "./pages/estoque/StockLevels";
 
 // WMS Module
+import WMSDashboardPage from "./pages/wms/Dashboard";
 import ReceivingPage from "./pages/wms/Receiving";
 import StoragePage from "./pages/wms/Storage";
 import PickingPage from "./pages/wms/Picking";
 import PackingPage from "./pages/wms/Packing";
 import InventoryPage from "./pages/wms/Inventory";
+import WMSMovementsPage from "./pages/wms/Movements";
 
 // Production Module
 import ProductionOrdersPage from "./pages/producao/ProductionOrders";
@@ -99,12 +101,13 @@ const App = () => (
             <Route path="/producao/apontamentos" element={<TimeEntriesPage />} />
             
             {/* WMS Module */}
+            <Route path="/wms/dashboard" element={<WMSDashboardPage />} />
             <Route path="/wms/recebimento" element={<ReceivingPage />} />
             <Route path="/wms/enderecamento" element={<StoragePage />} />
             <Route path="/wms/picking" element={<PickingPage />} />
             <Route path="/wms/packing" element={<PackingPage />} />
             <Route path="/wms/inventario" element={<InventoryPage />} />
-            <Route path="/wms/movimentacoes" element={<PlaceholderPage title="Movimentações WMS" />} />
+            <Route path="/wms/movimentacoes" element={<WMSMovementsPage />} />
             
             {/* Administration Module */}
             <Route path="/admin/usuarios" element={<UsersPage />} />

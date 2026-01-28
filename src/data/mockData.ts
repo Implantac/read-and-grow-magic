@@ -285,6 +285,7 @@ export const navigationItems = [
     href: '/wms',
     icon: 'Warehouse',
     children: [
+      { title: 'Dashboard WMS', href: '/wms/dashboard', icon: 'LayoutDashboard' },
       { title: 'Recebimento', href: '/wms/recebimento', icon: 'PackagePlus' },
       { title: 'Endereçamento', href: '/wms/enderecamento', icon: 'MapPin' },
       { title: 'Picking', href: '/wms/picking', icon: 'PackageSearch' },
@@ -294,14 +295,13 @@ export const navigationItems = [
     ],
   },
   {
-    title: 'Configurações',
-    href: '/config',
+    title: 'Administração',
+    href: '/admin',
     icon: 'Settings',
     children: [
-      { title: 'Usuários', href: '/config/usuarios', icon: 'Users' },
-      { title: 'Empresas', href: '/config/empresas', icon: 'Building' },
-      { title: 'Parâmetros', href: '/config/parametros', icon: 'Sliders' },
-      { title: 'Integrações', href: '/config/integracoes', icon: 'Plug' },
+      { title: 'Usuários', href: '/admin/usuarios', icon: 'Users' },
+      { title: 'Empresas', href: '/admin/empresas', icon: 'Building' },
+      { title: 'Parâmetros', href: '/admin/parametros', icon: 'Sliders' },
     ],
   },
 ];
