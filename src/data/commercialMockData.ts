@@ -1,4 +1,4 @@
-import type { Client, Sale, Order, OrderStatus, SaleStatus, PaymentMethod } from '@/types/commercial';
+import type { Client, Sale, Order, OrderStatus, SaleStatus, PaymentMethod, Quotation, QuotationStatus } from '@/types/commercial';
 
 // Mock Clients
 export const mockClients: Client[] = [
@@ -535,6 +535,170 @@ export const mockOrders: Order[] = [
   },
 ];
 
+// Mock Quotations
+export const mockQuotations: Quotation[] = [
+  {
+    id: '1',
+    number: 'ORC-2024-0001',
+    clientId: '1',
+    clientName: 'Tech Solutions Ltda',
+    date: '2024-01-15T10:00:00Z',
+    validUntil: '2024-02-15T23:59:59Z',
+    items: [
+      { id: '1', productId: 'P001', productName: 'Notebook Dell Inspiron', productCode: 'DELL-001', quantity: 15, unitPrice: 4500, discount: 0, total: 67500 },
+      { id: '2', productId: 'P002', productName: 'Mouse Wireless Logitech', productCode: 'LOG-001', quantity: 30, unitPrice: 150, discount: 0, total: 4500 },
+    ],
+    subtotal: 72000,
+    discount: 3600,
+    total: 68400,
+    status: 'sent',
+    salesRepId: '1',
+    salesRepName: 'Carlos Silva',
+    notes: 'Proposta para renovação de equipamentos',
+    createdAt: '2024-01-15T10:00:00Z',
+    updatedAt: '2024-01-15T10:30:00Z',
+  },
+  {
+    id: '2',
+    number: 'ORC-2024-0002',
+    clientId: '2',
+    clientName: 'Comércio ABC S.A.',
+    date: '2024-01-14T14:00:00Z',
+    validUntil: '2024-01-29T23:59:59Z',
+    items: [
+      { id: '1', productId: 'P003', productName: 'Impressora HP LaserJet', productCode: 'HP-001', quantity: 10, unitPrice: 2800, discount: 1400, total: 26600 },
+    ],
+    subtotal: 28000,
+    discount: 1400,
+    total: 26600,
+    status: 'approved',
+    salesRepId: '2',
+    salesRepName: 'Maria Santos',
+    createdAt: '2024-01-14T14:00:00Z',
+    updatedAt: '2024-01-16T09:00:00Z',
+  },
+  {
+    id: '3',
+    number: 'ORC-2024-0003',
+    clientId: '6',
+    clientName: 'Supermercados Família',
+    date: '2024-01-13T09:30:00Z',
+    validUntil: '2024-01-28T23:59:59Z',
+    items: [
+      { id: '1', productId: 'P006', productName: 'Monitor Samsung 27"', productCode: 'SAM-001', quantity: 50, unitPrice: 1800, discount: 4500, total: 85500 },
+      { id: '2', productId: 'P007', productName: 'Desktop HP ProDesk', productCode: 'HP-002', quantity: 25, unitPrice: 3200, discount: 4000, total: 76000 },
+    ],
+    subtotal: 170000,
+    discount: 8500,
+    total: 161500,
+    status: 'converted',
+    salesRepId: '2',
+    salesRepName: 'Maria Santos',
+    notes: 'Convertido para pedido PED-2024-0003',
+    createdAt: '2024-01-13T09:30:00Z',
+    updatedAt: '2024-01-14T11:00:00Z',
+  },
+  {
+    id: '4',
+    number: 'ORC-2024-0004',
+    clientId: '8',
+    clientName: 'Construtora Horizonte',
+    date: '2024-01-12T11:00:00Z',
+    validUntil: '2024-01-27T23:59:59Z',
+    items: [
+      { id: '1', productId: 'P007', productName: 'Desktop HP ProDesk', productCode: 'HP-002', quantity: 100, unitPrice: 3200, discount: 16000, total: 304000 },
+    ],
+    subtotal: 320000,
+    discount: 16000,
+    total: 304000,
+    status: 'draft',
+    salesRepId: '1',
+    salesRepName: 'Carlos Silva',
+    notes: 'Aguardando aprovação de desconto pela gerência',
+    createdAt: '2024-01-12T11:00:00Z',
+    updatedAt: '2024-01-12T11:00:00Z',
+  },
+  {
+    id: '5',
+    number: 'ORC-2024-0005',
+    clientId: '3',
+    clientName: 'Maria Silva',
+    date: '2024-01-10T16:00:00Z',
+    validUntil: '2024-01-17T23:59:59Z',
+    items: [
+      { id: '1', productId: 'P004', productName: 'Teclado Mecânico Redragon', productCode: 'RED-001', quantity: 2, unitPrice: 350, discount: 0, total: 700 },
+      { id: '2', productId: 'P005', productName: 'Headset Gamer HyperX', productCode: 'HYP-001', quantity: 2, unitPrice: 450, discount: 0, total: 900 },
+    ],
+    subtotal: 1600,
+    discount: 0,
+    total: 1600,
+    status: 'expired',
+    salesRepId: '1',
+    salesRepName: 'Carlos Silva',
+    createdAt: '2024-01-10T16:00:00Z',
+    updatedAt: '2024-01-17T23:59:59Z',
+  },
+  {
+    id: '6',
+    number: 'ORC-2024-0006',
+    clientId: '7',
+    clientName: 'João Pedro Santos',
+    date: '2024-01-09T10:30:00Z',
+    validUntil: '2024-01-24T23:59:59Z',
+    items: [
+      { id: '1', productId: 'P009', productName: 'SSD Samsung 1TB', productCode: 'SAM-002', quantity: 3, unitPrice: 550, discount: 0, total: 1650 },
+    ],
+    subtotal: 1650,
+    discount: 0,
+    total: 1650,
+    status: 'rejected',
+    salesRepId: '2',
+    salesRepName: 'Maria Santos',
+    notes: 'Cliente optou por outro fornecedor',
+    createdAt: '2024-01-09T10:30:00Z',
+    updatedAt: '2024-01-11T14:00:00Z',
+  },
+  {
+    id: '7',
+    number: 'ORC-2024-0007',
+    clientId: '1',
+    clientName: 'Tech Solutions Ltda',
+    date: '2024-01-08T08:00:00Z',
+    validUntil: '2024-02-08T23:59:59Z',
+    items: [
+      { id: '1', productId: 'P008', productName: 'Webcam Logitech C920', productCode: 'LOG-002', quantity: 20, unitPrice: 650, discount: 650, total: 12350 },
+    ],
+    subtotal: 13000,
+    discount: 650,
+    total: 12350,
+    status: 'sent',
+    salesRepId: '1',
+    salesRepName: 'Carlos Silva',
+    createdAt: '2024-01-08T08:00:00Z',
+    updatedAt: '2024-01-08T09:00:00Z',
+  },
+  {
+    id: '8',
+    number: 'ORC-2024-0008',
+    clientId: '2',
+    clientName: 'Comércio ABC S.A.',
+    date: '2024-01-15T15:00:00Z',
+    validUntil: '2024-02-15T23:59:59Z',
+    items: [
+      { id: '1', productId: 'P001', productName: 'Notebook Dell Inspiron', productCode: 'DELL-001', quantity: 5, unitPrice: 4500, discount: 0, total: 22500 },
+      { id: '2', productId: 'P003', productName: 'Impressora HP LaserJet', productCode: 'HP-001', quantity: 3, unitPrice: 2800, discount: 0, total: 8400 },
+    ],
+    subtotal: 30900,
+    discount: 1545,
+    total: 29355,
+    status: 'draft',
+    salesRepId: '2',
+    salesRepName: 'Maria Santos',
+    createdAt: '2024-01-15T15:00:00Z',
+    updatedAt: '2024-01-15T15:00:00Z',
+  },
+];
+
 // Helper functions
 export const getOrderStatusLabel = (status: OrderStatus): string => {
   const labels: Record<OrderStatus, string> = {
@@ -569,6 +733,18 @@ export const getPaymentMethodLabel = (method: PaymentMethod): string => {
     transfer: 'Transferência',
   };
   return labels[method];
+};
+
+export const getQuotationStatusLabel = (status: QuotationStatus): string => {
+  const labels: Record<QuotationStatus, string> = {
+    draft: 'Rascunho',
+    sent: 'Enviado',
+    approved: 'Aprovado',
+    rejected: 'Rejeitado',
+    expired: 'Expirado',
+    converted: 'Convertido',
+  };
+  return labels[status];
 };
 
 export const clientSegments = [
