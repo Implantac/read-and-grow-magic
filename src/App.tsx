@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import ClientsPage from "./pages/comercial/Clients";
 import SalesPage from "./pages/comercial/Sales";
 import OrdersPage from "./pages/comercial/Orders";
+import CommercialQuotationsPage from "./pages/comercial/Quotations";
 
 // Financial Module
 import AccountsPayable from "./pages/financeiro/AccountsPayable";
@@ -70,7 +71,7 @@ const App = () => (
             <Route path="/comercial/clientes" element={<ClientsPage />} />
             <Route path="/comercial/vendas" element={<SalesPage />} />
             <Route path="/comercial/pedidos" element={<OrdersPage />} />
-            <Route path="/comercial/orcamentos" element={<PlaceholderPage title="Orçamentos" />} />
+            <Route path="/comercial/orcamentos" element={<CommercialQuotationsPage />} />
             
             {/* Financial Module */}
             <Route path="/financeiro/pagar" element={<AccountsPayable />} />

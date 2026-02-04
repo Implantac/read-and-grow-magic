@@ -1,6 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { OrderStatus, SaleStatus } from '@/types/commercial';
+import type { OrderStatus, SaleStatus, QuotationStatus } from '@/types/commercial';
 import type { PaymentStatus } from '@/types/financial';
 
 type StatusVariant = 'default' | 'success' | 'warning' | 'destructive' | 'info' | 'secondary';
@@ -25,6 +25,15 @@ const saleStatusConfig: Record<SaleStatus, StatusConfig> = {
   completed: { label: 'Concluída', variant: 'success' },
   cancelled: { label: 'Cancelada', variant: 'destructive' },
   refunded: { label: 'Devolvida', variant: 'warning' },
+};
+
+const quotationStatusConfig: Record<QuotationStatus, StatusConfig> = {
+  draft: { label: 'Rascunho', variant: 'secondary' },
+  sent: { label: 'Enviado', variant: 'info' },
+  approved: { label: 'Aprovado', variant: 'success' },
+  rejected: { label: 'Rejeitado', variant: 'destructive' },
+  expired: { label: 'Expirado', variant: 'warning' },
+  converted: { label: 'Convertido', variant: 'default' },
 };
 
 const clientStatusConfig: Record<string, StatusConfig> = {
@@ -57,7 +66,7 @@ const variantStyles: Record<StatusVariant, string> = {
 };
 
 export interface StatusBadgeProps {
-  type: 'order' | 'sale' | 'client' | 'priority' | 'payment';
+  type: 'order' | 'sale' | 'client' | 'priority' | 'payment' | 'quotation';
   status: string;
   className?: string;
 }
@@ -71,6 +80,9 @@ export function StatusBadge({ type, status, className }: StatusBadgeProps) {
       break;
     case 'sale':
       config = saleStatusConfig[status as SaleStatus] || { label: status, variant: 'default' };
+      break;
+    case 'quotation':
+      config = quotationStatusConfig[status as QuotationStatus] || { label: status, variant: 'default' };
       break;
     case 'client':
       config = clientStatusConfig[status] || { label: status, variant: 'default' };

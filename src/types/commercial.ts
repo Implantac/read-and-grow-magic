@@ -133,3 +133,43 @@ export interface OrderFilters {
   priority?: string;
   paymentMethod?: string;
 }
+
+// Quotation Types
+export interface Quotation {
+  id: string;
+  number: string;
+  clientId: string;
+  clientName: string;
+  date: string;
+  validUntil: string;
+  items: QuotationItem[];
+  subtotal: number;
+  discount: number;
+  total: number;
+  status: QuotationStatus;
+  salesRepId: string;
+  salesRepName: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface QuotationItem {
+  id: string;
+  productId: string;
+  productName: string;
+  productCode: string;
+  quantity: number;
+  unitPrice: number;
+  discount: number;
+  total: number;
+}
+
+export type QuotationStatus = 'draft' | 'sent' | 'approved' | 'rejected' | 'expired' | 'converted';
+
+export interface QuotationFilters {
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: string;
+}
