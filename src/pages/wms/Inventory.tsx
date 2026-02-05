@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -125,6 +126,20 @@ export default function InventoryPage() {
           <h1 className="text-3xl font-bold tracking-tight">Inventário</h1>
           <p className="text-muted-foreground">Controle de estoque e movimentações</p>
         </div>
+        <ExportButton
+          data={filteredItems as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'productCode', label: 'Código' },
+            { key: 'productName', label: 'Produto' },
+            { key: 'category', label: 'Categoria' },
+            { key: 'location', label: 'Localização' },
+            { key: 'quantity', label: 'Quantidade' },
+            { key: 'availableQty', label: 'Disponível' },
+            { key: 'value', label: 'Valor', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+            { key: 'status', label: 'Status' },
+          ]}
+          filename="inventario_wms"
+        />
       </div>
 
       {/* Summary Cards */}

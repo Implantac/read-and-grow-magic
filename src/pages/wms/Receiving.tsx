@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -105,8 +106,18 @@ export default function ReceivingPage() {
           <h1 className="text-3xl font-bold tracking-tight">Recebimento</h1>
           <p className="text-muted-foreground">Gerenciamento de recebimento de mercadorias</p>
         </div>
+        <ExportButton
+          data={filteredOrders as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'orderNumber', label: 'Nº Ordem' },
+            { key: 'supplier', label: 'Fornecedor' },
+            { key: 'dock', label: 'Doca' },
+            { key: 'status', label: 'Status' },
+            { key: 'expectedDate', label: 'Data Prevista', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+          ]}
+          filename="recebimento_wms"
+        />
       </div>
-
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>

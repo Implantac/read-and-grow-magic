@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -92,10 +93,24 @@ export default function MaterialConsumptionPage() {
           <h1 className="text-3xl font-bold tracking-tight">Consumo de Matéria-Prima</h1>
           <p className="text-muted-foreground">Registro e acompanhamento do consumo de materiais</p>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Registrar Consumo
-        </Button>
+        <div className="flex gap-2">
+          <ExportButton
+            data={filteredConsumptions as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'orderNumber', label: 'Ordem' },
+              { key: 'componentCode', label: 'Código' },
+              { key: 'componentName', label: 'Material' },
+              { key: 'expectedQuantity', label: 'Qtd Esperada' },
+              { key: 'consumedQuantity', label: 'Qtd Consumida' },
+              { key: 'unit', label: 'Unidade' },
+            ]}
+            filename="consumo_materiais"
+          />
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            Registrar Consumo
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}

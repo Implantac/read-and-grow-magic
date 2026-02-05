@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
+  Download,
   FileText,
   Plus,
   Search,
   Filter,
-  Download,
   Send,
   XCircle,
   Eye,
@@ -17,6 +17,7 @@ import {
   AlertTriangle,
   Ban,
 } from 'lucide-react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -147,10 +148,24 @@ export default function NFePage() {
             Gerencie suas notas fiscais eletrônicas
           </p>
         </div>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Nova NF-e
-        </Button>
+        <div className="flex gap-2">
+          <ExportButton
+            data={filteredNFes as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'number', label: 'Número' },
+              { key: 'series', label: 'Série' },
+              { key: 'clientName', label: 'Destinatário' },
+              { key: 'totalValue', label: 'Valor', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+              { key: 'status', label: 'Status' },
+              { key: 'issuedAt', label: 'Emissão', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+            ]}
+            filename="nfe"
+          />
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            Nova NF-e
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}

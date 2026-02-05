@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, Pencil, Trash2, Eye, MoreHorizontal } from 'lucide-react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -292,10 +293,27 @@ export default function ClientsPage() {
           <h1 className="text-2xl font-bold text-foreground">Clientes</h1>
           <p className="text-muted-foreground">Gerencie sua base de clientes</p>
         </div>
-        <Button onClick={() => handleOpenForm()} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Novo Cliente
-        </Button>
+        <div className="flex gap-2">
+          <ExportButton
+            data={filteredClients as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'code', label: 'Código' },
+              { key: 'name', label: 'Nome/Razão Social' },
+              { key: 'document', label: 'CPF/CNPJ' },
+              { key: 'email', label: 'E-mail' },
+              { key: 'phone', label: 'Telefone' },
+              { key: 'address.city', label: 'Cidade' },
+              { key: 'address.state', label: 'UF' },
+              { key: 'creditLimit', label: 'Limite de Crédito', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+              { key: 'status', label: 'Status' },
+            ]}
+            filename="clientes"
+          />
+          <Button onClick={() => handleOpenForm()} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Novo Cliente
+          </Button>
+        </div>
       </div>
 
       <AdvancedFilters

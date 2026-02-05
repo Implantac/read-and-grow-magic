@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Plus, Search, Eye, Edit, Trash2, DollarSign, AlertTriangle, Clock, CheckCircle, Download, Mail } from 'lucide-react';
+import { Plus, Search, Eye, Edit, Trash2, DollarSign, AlertTriangle, Clock, CheckCircle, Mail } from 'lucide-react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -325,10 +326,18 @@ export default function AccountsReceivable() {
                 ))}
               </SelectContent>
             </Select>
-            <Button variant="outline" className="gap-2">
-              <Download className="h-4 w-4" />
-              Exportar
-            </Button>
+            <ExportButton
+              data={filteredAccounts as unknown as Record<string, unknown>[]}
+              columns={[
+                { key: 'description', label: 'Descrição' },
+                { key: 'client', label: 'Cliente' },
+                { key: 'category', label: 'Categoria' },
+                { key: 'dueDate', label: 'Vencimento', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+                { key: 'amount', label: 'Valor', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+                { key: 'status', label: 'Status' },
+              ]}
+              filename="contas_receber"
+            />
           </div>
         </CardContent>
       </Card>

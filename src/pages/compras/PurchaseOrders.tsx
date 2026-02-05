@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, Search, MoreHorizontal, Eye, Edit, Trash2, Send, CheckCircle, Package, FileText } from 'lucide-react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -153,10 +154,24 @@ export default function PurchaseOrdersPage() {
           <h1 className="text-3xl font-bold text-foreground">Pedidos de Compra</h1>
           <p className="text-muted-foreground">Gerencie os pedidos de compra</p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Pedido
-        </Button>
+        <div className="flex gap-2">
+          <ExportButton
+            data={filteredOrders as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'number', label: 'Número' },
+              { key: 'supplierName', label: 'Fornecedor' },
+              { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+              { key: 'total', label: 'Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+              { key: 'status', label: 'Status' },
+              { key: 'priority', label: 'Prioridade' },
+            ]}
+            filename="pedidos_compra"
+          />
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Pedido
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, Eye, MoreHorizontal, FileText, Truck, XCircle, CheckCircle } from 'lucide-react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
@@ -266,10 +267,24 @@ export default function OrdersPage() {
           <h1 className="text-2xl font-bold text-foreground">Pedidos</h1>
           <p className="text-muted-foreground">Gerencie pedidos de venda</p>
         </div>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Novo Pedido
-        </Button>
+        <div className="flex gap-2">
+          <ExportButton
+            data={filteredOrders as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'number', label: 'Pedido' },
+              { key: 'clientName', label: 'Cliente' },
+              { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+              { key: 'total', label: 'Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+              { key: 'priority', label: 'Prioridade' },
+              { key: 'status', label: 'Status' },
+            ]}
+            filename="pedidos"
+          />
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            Novo Pedido
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}

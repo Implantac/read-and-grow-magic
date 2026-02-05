@@ -16,6 +16,7 @@ import {
   Banknote,
   QrCode,
 } from 'lucide-react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -164,6 +165,19 @@ export default function NFCePage() {
             Gerencie suas notas fiscais de consumidor eletrônicas
           </p>
         </div>
+        <ExportButton
+          data={filteredNFCes as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'number', label: 'Número' },
+            { key: 'customerName', label: 'Cliente' },
+            { key: 'totalValue', label: 'Valor', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+            { key: 'paymentMethod', label: 'Pagamento' },
+            { key: 'status', label: 'Status' },
+            { key: 'issuedAt', label: 'Emissão', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+            { key: 'terminalId', label: 'Terminal' },
+          ]}
+          filename="nfce"
+        />
         <Button className="gap-2">
           <Plus className="h-4 w-4" />
           Nova Venda PDV

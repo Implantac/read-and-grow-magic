@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -98,10 +99,25 @@ export default function ProductionOrdersPage() {
           <h1 className="text-3xl font-bold tracking-tight">Ordens de Produção</h1>
           <p className="text-muted-foreground">Gerenciamento e acompanhamento da produção</p>
         </div>
-        <Button>
-          <FileText className="h-4 w-4 mr-2" />
-          Nova Ordem
-        </Button>
+        <div className="flex gap-2">
+          <ExportButton
+            data={filteredOrders as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'orderNumber', label: 'Nº Ordem' },
+              { key: 'productName', label: 'Produto' },
+              { key: 'productCode', label: 'Código' },
+              { key: 'quantity', label: 'Qtd Planejada' },
+              { key: 'producedQuantity', label: 'Qtd Produzida' },
+              { key: 'status', label: 'Status' },
+              { key: 'priority', label: 'Prioridade' },
+            ]}
+            filename="ordens_producao"
+          />
+          <Button>
+            <FileText className="h-4 w-4 mr-2" />
+            Nova Ordem
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
