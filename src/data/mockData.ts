@@ -295,6 +295,17 @@ export const navigationItems = [
     ],
   },
   {
+    title: 'Relatórios',
+    href: '/relatorios',
+    icon: 'BarChart3',
+    children: [
+      { title: 'Vendas', href: '/relatorios/vendas', icon: 'ShoppingBag' },
+      { title: 'Estoque', href: '/relatorios/estoque', icon: 'Package' },
+      { title: 'Financeiro', href: '/relatorios/financeiro', icon: 'Wallet' },
+      { title: 'Produção', href: '/relatorios/producao', icon: 'Factory' },
+    ],
+  },
+  {
     title: 'Administração',
     href: '/admin',
     icon: 'Settings',

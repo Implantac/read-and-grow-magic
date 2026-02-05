@@ -49,6 +49,12 @@ import SuppliersPage from "./pages/compras/Suppliers";
 import PurchaseOrdersPage from "./pages/compras/PurchaseOrders";
 import QuotationsPage from "./pages/compras/Quotations";
 
+// Reports Module
+import SalesReport from "./pages/relatorios/SalesReport";
+import InventoryReport from "./pages/relatorios/InventoryReport";
+import FinancialReport from "./pages/relatorios/FinancialReport";
+import ProductionReport from "./pages/relatorios/ProductionReport";
+
 // Administration Module
 import UsersPage from "./pages/admin/Users";
 import CompaniesPage from "./pages/admin/Companies";
@@ -110,6 +116,12 @@ const App = () => (
             <Route path="/wms/inventario" element={<InventoryPage />} />
             <Route path="/wms/movimentacoes" element={<WMSMovementsPage />} />
             
+            {/* Reports Module */}
+            <Route path="/relatorios/vendas" element={<SalesReport />} />
+            <Route path="/relatorios/estoque" element={<InventoryReport />} />
+            <Route path="/relatorios/financeiro" element={<FinancialReport />} />
+            <Route path="/relatorios/producao" element={<ProductionReport />} />
+
             {/* Administration Module */}
             <Route path="/admin/usuarios" element={<UsersPage />} />
             <Route path="/admin/empresas" element={<CompaniesPage />} />
