@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -141,10 +142,26 @@ export default function StockLevelsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Níveis de Estoque</h1>
           <p className="text-muted-foreground">Monitoramento de saldos e alertas</p>
         </div>
-        <Button variant="outline">
-          <ShoppingCart className="mr-2 h-4 w-4" />
-          Gerar Pedido de Compra
-        </Button>
+        <div className="flex gap-2">
+          <ExportButton
+            data={filteredLevels as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'productCode', label: 'Código' },
+              { key: 'productName', label: 'Produto' },
+              { key: 'category', label: 'Categoria' },
+              { key: 'currentStock', label: 'Estoque Atual' },
+              { key: 'minStock', label: 'Mínimo' },
+              { key: 'maxStock', label: 'Máximo' },
+              { key: 'totalValue', label: 'Valor Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+              { key: 'status', label: 'Status' },
+            ]}
+            filename="niveis_estoque"
+          />
+          <Button variant="outline">
+            <ShoppingCart className="mr-2 h-4 w-4" />
+            Gerar Pedido de Compra
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}

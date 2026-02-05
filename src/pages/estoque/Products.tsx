@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -122,10 +123,26 @@ export default function ProductsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Produtos</h1>
           <p className="text-muted-foreground">Cadastro e controle de produtos</p>
         </div>
-        <Button onClick={() => { setSelectedProduct(null); setIsFormOpen(true); }}>
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Produto
-        </Button>
+        <div className="flex gap-2">
+          <ExportButton
+            data={filteredProducts as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'code', label: 'Código' },
+              { key: 'name', label: 'Nome' },
+              { key: 'type', label: 'Tipo' },
+              { key: 'category', label: 'Categoria' },
+              { key: 'unit', label: 'Unidade' },
+              { key: 'costPrice', label: 'Custo', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+              { key: 'salePrice', label: 'Preço Venda', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+              { key: 'status', label: 'Status' },
+            ]}
+            filename="produtos"
+          />
+          <Button onClick={() => { setSelectedProduct(null); setIsFormOpen(true); }}>
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Produto
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}

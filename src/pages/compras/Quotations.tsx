@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, Search, MoreHorizontal, Eye, Edit, Trash2, Send, CheckCircle, Users, Clock, FileCheck } from 'lucide-react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -144,10 +145,23 @@ export default function QuotationsPage() {
           <h1 className="text-3xl font-bold text-foreground">Cotações</h1>
           <p className="text-muted-foreground">Gerencie as cotações de compra</p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Nova Cotação
-        </Button>
+        <div className="flex gap-2">
+          <ExportButton
+            data={filteredQuotations as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'number', label: 'Número' },
+              { key: 'title', label: 'Título' },
+              { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+              { key: 'status', label: 'Status' },
+              { key: 'priority', label: 'Prioridade' },
+            ]}
+            filename="cotacoes_compra"
+          />
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Nova Cotação
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}

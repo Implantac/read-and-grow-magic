@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, Eye, MoreHorizontal, FileText, Send, CheckCircle, XCircle, ArrowRightCircle } from 'lucide-react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { format, isPast } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
@@ -266,10 +267,24 @@ export default function QuotationsPage() {
           <h1 className="text-2xl font-bold text-foreground">Orçamentos</h1>
           <p className="text-muted-foreground">Gerencie propostas comerciais</p>
         </div>
-        <Button className="gap-2">
-          <Plus className="h-4 w-4" />
-          Novo Orçamento
-        </Button>
+        <div className="flex gap-2">
+          <ExportButton
+            data={filteredQuotations as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'number', label: 'Número' },
+              { key: 'clientName', label: 'Cliente' },
+              { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+              { key: 'validUntil', label: 'Validade', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+              { key: 'total', label: 'Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+              { key: 'status', label: 'Status' },
+            ]}
+            filename="orcamentos"
+          />
+          <Button className="gap-2">
+            <Plus className="h-4 w-4" />
+            Novo Orçamento
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}

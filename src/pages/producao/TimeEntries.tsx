@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -136,10 +137,25 @@ export default function TimeEntriesPage() {
           <h1 className="text-3xl font-bold tracking-tight">Apontamentos</h1>
           <p className="text-muted-foreground">Registro de tempo e produção por operação</p>
         </div>
-        <Button onClick={() => setStartOpen(true)}>
-          <Play className="h-4 w-4 mr-2" />
-          Novo Apontamento
-        </Button>
+        <div className="flex gap-2">
+          <ExportButton
+            data={filteredEntries as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'orderNumber', label: 'Ordem' },
+              { key: 'operationName', label: 'Operação' },
+              { key: 'operator', label: 'Operador' },
+              { key: 'workCenter', label: 'Centro de Trabalho' },
+              { key: 'producedQuantity', label: 'Produzido' },
+              { key: 'rejectedQuantity', label: 'Rejeitado' },
+              { key: 'status', label: 'Status' },
+            ]}
+            filename="apontamentos"
+          />
+          <Button onClick={() => setStartOpen(true)}>
+            <Play className="h-4 w-4 mr-2" />
+            Novo Apontamento
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -108,10 +109,28 @@ export default function MovementsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Movimentações</h1>
           <p className="text-muted-foreground">Controle de entradas e saídas de estoque</p>
         </div>
-        <Button onClick={() => setIsFormOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nova Movimentação
-        </Button>
+        <div className="flex gap-2">
+          <ExportButton
+            data={filteredMovements as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'documentNumber', label: 'Documento' },
+              { key: 'productCode', label: 'Código Produto' },
+              { key: 'productName', label: 'Produto' },
+              { key: 'type', label: 'Tipo' },
+              { key: 'direction', label: 'Direção' },
+              { key: 'quantity', label: 'Quantidade' },
+              { key: 'unitCost', label: 'Custo Unit.', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+              { key: 'totalCost', label: 'Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+              { key: 'operator', label: 'Operador' },
+              { key: 'createdAt', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+            ]}
+            filename="movimentacoes_estoque"
+          />
+          <Button onClick={() => setIsFormOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nova Movimentação
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}

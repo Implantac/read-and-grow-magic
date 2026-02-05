@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -147,10 +148,23 @@ const UsersPage = () => {
           <h1 className="text-2xl font-bold text-foreground">Gestão de Usuários</h1>
           <p className="text-muted-foreground">Gerencie usuários e permissões do sistema</p>
         </div>
-        <Button onClick={handleCreateUser}>
-          <Plus className="h-4 w-4 mr-2" />
-          Novo Usuário
-        </Button>
+        <div className="flex gap-2">
+          <ExportButton
+            data={filteredUsers as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'name', label: 'Nome' },
+              { key: 'email', label: 'E-mail' },
+              { key: 'role', label: 'Perfil' },
+              { key: 'department', label: 'Departamento' },
+              { key: 'status', label: 'Status' },
+            ]}
+            filename="usuarios"
+          />
+          <Button onClick={handleCreateUser}>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Novo Usuário
+          </Button>
+        </div>
       </div>
 
       {/* Stats Cards */}

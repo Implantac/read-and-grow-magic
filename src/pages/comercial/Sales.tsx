@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Eye, MoreHorizontal, FileText } from 'lucide-react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
@@ -148,9 +149,23 @@ export default function SalesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Vendas</h1>
-        <p className="text-muted-foreground">Histórico de vendas realizadas</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Vendas</h1>
+          <p className="text-muted-foreground">Histórico de vendas realizadas</p>
+        </div>
+        <ExportButton
+          data={filteredSales as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'number', label: 'Número' },
+            { key: 'clientName', label: 'Cliente' },
+            { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+            { key: 'paymentMethod', label: 'Pagamento', format: (v) => getPaymentMethodLabel(v as Sale['paymentMethod']) },
+            { key: 'total', label: 'Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+            { key: 'status', label: 'Status' },
+          ]}
+          filename="vendas"
+        />
       </div>
 
       {/* Summary Cards */}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -109,10 +110,21 @@ export default function KardexPage() {
           <p className="text-muted-foreground">Ficha de movimentação de estoque por produto</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            Exportar
-          </Button>
+          <ExportButton
+            data={(kardexData?.entries || []) as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+              { key: 'documentNumber', label: 'Documento' },
+              { key: 'type', label: 'Tipo' },
+              { key: 'description', label: 'Descrição' },
+              { key: 'quantityIn', label: 'Entrada' },
+              { key: 'quantityOut', label: 'Saída' },
+              { key: 'balance', label: 'Saldo' },
+              { key: 'unitCost', label: 'Custo Unit.', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+              { key: 'totalValue', label: 'Valor Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+            ]}
+            filename={`kardex_${kardexData?.productCode || 'produto'}`}
+          />
           <Button variant="outline">
             <Printer className="mr-2 h-4 w-4" />
             Imprimir

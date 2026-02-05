@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -129,6 +130,17 @@ export default function PickingPage() {
           <h1 className="text-3xl font-bold tracking-tight">Picking</h1>
           <p className="text-muted-foreground">Separação de pedidos para expedição</p>
         </div>
+        <ExportButton
+          data={filteredOrders as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'orderNumber', label: 'Nº Ordem' },
+            { key: 'customerName', label: 'Cliente' },
+            { key: 'priority', label: 'Prioridade' },
+            { key: 'status', label: 'Status' },
+            { key: 'assignedTo', label: 'Operador' },
+          ]}
+          filename="picking_wms"
+        />
       </div>
 
       {/* Summary Cards */}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -121,10 +122,27 @@ export default function WMSMovementsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Movimentações WMS</h1>
           <p className="text-muted-foreground">Registro e histórico de movimentações no armazém</p>
         </div>
-        <Button onClick={() => setNewMovementOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nova Movimentação
-        </Button>
+        <div className="flex gap-2">
+          <ExportButton
+            data={filteredMovements as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'productCode', label: 'Código' },
+              { key: 'productName', label: 'Produto' },
+              { key: 'type', label: 'Tipo' },
+              { key: 'fromLocation', label: 'Origem' },
+              { key: 'toLocation', label: 'Destino' },
+              { key: 'quantity', label: 'Quantidade' },
+              { key: 'reason', label: 'Motivo' },
+              { key: 'operator', label: 'Operador' },
+              { key: 'createdAt', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+            ]}
+            filename="movimentacoes_wms"
+          />
+          <Button onClick={() => setNewMovementOpen(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nova Movimentação
+          </Button>
+        </div>
       </div>
 
       {/* Summary Cards */}
