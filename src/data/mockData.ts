@@ -240,6 +240,19 @@ export const navigationItems = [
     ],
   },
   {
+    title: 'Contabilidade',
+    href: '/contabilidade',
+    icon: 'Calculator',
+    children: [
+      { title: 'Plano de Contas', href: '/contabilidade/plano-contas', icon: 'FolderTree' },
+      { title: 'Lançamentos', href: '/contabilidade/lancamentos', icon: 'FileText' },
+      { title: 'Razão Contábil', href: '/contabilidade/razao', icon: 'BookOpen' },
+      { title: 'Balancete', href: '/contabilidade/balancete', icon: 'Scale' },
+      { title: 'DRE', href: '/contabilidade/dre', icon: 'TrendingUp' },
+      { title: 'Balanço Patrimonial', href: '/contabilidade/balanco', icon: 'Building2' },
+    ],
+  },
+  {
     title: 'Fiscal',
     href: '/fiscal',
     icon: 'FileCheck',

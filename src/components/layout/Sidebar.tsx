@@ -42,6 +42,8 @@ import {
   Building,
   Sliders,
   Plug,
+  BookOpen,
+  Scale,
 } from 'lucide-react';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -81,6 +83,8 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Building,
   Sliders,
   Plug,
+  BookOpen,
+  Scale,
 };
 
 export function Sidebar() {
