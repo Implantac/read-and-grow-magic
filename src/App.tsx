@@ -19,6 +19,14 @@ import AccountsPayable from "./pages/financeiro/AccountsPayable";
 import AccountsReceivable from "./pages/financeiro/AccountsReceivable";
 import CashFlow from "./pages/financeiro/CashFlow";
 
+// Accounting Module
+import ChartOfAccountsPage from "./pages/contabilidade/ChartOfAccounts";
+import JournalEntriesPage from "./pages/contabilidade/JournalEntries";
+import GeneralLedgerPage from "./pages/contabilidade/GeneralLedger";
+import TrialBalancePage from "./pages/contabilidade/TrialBalance";
+import DREPage from "./pages/contabilidade/DRE";
+import BalanceSheetPage from "./pages/contabilidade/BalanceSheet";
+
 // Fiscal Module
 import NFePage from "./pages/fiscal/NFe";
 import NFCePage from "./pages/fiscal/NFCe";
@@ -85,6 +93,15 @@ const App = () => (
             <Route path="/financeiro/fluxo" element={<CashFlow />} />
             <Route path="/financeiro/conciliacao" element={<PlaceholderPage title="Conciliação Bancária" />} />
             
+            
+            {/* Accounting Module */}
+            <Route path="/contabilidade/plano-contas" element={<ChartOfAccountsPage />} />
+            <Route path="/contabilidade/lancamentos" element={<JournalEntriesPage />} />
+            <Route path="/contabilidade/razao" element={<GeneralLedgerPage />} />
+            <Route path="/contabilidade/balancete" element={<TrialBalancePage />} />
+            <Route path="/contabilidade/dre" element={<DREPage />} />
+            <Route path="/contabilidade/balanco" element={<BalanceSheetPage />} />
+
             {/* Fiscal Module */}
             <Route path="/fiscal/nfe" element={<NFePage />} />
             <Route path="/fiscal/nfce" element={<NFCePage />} />
