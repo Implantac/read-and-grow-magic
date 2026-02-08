@@ -5,6 +5,7 @@ import { ExportButton } from '@/components/shared/ExportButton';
 import { mockTrialBalance, getAccountTypeLabel } from '@/data/accountingMockData';
 import { cn } from '@/lib/utils';
 import { Scale } from 'lucide-react';
+import { TrialBalanceChart } from '@/components/contabilidade/TrialBalanceChart';
 import {
   Table,
   TableBody,
@@ -94,6 +95,8 @@ export default function TrialBalancePage() {
           </CardContent>
         </Card>
       </div>
+      {/* Chart */}
+      <TrialBalanceChart />
 
       {/* Table */}
       <Card>
