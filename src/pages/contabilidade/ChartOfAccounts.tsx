@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ExportButton } from '@/components/shared/ExportButton';
+import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { mockChartOfAccounts, getAccountTypeLabel } from '@/data/accountingMockData';
 import { cn } from '@/lib/utils';
 import { Search, ChevronRight, ChevronDown, BookOpen, Plus, FolderTree } from 'lucide-react';
@@ -26,9 +27,37 @@ const exportColumns: ExportColumn[] = [
   { key: 'balance', label: 'Saldo', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
 ];
 
+const accountFilterFields: FilterField[] = [
+  {
+    key: 'type', label: 'Tipo de Conta', type: 'select',
+    options: [
+      { value: 'asset', label: 'Ativo' },
+      { value: 'liability', label: 'Passivo' },
+      { value: 'equity', label: 'Patrimônio Líquido' },
+      { value: 'revenue', label: 'Receita' },
+      { value: 'expense', label: 'Despesa' },
+    ],
+  },
+  {
+    key: 'nature', label: 'Natureza', type: 'select',
+    options: [
+      { value: 'debit', label: 'Devedora' },
+      { value: 'credit', label: 'Credora' },
+    ],
+  },
+  {
+    key: 'level', label: 'Nível', type: 'select',
+    options: [
+      { value: 'analytical', label: 'Analítica' },
+      { value: 'synthetic', label: 'Sintética' },
+    ],
+  },
+];
+
 export default function ChartOfAccountsPage() {
   const [search, setSearch] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['1', '2', '3', '4', '5']));
+  const [filters, setFilters] = useState<Record<string, string>>({});
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -41,11 +70,16 @@ export default function ChartOfAccountsPage() {
     });
   };
 
-  const filteredAccounts = mockChartOfAccounts.filter(
-    (a) =>
-      a.code.toLowerCase().includes(search.toLowerCase()) ||
-      a.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredAccounts = useMemo(() => {
+    return mockChartOfAccounts.filter((a) => {
+      if (search && !a.code.toLowerCase().includes(search.toLowerCase()) && !a.name.toLowerCase().includes(search.toLowerCase())) return false;
+      if (filters.type && a.type !== filters.type) return false;
+      if (filters.nature && a.nature !== filters.nature) return false;
+      if (filters.level === 'analytical' && !a.isAnalytical) return false;
+      if (filters.level === 'synthetic' && a.isAnalytical) return false;
+      return true;
+    });
+  }, [search, filters]);
 
   const rootAccounts = filteredAccounts.filter((a) => a.parentId === null);
   const getChildren = (parentId: string) => filteredAccounts.filter((a) => a.parentId === parentId);
@@ -152,14 +186,20 @@ export default function ChartOfAccountsPage() {
         </Card>
       </div>
 
-      {/* Search + Tree */}
+      {/* Filters + Search + Tree */}
       <Card>
         <CardHeader className="pb-3">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <div className="relative flex-1 max-w-sm">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Buscar conta..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
             </div>
+            <AdvancedFilters
+              fields={accountFilterFields}
+              values={filters}
+              onChange={setFilters}
+              onClear={() => setFilters({})}
+            />
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={() => setExpandedGroups(new Set(mockChartOfAccounts.map((a) => a.id)))}>Expandir Tudo</Button>
               <Button variant="outline" size="sm" onClick={() => setExpandedGroups(new Set())}>Recolher Tudo</Button>

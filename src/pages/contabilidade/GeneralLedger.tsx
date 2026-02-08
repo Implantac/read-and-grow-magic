@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ExportButton } from '@/components/shared/ExportButton';
+import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { mockChartOfAccounts, generateLedgerEntries } from '@/data/accountingMockData';
 import { cn } from '@/lib/utils';
 import { BookOpen, Search } from 'lucide-react';
@@ -35,12 +36,26 @@ const exportColumns: ExportColumn[] = [
   { key: 'balance', label: 'Saldo', format: (v) => formatCurrency(Number(v)) },
 ];
 
+const ledgerFilterFields: FilterField[] = [
+  { key: 'dateFrom', label: 'Data Inicial', type: 'date' },
+  { key: 'dateTo', label: 'Data Final', type: 'date' },
+];
+
 export default function GeneralLedgerPage() {
   const analyticalAccounts = mockChartOfAccounts.filter((a) => a.isAnalytical);
   const [selectedAccount, setSelectedAccount] = useState(analyticalAccounts[0]?.code || '');
+  const [filters, setFilters] = useState<Record<string, string>>({});
 
   const account = mockChartOfAccounts.find((a) => a.code === selectedAccount);
-  const entries = generateLedgerEntries(selectedAccount);
+  const allEntries = generateLedgerEntries(selectedAccount);
+
+  const entries = useMemo(() => {
+    return allEntries.filter((e) => {
+      if (filters.dateFrom && e.date < filters.dateFrom) return false;
+      if (filters.dateTo && e.date > filters.dateTo) return false;
+      return true;
+    });
+  }, [allEntries, filters]);
 
   const totalDebits = entries.reduce((s, e) => s + e.debit, 0);
   const totalCredits = entries.reduce((s, e) => s + e.credit, 0);
@@ -56,10 +71,10 @@ export default function GeneralLedgerPage() {
         <ExportButton data={entries as unknown as Record<string, unknown>[]} columns={exportColumns} filename={`razao_${selectedAccount}`} />
       </div>
 
-      {/* Account Selector */}
+      {/* Account Selector + Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
             <div className="flex-1 max-w-md">
               <Select value={selectedAccount} onValueChange={setSelectedAccount}>
                 <SelectTrigger>
@@ -74,6 +89,12 @@ export default function GeneralLedgerPage() {
                 </SelectContent>
               </Select>
             </div>
+            <AdvancedFilters
+              fields={ledgerFilterFields}
+              values={filters}
+              onChange={setFilters}
+              onClear={() => setFilters({})}
+            />
             {account && (
               <div className="flex gap-4 text-sm">
                 <div><span className="text-muted-foreground">Natureza:</span> <Badge variant="outline">{account.nature === 'debit' ? 'Devedora' : 'Credora'}</Badge></div>

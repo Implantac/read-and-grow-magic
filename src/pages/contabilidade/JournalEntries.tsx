@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { ExportButton } from '@/components/shared/ExportButton';
+import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { mockJournalEntries, getJournalStatusLabel } from '@/data/accountingMockData';
 import { cn } from '@/lib/utils';
 import { BookOpen, Plus, FileText, CheckCircle, XCircle, Eye } from 'lucide-react';
@@ -43,12 +44,37 @@ const exportColumns: ExportColumn[] = [
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
+const filterFields: FilterField[] = [
+  {
+    key: 'status', label: 'Status', type: 'select',
+    options: [
+      { value: 'draft', label: 'Rascunho' },
+      { value: 'posted', label: 'Lançado' },
+      { value: 'reversed', label: 'Estornado' },
+    ],
+  },
+  { key: 'dateFrom', label: 'Data Inicial', type: 'date' },
+  { key: 'dateTo', label: 'Data Final', type: 'date' },
+  { key: 'createdBy', label: 'Criado por', type: 'text', placeholder: 'Nome do criador...' },
+];
+
 export default function JournalEntriesPage() {
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
+  const [filters, setFilters] = useState<Record<string, string>>({});
 
-  const totalPosted = mockJournalEntries.filter((e) => e.status === 'posted').length;
-  const totalDraft = mockJournalEntries.filter((e) => e.status === 'draft').length;
-  const totalValue = mockJournalEntries.filter((e) => e.status === 'posted').reduce((s, e) => s + e.totalDebit, 0);
+  const filteredEntries = useMemo(() => {
+    return mockJournalEntries.filter((e) => {
+      if (filters.status && e.status !== filters.status) return false;
+      if (filters.dateFrom && e.date < filters.dateFrom) return false;
+      if (filters.dateTo && e.date > filters.dateTo) return false;
+      if (filters.createdBy && !e.createdBy.toLowerCase().includes(filters.createdBy.toLowerCase())) return false;
+      return true;
+    });
+  }, [filters]);
+
+  const totalPosted = filteredEntries.filter((e) => e.status === 'posted').length;
+  const totalDraft = filteredEntries.filter((e) => e.status === 'draft').length;
+  const totalValue = filteredEntries.filter((e) => e.status === 'posted').reduce((s, e) => s + e.totalDebit, 0);
 
   const columns: Column<JournalEntry>[] = [
     { key: 'number', label: 'Número', sortable: true },
@@ -81,10 +107,17 @@ export default function JournalEntriesPage() {
           <p className="text-muted-foreground">Registro de partidas dobradas</p>
         </div>
         <div className="flex gap-2">
-          <ExportButton data={mockJournalEntries as unknown as Record<string, unknown>[]} columns={exportColumns} filename="lancamentos_contabeis" />
+          <ExportButton data={filteredEntries as unknown as Record<string, unknown>[]} columns={exportColumns} filename="lancamentos_contabeis" />
           <Button className="gap-2"><Plus className="h-4 w-4" /> Novo Lançamento</Button>
         </div>
       </div>
+
+      <AdvancedFilters
+        fields={filterFields}
+        values={filters}
+        onChange={setFilters}
+        onClear={() => setFilters({})}
+      />
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Total de Lançamentos</p><p className="text-2xl font-bold">{mockJournalEntries.length}</p></CardContent></Card>
@@ -97,7 +130,7 @@ export default function JournalEntriesPage() {
         <CardContent className="p-6">
           <DataTable
             columns={columns}
-            data={mockJournalEntries}
+            data={filteredEntries}
             searchPlaceholder="Buscar lançamento..."
             actions={(row) => (
               <div className="flex gap-1">
