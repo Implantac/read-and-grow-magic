@@ -4,6 +4,9 @@ import { ExportButton } from '@/components/shared/ExportButton';
 import { mockDRE } from '@/data/accountingMockData';
 import { cn } from '@/lib/utils';
 import { TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { MarginTrendChart } from '@/components/contabilidade/MarginTrendChart';
+import { ExpenseBreakdownChart } from '@/components/contabilidade/ExpenseBreakdownChart';
+import { RevenueExpenseTrendChart } from '@/components/contabilidade/RevenueExpenseTrendChart';
 import {
   Table,
   TableBody,
@@ -151,6 +154,14 @@ export default function DREPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Additional Charts */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <MarginTrendChart />
+        <ExpenseBreakdownChart />
+      </div>
+
+      <RevenueExpenseTrendChart />
     </div>
   );
 }

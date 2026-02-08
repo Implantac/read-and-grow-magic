@@ -5,6 +5,8 @@ import { ExportButton } from '@/components/shared/ExportButton';
 import { mockBalanceSheet } from '@/data/accountingMockData';
 import { cn } from '@/lib/utils';
 import { Scale, Building2, Landmark, PiggyBank } from 'lucide-react';
+import { EquityEvolutionChart } from '@/components/contabilidade/EquityEvolutionChart';
+import { FinancialIndicatorsPanel } from '@/components/contabilidade/FinancialIndicatorsPanel';
 import {
   Table,
   TableBody,
@@ -137,22 +139,9 @@ export default function BalanceSheetPage() {
         </Card>
       </div>
 
-      {/* Charts */}
+      {/* Evolution & Indicators */}
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader><CardTitle className="text-base">Composição do Ativo</CardTitle></CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <PieChart>
-                <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={2} dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
-                  {pieData.map((_, i) => <Cell key={i} fill={COLORS[i]} />)}
-                </Pie>
-                <Tooltip formatter={(v: number) => formatCurrency(v)} />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        <EquityEvolutionChart />
         <Card>
           <CardHeader><CardTitle className="text-base">Composição Passivo + PL</CardTitle></CardHeader>
           <CardContent>
@@ -169,10 +158,12 @@ export default function BalanceSheetPage() {
         </Card>
       </div>
 
+      <FinancialIndicatorsPanel />
+
       {/* Sections */}
-      {renderSection('Ativo', <Building2 className="h-4 w-4 text-blue-600" />, assets)}
-      {renderSection('Passivo', <Landmark className="h-4 w-4 text-red-600" />, liabilities)}
-      {renderSection('Patrimônio Líquido', <PiggyBank className="h-4 w-4 text-purple-600" />, equity)}
+      {renderSection('Ativo', <Building2 className="h-4 w-4 text-primary" />, assets)}
+      {renderSection('Passivo', <Landmark className="h-4 w-4 text-destructive" />, liabilities)}
+      {renderSection('Patrimônio Líquido', <PiggyBank className="h-4 w-4 text-primary" />, equity)}
     </div>
   );
 }
