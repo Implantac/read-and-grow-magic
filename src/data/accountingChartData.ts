@@ -117,3 +117,108 @@ export const trialBalanceByType = [
   { type: 'Receitas', debit: 128543, credit: 1285430 },
   { type: 'Despesas', debit: 887000, credit: 0 },
 ];
+
+// Period-based data for executive dashboard
+export interface PeriodData {
+  label: string;
+  revenue: number;
+  netIncome: number;
+  grossMargin: number;
+  netMargin: number;
+  totalAssets: number;
+  totalLiabilities: number;
+  totalEquity: number;
+  liquidezCorrente: number;
+  roe: number;
+  postedEntries: number;
+  draftEntries: number;
+  totalEntries: number;
+  assetPie: { name: string; value: number }[];
+  liabilityPie: { name: string; value: number }[];
+}
+
+export const periodOptions = [
+  { value: 'jan-24', label: 'Janeiro/2024' },
+  { value: 'dez-23', label: 'Dezembro/2023' },
+  { value: 'nov-23', label: 'Novembro/2023' },
+  { value: 'out-23', label: 'Outubro/2023' },
+  { value: 'set-23', label: 'Setembro/2023' },
+  { value: 'ago-23', label: 'Agosto/2023' },
+  { value: 'q4-23', label: '4º Trimestre/2023' },
+  { value: 'q3-23', label: '3º Trimestre/2023' },
+];
+
+export const periodData: Record<string, PeriodData> = {
+  'jan-24': {
+    label: 'Janeiro/2024',
+    revenue: 1285430, netIncome: 248920, grossMargin: 50.0, netMargin: 19.4,
+    totalAssets: 2850000, totalLiabilities: 1350000, totalEquity: 1500000,
+    liquidezCorrente: 1.71, roe: 16.6,
+    postedEntries: 8, draftEntries: 2, totalEntries: 10,
+    assetPie: [{ name: 'Ativo Circulante', value: 1450000 }, { name: 'Ativo Não Circulante', value: 1400000 }],
+    liabilityPie: [{ name: 'Passivo Circulante', value: 850000 }, { name: 'Passivo Não Circulante', value: 500000 }, { name: 'Patrimônio Líquido', value: 1500000 }],
+  },
+  'dez-23': {
+    label: 'Dezembro/2023',
+    revenue: 1142000, netIncome: 198800, grossMargin: 48.7, netMargin: 17.4,
+    totalAssets: 2715000, totalLiabilities: 1315000, totalEquity: 1400000,
+    liquidezCorrente: 1.63, roe: 14.2,
+    postedEntries: 7, draftEntries: 3, totalEntries: 10,
+    assetPie: [{ name: 'Ativo Circulante', value: 1380000 }, { name: 'Ativo Não Circulante', value: 1335000 }],
+    liabilityPie: [{ name: 'Passivo Circulante', value: 815000 }, { name: 'Passivo Não Circulante', value: 500000 }, { name: 'Patrimônio Líquido', value: 1400000 }],
+  },
+  'nov-23': {
+    label: 'Novembro/2023',
+    revenue: 1100000, netIncome: 190000, grossMargin: 48.5, netMargin: 17.3,
+    totalAssets: 2680000, totalLiabilities: 1310000, totalEquity: 1370000,
+    liquidezCorrente: 1.58, roe: 13.9,
+    postedEntries: 9, draftEntries: 1, totalEntries: 10,
+    assetPie: [{ name: 'Ativo Circulante', value: 1350000 }, { name: 'Ativo Não Circulante', value: 1330000 }],
+    liabilityPie: [{ name: 'Passivo Circulante', value: 810000 }, { name: 'Passivo Não Circulante', value: 500000 }, { name: 'Patrimônio Líquido', value: 1370000 }],
+  },
+  'out-23': {
+    label: 'Outubro/2023',
+    revenue: 1050000, netIncome: 180000, grossMargin: 47.8, netMargin: 17.1,
+    totalAssets: 2620000, totalLiabilities: 1300000, totalEquity: 1320000,
+    liquidezCorrente: 1.55, roe: 13.6,
+    postedEntries: 8, draftEntries: 2, totalEntries: 10,
+    assetPie: [{ name: 'Ativo Circulante', value: 1310000 }, { name: 'Ativo Não Circulante', value: 1310000 }],
+    liabilityPie: [{ name: 'Passivo Circulante', value: 800000 }, { name: 'Passivo Não Circulante', value: 500000 }, { name: 'Patrimônio Líquido', value: 1320000 }],
+  },
+  'set-23': {
+    label: 'Setembro/2023',
+    revenue: 1020000, netIncome: 178000, grossMargin: 48.1, netMargin: 17.5,
+    totalAssets: 2580000, totalLiabilities: 1290000, totalEquity: 1290000,
+    liquidezCorrente: 1.52, roe: 13.8,
+    postedEntries: 7, draftEntries: 3, totalEntries: 10,
+    assetPie: [{ name: 'Ativo Circulante', value: 1280000 }, { name: 'Ativo Não Circulante', value: 1300000 }],
+    liabilityPie: [{ name: 'Passivo Circulante', value: 790000 }, { name: 'Passivo Não Circulante', value: 500000 }, { name: 'Patrimônio Líquido', value: 1290000 }],
+  },
+  'ago-23': {
+    label: 'Agosto/2023',
+    revenue: 980000, netIncome: 160000, grossMargin: 47.2, netMargin: 16.8,
+    totalAssets: 2520000, totalLiabilities: 1280000, totalEquity: 1240000,
+    liquidezCorrente: 1.48, roe: 12.9,
+    postedEntries: 6, draftEntries: 4, totalEntries: 10,
+    assetPie: [{ name: 'Ativo Circulante', value: 1240000 }, { name: 'Ativo Não Circulante', value: 1280000 }],
+    liabilityPie: [{ name: 'Passivo Circulante', value: 780000 }, { name: 'Passivo Não Circulante', value: 500000 }, { name: 'Patrimônio Líquido', value: 1240000 }],
+  },
+  'q4-23': {
+    label: '4º Trimestre/2023',
+    revenue: 3292000, netIncome: 568800, grossMargin: 48.3, netMargin: 17.3,
+    totalAssets: 2715000, totalLiabilities: 1315000, totalEquity: 1400000,
+    liquidezCorrente: 1.63, roe: 14.2,
+    postedEntries: 24, draftEntries: 6, totalEntries: 30,
+    assetPie: [{ name: 'Ativo Circulante', value: 1380000 }, { name: 'Ativo Não Circulante', value: 1335000 }],
+    liabilityPie: [{ name: 'Passivo Circulante', value: 815000 }, { name: 'Passivo Não Circulante', value: 500000 }, { name: 'Patrimônio Líquido', value: 1400000 }],
+  },
+  'q3-23': {
+    label: '3º Trimestre/2023',
+    revenue: 3050000, netIncome: 518000, grossMargin: 47.7, netMargin: 17.1,
+    totalAssets: 2620000, totalLiabilities: 1300000, totalEquity: 1320000,
+    liquidezCorrente: 1.55, roe: 13.6,
+    postedEntries: 22, draftEntries: 8, totalEntries: 30,
+    assetPie: [{ name: 'Ativo Circulante', value: 1310000 }, { name: 'Ativo Não Circulante', value: 1310000 }],
+    liabilityPie: [{ name: 'Passivo Circulante', value: 800000 }, { name: 'Passivo Não Circulante', value: 500000 }, { name: 'Patrimônio Líquido', value: 1320000 }],
+  },
+};
