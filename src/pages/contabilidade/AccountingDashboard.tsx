@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -11,6 +12,7 @@ import {
   BarChart3,
   PiggyBank,
   Percent,
+  ExternalLink,
 } from 'lucide-react';
 import { EquityEvolutionChart } from '@/components/contabilidade/EquityEvolutionChart';
 import { MarginTrendChart } from '@/components/contabilidade/MarginTrendChart';
@@ -51,6 +53,8 @@ export default function AccountingDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('jan-24');
   const [comparePeriod, setComparePeriod] = useState('dez-23');
 
+  const navigate = useNavigate();
+
   const current = periodData[selectedPeriod];
   const compare = comparePeriod && comparePeriod !== 'none' ? periodData[comparePeriod] : null;
 
@@ -62,6 +66,7 @@ export default function AccountingDashboard() {
       variation: compare ? calcVariation(current.revenue, compare.revenue) : null,
       icon: DollarSign,
       color: 'text-chart-2',
+      drillTo: '/contabilidade/dre',
     },
     {
       title: 'Lucro Líquido',
@@ -70,6 +75,7 @@ export default function AccountingDashboard() {
       variation: compare ? calcVariation(current.netIncome, compare.netIncome) : null,
       icon: TrendingUp,
       color: 'text-success',
+      drillTo: '/contabilidade/dre',
     },
     {
       title: 'Ativo Total',
@@ -78,6 +84,7 @@ export default function AccountingDashboard() {
       variation: compare ? calcVariation(current.totalAssets, compare.totalAssets) : null,
       icon: BarChart3,
       color: 'text-chart-1',
+      drillTo: '/contabilidade/balanco',
     },
     {
       title: 'Patrimônio Líquido',
@@ -86,6 +93,7 @@ export default function AccountingDashboard() {
       variation: compare ? calcVariation(current.totalEquity, compare.totalEquity) : null,
       icon: PiggyBank,
       color: 'text-chart-5',
+      drillTo: '/contabilidade/balanco',
     },
     {
       title: 'Margem Bruta',
@@ -95,6 +103,7 @@ export default function AccountingDashboard() {
       icon: Percent,
       color: 'text-chart-2',
       isAbsolute: true,
+      drillTo: '/contabilidade/dre',
     },
     {
       title: 'Margem Líquida',
@@ -104,6 +113,7 @@ export default function AccountingDashboard() {
       icon: Percent,
       color: 'text-chart-4',
       isAbsolute: true,
+      drillTo: '/contabilidade/dre',
     },
     {
       title: 'Liquidez Corrente',
@@ -112,6 +122,7 @@ export default function AccountingDashboard() {
       variation: compare ? calcVariation(current.liquidezCorrente, compare.liquidezCorrente) : null,
       icon: Scale,
       color: 'text-success',
+      drillTo: '/contabilidade/balanco',
     },
     {
       title: 'ROE',
@@ -121,6 +132,7 @@ export default function AccountingDashboard() {
       icon: ArrowUpRight,
       color: 'text-chart-1',
       isAbsolute: true,
+      drillTo: '/contabilidade/balanco',
     },
   ], [current, compare]);
 
@@ -145,11 +157,18 @@ export default function AccountingDashboard() {
         {kpis.map((kpi) => {
           const Icon = kpi.icon;
           return (
-            <Card key={kpi.title}>
+            <Card
+              key={kpi.title}
+              className="cursor-pointer transition-shadow hover:shadow-md hover:ring-1 hover:ring-primary/20"
+              onClick={() => navigate(kpi.drillTo)}
+            >
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-sm text-muted-foreground">{kpi.title}</p>
-                  <Icon className={cn('h-4 w-4', kpi.color)} />
+                  <div className="flex items-center gap-1">
+                    <Icon className={cn('h-4 w-4', kpi.color)} />
+                    <ExternalLink className="h-3 w-3 text-muted-foreground/50" />
+                  </div>
                 </div>
                 <p className="text-2xl font-bold">{kpi.value}</p>
                 {kpi.compareValue && (
@@ -171,7 +190,7 @@ export default function AccountingDashboard() {
 
       {/* Journal Entries Status */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+        <Card className="cursor-pointer transition-shadow hover:shadow-md hover:ring-1 hover:ring-primary/20" onClick={() => navigate('/contabilidade/lancamentos')}>
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Lançamentos</p>
@@ -180,7 +199,7 @@ export default function AccountingDashboard() {
             <Badge variant="outline">Total</Badge>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="cursor-pointer transition-shadow hover:shadow-md hover:ring-1 hover:ring-primary/20" onClick={() => navigate('/contabilidade/lancamentos')}>
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Contabilizados</p>
@@ -189,7 +208,7 @@ export default function AccountingDashboard() {
             <Badge className="bg-success/10 text-success border-success/30" variant="outline">Postados</Badge>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="cursor-pointer transition-shadow hover:shadow-md hover:ring-1 hover:ring-primary/20" onClick={() => navigate('/contabilidade/lancamentos')}>
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Rascunhos</p>
@@ -214,9 +233,9 @@ export default function AccountingDashboard() {
 
       {/* Charts Row 3: Composition Pies & Trial Balance */}
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card>
+        <Card className="cursor-pointer transition-shadow hover:shadow-md hover:ring-1 hover:ring-primary/20" onClick={() => navigate('/contabilidade/balanco')}>
           <CardHeader>
-            <CardTitle className="text-base">Composição do Ativo</CardTitle>
+            <CardTitle className="text-base flex items-center justify-between">Composição do Ativo <ExternalLink className="h-3 w-3 text-muted-foreground/50" /></CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
@@ -230,9 +249,9 @@ export default function AccountingDashboard() {
             </ResponsiveContainer>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="cursor-pointer transition-shadow hover:shadow-md hover:ring-1 hover:ring-primary/20" onClick={() => navigate('/contabilidade/balanco')}>
           <CardHeader>
-            <CardTitle className="text-base">Composição Passivo + PL</CardTitle>
+            <CardTitle className="text-base flex items-center justify-between">Composição Passivo + PL <ExternalLink className="h-3 w-3 text-muted-foreground/50" /></CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
