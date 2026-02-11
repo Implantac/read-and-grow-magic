@@ -1,3 +1,4 @@
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -17,8 +18,8 @@ import { RevenueExpenseTrendChart } from '@/components/contabilidade/RevenueExpe
 import { ExpenseBreakdownChart } from '@/components/contabilidade/ExpenseBreakdownChart';
 import { FinancialIndicatorsPanel } from '@/components/contabilidade/FinancialIndicatorsPanel';
 import { TrialBalanceChart } from '@/components/contabilidade/TrialBalanceChart';
-import { mockDRE, mockBalanceSheet, mockJournalEntries } from '@/data/accountingMockData';
-import { revenueVsExpenseTrend, financialIndicators } from '@/data/accountingChartData';
+import { PeriodSelector } from '@/components/contabilidade/PeriodSelector';
+import { periodData } from '@/data/accountingChartData';
 import {
   PieChart,
   Pie,
@@ -41,108 +42,102 @@ const COLORS = [
   'hsl(var(--chart-5))',
 ];
 
+function calcVariation(current: number, previous: number) {
+  if (previous === 0) return 0;
+  return ((current - previous) / previous) * 100;
+}
+
 export default function AccountingDashboard() {
-  // DRE KPIs
-  const revenue = mockDRE.find((d) => d.code === '1')!;
-  const grossProfit = mockDRE.find((d) => d.code === '5')!;
-  const netIncome = mockDRE.find((d) => d.code === '9')!;
-  const grossMargin = ((grossProfit.currentPeriod / revenue.currentPeriod) * 100).toFixed(1);
-  const netMargin = ((netIncome.currentPeriod / revenue.currentPeriod) * 100).toFixed(1);
+  const [selectedPeriod, setSelectedPeriod] = useState('jan-24');
+  const [comparePeriod, setComparePeriod] = useState('dez-23');
 
-  // Balance Sheet KPIs
-  const totalAssets = mockBalanceSheet.find((a) => a.code === '1')!;
-  const totalLiabilities = mockBalanceSheet.find((a) => a.code === '2')!;
-  const totalEquity = mockBalanceSheet.find((a) => a.code === '3')!;
+  const current = periodData[selectedPeriod];
+  const compare = comparePeriod && comparePeriod !== 'none' ? periodData[comparePeriod] : null;
 
-  // Journal entries stats
-  const postedEntries = mockJournalEntries.filter((e) => e.status === 'posted').length;
-  const draftEntries = mockJournalEntries.filter((e) => e.status === 'draft').length;
-  const totalEntries = mockJournalEntries.length;
-
-  // Latest period from trend
-  const latestPeriod = revenueVsExpenseTrend[revenueVsExpenseTrend.length - 1];
-
-  // Liquidity
-  const liquidezCorrente = financialIndicators.find((i) => i.name === 'Liquidez Corrente')!;
-  const roe = financialIndicators.find((i) => i.name === 'ROE')!;
-
-  // Asset composition
-  const assetPie = [
-    { name: 'Ativo Circulante', value: 1450000 },
-    { name: 'Ativo Não Circulante', value: 1400000 },
-  ];
-
-  const liabilityPie = [
-    { name: 'Passivo Circulante', value: 850000 },
-    { name: 'Passivo Não Circulante', value: 500000 },
-    { name: 'Patrimônio Líquido', value: 1500000 },
-  ];
-
-  const kpis = [
+  const kpis = useMemo(() => [
     {
       title: 'Receita Bruta',
-      value: formatCompact(revenue.currentPeriod),
-      variation: revenue.variation,
+      value: formatCompact(current.revenue),
+      compareValue: compare ? formatCompact(compare.revenue) : null,
+      variation: compare ? calcVariation(current.revenue, compare.revenue) : null,
       icon: DollarSign,
       color: 'text-chart-2',
     },
     {
       title: 'Lucro Líquido',
-      value: formatCompact(netIncome.currentPeriod),
-      variation: netIncome.variation,
+      value: formatCompact(current.netIncome),
+      compareValue: compare ? formatCompact(compare.netIncome) : null,
+      variation: compare ? calcVariation(current.netIncome, compare.netIncome) : null,
       icon: TrendingUp,
       color: 'text-success',
     },
     {
       title: 'Ativo Total',
-      value: formatCompact(totalAssets.currentPeriod),
-      variation: ((totalAssets.currentPeriod - totalAssets.previousPeriod) / totalAssets.previousPeriod * 100),
+      value: formatCompact(current.totalAssets),
+      compareValue: compare ? formatCompact(compare.totalAssets) : null,
+      variation: compare ? calcVariation(current.totalAssets, compare.totalAssets) : null,
       icon: BarChart3,
       color: 'text-chart-1',
     },
     {
       title: 'Patrimônio Líquido',
-      value: formatCompact(totalEquity.currentPeriod),
-      variation: ((totalEquity.currentPeriod - totalEquity.previousPeriod) / totalEquity.previousPeriod * 100),
+      value: formatCompact(current.totalEquity),
+      compareValue: compare ? formatCompact(compare.totalEquity) : null,
+      variation: compare ? calcVariation(current.totalEquity, compare.totalEquity) : null,
       icon: PiggyBank,
       color: 'text-chart-5',
     },
     {
       title: 'Margem Bruta',
-      value: `${grossMargin}%`,
-      variation: null,
+      value: `${current.grossMargin}%`,
+      compareValue: compare ? `${compare.grossMargin}%` : null,
+      variation: compare ? current.grossMargin - compare.grossMargin : null,
       icon: Percent,
       color: 'text-chart-2',
+      isAbsolute: true,
     },
     {
       title: 'Margem Líquida',
-      value: `${netMargin}%`,
-      variation: null,
+      value: `${current.netMargin}%`,
+      compareValue: compare ? `${compare.netMargin}%` : null,
+      variation: compare ? current.netMargin - compare.netMargin : null,
       icon: Percent,
       color: 'text-chart-4',
+      isAbsolute: true,
     },
     {
       title: 'Liquidez Corrente',
-      value: `${liquidezCorrente.value.toFixed(2)}x`,
-      variation: ((liquidezCorrente.value - liquidezCorrente.previousValue) / liquidezCorrente.previousValue * 100),
+      value: `${current.liquidezCorrente.toFixed(2)}x`,
+      compareValue: compare ? `${compare.liquidezCorrente.toFixed(2)}x` : null,
+      variation: compare ? calcVariation(current.liquidezCorrente, compare.liquidezCorrente) : null,
       icon: Scale,
       color: 'text-success',
     },
     {
       title: 'ROE',
-      value: `${roe.value}%`,
-      variation: ((roe.value - roe.previousValue) / roe.previousValue * 100),
+      value: `${current.roe}%`,
+      compareValue: compare ? `${compare.roe}%` : null,
+      variation: compare ? current.roe - compare.roe : null,
       icon: ArrowUpRight,
       color: 'text-chart-1',
+      isAbsolute: true,
     },
-  ];
+  ], [current, compare]);
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Painel Executivo Contábil</h1>
-        <p className="text-muted-foreground">Visão consolidada dos indicadores contábeis — Janeiro/2024</p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Painel Executivo Contábil</h1>
+          <p className="text-muted-foreground">Visão consolidada dos indicadores contábeis — {current.label}</p>
+        </div>
+        <PeriodSelector
+          value={selectedPeriod}
+          onValueChange={setSelectedPeriod}
+          compareValue={comparePeriod}
+          onCompareChange={setComparePeriod}
+        />
       </div>
 
       {/* KPI Cards */}
@@ -157,10 +152,15 @@ export default function AccountingDashboard() {
                   <Icon className={cn('h-4 w-4', kpi.color)} />
                 </div>
                 <p className="text-2xl font-bold">{kpi.value}</p>
+                {kpi.compareValue && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Anterior: {kpi.compareValue}
+                  </p>
+                )}
                 {kpi.variation !== null && (
-                  <div className={cn('flex items-center gap-1 text-xs mt-1', kpi.variation > 0 ? 'text-success' : 'text-destructive')}>
-                    {kpi.variation > 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                    {kpi.variation > 0 ? '+' : ''}{kpi.variation.toFixed(1)}%
+                  <div className={cn('flex items-center gap-1 text-xs mt-1', kpi.variation > 0 ? 'text-success' : kpi.variation < 0 ? 'text-destructive' : 'text-muted-foreground')}>
+                    {kpi.variation > 0 ? <TrendingUp className="h-3 w-3" /> : kpi.variation < 0 ? <TrendingDown className="h-3 w-3" /> : null}
+                    {kpi.variation > 0 ? '+' : ''}{kpi.variation.toFixed(1)}{(kpi as any).isAbsolute ? 'pp' : '%'}
                   </div>
                 )}
               </CardContent>
@@ -175,7 +175,7 @@ export default function AccountingDashboard() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Lançamentos</p>
-              <p className="text-2xl font-bold">{totalEntries}</p>
+              <p className="text-2xl font-bold">{current.totalEntries}</p>
             </div>
             <Badge variant="outline">Total</Badge>
           </CardContent>
@@ -184,7 +184,7 @@ export default function AccountingDashboard() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Contabilizados</p>
-              <p className="text-2xl font-bold text-success">{postedEntries}</p>
+              <p className="text-2xl font-bold text-success">{current.postedEntries}</p>
             </div>
             <Badge className="bg-success/10 text-success border-success/30" variant="outline">Postados</Badge>
           </CardContent>
@@ -193,7 +193,7 @@ export default function AccountingDashboard() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-sm text-muted-foreground">Rascunhos</p>
-              <p className="text-2xl font-bold text-warning">{draftEntries}</p>
+              <p className="text-2xl font-bold text-warning">{current.draftEntries}</p>
             </div>
             <Badge className="bg-warning/10 text-warning border-warning/30" variant="outline">Pendentes</Badge>
           </CardContent>
@@ -221,9 +221,9 @@ export default function AccountingDashboard() {
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
-                <Pie data={assetPie} cx="50%" cy="50%" innerRadius={45} outerRadius={75} paddingAngle={3} dataKey="value"
+                <Pie data={current.assetPie} cx="50%" cy="50%" innerRadius={45} outerRadius={75} paddingAngle={3} dataKey="value"
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
-                  {assetPie.map((_, i) => <Cell key={i} fill={COLORS[i]} />)}
+                  {current.assetPie.map((_, i) => <Cell key={i} fill={COLORS[i]} />)}
                 </Pie>
                 <Tooltip formatter={(v: number) => formatCurrency(v)} />
               </PieChart>
@@ -237,9 +237,9 @@ export default function AccountingDashboard() {
           <CardContent>
             <ResponsiveContainer width="100%" height={220}>
               <PieChart>
-                <Pie data={liabilityPie} cx="50%" cy="50%" innerRadius={45} outerRadius={75} paddingAngle={3} dataKey="value"
+                <Pie data={current.liabilityPie} cx="50%" cy="50%" innerRadius={45} outerRadius={75} paddingAngle={3} dataKey="value"
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
-                  {liabilityPie.map((_, i) => <Cell key={i} fill={COLORS[i + 2]} />)}
+                  {current.liabilityPie.map((_, i) => <Cell key={i} fill={COLORS[i + 2]} />)}
                 </Pie>
                 <Tooltip formatter={(v: number) => formatCurrency(v)} />
               </PieChart>
