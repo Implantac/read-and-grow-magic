@@ -26,6 +26,7 @@ import GeneralLedgerPage from "./pages/contabilidade/GeneralLedger";
 import TrialBalancePage from "./pages/contabilidade/TrialBalance";
 import DREPage from "./pages/contabilidade/DRE";
 import BalanceSheetPage from "./pages/contabilidade/BalanceSheet";
+import AccountingDashboardPage from "./pages/contabilidade/AccountingDashboard";
 
 // Fiscal Module
 import NFePage from "./pages/fiscal/NFe";
@@ -95,6 +96,7 @@ const App = () => (
             
             
             {/* Accounting Module */}
+            <Route path="/contabilidade/painel" element={<AccountingDashboardPage />} />
             <Route path="/contabilidade/plano-contas" element={<ChartOfAccountsPage />} />
             <Route path="/contabilidade/lancamentos" element={<JournalEntriesPage />} />
             <Route path="/contabilidade/razao" element={<GeneralLedgerPage />} />

@@ -244,6 +244,7 @@ export const navigationItems = [
     href: '/contabilidade',
     icon: 'Calculator',
     children: [
+      { title: 'Painel Executivo', href: '/contabilidade/painel', icon: 'BarChart3' },
       { title: 'Plano de Contas', href: '/contabilidade/plano-contas', icon: 'FolderTree' },
       { title: 'Lançamentos', href: '/contabilidade/lancamentos', icon: 'FileText' },
       { title: 'Razão Contábil', href: '/contabilidade/razao', icon: 'BookOpen' },
