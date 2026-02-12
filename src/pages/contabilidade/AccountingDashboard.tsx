@@ -15,6 +15,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { EquityEvolutionChart } from '@/components/contabilidade/EquityEvolutionChart';
+import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MarginTrendChart } from '@/components/contabilidade/MarginTrendChart';
 import { RevenueExpenseTrendChart } from '@/components/contabilidade/RevenueExpenseTrendChart';
 import { ExpenseBreakdownChart } from '@/components/contabilidade/ExpenseBreakdownChart';
@@ -27,7 +28,7 @@ import {
   Pie,
   Cell,
   ResponsiveContainer,
-  Tooltip,
+  Tooltip as RechartsTooltip,
 } from 'recharts';
 
 const formatCurrency = (value: number) =>
@@ -61,6 +62,7 @@ export default function AccountingDashboard() {
   const kpis = useMemo(() => [
     {
       title: 'Receita Bruta',
+      tooltip: 'Soma de todas as vendas antes de deduções (impostos, devoluções). Fonte: DRE.',
       value: formatCompact(current.revenue),
       compareValue: compare ? formatCompact(compare.revenue) : null,
       variation: compare ? calcVariation(current.revenue, compare.revenue) : null,
@@ -70,6 +72,7 @@ export default function AccountingDashboard() {
     },
     {
       title: 'Lucro Líquido',
+      tooltip: 'Receita total menos todas as despesas, impostos e custos. Resultado final da DRE.',
       value: formatCompact(current.netIncome),
       compareValue: compare ? formatCompact(compare.netIncome) : null,
       variation: compare ? calcVariation(current.netIncome, compare.netIncome) : null,
@@ -79,6 +82,7 @@ export default function AccountingDashboard() {
     },
     {
       title: 'Ativo Total',
+      tooltip: 'Soma de todos os bens e direitos da empresa (circulante + não circulante). Fonte: Balanço.',
       value: formatCompact(current.totalAssets),
       compareValue: compare ? formatCompact(compare.totalAssets) : null,
       variation: compare ? calcVariation(current.totalAssets, compare.totalAssets) : null,
@@ -88,6 +92,7 @@ export default function AccountingDashboard() {
     },
     {
       title: 'Patrimônio Líquido',
+      tooltip: 'Ativo Total menos Passivo Total. Representa o valor contábil pertencente aos sócios.',
       value: formatCompact(current.totalEquity),
       compareValue: compare ? formatCompact(compare.totalEquity) : null,
       variation: compare ? calcVariation(current.totalEquity, compare.totalEquity) : null,
@@ -97,6 +102,7 @@ export default function AccountingDashboard() {
     },
     {
       title: 'Margem Bruta',
+      tooltip: 'Fórmula: (Receita − CMV) ÷ Receita × 100. Mede eficiência na produção/compra.',
       value: `${current.grossMargin}%`,
       compareValue: compare ? `${compare.grossMargin}%` : null,
       variation: compare ? current.grossMargin - compare.grossMargin : null,
@@ -107,6 +113,7 @@ export default function AccountingDashboard() {
     },
     {
       title: 'Margem Líquida',
+      tooltip: 'Fórmula: Lucro Líquido ÷ Receita × 100. Mede quanto de cada real vendido vira lucro.',
       value: `${current.netMargin}%`,
       compareValue: compare ? `${compare.netMargin}%` : null,
       variation: compare ? current.netMargin - compare.netMargin : null,
@@ -117,6 +124,7 @@ export default function AccountingDashboard() {
     },
     {
       title: 'Liquidez Corrente',
+      tooltip: 'Fórmula: Ativo Circulante ÷ Passivo Circulante. Acima de 1 indica capacidade de pagar dívidas de curto prazo.',
       value: `${current.liquidezCorrente.toFixed(2)}x`,
       compareValue: compare ? `${compare.liquidezCorrente.toFixed(2)}x` : null,
       variation: compare ? calcVariation(current.liquidezCorrente, compare.liquidezCorrente) : null,
@@ -126,6 +134,7 @@ export default function AccountingDashboard() {
     },
     {
       title: 'ROE',
+      tooltip: 'Fórmula: Lucro Líquido ÷ Patrimônio Líquido × 100. Mede o retorno sobre o capital dos sócios.',
       value: `${current.roe}%`,
       compareValue: compare ? `${compare.roe}%` : null,
       variation: compare ? current.roe - compare.roe : null,
@@ -153,40 +162,48 @@ export default function AccountingDashboard() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
-        {kpis.map((kpi) => {
-          const Icon = kpi.icon;
-          return (
-            <Card
-              key={kpi.title}
-              className="cursor-pointer transition-shadow hover:shadow-md hover:ring-1 hover:ring-primary/20"
-              onClick={() => navigate(kpi.drillTo)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm text-muted-foreground">{kpi.title}</p>
-                  <div className="flex items-center gap-1">
-                    <Icon className={cn('h-4 w-4', kpi.color)} />
-                    <ExternalLink className="h-3 w-3 text-muted-foreground/50" />
-                  </div>
-                </div>
-                <p className="text-2xl font-bold">{kpi.value}</p>
-                {kpi.compareValue && (
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Anterior: {kpi.compareValue}
-                  </p>
-                )}
-                {kpi.variation !== null && (
-                  <div className={cn('flex items-center gap-1 text-xs mt-1', kpi.variation > 0 ? 'text-success' : kpi.variation < 0 ? 'text-destructive' : 'text-muted-foreground')}>
-                    {kpi.variation > 0 ? <TrendingUp className="h-3 w-3" /> : kpi.variation < 0 ? <TrendingDown className="h-3 w-3" /> : null}
-                    {kpi.variation > 0 ? '+' : ''}{kpi.variation.toFixed(1)}{(kpi as any).isAbsolute ? 'pp' : '%'}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      <TooltipProvider delayDuration={200}>
+        <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
+          {kpis.map((kpi) => {
+            const Icon = kpi.icon;
+            return (
+              <UITooltip key={kpi.title}>
+                <TooltipTrigger asChild>
+                  <Card
+                    className="cursor-pointer transition-shadow hover:shadow-md hover:ring-1 hover:ring-primary/20"
+                    onClick={() => navigate(kpi.drillTo)}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-sm text-muted-foreground">{kpi.title}</p>
+                        <div className="flex items-center gap-1">
+                          <Icon className={cn('h-4 w-4', kpi.color)} />
+                          <ExternalLink className="h-3 w-3 text-muted-foreground/50" />
+                        </div>
+                      </div>
+                      <p className="text-2xl font-bold">{kpi.value}</p>
+                      {kpi.compareValue && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Anterior: {kpi.compareValue}
+                        </p>
+                      )}
+                      {kpi.variation !== null && (
+                        <div className={cn('flex items-center gap-1 text-xs mt-1', kpi.variation > 0 ? 'text-success' : kpi.variation < 0 ? 'text-destructive' : 'text-muted-foreground')}>
+                          {kpi.variation > 0 ? <TrendingUp className="h-3 w-3" /> : kpi.variation < 0 ? <TrendingDown className="h-3 w-3" /> : null}
+                          {kpi.variation > 0 ? '+' : ''}{kpi.variation.toFixed(1)}{(kpi as any).isAbsolute ? 'pp' : '%'}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-[250px] text-center">
+                  <p className="text-xs">{kpi.tooltip}</p>
+                </TooltipContent>
+              </UITooltip>
+            );
+          })}
+        </div>
+      </TooltipProvider>
 
       {/* Journal Entries Status */}
       <div className="grid gap-4 md:grid-cols-3">
@@ -244,7 +261,7 @@ export default function AccountingDashboard() {
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
                   {current.assetPie.map((_, i) => <Cell key={i} fill={COLORS[i]} />)}
                 </Pie>
-                <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                <RechartsTooltip formatter={(v: number) => formatCurrency(v)} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
@@ -260,7 +277,7 @@ export default function AccountingDashboard() {
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
                   {current.liabilityPie.map((_, i) => <Cell key={i} fill={COLORS[i + 2]} />)}
                 </Pie>
-                <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                <RechartsTooltip formatter={(v: number) => formatCurrency(v)} />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
