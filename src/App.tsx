@@ -18,6 +18,7 @@ import CommercialQuotationsPage from "./pages/comercial/Quotations";
 import AccountsPayable from "./pages/financeiro/AccountsPayable";
 import AccountsReceivable from "./pages/financeiro/AccountsReceivable";
 import CashFlow from "./pages/financeiro/CashFlow";
+import BankReconciliation from "./pages/financeiro/BankReconciliation";
 
 // Accounting Module
 import ChartOfAccountsPage from "./pages/contabilidade/ChartOfAccounts";
@@ -38,6 +39,7 @@ import InventoryProductsPage from "./pages/estoque/Products";
 import InventoryMovementsPage from "./pages/estoque/Movements";
 import KardexPage from "./pages/estoque/Kardex";
 import StockLevelsPage from "./pages/estoque/StockLevels";
+import CategoriesPage from "./pages/estoque/Categories";
 
 // WMS Module
 import WMSDashboardPage from "./pages/wms/Dashboard";
@@ -92,7 +94,7 @@ const App = () => (
             <Route path="/financeiro/pagar" element={<AccountsPayable />} />
             <Route path="/financeiro/receber" element={<AccountsReceivable />} />
             <Route path="/financeiro/fluxo" element={<CashFlow />} />
-            <Route path="/financeiro/conciliacao" element={<PlaceholderPage title="Conciliação Bancária" />} />
+            <Route path="/financeiro/conciliacao" element={<BankReconciliation />} />
             
             
             {/* Accounting Module */}
@@ -114,7 +116,7 @@ const App = () => (
             <Route path="/estoque/movimentacoes" element={<InventoryMovementsPage />} />
             <Route path="/estoque/kardex" element={<KardexPage />} />
             <Route path="/estoque/saldos" element={<StockLevelsPage />} />
-            <Route path="/estoque/categorias" element={<PlaceholderPage title="Categorias" />} />
+            <Route path="/estoque/categorias" element={<CategoriesPage />} />
             
             {/* Purchasing Module */}
             <Route path="/compras/fornecedores" element={<SuppliersPage />} />
