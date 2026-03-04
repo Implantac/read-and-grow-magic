@@ -199,13 +199,21 @@ export default function AccountingDashboard() {
           <h1 className="text-2xl font-bold text-foreground">Painel Executivo Contábil</h1>
           <p className="text-muted-foreground">Visão consolidada dos indicadores contábeis — {current.label}</p>
         </div>
-        <PeriodSelector
-          value={selectedPeriod}
-          onValueChange={setSelectedPeriod}
-          compareValue={comparePeriod}
-          onCompareChange={setComparePeriod}
-        />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={handleExportPDF} disabled={isExporting} className="gap-2">
+            {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
+            Exportar PDF
+          </Button>
+          <PeriodSelector
+            value={selectedPeriod}
+            onValueChange={setSelectedPeriod}
+            compareValue={comparePeriod}
+            onCompareChange={setComparePeriod}
+          />
+        </div>
       </div>
+
+      <div ref={dashboardRef} className="space-y-6">
 
       {/* KPI Cards */}
       <TooltipProvider delayDuration={200}>
