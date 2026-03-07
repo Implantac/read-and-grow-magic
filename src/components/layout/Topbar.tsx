@@ -1,6 +1,6 @@
 import { Bell, ChevronDown, LogOut, Menu, Moon, Sun, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '@/stores/useAppStore';
-import { mockCompanies, mockAlerts } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 export function Topbar() {
+  const navigate = useNavigate();
   const { 
     user, 
     activeCompany, 
