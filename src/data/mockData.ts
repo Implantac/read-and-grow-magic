@@ -271,6 +271,7 @@ export const navigationItems = [
       { title: 'Produtos', href: '/estoque/produtos', icon: 'Box' },
       { title: 'Categorias', href: '/estoque/categorias', icon: 'FolderTree' },
       { title: 'Movimentações', href: '/estoque/movimentacoes', icon: 'ArrowLeftRight' },
+      { title: 'Kardex', href: '/estoque/kardex', icon: 'BookOpen' },
       { title: 'Saldos', href: '/estoque/saldos', icon: 'Calculator' },
     ],
   },
