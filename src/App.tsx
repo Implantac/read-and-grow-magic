@@ -71,6 +71,10 @@ import UsersPage from "./pages/admin/Users";
 import CompaniesPage from "./pages/admin/Companies";
 import ParametersPage from "./pages/admin/Parameters";
 
+// Profile & Notifications
+import ProfilePage from "./pages/Profile";
+import NotificationsPage from "./pages/Notifications";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -147,6 +151,10 @@ const App = () => (
             <Route path="/admin/usuarios" element={<UsersPage />} />
             <Route path="/admin/empresas" element={<CompaniesPage />} />
             <Route path="/admin/parametros" element={<ParametersPage />} />
+
+            {/* Profile & Notifications */}
+            <Route path="/perfil" element={<ProfilePage />} />
+            <Route path="/notificacoes" element={<NotificationsPage />} />
             
             {/* Config - Placeholder routes */}
             <Route path="/config/*" element={<PlaceholderPage title="Configurações" />} />
