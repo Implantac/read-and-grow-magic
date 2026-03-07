@@ -1,6 +1,7 @@
 import { Bell, ChevronDown, LogOut, Menu, Moon, Sun, User } from 'lucide-react';
-import { useAppStore } from '@/stores/useAppStore';
+import { useNavigate } from 'react-router-dom';
 import { mockCompanies, mockAlerts } from '@/data/mockData';
+import { useAppStore } from '@/stores/useAppStore';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -14,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 export function Topbar() {
+  const navigate = useNavigate();
   const { 
     user, 
     activeCompany, 
@@ -173,7 +175,7 @@ export function Topbar() {
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="justify-center text-primary">
+            <DropdownMenuItem className="justify-center text-primary" onClick={() => navigate('/notificacoes')}>
               Ver todas as notificações
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -200,7 +202,7 @@ export function Topbar() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/perfil')}>
               <User className="mr-2 h-4 w-4" />
               Meu Perfil
             </DropdownMenuItem>
