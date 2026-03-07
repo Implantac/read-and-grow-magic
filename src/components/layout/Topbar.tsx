@@ -1,5 +1,6 @@
 import { Bell, ChevronDown, LogOut, Menu, Moon, Sun, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { mockCompanies, mockAlerts } from '@/data/mockData';
 import { useAppStore } from '@/stores/useAppStore';
 import { Button } from '@/components/ui/button';
 import {
