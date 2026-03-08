@@ -374,6 +374,229 @@ export type Database = {
         }
         Relationships: []
       }
+      quotation_items: {
+        Row: {
+          discount: number
+          id: string
+          product_code: string
+          product_id: string | null
+          product_name: string
+          quantity: number
+          quotation_id: string
+          total: number
+          unit_price: number
+        }
+        Insert: {
+          discount?: number
+          id?: string
+          product_code: string
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          quotation_id: string
+          total?: number
+          unit_price?: number
+        }
+        Update: {
+          discount?: number
+          id?: string
+          product_code?: string
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          quotation_id?: string
+          total?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotation_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotation_items_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "quotations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotations: {
+        Row: {
+          client_id: string | null
+          client_name: string
+          created_at: string
+          date: string
+          discount: number
+          id: string
+          notes: string | null
+          number: string
+          sales_rep_id: string | null
+          sales_rep_name: string | null
+          status: string
+          subtotal: number
+          total: number
+          updated_at: string
+          valid_until: string
+        }
+        Insert: {
+          client_id?: string | null
+          client_name: string
+          created_at?: string
+          date?: string
+          discount?: number
+          id?: string
+          notes?: string | null
+          number: string
+          sales_rep_id?: string | null
+          sales_rep_name?: string | null
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          valid_until: string
+        }
+        Update: {
+          client_id?: string | null
+          client_name?: string
+          created_at?: string
+          date?: string
+          discount?: number
+          id?: string
+          notes?: string | null
+          number?: string
+          sales_rep_id?: string | null
+          sales_rep_name?: string | null
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          valid_until?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sale_items: {
+        Row: {
+          discount: number
+          id: string
+          product_code: string
+          product_id: string | null
+          product_name: string
+          quantity: number
+          sale_id: string
+          total: number
+          unit_price: number
+        }
+        Insert: {
+          discount?: number
+          id?: string
+          product_code: string
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          sale_id: string
+          total?: number
+          unit_price?: number
+        }
+        Update: {
+          discount?: number
+          id?: string
+          product_code?: string
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          sale_id?: string
+          total?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sale_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sale_items_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales: {
+        Row: {
+          client_id: string | null
+          client_name: string
+          created_at: string
+          date: string
+          discount: number
+          id: string
+          notes: string | null
+          number: string
+          payment_method: string
+          sales_rep_id: string | null
+          sales_rep_name: string | null
+          status: string
+          subtotal: number
+          total: number
+        }
+        Insert: {
+          client_id?: string | null
+          client_name: string
+          created_at?: string
+          date?: string
+          discount?: number
+          id?: string
+          notes?: string | null
+          number: string
+          payment_method?: string
+          sales_rep_id?: string | null
+          sales_rep_name?: string | null
+          status?: string
+          subtotal?: number
+          total?: number
+        }
+        Update: {
+          client_id?: string | null
+          client_name?: string
+          created_at?: string
+          date?: string
+          discount?: number
+          id?: string
+          notes?: string | null
+          number?: string
+          payment_method?: string
+          sales_rep_id?: string | null
+          sales_rep_name?: string | null
+          status?: string
+          subtotal?: number
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
