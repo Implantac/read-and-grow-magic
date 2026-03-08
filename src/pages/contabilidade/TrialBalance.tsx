@@ -1,8 +1,8 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ExportButton } from '@/components/shared/ExportButton';
-import { mockTrialBalance, getAccountTypeLabel } from '@/data/accountingMockData';
+import { getAccountTypeLabel } from '@/config/accounting';
 import { cn } from '@/lib/utils';
 import { Scale } from 'lucide-react';
 import { TrialBalanceChart } from '@/components/contabilidade/TrialBalanceChart';
@@ -15,6 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { ExportColumn } from '@/lib/exportUtils';
+import type { TrialBalanceItem } from '@/types/accounting';
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -40,8 +41,10 @@ const exportColumns: ExportColumn[] = [
 ];
 
 export default function TrialBalancePage() {
+  const [trialBalance] = useState<TrialBalanceItem[]>([]);
+
   const totals = useMemo(() => {
-    return mockTrialBalance.reduce(
+    return trialBalance.reduce(
       (acc, item) => ({
         previousDebit: acc.previousDebit + item.previousDebit,
         previousCredit: acc.previousCredit + item.previousCredit,
@@ -52,7 +55,7 @@ export default function TrialBalancePage() {
       }),
       { previousDebit: 0, previousCredit: 0, periodDebit: 0, periodCredit: 0, currentDebit: 0, currentCredit: 0 }
     );
-  }, []);
+  }, [trialBalance]);
 
   const isBalanced = Math.abs(totals.currentDebit - totals.currentCredit) < 0.01;
 
@@ -61,9 +64,9 @@ export default function TrialBalancePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Balancete de Verificação</h1>
-          <p className="text-muted-foreground">Período: Janeiro/2024</p>
+          <p className="text-muted-foreground">Verificação de saldos contábeis</p>
         </div>
-        <ExportButton data={mockTrialBalance as unknown as Record<string, unknown>[]} columns={exportColumns} filename="balancete_verificacao" />
+        <ExportButton data={trialBalance as unknown as Record<string, unknown>[]} columns={exportColumns} filename="balancete_verificacao" />
       </div>
 
       {/* KPIs */}
@@ -95,6 +98,7 @@ export default function TrialBalancePage() {
           </CardContent>
         </Card>
       </div>
+
       {/* Chart */}
       <TrialBalanceChart />
 
@@ -107,52 +111,59 @@ export default function TrialBalancePage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead rowSpan={2}>Código</TableHead>
-                  <TableHead rowSpan={2}>Conta</TableHead>
-                  <TableHead rowSpan={2}>Tipo</TableHead>
-                  <TableHead colSpan={2} className="text-center border-x">Saldo Anterior</TableHead>
-                  <TableHead colSpan={2} className="text-center border-x">Movimento</TableHead>
-                  <TableHead colSpan={2} className="text-center">Saldo Atual</TableHead>
-                </TableRow>
-                <TableRow>
-                  <TableHead className="text-right border-l">Débito</TableHead>
-                  <TableHead className="text-right border-r">Crédito</TableHead>
-                  <TableHead className="text-right border-l">Débito</TableHead>
-                  <TableHead className="text-right border-r">Crédito</TableHead>
-                  <TableHead className="text-right">Débito</TableHead>
-                  <TableHead className="text-right">Crédito</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {mockTrialBalance.map((item) => (
-                  <TableRow key={item.accountCode}>
-                    <TableCell className="font-mono text-xs">{item.accountCode}</TableCell>
-                    <TableCell>{item.accountName}</TableCell>
-                    <TableCell><span className={cn('text-xs font-medium', typeColors[item.type])}>{getAccountTypeLabel(item.type)}</span></TableCell>
-                    <TableCell className="text-right border-l">{item.previousDebit > 0 ? formatCurrency(item.previousDebit) : '-'}</TableCell>
-                    <TableCell className="text-right border-r">{item.previousCredit > 0 ? formatCurrency(item.previousCredit) : '-'}</TableCell>
-                    <TableCell className="text-right border-l">{item.periodDebit > 0 ? formatCurrency(item.periodDebit) : '-'}</TableCell>
-                    <TableCell className="text-right border-r">{item.periodCredit > 0 ? formatCurrency(item.periodCredit) : '-'}</TableCell>
-                    <TableCell className="text-right font-medium">{item.currentDebit > 0 ? formatCurrency(item.currentDebit) : '-'}</TableCell>
-                    <TableCell className="text-right font-medium">{item.currentCredit > 0 ? formatCurrency(item.currentCredit) : '-'}</TableCell>
+          {trialBalance.length > 0 ? (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead rowSpan={2}>Código</TableHead>
+                    <TableHead rowSpan={2}>Conta</TableHead>
+                    <TableHead rowSpan={2}>Tipo</TableHead>
+                    <TableHead colSpan={2} className="text-center border-x">Saldo Anterior</TableHead>
+                    <TableHead colSpan={2} className="text-center border-x">Movimento</TableHead>
+                    <TableHead colSpan={2} className="text-center">Saldo Atual</TableHead>
                   </TableRow>
-                ))}
-                <TableRow className="font-bold bg-muted/50">
-                  <TableCell colSpan={3}>TOTAIS</TableCell>
-                  <TableCell className="text-right border-l">{formatCurrency(totals.previousDebit)}</TableCell>
-                  <TableCell className="text-right border-r">{formatCurrency(totals.previousCredit)}</TableCell>
-                  <TableCell className="text-right border-l">{formatCurrency(totals.periodDebit)}</TableCell>
-                  <TableCell className="text-right border-r">{formatCurrency(totals.periodCredit)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(totals.currentDebit)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(totals.currentCredit)}</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
+                  <TableRow>
+                    <TableHead className="text-right border-l">Débito</TableHead>
+                    <TableHead className="text-right border-r">Crédito</TableHead>
+                    <TableHead className="text-right border-l">Débito</TableHead>
+                    <TableHead className="text-right border-r">Crédito</TableHead>
+                    <TableHead className="text-right">Débito</TableHead>
+                    <TableHead className="text-right">Crédito</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {trialBalance.map((item) => (
+                    <TableRow key={item.accountCode}>
+                      <TableCell className="font-mono text-xs">{item.accountCode}</TableCell>
+                      <TableCell>{item.accountName}</TableCell>
+                      <TableCell><span className={cn('text-xs font-medium', typeColors[item.type])}>{getAccountTypeLabel(item.type)}</span></TableCell>
+                      <TableCell className="text-right border-l">{item.previousDebit > 0 ? formatCurrency(item.previousDebit) : '-'}</TableCell>
+                      <TableCell className="text-right border-r">{item.previousCredit > 0 ? formatCurrency(item.previousCredit) : '-'}</TableCell>
+                      <TableCell className="text-right border-l">{item.periodDebit > 0 ? formatCurrency(item.periodDebit) : '-'}</TableCell>
+                      <TableCell className="text-right border-r">{item.periodCredit > 0 ? formatCurrency(item.periodCredit) : '-'}</TableCell>
+                      <TableCell className="text-right font-medium">{item.currentDebit > 0 ? formatCurrency(item.currentDebit) : '-'}</TableCell>
+                      <TableCell className="text-right font-medium">{item.currentCredit > 0 ? formatCurrency(item.currentCredit) : '-'}</TableCell>
+                    </TableRow>
+                  ))}
+                  <TableRow className="font-bold bg-muted/50">
+                    <TableCell colSpan={3}>TOTAIS</TableCell>
+                    <TableCell className="text-right border-l">{formatCurrency(totals.previousDebit)}</TableCell>
+                    <TableCell className="text-right border-r">{formatCurrency(totals.previousCredit)}</TableCell>
+                    <TableCell className="text-right border-l">{formatCurrency(totals.periodDebit)}</TableCell>
+                    <TableCell className="text-right border-r">{formatCurrency(totals.periodCredit)}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(totals.currentDebit)}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(totals.currentCredit)}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <Scale className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Nenhum dado de balancete disponível</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -4,12 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import {
   Package,
   Search,
@@ -17,12 +13,8 @@ import {
   CheckCircle,
   Clock,
   PlayCircle,
-  Eye,
-  ClipboardCheck,
-  AlertCircle
 } from 'lucide-react';
-import { receivingOrders as initialOrders } from '@/data/wmsMockData';
-import { ReceivingOrder, ReceivingStatus } from '@/types/wms';
+import type { ReceivingOrder, ReceivingStatus } from '@/types/wms';
 
 const statusConfig: Record<ReceivingStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   pending: { label: 'Pendente', variant: 'secondary' },
@@ -32,13 +24,9 @@ const statusConfig: Record<ReceivingStatus, { label: string; variant: 'default' 
 };
 
 export default function ReceivingPage() {
-  const [orders, setOrders] = useState<ReceivingOrder[]>(initialOrders);
+  const [orders] = useState<ReceivingOrder[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedOrder, setSelectedOrder] = useState<ReceivingOrder | null>(null);
-  const [detailsOpen, setDetailsOpen] = useState(false);
-  const [receiveOpen, setReceiveOpen] = useState(false);
-  const [receivingItems, setReceivingItems] = useState<{ id: string; qty: number }[]>([]);
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch = 
@@ -50,54 +38,7 @@ export default function ReceivingPage() {
 
   const pendingCount = orders.filter(o => o.status === 'pending').length;
   const inProgressCount = orders.filter(o => o.status === 'in_progress').length;
-  const completedToday = orders.filter(o => 
-    o.status === 'completed' && 
-    o.receivedDate === format(new Date(), 'yyyy-MM-dd')
-  ).length;
-
-  const handleViewDetails = (order: ReceivingOrder) => {
-    setSelectedOrder(order);
-    setDetailsOpen(true);
-  };
-
-  const handleStartReceiving = (order: ReceivingOrder) => {
-    setSelectedOrder(order);
-    setReceivingItems(order.items.map(item => ({ id: item.id, qty: item.receivedQty })));
-    setReceiveOpen(true);
-  };
-
-  const handleConfirmReceiving = () => {
-    if (!selectedOrder) return;
-
-    const updatedItems = selectedOrder.items.map(item => {
-      const receiving = receivingItems.find(r => r.id === item.id);
-      return { ...item, receivedQty: receiving?.qty || item.receivedQty };
-    });
-
-    const allReceived = updatedItems.every(item => item.receivedQty >= item.expectedQty);
-    
-    setOrders(orders.map(o => 
-      o.id === selectedOrder.id 
-        ? { 
-            ...o, 
-            items: updatedItems,
-            status: allReceived ? 'completed' : 'in_progress',
-            receivedDate: allReceived ? format(new Date(), 'yyyy-MM-dd') : undefined,
-            operator: 'Usuário Atual'
-          }
-        : o
-    ));
-
-    toast.success(allReceived ? 'Recebimento concluído!' : 'Recebimento parcial registrado');
-    setReceiveOpen(false);
-    setSelectedOrder(null);
-  };
-
-  const updateReceivingQty = (itemId: string, qty: number) => {
-    setReceivingItems(items => 
-      items.map(item => item.id === itemId ? { ...item, qty } : item)
-    );
-  };
+  const completedToday = 0;
 
   return (
     <div className="space-y-6">
@@ -118,6 +59,7 @@ export default function ReceivingPage() {
           filename="recebimento_wms"
         />
       </div>
+
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
@@ -213,43 +155,6 @@ export default function ReceivingPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredOrders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.orderNumber}</TableCell>
-                  <TableCell>{order.supplier}</TableCell>
-                  <TableCell>
-                    {format(new Date(order.expectedDate), 'dd/MM/yyyy', { locale: ptBR })}
-                  </TableCell>
-                  <TableCell>{order.dock}</TableCell>
-                  <TableCell>{order.items.length} item(s)</TableCell>
-                  <TableCell>
-                    <Badge variant={statusConfig[order.status].variant}>
-                      {statusConfig[order.status].label}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewDetails(order)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      {(order.status === 'pending' || order.status === 'in_progress') && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleStartReceiving(order)}
-                        >
-                          <ClipboardCheck className="h-4 w-4 mr-1" />
-                          Receber
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
               {filteredOrders.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
@@ -261,130 +166,6 @@ export default function ReceivingPage() {
           </Table>
         </CardContent>
       </Card>
-
-      {/* Details Dialog */}
-      <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Detalhes do Recebimento - {selectedOrder?.orderNumber}</DialogTitle>
-          </DialogHeader>
-          {selectedOrder && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Fornecedor</p>
-                  <p className="font-medium">{selectedOrder.supplier}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Data Prevista</p>
-                  <p className="font-medium">
-                    {format(new Date(selectedOrder.expectedDate), 'dd/MM/yyyy', { locale: ptBR })}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Doca</p>
-                  <p className="font-medium">{selectedOrder.dock}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Operador</p>
-                  <p className="font-medium">{selectedOrder.operator || '-'}</p>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="font-medium mb-2">Itens</h4>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Código</TableHead>
-                      <TableHead>Produto</TableHead>
-                      <TableHead className="text-right">Esperado</TableHead>
-                      <TableHead className="text-right">Recebido</TableHead>
-                      <TableHead>Lote</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {selectedOrder.items.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell>{item.productCode}</TableCell>
-                        <TableCell>{item.productName}</TableCell>
-                        <TableCell className="text-right">{item.expectedQty} {item.unit}</TableCell>
-                        <TableCell className="text-right">
-                          <span className={item.receivedQty < item.expectedQty ? 'text-destructive' : ''}>
-                            {item.receivedQty} {item.unit}
-                          </span>
-                        </TableCell>
-                        <TableCell>{item.batch || '-'}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Receiving Dialog */}
-      <Dialog open={receiveOpen} onOpenChange={setReceiveOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Receber Mercadorias - {selectedOrder?.orderNumber}</DialogTitle>
-          </DialogHeader>
-          {selectedOrder && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                <AlertCircle className="h-4 w-4 text-primary" />
-                <span className="text-sm">Informe as quantidades recebidas para cada item</span>
-              </div>
-              
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Produto</TableHead>
-                    <TableHead className="text-right">Esperado</TableHead>
-                    <TableHead className="text-right">Recebido</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {selectedOrder.items.map((item) => {
-                    const receiving = receivingItems.find(r => r.id === item.id);
-                    return (
-                      <TableRow key={item.id}>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium">{item.productName}</p>
-                            <p className="text-sm text-muted-foreground">{item.productCode}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">{item.expectedQty} {item.unit}</TableCell>
-                        <TableCell className="text-right">
-                          <Input
-                            type="number"
-                            min={0}
-                            max={item.expectedQty}
-                            value={receiving?.qty || 0}
-                            onChange={(e) => updateReceivingQty(item.id, parseInt(e.target.value) || 0)}
-                            className="w-24 ml-auto"
-                          />
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setReceiveOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleConfirmReceiving}>
-              Confirmar Recebimento
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

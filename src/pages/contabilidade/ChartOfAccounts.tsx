@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
-import { mockChartOfAccounts, getAccountTypeLabel } from '@/data/accountingMockData';
+import { getAccountTypeLabel } from '@/config/accounting';
 import { cn } from '@/lib/utils';
 import { Search, ChevronRight, ChevronDown, BookOpen, Plus, FolderTree } from 'lucide-react';
 import type { ExportColumn } from '@/lib/exportUtils';
+import type { ChartOfAccount } from '@/types/accounting';
 
 const typeColorMap: Record<string, string> = {
   asset: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
@@ -55,6 +56,7 @@ const accountFilterFields: FilterField[] = [
 ];
 
 export default function ChartOfAccountsPage() {
+  const [accounts] = useState<ChartOfAccount[]>([]);
   const [search, setSearch] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['1', '2', '3', '4', '5']));
   const [filters, setFilters] = useState<Record<string, string>>({});
@@ -71,7 +73,7 @@ export default function ChartOfAccountsPage() {
   };
 
   const filteredAccounts = useMemo(() => {
-    return mockChartOfAccounts.filter((a) => {
+    return accounts.filter((a) => {
       if (search && !a.code.toLowerCase().includes(search.toLowerCase()) && !a.name.toLowerCase().includes(search.toLowerCase())) return false;
       if (filters.type && a.type !== filters.type) return false;
       if (filters.nature && a.nature !== filters.nature) return false;
@@ -79,17 +81,14 @@ export default function ChartOfAccountsPage() {
       if (filters.level === 'synthetic' && a.isAnalytical) return false;
       return true;
     });
-  }, [search, filters]);
+  }, [accounts, search, filters]);
 
   const rootAccounts = filteredAccounts.filter((a) => a.parentId === null);
   const getChildren = (parentId: string) => filteredAccounts.filter((a) => a.parentId === parentId);
 
-  const totalAssets = mockChartOfAccounts.find((a) => a.code === '1')?.balance || 0;
-  const totalLiabilities = mockChartOfAccounts.find((a) => a.code === '2')?.balance || 0;
-  const totalEquity = mockChartOfAccounts.find((a) => a.code === '3')?.balance || 0;
-  const analyticalCount = mockChartOfAccounts.filter((a) => a.isAnalytical).length;
+  const analyticalCount = accounts.filter((a) => a.isAnalytical).length;
 
-  const renderAccount = (account: typeof mockChartOfAccounts[0], depth = 0) => {
+  const renderAccount = (account: ChartOfAccount, depth = 0) => {
     const children = getChildren(account.id);
     const isExpanded = expandedGroups.has(account.id);
     const hasChildren = children.length > 0;
@@ -139,7 +138,7 @@ export default function ChartOfAccountsPage() {
           <p className="text-muted-foreground">Estrutura hierárquica das contas contábeis</p>
         </div>
         <div className="flex gap-2">
-          <ExportButton data={mockChartOfAccounts as unknown as Record<string, unknown>[]} columns={exportColumns} filename="plano_de_contas" />
+          <ExportButton data={accounts as unknown as Record<string, unknown>[]} columns={exportColumns} filename="plano_de_contas" />
           <Button className="gap-2"><Plus className="h-4 w-4" /> Nova Conta</Button>
         </div>
       </div>
@@ -152,7 +151,7 @@ export default function ChartOfAccountsPage() {
               <div className="rounded-lg bg-primary/10 p-2"><BookOpen className="h-5 w-5 text-primary" /></div>
               <div>
                 <p className="text-sm text-muted-foreground">Total de Contas</p>
-                <p className="text-xl font-bold">{mockChartOfAccounts.length}</p>
+                <p className="text-xl font-bold">{accounts.length}</p>
               </div>
             </div>
           </CardContent>
@@ -172,7 +171,7 @@ export default function ChartOfAccountsPage() {
           <CardContent className="p-4">
             <div>
               <p className="text-sm text-muted-foreground">Ativo Total</p>
-              <p className="text-xl font-bold text-blue-600">{formatCurrency(totalAssets)}</p>
+              <p className="text-xl font-bold text-blue-600">{formatCurrency(0)}</p>
             </div>
           </CardContent>
         </Card>
@@ -180,7 +179,7 @@ export default function ChartOfAccountsPage() {
           <CardContent className="p-4">
             <div>
               <p className="text-sm text-muted-foreground">Passivo + PL</p>
-              <p className="text-xl font-bold text-purple-600">{formatCurrency(totalLiabilities + totalEquity)}</p>
+              <p className="text-xl font-bold text-purple-600">{formatCurrency(0)}</p>
             </div>
           </CardContent>
         </Card>
@@ -201,13 +200,21 @@ export default function ChartOfAccountsPage() {
               onClear={() => setFilters({})}
             />
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setExpandedGroups(new Set(mockChartOfAccounts.map((a) => a.id)))}>Expandir Tudo</Button>
+              <Button variant="outline" size="sm" onClick={() => setExpandedGroups(new Set(accounts.map((a) => a.id)))}>Expandir Tudo</Button>
               <Button variant="outline" size="sm" onClick={() => setExpandedGroups(new Set())}>Recolher Tudo</Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-0.5">{rootAccounts.map((a) => renderAccount(a))}</div>
+          {rootAccounts.length > 0 ? (
+            <div className="space-y-0.5">{rootAccounts.map((a) => renderAccount(a))}</div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Nenhuma conta cadastrada</p>
+              <p className="text-sm">Clique em "Nova Conta" para começar</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

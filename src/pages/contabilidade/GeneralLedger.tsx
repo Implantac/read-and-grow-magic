@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -11,9 +10,8 @@ import {
 } from '@/components/ui/select';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
-import { mockChartOfAccounts, generateLedgerEntries } from '@/data/accountingMockData';
 import { cn } from '@/lib/utils';
-import { BookOpen, Search } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -23,6 +21,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { ExportColumn } from '@/lib/exportUtils';
+import type { ChartOfAccount, LedgerEntry } from '@/types/accounting';
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -42,24 +41,25 @@ const ledgerFilterFields: FilterField[] = [
 ];
 
 export default function GeneralLedgerPage() {
-  const analyticalAccounts = mockChartOfAccounts.filter((a) => a.isAnalytical);
+  const [accounts] = useState<ChartOfAccount[]>([]);
+  const [entries] = useState<LedgerEntry[]>([]);
+  const analyticalAccounts = accounts.filter((a) => a.isAnalytical);
   const [selectedAccount, setSelectedAccount] = useState(analyticalAccounts[0]?.code || '');
   const [filters, setFilters] = useState<Record<string, string>>({});
 
-  const account = mockChartOfAccounts.find((a) => a.code === selectedAccount);
-  const allEntries = generateLedgerEntries(selectedAccount);
+  const account = accounts.find((a) => a.code === selectedAccount);
 
-  const entries = useMemo(() => {
-    return allEntries.filter((e) => {
+  const filteredEntries = useMemo(() => {
+    return entries.filter((e) => {
       if (filters.dateFrom && e.date < filters.dateFrom) return false;
       if (filters.dateTo && e.date > filters.dateTo) return false;
       return true;
     });
-  }, [allEntries, filters]);
+  }, [entries, filters]);
 
-  const totalDebits = entries.reduce((s, e) => s + e.debit, 0);
-  const totalCredits = entries.reduce((s, e) => s + e.credit, 0);
-  const finalBalance = entries[entries.length - 1]?.balance || 0;
+  const totalDebits = filteredEntries.reduce((s, e) => s + e.debit, 0);
+  const totalCredits = filteredEntries.reduce((s, e) => s + e.credit, 0);
+  const finalBalance = filteredEntries[filteredEntries.length - 1]?.balance || 0;
 
   return (
     <div className="space-y-6">
@@ -68,7 +68,7 @@ export default function GeneralLedgerPage() {
           <h1 className="text-2xl font-bold text-foreground">Razão Contábil</h1>
           <p className="text-muted-foreground">Movimentação detalhada por conta</p>
         </div>
-        <ExportButton data={entries as unknown as Record<string, unknown>[]} columns={exportColumns} filename={`razao_${selectedAccount}`} />
+        <ExportButton data={filteredEntries as unknown as Record<string, unknown>[]} columns={exportColumns} filename={`razao_${selectedAccount}`} />
       </div>
 
       {/* Account Selector + Filters */}
@@ -81,11 +81,15 @@ export default function GeneralLedgerPage() {
                   <SelectValue placeholder="Selecione uma conta" />
                 </SelectTrigger>
                 <SelectContent>
-                  {analyticalAccounts.map((a) => (
-                    <SelectItem key={a.code} value={a.code}>
-                      {a.code} - {a.name}
-                    </SelectItem>
-                  ))}
+                  {analyticalAccounts.length > 0 ? (
+                    analyticalAccounts.map((a) => (
+                      <SelectItem key={a.code} value={a.code}>
+                        {a.code} - {a.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="" disabled>Nenhuma conta disponível</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -121,38 +125,45 @@ export default function GeneralLedgerPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Data</TableHead>
-                <TableHead>Lançamento</TableHead>
-                <TableHead>Descrição</TableHead>
-                <TableHead className="text-right">Débito</TableHead>
-                <TableHead className="text-right">Crédito</TableHead>
-                <TableHead className="text-right">Saldo</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {entries.map((entry) => (
-                <TableRow key={entry.id} className={entry.journalNumber === 'Saldo Anterior' ? 'bg-muted/50 font-medium' : ''}>
-                  <TableCell>{new Date(entry.date).toLocaleDateString('pt-BR')}</TableCell>
-                  <TableCell className="font-mono text-xs">{entry.journalNumber}</TableCell>
-                  <TableCell>{entry.description}</TableCell>
-                  <TableCell className="text-right">{entry.debit > 0 ? formatCurrency(entry.debit) : '-'}</TableCell>
-                  <TableCell className="text-right">{entry.credit > 0 ? formatCurrency(entry.credit) : '-'}</TableCell>
-                  <TableCell className={cn('text-right font-medium', entry.balance < 0 && 'text-destructive')}>
-                    {formatCurrency(entry.balance)}
-                  </TableCell>
+          {filteredEntries.length > 0 ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Lançamento</TableHead>
+                  <TableHead>Descrição</TableHead>
+                  <TableHead className="text-right">Débito</TableHead>
+                  <TableHead className="text-right">Crédito</TableHead>
+                  <TableHead className="text-right">Saldo</TableHead>
                 </TableRow>
-              ))}
-              <TableRow className="font-bold bg-muted/50">
-                <TableCell colSpan={3}>TOTAIS</TableCell>
-                <TableCell className="text-right">{formatCurrency(totalDebits)}</TableCell>
-                <TableCell className="text-right">{formatCurrency(totalCredits)}</TableCell>
-                <TableCell className="text-right">{formatCurrency(finalBalance)}</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredEntries.map((entry) => (
+                  <TableRow key={entry.id} className={entry.journalNumber === 'Saldo Anterior' ? 'bg-muted/50 font-medium' : ''}>
+                    <TableCell>{new Date(entry.date).toLocaleDateString('pt-BR')}</TableCell>
+                    <TableCell className="font-mono text-xs">{entry.journalNumber}</TableCell>
+                    <TableCell>{entry.description}</TableCell>
+                    <TableCell className="text-right">{entry.debit > 0 ? formatCurrency(entry.debit) : '-'}</TableCell>
+                    <TableCell className="text-right">{entry.credit > 0 ? formatCurrency(entry.credit) : '-'}</TableCell>
+                    <TableCell className={cn('text-right font-medium', entry.balance < 0 && 'text-destructive')}>
+                      {formatCurrency(entry.balance)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                <TableRow className="font-bold bg-muted/50">
+                  <TableCell colSpan={3}>TOTAIS</TableCell>
+                  <TableCell className="text-right">{formatCurrency(totalDebits)}</TableCell>
+                  <TableCell className="text-right">{formatCurrency(totalCredits)}</TableCell>
+                  <TableCell className="text-right">{formatCurrency(finalBalance)}</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Nenhuma movimentação encontrada</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
