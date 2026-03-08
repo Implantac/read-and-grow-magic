@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Bell, ChevronDown, LogOut, Menu, Moon, Sun, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Company, Alert } from '@/types';
