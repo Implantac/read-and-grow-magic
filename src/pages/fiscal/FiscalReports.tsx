@@ -84,19 +84,10 @@ export default function FiscalReportsPage() {
     return format(new Date(dateString), "dd/MM/yyyy HH:mm", { locale: ptBR });
   };
 
-  const handleGenerate = (report: FiscalReport) => {
+  const handleGenerate = async (report: FiscalReport) => {
     setGenerating(report.id);
-    toast({
-      title: 'Gerando Relatório',
-      description: `${reportTypeLabels[report.type]} está sendo gerado...`,
-    });
-    setTimeout(() => {
-      setGenerating(null);
-      toast({
-        title: 'Relatório Gerado',
-        description: `${reportTypeLabels[report.type]} foi gerado com sucesso!`,
-      });
-    }, 2000);
+    await generate(report.id);
+    setGenerating(null);
   };
 
   const handleDownload = (report: FiscalReport) => {

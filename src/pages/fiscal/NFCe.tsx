@@ -123,12 +123,8 @@ export default function NFCePage() {
     });
   };
 
-  const handleCancel = (nfce: NFCe) => {
-    toast({
-      title: 'Cancelamento Solicitado',
-      description: `NFC-e ${nfce.number} será cancelada`,
-      variant: 'destructive',
-    });
+  const handleCancel = async (nfce: NFCe) => {
+    await cancelNFCe(nfce.id);
   };
 
   const handleReprint = (nfce: NFCe) => {
