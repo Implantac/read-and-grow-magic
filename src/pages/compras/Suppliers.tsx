@@ -483,10 +483,16 @@ export default function SuppliersPage() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>CNPJ/CPF *</Label>
-                <Input
-                  value={formData.document || ''}
-                  onChange={(e) => setFormData({ ...formData, document: e.target.value })}
-                />
+                <div className="flex gap-2">
+                  <Input
+                    value={formData.document || ''}
+                    onChange={(e) => setFormData({ ...formData, document: e.target.value })}
+                    placeholder="00.000.000/0000-00"
+                  />
+                  <Button type="button" variant="outline" size="icon" onClick={handleSupplierCnpjLookup} disabled={cnpjLookup.loading} title="Buscar dados na Receita Federal">
+                    {cnpjLookup.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Categoria *</Label>
