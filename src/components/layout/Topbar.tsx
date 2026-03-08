@@ -2,6 +2,7 @@ import { Bell, ChevronDown, LogOut, Menu, Moon, Sun, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { mockCompanies, mockAlerts } from '@/data/mockData';
 import { useAppStore } from '@/stores/useAppStore';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -16,6 +17,7 @@ import { cn } from '@/lib/utils';
 
 export function Topbar() {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const { 
     user, 
     activeCompany, 
@@ -26,8 +28,12 @@ export function Topbar() {
     setActiveCompany, 
     setActiveBranch,
     toggleTheme,
-    logout,
   } = useAppStore();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   const unreadAlerts = mockAlerts.filter((a) => !a.read).length;
 
@@ -207,7 +213,7 @@ export function Topbar() {
               Meu Perfil
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={logout} className="text-destructive">
+            <DropdownMenuItem onClick={handleLogout} className="text-destructive">
               <LogOut className="mr-2 h-4 w-4" />
               Sair
             </DropdownMenuItem>
