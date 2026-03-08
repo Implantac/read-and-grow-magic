@@ -124,7 +124,7 @@ export function Sidebar() {
             </div>
             <div>
               <h1 className="text-lg font-bold text-sidebar-foreground">Use Sistemas</h1>
-              <p className="text-xs text-sidebar-foreground/60">ERP e WMS</p>
+              <p className="text-xs" style={{ color: '#ff9800' }}>ERP e WMS</p>
             </div>
           </div>
         )}

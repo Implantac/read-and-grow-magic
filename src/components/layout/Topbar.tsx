@@ -40,9 +40,10 @@ export function Topbar() {
   return (
     <header
       className={cn(
-        'fixed right-0 top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card px-4 transition-all duration-300',
+        'fixed right-0 top-0 z-30 flex h-16 items-center justify-between border-b px-4 transition-all duration-300',
         sidebarCollapsed ? 'left-16' : 'left-64'
       )}
+      style={{ background: '#1a2234', borderColor: 'rgba(255, 152, 0, 0.15)' }}
     >
       {/* Left Section */}
       <div className="flex items-center gap-4">
@@ -50,7 +51,7 @@ export function Topbar() {
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
-          className="text-muted-foreground hover:text-foreground"
+          className="text-white/70 hover:text-[#ff9800] hover:bg-white/10"
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -58,14 +59,14 @@ export function Topbar() {
         {/* Company/Branch Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2 border-white/20 text-white hover:bg-white/10 hover:text-[#ff9800]" style={{ background: 'rgba(42, 50, 69, 0.8)' }}>
               <span className="max-w-[200px] truncate">
                 {activeCompany?.name || 'Selecionar Empresa'}
               </span>
               <ChevronDown className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-64">
+          <DropdownMenuContent align="start" className="w-64" style={{ background: '#2a3245', borderColor: 'rgba(255, 152, 0, 0.2)' }}>
             <DropdownMenuLabel>Empresas</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {mockCompanies.map((company) => (
@@ -85,14 +86,14 @@ export function Topbar() {
         {activeCompany && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2">
-                <span className="max-w-[150px] truncate text-muted-foreground">
+              <Button variant="ghost" className="flex items-center gap-2 hover:bg-white/10">
+                <span className="max-w-[150px] truncate text-white/60">
                   {activeBranch?.name || 'Filial'}
                 </span>
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuContent align="start" className="w-56" style={{ background: '#2a3245', borderColor: 'rgba(255, 152, 0, 0.2)' }}>
               <DropdownMenuLabel>Filiais</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {activeCompany.branches.map((branch) => (
@@ -118,7 +119,7 @@ export function Topbar() {
           variant="ghost"
           size="icon"
           onClick={toggleTheme}
-          className="text-muted-foreground hover:text-foreground"
+          className="text-white/70 hover:text-[#ff9800] hover:bg-white/10"
         >
           {theme === 'light' ? (
             <Moon className="h-5 w-5" />
@@ -133,7 +134,7 @@ export function Topbar() {
             <Button
               variant="ghost"
               size="icon"
-              className="relative text-muted-foreground hover:text-foreground"
+              className="relative text-white/70 hover:text-[#ff9800] hover:bg-white/10"
             >
               <Bell className="h-5 w-5" />
               {unreadAlerts > 0 && (
@@ -146,7 +147,7 @@ export function Topbar() {
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
+          <DropdownMenuContent align="end" className="w-80" style={{ background: '#2a3245', borderColor: 'rgba(255, 152, 0, 0.2)' }}>
             <DropdownMenuLabel className="flex items-center justify-between">
               Notificações
               <Badge variant="secondary">{unreadAlerts} novas</Badge>
@@ -190,15 +191,15 @@ export function Topbar() {
         {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                <User className="h-4 w-4" />
+            <Button variant="ghost" className="flex items-center gap-2 hover:bg-white/10">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full" style={{ background: '#ff9800' }}>
+                <User className="h-4 w-4 text-white" />
               </div>
-              <span className="hidden md:inline-block">{user?.name || 'Usuário'}</span>
-              <ChevronDown className="h-4 w-4" />
+              <span className="hidden md:inline-block text-white">{user?.name || 'Usuário'}</span>
+              <ChevronDown className="h-4 w-4 text-white/60" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end" className="w-56" style={{ background: '#2a3245', borderColor: 'rgba(255, 152, 0, 0.2)' }}>
             <DropdownMenuLabel>
               <div className="flex flex-col">
                 <span>{user?.name}</span>
