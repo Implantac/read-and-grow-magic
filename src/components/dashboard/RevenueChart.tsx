@@ -9,7 +9,8 @@ import {
   Legend,
 } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { revenueChartData } from '@/data/mockData';
+import type { ChartData } from '@/types';
+const revenueChartData: ChartData[] = [];
 
 export function RevenueChart() {
   const formatCurrency = (value: number) => {

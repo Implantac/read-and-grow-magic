@@ -9,7 +9,9 @@ import {
   Cell,
 } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { salesByCategoryData } from '@/data/mockData';
+const salesByCategoryData = [
+  { name: 'Sem dados', value: 1 },
+];
 
 const COLORS = [
   'hsl(var(--chart-1))',
