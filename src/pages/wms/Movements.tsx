@@ -5,6 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import {
   Search,
   TrendingUp,
@@ -15,7 +19,10 @@ import {
   ArrowUpDown,
   Calendar
 } from 'lucide-react';
-import type { InventoryMovement, MovementType } from '@/types/wms';
+import { useWMSMovements } from '@/hooks/useWMSOperations';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import type { MovementType } from '@/types/wms';
 
 const movementTypeConfig: Record<MovementType, { label: string; icon: React.ReactNode; color: string }> = {
   inbound: { label: 'Entrada', icon: <TrendingUp className="h-4 w-4" />, color: 'text-green-600' },
@@ -25,10 +32,15 @@ const movementTypeConfig: Record<MovementType, { label: string; icon: React.Reac
 };
 
 export default function WMSMovementsPage() {
-  const [movements] = useState<InventoryMovement[]>([]);
+  const { movements, loading, createMovement } = useWMSMovements();
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<string>('all');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    product_code: '', product_name: '', type: 'inbound',
+    from_location: '', to_location: '', quantity: 0, reason: '', operator: '',
+  });
 
   const filteredMovements = movements.filter(movement => {
     const matchesSearch = 
