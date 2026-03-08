@@ -47,7 +47,6 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
-import {
   stockLevelStatusConfig,
 } from '@/config/inventory';
 import { ABCCurveChart } from '@/components/estoque/ABCCurveChart';
