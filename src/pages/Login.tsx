@@ -86,17 +86,17 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4" style={{ background: 'linear-gradient(135deg, #1a2234 0%, #2a3245 50%, #1a2234 100%)' }}>
-      <div className="w-full max-w-md animate-fade-in">
+    <div className="flex min-h-screen items-center justify-center p-4 overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a2234 0%, #2a3245 50%, #1a2234 100%)' }}>
+      <div className="w-full max-w-md" style={{ animation: 'login-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards', opacity: 0 }}>
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl" style={{ background: 'rgba(255, 152, 0, 0.15)', border: '2px solid rgba(255, 152, 0, 0.3)' }}>
+          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl" style={{ background: 'rgba(255, 152, 0, 0.15)', border: '2px solid rgba(255, 152, 0, 0.3)', animation: 'login-logo-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards', opacity: 0, transform: 'scale(0.5)' }}>
             <img src={logoUseSistemas} alt="Use Sistemas" className="h-16 w-16 object-contain" />
           </div>
-          <h1 className="text-3xl font-bold" style={{ color: '#ffffff' }}>Use Sistemas</h1>
-          <p style={{ color: '#ff9800' }} className="font-medium">ERP e WMS</p>
+          <h1 className="text-3xl font-bold" style={{ color: '#ffffff', animation: 'login-fade-in 0.5s ease-out 0.5s forwards', opacity: 0 }}>Use Sistemas</h1>
+          <p style={{ color: '#ff9800', animation: 'login-fade-in 0.5s ease-out 0.6s forwards', opacity: 0 }} className="font-medium">ERP e WMS</p>
         </div>
 
-        <Card className="border-0 shadow-2xl" style={{ background: 'rgba(42, 50, 69, 0.95)', backdropFilter: 'blur(20px)' }}>
+        <Card className="border-0 shadow-2xl" style={{ background: 'rgba(42, 50, 69, 0.95)', backdropFilter: 'blur(20px)', animation: 'login-card-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards', opacity: 0, transform: 'translateY(20px)' }}>
           {view === 'forgot' ? (
             <>
               <CardHeader className="space-y-1">
