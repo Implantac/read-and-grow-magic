@@ -86,7 +86,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
     }
   };
 
-  const handleAddProduct = (product: { id: string; code: string; name: string; salePrice: number; unit: string }) => {
+  const handleAddProduct = (product: { id: string; code: string; name: string; sale_price: number; unit: string }) => {
     setItems((prev) => [
       ...prev,
       {
@@ -97,7 +97,8 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
         cfop: '5102',
         unit: product.unit || 'UN',
         quantity: 1,
-        unitPrice: product.salePrice,
+        unitPrice: product.sale_price,
+      },
       },
     ]);
     setProductSearch('');
