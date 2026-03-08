@@ -217,7 +217,10 @@ export default function OrdersPage() {
     updateStatus.mutate({ id: order.id, status: nextStatus }, {
       onSuccess: () => {
         if (nextStatus === 'confirmed') {
-          toast({ title: 'Picking WMS gerado', description: 'Uma ordem de separação foi criada automaticamente no WMS.' });
+          toast({ title: '🏭 Picking WMS gerado', description: 'Uma ordem de separação foi criada automaticamente no WMS.' });
+        }
+        if (nextStatus === 'invoiced') {
+          toast({ title: '📄 NF-e gerada automaticamente', description: 'Uma NF-e de saída foi criada como rascunho no módulo Fiscal.' });
         }
       }
     });
