@@ -105,42 +105,19 @@ export default function PurchaseOrdersPage() {
 
   const handleConfirmReceive = () => {
     if (!selectedOrder) return;
-
-    const updatedItems = selectedOrder.items.map((item) => ({
-      ...item,
-      receivedQuantity: item.receivedQuantity + (receiveQuantities[item.id] || 0),
-    }));
-
-    const allReceived = updatedItems.every((item) => item.receivedQuantity >= item.quantity);
-    const someReceived = updatedItems.some((item) => item.receivedQuantity > 0);
-
-    let newStatus: PurchaseOrderStatus = selectedOrder.status;
-    if (allReceived) {
-      newStatus = 'received';
-    } else if (someReceived) {
-      newStatus = 'partial_received';
-    }
-
-    setOrders(
-      orders.map((o) =>
-        o.id === selectedOrder.id
-          ? { ...o, items: updatedItems, status: newStatus, updatedAt: new Date().toISOString() }
-          : o
-      )
-    );
+    // TODO: update received quantities via supabase
     setIsReceiveOpen(false);
   };
 
-  const handleStatusChange = (orderId: string, newStatus: PurchaseOrderStatus) => {
-    setOrders(
-      orders.map((o) =>
-        o.id === orderId ? { ...o, status: newStatus, updatedAt: new Date().toISOString() } : o
-      )
-    );
+  const handleStatusChange = async (orderId: string, newStatus: PurchaseOrderStatus) => {
+    await updateOrder(orderId, { status: newStatus });
+    if (newStatus === 'approved' || newStatus === 'sent') {
+      toast.success('🏭 Ordem de recebimento WMS gerada automaticamente!');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setOrders(orders.filter((o) => o.id !== id));
+  const handleDelete = async (id: string) => {
+    await removeOrder(id);
   };
 
   const getProgressPercentage = (order: PurchaseOrder) => {
