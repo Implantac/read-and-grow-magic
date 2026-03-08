@@ -23,6 +23,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { clientSegments, brazilianStates } from '@/config/commercial';
 import { useClients, useCreateClient, useUpdateClient, useDeleteClient, type DbClient } from '@/hooks/useClients';
+import { useCnpjLookup } from '@/hooks/useCnpjLookup';
 
 const filterFields: FilterField[] = [
   { key: 'status', label: 'Status', type: 'select', options: [
