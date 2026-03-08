@@ -149,7 +149,7 @@ export default function FiscalReportsPage() {
             Gerencie e exporte seus relatórios fiscais e obrigações acessórias
           </p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setCreateOpen(true)}>
           <FileSpreadsheet className="h-4 w-4" />
           Novo Relatório
         </Button>
