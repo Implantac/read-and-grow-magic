@@ -62,9 +62,10 @@ const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ 
 
 export default function FiscalReportsPage() {
   const { toast } = useToast();
-  const { reports, loading, generate } = useFiscalReports();
+  const { reports, loading, generate, create } = useFiscalReports();
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [generating, setGenerating] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const filteredReports = reports.filter((report) => {
     return typeFilter === 'all' || report.type === typeFilter;
