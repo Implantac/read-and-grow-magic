@@ -2123,6 +2123,7 @@ export type Database = {
           operator: string | null
           order_number: string
           picking_order_id: string | null
+          sales_order_id: string | null
           shipped_at: string | null
           started_at: string | null
           status: string
@@ -2137,6 +2138,7 @@ export type Database = {
           operator?: string | null
           order_number: string
           picking_order_id?: string | null
+          sales_order_id?: string | null
           shipped_at?: string | null
           started_at?: string | null
           status?: string
@@ -2151,6 +2153,7 @@ export type Database = {
           operator?: string | null
           order_number?: string
           picking_order_id?: string | null
+          sales_order_id?: string | null
           shipped_at?: string | null
           started_at?: string | null
           status?: string
