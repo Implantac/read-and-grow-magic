@@ -100,7 +100,7 @@ const UsersPage = () => {
       role: formData.get('role') as UserRole,
       department: formData.get('department') as string,
       branchId: formData.get('branchId') as string,
-      branchName: mockCompanies.find(c => c.id === formData.get('branchId'))?.tradeName,
+      branchName: formData.get('branchId') as string,
     };
 
     if (editingUser) {
