@@ -3,9 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { getAccountTypeLabel } from '@/config/accounting';
+import { useChartOfAccounts } from '@/hooks/useChartOfAccounts';
 import { cn } from '@/lib/utils';
 import { Search, ChevronRight, ChevronDown, BookOpen, Plus, FolderTree } from 'lucide-react';
 import type { ExportColumn } from '@/lib/exportUtils';
@@ -56,10 +58,17 @@ const accountFilterFields: FilterField[] = [
 ];
 
 export default function ChartOfAccountsPage() {
-  const [accounts] = useState<ChartOfAccount[]>([]);
+  const { accounts, loading } = useChartOfAccounts();
   const [search, setSearch] = useState('');
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['1', '2', '3', '4', '5']));
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState<Record<string, string>>({});
+
+  // Auto-expand root accounts when data loads
+  useMemo(() => {
+    if (accounts.length > 0 && expandedGroups.size === 0) {
+      setExpandedGroups(new Set(accounts.filter(a => a.parentId === null).map(a => a.id)));
+    }
+  }, [accounts]);
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -87,6 +96,8 @@ export default function ChartOfAccountsPage() {
   const getChildren = (parentId: string) => filteredAccounts.filter((a) => a.parentId === parentId);
 
   const analyticalCount = accounts.filter((a) => a.isAnalytical).length;
+  const totalAssets = accounts.filter(a => a.type === 'asset' && a.level === 1).reduce((s, a) => s + a.balance, 0);
+  const totalLiabilitiesEquity = accounts.filter(a => (a.type === 'liability' || a.type === 'equity') && a.level === 1).reduce((s, a) => s + a.balance, 0);
 
   const renderAccount = (account: ChartOfAccount, depth = 0) => {
     const children = getChildren(account.id);
@@ -130,6 +141,18 @@ export default function ChartOfAccountsPage() {
     );
   };
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-64" />
+        <div className="grid gap-4 md:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20" />)}
+        </div>
+        <Skeleton className="h-96" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -143,7 +166,6 @@ export default function ChartOfAccountsPage() {
         </div>
       </div>
 
-      {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="p-4">
@@ -171,7 +193,7 @@ export default function ChartOfAccountsPage() {
           <CardContent className="p-4">
             <div>
               <p className="text-sm text-muted-foreground">Ativo Total</p>
-              <p className="text-xl font-bold text-blue-600">{formatCurrency(0)}</p>
+              <p className="text-xl font-bold text-blue-600">{formatCurrency(totalAssets)}</p>
             </div>
           </CardContent>
         </Card>
@@ -179,13 +201,12 @@ export default function ChartOfAccountsPage() {
           <CardContent className="p-4">
             <div>
               <p className="text-sm text-muted-foreground">Passivo + PL</p>
-              <p className="text-xl font-bold text-purple-600">{formatCurrency(0)}</p>
+              <p className="text-xl font-bold text-purple-600">{formatCurrency(totalLiabilitiesEquity)}</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters + Search + Tree */}
       <Card>
         <CardHeader className="pb-3">
           <div className="flex flex-wrap items-center gap-4">
@@ -193,12 +214,7 @@ export default function ChartOfAccountsPage() {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Buscar conta..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
             </div>
-            <AdvancedFilters
-              fields={accountFilterFields}
-              values={filters}
-              onChange={setFilters}
-              onClear={() => setFilters({})}
-            />
+            <AdvancedFilters fields={accountFilterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={() => setExpandedGroups(new Set(accounts.map((a) => a.id)))}>Expandir Tudo</Button>
               <Button variant="outline" size="sm" onClick={() => setExpandedGroups(new Set())}>Recolher Tudo</Button>

@@ -1,19 +1,14 @@
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { getAccountTypeLabel } from '@/config/accounting';
+import { useChartOfAccounts } from '@/hooks/useChartOfAccounts';
 import { cn } from '@/lib/utils';
 import { Scale } from 'lucide-react';
 import { TrialBalanceChart } from '@/components/contabilidade/TrialBalanceChart';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { ExportColumn } from '@/lib/exportUtils';
 import type { TrialBalanceItem } from '@/types/accounting';
 
@@ -32,16 +27,29 @@ const exportColumns: ExportColumn[] = [
   { key: 'accountCode', label: 'Código' },
   { key: 'accountName', label: 'Conta' },
   { key: 'type', label: 'Tipo', format: (v) => getAccountTypeLabel(String(v)) },
-  { key: 'previousDebit', label: 'Saldo Ant. Débito', format: (v) => formatCurrency(Number(v)) },
-  { key: 'previousCredit', label: 'Saldo Ant. Crédito', format: (v) => formatCurrency(Number(v)) },
-  { key: 'periodDebit', label: 'Movimento Débito', format: (v) => formatCurrency(Number(v)) },
-  { key: 'periodCredit', label: 'Movimento Crédito', format: (v) => formatCurrency(Number(v)) },
   { key: 'currentDebit', label: 'Saldo Atual Débito', format: (v) => formatCurrency(Number(v)) },
   { key: 'currentCredit', label: 'Saldo Atual Crédito', format: (v) => formatCurrency(Number(v)) },
 ];
 
 export default function TrialBalancePage() {
-  const [trialBalance] = useState<TrialBalanceItem[]>([]);
+  const { accounts, loading } = useChartOfAccounts();
+
+  // Build trial balance from analytical accounts with non-zero balances
+  const trialBalance = useMemo<TrialBalanceItem[]>(() => {
+    return accounts
+      .filter(a => a.isAnalytical && a.balance !== 0)
+      .map(a => ({
+        accountCode: a.code,
+        accountName: a.name,
+        type: a.type,
+        previousDebit: 0,
+        previousCredit: 0,
+        periodDebit: a.nature === 'debit' ? Math.abs(a.balance) : 0,
+        periodCredit: a.nature === 'credit' ? Math.abs(a.balance) : 0,
+        currentDebit: a.nature === 'debit' ? Math.abs(a.balance) : 0,
+        currentCredit: a.nature === 'credit' ? Math.abs(a.balance) : 0,
+      }));
+  }, [accounts]);
 
   const totals = useMemo(() => {
     return trialBalance.reduce(
@@ -58,6 +66,18 @@ export default function TrialBalancePage() {
   }, [trialBalance]);
 
   const isBalanced = Math.abs(totals.currentDebit - totals.currentCredit) < 0.01;
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-64" />
+        <div className="grid gap-4 md:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20" />)}
+        </div>
+        <Skeleton className="h-96" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
