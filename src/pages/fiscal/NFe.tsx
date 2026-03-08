@@ -483,6 +483,39 @@ export default function NFePage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Cancel Confirmation Dialog */}
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancelar NF-e {nfeToCancel?.number}</DialogTitle>
+            <DialogDescription>
+              Esta ação é irreversível. Informe o motivo do cancelamento.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Textarea
+              placeholder="Motivo do cancelamento..."
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              rows={3}
+            />
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setCancelDialogOpen(false)}>
+                Voltar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmCancel}
+                disabled={!cancelReason.trim()}
+              >
+                <XCircle className="mr-2 h-4 w-4" />
+                Confirmar Cancelamento
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
