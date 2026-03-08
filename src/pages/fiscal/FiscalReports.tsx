@@ -118,6 +118,25 @@ export default function FiscalReportsPage() {
     cofins: reports.reduce((s, r) => s + r.totalCOFINS, 0),
   };
 
+  const taxDistributionData = [
+    { name: 'ICMS', value: taxBreakdown.icms, color: 'hsl(var(--primary))' },
+    { name: 'COFINS', value: taxBreakdown.cofins, color: 'hsl(var(--info, 210 100% 50%))' },
+    { name: 'IPI', value: taxBreakdown.ipi, color: 'hsl(var(--warning, 45 100% 50%))' },
+    { name: 'PIS', value: taxBreakdown.pis, color: 'hsl(var(--success, 142 76% 36%))' },
+  ].filter(d => d.value > 0);
+
+  const monthlyTaxData = reports
+    .filter(r => r.status === 'generated')
+    .slice(0, 6)
+    .reverse()
+    .map(r => ({
+      name: r.period,
+      icms: r.totalICMS,
+      ipi: r.totalIPI,
+      pis: r.totalPIS,
+      cofins: r.totalCOFINS,
+    }));
+
   return (
     <div className="space-y-6">
       {/* Header */}
