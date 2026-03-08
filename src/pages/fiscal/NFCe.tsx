@@ -185,7 +185,7 @@ export default function NFCePage() {
           ]}
           filename="nfce"
         />
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setPdvOpen(true)}>
           <Plus className="h-4 w-4" />
           Nova Venda PDV
         </Button>
