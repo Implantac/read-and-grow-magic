@@ -18,22 +18,22 @@ interface ModuleKPISectionProps {
 
 export function ModuleKPISection({ title, icon: Icon, kpis, accentColor }: ModuleKPISectionProps) {
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className={cn("py-3 px-4", accentColor)}>
-        <CardTitle className="flex items-center gap-2 text-sm font-semibold text-white">
-          <Icon className="h-4 w-4" />
+    <Card className="overflow-hidden hover-lift">
+      <CardHeader className={cn("py-2.5 px-4", accentColor)}>
+        <CardTitle className="flex items-center gap-2 text-xs font-semibold text-primary-foreground uppercase tracking-wider">
+          <Icon className="h-3.5 w-3.5" />
           {title}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4">
         <div className="grid grid-cols-2 gap-3">
           {kpis.map((kpi, index) => (
-            <div key={index} className="space-y-1">
-              <p className="text-xs text-muted-foreground truncate">{kpi.label}</p>
-              <p className="text-lg font-bold text-foreground">{kpi.value}</p>
+            <div key={index} className="space-y-0.5">
+              <p className="text-[11px] text-muted-foreground truncate">{kpi.label}</p>
+              <p className="text-base font-bold text-foreground tabular-nums">{kpi.value}</p>
               {kpi.trendValue && (
                 <p className={cn(
-                  "text-xs font-medium",
+                  "text-[11px] font-medium",
                   kpi.trend === 'up' && "text-success",
                   kpi.trend === 'down' && "text-destructive",
                   kpi.trend === 'neutral' && "text-muted-foreground"
