@@ -442,6 +442,9 @@ export default function FiscalReportsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Create Report Dialog */}
+      <CreateReportDialog open={createOpen} onOpenChange={setCreateOpen} onCreate={create} />
     </div>
   );
 }
