@@ -214,7 +214,13 @@ export default function OrdersPage() {
   const handleAdvanceStatus = (order: DbOrder) => {
     const nextStatus = statusFlow[order.status];
     if (!nextStatus) return;
-    updateStatus.mutate({ id: order.id, status: nextStatus });
+    updateStatus.mutate({ id: order.id, status: nextStatus }, {
+      onSuccess: () => {
+        if (nextStatus === 'confirmed') {
+          toast({ title: 'Picking WMS gerado', description: 'Uma ordem de separação foi criada automaticamente no WMS.' });
+        }
+      }
+    });
   };
 
   const handleCancel = () => {

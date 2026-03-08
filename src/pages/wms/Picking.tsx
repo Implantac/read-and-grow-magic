@@ -4,17 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 import {
-  Search,
-  Package,
-  Clock,
-  CheckCircle,
-  PlayCircle,
-  ClipboardList,
+  Search, Package, Clock, CheckCircle, PlayCircle, ClipboardList,
 } from 'lucide-react';
-import type { PickingOrder, PickingStatus } from '@/types/wms';
+import { useWMSPicking } from '@/hooks/useWMSOperations';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import type { PickingStatus } from '@/types/wms';
 
 const statusConfig: Record<PickingStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   pending: { label: 'Pendente', variant: 'secondary' },
@@ -32,13 +33,15 @@ const priorityConfig: Record<string, { label: string; color: string }> = {
 };
 
 export default function PickingPage() {
-  const [orders] = useState<PickingOrder[]>([]);
+  const { orders, loading, startPicking, completePicking } = useWMSPicking();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [startDialog, setStartDialog] = useState<string | null>(null);
+  const [operator, setOperator] = useState('');
 
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = 
+    const matchesSearch =
       order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.customerName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
@@ -48,8 +51,16 @@ export default function PickingPage() {
 
   const pendingCount = orders.filter(o => o.status === 'pending').length;
   const inProgressCount = orders.filter(o => o.status === 'in_progress' || o.status === 'assigned').length;
-  const completedToday = 0;
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
+  const completedToday = orders.filter(o => o.status === 'completed' && o.completedAt?.startsWith(todayStr)).length;
   const urgentCount = orders.filter(o => o.priority === 'urgent' && o.status !== 'completed').length;
+
+  const handleStart = async () => {
+    if (!startDialog || !operator.trim()) return;
+    await startPicking(startDialog, operator);
+    setStartDialog(null);
+    setOperator('');
+  };
 
   return (
     <div className="space-y-6">
@@ -162,33 +173,101 @@ export default function PickingPage() {
           <CardTitle className="flex items-center gap-2">
             <ClipboardList className="h-5 w-5" />
             Ordens de Picking
+            {orders.length > 0 && (
+              <Badge variant="secondary" className="ml-2">Integrado com Pedidos</Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Número</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Prioridade</TableHead>
-                <TableHead>Itens</TableHead>
-                <TableHead>Atribuído</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredOrders.length === 0 && (
+          {loading ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    Nenhuma ordem encontrada
-                  </TableCell>
+                  <TableHead>Número</TableHead>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Prioridade</TableHead>
+                  <TableHead>Itens</TableHead>
+                  <TableHead>Operador</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Criado em</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredOrders.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      Nenhuma ordem de picking encontrada. Confirme um pedido de venda para gerar automaticamente.
+                    </TableCell>
+                  </TableRow>
+                ) : filteredOrders.map((order) => {
+                  const status = statusConfig[order.status as PickingStatus] || statusConfig.pending;
+                  const priority = priorityConfig[order.priority] || priorityConfig.medium;
+                  return (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-medium">{order.orderNumber}</TableCell>
+                      <TableCell>{order.customerName}</TableCell>
+                      <TableCell>
+                        <span className="flex items-center gap-1.5">
+                          <span className={`h-2 w-2 rounded-full ${priority.color}`} />
+                          {priority.label}
+                        </span>
+                      </TableCell>
+                      <TableCell>{order.pickedItems}/{order.itemsCount}</TableCell>
+                      <TableCell>{order.assignedTo || '-'}</TableCell>
+                      <TableCell>
+                        <Badge variant={status.variant}>{status.label}</Badge>
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {order.status === 'pending' && (
+                          <Button size="sm" onClick={() => setStartDialog(order.id)}>
+                            <PlayCircle className="h-4 w-4 mr-1" />
+                            Iniciar
+                          </Button>
+                        )}
+                        {order.status === 'in_progress' && (
+                          <Button size="sm" variant="outline" onClick={() => completePicking(order.id)}>
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Concluir
+                          </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
+
+      {/* Start Picking Dialog */}
+      <Dialog open={!!startDialog} onOpenChange={() => setStartDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Iniciar Separação</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Label>Operador Responsável</Label>
+            <Input
+              value={operator}
+              onChange={(e) => setOperator(e.target.value)}
+              placeholder="Nome do operador"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setStartDialog(null)}>Cancelar</Button>
+            <Button onClick={handleStart} disabled={!operator.trim()}>Iniciar Picking</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
