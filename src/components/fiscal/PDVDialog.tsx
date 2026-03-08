@@ -173,7 +173,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                       <span className="font-medium">{p.name}</span>
                       <span className="text-muted-foreground ml-2">({p.code})</span>
                     </div>
-                    <span className="font-bold">{formatCurrency(p.salePrice)}</span>
+                    <span className="font-bold">{formatCurrency(p.sale_price)}</span>
                   </button>
                 ))}
               </div>

@@ -226,7 +226,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                     <span>
                       <span className="font-medium">{p.code}</span> - {p.name}
                     </span>
-                    <span className="text-muted-foreground">{formatCurrency(p.salePrice)}</span>
+                    <span className="text-muted-foreground">{formatCurrency(p.sale_price)}</span>
                   </button>
                 ))}
               </div>
