@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAppStore } from '@/stores/useAppStore';
-import { mockCompanies } from '@/data/mockData';
+import type { Company } from '@/types';
+const mockCompanies: Company[] = [];
 import type { User as AppUser } from '@/types';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 

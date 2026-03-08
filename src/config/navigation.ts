@@ -1,0 +1,120 @@
+export const navigationItems = [
+  {
+    title: 'Dashboard',
+    href: '/dashboard',
+    icon: 'LayoutDashboard',
+  },
+  {
+    title: 'Comercial',
+    href: '/comercial',
+    icon: 'Users',
+    children: [
+      { title: 'Clientes', href: '/comercial/clientes', icon: 'UserCircle' },
+      { title: 'Vendas', href: '/comercial/vendas', icon: 'ShoppingBag' },
+      { title: 'Pedidos', href: '/comercial/pedidos', icon: 'ClipboardList' },
+      { title: 'Orçamentos', href: '/comercial/orcamentos', icon: 'FileText' },
+    ],
+  },
+  {
+    title: 'Financeiro',
+    href: '/financeiro',
+    icon: 'Wallet',
+    children: [
+      { title: 'Contas a Pagar', href: '/financeiro/pagar', icon: 'ArrowUpCircle' },
+      { title: 'Contas a Receber', href: '/financeiro/receber', icon: 'ArrowDownCircle' },
+      { title: 'Fluxo de Caixa', href: '/financeiro/fluxo', icon: 'TrendingUp' },
+      { title: 'Conciliação', href: '/financeiro/conciliacao', icon: 'CheckCircle' },
+    ],
+  },
+  {
+    title: 'Contabilidade',
+    href: '/contabilidade',
+    icon: 'Calculator',
+    children: [
+      { title: 'Painel Executivo', href: '/contabilidade/painel', icon: 'BarChart3' },
+      { title: 'Plano de Contas', href: '/contabilidade/plano-contas', icon: 'FolderTree' },
+      { title: 'Lançamentos', href: '/contabilidade/lancamentos', icon: 'FileText' },
+      { title: 'Razão Contábil', href: '/contabilidade/razao', icon: 'BookOpen' },
+      { title: 'Balancete', href: '/contabilidade/balancete', icon: 'Scale' },
+      { title: 'DRE', href: '/contabilidade/dre', icon: 'TrendingUp' },
+      { title: 'Balanço Patrimonial', href: '/contabilidade/balanco', icon: 'Building2' },
+    ],
+  },
+  {
+    title: 'Fiscal',
+    href: '/fiscal',
+    icon: 'FileCheck',
+    children: [
+      { title: 'NF-e', href: '/fiscal/nfe', icon: 'FileText' },
+      { title: 'NFC-e', href: '/fiscal/nfce', icon: 'Receipt' },
+      { title: 'Relatórios Fiscais', href: '/fiscal/relatorios', icon: 'BarChart3' },
+    ],
+  },
+  {
+    title: 'Estoque',
+    href: '/estoque',
+    icon: 'Package',
+    children: [
+      { title: 'Produtos', href: '/estoque/produtos', icon: 'Box' },
+      { title: 'Categorias', href: '/estoque/categorias', icon: 'FolderTree' },
+      { title: 'Movimentações', href: '/estoque/movimentacoes', icon: 'ArrowLeftRight' },
+      { title: 'Kardex', href: '/estoque/kardex', icon: 'BookOpen' },
+      { title: 'Saldos', href: '/estoque/saldos', icon: 'Calculator' },
+    ],
+  },
+  {
+    title: 'Compras',
+    href: '/compras',
+    icon: 'ShoppingCart',
+    children: [
+      { title: 'Fornecedores', href: '/compras/fornecedores', icon: 'Building2' },
+      { title: 'Pedidos de Compra', href: '/compras/pedidos', icon: 'ClipboardList' },
+      { title: 'Cotações', href: '/compras/cotacoes', icon: 'FileSearch' },
+    ],
+  },
+  {
+    title: 'Produção',
+    href: '/producao',
+    icon: 'Factory',
+    children: [
+      { title: 'Ordens de Produção', href: '/producao/ordens', icon: 'ClipboardCheck' },
+      { title: 'Consumo MP', href: '/producao/consumo', icon: 'PackageMinus' },
+      { title: 'Apontamentos', href: '/producao/apontamentos', icon: 'Timer' },
+    ],
+  },
+  {
+    title: 'WMS',
+    href: '/wms',
+    icon: 'Warehouse',
+    children: [
+      { title: 'Dashboard WMS', href: '/wms/dashboard', icon: 'LayoutDashboard' },
+      { title: 'Recebimento', href: '/wms/recebimento', icon: 'PackagePlus' },
+      { title: 'Endereçamento', href: '/wms/enderecamento', icon: 'MapPin' },
+      { title: 'Picking', href: '/wms/picking', icon: 'PackageSearch' },
+      { title: 'Packing', href: '/wms/packing', icon: 'PackageCheck' },
+      { title: 'Inventário', href: '/wms/inventario', icon: 'ClipboardList' },
+      { title: 'Movimentações', href: '/wms/movimentacoes', icon: 'MoveHorizontal' },
+    ],
+  },
+  {
+    title: 'Relatórios',
+    href: '/relatorios',
+    icon: 'BarChart3',
+    children: [
+      { title: 'Vendas', href: '/relatorios/vendas', icon: 'ShoppingBag' },
+      { title: 'Estoque', href: '/relatorios/estoque', icon: 'Package' },
+      { title: 'Financeiro', href: '/relatorios/financeiro', icon: 'Wallet' },
+      { title: 'Produção', href: '/relatorios/producao', icon: 'Factory' },
+    ],
+  },
+  {
+    title: 'Administração',
+    href: '/admin',
+    icon: 'Settings',
+    children: [
+      { title: 'Usuários', href: '/admin/usuarios', icon: 'Users' },
+      { title: 'Empresas', href: '/admin/empresas', icon: 'Building' },
+      { title: 'Parâmetros', href: '/admin/parametros', icon: 'Sliders' },
+    ],
+  },
+];

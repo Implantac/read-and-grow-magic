@@ -1,6 +1,9 @@
 import { Bell, ChevronDown, LogOut, Menu, Moon, Sun, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { mockCompanies, mockAlerts } from '@/data/mockData';
+import type { Company, Alert } from '@/types';
+
+const mockCompanies: Company[] = [];
+const mockAlerts: Alert[] = [];
 import { useAppStore } from '@/stores/useAppStore';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
