@@ -119,7 +119,7 @@ export function Topbar() {
           variant="ghost"
           size="icon"
           onClick={toggleTheme}
-          className="text-muted-foreground hover:text-foreground"
+          className="text-white/70 hover:text-[#ff9800] hover:bg-white/10"
         >
           {theme === 'light' ? (
             <Moon className="h-5 w-5" />
