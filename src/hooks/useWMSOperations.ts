@@ -135,9 +135,9 @@ export function useWMSDashboardStats() {
   const fetch = useCallback(async () => {
     setLoading(true);
     const [recRes, pickRes, packRes, storRes, movRes] = await Promise.all([
-      supabase.from('wms_receiving_orders').select('status'),
-      supabase.from('wms_picking_orders').select('status'),
-      supabase.from('wms_packing_orders').select('status'),
+      supabase.from('wms_receiving_orders' as any).select('status'),
+      supabase.from('wms_picking_orders' as any).select('status'),
+      supabase.from('wms_packing_orders' as any).select('status'),
       supabase.from('wms_storage_locations' as any).select('capacity,occupied'),
       supabase.from('wms_movements' as any).select('*').order('created_at', { ascending: false }).limit(5),
     ]);
