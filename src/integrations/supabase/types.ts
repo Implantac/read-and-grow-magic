@@ -2217,7 +2217,9 @@ export type Database = {
           created_at: string
           customer_name: string
           id: string
+          items_count: number
           order_number: string
+          picked_items: number
           priority: string
           sales_order_id: string | null
           started_at: string | null
@@ -2229,7 +2231,9 @@ export type Database = {
           created_at?: string
           customer_name: string
           id?: string
+          items_count?: number
           order_number: string
+          picked_items?: number
           priority?: string
           sales_order_id?: string | null
           started_at?: string | null
@@ -2241,7 +2245,9 @@ export type Database = {
           created_at?: string
           customer_name?: string
           id?: string
+          items_count?: number
           order_number?: string
+          picked_items?: number
           priority?: string
           sales_order_id?: string | null
           started_at?: string | null
