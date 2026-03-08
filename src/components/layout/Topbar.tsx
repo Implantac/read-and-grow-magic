@@ -38,7 +38,9 @@ export function Topbar() {
     navigate('/login');
   };
 
-  const unreadAlerts = mockAlerts.filter((a) => !a.read).length;
+  const { companies } = useCompanies();
+  const [alerts] = useState<Alert[]>([]);
+  const unreadAlerts = alerts.filter((a) => !a.read).length;
 
   return (
     <header
