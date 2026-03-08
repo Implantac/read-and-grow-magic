@@ -7,29 +7,39 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   Package,
   Search,
   Truck,
   CheckCircle,
   Clock,
   PlayCircle,
+  MoreHorizontal,
+  ShoppingCart,
 } from 'lucide-react';
-import type { ReceivingOrder, ReceivingStatus } from '@/types/wms';
+import { useWMSReceiving } from '@/hooks/useWMSOperations';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
-const statusConfig: Record<ReceivingStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   pending: { label: 'Pendente', variant: 'secondary' },
   in_progress: { label: 'Em Andamento', variant: 'default' },
   completed: { label: 'Concluído', variant: 'outline' },
-  cancelled: { label: 'Cancelado', variant: 'destructive' }
+  cancelled: { label: 'Cancelado', variant: 'destructive' },
 };
 
 export default function ReceivingPage() {
-  const [orders] = useState<ReceivingOrder[]>([]);
+  const { orders, loading, refetch, update } = useWMSReceiving();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const filteredOrders = orders.filter(order => {
-    const matchesSearch = 
+    const matchesSearch =
       order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.supplier.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
@@ -38,7 +48,25 @@ export default function ReceivingPage() {
 
   const pendingCount = orders.filter(o => o.status === 'pending').length;
   const inProgressCount = orders.filter(o => o.status === 'in_progress').length;
-  const completedToday = 0;
+  const completedCount = orders.filter(o => o.status === 'completed').length;
+
+  const formatDate = (date: string) => {
+    try {
+      return format(new Date(date), 'dd/MM/yyyy', { locale: ptBR });
+    } catch {
+      return '-';
+    }
+  };
+
+  const handleStart = async (id: string) => {
+    await update(id, { status: 'in_progress', received_date: null });
+    refetch();
+  };
+
+  const handleComplete = async (id: string) => {
+    await update(id, { status: 'completed', received_date: new Date().toISOString() });
+    refetch();
+  };
 
   return (
     <div className="space-y-6">
@@ -54,7 +82,7 @@ export default function ReceivingPage() {
             { key: 'supplier', label: 'Fornecedor' },
             { key: 'dock', label: 'Doca' },
             { key: 'status', label: 'Status' },
-            { key: 'expectedDate', label: 'Data Prevista', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+            { key: 'expectedDate', label: 'Data Prevista', format: (v) => formatDate(v as string) },
           ]}
           filename="recebimento_wms"
         />
@@ -84,12 +112,12 @@ export default function ReceivingPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Concluídos Hoje</CardTitle>
+            <CardTitle className="text-sm font-medium">Concluídos</CardTitle>
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{completedToday}</div>
-            <p className="text-xs text-muted-foreground">Finalizados hoje</p>
+            <div className="text-2xl font-bold">{completedCount}</div>
+            <p className="text-xs text-muted-foreground">Finalizados</p>
           </CardContent>
         </Card>
         <Card>
@@ -142,28 +170,83 @@ export default function ReceivingPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Número</TableHead>
-                <TableHead>Fornecedor</TableHead>
-                <TableHead>Data Prevista</TableHead>
-                <TableHead>Doca</TableHead>
-                <TableHead>Itens</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredOrders.length === 0 && (
+          {loading ? (
+            <div className="flex items-center justify-center py-8 text-muted-foreground">Carregando...</div>
+          ) : (
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    Nenhuma ordem encontrada
-                  </TableCell>
+                  <TableHead>Número</TableHead>
+                  <TableHead>Fornecedor</TableHead>
+                  <TableHead>Data Prevista</TableHead>
+                  <TableHead>Doca</TableHead>
+                  <TableHead>Itens</TableHead>
+                  <TableHead>Origem</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredOrders.map((order) => {
+                  const cfg = statusConfig[order.status] || statusConfig.pending;
+                  return (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-medium">{order.orderNumber}</TableCell>
+                      <TableCell>{order.supplier}</TableCell>
+                      <TableCell>{formatDate(order.expectedDate)}</TableCell>
+                      <TableCell>{order.dock || '-'}</TableCell>
+                      <TableCell>
+                        {order.receivedItems || 0}/{order.itemsCount || 0}
+                      </TableCell>
+                      <TableCell>
+                        {order.notes?.includes('Gerado automaticamente') ? (
+                          <Badge variant="outline" className="text-xs gap-1">
+                            <ShoppingCart className="h-3 w-3" />
+                            Compras
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="text-xs">Manual</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={cfg.variant}>{cfg.label}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {order.status === 'pending' && (
+                              <DropdownMenuItem onClick={() => handleStart(order.id)}>
+                                <PlayCircle className="mr-2 h-4 w-4" />
+                                Iniciar Recebimento
+                              </DropdownMenuItem>
+                            )}
+                            {order.status === 'in_progress' && (
+                              <DropdownMenuItem onClick={() => handleComplete(order.id)}>
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                Concluir Recebimento
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {filteredOrders.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      Nenhuma ordem encontrada
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

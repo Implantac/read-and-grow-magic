@@ -39,8 +39,10 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { purchaseOrderStatuses } from '@/config/purchasing';
 import { PurchaseOrder, PurchaseOrderStatus } from '@/types/purchasing';
+import { usePurchaseOrders } from '@/hooks/usePurchaseOrders';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 const priorityConfig = {
   low: { label: 'Baixa', className: 'bg-gray-100 text-gray-800' },
@@ -50,7 +52,7 @@ const priorityConfig = {
 };
 
 export default function PurchaseOrdersPage() {
-  const [orders, setOrders] = useState<PurchaseOrder[]>([]);
+  const { orders, loading, refetch, update: updateOrder, remove: removeOrder } = usePurchaseOrders();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
@@ -103,42 +105,19 @@ export default function PurchaseOrdersPage() {
 
   const handleConfirmReceive = () => {
     if (!selectedOrder) return;
-
-    const updatedItems = selectedOrder.items.map((item) => ({
-      ...item,
-      receivedQuantity: item.receivedQuantity + (receiveQuantities[item.id] || 0),
-    }));
-
-    const allReceived = updatedItems.every((item) => item.receivedQuantity >= item.quantity);
-    const someReceived = updatedItems.some((item) => item.receivedQuantity > 0);
-
-    let newStatus: PurchaseOrderStatus = selectedOrder.status;
-    if (allReceived) {
-      newStatus = 'received';
-    } else if (someReceived) {
-      newStatus = 'partial_received';
-    }
-
-    setOrders(
-      orders.map((o) =>
-        o.id === selectedOrder.id
-          ? { ...o, items: updatedItems, status: newStatus, updatedAt: new Date().toISOString() }
-          : o
-      )
-    );
+    // TODO: update received quantities via supabase
     setIsReceiveOpen(false);
   };
 
-  const handleStatusChange = (orderId: string, newStatus: PurchaseOrderStatus) => {
-    setOrders(
-      orders.map((o) =>
-        o.id === orderId ? { ...o, status: newStatus, updatedAt: new Date().toISOString() } : o
-      )
-    );
+  const handleStatusChange = async (orderId: string, newStatus: PurchaseOrderStatus) => {
+    await updateOrder(orderId, { status: newStatus });
+    if (newStatus === 'approved' || newStatus === 'sent') {
+      toast.success('🏭 Ordem de recebimento WMS gerada automaticamente!');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    setOrders(orders.filter((o) => o.id !== id));
+  const handleDelete = async (id: string) => {
+    await removeOrder(id);
   };
 
   const getProgressPercentage = (order: PurchaseOrder) => {

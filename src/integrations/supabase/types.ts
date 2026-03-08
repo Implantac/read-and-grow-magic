@@ -2307,6 +2307,7 @@ export type Database = {
           id: string
           operator: string | null
           order_number: string
+          purchase_order_id: string | null
           received_date: string | null
           status: string
           supplier: string
@@ -2318,6 +2319,7 @@ export type Database = {
           id?: string
           operator?: string | null
           order_number: string
+          purchase_order_id?: string | null
           received_date?: string | null
           status?: string
           supplier: string
@@ -2329,6 +2331,7 @@ export type Database = {
           id?: string
           operator?: string | null
           order_number?: string
+          purchase_order_id?: string | null
           received_date?: string | null
           status?: string
           supplier?: string
