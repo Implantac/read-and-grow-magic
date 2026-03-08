@@ -107,7 +107,9 @@ export function useCreateSale() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['sales'] });
-      toast({ title: 'Venda registrada com sucesso!' });
+      qc.invalidateQueries({ queryKey: ['stock-movements'] });
+      qc.invalidateQueries({ queryKey: ['accounts-receivable'] });
+      toast({ title: 'Venda registrada com sucesso!', description: 'Movimentação de estoque e conta a receber geradas automaticamente.' });
     },
     onError: (e: any) => toast({ title: 'Erro ao registrar venda', description: e.message, variant: 'destructive' }),
   });
