@@ -8,7 +8,7 @@ export function useWMSMovements() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('wms_movements').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('wms_movements' as any).select('*').order('created_at', { ascending: false });
     if (error) { console.error(error); toast.error('Erro ao carregar movimentações'); }
     else setMovements((data || []).map((r: any) => ({
       id: r.id, productCode: r.product_code, productName: r.product_name,
