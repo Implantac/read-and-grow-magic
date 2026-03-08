@@ -199,7 +199,7 @@ export function Topbar() {
               <ChevronDown className="h-4 w-4 text-white/60" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end" className="w-56" style={{ background: '#2a3245', borderColor: 'rgba(255, 152, 0, 0.2)' }}>
             <DropdownMenuLabel>
               <div className="flex flex-col">
                 <span>{user?.name}</span>
