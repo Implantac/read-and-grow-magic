@@ -37,6 +37,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { reportTypeLabels } from '@/config/fiscal';
 import { useFiscalReports } from '@/hooks/useFiscalReports';
+import { CreateReportDialog } from '@/components/fiscal/CreateReportDialog';
 import type { FiscalReport } from '@/types/fiscal';
 import {
   AreaChart,
