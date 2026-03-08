@@ -212,7 +212,7 @@ export default function Login() {
         </Card>
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
-          © 2024 Use Sistemas. Todos os direitos reservados.
+          © 2025 Use Sistemas. Todos os direitos reservados.
         </p>
       </div>
     </div>
