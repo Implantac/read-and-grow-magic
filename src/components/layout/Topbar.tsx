@@ -86,8 +86,8 @@ export function Topbar() {
         {activeCompany && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2">
-                <span className="max-w-[150px] truncate text-muted-foreground">
+              <Button variant="ghost" className="flex items-center gap-2 hover:bg-white/10">
+                <span className="max-w-[150px] truncate text-white/60">
                   {activeBranch?.name || 'Filial'}
                 </span>
                 <ChevronDown className="h-4 w-4" />
