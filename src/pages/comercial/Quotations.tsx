@@ -4,14 +4,19 @@ import { ExportButton } from '@/components/shared/ExportButton';
 import { format, isPast } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
-import { useQuotations, useUpdateQuotationStatus, type DbQuotation } from '@/hooks/useQuotations';
+import { useQuotations, useCreateQuotation, useUpdateQuotationStatus, useConvertQuotationToOrder, type DbQuotation } from '@/hooks/useQuotations';
+import { ClientSelector } from '@/components/comercial/ClientSelector';
+import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
 
 const filterFields: FilterField[] = [
   { key: 'status', label: 'Status', type: 'select', options: [
@@ -26,11 +31,43 @@ const filterFields: FilterField[] = [
 export default function QuotationsPage() {
   const { toast } = useToast();
   const { data: quotations = [], isLoading } = useQuotations();
+  const createQuotation = useCreateQuotation();
   const updateStatus = useUpdateQuotationStatus();
+  const convertToOrder = useConvertQuotationToOrder();
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [isViewOpen, setIsViewOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [isConvertOpen, setIsConvertOpen] = useState(false);
   const [selectedQuotation, setSelectedQuotation] = useState<DbQuotation | null>(null);
+
+  // Form state
+  const [formClient, setFormClient] = useState<{ id: string | null; name: string }>({ id: null, name: '' });
+  const [formItems, setFormItems] = useState<LineItem[]>([]);
+  const [formValidUntil, setFormValidUntil] = useState('');
+  const [formNotes, setFormNotes] = useState('');
+
+  const resetForm = () => {
+    setFormClient({ id: null, name: '' });
+    setFormItems([]);
+    setFormValidUntil('');
+    setFormNotes('');
+  };
+
+  const handleCreate = () => {
+    if (!formClient.name || formItems.length === 0 || !formValidUntil) {
+      toast({ title: 'Preencha o cliente, validade e adicione pelo menos um item', variant: 'destructive' });
+      return;
+    }
+    createQuotation.mutate({
+      client_id: formClient.id,
+      client_name: formClient.name,
+      valid_until: formValidUntil,
+      notes: formNotes || null,
+      items: formItems,
+    }, {
+      onSuccess: () => { setIsFormOpen(false); resetForm(); },
+    });
+  };
 
   const filteredQuotations = quotations.filter((q) => {
     if (filters.status && q.status !== filters.status) return false;
@@ -60,12 +97,8 @@ export default function QuotationsPage() {
 
   const handleConvert = () => {
     if (!selectedQuotation) return;
-    updateStatus.mutate({ id: selectedQuotation.id, status: 'converted' }, {
-      onSuccess: () => {
-        toast({ title: 'Orçamento convertido', description: `Orçamento ${selectedQuotation.number} foi convertido em pedido` });
-        setIsConvertOpen(false);
-        setSelectedQuotation(null);
-      },
+    convertToOrder.mutate(selectedQuotation, {
+      onSuccess: () => { setIsConvertOpen(false); setSelectedQuotation(null); },
     });
   };
 
@@ -122,7 +155,9 @@ export default function QuotationsPage() {
             ]}
             filename="orcamentos"
           />
-          <Button className="gap-2"><Plus className="h-4 w-4" />Novo Orçamento</Button>
+          <Button className="gap-2" onClick={() => { resetForm(); setIsFormOpen(true); }}>
+            <Plus className="h-4 w-4" />Novo Orçamento
+          </Button>
         </div>
       </div>
 
@@ -131,23 +166,56 @@ export default function QuotationsPage() {
           <p className="text-sm text-muted-foreground">Valor Total</p>
           <p className="text-2xl font-bold text-foreground">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValue)}</p>
         </div>
-        <div className="rounded-lg border bg-muted/50 p-4">
+        <div className="rounded-lg border bg-card p-4">
           <p className="text-sm text-muted-foreground">Rascunhos</p>
           <p className="text-2xl font-bold text-foreground">{draftCount}</p>
         </div>
-        <div className="rounded-lg border bg-info/10 p-4">
-          <p className="text-sm text-info">Enviados</p>
-          <p className="text-2xl font-bold text-info">{sentCount}</p>
+        <div className="rounded-lg border bg-card p-4">
+          <p className="text-sm text-muted-foreground">Enviados</p>
+          <p className="text-2xl font-bold text-foreground">{sentCount}</p>
         </div>
-        <div className="rounded-lg border bg-success/10 p-4">
-          <p className="text-sm text-success">Aprovados</p>
-          <p className="text-2xl font-bold text-success">{approvedCount}</p>
+        <div className="rounded-lg border bg-card p-4">
+          <p className="text-sm text-muted-foreground">Aprovados</p>
+          <p className="text-2xl font-bold text-foreground">{approvedCount}</p>
         </div>
       </div>
 
       <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
       <DataTable columns={columns} data={filteredQuotations} searchPlaceholder="Buscar por número, cliente..." pageSize={10} actions={renderActions} />
 
+      {/* Create Quotation Dialog */}
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Novo Orçamento</DialogTitle>
+            <DialogDescription>Crie uma proposta comercial para o cliente</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <ClientSelector clientId={formClient.id} clientName={formClient.name} onSelect={setFormClient} />
+
+            <div className="space-y-2">
+              <Label>Validade do Orçamento</Label>
+              <Input type="date" value={formValidUntil} onChange={(e) => setFormValidUntil(e.target.value)} />
+            </div>
+
+            <OrderItemsEditor items={formItems} onChange={setFormItems} />
+
+            <div className="space-y-2">
+              <Label>Observações</Label>
+              <Textarea value={formNotes} onChange={(e) => setFormNotes(e.target.value)} placeholder="Observações sobre o orçamento..." />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsFormOpen(false)}>Cancelar</Button>
+            <Button onClick={handleCreate} disabled={createQuotation.isPending}>
+              {createQuotation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Criar Orçamento
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Dialog */}
       <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader><DialogTitle>Detalhes do Orçamento</DialogTitle></DialogHeader>
@@ -208,11 +276,14 @@ export default function QuotationsPage() {
             <AlertDialogTitle>Converter em Pedido</AlertDialogTitle>
             <AlertDialogDescription>
               Tem certeza que deseja converter o orçamento "{selectedQuotation?.number}" em um pedido de venda?
+              Um novo pedido será criado com os mesmos itens e valores.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConvert}>Converter em Pedido</AlertDialogAction>
+            <AlertDialogAction onClick={handleConvert} disabled={convertToOrder.isPending}>
+              {convertToOrder.isPending ? 'Convertendo...' : 'Converter em Pedido'}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

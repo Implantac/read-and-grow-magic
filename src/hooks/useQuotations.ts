@@ -33,6 +33,21 @@ export interface DbQuotation {
   items?: DbQuotationItem[];
 }
 
+export interface CreateQuotationInput {
+  client_id?: string | null;
+  client_name: string;
+  valid_until: string;
+  notes?: string | null;
+  items: Array<{
+    product_id?: string | null;
+    product_name: string;
+    product_code: string;
+    quantity: number;
+    unit_price: number;
+    discount: number;
+  }>;
+}
+
 export function useQuotations() {
   return useQuery({
     queryKey: ['quotations'],
@@ -50,6 +65,55 @@ export function useQuotations() {
   });
 }
 
+export function useCreateQuotation() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  return useMutation({
+    mutationFn: async (input: CreateQuotationInput) => {
+      const { count } = await supabase.from('quotations').select('id', { count: 'exact', head: true });
+      const nextNum = `ORC${String((count || 0) + 1).padStart(4, '0')}`;
+
+      const subtotal = input.items.reduce((s, i) => s + (i.quantity * i.unit_price), 0);
+      const discount = input.items.reduce((s, i) => s + i.discount, 0);
+      const total = subtotal - discount;
+
+      const { data: quotation, error: qError } = await supabase.from('quotations').insert({
+        number: nextNum,
+        client_id: input.client_id || null,
+        client_name: input.client_name,
+        valid_until: input.valid_until,
+        subtotal,
+        discount,
+        total,
+        notes: input.notes || null,
+        status: 'draft',
+      }).select().single();
+      if (qError) throw qError;
+
+      const items = input.items.map((item) => ({
+        quotation_id: quotation.id,
+        product_id: item.product_id || null,
+        product_name: item.product_name,
+        product_code: item.product_code,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        discount: item.discount,
+        total: item.quantity * item.unit_price - item.discount,
+      }));
+
+      const { error: itemsError } = await supabase.from('quotation_items').insert(items);
+      if (itemsError) throw itemsError;
+
+      return quotation;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['quotations'] });
+      toast({ title: 'Orçamento criado com sucesso!' });
+    },
+    onError: (e: any) => toast({ title: 'Erro ao criar orçamento', description: e.message, variant: 'destructive' }),
+  });
+}
+
 export function useUpdateQuotationStatus() {
   const qc = useQueryClient();
   const { toast } = useToast();
@@ -62,5 +126,60 @@ export function useUpdateQuotationStatus() {
       qc.invalidateQueries({ queryKey: ['quotations'] });
     },
     onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+  });
+}
+
+export function useConvertQuotationToOrder() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  return useMutation({
+    mutationFn: async (quotation: DbQuotation) => {
+      // Generate order number
+      const { count } = await supabase.from('orders').select('id', { count: 'exact', head: true });
+      const nextNum = `PED${String((count || 0) + 1).padStart(4, '0')}`;
+
+      // Create order from quotation
+      const { data: order, error: orderError } = await supabase.from('orders').insert({
+        number: nextNum,
+        client_id: quotation.client_id,
+        client_name: quotation.client_name,
+        subtotal: quotation.subtotal,
+        discount: quotation.discount,
+        total: quotation.total,
+        payment_method: 'boleto',
+        payment_condition: 'À vista',
+        priority: 'medium',
+        notes: `Convertido do orçamento ${quotation.number}`,
+        status: 'pending',
+      }).select().single();
+      if (orderError) throw orderError;
+
+      // Copy items
+      if (quotation.items && quotation.items.length > 0) {
+        const orderItems = quotation.items.map((item) => ({
+          order_id: order.id,
+          product_id: item.product_id,
+          product_name: item.product_name,
+          product_code: item.product_code,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          discount: item.discount,
+          total: item.total,
+        }));
+        const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
+        if (itemsError) throw itemsError;
+      }
+
+      // Update quotation status
+      await supabase.from('quotations').update({ status: 'converted', updated_at: new Date().toISOString() }).eq('id', quotation.id);
+
+      return order;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['quotations'] });
+      qc.invalidateQueries({ queryKey: ['orders'] });
+      toast({ title: 'Orçamento convertido em pedido com sucesso!' });
+    },
+    onError: (e: any) => toast({ title: 'Erro ao converter', description: e.message, variant: 'destructive' }),
   });
 }
