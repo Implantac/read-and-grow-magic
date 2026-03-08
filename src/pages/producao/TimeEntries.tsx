@@ -241,9 +241,7 @@ export default function TimeEntriesPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos Centros</SelectItem>
-                {workCenters.map(wc => (
-                  <SelectItem key={wc.id} value={wc.code}>{wc.name}</SelectItem>
-                ))}
+                <SelectItem value="empty">Nenhum centro cadastrado</SelectItem>
               </SelectContent>
             </Select>
           </div>
