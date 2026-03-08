@@ -174,7 +174,7 @@ export default function NFePage() {
             ]}
             filename="nfe"
           />
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={() => setCreateOpen(true)}>
             <Plus className="h-4 w-4" />
             Nova NF-e
           </Button>
