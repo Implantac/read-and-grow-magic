@@ -138,8 +138,8 @@ export function useWMSDashboardStats() {
       supabase.from('wms_receiving_orders').select('status'),
       supabase.from('wms_picking_orders').select('status'),
       supabase.from('wms_packing_orders').select('status'),
-      supabase.from('wms_storage_locations').select('capacity,occupied'),
-      supabase.from('wms_movements').select('*').order('created_at', { ascending: false }).limit(5),
+      supabase.from('wms_storage_locations' as any).select('capacity,occupied'),
+      supabase.from('wms_movements' as any).select('*').order('created_at', { ascending: false }).limit(5),
     ]);
 
     const receiving = (recRes.data || []).filter((r: any) => ['pending', 'in_progress'].includes(r.status)).length;

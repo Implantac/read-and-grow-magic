@@ -47,10 +47,11 @@ export function useNFCe() {
       discount: Number(row.discount),
       total: Number(row.total),
       amountPaid: Number(row.amount_paid),
-      changeAmount: Number(row.change_amount),
+      change: Number(row.change_amount),
       authorizationDate: row.authorization_date,
       cancellationDate: row.cancellation_date,
       items: itemsMap.get(row.id) || [],
+      createdAt: row.created_at,
     }));
 
     setNfces(mapped);

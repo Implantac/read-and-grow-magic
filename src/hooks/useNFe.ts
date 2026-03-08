@@ -18,7 +18,7 @@ export function useNFe() {
       series: row.series,
       issueDate: row.issue_date,
       operationType: row.operation_type,
-      clientId: row.client_id,
+      clientId: row.client_id || '',
       clientName: row.client_name,
       clientDocument: row.client_document || '',
       status: row.status,
@@ -35,7 +35,10 @@ export function useNFe() {
       authorizationDate: row.authorization_date,
       cancellationDate: row.cancellation_date,
       cancellationReason: row.cancellation_reason,
+      orderId: row.order_id,
       items: [],
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
     }));
 
     setNfes(mapped);
