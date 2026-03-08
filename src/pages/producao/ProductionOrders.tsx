@@ -43,7 +43,16 @@ const priorityConfig: Record<ProductionPriority, { label: string; color: string 
 };
 
 export default function ProductionOrdersPage() {
-  const [orders, setOrders] = useState<ProductionOrder[]>([]);
+  const { orders: rawOrders, loading, update: updateOrder } = useProductionOrders();
+  const orders = rawOrders.map((o) => ({
+    id: o.id, orderNumber: o.order_number, productId: o.product_id || '', productCode: o.product_code,
+    productName: o.product_name, quantity: Number(o.quantity), producedQuantity: Number(o.produced_quantity),
+    unit: o.unit, status: o.status as any, priority: o.priority as any,
+    startDate: o.start_date || new Date().toISOString(), dueDate: o.due_date || new Date().toISOString(),
+    completedDate: o.completed_date || undefined, workCenter: o.work_center || '',
+    operator: o.operator || undefined, notes: o.notes || undefined,
+    bomId: o.bom_id || '', routeId: o.route_id || '', createdAt: o.created_at,
+  }));
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
