@@ -134,7 +134,7 @@ export function Topbar() {
             <Button
               variant="ghost"
               size="icon"
-              className="relative text-muted-foreground hover:text-foreground"
+              className="relative text-white/70 hover:text-[#ff9800] hover:bg-white/10"
             >
               <Bell className="h-5 w-5" />
               {unreadAlerts > 0 && (
