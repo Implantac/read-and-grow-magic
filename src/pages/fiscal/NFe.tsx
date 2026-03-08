@@ -68,11 +68,14 @@ const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ 
 
 export default function NFePage() {
   const { toast } = useToast();
-  const { nfes, loading } = useNFe();
+  const { nfes, loading, transmit, cancel, sendToPending } = useNFe();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedNFe, setSelectedNFe] = useState<NFe | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [nfeToCancel, setNfeToCancel] = useState<NFe | null>(null);
 
   const filteredNFes = nfes.filter((nfe) => {
     const matchesSearch =
