@@ -64,7 +64,7 @@ const taxDistributionData: { name: string; value: number; color: string }[] = []
 
 export default function FiscalReportsPage() {
   const { toast } = useToast();
-  const [reports] = useState<FiscalReport[]>([]);
+  const { reports, loading } = useFiscalReports();
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [generating, setGenerating] = useState<string | null>(null);
 

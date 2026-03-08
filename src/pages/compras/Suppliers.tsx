@@ -107,30 +107,28 @@ export default function SuppliersPage() {
     await removeSupplier(id);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (selectedSupplier) {
-      setSuppliers(
-        suppliers.map((s) =>
-          s.id === selectedSupplier.id ? { ...s, ...formData, updatedAt: new Date().toISOString() } : s
-        )
-      );
+      await updateSupplier(selectedSupplier.id, {
+        name: formData.name, trade_name: formData.tradeName, document: formData.document,
+        document_type: formData.documentType, email: formData.email, phone: formData.phone,
+        cellphone: formData.cellphone, category: formData.category, status: formData.status,
+        payment_terms: formData.paymentTerms, delivery_time: formData.deliveryTime, rating: formData.rating,
+        address_street: formData.address?.street, address_number: formData.address?.number,
+        address_complement: formData.address?.complement, address_neighborhood: formData.address?.neighborhood,
+        address_city: formData.address?.city, address_state: formData.address?.state, address_zip_code: formData.address?.zipCode,
+      });
     } else {
-      const newSupplier: Supplier = {
-        ...formData,
-        id: `sup-${Date.now()}`,
+      await createSupplier({
         code: `F${String(suppliers.length + 1).padStart(4, '0')}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        address: formData.address || {
-          street: '',
-          number: '',
-          neighborhood: '',
-          city: '',
-          state: '',
-          zipCode: '',
-        },
-      } as Supplier;
-      setSuppliers([...suppliers, newSupplier]);
+        name: formData.name || '', document: formData.document || '', document_type: formData.documentType || 'cnpj',
+        email: formData.email, phone: formData.phone, cellphone: formData.cellphone,
+        trade_name: formData.tradeName, category: formData.category, status: formData.status || 'active',
+        payment_terms: formData.paymentTerms, delivery_time: formData.deliveryTime || 7, rating: formData.rating || 3,
+        address_street: formData.address?.street || '', address_number: formData.address?.number || '',
+        address_complement: formData.address?.complement, address_neighborhood: formData.address?.neighborhood || '',
+        address_city: formData.address?.city || '', address_state: formData.address?.state || '', address_zip_code: formData.address?.zipCode || '',
+      });
     }
     setIsFormOpen(false);
   };

@@ -158,9 +158,20 @@ export default function WMSDashboardPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            Nenhuma movimentação registrada
-          </div>
+          {recentMovements.length > 0 ? (
+            <div className="space-y-2">
+              {recentMovements.map((m: any) => (
+                <div key={m.id} className="flex items-center justify-between text-sm border-b pb-2">
+                  <span>{m.productName}</span>
+                  <span className="text-muted-foreground">{m.type} - {m.quantity} un</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              Nenhuma movimentação registrada
+            </div>
+          )}
         </CardContent>
       </Card>
 

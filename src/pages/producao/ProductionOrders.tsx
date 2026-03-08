@@ -74,25 +74,17 @@ export default function ProductionOrdersPage() {
     setDetailsOpen(true);
   };
 
-  const handleStartProduction = (order: ProductionOrder) => {
-    setOrders(orders.map(o => 
-      o.id === order.id 
-        ? { ...o, status: 'in_progress' as ProductionOrderStatus, operator: 'Usuário Atual', startDate: format(new Date(), 'yyyy-MM-dd') }
-        : o
-    ));
+  const handleStartProduction = async (order: any) => {
+    await updateOrder(order.id, { status: 'in_progress', operator: 'Usuário Atual', start_date: new Date().toISOString() });
     toast.success(`Produção iniciada: ${order.orderNumber}`);
   };
 
-  const handlePauseProduction = (order: ProductionOrder) => {
+  const handlePauseProduction = (order: any) => {
     toast.info(`Produção pausada: ${order.orderNumber}`);
   };
 
-  const handleCompleteProduction = (order: ProductionOrder) => {
-    setOrders(orders.map(o => 
-      o.id === order.id 
-        ? { ...o, status: 'completed' as ProductionOrderStatus, completedDate: format(new Date(), 'yyyy-MM-dd'), producedQuantity: o.quantity }
-        : o
-    ));
+  const handleCompleteProduction = async (order: any) => {
+    await updateOrder(order.id, { status: 'completed', completed_date: new Date().toISOString(), produced_quantity: order.quantity });
     toast.success(`Produção concluída: ${order.orderNumber}`);
   };
 

@@ -67,7 +67,7 @@ const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ 
 
 export default function NFePage() {
   const { toast } = useToast();
-  const [nfes] = useState<NFe[]>([]);
+  const { nfes, loading } = useNFe();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedNFe, setSelectedNFe] = useState<NFe | null>(null);
