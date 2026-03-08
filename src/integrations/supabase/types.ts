@@ -1716,6 +1716,54 @@ export type Database = {
           },
         ]
       }
+      rfid_wms_rules: {
+        Row: {
+          auto_complete: boolean
+          created_at: string
+          description: string | null
+          enabled: boolean
+          id: string
+          name: string
+          priority: number
+          trigger_event_type: string
+          trigger_reader_code: string | null
+          trigger_zone: string | null
+          updated_at: string
+          wms_action: string
+          wms_target_location: string | null
+        }
+        Insert: {
+          auto_complete?: boolean
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name: string
+          priority?: number
+          trigger_event_type: string
+          trigger_reader_code?: string | null
+          trigger_zone?: string | null
+          updated_at?: string
+          wms_action: string
+          wms_target_location?: string | null
+        }
+        Update: {
+          auto_complete?: boolean
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name?: string
+          priority?: number
+          trigger_event_type?: string
+          trigger_reader_code?: string | null
+          trigger_zone?: string | null
+          updated_at?: string
+          wms_action?: string
+          wms_target_location?: string | null
+        }
+        Relationships: []
+      }
       sale_items: {
         Row: {
           discount: number
