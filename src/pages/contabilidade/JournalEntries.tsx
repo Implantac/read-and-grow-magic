@@ -2,26 +2,16 @@ import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { getJournalStatusLabel } from '@/config/accounting';
+import { useJournalEntries } from '@/hooks/useJournalEntries';
 import { cn } from '@/lib/utils';
 import { Plus, CheckCircle, Eye, BookOpen } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { JournalEntry } from '@/types/accounting';
 import type { ExportColumn } from '@/lib/exportUtils';
 
@@ -59,7 +49,7 @@ const filterFields: FilterField[] = [
 ];
 
 export default function JournalEntriesPage() {
-  const [journalEntries] = useState<JournalEntry[]>([]);
+  const { entries: journalEntries, loading, postEntry } = useJournalEntries();
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
   const [filters, setFilters] = useState<Record<string, string>>({});
 
@@ -81,14 +71,8 @@ export default function JournalEntriesPage() {
     { key: 'number', label: 'Número', sortable: true },
     { key: 'date', label: 'Data', sortable: true, render: (v) => new Date(String(v)).toLocaleDateString('pt-BR') },
     { key: 'description', label: 'Descrição', sortable: true },
-    {
-      key: 'totalDebit', label: 'Débito', sortable: true, className: 'text-right',
-      render: (v) => formatCurrency(Number(v)),
-    },
-    {
-      key: 'totalCredit', label: 'Crédito', sortable: true, className: 'text-right',
-      render: (v) => formatCurrency(Number(v)),
-    },
+    { key: 'totalDebit', label: 'Débito', sortable: true, className: 'text-right', render: (v) => formatCurrency(Number(v)) },
+    { key: 'totalCredit', label: 'Crédito', sortable: true, className: 'text-right', render: (v) => formatCurrency(Number(v)) },
     {
       key: 'status', label: 'Status',
       render: (v) => (
@@ -99,6 +83,18 @@ export default function JournalEntriesPage() {
     },
     { key: 'createdBy', label: 'Criado por' },
   ];
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-64" />
+        <div className="grid gap-4 md:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20" />)}
+        </div>
+        <Skeleton className="h-96" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -113,12 +109,7 @@ export default function JournalEntriesPage() {
         </div>
       </div>
 
-      <AdvancedFilters
-        fields={filterFields}
-        values={filters}
-        onChange={setFilters}
-        onClear={() => setFilters({})}
-      />
+      <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Total de Lançamentos</p><p className="text-2xl font-bold">{journalEntries.length}</p></CardContent></Card>
@@ -138,7 +129,7 @@ export default function JournalEntriesPage() {
                 <div className="flex gap-1">
                   <Button variant="ghost" size="icon" onClick={() => setSelectedEntry(row)}><Eye className="h-4 w-4" /></Button>
                   {row.status === 'draft' && (
-                    <Button variant="ghost" size="icon" className="text-success"><CheckCircle className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="text-success" onClick={() => postEntry(row.id)}><CheckCircle className="h-4 w-4" /></Button>
                   )}
                 </div>
               )}
@@ -153,7 +144,6 @@ export default function JournalEntriesPage() {
         </CardContent>
       </Card>
 
-      {/* Detail Dialog */}
       <Dialog open={!!selectedEntry} onOpenChange={() => setSelectedEntry(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
