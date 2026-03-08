@@ -57,7 +57,6 @@ export default function WMSMovementsPage() {
   const outboundCount = movements.filter(m => m.type === 'outbound').length;
   const transferCount = movements.filter(m => m.type === 'transfer').length;
   const adjustmentCount = movements.filter(m => m.type === 'adjustment').length;
-  const adjustmentCount = movements.filter(m => m.type === 'adjustment').length;
 
   return (
     <div className="space-y-6">
