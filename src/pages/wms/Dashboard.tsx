@@ -39,7 +39,7 @@ export default function WMSDashboardPage() {
             <PackageSearch className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{stats.picking}</div>
             <p className="text-xs text-muted-foreground">Ordens ativas</p>
           </CardContent>
         </Card>
