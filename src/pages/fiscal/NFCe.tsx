@@ -82,7 +82,8 @@ const paymentIcons: Record<string, React.ComponentType<{ className?: string }>> 
 
 export default function NFCePage() {
   const { toast } = useToast();
-  const { nfces, loading, cancel: cancelNFCe } = useNFCe();
+  const { nfces, loading, cancel: cancelNFCe, emit } = useNFCe();
+  const [pdvOpen, setPdvOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [terminalFilter, setTerminalFilter] = useState<string>('all');

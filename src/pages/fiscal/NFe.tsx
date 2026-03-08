@@ -518,6 +518,9 @@ export default function NFePage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Create NF-e Dialog */}
+      <CreateNFeDialog open={createOpen} onOpenChange={setCreateOpen} onCreate={create} />
     </div>
   );
 }
