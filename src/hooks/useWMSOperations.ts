@@ -113,7 +113,7 @@ export function useWMSStorageLocations() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('wms_storage_locations').select('*').order('code');
+    const { data, error } = await supabase.from('wms_storage_locations' as any).select('*').order('code');
     if (error) { console.error(error); toast.error('Erro ao carregar endereços'); }
     else setLocations((data || []).map((r: any) => ({
       id: r.id, code: r.code, zone: r.zone, type: r.type,
