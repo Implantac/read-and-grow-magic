@@ -1,17 +1,11 @@
+import { useWMSDashboardStats } from '@/hooks/useWMSOperations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import {
-  Warehouse,
-  Package,
-  PackagePlus,
-  PackageSearch,
-  PackageCheck,
-  Truck,
-  CheckCircle,
-  MapPin,
-  ArrowUpDown
+  Warehouse, Package, PackagePlus, PackageSearch, PackageCheck, Truck,
+  CheckCircle, MapPin, ArrowUpDown
 } from 'lucide-react';
 
 export default function WMSDashboardPage() {
