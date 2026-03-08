@@ -14,6 +14,162 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounts_payable: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          description: string
+          due_date: string
+          id: string
+          invoice_number: string | null
+          notes: string | null
+          payment_date: string | null
+          payment_method: string | null
+          status: string
+          supplier: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          category?: string
+          created_at?: string
+          description: string
+          due_date: string
+          id?: string
+          invoice_number?: string | null
+          notes?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          status?: string
+          supplier: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          description?: string
+          due_date?: string
+          id?: string
+          invoice_number?: string | null
+          notes?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          status?: string
+          supplier?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      accounts_receivable: {
+        Row: {
+          amount: number
+          category: string
+          client_id: string | null
+          client_name: string
+          created_at: string
+          description: string
+          due_date: string
+          id: string
+          invoice_number: string | null
+          notes: string | null
+          order_id: string | null
+          payment_date: string | null
+          payment_method: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          category?: string
+          client_id?: string | null
+          client_name: string
+          created_at?: string
+          description: string
+          due_date: string
+          id?: string
+          invoice_number?: string | null
+          notes?: string | null
+          order_id?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          client_id?: string | null
+          client_name?: string
+          created_at?: string
+          description?: string
+          due_date?: string
+          id?: string
+          invoice_number?: string | null
+          notes?: string | null
+          order_id?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_receivable_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounts_receivable_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cash_flow_entries: {
+        Row: {
+          account: string
+          amount: number
+          balance: number
+          category: string
+          created_at: string
+          date: string
+          description: string
+          id: string
+          reference: string | null
+          type: string
+        }
+        Insert: {
+          account?: string
+          amount?: number
+          balance?: number
+          category: string
+          created_at?: string
+          date?: string
+          description: string
+          id?: string
+          reference?: string | null
+          type?: string
+        }
+        Update: {
+          account?: string
+          amount?: number
+          balance?: number
+          category?: string
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          reference?: string | null
+          type?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           active: boolean
