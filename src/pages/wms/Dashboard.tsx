@@ -61,7 +61,7 @@ export default function WMSDashboardPage() {
             <Truck className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{stats.shipped}</div>
             <p className="text-xs text-muted-foreground">Aguardando envio</p>
           </CardContent>
         </Card>
