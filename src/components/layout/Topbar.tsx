@@ -93,7 +93,7 @@ export function Topbar() {
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuContent align="start" className="w-56" style={{ background: '#2a3245', borderColor: 'rgba(255, 152, 0, 0.2)' }}>
               <DropdownMenuLabel>Filiais</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {activeCompany.branches.map((branch) => (
