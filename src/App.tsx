@@ -51,6 +51,11 @@ import PackingPage from "./pages/wms/Packing";
 import InventoryPage from "./pages/wms/Inventory";
 import WMSMovementsPage from "./pages/wms/Movements";
 
+// RFID Module
+import RFIDReadersPage from "./pages/rfid/Readers";
+import RFIDTagsPage from "./pages/rfid/Tags";
+import RFIDEventsPage from "./pages/rfid/Events";
+
 // Production Module
 import ProductionOrdersPage from "./pages/producao/ProductionOrders";
 import MaterialConsumptionPage from "./pages/producao/MaterialConsumption";
