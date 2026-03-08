@@ -28,7 +28,7 @@ export default function WMSDashboardPage() {
             <PackagePlus className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{stats.receiving}</div>
             <p className="text-xs text-muted-foreground">Pendentes/Em andamento</p>
           </CardContent>
         </Card>
