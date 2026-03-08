@@ -121,12 +121,12 @@ export default function FiscalReportsPage() {
     );
   };
 
-  const totalTaxes = reports.reduce((s, r) => s + r.totalIcms + r.totalIpi + r.totalPis + r.totalCofins, 0);
+  const totalTaxes = reports.reduce((s, r) => s + r.totalICMS + r.totalIPI + r.totalPIS + r.totalCOFINS, 0);
   const taxBreakdown = {
-    icms: reports.reduce((s, r) => s + r.totalIcms, 0),
-    ipi: reports.reduce((s, r) => s + r.totalIpi, 0),
-    pis: reports.reduce((s, r) => s + r.totalPis, 0),
-    cofins: reports.reduce((s, r) => s + r.totalCofins, 0),
+    icms: reports.reduce((s, r) => s + r.totalICMS, 0),
+    ipi: reports.reduce((s, r) => s + r.totalIPI, 0),
+    pis: reports.reduce((s, r) => s + r.totalPIS, 0),
+    cofins: reports.reduce((s, r) => s + r.totalCOFINS, 0),
   };
 
   return (

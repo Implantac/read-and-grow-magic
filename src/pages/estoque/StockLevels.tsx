@@ -169,7 +169,7 @@ export default function StockLevelsPage() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stockLevels.reduce((s, l) => s + (l.currentStock * l.unitCost), 0))}</div>
+            <div className="text-2xl font-bold">{formatCurrency(stockLevels.reduce((s, l) => s + l.totalValue, 0))}</div>
             <p className="text-xs text-muted-foreground">
               {stockLevels.length} produtos ativos
             </p>
