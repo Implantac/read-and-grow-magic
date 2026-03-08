@@ -97,6 +97,16 @@ export const navigationItems = [
     ],
   },
   {
+    title: 'RFID',
+    href: '/rfid',
+    icon: 'Radio',
+    children: [
+      { title: 'Leitores', href: '/rfid/leitores', icon: 'Wifi' },
+      { title: 'Tags', href: '/rfid/tags', icon: 'Tag' },
+      { title: 'Eventos', href: '/rfid/eventos', icon: 'Activity' },
+    ],
+  },
+  {
     title: 'Relatórios',
     href: '/relatorios',
     icon: 'BarChart3',
