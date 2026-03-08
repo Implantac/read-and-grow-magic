@@ -147,7 +147,7 @@ export function Topbar() {
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
+          <DropdownMenuContent align="end" className="w-80" style={{ background: '#2a3245', borderColor: 'rgba(255, 152, 0, 0.2)' }}>
             <DropdownMenuLabel className="flex items-center justify-between">
               Notificações
               <Badge variant="secondary">{unreadAlerts} novas</Badge>
