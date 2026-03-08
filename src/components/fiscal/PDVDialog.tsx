@@ -71,7 +71,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
   const total = subtotal - discount;
   const change = amountPaid - total;
 
-  const addToCart = (product: { id: string; code: string; name: string; salePrice: number; unit: string }) => {
+  const addToCart = (product: { id: string; code: string; name: string; sale_price: number; unit: string }) => {
     setCart((prev) => {
       const existing = prev.find((i) => i.productId === product.id);
       if (existing) {
@@ -79,7 +79,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
       }
       return [
         ...prev,
-        { productCode: product.code, productName: product.name, productId: product.id, quantity: 1, unitPrice: product.salePrice, unit: product.unit },
+        { productCode: product.code, productName: product.name, productId: product.id, quantity: 1, unitPrice: product.sale_price, unit: product.unit },
       ];
     });
     setSearch('');
