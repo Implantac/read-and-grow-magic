@@ -89,7 +89,7 @@ export default function WMSDashboardPage() {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-muted-foreground">Total Endereços</p>
-                  <p className="font-medium">0</p>
+                  <p className="font-medium">{stats.totalLocations}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Capacidade</p>
