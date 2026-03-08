@@ -4,15 +4,21 @@ import { ExportButton } from '@/components/shared/ExportButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { getPaymentMethodLabel, getOrderStatusLabel } from '@/config/commercial';
-import { useOrders, useUpdateOrderStatus, type DbOrder } from '@/hooks/useOrders';
+import { useOrders, useCreateOrder, useUpdateOrderStatus, type DbOrder } from '@/hooks/useOrders';
+import { ClientSelector } from '@/components/comercial/ClientSelector';
+import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
 
 const filterFields: FilterField[] = [
   { key: 'status', label: 'Status', type: 'select', options: [
@@ -43,11 +49,54 @@ const statusFlow: Record<string, string | null> = {
 export default function OrdersPage() {
   const { toast } = useToast();
   const { data: orders = [], isLoading } = useOrders();
+  const createOrder = useCreateOrder();
   const updateStatus = useUpdateOrderStatus();
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [isViewOpen, setIsViewOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<DbOrder | null>(null);
+
+  // Form state
+  const [formClient, setFormClient] = useState<{ id: string | null; name: string }>({ id: null, name: '' });
+  const [formItems, setFormItems] = useState<LineItem[]>([]);
+  const [formPayment, setFormPayment] = useState('boleto');
+  const [formCondition, setFormCondition] = useState('À vista');
+  const [formPriority, setFormPriority] = useState('medium');
+  const [formDelivery, setFormDelivery] = useState('');
+  const [formShipping, setFormShipping] = useState('0');
+  const [formNotes, setFormNotes] = useState('');
+
+  const resetForm = () => {
+    setFormClient({ id: null, name: '' });
+    setFormItems([]);
+    setFormPayment('boleto');
+    setFormCondition('À vista');
+    setFormPriority('medium');
+    setFormDelivery('');
+    setFormShipping('0');
+    setFormNotes('');
+  };
+
+  const handleCreate = () => {
+    if (!formClient.name || formItems.length === 0) {
+      toast({ title: 'Preencha o cliente e adicione pelo menos um item', variant: 'destructive' });
+      return;
+    }
+    createOrder.mutate({
+      client_id: formClient.id,
+      client_name: formClient.name,
+      payment_method: formPayment,
+      payment_condition: formCondition,
+      priority: formPriority,
+      delivery_date: formDelivery || null,
+      shipping: Number(formShipping) || 0,
+      notes: formNotes || null,
+      items: formItems,
+    }, {
+      onSuccess: () => { setIsFormOpen(false); resetForm(); },
+    });
+  };
 
   const filteredOrders = orders.filter((order) => {
     if (filters.status && order.status !== filters.status) return false;
@@ -96,20 +145,16 @@ export default function OrdersPage() {
           </DropdownMenuItem>
           <DropdownMenuItem><FileText className="mr-2 h-4 w-4" />Imprimir</DropdownMenuItem>
           {canAdvance && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleAdvanceStatus(order)}>
-                <CheckCircle className="mr-2 h-4 w-4" />Avançar para {getOrderStatusLabel(nextStatus as any)}
-              </DropdownMenuItem>
-            </>
+            <><DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => handleAdvanceStatus(order)}>
+              <CheckCircle className="mr-2 h-4 w-4" />Avançar para {getOrderStatusLabel(nextStatus as any)}
+            </DropdownMenuItem></>
           )}
           {order.status !== 'cancelled' && order.status !== 'delivered' && (
-            <>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive" onClick={() => { setSelectedOrder(order); setIsCancelOpen(true); }}>
-                <XCircle className="mr-2 h-4 w-4" />Cancelar Pedido
-              </DropdownMenuItem>
-            </>
+            <><DropdownMenuSeparator />
+            <DropdownMenuItem className="text-destructive" onClick={() => { setSelectedOrder(order); setIsCancelOpen(true); }}>
+              <XCircle className="mr-2 h-4 w-4" />Cancelar Pedido
+            </DropdownMenuItem></>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
@@ -142,7 +187,9 @@ export default function OrdersPage() {
             ]}
             filename="pedidos"
           />
-          <Button className="gap-2"><Plus className="h-4 w-4" />Novo Pedido</Button>
+          <Button className="gap-2" onClick={() => { resetForm(); setIsFormOpen(true); }}>
+            <Plus className="h-4 w-4" />Novo Pedido
+          </Button>
         </div>
       </div>
 
@@ -155,18 +202,97 @@ export default function OrdersPage() {
           <p className="text-sm text-muted-foreground">Total de Pedidos</p>
           <p className="text-2xl font-bold text-foreground">{filteredOrders.length}</p>
         </div>
-        <div className="rounded-lg border bg-warning/10 p-4">
-          <p className="text-sm text-warning">Aguardando Aprovação</p>
-          <p className="text-2xl font-bold text-warning">{pendingCount}</p>
+        <div className="rounded-lg border bg-card p-4">
+          <p className="text-sm text-muted-foreground">Aguardando Aprovação</p>
+          <p className="text-2xl font-bold text-foreground">{pendingCount}</p>
         </div>
-        <div className="rounded-lg border bg-info/10 p-4">
-          <p className="text-sm text-info">Em Processamento</p>
-          <p className="text-2xl font-bold text-info">{processingCount}</p>
+        <div className="rounded-lg border bg-card p-4">
+          <p className="text-sm text-muted-foreground">Em Processamento</p>
+          <p className="text-2xl font-bold text-foreground">{processingCount}</p>
         </div>
       </div>
 
       <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
       <DataTable columns={columns} data={filteredOrders} searchPlaceholder="Buscar por número, cliente..." pageSize={10} actions={renderActions} />
+
+      {/* Create Order Dialog */}
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Novo Pedido</DialogTitle>
+            <DialogDescription>Preencha as informações do pedido de venda</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <ClientSelector clientId={formClient.id} clientName={formClient.name} onSelect={setFormClient} />
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Forma de Pagamento</Label>
+                <Select value={formPayment} onValueChange={setFormPayment}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cash">Dinheiro</SelectItem>
+                    <SelectItem value="credit_card">Cartão de Crédito</SelectItem>
+                    <SelectItem value="debit_card">Cartão de Débito</SelectItem>
+                    <SelectItem value="pix">PIX</SelectItem>
+                    <SelectItem value="boleto">Boleto</SelectItem>
+                    <SelectItem value="transfer">Transferência</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Condição de Pagamento</Label>
+                <Select value={formCondition} onValueChange={setFormCondition}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="À vista">À vista</SelectItem>
+                    <SelectItem value="30 dias">30 dias</SelectItem>
+                    <SelectItem value="30/60 dias">30/60 dias</SelectItem>
+                    <SelectItem value="30/60/90 dias">30/60/90 dias</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Prioridade</Label>
+                <Select value={formPriority} onValueChange={setFormPriority}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Baixa</SelectItem>
+                    <SelectItem value="medium">Média</SelectItem>
+                    <SelectItem value="high">Alta</SelectItem>
+                    <SelectItem value="urgent">Urgente</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Previsão de Entrega</Label>
+                <Input type="date" value={formDelivery} onChange={(e) => setFormDelivery(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>Frete (R$)</Label>
+                <Input type="number" step="0.01" value={formShipping} onChange={(e) => setFormShipping(e.target.value)} />
+              </div>
+            </div>
+
+            <OrderItemsEditor items={formItems} onChange={setFormItems} />
+
+            <div className="space-y-2">
+              <Label>Observações</Label>
+              <Textarea value={formNotes} onChange={(e) => setFormNotes(e.target.value)} placeholder="Observações sobre o pedido..." />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsFormOpen(false)}>Cancelar</Button>
+            <Button onClick={handleCreate} disabled={createOrder.isPending}>
+              {createOrder.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Criar Pedido
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* View Dialog */}
       <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
@@ -198,14 +324,7 @@ export default function OrdersPage() {
                   <h4 className="mb-3 font-medium">Itens do Pedido</h4>
                   <div className="rounded-md border">
                     <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b bg-muted/50">
-                          <th className="p-2 text-left">Produto</th>
-                          <th className="p-2 text-right">Qtd</th>
-                          <th className="p-2 text-right">Preço Unit.</th>
-                          <th className="p-2 text-right">Total</th>
-                        </tr>
-                      </thead>
+                      <thead><tr className="border-b bg-muted/50"><th className="p-2 text-left">Produto</th><th className="p-2 text-right">Qtd</th><th className="p-2 text-right">Preço Unit.</th><th className="p-2 text-right">Total</th></tr></thead>
                       <tbody>
                         {selectedOrder.items.map((item) => (
                           <tr key={item.id} className="border-b last:border-0">

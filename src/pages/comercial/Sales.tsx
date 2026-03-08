@@ -1,16 +1,22 @@
 import { useState } from 'react';
-import { Eye, MoreHorizontal, FileText, Loader2 } from 'lucide-react';
+import { Plus, Eye, MoreHorizontal, FileText, Loader2 } from 'lucide-react';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { getPaymentMethodLabel } from '@/config/commercial';
-import { useSales, type DbSale } from '@/hooks/useSales';
+import { useSales, useCreateSale, type DbSale } from '@/hooks/useSales';
+import { ClientSelector } from '@/components/comercial/ClientSelector';
+import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
 
 const filterFields: FilterField[] = [
   { key: 'status', label: 'Status', type: 'select', options: [
@@ -26,10 +32,42 @@ const filterFields: FilterField[] = [
 ];
 
 export default function SalesPage() {
+  const { toast } = useToast();
   const { data: sales = [], isLoading } = useSales();
+  const createSale = useCreateSale();
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [isViewOpen, setIsViewOpen] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedSale, setSelectedSale] = useState<DbSale | null>(null);
+
+  // Form state
+  const [formClient, setFormClient] = useState<{ id: string | null; name: string }>({ id: null, name: '' });
+  const [formItems, setFormItems] = useState<LineItem[]>([]);
+  const [formPayment, setFormPayment] = useState('pix');
+  const [formNotes, setFormNotes] = useState('');
+
+  const resetForm = () => {
+    setFormClient({ id: null, name: '' });
+    setFormItems([]);
+    setFormPayment('pix');
+    setFormNotes('');
+  };
+
+  const handleCreate = () => {
+    if (!formClient.name || formItems.length === 0) {
+      toast({ title: 'Preencha o cliente e adicione pelo menos um item', variant: 'destructive' });
+      return;
+    }
+    createSale.mutate({
+      client_id: formClient.id,
+      client_name: formClient.name,
+      payment_method: formPayment,
+      notes: formNotes || null,
+      items: formItems,
+    }, {
+      onSuccess: () => { setIsFormOpen(false); resetForm(); },
+    });
+  };
 
   const filteredSales = sales.filter((sale) => {
     if (filters.status && sale.status !== filters.status) return false;
@@ -72,22 +110,27 @@ export default function SalesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Vendas</h1>
           <p className="text-muted-foreground">Histórico de vendas realizadas</p>
         </div>
-        <ExportButton
-          data={filteredSales as unknown as Record<string, unknown>[]}
-          columns={[
-            { key: 'number', label: 'Número' }, { key: 'client_name', label: 'Cliente' },
-            { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
-            { key: 'payment_method', label: 'Pagamento', format: (v) => getPaymentMethodLabel(v as any) },
-            { key: 'total', label: 'Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
-            { key: 'status', label: 'Status' },
-          ]}
-          filename="vendas"
-        />
+        <div className="flex gap-2">
+          <ExportButton
+            data={filteredSales as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'number', label: 'Número' }, { key: 'client_name', label: 'Cliente' },
+              { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+              { key: 'payment_method', label: 'Pagamento', format: (v) => getPaymentMethodLabel(v as any) },
+              { key: 'total', label: 'Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+              { key: 'status', label: 'Status' },
+            ]}
+            filename="vendas"
+          />
+          <Button className="gap-2" onClick={() => { resetForm(); setIsFormOpen(true); }}>
+            <Plus className="h-4 w-4" />Nova Venda
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -110,6 +153,49 @@ export default function SalesPage() {
       <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
       <DataTable columns={columns} data={filteredSales} searchPlaceholder="Buscar por número, cliente..." pageSize={10} actions={renderActions} />
 
+      {/* Create Sale Dialog */}
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Nova Venda</DialogTitle>
+            <DialogDescription>Registre uma nova venda</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <ClientSelector clientId={formClient.id} clientName={formClient.name} onSelect={setFormClient} />
+
+            <div className="space-y-2">
+              <Label>Forma de Pagamento</Label>
+              <Select value={formPayment} onValueChange={setFormPayment}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="cash">Dinheiro</SelectItem>
+                  <SelectItem value="credit_card">Cartão de Crédito</SelectItem>
+                  <SelectItem value="debit_card">Cartão de Débito</SelectItem>
+                  <SelectItem value="pix">PIX</SelectItem>
+                  <SelectItem value="boleto">Boleto</SelectItem>
+                  <SelectItem value="transfer">Transferência</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <OrderItemsEditor items={formItems} onChange={setFormItems} />
+
+            <div className="space-y-2">
+              <Label>Observações</Label>
+              <Textarea value={formNotes} onChange={(e) => setFormNotes(e.target.value)} placeholder="Observações sobre a venda..." />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsFormOpen(false)}>Cancelar</Button>
+            <Button onClick={handleCreate} disabled={createSale.isPending}>
+              {createSale.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Registrar Venda
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Dialog */}
       <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader><DialogTitle>Detalhes da Venda</DialogTitle></DialogHeader>
