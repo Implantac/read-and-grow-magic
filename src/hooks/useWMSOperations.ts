@@ -29,7 +29,7 @@ export function useWMSReceiving() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('wms_receiving_orders').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('wms_receiving_orders' as any).select('*').order('created_at', { ascending: false });
     if (error) { console.error(error); toast.error('Erro ao carregar recebimentos'); }
     else setOrders((data || []).map((r: any) => ({
       id: r.id, orderNumber: r.order_number, supplier: r.supplier,
