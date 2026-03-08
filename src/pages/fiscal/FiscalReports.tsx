@@ -121,12 +121,12 @@ export default function FiscalReportsPage() {
     );
   };
 
-  const totalTaxes = mockFiscalSummary.totalTaxes;
+  const totalTaxes = reports.reduce((s, r) => s + r.totalIcms + r.totalIpi + r.totalPis + r.totalCofins, 0);
   const taxBreakdown = {
-    icms: 231378,
-    ipi: 64271,
-    pis: 21210,
-    cofins: 97693,
+    icms: reports.reduce((s, r) => s + r.totalIcms, 0),
+    ipi: reports.reduce((s, r) => s + r.totalIpi, 0),
+    pis: reports.reduce((s, r) => s + r.totalPis, 0),
+    cofins: reports.reduce((s, r) => s + r.totalCofins, 0),
   };
 
   return (

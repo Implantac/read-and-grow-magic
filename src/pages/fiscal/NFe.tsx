@@ -176,7 +176,7 @@ export default function NFePage() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockFiscalSummary.totalNFeIssued}</div>
+            <div className="text-2xl font-bold">{nfes.filter(n => n.status === 'authorized').length}</div>
             <p className="text-xs text-muted-foreground">Este mês</p>
           </CardContent>
         </Card>
@@ -187,7 +187,7 @@ export default function NFePage() {
             <CheckCircle className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(mockFiscalSummary.totalBilled)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(nfes.filter(n => n.status === 'authorized').reduce((s, n) => s + n.total, 0))}</div>
             <p className="text-xs text-muted-foreground">Em NF-e autorizadas</p>
           </CardContent>
         </Card>
@@ -198,7 +198,7 @@ export default function NFePage() {
             <XCircle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockFiscalSummary.totalNFeCancelled}</div>
+            <div className="text-2xl font-bold">{nfes.filter(n => n.status === 'cancelled').length}</div>
             <p className="text-xs text-muted-foreground">Este mês</p>
           </CardContent>
         </Card>
@@ -209,7 +209,7 @@ export default function NFePage() {
             <AlertTriangle className="h-4 w-4 text-warning" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(mockFiscalSummary.totalTaxes)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(nfes.reduce((s, n) => s + n.icms + n.ipi + n.pis + n.cofins, 0))}</div>
             <p className="text-xs text-muted-foreground">ICMS + IPI + PIS + COFINS</p>
           </CardContent>
         </Card>
