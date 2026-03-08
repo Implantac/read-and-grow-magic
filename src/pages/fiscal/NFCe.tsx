@@ -53,6 +53,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useNFCe } from '@/hooks/useNFCe';
+import { PDVDialog } from '@/components/fiscal/PDVDialog';
 import type { NFCe } from '@/types/fiscal';
 
 const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ className?: string }> }> = {
@@ -81,7 +82,8 @@ const paymentIcons: Record<string, React.ComponentType<{ className?: string }>> 
 
 export default function NFCePage() {
   const { toast } = useToast();
-  const { nfces, loading, cancel: cancelNFCe } = useNFCe();
+  const { nfces, loading, cancel: cancelNFCe, emit } = useNFCe();
+  const [pdvOpen, setPdvOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [terminalFilter, setTerminalFilter] = useState<string>('all');
@@ -183,7 +185,7 @@ export default function NFCePage() {
           ]}
           filename="nfce"
         />
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setPdvOpen(true)}>
           <Plus className="h-4 w-4" />
           Nova Venda PDV
         </Button>
@@ -513,6 +515,9 @@ export default function NFCePage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* PDV Dialog */}
+      <PDVDialog open={pdvOpen} onOpenChange={setPdvOpen} onEmit={emit} />
     </div>
   );
 }

@@ -56,6 +56,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useNFe } from '@/hooks/useNFe';
 import { nfeStatusLabels } from '@/config/fiscal';
+import { CreateNFeDialog } from '@/components/fiscal/CreateNFeDialog';
 import type { NFe } from '@/types/fiscal';
 
 const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ className?: string }> }> = {
@@ -69,7 +70,7 @@ const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ 
 
 export default function NFePage() {
   const { toast } = useToast();
-  const { nfes, loading, transmit, cancel, sendToPending } = useNFe();
+  const { nfes, loading, transmit, cancel, sendToPending, create } = useNFe();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedNFe, setSelectedNFe] = useState<NFe | null>(null);
@@ -77,6 +78,7 @@ export default function NFePage() {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [nfeToCancel, setNfeToCancel] = useState<NFe | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const filteredNFes = nfes.filter((nfe) => {
     const matchesSearch =
@@ -172,7 +174,7 @@ export default function NFePage() {
             ]}
             filename="nfe"
           />
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={() => setCreateOpen(true)}>
             <Plus className="h-4 w-4" />
             Nova NF-e
           </Button>
@@ -516,6 +518,9 @@ export default function NFePage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Create NF-e Dialog */}
+      <CreateNFeDialog open={createOpen} onOpenChange={setCreateOpen} onCreate={create} />
     </div>
   );
 }

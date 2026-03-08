@@ -37,6 +37,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { reportTypeLabels } from '@/config/fiscal';
 import { useFiscalReports } from '@/hooks/useFiscalReports';
+import { CreateReportDialog } from '@/components/fiscal/CreateReportDialog';
 import type { FiscalReport } from '@/types/fiscal';
 import {
   AreaChart,
@@ -61,9 +62,10 @@ const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ 
 
 export default function FiscalReportsPage() {
   const { toast } = useToast();
-  const { reports, loading, generate } = useFiscalReports();
+  const { reports, loading, generate, create } = useFiscalReports();
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [generating, setGenerating] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const filteredReports = reports.filter((report) => {
     return typeFilter === 'all' || report.type === typeFilter;
@@ -147,7 +149,7 @@ export default function FiscalReportsPage() {
             Gerencie e exporte seus relatórios fiscais e obrigações acessórias
           </p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={() => setCreateOpen(true)}>
           <FileSpreadsheet className="h-4 w-4" />
           Novo Relatório
         </Button>
@@ -440,6 +442,9 @@ export default function FiscalReportsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Create Report Dialog */}
+      <CreateReportDialog open={createOpen} onOpenChange={setCreateOpen} onCreate={create} />
     </div>
   );
 }
