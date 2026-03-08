@@ -40,9 +40,10 @@ export function Topbar() {
   return (
     <header
       className={cn(
-        'fixed right-0 top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card px-4 transition-all duration-300',
+        'fixed right-0 top-0 z-30 flex h-16 items-center justify-between border-b px-4 transition-all duration-300',
         sidebarCollapsed ? 'left-16' : 'left-64'
       )}
+      style={{ background: '#1a2234', borderColor: 'rgba(255, 152, 0, 0.15)' }}
     >
       {/* Left Section */}
       <div className="flex items-center gap-4">
