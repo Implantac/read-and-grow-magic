@@ -6,12 +6,12 @@ export function useWMSMovements() {
   const [movements, setMovements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetch = useCallback(async () => {
+  const fetchMovements = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('wms_movements' as any).select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('wms_movements').select('*').order('created_at', { ascending: false });
     if (error) { console.error(error); toast.error('Erro ao carregar movimentações'); }
     else setMovements((data || []).map((r: any) => ({
-      id: r.id, productCode: r.product_code, productName: r.product_name,
+      id: r.id, productId: r.product_id, productCode: r.product_code, productName: r.product_name,
       type: r.type, fromLocation: r.from_location || '', toLocation: r.to_location || '',
       quantity: Number(r.quantity), reason: r.reason, operator: r.operator || '',
       reference: r.reference, createdAt: r.created_at,
@@ -19,8 +19,44 @@ export function useWMSMovements() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { fetch(); }, [fetch]);
-  return { movements, loading, refetch: fetch };
+  const createMovement = async (movement: {
+    product_id?: string; product_code: string; product_name: string;
+    type: string; from_location?: string; to_location?: string;
+    quantity: number; reason: string; reference?: string; operator?: string;
+  }) => {
+    const { error } = await supabase.from('wms_movements').insert(movement);
+    if (error) { toast.error('Erro ao criar movimentação'); console.error(error); return false; }
+    toast.success('Movimentação registrada! Estoque ERP atualizado automaticamente.');
+    await fetchMovements();
+    return true;
+  };
+
+  useEffect(() => { fetchMovements(); }, [fetchMovements]);
+  return { movements, loading, refetch: fetchMovements, createMovement };
+}
+
+export function useStockMovements() {
+  const [movements, setMovements] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchMovements = useCallback(async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from('stock_movements').select('*').order('created_at', { ascending: false });
+    if (error) { console.error(error); toast.error('Erro ao carregar movimentações de estoque'); }
+    else setMovements((data || []).map((r: any) => ({
+      id: r.id, documentNumber: r.document_number, productId: r.product_id,
+      productCode: r.product_code, productName: r.product_name,
+      type: r.type, direction: r.direction, quantity: Number(r.quantity),
+      unitCost: Number(r.unit_cost), totalCost: Number(r.total_cost),
+      batch: r.batch, fromWarehouse: r.from_warehouse, toWarehouse: r.to_warehouse,
+      reference: r.reference, notes: r.notes, operator: r.operator,
+      source: r.source, wmsMovementId: r.wms_movement_id, createdAt: r.created_at,
+    })));
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { fetchMovements(); }, [fetchMovements]);
+  return { movements, loading, refetch: fetchMovements };
 }
 
 export function useWMSReceiving() {
