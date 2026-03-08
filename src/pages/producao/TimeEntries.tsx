@@ -97,12 +97,12 @@ export default function TimeEntriesPage() {
   };
 
   const handleStartNew = () => {
-    const order = activeOrders.find(o => o.id === newEntry.orderId);
+    const order = activeOrders.find(o => o.orderNumber === newEntry.orderId);
     if (!order) return;
 
     const newTimeEntry: TimeEntry = {
       id: `te${Date.now()}`,
-      productionOrderId: order.id,
+      productionOrderId: newEntry.orderId,
       orderNumber: order.orderNumber,
       operationId: `op${Date.now()}`,
       operationName: newEntry.operationName,
