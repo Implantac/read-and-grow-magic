@@ -9,6 +9,8 @@ import {
 } from 'lucide-react';
 
 export default function WMSDashboardPage() {
+  const { stats, recentMovements, loading } = useWMSDashboardStats();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
