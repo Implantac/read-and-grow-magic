@@ -46,7 +46,16 @@ const statusConfig = {
 };
 
 export default function SuppliersPage() {
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const { suppliers: rawSuppliers, loading, create: createSupplier, update: updateSupplier, remove: removeSupplier } = useSuppliers();
+  const suppliers: Supplier[] = rawSuppliers.map((s: any) => ({
+    id: s.id, code: s.code, name: s.name, tradeName: s.trade_name,
+    document: s.document, documentType: s.document_type, email: s.email || '',
+    phone: s.phone || '', cellphone: s.cellphone, status: s.status,
+    category: s.category || '', paymentTerms: s.payment_terms || '', deliveryTime: s.delivery_time,
+    rating: Number(s.rating), createdAt: s.created_at, updatedAt: s.updated_at,
+    address: { street: s.address_street, number: s.address_number, complement: s.address_complement,
+      neighborhood: s.address_neighborhood, city: s.address_city, state: s.address_state, zipCode: s.address_zip_code },
+  }));
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
