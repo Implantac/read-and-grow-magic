@@ -66,7 +66,7 @@ export function Topbar() {
               <ChevronDown className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-64">
+          <DropdownMenuContent align="start" className="w-64" style={{ background: '#2a3245', borderColor: 'rgba(255, 152, 0, 0.2)' }}>
             <DropdownMenuLabel>Empresas</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {mockCompanies.map((company) => (
