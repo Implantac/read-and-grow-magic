@@ -1537,6 +1537,185 @@ export type Database = {
           },
         ]
       }
+      rfid_events: {
+        Row: {
+          action_taken: string | null
+          antenna: number | null
+          created_at: string
+          event_type: string
+          id: string
+          location: string | null
+          metadata: Json | null
+          processed: boolean
+          processed_at: string | null
+          reader_code: string
+          reader_id: string | null
+          rssi: number | null
+          tag_epc: string
+          tag_id: string | null
+          zone: string | null
+        }
+        Insert: {
+          action_taken?: string | null
+          antenna?: number | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          location?: string | null
+          metadata?: Json | null
+          processed?: boolean
+          processed_at?: string | null
+          reader_code: string
+          reader_id?: string | null
+          rssi?: number | null
+          tag_epc: string
+          tag_id?: string | null
+          zone?: string | null
+        }
+        Update: {
+          action_taken?: string | null
+          antenna?: number | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          location?: string | null
+          metadata?: Json | null
+          processed?: boolean
+          processed_at?: string | null
+          reader_code?: string
+          reader_id?: string | null
+          rssi?: number | null
+          tag_epc?: string
+          tag_id?: string | null
+          zone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfid_events_reader_id_fkey"
+            columns: ["reader_id"]
+            isOneToOne: false
+            referencedRelation: "rfid_readers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rfid_events_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "rfid_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rfid_readers: {
+        Row: {
+          antenna_count: number | null
+          code: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          last_heartbeat: string | null
+          location: string | null
+          manufacturer: string | null
+          model: string | null
+          name: string
+          port: number | null
+          status: string
+          updated_at: string
+          zone: string | null
+        }
+        Insert: {
+          antenna_count?: number | null
+          code: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          last_heartbeat?: string | null
+          location?: string | null
+          manufacturer?: string | null
+          model?: string | null
+          name: string
+          port?: number | null
+          status?: string
+          updated_at?: string
+          zone?: string | null
+        }
+        Update: {
+          antenna_count?: number | null
+          code?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          last_heartbeat?: string | null
+          location?: string | null
+          manufacturer?: string | null
+          model?: string | null
+          name?: string
+          port?: number | null
+          status?: string
+          updated_at?: string
+          zone?: string | null
+        }
+        Relationships: []
+      }
+      rfid_tags: {
+        Row: {
+          batch: string | null
+          created_at: string
+          epc: string
+          id: string
+          last_read_at: string | null
+          location: string | null
+          pallet_id: string | null
+          product_code: string | null
+          product_id: string | null
+          product_name: string | null
+          registered_at: string
+          status: string
+          tag_type: string
+          updated_at: string
+        }
+        Insert: {
+          batch?: string | null
+          created_at?: string
+          epc: string
+          id?: string
+          last_read_at?: string | null
+          location?: string | null
+          pallet_id?: string | null
+          product_code?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          registered_at?: string
+          status?: string
+          tag_type?: string
+          updated_at?: string
+        }
+        Update: {
+          batch?: string | null
+          created_at?: string
+          epc?: string
+          id?: string
+          last_read_at?: string | null
+          location?: string | null
+          pallet_id?: string | null
+          product_code?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          registered_at?: string
+          status?: string
+          tag_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rfid_tags_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sale_items: {
         Row: {
           discount: number
