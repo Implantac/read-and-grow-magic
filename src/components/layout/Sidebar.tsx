@@ -122,8 +122,8 @@ export function Sidebar() {
               <span className="text-lg font-bold text-sidebar-primary-foreground">E</span>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-sidebar-foreground">ERP+WMS</h1>
-              <p className="text-xs text-sidebar-foreground/60">Enterprise</p>
+              <h1 className="text-lg font-bold text-sidebar-foreground">Use Sistemas</h1>
+              <p className="text-xs text-sidebar-foreground/60">ERP e WMS</p>
             </div>
           </div>
         )}
