@@ -51,9 +51,12 @@ export default function WMSMovementsPage() {
     return matchesSearch && matchesType;
   });
 
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
+  const todayCount = movements.filter(m => m.createdAt?.startsWith(todayStr)).length;
   const inboundCount = movements.filter(m => m.type === 'inbound').length;
   const outboundCount = movements.filter(m => m.type === 'outbound').length;
   const transferCount = movements.filter(m => m.type === 'transfer').length;
+  const adjustmentCount = movements.filter(m => m.type === 'adjustment').length;
   const adjustmentCount = movements.filter(m => m.type === 'adjustment').length;
 
   return (
