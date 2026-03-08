@@ -51,7 +51,7 @@ export function Topbar() {
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
-          className="text-muted-foreground hover:text-foreground"
+          className="text-white/70 hover:text-[#ff9800] hover:bg-white/10"
         >
           <Menu className="h-5 w-5" />
         </Button>
