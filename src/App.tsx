@@ -150,6 +150,7 @@ const App = () => (
             <Route path="/wms/movimentacoes" element={<WMSMovementsPage />} />
             
             {/* RFID Module */}
+            <Route path="/rfid/dashboard" element={<RFIDDashboardPage />} />
             <Route path="/rfid/leitores" element={<RFIDReadersPage />} />
             <Route path="/rfid/tags" element={<RFIDTagsPage />} />
             <Route path="/rfid/eventos" element={<RFIDEventsPage />} />

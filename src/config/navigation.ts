@@ -101,6 +101,7 @@ export const navigationItems = [
     href: '/rfid',
     icon: 'Radio',
     children: [
+      { title: 'Dashboard RFID', href: '/rfid/dashboard', icon: 'LayoutDashboard' },
       { title: 'Leitores', href: '/rfid/leitores', icon: 'Wifi' },
       { title: 'Tags', href: '/rfid/tags', icon: 'Tag' },
       { title: 'Eventos', href: '/rfid/eventos', icon: 'Activity' },
