@@ -36,6 +36,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { reportTypeLabels } from '@/config/fiscal';
+import { useFiscalReports } from '@/hooks/useFiscalReports';
 import type { FiscalReport } from '@/types/fiscal';
 import {
   AreaChart,
