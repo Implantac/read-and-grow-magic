@@ -99,7 +99,7 @@ export function useWMSPacking() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const update = async (id: string, updates: any) => {
-    const { error } = await supabase.from('wms_packing_orders').update(updates).eq('id', id);
+    const { error } = await supabase.from('wms_packing_orders' as any).update(updates).eq('id', id);
     if (error) { toast.error('Erro ao atualizar'); return; }
     await fetch();
   };
