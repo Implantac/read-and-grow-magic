@@ -84,7 +84,7 @@ export default function WMSDashboardPage() {
                   <span>Taxa de Ocupação</span>
                   <span className="font-medium">{stats.occupancy}%</span>
                 </div>
-                <Progress value={0} className="h-3" />
+                <Progress value={stats.occupancy} className="h-3" />
               </div>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
