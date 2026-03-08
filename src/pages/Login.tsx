@@ -89,10 +89,10 @@ export default function Login() {
       <div className="w-full max-w-md animate-fade-in">
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-lg">
-            <span className="text-2xl font-bold text-primary-foreground">E</span>
+            <span className="text-2xl font-bold text-primary-foreground">U</span>
           </div>
-          <h1 className="text-3xl font-bold text-foreground">ERP+WMS</h1>
-          <p className="text-muted-foreground">Enterprise System</p>
+          <h1 className="text-3xl font-bold text-foreground">Use Sistemas</h1>
+          <p className="text-muted-foreground">ERP e WMS</p>
         </div>
 
         <Card className="border-border/50 shadow-xl">
@@ -211,7 +211,7 @@ export default function Login() {
         </Card>
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
-          © 2024 ERP+WMS Enterprise. Todos os direitos reservados.
+          © 2024 Use Sistemas. Todos os direitos reservados.
         </p>
       </div>
     </div>
