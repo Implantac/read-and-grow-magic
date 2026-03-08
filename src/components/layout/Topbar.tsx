@@ -191,12 +191,12 @@ export function Topbar() {
         {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                <User className="h-4 w-4" />
+            <Button variant="ghost" className="flex items-center gap-2 hover:bg-white/10">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full" style={{ background: '#ff9800' }}>
+                <User className="h-4 w-4 text-white" />
               </div>
-              <span className="hidden md:inline-block">{user?.name || 'Usuário'}</span>
-              <ChevronDown className="h-4 w-4" />
+              <span className="hidden md:inline-block text-white">{user?.name || 'Usuário'}</span>
+              <ChevronDown className="h-4 w-4 text-white/60" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
