@@ -9,13 +9,15 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { trialBalanceByType } from '@/data/accountingChartData';
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(value);
 
 const formatFull = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+
+// Empty data - will be populated from database
+const trialBalanceByType: { type: string; debit: number; credit: number }[] = [];
 
 export function TrialBalanceChart() {
   return (
@@ -24,17 +26,23 @@ export function TrialBalanceChart() {
         <CardTitle className="text-base">Saldos por Tipo de Conta</CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={trialBalanceByType}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis dataKey="type" tick={{ fontSize: 11 }} />
-            <YAxis tickFormatter={formatCurrency} tick={{ fontSize: 11 }} />
-            <Tooltip formatter={(v: number) => formatFull(v)} />
-            <Legend />
-            <Bar dataKey="debit" name="Débito" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="credit" name="Crédito" fill="hsl(var(--chart-3))" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        {trialBalanceByType.length > 0 ? (
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={trialBalanceByType}>
+              <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+              <XAxis dataKey="type" tick={{ fontSize: 11 }} />
+              <YAxis tickFormatter={formatCurrency} tick={{ fontSize: 11 }} />
+              <Tooltip formatter={(v: number) => formatFull(v)} />
+              <Legend />
+              <Bar dataKey="debit" name="Débito" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="credit" name="Crédito" fill="hsl(var(--chart-3))" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+            Nenhum dado disponível
+          </div>
+        )}
       </CardContent>
     </Card>
   );

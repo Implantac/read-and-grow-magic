@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { periodOptions } from '@/data/accountingChartData';
+import { periodOptions } from '@/config/accounting';
 
 interface PeriodSelectorProps {
   value: string;

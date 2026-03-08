@@ -3,14 +3,8 @@ import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { toast } from 'sonner';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import {
   Search,
   TrendingUp,
@@ -19,35 +13,22 @@ import {
   RotateCcw,
   Plus,
   ArrowUpDown,
-  Package,
-  MapPin,
   Calendar
 } from 'lucide-react';
-import { 
-  inventoryMovements as initialMovements,
-  inventoryItems,
-  storageLocations
-} from '@/data/wmsMockData';
-import { InventoryMovement, MovementType } from '@/types/wms';
+import type { InventoryMovement, MovementType } from '@/types/wms';
 
-const movementTypeConfig: Record<MovementType, { label: string; icon: React.ReactNode; color: string; bgColor: string }> = {
-  inbound: { label: 'Entrada', icon: <TrendingUp className="h-4 w-4" />, color: 'text-green-600', bgColor: 'bg-green-100 dark:bg-green-900' },
-  outbound: { label: 'Saída', icon: <TrendingDown className="h-4 w-4" />, color: 'text-red-600', bgColor: 'bg-red-100 dark:bg-red-900' },
-  transfer: { label: 'Transferência', icon: <ArrowRight className="h-4 w-4" />, color: 'text-blue-600', bgColor: 'bg-blue-100 dark:bg-blue-900' },
-  adjustment: { label: 'Ajuste', icon: <RotateCcw className="h-4 w-4" />, color: 'text-amber-600', bgColor: 'bg-amber-100 dark:bg-amber-900' }
+const movementTypeConfig: Record<MovementType, { label: string; icon: React.ReactNode; color: string }> = {
+  inbound: { label: 'Entrada', icon: <TrendingUp className="h-4 w-4" />, color: 'text-green-600' },
+  outbound: { label: 'Saída', icon: <TrendingDown className="h-4 w-4" />, color: 'text-red-600' },
+  transfer: { label: 'Transferência', icon: <ArrowRight className="h-4 w-4" />, color: 'text-blue-600' },
+  adjustment: { label: 'Ajuste', icon: <RotateCcw className="h-4 w-4" />, color: 'text-amber-600' }
 };
 
 export default function WMSMovementsPage() {
-  const [movements, setMovements] = useState<InventoryMovement[]>(initialMovements);
+  const [movements] = useState<InventoryMovement[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<string>('all');
-  const [newMovementOpen, setNewMovementOpen] = useState(false);
-  const [newMovement, setNewMovement] = useState<Partial<InventoryMovement>>({
-    type: 'transfer',
-    quantity: 0,
-    reason: ''
-  });
 
   const filteredMovements = movements.filter(movement => {
     const matchesSearch = 
@@ -55,65 +36,13 @@ export default function WMSMovementsPage() {
       movement.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       movement.reason.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = typeFilter === 'all' || movement.type === typeFilter;
-    
-    // Date filter
-    let matchesDate = true;
-    if (dateFilter === 'today') {
-      matchesDate = movement.createdAt.startsWith(format(new Date(), 'yyyy-MM-dd'));
-    } else if (dateFilter === 'week') {
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      matchesDate = new Date(movement.createdAt) >= weekAgo;
-    } else if (dateFilter === 'month') {
-      const monthAgo = new Date();
-      monthAgo.setMonth(monthAgo.getMonth() - 1);
-      matchesDate = new Date(movement.createdAt) >= monthAgo;
-    }
-    
-    return matchesSearch && matchesType && matchesDate;
+    return matchesSearch && matchesType;
   });
-
-  // Statistics
-  const todayMovements = movements.filter(m => 
-    m.createdAt.startsWith(format(new Date(), 'yyyy-MM-dd'))
-  ).length;
 
   const inboundCount = movements.filter(m => m.type === 'inbound').length;
   const outboundCount = movements.filter(m => m.type === 'outbound').length;
   const transferCount = movements.filter(m => m.type === 'transfer').length;
   const adjustmentCount = movements.filter(m => m.type === 'adjustment').length;
-
-  const handleCreateMovement = () => {
-    if (!newMovement.productCode || !newMovement.quantity || !newMovement.reason) {
-      toast.error('Preencha todos os campos obrigatórios');
-      return;
-    }
-
-    if (newMovement.type === 'transfer' && !newMovement.fromLocation && !newMovement.toLocation) {
-      toast.error('Informe origem e destino para transferência');
-      return;
-    }
-
-    const product = inventoryItems.find(p => p.productCode === newMovement.productCode);
-    
-    const movement: InventoryMovement = {
-      id: Date.now().toString(),
-      productCode: newMovement.productCode!,
-      productName: product?.productName || 'Produto Desconhecido',
-      type: newMovement.type as MovementType,
-      fromLocation: newMovement.fromLocation,
-      toLocation: newMovement.toLocation,
-      quantity: newMovement.quantity!,
-      reason: newMovement.reason!,
-      operator: 'Usuário Atual',
-      createdAt: new Date().toISOString()
-    };
-
-    setMovements([movement, ...movements]);
-    toast.success('Movimentação registrada com sucesso!');
-    setNewMovementOpen(false);
-    setNewMovement({ type: 'transfer', quantity: 0, reason: '' });
-  };
 
   return (
     <div className="space-y-6">
@@ -138,7 +67,7 @@ export default function WMSMovementsPage() {
             ]}
             filename="movimentacoes_wms"
           />
-          <Button onClick={() => setNewMovementOpen(true)}>
+          <Button>
             <Plus className="h-4 w-4 mr-2" />
             Nova Movimentação
           </Button>
@@ -153,7 +82,7 @@ export default function WMSMovementsPage() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{todayMovements}</div>
+            <div className="text-2xl font-bold">0</div>
             <p className="text-xs text-muted-foreground">Movimentações</p>
           </CardContent>
         </Card>
@@ -262,55 +191,6 @@ export default function WMSMovementsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredMovements.map((movement) => {
-                const config = movementTypeConfig[movement.type];
-                
-                return (
-                  <TableRow key={movement.id}>
-                    <TableCell className="whitespace-nowrap">
-                      {format(new Date(movement.createdAt), 'dd/MM/yyyy HH:mm', { locale: ptBR })}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={`${config.bgColor} ${config.color} border-0`}>
-                        <span className="flex items-center gap-1">
-                          {config.icon}
-                          {config.label}
-                        </span>
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{movement.productName}</p>
-                        <p className="text-sm text-muted-foreground">{movement.productCode}</p>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {movement.fromLocation ? (
-                        <div className="flex items-center gap-1 text-sm">
-                          <MapPin className="h-3 w-3" />
-                          {movement.fromLocation}
-                        </div>
-                      ) : '-'}
-                    </TableCell>
-                    <TableCell>
-                      {movement.toLocation ? (
-                        <div className="flex items-center gap-1 text-sm">
-                          <MapPin className="h-3 w-3" />
-                          {movement.toLocation}
-                        </div>
-                      ) : '-'}
-                    </TableCell>
-                    <TableCell className={`text-right font-medium ${config.color}`}>
-                      {movement.type === 'inbound' ? '+' : movement.type === 'outbound' || movement.quantity < 0 ? '' : ''}
-                      {movement.quantity}
-                    </TableCell>
-                    <TableCell className="max-w-[200px] truncate" title={movement.reason}>
-                      {movement.reason}
-                    </TableCell>
-                    <TableCell>{movement.operator}</TableCell>
-                  </TableRow>
-                );
-              })}
               {filteredMovements.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
@@ -322,133 +202,6 @@ export default function WMSMovementsPage() {
           </Table>
         </CardContent>
       </Card>
-
-      {/* New Movement Dialog */}
-      <Dialog open={newMovementOpen} onOpenChange={setNewMovementOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Nova Movimentação</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Tipo de Movimentação</label>
-              <Select 
-                value={newMovement.type} 
-                onValueChange={(v) => setNewMovement({ ...newMovement, type: v as MovementType })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(movementTypeConfig).map(([key, config]) => (
-                    <SelectItem key={key} value={key}>
-                      <span className="flex items-center gap-2">
-                        {config.icon}
-                        {config.label}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">Produto</label>
-              <Select 
-                value={newMovement.productCode} 
-                onValueChange={(v) => setNewMovement({ ...newMovement, productCode: v })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o produto" />
-                </SelectTrigger>
-                <SelectContent>
-                  {inventoryItems.map(item => (
-                    <SelectItem key={item.id} value={item.productCode}>
-                      {item.productCode} - {item.productName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {(newMovement.type === 'transfer' || newMovement.type === 'outbound') && (
-              <div>
-                <label className="text-sm font-medium">Origem</label>
-                <Select 
-                  value={newMovement.fromLocation} 
-                  onValueChange={(v) => setNewMovement({ ...newMovement, fromLocation: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a origem" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {storageLocations.map(loc => (
-                      <SelectItem key={loc.id} value={loc.code}>
-                        {loc.code} - Zona {loc.zone}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {(newMovement.type === 'transfer' || newMovement.type === 'inbound') && (
-              <div>
-                <label className="text-sm font-medium">Destino</label>
-                <Select 
-                  value={newMovement.toLocation} 
-                  onValueChange={(v) => setNewMovement({ ...newMovement, toLocation: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o destino" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {storageLocations.filter(l => l.code !== newMovement.fromLocation).map(loc => (
-                      <SelectItem key={loc.id} value={loc.code}>
-                        {loc.code} - Zona {loc.zone} (Disp: {loc.capacity - loc.occupied})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            <div>
-              <label className="text-sm font-medium">Quantidade</label>
-              <Input
-                type="number"
-                min={newMovement.type === 'adjustment' ? undefined : 1}
-                value={newMovement.quantity || ''}
-                onChange={(e) => setNewMovement({ ...newMovement, quantity: parseInt(e.target.value) || 0 })}
-                placeholder={newMovement.type === 'adjustment' ? 'Use valores negativos para reduzir' : 'Quantidade'}
-              />
-              {newMovement.type === 'adjustment' && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  Use valores negativos para ajustes de redução
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">Motivo</label>
-              <Textarea
-                value={newMovement.reason}
-                onChange={(e) => setNewMovement({ ...newMovement, reason: e.target.value })}
-                placeholder="Descreva o motivo da movimentação..."
-                rows={3}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setNewMovementOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleCreateMovement}>
-              Registrar Movimentação
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
