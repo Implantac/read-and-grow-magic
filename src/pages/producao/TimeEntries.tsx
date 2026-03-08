@@ -449,8 +449,8 @@ export default function TimeEntriesPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {activeOrders.map(order => (
-                    <SelectItem key={order.id} value={order.id}>
-                      {order.orderNumber} - {order.productName}
+                    <SelectItem key={order.orderNumber} value={order.orderNumber}>
+                      {order.orderNumber}
                     </SelectItem>
                   ))}
                 </SelectContent>
