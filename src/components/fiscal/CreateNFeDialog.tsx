@@ -56,8 +56,10 @@ interface CreateNFeDialogProps {
 }
 
 export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialogProps) {
-  const { clients } = useClients();
-  const { products } = useProducts();
+  const clientsQuery = useClients();
+  const productsQuery = useProducts();
+  const clients = clientsQuery.data || [];
+  const products = productsQuery.data || [];
   const [saving, setSaving] = useState(false);
 
   const [clientId, setClientId] = useState('');

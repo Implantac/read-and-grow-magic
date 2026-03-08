@@ -45,7 +45,8 @@ const paymentMethods = [
 ];
 
 export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
-  const { products } = useProducts();
+  const productsQuery = useProducts();
+  const products = productsQuery.data || [];
   const [cart, setCart] = useState<CartItem[]>([]);
   const [search, setSearch] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('pix');
