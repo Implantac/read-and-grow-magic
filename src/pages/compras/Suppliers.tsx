@@ -103,8 +103,8 @@ export default function SuppliersPage() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setSuppliers(suppliers.filter((s) => s.id !== id));
+  const handleDelete = async (id: string) => {
+    await removeSupplier(id);
   };
 
   const handleSave = () => {
