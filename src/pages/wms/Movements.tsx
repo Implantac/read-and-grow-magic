@@ -5,6 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import {
   Search,
   TrendingUp,
@@ -15,7 +19,10 @@ import {
   ArrowUpDown,
   Calendar
 } from 'lucide-react';
-import type { InventoryMovement, MovementType } from '@/types/wms';
+import { useWMSMovements } from '@/hooks/useWMSOperations';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import type { MovementType } from '@/types/wms';
 
 const movementTypeConfig: Record<MovementType, { label: string; icon: React.ReactNode; color: string }> = {
   inbound: { label: 'Entrada', icon: <TrendingUp className="h-4 w-4" />, color: 'text-green-600' },
@@ -25,10 +32,15 @@ const movementTypeConfig: Record<MovementType, { label: string; icon: React.Reac
 };
 
 export default function WMSMovementsPage() {
-  const [movements] = useState<InventoryMovement[]>([]);
+  const { movements, loading, createMovement } = useWMSMovements();
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [dateFilter, setDateFilter] = useState<string>('all');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    product_code: '', product_name: '', type: 'inbound',
+    from_location: '', to_location: '', quantity: 0, reason: '', operator: '',
+  });
 
   const filteredMovements = movements.filter(movement => {
     const matchesSearch = 
@@ -39,6 +51,8 @@ export default function WMSMovementsPage() {
     return matchesSearch && matchesType;
   });
 
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
+  const todayCount = movements.filter(m => m.createdAt?.startsWith(todayStr)).length;
   const inboundCount = movements.filter(m => m.type === 'inbound').length;
   const outboundCount = movements.filter(m => m.type === 'outbound').length;
   const transferCount = movements.filter(m => m.type === 'transfer').length;
@@ -67,7 +81,7 @@ export default function WMSMovementsPage() {
             ]}
             filename="movimentacoes_wms"
           />
-          <Button>
+          <Button onClick={() => setIsFormOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Nova Movimentação
           </Button>
@@ -82,7 +96,7 @@ export default function WMSMovementsPage() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{todayCount}</div>
             <p className="text-xs text-muted-foreground">Movimentações</p>
           </CardContent>
         </Card>
@@ -93,7 +107,6 @@ export default function WMSMovementsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{inboundCount}</div>
-            <p className="text-xs text-muted-foreground">Total registradas</p>
           </CardContent>
         </Card>
         <Card>
@@ -103,7 +116,6 @@ export default function WMSMovementsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{outboundCount}</div>
-            <p className="text-xs text-muted-foreground">Total registradas</p>
           </CardContent>
         </Card>
         <Card>
@@ -113,7 +125,6 @@ export default function WMSMovementsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{transferCount}</div>
-            <p className="text-xs text-muted-foreground">Total registradas</p>
           </CardContent>
         </Card>
         <Card>
@@ -123,7 +134,6 @@ export default function WMSMovementsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-amber-600">{adjustmentCount}</div>
-            <p className="text-xs text-muted-foreground">Total registradas</p>
           </CardContent>
         </Card>
       </div>
@@ -174,34 +184,136 @@ export default function WMSMovementsPage() {
           <CardTitle className="flex items-center gap-2">
             <ArrowUpDown className="h-5 w-5" />
             Histórico de Movimentações
+            {movements.length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                Integrado com ERP
+              </Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Data/Hora</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Produto</TableHead>
-                <TableHead>Origem</TableHead>
-                <TableHead>Destino</TableHead>
-                <TableHead className="text-right">Quantidade</TableHead>
-                <TableHead>Motivo</TableHead>
-                <TableHead>Operador</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredMovements.length === 0 && (
+          {loading ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                    Nenhuma movimentação encontrada
-                  </TableCell>
+                  <TableHead>Data/Hora</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Produto</TableHead>
+                  <TableHead>Origem</TableHead>
+                  <TableHead>Destino</TableHead>
+                  <TableHead className="text-right">Quantidade</TableHead>
+                  <TableHead>Motivo</TableHead>
+                  <TableHead>Operador</TableHead>
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredMovements.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      Nenhuma movimentação encontrada
+                    </TableCell>
+                  </TableRow>
+                ) : filteredMovements.map((m) => {
+                  const config = movementTypeConfig[m.type as MovementType];
+                  return (
+                    <TableRow key={m.id}>
+                      <TableCell className="text-sm">
+                        {format(new Date(m.createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                      </TableCell>
+                      <TableCell>
+                        <span className={`flex items-center gap-1 ${config?.color || ''}`}>
+                          {config?.icon}
+                          {config?.label || m.type}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium">{m.productName}</div>
+                        <div className="text-xs text-muted-foreground">{m.productCode}</div>
+                      </TableCell>
+                      <TableCell>{m.fromLocation || '-'}</TableCell>
+                      <TableCell>{m.toLocation || '-'}</TableCell>
+                      <TableCell className="text-right font-medium">{m.quantity}</TableCell>
+                      <TableCell>{m.reason}</TableCell>
+                      <TableCell>{m.operator || '-'}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
+
+      {/* New Movement Dialog */}
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Nova Movimentação WMS</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Código do Produto</Label>
+                <Input value={formData.product_code} onChange={(e) => setFormData(p => ({ ...p, product_code: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Nome do Produto</Label>
+                <Input value={formData.product_name} onChange={(e) => setFormData(p => ({ ...p, product_name: e.target.value }))} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Tipo</Label>
+                <Select value={formData.type} onValueChange={(v) => setFormData(p => ({ ...p, type: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="inbound">Entrada</SelectItem>
+                    <SelectItem value="outbound">Saída</SelectItem>
+                    <SelectItem value="transfer">Transferência</SelectItem>
+                    <SelectItem value="adjustment">Ajuste</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Quantidade</Label>
+                <Input type="number" value={formData.quantity} onChange={(e) => setFormData(p => ({ ...p, quantity: Number(e.target.value) }))} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Origem</Label>
+                <Input value={formData.from_location} onChange={(e) => setFormData(p => ({ ...p, from_location: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Destino</Label>
+                <Input value={formData.to_location} onChange={(e) => setFormData(p => ({ ...p, to_location: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <Label>Motivo</Label>
+              <Input value={formData.reason} onChange={(e) => setFormData(p => ({ ...p, reason: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Operador</Label>
+              <Input value={formData.operator} onChange={(e) => setFormData(p => ({ ...p, operator: e.target.value }))} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsFormOpen(false)}>Cancelar</Button>
+            <Button onClick={async () => {
+              const ok = await createMovement(formData);
+              if (ok) {
+                setIsFormOpen(false);
+                setFormData({ product_code: '', product_name: '', type: 'inbound', from_location: '', to_location: '', quantity: 0, reason: '', operator: '' });
+              }
+            }}>Registrar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

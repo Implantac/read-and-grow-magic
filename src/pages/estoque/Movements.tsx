@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ExportButton } from '@/components/shared/ExportButton';
+import { useStockMovements } from '@/hooks/useWMSOperations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,7 +48,15 @@ import {
 import type { StockMovement, MovementType, MovementDirection, MovementFilters } from '@/types/inventory';
 
 export default function MovementsPage() {
-  const [movements] = useState<StockMovement[]>([]);
+  const { movements: dbMovements, loading } = useStockMovements();
+  const movements = useMemo<StockMovement[]>(() => dbMovements.map((m: any) => ({
+    id: m.id, documentNumber: m.documentNumber, productId: m.productId || '',
+    productCode: m.productCode, productName: m.productName,
+    type: m.type as MovementType, direction: m.direction as MovementDirection,
+    quantity: m.quantity, unitCost: m.unitCost, totalCost: m.totalCost,
+    batch: m.batch, fromWarehouse: m.fromWarehouse, toWarehouse: m.toWarehouse,
+    reference: m.reference, notes: m.notes, operator: m.operator, createdAt: m.createdAt,
+  })), [dbMovements]);
   const [filters, setFilters] = useState<MovementFilters>({
     search: '',
     type: 'all',

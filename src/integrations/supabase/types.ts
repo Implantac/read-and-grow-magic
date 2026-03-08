@@ -1647,6 +1647,87 @@ export type Database = {
           },
         ]
       }
+      stock_movements: {
+        Row: {
+          batch: string | null
+          created_at: string
+          direction: string
+          document_number: string
+          from_warehouse: string | null
+          id: string
+          notes: string | null
+          operator: string
+          product_code: string
+          product_id: string | null
+          product_name: string
+          quantity: number
+          reference: string | null
+          source: string | null
+          to_warehouse: string | null
+          total_cost: number
+          type: string
+          unit_cost: number
+          wms_movement_id: string | null
+        }
+        Insert: {
+          batch?: string | null
+          created_at?: string
+          direction?: string
+          document_number?: string
+          from_warehouse?: string | null
+          id?: string
+          notes?: string | null
+          operator?: string
+          product_code: string
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          reference?: string | null
+          source?: string | null
+          to_warehouse?: string | null
+          total_cost?: number
+          type?: string
+          unit_cost?: number
+          wms_movement_id?: string | null
+        }
+        Update: {
+          batch?: string | null
+          created_at?: string
+          direction?: string
+          document_number?: string
+          from_warehouse?: string | null
+          id?: string
+          notes?: string | null
+          operator?: string
+          product_code?: string
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          reference?: string | null
+          source?: string | null
+          to_warehouse?: string | null
+          total_cost?: number
+          type?: string
+          unit_cost?: number
+          wms_movement_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_wms_movement_id_fkey"
+            columns: ["wms_movement_id"]
+            isOneToOne: false
+            referencedRelation: "wms_movements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           address_city: string
@@ -1978,6 +2059,59 @@ export type Database = {
           type?: string
         }
         Relationships: []
+      }
+      wms_movements: {
+        Row: {
+          created_at: string
+          from_location: string | null
+          id: string
+          operator: string | null
+          product_code: string
+          product_id: string | null
+          product_name: string
+          quantity: number
+          reason: string
+          reference: string | null
+          to_location: string | null
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          from_location?: string | null
+          id?: string
+          operator?: string | null
+          product_code: string
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          reason?: string
+          reference?: string | null
+          to_location?: string | null
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          from_location?: string | null
+          id?: string
+          operator?: string | null
+          product_code?: string
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          reason?: string
+          reference?: string | null
+          to_location?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wms_packing_orders: {
         Row: {
