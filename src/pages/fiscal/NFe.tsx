@@ -53,7 +53,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { nfeStatusLabels } from '@/config/fiscal';
+import { useNFe } from '@/hooks/useNFe';
 import type { NFe } from '@/types/fiscal';
 
 const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ className?: string }> }> = {
