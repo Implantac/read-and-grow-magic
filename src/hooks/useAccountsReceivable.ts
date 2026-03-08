@@ -39,7 +39,7 @@ export function useCreateAccountReceivable() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (account: Partial<AccountReceivableRow>) => {
+    mutationFn: async (account: { description: string; client_name: string; due_date: string; amount: number; category?: string; client_id?: string | null; invoice_number?: string | null; notes?: string | null }) => {
       const { data, error } = await supabase
         .from('accounts_receivable')
         .insert(account)
