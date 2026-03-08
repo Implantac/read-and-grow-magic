@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Bell, ChevronDown, LogOut, Menu, Moon, Sun, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Company, Alert } from '@/types';
@@ -37,7 +38,9 @@ export function Topbar() {
     navigate('/login');
   };
 
-  const unreadAlerts = mockAlerts.filter((a) => !a.read).length;
+  const { companies } = useCompanies();
+  const [alerts] = useState<Alert[]>([]);
+  const unreadAlerts = alerts.filter((a) => !a.read).length;
 
   return (
     <header
@@ -71,7 +74,7 @@ export function Topbar() {
           <DropdownMenuContent align="start" className="w-64" style={{ background: '#2a3245', borderColor: 'rgba(255, 152, 0, 0.2)' }}>
             <DropdownMenuLabel>Empresas</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {mockCompanies.map((company) => (
+            {companies.map((company: any) => (
               <DropdownMenuItem
                 key={company.id}
                 onClick={() => setActiveCompany(company)}
@@ -155,7 +158,7 @@ export function Topbar() {
               <Badge variant="secondary">{unreadAlerts} novas</Badge>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {mockAlerts.slice(0, 5).map((alert) => (
+            {alerts.slice(0, 5).map((alert) => (
               <DropdownMenuItem
                 key={alert.id}
                 className={cn(

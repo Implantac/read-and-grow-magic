@@ -61,6 +61,15 @@ const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ 
   contingency: { color: 'bg-warning/10 text-warning', icon: AlertTriangle },
 };
 
+const paymentLabels: Record<string, string> = {
+  cash: 'Dinheiro',
+  credit_card: 'Cartão de Crédito',
+  debit_card: 'Cartão de Débito',
+  pix: 'PIX',
+  voucher: 'Vale',
+  multiple: 'Múltiplo',
+};
+
 const paymentIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   cash: Banknote,
   credit_card: CreditCard,
@@ -150,7 +159,7 @@ export default function NFCePage() {
     return (
       <div className="flex items-center gap-2">
         <Icon className="h-4 w-4 text-muted-foreground" />
-        <span>{nfcePaymentMethodLabels[method] || method}</span>
+        <span>{paymentLabels[method] || method}</span>
       </div>
     );
   };

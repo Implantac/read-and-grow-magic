@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Star, Plus, Search, Eye, Edit, Trash2, Mail, Phone, MapPin, MoreHorizontal } from 'lucide-react';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
