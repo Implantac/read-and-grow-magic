@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ExportButton } from '@/components/shared/ExportButton';
+import { useState, useMemo } from 'react';
+import { useStockMovements } from '@/hooks/useWMSOperations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
