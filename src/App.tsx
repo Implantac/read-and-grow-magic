@@ -56,6 +56,7 @@ import RFIDDashboardPage from "./pages/rfid/Dashboard";
 import RFIDReadersPage from "./pages/rfid/Readers";
 import RFIDTagsPage from "./pages/rfid/Tags";
 import RFIDEventsPage from "./pages/rfid/Events";
+import RFIDIntegrationPage from "./pages/rfid/Integration";
 
 // Production Module
 import ProductionOrdersPage from "./pages/producao/ProductionOrders";
