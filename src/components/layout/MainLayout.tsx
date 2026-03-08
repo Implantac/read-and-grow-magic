@@ -25,7 +25,13 @@ export function MainLayout() {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="flex flex-col items-center gap-3">
+          <div className="relative">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div className="absolute inset-0 h-8 w-8 animate-ping rounded-full bg-primary/20" />
+          </div>
+          <p className="text-sm text-muted-foreground animate-pulse">Carregando...</p>
+        </div>
       </div>
     );
   }
@@ -40,7 +46,7 @@ export function MainLayout() {
       <Topbar />
       <main
         className={cn(
-          'min-h-screen pt-16 transition-all duration-300',
+          'min-h-screen pt-14 transition-all duration-300 ease-in-out',
           sidebarCollapsed ? 'pl-16' : 'pl-64'
         )}
       >

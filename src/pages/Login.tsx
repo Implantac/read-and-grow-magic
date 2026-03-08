@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Loader2, Lock, Mail, ArrowLeft, UserPlus } from 'lucide-react';
 import logoUseSistemas from '@/assets/logo-use-sistemas.png';
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { useEffect } from 'react';
+import { cn } from '@/lib/utils';
 
 type View = 'login' | 'signup' | 'forgot';
 
@@ -85,41 +85,63 @@ export default function Login() {
     setIsLoading(false);
   };
 
+  const inputClasses = "pl-10 h-11 bg-sidebar-accent/50 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/30 focus:border-primary focus:ring-primary/20 transition-colors";
+
   return (
-    <div className="flex min-h-screen items-center justify-center p-4 overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a2234 0%, #2a3245 50%, #1a2234 100%)' }}>
-      <div className="w-full max-w-md" style={{ animation: 'login-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards', opacity: 0 }}>
+    <div className="relative flex min-h-screen items-center justify-center p-4 overflow-hidden bg-sidebar">
+      {/* Ambient background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-1/3 -right-1/4 w-[600px] h-[600px] rounded-full opacity-[0.04]" style={{ background: 'radial-gradient(circle, hsl(36 100% 50%), transparent 70%)' }} />
+        <div className="absolute -bottom-1/4 -left-1/4 w-[500px] h-[500px] rounded-full opacity-[0.03]" style={{ background: 'radial-gradient(circle, hsl(207 90% 54%), transparent 70%)' }} />
+        {/* Grid pattern */}
+        <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'linear-gradient(hsl(210 40% 98%) 1px, transparent 1px), linear-gradient(90deg, hsl(210 40% 98%) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
+      </div>
+
+      <div className="relative w-full max-w-[420px]" style={{ animation: 'login-slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards', opacity: 0 }}>
+        {/* Logo & Title */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl" style={{ background: 'rgba(255, 152, 0, 0.15)', border: '2px solid rgba(255, 152, 0, 0.3)', animation: 'login-logo-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards', opacity: 0, transform: 'scale(0.5)' }}>
-            <img src={logoUseSistemas} alt="Use Sistemas" className="h-16 w-16 object-contain" />
+          <div
+            className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 ring-2 ring-primary/20"
+            style={{ animation: 'login-logo-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards', opacity: 0 }}
+          >
+            <img src={logoUseSistemas} alt="Use Sistemas" className="h-14 w-14 object-contain" />
           </div>
-          <h1 className="text-3xl font-bold" style={{ color: '#ffffff', animation: 'login-fade-in 0.5s ease-out 0.5s forwards', opacity: 0 }}>Use Sistemas</h1>
-          <p style={{ color: '#ff9800', animation: 'login-fade-in 0.5s ease-out 0.6s forwards', opacity: 0 }} className="font-medium">ERP e WMS</p>
+          <h1 className="text-3xl font-bold text-sidebar-foreground tracking-tight" style={{ animation: 'login-fade-in 0.5s ease-out 0.5s forwards', opacity: 0 }}>
+            Use Sistemas
+          </h1>
+          <p className="text-primary font-semibold text-sm mt-1" style={{ animation: 'login-fade-in 0.5s ease-out 0.6s forwards', opacity: 0 }}>
+            ERP e WMS
+          </p>
         </div>
 
-        <Card className="border-0 shadow-2xl" style={{ background: 'rgba(42, 50, 69, 0.95)', backdropFilter: 'blur(20px)', animation: 'login-card-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards', opacity: 0, transform: 'translateY(20px)' }}>
+        {/* Card */}
+        <Card
+          className="border-sidebar-border/50 bg-sidebar-accent/30 backdrop-blur-xl shadow-2xl"
+          style={{ animation: 'login-card-rise 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards', opacity: 0 }}
+        >
           {view === 'forgot' ? (
             <>
-              <CardHeader className="space-y-1">
+              <CardHeader className="space-y-1 pb-4">
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-white/10" style={{ color: '#ff9800' }} onClick={() => setView('login')}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-sidebar-accent" onClick={() => setView('login')}>
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
                   <div>
-                    <CardTitle className="text-2xl" style={{ color: '#ffffff' }}>Recuperar Senha</CardTitle>
-                    <CardDescription style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Informe seu email para receber instruções</CardDescription>
+                    <CardTitle className="text-xl text-sidebar-foreground">Recuperar Senha</CardTitle>
+                    <CardDescription className="text-sidebar-foreground/50 text-sm">Informe seu email para receber instruções</CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleResetPassword} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="reset-email" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Email</Label>
+                    <Label htmlFor="reset-email" className="text-sidebar-foreground/70 text-sm">Email</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: '#ff9800' }} />
-                      <Input id="reset-email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10 border-white/20 text-white placeholder:text-white/40 focus:border-[#ff9800] focus:ring-[#ff9800]" style={{ background: 'rgba(26, 34, 52, 0.8)' }} disabled={isLoading} />
+                      <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/70" />
+                      <Input id="reset-email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClasses} disabled={isLoading} />
                     </div>
                   </div>
-                  <Button type="submit" className="w-full font-semibold text-white hover:opacity-90" style={{ background: 'linear-gradient(135deg, #ff9800, #e08800)' }} disabled={isLoading}>
+                  <Button type="submit" className="w-full h-11 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-all" disabled={isLoading}>
                     {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Enviando...</> : 'Enviar Link de Recuperação'}
                   </Button>
                 </form>
@@ -127,44 +149,44 @@ export default function Login() {
             </>
           ) : view === 'signup' ? (
             <>
-              <CardHeader className="space-y-1">
+              <CardHeader className="space-y-1 pb-4">
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-white/10" style={{ color: '#ff9800' }} onClick={() => setView('login')}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-sidebar-accent" onClick={() => setView('login')}>
                     <ArrowLeft className="h-4 w-4" />
                   </Button>
                   <div>
-                    <CardTitle className="text-2xl" style={{ color: '#ffffff' }}>Criar Conta</CardTitle>
-                    <CardDescription style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Preencha os dados para se cadastrar</CardDescription>
+                    <CardTitle className="text-xl text-sidebar-foreground">Criar Conta</CardTitle>
+                    <CardDescription className="text-sidebar-foreground/50 text-sm">Preencha os dados para se cadastrar</CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSignUp} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-name" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Nome</Label>
+                    <Label htmlFor="signup-name" className="text-sidebar-foreground/70 text-sm">Nome</Label>
                     <div className="relative">
-                      <UserPlus className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: '#ff9800' }} />
-                      <Input id="signup-name" placeholder="Seu nome completo" value={name} onChange={(e) => setName(e.target.value)} className="pl-10 border-white/20 text-white placeholder:text-white/40 focus:border-[#ff9800] focus:ring-[#ff9800]" style={{ background: 'rgba(26, 34, 52, 0.8)' }} disabled={isLoading} />
+                      <UserPlus className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/70" />
+                      <Input id="signup-name" placeholder="Seu nome completo" value={name} onChange={(e) => setName(e.target.value)} className={inputClasses} disabled={isLoading} />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Email</Label>
+                    <Label htmlFor="signup-email" className="text-sidebar-foreground/70 text-sm">Email</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: '#ff9800' }} />
-                      <Input id="signup-email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10 border-white/20 text-white placeholder:text-white/40 focus:border-[#ff9800] focus:ring-[#ff9800]" style={{ background: 'rgba(26, 34, 52, 0.8)' }} disabled={isLoading} />
+                      <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/70" />
+                      <Input id="signup-email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClasses} disabled={isLoading} />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Senha</Label>
+                    <Label htmlFor="signup-password" className="text-sidebar-foreground/70 text-sm">Senha</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: '#ff9800' }} />
-                      <Input id="signup-password" type={showPassword ? 'text' : 'password'} placeholder="Mínimo 6 caracteres" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10 border-white/20 text-white placeholder:text-white/40 focus:border-[#ff9800] focus:ring-[#ff9800]" style={{ background: 'rgba(26, 34, 52, 0.8)' }} disabled={isLoading} />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 hover:opacity-80" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+                      <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/70" />
+                      <Input id="signup-password" type={showPassword ? 'text' : 'password'} placeholder="Mínimo 6 caracteres" value={password} onChange={(e) => setPassword(e.target.value)} className={cn(inputClasses, 'pr-10')} disabled={isLoading} />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-sidebar-foreground/40 hover:text-sidebar-foreground/60 transition-colors">
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
                   </div>
-                  <Button type="submit" className="w-full font-semibold text-white hover:opacity-90" style={{ background: 'linear-gradient(135deg, #ff9800, #e08800)' }} disabled={isLoading}>
+                  <Button type="submit" className="w-full h-11 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground transition-all" disabled={isLoading}>
                     {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Criando...</> : 'Criar Conta'}
                   </Button>
                 </form>
@@ -172,47 +194,47 @@ export default function Login() {
             </>
           ) : (
             <>
-              <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl" style={{ color: '#ffffff' }}>Login</CardTitle>
-                <CardDescription style={{ color: 'rgba(255, 255, 255, 0.6)' }}>Entre com suas credenciais para acessar o sistema</CardDescription>
+              <CardHeader className="space-y-1 pb-4">
+                <CardTitle className="text-xl text-sidebar-foreground">Acessar Sistema</CardTitle>
+                <CardDescription className="text-sidebar-foreground/50 text-sm">Entre com suas credenciais</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Email</Label>
+                    <Label htmlFor="email" className="text-sidebar-foreground/70 text-sm">Email</Label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: '#ff9800' }} />
-                      <Input id="email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className="pl-10 border-white/20 text-white placeholder:text-white/40 focus:border-[#ff9800] focus:ring-[#ff9800]" style={{ background: 'rgba(26, 34, 52, 0.8)' }} disabled={isLoading} />
+                      <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/70" />
+                      <Input id="email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClasses} disabled={isLoading} />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="password" style={{ color: 'rgba(255, 255, 255, 0.8)' }}>Senha</Label>
-                      <button type="button" onClick={() => setView('forgot')} className="text-xs hover:underline" style={{ color: '#ff9800' }}>Esqueceu a senha?</button>
+                      <Label htmlFor="password" className="text-sidebar-foreground/70 text-sm">Senha</Label>
+                      <button type="button" onClick={() => setView('forgot')} className="text-xs text-primary hover:text-primary/80 transition-colors">Esqueceu a senha?</button>
                     </div>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: '#ff9800' }} />
-                      <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10 pr-10 border-white/20 text-white placeholder:text-white/40 focus:border-[#ff9800] focus:ring-[#ff9800]" style={{ background: 'rgba(26, 34, 52, 0.8)' }} disabled={isLoading} />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 hover:opacity-80" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>
+                      <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/70" />
+                      <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className={cn(inputClasses, 'pr-10')} disabled={isLoading} />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-sidebar-foreground/40 hover:text-sidebar-foreground/60 transition-colors">
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
                   </div>
-                  <Button type="submit" className="w-full font-semibold text-white hover:opacity-90" style={{ background: 'linear-gradient(135deg, #ff9800, #e08800)' }} disabled={isLoading}>
+                  <Button type="submit" className="w-full h-11 font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all" disabled={isLoading}>
                     {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Entrando...</> : 'Entrar'}
                   </Button>
                 </form>
-                <div className="mt-4 text-center">
-                  <span className="text-sm" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>Não tem conta? </span>
-                  <button type="button" onClick={() => setView('signup')} className="text-sm hover:underline" style={{ color: '#ff9800' }}>Criar conta</button>
+                <div className="mt-5 text-center">
+                  <span className="text-sm text-sidebar-foreground/40">Não tem conta? </span>
+                  <button type="button" onClick={() => setView('signup')} className="text-sm text-primary font-medium hover:text-primary/80 transition-colors">Criar conta</button>
                 </div>
               </CardContent>
             </>
           )}
         </Card>
 
-        <p className="mt-4 text-center text-sm" style={{ color: 'rgba(255, 255, 255, 0.4)' }}>
-          © 2025 Use Sistemas. Todos os direitos reservados.
+        <p className="mt-6 text-center text-xs text-sidebar-foreground/30">
+          © {new Date().getFullYear()} Use Sistemas. Todos os direitos reservados.
         </p>
       </div>
     </div>

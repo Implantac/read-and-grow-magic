@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, ChevronDown, LogOut, Menu, Moon, Sun, User } from 'lucide-react';
+import { Bell, ChevronDown, LogOut, Menu, Moon, Sun, User, Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Company, Alert } from '@/types';
 
@@ -8,12 +8,8 @@ import { useAppStore } from '@/stores/useAppStore';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -22,15 +18,8 @@ export function Topbar() {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { 
-    user, 
-    activeCompany, 
-    activeBranch, 
-    sidebarCollapsed,
-    theme,
-    toggleSidebar, 
-    setActiveCompany, 
-    setActiveBranch,
-    toggleTheme,
+    user, activeCompany, activeBranch, sidebarCollapsed, theme,
+    toggleSidebar, setActiveCompany, setActiveBranch, toggleTheme,
   } = useAppStore();
 
   const handleLogout = async () => {
@@ -45,41 +34,42 @@ export function Topbar() {
   return (
     <header
       className={cn(
-        'fixed right-0 top-0 z-30 flex h-16 items-center justify-between border-b px-4 transition-all duration-300',
+        'fixed right-0 top-0 z-30 flex h-14 items-center justify-between border-b border-sidebar-border/30 px-4 transition-all duration-300 backdrop-blur-xl',
         sidebarCollapsed ? 'left-16' : 'left-64'
       )}
-      style={{ background: '#1a2234', borderColor: 'rgba(255, 152, 0, 0.15)' }}
+      style={{ background: 'hsl(222 33% 15% / 0.95)' }}
     >
       {/* Left Section */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
-          className="text-white/70 hover:text-[#ff9800] hover:bg-white/10"
+          className="h-8 w-8 text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-colors"
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-4 w-4" />
         </Button>
 
         {/* Company/Branch Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="flex items-center gap-2 border-white/20 text-white hover:bg-white/10 hover:text-[#ff9800]" style={{ background: 'rgba(42, 50, 69, 0.8)' }}>
-              <span className="max-w-[200px] truncate">
+            <Button variant="ghost" className="flex items-center gap-2 h-8 px-3 text-sidebar-foreground/80 hover:text-primary hover:bg-sidebar-accent/50 text-sm font-medium">
+              <span className="max-w-[180px] truncate">
                 {activeCompany?.name || 'Selecionar Empresa'}
               </span>
-              <ChevronDown className="h-4 w-4" />
+              <ChevronDown className="h-3.5 w-3.5 opacity-50" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-64" style={{ background: '#2a3245', borderColor: 'rgba(255, 152, 0, 0.2)' }}>
-            <DropdownMenuLabel>Empresas</DropdownMenuLabel>
-            <DropdownMenuSeparator />
+          <DropdownMenuContent align="start" className="w-64 bg-sidebar border-sidebar-border">
+            <DropdownMenuLabel className="text-sidebar-foreground/60 text-xs uppercase tracking-wider">Empresas</DropdownMenuLabel>
+            <DropdownMenuSeparator className="bg-sidebar-border" />
             {companies.map((company: any) => (
               <DropdownMenuItem
                 key={company.id}
                 onClick={() => setActiveCompany(company)}
                 className={cn(
-                  activeCompany?.id === company.id && 'bg-accent'
+                  'text-sidebar-foreground/80 hover:text-primary focus:text-primary',
+                  activeCompany?.id === company.id && 'text-primary bg-sidebar-accent'
                 )}
               >
                 {company.name}
@@ -91,22 +81,23 @@ export function Topbar() {
         {activeCompany && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 hover:bg-white/10">
-                <span className="max-w-[150px] truncate text-white/60">
+              <Button variant="ghost" className="flex items-center gap-2 h-8 px-3 text-sidebar-foreground/50 hover:text-sidebar-foreground/80 hover:bg-sidebar-accent/50 text-sm">
+                <span className="max-w-[120px] truncate">
                   {activeBranch?.name || 'Filial'}
                 </span>
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className="h-3 w-3 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56" style={{ background: '#2a3245', borderColor: 'rgba(255, 152, 0, 0.2)' }}>
-              <DropdownMenuLabel>Filiais</DropdownMenuLabel>
-              <DropdownMenuSeparator />
+            <DropdownMenuContent align="start" className="w-56 bg-sidebar border-sidebar-border">
+              <DropdownMenuLabel className="text-sidebar-foreground/60 text-xs uppercase tracking-wider">Filiais</DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-sidebar-border" />
               {activeCompany.branches.map((branch) => (
                 <DropdownMenuItem
                   key={branch.id}
                   onClick={() => setActiveBranch(branch)}
                   className={cn(
-                    activeBranch?.id === branch.id && 'bg-accent'
+                    'text-sidebar-foreground/80 hover:text-primary focus:text-primary',
+                    activeBranch?.id === branch.id && 'text-primary bg-sidebar-accent'
                   )}
                 >
                   {branch.name}
@@ -118,19 +109,15 @@ export function Topbar() {
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         {/* Theme Toggle */}
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleTheme}
-          className="text-white/70 hover:text-[#ff9800] hover:bg-white/10"
+          className="h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
         >
-          {theme === 'light' ? (
-            <Moon className="h-5 w-5" />
-          ) : (
-            <Sun className="h-5 w-5" />
-          )}
+          {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
         </Button>
 
         {/* Notifications */}
@@ -139,87 +126,78 @@ export function Topbar() {
             <Button
               variant="ghost"
               size="icon"
-              className="relative text-white/70 hover:text-[#ff9800] hover:bg-white/10"
+              className="relative h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
             >
-              <Bell className="h-5 w-5" />
+              <Bell className="h-4 w-4" />
               {unreadAlerts > 0 && (
-                <Badge
-                  variant="destructive"
-                  className="absolute -right-1 -top-1 h-5 w-5 rounded-full p-0 text-xs"
-                >
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
                   {unreadAlerts}
-                </Badge>
+                </span>
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80" style={{ background: '#2a3245', borderColor: 'rgba(255, 152, 0, 0.2)' }}>
-            <DropdownMenuLabel className="flex items-center justify-between">
+          <DropdownMenuContent align="end" className="w-80 bg-sidebar border-sidebar-border">
+            <DropdownMenuLabel className="flex items-center justify-between text-sidebar-foreground">
               Notificações
-              <Badge variant="secondary">{unreadAlerts} novas</Badge>
+              <Badge variant="secondary" className="text-xs">{unreadAlerts} novas</Badge>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="bg-sidebar-border" />
+            {alerts.length === 0 && (
+              <div className="py-6 text-center text-sm text-sidebar-foreground/40">
+                Nenhuma notificação
+              </div>
+            )}
             {alerts.slice(0, 5).map((alert) => (
               <DropdownMenuItem
                 key={alert.id}
                 className={cn(
-                  'flex flex-col items-start gap-1 p-3',
-                  !alert.read && 'bg-accent/50'
+                  'flex flex-col items-start gap-1 p-3 text-sidebar-foreground/80',
+                  !alert.read && 'bg-sidebar-accent/50'
                 )}
               >
                 <div className="flex w-full items-center justify-between">
                   <span className="font-medium">{alert.title}</span>
-                  <Badge
-                    variant={
-                      alert.type === 'error'
-                        ? 'destructive'
-                        : alert.type === 'warning'
-                        ? 'secondary'
-                        : 'outline'
-                    }
-                    className="text-xs"
-                  >
-                    {alert.module}
-                  </Badge>
+                  <Badge variant="outline" className="text-xs">{alert.module}</Badge>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {alert.description}
-                </span>
+                <span className="text-xs text-sidebar-foreground/50">{alert.description}</span>
               </DropdownMenuItem>
             ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="justify-center text-primary" onClick={() => navigate('/notificacoes')}>
+            <DropdownMenuSeparator className="bg-sidebar-border" />
+            <DropdownMenuItem className="justify-center text-primary font-medium" onClick={() => navigate('/notificacoes')}>
               Ver todas as notificações
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
+        {/* Divider */}
+        <div className="mx-1 h-6 w-px bg-sidebar-border/50" />
+
         {/* User Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2 hover:bg-white/10">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full" style={{ background: '#ff9800' }}>
-                <User className="h-4 w-4 text-white" />
+            <Button variant="ghost" className="flex items-center gap-2 h-8 px-2 hover:bg-sidebar-accent/50">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 ring-1 ring-primary/30">
+                <User className="h-3.5 w-3.5 text-primary" />
               </div>
-              <span className="hidden md:inline-block text-white">{user?.name || 'Usuário'}</span>
-              <ChevronDown className="h-4 w-4 text-white/60" />
+              <span className="hidden md:inline-block text-sm text-sidebar-foreground/80 font-medium max-w-[100px] truncate">
+                {user?.name || 'Usuário'}
+              </span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56" style={{ background: '#2a3245', borderColor: 'rgba(255, 152, 0, 0.2)' }}>
-            <DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-56 bg-sidebar border-sidebar-border">
+            <DropdownMenuLabel className="text-sidebar-foreground">
               <div className="flex flex-col">
-                <span>{user?.name}</span>
-                <span className="text-xs font-normal text-muted-foreground">
-                  {user?.email}
-                </span>
+                <span className="font-medium">{user?.name}</span>
+                <span className="text-xs font-normal text-sidebar-foreground/50">{user?.email}</span>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate('/perfil')}>
+            <DropdownMenuSeparator className="bg-sidebar-border" />
+            <DropdownMenuItem onClick={() => navigate('/perfil')} className="text-sidebar-foreground/80 hover:text-primary focus:text-primary">
               <User className="mr-2 h-4 w-4" />
               Meu Perfil
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+            <DropdownMenuSeparator className="bg-sidebar-border" />
+            <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
               <LogOut className="mr-2 h-4 w-4" />
               Sair
             </DropdownMenuItem>
