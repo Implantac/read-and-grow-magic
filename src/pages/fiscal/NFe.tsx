@@ -301,10 +301,16 @@ export default function NFePage() {
                           <Eye className="mr-2 h-4 w-4" />
                           Visualizar
                         </DropdownMenuItem>
+                        {nfe.status === 'draft' && (
+                          <DropdownMenuItem onClick={() => handleTransmit(nfe)}>
+                            <Send className="mr-2 h-4 w-4" />
+                            Enviar p/ Transmissão
+                          </DropdownMenuItem>
+                        )}
                         {nfe.status === 'pending' && (
                           <DropdownMenuItem onClick={() => handleTransmit(nfe)}>
                             <Send className="mr-2 h-4 w-4" />
-                            Transmitir
+                            Autorizar na SEFAZ
                           </DropdownMenuItem>
                         )}
                         {nfe.status === 'authorized' && (
