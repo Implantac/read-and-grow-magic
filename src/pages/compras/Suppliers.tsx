@@ -65,6 +65,31 @@ export default function SuppliersPage() {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
   const [formData, setFormData] = useState<Partial<Supplier>>({});
+  const cnpjLookup = useCnpjLookup();
+
+  const handleSupplierCnpjLookup = async () => {
+    if (!formData.document) return;
+    const data = await cnpjLookup.lookup(formData.document);
+    if (data) {
+      setFormData(p => ({
+        ...p,
+        name: data.razao_social,
+        tradeName: data.nome_fantasia,
+        email: data.email || p.email,
+        phone: data.telefone || p.phone,
+        address: {
+          ...p.address,
+          street: data.logradouro,
+          number: data.numero,
+          complement: data.complemento,
+          neighborhood: data.bairro,
+          city: data.municipio,
+          state: data.uf,
+          zipCode: data.cep,
+        },
+      }));
+    }
+  };
 
   const filteredSuppliers = suppliers.filter((supplier) => {
     const matchesSearch =
