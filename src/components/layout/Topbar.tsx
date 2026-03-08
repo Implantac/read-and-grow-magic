@@ -59,7 +59,7 @@ export function Topbar() {
         {/* Company/Branch Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2 border-white/20 text-white hover:bg-white/10 hover:text-[#ff9800]" style={{ background: 'rgba(42, 50, 69, 0.8)' }}>
               <span className="max-w-[200px] truncate">
                 {activeCompany?.name || 'Selecionar Empresa'}
               </span>
