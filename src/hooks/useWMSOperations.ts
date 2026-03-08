@@ -57,7 +57,7 @@ export function useWMSPicking() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('wms_picking_orders').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('wms_picking_orders' as any).select('*').order('created_at', { ascending: false });
     if (error) { console.error(error); toast.error('Erro ao carregar pickings'); }
     else setOrders((data || []).map((r: any) => ({
       id: r.id, orderNumber: r.order_number, customerName: r.customer_name,
