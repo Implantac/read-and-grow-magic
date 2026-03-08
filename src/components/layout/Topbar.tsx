@@ -74,7 +74,7 @@ export function Topbar() {
           <DropdownMenuContent align="start" className="w-64" style={{ background: '#2a3245', borderColor: 'rgba(255, 152, 0, 0.2)' }}>
             <DropdownMenuLabel>Empresas</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {mockCompanies.map((company) => (
+            {companies.map((company: any) => (
               <DropdownMenuItem
                 key={company.id}
                 onClick={() => setActiveCompany(company)}
