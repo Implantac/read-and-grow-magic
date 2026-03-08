@@ -39,6 +39,28 @@ export default function ClientsPage() {
   const createClient = useCreateClient();
   const updateClient = useUpdateClient();
   const deleteClient = useDeleteClient();
+  const cnpjLookup = useCnpjLookup();
+
+  const handleCnpjLookup = async () => {
+    if (formData.document_type !== 'cnpj') return;
+    const data = await cnpjLookup.lookup(formData.document);
+    if (data) {
+      setFormData(p => ({
+        ...p,
+        name: data.razao_social,
+        trade_name: data.nome_fantasia,
+        email: data.email || p.email,
+        phone: data.telefone || p.phone,
+        address_street: data.logradouro,
+        address_number: data.numero,
+        address_complement: data.complemento,
+        address_neighborhood: data.bairro,
+        address_city: data.municipio,
+        address_state: data.uf,
+        address_zip_code: data.cep,
+      }));
+    }
+  };
 
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [isFormOpen, setIsFormOpen] = useState(false);
