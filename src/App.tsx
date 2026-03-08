@@ -52,6 +52,7 @@ import InventoryPage from "./pages/wms/Inventory";
 import WMSMovementsPage from "./pages/wms/Movements";
 
 // RFID Module
+import RFIDDashboardPage from "./pages/rfid/Dashboard";
 import RFIDReadersPage from "./pages/rfid/Readers";
 import RFIDTagsPage from "./pages/rfid/Tags";
 import RFIDEventsPage from "./pages/rfid/Events";
@@ -149,6 +150,7 @@ const App = () => (
             <Route path="/wms/movimentacoes" element={<WMSMovementsPage />} />
             
             {/* RFID Module */}
+            <Route path="/rfid/dashboard" element={<RFIDDashboardPage />} />
             <Route path="/rfid/leitores" element={<RFIDReadersPage />} />
             <Route path="/rfid/tags" element={<RFIDTagsPage />} />
             <Route path="/rfid/eventos" element={<RFIDEventsPage />} />
