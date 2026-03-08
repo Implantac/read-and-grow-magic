@@ -42,39 +42,7 @@ export default function KardexPage() {
 
   const handleProductChange = (productId: string) => {
     setSelectedProductId(productId);
-    // Simulating fetching kardex data
-    if (productId === '1') {
-      setKardexData(kardexProduct1);
-    } else {
-      // Generate mock kardex for other products
-      const product = products.find((p) => p.id === productId);
-      if (product) {
-        setKardexData({
-          productId: product.id,
-          productCode: product.code,
-          productName: product.name,
-          unit: product.unit,
-          currentBalance: Math.floor(Math.random() * 500) + 50,
-          currentAverageCost: product.costPrice,
-          currentTotalValue: product.costPrice * (Math.floor(Math.random() * 500) + 50),
-          entries: [
-            {
-              id: '1',
-              date: '2024-01-01T00:00:00Z',
-              documentNumber: 'SALDO-INICIAL',
-              type: 'adjustment',
-              description: 'Saldo inicial do período',
-              quantityIn: Math.floor(Math.random() * 200) + 50,
-              quantityOut: 0,
-              balance: Math.floor(Math.random() * 200) + 50,
-              unitCost: product.costPrice,
-              averageCost: product.costPrice,
-              totalValue: product.costPrice * (Math.floor(Math.random() * 200) + 50),
-            },
-          ],
-        });
-      }
-    }
+    setKardexData(null);
   };
 
   const getTypeBadge = (type: MovementType) => {
