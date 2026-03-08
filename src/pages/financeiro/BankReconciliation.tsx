@@ -105,14 +105,9 @@ export default function BankReconciliation() {
     }
   };
 
-  const handleManualMatch = () => {
+  const handleManualMatch = async () => {
     if (selectedBank.length === 1 && selectedSystem.length === 1) {
-      setBankTransactions(prev => prev.map(t =>
-        t.id === selectedBank[0] ? { ...t, status: 'reconciled' as ReconciliationStatus, matchedEntryId: selectedSystem[0] } : t
-      ));
-      setSystemEntries(prev => prev.map(e =>
-        e.id === selectedSystem[0] ? { ...e, status: 'reconciled' as ReconciliationStatus, matchedBankId: selectedBank[0] } : e
-      ));
+      await updateBankTx(selectedBank[0], { status: 'reconciled', matched_entry_id: selectedSystem[0] });
       setSelectedBank([]);
       setSelectedSystem([]);
       setIsMatchDialogOpen(false);
