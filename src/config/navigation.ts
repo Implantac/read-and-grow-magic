@@ -105,6 +105,7 @@ export const navigationItems = [
       { title: 'Leitores', href: '/rfid/leitores', icon: 'Wifi' },
       { title: 'Tags', href: '/rfid/tags', icon: 'Tag' },
       { title: 'Eventos', href: '/rfid/eventos', icon: 'Activity' },
+      { title: 'Integração WMS', href: '/rfid/integracao', icon: 'ArrowLeftRight' },
     ],
   },
   {
