@@ -57,6 +57,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNFe } from '@/hooks/useNFe';
 import { nfeStatusLabels } from '@/config/fiscal';
 import { CreateNFeDialog } from '@/components/fiscal/CreateNFeDialog';
+import { generateDANFE, generateNFeXML } from '@/lib/fiscalDocuments';
 import type { NFe } from '@/types/fiscal';
 
 const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ className?: string }> }> = {
@@ -127,15 +128,17 @@ export default function NFePage() {
   };
 
   const handlePrint = (nfe: NFe) => {
+    generateDANFE(nfe);
     toast({
-      title: 'Imprimindo DANFE',
-      description: `DANFE da NF-e ${nfe.number} enviada para impressão`,
+      title: 'DANFE Gerado',
+      description: `PDF da DANFE ${nfe.number} baixado com sucesso`,
     });
   };
 
   const handleDownloadXML = (nfe: NFe) => {
+    generateNFeXML(nfe);
     toast({
-      title: 'Download XML',
+      title: 'XML Baixado',
       description: `XML da NF-e ${nfe.number} baixado com sucesso`,
     });
   };
