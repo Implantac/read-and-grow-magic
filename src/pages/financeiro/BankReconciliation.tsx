@@ -46,37 +46,25 @@ interface SystemEntry {
   matchedBankId?: string;
 }
 
-const mockBankTransactions: BankTransaction[] = [
-  { id: 'BK001', date: '2024-01-02', description: 'TED RECEBIDA - TECH SOLUTIONS', amount: 12500.00, type: 'credit', bankReference: 'TED-89012', status: 'reconciled', matchedEntryId: 'SYS001' },
-  { id: 'BK002', date: '2024-01-03', description: 'PAG FORNEC - ABC LTDA', amount: 8000.00, type: 'debit', bankReference: 'PAG-45678', status: 'reconciled', matchedEntryId: 'SYS002' },
-  { id: 'BK003', date: '2024-01-05', description: 'FOLHA PAGAMENTO JAN/24', amount: 125000.00, type: 'debit', bankReference: 'FOL-001', status: 'reconciled', matchedEntryId: 'SYS003' },
-  { id: 'BK004', date: '2024-01-08', description: 'PIX RECEBIDO - COMERCIO ABC', amount: 8900.00, type: 'credit', bankReference: 'PIX-12345', status: 'pending' },
-  { id: 'BK005', date: '2024-01-10', description: 'DEBITO ALUGUEL', amount: 8500.00, type: 'debit', bankReference: 'DEB-AUTO-001', status: 'reconciled', matchedEntryId: 'SYS005' },
-  { id: 'BK006', date: '2024-01-12', description: 'PIX RECEBIDO - LOJA EPSILON', amount: 3200.00, type: 'credit', bankReference: 'PIX-23456', status: 'reconciled', matchedEntryId: 'SYS006' },
-  { id: 'BK007', date: '2024-01-14', description: 'TED RECEBIDA - INDUSTRIA BETA', amount: 11800.00, type: 'credit', bankReference: 'TED-34567', status: 'divergent' },
-  { id: 'BK008', date: '2024-01-15', description: 'DARF IMPOSTOS', amount: 5200.00, type: 'debit', bankReference: 'DARF-2024-01', status: 'reconciled', matchedEntryId: 'SYS008' },
-  { id: 'BK009', date: '2024-01-18', description: 'TED RECEBIDA - CONSULTORIA', amount: 15000.00, type: 'credit', bankReference: 'TED-56789', status: 'pending' },
-  { id: 'BK010', date: '2024-01-20', description: 'PAG MANUTENCAO EQUIP', amount: 3500.00, type: 'debit', bankReference: 'PAG-67890', status: 'pending' },
-  { id: 'BK011', date: '2024-01-22', description: 'TED RECEBIDA - DIST DELTA', amount: 18750.00, type: 'credit', bankReference: 'TED-78901', status: 'pending' },
-  { id: 'BK012', date: '2024-01-25', description: 'TARIFA BANCARIA', amount: 89.50, type: 'debit', bankReference: 'TAR-JAN-01', status: 'divergent' },
-];
-
-const mockSystemEntries: SystemEntry[] = [
-  { id: 'SYS001', date: '2024-01-02', description: 'Recebimento - NF-2024-0099', amount: 12500.00, type: 'income', reference: 'AR-099', category: 'Vendas', status: 'reconciled', matchedBankId: 'BK001' },
-  { id: 'SYS002', date: '2024-01-03', description: 'Pagamento fornecedor - ABC Ltda', amount: 8000.00, type: 'expense', reference: 'AP-045', category: 'Fornecedores', status: 'reconciled', matchedBankId: 'BK002' },
-  { id: 'SYS003', date: '2024-01-05', description: 'Folha de pagamento', amount: 125000.00, type: 'expense', reference: 'AP004', category: 'Folha', status: 'reconciled', matchedBankId: 'BK003' },
-  { id: 'SYS004', date: '2024-01-08', description: 'Recebimento - NF-2024-0100', amount: 25000.00, type: 'income', reference: 'AR-100', category: 'Vendas', status: 'pending' },
-  { id: 'SYS005', date: '2024-01-10', description: 'Aluguel do galpão', amount: 8500.00, type: 'expense', reference: 'AP002', category: 'Aluguel', status: 'reconciled', matchedBankId: 'BK005' },
-  { id: 'SYS006', date: '2024-01-12', description: 'Recebimento PIX - Loja Epsilon', amount: 3200.00, type: 'income', reference: 'AR005', category: 'Vendas', status: 'reconciled', matchedBankId: 'BK006' },
-  { id: 'SYS007', date: '2024-01-14', description: 'Recebimento - Comércio ABC', amount: 8900.00, type: 'income', reference: 'AR002', category: 'Vendas', status: 'pending' },
-  { id: 'SYS008', date: '2024-01-15', description: 'Pagamento de impostos', amount: 5200.00, type: 'expense', reference: 'IMP-001', category: 'Impostos', status: 'reconciled', matchedBankId: 'BK008' },
-  { id: 'SYS009', date: '2024-01-18', description: 'Recebimento - Serviços consultoria', amount: 15000.00, type: 'income', reference: 'AR-098', category: 'Serviços', status: 'pending' },
-  { id: 'SYS010', date: '2024-01-20', description: 'Manutenção equipamentos', amount: 3500.00, type: 'expense', reference: 'AP-050', category: 'Fornecedores', status: 'pending' },
-];
+import { useBankTransactions } from '@/hooks/useBankReconciliation';
+import { useCashFlowEntries } from '@/hooks/useCashFlow';
 
 export default function BankReconciliation() {
-  const [bankTransactions, setBankTransactions] = useState(mockBankTransactions);
-  const [systemEntries, setSystemEntries] = useState(mockSystemEntries);
+  const { transactions: bankRaw, loading: bankLoading, update: updateBankTx } = useBankTransactions();
+  const { data: cashFlowRaw, isLoading: cfLoading } = useCashFlowEntries();
+
+  const bankTransactions: BankTransaction[] = bankRaw.map((t) => ({
+    id: t.id, date: t.date, description: t.description, amount: Number(t.amount),
+    type: t.type as any, bankReference: t.bank_reference || '', status: t.status as any,
+    matchedEntryId: t.matched_entry_id || undefined,
+  }));
+
+  const systemEntries: SystemEntry[] = (cashFlowRaw || []).map((e: any) => ({
+    id: e.id, date: e.date, description: e.description, amount: Number(e.amount),
+    type: e.type === 'income' ? 'income' : 'expense', reference: e.reference || '',
+    category: e.category, status: 'pending' as ReconciliationStatus,
+  }));
+
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [selectedBank, setSelectedBank] = useState<string[]>([]);
