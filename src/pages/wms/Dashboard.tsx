@@ -82,7 +82,7 @@ export default function WMSDashboardPage() {
               <div>
                 <div className="flex justify-between text-sm mb-2">
                   <span>Taxa de Ocupação</span>
-                  <span className="font-medium">0%</span>
+                  <span className="font-medium">{stats.occupancy}%</span>
                 </div>
                 <Progress value={0} className="h-3" />
               </div>
