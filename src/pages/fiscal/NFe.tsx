@@ -128,15 +128,17 @@ export default function NFePage() {
   };
 
   const handlePrint = (nfe: NFe) => {
+    generateDANFE(nfe);
     toast({
-      title: 'Imprimindo DANFE',
-      description: `DANFE da NF-e ${nfe.number} enviada para impressão`,
+      title: 'DANFE Gerado',
+      description: `PDF da DANFE ${nfe.number} baixado com sucesso`,
     });
   };
 
   const handleDownloadXML = (nfe: NFe) => {
+    generateNFeXML(nfe);
     toast({
-      title: 'Download XML',
+      title: 'XML Baixado',
       description: `XML da NF-e ${nfe.number} baixado com sucesso`,
     });
   };
