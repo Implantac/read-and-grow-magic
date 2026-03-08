@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, MoreHorizontal, Eye, Edit, Trash2, Star, Phone, Mail, MapPin, Filter } from 'lucide-react';
+import { useSuppliers } from '@/hooks/useSuppliers';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,7 +46,16 @@ const statusConfig = {
 };
 
 export default function SuppliersPage() {
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const { suppliers: rawSuppliers, loading, create: createSupplier, update: updateSupplier, remove: removeSupplier } = useSuppliers();
+  const suppliers: Supplier[] = rawSuppliers.map((s: any) => ({
+    id: s.id, code: s.code, name: s.name, tradeName: s.trade_name,
+    document: s.document, documentType: s.document_type, email: s.email || '',
+    phone: s.phone || '', cellphone: s.cellphone, status: s.status,
+    category: s.category || '', paymentTerms: s.payment_terms || '', deliveryTime: s.delivery_time,
+    rating: Number(s.rating), createdAt: s.created_at, updatedAt: s.updated_at,
+    address: { street: s.address_street, number: s.address_number, complement: s.address_complement,
+      neighborhood: s.address_neighborhood, city: s.address_city, state: s.address_state, zipCode: s.address_zip_code },
+  }));
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -94,34 +103,32 @@ export default function SuppliersPage() {
     setIsFormOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setSuppliers(suppliers.filter((s) => s.id !== id));
+  const handleDelete = async (id: string) => {
+    await removeSupplier(id);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (selectedSupplier) {
-      setSuppliers(
-        suppliers.map((s) =>
-          s.id === selectedSupplier.id ? { ...s, ...formData, updatedAt: new Date().toISOString() } : s
-        )
-      );
+      await updateSupplier(selectedSupplier.id, {
+        name: formData.name, trade_name: formData.tradeName, document: formData.document,
+        document_type: formData.documentType, email: formData.email, phone: formData.phone,
+        cellphone: formData.cellphone, category: formData.category, status: formData.status,
+        payment_terms: formData.paymentTerms, delivery_time: formData.deliveryTime, rating: formData.rating,
+        address_street: formData.address?.street, address_number: formData.address?.number,
+        address_complement: formData.address?.complement, address_neighborhood: formData.address?.neighborhood,
+        address_city: formData.address?.city, address_state: formData.address?.state, address_zip_code: formData.address?.zipCode,
+      });
     } else {
-      const newSupplier: Supplier = {
-        ...formData,
-        id: `sup-${Date.now()}`,
+      await createSupplier({
         code: `F${String(suppliers.length + 1).padStart(4, '0')}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        address: formData.address || {
-          street: '',
-          number: '',
-          neighborhood: '',
-          city: '',
-          state: '',
-          zipCode: '',
-        },
-      } as Supplier;
-      setSuppliers([...suppliers, newSupplier]);
+        name: formData.name || '', document: formData.document || '', document_type: formData.documentType || 'cnpj',
+        email: formData.email, phone: formData.phone, cellphone: formData.cellphone,
+        trade_name: formData.tradeName, category: formData.category, status: formData.status || 'active',
+        payment_terms: formData.paymentTerms, delivery_time: formData.deliveryTime || 7, rating: formData.rating || 3,
+        address_street: formData.address?.street || '', address_number: formData.address?.number || '',
+        address_complement: formData.address?.complement, address_neighborhood: formData.address?.neighborhood || '',
+        address_city: formData.address?.city || '', address_state: formData.address?.state || '', address_zip_code: formData.address?.zipCode || '',
+      });
     }
     setIsFormOpen(false);
   };

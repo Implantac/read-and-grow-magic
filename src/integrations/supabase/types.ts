@@ -131,6 +131,42 @@ export type Database = {
           },
         ]
       }
+      bank_transactions: {
+        Row: {
+          amount: number
+          bank_reference: string | null
+          created_at: string
+          date: string
+          description: string
+          id: string
+          matched_entry_id: string | null
+          status: string
+          type: string
+        }
+        Insert: {
+          amount?: number
+          bank_reference?: string | null
+          created_at?: string
+          date?: string
+          description: string
+          id?: string
+          matched_entry_id?: string | null
+          status?: string
+          type?: string
+        }
+        Update: {
+          amount?: number
+          bank_reference?: string | null
+          created_at?: string
+          date?: string
+          description?: string
+          id?: string
+          matched_entry_id?: string | null
+          status?: string
+          type?: string
+        }
+        Relationships: []
+      }
       cash_flow_entries: {
         Row: {
           account: string

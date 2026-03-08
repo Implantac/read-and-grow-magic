@@ -52,7 +52,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { nfcePaymentMethodLabels } from '@/config/fiscal';
+import { useNFCe } from '@/hooks/useNFCe';
 import type { NFCe } from '@/types/fiscal';
 
 const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ className?: string }> }> = {
@@ -72,7 +72,7 @@ const paymentIcons: Record<string, React.ComponentType<{ className?: string }>> 
 
 export default function NFCePage() {
   const { toast } = useToast();
-  const [nfces] = useState<NFCe[]>([]);
+  const { nfces, loading } = useNFCe();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [terminalFilter, setTerminalFilter] = useState<string>('all');

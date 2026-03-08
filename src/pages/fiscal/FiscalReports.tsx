@@ -36,6 +36,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { reportTypeLabels } from '@/config/fiscal';
+import { useFiscalReports } from '@/hooks/useFiscalReports';
 import type { FiscalReport } from '@/types/fiscal';
 import {
   AreaChart,
@@ -63,7 +64,7 @@ const taxDistributionData: { name: string; value: number; color: string }[] = []
 
 export default function FiscalReportsPage() {
   const { toast } = useToast();
-  const [reports] = useState<FiscalReport[]>([]);
+  const { reports, loading } = useFiscalReports();
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [generating, setGenerating] = useState<string | null>(null);
 

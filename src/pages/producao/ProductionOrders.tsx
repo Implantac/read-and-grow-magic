@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ExportButton } from '@/components/shared/ExportButton';
+import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,7 +43,16 @@ const priorityConfig: Record<ProductionPriority, { label: string; color: string 
 };
 
 export default function ProductionOrdersPage() {
-  const [orders, setOrders] = useState<ProductionOrder[]>([]);
+  const { orders: rawOrders, loading, update: updateOrder } = useProductionOrders();
+  const orders = rawOrders.map((o) => ({
+    id: o.id, orderNumber: o.order_number, productId: o.product_id || '', productCode: o.product_code,
+    productName: o.product_name, quantity: Number(o.quantity), producedQuantity: Number(o.produced_quantity),
+    unit: o.unit, status: o.status as any, priority: o.priority as any,
+    startDate: o.start_date || new Date().toISOString(), dueDate: o.due_date || new Date().toISOString(),
+    completedDate: o.completed_date || undefined, workCenter: o.work_center || '',
+    operator: o.operator || undefined, notes: o.notes || undefined,
+    bomId: o.bom_id || '', routeId: o.route_id || '', createdAt: o.created_at,
+  }));
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
@@ -65,25 +74,17 @@ export default function ProductionOrdersPage() {
     setDetailsOpen(true);
   };
 
-  const handleStartProduction = (order: ProductionOrder) => {
-    setOrders(orders.map(o => 
-      o.id === order.id 
-        ? { ...o, status: 'in_progress' as ProductionOrderStatus, operator: 'Usuário Atual', startDate: format(new Date(), 'yyyy-MM-dd') }
-        : o
-    ));
+  const handleStartProduction = async (order: any) => {
+    await updateOrder(order.id, { status: 'in_progress', operator: 'Usuário Atual', start_date: new Date().toISOString() });
     toast.success(`Produção iniciada: ${order.orderNumber}`);
   };
 
-  const handlePauseProduction = (order: ProductionOrder) => {
+  const handlePauseProduction = (order: any) => {
     toast.info(`Produção pausada: ${order.orderNumber}`);
   };
 
-  const handleCompleteProduction = (order: ProductionOrder) => {
-    setOrders(orders.map(o => 
-      o.id === order.id 
-        ? { ...o, status: 'completed' as ProductionOrderStatus, completedDate: format(new Date(), 'yyyy-MM-dd'), producedQuantity: o.quantity }
-        : o
-    ));
+  const handleCompleteProduction = async (order: any) => {
+    await updateOrder(order.id, { status: 'completed', completed_date: new Date().toISOString(), produced_quantity: order.quantity });
     toast.success(`Produção concluída: ${order.orderNumber}`);
   };
 

@@ -1,20 +1,16 @@
+import { useWMSDashboardStats } from '@/hooks/useWMSOperations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import {
-  Warehouse,
-  Package,
-  PackagePlus,
-  PackageSearch,
-  PackageCheck,
-  Truck,
-  CheckCircle,
-  MapPin,
-  ArrowUpDown
+  Warehouse, Package, PackagePlus, PackageSearch, PackageCheck, Truck,
+  CheckCircle, MapPin, ArrowUpDown
 } from 'lucide-react';
 
 export default function WMSDashboardPage() {
+  const { stats, recentMovements, loading } = useWMSDashboardStats();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -32,7 +28,7 @@ export default function WMSDashboardPage() {
             <PackagePlus className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{stats.receiving}</div>
             <p className="text-xs text-muted-foreground">Pendentes/Em andamento</p>
           </CardContent>
         </Card>
@@ -43,7 +39,7 @@ export default function WMSDashboardPage() {
             <PackageSearch className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{stats.picking}</div>
             <p className="text-xs text-muted-foreground">Ordens ativas</p>
           </CardContent>
         </Card>
@@ -54,7 +50,7 @@ export default function WMSDashboardPage() {
             <PackageCheck className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{stats.packing}</div>
             <p className="text-xs text-muted-foreground">Para embalar</p>
           </CardContent>
         </Card>
@@ -65,7 +61,7 @@ export default function WMSDashboardPage() {
             <Truck className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{stats.shipped}</div>
             <p className="text-xs text-muted-foreground">Aguardando envio</p>
           </CardContent>
         </Card>
@@ -86,18 +82,18 @@ export default function WMSDashboardPage() {
               <div>
                 <div className="flex justify-between text-sm mb-2">
                   <span>Taxa de Ocupação</span>
-                  <span className="font-medium">0%</span>
+                  <span className="font-medium">{stats.occupancy}%</span>
                 </div>
-                <Progress value={0} className="h-3" />
+                <Progress value={stats.occupancy} className="h-3" />
               </div>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-muted-foreground">Total Endereços</p>
-                  <p className="font-medium">0</p>
+                  <p className="font-medium">{stats.totalLocations}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Capacidade</p>
-                  <p className="font-medium">0/0</p>
+                  <p className="font-medium">{stats.occupied}/{stats.capacity}</p>
                 </div>
               </div>
               <Link to="/wms/enderecamento">
@@ -162,9 +158,20 @@ export default function WMSDashboardPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            Nenhuma movimentação registrada
-          </div>
+          {recentMovements.length > 0 ? (
+            <div className="space-y-2">
+              {recentMovements.map((m: any) => (
+                <div key={m.id} className="flex items-center justify-between text-sm border-b pb-2">
+                  <span>{m.productName}</span>
+                  <span className="text-muted-foreground">{m.type} - {m.quantity} un</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              Nenhuma movimentação registrada
+            </div>
+          )}
         </CardContent>
       </Card>
 
