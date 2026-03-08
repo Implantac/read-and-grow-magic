@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
@@ -68,11 +69,14 @@ const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ 
 
 export default function NFePage() {
   const { toast } = useToast();
-  const { nfes, loading } = useNFe();
+  const { nfes, loading, transmit, cancel, sendToPending } = useNFe();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedNFe, setSelectedNFe] = useState<NFe | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [nfeToCancel, setNfeToCancel] = useState<NFe | null>(null);
 
   const filteredNFes = nfes.filter((nfe) => {
     const matchesSearch =
@@ -99,19 +103,25 @@ export default function NFePage() {
     setDetailsOpen(true);
   };
 
-  const handleTransmit = (nfe: NFe) => {
-    toast({
-      title: 'Transmitindo NF-e',
-      description: `NF-e ${nfe.number} enviada para autorização na SEFAZ`,
-    });
+  const handleTransmit = async (nfe: NFe) => {
+    if (nfe.status === 'draft') {
+      await sendToPending(nfe.id);
+    } else if (nfe.status === 'pending') {
+      await transmit(nfe.id);
+    }
   };
 
   const handleCancel = (nfe: NFe) => {
-    toast({
-      title: 'Solicitação de Cancelamento',
-      description: `Cancelamento da NF-e ${nfe.number} solicitado`,
-      variant: 'destructive',
-    });
+    setNfeToCancel(nfe);
+    setCancelReason('');
+    setCancelDialogOpen(true);
+  };
+
+  const confirmCancel = async () => {
+    if (!nfeToCancel || !cancelReason.trim()) return;
+    await cancel(nfeToCancel.id, cancelReason);
+    setCancelDialogOpen(false);
+    setNfeToCancel(null);
   };
 
   const handlePrint = (nfe: NFe) => {
@@ -291,10 +301,16 @@ export default function NFePage() {
                           <Eye className="mr-2 h-4 w-4" />
                           Visualizar
                         </DropdownMenuItem>
+                        {nfe.status === 'draft' && (
+                          <DropdownMenuItem onClick={() => handleTransmit(nfe)}>
+                            <Send className="mr-2 h-4 w-4" />
+                            Enviar p/ Transmissão
+                          </DropdownMenuItem>
+                        )}
                         {nfe.status === 'pending' && (
                           <DropdownMenuItem onClick={() => handleTransmit(nfe)}>
                             <Send className="mr-2 h-4 w-4" />
-                            Transmitir
+                            Autorizar na SEFAZ
                           </DropdownMenuItem>
                         )}
                         {nfe.status === 'authorized' && (
@@ -465,6 +481,39 @@ export default function NFePage() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Confirmation Dialog */}
+      <Dialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancelar NF-e {nfeToCancel?.number}</DialogTitle>
+            <DialogDescription>
+              Esta ação é irreversível. Informe o motivo do cancelamento.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Textarea
+              placeholder="Motivo do cancelamento..."
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              rows={3}
+            />
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setCancelDialogOpen(false)}>
+                Voltar
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={confirmCancel}
+                disabled={!cancelReason.trim()}
+              >
+                <XCircle className="mr-2 h-4 w-4" />
+                Confirmar Cancelamento
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

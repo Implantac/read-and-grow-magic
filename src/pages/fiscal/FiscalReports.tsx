@@ -57,14 +57,11 @@ const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ 
   error: { color: 'bg-destructive/10 text-destructive', icon: XCircle },
 };
 
-// Chart data
-const monthlyTaxData: { name: string; icms: number; ipi: number; pis: number; cofins: number }[] = [];
-
-const taxDistributionData: { name: string; value: number; color: string }[] = [];
+// Chart data will be computed from reports
 
 export default function FiscalReportsPage() {
   const { toast } = useToast();
-  const { reports, loading } = useFiscalReports();
+  const { reports, loading, generate } = useFiscalReports();
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [generating, setGenerating] = useState<string | null>(null);
 
@@ -84,19 +81,10 @@ export default function FiscalReportsPage() {
     return format(new Date(dateString), "dd/MM/yyyy HH:mm", { locale: ptBR });
   };
 
-  const handleGenerate = (report: FiscalReport) => {
+  const handleGenerate = async (report: FiscalReport) => {
     setGenerating(report.id);
-    toast({
-      title: 'Gerando Relatório',
-      description: `${reportTypeLabels[report.type]} está sendo gerado...`,
-    });
-    setTimeout(() => {
-      setGenerating(null);
-      toast({
-        title: 'Relatório Gerado',
-        description: `${reportTypeLabels[report.type]} foi gerado com sucesso!`,
-      });
-    }, 2000);
+    await generate(report.id);
+    setGenerating(null);
   };
 
   const handleDownload = (report: FiscalReport) => {
@@ -129,6 +117,25 @@ export default function FiscalReportsPage() {
     pis: reports.reduce((s, r) => s + r.totalPIS, 0),
     cofins: reports.reduce((s, r) => s + r.totalCOFINS, 0),
   };
+
+  const taxDistributionData = [
+    { name: 'ICMS', value: taxBreakdown.icms, color: 'hsl(var(--primary))' },
+    { name: 'COFINS', value: taxBreakdown.cofins, color: 'hsl(var(--info, 210 100% 50%))' },
+    { name: 'IPI', value: taxBreakdown.ipi, color: 'hsl(var(--warning, 45 100% 50%))' },
+    { name: 'PIS', value: taxBreakdown.pis, color: 'hsl(var(--success, 142 76% 36%))' },
+  ].filter(d => d.value > 0);
+
+  const monthlyTaxData = reports
+    .filter(r => r.status === 'generated')
+    .slice(0, 6)
+    .reverse()
+    .map(r => ({
+      name: r.period,
+      icms: r.totalICMS,
+      ipi: r.totalIPI,
+      pis: r.totalPIS,
+      cofins: r.totalCOFINS,
+    }));
 
   return (
     <div className="space-y-6">

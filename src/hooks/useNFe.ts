@@ -1,16 +1,49 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import type { NFe } from '@/types/fiscal';
+import type { NFe, NFeItem } from '@/types/fiscal';
 
 export function useNFe() {
   const [nfes, setNfes] = useState<NFe[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetch = useCallback(async () => {
+  const fetchNFes = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.from('nfe').select('*').order('issue_date', { ascending: false });
     if (error) { console.error(error); toast.error('Erro ao carregar NF-e'); setLoading(false); return; }
+
+    // Fetch items for all NFes
+    const nfeIds = (data || []).map((r: any) => r.id);
+    let itemsMap = new Map<string, any[]>();
+    if (nfeIds.length > 0) {
+      const { data: itemsData } = await supabase.from('nfe_items').select('*').in('nfe_id', nfeIds);
+      (itemsData || []).forEach((item: any) => {
+        const arr = itemsMap.get(item.nfe_id) || [];
+        arr.push({
+          id: item.id,
+          productId: item.product_id,
+          productCode: item.product_code,
+          productName: item.product_name,
+          ncm: item.ncm || '',
+          cfop: item.cfop || '',
+          unit: item.unit,
+          quantity: Number(item.quantity),
+          unitPrice: Number(item.unit_price),
+          discount: Number(item.discount),
+          icmsBase: Number(item.icms_base),
+          icmsRate: Number(item.icms_rate),
+          icmsValue: Number(item.icms_value),
+          ipiRate: Number(item.ipi_rate),
+          ipiValue: Number(item.ipi_value),
+          pisRate: Number(item.pis_rate),
+          pisValue: Number(item.pis_value),
+          cofinsRate: Number(item.cofins_rate),
+          cofinsValue: Number(item.cofins_value),
+          total: Number(item.total),
+        });
+        itemsMap.set(item.nfe_id, arr);
+      });
+    }
 
     const mapped: NFe[] = (data || []).map((row: any) => ({
       id: row.id,
@@ -36,7 +69,7 @@ export function useNFe() {
       cancellationDate: row.cancellation_date,
       cancellationReason: row.cancellation_reason,
       orderId: row.order_id,
-      items: [],
+      items: itemsMap.get(row.id) || [],
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     }));
@@ -45,6 +78,98 @@ export function useNFe() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { fetch(); }, [fetch]);
-  return { nfes, loading, refetch: fetch };
+  const create = useCallback(async (nfeData: {
+    clientName: string;
+    clientId?: string;
+    clientDocument?: string;
+    operationType: string;
+    items: { productCode: string; productName: string; productId?: string; quantity: number; unitPrice: number; unit?: string; ncm?: string; cfop?: string }[];
+    discount?: number;
+    shipping?: number;
+  }) => {
+    const number = 'NFE-' + Date.now().toString().slice(-8);
+    const subtotal = nfeData.items.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
+    const discount = nfeData.discount || 0;
+    const shipping = nfeData.shipping || 0;
+    const total = subtotal - discount + shipping;
+
+    const { data, error } = await supabase.from('nfe').insert({
+      number,
+      client_name: nfeData.clientName,
+      client_id: nfeData.clientId || null,
+      client_document: nfeData.clientDocument || null,
+      operation_type: nfeData.operationType,
+      subtotal,
+      discount,
+      shipping,
+      total,
+      status: 'draft',
+    }).select().single();
+
+    if (error) { toast.error('Erro ao criar NF-e'); return null; }
+
+    // Insert items
+    if (nfeData.items.length > 0 && data) {
+      const itemsToInsert = nfeData.items.map(item => ({
+        nfe_id: data.id,
+        product_code: item.productCode,
+        product_name: item.productName,
+        product_id: item.productId || null,
+        quantity: item.quantity,
+        unit_price: item.unitPrice,
+        total: item.quantity * item.unitPrice,
+        unit: item.unit || 'UN',
+        ncm: item.ncm || null,
+        cfop: item.cfop || null,
+      }));
+      await supabase.from('nfe_items').insert(itemsToInsert);
+    }
+
+    toast.success(`NF-e ${number} criada como rascunho`);
+    await fetchNFes();
+    return data;
+  }, [fetchNFes]);
+
+  const transmit = useCallback(async (id: string) => {
+    // Simulate SEFAZ authorization (generates access key and protocol)
+    const accessKey = Array.from({ length: 44 }, () => Math.floor(Math.random() * 10)).join('');
+    const protocol = '1' + Date.now().toString().slice(-14);
+
+    const { error } = await supabase.from('nfe').update({
+      status: 'authorized',
+      access_key: accessKey,
+      protocol,
+      authorization_date: new Date().toISOString(),
+    }).eq('id', id);
+
+    if (error) { toast.error('Erro ao transmitir NF-e'); return false; }
+    toast.success('NF-e autorizada na SEFAZ (simulação)');
+    await fetchNFes();
+    return true;
+  }, [fetchNFes]);
+
+  const cancel = useCallback(async (id: string, reason: string) => {
+    const { error } = await supabase.from('nfe').update({
+      status: 'cancelled',
+      cancellation_date: new Date().toISOString(),
+      cancellation_reason: reason,
+    }).eq('id', id);
+
+    if (error) { toast.error('Erro ao cancelar NF-e'); return false; }
+    toast.success('NF-e cancelada com sucesso');
+    await fetchNFes();
+    return true;
+  }, [fetchNFes]);
+
+  const sendToPending = useCallback(async (id: string) => {
+    const { error } = await supabase.from('nfe').update({ status: 'pending' }).eq('id', id);
+    if (error) { toast.error('Erro ao enviar NF-e'); return false; }
+    toast.success('NF-e enviada para transmissão');
+    await fetchNFes();
+    return true;
+  }, [fetchNFes]);
+
+  useEffect(() => { fetchNFes(); }, [fetchNFes]);
+
+  return { nfes, loading, refetch: fetchNFes, create, transmit, cancel, sendToPending };
 }

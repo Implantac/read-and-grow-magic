@@ -81,7 +81,7 @@ const paymentIcons: Record<string, React.ComponentType<{ className?: string }>> 
 
 export default function NFCePage() {
   const { toast } = useToast();
-  const { nfces, loading } = useNFCe();
+  const { nfces, loading, cancel: cancelNFCe } = useNFCe();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [terminalFilter, setTerminalFilter] = useState<string>('all');
@@ -123,12 +123,8 @@ export default function NFCePage() {
     });
   };
 
-  const handleCancel = (nfce: NFCe) => {
-    toast({
-      title: 'Cancelamento Solicitado',
-      description: `NFC-e ${nfce.number} será cancelada`,
-      variant: 'destructive',
-    });
+  const handleCancel = async (nfce: NFCe) => {
+    await cancelNFCe(nfce.id);
   };
 
   const handleReprint = (nfce: NFCe) => {
