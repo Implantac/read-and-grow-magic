@@ -158,7 +158,7 @@ export function Topbar() {
               <Badge variant="secondary">{unreadAlerts} novas</Badge>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {mockAlerts.slice(0, 5).map((alert) => (
+            {alerts.slice(0, 5).map((alert) => (
               <DropdownMenuItem
                 key={alert.id}
                 className={cn(
