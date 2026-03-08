@@ -42,14 +42,12 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
-  stockMovements as initialMovements,
   movementTypeConfig,
-  products,
-} from '@/data/inventoryMockData';
+} from '@/config/inventory';
 import type { StockMovement, MovementType, MovementDirection, MovementFilters } from '@/types/inventory';
 
 export default function MovementsPage() {
-  const [movements] = useState<StockMovement[]>(initialMovements);
+  const [movements] = useState<StockMovement[]>([]);
   const [filters, setFilters] = useState<MovementFilters>({
     search: '',
     type: 'all',

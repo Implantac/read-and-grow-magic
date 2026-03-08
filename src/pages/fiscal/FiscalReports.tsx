@@ -35,7 +35,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { mockFiscalReports, mockFiscalSummary, reportTypeLabels } from '@/data/fiscalMockData';
+import { reportTypeLabels } from '@/config/fiscal';
 import type { FiscalReport } from '@/types/fiscal';
 import {
   AreaChart,
@@ -57,25 +57,13 @@ const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ 
 };
 
 // Chart data
-const monthlyTaxData = [
-  { name: 'Jul', icms: 180500, ipi: 45000, pis: 15000, cofins: 70000 },
-  { name: 'Ago', icms: 195000, ipi: 48000, pis: 16500, cofins: 76000 },
-  { name: 'Set', icms: 188000, ipi: 46500, pis: 15800, cofins: 72500 },
-  { name: 'Out', icms: 210000, ipi: 52000, pis: 17500, cofins: 80000 },
-  { name: 'Nov', icms: 205713, ipi: 57142, pis: 18857, cofins: 86857 },
-  { name: 'Dez', icms: 231378, ipi: 64271, pis: 21210, cofins: 97693 },
-];
+const monthlyTaxData: { name: string; icms: number; ipi: number; pis: number; cofins: number }[] = [];
 
-const taxDistributionData = [
-  { name: 'ICMS', value: 231378, color: 'hsl(var(--primary))' },
-  { name: 'COFINS', value: 97693, color: 'hsl(var(--info))' },
-  { name: 'IPI', value: 64271, color: 'hsl(var(--warning))' },
-  { name: 'PIS', value: 21210, color: 'hsl(var(--success))' },
-];
+const taxDistributionData: { name: string; value: number; color: string }[] = [];
 
 export default function FiscalReportsPage() {
   const { toast } = useToast();
-  const [reports] = useState<FiscalReport[]>(mockFiscalReports);
+  const [reports] = useState<FiscalReport[]>([]);
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [generating, setGenerating] = useState<string | null>(null);
 

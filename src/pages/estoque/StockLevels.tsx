@@ -47,17 +47,15 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
-  stockLevels as initialStockLevels,
-  stockSummary,
-  categories,
+import {
   stockLevelStatusConfig,
-} from '@/data/inventoryMockData';
+} from '@/config/inventory';
 import { ABCCurveChart } from '@/components/estoque/ABCCurveChart';
 import { InventoryTurnoverChart } from '@/components/estoque/InventoryTurnoverChart';
 import type { StockLevel, StockLevelStatus, StockLevelFilters } from '@/types/inventory';
 
 export default function StockLevelsPage() {
-  const [stockLevels] = useState<StockLevel[]>(initialStockLevels);
+  const [stockLevels] = useState<StockLevel[]>([]);
   const [filters, setFilters] = useState<StockLevelFilters>({
     search: '',
     category: 'all',

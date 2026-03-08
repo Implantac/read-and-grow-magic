@@ -32,15 +32,13 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
-  products,
-  kardexProduct1,
   movementTypeConfig,
-} from '@/data/inventoryMockData';
+} from '@/config/inventory';
 import type { ProductKardex, KardexEntry, MovementType } from '@/types/inventory';
 
 export default function KardexPage() {
-  const [selectedProductId, setSelectedProductId] = useState<string>('1');
-  const [kardexData, setKardexData] = useState<ProductKardex | null>(kardexProduct1);
+  const [selectedProductId, setSelectedProductId] = useState<string>('');
+  const [kardexData, setKardexData] = useState<ProductKardex | null>(null);
 
   const handleProductChange = (productId: string) => {
     setSelectedProductId(productId);

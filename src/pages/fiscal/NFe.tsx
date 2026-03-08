@@ -53,7 +53,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { mockNFes, mockFiscalSummary, nfeStatusLabels } from '@/data/fiscalMockData';
+import { nfeStatusLabels } from '@/config/fiscal';
 import type { NFe } from '@/types/fiscal';
 
 const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ className?: string }> }> = {
@@ -67,7 +67,7 @@ const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ 
 
 export default function NFePage() {
   const { toast } = useToast();
-  const [nfes] = useState<NFe[]>(mockNFes);
+  const [nfes] = useState<NFe[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedNFe, setSelectedNFe] = useState<NFe | null>(null);

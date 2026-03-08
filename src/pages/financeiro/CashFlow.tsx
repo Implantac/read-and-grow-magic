@@ -9,7 +9,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { useCashFlowEntries } from '@/hooks/useCashFlow';
-import { cashFlowChartData, expensesByCategory } from '@/data/financialMockData';
+// Chart data will come from real entries
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
