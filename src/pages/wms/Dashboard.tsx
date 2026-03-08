@@ -93,7 +93,7 @@ export default function WMSDashboardPage() {
                 </div>
                 <div>
                   <p className="text-muted-foreground">Capacidade</p>
-                  <p className="font-medium">0/0</p>
+                  <p className="font-medium">{stats.occupied}/{stats.capacity}</p>
                 </div>
               </div>
               <Link to="/wms/enderecamento">
