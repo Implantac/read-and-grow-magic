@@ -3,7 +3,7 @@ import logoUseSistemas from '@/assets/logo-use-sistemas.png';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
-import { navigationItems } from '@/data/mockData';
+import { navigationItems } from '@/config/navigation';
 import {
   LayoutDashboard,
   Users,
