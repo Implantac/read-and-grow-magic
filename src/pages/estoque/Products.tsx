@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Package, Plus, Search, Edit, Eye, Trash2, Box, Filter, FileText, Loader2 } from 'lucide-react';
-import { productStatusConfig, productTypeConfig } from '@/data/inventoryMockData';
+import { productStatusConfig, productTypeConfig } from '@/config/inventory';
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, type DbProduct } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
 import type { ProductType, ProductStatus, ProductFilters } from '@/types/inventory';

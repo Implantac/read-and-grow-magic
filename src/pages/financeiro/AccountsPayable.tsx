@@ -16,7 +16,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { StatusBadge } from '@/components/shared/StatusBadge';
-import { financialCategories } from '@/data/financialMockData';
+import { financialCategories } from '@/config/financial';
 import { PaymentStatus, PaymentMethod } from '@/types/financial';
 import { useToast } from '@/hooks/use-toast';
 import { useAccountsPayable, useCreateAccountPayable, useUpdateAccountPayable, useDeleteAccountPayable } from '@/hooks/useAccountsPayable';

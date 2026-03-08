@@ -37,7 +37,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { mockPurchaseOrders, purchaseOrderStatuses, mockSuppliers } from '@/data/purchasingMockData';
+import { purchaseOrderStatuses } from '@/config/purchasing';
 import { PurchaseOrder, PurchaseOrderStatus } from '@/types/purchasing';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -50,7 +50,7 @@ const priorityConfig = {
 };
 
 export default function PurchaseOrdersPage() {
-  const [orders, setOrders] = useState<PurchaseOrder[]>(mockPurchaseOrders);
+  const [orders, setOrders] = useState<PurchaseOrder[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');

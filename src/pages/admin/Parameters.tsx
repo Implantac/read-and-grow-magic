@@ -18,11 +18,11 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
-import { mockParameters, parameterCategoryConfig } from '@/data/administrationMockData';
+import { parameterCategoryConfig } from '@/config/administration';
 import { SystemParameter, ParameterCategory, ParameterFilter } from '@/types/administration';
 
 const Parameters = () => {
-  const [parameters, setParameters] = useState<SystemParameter[]>(mockParameters);
+  const [parameters, setParameters] = useState<SystemParameter[]>([]);
   const [filter, setFilter] = useState<ParameterFilter>({ category: 'all' });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingParameter, setEditingParameter] = useState<SystemParameter | null>(null);

@@ -24,7 +24,6 @@ import {
   User,
   Wrench
 } from 'lucide-react';
-import { timeEntries as initialEntries, productionOrders, workCenters } from '@/data/productionMockData';
 import { TimeEntry, TimeEntryStatus } from '@/types/production';
 
 const statusConfig: Record<TimeEntryStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ReactNode }> = {
@@ -34,7 +33,7 @@ const statusConfig: Record<TimeEntryStatus, { label: string; variant: 'default' 
 };
 
 export default function TimeEntriesPage() {
-  const [entries, setEntries] = useState<TimeEntry[]>(initialEntries);
+  const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [workCenterFilter, setWorkCenterFilter] = useState<string>('all');
@@ -43,7 +42,7 @@ export default function TimeEntriesPage() {
   const [startOpen, setStartOpen] = useState(false);
   const [newEntry, setNewEntry] = useState({ orderId: '', operationName: '', workCenter: '' });
 
-  const activeOrders = productionOrders.filter(o => o.status === 'in_progress');
+  const activeOrders: { orderNumber: string }[] = [];
 
   const filteredEntries = entries.filter(entry => {
     const matchesSearch = 
@@ -98,12 +97,12 @@ export default function TimeEntriesPage() {
   };
 
   const handleStartNew = () => {
-    const order = activeOrders.find(o => o.id === newEntry.orderId);
+    const order = activeOrders.find(o => o.orderNumber === newEntry.orderId);
     if (!order) return;
 
     const newTimeEntry: TimeEntry = {
       id: `te${Date.now()}`,
-      productionOrderId: order.id,
+      productionOrderId: newEntry.orderId,
       orderNumber: order.orderNumber,
       operationId: `op${Date.now()}`,
       operationName: newEntry.operationName,
@@ -242,9 +241,7 @@ export default function TimeEntriesPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos Centros</SelectItem>
-                {workCenters.map(wc => (
-                  <SelectItem key={wc.id} value={wc.code}>{wc.name}</SelectItem>
-                ))}
+                <SelectItem value="empty">Nenhum centro cadastrado</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -452,8 +449,8 @@ export default function TimeEntriesPage() {
                 </SelectTrigger>
                 <SelectContent>
                   {activeOrders.map(order => (
-                    <SelectItem key={order.id} value={order.id}>
-                      {order.orderNumber} - {order.productName}
+                    <SelectItem key={order.orderNumber} value={order.orderNumber}>
+                      {order.orderNumber}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -478,9 +475,7 @@ export default function TimeEntriesPage() {
                   <SelectValue placeholder="Selecione o centro" />
                 </SelectTrigger>
                 <SelectContent>
-                  {workCenters.map(wc => (
-                    <SelectItem key={wc.id} value={wc.code}>{wc.name}</SelectItem>
-                  ))}
+                  <SelectItem value="empty">Nenhum centro cadastrado</SelectItem>
                 </SelectContent>
               </Select>
             </div>

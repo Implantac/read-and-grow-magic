@@ -9,7 +9,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { useCashFlowEntries } from '@/hooks/useCashFlow';
-import { cashFlowChartData, expensesByCategory } from '@/data/financialMockData';
+// Chart data will come from real entries
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
@@ -84,7 +84,7 @@ export default function CashFlow() {
           <CardContent>
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={cashFlowChartData}>
+                <AreaChart data={[]}>
                   <defs>
                     <linearGradient id="colorReceitas" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.3} />
@@ -110,26 +110,8 @@ export default function CashFlow() {
         <Card>
           <CardHeader><CardTitle>Despesas por Categoria</CardTitle></CardHeader>
           <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={expensesByCategory} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={2} dataKey="value">
-                    {expensesByCategory.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.color} />))}
-                  </Pie>
-                  <Tooltip formatter={(value: number) => formatCurrency(value)} contentStyle={{ backgroundColor: 'hsl(var(--popover))', borderColor: 'hsl(var(--border))', borderRadius: '8px' }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="mt-4 space-y-2">
-              {expensesByCategory.slice(0, 4).map((cat) => (
-                <div key={cat.name} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="h-3 w-3 rounded-full" style={{ backgroundColor: cat.color }} />
-                    <span>{cat.name}</span>
-                  </div>
-                  <span className="font-medium">{formatCurrency(cat.value)}</span>
-                </div>
-              ))}
+            <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+              <p className="text-sm">Nenhum dado disponível</p>
             </div>
           </CardContent>
         </Card>
@@ -141,7 +123,7 @@ export default function CashFlow() {
         <CardContent>
           <ChartContainer config={chartConfig} className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={cashFlowChartData}>
+              <BarChart data={[]}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis dataKey="month" className="text-xs" />
                 <YAxis className="text-xs" tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`} />

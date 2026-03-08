@@ -25,16 +25,14 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { 
-  mockUsers, 
-  mockCompanies, 
-  mockPermissions,
   userStatusConfig, 
-  userRoleConfig 
-} from '@/data/administrationMockData';
+  userRoleConfig,
+  defaultPermissions as mockPermissions
+} from '@/config/administration';
 import { SystemUser, UserRole, UserStatus, UserFilter } from '@/types/administration';
 
 const UsersPage = () => {
-  const [users, setUsers] = useState<SystemUser[]>(mockUsers);
+  const [users, setUsers] = useState<SystemUser[]>([]);
   const [filter, setFilter] = useState<UserFilter>({ role: 'all', status: 'all' });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
@@ -102,7 +100,7 @@ const UsersPage = () => {
       role: formData.get('role') as UserRole,
       department: formData.get('department') as string,
       branchId: formData.get('branchId') as string,
-      branchName: mockCompanies.find(c => c.id === formData.get('branchId'))?.tradeName,
+      branchName: formData.get('branchId') as string,
     };
 
     if (editingUser) {
@@ -433,11 +431,7 @@ const UsersPage = () => {
                     <SelectValue placeholder="Selecione a filial" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockCompanies.filter(c => c.status === 'active').map(company => (
-                      <SelectItem key={company.id} value={company.id}>
-                        {company.tradeName}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="empty">Nenhuma empresa cadastrada</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

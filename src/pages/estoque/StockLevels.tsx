@@ -47,17 +47,14 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
-  stockLevels as initialStockLevels,
-  stockSummary,
-  categories,
   stockLevelStatusConfig,
-} from '@/data/inventoryMockData';
+} from '@/config/inventory';
 import { ABCCurveChart } from '@/components/estoque/ABCCurveChart';
 import { InventoryTurnoverChart } from '@/components/estoque/InventoryTurnoverChart';
 import type { StockLevel, StockLevelStatus, StockLevelFilters } from '@/types/inventory';
 
 export default function StockLevelsPage() {
-  const [stockLevels] = useState<StockLevel[]>(initialStockLevels);
+  const [stockLevels] = useState<StockLevel[]>([]);
   const [filters, setFilters] = useState<StockLevelFilters>({
     search: '',
     category: 'all',
@@ -172,9 +169,9 @@ export default function StockLevelsPage() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stockSummary.totalValue)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(stockLevels.reduce((s, l) => s + l.totalValue, 0))}</div>
             <p className="text-xs text-muted-foreground">
-              {stockSummary.activeProducts} produtos ativos
+              {stockLevels.length} produtos ativos
             </p>
           </CardContent>
         </Card>
@@ -262,9 +259,9 @@ export default function StockLevelsPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todas as categorias</SelectItem>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.name}>
-                        {cat.name}
+                    {[...new Set(stockLevels.map(s => s.category))].map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
                       </SelectItem>
                     ))}
                   </SelectContent>

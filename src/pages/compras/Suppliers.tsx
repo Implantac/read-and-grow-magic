@@ -36,7 +36,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { mockSuppliers, supplierCategories } from '@/data/purchasingMockData';
+import { supplierCategories } from '@/config/purchasing';
 import { Supplier } from '@/types/purchasing';
 
 const statusConfig = {
@@ -46,7 +46,7 @@ const statusConfig = {
 };
 
 export default function SuppliersPage() {
-  const [suppliers, setSuppliers] = useState<Supplier[]>(mockSuppliers);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');

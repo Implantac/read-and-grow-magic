@@ -52,7 +52,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { mockNFCes, mockFiscalSummary, nfcePaymentMethodLabels } from '@/data/fiscalMockData';
+import { nfcePaymentMethodLabels } from '@/config/fiscal';
 import type { NFCe } from '@/types/fiscal';
 
 const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ className?: string }> }> = {
@@ -72,7 +72,7 @@ const paymentIcons: Record<string, React.ComponentType<{ className?: string }>> 
 
 export default function NFCePage() {
   const { toast } = useToast();
-  const [nfces] = useState<NFCe[]>(mockNFCes);
+  const [nfces] = useState<NFCe[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [terminalFilter, setTerminalFilter] = useState<string>('all');
@@ -192,7 +192,7 @@ export default function NFCePage() {
             <Receipt className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockFiscalSummary.totalNFCeIssued}</div>
+            <div className="text-2xl font-bold">{nfces.length}</div>
             <p className="text-xs text-muted-foreground">Este mês</p>
           </CardContent>
         </Card>
@@ -203,7 +203,7 @@ export default function NFCePage() {
             <CreditCard className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(mockFiscalSummary.avgTicketNFCe)}</div>
+            <div className="text-2xl font-bold">{formatCurrency(nfces.length > 0 ? nfces.reduce((s, n) => s + n.total, 0) / nfces.length : 0)}</div>
             <p className="text-xs text-muted-foreground">Valor médio por venda</p>
           </CardContent>
         </Card>
@@ -214,7 +214,7 @@ export default function NFCePage() {
             <XCircle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{mockFiscalSummary.totalNFCeCancelled}</div>
+            <div className="text-2xl font-bold">{nfces.filter(n => n.status === 'cancelled').length}</div>
             <p className="text-xs text-muted-foreground">Este mês</p>
           </CardContent>
         </Card>
@@ -226,7 +226,7 @@ export default function NFCePage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {(((mockFiscalSummary.totalNFCeIssued - mockFiscalSummary.totalNFCeCancelled) / mockFiscalSummary.totalNFCeIssued) * 100).toFixed(1)}%
+              {nfces.length > 0 ? (((nfces.length - nfces.filter(n => n.status === 'cancelled').length) / nfces.length) * 100).toFixed(1) : '0.0'}%
             </div>
             <p className="text-xs text-muted-foreground">De vendas válidas</p>
           </CardContent>

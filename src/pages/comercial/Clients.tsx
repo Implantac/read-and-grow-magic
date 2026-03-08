@@ -21,7 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
-import { clientSegments, brazilianStates } from '@/data/commercialMockData';
+import { clientSegments, brazilianStates } from '@/config/commercial';
 import { useClients, useCreateClient, useUpdateClient, useDeleteClient, type DbClient } from '@/hooks/useClients';
 
 const filterFields: FilterField[] = [

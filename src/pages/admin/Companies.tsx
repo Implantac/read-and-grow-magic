@@ -23,11 +23,11 @@ import {
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
-import { mockCompanies, companyStatusConfig } from '@/data/administrationMockData';
+import { companyStatusConfig } from '@/config/administration';
 import { Company, CompanyStatus, CompanyFilter, Address } from '@/types/administration';
 
 const Companies = () => {
-  const [companies, setCompanies] = useState<Company[]>(mockCompanies);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [filter, setFilter] = useState<CompanyFilter>({ status: 'all', isHeadquarters: 'all' });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
