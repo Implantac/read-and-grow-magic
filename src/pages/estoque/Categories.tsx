@@ -13,25 +13,28 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { ExportButton } from '@/components/shared/ExportButton';
-import { Plus, Search, Edit, Trash2, FolderTree, Package, Filter } from 'lucide-react';
-import { categories as initialCategories } from '@/data/inventoryMockData';
-import type { ProductCategory } from '@/types/inventory';
+import { Plus, Search, Edit, Trash2, FolderTree, Package, Filter, Loader2 } from 'lucide-react';
+import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory, type DbCategory } from '@/hooks/useCategories';
 import { useToast } from '@/hooks/use-toast';
 
 export default function CategoriesPage() {
-  const [categories, setCategories] = useState<ProductCategory[]>(initialCategories);
+  const { data: categories = [], isLoading } = useCategories();
+  const createCategory = useCreateCategory();
+  const updateCategory = useUpdateCategory();
+  const deleteCategory = useDeleteCategory();
+  const { toast } = useToast();
+
   const [search, setSearch] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<ProductCategory | null>(null);
+  const [editingCategory, setEditingCategory] = useState<DbCategory | null>(null);
   const [formData, setFormData] = useState({ name: '', description: '', active: true });
-  const { toast } = useToast();
 
   const filteredCategories = categories.filter(c =>
     search === '' || c.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const totalProducts = categories.reduce((sum, c) => sum + c.productsCount, 0);
+  const totalProducts = categories.reduce((sum, c) => sum + (c.products_count || 0), 0);
   const activeCategories = categories.filter(c => c.active).length;
 
   const handleCreate = () => {
@@ -40,7 +43,7 @@ export default function CategoriesPage() {
     setIsFormOpen(true);
   };
 
-  const handleEdit = (category: ProductCategory) => {
+  const handleEdit = (category: DbCategory) => {
     setEditingCategory(category);
     setFormData({ name: category.name, description: category.description || '', active: category.active });
     setIsFormOpen(true);
@@ -51,40 +54,27 @@ export default function CategoriesPage() {
       toast({ title: 'Erro', description: 'O nome da categoria é obrigatório', variant: 'destructive' });
       return;
     }
-
     if (editingCategory) {
-      setCategories(prev => prev.map(c =>
-        c.id === editingCategory.id
-          ? { ...c, name: formData.name, description: formData.description, active: formData.active }
-          : c
-      ));
-      toast({ title: 'Categoria atualizada', description: `"${formData.name}" foi atualizada com sucesso.` });
+      updateCategory.mutate({ id: editingCategory.id, name: formData.name, description: formData.description || undefined, active: formData.active }, { onSuccess: () => setIsFormOpen(false) });
     } else {
-      const newCategory: ProductCategory = {
-        id: String(Date.now()),
-        name: formData.name,
-        description: formData.description,
-        productsCount: 0,
-        active: formData.active,
-      };
-      setCategories(prev => [...prev, newCategory]);
-      toast({ title: 'Categoria criada', description: `"${formData.name}" foi adicionada com sucesso.` });
+      createCategory.mutate({ name: formData.name, description: formData.description || undefined, active: formData.active }, { onSuccess: () => setIsFormOpen(false) });
     }
-    setIsFormOpen(false);
   };
 
   const handleDeleteConfirm = () => {
     if (editingCategory) {
-      if (editingCategory.productsCount > 0) {
+      if ((editingCategory.products_count || 0) > 0) {
         toast({ title: 'Não é possível excluir', description: 'A categoria possui produtos vinculados.', variant: 'destructive' });
-      } else {
-        setCategories(prev => prev.filter(c => c.id !== editingCategory.id));
-        toast({ title: 'Categoria excluída', description: `"${editingCategory.name}" foi removida.` });
+        setIsDeleteOpen(false);
+        return;
       }
-      setIsDeleteOpen(false);
-      setEditingCategory(null);
+      deleteCategory.mutate(editingCategory.id, { onSuccess: () => { setIsDeleteOpen(false); setEditingCategory(null); } });
     }
   };
+
+  if (isLoading) {
+    return <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -99,7 +89,7 @@ export default function CategoriesPage() {
             columns={[
               { key: 'name', label: 'Nome' },
               { key: 'description', label: 'Descrição' },
-              { key: 'productsCount', label: 'Qtd Produtos' },
+              { key: 'products_count', label: 'Qtd Produtos' },
               { key: 'active', label: 'Ativa', format: (v) => v ? 'Sim' : 'Não' },
             ]}
             filename="categorias"
@@ -111,7 +101,6 @@ export default function CategoriesPage() {
         </div>
       </div>
 
-      {/* Summary */}
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -145,13 +134,11 @@ export default function CategoriesPage() {
         </Card>
       </div>
 
-      {/* Search */}
       <div className="relative max-w-md">
         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input placeholder="Buscar categorias..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
       </div>
 
-      {/* Table */}
       <Card>
         <CardContent className="p-0">
           <Table>
@@ -182,7 +169,7 @@ export default function CategoriesPage() {
                     </TableCell>
                     <TableCell className="text-muted-foreground">{category.description || '-'}</TableCell>
                     <TableCell className="text-center">
-                      <Badge variant="outline">{category.productsCount}</Badge>
+                      <Badge variant="outline">{category.products_count || 0}</Badge>
                     </TableCell>
                     <TableCell>
                       <Badge className={category.active ? 'bg-success/10 text-success border-success/30' : 'bg-muted text-muted-foreground'}>
@@ -207,7 +194,6 @@ export default function CategoriesPage() {
         </CardContent>
       </Card>
 
-      {/* Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent>
           <DialogHeader>
@@ -232,28 +218,33 @@ export default function CategoriesPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsFormOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave}>{editingCategory ? 'Salvar' : 'Criar'}</Button>
+            <Button onClick={handleSave} disabled={createCategory.isPending || updateCategory.isPending}>
+              {(createCategory.isPending || updateCategory.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {editingCategory ? 'Salvar' : 'Criar'}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Excluir Categoria</DialogTitle>
             <DialogDescription>
               Tem certeza que deseja excluir a categoria "{editingCategory?.name}"?
-              {editingCategory && editingCategory.productsCount > 0 && (
+              {editingCategory && (editingCategory.products_count || 0) > 0 && (
                 <span className="block mt-2 text-destructive font-medium">
-                  Esta categoria possui {editingCategory.productsCount} produtos vinculados e não pode ser excluída.
+                  Esta categoria possui {editingCategory.products_count} produtos vinculados e não pode ser excluída.
                 </span>
               )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>Cancelar</Button>
-            <Button variant="destructive" onClick={handleDeleteConfirm}>Excluir</Button>
+            <Button variant="destructive" onClick={handleDeleteConfirm} disabled={deleteCategory.isPending}>
+              {deleteCategory.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Excluir
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
