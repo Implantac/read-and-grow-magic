@@ -155,6 +155,7 @@ const App = () => (
             <Route path="/rfid/leitores" element={<RFIDReadersPage />} />
             <Route path="/rfid/tags" element={<RFIDTagsPage />} />
             <Route path="/rfid/eventos" element={<RFIDEventsPage />} />
+            <Route path="/rfid/integracao" element={<RFIDIntegrationPage />} />
             
             {/* Reports Module */}
             <Route path="/relatorios/vendas" element={<SalesReport />} />
