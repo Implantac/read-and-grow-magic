@@ -1,95 +1,70 @@
 import { useState } from 'react';
-import { Plus, Search, Eye, Edit, Trash2, DollarSign, AlertTriangle, Clock, CheckCircle, Mail } from 'lucide-react';
+import { Plus, Search, Eye, Edit, Trash2, DollarSign, AlertTriangle, Clock, CheckCircle, Mail, Loader2 } from 'lucide-react';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from '@/components/ui/dialog';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { StatusBadge } from '@/components/shared/StatusBadge';
-import { mockAccountsReceivable, financialCategories } from '@/data/financialMockData';
-import { mockClients } from '@/data/commercialMockData';
-import { AccountReceivable, PaymentStatus, PaymentMethod } from '@/types/financial';
+import { financialCategories } from '@/data/financialMockData';
+import { PaymentStatus, PaymentMethod } from '@/types/financial';
 import { useToast } from '@/hooks/use-toast';
+import { useAccountsReceivable, useCreateAccountReceivable, useUpdateAccountReceivable, useDeleteAccountReceivable } from '@/hooks/useAccountsReceivable';
+import { useClients } from '@/hooks/useClients';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-const statusConfig: Record<PaymentStatus, { label: string; color: 'success' | 'warning' | 'error' | 'default' }> = {
-  paid: { label: 'Recebido', color: 'success' },
-  pending: { label: 'Pendente', color: 'warning' },
-  overdue: { label: 'Vencido', color: 'error' },
-  cancelled: { label: 'Cancelado', color: 'default' },
-};
-
 const paymentMethods: Record<PaymentMethod, string> = {
-  pix: 'PIX',
-  boleto: 'Boleto',
-  credit_card: 'Cartão de Crédito',
-  debit_card: 'Cartão de Débito',
-  transfer: 'Transferência',
-  cash: 'Dinheiro',
+  pix: 'PIX', boleto: 'Boleto', credit_card: 'Cartão de Crédito',
+  debit_card: 'Cartão de Débito', transfer: 'Transferência', cash: 'Dinheiro',
 };
 
 export default function AccountsReceivable() {
   const { toast } = useToast();
-  const [accounts, setAccounts] = useState<AccountReceivable[]>(mockAccountsReceivable);
+  const { data: accounts = [], isLoading } = useAccountsReceivable();
+  const { data: clients = [] } = useClients();
+  const createMutation = useCreateAccountReceivable();
+  const updateMutation = useUpdateAccountReceivable();
+  const deleteMutation = useDeleteAccountReceivable();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isReceiveDialogOpen, setIsReceiveDialogOpen] = useState(false);
-  const [selectedAccount, setSelectedAccount] = useState<AccountReceivable | null>(null);
+  const [selectedAccount, setSelectedAccount] = useState<typeof accounts[0] | null>(null);
   const [formData, setFormData] = useState({
-    description: '',
-    clientId: '',
-    category: '',
-    amount: '',
-    dueDate: '',
-    invoiceNumber: '',
-    notes: '',
+    description: '', clientId: '', category: '', amount: '', dueDate: '', invoiceNumber: '', notes: '',
   });
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix');
 
   const categories = [...new Set(accounts.map(a => a.category))];
 
   const filteredAccounts = accounts.filter(account => {
-    const matchesSearch = 
+    const matchesSearch =
       account.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      account.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      account.invoiceNumber?.toLowerCase().includes(searchTerm.toLowerCase());
+      account.client_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      account.invoice_number?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || account.status === statusFilter;
     const matchesCategory = categoryFilter === 'all' || account.category === categoryFilter;
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
   const summaryData = {
-    total: accounts.reduce((sum, a) => sum + a.amount, 0),
-    pending: accounts.filter(a => a.status === 'pending').reduce((sum, a) => sum + a.amount, 0),
-    overdue: accounts.filter(a => a.status === 'overdue').reduce((sum, a) => sum + a.amount, 0),
-    received: accounts.filter(a => a.status === 'paid').reduce((sum, a) => sum + a.amount, 0),
+    total: accounts.reduce((sum, a) => sum + Number(a.amount), 0),
+    pending: accounts.filter(a => a.status === 'pending').reduce((sum, a) => sum + Number(a.amount), 0),
+    overdue: accounts.filter(a => a.status === 'overdue').reduce((sum, a) => sum + Number(a.amount), 0),
+    received: accounts.filter(a => a.status === 'paid').reduce((sum, a) => sum + Number(a.amount), 0),
   };
 
   const handleSubmit = () => {
@@ -97,53 +72,54 @@ export default function AccountsReceivable() {
       toast({ title: 'Erro', description: 'Preencha todos os campos obrigatórios', variant: 'destructive' });
       return;
     }
-
-    const client = mockClients.find(c => c.id === formData.clientId);
-    const newAccount: AccountReceivable = {
-      id: `AR${String(accounts.length + 1).padStart(3, '0')}`,
+    const client = clients.find(c => c.id === formData.clientId);
+    createMutation.mutate({
       description: formData.description,
-      client: client?.name || '',
-      clientId: formData.clientId,
+      client_name: client?.name || '',
+      client_id: formData.clientId,
       category: formData.category || 'Vendas',
       amount: parseFloat(formData.amount),
-      dueDate: formData.dueDate,
-      status: 'pending',
-      invoiceNumber: formData.invoiceNumber,
-      notes: formData.notes,
-      createdAt: new Date().toISOString().split('T')[0],
-    };
-
-    setAccounts([newAccount, ...accounts]);
-    setIsDialogOpen(false);
-    setFormData({ description: '', clientId: '', category: '', amount: '', dueDate: '', invoiceNumber: '', notes: '' });
-    toast({ title: 'Sucesso', description: 'Conta a receber cadastrada com sucesso' });
+      due_date: formData.dueDate,
+      invoice_number: formData.invoiceNumber || null,
+      notes: formData.notes || null,
+    }, {
+      onSuccess: () => {
+        setIsDialogOpen(false);
+        setFormData({ description: '', clientId: '', category: '', amount: '', dueDate: '', invoiceNumber: '', notes: '' });
+      }
+    });
   };
 
   const handleReceive = () => {
     if (!selectedAccount) return;
-
-    setAccounts(accounts.map(a => 
-      a.id === selectedAccount.id 
-        ? { ...a, status: 'paid' as PaymentStatus, paymentDate: new Date().toISOString().split('T')[0], paymentMethod }
-        : a
-    ));
-    setIsReceiveDialogOpen(false);
-    setSelectedAccount(null);
-    toast({ title: 'Sucesso', description: 'Recebimento registrado com sucesso' });
+    updateMutation.mutate({
+      id: selectedAccount.id,
+      status: 'paid',
+      payment_date: new Date().toISOString(),
+      payment_method: paymentMethod,
+    }, {
+      onSuccess: () => {
+        setIsReceiveDialogOpen(false);
+        setSelectedAccount(null);
+        toast({ title: 'Sucesso', description: 'Recebimento registrado com sucesso' });
+      }
+    });
   };
 
-  const handleSendReminder = (account: AccountReceivable) => {
-    toast({ title: 'Lembrete enviado', description: `Lembrete de cobrança enviado para ${account.client}` });
+  const handleSendReminder = (account: typeof accounts[0]) => {
+    toast({ title: 'Lembrete enviado', description: `Lembrete de cobrança enviado para ${account.client_name}` });
   };
 
   const handleDelete = (id: string) => {
-    setAccounts(accounts.filter(a => a.id !== id));
-    toast({ title: 'Sucesso', description: 'Conta removida com sucesso' });
+    deleteMutation.mutate(id);
   };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-  };
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -154,34 +130,22 @@ export default function AccountsReceivable() {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Nova Conta
-            </Button>
+            <Button className="gap-2"><Plus className="h-4 w-4" />Nova Conta</Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle>Nova Conta a Receber</DialogTitle>
-            </DialogHeader>
+            <DialogHeader><DialogTitle>Nova Conta a Receber</DialogTitle></DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="description">Descrição *</Label>
-                <Input
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Descrição da conta"
-                />
+                <Input id="description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Descrição da conta" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="client">Cliente *</Label>
                   <Select value={formData.clientId} onValueChange={(v) => setFormData({ ...formData, clientId: v })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                     <SelectContent>
-                      {mockClients.map(client => (
+                      {clients.map(client => (
                         <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
                       ))}
                     </SelectContent>
@@ -190,9 +154,7 @@ export default function AccountsReceivable() {
                 <div className="grid gap-2">
                   <Label htmlFor="category">Categoria</Label>
                   <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione" />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                     <SelectContent>
                       {financialCategories.filter(c => c.type === 'income').map(cat => (
                         <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
@@ -204,47 +166,25 @@ export default function AccountsReceivable() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label htmlFor="amount">Valor *</Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    step="0.01"
-                    value={formData.amount}
-                    onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                    placeholder="0,00"
-                  />
+                  <Input id="amount" type="number" step="0.01" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} placeholder="0,00" />
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="dueDate">Vencimento *</Label>
-                  <Input
-                    id="dueDate"
-                    type="date"
-                    value={formData.dueDate}
-                    onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                  />
+                  <Input id="dueDate" type="date" value={formData.dueDate} onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })} />
                 </div>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="invoiceNumber">Número da Nota</Label>
-                <Input
-                  id="invoiceNumber"
-                  value={formData.invoiceNumber}
-                  onChange={(e) => setFormData({ ...formData, invoiceNumber: e.target.value })}
-                  placeholder="NF-0000"
-                />
+                <Input id="invoiceNumber" value={formData.invoiceNumber} onChange={(e) => setFormData({ ...formData, invoiceNumber: e.target.value })} placeholder="NF-0000" />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="notes">Observações</Label>
-                <Textarea
-                  id="notes"
-                  value={formData.notes}
-                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                  placeholder="Observações adicionais"
-                />
+                <Textarea id="notes" value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Observações adicionais" />
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-              <Button onClick={handleSubmit}>Salvar</Button>
+              <Button onClick={handleSubmit} disabled={createMutation.isPending}>Salvar</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -252,42 +192,10 @@ export default function AccountsReceivable() {
 
       {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total a Receber</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(summaryData.total)}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Pendente</CardTitle>
-            <Clock className="h-4 w-4 text-warning" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-warning">{formatCurrency(summaryData.pending)}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Vencido</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">{formatCurrency(summaryData.overdue)}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Recebido</CardTitle>
-            <CheckCircle className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-success">{formatCurrency(summaryData.received)}</div>
-          </CardContent>
-        </Card>
+        <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total a Receber</CardTitle><DollarSign className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{formatCurrency(summaryData.total)}</div></CardContent></Card>
+        <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Pendente</CardTitle><Clock className="h-4 w-4 text-warning" /></CardHeader><CardContent><div className="text-2xl font-bold text-warning">{formatCurrency(summaryData.pending)}</div></CardContent></Card>
+        <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Vencido</CardTitle><AlertTriangle className="h-4 w-4 text-destructive" /></CardHeader><CardContent><div className="text-2xl font-bold text-destructive">{formatCurrency(summaryData.overdue)}</div></CardContent></Card>
+        <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Recebido</CardTitle><CheckCircle className="h-4 w-4 text-success" /></CardHeader><CardContent><div className="text-2xl font-bold text-success">{formatCurrency(summaryData.received)}</div></CardContent></Card>
       </div>
 
       {/* Filters */}
@@ -296,17 +204,10 @@ export default function AccountsReceivable() {
           <div className="flex flex-col gap-4 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por descrição, cliente ou documento..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
+              <Input placeholder="Buscar por descrição, cliente ou documento..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9" />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
+              <SelectTrigger className="w-full sm:w-40"><SelectValue placeholder="Status" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="pending">Pendente</SelectItem>
@@ -316,24 +217,20 @@ export default function AccountsReceivable() {
               </SelectContent>
             </Select>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="Categoria" />
-              </SelectTrigger>
+              <SelectTrigger className="w-full sm:w-40"><SelectValue placeholder="Categoria" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
-                {categories.map(cat => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                ))}
+                {categories.map(cat => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
               </SelectContent>
             </Select>
             <ExportButton
               data={filteredAccounts as unknown as Record<string, unknown>[]}
               columns={[
                 { key: 'description', label: 'Descrição' },
-                { key: 'client', label: 'Cliente' },
+                { key: 'client_name', label: 'Cliente' },
                 { key: 'category', label: 'Categoria' },
-                { key: 'dueDate', label: 'Vencimento', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
-                { key: 'amount', label: 'Valor', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+                { key: 'due_date', label: 'Vencimento', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+                { key: 'amount', label: 'Valor', format: (v) => formatCurrency(Number(v)) },
                 { key: 'status', label: 'Status' },
               ]}
               filename="contas_receber"
@@ -363,63 +260,31 @@ export default function AccountsReceivable() {
                   <TableCell>
                     <div>
                       <div className="font-medium">{account.description}</div>
-                      {account.invoiceNumber && (
-                        <div className="text-sm text-muted-foreground">{account.invoiceNumber}</div>
-                      )}
+                      {account.invoice_number && <div className="text-sm text-muted-foreground">{account.invoice_number}</div>}
                     </div>
                   </TableCell>
-                  <TableCell>{account.client}</TableCell>
+                  <TableCell>{account.client_name}</TableCell>
                   <TableCell>{account.category}</TableCell>
-                  <TableCell>
-                    {format(new Date(account.dueDate), 'dd/MM/yyyy', { locale: ptBR })}
-                  </TableCell>
-                  <TableCell className="text-right font-medium">
-                    {formatCurrency(account.amount)}
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge type="payment" status={account.status} />
-                  </TableCell>
+                  <TableCell>{format(new Date(account.due_date), 'dd/MM/yyyy', { locale: ptBR })}</TableCell>
+                  <TableCell className="text-right font-medium">{formatCurrency(Number(account.amount))}</TableCell>
+                  <TableCell><StatusBadge type="payment" status={account.status} /></TableCell>
                   <TableCell>
                     <div className="flex justify-end gap-1">
                       {account.status !== 'paid' && account.status !== 'cancelled' && (
                         <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-success hover:text-success"
-                            onClick={() => {
-                              setSelectedAccount(account);
-                              setIsReceiveDialogOpen(true);
-                            }}
-                            title="Registrar recebimento"
-                          >
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-success hover:text-success" onClick={() => { setSelectedAccount(account); setIsReceiveDialogOpen(true); }} title="Registrar recebimento">
                             <DollarSign className="h-4 w-4" />
                           </Button>
                           {account.status === 'overdue' && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-warning hover:text-warning"
-                              onClick={() => handleSendReminder(account)}
-                              title="Enviar lembrete"
-                            >
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-warning hover:text-warning" onClick={() => handleSendReminder(account)} title="Enviar lembrete">
                               <Mail className="h-4 w-4" />
                             </Button>
                           )}
                         </>
                       )}
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={() => handleDelete(account.id)}
-                      >
+                      <Button variant="ghost" size="icon" className="h-8 w-8"><Eye className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8"><Edit className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(account.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -427,11 +292,7 @@ export default function AccountsReceivable() {
                 </TableRow>
               ))}
               {filteredAccounts.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                    Nenhuma conta encontrada
-                  </TableCell>
-                </TableRow>
+                <TableRow><TableCell colSpan={7} className="h-24 text-center text-muted-foreground">Nenhuma conta encontrada</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
@@ -441,22 +302,18 @@ export default function AccountsReceivable() {
       {/* Receive Dialog */}
       <Dialog open={isReceiveDialogOpen} onOpenChange={setIsReceiveDialogOpen}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Registrar Recebimento</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Registrar Recebimento</DialogTitle></DialogHeader>
           {selectedAccount && (
             <div className="space-y-4 py-4">
               <div className="rounded-lg bg-muted p-4">
                 <p className="font-medium">{selectedAccount.description}</p>
-                <p className="text-sm text-muted-foreground">{selectedAccount.client}</p>
-                <p className="mt-2 text-2xl font-bold">{formatCurrency(selectedAccount.amount)}</p>
+                <p className="text-sm text-muted-foreground">{selectedAccount.client_name}</p>
+                <p className="mt-2 text-2xl font-bold">{formatCurrency(Number(selectedAccount.amount))}</p>
               </div>
               <div className="grid gap-2">
                 <Label>Forma de Recebimento</Label>
                 <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {Object.entries(paymentMethods).map(([key, label]) => (
                       <SelectItem key={key} value={key}>{label}</SelectItem>
@@ -468,9 +325,8 @@ export default function AccountsReceivable() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsReceiveDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleReceive} className="gap-2">
-              <CheckCircle className="h-4 w-4" />
-              Confirmar Recebimento
+            <Button onClick={handleReceive} disabled={updateMutation.isPending} className="gap-2">
+              <CheckCircle className="h-4 w-4" />Confirmar Recebimento
             </Button>
           </DialogFooter>
         </DialogContent>
