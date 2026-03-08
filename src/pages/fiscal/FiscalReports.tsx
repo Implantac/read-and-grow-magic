@@ -57,10 +57,7 @@ const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ 
   error: { color: 'bg-destructive/10 text-destructive', icon: XCircle },
 };
 
-// Chart data
-const monthlyTaxData: { name: string; icms: number; ipi: number; pis: number; cofins: number }[] = [];
-
-const taxDistributionData: { name: string; value: number; color: string }[] = [];
+// Chart data will be computed from reports
 
 export default function FiscalReportsPage() {
   const { toast } = useToast();
