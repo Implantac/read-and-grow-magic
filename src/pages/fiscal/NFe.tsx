@@ -102,19 +102,25 @@ export default function NFePage() {
     setDetailsOpen(true);
   };
 
-  const handleTransmit = (nfe: NFe) => {
-    toast({
-      title: 'Transmitindo NF-e',
-      description: `NF-e ${nfe.number} enviada para autorização na SEFAZ`,
-    });
+  const handleTransmit = async (nfe: NFe) => {
+    if (nfe.status === 'draft') {
+      await sendToPending(nfe.id);
+    } else if (nfe.status === 'pending') {
+      await transmit(nfe.id);
+    }
   };
 
   const handleCancel = (nfe: NFe) => {
-    toast({
-      title: 'Solicitação de Cancelamento',
-      description: `Cancelamento da NF-e ${nfe.number} solicitado`,
-      variant: 'destructive',
-    });
+    setNfeToCancel(nfe);
+    setCancelReason('');
+    setCancelDialogOpen(true);
+  };
+
+  const confirmCancel = async () => {
+    if (!nfeToCancel || !cancelReason.trim()) return;
+    await cancel(nfeToCancel.id, cancelReason);
+    setCancelDialogOpen(false);
+    setNfeToCancel(null);
   };
 
   const handlePrint = (nfe: NFe) => {
