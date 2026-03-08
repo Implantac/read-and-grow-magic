@@ -99,7 +99,6 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
         quantity: 1,
         unitPrice: product.sale_price,
       },
-      },
     ]);
     setProductSearch('');
   };
