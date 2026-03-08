@@ -475,9 +475,7 @@ export default function TimeEntriesPage() {
                   <SelectValue placeholder="Selecione o centro" />
                 </SelectTrigger>
                 <SelectContent>
-                  {workCenters.map(wc => (
-                    <SelectItem key={wc.id} value={wc.code}>{wc.name}</SelectItem>
-                  ))}
+                  <SelectItem value="empty">Nenhum centro cadastrado</SelectItem>
                 </SelectContent>
               </Select>
             </div>

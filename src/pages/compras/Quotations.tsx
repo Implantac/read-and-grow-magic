@@ -56,7 +56,7 @@ const supplierStatusConfig = {
 };
 
 export default function QuotationsPage() {
-  const [quotations, setQuotations] = useState<Quotation[]>(mockQuotations);
+  const [quotations, setQuotations] = useState<Quotation[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');

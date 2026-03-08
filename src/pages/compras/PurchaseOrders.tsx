@@ -50,7 +50,7 @@ const priorityConfig = {
 };
 
 export default function PurchaseOrdersPage() {
-  const [orders, setOrders] = useState<PurchaseOrder[]>(mockPurchaseOrders);
+  const [orders, setOrders] = useState<PurchaseOrder[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');

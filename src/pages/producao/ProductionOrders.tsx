@@ -127,7 +127,7 @@ export default function ProductionOrdersPage() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{productionSummary.plannedOrders}</div>
+            <div className="text-2xl font-bold">{orders.filter(o => o.status === 'planned').length}</div>
             <p className="text-xs text-muted-foreground">Aguardando início</p>
           </CardContent>
         </Card>
@@ -137,7 +137,7 @@ export default function ProductionOrdersPage() {
             <PlayCircle className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{productionSummary.inProgressOrders}</div>
+            <div className="text-2xl font-bold">{orders.filter(o => o.status === 'in_progress').length}</div>
             <p className="text-xs text-muted-foreground">Sendo produzidas</p>
           </CardContent>
         </Card>
@@ -147,7 +147,7 @@ export default function ProductionOrdersPage() {
             <CheckCircle className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{productionSummary.efficiency}%</div>
+            <div className="text-2xl font-bold">0%</div>
             <p className="text-xs text-muted-foreground">Taxa de produção</p>
           </CardContent>
         </Card>
@@ -157,7 +157,7 @@ export default function ProductionOrdersPage() {
             <Clock className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{productionSummary.onTimeDelivery}%</div>
+            <div className="text-2xl font-bold">0%</div>
             <p className="text-xs text-muted-foreground">Cumprimento de prazos</p>
           </CardContent>
         </Card>

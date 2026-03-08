@@ -431,11 +431,7 @@ const UsersPage = () => {
                     <SelectValue placeholder="Selecione a filial" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockCompanies.filter(c => c.status === 'active').map(company => (
-                      <SelectItem key={company.id} value={company.id}>
-                        {company.tradeName}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="empty">Nenhuma empresa cadastrada</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

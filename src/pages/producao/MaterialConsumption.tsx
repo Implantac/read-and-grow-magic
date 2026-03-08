@@ -178,7 +178,7 @@ export default function MaterialConsumptionPage() {
               <SelectContent>
                 <SelectItem value="all">Todas as Ordens</SelectItem>
                 {activeOrders.map(order => (
-                  <SelectItem key={order.id} value={order.orderNumber}>
+                  <SelectItem key={order.orderNumber} value={order.orderNumber}>
                     {order.orderNumber}
                   </SelectItem>
                 ))}
