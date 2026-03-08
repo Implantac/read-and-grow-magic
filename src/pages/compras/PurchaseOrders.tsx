@@ -37,7 +37,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { mockPurchaseOrders, purchaseOrderStatuses, mockSuppliers } from '@/data/purchasingMockData';
+import { purchaseOrderStatuses } from '@/config/purchasing';
 import { PurchaseOrder, PurchaseOrderStatus } from '@/types/purchasing';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';

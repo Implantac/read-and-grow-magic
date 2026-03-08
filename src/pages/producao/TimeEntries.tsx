@@ -24,7 +24,6 @@ import {
   User,
   Wrench
 } from 'lucide-react';
-import { timeEntries as initialEntries, productionOrders, workCenters } from '@/data/productionMockData';
 import { TimeEntry, TimeEntryStatus } from '@/types/production';
 
 const statusConfig: Record<TimeEntryStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ReactNode }> = {
@@ -34,7 +33,7 @@ const statusConfig: Record<TimeEntryStatus, { label: string; variant: 'default' 
 };
 
 export default function TimeEntriesPage() {
-  const [entries, setEntries] = useState<TimeEntry[]>(initialEntries);
+  const [entries, setEntries] = useState<TimeEntry[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [workCenterFilter, setWorkCenterFilter] = useState<string>('all');
@@ -43,7 +42,7 @@ export default function TimeEntriesPage() {
   const [startOpen, setStartOpen] = useState(false);
   const [newEntry, setNewEntry] = useState({ orderId: '', operationName: '', workCenter: '' });
 
-  const activeOrders = productionOrders.filter(o => o.status === 'in_progress');
+  const activeOrders: { orderNumber: string }[] = [];
 
   const filteredEntries = entries.filter(entry => {
     const matchesSearch = 

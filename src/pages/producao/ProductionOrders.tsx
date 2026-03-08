@@ -25,7 +25,6 @@ import {
   FileText,
   Calendar
 } from 'lucide-react';
-import { productionOrders as initialOrders, productionSummary } from '@/data/productionMockData';
 import { ProductionOrder, ProductionOrderStatus, ProductionPriority } from '@/types/production';
 
 const statusConfig: Record<ProductionOrderStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
@@ -44,7 +43,7 @@ const priorityConfig: Record<ProductionPriority, { label: string; color: string 
 };
 
 export default function ProductionOrdersPage() {
-  const [orders, setOrders] = useState<ProductionOrder[]>(initialOrders);
+  const [orders, setOrders] = useState<ProductionOrder[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');

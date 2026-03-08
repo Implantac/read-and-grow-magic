@@ -22,11 +22,10 @@ import {
   MapPin,
   Box
 } from 'lucide-react';
-import { materialConsumptions as initialConsumptions, productionOrders, billsOfMaterials } from '@/data/productionMockData';
 import { MaterialConsumption } from '@/types/production';
 
 export default function MaterialConsumptionPage() {
-  const [consumptions, setConsumptions] = useState<MaterialConsumption[]>(initialConsumptions);
+  const [consumptions, setConsumptions] = useState<MaterialConsumption[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [orderFilter, setOrderFilter] = useState<string>('all');
   const [selectedConsumption, setSelectedConsumption] = useState<MaterialConsumption | null>(null);
@@ -34,7 +33,7 @@ export default function MaterialConsumptionPage() {
   const [consumeOpen, setConsumeOpen] = useState(false);
   const [consumeQty, setConsumeQty] = useState(0);
 
-  const activeOrders = productionOrders.filter(o => o.status === 'in_progress' || o.status === 'planned');
+  const activeOrders: { orderNumber: string }[] = [];
 
   const filteredConsumptions = consumptions.filter(consumption => {
     const matchesSearch = 

@@ -25,16 +25,14 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { 
-  mockUsers, 
-  mockCompanies, 
-  mockPermissions,
   userStatusConfig, 
-  userRoleConfig 
-} from '@/data/administrationMockData';
+  userRoleConfig,
+  defaultPermissions as mockPermissions
+} from '@/config/administration';
 import { SystemUser, UserRole, UserStatus, UserFilter } from '@/types/administration';
 
 const UsersPage = () => {
-  const [users, setUsers] = useState<SystemUser[]>(mockUsers);
+  const [users, setUsers] = useState<SystemUser[]>([]);
   const [filter, setFilter] = useState<UserFilter>({ role: 'all', status: 'all' });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);

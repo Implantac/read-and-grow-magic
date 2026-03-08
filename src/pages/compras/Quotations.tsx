@@ -37,7 +37,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { mockQuotations, quotationStatuses, mockSuppliers } from '@/data/purchasingMockData';
+import { quotationStatuses } from '@/config/purchasing';
 import { Quotation, QuotationStatus, QuotationSupplier } from '@/types/purchasing';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
