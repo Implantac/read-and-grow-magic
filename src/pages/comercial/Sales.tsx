@@ -9,7 +9,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
-import { getPaymentMethodLabel } from '@/data/commercialMockData';
+import { getPaymentMethodLabel } from '@/config/commercial';
 import { useSales, type DbSale } from '@/hooks/useSales';
 
 const filterFields: FilterField[] = [

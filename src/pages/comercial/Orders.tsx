@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
-import { getPaymentMethodLabel, getOrderStatusLabel } from '@/data/commercialMockData';
+import { getPaymentMethodLabel, getOrderStatusLabel } from '@/config/commercial';
 import { useOrders, useUpdateOrderStatus, type DbOrder } from '@/hooks/useOrders';
 
 const filterFields: FilterField[] = [
