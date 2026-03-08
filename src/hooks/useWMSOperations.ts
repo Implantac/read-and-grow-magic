@@ -96,8 +96,9 @@ export function useWMSPicking() {
     const { data, error } = await supabase.from('wms_picking_orders' as any).select('*').order('created_at', { ascending: false });
     if (error) { console.error(error); toast.error('Erro ao carregar pickings'); }
     else setOrders((data || []).map((r: any) => ({
-      id: r.id, orderNumber: r.order_number, customerName: r.customer_name,
-      priority: r.priority, itemsCount: r.items_count, pickedItems: r.picked_items,
+      id: r.id, orderNumber: r.order_number, salesOrderId: r.sales_order_id,
+      customerName: r.customer_name, priority: r.priority,
+      itemsCount: r.items_count || 0, pickedItems: r.picked_items || 0,
       status: r.status, assignedTo: r.assigned_to || '', startedAt: r.started_at,
       completedAt: r.completed_at, createdAt: r.created_at,
     })));
@@ -108,11 +109,21 @@ export function useWMSPicking() {
 
   const update = async (id: string, updates: any) => {
     const { error } = await supabase.from('wms_picking_orders' as any).update(updates).eq('id', id);
-    if (error) { toast.error('Erro ao atualizar'); return; }
+    if (error) { toast.error('Erro ao atualizar picking'); return false; }
+    toast.success('Picking atualizado!');
     await fetch();
+    return true;
   };
 
-  return { orders, loading, refetch: fetch, update };
+  const startPicking = async (id: string, operator: string) => {
+    return update(id, { status: 'in_progress', assigned_to: operator, started_at: new Date().toISOString() });
+  };
+
+  const completePicking = async (id: string) => {
+    return update(id, { status: 'completed', completed_at: new Date().toISOString() });
+  };
+
+  return { orders, loading, refetch: fetch, update, startPicking, completePicking };
 }
 
 export function useWMSPacking() {
