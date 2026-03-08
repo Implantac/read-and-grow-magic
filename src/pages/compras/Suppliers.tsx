@@ -38,6 +38,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { supplierCategories } from '@/config/purchasing';
+import { useCnpjLookup } from '@/hooks/useCnpjLookup';
 import { Supplier } from '@/types/purchasing';
 
 const statusConfig = {
