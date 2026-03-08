@@ -22,7 +22,7 @@ export function useBankTransactions() {
     setLoading(true);
     const { data, error } = await supabase.from('bank_transactions' as any).select('*').order('date', { ascending: false });
     if (error) { console.error(error); toast.error('Erro ao carregar transações bancárias'); }
-    else setTransactions(data || []);
+    else setTransactions((data as any as BankTransactionRow[]) || []);
     setLoading(false);
   }, []);
 
