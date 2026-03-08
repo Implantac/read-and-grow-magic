@@ -52,7 +52,7 @@ const priorityConfig = {
 };
 
 export default function PurchaseOrdersPage() {
-  const [orders, setOrders] = useState<PurchaseOrder[]>([]);
+  const { orders, loading, refetch, update: updateOrder, remove: removeOrder } = usePurchaseOrders();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
