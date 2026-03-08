@@ -115,11 +115,7 @@ export default function KardexPage() {
                   <SelectValue placeholder="Selecione um produto" />
                 </SelectTrigger>
                 <SelectContent>
-                  {products.map((product) => (
-                    <SelectItem key={product.id} value={product.id}>
-                      {product.code} - {product.name}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="empty">Nenhum produto cadastrado</SelectItem>
                 </SelectContent>
               </Select>
             </div>

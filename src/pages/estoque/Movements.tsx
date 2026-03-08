@@ -427,11 +427,7 @@ export default function MovementsPage() {
                   <SelectValue placeholder="Selecione o produto" />
                 </SelectTrigger>
                 <SelectContent>
-                  {products.map((product) => (
-                    <SelectItem key={product.id} value={product.id}>
-                      {product.code} - {product.name}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="empty">Nenhum produto cadastrado</SelectItem>
                 </SelectContent>
               </Select>
             </div>
