@@ -53,6 +53,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useNFCe } from '@/hooks/useNFCe';
+import { PDVDialog } from '@/components/fiscal/PDVDialog';
 import type { NFCe } from '@/types/fiscal';
 
 const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ className?: string }> }> = {
