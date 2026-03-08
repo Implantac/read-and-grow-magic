@@ -221,7 +221,14 @@ export default function ClientsPage() {
               </div>
               <div className="space-y-2">
                 <Label>{formData.document_type === 'cnpj' ? 'CNPJ' : 'CPF'}</Label>
-                <Input value={formData.document} onChange={(e) => setFormData(p => ({ ...p, document: e.target.value }))} placeholder={formData.document_type === 'cnpj' ? '00.000.000/0000-00' : '000.000.000-00'} />
+                <div className="flex gap-2">
+                  <Input value={formData.document} onChange={(e) => setFormData(p => ({ ...p, document: e.target.value }))} placeholder={formData.document_type === 'cnpj' ? '00.000.000/0000-00' : '000.000.000-00'} />
+                  {formData.document_type === 'cnpj' && (
+                    <Button type="button" variant="outline" size="icon" onClick={handleCnpjLookup} disabled={cnpjLookup.loading} title="Buscar dados na Receita Federal">
+                      {cnpjLookup.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
             <div className="space-y-2">
