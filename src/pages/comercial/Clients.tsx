@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Eye, MoreHorizontal, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, MoreHorizontal, Loader2, Search } from 'lucide-react';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,6 +23,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { clientSegments, brazilianStates } from '@/config/commercial';
 import { useClients, useCreateClient, useUpdateClient, useDeleteClient, type DbClient } from '@/hooks/useClients';
+import { useCnpjLookup } from '@/hooks/useCnpjLookup';
 
 const filterFields: FilterField[] = [
   { key: 'status', label: 'Status', type: 'select', options: [
@@ -38,6 +39,28 @@ export default function ClientsPage() {
   const createClient = useCreateClient();
   const updateClient = useUpdateClient();
   const deleteClient = useDeleteClient();
+  const cnpjLookup = useCnpjLookup();
+
+  const handleCnpjLookup = async () => {
+    if (formData.document_type !== 'cnpj') return;
+    const data = await cnpjLookup.lookup(formData.document);
+    if (data) {
+      setFormData(p => ({
+        ...p,
+        name: data.razao_social,
+        trade_name: data.nome_fantasia,
+        email: data.email || p.email,
+        phone: data.telefone || p.phone,
+        address_street: data.logradouro,
+        address_number: data.numero,
+        address_complement: data.complemento,
+        address_neighborhood: data.bairro,
+        address_city: data.municipio,
+        address_state: data.uf,
+        address_zip_code: data.cep,
+      }));
+    }
+  };
 
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -198,7 +221,14 @@ export default function ClientsPage() {
               </div>
               <div className="space-y-2">
                 <Label>{formData.document_type === 'cnpj' ? 'CNPJ' : 'CPF'}</Label>
-                <Input value={formData.document} onChange={(e) => setFormData(p => ({ ...p, document: e.target.value }))} placeholder={formData.document_type === 'cnpj' ? '00.000.000/0000-00' : '000.000.000-00'} />
+                <div className="flex gap-2">
+                  <Input value={formData.document} onChange={(e) => setFormData(p => ({ ...p, document: e.target.value }))} placeholder={formData.document_type === 'cnpj' ? '00.000.000/0000-00' : '000.000.000-00'} />
+                  {formData.document_type === 'cnpj' && (
+                    <Button type="button" variant="outline" size="icon" onClick={handleCnpjLookup} disabled={cnpjLookup.loading} title="Buscar dados na Receita Federal">
+                      {cnpjLookup.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
             <div className="space-y-2">

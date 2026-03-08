@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Star, Plus, Search, Eye, Edit, Trash2, Mail, Phone, MapPin, MoreHorizontal } from 'lucide-react';
+import { Star, Plus, Search, Eye, Edit, Trash2, Mail, Phone, MapPin, MoreHorizontal, Loader2 } from 'lucide-react';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
@@ -38,6 +38,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { supplierCategories } from '@/config/purchasing';
+import { useCnpjLookup } from '@/hooks/useCnpjLookup';
 import { Supplier } from '@/types/purchasing';
 
 const statusConfig = {
@@ -64,6 +65,31 @@ export default function SuppliersPage() {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null);
   const [formData, setFormData] = useState<Partial<Supplier>>({});
+  const cnpjLookup = useCnpjLookup();
+
+  const handleSupplierCnpjLookup = async () => {
+    if (!formData.document) return;
+    const data = await cnpjLookup.lookup(formData.document);
+    if (data) {
+      setFormData(p => ({
+        ...p,
+        name: data.razao_social,
+        tradeName: data.nome_fantasia,
+        email: data.email || p.email,
+        phone: data.telefone || p.phone,
+        address: {
+          ...p.address,
+          street: data.logradouro,
+          number: data.numero,
+          complement: data.complemento,
+          neighborhood: data.bairro,
+          city: data.municipio,
+          state: data.uf,
+          zipCode: data.cep,
+        },
+      }));
+    }
+  };
 
   const filteredSuppliers = suppliers.filter((supplier) => {
     const matchesSearch =
@@ -457,10 +483,16 @@ export default function SuppliersPage() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>CNPJ/CPF *</Label>
-                <Input
-                  value={formData.document || ''}
-                  onChange={(e) => setFormData({ ...formData, document: e.target.value })}
-                />
+                <div className="flex gap-2">
+                  <Input
+                    value={formData.document || ''}
+                    onChange={(e) => setFormData({ ...formData, document: e.target.value })}
+                    placeholder="00.000.000/0000-00"
+                  />
+                  <Button type="button" variant="outline" size="icon" onClick={handleSupplierCnpjLookup} disabled={cnpjLookup.loading} title="Buscar dados na Receita Federal">
+                    {cnpjLookup.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Categoria *</Label>
