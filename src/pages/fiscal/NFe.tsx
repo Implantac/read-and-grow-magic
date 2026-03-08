@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import {
