@@ -23,7 +23,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Receipt, BarChart3, Box, FolderTree, ArrowLeftRight, Calculator,
   Building2, FileSearch, ClipboardCheck, PackageMinus, Timer, PackagePlus,
   MapPin, PackageSearch, PackageCheck, MoveHorizontal, Building, Sliders,
-  Plug, BookOpen, Scale,
+  Plug, BookOpen, Scale, Radio, Wifi, Tag, Activity,
 };
 
 export function Sidebar() {
