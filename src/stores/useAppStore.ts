@@ -6,6 +6,7 @@ interface AppState {
   // Auth
   user: User | null;
   isAuthenticated: boolean;
+  userRole: 'admin' | 'manager' | 'operator' | 'viewer' | null;
   
   // Company/Branch
   activeCompany: Company | null;
@@ -18,6 +19,7 @@ interface AppState {
   // Actions
   setUser: (user: User | null) => void;
   logout: () => void;
+  setUserRole: (role: 'admin' | 'manager' | 'operator' | 'viewer' | null) => void;
   setActiveCompany: (company: Company | null) => void;
   setActiveBranch: (branch: Branch | null) => void;
   toggleSidebar: () => void;
@@ -31,6 +33,7 @@ export const useAppStore = create<AppState>()(
       // Initial State
       user: null,
       isAuthenticated: false,
+      userRole: null,
       activeCompany: null,
       activeBranch: null,
       sidebarCollapsed: false,
@@ -42,9 +45,12 @@ export const useAppStore = create<AppState>()(
         isAuthenticated: !!user 
       }),
       
+      setUserRole: (role) => set({ userRole: role }),
+      
       logout: () => set({ 
         user: null, 
         isAuthenticated: false,
+        userRole: null,
         activeCompany: null,
         activeBranch: null,
       }),

@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -13,13 +13,14 @@ import {
 } from '@/components/ui/table';
 import { 
   Search, Plus, Edit2, Trash2, UserCheck, UserX, Shield, 
-  Users as UsersIcon, UserPlus, Clock, MoreVertical, Key
+  Users as UsersIcon, UserPlus, Clock, MoreVertical, Key, Loader2
 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -30,9 +31,11 @@ import {
   defaultPermissions as mockPermissions
 } from '@/config/administration';
 import { SystemUser, UserRole, UserStatus, UserFilter } from '@/types/administration';
+import { useUsers } from '@/hooks/useUsers';
 
 const UsersPage = () => {
-  const [users, setUsers] = useState<SystemUser[]>([]);
+  const { users, isLoading, inviteUser, deleteUser, changeRole, toggleBan, resetPassword } = useUsers();
+  
   const [filter, setFilter] = useState<UserFilter>({ role: 'all', status: 'all' });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
@@ -72,71 +75,74 @@ const UsersPage = () => {
     setIsPermissionsDialogOpen(true);
   };
 
-  const handleToggleStatus = (user: SystemUser) => {
-    const newStatus: UserStatus = user.status === 'active' ? 'inactive' : 'active';
-    setUsers(prev => prev.map(u => 
-      u.id === user.id ? { ...u, status: newStatus, updatedAt: new Date().toISOString() } : u
-    ));
-    toast.success(`Usuário ${newStatus === 'active' ? 'ativado' : 'desativado'} com sucesso!`);
+  const handleToggleStatus = async (user: SystemUser) => {
+    try {
+      const isBanned = user.status === 'blocked';
+      await toggleBan({ user_id: user.id, banned: !isBanned });
+      toast.success(`Usuário ${isBanned ? 'desbloqueado' : 'bloqueado'} com sucesso!`);
+    } catch (error) {
+      toast.error('Erro ao alterar status do usuário');
+    }
   };
 
-  const handleResetPassword = (user: SystemUser) => {
-    toast.success(`Email de redefinição de senha enviado para ${user.email}`);
+  const handleResetPassword = async (user: SystemUser) => {
+    try {
+      await resetPassword(user.email);
+      toast.success(`Email de redefinição de senha enviado para ${user.email}`);
+    } catch (error) {
+      toast.error('Erro ao enviar email de redefinição');
+    }
   };
 
-  const handleDeleteUser = (user: SystemUser) => {
-    setUsers(prev => prev.filter(u => u.id !== user.id));
-    toast.success('Usuário excluído com sucesso!');
+  const handleDeleteUser = async (user: SystemUser) => {
+    if (confirm('Tem certeza que deseja excluir este usuário permanentemente?')) {
+      try {
+        await deleteUser(user.id);
+        toast.success('Usuário excluído com sucesso!');
+      } catch (error) {
+        toast.error('Erro ao excluir usuário');
+      }
+    }
   };
 
-  const handleSaveUser = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSaveUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
-    const userData: Partial<SystemUser> = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      phone: formData.get('phone') as string,
-      role: formData.get('role') as UserRole,
-      department: formData.get('department') as string,
-      branchId: formData.get('branchId') as string,
-      branchName: formData.get('branchId') as string,
-    };
-
-    if (editingUser) {
-      setUsers(prev => prev.map(u => 
-        u.id === editingUser.id 
-          ? { ...u, ...userData, updatedAt: new Date().toISOString() } 
-          : u
-      ));
-      toast.success('Usuário atualizado com sucesso!');
-    } else {
-      const newUser: SystemUser = {
-        id: `USR${String(users.length + 1).padStart(3, '0')}`,
-        ...userData as SystemUser,
-        status: 'pending',
-        permissions: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setUsers(prev => [...prev, newUser]);
-      toast.success('Usuário criado com sucesso!');
-    }
+    const role = formData.get('role') as UserRole;
     
-    setIsDialogOpen(false);
+    try {
+      if (editingUser) {
+        await changeRole({ user_id: editingUser.id, role });
+        toast.success('Perfil atualizado com sucesso!');
+      } else {
+        const name = formData.get('name') as string;
+        const email = formData.get('email') as string;
+        
+        await inviteUser({ email, name, role });
+        toast.success('Usuário convidado com sucesso!');
+      }
+      setIsDialogOpen(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao salvar usuário');
+    }
   };
 
   const handleSavePermissions = (permissions: string[]) => {
     if (!selectedUser) return;
-    
-    setUsers(prev => prev.map(u => 
-      u.id === selectedUser.id 
-        ? { ...u, permissions, updatedAt: new Date().toISOString() } 
-        : u
-    ));
-    toast.success('Permissões atualizadas com sucesso!');
+    toast.info('Gestão de permissões será implementada em breve', {
+      description: 'Atualmente o acesso é controlado pelos perfis (roles).'
+    });
     setIsPermissionsDialogOpen(false);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -338,16 +344,17 @@ const UsersPage = () => {
                           <Key className="h-4 w-4 mr-2" />
                           Redefinir Senha
                         </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => handleToggleStatus(user)}>
-                          {user.status === 'active' ? (
+                          {user.status === 'blocked' ? (
                             <>
-                              <UserX className="h-4 w-4 mr-2" />
-                              Desativar
+                              <UserCheck className="h-4 w-4 mr-2" />
+                              Desbloquear
                             </>
                           ) : (
                             <>
-                              <UserCheck className="h-4 w-4 mr-2" />
-                              Ativar
+                              <UserX className="h-4 w-4 mr-2 text-red-600" />
+                              <span className="text-red-600">Bloquear</span>
                             </>
                           )}
                         </DropdownMenuItem>
@@ -372,9 +379,14 @@ const UsersPage = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingUser ? 'Editar Usuário' : 'Novo Usuário'}</DialogTitle>
+            <DialogTitle>{editingUser ? 'Editar Perfil do Usuário' : 'Convidar Novo Usuário'}</DialogTitle>
+            {!editingUser && (
+              <DialogDescription>
+                Um convite será enviado para o email informado para que o usuário defina sua senha.
+              </DialogDescription>
+            )}
           </DialogHeader>
-          <form onSubmit={handleSaveUser} className="space-y-4">
+          <form onSubmit={handleSaveUser} className="space-y-4 mt-4">
             <div className="grid grid-cols-1 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Nome Completo *</Label>
@@ -382,7 +394,8 @@ const UsersPage = () => {
                   id="name" 
                   name="name" 
                   defaultValue={editingUser?.name}
-                  required 
+                  disabled={!!editingUser}
+                  required={!editingUser}
                 />
               </div>
               <div className="space-y-2">
@@ -392,20 +405,13 @@ const UsersPage = () => {
                   name="email" 
                   type="email"
                   defaultValue={editingUser?.email}
-                  required 
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Telefone</Label>
-                <Input 
-                  id="phone" 
-                  name="phone" 
-                  defaultValue={editingUser?.phone}
+                  disabled={!!editingUser}
+                  required={!editingUser}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role">Perfil *</Label>
-                <Select name="role" defaultValue={editingUser?.role || 'operator'}>
+                <Select name="role" defaultValue={editingUser?.role || 'viewer'}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o perfil" />
                   </SelectTrigger>
@@ -413,25 +419,6 @@ const UsersPage = () => {
                     {Object.entries(userRoleConfig).map(([key, config]) => (
                       <SelectItem key={key} value={key}>{config.label}</SelectItem>
                     ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="department">Departamento</Label>
-                <Input 
-                  id="department" 
-                  name="department" 
-                  defaultValue={editingUser?.department}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="branchId">Filial</Label>
-                <Select name="branchId" defaultValue={editingUser?.branchId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a filial" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="empty">Nenhuma empresa cadastrada</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

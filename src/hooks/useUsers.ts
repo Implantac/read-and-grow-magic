@@ -1,0 +1,123 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAppStore } from '@/stores/useAppStore';
+import type { SystemUser } from '@/types/administration';
+
+interface AdminUserResponse {
+  id: string;
+  name: string;
+  email: string;
+  avatar_url?: string;
+  created_at: string;
+  updated_at: string;
+  role: 'admin' | 'manager' | 'operator' | 'viewer';
+  last_sign_in_at?: string;
+  email_confirmed_at?: string;
+  status: 'active' | 'pending' | 'blocked';
+}
+
+interface InviteUserData {
+  email: string;
+  name: string;
+  role: 'admin' | 'manager' | 'operator' | 'viewer';
+}
+
+interface ChangeRoleData {
+  user_id: string;
+  role: 'admin' | 'manager' | 'operator' | 'viewer';
+}
+
+async function callAdminUsers(action: string, params?: any) {
+  const { data, error } = await supabase.functions.invoke('admin-users', {
+    body: { action, ...params },
+  });
+  
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+function mapToSystemUser(user: AdminUserResponse): SystemUser {
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    avatar: user.avatar_url,
+    role: user.role,
+    status: user.status,
+    permissions: [], // We'll handle permissions separately if needed
+    lastLogin: user.last_sign_in_at,
+    createdAt: user.created_at,
+    updatedAt: user.updated_at,
+    phone: '',
+    department: '',
+    branchId: '',
+    branchName: '',
+  };
+}
+
+export function useUsers() {
+  const queryClient = useQueryClient();
+  const { userRole } = useAppStore();
+
+  const usersQuery = useQuery({
+    queryKey: ['admin-users'],
+    queryFn: async () => {
+      const response = await callAdminUsers('list');
+      return response.data.map(mapToSystemUser);
+    },
+    enabled: userRole === 'admin',
+  });
+
+  const inviteUserMutation = useMutation({
+    mutationFn: (userData: InviteUserData) => callAdminUsers('invite', userData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: (user_id: string) => callAdminUsers('delete', { user_id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+    },
+  });
+
+  const changeRoleMutation = useMutation({
+    mutationFn: (data: ChangeRoleData) => callAdminUsers('change_role', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+    },
+  });
+
+  const toggleBanMutation = useMutation({
+    mutationFn: (data: { user_id: string; banned: boolean }) => 
+      callAdminUsers('toggle_ban', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: (email: string) => callAdminUsers('reset_password', { email }),
+  });
+
+  return {
+    users: usersQuery.data || [],
+    isLoading: usersQuery.isLoading,
+    error: usersQuery.error,
+    
+    // Mutations
+    inviteUser: inviteUserMutation.mutateAsync,
+    deleteUser: deleteUserMutation.mutateAsync,
+    changeRole: changeRoleMutation.mutateAsync,
+    toggleBan: toggleBanMutation.mutateAsync,
+    resetPassword: resetPasswordMutation.mutateAsync,
+    
+    // Loading states
+    isInviting: inviteUserMutation.isPending,
+    isDeleting: deleteUserMutation.isPending,
+    isChangingRole: changeRoleMutation.isPending,
+    isTogglingBan: toggleBanMutation.isPending,
+    isSendingReset: resetPasswordMutation.isPending,
+  };
+}
