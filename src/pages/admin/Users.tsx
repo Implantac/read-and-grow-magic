@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -13,13 +13,14 @@ import {
 } from '@/components/ui/table';
 import { 
   Search, Plus, Edit2, Trash2, UserCheck, UserX, Shield, 
-  Users as UsersIcon, UserPlus, Clock, MoreVertical, Key
+  Users as UsersIcon, UserPlus, Clock, MoreVertical, Key, Loader2
 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -30,9 +31,11 @@ import {
   defaultPermissions as mockPermissions
 } from '@/config/administration';
 import { SystemUser, UserRole, UserStatus, UserFilter } from '@/types/administration';
+import { useUsers } from '@/hooks/useUsers';
 
 const UsersPage = () => {
-  const [users, setUsers] = useState<SystemUser[]>([]);
+  const { users, isLoading, inviteUser, deleteUser, changeRole, toggleBan, resetPassword } = useUsers();
+  
   const [filter, setFilter] = useState<UserFilter>({ role: 'all', status: 'all' });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
