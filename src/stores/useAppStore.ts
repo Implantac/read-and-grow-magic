@@ -6,6 +6,7 @@ interface AppState {
   // Auth
   user: User | null;
   isAuthenticated: boolean;
+  userRole: 'admin' | 'manager' | 'operator' | 'viewer' | null;
   
   // Company/Branch
   activeCompany: Company | null;
@@ -18,6 +19,7 @@ interface AppState {
   // Actions
   setUser: (user: User | null) => void;
   logout: () => void;
+  setUserRole: (role: 'admin' | 'manager' | 'operator' | 'viewer' | null) => void;
   setActiveCompany: (company: Company | null) => void;
   setActiveBranch: (branch: Branch | null) => void;
   toggleSidebar: () => void;
