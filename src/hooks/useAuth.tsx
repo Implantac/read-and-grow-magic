@@ -17,7 +17,7 @@ function mapSupabaseUser(user: SupabaseUser, profileName?: string, role?: string
 }
 
 export function useAuth() {
-  const { setUser, setActiveCompany, logout: storeLogout } = useAppStore();
+  const { setUser, setUserRole, setActiveCompany, logout: storeLogout } = useAppStore();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
