@@ -12,6 +12,7 @@ import {
   ArrowLeftRight, Calculator, Building2, FileSearch, ClipboardCheck,
   PackageMinus, Timer, PackagePlus, MapPin, PackageSearch, PackageCheck,
   MoveHorizontal, Building, Sliders, Plug, BookOpen, Scale,
+  Radio, Wifi, Tag, Activity,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -22,7 +23,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Receipt, BarChart3, Box, FolderTree, ArrowLeftRight, Calculator,
   Building2, FileSearch, ClipboardCheck, PackageMinus, Timer, PackagePlus,
   MapPin, PackageSearch, PackageCheck, MoveHorizontal, Building, Sliders,
-  Plug, BookOpen, Scale,
+  Plug, BookOpen, Scale, Radio, Wifi, Tag, Activity,
 };
 
 export function Sidebar() {

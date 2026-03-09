@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAppStore } from '@/stores/useAppStore';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,28 +9,77 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
-  User, Mail, Shield, Building2, MapPin, Phone, Save, Eye, EyeOff, Lock,
+  User, Mail, Shield, Building2, MapPin, Phone, Save, Eye, EyeOff, Lock, Camera,
 } from 'lucide-react';
 
 export default function ProfilePage() {
-  const { user, activeCompany, activeBranch, theme, toggleTheme } = useAppStore();
+  const { user, activeCompany, activeBranch, theme, toggleTheme, setUser } = useAppStore();
   const { toast } = useToast();
 
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
-  const [phone, setPhone] = useState('(11) 99999-8888');
+  const [phone, setPhone] = useState('');
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPasswords, setShowPasswords] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
 
-  const handleSaveProfile = () => {
-    toast({ title: 'Perfil atualizado', description: 'Suas informações foram salvas com sucesso.' });
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.id) return;
+
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `${user.id}/avatar.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(path, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+      const publicUrl = `${data.publicUrl}?t=${Date.now()}`;
+
+      await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
+      setAvatarUrl(publicUrl);
+      toast({ title: 'Foto atualizada', description: 'Sua foto de perfil foi salva.' });
+    } catch (err: any) {
+      toast({ title: 'Erro no upload', description: err.message, variant: 'destructive' });
+    } finally {
+      setUploading(false);
+    }
   };
 
-  const handleChangePassword = () => {
+  const handleSaveProfile = async () => {
+    if (!user?.id) return;
+    setSavingProfile(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ name, email })
+        .eq('id', user.id);
+
+      if (error) throw error;
+      setUser({ ...user, name, email });
+      toast({ title: 'Perfil atualizado', description: 'Suas informações foram salvas com sucesso.' });
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message, variant: 'destructive' });
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
     if (!currentPassword || !newPassword) {
       toast({ title: 'Erro', description: 'Preencha todos os campos de senha.', variant: 'destructive' });
       return;
@@ -42,10 +92,28 @@ export default function ProfilePage() {
       toast({ title: 'Erro', description: 'A nova senha deve ter pelo menos 6 caracteres.', variant: 'destructive' });
       return;
     }
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    toast({ title: 'Senha alterada', description: 'Sua senha foi atualizada com sucesso.' });
+
+    setChangingPassword(true);
+    try {
+      // Re-authenticate first
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user?.email || '',
+        password: currentPassword,
+      });
+      if (signInError) throw new Error('Senha atual incorreta.');
+
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      toast({ title: 'Senha alterada', description: 'Sua senha foi atualizada com sucesso.' });
+    } catch (err: any) {
+      toast({ title: 'Erro', description: err.message, variant: 'destructive' });
+    } finally {
+      setChangingPassword(false);
+    }
   };
 
   const roleLabels: Record<string, string> = {
@@ -54,6 +122,8 @@ export default function ProfilePage() {
     operator: 'Operador',
     viewer: 'Visualizador',
   };
+
+  const initials = (user?.name || 'U').split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2);
 
   return (
     <div className="space-y-6 animate-fade-in max-w-4xl">
@@ -66,8 +136,27 @@ export default function ProfilePage() {
         {/* Profile Card */}
         <Card className="md:col-span-1">
           <CardContent className="pt-6 text-center space-y-4">
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary text-primary-foreground">
-              <User className="h-10 w-10" />
+            <div className="relative mx-auto w-20 h-20 group">
+              <Avatar className="h-20 w-20">
+                <AvatarImage src={avatarUrl || undefined} alt={user?.name} />
+                <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+              >
+                <Camera className="h-5 w-5 text-white" />
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarUpload}
+              />
             </div>
             <div>
               <h3 className="text-lg font-semibold text-foreground">{user?.name}</h3>
@@ -121,12 +210,12 @@ export default function ProfilePage() {
                 <Label htmlFor="phone">Telefone</Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                  <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="pl-10" />
+                  <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} className="pl-10" placeholder="(11) 99999-0000" />
                 </div>
               </div>
-              <Button onClick={handleSaveProfile} className="gap-2">
+              <Button onClick={handleSaveProfile} disabled={savingProfile} className="gap-2">
                 <Save className="h-4 w-4" />
-                Salvar Alterações
+                {savingProfile ? 'Salvando...' : 'Salvar Alterações'}
               </Button>
             </CardContent>
           </Card>
@@ -162,9 +251,9 @@ export default function ProfilePage() {
                   <Input type={showPasswords ? 'text' : 'password'} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                 </div>
               </div>
-              <Button variant="outline" onClick={handleChangePassword} className="gap-2">
+              <Button variant="outline" onClick={handleChangePassword} disabled={changingPassword} className="gap-2">
                 <Lock className="h-4 w-4" />
-                Alterar Senha
+                {changingPassword ? 'Alterando...' : 'Alterar Senha'}
               </Button>
             </CardContent>
           </Card>
