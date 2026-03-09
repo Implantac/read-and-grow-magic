@@ -379,9 +379,14 @@ const UsersPage = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editingUser ? 'Editar Usuário' : 'Novo Usuário'}</DialogTitle>
+            <DialogTitle>{editingUser ? 'Editar Perfil do Usuário' : 'Convidar Novo Usuário'}</DialogTitle>
+            {!editingUser && (
+              <DialogDescription>
+                Um convite será enviado para o email informado para que o usuário defina sua senha.
+              </DialogDescription>
+            )}
           </DialogHeader>
-          <form onSubmit={handleSaveUser} className="space-y-4">
+          <form onSubmit={handleSaveUser} className="space-y-4 mt-4">
             <div className="grid grid-cols-1 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Nome Completo *</Label>
@@ -389,7 +394,8 @@ const UsersPage = () => {
                   id="name" 
                   name="name" 
                   defaultValue={editingUser?.name}
-                  required 
+                  disabled={!!editingUser}
+                  required={!editingUser}
                 />
               </div>
               <div className="space-y-2">
@@ -399,20 +405,13 @@ const UsersPage = () => {
                   name="email" 
                   type="email"
                   defaultValue={editingUser?.email}
-                  required 
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Telefone</Label>
-                <Input 
-                  id="phone" 
-                  name="phone" 
-                  defaultValue={editingUser?.phone}
+                  disabled={!!editingUser}
+                  required={!editingUser}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role">Perfil *</Label>
-                <Select name="role" defaultValue={editingUser?.role || 'operator'}>
+                <Select name="role" defaultValue={editingUser?.role || 'viewer'}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione o perfil" />
                   </SelectTrigger>
@@ -420,25 +419,6 @@ const UsersPage = () => {
                     {Object.entries(userRoleConfig).map(([key, config]) => (
                       <SelectItem key={key} value={key}>{config.label}</SelectItem>
                     ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="department">Departamento</Label>
-                <Input 
-                  id="department" 
-                  name="department" 
-                  defaultValue={editingUser?.department}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="branchId">Filial</Label>
-                <Select name="branchId" defaultValue={editingUser?.branchId}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione a filial" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="empty">Nenhuma empresa cadastrada</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -11,7 +11,7 @@ function mapSupabaseUser(user: SupabaseUser, profileName?: string, role?: string
     id: user.id,
     name: profileName || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário',
     email: user.email || '',
-    role: role || 'viewer',
+    role: (role as AppUser['role']) || 'viewer',
     permissions: ['all'],
   };
 }
