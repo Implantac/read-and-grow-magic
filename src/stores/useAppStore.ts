@@ -45,9 +45,12 @@ export const useAppStore = create<AppState>()(
         isAuthenticated: !!user 
       }),
       
+      setUserRole: (role) => set({ userRole: role }),
+      
       logout: () => set({ 
         user: null, 
         isAuthenticated: false,
+        userRole: null,
         activeCompany: null,
         activeBranch: null,
       }),

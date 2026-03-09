@@ -68,7 +68,7 @@ export function useAuth() {
     });
 
     return () => subscription.unsubscribe();
-  }, [setUser, setActiveCompany, storeLogout]);
+  }, [setUser, setUserRole, setActiveCompany, storeLogout]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
