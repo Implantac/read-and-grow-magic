@@ -344,16 +344,17 @@ const UsersPage = () => {
                           <Key className="h-4 w-4 mr-2" />
                           Redefinir Senha
                         </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => handleToggleStatus(user)}>
-                          {user.status === 'active' ? (
+                          {user.status === 'blocked' ? (
                             <>
-                              <UserX className="h-4 w-4 mr-2" />
-                              Desativar
+                              <UserCheck className="h-4 w-4 mr-2" />
+                              Desbloquear
                             </>
                           ) : (
                             <>
-                              <UserCheck className="h-4 w-4 mr-2" />
-                              Ativar
+                              <UserX className="h-4 w-4 mr-2 text-red-600" />
+                              <span className="text-red-600">Bloquear</span>
                             </>
                           )}
                         </DropdownMenuItem>
