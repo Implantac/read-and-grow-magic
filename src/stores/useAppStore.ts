@@ -33,6 +33,7 @@ export const useAppStore = create<AppState>()(
       // Initial State
       user: null,
       isAuthenticated: false,
+      userRole: null,
       activeCompany: null,
       activeBranch: null,
       sidebarCollapsed: false,
