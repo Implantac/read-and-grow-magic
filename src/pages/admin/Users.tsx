@@ -130,15 +130,19 @@ const UsersPage = () => {
 
   const handleSavePermissions = (permissions: string[]) => {
     if (!selectedUser) return;
-    
-    setUsers(prev => prev.map(u => 
-      u.id === selectedUser.id 
-        ? { ...u, permissions, updatedAt: new Date().toISOString() } 
-        : u
-    ));
-    toast.success('Permissões atualizadas com sucesso!');
+    toast.info('Gestão de permissões será implementada em breve', {
+      description: 'Atualmente o acesso é controlado pelos perfis (roles).'
+    });
     setIsPermissionsDialogOpen(false);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
