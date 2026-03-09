@@ -75,21 +75,34 @@ const UsersPage = () => {
     setIsPermissionsDialogOpen(true);
   };
 
-  const handleToggleStatus = (user: SystemUser) => {
-    const newStatus: UserStatus = user.status === 'active' ? 'inactive' : 'active';
-    setUsers(prev => prev.map(u => 
-      u.id === user.id ? { ...u, status: newStatus, updatedAt: new Date().toISOString() } : u
-    ));
-    toast.success(`Usuário ${newStatus === 'active' ? 'ativado' : 'desativado'} com sucesso!`);
+  const handleToggleStatus = async (user: SystemUser) => {
+    try {
+      const isBanned = user.status === 'blocked';
+      await toggleBan({ user_id: user.id, banned: !isBanned });
+      toast.success(`Usuário ${isBanned ? 'desbloqueado' : 'bloqueado'} com sucesso!`);
+    } catch (error) {
+      toast.error('Erro ao alterar status do usuário');
+    }
   };
 
-  const handleResetPassword = (user: SystemUser) => {
-    toast.success(`Email de redefinição de senha enviado para ${user.email}`);
+  const handleResetPassword = async (user: SystemUser) => {
+    try {
+      await resetPassword(user.email);
+      toast.success(`Email de redefinição de senha enviado para ${user.email}`);
+    } catch (error) {
+      toast.error('Erro ao enviar email de redefinição');
+    }
   };
 
-  const handleDeleteUser = (user: SystemUser) => {
-    setUsers(prev => prev.filter(u => u.id !== user.id));
-    toast.success('Usuário excluído com sucesso!');
+  const handleDeleteUser = async (user: SystemUser) => {
+    if (confirm('Tem certeza que deseja excluir este usuário permanentemente?')) {
+      try {
+        await deleteUser(user.id);
+        toast.success('Usuário excluído com sucesso!');
+      } catch (error) {
+        toast.error('Erro ao excluir usuário');
+      }
+    }
   };
 
   const handleSaveUser = (e: React.FormEvent<HTMLFormElement>) => {
