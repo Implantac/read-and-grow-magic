@@ -6,12 +6,12 @@ const mockCompanies: Company[] = [];
 import type { User as AppUser } from '@/types';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
-function mapSupabaseUser(user: SupabaseUser, profileName?: string): AppUser {
+function mapSupabaseUser(user: SupabaseUser, profileName?: string, role?: string): AppUser {
   return {
     id: user.id,
     name: profileName || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário',
     email: user.email || '',
-    role: 'admin',
+    role: role || 'viewer',
     permissions: ['all'],
   };
 }
