@@ -12,6 +12,7 @@ import {
   ArrowLeftRight, Calculator, Building2, FileSearch, ClipboardCheck,
   PackageMinus, Timer, PackagePlus, MapPin, PackageSearch, PackageCheck,
   MoveHorizontal, Building, Sliders, Plug, BookOpen, Scale,
+  Radio, Wifi, Tag, Activity,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
