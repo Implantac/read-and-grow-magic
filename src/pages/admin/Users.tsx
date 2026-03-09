@@ -105,41 +105,27 @@ const UsersPage = () => {
     }
   };
 
-  const handleSaveUser = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSaveUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
-    const userData: Partial<SystemUser> = {
-      name: formData.get('name') as string,
-      email: formData.get('email') as string,
-      phone: formData.get('phone') as string,
-      role: formData.get('role') as UserRole,
-      department: formData.get('department') as string,
-      branchId: formData.get('branchId') as string,
-      branchName: formData.get('branchId') as string,
-    };
-
-    if (editingUser) {
-      setUsers(prev => prev.map(u => 
-        u.id === editingUser.id 
-          ? { ...u, ...userData, updatedAt: new Date().toISOString() } 
-          : u
-      ));
-      toast.success('Usuário atualizado com sucesso!');
-    } else {
-      const newUser: SystemUser = {
-        id: `USR${String(users.length + 1).padStart(3, '0')}`,
-        ...userData as SystemUser,
-        status: 'pending',
-        permissions: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setUsers(prev => [...prev, newUser]);
-      toast.success('Usuário criado com sucesso!');
-    }
+    const role = formData.get('role') as UserRole;
     
-    setIsDialogOpen(false);
+    try {
+      if (editingUser) {
+        await changeRole({ user_id: editingUser.id, role });
+        toast.success('Perfil atualizado com sucesso!');
+      } else {
+        const name = formData.get('name') as string;
+        const email = formData.get('email') as string;
+        
+        await inviteUser({ email, name, role });
+        toast.success('Usuário convidado com sucesso!');
+      }
+      setIsDialogOpen(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao salvar usuário');
+    }
   };
 
   const handleSavePermissions = (permissions: string[]) => {
