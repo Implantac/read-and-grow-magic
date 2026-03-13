@@ -8,10 +8,14 @@ import { useDashboardData } from '@/hooks/useDashboardData';
 import {
   ShoppingCart, Wallet, Package, Factory, Truck, Warehouse,
   DollarSign, TrendingUp, ArrowDownCircle, ArrowUpCircle,
+  RefreshCw,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 
 const iconMap = [DollarSign, TrendingUp, ArrowDownCircle, ArrowUpCircle];
 
@@ -32,8 +36,16 @@ const emptyModulePerformance = [
 ];
 
 export default function Dashboard() {
-  const { user, activeCompany, activeBranch } = useAppStore();
+  const { activeCompany, activeBranch } = useAppStore();
   const { data, isLoading } = useDashboardData();
+  const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await queryClient.invalidateQueries({ queryKey: ['dashboard-consolidated'] });
+    setTimeout(() => setIsRefreshing(false), 600);
+  };
 
   if (isLoading) {
     return (
@@ -72,9 +84,21 @@ export default function Dashboard() {
             Visão geral • {activeCompany?.name}{activeBranch ? ` - ${activeBranch.name}` : ''}
           </p>
         </div>
-        <p className="text-xs text-muted-foreground">
-          Atualizado a cada 60s
-        </p>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isRefreshing}
+            className="gap-2 text-xs"
+          >
+            <RefreshCw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} />
+            Atualizar
+          </Button>
+          <p className="text-xs text-muted-foreground">
+            Auto-refresh 60s
+          </p>
+        </div>
       </div>
 
       {/* KPIs Principais */}
@@ -83,12 +107,16 @@ export default function Dashboard() {
           const Icon = iconMap[idx] || DollarSign;
           const colors = colorClasses[kpi.color] || colorClasses.primary;
           return (
-            <Card key={kpi.title} className="hover-lift group cursor-default">
+            <Card
+              key={kpi.title}
+              className="hover-lift group cursor-default"
+              style={{ animationDelay: `${idx * 80}ms` }}
+            >
               <CardContent className="p-5">
                 <div className="flex items-start justify-between">
                   <div className="space-y-1.5">
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{kpi.title}</p>
-                    <p className="text-2xl font-bold text-foreground tabular-nums">{kpi.value}</p>
+                    <p className="text-2xl font-bold text-foreground tabular-nums animate-count-up">{kpi.value}</p>
                     <div className={cn(
                       "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold",
                       kpi.change >= 0
@@ -98,7 +126,7 @@ export default function Dashboard() {
                       {kpi.change >= 0 ? '↑' : '↓'} {Math.abs(kpi.change).toFixed(1)}%
                     </div>
                   </div>
-                  <div className={cn('rounded-xl p-2.5 ring-1', colors.bg, colors.ring)}>
+                  <div className={cn('rounded-xl p-2.5 ring-1 transition-transform duration-200 group-hover:scale-110', colors.bg, colors.ring)}>
                     <Icon className={cn('h-5 w-5', colors.icon)} />
                   </div>
                 </div>

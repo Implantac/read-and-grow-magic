@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
-import { Bell, ChevronDown, LogOut, Menu, Moon, Sun, User, Search } from 'lucide-react';
+import { useState } from 'react';
+import { Bell, ChevronDown, LogOut, Menu, Moon, Sun, User, Search, Command } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import type { Company, Alert } from '@/types';
+import type { Company } from '@/types';
 
 import { useCompanies } from '@/hooks/useCompanies';
 import { useAppStore } from '@/stores/useAppStore';
 import { useAuth } from '@/hooks/useAuth';
+import { useNotifications } from '@/hooks/useNotifications';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -13,6 +14,15 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+
+const typeColors = {
+  error: 'bg-destructive/10 text-destructive',
+  warning: 'bg-warning/10 text-warning',
+  info: 'bg-info/10 text-info',
+  success: 'bg-success/10 text-success',
+};
 
 export function Topbar() {
   const navigate = useNavigate();
@@ -22,14 +32,14 @@ export function Topbar() {
     toggleSidebar, setActiveCompany, setActiveBranch, toggleTheme,
   } = useAppStore();
 
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+
   const handleLogout = async () => {
     await signOut();
     navigate('/login');
   };
 
   const { companies } = useCompanies();
-  const [alerts] = useState<Alert[]>([]);
-  const unreadAlerts = alerts.filter((a) => !a.read).length;
 
   return (
     <header
@@ -110,6 +120,20 @@ export function Topbar() {
 
       {/* Right Section */}
       <div className="flex items-center gap-1">
+        {/* Search shortcut */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+          className="hidden md:flex items-center gap-2 h-8 px-3 text-sidebar-foreground/40 hover:text-sidebar-foreground/70 hover:bg-sidebar-accent/50 text-xs"
+        >
+          <Search className="h-3.5 w-3.5" />
+          <span>Buscar</span>
+          <kbd className="ml-1 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-sidebar-border/50 bg-sidebar-accent/30 px-1.5 font-mono text-[10px] font-medium text-sidebar-foreground/40">
+            <Command className="h-2.5 w-2.5" />K
+          </kbd>
+        </Button>
+
         {/* Theme Toggle */}
         <Button
           variant="ghost"
@@ -120,7 +144,7 @@ export function Topbar() {
           {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
         </Button>
 
-        {/* Notifications */}
+        {/* Notifications - Connected to real data */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -129,9 +153,9 @@ export function Topbar() {
               className="relative h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
             >
               <Bell className="h-4 w-4" />
-              {unreadAlerts > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
-                  {unreadAlerts}
+              {unreadCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground px-1 animate-fade-in">
+                  {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
             </Button>
@@ -139,29 +163,46 @@ export function Topbar() {
           <DropdownMenuContent align="end" className="w-80 bg-sidebar border-sidebar-border">
             <DropdownMenuLabel className="flex items-center justify-between text-sidebar-foreground">
               Notificações
-              <Badge variant="secondary" className="text-xs">{unreadAlerts} novas</Badge>
+              {unreadCount > 0 && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); markAllAsRead(); }}
+                  className="text-xs text-primary hover:text-primary/80 font-normal transition-colors"
+                >
+                  Marcar todas como lidas
+                </button>
+              )}
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-sidebar-border" />
-            {alerts.length === 0 && (
+            {notifications.length === 0 ? (
               <div className="py-6 text-center text-sm text-sidebar-foreground/40">
                 Nenhuma notificação
               </div>
+            ) : (
+              notifications.slice(0, 5).map((n) => (
+                <DropdownMenuItem
+                  key={n.id}
+                  onClick={() => { if (!n.read) markAsRead(n.id); }}
+                  className={cn(
+                    'flex flex-col items-start gap-1 p-3 text-sidebar-foreground/80 cursor-pointer',
+                    !n.read && 'bg-sidebar-accent/50'
+                  )}
+                >
+                  <div className="flex w-full items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {!n.read && <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />}
+                      <span className={cn('text-sm', !n.read ? 'font-semibold' : 'font-medium')}>{n.title}</span>
+                    </div>
+                    <Badge variant="outline" className={cn('text-[10px] h-4 px-1.5', typeColors[n.type])}>
+                      {n.module}
+                    </Badge>
+                  </div>
+                  <span className="text-xs text-sidebar-foreground/50 line-clamp-2">{n.description}</span>
+                  <span className="text-[10px] text-sidebar-foreground/30">
+                    {format(new Date(n.created_at), "dd/MM HH:mm", { locale: ptBR })}
+                  </span>
+                </DropdownMenuItem>
+              ))
             )}
-            {alerts.slice(0, 5).map((alert) => (
-              <DropdownMenuItem
-                key={alert.id}
-                className={cn(
-                  'flex flex-col items-start gap-1 p-3 text-sidebar-foreground/80',
-                  !alert.read && 'bg-sidebar-accent/50'
-                )}
-              >
-                <div className="flex w-full items-center justify-between">
-                  <span className="font-medium">{alert.title}</span>
-                  <Badge variant="outline" className="text-xs">{alert.module}</Badge>
-                </div>
-                <span className="text-xs text-sidebar-foreground/50">{alert.description}</span>
-              </DropdownMenuItem>
-            ))}
             <DropdownMenuSeparator className="bg-sidebar-border" />
             <DropdownMenuItem className="justify-center text-primary font-medium" onClick={() => navigate('/notificacoes')}>
               Ver todas as notificações

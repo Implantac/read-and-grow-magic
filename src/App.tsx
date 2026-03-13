@@ -1,89 +1,113 @@
+import { lazy, Suspense } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
+import { CommandPalette } from "@/components/layout/CommandPalette";
+import { Loader2 } from 'lucide-react';
+
+// Eager load critical pages
 import Login from "./pages/Login";
-import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
-import NotFound from "./pages/NotFound";
 
-// Commercial Module
-import ClientsPage from "./pages/comercial/Clients";
-import SalesPage from "./pages/comercial/Sales";
-import OrdersPage from "./pages/comercial/Orders";
-import CommercialQuotationsPage from "./pages/comercial/Quotations";
+// Lazy load all other pages
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
-// Financial Module
-import AccountsPayable from "./pages/financeiro/AccountsPayable";
-import AccountsReceivable from "./pages/financeiro/AccountsReceivable";
-import CashFlow from "./pages/financeiro/CashFlow";
-import BankReconciliation from "./pages/financeiro/BankReconciliation";
+// Commercial
+const ClientsPage = lazy(() => import("./pages/comercial/Clients"));
+const SalesPage = lazy(() => import("./pages/comercial/Sales"));
+const OrdersPage = lazy(() => import("./pages/comercial/Orders"));
+const CommercialQuotationsPage = lazy(() => import("./pages/comercial/Quotations"));
 
-// Accounting Module
-import ChartOfAccountsPage from "./pages/contabilidade/ChartOfAccounts";
-import JournalEntriesPage from "./pages/contabilidade/JournalEntries";
-import GeneralLedgerPage from "./pages/contabilidade/GeneralLedger";
-import TrialBalancePage from "./pages/contabilidade/TrialBalance";
-import DREPage from "./pages/contabilidade/DRE";
-import BalanceSheetPage from "./pages/contabilidade/BalanceSheet";
-import AccountingDashboardPage from "./pages/contabilidade/AccountingDashboard";
+// Financial
+const AccountsPayable = lazy(() => import("./pages/financeiro/AccountsPayable"));
+const AccountsReceivable = lazy(() => import("./pages/financeiro/AccountsReceivable"));
+const CashFlow = lazy(() => import("./pages/financeiro/CashFlow"));
+const BankReconciliation = lazy(() => import("./pages/financeiro/BankReconciliation"));
 
-// Fiscal Module
-import NFePage from "./pages/fiscal/NFe";
-import NFCePage from "./pages/fiscal/NFCe";
-import FiscalReportsPage from "./pages/fiscal/FiscalReports";
+// Accounting
+const ChartOfAccountsPage = lazy(() => import("./pages/contabilidade/ChartOfAccounts"));
+const JournalEntriesPage = lazy(() => import("./pages/contabilidade/JournalEntries"));
+const GeneralLedgerPage = lazy(() => import("./pages/contabilidade/GeneralLedger"));
+const TrialBalancePage = lazy(() => import("./pages/contabilidade/TrialBalance"));
+const DREPage = lazy(() => import("./pages/contabilidade/DRE"));
+const BalanceSheetPage = lazy(() => import("./pages/contabilidade/BalanceSheet"));
+const AccountingDashboardPage = lazy(() => import("./pages/contabilidade/AccountingDashboard"));
 
-// ERP Inventory Module
-import InventoryProductsPage from "./pages/estoque/Products";
-import InventoryMovementsPage from "./pages/estoque/Movements";
-import KardexPage from "./pages/estoque/Kardex";
-import StockLevelsPage from "./pages/estoque/StockLevels";
-import CategoriesPage from "./pages/estoque/Categories";
+// Fiscal
+const NFePage = lazy(() => import("./pages/fiscal/NFe"));
+const NFCePage = lazy(() => import("./pages/fiscal/NFCe"));
+const FiscalReportsPage = lazy(() => import("./pages/fiscal/FiscalReports"));
 
-// WMS Module
-import WMSDashboardPage from "./pages/wms/Dashboard";
-import ReceivingPage from "./pages/wms/Receiving";
-import StoragePage from "./pages/wms/Storage";
-import PickingPage from "./pages/wms/Picking";
-import PackingPage from "./pages/wms/Packing";
-import InventoryPage from "./pages/wms/Inventory";
-import WMSMovementsPage from "./pages/wms/Movements";
+// Inventory
+const InventoryProductsPage = lazy(() => import("./pages/estoque/Products"));
+const InventoryMovementsPage = lazy(() => import("./pages/estoque/Movements"));
+const KardexPage = lazy(() => import("./pages/estoque/Kardex"));
+const StockLevelsPage = lazy(() => import("./pages/estoque/StockLevels"));
+const CategoriesPage = lazy(() => import("./pages/estoque/Categories"));
 
-// RFID Module
-import RFIDDashboardPage from "./pages/rfid/Dashboard";
-import RFIDReadersPage from "./pages/rfid/Readers";
-import RFIDTagsPage from "./pages/rfid/Tags";
-import RFIDEventsPage from "./pages/rfid/Events";
-import RFIDIntegrationPage from "./pages/rfid/Integration";
+// WMS
+const WMSDashboardPage = lazy(() => import("./pages/wms/Dashboard"));
+const ReceivingPage = lazy(() => import("./pages/wms/Receiving"));
+const StoragePage = lazy(() => import("./pages/wms/Storage"));
+const PickingPage = lazy(() => import("./pages/wms/Picking"));
+const PackingPage = lazy(() => import("./pages/wms/Packing"));
+const InventoryPage = lazy(() => import("./pages/wms/Inventory"));
+const WMSMovementsPage = lazy(() => import("./pages/wms/Movements"));
 
-// Production Module
-import ProductionOrdersPage from "./pages/producao/ProductionOrders";
-import MaterialConsumptionPage from "./pages/producao/MaterialConsumption";
-import TimeEntriesPage from "./pages/producao/TimeEntries";
+// RFID
+const RFIDDashboardPage = lazy(() => import("./pages/rfid/Dashboard"));
+const RFIDReadersPage = lazy(() => import("./pages/rfid/Readers"));
+const RFIDTagsPage = lazy(() => import("./pages/rfid/Tags"));
+const RFIDEventsPage = lazy(() => import("./pages/rfid/Events"));
+const RFIDIntegrationPage = lazy(() => import("./pages/rfid/Integration"));
 
-// Purchasing Module
-import SuppliersPage from "./pages/compras/Suppliers";
-import PurchaseOrdersPage from "./pages/compras/PurchaseOrders";
-import QuotationsPage from "./pages/compras/Quotations";
+// Production
+const ProductionOrdersPage = lazy(() => import("./pages/producao/ProductionOrders"));
+const MaterialConsumptionPage = lazy(() => import("./pages/producao/MaterialConsumption"));
+const TimeEntriesPage = lazy(() => import("./pages/producao/TimeEntries"));
 
-// Reports Module
-import SalesReport from "./pages/relatorios/SalesReport";
-import InventoryReport from "./pages/relatorios/InventoryReport";
-import FinancialReport from "./pages/relatorios/FinancialReport";
-import ProductionReport from "./pages/relatorios/ProductionReport";
+// Purchasing
+const SuppliersPage = lazy(() => import("./pages/compras/Suppliers"));
+const PurchaseOrdersPage = lazy(() => import("./pages/compras/PurchaseOrders"));
+const QuotationsPage = lazy(() => import("./pages/compras/Quotations"));
 
-// Administration Module
-import UsersPage from "./pages/admin/Users";
-import CompaniesPage from "./pages/admin/Companies";
-import ParametersPage from "./pages/admin/Parameters";
+// Reports
+const SalesReport = lazy(() => import("./pages/relatorios/SalesReport"));
+const InventoryReport = lazy(() => import("./pages/relatorios/InventoryReport"));
+const FinancialReport = lazy(() => import("./pages/relatorios/FinancialReport"));
+const ProductionReport = lazy(() => import("./pages/relatorios/ProductionReport"));
+
+// Administration
+const UsersPage = lazy(() => import("./pages/admin/Users"));
+const CompaniesPage = lazy(() => import("./pages/admin/Companies"));
+const ParametersPage = lazy(() => import("./pages/admin/Parameters"));
 
 // Profile & Notifications
-import ProfilePage from "./pages/Profile";
-import NotificationsPage from "./pages/Notifications";
+const ProfilePage = lazy(() => import("./pages/Profile"));
+const NotificationsPage = lazy(() => import("./pages/Notifications"));
 
-const queryClient = new QueryClient();
+function PageLoader() {
+  return (
+    <div className="flex min-h-[40vh] items-center justify-center">
+      <Loader2 className="h-6 w-6 animate-spin text-primary" />
+    </div>
+  );
+}
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (previously cacheTime)
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -91,99 +115,100 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route element={<MainLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            
-            {/* Commercial Module */}
-            <Route path="/comercial/clientes" element={<ClientsPage />} />
-            <Route path="/comercial/vendas" element={<SalesPage />} />
-            <Route path="/comercial/pedidos" element={<OrdersPage />} />
-            <Route path="/comercial/orcamentos" element={<CommercialQuotationsPage />} />
-            
-            {/* Financial Module */}
-            <Route path="/financeiro/pagar" element={<AccountsPayable />} />
-            <Route path="/financeiro/receber" element={<AccountsReceivable />} />
-            <Route path="/financeiro/fluxo" element={<CashFlow />} />
-            <Route path="/financeiro/conciliacao" element={<BankReconciliation />} />
-            
-            
-            {/* Accounting Module */}
-            <Route path="/contabilidade/painel" element={<AccountingDashboardPage />} />
-            <Route path="/contabilidade/plano-contas" element={<ChartOfAccountsPage />} />
-            <Route path="/contabilidade/lancamentos" element={<JournalEntriesPage />} />
-            <Route path="/contabilidade/razao" element={<GeneralLedgerPage />} />
-            <Route path="/contabilidade/balancete" element={<TrialBalancePage />} />
-            <Route path="/contabilidade/dre" element={<DREPage />} />
-            <Route path="/contabilidade/balanco" element={<BalanceSheetPage />} />
+        <CommandPalette />
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route element={<MainLayout />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              
+              {/* Commercial Module */}
+              <Route path="/comercial/clientes" element={<ClientsPage />} />
+              <Route path="/comercial/vendas" element={<SalesPage />} />
+              <Route path="/comercial/pedidos" element={<OrdersPage />} />
+              <Route path="/comercial/orcamentos" element={<CommercialQuotationsPage />} />
+              
+              {/* Financial Module */}
+              <Route path="/financeiro/pagar" element={<AccountsPayable />} />
+              <Route path="/financeiro/receber" element={<AccountsReceivable />} />
+              <Route path="/financeiro/fluxo" element={<CashFlow />} />
+              <Route path="/financeiro/conciliacao" element={<BankReconciliation />} />
+              
+              {/* Accounting Module */}
+              <Route path="/contabilidade/painel" element={<AccountingDashboardPage />} />
+              <Route path="/contabilidade/plano-contas" element={<ChartOfAccountsPage />} />
+              <Route path="/contabilidade/lancamentos" element={<JournalEntriesPage />} />
+              <Route path="/contabilidade/razao" element={<GeneralLedgerPage />} />
+              <Route path="/contabilidade/balancete" element={<TrialBalancePage />} />
+              <Route path="/contabilidade/dre" element={<DREPage />} />
+              <Route path="/contabilidade/balanco" element={<BalanceSheetPage />} />
 
-            {/* Fiscal Module */}
-            <Route path="/fiscal/nfe" element={<NFePage />} />
-            <Route path="/fiscal/nfce" element={<NFCePage />} />
-            <Route path="/fiscal/relatorios" element={<FiscalReportsPage />} />
+              {/* Fiscal Module */}
+              <Route path="/fiscal/nfe" element={<NFePage />} />
+              <Route path="/fiscal/nfce" element={<NFCePage />} />
+              <Route path="/fiscal/relatorios" element={<FiscalReportsPage />} />
 
-            {/* Inventory Module */}
-            <Route path="/estoque/produtos" element={<InventoryProductsPage />} />
-            <Route path="/estoque/movimentacoes" element={<InventoryMovementsPage />} />
-            <Route path="/estoque/kardex" element={<KardexPage />} />
-            <Route path="/estoque/saldos" element={<StockLevelsPage />} />
-            <Route path="/estoque/categorias" element={<CategoriesPage />} />
-            
-            {/* Purchasing Module */}
-            <Route path="/compras/fornecedores" element={<SuppliersPage />} />
-            <Route path="/compras/pedidos" element={<PurchaseOrdersPage />} />
-            <Route path="/compras/cotacoes" element={<QuotationsPage />} />
-            
-            {/* Production Module */}
-            <Route path="/producao/ordens" element={<ProductionOrdersPage />} />
-            <Route path="/producao/consumo" element={<MaterialConsumptionPage />} />
-            <Route path="/producao/apontamentos" element={<TimeEntriesPage />} />
-            
-            {/* WMS Module */}
-            <Route path="/wms/dashboard" element={<WMSDashboardPage />} />
-            <Route path="/wms/recebimento" element={<ReceivingPage />} />
-            <Route path="/wms/enderecamento" element={<StoragePage />} />
-            <Route path="/wms/picking" element={<PickingPage />} />
-            <Route path="/wms/packing" element={<PackingPage />} />
-            <Route path="/wms/inventario" element={<InventoryPage />} />
-            <Route path="/wms/movimentacoes" element={<WMSMovementsPage />} />
-            
-            {/* RFID Module */}
-            <Route path="/rfid/dashboard" element={<RFIDDashboardPage />} />
-            <Route path="/rfid/leitores" element={<RFIDReadersPage />} />
-            <Route path="/rfid/tags" element={<RFIDTagsPage />} />
-            <Route path="/rfid/eventos" element={<RFIDEventsPage />} />
-            <Route path="/rfid/integracao" element={<RFIDIntegrationPage />} />
-            
-            {/* Reports Module */}
-            <Route path="/relatorios/vendas" element={<SalesReport />} />
-            <Route path="/relatorios/estoque" element={<InventoryReport />} />
-            <Route path="/relatorios/financeiro" element={<FinancialReport />} />
-            <Route path="/relatorios/producao" element={<ProductionReport />} />
+              {/* Inventory Module */}
+              <Route path="/estoque/produtos" element={<InventoryProductsPage />} />
+              <Route path="/estoque/movimentacoes" element={<InventoryMovementsPage />} />
+              <Route path="/estoque/kardex" element={<KardexPage />} />
+              <Route path="/estoque/saldos" element={<StockLevelsPage />} />
+              <Route path="/estoque/categorias" element={<CategoriesPage />} />
+              
+              {/* Purchasing Module */}
+              <Route path="/compras/fornecedores" element={<SuppliersPage />} />
+              <Route path="/compras/pedidos" element={<PurchaseOrdersPage />} />
+              <Route path="/compras/cotacoes" element={<QuotationsPage />} />
+              
+              {/* Production Module */}
+              <Route path="/producao/ordens" element={<ProductionOrdersPage />} />
+              <Route path="/producao/consumo" element={<MaterialConsumptionPage />} />
+              <Route path="/producao/apontamentos" element={<TimeEntriesPage />} />
+              
+              {/* WMS Module */}
+              <Route path="/wms/dashboard" element={<WMSDashboardPage />} />
+              <Route path="/wms/recebimento" element={<ReceivingPage />} />
+              <Route path="/wms/enderecamento" element={<StoragePage />} />
+              <Route path="/wms/picking" element={<PickingPage />} />
+              <Route path="/wms/packing" element={<PackingPage />} />
+              <Route path="/wms/inventario" element={<InventoryPage />} />
+              <Route path="/wms/movimentacoes" element={<WMSMovementsPage />} />
+              
+              {/* RFID Module */}
+              <Route path="/rfid/dashboard" element={<RFIDDashboardPage />} />
+              <Route path="/rfid/leitores" element={<RFIDReadersPage />} />
+              <Route path="/rfid/tags" element={<RFIDTagsPage />} />
+              <Route path="/rfid/eventos" element={<RFIDEventsPage />} />
+              <Route path="/rfid/integracao" element={<RFIDIntegrationPage />} />
+              
+              {/* Reports Module */}
+              <Route path="/relatorios/vendas" element={<SalesReport />} />
+              <Route path="/relatorios/estoque" element={<InventoryReport />} />
+              <Route path="/relatorios/financeiro" element={<FinancialReport />} />
+              <Route path="/relatorios/producao" element={<ProductionReport />} />
 
-            {/* Administration Module */}
-            <Route path="/admin/usuarios" element={<UsersPage />} />
-            <Route path="/admin/empresas" element={<CompaniesPage />} />
-            <Route path="/admin/parametros" element={<ParametersPage />} />
+              {/* Administration Module */}
+              <Route path="/admin/usuarios" element={<UsersPage />} />
+              <Route path="/admin/empresas" element={<CompaniesPage />} />
+              <Route path="/admin/parametros" element={<ParametersPage />} />
 
-            {/* Profile & Notifications */}
-            <Route path="/perfil" element={<ProfilePage />} />
-            <Route path="/notificacoes" element={<NotificationsPage />} />
-            
-            {/* Config - Placeholder routes */}
-            <Route path="/config/*" element={<PlaceholderPage title="Configurações" />} />
-          </Route>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+              {/* Profile & Notifications */}
+              <Route path="/perfil" element={<ProfilePage />} />
+              <Route path="/notificacoes" element={<NotificationsPage />} />
+              
+              {/* Config - Placeholder routes */}
+              <Route path="/config/*" element={<PlaceholderPage title="Configurações" />} />
+            </Route>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
 
-// Placeholder component for modules not yet implemented
 function PlaceholderPage({ title }: { title: string }) {
   return (
     <div className="flex min-h-[50vh] items-center justify-center">
