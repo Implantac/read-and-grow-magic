@@ -46,6 +46,7 @@ export function useAuth() {
         } else {
           storeLogout();
         }
+        authInitialized = true;
         setLoading(false);
       }
     );
