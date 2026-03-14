@@ -16,67 +16,58 @@ function mapSupabaseUser(user: SupabaseUser, profileName?: string, role?: string
   };
 }
 
-// Track global auth initialization
-let authInitialized = false;
-let authInitPromise: Promise<void> | null = null;
-
 export function useAuth() {
   const { setUser, setUserRole, setActiveCompany, logout: storeLogout } = useAppStore();
-  const [loading, setLoading] = useState(!authInitialized);
+  const [loading, setLoading] = useState(true);
+
+  const syncAuthState = useCallback(async (sessionUser: SupabaseUser | null) => {
+    if (sessionUser) {
+      const [profileResponse, roleResponse] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('name')
+          .eq('id', sessionUser.id)
+          .single(),
+        supabase.rpc('get_user_role', { _user_id: sessionUser.id })
+      ]);
+
+      const role = roleResponse.data || 'viewer';
+      const appUser = mapSupabaseUser(sessionUser, profileResponse.data?.name, role);
+      setUser(appUser);
+      setUserRole(role);
+      setActiveCompany(mockCompanies[0] ?? null);
+    } else {
+      storeLogout();
+    }
+  }, [setUser, setUserRole, setActiveCompany, storeLogout]);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session?.user) {
-          // Fetch profile name and user role
-          const [profileResponse, roleResponse] = await Promise.all([
-            supabase
-              .from('profiles')
-              .select('name')
-              .eq('id', session.user.id)
-              .single(),
-            supabase.rpc('get_user_role', { _user_id: session.user.id })
-          ]);
-          
-          const role = roleResponse.data || 'viewer';
-          const appUser = mapSupabaseUser(session.user, profileResponse.data?.name, role);
-          setUser(appUser);
-          setUserRole(role);
-          setActiveCompany(mockCompanies[0]);
-        } else {
-          storeLogout();
-        }
-        authInitialized = true;
-        setLoading(false);
+    let mounted = true;
+
+    const runSync = async (sessionUser: SupabaseUser | null) => {
+      try {
+        await syncAuthState(sessionUser);
+      } finally {
+        if (mounted) setLoading(false);
       }
-    );
+    };
 
-    // Check existing session (only once globally)
-    if (!authInitPromise) {
-      authInitPromise = supabase.auth.getSession().then(async ({ data: { session } }) => {
-        if (session?.user) {
-          const [profileResponse, roleResponse] = await Promise.all([
-            supabase
-              .from('profiles')
-              .select('name')
-              .eq('id', session.user.id)
-              .single(),
-            supabase.rpc('get_user_role', { _user_id: session.user.id })
-          ]);
-          
-          const role = roleResponse.data || 'viewer';
-          const appUser = mapSupabaseUser(session.user, profileResponse.data?.name, role);
-          setUser(appUser);
-          setUserRole(role);
-          setActiveCompany(mockCompanies[0]);
-        }
-        authInitialized = true;
-      });
-    }
-    authInitPromise.then(() => setLoading(false));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Avoid async Supabase calls directly inside this callback (deadlock workaround)
+      setTimeout(() => {
+        void runSync(session?.user ?? null);
+      }, 0);
+    });
 
-    return () => subscription.unsubscribe();
-  }, [setUser, setUserRole, setActiveCompany, storeLogout]);
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      void runSync(session?.user ?? null);
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, [syncAuthState]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
