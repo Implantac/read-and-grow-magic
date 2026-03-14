@@ -50,26 +50,29 @@ export function useAuth() {
       }
     );
 
-    // Check existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        const [profileResponse, roleResponse] = await Promise.all([
-          supabase
-            .from('profiles')
-            .select('name')
-            .eq('id', session.user.id)
-            .single(),
-          supabase.rpc('get_user_role', { _user_id: session.user.id })
-        ]);
-        
-        const role = roleResponse.data || 'viewer';
-        const appUser = mapSupabaseUser(session.user, profileResponse.data?.name, role);
-        setUser(appUser);
-        setUserRole(role);
-        setActiveCompany(mockCompanies[0]);
-      }
-      setLoading(false);
-    });
+    // Check existing session (only once globally)
+    if (!authInitPromise) {
+      authInitPromise = supabase.auth.getSession().then(async ({ data: { session } }) => {
+        if (session?.user) {
+          const [profileResponse, roleResponse] = await Promise.all([
+            supabase
+              .from('profiles')
+              .select('name')
+              .eq('id', session.user.id)
+              .single(),
+            supabase.rpc('get_user_role', { _user_id: session.user.id })
+          ]);
+          
+          const role = roleResponse.data || 'viewer';
+          const appUser = mapSupabaseUser(session.user, profileResponse.data?.name, role);
+          setUser(appUser);
+          setUserRole(role);
+          setActiveCompany(mockCompanies[0]);
+        }
+        authInitialized = true;
+      });
+    }
+    authInitPromise.then(() => setLoading(false));
 
     return () => subscription.unsubscribe();
   }, [setUser, setUserRole, setActiveCompany, storeLogout]);
