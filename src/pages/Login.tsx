@@ -60,8 +60,8 @@ export default function Login() {
     setIsLoading(true);
     try {
       await signUp(email, password, name);
-      toast({ title: 'Conta criada!', description: 'Você já pode acessar o sistema.' });
-      navigate('/dashboard');
+      toast({ title: 'Conta criada!', description: 'Verifique seu email para confirmar o cadastro.' });
+      setView('login');
     } catch (error: any) {
       toast({ title: 'Erro ao criar conta', description: error.message, variant: 'destructive' });
     }
