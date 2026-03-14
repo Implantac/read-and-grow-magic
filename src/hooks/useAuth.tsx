@@ -16,9 +16,13 @@ function mapSupabaseUser(user: SupabaseUser, profileName?: string, role?: string
   };
 }
 
+// Track global auth initialization
+let authInitialized = false;
+let authInitPromise: Promise<void> | null = null;
+
 export function useAuth() {
   const { setUser, setUserRole, setActiveCompany, logout: storeLogout } = useAppStore();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!authInitialized);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
