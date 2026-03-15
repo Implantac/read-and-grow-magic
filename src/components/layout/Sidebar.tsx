@@ -199,17 +199,6 @@ export function Sidebar() {
           <div className="space-y-4">
             {navigationSections.map((section, sectionIndex) => (
               <div key={section.label || sectionIndex}>
-                {/* Section label */}
-                {section.label && !sidebarCollapsed && (
-                  <div className="px-3 mb-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-sidebar-foreground/30">
-                      {section.label}
-                    </span>
-                  </div>
-                )}
-                {section.label && sidebarCollapsed && (
-                  <div className="mx-auto my-1 w-6 border-t border-sidebar-border/40" />
-                )}
                 <ul className="space-y-0.5">
                   {section.items.map((item) => (
                     <NavItemComponent
