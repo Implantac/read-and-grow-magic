@@ -196,7 +196,7 @@ export function Sidebar() {
 
         {/* Navigation */}
         <nav className="h-[calc(100vh-4rem)] overflow-y-auto scrollbar-thin py-3 px-2">
-          <div className="space-y-4">
+          <div className="space-y-1">
             {navigationSections.map((section, sectionIndex) => (
               <div key={section.label || sectionIndex}>
                 <ul className="space-y-0.5">
