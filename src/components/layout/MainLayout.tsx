@@ -47,7 +47,7 @@ export function MainLayout() {
       <main
         className={cn(
           'min-h-screen pt-14 transition-all duration-300 ease-in-out',
-          sidebarCollapsed ? 'pl-16' : 'pl-64'
+          sidebarCollapsed ? 'pl-14' : 'pl-56'
         )}
       >
         <div className="p-6">
