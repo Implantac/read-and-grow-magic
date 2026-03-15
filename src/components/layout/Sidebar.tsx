@@ -171,7 +171,7 @@ export function Sidebar() {
       <aside
         className={cn(
           'fixed left-0 top-0 z-40 h-screen bg-sidebar transition-all duration-300 ease-in-out',
-          sidebarCollapsed ? 'w-16' : 'w-64'
+          sidebarCollapsed ? 'w-14' : 'w-56'
         )}
         style={{ boxShadow: '4px 0 24px -4px hsl(222 33% 8% / 0.3)' }}
       >
