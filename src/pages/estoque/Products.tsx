@@ -129,10 +129,10 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Produtos</h1>
-          <p className="text-muted-foreground">Cadastro e controle de produtos</p>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Produtos</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Cadastro e controle de produtos</p>
         </div>
         <div className="flex gap-2">
           <ExportButton
@@ -149,8 +149,8 @@ export default function ProductsPage() {
             ]}
             filename="produtos"
           />
-          <Button onClick={() => handleOpenForm()}>
-            <Plus className="mr-2 h-4 w-4" />
+          <Button onClick={() => handleOpenForm()} className="gap-2">
+            <Plus className="h-4 w-4" />
             Novo Produto
           </Button>
         </div>
