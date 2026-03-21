@@ -174,7 +174,7 @@ export default function ProductsPage() {
             <Box className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{activeProducts}</div>
+            <div className="text-2xl font-bold text-success">{activeProducts}</div>
             <p className="text-xs text-muted-foreground">
               {products.length > 0 ? ((activeProducts / products.length) * 100).toFixed(0) : 0}% do total
             </p>

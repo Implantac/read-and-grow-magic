@@ -2,69 +2,64 @@ import { useWMSDashboardStats } from '@/hooks/useWMSOperations';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Link } from 'react-router-dom';
 import {
   Warehouse, Package, PackagePlus, PackageSearch, PackageCheck, Truck,
   CheckCircle, MapPin, ArrowUpDown
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+const kpiCards = [
+  { key: 'receiving', label: 'Recebimentos', sub: 'Pendentes/Em andamento', icon: PackagePlus, accent: 'bg-info/10 text-info ring-info/20' },
+  { key: 'picking', label: 'Picking', sub: 'Ordens ativas', icon: PackageSearch, accent: 'bg-warning/10 text-warning ring-warning/20' },
+  { key: 'packing', label: 'Packing', sub: 'Para embalar', icon: PackageCheck, accent: 'bg-[hsl(263,70%,50%)]/10 text-[hsl(263,70%,50%)] ring-[hsl(263,70%,50%)]/20' },
+  { key: 'shipped', label: 'Prontos p/ Expedição', sub: 'Aguardando envio', icon: Truck, accent: 'bg-success/10 text-success ring-success/20' },
+] as const;
 
 export default function WMSDashboardPage() {
   const { stats, recentMovements, loading } = useWMSDashboardStats();
 
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div><Skeleton className="h-8 w-64 mb-2" /><Skeleton className="h-4 w-80" /></div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1,2,3,4].map(i => <Card key={i}><CardContent className="p-5"><Skeleton className="h-16 w-full" /></CardContent></Card>)}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard WMS</h1>
-          <p className="text-muted-foreground">Visão geral das operações do armazém</p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold text-foreground tracking-tight">Dashboard WMS</h1>
+        <p className="text-sm text-muted-foreground mt-0.5">Visão geral das operações do armazém</p>
       </div>
 
       {/* Main KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-l-4 border-l-blue-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Recebimentos</CardTitle>
-            <PackagePlus className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.receiving}</div>
-            <p className="text-xs text-muted-foreground">Pendentes/Em andamento</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-amber-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Picking</CardTitle>
-            <PackageSearch className="h-4 w-4 text-amber-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.picking}</div>
-            <p className="text-xs text-muted-foreground">Ordens ativas</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-purple-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Packing</CardTitle>
-            <PackageCheck className="h-4 w-4 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.packing}</div>
-            <p className="text-xs text-muted-foreground">Para embalar</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-l-4 border-l-green-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Prontos p/ Expedição</CardTitle>
-            <Truck className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.shipped}</div>
-            <p className="text-xs text-muted-foreground">Aguardando envio</p>
-          </CardContent>
-        </Card>
+        {kpiCards.map((kpi, idx) => {
+          const Icon = kpi.icon;
+          const value = stats[kpi.key as keyof typeof stats];
+          return (
+            <Card key={kpi.key} className="hover-lift group cursor-default" style={{ animationDelay: `${idx * 80}ms` }}>
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-1.5">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{kpi.label}</p>
+                    <p className="text-2xl font-bold text-foreground tabular-nums">{value}</p>
+                    <p className="text-xs text-muted-foreground">{kpi.sub}</p>
+                  </div>
+                  <div className={cn('rounded-xl p-2.5 ring-1 transition-transform duration-200 group-hover:scale-110', kpi.accent)}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       {/* Secondary Row */}
@@ -73,7 +68,7 @@ export default function WMSDashboardPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Warehouse className="h-4 w-4" />
+              <Warehouse className="h-4 w-4 text-muted-foreground" />
               Ocupação do Armazém
             </CardTitle>
           </CardHeader>
@@ -81,24 +76,24 @@ export default function WMSDashboardPage() {
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span>Taxa de Ocupação</span>
-                  <span className="font-medium">{stats.occupancy}%</span>
+                  <span className="text-muted-foreground">Taxa de Ocupação</span>
+                  <span className="font-semibold text-foreground">{stats.occupancy}%</span>
                 </div>
                 <Progress value={stats.occupancy} className="h-3" />
               </div>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-muted-foreground">Total Endereços</p>
-                  <p className="font-medium">{stats.totalLocations}</p>
+                  <p className="font-semibold text-foreground">{stats.totalLocations}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Capacidade</p>
-                  <p className="font-medium">{stats.occupied}/{stats.capacity}</p>
+                  <p className="font-semibold text-foreground">{stats.occupied}/{stats.capacity}</p>
                 </div>
               </div>
               <Link to="/wms/enderecamento">
-                <Button variant="outline" size="sm" className="w-full">
-                  <MapPin className="h-4 w-4 mr-2" />
+                <Button variant="outline" size="sm" className="w-full gap-2">
+                  <MapPin className="h-4 w-4" />
                   Ver Endereçamento
                 </Button>
               </Link>
@@ -110,17 +105,17 @@ export default function WMSDashboardPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Package className="h-4 w-4" />
+              <Package className="h-4 w-4 text-muted-foreground" />
               Alertas de Estoque
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2 p-2 text-green-600">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 text-success">
               <CheckCircle className="h-4 w-4" />
-              <span className="text-sm">Nenhum alerta</span>
+              <span className="text-sm font-medium">Nenhum alerta</span>
             </div>
             <Link to="/wms/inventario">
-              <Button variant="outline" size="sm" className="w-full mt-2">
+              <Button variant="outline" size="sm" className="w-full mt-3 gap-2">
                 Ver Inventário
               </Button>
             </Link>
@@ -131,17 +126,17 @@ export default function WMSDashboardPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <PackageSearch className="h-4 w-4" />
+              <PackageSearch className="h-4 w-4 text-muted-foreground" />
               Pickings Urgentes
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2 p-2 text-green-600">
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 text-success">
               <CheckCircle className="h-4 w-4" />
-              <span className="text-sm">Nenhum picking urgente</span>
+              <span className="text-sm font-medium">Nenhum picking urgente</span>
             </div>
             <Link to="/wms/picking">
-              <Button variant="outline" size="sm" className="w-full mt-2">
+              <Button variant="outline" size="sm" className="w-full mt-3 gap-2">
                 Ver Todos Pickings
               </Button>
             </Link>
@@ -149,11 +144,11 @@ export default function WMSDashboardPage() {
         </Card>
       </div>
 
-      {/* Recent Movements - Empty State */}
+      {/* Recent Movements */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ArrowUpDown className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-base">
+            <ArrowUpDown className="h-5 w-5 text-muted-foreground" />
             Movimentações Recentes
           </CardTitle>
         </CardHeader>
@@ -161,8 +156,8 @@ export default function WMSDashboardPage() {
           {recentMovements.length > 0 ? (
             <div className="space-y-2">
               {recentMovements.map((m: any) => (
-                <div key={m.id} className="flex items-center justify-between text-sm border-b pb-2">
-                  <span>{m.productName}</span>
+                <div key={m.id} className="flex items-center justify-between text-sm border-b border-border pb-2">
+                  <span className="font-medium text-foreground">{m.productName}</span>
                   <span className="text-muted-foreground">{m.type} - {m.quantity} un</span>
                 </div>
               ))}
@@ -178,31 +173,31 @@ export default function WMSDashboardPage() {
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle>Ações Rápidas</CardTitle>
+          <CardTitle className="text-base">Ações Rápidas</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:grid-cols-4">
             <Link to="/wms/recebimento">
-              <Button variant="outline" className="w-full h-20 flex-col gap-2">
-                <PackagePlus className="h-6 w-6" />
+              <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:border-primary/50 hover:bg-primary/5">
+                <PackagePlus className="h-6 w-6 text-primary" />
                 <span>Novo Recebimento</span>
               </Button>
             </Link>
             <Link to="/wms/picking">
-              <Button variant="outline" className="w-full h-20 flex-col gap-2">
-                <PackageSearch className="h-6 w-6" />
+              <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:border-primary/50 hover:bg-primary/5">
+                <PackageSearch className="h-6 w-6 text-primary" />
                 <span>Iniciar Picking</span>
               </Button>
             </Link>
             <Link to="/wms/movimentacoes">
-              <Button variant="outline" className="w-full h-20 flex-col gap-2">
-                <ArrowUpDown className="h-6 w-6" />
+              <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:border-primary/50 hover:bg-primary/5">
+                <ArrowUpDown className="h-6 w-6 text-primary" />
                 <span>Nova Movimentação</span>
               </Button>
             </Link>
             <Link to="/wms/inventario">
-              <Button variant="outline" className="w-full h-20 flex-col gap-2">
-                <Package className="h-6 w-6" />
+              <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:border-primary/50 hover:bg-primary/5">
+                <Package className="h-6 w-6 text-primary" />
                 <span>Ajuste Inventário</span>
               </Button>
             </Link>
