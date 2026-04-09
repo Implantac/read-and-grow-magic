@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { Star, Plus, Search, Eye, Edit, Trash2, Mail, Phone, MapPin, MoreHorizontal, Loader2 } from 'lucide-react';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { ExportButton } from '@/components/shared/ExportButton';
@@ -573,6 +575,6 @@ export default function SuppliersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }
