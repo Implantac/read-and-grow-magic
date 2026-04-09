@@ -2,11 +2,16 @@ import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import {
-  FileDown,
-  Loader2,
-  BarChart3,
-} from 'lucide-react';
+import { FileDown, Loader2, BarChart3 } from 'lucide-react';
+import { EquityEvolutionChart } from '@/components/contabilidade/EquityEvolutionChart';
+import { MarginTrendChart } from '@/components/contabilidade/MarginTrendChart';
+import { RevenueExpenseTrendChart } from '@/components/contabilidade/RevenueExpenseTrendChart';
+import { ExpenseBreakdownChart } from '@/components/contabilidade/ExpenseBreakdownChart';
+import { FinancialIndicatorsPanel } from '@/components/contabilidade/FinancialIndicatorsPanel';
+import { TrialBalanceChart } from '@/components/contabilidade/TrialBalanceChart';
+import { PeriodSelector } from '@/components/contabilidade/PeriodSelector';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { EquityEvolutionChart } from '@/components/contabilidade/EquityEvolutionChart';
 import { MarginTrendChart } from '@/components/contabilidade/MarginTrendChart';
 import { RevenueExpenseTrendChart } from '@/components/contabilidade/RevenueExpenseTrendChart';
@@ -65,26 +70,19 @@ export default function AccountingDashboard() {
   }, [selectedPeriod]);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Painel Executivo Contábil</h1>
-          <p className="text-muted-foreground">Visão consolidada dos indicadores contábeis</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleExportPDF} disabled={isExporting} className="gap-2">
-            {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
-            Exportar PDF
-          </Button>
-          <PeriodSelector
-            value={selectedPeriod}
-            onValueChange={setSelectedPeriod}
-            compareValue={comparePeriod}
-            onCompareChange={setComparePeriod}
-          />
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader title="Painel Executivo Contábil" description="Visão consolidada dos indicadores contábeis">
+        <Button variant="outline" onClick={handleExportPDF} disabled={isExporting} className="gap-2">
+          {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
+          Exportar PDF
+        </Button>
+        <PeriodSelector
+          value={selectedPeriod}
+          onValueChange={setSelectedPeriod}
+          compareValue={comparePeriod}
+          onCompareChange={setComparePeriod}
+        />
+      </PageHeader>
 
       <div ref={dashboardRef} className="space-y-6">
         {/* Empty state message */}
