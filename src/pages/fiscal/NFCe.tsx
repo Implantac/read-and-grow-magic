@@ -55,6 +55,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useNFCe } from '@/hooks/useNFCe';
 import { PDVDialog } from '@/components/fiscal/PDVDialog';
 import type { NFCe } from '@/types/fiscal';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ className?: string }> }> = {
   authorized: { color: 'bg-success/10 text-success', icon: CheckCircle },
@@ -163,15 +165,8 @@ export default function NFCePage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">NFC-e - Nota Fiscal de Consumidor</h1>
-          <p className="text-muted-foreground">
-            Gerencie suas notas fiscais de consumidor eletrônicas
-          </p>
-        </div>
+    <PageContainer>
+      <PageHeader title="NFC-e - Nota Fiscal de Consumidor" description="Gerencie suas notas fiscais de consumidor eletrônicas">
         <ExportButton
           data={filteredNFCes as unknown as Record<string, unknown>[]}
           columns={[
@@ -189,7 +184,7 @@ export default function NFCePage() {
           <Plus className="h-4 w-4" />
           Nova Venda PDV
         </Button>
-      </div>
+      </PageHeader>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -518,6 +513,6 @@ export default function NFCePage() {
 
       {/* PDV Dialog */}
       <PDVDialog open={pdvOpen} onOpenChange={setPdvOpen} onEmit={emit} />
-    </div>
+    </PageContainer>
   );
 }

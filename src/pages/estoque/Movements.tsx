@@ -45,6 +45,9 @@ import { ptBR } from 'date-fns/locale';
 import {
   movementTypeConfig,
 } from '@/config/inventory';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 import type { StockMovement, MovementType, MovementDirection, MovementFilters } from '@/types/inventory';
 
 export default function MovementsPage() {
@@ -110,84 +113,35 @@ export default function MovementsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Movimentações</h1>
-          <p className="text-muted-foreground">Controle de entradas e saídas de estoque</p>
-        </div>
-        <div className="flex gap-2">
-          <ExportButton
-            data={filteredMovements as unknown as Record<string, unknown>[]}
-            columns={[
-              { key: 'documentNumber', label: 'Documento' },
-              { key: 'productCode', label: 'Código Produto' },
-              { key: 'productName', label: 'Produto' },
-              { key: 'type', label: 'Tipo' },
-              { key: 'direction', label: 'Direção' },
-              { key: 'quantity', label: 'Quantidade' },
-              { key: 'unitCost', label: 'Custo Unit.', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
-              { key: 'totalCost', label: 'Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
-              { key: 'operator', label: 'Operador' },
-              { key: 'createdAt', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
-            ]}
-            filename="movimentacoes_estoque"
-          />
-          <Button onClick={() => setIsFormOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Nova Movimentação
-          </Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader title="Movimentações" description="Controle de entradas e saídas de estoque">
+        <ExportButton
+          data={filteredMovements as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'documentNumber', label: 'Documento' },
+            { key: 'productCode', label: 'Código Produto' },
+            { key: 'productName', label: 'Produto' },
+            { key: 'type', label: 'Tipo' },
+            { key: 'direction', label: 'Direção' },
+            { key: 'quantity', label: 'Quantidade' },
+            { key: 'unitCost', label: 'Custo Unit.', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+            { key: 'totalCost', label: 'Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+            { key: 'operator', label: 'Operador' },
+            { key: 'createdAt', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+          ]}
+          filename="movimentacoes_estoque"
+        />
+        <Button onClick={() => setIsFormOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Nova Movimentação
+        </Button>
+      </PageHeader>
 
-      {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Movimentações</CardTitle>
-            <ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{movements.length}</div>
-            <p className="text-xs text-muted-foreground">{movementsToday} hoje</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Entradas</CardTitle>
-            <ArrowDownCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{formatCurrency(totalEntries)}</div>
-            <p className="text-xs text-muted-foreground">
-              {movements.filter((m) => m.direction === 'in').length} movimentações
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Saídas</CardTitle>
-            <ArrowUpCircle className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{formatCurrency(totalExits)}</div>
-            <p className="text-xs text-muted-foreground">
-              {movements.filter((m) => m.direction === 'out').length} movimentações
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Saldo Período</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className={`text-2xl font-bold ${totalEntries - totalExits >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {formatCurrency(totalEntries - totalExits)}
-            </div>
-            <p className="text-xs text-muted-foreground">Entradas - Saídas</p>
-          </CardContent>
-        </Card>
+        <KPICard title="Total de Movimentações" value={movements.length} icon={<ArrowLeftRight className="h-5 w-5" />} subtitle={`${movementsToday} hoje`} index={0} />
+        <KPICard title="Total Entradas" value={formatCurrency(totalEntries)} icon={<ArrowDownCircle className="h-5 w-5" />} accentColor="success" subtitle={`${movements.filter((m) => m.direction === 'in').length} movimentações`} index={1} />
+        <KPICard title="Total Saídas" value={formatCurrency(totalExits)} icon={<ArrowUpCircle className="h-5 w-5" />} accentColor="danger" subtitle={`${movements.filter((m) => m.direction === 'out').length} movimentações`} index={2} />
+        <KPICard title="Saldo Período" value={formatCurrency(totalEntries - totalExits)} icon={<Calendar className="h-5 w-5" />} accentColor={totalEntries - totalExits >= 0 ? 'success' : 'danger'} subtitle="Entradas - Saídas" index={3} />
       </div>
 
       {/* Filters */}
@@ -471,6 +425,6 @@ export default function MovementsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }

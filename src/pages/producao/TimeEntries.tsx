@@ -25,6 +25,8 @@ import {
   Wrench
 } from 'lucide-react';
 import { TimeEntry, TimeEntryStatus } from '@/types/production';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 const statusConfig: Record<TimeEntryStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ReactNode }> = {
   started: { label: 'Em Andamento', variant: 'default', icon: <PlayCircle className="h-4 w-4" /> },
@@ -130,32 +132,26 @@ export default function TimeEntriesPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Apontamentos</h1>
-          <p className="text-muted-foreground">Registro de tempo e produção por operação</p>
-        </div>
-        <div className="flex gap-2">
-          <ExportButton
-            data={filteredEntries as unknown as Record<string, unknown>[]}
-            columns={[
-              { key: 'orderNumber', label: 'Ordem' },
-              { key: 'operationName', label: 'Operação' },
-              { key: 'operator', label: 'Operador' },
-              { key: 'workCenter', label: 'Centro de Trabalho' },
-              { key: 'producedQuantity', label: 'Produzido' },
-              { key: 'rejectedQuantity', label: 'Rejeitado' },
-              { key: 'status', label: 'Status' },
-            ]}
-            filename="apontamentos"
-          />
-          <Button onClick={() => setStartOpen(true)}>
-            <Play className="h-4 w-4 mr-2" />
-            Novo Apontamento
-          </Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader title="Apontamentos" description="Registro de tempo e produção por operação">
+        <ExportButton
+          data={filteredEntries as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'orderNumber', label: 'Ordem' },
+            { key: 'operationName', label: 'Operação' },
+            { key: 'operator', label: 'Operador' },
+            { key: 'workCenter', label: 'Centro de Trabalho' },
+            { key: 'producedQuantity', label: 'Produzido' },
+            { key: 'rejectedQuantity', label: 'Rejeitado' },
+            { key: 'status', label: 'Status' },
+          ]}
+          filename="apontamentos"
+        />
+        <Button onClick={() => setStartOpen(true)}>
+          <Play className="h-4 w-4 mr-2" />
+          Novo Apontamento
+        </Button>
+      </PageHeader>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-5">
@@ -494,6 +490,6 @@ export default function TimeEntriesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }

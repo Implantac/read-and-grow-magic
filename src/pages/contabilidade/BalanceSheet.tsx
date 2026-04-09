@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { cn } from '@/lib/utils';
 import { Scale, Building2, Landmark, PiggyBank } from 'lucide-react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { EquityEvolutionChart } from '@/components/contabilidade/EquityEvolutionChart';
 import { FinancialIndicatorsPanel } from '@/components/contabilidade/FinancialIndicatorsPanel';
 import {
@@ -82,14 +84,10 @@ export default function BalanceSheetPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Balanço Patrimonial</h1>
-          <p className="text-muted-foreground">Posição patrimonial da empresa</p>
-        </div>
+    <PageContainer>
+      <PageHeader title="Balanço Patrimonial" description="Posição patrimonial da empresa">
         <ExportButton data={balanceSheet as unknown as Record<string, unknown>[]} columns={exportColumns} filename="balanco_patrimonial" />
-      </div>
+      </PageHeader>
 
       {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -134,6 +132,6 @@ export default function BalanceSheetPage() {
       {renderSection('Ativo', <Building2 className="h-4 w-4 text-primary" />, assets)}
       {renderSection('Passivo', <Landmark className="h-4 w-4 text-destructive" />, liabilities)}
       {renderSection('Patrimônio Líquido', <PiggyBank className="h-4 w-4 text-primary" />, equity)}
-    </div>
+    </PageContainer>
   );
 }

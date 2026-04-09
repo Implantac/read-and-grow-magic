@@ -23,6 +23,8 @@ import {
   Box
 } from 'lucide-react';
 import { MaterialConsumption } from '@/types/production';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 export default function MaterialConsumptionPage() {
   const [consumptions, setConsumptions] = useState<MaterialConsumption[]>([]);
@@ -86,31 +88,25 @@ export default function MaterialConsumptionPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Consumo de Matéria-Prima</h1>
-          <p className="text-muted-foreground">Registro e acompanhamento do consumo de materiais</p>
-        </div>
-        <div className="flex gap-2">
-          <ExportButton
-            data={filteredConsumptions as unknown as Record<string, unknown>[]}
-            columns={[
-              { key: 'orderNumber', label: 'Ordem' },
-              { key: 'componentCode', label: 'Código' },
-              { key: 'componentName', label: 'Material' },
-              { key: 'expectedQuantity', label: 'Qtd Esperada' },
-              { key: 'consumedQuantity', label: 'Qtd Consumida' },
-              { key: 'unit', label: 'Unidade' },
-            ]}
-            filename="consumo_materiais"
-          />
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Registrar Consumo
-          </Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader title="Consumo de Matéria-Prima" description="Registro e acompanhamento do consumo de materiais">
+        <ExportButton
+          data={filteredConsumptions as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'orderNumber', label: 'Ordem' },
+            { key: 'componentCode', label: 'Código' },
+            { key: 'componentName', label: 'Material' },
+            { key: 'expectedQuantity', label: 'Qtd Esperada' },
+            { key: 'consumedQuantity', label: 'Qtd Consumida' },
+            { key: 'unit', label: 'Unidade' },
+          ]}
+          filename="consumo_materiais"
+        />
+        <Button>
+          <Plus className="h-4 w-4 mr-2" />
+          Registrar Consumo
+        </Button>
+      </PageHeader>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -384,6 +380,6 @@ export default function MaterialConsumptionPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }
