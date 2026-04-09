@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { Download, DollarSign, TrendingUp, TrendingDown, AlertCircle, BarChart3 } from 'lucide-react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(value);
@@ -30,13 +33,7 @@ export default function FinancialReport() {
         const overdueItems = receivables.filter(r => r.status === 'pending' && r.due_date < now);
         const overdue = overdueItems.reduce((s, r) => s + Number(r.amount), 0);
 
-        setStats({
-          revenue,
-          expenses,
-          profit: revenue - expenses,
-          overdue,
-          overdueCount: overdueItems.length,
-        });
+        setStats({ revenue, expenses, profit: revenue - expenses, overdue, overdueCount: overdueItems.length });
       } catch (e) {
         console.error('Error fetching financial stats:', e);
       } finally {
@@ -50,68 +47,28 @@ export default function FinancialReport() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <PageContainer>
         <Skeleton className="h-10 w-64" />
         <div className="grid gap-4 md:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24" />)}
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   const hasData = stats.revenue > 0 || stats.expenses > 0;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Relatório Financeiro</h1>
-          <p className="text-muted-foreground">DRE simplificado, fluxo de caixa e inadimplência</p>
-        </div>
+    <PageContainer>
+      <PageHeader title="Relatório Financeiro" description="DRE simplificado, fluxo de caixa e inadimplência">
         <Button variant="outline" size="sm" className="gap-2"><Download className="h-4 w-4" /> Exportar</Button>
-      </div>
+      </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Receita Total</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.revenue)}</div>
-            <p className="text-xs text-muted-foreground">{hasData ? 'Contas a receber' : 'Nenhum dado disponível'}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Despesas</CardTitle>
-            <TrendingDown className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.expenses)}</div>
-            <p className="text-xs text-muted-foreground">{hasData ? 'Contas a pagar' : 'Nenhum dado disponível'}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lucro Líquido</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-success">{formatCurrency(stats.profit)}</div>
-            <p className="text-xs text-muted-foreground">Margem: {margin}%</p>
-          </CardContent>
-        </Card>
-        <Card className="border-destructive/50">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Inadimplência</CardTitle>
-            <AlertCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">{formatCurrency(stats.overdue)}</div>
-            <p className="text-xs text-destructive">{stats.overdueCount} títulos vencidos</p>
-          </CardContent>
-        </Card>
+        <KPICard title="Receita Total" value={formatCurrency(stats.revenue)} subtitle={hasData ? 'Contas a receber' : 'Nenhum dado disponível'} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Despesas" value={formatCurrency(stats.expenses)} subtitle={hasData ? 'Contas a pagar' : 'Nenhum dado disponível'} icon={<TrendingDown className="h-5 w-5" />} accentColor="warning" index={1} />
+        <KPICard title="Lucro Líquido" value={formatCurrency(stats.profit)} subtitle={`Margem: ${margin}%`} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={2} />
+        <KPICard title="Inadimplência" value={formatCurrency(stats.overdue)} subtitle={`${stats.overdueCount} títulos vencidos`} icon={<AlertCircle className="h-5 w-5" />} accentColor="danger" index={3} />
       </div>
 
       {!hasData && (
@@ -123,6 +80,6 @@ export default function FinancialReport() {
           </CardContent>
         </Card>
       )}
-    </div>
+    </PageContainer>
   );
 }

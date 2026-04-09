@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { Star, Plus, Search, Eye, Edit, Trash2, Mail, Phone, MapPin, MoreHorizontal, Loader2 } from 'lucide-react';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { ExportButton } from '@/components/shared/ExportButton';
@@ -177,32 +179,26 @@ export default function SuppliersPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Fornecedores</h1>
-          <p className="text-muted-foreground">Gerencie o cadastro de fornecedores</p>
-        </div>
-        <div className="flex gap-2">
-          <ExportButton
-            data={filteredSuppliers as unknown as Record<string, unknown>[]}
-            columns={[
-              { key: 'code', label: 'Código' },
-              { key: 'name', label: 'Nome' },
-              { key: 'document', label: 'CNPJ' },
-              { key: 'category', label: 'Categoria' },
-              { key: 'email', label: 'E-mail' },
-              { key: 'phone', label: 'Telefone' },
-              { key: 'status', label: 'Status' },
-            ]}
-            filename="fornecedores"
-          />
-          <Button onClick={handleNew}>
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Fornecedor
-          </Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader title="Fornecedores" description="Gerencie o cadastro de fornecedores">
+        <ExportButton
+          data={filteredSuppliers as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'code', label: 'Código' },
+            { key: 'name', label: 'Nome' },
+            { key: 'document', label: 'CNPJ' },
+            { key: 'category', label: 'Categoria' },
+            { key: 'email', label: 'E-mail' },
+            { key: 'phone', label: 'Telefone' },
+            { key: 'status', label: 'Status' },
+          ]}
+          filename="fornecedores"
+        />
+        <Button onClick={handleNew}>
+          <Plus className="mr-2 h-4 w-4" />
+          Novo Fornecedor
+        </Button>
+      </PageHeader>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -579,6 +575,6 @@ export default function SuppliersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }

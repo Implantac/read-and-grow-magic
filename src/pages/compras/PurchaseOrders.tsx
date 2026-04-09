@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { Plus, Search, MoreHorizontal, Eye, Edit, Trash2, Send, CheckCircle, Package, FileText } from 'lucide-react';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
@@ -127,31 +129,25 @@ export default function PurchaseOrdersPage() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Pedidos de Compra</h1>
-          <p className="text-sm text-muted-foreground">Gerencie os pedidos de compra</p>
-        </div>
-        <div className="flex gap-2">
-          <ExportButton
-            data={filteredOrders as unknown as Record<string, unknown>[]}
-            columns={[
-              { key: 'number', label: 'Número' },
-              { key: 'supplierName', label: 'Fornecedor' },
-              { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
-              { key: 'total', label: 'Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
-              { key: 'status', label: 'Status' },
-              { key: 'priority', label: 'Prioridade' },
-            ]}
-            filename="pedidos_compra"
-          />
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Pedido
-          </Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader title="Pedidos de Compra" description="Gerencie os pedidos de compra">
+        <ExportButton
+          data={filteredOrders as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'number', label: 'Número' },
+            { key: 'supplierName', label: 'Fornecedor' },
+            { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+            { key: 'total', label: 'Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+            { key: 'status', label: 'Status' },
+            { key: 'priority', label: 'Prioridade' },
+          ]}
+          filename="pedidos_compra"
+        />
+        <Button>
+          <Plus className="mr-2 h-4 w-4" />
+          Novo Pedido
+        </Button>
+      </PageHeader>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -541,6 +537,6 @@ export default function PurchaseOrdersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }

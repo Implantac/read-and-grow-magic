@@ -14,6 +14,8 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
 import { ExportButton } from '@/components/shared/ExportButton';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
 import {
   CheckCircle2, XCircle, AlertTriangle, Search, Filter, Link2, Unlink, RefreshCw,
   ArrowUpRight, ArrowDownRight, Building2, Calendar,
@@ -122,30 +124,24 @@ export default function BankReconciliation() {
   const toast = { info: (msg: string) => {} };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Conciliação Bancária</h1>
-          <p className="text-muted-foreground">Compare extrato bancário com lançamentos do sistema</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleAutoReconcile} className="gap-2">
-            <RefreshCw className="h-4 w-4" />
-            Conciliar Automático
-          </Button>
-          <ExportButton
-            data={bankTransactions as unknown as Record<string, unknown>[]}
-            columns={[
-              { key: 'date', label: 'Data' },
-              { key: 'description', label: 'Descrição' },
-              { key: 'amount', label: 'Valor', format: (v) => formatCurrency(Number(v)) },
-              { key: 'type', label: 'Tipo' },
-              { key: 'status', label: 'Status' },
-            ]}
-            filename="conciliacao-bancaria"
-          />
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader title="Conciliação Bancária" description="Compare extrato bancário com lançamentos do sistema">
+        <Button variant="outline" onClick={handleAutoReconcile} className="gap-2">
+          <RefreshCw className="h-4 w-4" />
+          Conciliar Automático
+        </Button>
+        <ExportButton
+          data={bankTransactions as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'date', label: 'Data' },
+            { key: 'description', label: 'Descrição' },
+            { key: 'amount', label: 'Valor', format: (v) => formatCurrency(Number(v)) },
+            { key: 'type', label: 'Tipo' },
+            { key: 'status', label: 'Status' },
+          ]}
+          filename="conciliacao-bancaria"
+        />
+      </PageHeader>
 
       {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -365,6 +361,6 @@ export default function BankReconciliation() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }

@@ -5,6 +5,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
 import { Download, TrendingUp, ShoppingBag, Users, Target } from 'lucide-react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(value);
@@ -37,76 +40,34 @@ export default function SalesReport() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <PageContainer>
         <Skeleton className="h-10 w-64" />
         <div className="grid gap-4 md:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24" />)}
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Relatório de Vendas</h1>
-          <p className="text-muted-foreground">Análise consolidada de vendas e desempenho comercial</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="monthly">Mensal</SelectItem>
-              <SelectItem value="quarterly">Trimestral</SelectItem>
-              <SelectItem value="yearly">Anual</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline" size="sm" className="gap-2"><Download className="h-4 w-4" /> Exportar</Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader title="Relatório de Vendas" description="Análise consolidada de vendas e desempenho comercial">
+        <Select value={period} onValueChange={setPeriod}>
+          <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="monthly">Mensal</SelectItem>
+            <SelectItem value="quarterly">Trimestral</SelectItem>
+            <SelectItem value="yearly">Anual</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button variant="outline" size="sm" className="gap-2"><Download className="h-4 w-4" /> Exportar</Button>
+      </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Vendas</CardTitle>
-            <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.count}</div>
-            <p className="text-xs text-muted-foreground">{stats.count === 0 ? 'Nenhuma venda registrada' : 'Vendas no período'}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Faturamento</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.revenue)}</div>
-            <p className="text-xs text-muted-foreground">{stats.count === 0 ? 'Nenhum dado disponível' : 'Total acumulado'}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ticket Médio</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.avgTicket)}</div>
-            <p className="text-xs text-muted-foreground">Por venda</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Meta Atingida</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-success">0%</div>
-            <p className="text-xs text-muted-foreground">Acumulado no período</p>
-          </CardContent>
-        </Card>
+        <KPICard title="Total Vendas" value={stats.count} subtitle={stats.count === 0 ? 'Nenhuma venda registrada' : 'Vendas no período'} icon={<ShoppingBag className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Faturamento" value={formatCurrency(stats.revenue)} subtitle={stats.count === 0 ? 'Nenhum dado disponível' : 'Total acumulado'} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={1} />
+        <KPICard title="Ticket Médio" value={formatCurrency(stats.avgTicket)} subtitle="Por venda" icon={<Users className="h-5 w-5" />} accentColor="info" index={2} />
+        <KPICard title="Meta Atingida" value="0%" subtitle="Acumulado no período" icon={<Target className="h-5 w-5" />} accentColor="warning" index={3} />
       </div>
 
       {stats.count === 0 && (
@@ -118,6 +79,6 @@ export default function SalesReport() {
           </CardContent>
         </Card>
       )}
-    </div>
+    </PageContainer>
   );
 }
