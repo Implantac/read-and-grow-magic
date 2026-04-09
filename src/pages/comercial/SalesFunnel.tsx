@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
@@ -9,8 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, DollarSign, Target, TrendingUp, Pencil } from 'lucide-react';
+import { Plus, DollarSign, Target, TrendingUp, Pencil, MoreHorizontal, Trophy, XCircle, ArrowRight } from 'lucide-react';
 import { useSalesFunnel, useCreateFunnelItem, useUpdateFunnelItem, FUNNEL_STAGES, type DbFunnelItem } from '@/hooks/useSalesFunnel';
 import { useClients } from '@/hooks/useClients';
 import { useSalesReps } from '@/hooks/useSalesReps';
@@ -31,6 +32,8 @@ export default function SalesFunnelPage() {
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<DbFunnelItem | null>(null);
+  const [draggedItem, setDraggedItem] = useState<DbFunnelItem | null>(null);
+  const [dragOverStage, setDragOverStage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     title: '', description: '', stage: 'lead', value: '', probability: '10',
     expected_close_date: '', contact_name: '', contact_email: '', contact_phone: '',
@@ -103,6 +106,50 @@ export default function SalesFunnelPage() {
     resetForm();
   };
 
+  const markAsWon = async (item: DbFunnelItem) => {
+    await updateItem.mutateAsync({ id: item.id, status: 'won', won_date: new Date().toISOString() } as any);
+    toast({ title: '🏆 Oportunidade ganha!', description: item.title });
+  };
+
+  const markAsLost = async (item: DbFunnelItem) => {
+    await updateItem.mutateAsync({ id: item.id, status: 'lost', lost_date: new Date().toISOString() } as any);
+    toast({ title: 'Oportunidade perdida', description: item.title });
+  };
+
+  const moveToNextStage = async (item: DbFunnelItem) => {
+    const idx = KANBAN_STAGES.findIndex(s => s.value === item.stage);
+    if (idx < KANBAN_STAGES.length - 1) {
+      const next = KANBAN_STAGES[idx + 1].value;
+      await updateItem.mutateAsync({ id: item.id, stage: next } as any);
+    }
+  };
+
+  // Drag & Drop handlers
+  const handleDragStart = useCallback((e: React.DragEvent, item: DbFunnelItem) => {
+    setDraggedItem(item);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', item.id);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent, stageValue: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverStage(stageValue);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setDragOverStage(null);
+  }, []);
+
+  const handleDrop = useCallback(async (e: React.DragEvent, targetStage: string) => {
+    e.preventDefault();
+    setDragOverStage(null);
+    if (draggedItem && draggedItem.stage !== targetStage) {
+      await updateItem.mutateAsync({ id: draggedItem.id, stage: targetStage } as any);
+    }
+    setDraggedItem(null);
+  }, [draggedItem, updateItem]);
+
   if (isLoading) {
     return (
       <PageContainer>
@@ -114,7 +161,7 @@ export default function SalesFunnelPage() {
 
   return (
     <PageContainer>
-      <PageHeader title="Funil Comercial" description="Pipeline visual de oportunidades de vendas">
+      <PageHeader title="Funil Comercial" description="Pipeline visual de oportunidades — arraste cards entre etapas">
         <Button onClick={() => openNew()} size="sm"><Plus className="h-4 w-4 mr-1" /> Nova Oportunidade</Button>
       </PageHeader>
 
@@ -130,8 +177,15 @@ export default function SalesFunnelPage() {
         {KANBAN_STAGES.map(stage => {
           const items = grouped[stage.value] || [];
           const stageValue = items.reduce((s, i) => s + i.value, 0);
+          const isOver = dragOverStage === stage.value;
           return (
-            <div key={stage.value} className="flex flex-col min-h-[400px]">
+            <div
+              key={stage.value}
+              className={`flex flex-col min-h-[400px] rounded-lg transition-colors ${isOver ? 'bg-primary/5 ring-2 ring-primary/20' : ''}`}
+              onDragOver={e => handleDragOver(e, stage.value)}
+              onDragLeave={handleDragLeave}
+              onDrop={e => handleDrop(e, stage.value)}
+            >
               <div className="flex items-center justify-between mb-2 px-1">
                 <div className="flex items-center gap-2">
                   <div className={`w-2.5 h-2.5 rounded-full ${stage.color}`} />
@@ -145,16 +199,37 @@ export default function SalesFunnelPage() {
               <div className="text-[10px] text-muted-foreground mb-2 px-1">{fmt(stageValue)}</div>
               <div className="flex-1 space-y-2 overflow-y-auto pr-1">
                 {items.map(item => (
-                  <Card key={item.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                  <Card
+                    key={item.id}
+                    draggable
+                    onDragStart={e => handleDragStart(e, item)}
+                    className={`cursor-grab active:cursor-grabbing hover:shadow-md transition-all ${draggedItem?.id === item.id ? 'opacity-40' : ''}`}
+                  >
                     <CardContent className="p-3 space-y-1.5">
-                      <p className="text-sm font-medium line-clamp-2">{item.title}</p>
+                      <div className="flex items-start justify-between gap-1">
+                        <p className="text-sm font-medium line-clamp-2 flex-1">{item.title}</p>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0"><MoreHorizontal className="h-3 w-3" /></Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => openEdit(item)}><Pencil className="h-3.5 w-3.5 mr-2" />Editar</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => moveToNextStage(item)}><ArrowRight className="h-3.5 w-3.5 mr-2" />Avançar Etapa</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => markAsWon(item)} className="text-emerald-600"><Trophy className="h-3.5 w-3.5 mr-2" />Marcar como Ganha</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => markAsLost(item)} className="text-destructive"><XCircle className="h-3.5 w-3.5 mr-2" />Marcar como Perdida</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                       <p className="text-xs text-primary font-semibold">{fmt(item.value)}</p>
                       {item.contact_name && <p className="text-[11px] text-muted-foreground">{item.contact_name}</p>}
                       <div className="flex items-center justify-between pt-1">
                         <Badge variant="outline" className="text-[10px]">{item.probability}%</Badge>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEdit(item)}>
-                          <Pencil className="h-3 w-3" />
-                        </Button>
+                        {item.expected_close_date && (
+                          <span className="text-[10px] text-muted-foreground">
+                            {new Date(item.expected_close_date).toLocaleDateString('pt-BR')}
+                          </span>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
