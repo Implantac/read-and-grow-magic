@@ -140,20 +140,13 @@ export default function FiscalReportsPage() {
     }));
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Relatórios Fiscais</h1>
-          <p className="text-muted-foreground">
-            Gerencie e exporte seus relatórios fiscais e obrigações acessórias
-          </p>
-        </div>
+    <PageContainer>
+      <PageHeader title="Relatórios Fiscais" description="Gerencie e exporte seus relatórios fiscais e obrigações acessórias">
         <Button className="gap-2" onClick={() => setCreateOpen(true)}>
           <FileSpreadsheet className="h-4 w-4" />
           Novo Relatório
         </Button>
-      </div>
+      </PageHeader>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">

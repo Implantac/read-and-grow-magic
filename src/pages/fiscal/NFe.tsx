@@ -155,34 +155,25 @@ export default function NFePage() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">NF-e - Nota Fiscal Eletrônica</h1>
-          <p className="text-muted-foreground">
-            Gerencie suas notas fiscais eletrônicas
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <ExportButton
-            data={filteredNFes as unknown as Record<string, unknown>[]}
-            columns={[
-              { key: 'number', label: 'Número' },
-              { key: 'series', label: 'Série' },
-              { key: 'clientName', label: 'Destinatário' },
-              { key: 'totalValue', label: 'Valor', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
-              { key: 'status', label: 'Status' },
-              { key: 'issuedAt', label: 'Emissão', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
-            ]}
-            filename="nfe"
-          />
-          <Button className="gap-2" onClick={() => setCreateOpen(true)}>
-            <Plus className="h-4 w-4" />
-            Nova NF-e
-          </Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader title="NF-e - Nota Fiscal Eletrônica" description="Gerencie suas notas fiscais eletrônicas">
+        <ExportButton
+          data={filteredNFes as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'number', label: 'Número' },
+            { key: 'series', label: 'Série' },
+            { key: 'clientName', label: 'Destinatário' },
+            { key: 'totalValue', label: 'Valor', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+            { key: 'status', label: 'Status' },
+            { key: 'issuedAt', label: 'Emissão', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+          ]}
+          filename="nfe"
+        />
+        <Button className="gap-2" onClick={() => setCreateOpen(true)}>
+          <Plus className="h-4 w-4" />
+          Nova NF-e
+        </Button>
+      </PageHeader>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
