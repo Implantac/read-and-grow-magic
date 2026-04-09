@@ -279,6 +279,6 @@ export default function KardexPage() {
           </Card>
         </>
       )}
-    </div>
+    </PageContainer>
   );
 }

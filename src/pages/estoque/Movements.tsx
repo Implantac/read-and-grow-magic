@@ -425,6 +425,6 @@ export default function MovementsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }
