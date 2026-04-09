@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Eye, MoreHorizontal, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, MoreHorizontal, Search, Loader2 } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageLoading } from '@/components/shared/PageLoading';
