@@ -76,6 +76,10 @@ export default function ClientsPage() {
     address_street: '', address_number: '', address_complement: '',
     address_neighborhood: '', address_city: '', address_state: '', address_zip_code: '',
     status: 'active', credit_limit: '', segment: '',
+    state_registration: '', municipal_registration: '',
+    region: '', micro_region: '', default_payment_condition: 'À vista',
+    price_table: 'default', abc_classification: 'C',
+    commercial_notes: '', estimated_potential: '',
   });
 
   const filteredClients = clients.filter((client) => {
