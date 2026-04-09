@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { Plus, Eye, MoreHorizontal, FileText, Loader2 } from 'lucide-react';
+import { Plus, Eye, MoreHorizontal, FileText, Loader2, DollarSign, ShoppingBag, TrendingUp } from 'lucide-react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { PageLoading } from '@/components/shared/PageLoading';
+import { KPICard } from '@/components/shared/KPICard';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -105,17 +109,14 @@ export default function SalesPage() {
   const salesCount = filteredSales.filter(s => s.status === 'completed').length;
 
   if (isLoading) {
-    return <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+    return <PageLoading message="Carregando vendas..." />;
   }
 
+  const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Vendas</h1>
-          <p className="text-muted-foreground">Histórico de vendas realizadas</p>
-        </div>
-        <div className="flex gap-2">
+    <PageContainer>
+      <PageHeader title="Vendas" description="Histórico de vendas realizadas">
           <ExportButton
             data={filteredSales as unknown as Record<string, unknown>[]}
             columns={[
@@ -130,24 +131,12 @@ export default function SalesPage() {
           <Button className="gap-2" onClick={() => { resetForm(); setIsFormOpen(true); }}>
             <Plus className="h-4 w-4" />Nova Venda
           </Button>
-        </div>
-      </div>
+      </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-lg border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Total de Vendas</p>
-          <p className="text-2xl font-bold text-foreground">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalSales)}</p>
-        </div>
-        <div className="rounded-lg border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Vendas Concluídas</p>
-          <p className="text-2xl font-bold text-foreground">{salesCount}</p>
-        </div>
-        <div className="rounded-lg border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Ticket Médio</p>
-          <p className="text-2xl font-bold text-foreground">
-            {salesCount > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalSales / salesCount) : 'R$ 0,00'}
-          </p>
-        </div>
+        <KPICard title="Total de Vendas" value={fmt(totalSales)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Vendas Concluídas" value={salesCount} icon={<ShoppingBag className="h-5 w-5" />} accentColor="success" index={1} />
+        <KPICard title="Ticket Médio" value={salesCount > 0 ? fmt(totalSales / salesCount) : 'R$ 0,00'} icon={<TrendingUp className="h-5 w-5" />} accentColor="info" index={2} />
       </div>
 
       <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
@@ -245,6 +234,6 @@ export default function SalesPage() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }

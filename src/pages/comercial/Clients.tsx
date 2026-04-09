@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Eye, MoreHorizontal, Loader2, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, MoreHorizontal, Search, Loader2 } from 'lucide-react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { PageLoading } from '@/components/shared/PageLoading';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import {
@@ -167,17 +170,12 @@ export default function ClientsPage() {
   );
 
   if (isLoading) {
-    return <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+    return <PageLoading message="Carregando clientes..." />;
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Clientes</h1>
-          <p className="text-muted-foreground">Gerencie sua base de clientes</p>
-        </div>
-        <div className="flex gap-2">
+    <PageContainer>
+      <PageHeader title="Clientes" description="Gerencie sua base de clientes">
           <ExportButton
             data={filteredClients as unknown as Record<string, unknown>[]}
             columns={[
@@ -193,8 +191,7 @@ export default function ClientsPage() {
           <Button onClick={() => handleOpenForm()} className="gap-2">
             <Plus className="h-4 w-4" />Novo Cliente
           </Button>
-        </div>
-      </div>
+      </PageHeader>
 
       <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
 
@@ -392,6 +389,6 @@ export default function ClientsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageContainer>
   );
 }

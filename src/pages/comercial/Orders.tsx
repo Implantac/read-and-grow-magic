@@ -3,6 +3,10 @@ import {
   Plus, Eye, MoreHorizontal, FileText, XCircle, CheckCircle, Loader2,
   Package, DollarSign, Clock, TruckIcon, ArrowRight, CalendarDays, User, CreditCard, Hash, MapPin, StickyNote,
 } from 'lucide-react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { PageLoading } from '@/components/shared/PageLoading';
+import { KPICard } from '@/components/shared/KPICard';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -274,23 +278,12 @@ export default function OrdersPage() {
   const totalValue = filteredOrders.filter((o) => o.status !== 'cancelled').reduce((acc, o) => acc + o.total, 0);
 
   if (isLoading) {
-    return (
-      <div className="flex h-64 items-center justify-center gap-3">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        <span className="text-sm text-muted-foreground">Carregando pedidos...</span>
-      </div>
-    );
+    return <PageLoading message="Carregando pedidos..." />;
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Pedidos de Venda</h1>
-          <p className="text-sm text-muted-foreground">Gerencie e acompanhe o ciclo de vida dos seus pedidos</p>
-        </div>
-        <div className="flex gap-2">
+    <PageContainer>
+      <PageHeader title="Pedidos de Venda" description="Gerencie e acompanhe o ciclo de vida dos seus pedidos">
           <ExportButton
             data={filteredOrders as unknown as Record<string, unknown>[]}
             columns={[
@@ -304,61 +297,14 @@ export default function OrdersPage() {
           <Button className="gap-2 shadow-sm" onClick={() => { resetForm(); setIsFormOpen(true); }}>
             <Plus className="h-4 w-4" />Novo Pedido
           </Button>
-        </div>
-      </div>
+      </PageHeader>
 
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="border-l-4 border-l-primary">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <DollarSign className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Valor Total</p>
-              <p className="text-xl font-bold text-foreground">{fmt(totalValue)}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-accent">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent/10">
-              <Package className="h-5 w-5 text-accent-foreground" />
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Total Pedidos</p>
-              <p className="text-xl font-bold text-foreground">{filteredOrders.length}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-yellow-500">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-yellow-500/10">
-              <Clock className="h-5 w-5 text-yellow-600" />
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Pendentes</p>
-              <p className="text-xl font-bold text-foreground">{pendingCount}</p>
-              <p className="text-[11px] text-muted-foreground">{processingCount} em processamento</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-green-500">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-green-500/10">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Entregues</p>
-              <p className="text-xl font-bold text-foreground">{deliveredCount}</p>
-              <p className="text-[11px] text-muted-foreground">
-                {filteredOrders.length > 0
-                  ? `${Math.round((deliveredCount / filteredOrders.length) * 100)}% concluídos`
-                  : '—'}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <KPICard title="Valor Total" value={fmt(totalValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Total Pedidos" value={filteredOrders.length} icon={<Package className="h-5 w-5" />} accentColor="accent" index={1} />
+        <KPICard title="Pendentes" value={pendingCount} subtitle={`${processingCount} em processamento`} icon={<Clock className="h-5 w-5" />} accentColor="warning" index={2} />
+        <KPICard title="Entregues" value={deliveredCount} subtitle={filteredOrders.length > 0 ? `${Math.round((deliveredCount / filteredOrders.length) * 100)}% concluídos` : '—'} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={3} />
       </div>
 
       {/* Filters & Table */}
@@ -697,6 +643,6 @@ export default function OrdersPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageContainer>
   );
 }
