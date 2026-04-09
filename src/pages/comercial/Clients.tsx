@@ -101,6 +101,18 @@ export default function ClientsPage() {
     { key: 'status', label: 'Status', render: (value) => <StatusBadge type="client" status={value as string} /> },
   ];
 
+  const defaultFormData = {
+    name: '', trade_name: '', document: '', document_type: 'cnpj' as string,
+    email: '', phone: '', cellphone: '',
+    address_street: '', address_number: '', address_complement: '',
+    address_neighborhood: '', address_city: '', address_state: '', address_zip_code: '',
+    status: 'active', credit_limit: '', segment: '',
+    state_registration: '', municipal_registration: '',
+    region: '', micro_region: '', default_payment_condition: 'À vista',
+    price_table: 'default', abc_classification: 'C',
+    commercial_notes: '', estimated_potential: '',
+  };
+
   const handleOpenForm = (client?: DbClient) => {
     if (client) {
       setSelectedClient(client);
@@ -113,22 +125,21 @@ export default function ClientsPage() {
         address_city: client.address_city, address_state: client.address_state,
         address_zip_code: client.address_zip_code,
         status: client.status, credit_limit: String(client.credit_limit), segment: client.segment || '',
+        state_registration: client.state_registration || '', municipal_registration: client.municipal_registration || '',
+        region: client.region || '', micro_region: client.micro_region || '',
+        default_payment_condition: client.default_payment_condition || 'À vista',
+        price_table: client.price_table || 'default', abc_classification: client.abc_classification || 'C',
+        commercial_notes: client.commercial_notes || '', estimated_potential: String(client.estimated_potential || ''),
       });
     } else {
       setSelectedClient(null);
-      setFormData({
-        name: '', trade_name: '', document: '', document_type: 'cnpj',
-        email: '', phone: '', cellphone: '',
-        address_street: '', address_number: '', address_complement: '',
-        address_neighborhood: '', address_city: '', address_state: '', address_zip_code: '',
-        status: 'active', credit_limit: '', segment: '',
-      });
+      setFormData({ ...defaultFormData });
     }
     setIsFormOpen(true);
   };
 
   const handleSave = () => {
-    const payload = {
+    const payload: any = {
       name: formData.name, trade_name: formData.trade_name || null, document: formData.document,
       document_type: formData.document_type, email: formData.email, phone: formData.phone,
       cellphone: formData.cellphone || null,
@@ -138,6 +149,14 @@ export default function ClientsPage() {
       address_zip_code: formData.address_zip_code,
       status: formData.status, credit_limit: Number(formData.credit_limit) || 0,
       current_balance: 0, segment: formData.segment || null, sales_rep_id: null,
+      state_registration: formData.state_registration || null,
+      municipal_registration: formData.municipal_registration || null,
+      region: formData.region || null, micro_region: formData.micro_region || null,
+      default_payment_condition: formData.default_payment_condition || 'À vista',
+      price_table: formData.price_table || 'default',
+      abc_classification: formData.abc_classification || 'C',
+      commercial_notes: formData.commercial_notes || null,
+      estimated_potential: Number(formData.estimated_potential) || 0,
     };
 
     if (selectedClient) {
