@@ -34,6 +34,8 @@ import { ptBR } from 'date-fns/locale';
 import {
   movementTypeConfig,
 } from '@/config/inventory';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
 import type { ProductKardex, KardexEntry, MovementType } from '@/types/inventory';
 
 export default function KardexPage() {
@@ -69,34 +71,28 @@ export default function KardexPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Kardex</h1>
-          <p className="text-muted-foreground">Ficha de movimentação de estoque por produto</p>
-        </div>
-        <div className="flex gap-2">
-          <ExportButton
-            data={(kardexData?.entries || []) as unknown as Record<string, unknown>[]}
-            columns={[
-              { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
-              { key: 'documentNumber', label: 'Documento' },
-              { key: 'type', label: 'Tipo' },
-              { key: 'description', label: 'Descrição' },
-              { key: 'quantityIn', label: 'Entrada' },
-              { key: 'quantityOut', label: 'Saída' },
-              { key: 'balance', label: 'Saldo' },
-              { key: 'unitCost', label: 'Custo Unit.', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
-              { key: 'totalValue', label: 'Valor Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
-            ]}
-            filename={`kardex_${kardexData?.productCode || 'produto'}`}
-          />
-          <Button variant="outline">
-            <Printer className="mr-2 h-4 w-4" />
-            Imprimir
-          </Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader title="Kardex" description="Ficha de movimentação de estoque por produto">
+        <ExportButton
+          data={(kardexData?.entries || []) as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+            { key: 'documentNumber', label: 'Documento' },
+            { key: 'type', label: 'Tipo' },
+            { key: 'description', label: 'Descrição' },
+            { key: 'quantityIn', label: 'Entrada' },
+            { key: 'quantityOut', label: 'Saída' },
+            { key: 'balance', label: 'Saldo' },
+            { key: 'unitCost', label: 'Custo Unit.', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+            { key: 'totalValue', label: 'Valor Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+          ]}
+          filename={`kardex_${kardexData?.productCode || 'produto'}`}
+        />
+        <Button variant="outline">
+          <Printer className="mr-2 h-4 w-4" />
+          Imprimir
+        </Button>
+      </PageHeader>
 
       {/* Product Selector */}
       <Card>
