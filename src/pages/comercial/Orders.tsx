@@ -127,6 +127,7 @@ export default function OrdersPage() {
   const { data: orders = [], isLoading } = useOrders();
   const createOrder = useCreateOrder();
   const updateStatus = useUpdateOrderStatus();
+  const updateFields = useUpdateOrderFields();
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
