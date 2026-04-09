@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import logoUseSistemas from '@/assets/logo-use-sistemas.png';
+import logoUseSistemas from '@/assets/logo.png';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
