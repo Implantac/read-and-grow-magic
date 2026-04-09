@@ -132,6 +132,6 @@ export default function BalanceSheetPage() {
       {renderSection('Ativo', <Building2 className="h-4 w-4 text-primary" />, assets)}
       {renderSection('Passivo', <Landmark className="h-4 w-4 text-destructive" />, liabilities)}
       {renderSection('Patrimônio Líquido', <PiggyBank className="h-4 w-4 text-primary" />, equity)}
-    </div>
+    </PageContainer>
   );
 }
