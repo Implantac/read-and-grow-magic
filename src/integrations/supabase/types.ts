@@ -359,6 +359,7 @@ export type Database = {
           address_zip_code: string
           avg_ticket: number | null
           cellphone: string | null
+          client_score: string | null
           code: string
           commercial_notes: string | null
           created_at: string
@@ -376,6 +377,7 @@ export type Database = {
           name: string
           phone: string
           price_table: string | null
+          purchase_frequency: number | null
           region: string | null
           sales_rep_id: string | null
           segment: string | null
@@ -396,6 +398,7 @@ export type Database = {
           address_zip_code?: string
           avg_ticket?: number | null
           cellphone?: string | null
+          client_score?: string | null
           code: string
           commercial_notes?: string | null
           created_at?: string
@@ -413,6 +416,7 @@ export type Database = {
           name: string
           phone: string
           price_table?: string | null
+          purchase_frequency?: number | null
           region?: string | null
           sales_rep_id?: string | null
           segment?: string | null
@@ -433,6 +437,7 @@ export type Database = {
           address_zip_code?: string
           avg_ticket?: number | null
           cellphone?: string | null
+          client_score?: string | null
           code?: string
           commercial_notes?: string | null
           created_at?: string
@@ -450,6 +455,7 @@ export type Database = {
           name?: string
           phone?: string
           price_table?: string | null
+          purchase_frequency?: number | null
           region?: string | null
           sales_rep_id?: string | null
           segment?: string | null
