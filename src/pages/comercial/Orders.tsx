@@ -644,3 +644,5 @@ export default function OrdersPage() {
         </AlertDialogContent>
       </AlertDialog>
     </PageContainer>
+  );
+}
