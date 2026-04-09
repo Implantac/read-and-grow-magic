@@ -278,22 +278,12 @@ export default function OrdersPage() {
   const totalValue = filteredOrders.filter((o) => o.status !== 'cancelled').reduce((acc, o) => acc + o.total, 0);
 
   if (isLoading) {
-    return (
-      <div className="flex h-64 items-center justify-center gap-3">
-        <Loader2 className="h-6 w-6 animate-spin text-primary" />
-        <span className="text-sm text-muted-foreground">Carregando pedidos...</span>
-      </div>
-    );
+    return <PageLoading message="Carregando pedidos..." />;
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">Pedidos de Venda</h1>
-          <p className="text-sm text-muted-foreground">Gerencie e acompanhe o ciclo de vida dos seus pedidos</p>
-        </div>
+    <PageContainer>
+      <PageHeader title="Pedidos de Venda" description="Gerencie e acompanhe o ciclo de vida dos seus pedidos">
         <div className="flex gap-2">
           <ExportButton
             data={filteredOrders as unknown as Record<string, unknown>[]}
