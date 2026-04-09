@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   DollarSign, ShoppingCart, Users, TrendingUp, AlertTriangle, Target,
-  ArrowUpRight, ArrowDownRight, Clock, CheckCircle,
+  ArrowUpRight, Clock, CheckCircle,
 } from 'lucide-react';
 import { useOrders } from '@/hooks/useOrders';
 import { useClients } from '@/hooks/useClients';
@@ -14,8 +14,8 @@ import { useSalesFunnel } from '@/hooks/useSalesFunnel';
 import { useSalesReps } from '@/hooks/useSalesReps';
 import { useCommercialAlerts } from '@/hooks/useCommercialAlerts';
 import { useSales } from '@/hooks/useSales';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
-import { format, startOfMonth, endOfMonth, isToday, subDays, isAfter } from 'date-fns';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { startOfMonth, endOfMonth, isToday, subDays } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
@@ -60,7 +60,6 @@ export default function CommercialDashboard() {
       return !lp || new Date(lp) < subDays(now, 90);
     });
 
-    // Top clients by order value
     const clientTotals: Record<string, { name: string; total: number }> = {};
     orders.filter(o => o.status !== 'cancelled').forEach(o => {
       if (!clientTotals[o.client_name]) clientTotals[o.client_name] = { name: o.client_name, total: 0 };
@@ -68,7 +67,6 @@ export default function CommercialDashboard() {
     });
     const topClients = Object.values(clientTotals).sort((a, b) => b.total - a.total).slice(0, 5);
 
-    // Top reps
     const repTotals: Record<string, { name: string; total: number }> = {};
     orders.filter(o => o.status !== 'cancelled' && o.sales_rep_name).forEach(o => {
       const rn = o.sales_rep_name!;
@@ -77,7 +75,6 @@ export default function CommercialDashboard() {
     });
     const topReps = Object.values(repTotals).sort((a, b) => b.total - a.total).slice(0, 5);
 
-    // Funnel stats
     const funnelOpen = funnel.filter(f => f.status === 'open');
     const funnelValue = funnelOpen.reduce((s, f) => s + f.value, 0);
     const conversionRate = funnel.length > 0
@@ -105,7 +102,7 @@ export default function CommercialDashboard() {
     return (
       <PageContainer>
         <PageHeader title="Dashboard Comercial" description="Visão geral do desempenho comercial" />
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mt-6">
           {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-32" />)}
         </div>
       </PageContainer>
@@ -116,25 +113,21 @@ export default function CommercialDashboard() {
     <PageContainer>
       <PageHeader title="Dashboard Comercial" description="Centro de inteligência e performance de vendas" />
 
-      {/* KPIs Row 1 */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-        <KPICard index={0} title="Pedidos Hoje" value={stats.ordersToday.toString()} icon={ShoppingCart} color="primary" />
-        <KPICard index={1} title="Pedidos do Mês" value={stats.ordersMonth.toString()} icon={Target} color="blue" />
-        <KPICard index={2} title="Faturamento do Mês" value={fmt(stats.billingMonth)} icon={DollarSign} color="green" />
-        <KPICard index={3} title="Ticket Médio" value={fmt(stats.avgTicket)} icon={TrendingUp} color="purple" />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 mt-6">
+        <KPICard index={0} title="Pedidos Hoje" value={stats.ordersToday.toString()} icon={<ShoppingCart className="h-5 w-5" />} accentColor="primary" />
+        <KPICard index={1} title="Pedidos do Mês" value={stats.ordersMonth.toString()} icon={<Target className="h-5 w-5" />} accentColor="info" />
+        <KPICard index={2} title="Faturamento do Mês" value={fmt(stats.billingMonth)} icon={<DollarSign className="h-5 w-5" />} accentColor="success" />
+        <KPICard index={3} title="Ticket Médio" value={fmt(stats.avgTicket)} icon={<TrendingUp className="h-5 w-5" />} accentColor="accent" />
       </div>
 
-      {/* KPIs Row 2 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
-        <KPICard index={4} title="Pedidos Atrasados" value={stats.overdueOrders.toString()} icon={Clock} color="red" />
-        <KPICard index={5} title="Clientes Inativos" value={stats.inactiveClients.toString()} icon={Users} color="amber" />
-        <KPICard index={6} title="Oportunidades Abertas" value={`${stats.funnelOpen} (${fmt(stats.funnelValue)})`} icon={ArrowUpRight} color="indigo" />
-        <KPICard index={7} title="Taxa de Conversão" value={`${stats.conversionRate.toFixed(1)}%`} icon={CheckCircle} color="emerald" />
+        <KPICard index={4} title="Pedidos Atrasados" value={stats.overdueOrders.toString()} icon={<Clock className="h-5 w-5" />} accentColor="danger" />
+        <KPICard index={5} title="Clientes Inativos" value={stats.inactiveClients.toString()} icon={<Users className="h-5 w-5" />} accentColor="warning" />
+        <KPICard index={6} title="Oportunidades Abertas" value={`${stats.funnelOpen} (${fmt(stats.funnelValue)})`} icon={<ArrowUpRight className="h-5 w-5" />} accentColor="info" />
+        <KPICard index={7} title="Taxa de Conversão" value={`${stats.conversionRate.toFixed(1)}%`} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" />
       </div>
 
-      {/* Charts & Rankings */}
       <div className="grid gap-6 lg:grid-cols-2 mb-6">
-        {/* Status Chart */}
         <Card>
           <CardHeader><CardTitle className="text-sm font-medium">Pedidos por Status</CardTitle></CardHeader>
           <CardContent>
@@ -153,7 +146,6 @@ export default function CommercialDashboard() {
           </CardContent>
         </Card>
 
-        {/* Top Clients */}
         <Card>
           <CardHeader><CardTitle className="text-sm font-medium">Top 5 Clientes</CardTitle></CardHeader>
           <CardContent>
@@ -174,7 +166,6 @@ export default function CommercialDashboard() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Top Reps */}
         <Card>
           <CardHeader><CardTitle className="text-sm font-medium">Top Representantes</CardTitle></CardHeader>
           <CardContent>
@@ -198,11 +189,10 @@ export default function CommercialDashboard() {
           </CardContent>
         </Card>
 
-        {/* Alerts */}
         <Card>
           <CardHeader>
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
+              <AlertTriangle className="h-4 w-4 text-warning" />
               Alertas Comerciais ({stats.openAlerts})
             </CardTitle>
           </CardHeader>
@@ -211,7 +201,7 @@ export default function CommercialDashboard() {
               <div className="space-y-3 max-h-[260px] overflow-y-auto">
                 {alerts.slice(0, 8).map(a => (
                   <div key={a.id} className="flex items-start gap-3 border-b pb-2 last:border-0">
-                    <Badge variant={a.severity === 'high' ? 'destructive' : a.severity === 'medium' ? 'default' : 'secondary'} className="mt-0.5 text-[10px]">
+                    <Badge variant={a.severity === 'high' ? 'destructive' : 'default'} className="mt-0.5 text-[10px]">
                       {a.severity === 'high' ? 'Alta' : a.severity === 'medium' ? 'Média' : 'Baixa'}
                     </Badge>
                     <div>

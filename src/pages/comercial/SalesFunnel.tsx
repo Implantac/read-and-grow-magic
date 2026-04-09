@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,8 +10,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, DollarSign, Target, TrendingUp, Eye, Pencil, GripVertical } from 'lucide-react';
-import { useSalesFunnel, useCreateFunnelItem, useUpdateFunnelItem, useDeleteFunnelItem, FUNNEL_STAGES, type DbFunnelItem } from '@/hooks/useSalesFunnel';
+import { Plus, DollarSign, Target, TrendingUp, Pencil } from 'lucide-react';
+import { useSalesFunnel, useCreateFunnelItem, useUpdateFunnelItem, FUNNEL_STAGES, type DbFunnelItem } from '@/hooks/useSalesFunnel';
 import { useClients } from '@/hooks/useClients';
 import { useSalesReps } from '@/hooks/useSalesReps';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,7 +19,6 @@ import { useToast } from '@/hooks/use-toast';
 
 const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
-// Show first 6 key stages in Kanban view
 const KANBAN_STAGES = FUNNEL_STAGES.slice(0, 6);
 
 export default function SalesFunnelPage() {
@@ -28,7 +27,6 @@ export default function SalesFunnelPage() {
   const { data: reps = [] } = useSalesReps();
   const createItem = useCreateFunnelItem();
   const updateItem = useUpdateFunnelItem();
-  const deleteItem = useDeleteFunnelItem();
   const { toast } = useToast();
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -105,36 +103,26 @@ export default function SalesFunnelPage() {
     resetForm();
   };
 
-  const moveStage = async (item: DbFunnelItem, direction: 'next' | 'prev') => {
-    const stages = FUNNEL_STAGES.map(s => s.value);
-    const idx = stages.indexOf(item.stage);
-    const newIdx = direction === 'next' ? idx + 1 : idx - 1;
-    if (newIdx < 0 || newIdx >= stages.length) return;
-    await updateItem.mutateAsync({ id: item.id, stage: stages[newIdx] });
-  };
-
   if (isLoading) {
     return (
       <PageContainer>
         <PageHeader title="Funil Comercial" description="Pipeline de vendas" />
-        <div className="grid gap-4 md:grid-cols-4"><Skeleton className="h-32" /><Skeleton className="h-32" /><Skeleton className="h-32" /><Skeleton className="h-32" /></div>
+        <div className="grid gap-4 md:grid-cols-4 mt-6"><Skeleton className="h-32" /><Skeleton className="h-32" /><Skeleton className="h-32" /><Skeleton className="h-32" /></div>
       </PageContainer>
     );
   }
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Funil Comercial"
-        description="Pipeline visual de oportunidades de vendas"
-        actions={<Button onClick={() => openNew()} size="sm"><Plus className="h-4 w-4 mr-1" /> Nova Oportunidade</Button>}
-      />
+      <PageHeader title="Funil Comercial" description="Pipeline visual de oportunidades de vendas">
+        <Button onClick={() => openNew()} size="sm"><Plus className="h-4 w-4 mr-1" /> Nova Oportunidade</Button>
+      </PageHeader>
 
-      <div className="grid gap-4 md:grid-cols-4 mb-6">
-        <KPICard index={0} title="Oportunidades Abertas" value={stats.openCount.toString()} icon={Target} color="blue" />
-        <KPICard index={1} title="Valor Total Pipeline" value={fmt(stats.totalValue)} icon={DollarSign} color="primary" />
-        <KPICard index={2} title="Valor Ponderado" value={fmt(stats.weightedValue)} icon={TrendingUp} color="purple" />
-        <KPICard index={3} title="Ganhos Totais" value={fmt(stats.wonValue)} icon={DollarSign} color="green" />
+      <div className="grid gap-4 md:grid-cols-4 mb-6 mt-6">
+        <KPICard index={0} title="Oportunidades Abertas" value={stats.openCount.toString()} icon={<Target className="h-5 w-5" />} accentColor="info" />
+        <KPICard index={1} title="Valor Total Pipeline" value={fmt(stats.totalValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" />
+        <KPICard index={2} title="Valor Ponderado" value={fmt(stats.weightedValue)} icon={<TrendingUp className="h-5 w-5" />} accentColor="accent" />
+        <KPICard index={3} title="Ganhos Totais" value={fmt(stats.wonValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="success" />
       </div>
 
       {/* Kanban Board */}
@@ -157,18 +145,16 @@ export default function SalesFunnelPage() {
               <div className="text-[10px] text-muted-foreground mb-2 px-1">{fmt(stageValue)}</div>
               <div className="flex-1 space-y-2 overflow-y-auto pr-1">
                 {items.map(item => (
-                  <Card key={item.id} className="cursor-pointer hover:shadow-md transition-shadow border-l-2" style={{ borderLeftColor: `var(--${stage.color.replace('bg-', '')})` }}>
+                  <Card key={item.id} className="cursor-pointer hover:shadow-md transition-shadow">
                     <CardContent className="p-3 space-y-1.5">
                       <p className="text-sm font-medium line-clamp-2">{item.title}</p>
                       <p className="text-xs text-primary font-semibold">{fmt(item.value)}</p>
                       {item.contact_name && <p className="text-[11px] text-muted-foreground">{item.contact_name}</p>}
                       <div className="flex items-center justify-between pt-1">
                         <Badge variant="outline" className="text-[10px]">{item.probability}%</Badge>
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEdit(item)}>
-                            <Pencil className="h-3 w-3" />
-                          </Button>
-                        </div>
+                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openEdit(item)}>
+                          <Pencil className="h-3 w-3" />
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>

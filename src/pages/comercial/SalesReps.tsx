@@ -13,9 +13,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, MoreHorizontal, Pencil, Trash2, Users, Target, DollarSign, TrendingUp } from 'lucide-react';
+import { Plus, MoreHorizontal, Pencil, Trash2, Users, Target, DollarSign } from 'lucide-react';
 import { useSalesReps, useCreateSalesRep, useUpdateSalesRep, useDeleteSalesRep, type DbSalesRep } from '@/hooks/useSalesReps';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
@@ -80,15 +81,19 @@ export default function SalesRepsPage() {
   const activeReps = reps.filter(r => r.status === 'active').length;
 
   const columns: Column<DbSalesRep>[] = [
-    { key: 'code', header: 'Código', sortable: true },
-    { key: 'name', header: 'Nome', sortable: true },
-    { key: 'region', header: 'Região', render: (r) => r.region || '—' },
-    { key: 'commission_rate', header: 'Comissão', render: (r) => `${r.commission_rate}%` },
-    { key: 'monthly_target', header: 'Meta Mensal', render: (r) => fmt(r.monthly_target) },
-    { key: 'total_sales', header: 'Vendas Total', render: (r) => fmt(r.total_sales) },
-    { key: 'status', header: 'Status', render: (r) => <StatusBadge status={r.status} /> },
+    { key: 'code', label: 'Código', sortable: true },
+    { key: 'name', label: 'Nome', sortable: true },
+    { key: 'region', label: 'Região', render: (_v, r) => r.region || '—' },
+    { key: 'commission_rate', label: 'Comissão', render: (_v, r) => `${r.commission_rate}%` },
+    { key: 'monthly_target', label: 'Meta Mensal', render: (_v, r) => fmt(r.monthly_target) },
+    { key: 'total_sales', label: 'Vendas Total', render: (_v, r) => fmt(r.total_sales) },
+    { key: 'status', label: 'Status', render: (_v, r) => (
+      <Badge variant={r.status === 'active' ? 'default' : 'secondary'}>
+        {r.status === 'active' ? 'Ativo' : 'Inativo'}
+      </Badge>
+    )},
     {
-      key: 'actions' as any, header: '', render: (r) => (
+      key: 'id', label: '', render: (_v, r) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -100,31 +105,24 @@ export default function SalesRepsPage() {
     },
   ];
 
-  if (isLoading) return <PageLoading title="Representantes" />;
+  if (isLoading) return <PageLoading />;
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Representantes Comerciais"
-        description="Gestão de equipe de vendas, carteiras e metas"
-        actions={
-          <div className="flex gap-2">
-            <ExportButton data={reps} filename="representantes" />
-            <Button onClick={() => { resetForm(); setIsFormOpen(true); }} size="sm"><Plus className="h-4 w-4 mr-1" /> Novo Representante</Button>
-          </div>
-        }
-      />
+      <PageHeader title="Representantes Comerciais" description="Gestão de equipe de vendas, carteiras e metas">
+        <ExportButton data={reps as any} filename="representantes" />
+        <Button onClick={() => { resetForm(); setIsFormOpen(true); }} size="sm"><Plus className="h-4 w-4 mr-1" /> Novo Representante</Button>
+      </PageHeader>
 
-      <div className="grid gap-4 md:grid-cols-4 mb-6">
-        <KPICard index={0} title="Total Representantes" value={reps.length.toString()} icon={Users} color="primary" />
-        <KPICard index={1} title="Ativos" value={activeReps.toString()} icon={Users} color="green" />
-        <KPICard index={2} title="Meta Total Mês" value={fmt(totalTarget)} icon={Target} color="blue" />
-        <KPICard index={3} title="Vendas Total" value={fmt(totalSales)} icon={DollarSign} color="purple" />
+      <div className="grid gap-4 md:grid-cols-4 mb-6 mt-6">
+        <KPICard index={0} title="Total Representantes" value={reps.length.toString()} icon={<Users className="h-5 w-5" />} accentColor="primary" />
+        <KPICard index={1} title="Ativos" value={activeReps.toString()} icon={<Users className="h-5 w-5" />} accentColor="success" />
+        <KPICard index={2} title="Meta Total Mês" value={fmt(totalTarget)} icon={<Target className="h-5 w-5" />} accentColor="info" />
+        <KPICard index={3} title="Vendas Total" value={fmt(totalSales)} icon={<DollarSign className="h-5 w-5" />} accentColor="accent" />
       </div>
 
       <DataTable columns={columns} data={reps} searchPlaceholder="Buscar representante..." />
 
-      {/* Form */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
