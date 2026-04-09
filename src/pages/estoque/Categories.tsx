@@ -15,6 +15,10 @@ import {
 import { ExportButton } from '@/components/shared/ExportButton';
 import { Plus, Search, Edit, Trash2, FolderTree, Package, Filter, Loader2 } from 'lucide-react';
 import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory, type DbCategory } from '@/hooks/useCategories';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { PageLoading } from '@/components/shared/PageLoading';
+import { KPICard } from '@/components/shared/KPICard';
 import { useToast } from '@/hooks/use-toast';
 
 export default function CategoriesPage() {
@@ -72,66 +76,31 @@ export default function CategoriesPage() {
     }
   };
 
-  if (isLoading) {
-    return <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
-  }
+  if (isLoading) return <PageLoading />;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Categorias</h1>
-          <p className="text-muted-foreground">Gerencie as categorias de produtos do estoque</p>
-        </div>
-        <div className="flex gap-2">
-          <ExportButton
-            data={categories as unknown as Record<string, unknown>[]}
-            columns={[
-              { key: 'name', label: 'Nome' },
-              { key: 'description', label: 'Descrição' },
-              { key: 'products_count', label: 'Qtd Produtos' },
-              { key: 'active', label: 'Ativa', format: (v) => v ? 'Sim' : 'Não' },
-            ]}
-            filename="categorias"
-          />
-          <Button onClick={handleCreate}>
-            <Plus className="mr-2 h-4 w-4" />
-            Nova Categoria
-          </Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader title="Categorias" description="Gerencie as categorias de produtos do estoque">
+        <ExportButton
+          data={categories as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'name', label: 'Nome' },
+            { key: 'description', label: 'Descrição' },
+            { key: 'products_count', label: 'Qtd Produtos' },
+            { key: 'active', label: 'Ativa', format: (v) => v ? 'Sim' : 'Não' },
+          ]}
+          filename="categorias"
+        />
+        <Button onClick={handleCreate}>
+          <Plus className="mr-2 h-4 w-4" />
+          Nova Categoria
+        </Button>
+      </PageHeader>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total de Categorias</CardTitle>
-            <FolderTree className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{categories.length}</div>
-            <p className="text-xs text-muted-foreground">{activeCategories} ativas</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Produtos Cadastrados</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalProducts}</div>
-            <p className="text-xs text-muted-foreground">Em todas as categorias</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Média por Categoria</CardTitle>
-            <Filter className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{categories.length > 0 ? Math.round(totalProducts / categories.length) : 0}</div>
-            <p className="text-xs text-muted-foreground">Produtos por categoria</p>
-          </CardContent>
-        </Card>
+        <KPICard title="Total de Categorias" value={categories.length} icon={<FolderTree className="h-5 w-5" />} subtitle={`${activeCategories} ativas`} index={0} />
+        <KPICard title="Produtos Cadastrados" value={totalProducts} icon={<Package className="h-5 w-5" />} accentColor="success" subtitle="Em todas as categorias" index={1} />
+        <KPICard title="Média por Categoria" value={categories.length > 0 ? Math.round(totalProducts / categories.length) : 0} icon={<Filter className="h-5 w-5" />} accentColor="info" subtitle="Produtos por categoria" index={2} />
       </div>
 
       <div className="relative max-w-md">

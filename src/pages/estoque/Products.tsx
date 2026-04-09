@@ -18,6 +18,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Package, Plus, Search, Edit, Eye, Trash2, Box, Filter, FileText, Loader2 } from 'lucide-react';
 import { productStatusConfig, productTypeConfig } from '@/config/inventory';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { PageLoading } from '@/components/shared/PageLoading';
+import { KPICard } from '@/components/shared/KPICard';
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, type DbProduct } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
 import type { ProductType, ProductStatus, ProductFilters } from '@/types/inventory';
@@ -119,23 +123,12 @@ export default function ProductsPage() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
-  }
+  if (isLoading) return <PageLoading />;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Produtos</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Cadastro e controle de produtos</p>
-        </div>
-        <div className="flex gap-2">
-          <ExportButton
+    <PageContainer>
+      <PageHeader title="Produtos" description="Cadastro e controle de produtos">
+        <ExportButton
             data={filteredProducts as unknown as Record<string, unknown>[]}
             columns={[
               { key: 'code', label: 'Código' },
@@ -149,59 +142,17 @@ export default function ProductsPage() {
             ]}
             filename="produtos"
           />
-          <Button onClick={() => handleOpenForm()} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Novo Produto
-          </Button>
-        </div>
-      </div>
+        <Button onClick={() => handleOpenForm()} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Novo Produto
+        </Button>
+      </PageHeader>
 
-      {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Produtos</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{products.length}</div>
-            <p className="text-xs text-muted-foreground">{categories.length} categorias</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Produtos Ativos</CardTitle>
-            <Box className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-success">{activeProducts}</div>
-            <p className="text-xs text-muted-foreground">
-              {products.length > 0 ? ((activeProducts / products.length) * 100).toFixed(0) : 0}% do total
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Valor Médio</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {formatCurrency(products.length > 0 ? products.reduce((acc, p) => acc + p.cost_price, 0) / products.length : 0)}
-            </div>
-            <p className="text-xs text-muted-foreground">Custo médio por produto</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Valor Estimado</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalValue)}</div>
-            <p className="text-xs text-muted-foreground">Baseado no estoque mínimo</p>
-          </CardContent>
-        </Card>
+        <KPICard title="Total de Produtos" value={products.length} icon={<Package className="h-5 w-5" />} subtitle={`${categories.length} categorias`} index={0} />
+        <KPICard title="Produtos Ativos" value={activeProducts} icon={<Box className="h-5 w-5" />} accentColor="success" subtitle={`${products.length > 0 ? ((activeProducts / products.length) * 100).toFixed(0) : 0}% do total`} index={1} />
+        <KPICard title="Valor Médio" value={formatCurrency(products.length > 0 ? products.reduce((acc, p) => acc + p.cost_price, 0) / products.length : 0)} icon={<FileText className="h-5 w-5" />} accentColor="info" subtitle="Custo médio por produto" index={2} />
+        <KPICard title="Valor Estimado" value={formatCurrency(totalValue)} icon={<Package className="h-5 w-5" />} accentColor="warning" subtitle="Baseado no estoque mínimo" index={3} />
       </div>
 
       {/* Filters */}
