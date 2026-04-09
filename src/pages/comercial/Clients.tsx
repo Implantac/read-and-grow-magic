@@ -351,8 +351,76 @@ export default function ClientsPage() {
                 </Select>
               </div>
             </div>
+            <div className="border-t pt-4">
+              <h4 className="mb-3 font-medium">Dados Comerciais</h4>
+              <div className="grid gap-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Inscrição Estadual</Label>
+                    <Input value={formData.state_registration} onChange={(e) => setFormData(p => ({ ...p, state_registration: e.target.value }))} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Inscrição Municipal</Label>
+                    <Input value={formData.municipal_registration} onChange={(e) => setFormData(p => ({ ...p, municipal_registration: e.target.value }))} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Região</Label>
+                    <Input value={formData.region} onChange={(e) => setFormData(p => ({ ...p, region: e.target.value }))} placeholder="Ex: Sul, Sudeste..." />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Micro-Região</Label>
+                    <Input value={formData.micro_region} onChange={(e) => setFormData(p => ({ ...p, micro_region: e.target.value }))} placeholder="Ex: Grande SP..." />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>Condição de Pagamento</Label>
+                    <Select value={formData.default_payment_condition} onValueChange={(v) => setFormData(p => ({ ...p, default_payment_condition: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="À vista">À Vista</SelectItem>
+                        <SelectItem value="30 dias">30 Dias</SelectItem>
+                        <SelectItem value="30/60 dias">30/60 Dias</SelectItem>
+                        <SelectItem value="30/60/90 dias">30/60/90 Dias</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Tabela de Preço</Label>
+                    <Select value={formData.price_table} onValueChange={(v) => setFormData(p => ({ ...p, price_table: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="default">Padrão</SelectItem>
+                        <SelectItem value="wholesale">Atacado</SelectItem>
+                        <SelectItem value="special">Especial</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Classificação ABC</Label>
+                    <Select value={formData.abc_classification} onValueChange={(v) => setFormData(p => ({ ...p, abc_classification: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="A">A - Alta</SelectItem>
+                        <SelectItem value="B">B - Média</SelectItem>
+                        <SelectItem value="C">C - Baixa</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Potencial Estimado (R$)</Label>
+                  <Input type="number" value={formData.estimated_potential} onChange={(e) => setFormData(p => ({ ...p, estimated_potential: e.target.value }))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Observações Comerciais</Label>
+                  <Input value={formData.commercial_notes} onChange={(e) => setFormData(p => ({ ...p, commercial_notes: e.target.value }))} placeholder="Notas internas sobre o cliente..." />
+                </div>
+              </div>
+            </div>
           </div>
-          <DialogFooter>
             <Button variant="outline" onClick={() => setIsFormOpen(false)}>Cancelar</Button>
             <Button onClick={handleSave} disabled={createClient.isPending || updateClient.isPending}>
               {(createClient.isPending || updateClient.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
