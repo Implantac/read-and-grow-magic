@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Plus, Eye, MoreHorizontal, FileText, XCircle, CheckCircle, Loader2,
   Package, DollarSign, Clock, TruckIcon, ArrowRight, CalendarDays, User, CreditCard, Hash, MapPin, StickyNote,
-  ShieldCheck, ShieldAlert,
+  ShieldCheck, ShieldAlert, AlertTriangle,
 } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -29,8 +29,10 @@ import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { getPaymentMethodLabel, getOrderStatusLabel } from '@/config/commercial';
 import { useOrders, useCreateOrder, useUpdateOrderStatus, useUpdateOrderFields, type DbOrder } from '@/hooks/useOrders';
+import { useClients } from '@/hooks/useClients';
 import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
+import { validateOrder, type CommercialValidation } from '@/hooks/useCommercialRules';
 
 const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
@@ -125,6 +127,7 @@ function OrderStatusTimeline({ currentStatus }: { currentStatus: string }) {
 export default function OrdersPage() {
   const { toast } = useToast();
   const { data: orders = [], isLoading } = useOrders();
+  const { data: clients = [] } = useClients();
   const createOrder = useCreateOrder();
   const updateStatus = useUpdateOrderStatus();
   const updateFields = useUpdateOrderFields();
@@ -144,6 +147,27 @@ export default function OrdersPage() {
   const [formShipping, setFormShipping] = useState('0');
   const [formNotes, setFormNotes] = useState('');
 
+  // Commercial rules validation
+  const orderValidations = useMemo<CommercialValidation[]>(() => {
+    if (!formClient.id || formItems.length === 0) return [];
+    const client = clients.find(c => c.id === formClient.id) || null;
+    const subtotal = formItems.reduce((s, i) => s + (i.quantity * i.unit_price), 0);
+    const discount = formItems.reduce((s, i) => s + i.discount, 0);
+    const discountPct = subtotal > 0 ? (discount / subtotal) * 100 : 0;
+    const clientOrders = orders.filter(o => o.client_id === formClient.id);
+    return validateOrder({
+      client,
+      subtotal,
+      discount,
+      discountPct,
+      maxDiscountPct: 10,
+      paymentCondition: formCondition,
+      isNewClient: clientOrders.length === 0,
+    });
+  }, [formClient, formItems, formCondition, clients, orders]);
+
+  const hasBlocks = orderValidations.some(v => v.type === 'block');
+
   const resetForm = () => {
     setFormClient({ id: null, name: '' });
     setFormItems([]);
@@ -160,6 +184,11 @@ export default function OrdersPage() {
       toast({ title: 'Preencha o cliente e adicione pelo menos um item', variant: 'destructive' });
       return;
     }
+    if (hasBlocks) {
+      toast({ title: 'Pedido bloqueado', description: 'Corrija as pendências antes de continuar.', variant: 'destructive' });
+      return;
+    }
+    const needsApproval = orderValidations.some(v => v.type === 'approval');
     createOrder.mutate({
       client_id: formClient.id,
       client_name: formClient.name,
@@ -171,7 +200,13 @@ export default function OrdersPage() {
       notes: formNotes || null,
       items: formItems,
     }, {
-      onSuccess: () => { setIsFormOpen(false); resetForm(); },
+      onSuccess: () => {
+        setIsFormOpen(false);
+        resetForm();
+        if (needsApproval) {
+          toast({ title: '⚠️ Pedido criado com pendência de aprovação', description: 'Desconto ou condição especial requer aprovação.' });
+        }
+      },
     });
   };
 
@@ -401,6 +436,27 @@ export default function OrdersPage() {
             </TabsContent>
 
             <TabsContent value="details" className="mt-4 space-y-4">
+              {/* Commercial Rules Validation */}
+              {orderValidations.length > 0 && (
+                <div className="space-y-2">
+                  {orderValidations.map((v, i) => (
+                    <div key={i} className={`flex items-start gap-2 rounded-lg border p-3 text-sm ${
+                      v.type === 'block' ? 'border-destructive/50 bg-destructive/5 text-destructive' :
+                      v.type === 'approval' ? 'border-yellow-500/50 bg-yellow-500/5 text-yellow-700 dark:text-yellow-400' :
+                      'border-muted bg-muted/30 text-muted-foreground'
+                    }`}>
+                      {v.type === 'block' ? <XCircle className="h-4 w-4 mt-0.5 shrink-0" /> :
+                       v.type === 'approval' ? <ShieldAlert className="h-4 w-4 mt-0.5 shrink-0" /> :
+                       <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />}
+                      <div>
+                        <p className="font-medium text-xs">{v.type === 'block' ? 'BLOQUEIO' : v.type === 'approval' ? 'APROVAÇÃO NECESSÁRIA' : 'AVISO'}</p>
+                        <p className="text-xs">{v.message}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Observações</Label>
                 <Textarea

@@ -36,6 +36,8 @@ export interface DbClient {
   avg_ticket: number;
   estimated_potential: number;
   total_purchases: number;
+  purchase_frequency: number;
+  client_score: string;
   created_at: string;
   updated_at: string;
 }
