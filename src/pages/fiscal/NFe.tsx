@@ -515,6 +515,6 @@ export default function NFePage() {
 
       {/* Create NF-e Dialog */}
       <CreateNFeDialog open={createOpen} onOpenChange={setCreateOpen} onCreate={create} />
-    </div>
+    </PageContainer>
   );
 }

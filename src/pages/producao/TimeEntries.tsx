@@ -488,6 +488,6 @@ export default function TimeEntriesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }

@@ -94,32 +94,26 @@ export default function ProductionOrdersPage() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Ordens de Produção</h1>
-          <p className="text-sm text-muted-foreground">Gerenciamento e acompanhamento da produção</p>
-        </div>
-        <div className="flex gap-2">
-          <ExportButton
-            data={filteredOrders as unknown as Record<string, unknown>[]}
-            columns={[
-              { key: 'orderNumber', label: 'Nº Ordem' },
-              { key: 'productName', label: 'Produto' },
-              { key: 'productCode', label: 'Código' },
-              { key: 'quantity', label: 'Qtd Planejada' },
-              { key: 'producedQuantity', label: 'Qtd Produzida' },
-              { key: 'status', label: 'Status' },
-              { key: 'priority', label: 'Prioridade' },
-            ]}
-            filename="ordens_producao"
-          />
-          <Button>
-            <FileText className="h-4 w-4 mr-2" />
-            Nova Ordem
-          </Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader title="Ordens de Produção" description="Gerenciamento e acompanhamento da produção">
+        <ExportButton
+          data={filteredOrders as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'orderNumber', label: 'Nº Ordem' },
+            { key: 'productName', label: 'Produto' },
+            { key: 'productCode', label: 'Código' },
+            { key: 'quantity', label: 'Qtd Planejada' },
+            { key: 'producedQuantity', label: 'Qtd Produzida' },
+            { key: 'status', label: 'Status' },
+            { key: 'priority', label: 'Prioridade' },
+          ]}
+          filename="ordens_producao"
+        />
+        <Button>
+          <FileText className="h-4 w-4 mr-2" />
+          Nova Ordem
+        </Button>
+      </PageHeader>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -383,6 +377,6 @@ export default function ProductionOrdersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }

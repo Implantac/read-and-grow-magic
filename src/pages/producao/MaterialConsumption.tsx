@@ -378,6 +378,6 @@ export default function MaterialConsumptionPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }

@@ -438,6 +438,6 @@ export default function FiscalReportsPage() {
 
       {/* Create Report Dialog */}
       <CreateReportDialog open={createOpen} onOpenChange={setCreateOpen} onCreate={create} />
-    </div>
+    </PageContainer>
   );
 }

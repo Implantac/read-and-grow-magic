@@ -511,6 +511,6 @@ export default function NFCePage() {
 
       {/* PDV Dialog */}
       <PDVDialog open={pdvOpen} onOpenChange={setPdvOpen} onEmit={emit} />
-    </div>
+    </PageContainer>
   );
 }
