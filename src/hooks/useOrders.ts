@@ -34,6 +34,15 @@ export interface DbOrder {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  commercial_approval: string | null;
+  financial_approval: string | null;
+  approved_by: string | null;
+  approved_at: string | null;
+  commission_rate: number | null;
+  commission_value: number | null;
+  internal_notes: string | null;
+  expected_billing_date: string | null;
+  max_discount_pct: number | null;
   items?: DbOrderItem[];
 }
 
