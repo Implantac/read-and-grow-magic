@@ -8,9 +8,8 @@ interface KPICardProps {
   subtitle?: string;
   icon: ReactNode;
   accentColor?: string;
-  iconBgClass?: string;
-  iconTextClass?: string;
   className?: string;
+  index?: number;
 }
 
 const colorMap: Record<string, { border: string; iconBg: string; iconText: string }> = {
@@ -22,13 +21,20 @@ const colorMap: Record<string, { border: string; iconBg: string; iconText: strin
   accent: { border: 'border-l-primary', iconBg: 'bg-accent/10', iconText: 'text-accent-foreground' },
 };
 
-export function KPICard({ title, value, subtitle, icon, accentColor = 'primary', className }: KPICardProps) {
+export function KPICard({ title, value, subtitle, icon, accentColor = 'primary', className, index = 0 }: KPICardProps) {
   const colors = colorMap[accentColor] || colorMap.primary;
 
   return (
-    <Card className={cn('border-l-4 hover-lift', colors.border, className)}>
+    <Card
+      className={cn(
+        'border-l-4 hover-lift opacity-0 animate-slide-in-bottom',
+        colors.border,
+        className
+      )}
+      style={{ animationDelay: `${index * 80}ms`, animationFillMode: 'forwards' }}
+    >
       <CardContent className="flex items-center gap-4 p-5">
-        <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-lg', colors.iconBg)}>
+        <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110', colors.iconBg)}>
           <div className={colors.iconText}>{icon}</div>
         </div>
         <div className="min-w-0">
