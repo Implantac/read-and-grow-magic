@@ -34,7 +34,10 @@ export const navigationSections: NavSection[] = [
         href: '/comercial',
         icon: 'Users',
         children: [
+          { title: 'Dashboard', href: '/comercial/dashboard', icon: 'BarChart3' },
+          { title: 'Funil Comercial', href: '/comercial/funil', icon: 'Filter' },
           { title: 'Clientes', href: '/comercial/clientes', icon: 'UserCircle' },
+          { title: 'Representantes', href: '/comercial/representantes', icon: 'UserCheck' },
           { title: 'Vendas', href: '/comercial/vendas', icon: 'ShoppingBag' },
           { title: 'Pedidos', href: '/comercial/pedidos', icon: 'ClipboardList' },
           { title: 'Orçamentos', href: '/comercial/orcamentos', icon: 'FileText' },
