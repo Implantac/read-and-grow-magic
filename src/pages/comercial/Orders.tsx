@@ -284,7 +284,6 @@ export default function OrdersPage() {
   return (
     <PageContainer>
       <PageHeader title="Pedidos de Venda" description="Gerencie e acompanhe o ciclo de vida dos seus pedidos">
-        <div className="flex gap-2">
           <ExportButton
             data={filteredOrders as unknown as Record<string, unknown>[]}
             columns={[
@@ -298,61 +297,14 @@ export default function OrdersPage() {
           <Button className="gap-2 shadow-sm" onClick={() => { resetForm(); setIsFormOpen(true); }}>
             <Plus className="h-4 w-4" />Novo Pedido
           </Button>
-        </div>
-      </div>
+      </PageHeader>
 
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card className="border-l-4 border-l-primary">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <DollarSign className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Valor Total</p>
-              <p className="text-xl font-bold text-foreground">{fmt(totalValue)}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-accent">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent/10">
-              <Package className="h-5 w-5 text-accent-foreground" />
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Total Pedidos</p>
-              <p className="text-xl font-bold text-foreground">{filteredOrders.length}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-yellow-500">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-yellow-500/10">
-              <Clock className="h-5 w-5 text-yellow-600" />
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Pendentes</p>
-              <p className="text-xl font-bold text-foreground">{pendingCount}</p>
-              <p className="text-[11px] text-muted-foreground">{processingCount} em processamento</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-green-500">
-          <CardContent className="flex items-center gap-4 p-5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-green-500/10">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-            </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Entregues</p>
-              <p className="text-xl font-bold text-foreground">{deliveredCount}</p>
-              <p className="text-[11px] text-muted-foreground">
-                {filteredOrders.length > 0
-                  ? `${Math.round((deliveredCount / filteredOrders.length) * 100)}% concluídos`
-                  : '—'}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <KPICard title="Valor Total" value={fmt(totalValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" />
+        <KPICard title="Total Pedidos" value={filteredOrders.length} icon={<Package className="h-5 w-5" />} accentColor="accent" />
+        <KPICard title="Pendentes" value={pendingCount} subtitle={`${processingCount} em processamento`} icon={<Clock className="h-5 w-5" />} accentColor="warning" />
+        <KPICard title="Entregues" value={deliveredCount} subtitle={filteredOrders.length > 0 ? `${Math.round((deliveredCount / filteredOrders.length) * 100)}% concluídos` : '—'} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" />
       </div>
 
       {/* Filters & Table */}
