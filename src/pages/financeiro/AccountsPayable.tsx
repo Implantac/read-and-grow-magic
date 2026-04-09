@@ -173,7 +173,6 @@ export default function AccountsPayable() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-        </Dialog>
       </PageHeader>
 
       {/* Summary Cards */}
