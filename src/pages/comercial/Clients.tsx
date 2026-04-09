@@ -167,17 +167,12 @@ export default function ClientsPage() {
   );
 
   if (isLoading) {
-    return <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+    return <PageLoading message="Carregando clientes..." />;
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Clientes</h1>
-          <p className="text-muted-foreground">Gerencie sua base de clientes</p>
-        </div>
-        <div className="flex gap-2">
+    <PageContainer>
+      <PageHeader title="Clientes" description="Gerencie sua base de clientes">
           <ExportButton
             data={filteredClients as unknown as Record<string, unknown>[]}
             columns={[
