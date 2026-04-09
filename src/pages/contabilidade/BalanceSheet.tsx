@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { cn } from '@/lib/utils';
 import { Scale, Building2, Landmark, PiggyBank } from 'lucide-react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { EquityEvolutionChart } from '@/components/contabilidade/EquityEvolutionChart';
 import { FinancialIndicatorsPanel } from '@/components/contabilidade/FinancialIndicatorsPanel';
 import {

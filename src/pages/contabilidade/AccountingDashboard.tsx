@@ -117,6 +117,6 @@ export default function AccountingDashboard() {
         {/* Financial Indicators */}
         <FinancialIndicatorsPanel />
       </div>
-    </div>
+    </PageContainer>
   );
 }
