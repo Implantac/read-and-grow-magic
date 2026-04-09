@@ -28,7 +28,7 @@ import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { getPaymentMethodLabel, getOrderStatusLabel } from '@/config/commercial';
-import { useOrders, useCreateOrder, useUpdateOrderStatus, type DbOrder } from '@/hooks/useOrders';
+import { useOrders, useCreateOrder, useUpdateOrderStatus, useUpdateOrderFields, type DbOrder } from '@/hooks/useOrders';
 import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
 
