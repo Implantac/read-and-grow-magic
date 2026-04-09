@@ -436,6 +436,27 @@ export default function OrdersPage() {
             </TabsContent>
 
             <TabsContent value="details" className="mt-4 space-y-4">
+              {/* Commercial Rules Validation */}
+              {orderValidations.length > 0 && (
+                <div className="space-y-2">
+                  {orderValidations.map((v, i) => (
+                    <div key={i} className={`flex items-start gap-2 rounded-lg border p-3 text-sm ${
+                      v.type === 'block' ? 'border-destructive/50 bg-destructive/5 text-destructive' :
+                      v.type === 'approval' ? 'border-yellow-500/50 bg-yellow-500/5 text-yellow-700 dark:text-yellow-400' :
+                      'border-muted bg-muted/30 text-muted-foreground'
+                    }`}>
+                      {v.type === 'block' ? <XCircle className="h-4 w-4 mt-0.5 shrink-0" /> :
+                       v.type === 'approval' ? <ShieldAlert className="h-4 w-4 mt-0.5 shrink-0" /> :
+                       <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />}
+                      <div>
+                        <p className="font-medium text-xs">{v.type === 'block' ? 'BLOQUEIO' : v.type === 'approval' ? 'APROVAÇÃO NECESSÁRIA' : 'AVISO'}</p>
+                        <p className="text-xs">{v.message}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Observações</Label>
                 <Textarea
