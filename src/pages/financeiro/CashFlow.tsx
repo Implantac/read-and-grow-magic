@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight, Download, Filter, Calendar, Loader2 } from 'lucide-react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { PageLoading } from '@/components/shared/PageLoading';
+import { KPICard } from '@/components/shared/KPICard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -42,17 +46,12 @@ export default function CashFlow() {
   const currentBalance = entries.length > 0 ? Number(entries[entries.length - 1].balance) : 0;
 
   if (isLoading) {
-    return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
+    return <PageLoading message="Carregando fluxo de caixa..." />;
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Fluxo de Caixa</h1>
-          <p className="text-muted-foreground">Acompanhe as movimentações financeiras</p>
-        </div>
-        <div className="flex gap-2">
+    <PageContainer>
+      <PageHeader title="Fluxo de Caixa" description="Acompanhe as movimentações financeiras">
           <Select value={periodFilter} onValueChange={setPeriodFilter}>
             <SelectTrigger className="w-40">
               <Calendar className="mr-2 h-4 w-4" />
@@ -66,15 +65,14 @@ export default function CashFlow() {
             </SelectContent>
           </Select>
           <Button variant="outline" className="gap-2"><Download className="h-4 w-4" />Exportar</Button>
-        </div>
-      </div>
+      </PageHeader>
 
       {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Saldo Atual</CardTitle><Wallet className="h-4 w-4 text-primary" /></CardHeader><CardContent><div className="text-2xl font-bold">{formatCurrency(currentBalance)}</div><p className="text-xs text-muted-foreground">Conta Principal</p></CardContent></Card>
-        <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total Entradas</CardTitle><TrendingUp className="h-4 w-4 text-success" /></CardHeader><CardContent><div className="text-2xl font-bold text-success">{formatCurrency(totalIncome)}</div><p className="text-xs text-muted-foreground">No período</p></CardContent></Card>
-        <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Total Saídas</CardTitle><TrendingDown className="h-4 w-4 text-destructive" /></CardHeader><CardContent><div className="text-2xl font-bold text-destructive">{formatCurrency(totalExpense)}</div><p className="text-xs text-muted-foreground">No período</p></CardContent></Card>
-        <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium text-muted-foreground">Saldo Projetado</CardTitle><Wallet className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold">{formatCurrency(currentBalance)}</div><p className="text-xs text-muted-foreground">Próximos 30 dias</p></CardContent></Card>
+        <KPICard title="Saldo Atual" value={formatCurrency(currentBalance)} subtitle="Conta Principal" icon={<Wallet className="h-5 w-5" />} accentColor="primary" />
+        <KPICard title="Total Entradas" value={formatCurrency(totalIncome)} subtitle="No período" icon={<TrendingUp className="h-5 w-5" />} accentColor="success" />
+        <KPICard title="Total Saídas" value={formatCurrency(totalExpense)} subtitle="No período" icon={<TrendingDown className="h-5 w-5" />} accentColor="danger" />
+        <KPICard title="Saldo Projetado" value={formatCurrency(currentBalance)} subtitle="Próximos 30 dias" icon={<Wallet className="h-5 w-5" />} accentColor="info" />
       </div>
 
       {/* Charts Row */}
@@ -194,6 +192,6 @@ export default function CashFlow() {
           </Table>
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   );
 }
