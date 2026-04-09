@@ -49,6 +49,9 @@ import { ptBR } from 'date-fns/locale';
 import {
   stockLevelStatusConfig,
 } from '@/config/inventory';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 import { ABCCurveChart } from '@/components/estoque/ABCCurveChart';
 import { InventoryTurnoverChart } from '@/components/estoque/InventoryTurnoverChart';
 import type { StockLevel, StockLevelStatus, StockLevelFilters } from '@/types/inventory';
@@ -133,78 +136,33 @@ export default function StockLevelsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Níveis de Estoque</h1>
-          <p className="text-muted-foreground">Monitoramento de saldos e alertas</p>
-        </div>
-        <div className="flex gap-2">
-          <ExportButton
-            data={filteredLevels as unknown as Record<string, unknown>[]}
-            columns={[
-              { key: 'productCode', label: 'Código' },
-              { key: 'productName', label: 'Produto' },
-              { key: 'category', label: 'Categoria' },
-              { key: 'currentStock', label: 'Estoque Atual' },
-              { key: 'minStock', label: 'Mínimo' },
-              { key: 'maxStock', label: 'Máximo' },
-              { key: 'totalValue', label: 'Valor Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
-              { key: 'status', label: 'Status' },
-            ]}
-            filename="niveis_estoque"
-          />
-          <Button variant="outline">
-            <ShoppingCart className="mr-2 h-4 w-4" />
-            Gerar Pedido de Compra
-          </Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader title="Níveis de Estoque" description="Monitoramento de saldos e alertas">
+        <ExportButton
+          data={filteredLevels as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'productCode', label: 'Código' },
+            { key: 'productName', label: 'Produto' },
+            { key: 'category', label: 'Categoria' },
+            { key: 'currentStock', label: 'Estoque Atual' },
+            { key: 'minStock', label: 'Mínimo' },
+            { key: 'maxStock', label: 'Máximo' },
+            { key: 'totalValue', label: 'Valor Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+            { key: 'status', label: 'Status' },
+          ]}
+          filename="niveis_estoque"
+        />
+        <Button variant="outline">
+          <ShoppingCart className="mr-2 h-4 w-4" />
+          Gerar Pedido de Compra
+        </Button>
+      </PageHeader>
 
-      {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Valor Total em Estoque</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stockLevels.reduce((s, l) => s + l.totalValue, 0))}</div>
-            <p className="text-xs text-muted-foreground">
-              {stockLevels.length} produtos ativos
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="border-red-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Estoque Crítico</CardTitle>
-            <AlertCircle className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{criticalItems.length}</div>
-            <p className="text-xs text-muted-foreground">Requer ação imediata</p>
-          </CardContent>
-        </Card>
-        <Card className="border-amber-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Estoque Baixo</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-amber-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-amber-600">{lowItems.length}</div>
-            <p className="text-xs text-muted-foreground">Abaixo do mínimo</p>
-          </CardContent>
-        </Card>
-        <Card className="border-blue-500">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Estoque em Excesso</CardTitle>
-            <TrendingUp className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{excessItems.length}</div>
-            <p className="text-xs text-muted-foreground">Acima do máximo</p>
-          </CardContent>
-        </Card>
+        <KPICard title="Valor Total em Estoque" value={formatCurrency(stockLevels.reduce((s, l) => s + l.totalValue, 0))} icon={<Package className="h-5 w-5" />} subtitle={`${stockLevels.length} produtos ativos`} index={0} />
+        <KPICard title="Estoque Crítico" value={criticalItems.length} icon={<AlertCircle className="h-5 w-5" />} accentColor="danger" subtitle="Requer ação imediata" index={1} />
+        <KPICard title="Estoque Baixo" value={lowItems.length} icon={<AlertTriangle className="h-5 w-5" />} accentColor="warning" subtitle="Abaixo do mínimo" index={2} />
+        <KPICard title="Estoque em Excesso" value={excessItems.length} icon={<TrendingUp className="h-5 w-5" />} accentColor="info" subtitle="Acima do máximo" index={3} />
       </div>
 
       {/* Tabs for different views */}
