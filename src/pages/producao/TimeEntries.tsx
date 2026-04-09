@@ -25,6 +25,8 @@ import {
   Wrench
 } from 'lucide-react';
 import { TimeEntry, TimeEntryStatus } from '@/types/production';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 const statusConfig: Record<TimeEntryStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ReactNode }> = {
   started: { label: 'Em Andamento', variant: 'default', icon: <PlayCircle className="h-4 w-4" /> },

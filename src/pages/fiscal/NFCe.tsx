@@ -55,6 +55,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useNFCe } from '@/hooks/useNFCe';
 import { PDVDialog } from '@/components/fiscal/PDVDialog';
 import type { NFCe } from '@/types/fiscal';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ className?: string }> }> = {
   authorized: { color: 'bg-success/10 text-success', icon: CheckCircle },

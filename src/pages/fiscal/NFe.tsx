@@ -59,6 +59,8 @@ import { nfeStatusLabels } from '@/config/fiscal';
 import { CreateNFeDialog } from '@/components/fiscal/CreateNFeDialog';
 import { generateDANFE, generateNFeXML } from '@/lib/fiscalDocuments';
 import type { NFe } from '@/types/fiscal';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ className?: string }> }> = {
   draft: { color: 'bg-muted text-muted-foreground', icon: FileText },

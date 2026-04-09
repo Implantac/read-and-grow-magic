@@ -23,6 +23,8 @@ import {
   Box
 } from 'lucide-react';
 import { MaterialConsumption } from '@/types/production';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 export default function MaterialConsumptionPage() {
   const [consumptions, setConsumptions] = useState<MaterialConsumption[]>([]);

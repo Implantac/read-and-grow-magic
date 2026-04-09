@@ -27,6 +27,8 @@ import {
   Calendar
 } from 'lucide-react';
 import { ProductionOrder, ProductionOrderStatus, ProductionPriority } from '@/types/production';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 const statusConfig: Record<ProductionOrderStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   draft: { label: 'Rascunho', variant: 'secondary' },

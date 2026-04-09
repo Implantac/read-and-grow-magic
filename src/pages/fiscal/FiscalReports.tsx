@@ -39,6 +39,8 @@ import { reportTypeLabels } from '@/config/fiscal';
 import { useFiscalReports } from '@/hooks/useFiscalReports';
 import { CreateReportDialog } from '@/components/fiscal/CreateReportDialog';
 import type { FiscalReport } from '@/types/fiscal';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
 import {
   AreaChart,
   Area,
