@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { Download, Factory, Target, AlertTriangle, Gauge } from 'lucide-react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 
 export default function ProductionReport() {
   const [loading, setLoading] = useState(true);
@@ -23,13 +26,7 @@ export default function ProductionReport() {
         const produced = orders.reduce((s, o) => s + Number(o.produced_quantity), 0);
         const efficiency = planned > 0 ? Math.round((produced / planned) * 100) : 0;
 
-        setStats({
-          total: orders.length,
-          produced,
-          planned,
-          efficiency,
-          defects: 0,
-        });
+        setStats({ total: orders.length, produced, planned, efficiency, defects: 0 });
       } catch (e) {
         console.error('Error fetching production stats:', e);
       } finally {
@@ -41,66 +38,26 @@ export default function ProductionReport() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <PageContainer>
         <Skeleton className="h-10 w-64" />
         <div className="grid gap-4 md:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24" />)}
         </div>
-      </div>
+      </PageContainer>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Relatório de Produção</h1>
-          <p className="text-muted-foreground">Eficiência, qualidade e consumo de materiais</p>
-        </div>
+    <PageContainer>
+      <PageHeader title="Relatório de Produção" description="Eficiência, qualidade e consumo de materiais">
         <Button variant="outline" size="sm" className="gap-2"><Download className="h-4 w-4" /> Exportar</Button>
-      </div>
+      </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Produção Total</CardTitle>
-            <Factory className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.produced}</div>
-            <p className="text-xs text-muted-foreground">de {stats.planned} planejados</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Eficiência Média</CardTitle>
-            <Gauge className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-success">{stats.efficiency}%</div>
-            <p className="text-xs text-muted-foreground">{stats.total === 0 ? 'Nenhum dado disponível' : `${stats.total} ordens`}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Atingimento Meta</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.efficiency}%</div>
-            <p className="text-xs text-muted-foreground">Planejado vs Realizado</p>
-          </CardContent>
-        </Card>
-        <Card className="border-warning/50">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Defeitos</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-warning" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-warning">{stats.defects}</div>
-            <p className="text-xs text-muted-foreground">0% taxa de defeito</p>
-          </CardContent>
-        </Card>
+        <KPICard title="Produção Total" value={stats.produced} subtitle={`de ${stats.planned} planejados`} icon={<Factory className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Eficiência Média" value={`${stats.efficiency}%`} subtitle={stats.total === 0 ? 'Nenhum dado disponível' : `${stats.total} ordens`} icon={<Gauge className="h-5 w-5" />} accentColor="success" index={1} />
+        <KPICard title="Atingimento Meta" value={`${stats.efficiency}%`} subtitle="Planejado vs Realizado" icon={<Target className="h-5 w-5" />} accentColor="info" index={2} />
+        <KPICard title="Defeitos" value={stats.defects} subtitle="0% taxa de defeito" icon={<AlertTriangle className="h-5 w-5" />} accentColor="warning" index={3} />
       </div>
 
       {stats.total === 0 && (
@@ -112,6 +69,6 @@ export default function ProductionReport() {
           </CardContent>
         </Card>
       )}
-    </div>
+    </PageContainer>
   );
 }
