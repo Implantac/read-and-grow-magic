@@ -38,9 +38,9 @@ const statusConfig: Record<ProductionOrderStatus, { label: string; variant: 'def
 
 const priorityConfig: Record<ProductionPriority, { label: string; color: string }> = {
   low: { label: 'Baixa', color: 'text-muted-foreground' },
-  medium: { label: 'Média', color: 'text-blue-600' },
-  high: { label: 'Alta', color: 'text-orange-600' },
-  urgent: { label: 'Urgente', color: 'text-red-600' }
+  medium: { label: 'Média', color: 'text-info' },
+  high: { label: 'Alta', color: 'text-warning' },
+  urgent: { label: 'Urgente', color: 'text-destructive' }
 };
 
 export default function ProductionOrdersPage() {
@@ -94,11 +94,11 @@ export default function ProductionOrdersPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Ordens de Produção</h1>
-          <p className="text-muted-foreground">Gerenciamento e acompanhamento da produção</p>
+          <h1 className="text-2xl font-bold text-foreground">Ordens de Produção</h1>
+          <p className="text-sm text-muted-foreground">Gerenciamento e acompanhamento da produção</p>
         </div>
         <div className="flex gap-2">
           <ExportButton
@@ -146,7 +146,7 @@ export default function ProductionOrdersPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Eficiência</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
+            <CheckCircle className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0%</div>
@@ -156,7 +156,7 @@ export default function ProductionOrdersPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Entregas no Prazo</CardTitle>
-            <Clock className="h-4 w-4 text-blue-500" />
+            <Clock className="h-4 w-4 text-info" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0%</div>
