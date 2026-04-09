@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Eye, MoreHorizontal, Loader2, Search } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, MoreHorizontal, Search } from 'lucide-react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { PageLoading } from '@/components/shared/PageLoading';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import {
@@ -188,8 +191,7 @@ export default function ClientsPage() {
           <Button onClick={() => handleOpenForm()} className="gap-2">
             <Plus className="h-4 w-4" />Novo Cliente
           </Button>
-        </div>
-      </div>
+      </PageHeader>
 
       <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
 
@@ -387,6 +389,6 @@ export default function ClientsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageContainer>
   );
 }
