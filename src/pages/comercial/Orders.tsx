@@ -246,6 +246,10 @@ export default function OrdersPage() {
     });
   };
 
+  const handleApproval = (orderId: string, field: string, value: string) => {
+    updateFields.mutate({ id: orderId, [field]: value, ...(value === 'approved' ? { approved_at: new Date().toISOString() } : {}) });
+  };
+
   const renderActions = (order: DbOrder) => {
     const nextStatus = statusFlow[order.status];
     const canAdvance = nextStatus !== null && order.status !== 'cancelled';
