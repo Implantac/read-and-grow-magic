@@ -12,13 +12,6 @@ import { TrialBalanceChart } from '@/components/contabilidade/TrialBalanceChart'
 import { PeriodSelector } from '@/components/contabilidade/PeriodSelector';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { EquityEvolutionChart } from '@/components/contabilidade/EquityEvolutionChart';
-import { MarginTrendChart } from '@/components/contabilidade/MarginTrendChart';
-import { RevenueExpenseTrendChart } from '@/components/contabilidade/RevenueExpenseTrendChart';
-import { ExpenseBreakdownChart } from '@/components/contabilidade/ExpenseBreakdownChart';
-import { FinancialIndicatorsPanel } from '@/components/contabilidade/FinancialIndicatorsPanel';
-import { TrialBalanceChart } from '@/components/contabilidade/TrialBalanceChart';
-import { PeriodSelector } from '@/components/contabilidade/PeriodSelector';
 
 export default function AccountingDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('jan-24');

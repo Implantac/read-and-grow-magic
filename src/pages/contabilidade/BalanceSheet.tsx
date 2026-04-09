@@ -84,14 +84,10 @@ export default function BalanceSheetPage() {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Balanço Patrimonial</h1>
-          <p className="text-muted-foreground">Posição patrimonial da empresa</p>
-        </div>
+    <PageContainer>
+      <PageHeader title="Balanço Patrimonial" description="Posição patrimonial da empresa">
         <ExportButton data={balanceSheet as unknown as Record<string, unknown>[]} columns={exportColumns} filename="balanco_patrimonial" />
-      </div>
+      </PageHeader>
 
       {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-4">
