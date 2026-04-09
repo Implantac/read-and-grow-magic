@@ -27,6 +27,7 @@ import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedF
 import { clientSegments, brazilianStates } from '@/config/commercial';
 import { useClients, useCreateClient, useUpdateClient, useDeleteClient, type DbClient } from '@/hooks/useClients';
 import { useCnpjLookup } from '@/hooks/useCnpjLookup';
+import { ClientDetailDialog } from '@/components/comercial/ClientDetailDialog';
 
 const filterFields: FilterField[] = [
   { key: 'status', label: 'Status', type: 'select', options: [
@@ -431,38 +432,8 @@ export default function ClientsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* View Dialog */}
-      <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Detalhes do Cliente</DialogTitle></DialogHeader>
-          {selectedClient && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-sm text-muted-foreground">{selectedClient.code}</span>
-                <StatusBadge type="client" status={selectedClient.status} />
-              </div>
-              <div>
-                <h3 className="font-semibold">{selectedClient.name}</h3>
-                {selectedClient.trade_name && <p className="text-sm text-muted-foreground">{selectedClient.trade_name}</p>}
-              </div>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div><span className="text-muted-foreground">{selectedClient.document_type === 'cnpj' ? 'CNPJ' : 'CPF'}</span><p>{selectedClient.document}</p></div>
-                <div><span className="text-muted-foreground">Segmento</span><p>{selectedClient.segment || '-'}</p></div>
-                <div><span className="text-muted-foreground">E-mail</span><p>{selectedClient.email}</p></div>
-                <div><span className="text-muted-foreground">Telefone</span><p>{selectedClient.phone}</p></div>
-                <div><span className="text-muted-foreground">Limite de Crédito</span><p>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedClient.credit_limit)}</p></div>
-                <div><span className="text-muted-foreground">Saldo Atual</span><p>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedClient.current_balance)}</p></div>
-              </div>
-              <div className="border-t pt-4 text-sm">
-                <span className="text-muted-foreground">Endereço</span>
-                <p>{selectedClient.address_street}, {selectedClient.address_number}{selectedClient.address_complement && ` - ${selectedClient.address_complement}`}</p>
-                <p>{selectedClient.address_neighborhood} - {selectedClient.address_city}/{selectedClient.address_state}</p>
-                <p>CEP: {selectedClient.address_zip_code}</p>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Client Detail Dialog with Timeline */}
+      <ClientDetailDialog client={selectedClient} open={isViewOpen} onOpenChange={setIsViewOpen} />
 
       {/* Delete Confirmation */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>

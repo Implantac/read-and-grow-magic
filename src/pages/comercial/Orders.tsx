@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   Plus, Eye, MoreHorizontal, FileText, XCircle, CheckCircle, Loader2,
   Package, DollarSign, Clock, TruckIcon, ArrowRight, CalendarDays, User, CreditCard, Hash, MapPin, StickyNote,
+  ShieldCheck, ShieldAlert,
 } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -27,7 +28,7 @@ import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { getPaymentMethodLabel, getOrderStatusLabel } from '@/config/commercial';
-import { useOrders, useCreateOrder, useUpdateOrderStatus, type DbOrder } from '@/hooks/useOrders';
+import { useOrders, useCreateOrder, useUpdateOrderStatus, useUpdateOrderFields, type DbOrder } from '@/hooks/useOrders';
 import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
 
@@ -52,6 +53,13 @@ const filterFields: FilterField[] = [
   { key: 'startDate', label: 'Data Inicial', type: 'date' },
   { key: 'endDate', label: 'Data Final', type: 'date' },
 ];
+
+
+function ApprovalBadge({ status }: { status: string | null }) {
+  if (status === 'approved') return <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-[10px]">Aprovado</Badge>;
+  if (status === 'rejected') return <Badge variant="destructive" className="text-[10px]">Rejeitado</Badge>;
+  return <Badge variant="secondary" className="text-[10px]">Pendente</Badge>;
+}
 
 const statusSteps = ['pending', 'confirmed', 'processing', 'separated', 'invoiced', 'shipped', 'delivered'];
 
@@ -119,6 +127,7 @@ export default function OrdersPage() {
   const { data: orders = [], isLoading } = useOrders();
   const createOrder = useCreateOrder();
   const updateStatus = useUpdateOrderStatus();
+  const updateFields = useUpdateOrderFields();
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -235,6 +244,10 @@ export default function OrdersPage() {
     updateStatus.mutate({ id: selectedOrder.id, status: 'cancelled' }, {
       onSuccess: () => { setIsCancelOpen(false); setSelectedOrder(null); },
     });
+  };
+
+  const handleApproval = (orderId: string, field: string, value: string) => {
+    updateFields.mutate({ id: orderId, [field]: value, ...(value === 'approved' ? { approved_at: new Date().toISOString() } : {}) });
   };
 
   const renderActions = (order: DbOrder) => {
@@ -511,7 +524,45 @@ export default function OrdersPage() {
                   )}
                 </div>
 
-                {/* Items Table */}
+                {/* Approval Status */}
+                <div className="rounded-lg border p-4 space-y-3">
+                  <h4 className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <ShieldCheck className="h-3.5 w-3.5" /> Aprovações
+                  </h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Comercial:</span>
+                      <ApprovalBadge status={selectedOrder.commercial_approval} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">Financeira:</span>
+                      <ApprovalBadge status={selectedOrder.financial_approval} />
+                    </div>
+                  </div>
+                  {selectedOrder.status === 'pending' && (
+                    <div className="flex gap-2 pt-1">
+                      {selectedOrder.commercial_approval !== 'approved' && (
+                        <Button size="sm" variant="outline" className="text-xs gap-1" onClick={() => handleApproval(selectedOrder.id, 'commercial_approval', 'approved')}>
+                          <CheckCircle className="h-3 w-3" /> Aprovar Comercial
+                        </Button>
+                      )}
+                      {selectedOrder.financial_approval !== 'approved' && (
+                        <Button size="sm" variant="outline" className="text-xs gap-1" onClick={() => handleApproval(selectedOrder.id, 'financial_approval', 'approved')}>
+                          <CheckCircle className="h-3 w-3" /> Aprovar Financeira
+                        </Button>
+                      )}
+                      {(selectedOrder.commercial_approval !== 'approved' || selectedOrder.financial_approval !== 'approved') && (
+                        <Button size="sm" variant="ghost" className="text-xs gap-1 text-destructive" onClick={() => handleApproval(selectedOrder.id, selectedOrder.commercial_approval !== 'rejected' ? 'commercial_approval' : 'financial_approval', 'rejected')}>
+                          <ShieldAlert className="h-3 w-3" /> Rejeitar
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                  {selectedOrder.approved_by && (
+                    <p className="text-[11px] text-muted-foreground">Aprovado por: {selectedOrder.approved_by}{selectedOrder.approved_at ? ` em ${new Date(selectedOrder.approved_at).toLocaleDateString('pt-BR')}` : ''}</p>
+                  )}
+                </div>
+
                 {selectedOrder.items && selectedOrder.items.length > 0 && (
                   <div>
                     <h4 className="mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">

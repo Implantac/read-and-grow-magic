@@ -34,6 +34,15 @@ export interface DbOrder {
   notes: string | null;
   created_at: string;
   updated_at: string;
+  commercial_approval: string | null;
+  financial_approval: string | null;
+  approved_by: string | null;
+  approved_at: string | null;
+  commission_rate: number | null;
+  commission_value: number | null;
+  internal_notes: string | null;
+  expected_billing_date: string | null;
+  max_discount_pct: number | null;
   items?: DbOrderItem[];
 }
 
@@ -138,6 +147,22 @@ export function useUpdateOrderStatus() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['orders'] });
       toast({ title: 'Status do pedido atualizado!' });
+    },
+    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+  });
+}
+
+export function useUpdateOrderFields() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  return useMutation({
+    mutationFn: async ({ id, ...fields }: { id: string; [key: string]: any }) => {
+      const { error } = await supabase.from('orders').update({ ...fields, updated_at: new Date().toISOString() } as any).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['orders'] });
+      toast({ title: 'Pedido atualizado!' });
     },
     onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
   });
