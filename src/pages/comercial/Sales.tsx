@@ -134,9 +134,9 @@ export default function SalesPage() {
       </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <KPICard title="Total de Vendas" value={fmt(totalSales)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" />
-        <KPICard title="Vendas Concluídas" value={salesCount} icon={<ShoppingBag className="h-5 w-5" />} accentColor="success" />
-        <KPICard title="Ticket Médio" value={salesCount > 0 ? fmt(totalSales / salesCount) : 'R$ 0,00'} icon={<TrendingUp className="h-5 w-5" />} accentColor="info" />
+        <KPICard title="Total de Vendas" value={fmt(totalSales)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Vendas Concluídas" value={salesCount} icon={<ShoppingBag className="h-5 w-5" />} accentColor="success" index={1} />
+        <KPICard title="Ticket Médio" value={salesCount > 0 ? fmt(totalSales / salesCount) : 'R$ 0,00'} icon={<TrendingUp className="h-5 w-5" />} accentColor="info" index={2} />
       </div>
 
       <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />

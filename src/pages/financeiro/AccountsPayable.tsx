@@ -177,10 +177,10 @@ export default function AccountsPayable() {
 
       {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KPICard title="Total a Pagar" value={formatCurrency(summaryData.total)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" />
-        <KPICard title="Pendente" value={formatCurrency(summaryData.pending)} icon={<Clock className="h-5 w-5" />} accentColor="warning" />
-        <KPICard title="Vencido" value={formatCurrency(summaryData.overdue)} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" />
-        <KPICard title="Pago" value={formatCurrency(summaryData.paid)} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" />
+        <KPICard title="Total a Pagar" value={formatCurrency(summaryData.total)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Pendente" value={formatCurrency(summaryData.pending)} icon={<Clock className="h-5 w-5" />} accentColor="warning" index={1} />
+        <KPICard title="Vencido" value={formatCurrency(summaryData.overdue)} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={2} />
+        <KPICard title="Pago" value={formatCurrency(summaryData.paid)} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={3} />
       </div>
 
       {/* Filters */}

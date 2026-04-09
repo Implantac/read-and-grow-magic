@@ -69,10 +69,10 @@ export default function CashFlow() {
 
       {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KPICard title="Saldo Atual" value={formatCurrency(currentBalance)} subtitle="Conta Principal" icon={<Wallet className="h-5 w-5" />} accentColor="primary" />
-        <KPICard title="Total Entradas" value={formatCurrency(totalIncome)} subtitle="No período" icon={<TrendingUp className="h-5 w-5" />} accentColor="success" />
-        <KPICard title="Total Saídas" value={formatCurrency(totalExpense)} subtitle="No período" icon={<TrendingDown className="h-5 w-5" />} accentColor="danger" />
-        <KPICard title="Saldo Projetado" value={formatCurrency(currentBalance)} subtitle="Próximos 30 dias" icon={<Wallet className="h-5 w-5" />} accentColor="info" />
+        <KPICard title="Saldo Atual" value={formatCurrency(currentBalance)} subtitle="Conta Principal" icon={<Wallet className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Total Entradas" value={formatCurrency(totalIncome)} subtitle="No período" icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={1} />
+        <KPICard title="Total Saídas" value={formatCurrency(totalExpense)} subtitle="No período" icon={<TrendingDown className="h-5 w-5" />} accentColor="danger" index={2} />
+        <KPICard title="Saldo Projetado" value={formatCurrency(currentBalance)} subtitle="Próximos 30 dias" icon={<Wallet className="h-5 w-5" />} accentColor="info" index={3} />
       </div>
 
       {/* Charts Row */}
