@@ -1,27 +1,34 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageLoading } from '@/components/shared/PageLoading';
 import { KPICard } from '@/components/shared/KPICard';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { DataTable, type Column } from '@/components/shared/DataTable';
-import { StatusBadge } from '@/components/shared/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, MoreHorizontal, Pencil, Trash2, Users, Target, DollarSign } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { Plus, MoreHorizontal, Pencil, Trash2, Users, Target, DollarSign, TrendingUp, Briefcase } from 'lucide-react';
 import { useSalesReps, useCreateSalesRep, useUpdateSalesRep, useDeleteSalesRep, type DbSalesRep } from '@/hooks/useSalesReps';
+import { useClients } from '@/hooks/useClients';
+import { useOrders } from '@/hooks/useOrders';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
 export default function SalesRepsPage() {
   const { data: reps = [], isLoading } = useSalesReps();
+  const { data: clients = [] } = useClients();
+  const { data: orders = [] } = useOrders();
   const createRep = useCreateSalesRep();
   const updateRep = useUpdateSalesRep();
   const deleteRep = useDeleteSalesRep();
@@ -34,6 +41,37 @@ export default function SalesRepsPage() {
     name: '', code: '', email: '', phone: '', region: '', micro_region: '',
     commission_rate: '5', monthly_target: '0', status: 'active',
   });
+
+  // Portfolio analysis
+  const portfolioData = useMemo(() => {
+    const repPortfolios = reps.map(rep => {
+      const repClients = clients.filter(c => c.sales_rep_id === rep.id);
+      const repOrders = orders.filter(o => o.sales_rep_id === rep.id && o.status !== 'cancelled');
+      const monthlyRevenue = repOrders.reduce((s, o) => s + o.total, 0);
+      const conversionRate = repOrders.length > 0 ? (repOrders.filter(o => o.status === 'delivered').length / repOrders.length) * 100 : 0;
+      const activeClients = repClients.filter(c => c.status === 'active').length;
+      const targetPct = rep.monthly_target > 0 ? (monthlyRevenue / rep.monthly_target) * 100 : 0;
+
+      return {
+        ...rep,
+        clientCount: repClients.length,
+        activeClients,
+        orderCount: repOrders.length,
+        revenue: monthlyRevenue,
+        conversionRate,
+        targetPct,
+      };
+    });
+
+    const unassigned = clients.filter(c => !c.sales_rep_id || !reps.some(r => r.id === c.sales_rep_id));
+
+    const rankingData = repPortfolios
+      .filter(r => r.status === 'active')
+      .sort((a, b) => b.revenue - a.revenue)
+      .map(r => ({ name: r.name, revenue: r.revenue, meta: r.monthly_target }));
+
+    return { repPortfolios, unassigned, rankingData };
+  }, [reps, clients, orders]);
 
   const resetForm = () => {
     setFormData({ name: '', code: '', email: '', phone: '', region: '', micro_region: '', commission_rate: '5', monthly_target: '0', status: 'active' });
@@ -77,39 +115,51 @@ export default function SalesRepsPage() {
   };
 
   const totalTarget = reps.reduce((s, r) => s + r.monthly_target, 0);
-  const totalSales = reps.reduce((s, r) => s + r.total_sales, 0);
+  const totalRevenue = portfolioData.repPortfolios.reduce((s, r) => s + r.revenue, 0);
   const activeReps = reps.filter(r => r.status === 'active').length;
 
   const columns: Column<DbSalesRep>[] = [
     { key: 'code', label: 'Código', sortable: true },
     { key: 'name', label: 'Nome', sortable: true },
-    { key: 'region', label: 'Região', render: (_v, r) => r.region || '—' },
+    { key: 'region', label: 'Região', render: (_v, r) => (
+      <div>
+        <p className="text-sm">{r.region || '—'}</p>
+        {r.micro_region && <p className="text-[10px] text-muted-foreground">{r.micro_region}</p>}
+      </div>
+    )},
     { key: 'commission_rate', label: 'Comissão', render: (_v, r) => `${r.commission_rate}%` },
     { key: 'monthly_target', label: 'Meta Mensal', render: (_v, r) => fmt(r.monthly_target) },
-    { key: 'total_sales', label: 'Vendas Total', render: (_v, r) => fmt(r.total_sales) },
+    { key: 'total_sales', label: 'Vendas Total', render: (_v, r) => {
+      const portfolio = portfolioData.repPortfolios.find(p => p.id === r.id);
+      return (
+        <div>
+          <p className="font-semibold">{fmt(portfolio?.revenue || 0)}</p>
+          <p className="text-[10px] text-muted-foreground">{portfolio?.clientCount || 0} clientes</p>
+        </div>
+      );
+    }},
     { key: 'status', label: 'Status', render: (_v, r) => (
       <Badge variant={r.status === 'active' ? 'default' : 'secondary'}>
         {r.status === 'active' ? 'Ativo' : 'Inativo'}
       </Badge>
     )},
-    {
-      key: 'id', label: '', render: (_v, r) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => openEdit(r)}><Pencil className="h-4 w-4 mr-2" />Editar</DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive" onClick={() => { setSelected(r); setIsDeleteOpen(true); }}><Trash2 className="h-4 w-4 mr-2" />Excluir</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
-    },
   ];
+
+  const renderActions = (_v: any, r: DbSalesRep) => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
+      <DropdownMenuContent>
+        <DropdownMenuItem onClick={() => openEdit(r)}><Pencil className="h-4 w-4 mr-2" />Editar</DropdownMenuItem>
+        <DropdownMenuItem className="text-destructive" onClick={() => { setSelected(r); setIsDeleteOpen(true); }}><Trash2 className="h-4 w-4 mr-2" />Excluir</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 
   if (isLoading) return <PageLoading />;
 
   return (
     <PageContainer>
-      <PageHeader title="Representantes Comerciais" description="Gestão de equipe de vendas, carteiras e metas">
+      <PageHeader title="Representantes Comerciais" description="Gestão de equipe, carteira e performance">
         <ExportButton data={reps as any} columns={[
           { key: 'code', label: 'Código' }, { key: 'name', label: 'Nome' },
           { key: 'region', label: 'Região' }, { key: 'commission_rate', label: 'Comissão %' },
@@ -118,15 +168,110 @@ export default function SalesRepsPage() {
         <Button onClick={() => { resetForm(); setIsFormOpen(true); }} size="sm"><Plus className="h-4 w-4 mr-1" /> Novo Representante</Button>
       </PageHeader>
 
-      <div className="grid gap-4 md:grid-cols-4 mb-6 mt-6">
-        <KPICard index={0} title="Total Representantes" value={reps.length.toString()} icon={<Users className="h-5 w-5" />} accentColor="primary" />
-        <KPICard index={1} title="Ativos" value={activeReps.toString()} icon={<Users className="h-5 w-5" />} accentColor="success" />
-        <KPICard index={2} title="Meta Total Mês" value={fmt(totalTarget)} icon={<Target className="h-5 w-5" />} accentColor="info" />
-        <KPICard index={3} title="Vendas Total" value={fmt(totalSales)} icon={<DollarSign className="h-5 w-5" />} accentColor="accent" />
+      <div className="grid gap-4 md:grid-cols-5 mb-6 mt-6">
+        <KPICard index={0} title="Representantes" value={reps.length.toString()} subtitle={`${activeReps} ativos`} icon={<Users className="h-5 w-5" />} accentColor="primary" />
+        <KPICard index={1} title="Meta Total Mês" value={fmt(totalTarget)} icon={<Target className="h-5 w-5" />} accentColor="info" />
+        <KPICard index={2} title="Faturamento Total" value={fmt(totalRevenue)} icon={<DollarSign className="h-5 w-5" />} accentColor="success" />
+        <KPICard index={3} title="Atingimento" value={`${totalTarget > 0 ? ((totalRevenue / totalTarget) * 100).toFixed(0) : 0}%`} icon={<TrendingUp className="h-5 w-5" />} accentColor="accent" />
+        <KPICard index={4} title="Sem Representante" value={portfolioData.unassigned.length.toString()} icon={<Briefcase className="h-5 w-5" />} accentColor="warning" />
       </div>
 
-      <DataTable columns={columns} data={reps} searchPlaceholder="Buscar representante..." />
+      <Tabs defaultValue="list" className="mb-6">
+        <TabsList>
+          <TabsTrigger value="list">Lista</TabsTrigger>
+          <TabsTrigger value="ranking">Ranking</TabsTrigger>
+          <TabsTrigger value="portfolio">Carteira</TabsTrigger>
+        </TabsList>
 
+        <TabsContent value="list">
+          <DataTable columns={columns} data={reps} searchPlaceholder="Buscar representante..." actions={(r) => renderActions(null, r)} />
+        </TabsContent>
+
+        <TabsContent value="ranking">
+          <Card>
+            <CardHeader><CardTitle className="text-sm">Ranking de Vendas — Representantes Ativos</CardTitle></CardHeader>
+            <CardContent>
+              {portfolioData.rankingData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={Math.max(300, portfolioData.rankingData.length * 50)}>
+                  <BarChart data={portfolioData.rankingData} layout="vertical">
+                    <XAxis type="number" tickFormatter={v => fmt(v)} fontSize={11} />
+                    <YAxis type="category" dataKey="name" width={140} fontSize={12} />
+                    <Tooltip formatter={(v: number) => fmt(v)} />
+                    <Bar dataKey="revenue" name="Faturamento" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="meta" name="Meta" fill="hsl(var(--muted-foreground))" radius={[0, 4, 4, 0]} opacity={0.3} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-center text-muted-foreground py-10">Sem dados</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="portfolio">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {portfolioData.repPortfolios.filter(r => r.status === 'active').map(rep => (
+              <Card key={rep.id}>
+                <CardContent className="p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold">{rep.name}</p>
+                      <p className="text-xs text-muted-foreground">{rep.region || 'Sem região'}{rep.micro_region ? ` • ${rep.micro_region}` : ''}</p>
+                    </div>
+                    <Badge variant="outline" className="font-mono text-xs">{rep.code}</Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div className="p-2 rounded bg-muted/50">
+                      <p className="text-[10px] text-muted-foreground">Clientes</p>
+                      <p className="font-semibold">{rep.clientCount} <span className="text-xs font-normal text-muted-foreground">({rep.activeClients} ativos)</span></p>
+                    </div>
+                    <div className="p-2 rounded bg-muted/50">
+                      <p className="text-[10px] text-muted-foreground">Pedidos</p>
+                      <p className="font-semibold">{rep.orderCount}</p>
+                    </div>
+                    <div className="p-2 rounded bg-muted/50">
+                      <p className="text-[10px] text-muted-foreground">Faturamento</p>
+                      <p className="font-semibold text-primary">{fmt(rep.revenue)}</p>
+                    </div>
+                    <div className="p-2 rounded bg-muted/50">
+                      <p className="text-[10px] text-muted-foreground">Conversão</p>
+                      <p className="font-semibold">{rep.conversionRate.toFixed(0)}%</p>
+                    </div>
+                  </div>
+                  {rep.monthly_target > 0 && (
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Meta: {fmt(rep.monthly_target)}</span>
+                        <span className="font-medium">{rep.targetPct.toFixed(0)}%</span>
+                      </div>
+                      <Progress value={Math.min(rep.targetPct, 100)} className="h-1.5" />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+            {portfolioData.unassigned.length > 0 && (
+              <Card className="border-dashed">
+                <CardContent className="p-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="h-4 w-4 text-warning" />
+                    <p className="font-semibold text-warning">Sem Representante</p>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{portfolioData.unassigned.length} clientes sem responsável</p>
+                  <div className="max-h-32 overflow-y-auto space-y-1">
+                    {portfolioData.unassigned.slice(0, 10).map(c => (
+                      <p key={c.id} className="text-xs truncate">{c.name} <span className="text-muted-foreground">• {c.address_city}/{c.address_state}</span></p>
+                    ))}
+                    {portfolioData.unassigned.length > 10 && <p className="text-xs text-muted-foreground">+{portfolioData.unassigned.length - 10} mais...</p>}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
