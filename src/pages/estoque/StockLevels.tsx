@@ -428,7 +428,7 @@ export default function StockLevelsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }
 
