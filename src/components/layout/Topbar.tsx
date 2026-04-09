@@ -45,7 +45,7 @@ export function Topbar() {
     <header
       className={cn(
         'fixed right-0 top-0 z-30 flex h-14 items-center justify-between border-b border-sidebar-border/30 px-4 transition-all duration-300 backdrop-blur-xl',
-        sidebarCollapsed ? 'left-16' : 'left-64'
+        sidebarCollapsed ? 'left-14' : 'left-56'
       )}
       style={{ background: 'hsl(222 33% 15% / 0.95)' }}
     >
