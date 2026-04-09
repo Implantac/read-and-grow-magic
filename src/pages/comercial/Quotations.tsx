@@ -137,17 +137,14 @@ export default function QuotationsPage() {
   const totalValue = filteredQuotations.filter(q => !['rejected', 'expired'].includes(q.status)).reduce((acc, q) => acc + q.total, 0);
 
   if (isLoading) {
-    return <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>;
+    return <PageLoading message="Carregando orçamentos..." />;
   }
 
+  const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Orçamentos</h1>
-          <p className="text-muted-foreground">Gerencie propostas comerciais</p>
-        </div>
-        <div className="flex gap-2">
+    <PageContainer>
+      <PageHeader title="Orçamentos" description="Gerencie propostas comerciais">
           <ExportButton
             data={filteredQuotations as unknown as Record<string, unknown>[]}
             columns={[
@@ -162,26 +159,13 @@ export default function QuotationsPage() {
           <Button className="gap-2" onClick={() => { resetForm(); setIsFormOpen(true); }}>
             <Plus className="h-4 w-4" />Novo Orçamento
           </Button>
-        </div>
-      </div>
+      </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-lg border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Valor Total</p>
-          <p className="text-2xl font-bold text-foreground">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValue)}</p>
-        </div>
-        <div className="rounded-lg border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Rascunhos</p>
-          <p className="text-2xl font-bold text-foreground">{draftCount}</p>
-        </div>
-        <div className="rounded-lg border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Enviados</p>
-          <p className="text-2xl font-bold text-foreground">{sentCount}</p>
-        </div>
-        <div className="rounded-lg border bg-card p-4">
-          <p className="text-sm text-muted-foreground">Aprovados</p>
-          <p className="text-2xl font-bold text-foreground">{approvedCount}</p>
-        </div>
+        <KPICard title="Valor Total" value={fmt(totalValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" />
+        <KPICard title="Rascunhos" value={draftCount} icon={<FileEdit className="h-5 w-5" />} accentColor="warning" />
+        <KPICard title="Enviados" value={sentCount} icon={<Mail className="h-5 w-5" />} accentColor="info" />
+        <KPICard title="Aprovados" value={approvedCount} icon={<ThumbsUp className="h-5 w-5" />} accentColor="success" />
       </div>
 
       <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
@@ -291,6 +275,6 @@ export default function QuotationsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </PageContainer>
   );
 }
