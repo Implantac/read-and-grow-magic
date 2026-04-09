@@ -3,6 +3,10 @@ import {
   Plus, Eye, MoreHorizontal, FileText, XCircle, CheckCircle, Loader2,
   Package, DollarSign, Clock, TruckIcon, ArrowRight, CalendarDays, User, CreditCard, Hash, MapPin, StickyNote,
 } from 'lucide-react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { PageLoading } from '@/components/shared/PageLoading';
+import { KPICard } from '@/components/shared/KPICard';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';

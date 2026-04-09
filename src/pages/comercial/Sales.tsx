@@ -1,5 +1,9 @@
 import { useState } from 'react';
-import { Plus, Eye, MoreHorizontal, FileText, Loader2 } from 'lucide-react';
+import { Plus, Eye, MoreHorizontal, FileText, Loader2, DollarSign, ShoppingBag, TrendingUp } from 'lucide-react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { PageLoading } from '@/components/shared/PageLoading';
+import { KPICard } from '@/components/shared/KPICard';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
