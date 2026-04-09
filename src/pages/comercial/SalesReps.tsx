@@ -110,7 +110,11 @@ export default function SalesRepsPage() {
   return (
     <PageContainer>
       <PageHeader title="Representantes Comerciais" description="Gestão de equipe de vendas, carteiras e metas">
-        <ExportButton data={reps as any} filename="representantes" />
+        <ExportButton data={reps as any} columns={[
+          { key: 'code', label: 'Código' }, { key: 'name', label: 'Nome' },
+          { key: 'region', label: 'Região' }, { key: 'commission_rate', label: 'Comissão %' },
+          { key: 'monthly_target', label: 'Meta Mensal' }, { key: 'status', label: 'Status' },
+        ]} filename="representantes" />
         <Button onClick={() => { resetForm(); setIsFormOpen(true); }} size="sm"><Plus className="h-4 w-4 mr-1" /> Novo Representante</Button>
       </PageHeader>
 
