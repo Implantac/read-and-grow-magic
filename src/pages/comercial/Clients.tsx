@@ -421,6 +421,7 @@ export default function ClientsPage() {
               </div>
             </div>
           </div>
+          <DialogFooter>
             <Button variant="outline" onClick={() => setIsFormOpen(false)}>Cancelar</Button>
             <Button onClick={handleSave} disabled={createClient.isPending || updateClient.isPending}>
               {(createClient.isPending || updateClient.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
