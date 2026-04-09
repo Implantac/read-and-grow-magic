@@ -45,10 +45,10 @@ import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 
 const priorityConfig = {
-  low: { label: 'Baixa', className: 'bg-gray-100 text-gray-800' },
-  medium: { label: 'Média', className: 'bg-blue-100 text-blue-800' },
-  high: { label: 'Alta', className: 'bg-orange-100 text-orange-800' },
-  urgent: { label: 'Urgente', className: 'bg-red-100 text-red-800' },
+  low: { label: 'Baixa', className: 'bg-muted text-muted-foreground' },
+  medium: { label: 'Média', className: 'bg-info/10 text-info' },
+  high: { label: 'Alta', className: 'bg-warning/10 text-warning' },
+  urgent: { label: 'Urgente', className: 'bg-destructive/10 text-destructive' },
 };
 
 export default function PurchaseOrdersPage() {
@@ -127,11 +127,11 @@ export default function PurchaseOrdersPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Pedidos de Compra</h1>
-          <p className="text-muted-foreground">Gerencie os pedidos de compra</p>
+          <h1 className="text-2xl font-bold text-foreground">Pedidos de Compra</h1>
+          <p className="text-sm text-muted-foreground">Gerencie os pedidos de compra</p>
         </div>
         <div className="flex gap-2">
           <ExportButton
@@ -165,26 +165,26 @@ export default function PurchaseOrdersPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-yellow-600">Pendentes</CardTitle>
+            <CardTitle className="text-sm font-medium text-warning">Pendentes</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{summaryData.pending}</div>
+            <div className="text-2xl font-bold text-warning">{summaryData.pending}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-blue-600">Em Trânsito</CardTitle>
+            <CardTitle className="text-sm font-medium text-info">Em Trânsito</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{summaryData.inTransit}</div>
+            <div className="text-2xl font-bold text-info">{summaryData.inTransit}</div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-green-600">Recebidos</CardTitle>
+            <CardTitle className="text-sm font-medium text-success">Recebidos</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{summaryData.received}</div>
+            <div className="text-2xl font-bold text-success">{summaryData.received}</div>
           </CardContent>
         </Card>
       </div>
@@ -262,9 +262,9 @@ export default function PurchaseOrdersPage() {
                     <TableCell>{formatCurrency(order.total)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <div className="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-green-500 rounded-full"
+                            className="h-full bg-success rounded-full transition-all duration-300"
                             style={{ width: `${progress}%` }}
                           />
                         </div>
@@ -329,7 +329,7 @@ export default function PurchaseOrdersPage() {
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={() => handleDelete(order.id)}
-                            className="text-red-600"
+                            className="text-destructive"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Excluir

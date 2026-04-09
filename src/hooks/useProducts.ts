@@ -70,7 +70,7 @@ export function useUpdateProduct() {
   const qc = useQueryClient();
   const { toast } = useToast();
   return useMutation({
-    mutationFn: async ({ id, ...product }: Partial<DbProduct> & { id: string }) => {
+    mutationFn: async ({ id, category_name, ...product }: Partial<DbProduct> & { id: string; category_name?: string }) => {
       const { data, error } = await supabase.from('products').update({ ...product, updated_at: new Date().toISOString() }).eq('id', id).select().single();
       if (error) throw error;
       return data;
