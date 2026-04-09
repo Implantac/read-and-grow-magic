@@ -76,6 +76,10 @@ export default function ClientsPage() {
     address_street: '', address_number: '', address_complement: '',
     address_neighborhood: '', address_city: '', address_state: '', address_zip_code: '',
     status: 'active', credit_limit: '', segment: '',
+    state_registration: '', municipal_registration: '',
+    region: '', micro_region: '', default_payment_condition: 'À vista',
+    price_table: 'default', abc_classification: 'C',
+    commercial_notes: '', estimated_potential: '',
   });
 
   const filteredClients = clients.filter((client) => {
@@ -97,6 +101,18 @@ export default function ClientsPage() {
     { key: 'status', label: 'Status', render: (value) => <StatusBadge type="client" status={value as string} /> },
   ];
 
+  const defaultFormData = {
+    name: '', trade_name: '', document: '', document_type: 'cnpj' as string,
+    email: '', phone: '', cellphone: '',
+    address_street: '', address_number: '', address_complement: '',
+    address_neighborhood: '', address_city: '', address_state: '', address_zip_code: '',
+    status: 'active', credit_limit: '', segment: '',
+    state_registration: '', municipal_registration: '',
+    region: '', micro_region: '', default_payment_condition: 'À vista',
+    price_table: 'default', abc_classification: 'C',
+    commercial_notes: '', estimated_potential: '',
+  };
+
   const handleOpenForm = (client?: DbClient) => {
     if (client) {
       setSelectedClient(client);
@@ -109,22 +125,21 @@ export default function ClientsPage() {
         address_city: client.address_city, address_state: client.address_state,
         address_zip_code: client.address_zip_code,
         status: client.status, credit_limit: String(client.credit_limit), segment: client.segment || '',
+        state_registration: client.state_registration || '', municipal_registration: client.municipal_registration || '',
+        region: client.region || '', micro_region: client.micro_region || '',
+        default_payment_condition: client.default_payment_condition || 'À vista',
+        price_table: client.price_table || 'default', abc_classification: client.abc_classification || 'C',
+        commercial_notes: client.commercial_notes || '', estimated_potential: String(client.estimated_potential || ''),
       });
     } else {
       setSelectedClient(null);
-      setFormData({
-        name: '', trade_name: '', document: '', document_type: 'cnpj',
-        email: '', phone: '', cellphone: '',
-        address_street: '', address_number: '', address_complement: '',
-        address_neighborhood: '', address_city: '', address_state: '', address_zip_code: '',
-        status: 'active', credit_limit: '', segment: '',
-      });
+      setFormData({ ...defaultFormData });
     }
     setIsFormOpen(true);
   };
 
   const handleSave = () => {
-    const payload = {
+    const payload: any = {
       name: formData.name, trade_name: formData.trade_name || null, document: formData.document,
       document_type: formData.document_type, email: formData.email, phone: formData.phone,
       cellphone: formData.cellphone || null,
@@ -134,6 +149,14 @@ export default function ClientsPage() {
       address_zip_code: formData.address_zip_code,
       status: formData.status, credit_limit: Number(formData.credit_limit) || 0,
       current_balance: 0, segment: formData.segment || null, sales_rep_id: null,
+      state_registration: formData.state_registration || null,
+      municipal_registration: formData.municipal_registration || null,
+      region: formData.region || null, micro_region: formData.micro_region || null,
+      default_payment_condition: formData.default_payment_condition || 'À vista',
+      price_table: formData.price_table || 'default',
+      abc_classification: formData.abc_classification || 'C',
+      commercial_notes: formData.commercial_notes || null,
+      estimated_potential: Number(formData.estimated_potential) || 0,
     };
 
     if (selectedClient) {
@@ -326,6 +349,75 @@ export default function ClientsPage() {
                     <SelectItem value="blocked">Bloqueado</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+            <div className="border-t pt-4">
+              <h4 className="mb-3 font-medium">Dados Comerciais</h4>
+              <div className="grid gap-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Inscrição Estadual</Label>
+                    <Input value={formData.state_registration} onChange={(e) => setFormData(p => ({ ...p, state_registration: e.target.value }))} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Inscrição Municipal</Label>
+                    <Input value={formData.municipal_registration} onChange={(e) => setFormData(p => ({ ...p, municipal_registration: e.target.value }))} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Região</Label>
+                    <Input value={formData.region} onChange={(e) => setFormData(p => ({ ...p, region: e.target.value }))} placeholder="Ex: Sul, Sudeste..." />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Micro-Região</Label>
+                    <Input value={formData.micro_region} onChange={(e) => setFormData(p => ({ ...p, micro_region: e.target.value }))} placeholder="Ex: Grande SP..." />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>Condição de Pagamento</Label>
+                    <Select value={formData.default_payment_condition} onValueChange={(v) => setFormData(p => ({ ...p, default_payment_condition: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="À vista">À Vista</SelectItem>
+                        <SelectItem value="30 dias">30 Dias</SelectItem>
+                        <SelectItem value="30/60 dias">30/60 Dias</SelectItem>
+                        <SelectItem value="30/60/90 dias">30/60/90 Dias</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Tabela de Preço</Label>
+                    <Select value={formData.price_table} onValueChange={(v) => setFormData(p => ({ ...p, price_table: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="default">Padrão</SelectItem>
+                        <SelectItem value="wholesale">Atacado</SelectItem>
+                        <SelectItem value="special">Especial</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Classificação ABC</Label>
+                    <Select value={formData.abc_classification} onValueChange={(v) => setFormData(p => ({ ...p, abc_classification: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="A">A - Alta</SelectItem>
+                        <SelectItem value="B">B - Média</SelectItem>
+                        <SelectItem value="C">C - Baixa</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Potencial Estimado (R$)</Label>
+                  <Input type="number" value={formData.estimated_potential} onChange={(e) => setFormData(p => ({ ...p, estimated_potential: e.target.value }))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Observações Comerciais</Label>
+                  <Input value={formData.commercial_notes} onChange={(e) => setFormData(p => ({ ...p, commercial_notes: e.target.value }))} placeholder="Notas internas sobre o cliente..." />
+                </div>
               </div>
             </div>
           </div>

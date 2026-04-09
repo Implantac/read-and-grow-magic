@@ -24,6 +24,18 @@ export interface DbClient {
   current_balance: number;
   segment: string | null;
   sales_rep_id: string | null;
+  state_registration: string | null;
+  municipal_registration: string | null;
+  region: string | null;
+  micro_region: string | null;
+  default_payment_condition: string | null;
+  price_table: string | null;
+  abc_classification: string | null;
+  commercial_notes: string | null;
+  last_purchase_date: string | null;
+  avg_ticket: number;
+  estimated_potential: number;
+  total_purchases: number;
   created_at: string;
   updated_at: string;
 }

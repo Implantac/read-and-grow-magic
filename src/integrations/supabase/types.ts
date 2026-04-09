@@ -297,8 +297,59 @@ export type Database = {
           },
         ]
       }
+      client_timeline: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          description: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          reference_id: string | null
+          reference_type: string | null
+          title: string
+          user_id: string | null
+          user_name: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          description?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          reference_id?: string | null
+          reference_type?: string | null
+          title: string
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          description?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          reference_id?: string | null
+          reference_type?: string | null
+          title?: string
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_timeline_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
+          abc_classification: string | null
           address_city: string
           address_complement: string | null
           address_neighborhood: string
@@ -306,24 +357,36 @@ export type Database = {
           address_state: string
           address_street: string
           address_zip_code: string
+          avg_ticket: number | null
           cellphone: string | null
           code: string
+          commercial_notes: string | null
           created_at: string
           credit_limit: number
           current_balance: number
+          default_payment_condition: string | null
           document: string
           document_type: string
           email: string
+          estimated_potential: number | null
           id: string
+          last_purchase_date: string | null
+          micro_region: string | null
+          municipal_registration: string | null
           name: string
           phone: string
+          price_table: string | null
+          region: string | null
           sales_rep_id: string | null
           segment: string | null
+          state_registration: string | null
           status: string
+          total_purchases: number | null
           trade_name: string | null
           updated_at: string
         }
         Insert: {
+          abc_classification?: string | null
           address_city?: string
           address_complement?: string | null
           address_neighborhood?: string
@@ -331,24 +394,36 @@ export type Database = {
           address_state?: string
           address_street?: string
           address_zip_code?: string
+          avg_ticket?: number | null
           cellphone?: string | null
           code: string
+          commercial_notes?: string | null
           created_at?: string
           credit_limit?: number
           current_balance?: number
+          default_payment_condition?: string | null
           document: string
           document_type?: string
           email: string
+          estimated_potential?: number | null
           id?: string
+          last_purchase_date?: string | null
+          micro_region?: string | null
+          municipal_registration?: string | null
           name: string
           phone: string
+          price_table?: string | null
+          region?: string | null
           sales_rep_id?: string | null
           segment?: string | null
+          state_registration?: string | null
           status?: string
+          total_purchases?: number | null
           trade_name?: string | null
           updated_at?: string
         }
         Update: {
+          abc_classification?: string | null
           address_city?: string
           address_complement?: string | null
           address_neighborhood?: string
@@ -356,24 +431,112 @@ export type Database = {
           address_state?: string
           address_street?: string
           address_zip_code?: string
+          avg_ticket?: number | null
           cellphone?: string | null
           code?: string
+          commercial_notes?: string | null
           created_at?: string
           credit_limit?: number
           current_balance?: number
+          default_payment_condition?: string | null
           document?: string
           document_type?: string
           email?: string
+          estimated_potential?: number | null
           id?: string
+          last_purchase_date?: string | null
+          micro_region?: string | null
+          municipal_registration?: string | null
           name?: string
           phone?: string
+          price_table?: string | null
+          region?: string | null
           sales_rep_id?: string | null
           segment?: string | null
+          state_registration?: string | null
           status?: string
+          total_purchases?: number | null
           trade_name?: string | null
           updated_at?: string
         }
         Relationships: []
+      }
+      commercial_alerts: {
+        Row: {
+          alert_type: string
+          client_id: string | null
+          created_at: string | null
+          description: string | null
+          funnel_id: string | null
+          id: string
+          order_id: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          sales_rep_id: string | null
+          severity: string | null
+          status: string | null
+          title: string
+        }
+        Insert: {
+          alert_type: string
+          client_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          funnel_id?: string | null
+          id?: string
+          order_id?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          sales_rep_id?: string | null
+          severity?: string | null
+          status?: string | null
+          title: string
+        }
+        Update: {
+          alert_type?: string
+          client_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          funnel_id?: string | null
+          id?: string
+          order_id?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          sales_rep_id?: string | null
+          severity?: string | null
+          status?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commercial_alerts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_alerts_funnel_id_fkey"
+            columns: ["funnel_id"]
+            isOneToOne: false
+            referencedRelation: "sales_funnel"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_alerts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commercial_alerts_sales_rep_id_fkey"
+            columns: ["sales_rep_id"]
+            isOneToOne: false
+            referencedRelation: "sales_reps"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       companies: {
         Row: {
@@ -1055,13 +1218,22 @@ export type Database = {
       }
       orders: {
         Row: {
+          approved_at: string | null
+          approved_by: string | null
           client_id: string | null
           client_name: string
+          commercial_approval: string | null
+          commission_rate: number | null
+          commission_value: number | null
           created_at: string
           date: string
           delivery_date: string | null
           discount: number
+          expected_billing_date: string | null
+          financial_approval: string | null
           id: string
+          internal_notes: string | null
+          max_discount_pct: number | null
           notes: string | null
           number: string
           payment_condition: string
@@ -1076,13 +1248,22 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
           client_id?: string | null
           client_name: string
+          commercial_approval?: string | null
+          commission_rate?: number | null
+          commission_value?: number | null
           created_at?: string
           date?: string
           delivery_date?: string | null
           discount?: number
+          expected_billing_date?: string | null
+          financial_approval?: string | null
           id?: string
+          internal_notes?: string | null
+          max_discount_pct?: number | null
           notes?: string | null
           number: string
           payment_condition?: string
@@ -1097,13 +1278,22 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approved_at?: string | null
+          approved_by?: string | null
           client_id?: string | null
           client_name?: string
+          commercial_approval?: string | null
+          commission_rate?: number | null
+          commission_value?: number | null
           created_at?: string
           date?: string
           delivery_date?: string | null
           discount?: number
+          expected_billing_date?: string | null
+          financial_approval?: string | null
           id?: string
+          internal_notes?: string | null
+          max_discount_pct?: number | null
           notes?: string | null
           number?: string
           payment_condition?: string
@@ -1906,6 +2096,151 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sales_funnel: {
+        Row: {
+          client_id: string | null
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string | null
+          description: string | null
+          expected_close_date: string | null
+          id: string
+          lost_date: string | null
+          lost_reason: string | null
+          notes: string | null
+          order_id: string | null
+          probability: number | null
+          sales_rep_id: string | null
+          source: string | null
+          stage: string
+          status: string | null
+          title: string
+          updated_at: string | null
+          value: number | null
+          won_date: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          description?: string | null
+          expected_close_date?: string | null
+          id?: string
+          lost_date?: string | null
+          lost_reason?: string | null
+          notes?: string | null
+          order_id?: string | null
+          probability?: number | null
+          sales_rep_id?: string | null
+          source?: string | null
+          stage?: string
+          status?: string | null
+          title: string
+          updated_at?: string | null
+          value?: number | null
+          won_date?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          description?: string | null
+          expected_close_date?: string | null
+          id?: string
+          lost_date?: string | null
+          lost_reason?: string | null
+          notes?: string | null
+          order_id?: string | null
+          probability?: number | null
+          sales_rep_id?: string | null
+          source?: string | null
+          stage?: string
+          status?: string | null
+          title?: string
+          updated_at?: string | null
+          value?: number | null
+          won_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_funnel_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_funnel_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_funnel_sales_rep_id_fkey"
+            columns: ["sales_rep_id"]
+            isOneToOne: false
+            referencedRelation: "sales_reps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_reps: {
+        Row: {
+          code: string
+          commission_rate: number | null
+          created_at: string | null
+          email: string | null
+          id: string
+          micro_region: string | null
+          monthly_target: number | null
+          name: string
+          phone: string | null
+          region: string | null
+          status: string | null
+          total_sales: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          code: string
+          commission_rate?: number | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          micro_region?: string | null
+          monthly_target?: number | null
+          name: string
+          phone?: string | null
+          region?: string | null
+          status?: string | null
+          total_sales?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          code?: string
+          commission_rate?: number | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          micro_region?: string | null
+          monthly_target?: number | null
+          name?: string
+          phone?: string | null
+          region?: string | null
+          status?: string | null
+          total_sales?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       stock_movements: {
         Row: {
