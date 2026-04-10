@@ -2,9 +2,13 @@ import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useStockReservations } from '@/hooks/useOrderFlow';
-import { Package, Lock, CheckCircle, XCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import { Package, Lock, CheckCircle, XCircle, Play } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -18,6 +22,17 @@ const reservationStatusConfig: Record<string, { label: string; color: string }> 
 
 export default function SeparationQueue() {
   const { data: reservations, isLoading } = useStockReservations();
+  const qc = useQueryClient();
+  const { toast } = useToast();
+
+  const updateReservationStatus = async (id: string, status: string) => {
+    const updates: any = { status, updated_at: new Date().toISOString() };
+    if (status === 'picked') updates.picked_at = new Date().toISOString();
+    const { error } = await supabase.from('stock_reservations').update(updates).eq('id', id);
+    if (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); return; }
+    toast({ title: `Status atualizado para ${reservationStatusConfig[status]?.label || status}` });
+    qc.invalidateQueries({ queryKey: ['stock-reservations'] });
+  };
 
   const statusCounts = (reservations || []).reduce((acc: Record<string, number>, r: any) => {
     acc[r.status] = (acc[r.status] || 0) + 1;
@@ -60,12 +75,13 @@ export default function SeparationQueue() {
               <TableHead>Local</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Data</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
             </TableRow></TableHeader>
             <TableBody>
               {isLoading ? (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
               ) : !reservations?.length ? (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhuma reserva na fila</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Nenhuma reserva na fila</TableCell></TableRow>
               ) : reservations.map((r: any) => {
                 const sc = reservationStatusConfig[r.status] || { label: r.status, color: '' };
                 return (
@@ -78,6 +94,25 @@ export default function SeparationQueue() {
                     <TableCell>{r.location || '-'}</TableCell>
                     <TableCell><Badge variant="outline" className={cn('font-medium border', sc.color)}>{sc.label}</Badge></TableCell>
                     <TableCell>{format(new Date(r.created_at), 'dd/MM/yyyy')}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex gap-1 justify-end">
+                        {r.status === 'pending' && (
+                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateReservationStatus(r.id, 'reserved')}>
+                            <Lock className="h-3 w-3 mr-1" /> Reservar
+                          </Button>
+                        )}
+                        {r.status === 'reserved' && (
+                          <Button size="sm" className="h-7 text-xs" onClick={() => updateReservationStatus(r.id, 'picked')}>
+                            <CheckCircle className="h-3 w-3 mr-1" /> Separar
+                          </Button>
+                        )}
+                        {(r.status === 'pending' || r.status === 'reserved') && (
+                          <Button size="sm" variant="destructive" className="h-7 text-xs" onClick={() => updateReservationStatus(r.id, 'cancelled')}>
+                            <XCircle className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
                   </TableRow>
                 );
               })}

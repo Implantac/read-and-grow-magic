@@ -1,11 +1,16 @@
+import { useState } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useShipmentOrders } from '@/hooks/useOrderFlow';
-import { Truck, Clock, CheckCircle, Package, MapPin } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useShipmentOrders, useUpdateShipment } from '@/hooks/useOrderFlow';
+import { useDeliveryTracking, useCreateTrackingEvent } from '@/hooks/useDeliveryTracking';
+import { Truck, Clock, CheckCircle, Package, MapPin, Play, Eye, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 const shipmentStatusConfig: Record<string, { label: string; color: string }> = {
@@ -17,8 +22,28 @@ const shipmentStatusConfig: Record<string, { label: string; color: string }> = {
   returned: { label: 'Devolvido', color: 'bg-destructive/10 text-destructive' },
 };
 
+const SHIPMENT_TRANSITIONS: Record<string, string[]> = {
+  pending: ['loading'],
+  loading: ['dispatched'],
+  dispatched: ['in_transit'],
+  in_transit: ['delivered', 'returned'],
+};
+
 export default function ShipmentPage() {
   const { data: shipments, isLoading } = useShipmentOrders();
+  const updateShipment = useUpdateShipment();
+  const [selectedShipment, setSelectedShipment] = useState<any>(null);
+  const { data: tracking } = useDeliveryTracking(selectedShipment?.id);
+  const createTracking = useCreateTrackingEvent();
+
+  const handleAdvance = (shipment: any, nextStatus: string) => {
+    updateShipment.mutate({ id: shipment.id, status: nextStatus });
+    createTracking.mutate({
+      shipment_id: shipment.id,
+      event_type: nextStatus,
+      description: `Status alterado para ${shipmentStatusConfig[nextStatus]?.label || nextStatus}`,
+    });
+  };
 
   const statusCounts = (shipments || []).reduce((acc: Record<string, number>, s: any) => {
     acc[s.status] = (acc[s.status] || 0) + 1;
@@ -40,7 +65,7 @@ export default function ShipmentPage() {
         </CardContent></Card>
         <Card><CardContent className="p-4 flex items-center gap-3">
           <MapPin className="h-8 w-8 text-info" />
-          <div><p className="text-2xl font-bold">{statusCounts['in_transit'] || 0}</p><p className="text-xs text-muted-foreground">Em Trânsito</p></div>
+          <div><p className="text-2xl font-bold">{(statusCounts['in_transit'] || 0) + (statusCounts['dispatched'] || 0)}</p><p className="text-xs text-muted-foreground">Em Trânsito</p></div>
         </CardContent></Card>
         <Card><CardContent className="p-4 flex items-center gap-3">
           <CheckCircle className="h-8 w-8 text-success" />
@@ -60,7 +85,7 @@ export default function ShipmentPage() {
               <TableHead>Peso (kg)</TableHead>
               <TableHead>Rastreio</TableHead>
               <TableHead>Prev. Entrega</TableHead>
-              <TableHead>Frete</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
             </TableRow></TableHeader>
             <TableBody>
               {isLoading ? (
@@ -69,6 +94,7 @@ export default function ShipmentPage() {
                 <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhuma expedição registrada</TableCell></TableRow>
               ) : shipments.map((s: any) => {
                 const sc = shipmentStatusConfig[s.status] || { label: s.status, color: '' };
+                const nextStatuses = SHIPMENT_TRANSITIONS[s.status] || [];
                 return (
                   <TableRow key={s.id}>
                     <TableCell className="font-mono">{s.shipment_number}</TableCell>
@@ -78,7 +104,19 @@ export default function ShipmentPage() {
                     <TableCell>{s.total_weight?.toFixed(1)}</TableCell>
                     <TableCell className="font-mono text-xs">{s.tracking_code || '-'}</TableCell>
                     <TableCell>{s.expected_delivery ? format(new Date(s.expected_delivery), 'dd/MM/yyyy') : '-'}</TableCell>
-                    <TableCell>{s.freight_type} - R$ {s.freight_cost?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex gap-1 justify-end">
+                        {nextStatuses.map(ns => (
+                          <Button key={ns} size="sm" variant="outline" className="h-7 text-xs"
+                            onClick={() => handleAdvance(s, ns)}>
+                            <Play className="h-3 w-3 mr-1" /> {shipmentStatusConfig[ns]?.label}
+                          </Button>
+                        ))}
+                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setSelectedShipment(s)}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 );
               })}
@@ -86,6 +124,32 @@ export default function ShipmentPage() {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Tracking Dialog */}
+      <Dialog open={!!selectedShipment} onOpenChange={() => setSelectedShipment(null)}>
+        <DialogContent className="max-w-lg max-h-[70vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Rastreamento - {selectedShipment?.shipment_number}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            {!tracking?.length ? (
+              <p className="text-sm text-muted-foreground text-center py-4">Nenhum evento registrado</p>
+            ) : tracking.map((t: any) => (
+              <div key={t.id} className="flex gap-3 items-start">
+                <div className="mt-1 h-2 w-2 rounded-full bg-primary flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-medium">{t.description}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {format(new Date(t.occurred_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                    {t.location && ` • ${t.location}`}
+                    {t.registered_by && ` • ${t.registered_by}`}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }

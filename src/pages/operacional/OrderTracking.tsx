@@ -7,14 +7,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { useOrders } from '@/hooks/useOrders';
 import { useOrderStatusHistory, getOrderFlowStatus, orderFlowStatuses, useAdvancedOrderStatusUpdate } from '@/hooks/useOrderFlow';
-import { Search, Eye, ArrowRight, Clock, CheckCircle, XCircle, AlertTriangle, Package, Truck, FileText } from 'lucide-react';
+import { getAllowedTransitions, validateTransition } from '@/lib/orderFlowEngine';
+import { Search, Eye, ArrowRight, Clock, CheckCircle, XCircle, AlertTriangle, Package, Truck, FileText, Play } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 function OrderFlowBadge({ status }: { status: string }) {
   const s = getOrderFlowStatus(status);
@@ -55,7 +58,10 @@ export default function OrderTracking() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [transitionDialog, setTransitionDialog] = useState<{ order: any; targetStatus: string } | null>(null);
+  const [observation, setObservation] = useState('');
   const updateStatus = useAdvancedOrderStatusUpdate();
+  const { toast } = useToast();
 
   const filtered = (orders || []).filter(o => {
     const matchSearch = !search || o.number.toLowerCase().includes(search.toLowerCase()) || o.client_name.toLowerCase().includes(search.toLowerCase());
@@ -67,6 +73,37 @@ export default function OrderTracking() {
     acc[o.status] = (acc[o.status] || 0) + 1;
     return acc;
   }, {});
+
+  const handleTransition = (order: any, targetStatus: string) => {
+    const validation = validateTransition(order.status, targetStatus, {
+      hasFinancialApproval: order.financial_approval === 'approved',
+      hasCommercialApproval: order.commercial_approval === 'approved',
+      isBlocked: order.status === 'blocked',
+    });
+
+    if (!validation.valid) {
+      toast({ title: 'Transição bloqueada', description: validation.errors.join('\n'), variant: 'destructive' });
+      return;
+    }
+
+    if (targetStatus === 'blocked' || targetStatus === 'cancelled') {
+      setTransitionDialog({ order, targetStatus });
+      setObservation('');
+    } else {
+      updateStatus.mutate({ id: order.id, status: targetStatus, observation: '' });
+    }
+  };
+
+  const confirmTransition = () => {
+    if (!transitionDialog) return;
+    updateStatus.mutate({
+      id: transitionDialog.order.id,
+      status: transitionDialog.targetStatus,
+      observation,
+      block_reason: transitionDialog.targetStatus === 'blocked' ? observation : undefined,
+    });
+    setTransitionDialog(null);
+  };
 
   const kpis = [
     { label: 'Total Pedidos', value: orders?.length || 0, icon: FileText, color: 'text-primary' },
@@ -129,77 +166,132 @@ export default function OrderTracking() {
                 <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
               ) : filtered.length === 0 ? (
                 <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhum pedido encontrado</TableCell></TableRow>
-              ) : filtered.map(o => (
-                <TableRow key={o.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setSelectedOrder(o)}>
-                  <TableCell className="font-mono font-medium">{o.number}</TableCell>
-                  <TableCell>{o.client_name}</TableCell>
-                  <TableCell>{format(new Date(o.date), 'dd/MM/yyyy')}</TableCell>
-                  <TableCell>R$ {o.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
-                  <TableCell><OrderFlowBadge status={o.status} /></TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={cn('font-medium',
-                      o.priority === 'urgent' ? 'text-destructive border-destructive/20' :
-                      o.priority === 'high' ? 'text-warning border-warning/20' : 'text-muted-foreground'
-                    )}>{o.priority === 'urgent' ? 'Urgente' : o.priority === 'high' ? 'Alta' : o.priority === 'medium' ? 'Média' : 'Baixa'}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={e => { e.stopPropagation(); setSelectedOrder(o); }}>
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+              ) : filtered.map(o => {
+                const nextStatuses = getAllowedTransitions(o.status).slice(0, 2);
+                return (
+                  <TableRow key={o.id}>
+                    <TableCell className="font-mono font-medium">{o.number}</TableCell>
+                    <TableCell>{o.client_name}</TableCell>
+                    <TableCell>{format(new Date(o.date), 'dd/MM/yyyy')}</TableCell>
+                    <TableCell>R$ {o.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
+                    <TableCell><OrderFlowBadge status={o.status} /></TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={cn('font-medium',
+                        o.priority === 'urgent' ? 'text-destructive border-destructive/20' :
+                        o.priority === 'high' ? 'text-warning border-warning/20' : 'text-muted-foreground'
+                      )}>{o.priority === 'urgent' ? 'Urgente' : o.priority === 'high' ? 'Alta' : o.priority === 'medium' ? 'Média' : 'Baixa'}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex gap-1 justify-end">
+                        {nextStatuses.filter(s => s !== 'cancelled').map(ns => (
+                          <Button key={ns} variant="outline" size="sm" className="text-xs h-7 px-2"
+                            onClick={e => { e.stopPropagation(); handleTransition(o, ns); }}>
+                            <Play className="h-3 w-3 mr-1" />
+                            {getOrderFlowStatus(ns).label}
+                          </Button>
+                        ))}
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); setSelectedOrder(o); }}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
+      {/* Order Detail Dialog */}
       <Dialog open={!!selectedOrder} onOpenChange={() => setSelectedOrder(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Pedido {selectedOrder?.number}</DialogTitle>
+            <DialogTitle className="flex items-center gap-3">
+              Pedido {selectedOrder?.number}
+              {selectedOrder && <OrderFlowBadge status={selectedOrder.status} />}
+            </DialogTitle>
           </DialogHeader>
           {selectedOrder && (
-            <Tabs defaultValue="timeline">
-              <TabsList className="w-full">
-                <TabsTrigger value="timeline" className="flex-1">Timeline</TabsTrigger>
-                <TabsTrigger value="details" className="flex-1">Detalhes</TabsTrigger>
-                <TabsTrigger value="items" className="flex-1">Itens</TabsTrigger>
-              </TabsList>
-              <TabsContent value="timeline" className="mt-4">
-                <OrderTimeline orderId={selectedOrder.id} />
-              </TabsContent>
-              <TabsContent value="details" className="mt-4">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="text-muted-foreground">Cliente:</span> {selectedOrder.client_name}</div>
-                  <div><span className="text-muted-foreground">Status:</span> <OrderFlowBadge status={selectedOrder.status} /></div>
-                  <div><span className="text-muted-foreground">Data:</span> {format(new Date(selectedOrder.date), 'dd/MM/yyyy')}</div>
-                  <div><span className="text-muted-foreground">Entrega:</span> {selectedOrder.delivery_date ? format(new Date(selectedOrder.delivery_date), 'dd/MM/yyyy') : '-'}</div>
-                  <div><span className="text-muted-foreground">Subtotal:</span> R$ {selectedOrder.subtotal?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                  <div><span className="text-muted-foreground">Total:</span> R$ {selectedOrder.total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                  <div><span className="text-muted-foreground">Pgto:</span> {selectedOrder.payment_method}</div>
-                  <div><span className="text-muted-foreground">Condição:</span> {selectedOrder.payment_condition}</div>
-                </div>
-              </TabsContent>
-              <TabsContent value="items" className="mt-4">
-                <Table>
-                  <TableHeader><TableRow>
-                    <TableHead>Código</TableHead><TableHead>Produto</TableHead><TableHead>Qtde</TableHead><TableHead>Total</TableHead>
-                  </TableRow></TableHeader>
-                  <TableBody>
-                    {(selectedOrder.items || []).map((i: any) => (
-                      <TableRow key={i.id}>
-                        <TableCell className="font-mono">{i.product_code}</TableCell>
-                        <TableCell>{i.product_name}</TableCell>
-                        <TableCell>{i.quantity}</TableCell>
-                        <TableCell>R$ {i.total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TabsContent>
-            </Tabs>
+            <>
+              {/* Quick actions */}
+              <div className="flex flex-wrap gap-2 pb-2 border-b">
+                {getAllowedTransitions(selectedOrder.status).map(ns => (
+                  <Button key={ns} size="sm" variant={ns === 'cancelled' || ns === 'blocked' ? 'destructive' : 'default'}
+                    onClick={() => handleTransition(selectedOrder, ns)}>
+                    {getOrderFlowStatus(ns).label}
+                  </Button>
+                ))}
+              </div>
+              <Tabs defaultValue="timeline">
+                <TabsList className="w-full">
+                  <TabsTrigger value="timeline" className="flex-1">Timeline</TabsTrigger>
+                  <TabsTrigger value="details" className="flex-1">Detalhes</TabsTrigger>
+                  <TabsTrigger value="items" className="flex-1">Itens</TabsTrigger>
+                </TabsList>
+                <TabsContent value="timeline" className="mt-4">
+                  <OrderTimeline orderId={selectedOrder.id} />
+                </TabsContent>
+                <TabsContent value="details" className="mt-4">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div><span className="text-muted-foreground">Cliente:</span> {selectedOrder.client_name}</div>
+                    <div><span className="text-muted-foreground">Status:</span> <OrderFlowBadge status={selectedOrder.status} /></div>
+                    <div><span className="text-muted-foreground">Data:</span> {format(new Date(selectedOrder.date), 'dd/MM/yyyy')}</div>
+                    <div><span className="text-muted-foreground">Entrega:</span> {selectedOrder.delivery_date ? format(new Date(selectedOrder.delivery_date), 'dd/MM/yyyy') : '-'}</div>
+                    <div><span className="text-muted-foreground">Subtotal:</span> R$ {selectedOrder.subtotal?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                    <div><span className="text-muted-foreground">Total:</span> R$ {selectedOrder.total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                    <div><span className="text-muted-foreground">Pgto:</span> {selectedOrder.payment_method}</div>
+                    <div><span className="text-muted-foreground">Condição:</span> {selectedOrder.payment_condition}</div>
+                    <div><span className="text-muted-foreground">Aprov. Comercial:</span> {selectedOrder.commercial_approval || 'Pendente'}</div>
+                    <div><span className="text-muted-foreground">Aprov. Financeira:</span> {selectedOrder.financial_approval || 'Pendente'}</div>
+                  </div>
+                </TabsContent>
+                <TabsContent value="items" className="mt-4">
+                  <Table>
+                    <TableHeader><TableRow>
+                      <TableHead>Código</TableHead><TableHead>Produto</TableHead><TableHead>Qtde</TableHead><TableHead>Total</TableHead>
+                    </TableRow></TableHeader>
+                    <TableBody>
+                      {(selectedOrder.items || []).map((i: any) => (
+                        <TableRow key={i.id}>
+                          <TableCell className="font-mono">{i.product_code}</TableCell>
+                          <TableCell>{i.product_name}</TableCell>
+                          <TableCell>{i.quantity}</TableCell>
+                          <TableCell>R$ {i.total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TabsContent>
+              </Tabs>
+            </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Transition confirmation dialog (for block/cancel) */}
+      <Dialog open={!!transitionDialog} onOpenChange={() => setTransitionDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {transitionDialog?.targetStatus === 'blocked' ? 'Bloquear Pedido' : 'Cancelar Pedido'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              {transitionDialog?.targetStatus === 'blocked'
+                ? 'Informe o motivo do bloqueio:'
+                : 'Informe o motivo do cancelamento:'}
+            </p>
+            <Textarea value={observation} onChange={e => setObservation(e.target.value)}
+              placeholder="Motivo..." rows={3} />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTransitionDialog(null)}>Voltar</Button>
+            <Button variant="destructive" onClick={confirmTransition} disabled={!observation.trim()}>
+              Confirmar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </PageContainer>
