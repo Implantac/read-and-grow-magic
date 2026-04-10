@@ -209,6 +209,385 @@ export type Database = {
           },
         ]
       }
+      ai_daily_actions: {
+        Row: {
+          action_date: string
+          action_type: string
+          client_id: string | null
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          estimated_value: number | null
+          explanation: string | null
+          id: string
+          priority: number
+          result: string | null
+          sales_rep_id: string | null
+          status: string | null
+          title: string
+        }
+        Insert: {
+          action_date?: string
+          action_type?: string
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_value?: number | null
+          explanation?: string | null
+          id?: string
+          priority?: number
+          result?: string | null
+          sales_rep_id?: string | null
+          status?: string | null
+          title: string
+        }
+        Update: {
+          action_date?: string
+          action_type?: string
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_value?: number | null
+          explanation?: string | null
+          id?: string
+          priority?: number
+          result?: string | null
+          sales_rep_id?: string | null
+          status?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_daily_actions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_forecast_snapshots: {
+        Row: {
+          best_case: number | null
+          by_region: Json | null
+          by_rep: Json | null
+          by_segment: Json | null
+          confidence: number | null
+          created_at: string
+          factors: Json | null
+          forecast_date: string
+          id: string
+          period: string
+          predicted_revenue: number | null
+          worst_case: number | null
+        }
+        Insert: {
+          best_case?: number | null
+          by_region?: Json | null
+          by_rep?: Json | null
+          by_segment?: Json | null
+          confidence?: number | null
+          created_at?: string
+          factors?: Json | null
+          forecast_date?: string
+          id?: string
+          period?: string
+          predicted_revenue?: number | null
+          worst_case?: number | null
+        }
+        Update: {
+          best_case?: number | null
+          by_region?: Json | null
+          by_rep?: Json | null
+          by_segment?: Json | null
+          confidence?: number | null
+          created_at?: string
+          factors?: Json | null
+          forecast_date?: string
+          id?: string
+          period?: string
+          predicted_revenue?: number | null
+          worst_case?: number | null
+        }
+        Relationships: []
+      }
+      ai_opportunity_predictions: {
+        Row: {
+          client_id: string | null
+          close_probability: number
+          computed_at: string
+          created_at: string
+          explanation: string | null
+          funnel_id: string | null
+          id: string
+          key_factors: Json | null
+          loss_risk: number
+          model_version: string | null
+          order_id: string | null
+          predicted_close_date: string | null
+          predicted_value: number | null
+          recommended_action: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          close_probability?: number
+          computed_at?: string
+          created_at?: string
+          explanation?: string | null
+          funnel_id?: string | null
+          id?: string
+          key_factors?: Json | null
+          loss_risk?: number
+          model_version?: string | null
+          order_id?: string | null
+          predicted_close_date?: string | null
+          predicted_value?: number | null
+          recommended_action?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          close_probability?: number
+          computed_at?: string
+          created_at?: string
+          explanation?: string | null
+          funnel_id?: string | null
+          id?: string
+          key_factors?: Json | null
+          loss_risk?: number
+          model_version?: string | null
+          order_id?: string | null
+          predicted_close_date?: string | null
+          predicted_value?: number | null
+          recommended_action?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_opportunity_predictions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_opportunity_predictions_funnel_id_fkey"
+            columns: ["funnel_id"]
+            isOneToOne: false
+            referencedRelation: "sales_funnel"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_opportunity_predictions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_recommendations: {
+        Row: {
+          acted_at: string | null
+          acted_by: string | null
+          client_id: string
+          confidence: number | null
+          created_at: string
+          description: string | null
+          estimated_value: number | null
+          expires_at: string | null
+          explanation: string | null
+          id: string
+          priority: string | null
+          recommendation_type: string
+          result: string | null
+          sales_rep_id: string | null
+          status: string | null
+          suggested_products: Json | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          acted_at?: string | null
+          acted_by?: string | null
+          client_id: string
+          confidence?: number | null
+          created_at?: string
+          description?: string | null
+          estimated_value?: number | null
+          expires_at?: string | null
+          explanation?: string | null
+          id?: string
+          priority?: string | null
+          recommendation_type?: string
+          result?: string | null
+          sales_rep_id?: string | null
+          status?: string | null
+          suggested_products?: Json | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          acted_at?: string | null
+          acted_by?: string | null
+          client_id?: string
+          confidence?: number | null
+          created_at?: string
+          description?: string | null
+          estimated_value?: number | null
+          expires_at?: string | null
+          explanation?: string | null
+          id?: string
+          priority?: string | null
+          recommendation_type?: string
+          result?: string | null
+          sales_rep_id?: string | null
+          status?: string | null
+          suggested_products?: Json | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_recommendations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_sales_insights: {
+        Row: {
+          created_at: string
+          data_points: Json | null
+          description: string
+          dismissed_at: string | null
+          dismissed_by: string | null
+          expires_at: string | null
+          explanation: string | null
+          id: string
+          insight_type: string
+          related_entity_id: string | null
+          related_entity_type: string | null
+          severity: string | null
+          status: string | null
+          suggested_actions: Json | null
+          target_role: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          data_points?: Json | null
+          description: string
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          expires_at?: string | null
+          explanation?: string | null
+          id?: string
+          insight_type?: string
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          severity?: string | null
+          status?: string | null
+          suggested_actions?: Json | null
+          target_role?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          data_points?: Json | null
+          description?: string
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          expires_at?: string | null
+          explanation?: string | null
+          id?: string
+          insight_type?: string
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          severity?: string | null
+          status?: string | null
+          suggested_actions?: Json | null
+          target_role?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      ai_sales_scores: {
+        Row: {
+          churn_probability: number | null
+          client_id: string
+          computed_at: string
+          created_at: string
+          days_since_purchase: number | null
+          engagement_score: number | null
+          explanation: string | null
+          frequency_score: number | null
+          growth_score: number | null
+          id: string
+          monetary_score: number | null
+          priority_level: string
+          purchase_trend: string | null
+          recency_score: number | null
+          recompra_probability: number | null
+          risk_score: number | null
+          score_grade: string
+          score_numeric: number
+          updated_at: string
+        }
+        Insert: {
+          churn_probability?: number | null
+          client_id: string
+          computed_at?: string
+          created_at?: string
+          days_since_purchase?: number | null
+          engagement_score?: number | null
+          explanation?: string | null
+          frequency_score?: number | null
+          growth_score?: number | null
+          id?: string
+          monetary_score?: number | null
+          priority_level?: string
+          purchase_trend?: string | null
+          recency_score?: number | null
+          recompra_probability?: number | null
+          risk_score?: number | null
+          score_grade?: string
+          score_numeric?: number
+          updated_at?: string
+        }
+        Update: {
+          churn_probability?: number | null
+          client_id?: string
+          computed_at?: string
+          created_at?: string
+          days_since_purchase?: number | null
+          engagement_score?: number | null
+          explanation?: string | null
+          frequency_score?: number | null
+          growth_score?: number | null
+          id?: string
+          monetary_score?: number | null
+          priority_level?: string
+          purchase_trend?: string | null
+          recency_score?: number | null
+          recompra_probability?: number | null
+          risk_score?: number | null
+          score_grade?: string
+          score_numeric?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_sales_scores_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bank_accounts: {
         Row: {
           account_number: string | null
