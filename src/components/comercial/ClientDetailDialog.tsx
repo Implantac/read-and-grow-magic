@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ClientAIWidget } from './ClientAIWidget';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -209,6 +210,9 @@ export function ClientDetailDialog({ client, open, onOpenChange }: Props) {
                 </div>
               </div>
             )}
+
+            {/* AI Widget */}
+            <ClientAIWidget clientId={client.id} />
 
             {client.commercial_notes && (
               <div className="text-sm border-t pt-3"><span className="text-muted-foreground block text-xs">Observações Comerciais</span><p>{client.commercial_notes}</p></div>
