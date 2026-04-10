@@ -39,6 +39,10 @@ const AccountsPayable = lazy(() => import("./pages/financeiro/AccountsPayable"))
 const AccountsReceivable = lazy(() => import("./pages/financeiro/AccountsReceivable"));
 const CashFlow = lazy(() => import("./pages/financeiro/CashFlow"));
 const BankReconciliation = lazy(() => import("./pages/financeiro/BankReconciliation"));
+const FinancialDashboardPage = lazy(() => import("./pages/financeiro/FinancialDashboard"));
+const BankAccountsPage = lazy(() => import("./pages/financeiro/BankAccounts"));
+const CostCentersPage = lazy(() => import("./pages/financeiro/CostCenters"));
+const RenegotiationsPage = lazy(() => import("./pages/financeiro/Renegotiations"));
 
 // Accounting
 const ChartOfAccountsPage = lazy(() => import("./pages/contabilidade/ChartOfAccounts"));
@@ -163,9 +167,13 @@ const App = () => (
               <Route path="/comercial/forecast" element={<ForecastPage />} />
               
               {/* Financial Module */}
+              <Route path="/financeiro/dashboard" element={<FinancialDashboardPage />} />
               <Route path="/financeiro/pagar" element={<AccountsPayable />} />
               <Route path="/financeiro/receber" element={<AccountsReceivable />} />
               <Route path="/financeiro/fluxo" element={<CashFlow />} />
+              <Route path="/financeiro/tesouraria" element={<BankAccountsPage />} />
+              <Route path="/financeiro/centros-custo" element={<CostCentersPage />} />
+              <Route path="/financeiro/renegociacoes" element={<RenegotiationsPage />} />
               <Route path="/financeiro/conciliacao" element={<BankReconciliation />} />
               
               {/* Credit & Risk Module */}
