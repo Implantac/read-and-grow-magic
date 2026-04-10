@@ -582,7 +582,7 @@ export type Database = {
           {
             foreignKeyName: "ai_sales_scores_client_id_fkey"
             columns: ["client_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },

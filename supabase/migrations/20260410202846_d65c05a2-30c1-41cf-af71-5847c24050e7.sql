@@ -1,0 +1,1 @@
+ALTER TABLE public.ai_sales_scores ADD CONSTRAINT ai_sales_scores_client_id_unique UNIQUE (client_id);
