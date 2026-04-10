@@ -34,8 +34,6 @@ export default function FinancialDashboard() {
   const { data: cashFlow = [], isLoading: loadingCF } = useCashFlowEntries();
   const { data: bankAccounts = [], isLoading: loadingBA } = useBankAccounts();
 
-  if (loadingR || loadingP || loadingCF || loadingBA) return <PageLoading message="Carregando dashboard financeiro..." />;
-
   const now = new Date();
 
   // KPIs
