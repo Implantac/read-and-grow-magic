@@ -4279,6 +4279,123 @@ export type Database = {
         }
         Relationships: []
       }
+      sales_contact_logs: {
+        Row: {
+          client_id: string | null
+          contact_type: string
+          created_at: string
+          duration_minutes: number | null
+          funnel_id: string | null
+          id: string
+          next_action: string | null
+          next_action_date: string | null
+          notes: string | null
+          response_time_minutes: number | null
+          result: string
+          sales_rep_id: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          contact_type?: string
+          created_at?: string
+          duration_minutes?: number | null
+          funnel_id?: string | null
+          id?: string
+          next_action?: string | null
+          next_action_date?: string | null
+          notes?: string | null
+          response_time_minutes?: number | null
+          result?: string
+          sales_rep_id?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          contact_type?: string
+          created_at?: string
+          duration_minutes?: number | null
+          funnel_id?: string | null
+          id?: string
+          next_action?: string | null
+          next_action_date?: string | null
+          notes?: string | null
+          response_time_minutes?: number | null
+          result?: string
+          sales_rep_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_contact_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_contact_logs_funnel_id_fkey"
+            columns: ["funnel_id"]
+            isOneToOne: false
+            referencedRelation: "sales_funnel"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_contact_logs_sales_rep_id_fkey"
+            columns: ["sales_rep_id"]
+            isOneToOne: false
+            referencedRelation: "sales_reps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sales_daily_goals: {
+        Row: {
+          achieved_contacts: number
+          achieved_proposals: number
+          achieved_value: number
+          created_at: string
+          goal_date: string
+          id: string
+          sales_rep_id: string
+          target_contacts: number
+          target_proposals: number
+          target_value: number
+          updated_at: string
+        }
+        Insert: {
+          achieved_contacts?: number
+          achieved_proposals?: number
+          achieved_value?: number
+          created_at?: string
+          goal_date?: string
+          id?: string
+          sales_rep_id: string
+          target_contacts?: number
+          target_proposals?: number
+          target_value?: number
+          updated_at?: string
+        }
+        Update: {
+          achieved_contacts?: number
+          achieved_proposals?: number
+          achieved_value?: number
+          created_at?: string
+          goal_date?: string
+          id?: string
+          sales_rep_id?: string
+          target_contacts?: number
+          target_proposals?: number
+          target_value?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_daily_goals_sales_rep_id_fkey"
+            columns: ["sales_rep_id"]
+            isOneToOne: false
+            referencedRelation: "sales_reps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sales_forecasts: {
         Row: {
           confirmed_value: number
