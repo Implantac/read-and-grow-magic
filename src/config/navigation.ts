@@ -41,6 +41,9 @@ export const navigationSections: NavSection[] = [
           { title: 'Vendas', href: '/comercial/vendas', icon: 'ShoppingBag' },
           { title: 'Pedidos', href: '/comercial/pedidos', icon: 'ClipboardList' },
           { title: 'Orçamentos', href: '/comercial/orcamentos', icon: 'FileText' },
+          { title: 'Comissões', href: '/comercial/comissoes', icon: 'DollarSign' },
+          { title: 'Metas', href: '/comercial/metas', icon: 'Target' },
+          { title: 'Forecast', href: '/comercial/forecast', icon: 'TrendingUp' },
         ],
       },
       {
