@@ -5,10 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useConferenceRecords } from '@/hooks/useOrderFlow';
+import { useOrders } from '@/hooks/useOrders';
+import { useOrderLifecycle } from '@/hooks/useOrderLifecycle';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, Clock, AlertTriangle, ClipboardCheck, Play, Eye } from 'lucide-react';
+import { CheckCircle, Clock, AlertTriangle, ClipboardCheck, Play } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -22,17 +24,36 @@ const conferenceStatusConfig: Record<string, { label: string; color: string }> =
 
 export default function ConferenceQueue() {
   const { data: conferences, isLoading } = useConferenceRecords();
+  const { data: orders } = useOrders();
+  const lifecycle = useOrderLifecycle();
   const qc = useQueryClient();
   const { toast } = useToast();
 
-  const updateConferenceStatus = async (id: string, status: string) => {
+  const updateConferenceStatus = async (id: string, status: string, orderId?: string) => {
     const updates: any = { status, updated_at: new Date().toISOString() };
     if (status === 'in_progress') updates.started_at = new Date().toISOString();
-    if (status === 'completed' || status === 'approved') updates.completed_at = new Date().toISOString();
+    if (status === 'completed' || status === 'approved') {
+      updates.completed_at = new Date().toISOString();
+      updates.approved = true;
+      updates.approved_at = new Date().toISOString();
+    }
     const { error } = await supabase.from('conference_records').update(updates).eq('id', id);
     if (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); return; }
     toast({ title: `Conferência ${conferenceStatusConfig[status]?.label || status}` });
     qc.invalidateQueries({ queryKey: ['conference-records'] });
+
+    // When conference is completed/approved, advance order to conferenced → awaiting_billing
+    if ((status === 'completed' || status === 'approved') && orderId) {
+      const order = (orders || []).find(o => o.id === orderId);
+      if (order && order.status === 'awaiting_conference') {
+        lifecycle.mutate({
+          orderId: order.id,
+          order,
+          targetStatus: 'conferenced',
+          observation: 'Conferência aprovada',
+        });
+      }
+    }
   };
 
   const statusCounts = (conferences || []).reduce((acc: Record<string, number>, c: any) => {
@@ -96,17 +117,17 @@ export default function ConferenceQueue() {
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">
                         {c.status === 'pending' && (
-                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateConferenceStatus(c.id, 'in_progress')}>
+                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateConferenceStatus(c.id, 'in_progress', c.order_id)}>
                             <Play className="h-3 w-3 mr-1" /> Iniciar
                           </Button>
                         )}
                         {c.status === 'in_progress' && (
-                          <Button size="sm" className="h-7 text-xs" onClick={() => updateConferenceStatus(c.id, 'completed')}>
+                          <Button size="sm" className="h-7 text-xs" onClick={() => updateConferenceStatus(c.id, 'completed', c.order_id)}>
                             <CheckCircle className="h-3 w-3 mr-1" /> Concluir
                           </Button>
                         )}
                         {c.status === 'divergent' && (
-                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateConferenceStatus(c.id, 'approved')}>
+                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateConferenceStatus(c.id, 'approved', c.order_id)}>
                             Aprovar Divergência
                           </Button>
                         )}

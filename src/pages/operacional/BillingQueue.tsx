@@ -5,7 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useBillingQueue, useUpdateBillingStatus } from '@/hooks/useOrderFlow';
-import { FileText, Clock, CheckCircle, XCircle, DollarSign, Play, Ban } from 'lucide-react';
+import { useOrders } from '@/hooks/useOrders';
+import { useOrderLifecycle } from '@/hooks/useOrderLifecycle';
+import { FileText, Clock, CheckCircle, DollarSign, Play, Ban } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -19,7 +21,9 @@ const billingStatusConfig: Record<string, { label: string; color: string }> = {
 
 export default function BillingQueuePage() {
   const { data: items, isLoading } = useBillingQueue();
+  const { data: orders } = useOrders();
   const updateStatus = useUpdateBillingStatus();
+  const lifecycle = useOrderLifecycle();
 
   const statusCounts = (items || []).reduce((acc: Record<string, number>, i: any) => {
     acc[i.status] = (acc[i.status] || 0) + 1;
@@ -27,6 +31,29 @@ export default function BillingQueuePage() {
   }, {});
 
   const totalPending = (items || []).filter((i: any) => i.status === 'awaiting_billing').reduce((s: number, i: any) => s + (i.pending_amount || 0), 0);
+
+  const handleBillFull = (item: any) => {
+    updateStatus.mutate({
+      id: item.id,
+      status: 'billed_full',
+      billed_amount: item.amount,
+      pending_amount: 0,
+      billed_at: new Date().toISOString(),
+    }, {
+      onSuccess: () => {
+        // Advance order to invoiced
+        const order = (orders || []).find(o => o.id === item.order_id);
+        if (order && (order.status === 'awaiting_billing' || order.status === 'conferenced')) {
+          lifecycle.mutate({
+            orderId: order.id,
+            order,
+            targetStatus: 'invoiced',
+            observation: 'Faturamento total concluído',
+          });
+        }
+      },
+    });
+  };
 
   return (
     <PageContainer>
@@ -90,13 +117,7 @@ export default function BillingQueuePage() {
                         )}
                         {item.status === 'in_billing' && (
                           <>
-                            <Button size="sm" className="h-7 text-xs" onClick={() => updateStatus.mutate({
-                              id: item.id,
-                              status: 'billed_full',
-                              billed_amount: item.amount,
-                              pending_amount: 0,
-                              billed_at: new Date().toISOString(),
-                            })}>
+                            <Button size="sm" className="h-7 text-xs" onClick={() => handleBillFull(item)}>
                               <CheckCircle className="h-3 w-3 mr-1" /> Faturar Total
                             </Button>
                             <Button size="sm" variant="destructive" className="h-7 text-xs" onClick={() => updateStatus.mutate({ id: item.id, status: 'rejected' })}>

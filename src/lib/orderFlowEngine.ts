@@ -24,8 +24,8 @@ const TRANSITIONS: Record<string, string[]> = {
   awaiting_separation: ['in_separation', 'cancelled'],
   in_separation: ['awaiting_conference', 'awaiting_separation', 'cancelled'],
   awaiting_production: ['in_production', 'cancelled'],
-  in_production: ['partial_production', 'awaiting_conference', 'cancelled'],
-  partial_production: ['in_production', 'awaiting_conference', 'cancelled'],
+  in_production: ['partial_production', 'awaiting_conference', 'awaiting_separation', 'cancelled'],
+  partial_production: ['in_production', 'awaiting_conference', 'awaiting_separation', 'cancelled'],
   awaiting_conference: ['conferenced', 'cancelled'],
   conferenced: ['awaiting_billing', 'cancelled'],
   awaiting_billing: ['invoiced', 'cancelled'],
@@ -47,6 +47,7 @@ export function canTransition(from: string, to: string): boolean {
 export interface TransitionValidation {
   valid: boolean;
   errors: string[];
+  warnings: string[];
 }
 
 export function validateTransition(
@@ -58,13 +59,16 @@ export function validateTransition(
     isSeparated?: boolean;
     isConferenced?: boolean;
     isBlocked?: boolean;
+    hasStockForAllItems?: boolean;
+    hasProductionItems?: boolean;
   }
 ): TransitionValidation {
   const errors: string[] = [];
+  const warnings: string[] = [];
 
   if (!canTransition(from, to)) {
-    errors.push(`Transição de "${from}" para "${to}" não é permitida.`);
-    return { valid: false, errors };
+    errors.push(`Transição de "${getStatusLabel(from)}" para "${getStatusLabel(to)}" não é permitida.`);
+    return { valid: false, errors, warnings };
   }
 
   if (context) {
@@ -89,9 +93,19 @@ export function validateTransition(
     if (to === 'awaiting_billing' && context.isConferenced === false) {
       errors.push('Conferência precisa ser concluída antes do faturamento.');
     }
+
+    // Warn if items need production
+    if ((to === 'awaiting_separation') && context.hasProductionItems) {
+      warnings.push('Existem itens que podem precisar de produção antes da separação.');
+    }
+
+    // Warn if stock insufficient
+    if (to === 'awaiting_separation' && context.hasStockForAllItems === false) {
+      warnings.push('Nem todos os itens possuem saldo em estoque suficiente.');
+    }
   }
 
-  return { valid: errors.length === 0, errors };
+  return { valid: errors.length === 0, errors, warnings };
 }
 
 // Status groups for filtering
@@ -109,4 +123,56 @@ export function getStatusGroup(status: string): string {
     if ((statuses as readonly string[]).includes(status)) return group;
   }
   return 'other';
+}
+
+const STATUS_LABELS: Record<string, string> = {
+  quote: 'Orçamento',
+  pending: 'Digitado',
+  awaiting_commercial_approval: 'Aguard. Aprov. Comercial',
+  awaiting_financial_approval: 'Aguard. Aprov. Financeira',
+  blocked: 'Bloqueado',
+  confirmed: 'Liberado',
+  awaiting_separation: 'Aguard. Separação',
+  in_separation: 'Em Separação',
+  awaiting_production: 'Aguard. Produção',
+  in_production: 'Em Produção',
+  partial_production: 'Produção Parcial',
+  awaiting_conference: 'Aguard. Conferência',
+  conferenced: 'Conferido',
+  awaiting_billing: 'Aguard. Faturamento',
+  invoiced: 'Faturado',
+  shipped: 'Expedido',
+  delivered: 'Entregue',
+  cancelled: 'Cancelado',
+};
+
+export function getStatusLabel(status: string): string {
+  return STATUS_LABELS[status] || status;
+}
+
+/**
+ * Returns the visual flow steps for a progress indicator
+ */
+export const ORDER_FLOW_STEPS = [
+  { key: 'pending', label: 'Digitado', group: 'approval' },
+  { key: 'confirmed', label: 'Liberado', group: 'approval' },
+  { key: 'awaiting_separation', label: 'Separação', group: 'logistics' },
+  { key: 'awaiting_conference', label: 'Conferência', group: 'logistics' },
+  { key: 'awaiting_billing', label: 'Faturamento', group: 'billing' },
+  { key: 'shipped', label: 'Expedição', group: 'delivery' },
+  { key: 'delivered', label: 'Entregue', group: 'delivery' },
+];
+
+export function getFlowStepIndex(status: string): number {
+  const stepMap: Record<string, number> = {
+    quote: -1, pending: 0,
+    awaiting_commercial_approval: 0, awaiting_financial_approval: 0,
+    blocked: 0, confirmed: 1,
+    awaiting_separation: 2, in_separation: 2,
+    awaiting_production: 2, in_production: 2, partial_production: 2,
+    awaiting_conference: 3, conferenced: 3,
+    awaiting_billing: 4, invoiced: 4,
+    shipped: 5, delivered: 6, cancelled: -2,
+  };
+  return stepMap[status] ?? -1;
 }
