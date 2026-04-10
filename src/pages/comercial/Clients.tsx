@@ -387,6 +387,18 @@ export default function ClientsPage() {
                     <Input value={formData.municipal_registration} onChange={(e) => setFormData(p => ({ ...p, municipal_registration: e.target.value }))} />
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <Label>Representante Responsável</Label>
+                  <Select value={formData.sales_rep_id || '_none'} onValueChange={(v) => setFormData(p => ({ ...p, sales_rep_id: v === '_none' ? '' : v }))}>
+                    <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="_none">Nenhum</SelectItem>
+                      {salesReps.filter(r => r.status === 'active').map((r) => (
+                        <SelectItem key={r.id} value={r.id}>{r.name} ({r.code})</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Região</Label>
@@ -397,7 +409,7 @@ export default function ClientsPage() {
                     <Input value={formData.micro_region} onChange={(e) => setFormData(p => ({ ...p, micro_region: e.target.value }))} placeholder="Ex: Grande SP..." />
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Condição de Pagamento</Label>
                     <Select value={formData.default_payment_condition} onValueChange={(v) => setFormData(p => ({ ...p, default_payment_condition: v }))}>
@@ -421,6 +433,8 @@ export default function ClientsPage() {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>Classificação ABC</Label>
                     <Select value={formData.abc_classification} onValueChange={(v) => setFormData(p => ({ ...p, abc_classification: v }))}>
@@ -432,10 +446,21 @@ export default function ClientsPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Potencial Estimado (R$)</Label>
-                  <Input type="number" value={formData.estimated_potential} onChange={(e) => setFormData(p => ({ ...p, estimated_potential: e.target.value }))} />
+                  <div className="space-y-2">
+                    <Label>Score</Label>
+                    <Select value={formData.client_score} onValueChange={(v) => setFormData(p => ({ ...p, client_score: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="high">Alto Potencial</SelectItem>
+                        <SelectItem value="medium">Médio</SelectItem>
+                        <SelectItem value="low">Baixo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Potencial (R$)</Label>
+                    <Input type="number" value={formData.estimated_potential} onChange={(e) => setFormData(p => ({ ...p, estimated_potential: e.target.value }))} />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label>Observações Comerciais</Label>
