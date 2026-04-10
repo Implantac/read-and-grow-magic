@@ -26,6 +26,9 @@ export interface ExecutiveKPIs {
   prodInProgress: number;
   prodPlanned: number;
   prodCompleted: number;
+  targetAttainment: number;
+  totalTarget: number;
+  totalAchieved: number;
 }
 
 export interface ExecutiveInsight {
