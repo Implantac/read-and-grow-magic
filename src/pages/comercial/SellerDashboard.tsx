@@ -234,6 +234,9 @@ export default function SellerDashboard() {
                           <Badge variant="outline" className="text-[10px]">
                             {OPPORTUNITY_LABELS[insight.opportunityType] || insight.opportunityType}
                           </Badge>
+                          <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setScriptClient(insight); setScriptOpen(true); }}>
+                            📋 Script
+                          </Button>
                           <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleScheduleFollowUp(insight)}>
                             <PhoneCall className="h-3 w-3 mr-1" /> Agendar
                           </Button>
