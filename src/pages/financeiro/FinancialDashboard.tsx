@@ -34,8 +34,6 @@ export default function FinancialDashboard() {
   const { data: cashFlow = [], isLoading: loadingCF } = useCashFlowEntries();
   const { data: bankAccounts = [], isLoading: loadingBA } = useBankAccounts();
 
-  if (loadingR || loadingP || loadingCF || loadingBA) return <PageLoading message="Carregando dashboard financeiro..." />;
-
   const now = new Date();
 
   // KPIs
@@ -91,6 +89,22 @@ export default function FinancialDashboard() {
       return { month: format(m, 'MMM/yy', { locale: ptBR }), receitas: received, despesas: paid, lucro: received - paid };
     });
   }, [receivables, payables]);
+
+  // DRE Gerencial simplificado
+  const dreData = useMemo(() => {
+    const paidReceivables = receivables.filter(r => r.status === 'paid');
+    const paidPayables = payables.filter(p => p.status === 'paid');
+    const totalRevenue = paidReceivables.reduce((s, r) => s + Number(r.paid_amount ?? r.amount), 0);
+    const totalCosts = paidPayables.filter(p => p.category === 'Fornecedores').reduce((s, p) => s + Number(p.paid_amount ?? p.amount), 0);
+    const grossProfit = totalRevenue - totalCosts;
+    const totalExpenses = paidPayables.filter(p => p.category !== 'Fornecedores').reduce((s, p) => s + Number(p.paid_amount ?? p.amount), 0);
+    const netProfit = grossProfit - totalExpenses;
+    const grossMargin = totalRevenue > 0 ? (grossProfit / totalRevenue * 100) : 0;
+    const netMargin = totalRevenue > 0 ? (netProfit / totalRevenue * 100) : 0;
+    return { totalRevenue, totalCosts, grossProfit, totalExpenses, netProfit, grossMargin, netMargin };
+  }, [receivables, payables]);
+
+  if (loadingR || loadingP || loadingCF || loadingBA) return <PageLoading message="Carregando dashboard financeiro..." />;
 
   return (
     <PageContainer>
@@ -168,6 +182,49 @@ export default function FinancialDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* DRE Gerencial */}
+      <Card>
+        <CardHeader><CardTitle className="text-base flex items-center gap-2"><BarChart3 className="h-4 w-4" /> DRE Gerencial Simplificado</CardTitle></CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Conta</TableHead>
+                <TableHead className="text-right">Valor</TableHead>
+                <TableHead className="text-right">%</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell className="font-semibold">Receita Bruta</TableCell>
+                <TableCell className="text-right font-medium">{formatCurrency(dreData.totalRevenue)}</TableCell>
+                <TableCell className="text-right text-muted-foreground">100%</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="pl-6">(-) Custo dos Produtos/Serviços</TableCell>
+                <TableCell className="text-right text-destructive">{formatCurrency(dreData.totalCosts)}</TableCell>
+                <TableCell className="text-right text-muted-foreground">{dreData.totalRevenue > 0 ? (dreData.totalCosts / dreData.totalRevenue * 100).toFixed(1) : '0'}%</TableCell>
+              </TableRow>
+              <TableRow className="bg-muted/50">
+                <TableCell className="font-semibold">= Lucro Bruto</TableCell>
+                <TableCell className={`text-right font-bold ${dreData.grossProfit >= 0 ? 'text-success' : 'text-destructive'}`}>{formatCurrency(dreData.grossProfit)}</TableCell>
+                <TableCell className="text-right font-medium">{dreData.grossMargin.toFixed(1)}%</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="pl-6">(-) Despesas Operacionais</TableCell>
+                <TableCell className="text-right text-destructive">{formatCurrency(dreData.totalExpenses)}</TableCell>
+                <TableCell className="text-right text-muted-foreground">{dreData.totalRevenue > 0 ? (dreData.totalExpenses / dreData.totalRevenue * 100).toFixed(1) : '0'}%</TableCell>
+              </TableRow>
+              <TableRow className="bg-muted/50 border-t-2">
+                <TableCell className="font-bold text-base">= Lucro Líquido</TableCell>
+                <TableCell className={`text-right font-bold text-base ${dreData.netProfit >= 0 ? 'text-success' : 'text-destructive'}`}>{formatCurrency(dreData.netProfit)}</TableCell>
+                <TableCell className="text-right font-bold">{dreData.netMargin.toFixed(1)}%</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
       {/* Bank Accounts Summary */}
       {bankAccounts.length > 0 && (

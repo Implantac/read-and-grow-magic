@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCashFlowEntries } from '@/hooks/useCashFlow';
 import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/useAccountsPayable';
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, endOfYear, isWithinInterval, eachMonthOfInterval, subMonths } from 'date-fns';
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, startOfYear, endOfYear, isWithinInterval, eachMonthOfInterval, eachDayOfInterval, subMonths, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, Legend, Tooltip, PieChart, Pie, Cell } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -96,6 +96,28 @@ export default function CashFlow() {
     return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [filteredEntries]);
 
+  // Daily 30-day projection
+  const dailyProjection = useMemo(() => {
+    const days = eachDayOfInterval({ start: now, end: addDays(now, 30) });
+    let runningBalance = currentBalance;
+    return days.map(day => {
+      const dayStr = format(day, 'yyyy-MM-dd');
+      const dayIncome = receivables
+        .filter(r => r.status !== 'paid' && r.status !== 'cancelled' && r.due_date === dayStr)
+        .reduce((s, r) => s + Number(r.open_amount ?? r.amount), 0);
+      const dayExpense = payables
+        .filter(p => p.status !== 'paid' && p.status !== 'cancelled' && p.due_date === dayStr)
+        .reduce((s, p) => s + Number(p.open_amount ?? p.amount), 0);
+      runningBalance = runningBalance + dayIncome - dayExpense;
+      return {
+        day: format(day, 'dd/MM', { locale: ptBR }),
+        receitas: dayIncome,
+        despesas: dayExpense,
+        saldo: runningBalance,
+      };
+    });
+  }, [currentBalance, receivables, payables]);
+
   const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
   if (loadingCF || loadingR || loadingP) return <PageLoading message="Carregando fluxo de caixa..." />;
@@ -152,9 +174,33 @@ export default function CashFlow() {
               <div className="h-[300px] flex items-center justify-center text-muted-foreground">Sem dados no período</div>
             )}
           </CardContent>
-        </Card>
+      </Card>
 
-        <Card>
+      {/* Daily 30-day Projection */}
+      <Card>
+        <CardHeader><CardTitle>Projeção Diária (30 dias)</CardTitle></CardHeader>
+        <CardContent>
+          <ChartContainer config={{ ...chartConfig, saldo: { label: 'Saldo Projetado', color: 'hsl(var(--primary))' } }} className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={dailyProjection}>
+                <defs>
+                  <linearGradient id="colorSaldo" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis dataKey="day" className="text-xs" interval={2} />
+                <YAxis className="text-xs" tickFormatter={(v) => formatCompact(v)} />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Area type="monotone" dataKey="saldo" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorSaldo)" strokeWidth={2} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+
+      <Card>
           <CardHeader><CardTitle>Despesas por Categoria</CardTitle></CardHeader>
           <CardContent>
             {expenseByCat.length > 0 ? (
