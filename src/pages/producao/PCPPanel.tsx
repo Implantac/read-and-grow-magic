@@ -7,20 +7,27 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { useOrders } from '@/hooks/useOrders';
+import { useAdvancedOrderStatusUpdate } from '@/hooks/useOrderFlow';
+import { supabase } from '@/integrations/supabase/client';
 import { productionStatusConfig, priorityConfig } from '@/config/production';
-import { Factory, Clock, CheckCircle, AlertTriangle, Search, Calendar, BarChart3 } from 'lucide-react';
+import { Factory, Clock, CheckCircle, AlertTriangle, Search, Plus, Play, Pause, SquareIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PCPPanel() {
-  const { orders: productionOrders, loading } = useProductionOrders();
+  const { orders: productionOrders, loading, refetch, update } = useProductionOrders();
   const { data: salesOrders } = useOrders();
+  const updateOrderStatus = useAdvancedOrderStatusUpdate();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [generatingFor, setGeneratingFor] = useState<any>(null);
+  const { toast } = useToast();
 
   const filtered = productionOrders.filter(o => {
     const matchSearch = !search || o.order_number.toLowerCase().includes(search.toLowerCase()) || o.product_name.toLowerCase().includes(search.toLowerCase());
@@ -37,7 +44,46 @@ export default function PCPPanel() {
     ? productionOrders.reduce((s, o) => s + (o.produced_quantity / Math.max(o.quantity, 1)), 0) / productionOrders.length * 100
     : 0;
 
-  const ordersAwaitingProduction = (salesOrders || []).filter(o => o.status === 'awaiting_production' || o.status === 'in_production');
+  const ordersAwaitingProduction = (salesOrders || []).filter(o => o.status === 'awaiting_production' || o.status === 'confirmed');
+
+  const generateOPFromOrder = async (order: any) => {
+    const items = order.items || [];
+    if (items.length === 0) {
+      toast({ title: 'Pedido sem itens', variant: 'destructive' });
+      return;
+    }
+
+    try {
+      for (const item of items) {
+        const opNumber = `OP-${format(new Date(), 'yyyyMMdd')}-${order.number}-${item.product_code}`;
+        await supabase.from('production_orders').insert({
+          order_number: opNumber,
+          product_id: item.product_id,
+          product_code: item.product_code,
+          product_name: item.product_name,
+          quantity: item.quantity,
+          produced_quantity: 0,
+          unit: 'UN',
+          status: 'planned',
+          priority: order.priority || 'medium',
+          due_date: order.delivery_date,
+          notes: `Gerada do pedido ${order.number}`,
+        } as any);
+      }
+
+      // Update order status
+      updateOrderStatus.mutate({ id: order.id, status: 'in_production' });
+      toast({ title: `${items.length} OP(s) gerada(s) do pedido ${order.number}` });
+      await refetch();
+      setGeneratingFor(null);
+    } catch (e: any) {
+      toast({ title: 'Erro ao gerar OP', description: e.message, variant: 'destructive' });
+    }
+  };
+
+  const handleStatusChange = (op: any, newStatus: string) => {
+    update(op.id, { status: newStatus });
+  };
 
   return (
     <PageContainer>
@@ -70,7 +116,7 @@ export default function PCPPanel() {
       <Tabs defaultValue="orders">
         <TabsList>
           <TabsTrigger value="orders">Ordens de Produção</TabsTrigger>
-          <TabsTrigger value="demand">Demanda Comercial</TabsTrigger>
+          <TabsTrigger value="demand">Demanda Comercial ({ordersAwaitingProduction.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="orders" className="mt-4">
@@ -103,7 +149,7 @@ export default function PCPPanel() {
                   <TableHead>Status</TableHead>
                   <TableHead>Prioridade</TableHead>
                   <TableHead>Prazo</TableHead>
-                  <TableHead>Setor</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
                   {loading ? (
@@ -129,7 +175,30 @@ export default function PCPPanel() {
                         <TableCell><Badge className={cn('text-xs', sc.color)}>{sc.label}</Badge></TableCell>
                         <TableCell><Badge className={cn('text-xs', pc.color)}>{pc.label}</Badge></TableCell>
                         <TableCell>{o.due_date ? format(new Date(o.due_date), 'dd/MM/yyyy') : '-'}</TableCell>
-                        <TableCell>{o.work_center || '-'}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex gap-1 justify-end">
+                            {o.status === 'planned' && (
+                              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'in_progress')}>
+                                <Play className="h-3 w-3 mr-1" /> Iniciar
+                              </Button>
+                            )}
+                            {o.status === 'in_progress' && (
+                              <>
+                                <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'paused')}>
+                                  <Pause className="h-3 w-3 mr-1" /> Pausar
+                                </Button>
+                                <Button size="sm" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'completed')}>
+                                  <CheckCircle className="h-3 w-3 mr-1" /> Finalizar
+                                </Button>
+                              </>
+                            )}
+                            {o.status === 'paused' && (
+                              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'in_progress')}>
+                                <Play className="h-3 w-3 mr-1" /> Retomar
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
                       </TableRow>
                     );
                   })}
@@ -147,22 +216,32 @@ export default function PCPPanel() {
                 <TableHeader><TableRow>
                   <TableHead>Nº Pedido</TableHead>
                   <TableHead>Cliente</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Itens</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Entrega</TableHead>
                   <TableHead>Prioridade</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
                   {ordersAwaitingProduction.length === 0 ? (
-                    <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhum pedido aguardando produção</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhum pedido aguardando produção</TableCell></TableRow>
                   ) : ordersAwaitingProduction.map(o => (
                     <TableRow key={o.id}>
                       <TableCell className="font-mono">{o.number}</TableCell>
                       <TableCell>{o.client_name}</TableCell>
-                      <TableCell><Badge variant="outline" className="bg-warning/10 text-warning">{o.status}</Badge></TableCell>
+                      <TableCell>{o.items?.length || 0} itens</TableCell>
                       <TableCell>R$ {o.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
                       <TableCell>{o.delivery_date ? format(new Date(o.delivery_date), 'dd/MM/yyyy') : '-'}</TableCell>
-                      <TableCell>{o.priority}</TableCell>
+                      <TableCell>
+                        <Badge className={cn('text-xs', priorityConfig[o.priority]?.color)}>
+                          {priorityConfig[o.priority]?.label || o.priority}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button size="sm" onClick={() => setGeneratingFor(o)}>
+                          <Plus className="h-3 w-3 mr-1" /> Gerar OP
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -171,6 +250,35 @@ export default function PCPPanel() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Generate OP confirmation dialog */}
+      <Dialog open={!!generatingFor} onOpenChange={() => setGeneratingFor(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Gerar Ordem de Produção</DialogTitle>
+          </DialogHeader>
+          {generatingFor && (
+            <div className="space-y-3">
+              <p className="text-sm">Criar OPs para o pedido <strong>{generatingFor.number}</strong> ({generatingFor.client_name})?</p>
+              <div className="text-sm space-y-1">
+                {(generatingFor.items || []).map((i: any) => (
+                  <div key={i.id} className="flex justify-between">
+                    <span>{i.product_name}</span>
+                    <span className="font-mono">{i.quantity} un</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">Será criada uma OP para cada item do pedido.</p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setGeneratingFor(null)}>Cancelar</Button>
+            <Button onClick={() => generateOPFromOrder(generatingFor)}>
+              <Plus className="h-4 w-4 mr-1" /> Gerar OPs
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }

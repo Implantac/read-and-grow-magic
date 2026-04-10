@@ -1494,6 +1494,47 @@ export type Database = {
           },
         ]
       }
+      delivery_tracking: {
+        Row: {
+          created_at: string
+          description: string
+          event_type: string
+          id: string
+          location: string | null
+          occurred_at: string
+          registered_by: string | null
+          shipment_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          event_type?: string
+          id?: string
+          location?: string | null
+          occurred_at?: string
+          registered_by?: string | null
+          shipment_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          event_type?: string
+          id?: string
+          location?: string | null
+          occurred_at?: string
+          registered_by?: string | null
+          shipment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "delivery_tracking_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipment_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_alerts: {
         Row: {
           alert_type: string

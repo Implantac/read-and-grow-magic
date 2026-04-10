@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useBillingQueue, useUpdateBillingStatus } from '@/hooks/useOrderFlow';
-import { FileText, Clock, CheckCircle, XCircle, DollarSign } from 'lucide-react';
+import { FileText, Clock, CheckCircle, XCircle, DollarSign, Play, Ban } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -82,11 +82,29 @@ export default function BillingQueuePage() {
                     <TableCell>{item.invoice_number || '-'}</TableCell>
                     <TableCell>{format(new Date(item.created_at), 'dd/MM/yyyy')}</TableCell>
                     <TableCell className="text-right">
-                      {item.status === 'awaiting_billing' && (
-                        <Button size="sm" onClick={() => updateStatus.mutate({ id: item.id, status: 'in_billing' })}>
-                          Iniciar
-                        </Button>
-                      )}
+                      <div className="flex gap-1 justify-end">
+                        {item.status === 'awaiting_billing' && (
+                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateStatus.mutate({ id: item.id, status: 'in_billing' })}>
+                            <Play className="h-3 w-3 mr-1" /> Iniciar
+                          </Button>
+                        )}
+                        {item.status === 'in_billing' && (
+                          <>
+                            <Button size="sm" className="h-7 text-xs" onClick={() => updateStatus.mutate({
+                              id: item.id,
+                              status: 'billed_full',
+                              billed_amount: item.amount,
+                              pending_amount: 0,
+                              billed_at: new Date().toISOString(),
+                            })}>
+                              <CheckCircle className="h-3 w-3 mr-1" /> Faturar Total
+                            </Button>
+                            <Button size="sm" variant="destructive" className="h-7 text-xs" onClick={() => updateStatus.mutate({ id: item.id, status: 'rejected' })}>
+                              <Ban className="h-3 w-3 mr-1" /> Rejeitar
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
