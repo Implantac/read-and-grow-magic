@@ -351,7 +351,7 @@ export default function SalesFunnelPage() {
                         <td className="px-4 py-3 text-center">
                           <Badge variant="secondary" className="font-mono">{m.count}</Badge>
                         </td>
-                        <td className="px-4 py-3 text-right font-semibold text-primary">{fmt(m.value)}</td>
+                        <td className="px-4 py-3 text-right font-semibold text-primary">{fmt(m.totalValue)}</td>
                         <td className="px-4 py-3 text-center">
                           <div className="flex items-center justify-center gap-1">
                             <Clock className="h-3 w-3 text-muted-foreground" />
