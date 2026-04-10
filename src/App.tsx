@@ -81,6 +81,15 @@ const RFIDIntegrationPage = lazy(() => import("./pages/rfid/Integration"));
 const ProductionOrdersPage = lazy(() => import("./pages/producao/ProductionOrders"));
 const MaterialConsumptionPage = lazy(() => import("./pages/producao/MaterialConsumption"));
 const TimeEntriesPage = lazy(() => import("./pages/producao/TimeEntries"));
+const PCPPanelPage = lazy(() => import("./pages/producao/PCPPanel"));
+
+// Operational Flow
+const OperationalDashboardPage = lazy(() => import("./pages/operacional/OperationalDashboard"));
+const OrderTrackingPage = lazy(() => import("./pages/operacional/OrderTracking"));
+const SeparationQueuePage = lazy(() => import("./pages/operacional/SeparationQueue"));
+const ConferenceQueuePage = lazy(() => import("./pages/operacional/ConferenceQueue"));
+const BillingQueuePage = lazy(() => import("./pages/operacional/BillingQueue"));
+const ShipmentPage = lazy(() => import("./pages/operacional/ShipmentPage"));
 
 // Purchasing
 const SuppliersPage = lazy(() => import("./pages/compras/Suppliers"));
@@ -192,9 +201,18 @@ const App = () => (
               <Route path="/compras/cotacoes" element={<QuotationsPage />} />
               
               {/* Production Module */}
+              <Route path="/producao/pcp" element={<PCPPanelPage />} />
               <Route path="/producao/ordens" element={<ProductionOrdersPage />} />
               <Route path="/producao/consumo" element={<MaterialConsumptionPage />} />
               <Route path="/producao/apontamentos" element={<TimeEntriesPage />} />
+
+              {/* Operational Flow Module */}
+              <Route path="/operacional/dashboard" element={<OperationalDashboardPage />} />
+              <Route path="/operacional/acompanhamento" element={<OrderTrackingPage />} />
+              <Route path="/operacional/separacao" element={<SeparationQueuePage />} />
+              <Route path="/operacional/conferencia" element={<ConferenceQueuePage />} />
+              <Route path="/operacional/faturamento" element={<BillingQueuePage />} />
+              <Route path="/operacional/expedicao" element={<ShipmentPage />} />
               
               {/* WMS Module */}
               <Route path="/wms/dashboard" element={<WMSDashboardPage />} />
