@@ -5,10 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useStockReservations } from '@/hooks/useOrderFlow';
+import { useOrders } from '@/hooks/useOrders';
+import { useOrderLifecycle } from '@/hooks/useOrderLifecycle';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
-import { Package, Lock, CheckCircle, XCircle, Play } from 'lucide-react';
+import { Package, Lock, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -22,20 +24,51 @@ const reservationStatusConfig: Record<string, { label: string; color: string }> 
 
 export default function SeparationQueue() {
   const { data: reservations, isLoading } = useStockReservations();
+  const { data: orders } = useOrders();
+  const lifecycle = useOrderLifecycle();
   const qc = useQueryClient();
   const { toast } = useToast();
 
-  const updateReservationStatus = async (id: string, status: string) => {
+  const updateReservationStatus = async (id: string, status: string, orderId?: string) => {
     const updates: any = { status, updated_at: new Date().toISOString() };
     if (status === 'picked') updates.picked_at = new Date().toISOString();
     const { error } = await supabase.from('stock_reservations').update(updates).eq('id', id);
     if (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); return; }
     toast({ title: `Status atualizado para ${reservationStatusConfig[status]?.label || status}` });
     qc.invalidateQueries({ queryKey: ['stock-reservations'] });
+
+    // Check if all reservations for this order are picked → advance order to awaiting_conference
+    if (status === 'picked' && orderId) {
+      const { data: orderReservations } = await supabase
+        .from('stock_reservations')
+        .select('status')
+        .eq('order_id', orderId);
+
+      const allPicked = orderReservations?.every((r: any) => r.status === 'picked');
+      if (allPicked) {
+        const order = (orders || []).find(o => o.id === orderId);
+        if (order && (order.status === 'in_separation' || order.status === 'awaiting_separation')) {
+          lifecycle.mutate({
+            orderId: order.id,
+            order,
+            targetStatus: 'awaiting_conference',
+            observation: 'Separação concluída - todos os itens separados',
+          });
+        }
+      }
+    }
   };
 
   const statusCounts = (reservations || []).reduce((acc: Record<string, number>, r: any) => {
     acc[r.status] = (acc[r.status] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Group by order
+  const reservationsByOrder = (reservations || []).reduce((acc: Record<string, any[]>, r: any) => {
+    const oid = r.order_id || 'sem-pedido';
+    if (!acc[oid]) acc[oid] = [];
+    acc[oid].push(r);
     return acc;
   }, {});
 
@@ -97,17 +130,17 @@ export default function SeparationQueue() {
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">
                         {r.status === 'pending' && (
-                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateReservationStatus(r.id, 'reserved')}>
+                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateReservationStatus(r.id, 'reserved', r.order_id)}>
                             <Lock className="h-3 w-3 mr-1" /> Reservar
                           </Button>
                         )}
                         {r.status === 'reserved' && (
-                          <Button size="sm" className="h-7 text-xs" onClick={() => updateReservationStatus(r.id, 'picked')}>
+                          <Button size="sm" className="h-7 text-xs" onClick={() => updateReservationStatus(r.id, 'picked', r.order_id)}>
                             <CheckCircle className="h-3 w-3 mr-1" /> Separar
                           </Button>
                         )}
                         {(r.status === 'pending' || r.status === 'reserved') && (
-                          <Button size="sm" variant="destructive" className="h-7 text-xs" onClick={() => updateReservationStatus(r.id, 'cancelled')}>
+                          <Button size="sm" variant="destructive" className="h-7 text-xs" onClick={() => updateReservationStatus(r.id, 'cancelled', r.order_id)}>
                             <XCircle className="h-3 w-3" />
                           </Button>
                         )}
