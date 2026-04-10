@@ -41,12 +41,12 @@ export function MainLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen overflow-hidden bg-background">
       <Sidebar />
       <Topbar />
       <main
         className={cn(
-          'min-h-screen pt-14 transition-all duration-300 ease-in-out',
+          'h-screen overflow-y-auto pt-14 transition-[padding-left] duration-300 ease-in-out',
           sidebarCollapsed ? 'pl-14' : 'pl-56'
         )}
       >
