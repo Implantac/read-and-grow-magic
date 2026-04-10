@@ -104,6 +104,8 @@ export default function FinancialDashboard() {
     return { totalRevenue, totalCosts, grossProfit, totalExpenses, netProfit, grossMargin, netMargin };
   }, [receivables, payables]);
 
+  if (loadingR || loadingP || loadingCF || loadingBA) return <PageLoading message="Carregando dashboard financeiro..." />;
+
   return (
     <PageContainer>
       <PageHeader title="Dashboard Financeiro" description="Visão gerencial completa do financeiro" />
