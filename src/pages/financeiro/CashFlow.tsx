@@ -174,9 +174,33 @@ export default function CashFlow() {
               <div className="h-[300px] flex items-center justify-center text-muted-foreground">Sem dados no período</div>
             )}
           </CardContent>
-        </Card>
+      </Card>
 
-        <Card>
+      {/* Daily 30-day Projection */}
+      <Card>
+        <CardHeader><CardTitle>Projeção Diária (30 dias)</CardTitle></CardHeader>
+        <CardContent>
+          <ChartContainer config={{ ...chartConfig, saldo: { label: 'Saldo Projetado', color: 'hsl(var(--primary))' } }} className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={dailyProjection}>
+                <defs>
+                  <linearGradient id="colorSaldo" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis dataKey="day" className="text-xs" interval={2} />
+                <YAxis className="text-xs" tickFormatter={(v) => formatCompact(v)} />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Area type="monotone" dataKey="saldo" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorSaldo)" strokeWidth={2} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+
+      <Card>
           <CardHeader><CardTitle>Despesas por Categoria</CardTitle></CardHeader>
           <CardContent>
             {expenseByCat.length > 0 ? (
