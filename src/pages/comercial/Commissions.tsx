@@ -74,10 +74,10 @@ export default function CommissionsPage() {
       <PageHeader title="Comissões" description="Gestão de comissões, políticas e pagamentos" />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <KPICard title="Prevista" value={`R$ ${totalForecast.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={Clock} index={0} />
-        <KPICard title="Liberada" value={`R$ ${totalReleased.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={TrendingUp} index={1} />
-        <KPICard title="Aprovada" value={`R$ ${totalApproved.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={CheckCircle} index={2} />
-        <KPICard title="Paga" value={`R$ ${totalPaid.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={DollarSign} index={3} />
+        <KPICard title="Prevista" value={`R$ ${totalForecast.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={<Clock className="h-5 w-5" />} index={0} />
+        <KPICard title="Liberada" value={`R$ ${totalReleased.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={<TrendingUp className="h-5 w-5" />} index={1} />
+        <KPICard title="Aprovada" value={`R$ ${totalApproved.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={<CheckCircle className="h-5 w-5" />} index={2} />
+        <KPICard title="Paga" value={`R$ ${totalPaid.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={<DollarSign className="h-5 w-5" />} index={3} />
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>

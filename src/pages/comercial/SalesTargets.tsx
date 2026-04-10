@@ -98,10 +98,10 @@ export default function SalesTargetsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <KPICard title="Meta Total" value={`R$ ${totalTarget.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`} icon={Target} index={0} />
-        <KPICard title="Realizado" value={`R$ ${totalAchieved.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`} icon={TrendingUp} index={1} />
-        <KPICard title="% Médio Atingido" value={`${avgPct.toFixed(1)}%`} icon={Award} index={2} />
-        <KPICard title="Em Risco" value={`${atRisk}`} icon={AlertTriangle} index={3} color="red" />
+        <KPICard title="Meta Total" value={`R$ ${totalTarget.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`} icon={<Target className="h-5 w-5" />} index={0} />
+        <KPICard title="Realizado" value={`R$ ${totalAchieved.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`} icon={<TrendingUp className="h-5 w-5" />} index={1} />
+        <KPICard title="% Médio Atingido" value={`${avgPct.toFixed(1)}%`} icon={<Award className="h-5 w-5" />} index={2} />
+        <KPICard title="Em Risco" value={`${atRisk}`} icon={<AlertTriangle className="h-5 w-5" />} index={3} />
       </div>
 
       {chartData.length > 0 && (
