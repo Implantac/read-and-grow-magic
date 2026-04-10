@@ -22,7 +22,7 @@ import { useOrders } from '@/hooks/useOrders';
 import { useSales } from '@/hooks/useSales';
 import { useSalesFunnel } from '@/hooks/useSalesFunnel';
 import { useSalesReps } from '@/hooks/useSalesReps';
-import { useFollowUps, useCreateFollowUp, useUpdateFollowUp, useClientInsights, type ClientInsight } from '@/hooks/useSalesIntelligence';
+import { useFollowUps, useCreateFollowUp, useUpdateFollowUp, useClientInsights, useRepPerformance, useLostSalesAlerts, useSalesScript, type ClientInsight } from '@/hooks/useSalesIntelligence';
 import { useCommercialAlerts } from '@/hooks/useCommercialAlerts';
 import { differenceInDays, format, isToday, startOfMonth, endOfMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -57,7 +57,14 @@ export default function SellerDashboard() {
   const updateFollowUp = useUpdateFollowUp();
 
   const insights = useClientInsights(clients, orders, sales);
+  const performances = useRepPerformance(reps, orders, funnel);
+  const lostAlerts = useLostSalesAlerts(funnel, orders, followUps);
   const loading = lc || lo;
+
+  const [scriptClient, setScriptClient] = useState<ClientInsight | null>(null);
+  const [scriptOpen, setScriptOpen] = useState(false);
+  const scriptClientData = clients.find(c => c.id === scriptClient?.clientId) || null;
+  const salesScript = useSalesScript(scriptClientData, scriptClient);
 
   const [followUpOpen, setFollowUpOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<ClientInsight | null>(null);
@@ -177,10 +184,12 @@ export default function SellerDashboard() {
       </Card>
 
       <Tabs defaultValue="opportunities" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="opportunities">🎯 Oportunidades</TabsTrigger>
           <TabsTrigger value="followups">📞 Follow-ups</TabsTrigger>
           <TabsTrigger value="at-risk">⚠️ Em Risco</TabsTrigger>
+          <TabsTrigger value="lost">🚨 Perdendo ({lostAlerts.length})</TabsTrigger>
+          <TabsTrigger value="ranking">🏆 Ranking</TabsTrigger>
           <TabsTrigger value="pipeline">💰 Pipeline</TabsTrigger>
         </TabsList>
 
@@ -225,6 +234,9 @@ export default function SellerDashboard() {
                           <Badge variant="outline" className="text-[10px]">
                             {OPPORTUNITY_LABELS[insight.opportunityType] || insight.opportunityType}
                           </Badge>
+                          <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setScriptClient(insight); setScriptOpen(true); }}>
+                            📋 Script
+                          </Button>
                           <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleScheduleFollowUp(insight)}>
                             <PhoneCall className="h-3 w-3 mr-1" /> Agendar
                           </Button>
@@ -318,6 +330,86 @@ export default function SellerDashboard() {
                       </div>
                     );
                   })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Lost Sales Tab */}
+        <TabsContent value="lost" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium flex items-center gap-2 text-destructive">
+                <AlertTriangle className="h-4 w-4" />
+                Você Está Perdendo Essas Vendas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {lostAlerts.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">Nenhuma venda em risco 🎉</p>
+              ) : (
+                <div className="space-y-3">
+                  {lostAlerts.slice(0, 10).map((alert, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 rounded-lg border border-destructive/30 bg-destructive/5">
+                      <span className="text-lg">{alert.type === 'stagnant_funnel' ? '⏳' : alert.type === 'cancelled_order' ? '❌' : '📞'}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">{alert.title}</p>
+                        <p className="text-xs text-muted-foreground">{alert.description}</p>
+                      </div>
+                      {alert.estimatedLoss > 0 && (
+                        <Badge variant="destructive">{fmt(alert.estimatedLoss)}</Badge>
+                      )}
+                    </div>
+                  ))}
+                  <div className="p-3 rounded-lg bg-destructive/10 text-center">
+                    <p className="text-sm font-medium text-destructive">
+                      Total em risco: {fmt(lostAlerts.reduce((s, a) => s + a.estimatedLoss, 0))}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Ranking Tab */}
+        <TabsContent value="ranking" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Trophy className="h-4 w-4 text-primary" /> Ranking de Vendedores
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {performances.length === 0 ? (
+                <p className="text-center text-muted-foreground py-8">Sem dados</p>
+              ) : (
+                <div className="space-y-3">
+                  {performances.map((p, i) => (
+                    <div key={p.repId} className={`flex items-center gap-3 p-3 rounded-lg border ${i === 0 ? 'bg-primary/5 border-primary/20' : ''}`}>
+                      <div className="shrink-0 w-8 text-center">
+                        {i < 3 ? <span className="text-xl">{['🥇', '🥈', '🥉'][i]}</span> : <span className="text-lg font-bold text-muted-foreground">{i + 1}</span>}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium truncate">{p.repName}</span>
+                          <span className="text-sm font-bold text-primary">{fmt(p.totalSales)}</span>
+                        </div>
+                        <div className="flex items-center gap-3 mt-1 text-[10px] text-muted-foreground">
+                          <span>{p.ordersCount} pedidos</span>
+                          <span>Ticket: {fmt(p.avgTicket)}</span>
+                          <span>Conv: {p.conversionRate.toFixed(0)}%</span>
+                        </div>
+                        {p.monthlyTarget > 0 && (
+                          <div className="flex items-center gap-2 mt-1">
+                            <Progress value={Math.min(p.targetPct, 100)} className="h-1 flex-1" />
+                            <span className="text-[10px] font-medium">{p.targetPct.toFixed(0)}%</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </CardContent>
@@ -419,6 +511,48 @@ export default function SellerDashboard() {
             <Button variant="outline" onClick={() => setFollowUpOpen(false)}>Cancelar</Button>
             <Button onClick={saveFollowUp} disabled={createFollowUp.isPending}>Agendar</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Sales Script Dialog */}
+      <Dialog open={scriptOpen} onOpenChange={setScriptOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>📋 Script de Venda — {scriptClient?.clientName}</DialogTitle>
+          </DialogHeader>
+          {salesScript ? (
+            <div className="space-y-4">
+              <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+                <p className="text-sm font-bold">{salesScript.approach}</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-1">ABERTURA</p>
+                <p className="text-sm italic">&ldquo;{salesScript.openingLine}&rdquo;</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-1">PONTOS-CHAVE</p>
+                <ul className="space-y-1">
+                  {salesScript.keyPoints.map((p, i) => (
+                    <li key={i} className="text-sm flex items-start gap-2"><span className="text-primary">•</span>{p}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-1">OBJEÇÕES</p>
+                <ul className="space-y-1">
+                  {salesScript.objectionHandlers.map((o, i) => (
+                    <li key={i} className="text-xs bg-muted/50 p-2 rounded">{o}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800">
+                <p className="text-xs font-medium text-muted-foreground mb-1">FECHAMENTO</p>
+                <p className="text-sm font-medium">{salesScript.closingTechnique}</p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground py-4">Selecione um cliente</p>
+          )}
         </DialogContent>
       </Dialog>
     </PageContainer>

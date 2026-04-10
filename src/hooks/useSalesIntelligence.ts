@@ -318,6 +318,243 @@ export function useClientInsights(clients: any[], orders: any[], sales: any[]) {
   }, [clients, orders, sales]);
 }
 
+// ─── Product Suggestions (cross-sell / upsell) ──────────────────────────
+export interface ProductSuggestion {
+  productId: string;
+  productName: string;
+  productCode: string;
+  reason: string;
+  estimatedValue: number;
+  confidence: 'high' | 'medium' | 'low';
+}
+
+export function useProductSuggestions(clientId: string | null, orders: any[], sales: any[], products: any[]) {
+  return useMemo(() => {
+    if (!clientId || products.length === 0) return [];
+
+    // Collect all items this client has purchased
+    const purchasedProductIds = new Set<string>();
+    const purchasedCategories = new Set<string>();
+    const itemFrequency: Record<string, number> = {};
+
+    const clientOrders = orders.filter((o: any) => o.client_id === clientId && o.status !== 'cancelled');
+    const clientSales = sales.filter((s: any) => s.client_id === clientId && s.status !== 'cancelled');
+
+    [...clientOrders, ...clientSales].forEach((o: any) => {
+      (o.items || []).forEach((item: any) => {
+        if (item.product_id) {
+          purchasedProductIds.add(item.product_id);
+          itemFrequency[item.product_id] = (itemFrequency[item.product_id] || 0) + 1;
+        }
+      });
+    });
+
+    // Find product categories the client buys
+    products.forEach(p => {
+      if (purchasedProductIds.has(p.id) && p.category_id) {
+        purchasedCategories.add(p.category_id);
+      }
+    });
+
+    const suggestions: ProductSuggestion[] = [];
+
+    // Cross-sell: same category, not purchased
+    products.forEach(p => {
+      if (purchasedProductIds.has(p.id) || p.status !== 'active') return;
+
+      if (p.category_id && purchasedCategories.has(p.category_id)) {
+        suggestions.push({
+          productId: p.id,
+          productName: p.name,
+          productCode: p.code,
+          reason: 'Mesmo segmento de produtos que o cliente já compra',
+          estimatedValue: p.sale_price,
+          confidence: 'high',
+        });
+      }
+    });
+
+    // Upsell: higher-margin products in same categories
+    const avgPrice = products.filter(p => purchasedProductIds.has(p.id))
+      .reduce((s, p) => s + p.sale_price, 0) / Math.max(purchasedProductIds.size, 1);
+
+    products.forEach(p => {
+      if (purchasedProductIds.has(p.id) || p.status !== 'active') return;
+      if (suggestions.find(s => s.productId === p.id)) return;
+
+      const margin = p.cost_price > 0 ? ((p.sale_price - p.cost_price) / p.sale_price) * 100 : 0;
+      if (margin > 40 && p.sale_price > avgPrice) {
+        suggestions.push({
+          productId: p.id,
+          productName: p.name,
+          productCode: p.code,
+          reason: `Alta margem (${margin.toFixed(0)}%) — produto premium`,
+          estimatedValue: p.sale_price,
+          confidence: 'medium',
+        });
+      }
+    });
+
+    return suggestions.slice(0, 10);
+  }, [clientId, orders, sales, products]);
+}
+
+// ─── Sales Script Generator ──────────────────────────────────────────────
+export interface SalesScript {
+  approach: string;
+  openingLine: string;
+  keyPoints: string[];
+  objectionHandlers: string[];
+  closingTechnique: string;
+}
+
+export function useSalesScript(client: any | null, insight: ClientInsight | null): SalesScript | null {
+  return useMemo(() => {
+    if (!client || !insight) return null;
+
+    const isHighValue = insight.avgTicket > 5000;
+    const isInactive = insight.daysSinceLastPurchase > 60;
+    const isPriceOriented = (client.default_payment_condition || '').includes('prazo');
+    const classification = insight.classification || 'C';
+
+    if (isInactive) {
+      return {
+        approach: '🔄 Reativação — tom amigável e consultivo',
+        openingLine: `Olá! Sentimos sua falta. Faz ${insight.daysSinceLastPurchase} dias desde seu último pedido.`,
+        keyPoints: [
+          'Perguntar o motivo da pausa',
+          'Apresentar novidades desde a última compra',
+          'Oferecer condição exclusiva de retorno',
+        ],
+        objectionHandlers: [
+          '"Preço alto" → Destacar condições de pagamento flexíveis',
+          '"Sem necessidade" → Perguntar sobre estoque e reposição',
+          '"Mudou de fornecedor" → Pedir feedback e oferecer teste',
+        ],
+        closingTechnique: 'Oferecer pedido inicial com desconto especial de reativação.',
+      };
+    }
+
+    if (classification === 'A' || isHighValue) {
+      return {
+        approach: '👑 VIP — foco em valor e relacionamento',
+        openingLine: `Como um dos nossos clientes mais importantes, tenho uma proposta especial.`,
+        keyPoints: [
+          'Reforçar parceria de longo prazo',
+          'Apresentar lançamentos em primeira mão',
+          'Sugerir aumento de mix de produtos',
+        ],
+        objectionHandlers: [
+          '"Já tenho estoque" → Sugerir agendamento futuro com preço travado',
+          '"Concorrente ofereceu melhor" → Destacar qualidade e pós-venda',
+        ],
+        closingTechnique: 'Fechar com exclusividade: "Essa condição é só para nossos parceiros principais."',
+      };
+    }
+
+    if (isPriceOriented) {
+      return {
+        approach: '💰 Sensível a preço — focar economia e condições',
+        openingLine: `Tenho uma oportunidade de economia que pode interessar.`,
+        keyPoints: [
+          'Mostrar economia em volume',
+          'Destacar condições de pagamento',
+          'Comparar custo-benefício',
+        ],
+        objectionHandlers: [
+          '"Muito caro" → Parcelar ou oferecer desconto progressivo',
+          '"Vou pensar" → Criar urgência com prazo da oferta',
+        ],
+        closingTechnique: 'Ancoragem: mostrar preço cheio e depois o desconto especial.',
+      };
+    }
+
+    return {
+      approach: '📋 Padrão — consultivo e focado em necessidades',
+      openingLine: `Vim verificar se posso ajudar com alguma necessidade.`,
+      keyPoints: [
+        'Entender necessidades atuais',
+        'Sugerir produtos complementares',
+        'Apresentar novidades do catálogo',
+      ],
+      objectionHandlers: [
+        '"Sem orçamento" → Sugerir quantidade menor ou parcelamento',
+        '"Preciso de aprovação" → Enviar proposta formal para decisor',
+      ],
+      closingTechnique: 'Fechar com pergunta direta: "Posso incluir no pedido?"',
+    };
+  }, [client, insight]);
+}
+
+// ─── Lost Sales Alerts ───────────────────────────────────────────────────
+export interface LostSaleAlert {
+  type: 'stagnant_funnel' | 'no_followup' | 'expired_quote' | 'cancelled_order';
+  title: string;
+  description: string;
+  estimatedLoss: number;
+  referenceId: string;
+  daysSince: number;
+  clientName: string;
+}
+
+export function useLostSalesAlerts(funnel: any[], orders: any[], followUps: any[]) {
+  return useMemo(() => {
+    const now = new Date();
+    const alerts: LostSaleAlert[] = [];
+
+    // Stagnant funnel items (> 14 days no update)
+    funnel.filter(f => f.status === 'open').forEach(f => {
+      const days = differenceInDays(now, new Date(f.updated_at || f.created_at));
+      if (days > 14) {
+        alerts.push({
+          type: 'stagnant_funnel',
+          title: `Oportunidade parada: ${f.title}`,
+          description: `Parada há ${days} dias na etapa atual. Valor: R$ ${f.value.toFixed(2)}`,
+          estimatedLoss: f.value,
+          referenceId: f.id,
+          daysSince: days,
+          clientName: f.contact_name || 'N/A',
+        });
+      }
+    });
+
+    // Cancelled orders
+    orders.filter(o => o.status === 'cancelled').forEach(o => {
+      const days = differenceInDays(now, new Date(o.date));
+      if (days <= 30) {
+        alerts.push({
+          type: 'cancelled_order',
+          title: `Pedido cancelado: ${o.number}`,
+          description: `Cancelado há ${days} dias. Cliente: ${o.client_name}`,
+          estimatedLoss: o.total,
+          referenceId: o.id,
+          daysSince: days,
+          clientName: o.client_name,
+        });
+      }
+    });
+
+    // Overdue follow-ups without completion
+    followUps.filter(f => f.status === 'pending').forEach(f => {
+      const days = differenceInDays(now, new Date(f.scheduled_date));
+      if (days > 3) {
+        alerts.push({
+          type: 'no_followup',
+          title: `Follow-up atrasado: ${f.subject}`,
+          description: `Atrasado há ${days} dias sem retorno`,
+          estimatedLoss: 0,
+          referenceId: f.id,
+          daysSince: days,
+          clientName: f.subject,
+        });
+      }
+    });
+
+    alerts.sort((a, b) => b.estimatedLoss - a.estimatedLoss);
+    return alerts;
+  }, [funnel, orders, followUps]);
+}
+
 // ─── Performance Metrics ─────────────────────────────────────────────────
 export interface RepPerformance {
   repId: string;
@@ -328,7 +565,11 @@ export interface RepPerformance {
   conversionRate: number;
   avgCycleTime: number;
   lostDeals: number;
+  wonDeals: number;
+  clientsServed: number;
   ranking: number;
+  monthlyTarget: number;
+  targetPct: number;
 }
 
 export function useRepPerformance(reps: any[], orders: any[], funnel: any[]) {
@@ -340,6 +581,8 @@ export function useRepPerformance(reps: any[], orders: any[], funnel: any[]) {
       const won = repFunnel.filter((f: any) => f.status === 'won').length;
       const lost = repFunnel.filter((f: any) => f.status === 'lost').length;
       const conversion = (won + lost) > 0 ? (won / (won + lost)) * 100 : 0;
+      const uniqueClients = new Set(repOrders.map((o: any) => o.client_id)).size;
+      const target = rep.monthly_target || 0;
 
       return {
         repId: rep.id,
@@ -350,7 +593,11 @@ export function useRepPerformance(reps: any[], orders: any[], funnel: any[]) {
         conversionRate: conversion,
         avgCycleTime: 0,
         lostDeals: lost,
+        wonDeals: won,
+        clientsServed: uniqueClients,
         ranking: 0,
+        monthlyTarget: target,
+        targetPct: target > 0 ? (total / target) * 100 : 0,
       };
     });
 
