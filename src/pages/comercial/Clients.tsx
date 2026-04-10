@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, Eye, MoreHorizontal, Search, Loader2 } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, MoreHorizontal, Search, Loader2, Star, TrendingUp, Target } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageLoading } from '@/components/shared/PageLoading';
@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
@@ -26,6 +27,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { clientSegments, brazilianStates } from '@/config/commercial';
 import { useClients, useCreateClient, useUpdateClient, useDeleteClient, type DbClient } from '@/hooks/useClients';
+import { useSalesReps } from '@/hooks/useSalesReps';
 import { useCnpjLookup } from '@/hooks/useCnpjLookup';
 import { ClientDetailDialog } from '@/components/comercial/ClientDetailDialog';
 
@@ -40,6 +42,7 @@ const filterFields: FilterField[] = [
 export default function ClientsPage() {
   const { toast } = useToast();
   const { data: clients = [], isLoading } = useClients();
+  const { data: salesReps = [] } = useSalesReps();
   const createClient = useCreateClient();
   const updateClient = useUpdateClient();
   const deleteClient = useDeleteClient();
@@ -76,10 +79,10 @@ export default function ClientsPage() {
     email: '', phone: '', cellphone: '',
     address_street: '', address_number: '', address_complement: '',
     address_neighborhood: '', address_city: '', address_state: '', address_zip_code: '',
-    status: 'active', credit_limit: '', segment: '',
+    status: 'active', credit_limit: '', segment: '', sales_rep_id: '',
     state_registration: '', municipal_registration: '',
     region: '', micro_region: '', default_payment_condition: 'À vista',
-    price_table: 'default', abc_classification: 'C',
+    price_table: 'default', abc_classification: 'C', client_score: 'medium',
     commercial_notes: '', estimated_potential: '',
   });
 
@@ -92,13 +95,28 @@ export default function ClientsPage() {
 
   const columns: Column<DbClient>[] = [
     { key: 'code', label: 'Código', sortable: true },
-    { key: 'name', label: 'Nome/Razão Social', sortable: true },
+    { key: 'name', label: 'Nome/Razão Social', sortable: true, render: (_, row) => (
+      <div>
+        <p className="font-medium">{row.name}</p>
+        {row.trade_name && <p className="text-[10px] text-muted-foreground">{row.trade_name}</p>}
+      </div>
+    )},
     { key: 'document', label: 'CPF/CNPJ', sortable: true },
-    { key: 'email', label: 'E-mail' },
-    { key: 'phone', label: 'Telefone' },
     { key: 'address_city', label: 'Cidade/UF', render: (_, row) => `${row.address_city}/${row.address_state}` },
-    { key: 'credit_limit', label: 'Limite de Crédito', sortable: true,
-      render: (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value as number) },
+    { key: 'abc_classification', label: 'ABC', sortable: true, render: (v) => (
+      <Badge variant={(v as string) === 'A' ? 'default' : 'secondary'} className="text-xs font-bold w-7 justify-center">{(v as string) || 'C'}</Badge>
+    )},
+    { key: 'client_score', label: 'Score', render: (v) => {
+      const score = (v as string) || 'medium';
+      const cfg: Record<string, { label: string; cls: string }> = {
+        high: { label: 'Alto', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+        medium: { label: 'Médio', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+        low: { label: 'Baixo', cls: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' },
+      };
+      return <Badge className={`text-[10px] ${cfg[score]?.cls}`}>{cfg[score]?.label || score}</Badge>;
+    }},
+    { key: 'credit_limit', label: 'Limite', sortable: true,
+      render: (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(value as number) },
     { key: 'status', label: 'Status', render: (value) => <StatusBadge type="client" status={value as string} /> },
   ];
 
@@ -107,10 +125,10 @@ export default function ClientsPage() {
     email: '', phone: '', cellphone: '',
     address_street: '', address_number: '', address_complement: '',
     address_neighborhood: '', address_city: '', address_state: '', address_zip_code: '',
-    status: 'active', credit_limit: '', segment: '',
+    status: 'active', credit_limit: '', segment: '', sales_rep_id: '',
     state_registration: '', municipal_registration: '',
     region: '', micro_region: '', default_payment_condition: 'À vista',
-    price_table: 'default', abc_classification: 'C',
+    price_table: 'default', abc_classification: 'C', client_score: 'medium',
     commercial_notes: '', estimated_potential: '',
   };
 
@@ -126,10 +144,12 @@ export default function ClientsPage() {
         address_city: client.address_city, address_state: client.address_state,
         address_zip_code: client.address_zip_code,
         status: client.status, credit_limit: String(client.credit_limit), segment: client.segment || '',
+        sales_rep_id: client.sales_rep_id || '',
         state_registration: client.state_registration || '', municipal_registration: client.municipal_registration || '',
         region: client.region || '', micro_region: client.micro_region || '',
         default_payment_condition: client.default_payment_condition || 'À vista',
         price_table: client.price_table || 'default', abc_classification: client.abc_classification || 'C',
+        client_score: client.client_score || 'medium',
         commercial_notes: client.commercial_notes || '', estimated_potential: String(client.estimated_potential || ''),
       });
     } else {
@@ -149,7 +169,9 @@ export default function ClientsPage() {
       address_city: formData.address_city, address_state: formData.address_state,
       address_zip_code: formData.address_zip_code,
       status: formData.status, credit_limit: Number(formData.credit_limit) || 0,
-      current_balance: 0, segment: formData.segment || null, sales_rep_id: null,
+      current_balance: 0, segment: formData.segment || null,
+      sales_rep_id: formData.sales_rep_id || null,
+      client_score: formData.client_score || 'medium',
       state_registration: formData.state_registration || null,
       municipal_registration: formData.municipal_registration || null,
       region: formData.region || null, micro_region: formData.micro_region || null,
@@ -365,6 +387,18 @@ export default function ClientsPage() {
                     <Input value={formData.municipal_registration} onChange={(e) => setFormData(p => ({ ...p, municipal_registration: e.target.value }))} />
                   </div>
                 </div>
+                <div className="space-y-2">
+                  <Label>Representante Responsável</Label>
+                  <Select value={formData.sales_rep_id || '_none'} onValueChange={(v) => setFormData(p => ({ ...p, sales_rep_id: v === '_none' ? '' : v }))}>
+                    <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="_none">Nenhum</SelectItem>
+                      {salesReps.filter(r => r.status === 'active').map((r) => (
+                        <SelectItem key={r.id} value={r.id}>{r.name} ({r.code})</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Região</Label>
@@ -375,7 +409,7 @@ export default function ClientsPage() {
                     <Input value={formData.micro_region} onChange={(e) => setFormData(p => ({ ...p, micro_region: e.target.value }))} placeholder="Ex: Grande SP..." />
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Condição de Pagamento</Label>
                     <Select value={formData.default_payment_condition} onValueChange={(v) => setFormData(p => ({ ...p, default_payment_condition: v }))}>
@@ -399,6 +433,8 @@ export default function ClientsPage() {
                       </SelectContent>
                     </Select>
                   </div>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>Classificação ABC</Label>
                     <Select value={formData.abc_classification} onValueChange={(v) => setFormData(p => ({ ...p, abc_classification: v }))}>
@@ -410,10 +446,21 @@ export default function ClientsPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Potencial Estimado (R$)</Label>
-                  <Input type="number" value={formData.estimated_potential} onChange={(e) => setFormData(p => ({ ...p, estimated_potential: e.target.value }))} />
+                  <div className="space-y-2">
+                    <Label>Score</Label>
+                    <Select value={formData.client_score} onValueChange={(v) => setFormData(p => ({ ...p, client_score: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="high">Alto Potencial</SelectItem>
+                        <SelectItem value="medium">Médio</SelectItem>
+                        <SelectItem value="low">Baixo</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Potencial (R$)</Label>
+                    <Input type="number" value={formData.estimated_potential} onChange={(e) => setFormData(p => ({ ...p, estimated_potential: e.target.value }))} />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label>Observações Comerciais</Label>
