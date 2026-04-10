@@ -544,6 +544,291 @@ export type Database = {
           },
         ]
       }
+      commission_payments: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          commissions_count: number
+          created_at: string
+          id: string
+          notes: string | null
+          payment_date: string | null
+          payment_method: string | null
+          period: string
+          sales_rep_id: string
+          sales_rep_name: string
+          status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          commissions_count?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          period: string
+          sales_rep_id: string
+          sales_rep_name: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          commissions_count?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          period?: string
+          sales_rep_id?: string
+          sales_rep_name?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      commission_policies: {
+        Row: {
+          active: boolean
+          applies_to: string
+          applies_to_entity_id: string | null
+          base_percentage: number
+          calculation_type: string
+          created_at: string
+          description: string | null
+          discount_reduction_pct: number | null
+          extra_percentage: number | null
+          id: string
+          margin_reduction_pct: number | null
+          max_discount_pct: number | null
+          min_margin_pct: number | null
+          name: string
+          requires_invoicing: boolean
+          requires_payment: boolean
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          active?: boolean
+          applies_to?: string
+          applies_to_entity_id?: string | null
+          base_percentage?: number
+          calculation_type?: string
+          created_at?: string
+          description?: string | null
+          discount_reduction_pct?: number | null
+          extra_percentage?: number | null
+          id?: string
+          margin_reduction_pct?: number | null
+          max_discount_pct?: number | null
+          min_margin_pct?: number | null
+          name: string
+          requires_invoicing?: boolean
+          requires_payment?: boolean
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          active?: boolean
+          applies_to?: string
+          applies_to_entity_id?: string | null
+          base_percentage?: number
+          calculation_type?: string
+          created_at?: string
+          description?: string | null
+          discount_reduction_pct?: number | null
+          extra_percentage?: number | null
+          id?: string
+          margin_reduction_pct?: number | null
+          max_discount_pct?: number | null
+          min_margin_pct?: number | null
+          name?: string
+          requires_invoicing?: boolean
+          requires_payment?: boolean
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
+      commission_rules: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          max_value: number | null
+          min_value: number | null
+          percentage: number
+          policy_id: string
+          priority: number
+          rule_label: string | null
+          rule_type: string
+          rule_value: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          max_value?: number | null
+          min_value?: number | null
+          percentage?: number
+          policy_id: string
+          priority?: number
+          rule_label?: string | null
+          rule_type?: string
+          rule_value?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          max_value?: number | null
+          min_value?: number | null
+          percentage?: number
+          policy_id?: string
+          priority?: number
+          rule_label?: string | null
+          rule_type?: string
+          rule_value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_rules_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "commission_policies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      commissions: {
+        Row: {
+          adjusted_value: number | null
+          adjustment_reason: string | null
+          applied_percentage: number
+          approved_at: string | null
+          approved_by: string | null
+          base_value: number
+          block_reason: string | null
+          calculated_value: number
+          client_id: string | null
+          client_name: string | null
+          created_at: string
+          discount_value: number | null
+          id: string
+          invoice_date: string | null
+          margin_pct: number | null
+          net_value: number
+          order_id: string | null
+          order_item_id: string | null
+          order_number: string | null
+          paid_at: string | null
+          payment_date: string | null
+          period: string | null
+          policy_id: string | null
+          policy_name: string | null
+          rule_id: string | null
+          sales_rep_id: string | null
+          sales_rep_name: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          adjusted_value?: number | null
+          adjustment_reason?: string | null
+          applied_percentage?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          base_value?: number
+          block_reason?: string | null
+          calculated_value?: number
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string
+          discount_value?: number | null
+          id?: string
+          invoice_date?: string | null
+          margin_pct?: number | null
+          net_value?: number
+          order_id?: string | null
+          order_item_id?: string | null
+          order_number?: string | null
+          paid_at?: string | null
+          payment_date?: string | null
+          period?: string | null
+          policy_id?: string | null
+          policy_name?: string | null
+          rule_id?: string | null
+          sales_rep_id?: string | null
+          sales_rep_name?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          adjusted_value?: number | null
+          adjustment_reason?: string | null
+          applied_percentage?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          base_value?: number
+          block_reason?: string | null
+          calculated_value?: number
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string
+          discount_value?: number | null
+          id?: string
+          invoice_date?: string | null
+          margin_pct?: number | null
+          net_value?: number
+          order_id?: string | null
+          order_item_id?: string | null
+          order_number?: string | null
+          paid_at?: string | null
+          payment_date?: string | null
+          period?: string | null
+          policy_id?: string | null
+          policy_name?: string | null
+          rule_id?: string | null
+          sales_rep_id?: string | null
+          sales_rep_name?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commissions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_policy_id_fkey"
+            columns: ["policy_id"]
+            isOneToOne: false
+            referencedRelation: "commission_policies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "commissions_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "commission_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           address_city: string
@@ -2103,6 +2388,63 @@ export type Database = {
           },
         ]
       }
+      sales_forecasts: {
+        Row: {
+          confirmed_value: number
+          conservative_value: number
+          conversion_rate: number | null
+          created_at: string
+          entity_id: string | null
+          entity_name: string | null
+          entity_type: string
+          historical_avg: number | null
+          id: string
+          notes: string | null
+          optimistic_value: number
+          period: string
+          pipeline_value: number
+          realistic_value: number
+          snapshot_date: string
+          weighted_value: number
+        }
+        Insert: {
+          confirmed_value?: number
+          conservative_value?: number
+          conversion_rate?: number | null
+          created_at?: string
+          entity_id?: string | null
+          entity_name?: string | null
+          entity_type?: string
+          historical_avg?: number | null
+          id?: string
+          notes?: string | null
+          optimistic_value?: number
+          period: string
+          pipeline_value?: number
+          realistic_value?: number
+          snapshot_date?: string
+          weighted_value?: number
+        }
+        Update: {
+          confirmed_value?: number
+          conservative_value?: number
+          conversion_rate?: number | null
+          created_at?: string
+          entity_id?: string | null
+          entity_name?: string | null
+          entity_type?: string
+          historical_avg?: number | null
+          id?: string
+          notes?: string | null
+          optimistic_value?: number
+          period?: string
+          pipeline_value?: number
+          realistic_value?: number
+          snapshot_date?: string
+          weighted_value?: number
+        }
+        Relationships: []
+      }
       sales_funnel: {
         Row: {
           client_id: string | null
@@ -2245,6 +2587,63 @@ export type Database = {
           total_sales?: number | null
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      sales_targets: {
+        Row: {
+          achieved_value: number
+          achievement_pct: number | null
+          created_at: string
+          entity_id: string | null
+          entity_name: string | null
+          entity_type: string
+          id: string
+          name: string
+          notes: string | null
+          period: string
+          period_type: string
+          projection: number | null
+          status: string
+          target_type: string
+          target_value: number
+          updated_at: string
+        }
+        Insert: {
+          achieved_value?: number
+          achievement_pct?: number | null
+          created_at?: string
+          entity_id?: string | null
+          entity_name?: string | null
+          entity_type?: string
+          id?: string
+          name: string
+          notes?: string | null
+          period: string
+          period_type?: string
+          projection?: number | null
+          status?: string
+          target_type?: string
+          target_value?: number
+          updated_at?: string
+        }
+        Update: {
+          achieved_value?: number
+          achievement_pct?: number | null
+          created_at?: string
+          entity_id?: string | null
+          entity_name?: string | null
+          entity_type?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          period?: string
+          period_type?: string
+          projection?: number | null
+          status?: string
+          target_type?: string
+          target_value?: number
+          updated_at?: string
         }
         Relationships: []
       }

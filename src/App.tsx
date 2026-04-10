@@ -24,6 +24,9 @@ const CommercialQuotationsPage = lazy(() => import("./pages/comercial/Quotations
 const CommercialDashboardPage = lazy(() => import("./pages/comercial/CommercialDashboard"));
 const SalesFunnelPage = lazy(() => import("./pages/comercial/SalesFunnel"));
 const SalesRepsPage = lazy(() => import("./pages/comercial/SalesReps"));
+const CommissionsPage = lazy(() => import("./pages/comercial/Commissions"));
+const SalesTargetsPage = lazy(() => import("./pages/comercial/SalesTargets"));
+const ForecastPage = lazy(() => import("./pages/comercial/Forecast"));
 
 // Financial
 const AccountsPayable = lazy(() => import("./pages/financeiro/AccountsPayable"));
@@ -134,6 +137,9 @@ const App = () => (
               <Route path="/comercial/orcamentos" element={<CommercialQuotationsPage />} />
               <Route path="/comercial/funil" element={<SalesFunnelPage />} />
               <Route path="/comercial/representantes" element={<SalesRepsPage />} />
+              <Route path="/comercial/comissoes" element={<CommissionsPage />} />
+              <Route path="/comercial/metas" element={<SalesTargetsPage />} />
+              <Route path="/comercial/forecast" element={<ForecastPage />} />
               
               {/* Financial Module */}
               <Route path="/financeiro/pagar" element={<AccountsPayable />} />
