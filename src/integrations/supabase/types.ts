@@ -2533,6 +2533,98 @@ export type Database = {
           },
         ]
       }
+      plan_features: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          feature_key: string
+          feature_label: string
+          id: string
+          limit_value: number | null
+          plan_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          feature_key: string
+          feature_label: string
+          id?: string
+          limit_value?: number | null
+          plan_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          feature_key?: string
+          feature_label?: string
+          id?: string
+          limit_value?: number | null
+          plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_features_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          allowed_modules: string[]
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          max_orders_month: number
+          max_users: number
+          name: string
+          price_annual: number
+          price_monthly: number
+          slug: string
+          sort_order: number
+          storage_mb: number
+          trial_days: number
+          updated_at: string
+        }
+        Insert: {
+          allowed_modules?: string[]
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_orders_month?: number
+          max_users?: number
+          name: string
+          price_annual?: number
+          price_monthly?: number
+          slug: string
+          sort_order?: number
+          storage_mb?: number
+          trial_days?: number
+          updated_at?: string
+        }
+        Update: {
+          allowed_modules?: string[]
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          max_orders_month?: number
+          max_users?: number
+          name?: string
+          price_annual?: number
+          price_monthly?: number
+          slug?: string
+          sort_order?: number
+          storage_mb?: number
+          trial_days?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       production_orders: {
         Row: {
           bom_id: string | null
@@ -3324,6 +3416,63 @@ export type Database = {
         }
         Relationships: []
       }
+      saas_invoices: {
+        Row: {
+          amount: number
+          company_id: string
+          created_at: string
+          description: string | null
+          due_date: string
+          external_payment_id: string | null
+          id: string
+          paid_at: string | null
+          payment_method: string | null
+          status: string
+          subscription_id: string | null
+        }
+        Insert: {
+          amount?: number
+          company_id: string
+          created_at?: string
+          description?: string | null
+          due_date: string
+          external_payment_id?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          subscription_id?: string | null
+        }
+        Update: {
+          amount?: number
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          due_date?: string
+          external_payment_id?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          subscription_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saas_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saas_invoices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sale_items: {
         Row: {
           discount: number
@@ -3984,6 +4133,69 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          billing_cycle: string
+          cancelled_at: string | null
+          company_id: string
+          created_at: string
+          current_period_end: string
+          current_period_start: string
+          external_gateway: string | null
+          external_subscription_id: string | null
+          id: string
+          plan_id: string
+          status: string
+          trial_end: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_cycle?: string
+          cancelled_at?: string | null
+          company_id: string
+          created_at?: string
+          current_period_end?: string
+          current_period_start?: string
+          external_gateway?: string | null
+          external_subscription_id?: string | null
+          id?: string
+          plan_id: string
+          status?: string
+          trial_end?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_cycle?: string
+          cancelled_at?: string | null
+          company_id?: string
+          created_at?: string
+          current_period_end?: string
+          current_period_start?: string
+          external_gateway?: string | null
+          external_subscription_id?: string | null
+          id?: string
+          plan_id?: string
+          status?: string
+          trial_end?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           address_city: string
@@ -4171,6 +4383,44 @@ export type Database = {
             columns: ["production_order_id"]
             isOneToOne: false
             referencedRelation: "production_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usage_tracking: {
+        Row: {
+          company_id: string
+          current_value: number
+          id: string
+          limit_value: number | null
+          metric: string
+          period: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          current_value?: number
+          id?: string
+          limit_value?: number | null
+          metric: string
+          period: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          current_value?: number
+          id?: string
+          limit_value?: number | null
+          metric?: string
+          period?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_tracking_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
