@@ -22,7 +22,7 @@ import { useOrders } from '@/hooks/useOrders';
 import { useSales } from '@/hooks/useSales';
 import { useSalesFunnel } from '@/hooks/useSalesFunnel';
 import { useSalesReps } from '@/hooks/useSalesReps';
-import { useFollowUps, useCreateFollowUp, useUpdateFollowUp, useClientInsights, type ClientInsight } from '@/hooks/useSalesIntelligence';
+import { useFollowUps, useCreateFollowUp, useUpdateFollowUp, useClientInsights, useRepPerformance, useLostSalesAlerts, useSalesScript, type ClientInsight } from '@/hooks/useSalesIntelligence';
 import { useCommercialAlerts } from '@/hooks/useCommercialAlerts';
 import { differenceInDays, format, isToday, startOfMonth, endOfMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -57,7 +57,14 @@ export default function SellerDashboard() {
   const updateFollowUp = useUpdateFollowUp();
 
   const insights = useClientInsights(clients, orders, sales);
+  const performances = useRepPerformance(reps, orders, funnel);
+  const lostAlerts = useLostSalesAlerts(funnel, orders, followUps);
   const loading = lc || lo;
+
+  const [scriptClient, setScriptClient] = useState<ClientInsight | null>(null);
+  const [scriptOpen, setScriptOpen] = useState(false);
+  const scriptClientData = clients.find(c => c.id === scriptClient?.clientId) || null;
+  const salesScript = useSalesScript(scriptClientData, scriptClient);
 
   const [followUpOpen, setFollowUpOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<ClientInsight | null>(null);
@@ -177,10 +184,12 @@ export default function SellerDashboard() {
       </Card>
 
       <Tabs defaultValue="opportunities" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="opportunities">🎯 Oportunidades</TabsTrigger>
           <TabsTrigger value="followups">📞 Follow-ups</TabsTrigger>
           <TabsTrigger value="at-risk">⚠️ Em Risco</TabsTrigger>
+          <TabsTrigger value="lost">🚨 Perdendo ({lostAlerts.length})</TabsTrigger>
+          <TabsTrigger value="ranking">🏆 Ranking</TabsTrigger>
           <TabsTrigger value="pipeline">💰 Pipeline</TabsTrigger>
         </TabsList>
 
