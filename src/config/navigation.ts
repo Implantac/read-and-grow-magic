@@ -102,9 +102,13 @@ export const navigationSections: NavSection[] = [
         href: '/financeiro',
         icon: 'Wallet',
         children: [
+          { title: 'Dashboard', href: '/financeiro/dashboard', icon: 'BarChart3' },
           { title: 'Contas a Pagar', href: '/financeiro/pagar', icon: 'ArrowUpCircle' },
           { title: 'Contas a Receber', href: '/financeiro/receber', icon: 'ArrowDownCircle' },
           { title: 'Fluxo de Caixa', href: '/financeiro/fluxo', icon: 'TrendingUp' },
+          { title: 'Tesouraria', href: '/financeiro/tesouraria', icon: 'Building2' },
+          { title: 'Centros de Custo', href: '/financeiro/centros-custo', icon: 'FolderTree' },
+          { title: 'Renegociações', href: '/financeiro/renegociacoes', icon: 'RefreshCw' },
           { title: 'Conciliação', href: '/financeiro/conciliacao', icon: 'CheckCircle' },
         ],
       },

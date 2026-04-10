@@ -39,6 +39,10 @@ const AccountsPayable = lazy(() => import("./pages/financeiro/AccountsPayable"))
 const AccountsReceivable = lazy(() => import("./pages/financeiro/AccountsReceivable"));
 const CashFlow = lazy(() => import("./pages/financeiro/CashFlow"));
 const BankReconciliation = lazy(() => import("./pages/financeiro/BankReconciliation"));
+const FinancialDashboardPage = lazy(() => import("./pages/financeiro/FinancialDashboard"));
+const BankAccountsPage = lazy(() => import("./pages/financeiro/BankAccounts"));
+const CostCentersPage = lazy(() => import("./pages/financeiro/CostCenters"));
+const RenegotiationsPage = lazy(() => import("./pages/financeiro/Renegotiations"));
 
 // Accounting
 const ChartOfAccountsPage = lazy(() => import("./pages/contabilidade/ChartOfAccounts"));
