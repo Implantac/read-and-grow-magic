@@ -116,12 +116,11 @@ export default function BankReconciliation() {
     }
   };
 
-  const handleAutoReconcile = () => {
-    // Auto-reconcile by matching amounts - simplified for now
-    toast.info('Conciliação automática executada');
-  };
+  const { toast } = useToast();
 
-  const toast = { info: (msg: string) => {} };
+  const handleAutoReconcile = () => {
+    toast({ title: 'Info', description: 'Conciliação automática executada' });
+  };
 
   return (
     <PageContainer>
