@@ -48,6 +48,7 @@ export const navigationSections: NavSection[] = [
         icon: 'Users',
         children: [
           { title: 'Dashboard', href: '/comercial/dashboard', icon: 'BarChart3' },
+          { title: 'Painel Vendedor', href: '/comercial/vendedor', icon: 'Zap' },
           { title: 'Funil Comercial', href: '/comercial/funil', icon: 'Filter' },
           { title: 'Clientes', href: '/comercial/clientes', icon: 'UserCircle' },
           { title: 'Representantes', href: '/comercial/representantes', icon: 'UserCheck' },
@@ -57,6 +58,7 @@ export const navigationSections: NavSection[] = [
           { title: 'Comissões', href: '/comercial/comissoes', icon: 'DollarSign' },
           { title: 'Metas', href: '/comercial/metas', icon: 'Target' },
           { title: 'Forecast', href: '/comercial/forecast', icon: 'TrendingUp' },
+          { title: 'Campanhas', href: '/comercial/campanhas', icon: 'Megaphone' },
         ],
       },
       {

@@ -1637,6 +1637,89 @@ export type Database = {
         }
         Relationships: []
       }
+      follow_ups: {
+        Row: {
+          client_id: string
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          funnel_id: string | null
+          id: string
+          next_action: string | null
+          order_id: string | null
+          result: string | null
+          sales_rep_id: string | null
+          scheduled_date: string
+          status: string
+          subject: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          funnel_id?: string | null
+          id?: string
+          next_action?: string | null
+          order_id?: string | null
+          result?: string | null
+          sales_rep_id?: string | null
+          scheduled_date: string
+          status?: string
+          subject: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          funnel_id?: string | null
+          id?: string
+          next_action?: string | null
+          order_id?: string | null
+          result?: string | null
+          sales_rep_id?: string | null
+          scheduled_date?: string
+          status?: string
+          subject?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follow_ups_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_ups_funnel_id_fkey"
+            columns: ["funnel_id"]
+            isOneToOne: false
+            referencedRelation: "sales_funnel"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_ups_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_ups_sales_rep_id_fkey"
+            columns: ["sales_rep_id"]
+            isOneToOne: false
+            referencedRelation: "sales_reps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       journal_entries: {
         Row: {
           created_at: string
@@ -3583,6 +3666,60 @@ export type Database = {
           },
         ]
       }
+      sales_campaigns: {
+        Row: {
+          campaign_type: string
+          created_at: string
+          current_value: number
+          description: string | null
+          end_date: string
+          goal_type: string
+          goal_value: number
+          id: string
+          incentive_description: string | null
+          name: string
+          start_date: string
+          status: string
+          target_products: Json | null
+          target_segments: Json | null
+          updated_at: string
+        }
+        Insert: {
+          campaign_type?: string
+          created_at?: string
+          current_value?: number
+          description?: string | null
+          end_date: string
+          goal_type?: string
+          goal_value?: number
+          id?: string
+          incentive_description?: string | null
+          name: string
+          start_date: string
+          status?: string
+          target_products?: Json | null
+          target_segments?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          campaign_type?: string
+          created_at?: string
+          current_value?: number
+          description?: string | null
+          end_date?: string
+          goal_type?: string
+          goal_value?: number
+          id?: string
+          incentive_description?: string | null
+          name?: string
+          start_date?: string
+          status?: string
+          target_products?: Json | null
+          target_segments?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sales_forecasts: {
         Row: {
           confirmed_value: number
@@ -3734,6 +3871,75 @@ export type Database = {
           },
         ]
       }
+      sales_opportunities: {
+        Row: {
+          client_id: string
+          contacted_at: string | null
+          created_at: string
+          description: string | null
+          estimated_value: number
+          id: string
+          opportunity_type: string
+          priority: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          sales_rep_id: string | null
+          status: string
+          suggested_products: Json | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          contacted_at?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_value?: number
+          id?: string
+          opportunity_type?: string
+          priority?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          sales_rep_id?: string | null
+          status?: string
+          suggested_products?: Json | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          contacted_at?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_value?: number
+          id?: string
+          opportunity_type?: string
+          priority?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          sales_rep_id?: string | null
+          status?: string
+          suggested_products?: Json | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_opportunities_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_opportunities_sales_rep_id_fkey"
+            columns: ["sales_rep_id"]
+            isOneToOne: false
+            referencedRelation: "sales_reps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sales_reps: {
         Row: {
           code: string
@@ -3841,6 +4047,53 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      seller_daily_targets: {
+        Row: {
+          achieved_value: number
+          contacts_made: number
+          created_at: string
+          daily_target: number
+          id: string
+          opportunities_converted: number
+          orders_count: number
+          sales_rep_id: string
+          target_date: string
+          updated_at: string
+        }
+        Insert: {
+          achieved_value?: number
+          contacts_made?: number
+          created_at?: string
+          daily_target?: number
+          id?: string
+          opportunities_converted?: number
+          orders_count?: number
+          sales_rep_id: string
+          target_date?: string
+          updated_at?: string
+        }
+        Update: {
+          achieved_value?: number
+          contacts_made?: number
+          created_at?: string
+          daily_target?: number
+          id?: string
+          opportunities_converted?: number
+          orders_count?: number
+          sales_rep_id?: string
+          target_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seller_daily_targets_sales_rep_id_fkey"
+            columns: ["sales_rep_id"]
+            isOneToOne: false
+            referencedRelation: "sales_reps"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       shipment_items: {
         Row: {
