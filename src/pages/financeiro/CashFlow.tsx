@@ -96,6 +96,28 @@ export default function CashFlow() {
     return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
   }, [filteredEntries]);
 
+  // Daily 30-day projection
+  const dailyProjection = useMemo(() => {
+    const days = eachDayOfInterval({ start: now, end: addDays(now, 30) });
+    let runningBalance = currentBalance;
+    return days.map(day => {
+      const dayStr = format(day, 'yyyy-MM-dd');
+      const dayIncome = receivables
+        .filter(r => r.status !== 'paid' && r.status !== 'cancelled' && r.due_date === dayStr)
+        .reduce((s, r) => s + Number(r.open_amount ?? r.amount), 0);
+      const dayExpense = payables
+        .filter(p => p.status !== 'paid' && p.status !== 'cancelled' && p.due_date === dayStr)
+        .reduce((s, p) => s + Number(p.open_amount ?? p.amount), 0);
+      runningBalance = runningBalance + dayIncome - dayExpense;
+      return {
+        day: format(day, 'dd/MM', { locale: ptBR }),
+        receitas: dayIncome,
+        despesas: dayExpense,
+        saldo: runningBalance,
+      };
+    });
+  }, [currentBalance, receivables, payables]);
+
   const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
   if (loadingCF || loadingR || loadingP) return <PageLoading message="Carregando fluxo de caixa..." />;
