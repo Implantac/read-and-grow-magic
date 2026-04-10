@@ -34,8 +34,8 @@ export function useCreateBankAccount() {
   const qc = useQueryClient();
   const { toast } = useToast();
   return useMutation({
-    mutationFn: async (account: Partial<BankAccountRow>) => {
-      const { data, error } = await supabase.from('bank_accounts').insert(account).select().single();
+    mutationFn: async (account: { name: string; bank_name: string; bank_code?: string; agency?: string; account_number?: string; account_type?: string }) => {
+      const { data, error } = await supabase.from('bank_accounts').insert([account]).select().single();
       if (error) throw error;
       return data;
     },
