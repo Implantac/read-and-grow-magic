@@ -95,6 +95,17 @@ export const navigationSections: NavSection[] = [
         ],
       },
       {
+        title: 'Crédito & Risco',
+        href: '/credito',
+        icon: 'ShieldCheck',
+        children: [
+          { title: 'Dashboard Risco', href: '/credito/dashboard', icon: 'BarChart3' },
+          { title: 'Análise de Crédito', href: '/credito/analise', icon: 'Shield' },
+          { title: 'Bloqueios', href: '/credito/bloqueios', icon: 'Lock' },
+          { title: 'Cobrança', href: '/credito/cobranca', icon: 'Phone' },
+        ],
+      },
+      {
         title: 'Contabilidade',
         href: '/contabilidade',
         icon: 'Calculator',

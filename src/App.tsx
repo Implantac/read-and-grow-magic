@@ -28,6 +28,12 @@ const CommissionsPage = lazy(() => import("./pages/comercial/Commissions"));
 const SalesTargetsPage = lazy(() => import("./pages/comercial/SalesTargets"));
 const ForecastPage = lazy(() => import("./pages/comercial/Forecast"));
 
+// Credit & Risk
+const CreditAnalysisPage = lazy(() => import("./pages/credito/CreditAnalysis"));
+const OrderBlocksPage = lazy(() => import("./pages/credito/OrderBlocks"));
+const CollectionsPage = lazy(() => import("./pages/credito/Collections"));
+const RiskDashboardPage = lazy(() => import("./pages/credito/RiskDashboard"));
+
 // Financial
 const AccountsPayable = lazy(() => import("./pages/financeiro/AccountsPayable"));
 const AccountsReceivable = lazy(() => import("./pages/financeiro/AccountsReceivable"));
@@ -146,6 +152,12 @@ const App = () => (
               <Route path="/financeiro/receber" element={<AccountsReceivable />} />
               <Route path="/financeiro/fluxo" element={<CashFlow />} />
               <Route path="/financeiro/conciliacao" element={<BankReconciliation />} />
+              
+              {/* Credit & Risk Module */}
+              <Route path="/credito/dashboard" element={<RiskDashboardPage />} />
+              <Route path="/credito/analise" element={<CreditAnalysisPage />} />
+              <Route path="/credito/bloqueios" element={<OrderBlocksPage />} />
+              <Route path="/credito/cobranca" element={<CollectionsPage />} />
               
               {/* Accounting Module */}
               <Route path="/contabilidade/painel" element={<AccountingDashboardPage />} />
