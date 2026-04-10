@@ -167,9 +167,13 @@ const App = () => (
               <Route path="/comercial/forecast" element={<ForecastPage />} />
               
               {/* Financial Module */}
+              <Route path="/financeiro/dashboard" element={<FinancialDashboardPage />} />
               <Route path="/financeiro/pagar" element={<AccountsPayable />} />
               <Route path="/financeiro/receber" element={<AccountsReceivable />} />
               <Route path="/financeiro/fluxo" element={<CashFlow />} />
+              <Route path="/financeiro/tesouraria" element={<BankAccountsPage />} />
+              <Route path="/financeiro/centros-custo" element={<CostCentersPage />} />
+              <Route path="/financeiro/renegociacoes" element={<RenegotiationsPage />} />
               <Route path="/financeiro/conciliacao" element={<BankReconciliation />} />
               
               {/* Credit & Risk Module */}
