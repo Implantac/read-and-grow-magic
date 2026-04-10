@@ -9,13 +9,23 @@ export interface AccountReceivableRow {
   client_id: string | null;
   category: string;
   amount: number;
+  original_amount: number | null;
+  open_amount: number | null;
+  paid_amount: number | null;
+  interest: number | null;
+  penalty: number | null;
+  discount_amount: number | null;
   due_date: string;
+  issue_date: string | null;
   payment_date: string | null;
   status: string;
   payment_method: string | null;
   notes: string | null;
   invoice_number: string | null;
+  nfe_id: string | null;
   order_id: string | null;
+  installment_number: number | null;
+  total_installments: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -39,7 +49,7 @@ export function useCreateAccountReceivable() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (account: { description: string; client_name: string; due_date: string; amount: number; category?: string; client_id?: string | null; invoice_number?: string | null; notes?: string | null }) => {
+    mutationFn: async (account: Partial<AccountReceivableRow> & { description: string; client_name: string; due_date: string; amount: number }) => {
       const { data, error } = await supabase
         .from('accounts_receivable')
         .insert(account)
