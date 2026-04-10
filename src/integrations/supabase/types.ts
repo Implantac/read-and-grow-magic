@@ -467,6 +467,75 @@ export type Database = {
         }
         Relationships: []
       }
+      collection_actions: {
+        Row: {
+          action_type: string
+          client_id: string
+          contact_method: string | null
+          created_at: string
+          description: string
+          id: string
+          next_action_date: string | null
+          next_action_description: string | null
+          promise_amount: number | null
+          promise_date: string | null
+          promise_status: string | null
+          receivable_id: string | null
+          responsible: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          action_type?: string
+          client_id: string
+          contact_method?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          next_action_date?: string | null
+          next_action_description?: string | null
+          promise_amount?: number | null
+          promise_date?: string | null
+          promise_status?: string | null
+          receivable_id?: string | null
+          responsible?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          client_id?: string
+          contact_method?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          next_action_date?: string | null
+          next_action_description?: string | null
+          promise_amount?: number | null
+          promise_date?: string | null
+          promise_status?: string | null
+          receivable_id?: string | null
+          responsible?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_actions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_actions_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_receivable"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       commercial_alerts: {
         Row: {
           alert_type: string
@@ -902,6 +971,173 @@ export type Database = {
             columns: ["parent_company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credit_audit_logs: {
+        Row: {
+          action: string
+          entity_id: string
+          entity_type: string
+          id: string
+          ip_address: string | null
+          justification: string | null
+          new_value: Json | null
+          old_value: Json | null
+          performed_at: string
+          performed_by: string | null
+        }
+        Insert: {
+          action: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          justification?: string | null
+          new_value?: Json | null
+          old_value?: Json | null
+          performed_at?: string
+          performed_by?: string | null
+        }
+        Update: {
+          action?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          justification?: string | null
+          new_value?: Json | null
+          old_value?: Json | null
+          performed_at?: string
+          performed_by?: string | null
+        }
+        Relationships: []
+      }
+      credit_policies: {
+        Row: {
+          active: boolean
+          allow_new_client_credit: boolean | null
+          auto_block_overdue_amount: number | null
+          auto_block_overdue_days: number | null
+          created_at: string
+          description: string | null
+          id: string
+          max_discount_pct: number | null
+          max_payment_days: number | null
+          max_score: number | null
+          min_score: number | null
+          name: string
+          requires_approval_above: number | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          allow_new_client_credit?: boolean | null
+          auto_block_overdue_amount?: number | null
+          auto_block_overdue_days?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          max_discount_pct?: number | null
+          max_payment_days?: number | null
+          max_score?: number | null
+          min_score?: number | null
+          name: string
+          requires_approval_above?: number | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          allow_new_client_credit?: boolean | null
+          auto_block_overdue_amount?: number | null
+          auto_block_overdue_days?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          max_discount_pct?: number | null
+          max_payment_days?: number | null
+          max_score?: number | null
+          min_score?: number | null
+          name?: string
+          requires_approval_above?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      customer_credit_profiles: {
+        Row: {
+          analysis_notes: string | null
+          analysis_valid_until: string | null
+          analyst_id: string | null
+          analyst_name: string | null
+          available_limit: number | null
+          avg_delay_days: number | null
+          client_id: string
+          created_at: string
+          credit_limit: number
+          credit_status: string
+          id: string
+          last_analysis_date: string | null
+          overdue_amount: number | null
+          overdue_count: number | null
+          risk_classification: string
+          score_grade: string | null
+          score_numeric: number
+          total_open_amount: number | null
+          updated_at: string
+          used_limit: number
+        }
+        Insert: {
+          analysis_notes?: string | null
+          analysis_valid_until?: string | null
+          analyst_id?: string | null
+          analyst_name?: string | null
+          available_limit?: number | null
+          avg_delay_days?: number | null
+          client_id: string
+          created_at?: string
+          credit_limit?: number
+          credit_status?: string
+          id?: string
+          last_analysis_date?: string | null
+          overdue_amount?: number | null
+          overdue_count?: number | null
+          risk_classification?: string
+          score_grade?: string | null
+          score_numeric?: number
+          total_open_amount?: number | null
+          updated_at?: string
+          used_limit?: number
+        }
+        Update: {
+          analysis_notes?: string | null
+          analysis_valid_until?: string | null
+          analyst_id?: string | null
+          analyst_name?: string | null
+          available_limit?: number | null
+          avg_delay_days?: number | null
+          client_id?: string
+          created_at?: string
+          credit_limit?: number
+          credit_status?: string
+          id?: string
+          last_analysis_date?: string | null
+          overdue_amount?: number | null
+          overdue_count?: number | null
+          risk_classification?: string
+          score_grade?: string | null
+          score_numeric?: number
+          total_open_amount?: number | null
+          updated_at?: string
+          used_limit?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_credit_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
         ]
@@ -1455,6 +1691,125 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      order_approvals: {
+        Row: {
+          approval_type: string
+          approved_at: string | null
+          approved_by: string | null
+          block_id: string | null
+          created_at: string
+          id: string
+          justification: string | null
+          notes: string | null
+          order_id: string
+          requested_at: string
+          requested_by: string | null
+          status: string
+        }
+        Insert: {
+          approval_type?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          block_id?: string | null
+          created_at?: string
+          id?: string
+          justification?: string | null
+          notes?: string | null
+          order_id: string
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+        }
+        Update: {
+          approval_type?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          block_id?: string | null
+          created_at?: string
+          id?: string
+          justification?: string | null
+          notes?: string | null
+          order_id?: string
+          requested_at?: string
+          requested_by?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_approvals_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "order_blocks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_approvals_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_blocks: {
+        Row: {
+          approval_level: string | null
+          block_reason: string
+          block_type: string
+          blocked_at: string
+          blocked_by: string | null
+          created_at: string
+          description: string | null
+          id: string
+          order_id: string
+          release_justification: string | null
+          released_at: string | null
+          released_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          approval_level?: string | null
+          block_reason: string
+          block_type?: string
+          blocked_at?: string
+          blocked_by?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id: string
+          release_justification?: string | null
+          released_at?: string | null
+          released_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          approval_level?: string | null
+          block_reason?: string
+          block_type?: string
+          blocked_at?: string
+          blocked_by?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string
+          release_justification?: string | null
+          released_at?: string | null
+          released_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_blocks_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_items: {
         Row: {
