@@ -268,6 +268,186 @@ export type Database = {
           },
         ]
       }
+      ai_executive_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_type: string
+          created_at: string
+          description: string | null
+          id: string
+          metric_name: string | null
+          metric_value: number | null
+          module: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          threshold_value: number | null
+          title: string
+          trend: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metric_name?: string | null
+          metric_value?: number | null
+          module?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          threshold_value?: number | null
+          title: string
+          trend?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metric_name?: string | null
+          metric_value?: number | null
+          module?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          threshold_value?: number | null
+          title?: string
+          trend?: string | null
+        }
+        Relationships: []
+      }
+      ai_executive_chat: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          role: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          role?: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          role?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      ai_executive_insights: {
+        Row: {
+          category: string
+          created_at: string
+          data_points: Json | null
+          description: string | null
+          dismissed_at: string | null
+          dismissed_by: string | null
+          expires_at: string | null
+          explanation: string | null
+          id: string
+          impact_estimate: string | null
+          insight_type: string
+          module: string | null
+          recommended_actions: Json | null
+          severity: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          data_points?: Json | null
+          description?: string | null
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          expires_at?: string | null
+          explanation?: string | null
+          id?: string
+          impact_estimate?: string | null
+          insight_type?: string
+          module?: string | null
+          recommended_actions?: Json | null
+          severity?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          data_points?: Json | null
+          description?: string | null
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          expires_at?: string | null
+          explanation?: string | null
+          id?: string
+          impact_estimate?: string | null
+          insight_type?: string
+          module?: string | null
+          recommended_actions?: Json | null
+          severity?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ai_executive_scenarios: {
+        Row: {
+          assumptions: Json | null
+          created_at: string
+          generated_at: string
+          id: string
+          optimistic: Json | null
+          period: string
+          pessimistic: Json | null
+          realistic: Json | null
+          recommendations: Json | null
+          scenario_type: string
+        }
+        Insert: {
+          assumptions?: Json | null
+          created_at?: string
+          generated_at?: string
+          id?: string
+          optimistic?: Json | null
+          period?: string
+          pessimistic?: Json | null
+          realistic?: Json | null
+          recommendations?: Json | null
+          scenario_type?: string
+        }
+        Update: {
+          assumptions?: Json | null
+          created_at?: string
+          generated_at?: string
+          id?: string
+          optimistic?: Json | null
+          period?: string
+          pessimistic?: Json | null
+          realistic?: Json | null
+          recommendations?: Json | null
+          scenario_type?: string
+        }
+        Relationships: []
+      }
       ai_forecast_snapshots: {
         Row: {
           best_case: number | null

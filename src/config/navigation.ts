@@ -24,6 +24,11 @@ export const navigationSections: NavSection[] = [
         href: '/dashboard',
         icon: 'LayoutDashboard',
       },
+      {
+        title: '🧠 IA Executiva',
+        href: '/diretoria/executive',
+        icon: 'Brain',
+      },
     ],
   },
   {
