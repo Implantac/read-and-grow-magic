@@ -20,7 +20,7 @@ const formatCurrency = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
 export default function SuperAdmin() {
-  const { data: companies = [], isLoading: loadingC } = useCompanies();
+  const { companies, loading: loadingC } = useCompanies();
   const { data: plans = [], isLoading: loadingP } = usePlans();
   const [search, setSearch] = useState('');
 
