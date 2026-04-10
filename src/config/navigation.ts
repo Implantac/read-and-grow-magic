@@ -53,6 +53,7 @@ export const navigationSections: NavSection[] = [
         icon: 'Users',
         children: [
           { title: 'Dashboard', href: '/comercial/dashboard', icon: 'BarChart3' },
+          { title: '⚡ O Que Fazer Hoje', href: '/comercial/execucao', icon: 'Zap' },
           { title: 'Painel Vendedor', href: '/comercial/vendedor', icon: 'Zap' },
           { title: 'Funil Comercial', href: '/comercial/funil', icon: 'Filter' },
           { title: 'Clientes', href: '/comercial/clientes', icon: 'UserCircle' },

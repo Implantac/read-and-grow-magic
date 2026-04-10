@@ -180,6 +180,7 @@ const App = () => (
               <Route path="/comercial/campanhas" element={<CampaignsPage />} />
               <Route path="/comercial/performance" element={<PerformanceDashboardPage />} />
               <Route path="/comercial/ia" element={<AICommercialDashboardPage />} />
+              <Route path="/comercial/execucao" element={<SalesExecutionPage />} />
               
               {/* Financial Module */}
               <Route path="/financeiro/dashboard" element={<FinancialDashboardPage />} />
