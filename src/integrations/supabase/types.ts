@@ -167,6 +167,78 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_queue: {
+        Row: {
+          amount: number
+          billed_amount: number
+          billed_at: string | null
+          billed_by: string | null
+          billing_type: string
+          created_at: string
+          id: string
+          invoice_number: string | null
+          nfe_id: string | null
+          notes: string | null
+          order_id: string
+          pending_amount: number
+          status: string
+          updated_at: string
+          validated_at: string | null
+          validation_errors: string[] | null
+        }
+        Insert: {
+          amount?: number
+          billed_amount?: number
+          billed_at?: string | null
+          billed_by?: string | null
+          billing_type?: string
+          created_at?: string
+          id?: string
+          invoice_number?: string | null
+          nfe_id?: string | null
+          notes?: string | null
+          order_id: string
+          pending_amount?: number
+          status?: string
+          updated_at?: string
+          validated_at?: string | null
+          validation_errors?: string[] | null
+        }
+        Update: {
+          amount?: number
+          billed_amount?: number
+          billed_at?: string | null
+          billed_by?: string | null
+          billing_type?: string
+          created_at?: string
+          id?: string
+          invoice_number?: string | null
+          nfe_id?: string | null
+          notes?: string | null
+          order_id?: string
+          pending_amount?: number
+          status?: string
+          updated_at?: string
+          validated_at?: string | null
+          validation_errors?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_queue_nfe_id_fkey"
+            columns: ["nfe_id"]
+            isOneToOne: false
+            referencedRelation: "nfe"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_queue_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cash_flow_entries: {
         Row: {
           account: string
@@ -971,6 +1043,128 @@ export type Database = {
             columns: ["parent_company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conference_record_items: {
+        Row: {
+          checked_qty: number
+          conference_id: string
+          divergence: number
+          expected_qty: number
+          id: string
+          notes: string | null
+          order_item_id: string | null
+          product_code: string
+          product_name: string
+          status: string
+        }
+        Insert: {
+          checked_qty?: number
+          conference_id: string
+          divergence?: number
+          expected_qty?: number
+          id?: string
+          notes?: string | null
+          order_item_id?: string | null
+          product_code: string
+          product_name: string
+          status?: string
+        }
+        Update: {
+          checked_qty?: number
+          conference_id?: string
+          divergence?: number
+          expected_qty?: number
+          id?: string
+          notes?: string | null
+          order_item_id?: string | null
+          product_code?: string
+          product_name?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conference_record_items_conference_id_fkey"
+            columns: ["conference_id"]
+            isOneToOne: false
+            referencedRelation: "conference_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conference_record_items_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conference_records: {
+        Row: {
+          approved: boolean | null
+          approved_at: string | null
+          approved_by: string | null
+          checked_items: number
+          completed_at: string | null
+          conferee: string | null
+          conferee_user_id: string | null
+          conference_number: string
+          created_at: string
+          divergent_items: number
+          id: string
+          notes: string | null
+          order_id: string
+          started_at: string | null
+          status: string
+          total_items: number
+          updated_at: string
+        }
+        Insert: {
+          approved?: boolean | null
+          approved_at?: string | null
+          approved_by?: string | null
+          checked_items?: number
+          completed_at?: string | null
+          conferee?: string | null
+          conferee_user_id?: string | null
+          conference_number: string
+          created_at?: string
+          divergent_items?: number
+          id?: string
+          notes?: string | null
+          order_id: string
+          started_at?: string | null
+          status?: string
+          total_items?: number
+          updated_at?: string
+        }
+        Update: {
+          approved?: boolean | null
+          approved_at?: string | null
+          approved_by?: string | null
+          checked_items?: number
+          completed_at?: string | null
+          conferee?: string | null
+          conferee_user_id?: string | null
+          conference_number?: string
+          created_at?: string
+          divergent_items?: number
+          id?: string
+          notes?: string | null
+          order_id?: string
+          started_at?: string | null
+          status?: string
+          total_items?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conference_records_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
@@ -1862,21 +2056,68 @@ export type Database = {
           },
         ]
       }
+      order_status_history: {
+        Row: {
+          block_reason: string | null
+          changed_by: string | null
+          changed_by_user_id: string | null
+          created_at: string
+          from_status: string | null
+          id: string
+          observation: string | null
+          order_id: string
+          to_status: string
+        }
+        Insert: {
+          block_reason?: string | null
+          changed_by?: string | null
+          changed_by_user_id?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          observation?: string | null
+          order_id: string
+          to_status: string
+        }
+        Update: {
+          block_reason?: string | null
+          changed_by?: string | null
+          changed_by_user_id?: string | null
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          observation?: string | null
+          order_id?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_status_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           approved_at: string | null
           approved_by: string | null
+          billing_status: string | null
           client_id: string | null
           client_name: string
           commercial_approval: string | null
           commission_rate: number | null
           commission_value: number | null
+          conference_status: string | null
           created_at: string
           date: string
           delivery_date: string | null
           discount: number
           expected_billing_date: string | null
           financial_approval: string | null
+          fulfillment_status: string | null
           id: string
           internal_notes: string | null
           max_discount_pct: number | null
@@ -1885,8 +2126,11 @@ export type Database = {
           payment_condition: string
           payment_method: string
           priority: string
+          production_status: string | null
           sales_rep_id: string | null
           sales_rep_name: string | null
+          separation_status: string | null
+          shipment_status: string | null
           shipping: number
           status: string
           subtotal: number
@@ -1896,17 +2140,20 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           approved_by?: string | null
+          billing_status?: string | null
           client_id?: string | null
           client_name: string
           commercial_approval?: string | null
           commission_rate?: number | null
           commission_value?: number | null
+          conference_status?: string | null
           created_at?: string
           date?: string
           delivery_date?: string | null
           discount?: number
           expected_billing_date?: string | null
           financial_approval?: string | null
+          fulfillment_status?: string | null
           id?: string
           internal_notes?: string | null
           max_discount_pct?: number | null
@@ -1915,8 +2162,11 @@ export type Database = {
           payment_condition?: string
           payment_method?: string
           priority?: string
+          production_status?: string | null
           sales_rep_id?: string | null
           sales_rep_name?: string | null
+          separation_status?: string | null
+          shipment_status?: string | null
           shipping?: number
           status?: string
           subtotal?: number
@@ -1926,17 +2176,20 @@ export type Database = {
         Update: {
           approved_at?: string | null
           approved_by?: string | null
+          billing_status?: string | null
           client_id?: string | null
           client_name?: string
           commercial_approval?: string | null
           commission_rate?: number | null
           commission_value?: number | null
+          conference_status?: string | null
           created_at?: string
           date?: string
           delivery_date?: string | null
           discount?: number
           expected_billing_date?: string | null
           financial_approval?: string | null
+          fulfillment_status?: string | null
           id?: string
           internal_notes?: string | null
           max_discount_pct?: number | null
@@ -1945,8 +2198,11 @@ export type Database = {
           payment_condition?: string
           payment_method?: string
           priority?: string
+          production_status?: string | null
           sales_rep_id?: string | null
           sales_rep_name?: string | null
+          separation_status?: string | null
+          shipment_status?: string | null
           shipping?: number
           status?: string
           subtotal?: number
@@ -1969,9 +2225,11 @@ export type Database = {
           completed_date: string | null
           created_at: string
           due_date: string | null
+          estimated_time_minutes: number | null
           id: string
           notes: string | null
           operator: string | null
+          order_item_id: string | null
           order_number: string
           priority: string
           produced_quantity: number
@@ -1979,7 +2237,10 @@ export type Database = {
           product_id: string | null
           product_name: string
           quantity: number
+          realized_time_minutes: number | null
           route_id: string | null
+          sales_order_id: string | null
+          sector: string | null
           start_date: string | null
           status: string
           unit: string
@@ -1991,9 +2252,11 @@ export type Database = {
           completed_date?: string | null
           created_at?: string
           due_date?: string | null
+          estimated_time_minutes?: number | null
           id?: string
           notes?: string | null
           operator?: string | null
+          order_item_id?: string | null
           order_number: string
           priority?: string
           produced_quantity?: number
@@ -2001,7 +2264,10 @@ export type Database = {
           product_id?: string | null
           product_name: string
           quantity?: number
+          realized_time_minutes?: number | null
           route_id?: string | null
+          sales_order_id?: string | null
+          sector?: string | null
           start_date?: string | null
           status?: string
           unit?: string
@@ -2013,9 +2279,11 @@ export type Database = {
           completed_date?: string | null
           created_at?: string
           due_date?: string | null
+          estimated_time_minutes?: number | null
           id?: string
           notes?: string | null
           operator?: string | null
+          order_item_id?: string | null
           order_number?: string
           priority?: string
           produced_quantity?: number
@@ -2023,7 +2291,10 @@ export type Database = {
           product_id?: string | null
           product_name?: string
           quantity?: number
+          realized_time_minutes?: number | null
           route_id?: string | null
+          sales_order_id?: string | null
+          sector?: string | null
           start_date?: string | null
           status?: string
           unit?: string
@@ -2032,10 +2303,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "production_orders_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "production_orders_product_id_fkey"
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_orders_sales_order_id_fkey"
+            columns: ["sales_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
@@ -3002,6 +3287,137 @@ export type Database = {
         }
         Relationships: []
       }
+      shipment_items: {
+        Row: {
+          id: string
+          notes: string | null
+          order_item_id: string | null
+          product_code: string
+          product_name: string
+          quantity: number
+          shipment_id: string
+          volume_number: number | null
+          weight: number
+        }
+        Insert: {
+          id?: string
+          notes?: string | null
+          order_item_id?: string | null
+          product_code: string
+          product_name: string
+          quantity?: number
+          shipment_id: string
+          volume_number?: number | null
+          weight?: number
+        }
+        Update: {
+          id?: string
+          notes?: string | null
+          order_item_id?: string | null
+          product_code?: string
+          product_name?: string
+          quantity?: number
+          shipment_id?: string
+          volume_number?: number | null
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_items_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_items_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipment_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipment_orders: {
+        Row: {
+          carrier: string | null
+          carrier_document: string | null
+          created_at: string
+          delivered_at: string | null
+          delivery_confirmed_by: string | null
+          departure_date: string | null
+          driver_name: string | null
+          expected_delivery: string | null
+          freight_cost: number
+          freight_type: string | null
+          id: string
+          notes: string | null
+          order_id: string
+          shipment_number: string
+          status: string
+          total_value: number
+          total_weight: number
+          tracking_code: string | null
+          updated_at: string
+          vehicle_plate: string | null
+          volumes: number
+        }
+        Insert: {
+          carrier?: string | null
+          carrier_document?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          delivery_confirmed_by?: string | null
+          departure_date?: string | null
+          driver_name?: string | null
+          expected_delivery?: string | null
+          freight_cost?: number
+          freight_type?: string | null
+          id?: string
+          notes?: string | null
+          order_id: string
+          shipment_number: string
+          status?: string
+          total_value?: number
+          total_weight?: number
+          tracking_code?: string | null
+          updated_at?: string
+          vehicle_plate?: string | null
+          volumes?: number
+        }
+        Update: {
+          carrier?: string | null
+          carrier_document?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          delivery_confirmed_by?: string | null
+          departure_date?: string | null
+          driver_name?: string | null
+          expected_delivery?: string | null
+          freight_cost?: number
+          freight_type?: string | null
+          id?: string
+          notes?: string | null
+          order_id?: string
+          shipment_number?: string
+          status?: string
+          total_value?: number
+          total_weight?: number
+          tracking_code?: string | null
+          updated_at?: string
+          vehicle_plate?: string | null
+          volumes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_orders_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_movements: {
         Row: {
           batch: string | null
@@ -3079,6 +3495,85 @@ export type Database = {
             columns: ["wms_movement_id"]
             isOneToOne: false
             referencedRelation: "wms_movements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stock_reservations: {
+        Row: {
+          created_at: string
+          id: string
+          location: string | null
+          order_id: string
+          order_item_id: string | null
+          picked_qty: number
+          product_code: string
+          product_id: string | null
+          product_name: string
+          released_at: string | null
+          requested_qty: number
+          reserved_at: string | null
+          reserved_by: string | null
+          reserved_qty: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          order_id: string
+          order_item_id?: string | null
+          picked_qty?: number
+          product_code: string
+          product_id?: string | null
+          product_name: string
+          released_at?: string | null
+          requested_qty?: number
+          reserved_at?: string | null
+          reserved_by?: string | null
+          reserved_qty?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          location?: string | null
+          order_id?: string
+          order_item_id?: string | null
+          picked_qty?: number
+          product_code?: string
+          product_id?: string | null
+          product_name?: string
+          released_at?: string | null
+          requested_qty?: number
+          reserved_at?: string | null
+          reserved_by?: string | null
+          reserved_qty?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_reservations_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_reservations_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_reservations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]

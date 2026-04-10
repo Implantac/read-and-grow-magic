@@ -30,6 +30,19 @@ export const navigationSections: NavSection[] = [
     label: 'Operacional',
     items: [
       {
+        title: 'Fluxo Operacional',
+        href: '/operacional',
+        icon: 'ArrowRightLeft',
+        children: [
+          { title: 'Dashboard Operacional', href: '/operacional/dashboard', icon: 'BarChart3' },
+          { title: 'Acompanhamento', href: '/operacional/acompanhamento', icon: 'Eye' },
+          { title: 'Separação', href: '/operacional/separacao', icon: 'PackageSearch' },
+          { title: 'Conferência', href: '/operacional/conferencia', icon: 'ClipboardCheck' },
+          { title: 'Faturamento', href: '/operacional/faturamento', icon: 'FileText' },
+          { title: 'Expedição', href: '/operacional/expedicao', icon: 'Truck' },
+        ],
+      },
+      {
         title: 'Comercial',
         href: '/comercial',
         icon: 'Users',
@@ -61,6 +74,7 @@ export const navigationSections: NavSection[] = [
         href: '/producao',
         icon: 'Factory',
         children: [
+          { title: 'Painel PCP', href: '/producao/pcp', icon: 'BarChart3' },
           { title: 'Ordens de Produção', href: '/producao/ordens', icon: 'ClipboardCheck' },
           { title: 'Consumo MP', href: '/producao/consumo', icon: 'PackageMinus' },
           { title: 'Apontamentos', href: '/producao/apontamentos', icon: 'Timer' },
