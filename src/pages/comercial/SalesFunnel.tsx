@@ -2,21 +2,25 @@ import { useState, useMemo, useCallback } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, DollarSign, Target, TrendingUp, Pencil, MoreHorizontal, Trophy, XCircle, ArrowRight } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, DollarSign, Target, TrendingUp, Pencil, MoreHorizontal, Trophy, XCircle, ArrowRight, Clock, BarChart3, AlertTriangle } from 'lucide-react';
 import { useSalesFunnel, useCreateFunnelItem, useUpdateFunnelItem, FUNNEL_STAGES, type DbFunnelItem } from '@/hooks/useSalesFunnel';
 import { useClients } from '@/hooks/useClients';
 import { useSalesReps } from '@/hooks/useSalesReps';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { differenceInDays } from 'date-fns';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
@@ -34,6 +38,7 @@ export default function SalesFunnelPage() {
   const [editingItem, setEditingItem] = useState<DbFunnelItem | null>(null);
   const [draggedItem, setDraggedItem] = useState<DbFunnelItem | null>(null);
   const [dragOverStage, setDragOverStage] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState('kanban');
   const [formData, setFormData] = useState({
     title: '', description: '', stage: 'lead', value: '', probability: '10',
     expected_close_date: '', contact_name: '', contact_email: '', contact_phone: '',
@@ -45,8 +50,45 @@ export default function SalesFunnelPage() {
     const totalValue = open.reduce((s, f) => s + f.value, 0);
     const weightedValue = open.reduce((s, f) => s + (f.value * f.probability / 100), 0);
     const won = funnel.filter(f => f.status === 'won');
+    const lost = funnel.filter(f => f.status === 'lost');
     const wonValue = won.reduce((s, f) => s + f.value, 0);
-    return { openCount: open.length, totalValue, weightedValue, wonValue };
+    const conversionRate = (won.length + lost.length) > 0 ? (won.length / (won.length + lost.length)) * 100 : 0;
+    return { openCount: open.length, totalValue, weightedValue, wonValue, conversionRate, wonCount: won.length, lostCount: lost.length };
+  }, [funnel]);
+
+  // Stage metrics: count, value, avg time in stage, conversion to next
+  const stageMetrics = useMemo(() => {
+    const now = new Date();
+    return FUNNEL_STAGES.map((stage, idx) => {
+      const inStage = funnel.filter(f => f.stage === stage.value && f.status === 'open');
+      const value = inStage.reduce((s, f) => s + f.value, 0);
+      // Average time in current stage (days since updated_at or created_at)
+      const avgDays = inStage.length > 0
+        ? inStage.reduce((s, f) => s + differenceInDays(now, new Date(f.updated_at || f.created_at)), 0) / inStage.length
+        : 0;
+      // Items that moved past this stage (won or in later stages)
+      const pastStage = funnel.filter(f => {
+        const fIdx = FUNNEL_STAGES.findIndex(s => s.value === f.stage);
+        return fIdx > idx || f.status === 'won';
+      });
+      const enteredStage = funnel.filter(f => {
+        const fIdx = FUNNEL_STAGES.findIndex(s => s.value === f.stage);
+        return fIdx >= idx || f.status === 'won' || f.status === 'lost';
+      });
+      const stageConversion = enteredStage.length > 0 ? (pastStage.length / enteredStage.length) * 100 : 0;
+      
+      return { ...stage, count: inStage.length, totalValue: value, avgDays: Math.round(avgDays), stageConversion: Math.round(stageConversion) };
+    });
+  }, [funnel]);
+
+  // Stagnation alerts: items in same stage for > 14 days
+  const stagnantItems = useMemo(() => {
+    const now = new Date();
+    return funnel.filter(f => {
+      if (f.status !== 'open') return false;
+      const days = differenceInDays(now, new Date(f.updated_at || f.created_at));
+      return days > 14;
+    }).sort((a, b) => new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime());
   }, [funnel]);
 
   const grouped = useMemo(() => {
@@ -56,6 +98,14 @@ export default function SalesFunnelPage() {
       if (map[f.stage]) map[f.stage].push(f);
     });
     return map;
+  }, [funnel]);
+
+  // Funnel chart data (for analytics tab)
+  const funnelChartData = useMemo(() => {
+    return FUNNEL_STAGES.map(stage => {
+      const items = funnel.filter(f => f.stage === stage.value && f.status === 'open');
+      return { name: stage.label, count: items.length, value: items.reduce((s, f) => s + f.value, 0) };
+    }).filter(d => d.count > 0);
   }, [funnel]);
 
   const resetForm = () => {
@@ -124,7 +174,6 @@ export default function SalesFunnelPage() {
     }
   };
 
-  // Drag & Drop handlers
   const handleDragStart = useCallback((e: React.DragEvent, item: DbFunnelItem) => {
     setDraggedItem(item);
     e.dataTransfer.effectAllowed = 'move';
@@ -165,85 +214,230 @@ export default function SalesFunnelPage() {
         <Button onClick={() => openNew()} size="sm"><Plus className="h-4 w-4 mr-1" /> Nova Oportunidade</Button>
       </PageHeader>
 
-      <div className="grid gap-4 md:grid-cols-4 mb-6 mt-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 mb-6 mt-6">
         <KPICard index={0} title="Oportunidades Abertas" value={stats.openCount.toString()} icon={<Target className="h-5 w-5" />} accentColor="info" />
-        <KPICard index={1} title="Valor Total Pipeline" value={fmt(stats.totalValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" />
+        <KPICard index={1} title="Valor Pipeline" value={fmt(stats.totalValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" />
         <KPICard index={2} title="Valor Ponderado" value={fmt(stats.weightedValue)} icon={<TrendingUp className="h-5 w-5" />} accentColor="accent" />
-        <KPICard index={3} title="Ganhos Totais" value={fmt(stats.wonValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="success" />
+        <KPICard index={3} title="Ganhos Totais" value={fmt(stats.wonValue)} subtitle={`${stats.wonCount} oportunidades`} icon={<Trophy className="h-5 w-5" />} accentColor="success" />
+        <KPICard index={4} title="Taxa Conversão" value={`${stats.conversionRate.toFixed(1)}%`} subtitle={`${stats.lostCount} perdidas`} icon={<BarChart3 className="h-5 w-5" />} accentColor="warning" />
       </div>
 
-      {/* Kanban Board */}
-      <div className="grid gap-3 overflow-x-auto" style={{ gridTemplateColumns: `repeat(${KANBAN_STAGES.length}, minmax(220px, 1fr))` }}>
-        {KANBAN_STAGES.map(stage => {
-          const items = grouped[stage.value] || [];
-          const stageValue = items.reduce((s, i) => s + i.value, 0);
-          const isOver = dragOverStage === stage.value;
-          return (
-            <div
-              key={stage.value}
-              className={`flex flex-col min-h-[400px] rounded-lg transition-colors ${isOver ? 'bg-primary/5 ring-2 ring-primary/20' : ''}`}
-              onDragOver={e => handleDragOver(e, stage.value)}
-              onDragLeave={handleDragLeave}
-              onDrop={e => handleDrop(e, stage.value)}
-            >
-              <div className="flex items-center justify-between mb-2 px-1">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2.5 h-2.5 rounded-full ${stage.color}`} />
-                  <span className="text-xs font-semibold uppercase tracking-wide">{stage.label}</span>
-                  <Badge variant="secondary" className="text-[10px] px-1.5">{items.length}</Badge>
-                </div>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openNew(stage.value)}>
-                  <Plus className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-              <div className="text-[10px] text-muted-foreground mb-2 px-1">{fmt(stageValue)}</div>
-              <div className="flex-1 space-y-2 overflow-y-auto pr-1">
-                {items.map(item => (
-                  <Card
-                    key={item.id}
-                    draggable
-                    onDragStart={e => handleDragStart(e, item)}
-                    className={`cursor-grab active:cursor-grabbing hover:shadow-md transition-all ${draggedItem?.id === item.id ? 'opacity-40' : ''}`}
-                  >
-                    <CardContent className="p-3 space-y-1.5">
-                      <div className="flex items-start justify-between gap-1">
-                        <p className="text-sm font-medium line-clamp-2 flex-1">{item.title}</p>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0"><MoreHorizontal className="h-3 w-3" /></Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => openEdit(item)}><Pencil className="h-3.5 w-3.5 mr-2" />Editar</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => moveToNextStage(item)}><ArrowRight className="h-3.5 w-3.5 mr-2" />Avançar Etapa</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => markAsWon(item)} className="text-emerald-600"><Trophy className="h-3.5 w-3.5 mr-2" />Marcar como Ganha</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => markAsLost(item)} className="text-destructive"><XCircle className="h-3.5 w-3.5 mr-2" />Marcar como Perdida</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                      <p className="text-xs text-primary font-semibold">{fmt(item.value)}</p>
-                      {item.contact_name && <p className="text-[11px] text-muted-foreground">{item.contact_name}</p>}
-                      <div className="flex items-center justify-between pt-1">
-                        <Badge variant="outline" className="text-[10px]">{item.probability}%</Badge>
-                        {item.expected_close_date && (
-                          <span className="text-[10px] text-muted-foreground">
-                            {new Date(item.expected_close_date).toLocaleDateString('pt-BR')}
-                          </span>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                {items.length === 0 && (
-                  <div className="flex items-center justify-center h-24 text-xs text-muted-foreground border border-dashed rounded-lg">
-                    Nenhuma oportunidade
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
+        <TabsList>
+          <TabsTrigger value="kanban">Kanban</TabsTrigger>
+          <TabsTrigger value="analytics">Métricas por Etapa</TabsTrigger>
+          <TabsTrigger value="alerts">Alertas ({stagnantItems.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="kanban" className="mt-4">
+          {/* Kanban Board */}
+          <div className="grid gap-3 overflow-x-auto" style={{ gridTemplateColumns: `repeat(${KANBAN_STAGES.length}, minmax(220px, 1fr))` }}>
+            {KANBAN_STAGES.map(stage => {
+              const items = grouped[stage.value] || [];
+              const stageValue = items.reduce((s, i) => s + i.value, 0);
+              const isOver = dragOverStage === stage.value;
+              const metric = stageMetrics.find(m => m.value === stage.value);
+              return (
+                <div
+                  key={stage.value}
+                  className={`flex flex-col min-h-[400px] rounded-lg transition-colors ${isOver ? 'bg-primary/5 ring-2 ring-primary/20' : ''}`}
+                  onDragOver={e => handleDragOver(e, stage.value)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={e => handleDrop(e, stage.value)}
+                >
+                  <div className="flex items-center justify-between mb-1 px-1">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2.5 h-2.5 rounded-full ${stage.color}`} />
+                      <span className="text-xs font-semibold uppercase tracking-wide">{stage.label}</span>
+                      <Badge variant="secondary" className="text-[10px] px-1.5">{items.length}</Badge>
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openNew(stage.value)}>
+                      <Plus className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
-                )}
+                  <div className="flex items-center gap-2 mb-2 px-1">
+                    <span className="text-[10px] text-muted-foreground">{fmt(stageValue)}</span>
+                    {metric && metric.avgDays > 0 && (
+                      <Badge variant="outline" className="text-[9px] px-1 py-0">
+                        <Clock className="h-2.5 w-2.5 mr-0.5" />{metric.avgDays}d
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-2 overflow-y-auto pr-1">
+                    {items.map(item => {
+                      const daysInStage = differenceInDays(new Date(), new Date(item.updated_at || item.created_at));
+                      const isStagnant = daysInStage > 14;
+                      return (
+                        <Card
+                          key={item.id}
+                          draggable
+                          onDragStart={e => handleDragStart(e, item)}
+                          className={`cursor-grab active:cursor-grabbing hover:shadow-md transition-all ${draggedItem?.id === item.id ? 'opacity-40' : ''} ${isStagnant ? 'border-warning/50' : ''}`}
+                        >
+                          <CardContent className="p-3 space-y-1.5">
+                            <div className="flex items-start justify-between gap-1">
+                              <p className="text-sm font-medium line-clamp-2 flex-1">{item.title}</p>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0"><MoreHorizontal className="h-3 w-3" /></Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => openEdit(item)}><Pencil className="h-3.5 w-3.5 mr-2" />Editar</DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => moveToNextStage(item)}><ArrowRight className="h-3.5 w-3.5 mr-2" />Avançar Etapa</DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => markAsWon(item)} className="text-emerald-600"><Trophy className="h-3.5 w-3.5 mr-2" />Marcar como Ganha</DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => markAsLost(item)} className="text-destructive"><XCircle className="h-3.5 w-3.5 mr-2" />Marcar como Perdida</DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                            <p className="text-xs text-primary font-semibold">{fmt(item.value)}</p>
+                            {item.contact_name && <p className="text-[11px] text-muted-foreground">{item.contact_name}</p>}
+                            <div className="flex items-center justify-between pt-1">
+                              <div className="flex items-center gap-1">
+                                <Badge variant="outline" className="text-[10px]">{item.probability}%</Badge>
+                                {isStagnant && (
+                                  <Badge variant="secondary" className="text-[9px] px-1 py-0 text-warning">
+                                    <AlertTriangle className="h-2.5 w-2.5 mr-0.5" />{daysInStage}d
+                                  </Badge>
+                                )}
+                              </div>
+                              {item.expected_close_date && (
+                                <span className="text-[10px] text-muted-foreground">
+                                  {new Date(item.expected_close_date).toLocaleDateString('pt-BR')}
+                                </span>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                    {items.length === 0 && (
+                      <div className="flex items-center justify-center h-24 text-xs text-muted-foreground border border-dashed rounded-lg">
+                        Nenhuma oportunidade
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="analytics" className="mt-4 space-y-6">
+          {/* Stage Metrics Table */}
+          <Card>
+            <CardHeader><CardTitle className="text-sm font-medium">Métricas por Etapa do Funil</CardTitle></CardHeader>
+            <CardContent>
+              <div className="overflow-hidden rounded-lg border">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-muted/50">
+                      <th className="px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wide text-muted-foreground">Etapa</th>
+                      <th className="px-4 py-2.5 text-center text-xs font-medium uppercase tracking-wide text-muted-foreground">Qtd</th>
+                      <th className="px-4 py-2.5 text-right text-xs font-medium uppercase tracking-wide text-muted-foreground">Valor</th>
+                      <th className="px-4 py-2.5 text-center text-xs font-medium uppercase tracking-wide text-muted-foreground">Tempo Médio</th>
+                      <th className="px-4 py-2.5 text-center text-xs font-medium uppercase tracking-wide text-muted-foreground">Conversão</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stageMetrics.map((m, idx) => (
+                      <tr key={m.value} className={idx < stageMetrics.length - 1 ? 'border-b' : ''}>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2.5 h-2.5 rounded-full ${m.color}`} />
+                            <span className="font-medium">{m.label}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <Badge variant="secondary" className="font-mono">{m.count}</Badge>
+                        </td>
+                        <td className="px-4 py-3 text-right font-semibold text-primary">{fmt(m.totalValue)}</td>
+                        <td className="px-4 py-3 text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            <Clock className="h-3 w-3 text-muted-foreground" />
+                            <span className={m.avgDays > 14 ? 'text-warning font-semibold' : ''}>{m.avgDays} dias</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2 justify-center">
+                            <Progress value={m.stageConversion} className="h-1.5 w-16" />
+                            <span className="text-xs font-medium w-10 text-right">{m.stageConversion}%</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            </CardContent>
+          </Card>
+
+          {/* Funnel Chart */}
+          <Card>
+            <CardHeader><CardTitle className="text-sm font-medium">Distribuição do Pipeline</CardTitle></CardHeader>
+            <CardContent>
+              {funnelChartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={funnelChartData}>
+                    <XAxis dataKey="name" fontSize={11} angle={-20} textAnchor="end" height={60} />
+                    <YAxis fontSize={11} />
+                    <Tooltip
+                      formatter={(v: number, name: string) => [name === 'value' ? fmt(v) : v, name === 'value' ? 'Valor' : 'Quantidade']}
+                    />
+                    <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Quantidade" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-center text-muted-foreground py-10">Sem dados</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="alerts" className="mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-warning" />
+                Oportunidades Estagnadas ({stagnantItems.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {stagnantItems.length > 0 ? (
+                <div className="space-y-3">
+                  {stagnantItems.map(item => {
+                    const days = differenceInDays(new Date(), new Date(item.updated_at || item.created_at));
+                    const stage = FUNNEL_STAGES.find(s => s.value === item.stage);
+                    return (
+                      <div key={item.id} className="flex items-center justify-between rounded-lg border border-warning/30 bg-warning/5 p-3">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-2.5 h-2.5 rounded-full ${stage?.color || 'bg-muted'}`} />
+                          <div>
+                            <p className="text-sm font-medium">{item.title}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {stage?.label} • {fmt(item.value)} • Parado há <span className="font-semibold text-warning">{days} dias</span>
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => moveToNextStage(item)}>
+                            <ArrowRight className="h-3 w-3 mr-1" />Avançar
+                          </Button>
+                          <Button size="sm" variant="ghost" className="text-xs h-7" onClick={() => openEdit(item)}>
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-center text-muted-foreground py-10">Nenhuma oportunidade estagnada 🎉</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
