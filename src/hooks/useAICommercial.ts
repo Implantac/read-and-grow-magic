@@ -45,11 +45,7 @@ export interface AIRecommendation {
   status: string;
   acted_at: string | null;
   created_at: string;
-  clients?: {
-    id: string;
-    name: string;
-    code: string;
-  };
+  clients?: { id: string; name: string; code: string };
 }
 
 export interface AIInsight {
@@ -81,13 +77,7 @@ export interface AIDailyAction {
   completed_at: string | null;
   result: string | null;
   created_at: string;
-  clients?: {
-    id: string;
-    name: string;
-    code: string;
-    phone: string;
-    cellphone: string | null;
-  };
+  clients?: { id: string; name: string; code: string; phone: string; cellphone: string | null };
 }
 
 export interface AIPrediction {
@@ -102,6 +92,23 @@ export interface AIPrediction {
   recommended_action: string | null;
   key_factors: any;
   explanation: string | null;
+  created_at: string;
+  clients?: { id: string; name: string; code: string };
+  sales_funnel?: { id: string; title: string; stage: string; value: number };
+}
+
+export interface AIForecast {
+  id: string;
+  period: string;
+  forecast_date: string;
+  predicted_revenue: number | null;
+  best_case: number | null;
+  worst_case: number | null;
+  confidence: number | null;
+  by_rep: any;
+  by_segment: any;
+  by_region: any;
+  factors: any;
   created_at: string;
 }
 
@@ -147,7 +154,7 @@ export function useAIInsights(role?: string) {
         .select('*')
         .eq('status', 'active')
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(30);
       if (role) q = q.eq('target_role', role);
       const { data, error } = await q;
       if (error) throw error;
@@ -178,11 +185,26 @@ export function useAIPredictions() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('ai_opportunity_predictions')
-        .select('*')
+        .select('*, clients:client_id(id, name, code), sales_funnel:funnel_id(id, title, stage, value)')
         .order('close_probability', { ascending: false })
-        .limit(30);
+        .limit(50);
       if (error) throw error;
       return (data || []) as unknown as AIPrediction[];
+    },
+  });
+}
+
+export function useAIForecasts() {
+  return useQuery({
+    queryKey: ['ai_forecast_snapshots'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('ai_forecast_snapshots')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+      if (error) throw error;
+      return (data || []) as unknown as AIForecast[];
     },
   });
 }
@@ -200,13 +222,14 @@ export function useRunAIEngine() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data, action) => {
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['ai_sales_scores'] });
       qc.invalidateQueries({ queryKey: ['ai_recommendations'] });
       qc.invalidateQueries({ queryKey: ['ai_sales_insights'] });
       qc.invalidateQueries({ queryKey: ['ai_daily_actions'] });
       qc.invalidateQueries({ queryKey: ['ai_opportunity_predictions'] });
-      toast({ title: '✨ IA Comercial', description: `Motor executado com sucesso!` });
+      qc.invalidateQueries({ queryKey: ['ai_forecast_snapshots'] });
+      toast({ title: '✨ IA Comercial', description: 'Motor executado com sucesso!' });
     },
     onError: (e: Error) => {
       const msg = e.message.includes('429') ? 'Limite de requisições excedido. Tente novamente em alguns minutos.'
