@@ -144,10 +144,12 @@ export default function ClientsPage() {
         address_city: client.address_city, address_state: client.address_state,
         address_zip_code: client.address_zip_code,
         status: client.status, credit_limit: String(client.credit_limit), segment: client.segment || '',
+        sales_rep_id: client.sales_rep_id || '',
         state_registration: client.state_registration || '', municipal_registration: client.municipal_registration || '',
         region: client.region || '', micro_region: client.micro_region || '',
         default_payment_condition: client.default_payment_condition || 'À vista',
         price_table: client.price_table || 'default', abc_classification: client.abc_classification || 'C',
+        client_score: client.client_score || 'medium',
         commercial_notes: client.commercial_notes || '', estimated_potential: String(client.estimated_potential || ''),
       });
     } else {
