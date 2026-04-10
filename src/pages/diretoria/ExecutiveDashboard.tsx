@@ -92,19 +92,18 @@ export default function ExecutiveDashboard() {
       <PageHeader
         title="🧠 IA Executiva"
         description="Visão estratégica consolidada com inteligência artificial"
-        actions={
-          <Button
-            onClick={() => generateInsights.mutate()}
-            disabled={generateInsights.isPending}
-            variant="outline"
-            size="sm"
-            className="gap-2"
-          >
-            <Brain className={cn('h-4 w-4', generateInsights.isPending && 'animate-spin')} />
-            Gerar Insights
-          </Button>
-        }
-      />
+      >
+        <Button
+          onClick={() => generateInsights.mutate()}
+          disabled={generateInsights.isPending}
+          variant="outline"
+          size="sm"
+          className="gap-2"
+        >
+          <Brain className={cn('h-4 w-4', generateInsights.isPending && 'animate-spin')} />
+          Gerar Insights
+        </Button>
+      </PageHeader>
 
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
