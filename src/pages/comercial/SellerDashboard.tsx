@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Target, Phone, AlertTriangle, TrendingUp, Users, Clock, CheckCircle,
   DollarSign, Trophy, Zap, ArrowRight, PhoneCall, Mail, MessageSquare,
-  Calendar, Star, ShieldAlert, Eye,
+  Calendar, Star, ShieldAlert, Eye, Brain, Sparkles, RefreshCw,
 } from 'lucide-react';
 import { useClients } from '@/hooks/useClients';
 import { useOrders } from '@/hooks/useOrders';
@@ -24,6 +24,7 @@ import { useSalesFunnel } from '@/hooks/useSalesFunnel';
 import { useSalesReps } from '@/hooks/useSalesReps';
 import { useFollowUps, useCreateFollowUp, useUpdateFollowUp, useClientInsights, useRepPerformance, useLostSalesAlerts, useSalesScript, type ClientInsight } from '@/hooks/useSalesIntelligence';
 import { useCommercialAlerts } from '@/hooks/useCommercialAlerts';
+import { useAIDailyActions, useAIRecommendations, useCompleteAIAction, useActOnRecommendation, useRunAIEngine } from '@/hooks/useAICommercial';
 import { differenceInDays, format, isToday, startOfMonth, endOfMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
