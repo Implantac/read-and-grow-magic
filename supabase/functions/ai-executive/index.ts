@@ -17,15 +17,9 @@ serve(async (req) => {
 
     const { action, messages } = await req.json();
 
-    if (action === "chat") {
-      return await handleChat(messages, supabase, lovableKey, corsHeaders);
-    }
-    if (action === "generate_insights") {
-      return await handleGenerateInsights(supabase, lovableKey, corsHeaders);
-    }
-    if (action === "generate_scenarios") {
-      return await handleGenerateScenarios(supabase, lovableKey, corsHeaders);
-    }
+    if (action === "chat") return await handleChat(messages, supabase, lovableKey, corsHeaders);
+    if (action === "generate_insights") return await handleGenerateInsights(supabase, lovableKey, corsHeaders);
+    if (action === "generate_scenarios") return await handleGenerateScenarios(supabase, lovableKey, corsHeaders);
     return await handleDashboardData(supabase, corsHeaders);
   } catch (e) {
     console.error("ai-executive error:", e);
@@ -36,20 +30,21 @@ serve(async (req) => {
   }
 });
 
-// ─── Dashboard Data Aggregation ──────────────────────────────────
+// ─── Data Fetching ──────────────────────────────────────────────
 
 async function fetchAllData(supabase: any) {
   const [
     ordersRes, receivableRes, payableRes, productsRes,
     clientsRes, productionRes, insightsRes, alertsRes, scenariosRes,
     salesRes, cashFlowRes, salesRepsRes, funnelRes, salesTargetsRes,
+    orderItemsRes, commissionRes,
   ] = await Promise.all([
     supabase.from("orders").select("id, total, status, created_at, client_name, client_id, discount, subtotal, sales_rep_id, sales_rep_name, priority").order("created_at", { ascending: false }).limit(500),
     supabase.from("accounts_receivable").select("id, amount, status, due_date, paid_amount, open_amount, client_name, client_id").limit(500),
     supabase.from("accounts_payable").select("id, amount, status, due_date, paid_amount, open_amount, supplier, category").limit(500),
-    supabase.from("products").select("id, name, price, cost, stock_current, stock_min, status").limit(500),
+    supabase.from("products").select("id, name, price, cost, stock_current, stock_min, status, category_id").limit(500),
     supabase.from("clients").select("id, name, total_purchases, last_purchase_date, status, credit_limit, current_balance, segment, region, abc_classification, avg_ticket").limit(500),
-    supabase.from("production_orders").select("id, status, planned_quantity, produced_quantity, created_at").limit(200),
+    supabase.from("production_orders").select("id, status, planned_quantity, produced_quantity, created_at, start_date, end_date").limit(200),
     supabase.from("ai_executive_insights").select("*").eq("status", "active").order("created_at", { ascending: false }).limit(20),
     supabase.from("ai_executive_alerts").select("*").eq("status", "active").order("created_at", { ascending: false }).limit(10),
     supabase.from("ai_executive_scenarios").select("*").order("created_at", { ascending: false }).limit(3),
@@ -58,6 +53,8 @@ async function fetchAllData(supabase: any) {
     supabase.from("sales_reps").select("id, name, email, region, status").limit(100),
     supabase.from("sales_funnel").select("id, client_name, stage, value, probability, sales_rep_id, created_at, status").limit(300),
     supabase.from("sales_targets").select("id, sales_rep_id, target_value, achieved_value, period, target_type").limit(100),
+    supabase.from("order_items").select("id, order_id, product_id, product_name, product_code, quantity, unit_price, total, discount").limit(1000),
+    supabase.from("commissions").select("id, sales_rep_id, sales_rep_name, calculated_value, status, period").limit(200),
   ]);
 
   return {
@@ -75,17 +72,24 @@ async function fetchAllData(supabase: any) {
     salesReps: salesRepsRes.data || [],
     funnel: funnelRes.data || [],
     salesTargets: salesTargetsRes.data || [],
+    orderItems: orderItemsRes.data || [],
+    commissions: commissionRes.data || [],
   };
 }
 
+// ─── KPI Computation ──────────────────────────────────────────────
+
 function computeKPIs(d: any) {
   const completedStatuses = ['completed', 'invoiced', 'shipped', 'delivered'];
+  const now = new Date();
+
+  // Revenue
   const totalRevenue = d.orders.filter((o: any) => completedStatuses.includes(o.status)).reduce((s: number, o: any) => s + (o.total || 0), 0);
   const totalCosts = d.payables.filter((p: any) => p.status === 'paid').reduce((s: number, p: any) => s + (p.amount || 0), 0);
   const grossProfit = totalRevenue - totalCosts;
   const grossMargin = totalRevenue > 0 ? (grossProfit / totalRevenue * 100) : 0;
 
-  const now = new Date();
+  // Receivables & Payables
   const overdueReceivable = d.receivables.filter((r: any) => r.status === 'overdue' || (r.status === 'pending' && new Date(r.due_date) < now)).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
   const overduePayable = d.payables.filter((p: any) => p.status === 'overdue' || (p.status === 'pending' && new Date(p.due_date) < now)).reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0);
   const totalReceivable = d.receivables.filter((r: any) => r.status === 'pending').reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
@@ -109,17 +113,14 @@ function computeKPIs(d: any) {
     });
   }
 
-  // Top clients by revenue
+  // Top clients
   const clientRevenue: Record<string, number> = {};
   d.orders.forEach((o: any) => {
     if (completedStatuses.includes(o.status)) {
       clientRevenue[o.client_name] = (clientRevenue[o.client_name] || 0) + (o.total || 0);
     }
   });
-  const topClients = Object.entries(clientRevenue)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([name, revenue]) => ({ name, revenue }));
+  const topClients = Object.entries(clientRevenue).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, revenue]) => ({ name, revenue }));
 
   const totalClientRevenue = Object.values(clientRevenue).reduce((a, b) => a + b, 0);
   const top3Revenue = topClients.slice(0, 3).reduce((s, c) => s + c.revenue, 0);
@@ -132,18 +133,18 @@ function computeKPIs(d: any) {
   });
 
   // Sales rep performance
-  const repPerformance: Record<string, { orders: number; revenue: number; name: string }> = {};
+  const repPerformance: Record<string, { orders: number; revenue: number; name: string; discount: number }> = {};
   d.orders.forEach((o: any) => {
     if (o.sales_rep_id && completedStatuses.includes(o.status)) {
-      if (!repPerformance[o.sales_rep_id]) repPerformance[o.sales_rep_id] = { orders: 0, revenue: 0, name: o.sales_rep_name || 'N/A' };
+      if (!repPerformance[o.sales_rep_id]) repPerformance[o.sales_rep_id] = { orders: 0, revenue: 0, name: o.sales_rep_name || 'N/A', discount: 0 };
       repPerformance[o.sales_rep_id].orders++;
       repPerformance[o.sales_rep_id].revenue += o.total || 0;
+      repPerformance[o.sales_rep_id].discount += o.discount || 0;
     }
   });
   const salesRepStats = Object.entries(repPerformance)
-    .map(([id, v]) => ({ id, ...v }))
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 10);
+    .map(([id, v]) => ({ id, ...v, avgTicket: v.orders > 0 ? +(v.revenue / v.orders).toFixed(0) : 0, discountPct: v.revenue > 0 ? +((v.discount / (v.revenue + v.discount)) * 100).toFixed(1) : 0 }))
+    .sort((a, b) => b.revenue - a.revenue).slice(0, 10);
 
   // Funnel summary
   const funnelByStage: Record<string, { count: number; value: number }> = {};
@@ -154,7 +155,7 @@ function computeKPIs(d: any) {
     funnelByStage[stage].value += f.value || 0;
   });
 
-  // Production efficiency
+  // Production
   const prodCompleted = d.production.filter((p: any) => p.status === 'completed');
   const prodInProgress = d.production.filter((p: any) => p.status === 'in_progress');
   const prodPlanned = d.production.filter((p: any) => p.status === 'planned' || p.status === 'pending');
@@ -162,7 +163,7 @@ function computeKPIs(d: any) {
     ? prodCompleted.reduce((s: number, p: any) => s + (p.produced_quantity || 0), 0) / prodCompleted.reduce((s: number, p: any) => s + (p.planned_quantity || 1), 0) * 100
     : 0;
 
-  // Cash flow projection (next 30 days)
+  // Cash flow projection
   const futureReceivables = d.receivables.filter((r: any) => {
     const dd = new Date(r.due_date);
     return r.status === 'pending' && dd >= now && dd <= new Date(now.getTime() + 30 * 86400000);
@@ -172,23 +173,85 @@ function computeKPIs(d: any) {
     return p.status === 'pending' && dd >= now && dd <= new Date(now.getTime() + 30 * 86400000);
   }).reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0);
 
-  // Revenue trend (growth rate)
+  // Revenue growth
   const lastTwoMonths = revenueByMonth.slice(-2);
   const revenueGrowth = lastTwoMonths.length === 2 && lastTwoMonths[0].revenue > 0
-    ? ((lastTwoMonths[1].revenue - lastTwoMonths[0].revenue) / lastTwoMonths[0].revenue * 100)
-    : 0;
+    ? ((lastTwoMonths[1].revenue - lastTwoMonths[0].revenue) / lastTwoMonths[0].revenue * 100) : 0;
 
   // Avg ticket
   const completedOrders = d.orders.filter((o: any) => completedStatuses.includes(o.status));
   const avgTicket = completedOrders.length > 0 ? totalRevenue / completedOrders.length : 0;
 
-  // Clients at risk (inactive > 60 days)
+  // Clients at risk
   const clientsAtRisk = d.clients.filter((c: any) => {
     if (c.status !== 'active') return false;
     if (!c.last_purchase_date) return true;
-    const diff = (now.getTime() - new Date(c.last_purchase_date).getTime()) / 86400000;
-    return diff > 60;
+    return (now.getTime() - new Date(c.last_purchase_date).getTime()) / 86400000 > 60;
   }).length;
+
+  // ── Product Margin Analysis ──
+  const productMap: Record<string, { name: string; price: number; cost: number; stock: number }> = {};
+  d.products.forEach((p: any) => { productMap[p.id] = { name: p.name, price: p.price || 0, cost: p.cost || 0, stock: p.stock_current || 0 }; });
+
+  const productMargins: { name: string; revenue: number; cost: number; margin: number; marginPct: number; qty: number }[] = [];
+  const productSales: Record<string, { revenue: number; cost: number; qty: number; name: string }> = {};
+  d.orderItems.forEach((item: any) => {
+    if (!item.product_id) return;
+    const prod = productMap[item.product_id];
+    if (!prod) return;
+    if (!productSales[item.product_id]) productSales[item.product_id] = { revenue: 0, cost: 0, qty: 0, name: prod.name };
+    productSales[item.product_id].revenue += item.total || 0;
+    productSales[item.product_id].cost += (prod.cost || 0) * (item.quantity || 0);
+    productSales[item.product_id].qty += item.quantity || 0;
+  });
+  Object.entries(productSales).forEach(([, v]) => {
+    const margin = v.revenue - v.cost;
+    productMargins.push({ name: v.name, revenue: v.revenue, cost: v.cost, margin, marginPct: v.revenue > 0 ? +(margin / v.revenue * 100).toFixed(1) : 0, qty: v.qty });
+  });
+  productMargins.sort((a, b) => b.revenue - a.revenue);
+
+  // Top profitable & unprofitable
+  const topProfitable = [...productMargins].sort((a, b) => b.margin - a.margin).slice(0, 5);
+  const lowMarginProducts = productMargins.filter(p => p.marginPct < 15 && p.revenue > 0).slice(0, 5);
+
+  // ── Client margin analysis ──
+  const clientMargins: Record<string, { revenue: number; orders: number }> = {};
+  d.orders.forEach((o: any) => {
+    if (completedStatuses.includes(o.status) && o.client_name) {
+      if (!clientMargins[o.client_name]) clientMargins[o.client_name] = { revenue: 0, orders: 0 };
+      clientMargins[o.client_name].revenue += o.total || 0;
+      clientMargins[o.client_name].orders++;
+    }
+  });
+
+  // ── Revenue by region ──
+  const revenueByRegion: Record<string, number> = {};
+  const clientRegionMap: Record<string, string> = {};
+  d.clients.forEach((c: any) => { if (c.region) clientRegionMap[c.name] = c.region; });
+  d.orders.forEach((o: any) => {
+    if (completedStatuses.includes(o.status)) {
+      const region = clientRegionMap[o.client_name] || 'Não definida';
+      revenueByRegion[region] = (revenueByRegion[region] || 0) + (o.total || 0);
+    }
+  });
+
+  // ── Sales targets vs achieved ──
+  const targetsSummary = d.salesTargets.reduce((acc: any, t: any) => {
+    acc.target += t.target_value || 0;
+    acc.achieved += t.achieved_value || 0;
+    return acc;
+  }, { target: 0, achieved: 0 });
+  const targetAttainment = targetsSummary.target > 0 ? +(targetsSummary.achieved / targetsSummary.target * 100).toFixed(1) : 0;
+
+  // ── Auto-generate alerts ──
+  const autoAlerts: any[] = [];
+  if (defaultRate > 10) autoAlerts.push({ type: 'financial_risk', severity: 'critical', title: 'Inadimplência acima de 10%', description: `Taxa atual: ${defaultRate.toFixed(1)}%. Ação imediata necessária.`, metric: 'default_rate', value: defaultRate });
+  if (concentrationPct > 60) autoAlerts.push({ type: 'revenue_concentration', severity: 'high', title: 'Concentração excessiva de receita', description: `Top 3 clientes representam ${concentrationPct.toFixed(0)}% da receita.`, metric: 'concentration', value: concentrationPct });
+  if (revenueGrowth < -10) autoAlerts.push({ type: 'revenue_decline', severity: 'critical', title: 'Queda acentuada de receita', description: `Receita caiu ${Math.abs(revenueGrowth).toFixed(1)}% vs mês anterior.`, metric: 'revenue_growth', value: revenueGrowth });
+  if ((kpis => kpis < 0)(futureReceivables - futurePayables)) autoAlerts.push({ type: 'cash_flow_risk', severity: 'high', title: 'Fluxo de caixa negativo projetado', description: `Projeção 30d: déficit de R$ ${Math.abs(futureReceivables - futurePayables).toLocaleString('pt-BR')}.`, metric: 'cash_flow_30d', value: futureReceivables - futurePayables });
+  if (lowStockProducts > 3) autoAlerts.push({ type: 'stock_critical', severity: 'medium', title: `${lowStockProducts} produtos abaixo do estoque mínimo`, description: 'Risco de ruptura e perda de vendas.', metric: 'low_stock', value: lowStockProducts });
+  if (clientsAtRisk > 5) autoAlerts.push({ type: 'client_churn', severity: 'high', title: `${clientsAtRisk} clientes em risco de perda`, description: 'Clientes ativos sem compra há mais de 60 dias.', metric: 'clients_at_risk', value: clientsAtRisk });
+  if (targetAttainment > 0 && targetAttainment < 70) autoAlerts.push({ type: 'target_risk', severity: 'high', title: 'Meta de vendas em risco', description: `Atingimento atual: ${targetAttainment}% da meta.`, metric: 'target_attainment', value: targetAttainment });
 
   return {
     kpis: {
@@ -209,12 +272,20 @@ function computeKPIs(d: any) {
       prodInProgress: prodInProgress.length,
       prodPlanned: prodPlanned.length,
       prodCompleted: prodCompleted.length,
+      targetAttainment,
+      totalTarget: targetsSummary.target,
+      totalAchieved: targetsSummary.achieved,
     },
     revenueByMonth,
     topClients,
     expenseByCategory,
     salesRepStats,
     funnelByStage,
+    productMargins: productMargins.slice(0, 10),
+    topProfitable,
+    lowMarginProducts,
+    revenueByRegion,
+    autoAlerts,
     summary: {
       totalOrders: d.orders.length,
       totalProducts: d.products.length,
@@ -249,20 +320,24 @@ async function handleGenerateInsights(supabase: any, lovableKey: string, corsHea
 
 REGRAS:
 - Responda APENAS com JSON válido
-- Gere entre 4-8 insights cobrindo: receita, lucro, custos, risco, operacional, comercial
-- Cada insight: { type (revenue|profit|cost|risk|operational|commercial), severity (critical|high|medium|low), title, description, explanation, impact_estimate, recommended_actions (array de strings), module }
-- Priorize problemas reais e ações concretas
-- Use dados reais. Seja direto e objetivo.
-- Inclua análise de tendência, concentração, eficiência e risco.`;
+- Gere entre 6-10 insights cobrindo TODAS as áreas: receita, lucro, custos, risco financeiro, eficiência operacional, performance comercial
+- Cada insight: { type (revenue|profit|cost|risk|operational|commercial), severity (critical|high|medium|low), title, description, explanation, impact_estimate, recommended_actions (array de strings, máx 3), module }
+- FOCO EM AÇÃO: cada insight deve ter recomendações concretas e mensuráveis
+- Inclua análise de: tendência de receita, concentração de clientes, margem por produto, risco de inadimplência, eficiência produtiva, performance de vendedores
+- Priorize problemas que impactam caixa e lucro
+- Toda recomendação deve explicar POR QUE e QUAL o impacto esperado (Explainable AI)`;
 
   const userPrompt = `DADOS DA EMPRESA:
-${JSON.stringify(computed.kpis, null, 2)}
-
+KPIs: ${JSON.stringify(computed.kpis)}
 RECEITA MENSAL: ${JSON.stringify(computed.revenueByMonth)}
 TOP CLIENTES: ${JSON.stringify(computed.topClients)}
 DESPESAS: ${JSON.stringify(computed.expenseByCategory)}
-PERFORMANCE VENDEDORES: ${JSON.stringify(computed.salesRepStats)}
+VENDEDORES: ${JSON.stringify(computed.salesRepStats)}
 FUNIL: ${JSON.stringify(computed.funnelByStage)}
+MARGEM POR PRODUTO (top 10): ${JSON.stringify(computed.productMargins)}
+PRODUTOS BAIXA MARGEM: ${JSON.stringify(computed.lowMarginProducts)}
+RECEITA POR REGIÃO: ${JSON.stringify(computed.revenueByRegion)}
+ALERTAS AUTO: ${JSON.stringify(computed.autoAlerts)}
 RESUMO: ${JSON.stringify(computed.summary)}
 
 Gere insights estratégicos: { "insights": [...] }`;
@@ -291,6 +366,9 @@ Gere insights estratégicos: { "insights": [...] }`;
   try { parsed = JSON.parse(content); } catch { parsed = { insights: [] }; }
   const insights = parsed.insights || [];
 
+  // Expire old active insights before inserting new ones
+  await supabase.from("ai_executive_insights").update({ status: "expired" }).eq("status", "active");
+
   for (const ins of insights) {
     await supabase.from("ai_executive_insights").insert({
       insight_type: ins.type || "general",
@@ -316,18 +394,22 @@ async function handleGenerateScenarios(supabase: any, lovableKey: string, corsHe
   const d = await fetchAllData(supabase);
   const computed = computeKPIs(d);
 
-  const systemPrompt = `Você é um analista estratégico. Com base nos dados, gere 3 cenários (otimista, realista, pessimista) para os próximos 3 meses.
+  const systemPrompt = `Você é um analista estratégico sênior. Com base nos dados, gere 3 cenários (otimista, realista, pessimista) para os próximos 3 meses.
 
 REGRAS:
 - Responda APENAS com JSON válido
-- Formato: { "scenarios": { "optimistic": { "revenue", "profit", "margin", "description", "key_actions": [...] }, "realistic": {...}, "pessimistic": {...} }, "assumptions": [...], "recommendations": [...] }
-- Use dados reais para projetar
-- Valores em reais (números)`;
+- Formato: { "scenarios": { "optimistic": { "revenue", "profit", "margin", "growth", "description", "key_actions": [...] }, "realistic": {...}, "pessimistic": {...} }, "assumptions": [...], "recommendations": [...], "risks": [...] }
+- Use dados reais para projetar - considere tendência de receita, pipeline, inadimplência e capacidade produtiva
+- Cada cenário deve ter ações específicas e mensuráveis
+- Valores em reais (números)
+- Inclua riscos e recomendações prioritárias`;
 
   const userPrompt = `KPIs: ${JSON.stringify(computed.kpis)}
 RECEITA MENSAL: ${JSON.stringify(computed.revenueByMonth)}
 FUNIL: ${JSON.stringify(computed.funnelByStage)}
-VENDEDORES: ${JSON.stringify(computed.salesRepStats)}`;
+VENDEDORES: ${JSON.stringify(computed.salesRepStats)}
+MARGEM PRODUTOS: ${JSON.stringify(computed.productMargins?.slice(0, 5))}
+RECEITA REGIÃO: ${JSON.stringify(computed.revenueByRegion)}`;
 
   const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
@@ -375,32 +457,49 @@ async function handleChat(messages: any[], supabase: any, lovableKey: string, co
   const computed = computeKPIs(d);
   const k = computed.kpis;
 
-  const systemPrompt = `Você é o CEO AI, diretor executivo digital de uma empresa brasileira. Responda com dados reais do sistema.
+  const systemPrompt = `Você é o CEO AI, diretor executivo digital de uma empresa brasileira. Responda com dados reais do sistema. Seja estratégico, direto e acionável.
 
-DADOS ATUAIS:
-- Receita: R$ ${k.totalRevenue.toLocaleString('pt-BR')} | Lucro Bruto: R$ ${k.grossProfit.toLocaleString('pt-BR')} | Margem: ${k.grossMargin}%
-- Crescimento: ${k.revenueGrowth}% | Ticket Médio: R$ ${k.avgTicket}
-- Inadimplência: R$ ${k.overdueReceivable.toLocaleString('pt-BR')} (${k.defaultRate}%)
+DADOS ATUAIS DA EMPRESA:
+📊 RECEITA E LUCRO:
+- Receita Total: R$ ${k.totalRevenue.toLocaleString('pt-BR')} | Lucro Bruto: R$ ${k.grossProfit.toLocaleString('pt-BR')} | Margem: ${k.grossMargin}%
+- Crescimento: ${k.revenueGrowth}% vs mês anterior | Ticket Médio: R$ ${k.avgTicket}
+- Meta: ${k.targetAttainment}% atingida (R$ ${k.totalAchieved?.toLocaleString('pt-BR')} de R$ ${k.totalTarget?.toLocaleString('pt-BR')})
+
+💰 FINANCEIRO:
 - A Receber: R$ ${k.totalReceivable.toLocaleString('pt-BR')} | A Pagar: R$ ${k.totalPayable.toLocaleString('pt-BR')}
+- Inadimplência: R$ ${k.overdueReceivable.toLocaleString('pt-BR')} (${k.defaultRate}%)
 - Posição Líquida: R$ ${k.netPosition.toLocaleString('pt-BR')}
 - Projeção Caixa 30d: R$ ${k.cashFlowProjection30d.toLocaleString('pt-BR')}
+
+👥 COMERCIAL:
 - Clientes Ativos: ${k.activeClients} | Em Risco: ${k.clientsAtRisk}
 - Concentração Top3: ${k.concentrationPct}%
-- Estoque Baixo: ${k.lowStockProducts}
+
+🏭 OPERACIONAL:
 - Eficiência Produção: ${k.prodEfficiency}% | Em Andamento: ${k.prodInProgress} | Planejadas: ${k.prodPlanned}
+- Estoque Baixo: ${k.lowStockProducts} produtos
+
+📦 PRODUTOS (MARGEM):
+${computed.productMargins?.slice(0, 5).map((p: any) => `- ${p.name}: Margem ${p.marginPct}% (Receita R$ ${p.revenue.toLocaleString('pt-BR')})`).join('\n') || 'Sem dados'}
+
+${computed.lowMarginProducts?.length ? `⚠️ PRODUTOS BAIXA MARGEM:\n${computed.lowMarginProducts.map((p: any) => `- ${p.name}: Margem ${p.marginPct}%`).join('\n')}` : ''}
 
 TOP CLIENTES: ${JSON.stringify(computed.topClients)}
 RECEITA MENSAL: ${JSON.stringify(computed.revenueByMonth)}
 VENDEDORES: ${JSON.stringify(computed.salesRepStats)}
 FUNIL: ${JSON.stringify(computed.funnelByStage)}
 DESPESAS: ${JSON.stringify(computed.expenseByCategory)}
+RECEITA POR REGIÃO: ${JSON.stringify(computed.revenueByRegion)}
 
 REGRAS:
-- Português, direto, estratégico
-- Use dados reais acima
-- Sugira ações concretas
-- Use markdown
-- Analise tendências e riscos`;
+- Português brasileiro, direto, estratégico
+- Use SEMPRE dados reais acima
+- Sugira ações concretas com impacto estimado
+- Use markdown para formatação
+- Explique o "porquê" de cada recomendação (IA explicável)
+- Analise tendências, riscos e oportunidades
+- Quando perguntado sobre um vendedor, compare com a média
+- Quando perguntado sobre custos, detalhe por categoria`;
 
   const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
     method: "POST",
