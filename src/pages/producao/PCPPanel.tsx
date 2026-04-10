@@ -12,18 +12,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { useOrders } from '@/hooks/useOrders';
-import { useAdvancedOrderStatusUpdate } from '@/hooks/useOrderFlow';
+import { useOrderLifecycle, checkProductionCompletion } from '@/hooks/useOrderLifecycle';
 import { supabase } from '@/integrations/supabase/client';
 import { productionStatusConfig, priorityConfig } from '@/config/production';
-import { Factory, Clock, CheckCircle, AlertTriangle, Search, Plus, Play, Pause, SquareIcon } from 'lucide-react';
-import { format } from 'date-fns';
+import { Factory, Clock, CheckCircle, AlertTriangle, Search, Plus, Play, Pause, BarChart3 } from 'lucide-react';
+import { format, differenceInDays, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function PCPPanel() {
   const { orders: productionOrders, loading, refetch, update } = useProductionOrders();
   const { data: salesOrders } = useOrders();
-  const updateOrderStatus = useAdvancedOrderStatusUpdate();
+  const lifecycle = useOrderLifecycle();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [generatingFor, setGeneratingFor] = useState<any>(null);
@@ -45,6 +46,25 @@ export default function PCPPanel() {
     : 0;
 
   const ordersAwaitingProduction = (salesOrders || []).filter(o => o.status === 'awaiting_production' || o.status === 'confirmed');
+
+  // Workload by work center
+  const workCenterLoad = productionOrders
+    .filter(o => o.status === 'in_progress' || o.status === 'planned')
+    .reduce((acc: Record<string, { count: number; totalQty: number }>, o) => {
+      const wc = o.work_center || 'Sem setor';
+      if (!acc[wc]) acc[wc] = { count: 0, totalQty: 0 };
+      acc[wc].count++;
+      acc[wc].totalQty += o.quantity - o.produced_quantity;
+      return acc;
+    }, {});
+  const workCenterData = Object.entries(workCenterLoad).map(([name, v]) => ({ name, ordens: v.count, pendente: v.totalQty }));
+
+  // Delayed OPs
+  const today = new Date();
+  const delayedOPs = productionOrders.filter(o => {
+    if (!o.due_date || o.status === 'completed' || o.status === 'cancelled') return false;
+    return differenceInDays(today, parseISO(o.due_date)) > 0;
+  });
 
   const generateOPFromOrder = async (order: any) => {
     const items = order.items || [];
@@ -71,8 +91,14 @@ export default function PCPPanel() {
         } as any);
       }
 
-      // Update order status
-      updateOrderStatus.mutate({ id: order.id, status: 'in_production' });
+      // Update order status via lifecycle
+      lifecycle.mutate({
+        orderId: order.id,
+        order,
+        targetStatus: 'in_production',
+        observation: `${items.length} OP(s) gerada(s)`,
+      });
+
       toast({ title: `${items.length} OP(s) gerada(s) do pedido ${order.number}` });
       await refetch();
       setGeneratingFor(null);
@@ -81,8 +107,23 @@ export default function PCPPanel() {
     }
   };
 
-  const handleStatusChange = (op: any, newStatus: string) => {
-    update(op.id, { status: newStatus });
+  const handleStatusChange = async (op: any, newStatus: string) => {
+    await update(op.id, {
+      status: newStatus,
+      ...(newStatus === 'in_progress' ? { start_date: new Date().toISOString() } : {}),
+      ...(newStatus === 'completed' ? { completed_date: new Date().toISOString() } : {}),
+    });
+
+    // When completing a production order, check if all OPs for the sales order are done
+    if (newStatus === 'completed') {
+      const orderNumMatch = op.order_number.match(/PED\d+/);
+      if (orderNumMatch) {
+        const salesOrder = (salesOrders || []).find(o => o.number === orderNumMatch[0]);
+        if (salesOrder) {
+          await checkProductionCompletion(salesOrder.number, salesOrder.id);
+        }
+      }
+    }
   };
 
   return (
@@ -117,6 +158,7 @@ export default function PCPPanel() {
         <TabsList>
           <TabsTrigger value="orders">Ordens de Produção</TabsTrigger>
           <TabsTrigger value="demand">Demanda Comercial ({ordersAwaitingProduction.length})</TabsTrigger>
+          <TabsTrigger value="capacity">Capacidade {delayedOPs.length > 0 && <Badge variant="destructive" className="ml-1 h-5 text-[10px]">{delayedOPs.length}</Badge>}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="orders" className="mt-4">
@@ -160,8 +202,9 @@ export default function PCPPanel() {
                     const pct = o.quantity > 0 ? (o.produced_quantity / o.quantity) * 100 : 0;
                     const sc = productionStatusConfig[o.status] || { label: o.status, color: '' };
                     const pc = priorityConfig[o.priority] || { label: o.priority, color: '' };
+                    const isDelayed = o.due_date && differenceInDays(today, parseISO(o.due_date)) > 0 && o.status !== 'completed' && o.status !== 'cancelled';
                     return (
-                      <TableRow key={o.id}>
+                      <TableRow key={o.id} className={cn(isDelayed && 'bg-destructive/5')}>
                         <TableCell className="font-mono font-medium">{o.order_number}</TableCell>
                         <TableCell>{o.product_name}</TableCell>
                         <TableCell>{o.quantity} {o.unit}</TableCell>
@@ -174,7 +217,12 @@ export default function PCPPanel() {
                         </TableCell>
                         <TableCell><Badge className={cn('text-xs', sc.color)}>{sc.label}</Badge></TableCell>
                         <TableCell><Badge className={cn('text-xs', pc.color)}>{pc.label}</Badge></TableCell>
-                        <TableCell>{o.due_date ? format(new Date(o.due_date), 'dd/MM/yyyy') : '-'}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            {o.due_date ? format(new Date(o.due_date), 'dd/MM/yyyy') : '-'}
+                            {isDelayed && <AlertTriangle className="h-3 w-3 text-destructive" />}
+                          </div>
+                        </TableCell>
                         <TableCell className="text-right">
                           <div className="flex gap-1 justify-end">
                             {o.status === 'planned' && (
@@ -249,6 +297,48 @@ export default function PCPPanel() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="capacity" className="mt-4 space-y-6">
+          {/* Workload chart */}
+          <Card>
+            <CardHeader><CardTitle className="flex items-center gap-2"><BarChart3 className="h-5 w-5" /> Carga por Centro de Trabalho</CardTitle></CardHeader>
+            <CardContent>
+              {workCenterData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={workCenterData}>
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="ordens" fill="hsl(var(--primary))" name="Ordens" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="pendente" fill="hsl(var(--warning))" name="Qtde Pendente" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : <p className="text-sm text-muted-foreground text-center py-8">Sem dados de carga produtiva</p>}
+            </CardContent>
+          </Card>
+
+          {/* Delayed OPs */}
+          {delayedOPs.length > 0 && (
+            <Card className="border-destructive/30">
+              <CardHeader><CardTitle className="text-destructive flex items-center gap-2"><AlertTriangle className="h-5 w-5" /> OPs Atrasadas ({delayedOPs.length})</CardTitle></CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {delayedOPs.map(o => (
+                    <div key={o.id} className="flex items-center justify-between text-sm border-b pb-2 last:border-0">
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono font-medium">{o.order_number}</span>
+                        <span className="text-muted-foreground">{o.product_name}</span>
+                      </div>
+                      <Badge variant="destructive" className="text-xs">
+                        {differenceInDays(today, parseISO(o.due_date!))} dias de atraso
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
       </Tabs>
 
       {/* Generate OP confirmation dialog */}
@@ -273,7 +363,7 @@ export default function PCPPanel() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setGeneratingFor(null)}>Cancelar</Button>
-            <Button onClick={() => generateOPFromOrder(generatingFor)}>
+            <Button onClick={() => generateOPFromOrder(generatingFor)} disabled={lifecycle.isPending}>
               <Plus className="h-4 w-4 mr-1" /> Gerar OPs
             </Button>
           </DialogFooter>

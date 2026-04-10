@@ -11,17 +11,36 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { useOrders } from '@/hooks/useOrders';
-import { useOrderStatusHistory, getOrderFlowStatus, orderFlowStatuses, useAdvancedOrderStatusUpdate } from '@/hooks/useOrderFlow';
-import { getAllowedTransitions, validateTransition } from '@/lib/orderFlowEngine';
+import { useOrderStatusHistory, getOrderFlowStatus, orderFlowStatuses } from '@/hooks/useOrderFlow';
+import { useOrderLifecycle } from '@/hooks/useOrderLifecycle';
+import { getAllowedTransitions, ORDER_FLOW_STEPS, getFlowStepIndex } from '@/lib/orderFlowEngine';
 import { Search, Eye, ArrowRight, Clock, CheckCircle, XCircle, AlertTriangle, Package, Truck, FileText, Play } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
 
 function OrderFlowBadge({ status }: { status: string }) {
   const s = getOrderFlowStatus(status);
   return <Badge variant="outline" className={cn('font-medium border', s.color)}>{s.label}</Badge>;
+}
+
+function OrderProgressBar({ status }: { status: string }) {
+  const currentIdx = getFlowStepIndex(status);
+  if (status === 'cancelled') {
+    return <div className="flex items-center gap-1"><XCircle className="h-4 w-4 text-destructive" /><span className="text-xs text-destructive font-medium">Cancelado</span></div>;
+  }
+  return (
+    <div className="flex items-center gap-1 w-full">
+      {ORDER_FLOW_STEPS.map((step, idx) => (
+        <div key={step.key} className="flex items-center gap-1 flex-1">
+          <div className={cn(
+            'h-2 flex-1 rounded-full transition-colors',
+            idx <= currentIdx ? 'bg-primary' : 'bg-muted'
+          )} />
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function OrderTimeline({ orderId }: { orderId: string }) {
@@ -60,8 +79,7 @@ export default function OrderTracking() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [transitionDialog, setTransitionDialog] = useState<{ order: any; targetStatus: string } | null>(null);
   const [observation, setObservation] = useState('');
-  const updateStatus = useAdvancedOrderStatusUpdate();
-  const { toast } = useToast();
+  const lifecycle = useOrderLifecycle();
 
   const filtered = (orders || []).filter(o => {
     const matchSearch = !search || o.number.toLowerCase().includes(search.toLowerCase()) || o.client_name.toLowerCase().includes(search.toLowerCase());
@@ -75,32 +93,26 @@ export default function OrderTracking() {
   }, {});
 
   const handleTransition = (order: any, targetStatus: string) => {
-    const validation = validateTransition(order.status, targetStatus, {
-      hasFinancialApproval: order.financial_approval === 'approved',
-      hasCommercialApproval: order.commercial_approval === 'approved',
-      isBlocked: order.status === 'blocked',
-    });
-
-    if (!validation.valid) {
-      toast({ title: 'Transição bloqueada', description: validation.errors.join('\n'), variant: 'destructive' });
-      return;
-    }
-
     if (targetStatus === 'blocked' || targetStatus === 'cancelled') {
       setTransitionDialog({ order, targetStatus });
       setObservation('');
     } else {
-      updateStatus.mutate({ id: order.id, status: targetStatus, observation: '' });
+      lifecycle.mutate({
+        orderId: order.id,
+        order,
+        targetStatus,
+      });
     }
   };
 
   const confirmTransition = () => {
     if (!transitionDialog) return;
-    updateStatus.mutate({
-      id: transitionDialog.order.id,
-      status: transitionDialog.targetStatus,
+    lifecycle.mutate({
+      orderId: transitionDialog.order.id,
+      order: transitionDialog.order,
+      targetStatus: transitionDialog.targetStatus,
       observation,
-      block_reason: transitionDialog.targetStatus === 'blocked' ? observation : undefined,
+      blockReason: transitionDialog.targetStatus === 'blocked' ? observation : undefined,
     });
     setTransitionDialog(null);
   };
@@ -157,7 +169,7 @@ export default function OrderTracking() {
                 <TableHead>Data</TableHead>
                 <TableHead>Total</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Prioridade</TableHead>
+                <TableHead className="hidden lg:table-cell min-w-[160px]">Progresso</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -167,7 +179,7 @@ export default function OrderTracking() {
               ) : filtered.length === 0 ? (
                 <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhum pedido encontrado</TableCell></TableRow>
               ) : filtered.map(o => {
-                const nextStatuses = getAllowedTransitions(o.status).slice(0, 2);
+                const nextStatuses = getAllowedTransitions(o.status).filter(s => s !== 'cancelled').slice(0, 2);
                 return (
                   <TableRow key={o.id}>
                     <TableCell className="font-mono font-medium">{o.number}</TableCell>
@@ -175,17 +187,13 @@ export default function OrderTracking() {
                     <TableCell>{format(new Date(o.date), 'dd/MM/yyyy')}</TableCell>
                     <TableCell>R$ {o.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
                     <TableCell><OrderFlowBadge status={o.status} /></TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={cn('font-medium',
-                        o.priority === 'urgent' ? 'text-destructive border-destructive/20' :
-                        o.priority === 'high' ? 'text-warning border-warning/20' : 'text-muted-foreground'
-                      )}>{o.priority === 'urgent' ? 'Urgente' : o.priority === 'high' ? 'Alta' : o.priority === 'medium' ? 'Média' : 'Baixa'}</Badge>
-                    </TableCell>
+                    <TableCell className="hidden lg:table-cell"><OrderProgressBar status={o.status} /></TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">
-                        {nextStatuses.filter(s => s !== 'cancelled').map(ns => (
+                        {nextStatuses.map(ns => (
                           <Button key={ns} variant="outline" size="sm" className="text-xs h-7 px-2"
-                            onClick={e => { e.stopPropagation(); handleTransition(o, ns); }}>
+                            onClick={e => { e.stopPropagation(); handleTransition(o, ns); }}
+                            disabled={lifecycle.isPending}>
                             <Play className="h-3 w-3 mr-1" />
                             {getOrderFlowStatus(ns).label}
                           </Button>
@@ -214,10 +222,28 @@ export default function OrderTracking() {
           </DialogHeader>
           {selectedOrder && (
             <>
+              {/* Progress bar */}
+              <div className="pb-2">
+                <p className="text-xs text-muted-foreground mb-2">Progresso do Pedido</p>
+                <div className="flex items-center gap-1">
+                  {ORDER_FLOW_STEPS.map((step, idx) => {
+                    const currentIdx = getFlowStepIndex(selectedOrder.status);
+                    const isActive = idx <= currentIdx;
+                    return (
+                      <div key={step.key} className="flex flex-col items-center flex-1">
+                        <div className={cn('h-2 w-full rounded-full', isActive ? 'bg-primary' : 'bg-muted')} />
+                        <span className={cn('text-[10px] mt-1', isActive ? 'text-foreground font-medium' : 'text-muted-foreground')}>{step.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Quick actions */}
               <div className="flex flex-wrap gap-2 pb-2 border-b">
                 {getAllowedTransitions(selectedOrder.status).map(ns => (
                   <Button key={ns} size="sm" variant={ns === 'cancelled' || ns === 'blocked' ? 'destructive' : 'default'}
+                    disabled={lifecycle.isPending}
                     onClick={() => handleTransition(selectedOrder, ns)}>
                     {getOrderFlowStatus(ns).label}
                   </Button>
@@ -244,6 +270,10 @@ export default function OrderTracking() {
                     <div><span className="text-muted-foreground">Condição:</span> {selectedOrder.payment_condition}</div>
                     <div><span className="text-muted-foreground">Aprov. Comercial:</span> {selectedOrder.commercial_approval || 'Pendente'}</div>
                     <div><span className="text-muted-foreground">Aprov. Financeira:</span> {selectedOrder.financial_approval || 'Pendente'}</div>
+                    {selectedOrder.separation_status && <div><span className="text-muted-foreground">Separação:</span> {selectedOrder.separation_status}</div>}
+                    {selectedOrder.production_status && <div><span className="text-muted-foreground">Produção:</span> {selectedOrder.production_status}</div>}
+                    {selectedOrder.billing_status && <div><span className="text-muted-foreground">Faturamento:</span> {selectedOrder.billing_status}</div>}
+                    {selectedOrder.shipment_status && <div><span className="text-muted-foreground">Expedição:</span> {selectedOrder.shipment_status}</div>}
                   </div>
                 </TabsContent>
                 <TabsContent value="items" className="mt-4">
@@ -288,7 +318,7 @@ export default function OrderTracking() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setTransitionDialog(null)}>Voltar</Button>
-            <Button variant="destructive" onClick={confirmTransition} disabled={!observation.trim()}>
+            <Button variant="destructive" onClick={confirmTransition} disabled={!observation.trim() || lifecycle.isPending}>
               Confirmar
             </Button>
           </DialogFooter>
