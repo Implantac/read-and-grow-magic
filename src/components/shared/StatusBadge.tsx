@@ -10,13 +10,25 @@ interface StatusConfig {
   variant: StatusVariant;
 }
 
-const orderStatusConfig: Record<OrderStatus, StatusConfig> = {
+const orderStatusConfig: Record<string, StatusConfig> = {
+  quote: { label: 'Orçamento', variant: 'secondary' },
   pending: { label: 'Pendente', variant: 'warning' },
-  confirmed: { label: 'Confirmado', variant: 'info' },
+  awaiting_commercial_approval: { label: 'Aguard. Aprov. Comercial', variant: 'warning' },
+  awaiting_financial_approval: { label: 'Aguard. Aprov. Financeira', variant: 'warning' },
+  blocked: { label: 'Bloqueado', variant: 'destructive' },
+  confirmed: { label: 'Liberado', variant: 'info' },
+  awaiting_separation: { label: 'Aguard. Separação', variant: 'secondary' },
+  in_separation: { label: 'Em Separação', variant: 'info' },
+  awaiting_production: { label: 'Aguard. Produção', variant: 'warning' },
+  in_production: { label: 'Em Produção', variant: 'info' },
+  partial_production: { label: 'Produção Parcial', variant: 'warning' },
+  awaiting_conference: { label: 'Aguard. Conferência', variant: 'secondary' },
+  conferenced: { label: 'Conferido', variant: 'success' },
+  awaiting_billing: { label: 'Aguard. Faturamento', variant: 'secondary' },
   processing: { label: 'Processando', variant: 'info' },
   separated: { label: 'Separado', variant: 'secondary' },
   invoiced: { label: 'Faturado', variant: 'default' },
-  shipped: { label: 'Enviado', variant: 'info' },
+  shipped: { label: 'Expedido', variant: 'info' },
   delivered: { label: 'Entregue', variant: 'success' },
   cancelled: { label: 'Cancelado', variant: 'destructive' },
 };
