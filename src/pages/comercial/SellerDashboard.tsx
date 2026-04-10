@@ -54,6 +54,11 @@ export default function SellerDashboard() {
   const { data: reps = [] } = useSalesReps();
   const { data: followUps = [] } = useFollowUps();
   const { data: alerts = [] } = useCommercialAlerts('open');
+  const { data: aiActions = [] } = useAIDailyActions();
+  const { data: aiRecs = [] } = useAIRecommendations('pending');
+  const completeAIAction = useCompleteAIAction();
+  const actOnAIRec = useActOnRecommendation();
+  const runAIEngine = useRunAIEngine();
   const createFollowUp = useCreateFollowUp();
   const updateFollowUp = useUpdateFollowUp();
 
