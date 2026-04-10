@@ -17,50 +17,98 @@ export type Database = {
       accounts_payable: {
         Row: {
           amount: number
+          bank_account_id: string | null
           category: string
+          cost_center_id: string | null
           created_at: string
           description: string
+          discount_amount: number | null
           due_date: string
+          expense_type: string | null
           id: string
+          installment_number: number | null
+          interest: number | null
           invoice_number: string | null
           notes: string | null
+          open_amount: number | null
+          original_amount: number | null
+          paid_amount: number | null
           payment_date: string | null
           payment_method: string | null
+          penalty: number | null
           status: string
           supplier: string
+          total_installments: number | null
           updated_at: string
         }
         Insert: {
           amount?: number
+          bank_account_id?: string | null
           category?: string
+          cost_center_id?: string | null
           created_at?: string
           description: string
+          discount_amount?: number | null
           due_date: string
+          expense_type?: string | null
           id?: string
+          installment_number?: number | null
+          interest?: number | null
           invoice_number?: string | null
           notes?: string | null
+          open_amount?: number | null
+          original_amount?: number | null
+          paid_amount?: number | null
           payment_date?: string | null
           payment_method?: string | null
+          penalty?: number | null
           status?: string
           supplier: string
+          total_installments?: number | null
           updated_at?: string
         }
         Update: {
           amount?: number
+          bank_account_id?: string | null
           category?: string
+          cost_center_id?: string | null
           created_at?: string
           description?: string
+          discount_amount?: number | null
           due_date?: string
+          expense_type?: string | null
           id?: string
+          installment_number?: number | null
+          interest?: number | null
           invoice_number?: string | null
           notes?: string | null
+          open_amount?: number | null
+          original_amount?: number | null
+          paid_amount?: number | null
           payment_date?: string | null
           payment_method?: string | null
+          penalty?: number | null
           status?: string
           supplier?: string
+          total_installments?: number | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "accounts_payable_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounts_payable_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       accounts_receivable: {
         Row: {
@@ -70,14 +118,24 @@ export type Database = {
           client_name: string
           created_at: string
           description: string
+          discount_amount: number | null
           due_date: string
           id: string
+          installment_number: number | null
+          interest: number | null
           invoice_number: string | null
+          issue_date: string | null
+          nfe_id: string | null
           notes: string | null
+          open_amount: number | null
           order_id: string | null
+          original_amount: number | null
+          paid_amount: number | null
           payment_date: string | null
           payment_method: string | null
+          penalty: number | null
           status: string
+          total_installments: number | null
           updated_at: string
         }
         Insert: {
@@ -87,14 +145,24 @@ export type Database = {
           client_name: string
           created_at?: string
           description: string
+          discount_amount?: number | null
           due_date: string
           id?: string
+          installment_number?: number | null
+          interest?: number | null
           invoice_number?: string | null
+          issue_date?: string | null
+          nfe_id?: string | null
           notes?: string | null
+          open_amount?: number | null
           order_id?: string | null
+          original_amount?: number | null
+          paid_amount?: number | null
           payment_date?: string | null
           payment_method?: string | null
+          penalty?: number | null
           status?: string
+          total_installments?: number | null
           updated_at?: string
         }
         Update: {
@@ -104,14 +172,24 @@ export type Database = {
           client_name?: string
           created_at?: string
           description?: string
+          discount_amount?: number | null
           due_date?: string
           id?: string
+          installment_number?: number | null
+          interest?: number | null
           invoice_number?: string | null
+          issue_date?: string | null
+          nfe_id?: string | null
           notes?: string | null
+          open_amount?: number | null
           order_id?: string | null
+          original_amount?: number | null
+          paid_amount?: number | null
           payment_date?: string | null
           payment_method?: string | null
+          penalty?: number | null
           status?: string
+          total_installments?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -130,6 +208,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      bank_accounts: {
+        Row: {
+          account_number: string | null
+          account_type: string
+          active: boolean
+          agency: string | null
+          balance: number
+          bank_code: string | null
+          bank_name: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          account_number?: string | null
+          account_type?: string
+          active?: boolean
+          agency?: string | null
+          balance?: number
+          bank_code?: string | null
+          bank_name?: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          account_number?: string | null
+          account_type?: string
+          active?: boolean
+          agency?: string | null
+          balance?: number
+          bank_code?: string | null
+          bank_name?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       bank_transactions: {
         Row: {
@@ -1169,6 +1289,44 @@ export type Database = {
           },
         ]
       }
+      cost_centers: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          id: string
+          name: string
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          id?: string
+          name: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          id?: string
+          name?: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cost_centers_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credit_audit_logs: {
         Row: {
           action: string
@@ -1335,6 +1493,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      financial_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          description: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          status: string
+          title: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          description?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          title: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          description?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
       }
       fiscal_reports: {
         Row: {
@@ -2219,6 +2419,79 @@ export type Database = {
           },
         ]
       }
+      payment_records: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          created_at: string
+          created_by: string | null
+          discount: number
+          id: string
+          interest: number
+          notes: string | null
+          payable_id: string | null
+          payment_date: string
+          payment_method: string
+          penalty: number
+          receivable_id: string | null
+          total_paid: number
+        }
+        Insert: {
+          amount?: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount?: number
+          id?: string
+          interest?: number
+          notes?: string | null
+          payable_id?: string | null
+          payment_date?: string
+          payment_method?: string
+          penalty?: number
+          receivable_id?: string | null
+          total_paid?: number
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount?: number
+          id?: string
+          interest?: number
+          notes?: string | null
+          payable_id?: string | null
+          payment_date?: string
+          payment_method?: string
+          penalty?: number
+          receivable_id?: string | null
+          total_paid?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_records_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_records_payable_id_fkey"
+            columns: ["payable_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_payable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_records_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_receivable"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_orders: {
         Row: {
           bom_id: string | null
@@ -2684,6 +2957,98 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "quotations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      renegotiation_items: {
+        Row: {
+          id: string
+          original_amount: number
+          receivable_id: string | null
+          renegotiation_id: string
+        }
+        Insert: {
+          id?: string
+          original_amount?: number
+          receivable_id?: string | null
+          renegotiation_id: string
+        }
+        Update: {
+          id?: string
+          original_amount?: number
+          receivable_id?: string | null
+          renegotiation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "renegotiation_items_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_receivable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "renegotiation_items_renegotiation_id_fkey"
+            columns: ["renegotiation_id"]
+            isOneToOne: false
+            referencedRelation: "renegotiations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      renegotiations: {
+        Row: {
+          client_id: string
+          client_name: string
+          created_at: string
+          created_by: string | null
+          first_due_date: string | null
+          id: string
+          installments: number
+          interest_rate: number
+          new_total: number
+          notes: string | null
+          original_total: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          client_name: string
+          created_at?: string
+          created_by?: string | null
+          first_due_date?: string | null
+          id?: string
+          installments?: number
+          interest_rate?: number
+          new_total?: number
+          notes?: string | null
+          original_total?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          client_name?: string
+          created_at?: string
+          created_by?: string | null
+          first_due_date?: string | null
+          id?: string
+          installments?: number
+          interest_rate?: number
+          new_total?: number
+          notes?: string | null
+          original_total?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "renegotiations_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
