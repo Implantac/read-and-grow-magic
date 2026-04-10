@@ -8,12 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import {
   Brain, TrendingUp, TrendingDown, DollarSign, AlertTriangle, Users,
-  Package, Send, MessageSquare, Lightbulb, ShieldAlert, BarChart3,
+  Send, MessageSquare, Lightbulb, ShieldAlert, BarChart3,
   ArrowUpRight, ArrowDownRight, Wallet, PieChart, Activity,
-  Target, Factory, Layers, Zap,
+  Target, Factory, Layers, Zap, MapPin, Package, Flame,
 } from 'lucide-react';
 import { useExecutiveDashboard, useGenerateInsights, useGenerateScenarios, useExecutiveChat } from '@/hooks/useExecutiveAI';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
@@ -33,6 +34,13 @@ const severityColor: Record<string, string> = {
   low: 'bg-muted text-muted-foreground',
 };
 
+const alertSeverityBorder: Record<string, string> = {
+  critical: 'border-l-destructive',
+  high: 'border-l-orange-500',
+  medium: 'border-l-blue-500',
+  low: 'border-l-muted-foreground',
+};
+
 const insightIcon: Record<string, any> = {
   revenue: TrendingUp,
   profit: DollarSign,
@@ -44,7 +52,7 @@ const insightIcon: Record<string, any> = {
 
 function RiskItem({ label, value, threshold, current }: { label: string; value: string; threshold: number; current: number }) {
   const pct = Math.min(100, (current / threshold) * 100);
-  const color = pct >= 100 ? 'bg-destructive' : pct >= 70 ? 'bg-orange-500' : 'bg-success';
+  const color = pct >= 100 ? 'bg-destructive' : pct >= 70 ? 'bg-orange-500' : 'bg-emerald-500';
   return (
     <div className="space-y-1">
       <div className="flex justify-between text-xs">
@@ -91,9 +99,14 @@ export default function ExecutiveDashboard() {
   const expenseByCategory = data?.expenseByCategory || {};
   const salesRepStats = data?.salesRepStats || [];
   const funnelByStage = data?.funnelByStage || {};
+  const productMargins = (data as any)?.productMargins || [];
+  const lowMarginProducts = (data as any)?.lowMarginProducts || [];
+  const revenueByRegion = (data as any)?.revenueByRegion || {};
+  const autoAlerts = (data as any)?.autoAlerts || [];
 
-  const expenseData = Object.entries(expenseByCategory).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 6);
-  const funnelData = Object.entries(funnelByStage).map(([stage, v]) => ({ stage, ...v }));
+  const expenseData = Object.entries(expenseByCategory).map(([name, value]) => ({ name, value })).sort((a, b) => (b.value as number) - (a.value as number)).slice(0, 6);
+  const funnelData = Object.entries(funnelByStage).map(([stage, v]: any) => ({ stage, ...v }));
+  const regionData = Object.entries(revenueByRegion).map(([name, value]) => ({ name, value })).sort((a, b) => (b.value as number) - (a.value as number));
   const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))', 'hsl(var(--muted-foreground))'];
 
   const kpiCards = [
@@ -110,13 +123,15 @@ export default function ExecutiveDashboard() {
     'O que fazer para aumentar lucro?',
     'Qual vendedor precisa de atenção?',
     'Como está o fluxo de caixa?',
+    'Quais produtos têm margem baixa?',
+    'Como está a meta de vendas?',
   ];
 
   const latestScenario = scenarios[0];
 
   return (
     <PageContainer>
-      <PageHeader title="🧠 IA Executiva" description="Visão estratégica consolidada com inteligência artificial">
+      <PageHeader title="🧠 IA Executiva" description="Diretor Digital — Visão estratégica com inteligência artificial">
         <div className="flex gap-2">
           <Button onClick={() => generateInsights.mutate()} disabled={generateInsights.isPending} variant="outline" size="sm" className="gap-2">
             <Brain className={cn('h-4 w-4', generateInsights.isPending && 'animate-spin')} />
@@ -129,7 +144,7 @@ export default function ExecutiveDashboard() {
         </div>
       </PageHeader>
 
-      {/* Primary KPIs */}
+      {/* ── Primary KPIs ── */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {kpiCards.map((k, idx) => (
           <Card key={k.label} className="hover-lift" style={{ animationDelay: `${idx * 60}ms` }}>
@@ -149,15 +164,15 @@ export default function ExecutiveDashboard() {
         ))}
       </div>
 
-      {/* Secondary KPIs */}
-      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
+      {/* ── Secondary KPIs with Target Progress ── */}
+      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-6">
         <Card><CardContent className="p-4 flex items-center gap-3">
           <Users className="h-4 w-4 text-primary" />
           <div><p className="text-xs text-muted-foreground">Clientes Ativos</p><p className="text-lg font-bold">{kpis?.activeClients || 0}</p></div>
         </CardContent></Card>
         <Card><CardContent className="p-4 flex items-center gap-3">
           <AlertTriangle className="h-4 w-4 text-destructive" />
-          <div><p className="text-xs text-muted-foreground">Clientes em Risco</p><p className="text-lg font-bold">{kpis?.clientsAtRisk || 0}</p></div>
+          <div><p className="text-xs text-muted-foreground">Em Risco</p><p className="text-lg font-bold">{kpis?.clientsAtRisk || 0}</p></div>
         </CardContent></Card>
         <Card><CardContent className="p-4 flex items-center gap-3">
           <Target className="h-4 w-4 text-primary" />
@@ -171,12 +186,57 @@ export default function ExecutiveDashboard() {
           <Activity className="h-4 w-4 text-emerald-600" />
           <div><p className="text-xs text-muted-foreground">Caixa 30d</p><p className="text-lg font-bold">{fmt(kpis?.cashFlowProjection30d || 0)}</p></div>
         </CardContent></Card>
+        <Card><CardContent className="p-4 flex items-center gap-3">
+          <Package className="h-4 w-4 text-destructive" />
+          <div><p className="text-xs text-muted-foreground">Estoque Crítico</p><p className="text-lg font-bold">{kpis?.lowStockProducts || 0}</p></div>
+        </CardContent></Card>
       </div>
+
+      {/* ── Target Attainment Bar ── */}
+      {(kpis?.totalTarget || 0) > 0 && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Meta de Vendas</span>
+              </div>
+              <span className="text-sm font-bold">{kpis?.targetAttainment || 0}%</span>
+            </div>
+            <Progress value={Math.min(100, kpis?.targetAttainment || 0)} className="h-2.5" />
+            <div className="flex justify-between mt-1 text-xs text-muted-foreground">
+              <span>Atingido: {fmt(kpis?.totalAchieved || 0)}</span>
+              <span>Meta: {fmt(kpis?.totalTarget || 0)}</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── Proactive Auto-Alerts (always visible) ── */}
+      {autoAlerts.length > 0 && (
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {autoAlerts.map((alert: any, i: number) => (
+            <Card key={i} className={cn('border-l-4', alertSeverityBorder[alert.severity] || 'border-l-muted')}>
+              <CardContent className="p-4">
+                <div className="flex items-start justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <Flame className="h-4 w-4 text-destructive" />
+                    <p className="text-sm font-medium">{alert.title}</p>
+                  </div>
+                  <Badge className={cn('text-[10px]', severityColor[alert.severity])}>{alert.severity}</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">{alert.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       <Tabs defaultValue="insights" className="space-y-4">
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="insights" className="gap-1.5"><Lightbulb className="h-3.5 w-3.5" />Insights</TabsTrigger>
           <TabsTrigger value="charts" className="gap-1.5"><BarChart3 className="h-3.5 w-3.5" />Análises</TabsTrigger>
+          <TabsTrigger value="margins" className="gap-1.5"><DollarSign className="h-3.5 w-3.5" />Margens</TabsTrigger>
           <TabsTrigger value="alerts" className="gap-1.5"><ShieldAlert className="h-3.5 w-3.5" />Alertas & Riscos</TabsTrigger>
           <TabsTrigger value="scenarios" className="gap-1.5"><Layers className="h-3.5 w-3.5" />Cenários</TabsTrigger>
           <TabsTrigger value="chat" className="gap-1.5"><MessageSquare className="h-3.5 w-3.5" />Chat Gerencial</TabsTrigger>
@@ -187,7 +247,8 @@ export default function ExecutiveDashboard() {
           {insights.length === 0 ? (
             <Card><CardContent className="p-8 text-center">
               <Brain className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
-              <p className="text-muted-foreground">Clique em "Gerar Insights" para a IA analisar seus dados</p>
+              <p className="text-muted-foreground mb-2">Clique em "Gerar Insights" para a IA analisar seus dados</p>
+              <p className="text-xs text-muted-foreground">A IA irá analisar receita, lucro, custos, riscos, operação e performance comercial</p>
             </CardContent></Card>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
@@ -215,7 +276,7 @@ export default function ExecutiveDashboard() {
                       {ins.recommended_actions?.length > 0 && (
                         <div className="space-y-1">
                           <p className="text-xs font-medium">Ações recomendadas:</p>
-                          {ins.recommended_actions.map((a: string, i: number) => (
+                          {(Array.isArray(ins.recommended_actions) ? ins.recommended_actions : []).map((a: string, i: number) => (
                             <p key={i} className="text-xs text-muted-foreground">• {a}</p>
                           ))}
                         </div>
@@ -253,7 +314,7 @@ export default function ExecutiveDashboard() {
                 <CardTitle className="text-sm flex items-center gap-2">
                   <Users className="h-4 w-4 text-primary" />Top Clientes
                   {kpis?.concentrationPct && kpis.concentrationPct > 50 && (
-                    <Badge variant="destructive" className="text-[10px]">Concentração {kpis.concentrationPct}%</Badge>
+                    <Badge variant="destructive" className="text-[10px]">⚠️ Concentração {kpis.concentrationPct}%</Badge>
                   )}
                 </CardTitle>
               </CardHeader>
@@ -271,6 +332,7 @@ export default function ExecutiveDashboard() {
                       <span className="text-sm font-bold tabular-nums">{fmt(c.revenue)}</span>
                     </div>
                   ))}
+                  {topClients.length === 0 && <p className="text-xs text-center text-muted-foreground py-4">Sem dados de clientes</p>}
                 </div>
               </CardContent>
             </Card>
@@ -280,18 +342,47 @@ export default function ExecutiveDashboard() {
                 <CardTitle className="text-sm flex items-center gap-2"><PieChart className="h-4 w-4 text-orange-500" />Despesas por Categoria</CardTitle>
               </CardHeader>
               <CardContent>
-                <ChartContainer config={{}} className="h-[250px]">
-                  <RPieChart>
-                    <Pie data={expenseData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                      {expenseData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                    </Pie>
-                    <ChartTooltip content={<ChartTooltipContent formatter={(v) => fmt(Number(v))} />} />
-                  </RPieChart>
-                </ChartContainer>
+                {expenseData.length > 0 ? (
+                  <ChartContainer config={{}} className="h-[250px]">
+                    <RPieChart>
+                      <Pie data={expenseData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                        {expenseData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                      </Pie>
+                      <ChartTooltip content={<ChartTooltipContent formatter={(v) => fmt(Number(v))} />} />
+                    </RPieChart>
+                  </ChartContainer>
+                ) : <p className="text-xs text-center text-muted-foreground py-8">Sem dados de despesas</p>}
               </CardContent>
             </Card>
 
-            {/* Sales Rep Performance */}
+            {/* Revenue by Region */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" />Receita por Região</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {regionData.length > 0 ? (
+                  <div className="space-y-3">
+                    {regionData.slice(0, 6).map((r, i) => (
+                      <div key={r.name} className="flex items-center gap-3">
+                        <span className="text-xs font-bold text-muted-foreground w-5">{i + 1}.</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{r.name}</p>
+                          <div className="h-1.5 rounded-full bg-muted mt-1">
+                            <div className="h-full rounded-full bg-chart-3" style={{ width: `${((r.value as number) / ((regionData[0]?.value as number) || 1)) * 100}%` }} />
+                          </div>
+                        </div>
+                        <span className="text-sm font-bold tabular-nums">{fmt(r.value as number)}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : <p className="text-xs text-center text-muted-foreground py-8">Sem dados de região</p>}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sales Rep & Funnel */}
+          <div className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2"><Zap className="h-4 w-4 text-primary" />Performance Vendedores</CardTitle>
@@ -301,12 +392,12 @@ export default function ExecutiveDashboard() {
                   <p className="text-xs text-muted-foreground text-center py-8">Sem dados de vendedores</p>
                 ) : (
                   <div className="space-y-3">
-                    {salesRepStats.slice(0, 5).map((rep, i) => (
+                    {salesRepStats.slice(0, 5).map((rep: any, i: number) => (
                       <div key={rep.id} className="flex items-center gap-3">
                         <span className="text-xs font-bold text-muted-foreground w-5">{i + 1}.</span>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{rep.name}</p>
-                          <p className="text-xs text-muted-foreground">{rep.orders} pedidos</p>
+                          <p className="text-xs text-muted-foreground">{rep.orders} ped · TM {fmt(rep.avgTicket || 0)} · Desc {rep.discountPct || 0}%</p>
                         </div>
                         <span className="text-sm font-bold tabular-nums">{fmt(rep.revenue)}</span>
                       </div>
@@ -315,24 +406,111 @@ export default function ExecutiveDashboard() {
                 )}
               </CardContent>
             </Card>
-          </div>
 
-          {/* Funnel Summary */}
-          {funnelData.length > 0 && (
+            {funnelData.length > 0 && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2"><Target className="h-4 w-4 text-primary" />Funil de Vendas</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
+                    {funnelData.map((f: any) => (
+                      <div key={f.stage} className="rounded-lg border p-3 text-center">
+                        <p className="text-xs text-muted-foreground capitalize">{f.stage}</p>
+                        <p className="text-lg font-bold">{f.count}</p>
+                        <p className="text-xs text-muted-foreground">{fmt(f.value)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+
+        {/* ── Margins Tab ── */}
+        <TabsContent value="margins" className="space-y-4">
+          <div className="grid gap-4 lg:grid-cols-2">
+            {/* Top Profitable Products */}
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2"><Target className="h-4 w-4 text-primary" />Funil de Vendas</CardTitle>
+                <CardTitle className="text-sm flex items-center gap-2"><TrendingUp className="h-4 w-4 text-emerald-600" />Produtos Mais Rentáveis</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-5">
-                  {funnelData.map((f) => (
-                    <div key={f.stage} className="rounded-lg border p-3 text-center">
-                      <p className="text-xs text-muted-foreground capitalize">{f.stage}</p>
-                      <p className="text-lg font-bold">{f.count}</p>
-                      <p className="text-xs text-muted-foreground">{fmt(f.value)}</p>
-                    </div>
-                  ))}
-                </div>
+                {productMargins.length > 0 ? (
+                  <div className="space-y-3">
+                    {productMargins.slice(0, 6).map((p: any, i: number) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <span className="text-xs font-bold text-muted-foreground w-5">{i + 1}.</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{p.name}</p>
+                          <div className="flex gap-2 text-xs text-muted-foreground">
+                            <span>Receita: {fmt(p.revenue)}</span>
+                            <span>·</span>
+                            <span>Qtd: {p.qty}</span>
+                          </div>
+                        </div>
+                        <Badge className={cn('text-[10px]', p.marginPct >= 30 ? 'bg-emerald-500/20 text-emerald-700' : p.marginPct >= 15 ? 'bg-blue-500/20 text-blue-700' : 'bg-destructive/20 text-destructive')}>
+                          {p.marginPct}%
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-center text-muted-foreground py-8">Cadastre produtos com custo para análise de margem</p>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Low Margin Products */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2"><TrendingDown className="h-4 w-4 text-destructive" />Produtos com Margem Baixa (&lt;15%)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {lowMarginProducts.length > 0 ? (
+                  <div className="space-y-3">
+                    {lowMarginProducts.map((p: any, i: number) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <AlertTriangle className="h-4 w-4 text-orange-500 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{p.name}</p>
+                          <p className="text-xs text-muted-foreground">Receita: {fmt(p.revenue)} · Custo: {fmt(p.cost)}</p>
+                        </div>
+                        <Badge variant="destructive" className="text-[10px]">{p.marginPct}%</Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <TrendingUp className="h-8 w-8 mx-auto text-emerald-500/50 mb-2" />
+                    <p className="text-xs text-muted-foreground">Todos os produtos com margem saudável ✓</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Margin Chart */}
+          {productMargins.length > 0 && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2"><BarChart3 className="h-4 w-4 text-primary" />Margem por Produto (Top 10)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ChartContainer config={{ marginPct: { label: 'Margem %', color: 'hsl(var(--chart-1))' } }} className="h-[300px]">
+                  <BarChart data={productMargins.slice(0, 10)} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                    <XAxis type="number" tickFormatter={(v) => `${v}%`} className="text-xs" />
+                    <YAxis dataKey="name" type="category" width={120} className="text-xs" tick={{ fontSize: 10 }} />
+                    <ChartTooltip content={<ChartTooltipContent formatter={(v) => `${v}%`} />} />
+                    <Bar dataKey="marginPct" radius={[0, 4, 4, 0]}>
+                      {productMargins.slice(0, 10).map((p: any, i: number) => (
+                        <Cell key={i} fill={p.marginPct >= 30 ? 'hsl(var(--chart-1))' : p.marginPct >= 15 ? 'hsl(var(--chart-2))' : 'hsl(var(--destructive))'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ChartContainer>
               </CardContent>
             </Card>
           )}
@@ -379,11 +557,10 @@ export default function ExecutiveDashboard() {
             </Card>
           </div>
 
-          {/* Active alerts */}
           {alerts.length > 0 && (
             <div className="grid gap-3 md:grid-cols-2">
               {alerts.map((alert: any) => (
-                <Card key={alert.id} className="border-l-4" style={{ borderLeftColor: alert.severity === 'critical' ? 'hsl(var(--destructive))' : alert.severity === 'high' ? '#f97316' : 'hsl(var(--primary))' }}>
+                <Card key={alert.id} className={cn('border-l-4', alertSeverityBorder[alert.severity] || 'border-l-muted')}>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-1">
                       <p className="text-sm font-medium">{alert.title}</p>
@@ -396,7 +573,6 @@ export default function ExecutiveDashboard() {
               ))}
             </div>
           )}
-
           {alerts.length === 0 && (
             <Card><CardContent className="p-6 text-center text-muted-foreground text-sm">Nenhum alerta ativo no momento</CardContent></Card>
           )}
@@ -407,7 +583,8 @@ export default function ExecutiveDashboard() {
           {!latestScenario ? (
             <Card><CardContent className="p-8 text-center">
               <Layers className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
-              <p className="text-muted-foreground mb-4">Clique em "Cenários" para gerar projeções estratégicas</p>
+              <p className="text-muted-foreground mb-2">Clique em "Cenários" para gerar projeções estratégicas</p>
+              <p className="text-xs text-muted-foreground">Serão gerados cenários otimista, realista e pessimista para os próximos 3 meses</p>
             </CardContent></Card>
           ) : (
             <>
