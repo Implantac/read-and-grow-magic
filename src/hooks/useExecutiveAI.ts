@@ -16,6 +16,16 @@ export interface ExecutiveKPIs {
   lowStockProducts: number;
   defaultRate: number;
   concentrationPct: number;
+  avgTicket: number;
+  revenueGrowth: number;
+  clientsAtRisk: number;
+  cashFlowProjection30d: number;
+  futureReceivables: number;
+  futurePayables: number;
+  prodEfficiency: number;
+  prodInProgress: number;
+  prodPlanned: number;
+  prodCompleted: number;
 }
 
 export interface ExecutiveInsight {
@@ -49,15 +59,24 @@ export interface ExecutiveAlert {
   created_at: string;
 }
 
+export interface SalesRepStat {
+  id: string;
+  name: string;
+  orders: number;
+  revenue: number;
+}
+
 export interface ExecutiveDashboardData {
   kpis: ExecutiveKPIs;
   revenueByMonth: { month: string; revenue: number }[];
   topClients: { name: string; revenue: number }[];
   expenseByCategory: Record<string, number>;
+  salesRepStats: SalesRepStat[];
+  funnelByStage: Record<string, { count: number; value: number }>;
   insights: ExecutiveInsight[];
   alerts: ExecutiveAlert[];
   scenarios: any[];
-  summary: { totalOrders: number; totalProducts: number; totalClients: number; productionOrders: number };
+  summary: { totalOrders: number; totalProducts: number; totalClients: number; productionOrders: number; funnelOpportunities: number };
 }
 
 export interface ChatMessage {
@@ -85,6 +104,22 @@ export function useGenerateInsights() {
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke('ai-executive', {
         body: { action: 'generate_insights' },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['executive-dashboard'] });
+    },
+  });
+}
+
+export function useGenerateScenarios() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('ai-executive', {
+        body: { action: 'generate_scenarios' },
       });
       if (error) throw error;
       return data;
