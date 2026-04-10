@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Target, Phone, AlertTriangle, TrendingUp, Users, Clock, CheckCircle,
   DollarSign, Trophy, Zap, ArrowRight, PhoneCall, Mail, MessageSquare,
-  Calendar, Star, ShieldAlert, Eye,
+  Calendar, Star, ShieldAlert, Eye, Brain, Sparkles, RefreshCw,
 } from 'lucide-react';
 import { useClients } from '@/hooks/useClients';
 import { useOrders } from '@/hooks/useOrders';
@@ -24,6 +24,7 @@ import { useSalesFunnel } from '@/hooks/useSalesFunnel';
 import { useSalesReps } from '@/hooks/useSalesReps';
 import { useFollowUps, useCreateFollowUp, useUpdateFollowUp, useClientInsights, useRepPerformance, useLostSalesAlerts, useSalesScript, type ClientInsight } from '@/hooks/useSalesIntelligence';
 import { useCommercialAlerts } from '@/hooks/useCommercialAlerts';
+import { useAIDailyActions, useAIRecommendations, useCompleteAIAction, useActOnRecommendation, useRunAIEngine } from '@/hooks/useAICommercial';
 import { differenceInDays, format, isToday, startOfMonth, endOfMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -53,6 +54,11 @@ export default function SellerDashboard() {
   const { data: reps = [] } = useSalesReps();
   const { data: followUps = [] } = useFollowUps();
   const { data: alerts = [] } = useCommercialAlerts('open');
+  const { data: aiActions = [] } = useAIDailyActions();
+  const { data: aiRecs = [] } = useAIRecommendations('pending');
+  const completeAIAction = useCompleteAIAction();
+  const actOnAIRec = useActOnRecommendation();
+  const runAIEngine = useRunAIEngine();
   const createFollowUp = useCreateFollowUp();
   const updateFollowUp = useUpdateFollowUp();
 
@@ -183,8 +189,9 @@ export default function SellerDashboard() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="opportunities" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+      <Tabs defaultValue="ai" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="ai">🤖 IA ({aiActions.filter(a => a.status === 'pending').length})</TabsTrigger>
           <TabsTrigger value="opportunities">🎯 Oportunidades</TabsTrigger>
           <TabsTrigger value="followups">📞 Follow-ups</TabsTrigger>
           <TabsTrigger value="at-risk">⚠️ Em Risco</TabsTrigger>
@@ -192,6 +199,101 @@ export default function SellerDashboard() {
           <TabsTrigger value="ranking">🏆 Ranking</TabsTrigger>
           <TabsTrigger value="pipeline">💰 Pipeline</TabsTrigger>
         </TabsList>
+
+        {/* AI Tab */}
+        <TabsContent value="ai" className="space-y-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium flex items-center gap-2">
+              <Brain className="h-4 w-4 text-primary" />
+              Suas Ações do Dia (IA)
+            </h3>
+            <Button size="sm" variant="outline" onClick={() => runAIEngine.mutate('generate_daily_actions')} disabled={runAIEngine.isPending}>
+              <RefreshCw className={`h-3 w-3 mr-1 ${runAIEngine.isPending ? 'animate-spin' : ''}`} /> Atualizar
+            </Button>
+          </div>
+
+          {aiActions.length === 0 ? (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Brain className="h-10 w-10 mx-auto text-muted-foreground/30 mb-3" />
+                <p className="text-sm text-muted-foreground mb-3">Nenhuma ação gerada pela IA hoje.</p>
+                <Button size="sm" onClick={() => runAIEngine.mutate('full_analysis')} disabled={runAIEngine.isPending}>
+                  <Brain className="h-3 w-3 mr-1" /> Gerar Análise Completa
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {aiActions.map(action => {
+                const isDone = action.status === 'completed';
+                const ActionIcon = action.action_type === 'urgent_call' ? ShieldAlert : action.action_type === 'recovery' ? AlertTriangle : action.action_type === 'upsell' ? TrendingUp : action.action_type === 'reorder' ? RefreshCw : Phone;
+                return (
+                  <Card key={action.id} className={isDone ? 'opacity-50' : ''}>
+                    <CardContent className="p-4 flex items-start gap-3">
+                      <div className={`p-2 rounded-lg ${isDone ? 'bg-muted' : action.priority <= 2 ? 'bg-destructive/10' : 'bg-primary/10'}`}>
+                        <ActionIcon className={`h-4 w-4 ${isDone ? 'text-muted-foreground' : action.priority <= 2 ? 'text-destructive' : 'text-primary'}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span className="font-medium text-sm">{action.title}</span>
+                          <Badge variant={action.priority <= 2 ? 'destructive' : 'outline'} className="text-[10px]">P{action.priority}</Badge>
+                          {isDone && <Badge className="bg-emerald-500 text-white text-[10px]">✓</Badge>}
+                        </div>
+                        <p className="text-xs text-muted-foreground">{action.description}</p>
+                        {action.explanation && (
+                          <p className="text-[10px] text-muted-foreground/70 mt-1 italic border-l-2 border-primary/30 pl-2">💡 {action.explanation}</p>
+                        )}
+                        {action.clients && (
+                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                            <Phone className="h-3 w-3" />
+                            <span>{action.clients.cellphone || action.clients.phone}</span>
+                            {action.estimated_value > 0 && <span className="text-primary font-medium">{fmt(action.estimated_value)}</span>}
+                          </div>
+                        )}
+                      </div>
+                      {!isDone && (
+                        <Button size="sm" variant="outline" onClick={() => completeAIAction.mutate({ id: action.id, result: 'contacted' })}>
+                          <CheckCircle className="h-3 w-3 mr-1" /> Feito
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+
+          {/* AI Recommendations section */}
+          {aiRecs.length > 0 && (
+            <div className="mt-6">
+              <h3 className="text-sm font-medium flex items-center gap-2 mb-3">
+                <Sparkles className="h-4 w-4 text-primary" />
+                Recomendações da IA
+                <Badge variant="secondary">{aiRecs.length}</Badge>
+              </h3>
+              <div className="space-y-2">
+                {aiRecs.slice(0, 5).map(rec => (
+                  <Card key={rec.id}>
+                    <CardContent className="p-3 flex items-center gap-3">
+                      <Sparkles className="h-4 w-4 text-primary shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-medium">{rec.title}</span>
+                          {rec.estimated_value > 0 && <Badge variant="secondary" className="text-[10px]">{fmt(rec.estimated_value)}</Badge>}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">{rec.description}</p>
+                        {rec.explanation && <p className="text-[10px] text-muted-foreground/70 italic mt-1">💡 {rec.explanation}</p>}
+                      </div>
+                      <Button size="sm" variant="outline" className="shrink-0" onClick={() => actOnAIRec.mutate({ id: rec.id, result: 'applied' })}>
+                        <ArrowRight className="h-3 w-3" />
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+        </TabsContent>
 
         {/* Opportunities Tab */}
         <TabsContent value="opportunities" className="space-y-4">
