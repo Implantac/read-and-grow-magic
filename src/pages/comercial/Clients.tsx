@@ -79,10 +79,10 @@ export default function ClientsPage() {
     email: '', phone: '', cellphone: '',
     address_street: '', address_number: '', address_complement: '',
     address_neighborhood: '', address_city: '', address_state: '', address_zip_code: '',
-    status: 'active', credit_limit: '', segment: '',
+    status: 'active', credit_limit: '', segment: '', sales_rep_id: '',
     state_registration: '', municipal_registration: '',
     region: '', micro_region: '', default_payment_condition: 'À vista',
-    price_table: 'default', abc_classification: 'C',
+    price_table: 'default', abc_classification: 'C', client_score: 'medium',
     commercial_notes: '', estimated_potential: '',
   });
 
