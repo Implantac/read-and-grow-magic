@@ -128,10 +128,16 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <CommandPalette />
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
+        <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route
+              path="/reset-password"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <ResetPassword />
+                </Suspense>
+              }
+            />
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
               
@@ -225,9 +231,15 @@ const App = () => (
               <Route path="/config/*" element={<PlaceholderPage title="Configurações" />} />
             </Route>
             <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="*" element={<NotFound />} />
+            <Route
+              path="*"
+              element={
+                <Suspense fallback={<PageLoader />}>
+                  <NotFound />
+                </Suspense>
+              }
+            />
           </Routes>
-        </Suspense>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
