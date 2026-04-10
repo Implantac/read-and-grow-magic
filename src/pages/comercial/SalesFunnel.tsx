@@ -77,7 +77,7 @@ export default function SalesFunnelPage() {
       });
       const stageConversion = enteredStage.length > 0 ? (pastStage.length / enteredStage.length) * 100 : 0;
       
-      return { ...stage, count: inStage.length, value, avgDays: Math.round(avgDays), stageConversion: Math.round(stageConversion) };
+      return { ...stage, count: inStage.length, totalValue: value, avgDays: Math.round(avgDays), stageConversion: Math.round(stageConversion) };
     });
   }, [funnel]);
 
