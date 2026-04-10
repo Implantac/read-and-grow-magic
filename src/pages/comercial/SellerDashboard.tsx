@@ -189,8 +189,9 @@ export default function SellerDashboard() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="opportunities" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+      <Tabs defaultValue="ai" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="ai">🤖 IA ({aiActions.filter(a => a.status === 'pending').length})</TabsTrigger>
           <TabsTrigger value="opportunities">🎯 Oportunidades</TabsTrigger>
           <TabsTrigger value="followups">📞 Follow-ups</TabsTrigger>
           <TabsTrigger value="at-risk">⚠️ Em Risco</TabsTrigger>
