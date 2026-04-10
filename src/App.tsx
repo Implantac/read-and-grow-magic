@@ -162,6 +162,7 @@ const App = () => (
             />
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/diretoria/executive" element={<ExecutiveDashboardPage />} />
               
               {/* Commercial Module */}
               <Route path="/comercial/dashboard" element={<CommercialDashboardPage />} />
