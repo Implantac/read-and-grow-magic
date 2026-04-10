@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, Eye, Edit, Trash2, DollarSign, AlertTriangle, Clock, CheckCircle, Mail, Loader2 } from 'lucide-react';
+import { Plus, Search, Eye, Edit, Trash2, DollarSign, AlertTriangle, Clock, CheckCircle, Mail, FileText } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageLoading } from '@/components/shared/PageLoading';
@@ -7,25 +7,22 @@ import { KPICard } from '@/components/shared/KPICard';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table';
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
-} from '@/components/ui/dialog';
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/components/ui/select';
+import { Card, CardContent } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { StatusBadge } from '@/components/shared/StatusBadge';
+import { Badge } from '@/components/ui/badge';
 import { financialCategories } from '@/config/financial';
-import { PaymentStatus, PaymentMethod } from '@/types/financial';
+import { PaymentMethod } from '@/types/financial';
 import { useToast } from '@/hooks/use-toast';
 import { useAccountsReceivable, useCreateAccountReceivable, useUpdateAccountReceivable, useDeleteAccountReceivable } from '@/hooks/useAccountsReceivable';
+import { useCreatePaymentRecord } from '@/hooks/usePaymentRecords';
+import { useBankAccounts } from '@/hooks/useBankAccounts';
 import { useClients } from '@/hooks/useClients';
-import { format } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const paymentMethods: Record<PaymentMethod, string> = {
@@ -33,25 +30,40 @@ const paymentMethods: Record<PaymentMethod, string> = {
   debit_card: 'Cartão de Débito', transfer: 'Transferência', cash: 'Dinheiro',
 };
 
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+
 export default function AccountsReceivable() {
   const { toast } = useToast();
   const { data: accounts = [], isLoading } = useAccountsReceivable();
   const { data: clients = [] } = useClients();
+  const { data: bankAccounts = [] } = useBankAccounts();
   const createMutation = useCreateAccountReceivable();
   const updateMutation = useUpdateAccountReceivable();
   const deleteMutation = useDeleteAccountReceivable();
+  const createPayment = useCreatePaymentRecord();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isReceiveDialogOpen, setIsReceiveDialogOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<typeof accounts[0] | null>(null);
-  const [formData, setFormData] = useState({
-    description: '', clientId: '', category: '', amount: '', dueDate: '', invoiceNumber: '', notes: '',
-  });
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix');
 
+  // Create form
+  const [formData, setFormData] = useState({
+    description: '', clientId: '', category: '', amount: '', dueDate: '',
+    invoiceNumber: '', notes: '', installments: '1',
+  });
+
+  // Payment form
+  const [payForm, setPayForm] = useState({
+    amount: '', interest: '0', penalty: '0', discount: '0',
+    paymentMethod: 'pix' as PaymentMethod, bankAccountId: '', notes: '',
+  });
+
+  const now = new Date();
   const categories = [...new Set(accounts.map(a => a.category))];
 
   const filteredAccounts = accounts.filter(account => {
@@ -64,11 +76,15 @@ export default function AccountsReceivable() {
     return matchesSearch && matchesStatus && matchesCategory;
   });
 
+  const pendingAccounts = accounts.filter(a => a.status !== 'paid' && a.status !== 'cancelled');
   const summaryData = {
-    total: accounts.reduce((sum, a) => sum + Number(a.amount), 0),
-    pending: accounts.filter(a => a.status === 'pending').reduce((sum, a) => sum + Number(a.amount), 0),
-    overdue: accounts.filter(a => a.status === 'overdue').reduce((sum, a) => sum + Number(a.amount), 0),
-    received: accounts.filter(a => a.status === 'paid').reduce((sum, a) => sum + Number(a.amount), 0),
+    total: pendingAccounts.reduce((s, a) => s + Number(a.open_amount ?? a.amount), 0),
+    pending: accounts.filter(a => a.status === 'pending').reduce((s, a) => s + Number(a.open_amount ?? a.amount), 0),
+    overdue: accounts.filter(a => {
+      const isOverdue = a.status === 'overdue' || (a.status === 'pending' && new Date(a.due_date) < now);
+      return isOverdue;
+    }).reduce((s, a) => s + Number(a.open_amount ?? a.amount), 0),
+    received: accounts.filter(a => a.status === 'paid').reduce((s, a) => s + Number(a.paid_amount ?? a.amount), 0),
   };
 
   const handleSubmit = () => {
@@ -77,109 +93,186 @@ export default function AccountsReceivable() {
       return;
     }
     const client = clients.find(c => c.id === formData.clientId);
-    createMutation.mutate({
-      description: formData.description,
-      client_name: client?.name || '',
-      client_id: formData.clientId,
-      category: formData.category || 'Vendas',
-      amount: parseFloat(formData.amount),
-      due_date: formData.dueDate,
-      invoice_number: formData.invoiceNumber || null,
-      notes: formData.notes || null,
-    }, {
-      onSuccess: () => {
-        setIsDialogOpen(false);
-        setFormData({ description: '', clientId: '', category: '', amount: '', dueDate: '', invoiceNumber: '', notes: '' });
+    const totalAmount = parseFloat(formData.amount);
+    const installments = parseInt(formData.installments) || 1;
+
+    if (installments === 1) {
+      createMutation.mutate({
+        description: formData.description,
+        client_name: client?.name || '',
+        client_id: formData.clientId,
+        category: formData.category || 'Vendas',
+        amount: totalAmount,
+        original_amount: totalAmount,
+        open_amount: totalAmount,
+        due_date: formData.dueDate,
+        invoice_number: formData.invoiceNumber || null,
+        notes: formData.notes || null,
+        installment_number: 1,
+        total_installments: 1,
+      }, { onSuccess: () => { setIsDialogOpen(false); resetForm(); } });
+    } else {
+      const installmentAmount = Math.round((totalAmount / installments) * 100) / 100;
+      const baseDate = new Date(formData.dueDate);
+
+      for (let i = 0; i < installments; i++) {
+        const dueDate = new Date(baseDate);
+        dueDate.setMonth(dueDate.getMonth() + i);
+        const isLast = i === installments - 1;
+        const amount = isLast ? totalAmount - installmentAmount * (installments - 1) : installmentAmount;
+
+        createMutation.mutate({
+          description: `${formData.description} (${i + 1}/${installments})`,
+          client_name: client?.name || '',
+          client_id: formData.clientId,
+          category: formData.category || 'Vendas',
+          amount,
+          original_amount: amount,
+          open_amount: amount,
+          due_date: dueDate.toISOString().split('T')[0],
+          invoice_number: formData.invoiceNumber || null,
+          notes: formData.notes || null,
+          installment_number: i + 1,
+          total_installments: installments,
+        });
       }
-    });
+      setIsDialogOpen(false);
+      resetForm();
+    }
+  };
+
+  const resetForm = () => setFormData({ description: '', clientId: '', category: '', amount: '', dueDate: '', invoiceNumber: '', notes: '', installments: '1' });
+
+  const openReceiveDialog = (account: typeof accounts[0]) => {
+    setSelectedAccount(account);
+    const openAmt = Number(account.open_amount ?? account.amount);
+    setPayForm({ amount: openAmt.toString(), interest: '0', penalty: '0', discount: '0', paymentMethod: 'pix', bankAccountId: '', notes: '' });
+    setIsReceiveDialogOpen(true);
   };
 
   const handleReceive = () => {
     if (!selectedAccount) return;
-    updateMutation.mutate({
-      id: selectedAccount.id,
-      status: 'paid',
-      payment_date: new Date().toISOString(),
-      payment_method: paymentMethod,
+    const amount = parseFloat(payForm.amount) || 0;
+    const interest = parseFloat(payForm.interest) || 0;
+    const penalty = parseFloat(payForm.penalty) || 0;
+    const discount = parseFloat(payForm.discount) || 0;
+    const totalPaid = amount + interest + penalty - discount;
+    const openAmount = Number(selectedAccount.open_amount ?? selectedAccount.amount);
+
+    if (amount <= 0) {
+      toast({ title: 'Erro', description: 'Informe o valor do recebimento', variant: 'destructive' });
+      return;
+    }
+
+    createPayment.mutate({
+      receivable_id: selectedAccount.id,
+      payable_id: null,
+      amount, interest, penalty, discount, total_paid: totalPaid,
+      payment_method: payForm.paymentMethod,
+      payment_date: new Date().toISOString().split('T')[0],
+      bank_account_id: payForm.bankAccountId || null,
+      notes: payForm.notes || null,
+      created_by: null,
     }, {
       onSuccess: () => {
+        const newPaidAmount = Number(selectedAccount.paid_amount ?? 0) + amount;
+        const newOpenAmount = openAmount - amount;
+        const newStatus = newOpenAmount <= 0.01 ? 'paid' : 'partial';
+
+        updateMutation.mutate({
+          id: selectedAccount.id,
+          paid_amount: newPaidAmount,
+          open_amount: Math.max(0, newOpenAmount),
+          status: newStatus,
+          payment_date: newStatus === 'paid' ? new Date().toISOString() : selectedAccount.payment_date,
+          payment_method: payForm.paymentMethod,
+          interest: Number(selectedAccount.interest ?? 0) + interest,
+          penalty: Number(selectedAccount.penalty ?? 0) + penalty,
+          discount_amount: Number(selectedAccount.discount_amount ?? 0) + discount,
+        });
         setIsReceiveDialogOpen(false);
         setSelectedAccount(null);
-        toast({ title: 'Sucesso', description: 'Recebimento registrado com sucesso' });
+        toast({ title: 'Sucesso', description: newStatus === 'paid' ? 'Título quitado com sucesso' : 'Baixa parcial registrada com sucesso' });
       }
     });
   };
 
-  const handleSendReminder = (account: typeof accounts[0]) => {
-    toast({ title: 'Lembrete enviado', description: `Lembrete de cobrança enviado para ${account.client_name}` });
+  const getDaysOverdue = (dueDate: string) => {
+    const days = differenceInDays(now, new Date(dueDate));
+    return days > 0 ? days : 0;
   };
 
-  const handleDelete = (id: string) => {
-    deleteMutation.mutate(id);
+  const getAgingBadge = (dueDate: string, status: string) => {
+    if (status === 'paid' || status === 'cancelled') return null;
+    const days = getDaysOverdue(dueDate);
+    if (days === 0) return null;
+    if (days <= 7) return <Badge variant="outline" className="text-yellow-600 border-yellow-300 bg-yellow-50 text-xs">{days}d</Badge>;
+    if (days <= 30) return <Badge variant="outline" className="text-orange-600 border-orange-300 bg-orange-50 text-xs">{days}d</Badge>;
+    return <Badge variant="outline" className="text-destructive border-destructive/30 bg-destructive/5 text-xs">{days}d</Badge>;
   };
 
-  const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-
-  if (isLoading) {
-    return <PageLoading message="Carregando contas a receber..." />;
-  }
+  if (isLoading) return <PageLoading message="Carregando contas a receber..." />;
 
   return (
     <PageContainer>
       <PageHeader title="Contas a Receber" description="Gerencie seus recebíveis e cobranças">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2"><Plus className="h-4 w-4" />Nova Conta</Button>
-          </DialogTrigger>
+          <DialogTrigger asChild><Button className="gap-2"><Plus className="h-4 w-4" />Nova Conta</Button></DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader><DialogTitle>Nova Conta a Receber</DialogTitle></DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="description">Descrição *</Label>
-                <Input id="description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Descrição da conta" />
+                <Label>Descrição *</Label>
+                <Input value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Descrição da conta" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="client">Cliente *</Label>
+                  <Label>Cliente *</Label>
                   <Select value={formData.clientId} onValueChange={(v) => setFormData({ ...formData, clientId: v })}>
                     <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                    <SelectContent>
-                      {clients.map(client => (
-                        <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
-                      ))}
-                    </SelectContent>
+                    <SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="category">Categoria</Label>
+                  <Label>Categoria</Label>
                   <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
                     <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectContent>{financialCategories.filter(c => c.type === 'income').map(cat => <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="grid gap-2">
+                  <Label>Valor Total *</Label>
+                  <Input type="number" step="0.01" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} placeholder="0,00" />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Vencimento *</Label>
+                  <Input type="date" value={formData.dueDate} onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })} />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Parcelas</Label>
+                  <Select value={formData.installments} onValueChange={(v) => setFormData({ ...formData, installments: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {financialCategories.filter(c => c.type === 'income').map(cat => (
-                        <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
-                      ))}
+                      {[1,2,3,4,5,6,7,8,9,10,11,12].map(n => <SelectItem key={n} value={n.toString()}>{n}x</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="amount">Valor *</Label>
-                  <Input id="amount" type="number" step="0.01" value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })} placeholder="0,00" />
+              {parseInt(formData.installments) > 1 && formData.amount && (
+                <div className="rounded-md bg-muted p-3 text-sm">
+                  <p className="font-medium">Parcelamento: {formData.installments}x de {formatCurrency(parseFloat(formData.amount) / parseInt(formData.installments))}</p>
+                  <p className="text-muted-foreground">Parcelas com vencimento mensal a partir de {formData.dueDate}</p>
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="dueDate">Vencimento *</Label>
-                  <Input id="dueDate" type="date" value={formData.dueDate} onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })} />
-                </div>
+              )}
+              <div className="grid gap-2">
+                <Label>Número da Nota</Label>
+                <Input value={formData.invoiceNumber} onChange={(e) => setFormData({ ...formData, invoiceNumber: e.target.value })} placeholder="NF-0000" />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="invoiceNumber">Número da Nota</Label>
-                <Input id="invoiceNumber" value={formData.invoiceNumber} onChange={(e) => setFormData({ ...formData, invoiceNumber: e.target.value })} placeholder="NF-0000" />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="notes">Observações</Label>
-                <Textarea id="notes" value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Observações adicionais" />
+                <Label>Observações</Label>
+                <Textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} placeholder="Observações adicionais" />
               </div>
             </div>
             <DialogFooter>
@@ -190,15 +283,13 @@ export default function AccountsReceivable() {
         </Dialog>
       </PageHeader>
 
-      {/* Summary Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KPICard title="Total a Receber" value={formatCurrency(summaryData.total)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="Pendente" value={formatCurrency(summaryData.pending)} icon={<Clock className="h-5 w-5" />} accentColor="warning" index={1} />
-        <KPICard title="Vencido" value={formatCurrency(summaryData.overdue)} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={2} />
+        <KPICard title="Total em Aberto" value={formatCurrency(summaryData.total)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="A Vencer" value={formatCurrency(summaryData.pending)} subtitle={`${accounts.filter(a => a.status === 'pending').length} títulos`} icon={<Clock className="h-5 w-5" />} accentColor="warning" index={1} />
+        <KPICard title="Vencido" value={formatCurrency(summaryData.overdue)} subtitle={`${accounts.filter(a => a.status === 'overdue' || (a.status === 'pending' && new Date(a.due_date) < now)).length} títulos`} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={2} />
         <KPICard title="Recebido" value={formatCurrency(summaryData.received)} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={3} />
       </div>
 
-      {/* Filters */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col gap-4 sm:flex-row">
@@ -211,8 +302,10 @@ export default function AccountsReceivable() {
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="pending">Pendente</SelectItem>
+                <SelectItem value="partial">Parcial</SelectItem>
                 <SelectItem value="overdue">Vencido</SelectItem>
                 <SelectItem value="paid">Recebido</SelectItem>
+                <SelectItem value="renegotiated">Renegociado</SelectItem>
                 <SelectItem value="cancelled">Cancelado</SelectItem>
               </SelectContent>
             </Select>
@@ -220,7 +313,7 @@ export default function AccountsReceivable() {
               <SelectTrigger className="w-full sm:w-40"><SelectValue placeholder="Categoria" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
-                {categories.map(cat => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
+                {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
               </SelectContent>
             </Select>
             <ExportButton
@@ -230,7 +323,9 @@ export default function AccountsReceivable() {
                 { key: 'client_name', label: 'Cliente' },
                 { key: 'category', label: 'Categoria' },
                 { key: 'due_date', label: 'Vencimento', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
-                { key: 'amount', label: 'Valor', format: (v) => formatCurrency(Number(v)) },
+                { key: 'amount', label: 'Valor Original', format: (v) => formatCurrency(Number(v)) },
+                { key: 'open_amount', label: 'Em Aberto', format: (v) => formatCurrency(Number(v ?? 0)) },
+                { key: 'paid_amount', label: 'Pago', format: (v) => formatCurrency(Number(v ?? 0)) },
                 { key: 'status', label: 'Status' },
               ]}
               filename="contas_receber"
@@ -239,7 +334,6 @@ export default function AccountsReceivable() {
         </CardContent>
       </Card>
 
-      {/* Table */}
       <Card>
         <CardContent className="p-0">
           <Table>
@@ -247,9 +341,11 @@ export default function AccountsReceivable() {
               <TableRow>
                 <TableHead>Descrição</TableHead>
                 <TableHead>Cliente</TableHead>
-                <TableHead>Categoria</TableHead>
                 <TableHead>Vencimento</TableHead>
-                <TableHead className="text-right">Valor</TableHead>
+                <TableHead className="text-right">Original</TableHead>
+                <TableHead className="text-right">Em Aberto</TableHead>
+                <TableHead className="text-right">Pago</TableHead>
+                <TableHead>Parcela</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
@@ -260,31 +356,44 @@ export default function AccountsReceivable() {
                   <TableCell>
                     <div>
                       <div className="font-medium">{account.description}</div>
-                      {account.invoice_number && <div className="text-sm text-muted-foreground">{account.invoice_number}</div>}
+                      {account.invoice_number && <div className="text-xs text-muted-foreground">{account.invoice_number}</div>}
                     </div>
                   </TableCell>
-                  <TableCell>{account.client_name}</TableCell>
-                  <TableCell>{account.category}</TableCell>
-                  <TableCell>{format(new Date(account.due_date), 'dd/MM/yyyy', { locale: ptBR })}</TableCell>
-                  <TableCell className="text-right font-medium">{formatCurrency(Number(account.amount))}</TableCell>
+                  <TableCell className="text-sm">{account.client_name}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm">{format(new Date(account.due_date), 'dd/MM/yyyy', { locale: ptBR })}</span>
+                      {getAgingBadge(account.due_date, account.status)}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right text-sm">{formatCurrency(Number(account.original_amount ?? account.amount))}</TableCell>
+                  <TableCell className="text-right text-sm font-medium">{formatCurrency(Number(account.open_amount ?? account.amount))}</TableCell>
+                  <TableCell className="text-right text-sm text-success">{formatCurrency(Number(account.paid_amount ?? 0))}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {account.total_installments && account.total_installments > 1
+                      ? `${account.installment_number}/${account.total_installments}`
+                      : '-'}
+                  </TableCell>
                   <TableCell><StatusBadge type="payment" status={account.status} /></TableCell>
                   <TableCell>
                     <div className="flex justify-end gap-1">
                       {account.status !== 'paid' && account.status !== 'cancelled' && (
                         <>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-success hover:text-success" onClick={() => { setSelectedAccount(account); setIsReceiveDialogOpen(true); }} title="Registrar recebimento">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-success hover:text-success" onClick={() => openReceiveDialog(account)} title="Registrar recebimento">
                             <DollarSign className="h-4 w-4" />
                           </Button>
-                          {account.status === 'overdue' && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-warning hover:text-warning" onClick={() => handleSendReminder(account)} title="Enviar lembrete">
+                          {(account.status === 'overdue' || (account.status === 'pending' && new Date(account.due_date) < now)) && (
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-warning hover:text-warning" title="Enviar cobrança"
+                              onClick={() => toast({ title: 'Lembrete enviado', description: `Cobrança enviada para ${account.client_name}` })}>
                               <Mail className="h-4 w-4" />
                             </Button>
                           )}
                         </>
                       )}
-                      <Button variant="ghost" size="icon" className="h-8 w-8"><Eye className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8"><Edit className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(account.id)}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setSelectedAccount(account); setIsDetailOpen(true); }}>
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => deleteMutation.mutate(account.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -292,43 +401,117 @@ export default function AccountsReceivable() {
                 </TableRow>
               ))}
               {filteredAccounts.length === 0 && (
-                <TableRow><TableCell colSpan={7} className="h-24 text-center text-muted-foreground">Nenhuma conta encontrada</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="h-24 text-center text-muted-foreground">Nenhuma conta encontrada</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
-      {/* Receive Dialog */}
+      {/* Receive Dialog - Professional */}
       <Dialog open={isReceiveDialogOpen} onOpenChange={setIsReceiveDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader><DialogTitle>Registrar Recebimento</DialogTitle></DialogHeader>
           {selectedAccount && (
-            <div className="space-y-4 py-4">
+            <div className="space-y-4 py-2">
               <div className="rounded-lg bg-muted p-4">
                 <p className="font-medium">{selectedAccount.description}</p>
                 <p className="text-sm text-muted-foreground">{selectedAccount.client_name}</p>
-                <p className="mt-2 text-2xl font-bold">{formatCurrency(Number(selectedAccount.amount))}</p>
+                <div className="mt-2 flex justify-between">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Original</p>
+                    <p className="font-medium">{formatCurrency(Number(selectedAccount.original_amount ?? selectedAccount.amount))}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">Em Aberto</p>
+                    <p className="text-xl font-bold text-primary">{formatCurrency(Number(selectedAccount.open_amount ?? selectedAccount.amount))}</p>
+                  </div>
+                </div>
               </div>
-              <div className="grid gap-2">
-                <Label>Forma de Recebimento</Label>
-                <Select value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as PaymentMethod)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(paymentMethods).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>{label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-1.5">
+                  <Label className="text-xs">Valor Recebido *</Label>
+                  <Input type="number" step="0.01" value={payForm.amount} onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })} />
+                </div>
+                <div className="grid gap-1.5">
+                  <Label className="text-xs">Juros</Label>
+                  <Input type="number" step="0.01" value={payForm.interest} onChange={(e) => setPayForm({ ...payForm, interest: e.target.value })} />
+                </div>
+                <div className="grid gap-1.5">
+                  <Label className="text-xs">Multa</Label>
+                  <Input type="number" step="0.01" value={payForm.penalty} onChange={(e) => setPayForm({ ...payForm, penalty: e.target.value })} />
+                </div>
+                <div className="grid gap-1.5">
+                  <Label className="text-xs">Desconto</Label>
+                  <Input type="number" step="0.01" value={payForm.discount} onChange={(e) => setPayForm({ ...payForm, discount: e.target.value })} />
+                </div>
+              </div>
+
+              <div className="rounded-md border p-3 bg-accent/50">
+                <p className="text-xs text-muted-foreground">Total Líquido</p>
+                <p className="text-lg font-bold">
+                  {formatCurrency(
+                    (parseFloat(payForm.amount) || 0) + (parseFloat(payForm.interest) || 0) + (parseFloat(payForm.penalty) || 0) - (parseFloat(payForm.discount) || 0)
+                  )}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="grid gap-1.5">
+                  <Label className="text-xs">Forma de Recebimento</Label>
+                  <Select value={payForm.paymentMethod} onValueChange={(v) => setPayForm({ ...payForm, paymentMethod: v as PaymentMethod })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>{Object.entries(paymentMethods).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-1.5">
+                  <Label className="text-xs">Conta Bancária</Label>
+                  <Select value={payForm.bankAccountId} onValueChange={(v) => setPayForm({ ...payForm, bankAccountId: v })}>
+                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectContent>{bankAccounts.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid gap-1.5">
+                <Label className="text-xs">Observações</Label>
+                <Textarea value={payForm.notes} onChange={(e) => setPayForm({ ...payForm, notes: e.target.value })} className="h-16" />
               </div>
             </div>
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsReceiveDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleReceive} disabled={updateMutation.isPending} className="gap-2">
-              <CheckCircle className="h-4 w-4" />Confirmar Recebimento
+            <Button onClick={handleReceive} disabled={createPayment.isPending} className="gap-2">
+              <CheckCircle className="h-4 w-4" />Confirmar
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Detail Dialog */}
+      <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Detalhes do Título</DialogTitle></DialogHeader>
+          {selectedAccount && (
+            <div className="space-y-3 py-2 text-sm">
+              <div className="grid grid-cols-2 gap-2">
+                <div><p className="text-muted-foreground">Descrição</p><p className="font-medium">{selectedAccount.description}</p></div>
+                <div><p className="text-muted-foreground">Cliente</p><p className="font-medium">{selectedAccount.client_name}</p></div>
+                <div><p className="text-muted-foreground">Categoria</p><p>{selectedAccount.category}</p></div>
+                <div><p className="text-muted-foreground">Nota Fiscal</p><p>{selectedAccount.invoice_number || '-'}</p></div>
+                <div><p className="text-muted-foreground">Vencimento</p><p>{format(new Date(selectedAccount.due_date), 'dd/MM/yyyy', { locale: ptBR })}</p></div>
+                <div><p className="text-muted-foreground">Parcela</p><p>{selectedAccount.total_installments && selectedAccount.total_installments > 1 ? `${selectedAccount.installment_number}/${selectedAccount.total_installments}` : 'Única'}</p></div>
+                <div><p className="text-muted-foreground">Valor Original</p><p className="font-medium">{formatCurrency(Number(selectedAccount.original_amount ?? selectedAccount.amount))}</p></div>
+                <div><p className="text-muted-foreground">Em Aberto</p><p className="font-medium text-primary">{formatCurrency(Number(selectedAccount.open_amount ?? selectedAccount.amount))}</p></div>
+                <div><p className="text-muted-foreground">Pago</p><p className="text-success">{formatCurrency(Number(selectedAccount.paid_amount ?? 0))}</p></div>
+                <div><p className="text-muted-foreground">Juros</p><p>{formatCurrency(Number(selectedAccount.interest ?? 0))}</p></div>
+                <div><p className="text-muted-foreground">Multa</p><p>{formatCurrency(Number(selectedAccount.penalty ?? 0))}</p></div>
+                <div><p className="text-muted-foreground">Desconto</p><p>{formatCurrency(Number(selectedAccount.discount_amount ?? 0))}</p></div>
+              </div>
+              {selectedAccount.notes && <div><p className="text-muted-foreground">Observações</p><p>{selectedAccount.notes}</p></div>}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </PageContainer>
