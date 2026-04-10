@@ -8,12 +8,23 @@ export interface AccountPayableRow {
   supplier: string;
   category: string;
   amount: number;
+  original_amount: number | null;
+  open_amount: number | null;
+  paid_amount: number | null;
+  interest: number | null;
+  penalty: number | null;
+  discount_amount: number | null;
   due_date: string;
   payment_date: string | null;
   status: string;
   payment_method: string | null;
   notes: string | null;
   invoice_number: string | null;
+  expense_type: string | null;
+  cost_center_id: string | null;
+  bank_account_id: string | null;
+  installment_number: number | null;
+  total_installments: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -37,7 +48,7 @@ export function useCreateAccountPayable() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (account: Omit<AccountPayableRow, 'id' | 'created_at' | 'updated_at' | 'payment_date' | 'payment_method' | 'status'> & { status?: string }) => {
+    mutationFn: async (account: Partial<AccountPayableRow> & { description: string; supplier: string; due_date: string; amount: number }) => {
       const { data, error } = await supabase
         .from('accounts_payable')
         .insert(account)
