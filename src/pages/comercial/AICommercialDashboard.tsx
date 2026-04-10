@@ -372,7 +372,7 @@ function RecommendationCard({ rec, onAct }: { rec: AIRecommendation; onAct: (res
             <div className="flex items-center gap-2 mb-1 flex-wrap">
               <span className="font-medium text-sm">{rec.title}</span>
               <Badge variant="outline" className="text-xs">{typeLabels[rec.recommendation_type] || rec.recommendation_type}</Badge>
-              <Badge className={PRIORITY_MAP[rec.priority] || ''} variant="outline" className2="text-xs">{rec.priority}</Badge>
+              <Badge className={`text-xs ${PRIORITY_MAP[rec.priority] || ''}`} variant="outline">{rec.priority}</Badge>
               {rec.estimated_value > 0 && <Badge variant="secondary" className="text-xs">{fmt(rec.estimated_value)}</Badge>}
             </div>
             <p className="text-xs text-muted-foreground">{rec.description}</p>
