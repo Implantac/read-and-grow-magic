@@ -110,6 +110,10 @@ const ProductionReport = lazy(() => import("./pages/relatorios/ProductionReport"
 const UsersPage = lazy(() => import("./pages/admin/Users"));
 const CompaniesPage = lazy(() => import("./pages/admin/Companies"));
 const ParametersPage = lazy(() => import("./pages/admin/Parameters"));
+const SuperAdminPage = lazy(() => import("./pages/admin/SuperAdmin"));
+
+// SaaS
+const LandingPage = lazy(() => import("./pages/LandingPage"));
 
 // Profile & Notifications
 const ProfilePage = lazy(() => import("./pages/Profile"));
@@ -248,6 +252,7 @@ const App = () => (
               <Route path="/admin/usuarios" element={<UsersPage />} />
               <Route path="/admin/empresas" element={<CompaniesPage />} />
               <Route path="/admin/parametros" element={<ParametersPage />} />
+              <Route path="/admin/super" element={<SuperAdminPage />} />
 
               {/* Profile & Notifications */}
               <Route path="/perfil" element={<ProfilePage />} />
@@ -256,7 +261,7 @@ const App = () => (
               {/* Config - Placeholder routes */}
               <Route path="/config/*" element={<PlaceholderPage title="Configurações" />} />
             </Route>
-            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/" element={<Suspense fallback={<PageLoader />}><LandingPage /></Suspense>} />
             <Route
               path="*"
               element={
