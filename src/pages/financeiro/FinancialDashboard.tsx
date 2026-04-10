@@ -92,6 +92,20 @@ export default function FinancialDashboard() {
     });
   }, [receivables, payables]);
 
+  // DRE Gerencial simplificado
+  const dreData = useMemo(() => {
+    const paidReceivables = receivables.filter(r => r.status === 'paid');
+    const paidPayables = payables.filter(p => p.status === 'paid');
+    const totalRevenue = paidReceivables.reduce((s, r) => s + Number(r.paid_amount ?? r.amount), 0);
+    const totalCosts = paidPayables.filter(p => p.category === 'Fornecedores').reduce((s, p) => s + Number(p.paid_amount ?? p.amount), 0);
+    const grossProfit = totalRevenue - totalCosts;
+    const totalExpenses = paidPayables.filter(p => p.category !== 'Fornecedores').reduce((s, p) => s + Number(p.paid_amount ?? p.amount), 0);
+    const netProfit = grossProfit - totalExpenses;
+    const grossMargin = totalRevenue > 0 ? (grossProfit / totalRevenue * 100) : 0;
+    const netMargin = totalRevenue > 0 ? (netProfit / totalRevenue * 100) : 0;
+    return { totalRevenue, totalCosts, grossProfit, totalExpenses, netProfit, grossMargin, netMargin };
+  }, [receivables, payables]);
+
   return (
     <PageContainer>
       <PageHeader title="Dashboard Financeiro" description="Visão gerencial completa do financeiro" />
