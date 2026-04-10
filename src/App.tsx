@@ -30,6 +30,7 @@ const ForecastPage = lazy(() => import("./pages/comercial/Forecast"));
 const SellerDashboardPage = lazy(() => import("./pages/comercial/SellerDashboard"));
 const CampaignsPage = lazy(() => import("./pages/comercial/Campaigns"));
 const PerformanceDashboardPage = lazy(() => import("./pages/comercial/PerformanceDashboard"));
+const AICommercialDashboardPage = lazy(() => import("./pages/comercial/AICommercialDashboard"));
 
 // Credit & Risk
 const CreditAnalysisPage = lazy(() => import("./pages/credito/CreditAnalysis"));
@@ -175,6 +176,7 @@ const App = () => (
               <Route path="/comercial/vendedor" element={<SellerDashboardPage />} />
               <Route path="/comercial/campanhas" element={<CampaignsPage />} />
               <Route path="/comercial/performance" element={<PerformanceDashboardPage />} />
+              <Route path="/comercial/ia" element={<AICommercialDashboardPage />} />
               
               {/* Financial Module */}
               <Route path="/financeiro/dashboard" element={<FinancialDashboardPage />} />
