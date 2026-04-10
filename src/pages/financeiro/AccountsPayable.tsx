@@ -180,8 +180,8 @@ export default function AccountsPayable() {
     if (status === 'paid' || status === 'cancelled') return null;
     const days = getDaysOverdue(dueDate);
     if (days === 0) return null;
-    if (days <= 7) return <Badge variant="outline" className="text-yellow-600 border-yellow-300 bg-yellow-50 text-xs">{days}d</Badge>;
-    if (days <= 30) return <Badge variant="outline" className="text-orange-600 border-orange-300 bg-orange-50 text-xs">{days}d</Badge>;
+    if (days <= 7) return <Badge variant="outline" className="text-warning border-warning/30 bg-warning/10 text-xs">{days}d</Badge>;
+    if (days <= 30) return <Badge variant="outline" className="text-warning border-warning/50 bg-warning/20 text-xs">{days}d</Badge>;
     return <Badge variant="outline" className="text-destructive border-destructive/30 bg-destructive/5 text-xs">{days}d</Badge>;
   };
 
