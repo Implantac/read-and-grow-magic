@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,17 +13,19 @@ import { Progress } from '@/components/ui/progress';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { useOrders } from '@/hooks/useOrders';
 import { useOrderLifecycle, checkProductionCompletion } from '@/hooks/useOrderLifecycle';
+import { useTimeEntries } from '@/hooks/useTimeEntries';
 import { supabase } from '@/integrations/supabase/client';
 import { productionStatusConfig, priorityConfig } from '@/config/production';
-import { Factory, Clock, CheckCircle, AlertTriangle, Search, Plus, Play, Pause, BarChart3 } from 'lucide-react';
-import { format, differenceInDays, parseISO } from 'date-fns';
+import { Factory, Clock, CheckCircle, AlertTriangle, Search, Plus, Play, Pause, BarChart3, Users, Gauge, Bell, ShieldCheck } from 'lucide-react';
+import { format, differenceInDays, parseISO, differenceInMinutes } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 export default function PCPPanel() {
   const { orders: productionOrders, loading, refetch, update } = useProductionOrders();
   const { data: salesOrders } = useOrders();
+  const { entries: timeEntries } = useTimeEntries();
   const lifecycle = useOrderLifecycle();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -159,6 +161,8 @@ export default function PCPPanel() {
           <TabsTrigger value="orders">Ordens de Produção</TabsTrigger>
           <TabsTrigger value="demand">Demanda Comercial ({ordersAwaitingProduction.length})</TabsTrigger>
           <TabsTrigger value="capacity">Capacidade {delayedOPs.length > 0 && <Badge variant="destructive" className="ml-1 h-5 text-[10px]">{delayedOPs.length}</Badge>}</TabsTrigger>
+          <TabsTrigger value="productivity">Produtividade</TabsTrigger>
+          <TabsTrigger value="alerts">Alertas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="orders" className="mt-4">
@@ -335,6 +339,187 @@ export default function PCPPanel() {
                     </div>
                   ))}
                 </div>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Productivity Tab */}
+        <TabsContent value="productivity" className="mt-4 space-y-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Productivity by Operator */}
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Users className="h-5 w-5" /> Produtividade por Operador</CardTitle></CardHeader>
+              <CardContent>
+                {(() => {
+                  const operatorData = timeEntries.reduce((acc: Record<string, { produced: number; time: number }>, e) => {
+                    const op = e.operator || 'Sem operador';
+                    if (!acc[op]) acc[op] = { produced: 0, time: 0 };
+                    acc[op].produced += Number(e.produced_quantity);
+                    if (e.start_time && e.end_time) {
+                      acc[op].time += differenceInMinutes(new Date(e.end_time), new Date(e.start_time)) - (e.paused_time || 0);
+                    }
+                    return acc;
+                  }, {});
+                  const chartData = Object.entries(operatorData).map(([name, v]) => ({
+                    name: name.length > 12 ? name.slice(0, 12) + '...' : name,
+                    produzido: v.produced,
+                    tempo: Math.round(v.time / 60),
+                  }));
+                  return chartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart data={chartData}>
+                        <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                        <YAxis />
+                        <Tooltip />
+                        <Bar dataKey="produzido" fill="hsl(var(--primary))" name="Produzido" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="tempo" fill="hsl(var(--muted-foreground))" name="Horas" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : <p className="text-sm text-muted-foreground text-center py-8">Sem dados de apontamentos</p>;
+                })()}
+              </CardContent>
+            </Card>
+
+            {/* Status Distribution */}
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Gauge className="h-5 w-5" /> Distribuição por Status</CardTitle></CardHeader>
+              <CardContent>
+                {(() => {
+                  const COLORS = ['hsl(var(--primary))', 'hsl(var(--warning))', 'hsl(var(--destructive))', '#6366f1', '#10b981', '#f59e0b'];
+                  const data = Object.entries(statusCounts).map(([status, count]) => ({
+                    name: productionStatusConfig[status]?.label || status,
+                    value: count,
+                  }));
+                  return data.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={250}>
+                      <PieChart>
+                        <Pie data={data} cx="50%" cy="50%" outerRadius={80} dataKey="value" label>
+                          {data.map((_, idx) => <Cell key={idx} fill={COLORS[idx % COLORS.length]} />)}
+                        </Pie>
+                        <Tooltip />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  ) : <p className="text-sm text-muted-foreground text-center py-8">Sem dados</p>;
+                })()}
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Sector Productivity */}
+          <Card>
+            <CardHeader><CardTitle className="flex items-center gap-2"><Factory className="h-5 w-5" /> Produtividade por Setor</CardTitle></CardHeader>
+            <CardContent>
+              {(() => {
+                const sectorData = productionOrders
+                  .filter(o => o.status === 'completed')
+                  .reduce((acc: Record<string, { count: number; qty: number }>, o) => {
+                    const sector = o.work_center || (o as any).sector || 'Sem setor';
+                    if (!acc[sector]) acc[sector] = { count: 0, qty: 0 };
+                    acc[sector].count++;
+                    acc[sector].qty += o.produced_quantity;
+                    return acc;
+                  }, {});
+                const chartData = Object.entries(sectorData).map(([name, v]) => ({
+                  name, concluidas: v.count, pecas: v.qty,
+                }));
+                return chartData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={200}>
+                    <BarChart data={chartData}>
+                      <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                      <YAxis />
+                      <Tooltip />
+                      <Bar dataKey="concluidas" fill="hsl(var(--primary))" name="OPs Concluídas" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="pecas" fill="hsl(var(--info))" name="Peças Produzidas" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-sm text-muted-foreground text-center py-8">Nenhuma OP concluída para análise</p>;
+              })()}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Alerts Tab */}
+        <TabsContent value="alerts" className="mt-4 space-y-4">
+          {delayedOPs.length > 0 && (
+            <Card className="border-destructive/30">
+              <CardHeader><CardTitle className="text-destructive flex items-center gap-2"><AlertTriangle className="h-5 w-5" /> OPs Atrasadas ({delayedOPs.length})</CardTitle></CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {delayedOPs.map(o => (
+                    <div key={o.id} className="flex items-center justify-between text-sm border-b pb-2 last:border-0">
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono font-medium">{o.order_number}</span>
+                        <span className="text-muted-foreground">{o.product_name}</span>
+                      </div>
+                      <Badge variant="destructive" className="text-xs">
+                        {differenceInDays(today, parseISO(o.due_date!))} dias de atraso
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Paused/Stalled OPs */}
+          {(() => {
+            const pausedOPs = productionOrders.filter(o => o.status === 'paused');
+            return pausedOPs.length > 0 ? (
+              <Card className="border-warning/30">
+                <CardHeader><CardTitle className="flex items-center gap-2 text-warning"><Pause className="h-5 w-5" /> Etapas Paradas ({pausedOPs.length})</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {pausedOPs.map(o => (
+                      <div key={o.id} className="flex items-center justify-between text-sm border-b pb-2 last:border-0">
+                        <div className="flex items-center gap-3">
+                          <span className="font-mono font-medium">{o.order_number}</span>
+                          <span className="text-muted-foreground">{o.product_name}</span>
+                          <span className="text-xs text-muted-foreground">{o.work_center || '-'}</span>
+                        </div>
+                        <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'in_progress')}>
+                          <Play className="h-3 w-3 mr-1" /> Retomar
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ) : null;
+          })()}
+
+          {/* Bottleneck Detection */}
+          {(() => {
+            const bottlenecks = Object.entries(workCenterLoad)
+              .filter(([_, v]) => v.count >= 3)
+              .sort(([, a], [, b]) => b.totalQty - a.totalQty);
+            return bottlenecks.length > 0 ? (
+              <Card className="border-orange-300/50">
+                <CardHeader><CardTitle className="flex items-center gap-2"><Gauge className="h-5 w-5 text-orange-500" /> Gargalos Detectados</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {bottlenecks.map(([name, v]) => (
+                      <div key={name} className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">{name}</p>
+                          <p className="text-xs text-muted-foreground">{v.count} ordens em fila • {v.totalQty} peças pendentes</p>
+                        </div>
+                        <Badge variant="outline" className="text-orange-600 border-orange-300">Gargalo</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ) : null;
+          })()}
+
+          {delayedOPs.length === 0 && productionOrders.filter(o => o.status === 'paused').length === 0 && (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-500 opacity-50" />
+                <h3 className="text-lg font-semibold mb-2">Tudo em ordem!</h3>
+                <p className="text-muted-foreground">Nenhum alerta de produção no momento.</p>
               </CardContent>
             </Card>
           )}

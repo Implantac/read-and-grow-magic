@@ -22,6 +22,17 @@ export interface ProductionOrderRow {
   bom_id: string | null;
   route_id: string | null;
   created_at: string;
+  sales_order_id: string | null;
+  order_item_id: string | null;
+  estimated_time_minutes: number;
+  realized_time_minutes: number;
+  sector: string | null;
+  client_name: string | null;
+  client_id: string | null;
+  rejected_quantity: number;
+  defect_notes: string | null;
+  delivery_type: string;
+  partial_delivered_qty: number;
 }
 
 export function useProductionOrders() {
@@ -30,16 +41,16 @@ export function useProductionOrders() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('production_orders').select('*').order('created_at', { ascending: false });
+    const { data, error } = await (supabase as any).from('production_orders').select('*').order('created_at', { ascending: false });
     if (error) { console.error(error); toast.error('Erro ao carregar ordens de produção'); }
-    else setOrders(data || []);
+    else setOrders((data || []) as ProductionOrderRow[]);
     setLoading(false);
   }, []);
 
   useEffect(() => { fetch(); }, [fetch]);
 
   const update = async (id: string, updates: Partial<ProductionOrderRow>) => {
-    const { error } = await supabase.from('production_orders').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await (supabase as any).from('production_orders').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
     if (error) { toast.error('Erro ao atualizar ordem'); return; }
     toast.success('Ordem atualizada');
     await fetch();
