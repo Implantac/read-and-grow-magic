@@ -25,6 +25,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pi
 export default function PCPPanel() {
   const { orders: productionOrders, loading, refetch, update } = useProductionOrders();
   const { data: salesOrders } = useOrders();
+  const { entries: timeEntries } = useTimeEntries();
   const lifecycle = useOrderLifecycle();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
