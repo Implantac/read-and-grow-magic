@@ -29,6 +29,7 @@ import {
 import { ProductionOrder, ProductionOrderStatus, ProductionPriority } from '@/types/production';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { QRCodeOPButton } from '@/components/producao/QRCodeOP';
 
 const statusConfig: Record<ProductionOrderStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   draft: { label: 'Rascunho', variant: 'secondary' },
@@ -264,6 +265,7 @@ export default function ProductionOrdersPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
+                      <QRCodeOPButton orderNumber={order.orderNumber} orderId={order.id} productName={order.productName} />
                       <Button
                         variant="ghost"
                         size="sm"

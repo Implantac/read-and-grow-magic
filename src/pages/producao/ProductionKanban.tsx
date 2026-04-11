@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { productionStatusConfig, priorityConfig } from '@/config/production';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowRight, Clock, Factory, CheckCircle, Pause, AlertTriangle } from 'lucide-react';
+import { ArrowRight, Clock, Factory, CheckCircle, Pause, AlertTriangle, QrCode } from 'lucide-react';
+import { QRCodeOPButton } from '@/components/producao/QRCodeOP';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -94,7 +95,8 @@ export default function ProductionKanban() {
                           </p>
                         )}
 
-                        <div className="flex gap-1 pt-1">
+                        <div className="flex gap-1 pt-1 flex-wrap">
+                          <QRCodeOPButton orderNumber={order.order_number} orderId={order.id} productName={order.product_name} batchCode={order.batch_code || undefined} />
                           {col.key === 'planned' && (
                             <Button size="sm" variant="outline" className="text-xs h-7 flex-1" onClick={() => moveOrder(order.id, 'in_progress')}>
                               <ArrowRight className="h-3 w-3 mr-1" /> Iniciar
