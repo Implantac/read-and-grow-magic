@@ -1,8 +1,13 @@
 import { useState } from 'react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -12,7 +17,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Truck, Search, MoreHorizontal, PackageCheck, MapPin, Clock, CheckCircle, FileText, Plus } from 'lucide-react';
 import { useWMSShipments } from '@/hooks/useWMSShipments';
-import { ExportButton } from '@/components/shared/ExportButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -46,12 +50,6 @@ export default function ShipmentsPage() {
     return matchesSearch && matchesStatus;
   });
 
-  const formatDate = (d?: string) => {
-    if (!d) return '-';
-    try { return format(new Date(d), 'dd/MM/yyyy HH:mm', { locale: ptBR }); }
-    catch { return '-'; }
-  };
-
   const handleCreate = async () => {
     if (!newShipment.customer_name) return;
     await create(newShipment);
@@ -70,60 +68,28 @@ export default function ShipmentsPage() {
   const deliveredCount = shipments.filter(s => s.status === 'delivered').length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Expedição</h1>
-          <p className="text-muted-foreground">Controle de embarques, romaneio e rastreamento</p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={() => setCreateOpen(true)} className="gap-2">
-            <Plus className="h-4 w-4" /> Nova Expedição
-          </Button>
-          <ExportButton
-            data={filteredShipments as unknown as Record<string, unknown>[]}
-            columns={[
-              { key: 'shipmentNumber', label: 'Nº Expedição' },
-              { key: 'customerName', label: 'Cliente' },
-              { key: 'carrier', label: 'Transportadora' },
-              { key: 'volumes', label: 'Volumes' },
-              { key: 'status', label: 'Status' },
-              { key: 'trackingNumber', label: 'Rastreio' },
-            ]}
-            filename="expedicao_wms"
-          />
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader title="Expedição" description="Controle de embarques, romaneio e rastreamento">
+        <Button onClick={() => setCreateOpen(true)} className="gap-2"><Plus className="h-4 w-4" /> Nova Expedição</Button>
+        <ExportButton
+          data={filteredShipments as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'shipmentNumber', label: 'Nº Expedição' },
+            { key: 'customerName', label: 'Cliente' },
+            { key: 'carrier', label: 'Transportadora' },
+            { key: 'volumes', label: 'Volumes' },
+            { key: 'status', label: 'Status' },
+            { key: 'trackingNumber', label: 'Rastreio' },
+          ]}
+          filename="expedicao_wms"
+        />
+      </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Aguardando</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{pendingCount}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Enviados</CardTitle>
-            <Truck className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{shippedCount}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Entregues</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{deliveredCount}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total</CardTitle>
-            <PackageCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{shipments.length}</div></CardContent>
-        </Card>
+        <KPICard title="Aguardando" value={pendingCount} subtitle="Pendentes de envio" icon={<Clock className="h-5 w-5" />} accentColor="warning" index={0} />
+        <KPICard title="Enviados" value={shippedCount} subtitle="Em trânsito" icon={<Truck className="h-5 w-5" />} accentColor="info" index={1} />
+        <KPICard title="Entregues" value={deliveredCount} subtitle="Confirmados" icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={2} />
+        <KPICard title="Total" value={shipments.length} subtitle="Expedições registradas" icon={<PackageCheck className="h-5 w-5" />} accentColor="primary" index={3} />
       </div>
 
       <Card>
@@ -153,7 +119,7 @@ export default function ShipmentsPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-8 text-muted-foreground">Carregando...</div>
+            <div className="space-y-3">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}</div>
           ) : (
             <Table>
               <TableHeader>
@@ -174,7 +140,7 @@ export default function ShipmentsPage() {
                   const cfg = statusConfig[s.status] || statusConfig.pending;
                   return (
                     <TableRow key={s.id}>
-                      <TableCell className="font-medium">{s.shipmentNumber}</TableCell>
+                      <TableCell className="font-medium font-mono">{s.shipmentNumber}</TableCell>
                       <TableCell>
                         {s.romaneioNumber ? (
                           <Badge variant="outline" className="gap-1"><FileText className="h-3 w-3" />{s.romaneioNumber}</Badge>
@@ -182,8 +148,8 @@ export default function ShipmentsPage() {
                       </TableCell>
                       <TableCell>{s.customerName}</TableCell>
                       <TableCell>{s.carrier || '-'}</TableCell>
-                      <TableCell>{s.volumes}</TableCell>
-                      <TableCell>{s.totalWeight > 0 ? s.totalWeight.toFixed(1) : '-'}</TableCell>
+                      <TableCell className="tabular-nums">{s.volumes}</TableCell>
+                      <TableCell className="tabular-nums">{s.totalWeight > 0 ? s.totalWeight.toFixed(1) : '-'}</TableCell>
                       <TableCell>
                         {s.trackingNumber ? (
                           <Badge variant="outline" className="gap-1 font-mono text-xs">
@@ -194,9 +160,7 @@ export default function ShipmentsPage() {
                       <TableCell><Badge variant={cfg.variant}>{cfg.label}</Badge></TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
-                          </DropdownMenuTrigger>
+                          <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             {['pending', 'ready'].includes(s.status) && (
                               <DropdownMenuItem onClick={() => { setSelectedId(s.id); setTrackingOpen(true); }}>
@@ -216,7 +180,10 @@ export default function ShipmentsPage() {
                 })}
                 {filteredShipments.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Nenhuma expedição encontrada</TableCell>
+                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                      <Truck className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                      Nenhuma expedição encontrada
+                    </TableCell>
                   </TableRow>
                 )}
               </TableBody>
@@ -246,39 +213,15 @@ export default function ShipmentsPage() {
           <DialogHeader><DialogTitle>Nova Expedição</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Cliente *</Label>
-                <Input value={newShipment.customer_name} onChange={e => setNewShipment(p => ({ ...p, customer_name: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Nº Pedido</Label>
-                <Input value={newShipment.order_number} onChange={e => setNewShipment(p => ({ ...p, order_number: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Transportadora</Label>
-                <Input value={newShipment.carrier} onChange={e => setNewShipment(p => ({ ...p, carrier: e.target.value }))} />
-              </div>
-              <div>
-                <Label>Volumes</Label>
-                <Input type="number" value={newShipment.volumes} onChange={e => setNewShipment(p => ({ ...p, volumes: Number(e.target.value) }))} />
-              </div>
-              <div>
-                <Label>Peso Total (kg)</Label>
-                <Input type="number" value={newShipment.total_weight || ''} onChange={e => setNewShipment(p => ({ ...p, total_weight: Number(e.target.value) }))} />
-              </div>
-              <div>
-                <Label>Valor Total (R$)</Label>
-                <Input type="number" value={newShipment.total_value || ''} onChange={e => setNewShipment(p => ({ ...p, total_value: Number(e.target.value) }))} />
-              </div>
+              <div><Label>Cliente *</Label><Input value={newShipment.customer_name} onChange={e => setNewShipment(p => ({ ...p, customer_name: e.target.value }))} /></div>
+              <div><Label>Nº Pedido</Label><Input value={newShipment.order_number} onChange={e => setNewShipment(p => ({ ...p, order_number: e.target.value }))} /></div>
+              <div><Label>Transportadora</Label><Input value={newShipment.carrier} onChange={e => setNewShipment(p => ({ ...p, carrier: e.target.value }))} /></div>
+              <div><Label>Volumes</Label><Input type="number" value={newShipment.volumes} onChange={e => setNewShipment(p => ({ ...p, volumes: Number(e.target.value) }))} /></div>
+              <div><Label>Peso Total (kg)</Label><Input type="number" value={newShipment.total_weight || ''} onChange={e => setNewShipment(p => ({ ...p, total_weight: Number(e.target.value) }))} /></div>
+              <div><Label>Valor Total (R$)</Label><Input type="number" value={newShipment.total_value || ''} onChange={e => setNewShipment(p => ({ ...p, total_value: Number(e.target.value) }))} /></div>
             </div>
-            <div>
-              <Label>Endereço de Entrega</Label>
-              <Input value={newShipment.shipping_address} onChange={e => setNewShipment(p => ({ ...p, shipping_address: e.target.value }))} />
-            </div>
-            <div>
-              <Label>Operador</Label>
-              <Input value={newShipment.operator} onChange={e => setNewShipment(p => ({ ...p, operator: e.target.value }))} />
-            </div>
+            <div><Label>Endereço de Entrega</Label><Input value={newShipment.shipping_address} onChange={e => setNewShipment(p => ({ ...p, shipping_address: e.target.value }))} /></div>
+            <div><Label>Operador</Label><Input value={newShipment.operator} onChange={e => setNewShipment(p => ({ ...p, operator: e.target.value }))} /></div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancelar</Button>
@@ -286,6 +229,6 @@ export default function ShipmentsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }

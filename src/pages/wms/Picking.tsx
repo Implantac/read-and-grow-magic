@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import {
-  Search, Package, Clock, CheckCircle, PlayCircle, ClipboardList,
+  Search, Package, Clock, CheckCircle, PlayCircle, ClipboardList, AlertTriangle, Zap, PackageSearch,
 } from 'lucide-react';
 import { useWMSPicking } from '@/hooks/useWMSOperations';
 import { format } from 'date-fns';
@@ -22,14 +25,14 @@ const statusConfig: Record<PickingStatus, { label: string; variant: 'default' | 
   assigned: { label: 'Atribuído', variant: 'default' },
   in_progress: { label: 'Em Andamento', variant: 'default' },
   completed: { label: 'Concluído', variant: 'outline' },
-  cancelled: { label: 'Cancelado', variant: 'destructive' }
+  cancelled: { label: 'Cancelado', variant: 'destructive' },
 };
 
 const priorityConfig: Record<string, { label: string; color: string }> = {
-  low: { label: 'Baixa', color: 'bg-slate-500' },
+  low: { label: 'Baixa', color: 'bg-muted-foreground' },
   medium: { label: 'Média', color: 'bg-blue-500' },
-  high: { label: 'Alta', color: 'bg-amber-500' },
-  urgent: { label: 'Urgente', color: 'bg-red-500' }
+  high: { label: 'Alta', color: 'bg-yellow-500' },
+  urgent: { label: 'Urgente', color: 'bg-destructive' },
 };
 
 export default function PickingPage() {
@@ -63,12 +66,8 @@ export default function PickingPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Picking</h1>
-          <p className="text-muted-foreground">Separação de pedidos para expedição</p>
-        </div>
+    <PageContainer>
+      <PageHeader title="Picking" description="Separação de pedidos para expedição">
         <ExportButton
           data={filteredOrders as unknown as Record<string, unknown>[]}
           columns={[
@@ -80,50 +79,14 @@ export default function PickingPage() {
           ]}
           filename="picking_wms"
         />
-      </div>
+      </PageHeader>
 
-      {/* Summary Cards */}
+      {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{pendingCount}</div>
-            <p className="text-xs text-muted-foreground">Aguardando separação</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Em Andamento</CardTitle>
-            <PlayCircle className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{inProgressCount}</div>
-            <p className="text-xs text-muted-foreground">Sendo separados</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Concluídos Hoje</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{completedToday}</div>
-            <p className="text-xs text-muted-foreground">Finalizados hoje</p>
-          </CardContent>
-        </Card>
-        <Card className={urgentCount > 0 ? 'border-red-500' : ''}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Urgentes</CardTitle>
-            <Package className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-500">{urgentCount}</div>
-            <p className="text-xs text-muted-foreground">Prioridade máxima</p>
-          </CardContent>
-        </Card>
+        <KPICard title="Pendentes" value={pendingCount} subtitle="Aguardando separação" icon={<Clock className="h-5 w-5" />} accentColor="warning" index={0} />
+        <KPICard title="Em Andamento" value={inProgressCount} subtitle="Sendo separados" icon={<PlayCircle className="h-5 w-5" />} accentColor="info" index={1} />
+        <KPICard title="Concluídos Hoje" value={completedToday} subtitle="Finalizados hoje" icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={2} />
+        <KPICard title="Urgentes" value={urgentCount} subtitle="Prioridade máxima" icon={<AlertTriangle className="h-5 w-5" />} accentColor={urgentCount > 0 ? 'danger' : 'primary'} index={3} />
       </div>
 
       {/* Filters */}
@@ -132,17 +95,10 @@ export default function PickingPage() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por número ou cliente..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
+              <Input placeholder="Buscar por número ou cliente..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9" />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
+              <SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Status" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="pending">Pendente</SelectItem>
@@ -152,9 +108,7 @@ export default function PickingPage() {
               </SelectContent>
             </Select>
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger className="w-full md:w-[150px]">
-                <SelectValue placeholder="Prioridade" />
-              </SelectTrigger>
+              <SelectTrigger className="w-full md:w-[150px]"><SelectValue placeholder="Prioridade" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas</SelectItem>
                 <SelectItem value="urgent">Urgente</SelectItem>
@@ -167,22 +121,18 @@ export default function PickingPage() {
         </CardContent>
       </Card>
 
-      {/* Orders Table */}
+      {/* Table */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ClipboardList className="h-5 w-5" />
             Ordens de Picking
-            {orders.length > 0 && (
-              <Badge variant="secondary" className="ml-2">Integrado com Pedidos</Badge>
-            )}
+            {orders.length > 0 && <Badge variant="secondary" className="ml-2">Integrado com Pedidos</Badge>}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="space-y-3">
-              {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
-            </div>
+            <div className="space-y-3">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}</div>
           ) : (
             <Table>
               <TableHeader>
@@ -201,7 +151,8 @@ export default function PickingPage() {
                 {filteredOrders.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      Nenhuma ordem de picking encontrada. Confirme um pedido de venda para gerar automaticamente.
+                      <PackageSearch className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                      Nenhuma ordem de picking encontrada
                     </TableCell>
                   </TableRow>
                 ) : filteredOrders.map((order) => {
@@ -209,7 +160,7 @@ export default function PickingPage() {
                   const priority = priorityConfig[order.priority] || priorityConfig.medium;
                   return (
                     <TableRow key={order.id}>
-                      <TableCell className="font-medium">{order.orderNumber}</TableCell>
+                      <TableCell className="font-medium font-mono">{order.orderNumber}</TableCell>
                       <TableCell>{order.customerName}</TableCell>
                       <TableCell>
                         <span className="flex items-center gap-1.5">
@@ -217,25 +168,21 @@ export default function PickingPage() {
                           {priority.label}
                         </span>
                       </TableCell>
-                      <TableCell>{order.pickedItems}/{order.itemsCount}</TableCell>
+                      <TableCell className="tabular-nums">{order.pickedItems}/{order.itemsCount}</TableCell>
                       <TableCell>{order.assignedTo || '-'}</TableCell>
-                      <TableCell>
-                        <Badge variant={status.variant}>{status.label}</Badge>
-                      </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell><Badge variant={status.variant}>{status.label}</Badge></TableCell>
+                      <TableCell className="text-sm tabular-nums">
                         {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
                       </TableCell>
                       <TableCell className="text-right">
                         {order.status === 'pending' && (
-                          <Button size="sm" onClick={() => setStartDialog(order.id)}>
-                            <PlayCircle className="h-4 w-4 mr-1" />
-                            Iniciar
+                          <Button size="sm" onClick={() => setStartDialog(order.id)} className="gap-1">
+                            <PlayCircle className="h-4 w-4" /> Iniciar
                           </Button>
                         )}
                         {order.status === 'in_progress' && (
-                          <Button size="sm" variant="outline" onClick={() => completePicking(order.id)}>
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                            Concluir
+                          <Button size="sm" variant="outline" onClick={() => completePicking(order.id)} className="gap-1">
+                            <CheckCircle className="h-4 w-4" /> Concluir
                           </Button>
                         )}
                       </TableCell>
@@ -248,19 +195,13 @@ export default function PickingPage() {
         </CardContent>
       </Card>
 
-      {/* Start Picking Dialog */}
+      {/* Start Dialog */}
       <Dialog open={!!startDialog} onOpenChange={() => setStartDialog(null)}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Iniciar Separação</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Iniciar Separação</DialogTitle></DialogHeader>
           <div className="py-4">
             <Label>Operador Responsável</Label>
-            <Input
-              value={operator}
-              onChange={(e) => setOperator(e.target.value)}
-              placeholder="Nome do operador"
-            />
+            <Input value={operator} onChange={(e) => setOperator(e.target.value)} placeholder="Nome do operador" />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setStartDialog(null)}>Cancelar</Button>
@@ -268,6 +209,6 @@ export default function PickingPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }
