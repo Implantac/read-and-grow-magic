@@ -161,6 +161,8 @@ export default function PCPPanel() {
           <TabsTrigger value="orders">Ordens de Produção</TabsTrigger>
           <TabsTrigger value="demand">Demanda Comercial ({ordersAwaitingProduction.length})</TabsTrigger>
           <TabsTrigger value="capacity">Capacidade {delayedOPs.length > 0 && <Badge variant="destructive" className="ml-1 h-5 text-[10px]">{delayedOPs.length}</Badge>}</TabsTrigger>
+          <TabsTrigger value="productivity">Produtividade</TabsTrigger>
+          <TabsTrigger value="alerts">Alertas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="orders" className="mt-4">
