@@ -2279,6 +2279,255 @@ export type Database = {
           },
         ]
       }
+      gamification_badge_awards: {
+        Row: {
+          awarded_at: string
+          badge_id: string
+          id: string
+          sales_rep_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          badge_id: string
+          id?: string
+          sales_rep_id: string
+        }
+        Update: {
+          awarded_at?: string
+          badge_id?: string
+          id?: string
+          sales_rep_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gamification_badge_awards_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "gamification_badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gamification_badges: {
+        Row: {
+          active: boolean | null
+          category: string
+          created_at: string
+          criteria: Json | null
+          description: string | null
+          icon: string
+          id: string
+          name: string
+          points_required: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          category?: string
+          created_at?: string
+          criteria?: Json | null
+          description?: string | null
+          icon?: string
+          id?: string
+          name: string
+          points_required?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          category?: string
+          created_at?: string
+          criteria?: Json | null
+          description?: string | null
+          icon?: string
+          id?: string
+          name?: string
+          points_required?: number | null
+        }
+        Relationships: []
+      }
+      gamification_challenge_participants: {
+        Row: {
+          challenge_id: string
+          id: string
+          joined_at: string
+          rank: number | null
+          sales_rep_id: string
+          score: number
+        }
+        Insert: {
+          challenge_id: string
+          id?: string
+          joined_at?: string
+          rank?: number | null
+          sales_rep_id: string
+          score?: number
+        }
+        Update: {
+          challenge_id?: string
+          id?: string
+          joined_at?: string
+          rank?: number | null
+          sales_rep_id?: string
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gamification_challenge_participants_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "gamification_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gamification_challenges: {
+        Row: {
+          bonus_points: number | null
+          challenge_type: string
+          created_at: string
+          description: string | null
+          end_date: string
+          id: string
+          prize_description: string | null
+          start_date: string
+          status: string
+          title: string
+        }
+        Insert: {
+          bonus_points?: number | null
+          challenge_type?: string
+          created_at?: string
+          description?: string | null
+          end_date: string
+          id?: string
+          prize_description?: string | null
+          start_date: string
+          status?: string
+          title: string
+        }
+        Update: {
+          bonus_points?: number | null
+          challenge_type?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string
+          id?: string
+          prize_description?: string | null
+          start_date?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      gamification_mission_progress: {
+        Row: {
+          completed: boolean | null
+          completed_at: string | null
+          created_at: string
+          current_count: number
+          id: string
+          mission_date: string
+          mission_id: string
+          sales_rep_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string
+          current_count?: number
+          id?: string
+          mission_date?: string
+          mission_id: string
+          sales_rep_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string
+          current_count?: number
+          id?: string
+          mission_date?: string
+          mission_id?: string
+          sales_rep_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gamification_mission_progress_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "gamification_missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gamification_missions: {
+        Row: {
+          action_type: string
+          active: boolean | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          mission_type: string
+          reward_points: number
+          target_count: number
+          title: string
+        }
+        Insert: {
+          action_type: string
+          active?: boolean | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          mission_type?: string
+          reward_points?: number
+          target_count?: number
+          title: string
+        }
+        Update: {
+          action_type?: string
+          active?: boolean | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          mission_type?: string
+          reward_points?: number
+          target_count?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      gamification_points: {
+        Row: {
+          action_type: string
+          created_at: string
+          description: string | null
+          id: string
+          points: number
+          reference_id: string | null
+          sales_rep_id: string
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          points?: number
+          reference_id?: string | null
+          sales_rep_id: string
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          points?: number
+          reference_id?: string | null
+          sales_rep_id?: string
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           created_at: string
