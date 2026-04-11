@@ -99,7 +99,14 @@ const RFIDTagsPage = lazy(() => import("./pages/rfid/Tags"));
 const RFIDEventsPage = lazy(() => import("./pages/rfid/Events"));
 const RFIDIntegrationPage = lazy(() => import("./pages/rfid/Integration"));
 
-// Production
+// TMS
+const TMSDashboardPage = lazy(() => import("./pages/tms/TMSDashboard"));
+const CarriersPage = lazy(() => import("./pages/tms/Carriers"));
+const VehiclesPage = lazy(() => import("./pages/tms/Vehicles"));
+const RoutesPage = lazy(() => import("./pages/tms/Routes"));
+const DeliveryProofPage = lazy(() => import("./pages/tms/DeliveryProof"));
+
+
 const ProductionOrdersPage = lazy(() => import("./pages/producao/ProductionOrders"));
 const MaterialConsumptionPage = lazy(() => import("./pages/producao/MaterialConsumption"));
 const TimeEntriesPage = lazy(() => import("./pages/producao/TimeEntries"));
