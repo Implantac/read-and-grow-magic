@@ -1,10 +1,13 @@
 import { useState } from 'react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { Building2, Search, Plus, MapPin } from 'lucide-react';
+import { Building2, Search, Plus, MapPin, CheckCircle, Warehouse } from 'lucide-react';
 import { useDistributionCenters } from '@/hooks/useDistributionCenters';
 
 export default function DistributionCentersPage() {
@@ -16,53 +19,30 @@ export default function DistributionCentersPage() {
     c.code.toLowerCase().includes(search.toLowerCase())
   );
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-    </div>
-  );
+  const totalCapacity = centers.reduce((s, c) => s + c.totalCapacity, 0);
+  const totalUsed = centers.reduce((s, c) => s + c.usedCapacity, 0);
+  const avgOccupancy = totalCapacity > 0 ? Math.round((totalUsed / totalCapacity) * 100) : 0;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Centros de Distribuição</h1>
-          <p className="text-muted-foreground">Gestão multi-CD para operação logística</p>
-        </div>
-        <Button><Plus className="h-4 w-4 mr-2" /> Novo CD</Button>
-      </div>
+    <PageContainer loading={loading}>
+      <PageHeader
+        title="Centros de Distribuição"
+        description="Gestão multi-CD para operação logística"
+        actions={<Button><Plus className="h-4 w-4 mr-2" /> Novo CD</Button>}
+      />
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de CDs</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{centers.length}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ativos</CardTitle>
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold text-green-500">{centers.filter(c => c.status === 'active').length}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Capacidade Total</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {centers.reduce((s, c) => s + c.totalCapacity, 0).toLocaleString('pt-BR')} m³
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-4">
+        <KPICard title="Total de CDs" value={centers.length} icon={Building2} index={0} />
+        <KPICard title="Ativos" value={centers.filter(c => c.status === 'active').length} icon={CheckCircle} index={1} color="success" />
+        <KPICard title="Capacidade Total" value={`${totalCapacity.toLocaleString('pt-BR')} m³`} icon={Warehouse} index={2} />
+        <KPICard title="Ocupação Média" value={`${avgOccupancy}%`} icon={Building2} index={3} color={avgOccupancy > 85 ? 'danger' : avgOccupancy > 70 ? 'warning' : undefined} />
       </div>
 
       <Card>
         <CardContent className="pt-6">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Buscar CD..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+            <Input placeholder="Buscar CD por nome ou código..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
           </div>
         </CardContent>
       </Card>
@@ -72,7 +52,7 @@ export default function DistributionCentersPage() {
           {filtered.map(dc => {
             const occupancy = dc.totalCapacity > 0 ? Math.round((dc.usedCapacity / dc.totalCapacity) * 100) : 0;
             return (
-              <Card key={dc.id}>
+              <Card key={dc.id} className="hover-lift">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg flex items-center gap-2">
@@ -93,10 +73,10 @@ export default function DistributionCentersPage() {
                   {dc.manager && <p className="text-sm"><span className="text-muted-foreground">Gestor:</span> {dc.manager}</p>}
                   <div>
                     <div className="flex justify-between text-sm mb-1">
-                      <span>Ocupação</span>
-                      <span>{dc.usedCapacity.toLocaleString('pt-BR')}/{dc.totalCapacity.toLocaleString('pt-BR')} m³ ({occupancy}%)</span>
+                      <span className="text-muted-foreground">Ocupação</span>
+                      <span className="font-medium">{dc.usedCapacity.toLocaleString('pt-BR')}/{dc.totalCapacity.toLocaleString('pt-BR')} m³ ({occupancy}%)</span>
                     </div>
-                    <Progress value={occupancy} />
+                    <Progress value={occupancy} className={`h-2 ${occupancy > 85 ? '[&>div]:bg-destructive' : occupancy > 70 ? '[&>div]:bg-amber-500' : ''}`} />
                   </div>
                 </CardContent>
               </Card>
@@ -112,6 +92,6 @@ export default function DistributionCentersPage() {
           </CardContent>
         </Card>
       )}
-    </div>
+    </PageContainer>
   );
 }

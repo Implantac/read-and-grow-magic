@@ -1,10 +1,13 @@
 import { useState } from 'react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RotateCcw, Search, Package, Truck, Factory } from 'lucide-react';
+import { RotateCcw, Search, Package, Truck, Factory, AlertTriangle, CheckCircle, Eye } from 'lucide-react';
 import { useWMSReturns } from '@/hooks/useWMSReturns';
 
 const typeConfig: Record<string, { label: string; icon: React.ReactNode }> = {
@@ -33,47 +36,19 @@ export default function ReturnsPage() {
     return matchSearch && matchType;
   });
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-    </div>
-  );
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Devoluções</h1>
-          <p className="text-muted-foreground">Logística reversa - devoluções e retornos</p>
-        </div>
-        <Button><RotateCcw className="h-4 w-4 mr-2" /> Nova Devolução</Button>
-      </div>
+    <PageContainer loading={loading}>
+      <PageHeader
+        title="Devoluções"
+        description="Logística reversa — devoluções e retornos"
+        actions={<Button><RotateCcw className="h-4 w-4 mr-2" /> Nova Devolução</Button>}
+      />
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total</CardTitle>
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{returns.length}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold text-amber-500">{returns.filter(r => r.status === 'pending').length}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Em Inspeção</CardTitle>
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{returns.filter(r => r.status === 'inspecting').length}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Concluídas</CardTitle>
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold text-green-500">{returns.filter(r => r.status === 'completed').length}</div></CardContent>
-        </Card>
+        <KPICard title="Total" value={returns.length} icon={RotateCcw} index={0} />
+        <KPICard title="Pendentes" value={returns.filter(r => r.status === 'pending').length} icon={AlertTriangle} index={1} color="warning" />
+        <KPICard title="Em Inspeção" value={returns.filter(r => r.status === 'inspecting').length} icon={Eye} index={2} />
+        <KPICard title="Concluídas" value={returns.filter(r => r.status === 'completed').length} icon={CheckCircle} index={3} color="success" />
       </div>
 
       <Card>
@@ -81,15 +56,13 @@ export default function ReturnsPage() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Buscar..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+              <Input placeholder="Buscar devolução ou cliente..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
             </div>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Tipo" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
-                {Object.entries(typeConfig).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>{v.label}</SelectItem>
-                ))}
+                {Object.entries(typeConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -102,31 +75,29 @@ export default function ReturnsPage() {
             const cfg = statusConfig[ret.status] || statusConfig.pending;
             const tc = typeConfig[ret.returnType] || typeConfig.customer;
             return (
-              <Card key={ret.id}>
+              <Card key={ret.id} className="hover-lift">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      {tc.icon} {ret.returnNumber}
-                    </CardTitle>
+                    <CardTitle className="text-lg flex items-center gap-2">{tc.icon} {ret.returnNumber}</CardTitle>
                     <Badge variant={cfg.variant}>{cfg.label}</Badge>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-2 text-sm">
-                  <p><span className="text-muted-foreground">Tipo:</span> {tc.label}</p>
+                <CardContent className="space-y-3 text-sm">
+                  <Badge variant="outline">{tc.label}</Badge>
                   {ret.customerName && <p><span className="text-muted-foreground">Cliente:</span> {ret.customerName}</p>}
                   {ret.supplierName && <p><span className="text-muted-foreground">Fornecedor:</span> {ret.supplierName}</p>}
                   {ret.reason && <p><span className="text-muted-foreground">Motivo:</span> {ret.reason}</p>}
-                  <div className="grid grid-cols-2 gap-1 pt-1">
-                    <span>Total: {ret.totalItems}</span>
-                    <span>Aprovados: {ret.approvedItems}</span>
-                    <span>Rejeitados: {ret.rejectedItems}</span>
-                    <span>Destino: {ret.destination}</span>
+                  <div className="grid grid-cols-2 gap-1 pt-1 bg-muted/50 rounded-md p-2">
+                    <span>Total: <strong>{ret.totalItems}</strong></span>
+                    <span>Aprovados: <strong className="text-green-600">{ret.approvedItems}</strong></span>
+                    <span>Rejeitados: <strong className="text-destructive">{ret.rejectedItems}</strong></span>
+                    <span>Destino: <strong>{ret.destination}</strong></span>
                   </div>
                   {ret.status === 'pending' && (
-                    <Button size="sm" className="w-full mt-2" onClick={() => updateStatus(ret.id, 'inspecting')}>Iniciar Inspeção</Button>
+                    <Button size="sm" className="w-full" onClick={() => updateStatus(ret.id, 'inspecting')}>Iniciar Inspeção</Button>
                   )}
                   {ret.status === 'inspecting' && (
-                    <Button size="sm" className="w-full mt-2" onClick={() => updateStatus(ret.id, 'completed')}>Concluir</Button>
+                    <Button size="sm" className="w-full" onClick={() => updateStatus(ret.id, 'completed')}>Concluir</Button>
                   )}
                 </CardContent>
               </Card>
@@ -142,6 +113,6 @@ export default function ReturnsPage() {
           </CardContent>
         </Card>
       )}
-    </div>
+    </PageContainer>
   );
 }
