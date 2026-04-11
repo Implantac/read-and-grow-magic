@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,9 +13,8 @@ import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProductionCapacity } from '@/hooks/useProductionCapacity';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Pencil, Trash2, Gauge, Factory, Users, Clock } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function ProductionCapacityPage() {
   const { capacities, loading, create, update, remove } = useProductionCapacity();
@@ -32,7 +32,6 @@ export default function ProductionCapacityPage() {
     setDialogOpen(false);
   };
 
-  // Aggregate by sector
   const sectorData = capacities.reduce((acc: Record<string, { total: number; used: number; count: number }>, c) => {
     if (!acc[c.sector]) acc[c.sector] = { total: 0, used: 0, count: 0 };
     const dailyCap = c.capacity_per_hour * c.max_hours_per_day;
@@ -41,40 +40,30 @@ export default function ProductionCapacityPage() {
     acc[c.sector].count++;
     return acc;
   }, {});
-  const chartData = Object.entries(sectorData).map(([sector, v]) => ({
-    sector,
-    capacidade: v.total,
-    utilizado: Math.round(v.used),
-    pct: v.total > 0 ? Math.round((v.used / v.total) * 100) : 0,
-  }));
-
+  const chartData = Object.entries(sectorData).map(([sector, v]) => ({ sector, capacidade: v.total, utilizado: Math.round(v.used) }));
   const totalCapDaily = capacities.reduce((s, c) => s + c.capacity_per_hour * c.max_hours_per_day, 0);
   const avgLoad = capacities.length > 0 ? capacities.reduce((s, c) => s + c.current_load_pct, 0) / capacities.length : 0;
 
-  if (loading) return <PageContainer><Skeleton className="h-10 w-64" /></PageContainer>;
-
   return (
-    <PageContainer>
+    <PageContainer loading={loading}>
       <PageHeader title="Capacidade Produtiva" description="Setor, máquinas, operadores e turnos">
         <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Cadastrar</Button>
       </PageHeader>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <Card><CardContent className="p-4 flex items-center gap-3"><Factory className="h-8 w-8 text-primary" /><div><p className="text-2xl font-bold">{Object.keys(sectorData).length}</p><p className="text-xs text-muted-foreground">Setores</p></div></CardContent></Card>
-        <Card><CardContent className="p-4 flex items-center gap-3"><Users className="h-8 w-8 text-blue-500" /><div><p className="text-2xl font-bold">{capacities.length}</p><p className="text-xs text-muted-foreground">Recursos</p></div></CardContent></Card>
-        <Card><CardContent className="p-4 flex items-center gap-3"><Gauge className="h-8 w-8 text-yellow-500" /><div><p className="text-2xl font-bold">{totalCapDaily}</p><p className="text-xs text-muted-foreground">Cap. Diária (un)</p></div></CardContent></Card>
-        <Card><CardContent className="p-4 flex items-center gap-3"><Clock className="h-8 w-8 text-green-500" /><div><p className="text-2xl font-bold">{avgLoad.toFixed(0)}%</p><p className="text-xs text-muted-foreground">Carga Média</p></div></CardContent></Card>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <KPICard title="Setores" value={Object.keys(sectorData).length} icon={<Factory className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Recursos" value={capacities.length} icon={<Users className="h-5 w-5" />} accentColor="info" index={1} />
+        <KPICard title="Cap. Diária (un)" value={totalCapDaily} icon={<Gauge className="h-5 w-5" />} accentColor="warning" index={2} />
+        <KPICard title="Carga Média" value={`${avgLoad.toFixed(0)}%`} icon={<Clock className="h-5 w-5" />} accentColor={avgLoad > 80 ? 'danger' : 'success'} index={3} />
       </div>
 
       {chartData.length > 0 && (
-        <Card className="mb-6">
+        <Card>
           <CardHeader><CardTitle>Capacidade por Setor</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={chartData}>
-                <XAxis dataKey="sector" />
-                <YAxis />
-                <Tooltip />
+                <XAxis dataKey="sector" /><YAxis /><Tooltip />
                 <Bar dataKey="capacidade" fill="hsl(var(--primary))" name="Capacidade" />
                 <Bar dataKey="utilizado" fill="hsl(var(--destructive))" name="Utilizado" />
               </BarChart>
@@ -87,15 +76,9 @@ export default function ProductionCapacityPage() {
         <CardContent className="p-0">
           <Table>
             <TableHeader><TableRow>
-              <TableHead>Setor</TableHead>
-              <TableHead>Máquina</TableHead>
-              <TableHead>Operador</TableHead>
-              <TableHead>Turno</TableHead>
-              <TableHead>Cap./Hora</TableHead>
-              <TableHead>Horas/Dia</TableHead>
-              <TableHead>Carga</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
+              <TableHead>Setor</TableHead><TableHead>Máquina</TableHead><TableHead>Operador</TableHead>
+              <TableHead>Turno</TableHead><TableHead>Cap./Hora</TableHead><TableHead>Horas/Dia</TableHead>
+              <TableHead>Carga</TableHead><TableHead>Status</TableHead><TableHead className="text-right">Ações</TableHead>
             </TableRow></TableHeader>
             <TableBody>
               {capacities.length === 0 ? (
@@ -131,11 +114,7 @@ export default function ProductionCapacityPage() {
             <div><Label>Turno</Label>
               <Select value={form.shift} onValueChange={v => setForm(f => ({ ...f, shift: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="diurno">Diurno</SelectItem>
-                  <SelectItem value="noturno">Noturno</SelectItem>
-                  <SelectItem value="integral">Integral</SelectItem>
-                </SelectContent>
+                <SelectContent><SelectItem value="diurno">Diurno</SelectItem><SelectItem value="noturno">Noturno</SelectItem><SelectItem value="integral">Integral</SelectItem></SelectContent>
               </Select>
             </div>
             <div><Label>Cap./Hora</Label><Input type="number" value={form.capacity_per_hour} onChange={e => setForm(f => ({ ...f, capacity_per_hour: +e.target.value }))} /></div>

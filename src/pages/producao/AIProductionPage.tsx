@@ -1,39 +1,32 @@
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAIProductionInsights } from '@/hooks/useAIProductionInsights';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Brain, Sparkles, CheckCircle, AlertTriangle, TrendingDown, Zap, Loader2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 
 const severityConfig: Record<string, { color: string; icon: any }> = {
-  low: { color: 'bg-blue-100 text-blue-800', icon: Zap },
-  medium: { color: 'bg-yellow-100 text-yellow-800', icon: AlertTriangle },
-  high: { color: 'bg-orange-100 text-orange-800', icon: AlertTriangle },
-  critical: { color: 'bg-red-100 text-red-800', icon: TrendingDown },
+  low: { color: 'bg-info/15 text-info', icon: Zap },
+  medium: { color: 'bg-warning/15 text-warning', icon: AlertTriangle },
+  high: { color: 'bg-warning/15 text-warning', icon: AlertTriangle },
+  critical: { color: 'bg-destructive/15 text-destructive', icon: TrendingDown },
 };
 
 const typeLabels: Record<string, string> = {
-  bottleneck: '🔴 Gargalo',
-  delay_risk: '⏰ Risco de Atraso',
-  low_productivity: '📉 Baixa Produtividade',
-  capacity_optimization: '⚡ Otimização',
-  material_shortage: '📦 Falta de Material',
-  rebalance: '🔄 Redistribuição',
+  bottleneck: '🔴 Gargalo', delay_risk: '⏰ Risco de Atraso', low_productivity: '📉 Baixa Produtividade',
+  capacity_optimization: '⚡ Otimização', material_shortage: '📦 Falta de Material', rebalance: '🔄 Redistribuição',
 };
 
 export default function AIProductionPage() {
   const { insights, loading, generating, generateInsights, resolveInsight } = useAIProductionInsights();
-
   const active = insights.filter(i => i.status === 'active');
   const resolved = insights.filter(i => i.status === 'resolved');
 
-  if (loading) return <PageContainer><Skeleton className="h-10 w-64" /></PageContainer>;
-
   return (
-    <PageContainer>
+    <PageContainer loading={loading}>
       <PageHeader title="🧠 IA de Produção" description="Inteligência artificial para otimização da fábrica">
         <Button onClick={generateInsights} disabled={generating}>
           {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
@@ -41,14 +34,14 @@ export default function AIProductionPage() {
         </Button>
       </PageHeader>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card><CardContent className="p-4 flex items-center gap-3"><Brain className="h-8 w-8 text-primary" /><div><p className="text-2xl font-bold">{insights.length}</p><p className="text-xs text-muted-foreground">Insights Total</p></div></CardContent></Card>
-        <Card><CardContent className="p-4 flex items-center gap-3"><AlertTriangle className="h-8 w-8 text-destructive" /><div><p className="text-2xl font-bold">{active.length}</p><p className="text-xs text-muted-foreground">Ativos</p></div></CardContent></Card>
-        <Card><CardContent className="p-4 flex items-center gap-3"><CheckCircle className="h-8 w-8 text-green-500" /><div><p className="text-2xl font-bold">{resolved.length}</p><p className="text-xs text-muted-foreground">Resolvidos</p></div></CardContent></Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <KPICard title="Insights Total" value={insights.length} icon={<Brain className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Ativos" value={active.length} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={1} />
+        <KPICard title="Resolvidos" value={resolved.length} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={2} />
       </div>
 
       {active.length === 0 && (
-        <Card className="mb-6">
+        <Card>
           <CardContent className="py-12 text-center">
             <Brain className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <p className="text-lg font-medium">Nenhum insight ativo</p>
@@ -66,7 +59,7 @@ export default function AIProductionPage() {
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-2 flex-1">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <SevIcon className="h-5 w-5" />
                       <span className="font-semibold">{insight.title}</span>
                       <Badge className={sev.color}>{insight.severity}</Badge>
@@ -96,7 +89,7 @@ export default function AIProductionPage() {
       </div>
 
       {resolved.length > 0 && (
-        <Card className="mt-6">
+        <Card>
           <CardHeader><CardTitle className="text-sm text-muted-foreground">Histórico Resolvido ({resolved.length})</CardTitle></CardHeader>
           <CardContent className="space-y-2">
             {resolved.slice(0, 10).map(i => (

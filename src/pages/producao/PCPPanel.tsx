@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -49,7 +50,6 @@ export default function PCPPanel() {
 
   const ordersAwaitingProduction = (salesOrders || []).filter(o => o.status === 'awaiting_production' || o.status === 'confirmed');
 
-  // Workload by work center
   const workCenterLoad = productionOrders
     .filter(o => o.status === 'in_progress' || o.status === 'planned')
     .reduce((acc: Record<string, { count: number; totalQty: number }>, o) => {
@@ -61,7 +61,6 @@ export default function PCPPanel() {
     }, {});
   const workCenterData = Object.entries(workCenterLoad).map(([name, v]) => ({ name, ordens: v.count, pendente: v.totalQty }));
 
-  // Delayed OPs
   const today = new Date();
   const delayedOPs = productionOrders.filter(o => {
     if (!o.due_date || o.status === 'completed' || o.status === 'cancelled') return false;
@@ -70,43 +69,22 @@ export default function PCPPanel() {
 
   const generateOPFromOrder = async (order: any) => {
     const items = order.items || [];
-    if (items.length === 0) {
-      toast({ title: 'Pedido sem itens', variant: 'destructive' });
-      return;
-    }
-
+    if (items.length === 0) { toast({ title: 'Pedido sem itens', variant: 'destructive' }); return; }
     try {
       for (const item of items) {
         const opNumber = `OP-${format(new Date(), 'yyyyMMdd')}-${order.number}-${item.product_code}`;
         await supabase.from('production_orders').insert({
-          order_number: opNumber,
-          product_id: item.product_id,
-          product_code: item.product_code,
-          product_name: item.product_name,
-          quantity: item.quantity,
-          produced_quantity: 0,
-          unit: 'UN',
-          status: 'planned',
-          priority: order.priority || 'medium',
-          due_date: order.delivery_date,
+          order_number: opNumber, product_id: item.product_id, product_code: item.product_code,
+          product_name: item.product_name, quantity: item.quantity, produced_quantity: 0, unit: 'UN',
+          status: 'planned', priority: order.priority || 'medium', due_date: order.delivery_date,
           notes: `Gerada do pedido ${order.number}`,
         } as any);
       }
-
-      // Update order status via lifecycle
-      lifecycle.mutate({
-        orderId: order.id,
-        order,
-        targetStatus: 'in_production',
-        observation: `${items.length} OP(s) gerada(s)`,
-      });
-
+      lifecycle.mutate({ orderId: order.id, order, targetStatus: 'in_production', observation: `${items.length} OP(s) gerada(s)` });
       toast({ title: `${items.length} OP(s) gerada(s) do pedido ${order.number}` });
       await refetch();
       setGeneratingFor(null);
-    } catch (e: any) {
-      toast({ title: 'Erro ao gerar OP', description: e.message, variant: 'destructive' });
-    }
+    } catch (e: any) { toast({ title: 'Erro ao gerar OP', description: e.message, variant: 'destructive' }); }
   };
 
   const handleStatusChange = async (op: any, newStatus: string) => {
@@ -115,45 +93,42 @@ export default function PCPPanel() {
       ...(newStatus === 'in_progress' ? { start_date: new Date().toISOString() } : {}),
       ...(newStatus === 'completed' ? { completed_date: new Date().toISOString() } : {}),
     });
-
-    // When completing a production order, check if all OPs for the sales order are done
     if (newStatus === 'completed') {
       const orderNumMatch = op.order_number.match(/PED\d+/);
       if (orderNumMatch) {
         const salesOrder = (salesOrders || []).find(o => o.number === orderNumMatch[0]);
-        if (salesOrder) {
-          await checkProductionCompletion(salesOrder.number, salesOrder.id);
-        }
+        if (salesOrder) await checkProductionCompletion(salesOrder.number, salesOrder.id);
       }
     }
   };
 
-  return (
-    <PageContainer>
-      <PageHeader title="Painel PCP" description="Planejamento e Controle de Produção - Visão integrada com pedidos" />
+  // Productivity data
+  const todayStr = new Date().toDateString();
+  const todayEntries = timeEntries.filter(e => new Date(e.start_time).toDateString() === todayStr);
+  const operators = [...new Set(todayEntries.map(e => e.operator))];
+  const operatorData = operators.map(op => {
+    const opEntries = todayEntries.filter(e => e.operator === op);
+    const produced = opEntries.reduce((s, e) => s + e.produced_quantity, 0);
+    const totalMin = opEntries.filter(e => e.end_time).reduce((s, e) => s + differenceInMinutes(new Date(e.end_time!), new Date(e.start_time)) - (e.paused_time || 0), 0);
+    const pcsH = totalMin > 0 ? (produced / (totalMin / 60)) : 0;
+    return { name: op.split(' ')[0], pcsH: Number(pcsH.toFixed(1)) };
+  }).sort((a, b) => b.pcsH - a.pcsH).slice(0, 10);
 
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-        <Card><CardContent className="p-4 flex items-center gap-3">
-          <Factory className="h-7 w-7 text-primary" />
-          <div><p className="text-2xl font-bold">{productionOrders.length}</p><p className="text-xs text-muted-foreground">Total OPs</p></div>
-        </CardContent></Card>
-        <Card><CardContent className="p-4 flex items-center gap-3">
-          <Clock className="h-7 w-7 text-warning" />
-          <div><p className="text-2xl font-bold">{statusCounts['planned'] || 0}</p><p className="text-xs text-muted-foreground">Planejadas</p></div>
-        </CardContent></Card>
-        <Card><CardContent className="p-4 flex items-center gap-3">
-          <Factory className="h-7 w-7 text-info" />
-          <div><p className="text-2xl font-bold">{statusCounts['in_progress'] || 0}</p><p className="text-xs text-muted-foreground">Em Produção</p></div>
-        </CardContent></Card>
-        <Card><CardContent className="p-4 flex items-center gap-3">
-          <CheckCircle className="h-7 w-7 text-success" />
-          <div><p className="text-2xl font-bold">{statusCounts['completed'] || 0}</p><p className="text-xs text-muted-foreground">Finalizadas</p></div>
-        </CardContent></Card>
-        <Card><CardContent className="p-4">
-          <p className="text-xs text-muted-foreground mb-1">Eficiência Geral</p>
-          <p className="text-2xl font-bold">{totalCapacity.toFixed(0)}%</p>
-          <Progress value={totalCapacity} className="mt-2 h-2" />
-        </CardContent></Card>
+  const statusPieData = Object.entries(statusCounts).map(([k, v]) => ({
+    name: productionStatusConfig[k]?.label || k, value: v,
+  }));
+  const PIE_COLORS = ['hsl(var(--primary))', 'hsl(var(--warning))', 'hsl(var(--info))', 'hsl(var(--success))', 'hsl(var(--destructive))'];
+
+  return (
+    <PageContainer loading={loading}>
+      <PageHeader title="Painel PCP" description="Planejamento e Controle de Produção — Visão integrada com pedidos" />
+
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        <KPICard title="Total OPs" value={productionOrders.length} icon={<Factory className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Planejadas" value={statusCounts['planned'] || 0} icon={<Clock className="h-5 w-5" />} accentColor="warning" index={1} />
+        <KPICard title="Em Produção" value={statusCounts['in_progress'] || 0} icon={<Factory className="h-5 w-5" />} accentColor="info" index={2} />
+        <KPICard title="Finalizadas" value={statusCounts['completed'] || 0} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={3} />
+        <KPICard title="Eficiência Geral" value={`${totalCapacity.toFixed(0)}%`} icon={<Gauge className="h-5 w-5" />} accentColor={totalCapacity >= 70 ? 'success' : 'warning'} index={4} />
       </div>
 
       <Tabs defaultValue="orders">
@@ -187,20 +162,12 @@ export default function PCPPanel() {
             <CardContent>
               <Table>
                 <TableHeader><TableRow>
-                  <TableHead>Nº OP</TableHead>
-                  <TableHead>Produto</TableHead>
-                  <TableHead>Qtde</TableHead>
-                  <TableHead>Produzido</TableHead>
-                  <TableHead>%</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Prioridade</TableHead>
-                  <TableHead>Prazo</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  <TableHead>Nº OP</TableHead><TableHead>Produto</TableHead><TableHead>Qtde</TableHead>
+                  <TableHead>Produzido</TableHead><TableHead>%</TableHead><TableHead>Status</TableHead>
+                  <TableHead>Prioridade</TableHead><TableHead>Prazo</TableHead><TableHead className="text-right">Ações</TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
-                  {loading ? (
-                    <TableRow><TableCell colSpan={9} className="text-center py-8">Carregando...</TableCell></TableRow>
-                  ) : filtered.length === 0 ? (
+                  {filtered.length === 0 ? (
                     <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Nenhuma OP encontrada</TableCell></TableRow>
                   ) : filtered.map(o => {
                     const pct = o.quantity > 0 ? (o.produced_quantity / o.quantity) * 100 : 0;
@@ -213,42 +180,20 @@ export default function PCPPanel() {
                         <TableCell>{o.product_name}</TableCell>
                         <TableCell>{o.quantity} {o.unit}</TableCell>
                         <TableCell>{o.produced_quantity} {o.unit}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Progress value={pct} className="h-2 w-16" />
-                            <span className="text-xs">{pct.toFixed(0)}%</span>
-                          </div>
-                        </TableCell>
+                        <TableCell><div className="flex items-center gap-2"><Progress value={pct} className="h-2 w-16" /><span className="text-xs">{pct.toFixed(0)}%</span></div></TableCell>
                         <TableCell><Badge className={cn('text-xs', sc.color)}>{sc.label}</Badge></TableCell>
                         <TableCell><Badge className={cn('text-xs', pc.color)}>{pc.label}</Badge></TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            {o.due_date ? format(new Date(o.due_date), 'dd/MM/yyyy') : '-'}
-                            {isDelayed && <AlertTriangle className="h-3 w-3 text-destructive" />}
-                          </div>
-                        </TableCell>
+                        <TableCell><div className="flex items-center gap-1">{o.due_date ? format(new Date(o.due_date), 'dd/MM/yyyy') : '-'}{isDelayed && <AlertTriangle className="h-3 w-3 text-destructive" />}</div></TableCell>
                         <TableCell className="text-right">
                           <div className="flex gap-1 justify-end">
-                            {o.status === 'planned' && (
-                              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'in_progress')}>
-                                <Play className="h-3 w-3 mr-1" /> Iniciar
-                              </Button>
-                            )}
+                            {o.status === 'planned' && <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'in_progress')}><Play className="h-3 w-3 mr-1" /> Iniciar</Button>}
                             {o.status === 'in_progress' && (
                               <>
-                                <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'paused')}>
-                                  <Pause className="h-3 w-3 mr-1" /> Pausar
-                                </Button>
-                                <Button size="sm" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'completed')}>
-                                  <CheckCircle className="h-3 w-3 mr-1" /> Finalizar
-                                </Button>
+                                <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'paused')}><Pause className="h-3 w-3 mr-1" /> Pausar</Button>
+                                <Button size="sm" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'completed')}><CheckCircle className="h-3 w-3 mr-1" /> Finalizar</Button>
                               </>
                             )}
-                            {o.status === 'paused' && (
-                              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'in_progress')}>
-                                <Play className="h-3 w-3 mr-1" /> Retomar
-                              </Button>
-                            )}
+                            {o.status === 'paused' && <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'in_progress')}><Play className="h-3 w-3 mr-1" /> Retomar</Button>}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -266,12 +211,8 @@ export default function PCPPanel() {
             <CardContent>
               <Table>
                 <TableHeader><TableRow>
-                  <TableHead>Nº Pedido</TableHead>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Itens</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead>Entrega</TableHead>
-                  <TableHead>Prioridade</TableHead>
+                  <TableHead>Nº Pedido</TableHead><TableHead>Cliente</TableHead><TableHead>Itens</TableHead>
+                  <TableHead>Total</TableHead><TableHead>Entrega</TableHead><TableHead>Prioridade</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
@@ -284,16 +225,8 @@ export default function PCPPanel() {
                       <TableCell>{o.items?.length || 0} itens</TableCell>
                       <TableCell>R$ {o.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
                       <TableCell>{o.delivery_date ? format(new Date(o.delivery_date), 'dd/MM/yyyy') : '-'}</TableCell>
-                      <TableCell>
-                        <Badge className={cn('text-xs', priorityConfig[o.priority]?.color)}>
-                          {priorityConfig[o.priority]?.label || o.priority}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button size="sm" onClick={() => setGeneratingFor(o)}>
-                          <Plus className="h-3 w-3 mr-1" /> Gerar OP
-                        </Button>
-                      </TableCell>
+                      <TableCell><Badge className={cn('text-xs', priorityConfig[o.priority]?.color)}>{priorityConfig[o.priority]?.label || o.priority}</Badge></TableCell>
+                      <TableCell className="text-right"><Button size="sm" onClick={() => setGeneratingFor(o)}><Plus className="h-3 w-3 mr-1" /> Gerar OP</Button></TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -303,16 +236,13 @@ export default function PCPPanel() {
         </TabsContent>
 
         <TabsContent value="capacity" className="mt-4 space-y-6">
-          {/* Workload chart */}
           <Card>
             <CardHeader><CardTitle className="flex items-center gap-2"><BarChart3 className="h-5 w-5" /> Carga por Centro de Trabalho</CardTitle></CardHeader>
             <CardContent>
               {workCenterData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={250}>
                   <BarChart data={workCenterData}>
-                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                    <YAxis />
-                    <Tooltip />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} /><YAxis /><Tooltip />
                     <Bar dataKey="ordens" fill="hsl(var(--primary))" name="Ordens" radius={[4, 4, 0, 0]} />
                     <Bar dataKey="pendente" fill="hsl(var(--warning))" name="Qtde Pendente" radius={[4, 4, 0, 0]} />
                   </BarChart>
@@ -320,8 +250,6 @@ export default function PCPPanel() {
               ) : <p className="text-sm text-muted-foreground text-center py-8">Sem dados de carga produtiva</p>}
             </CardContent>
           </Card>
-
-          {/* Delayed OPs */}
           {delayedOPs.length > 0 && (
             <Card className="border-destructive/30">
               <CardHeader><CardTitle className="text-destructive flex items-center gap-2"><AlertTriangle className="h-5 w-5" /> OPs Atrasadas ({delayedOPs.length})</CardTitle></CardHeader>
@@ -329,13 +257,8 @@ export default function PCPPanel() {
                 <div className="space-y-2">
                   {delayedOPs.map(o => (
                     <div key={o.id} className="flex items-center justify-between text-sm border-b pb-2 last:border-0">
-                      <div className="flex items-center gap-3">
-                        <span className="font-mono font-medium">{o.order_number}</span>
-                        <span className="text-muted-foreground">{o.product_name}</span>
-                      </div>
-                      <Badge variant="destructive" className="text-xs">
-                        {differenceInDays(today, parseISO(o.due_date!))} dias de atraso
-                      </Badge>
+                      <div className="flex items-center gap-3"><span className="font-mono font-medium">{o.order_number}</span><span className="text-muted-foreground">{o.product_name}</span></div>
+                      <Badge variant="destructive" className="text-xs">{differenceInDays(today, parseISO(o.due_date!))} dias de atraso</Badge>
                     </div>
                   ))}
                 </div>
@@ -344,216 +267,74 @@ export default function PCPPanel() {
           )}
         </TabsContent>
 
-        {/* Productivity Tab */}
         <TabsContent value="productivity" className="mt-4 space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Productivity by Operator */}
             <Card>
-              <CardHeader><CardTitle className="flex items-center gap-2"><Users className="h-5 w-5" /> Produtividade por Operador</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Users className="h-5 w-5" /> Produtividade por Operador (peças/h)</CardTitle></CardHeader>
               <CardContent>
-                {(() => {
-                  const operatorData = timeEntries.reduce((acc: Record<string, { produced: number; time: number }>, e) => {
-                    const op = e.operator || 'Sem operador';
-                    if (!acc[op]) acc[op] = { produced: 0, time: 0 };
-                    acc[op].produced += Number(e.produced_quantity);
-                    if (e.start_time && e.end_time) {
-                      acc[op].time += differenceInMinutes(new Date(e.end_time), new Date(e.start_time)) - (e.paused_time || 0);
-                    }
-                    return acc;
-                  }, {});
-                  const chartData = Object.entries(operatorData).map(([name, v]) => ({
-                    name: name.length > 12 ? name.slice(0, 12) + '...' : name,
-                    produzido: v.produced,
-                    tempo: Math.round(v.time / 60),
-                  }));
-                  return chartData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={250}>
-                      <BarChart data={chartData}>
-                        <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                        <YAxis />
-                        <Tooltip />
-                        <Bar dataKey="produzido" fill="hsl(var(--primary))" name="Produzido" radius={[4, 4, 0, 0]} />
-                        <Bar dataKey="tempo" fill="hsl(var(--muted-foreground))" name="Horas" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : <p className="text-sm text-muted-foreground text-center py-8">Sem dados de apontamentos</p>;
-                })()}
+                {operatorData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={250}>
+                    <BarChart data={operatorData}>
+                      <XAxis dataKey="name" fontSize={11} /><YAxis /><Tooltip />
+                      <Bar dataKey="pcsH" fill="hsl(var(--primary))" name="Peças/h" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-center text-muted-foreground py-8">Sem apontamentos hoje</p>}
               </CardContent>
             </Card>
-
-            {/* Status Distribution */}
             <Card>
-              <CardHeader><CardTitle className="flex items-center gap-2"><Gauge className="h-5 w-5" /> Distribuição por Status</CardTitle></CardHeader>
+              <CardHeader><CardTitle>Distribuição por Status</CardTitle></CardHeader>
               <CardContent>
-                {(() => {
-                  const COLORS = ['hsl(var(--primary))', 'hsl(var(--warning))', 'hsl(var(--destructive))', '#6366f1', '#10b981', '#f59e0b'];
-                  const data = Object.entries(statusCounts).map(([status, count]) => ({
-                    name: productionStatusConfig[status]?.label || status,
-                    value: count,
-                  }));
-                  return data.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={250}>
-                      <PieChart>
-                        <Pie data={data} cx="50%" cy="50%" outerRadius={80} dataKey="value" label>
-                          {data.map((_, idx) => <Cell key={idx} fill={COLORS[idx % COLORS.length]} />)}
-                        </Pie>
-                        <Tooltip />
-                        <Legend />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  ) : <p className="text-sm text-muted-foreground text-center py-8">Sem dados</p>;
-                })()}
+                {statusPieData.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={250}>
+                    <PieChart>
+                      <Pie data={statusPieData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label>
+                        {statusPieData.map((_, idx) => <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} />)}
+                      </Pie>
+                      <Tooltip /><Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-center text-muted-foreground py-8">Sem dados</p>}
               </CardContent>
             </Card>
           </div>
-
-          {/* Sector Productivity */}
-          <Card>
-            <CardHeader><CardTitle className="flex items-center gap-2"><Factory className="h-5 w-5" /> Produtividade por Setor</CardTitle></CardHeader>
-            <CardContent>
-              {(() => {
-                const sectorData = productionOrders
-                  .filter(o => o.status === 'completed')
-                  .reduce((acc: Record<string, { count: number; qty: number }>, o) => {
-                    const sector = o.work_center || (o as any).sector || 'Sem setor';
-                    if (!acc[sector]) acc[sector] = { count: 0, qty: 0 };
-                    acc[sector].count++;
-                    acc[sector].qty += o.produced_quantity;
-                    return acc;
-                  }, {});
-                const chartData = Object.entries(sectorData).map(([name, v]) => ({
-                  name, concluidas: v.count, pecas: v.qty,
-                }));
-                return chartData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={200}>
-                    <BarChart data={chartData}>
-                      <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="concluidas" fill="hsl(var(--primary))" name="OPs Concluídas" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="pecas" fill="hsl(var(--info))" name="Peças Produzidas" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : <p className="text-sm text-muted-foreground text-center py-8">Nenhuma OP concluída para análise</p>;
-              })()}
-            </CardContent>
-          </Card>
         </TabsContent>
 
-        {/* Alerts Tab */}
         <TabsContent value="alerts" className="mt-4 space-y-4">
-          {delayedOPs.length > 0 && (
-            <Card className="border-destructive/30">
-              <CardHeader><CardTitle className="text-destructive flex items-center gap-2"><AlertTriangle className="h-5 w-5" /> OPs Atrasadas ({delayedOPs.length})</CardTitle></CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {delayedOPs.map(o => (
-                    <div key={o.id} className="flex items-center justify-between text-sm border-b pb-2 last:border-0">
-                      <div className="flex items-center gap-3">
-                        <span className="font-mono font-medium">{o.order_number}</span>
-                        <span className="text-muted-foreground">{o.product_name}</span>
-                      </div>
-                      <Badge variant="destructive" className="text-xs">
-                        {differenceInDays(today, parseISO(o.due_date!))} dias de atraso
-                      </Badge>
-                    </div>
-                  ))}
+          {delayedOPs.length === 0 && (
+            <Card><CardContent className="py-12 text-center"><ShieldCheck className="h-12 w-12 mx-auto text-success mb-4" /><p className="text-lg font-medium">Nenhum alerta ativo</p><p className="text-sm text-muted-foreground">Todas as OPs estão dentro do prazo</p></CardContent></Card>
+          )}
+          {delayedOPs.map(o => (
+            <Card key={o.id} className="border-l-4 border-l-destructive">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                  <div><p className="font-medium">{o.order_number} — {o.product_name}</p><p className="text-sm text-muted-foreground">{differenceInDays(today, parseISO(o.due_date!))} dias de atraso</p></div>
                 </div>
+                <Button size="sm" variant="outline" onClick={() => handleStatusChange(o, 'in_progress')}><Play className="h-3 w-3 mr-1" /> Priorizar</Button>
               </CardContent>
             </Card>
-          )}
-
-          {/* Paused/Stalled OPs */}
-          {(() => {
-            const pausedOPs = productionOrders.filter(o => o.status === 'paused');
-            return pausedOPs.length > 0 ? (
-              <Card className="border-warning/30">
-                <CardHeader><CardTitle className="flex items-center gap-2 text-warning"><Pause className="h-5 w-5" /> Etapas Paradas ({pausedOPs.length})</CardTitle></CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {pausedOPs.map(o => (
-                      <div key={o.id} className="flex items-center justify-between text-sm border-b pb-2 last:border-0">
-                        <div className="flex items-center gap-3">
-                          <span className="font-mono font-medium">{o.order_number}</span>
-                          <span className="text-muted-foreground">{o.product_name}</span>
-                          <span className="text-xs text-muted-foreground">{o.work_center || '-'}</span>
-                        </div>
-                        <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'in_progress')}>
-                          <Play className="h-3 w-3 mr-1" /> Retomar
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ) : null;
-          })()}
-
-          {/* Bottleneck Detection */}
-          {(() => {
-            const bottlenecks = Object.entries(workCenterLoad)
-              .filter(([_, v]) => v.count >= 3)
-              .sort(([, a], [, b]) => b.totalQty - a.totalQty);
-            return bottlenecks.length > 0 ? (
-              <Card className="border-orange-300/50">
-                <CardHeader><CardTitle className="flex items-center gap-2"><Gauge className="h-5 w-5 text-orange-500" /> Gargalos Detectados</CardTitle></CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {bottlenecks.map(([name, v]) => (
-                      <div key={name} className="flex items-center justify-between">
-                        <div>
-                          <p className="font-medium">{name}</p>
-                          <p className="text-xs text-muted-foreground">{v.count} ordens em fila • {v.totalQty} peças pendentes</p>
-                        </div>
-                        <Badge variant="outline" className="text-orange-600 border-orange-300">Gargalo</Badge>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ) : null;
-          })()}
-
-          {delayedOPs.length === 0 && productionOrders.filter(o => o.status === 'paused').length === 0 && (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <CheckCircle className="h-12 w-12 mx-auto mb-4 text-green-500 opacity-50" />
-                <h3 className="text-lg font-semibold mb-2">Tudo em ordem!</h3>
-                <p className="text-muted-foreground">Nenhum alerta de produção no momento.</p>
-              </CardContent>
-            </Card>
-          )}
+          ))}
         </TabsContent>
       </Tabs>
 
-      {/* Generate OP confirmation dialog */}
-      <Dialog open={!!generatingFor} onOpenChange={() => setGeneratingFor(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Gerar Ordem de Produção</DialogTitle>
-          </DialogHeader>
-          {generatingFor && (
-            <div className="space-y-3">
-              <p className="text-sm">Criar OPs para o pedido <strong>{generatingFor.number}</strong> ({generatingFor.client_name})?</p>
-              <div className="text-sm space-y-1">
-                {(generatingFor.items || []).map((i: any) => (
-                  <div key={i.id} className="flex justify-between">
-                    <span>{i.product_name}</span>
-                    <span className="font-mono">{i.quantity} un</span>
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-muted-foreground">Será criada uma OP para cada item do pedido.</p>
+      {/* Generate OP Dialog */}
+      {generatingFor && (
+        <Dialog open={!!generatingFor} onOpenChange={() => setGeneratingFor(null)}>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Gerar OPs do Pedido {generatingFor.number}</DialogTitle></DialogHeader>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Cliente: <strong>{generatingFor.client_name}</strong></p>
+              <p className="text-sm text-muted-foreground">Itens: <strong>{generatingFor.items?.length || 0}</strong></p>
+              <p className="text-sm">Será gerada uma OP para cada item do pedido.</p>
             </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setGeneratingFor(null)}>Cancelar</Button>
-            <Button onClick={() => generateOPFromOrder(generatingFor)} disabled={lifecycle.isPending}>
-              <Plus className="h-4 w-4 mr-1" /> Gerar OPs
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setGeneratingFor(null)}>Cancelar</Button>
+              <Button onClick={() => generateOPFromOrder(generatingFor)}>Gerar OPs</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </PageContainer>
   );
 }
