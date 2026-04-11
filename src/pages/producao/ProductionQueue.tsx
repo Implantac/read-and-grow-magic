@@ -22,7 +22,7 @@ export default function ProductionQueuePage() {
   const activeOrders = useMemo(() => {
     return orders
       .filter(o => ['planned', 'in_progress', 'paused'].includes(o.status))
-      .filter(o => sectorFilter === 'all' || o.work_center === sectorFilter || o.sector === sectorFilter)
+      .filter(o => sectorFilter === 'all' || o.work_center === sectorFilter || (o as any).sector === sectorFilter)
       .sort((a, b) => {
         // 1. Priority weight
         const pw = (priorityWeight[b.priority] || 0) - (priorityWeight[a.priority] || 0);
@@ -38,7 +38,7 @@ export default function ProductionQueuePage() {
       });
   }, [orders, sectorFilter]);
 
-  const sectors = [...new Set(orders.map(o => o.work_center || o.sector).filter(Boolean))];
+  const sectors = [...new Set(orders.map(o => o.work_center || (o as any).sector).filter(Boolean))];
   const today = new Date();
 
   const handleStart = async (op: any) => {

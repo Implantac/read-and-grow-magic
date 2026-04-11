@@ -31,7 +31,6 @@ export interface ProductionOrderStep {
   completed_at: string | null;
   notes: string | null;
   created_at: string;
-  // joined
   step_name?: string;
   step_code?: string;
   step_sector?: string;
@@ -43,19 +42,19 @@ export function useProductionSteps() {
 
   const fetchSteps = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('production_steps')
       .select('*')
       .order('sequence', { ascending: true });
     if (error) { console.error(error); toast.error('Erro ao carregar etapas'); }
-    else setSteps((data as any[]) || []);
+    else setSteps(data || []);
     setLoading(false);
   }, []);
 
   useEffect(() => { fetchSteps(); }, [fetchSteps]);
 
   const createStep = async (step: Partial<ProductionStep>) => {
-    const { error } = await supabase.from('production_steps').insert(step as any);
+    const { error } = await (supabase as any).from('production_steps').insert(step);
     if (error) { toast.error('Erro ao criar etapa'); return false; }
     toast.success('Etapa criada');
     await fetchSteps();
@@ -63,14 +62,14 @@ export function useProductionSteps() {
   };
 
   const updateStep = async (id: string, updates: Partial<ProductionStep>) => {
-    const { error } = await supabase.from('production_steps').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
+    const { error } = await (supabase as any).from('production_steps').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
     if (error) { toast.error('Erro ao atualizar etapa'); return; }
     toast.success('Etapa atualizada');
     await fetchSteps();
   };
 
   const deleteStep = async (id: string) => {
-    const { error } = await supabase.from('production_steps').delete().eq('id', id);
+    const { error } = await (supabase as any).from('production_steps').delete().eq('id', id);
     if (error) { toast.error('Erro ao excluir etapa'); return; }
     toast.success('Etapa excluída');
     await fetchSteps();
@@ -86,7 +85,7 @@ export function useProductionOrderSteps(productionOrderId?: string) {
   const fetchOrderSteps = useCallback(async () => {
     if (!productionOrderId) { setOrderSteps([]); setLoading(false); return; }
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('production_order_steps')
       .select('*, production_steps(name, code, sector)')
       .eq('production_order_id', productionOrderId)
@@ -106,13 +105,13 @@ export function useProductionOrderSteps(productionOrderId?: string) {
   useEffect(() => { fetchOrderSteps(); }, [fetchOrderSteps]);
 
   const updateOrderStep = async (id: string, updates: Partial<ProductionOrderStep>) => {
-    const { error } = await supabase.from('production_order_steps').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
+    const { error } = await (supabase as any).from('production_order_steps').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
     if (error) { toast.error('Erro ao atualizar etapa'); return; }
     await fetchOrderSteps();
   };
 
   const generateStepsForOrder = async (orderId: string, quantity: number, selectedStepIds: string[]) => {
-    const { data: stepsData } = await supabase
+    const { data: stepsData } = await (supabase as any)
       .from('production_steps')
       .select('*')
       .in('id', selectedStepIds)
@@ -120,7 +119,7 @@ export function useProductionOrderSteps(productionOrderId?: string) {
 
     if (!stepsData || stepsData.length === 0) return;
 
-    const inserts = (stepsData as any[]).map((s) => ({
+    const inserts = stepsData.map((s: any) => ({
       production_order_id: orderId,
       step_id: s.id,
       sequence: s.sequence,
@@ -129,7 +128,7 @@ export function useProductionOrderSteps(productionOrderId?: string) {
       status: 'pending',
     }));
 
-    const { error } = await supabase.from('production_order_steps').insert(inserts as any);
+    const { error } = await (supabase as any).from('production_order_steps').insert(inserts);
     if (error) { toast.error('Erro ao gerar etapas'); return; }
     toast.success(`${inserts.length} etapas geradas`);
     await fetchOrderSteps();
