@@ -102,6 +102,11 @@ const ProductCostsPage = lazy(() => import("./pages/producao/ProductCosts"));
 const IndustrialDashboardPage = lazy(() => import("./pages/producao/IndustrialDashboard"));
 const OperatorTerminalPage = lazy(() => import("./pages/producao/OperatorTerminal"));
 const ShopFloorDashboardPage = lazy(() => import("./pages/producao/ShopFloorDashboard"));
+const ProductionKanbanPage = lazy(() => import("./pages/producao/ProductionKanban"));
+const TechnicalSheetsPage = lazy(() => import("./pages/producao/TechnicalSheets"));
+const ProductionCapacityPage = lazy(() => import("./pages/producao/ProductionCapacity"));
+const ProductionTraceabilityPage = lazy(() => import("./pages/producao/ProductionTraceability"));
+const AIProductionPage = lazy(() => import("./pages/producao/AIProductionPage"));
 
 // Operational Flow
 const OperationalDashboardPage = lazy(() => import("./pages/operacional/OperationalDashboard"));
@@ -249,6 +254,11 @@ const App = () => (
               <Route path="/producao/dashboard-industrial" element={<IndustrialDashboardPage />} />
               <Route path="/producao/terminal" element={<OperatorTerminalPage />} />
               <Route path="/producao/chao-fabrica" element={<ShopFloorDashboardPage />} />
+              <Route path="/producao/kanban" element={<ProductionKanbanPage />} />
+              <Route path="/producao/fichas-tecnicas" element={<TechnicalSheetsPage />} />
+              <Route path="/producao/capacidade" element={<ProductionCapacityPage />} />
+              <Route path="/producao/rastreabilidade" element={<ProductionTraceabilityPage />} />
+              <Route path="/producao/ia" element={<AIProductionPage />} />
 
               {/* Operational Flow Module */}
               <Route path="/operacional/dashboard" element={<OperationalDashboardPage />} />

@@ -566,6 +566,62 @@ export type Database = {
           },
         ]
       }
+      ai_production_insights: {
+        Row: {
+          affected_order_id: string | null
+          affected_sector: string | null
+          created_at: string
+          description: string | null
+          id: string
+          impact_estimate: string | null
+          insight_type: string
+          recommended_action: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          affected_order_id?: string | null
+          affected_sector?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          impact_estimate?: string | null
+          insight_type?: string
+          recommended_action?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          affected_order_id?: string | null
+          affected_sector?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          impact_estimate?: string | null
+          insight_type?: string
+          recommended_action?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_production_insights_affected_order_id_fkey"
+            columns: ["affected_order_id"]
+            isOneToOne: false
+            referencedRelation: "production_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_recommendations: {
         Row: {
           acted_at: string | null
@@ -3686,18 +3742,239 @@ export type Database = {
           },
         ]
       }
+      product_technical_sheets: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          materials: Json
+          notes: string | null
+          product_code: string
+          product_id: string | null
+          product_name: string
+          standard_cost: number
+          steps: Json
+          total_time_minutes: number
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          materials?: Json
+          notes?: string | null
+          product_code: string
+          product_id?: string | null
+          product_name: string
+          standard_cost?: number
+          steps?: Json
+          total_time_minutes?: number
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          materials?: Json
+          notes?: string | null
+          product_code?: string
+          product_id?: string | null
+          product_name?: string
+          standard_cost?: number
+          steps?: Json
+          total_time_minutes?: number
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_technical_sheets_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_capacity: {
+        Row: {
+          capacity_per_hour: number
+          created_at: string
+          current_load_pct: number
+          id: string
+          is_active: boolean
+          machine: string | null
+          max_hours_per_day: number
+          notes: string | null
+          operator_name: string | null
+          sector: string
+          shift: string
+          updated_at: string
+        }
+        Insert: {
+          capacity_per_hour?: number
+          created_at?: string
+          current_load_pct?: number
+          id?: string
+          is_active?: boolean
+          machine?: string | null
+          max_hours_per_day?: number
+          notes?: string | null
+          operator_name?: string | null
+          sector: string
+          shift?: string
+          updated_at?: string
+        }
+        Update: {
+          capacity_per_hour?: number
+          created_at?: string
+          current_load_pct?: number
+          id?: string
+          is_active?: boolean
+          machine?: string | null
+          max_hours_per_day?: number
+          notes?: string | null
+          operator_name?: string | null
+          sector?: string
+          shift?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      production_logs: {
+        Row: {
+          created_at: string
+          description: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          operator: string | null
+          production_order_id: string | null
+          quantity: number | null
+          step_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          operator?: string | null
+          production_order_id?: string | null
+          quantity?: number | null
+          step_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          operator?: string | null
+          production_order_id?: string | null
+          quantity?: number | null
+          step_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_logs_production_order_id_fkey"
+            columns: ["production_order_id"]
+            isOneToOne: false
+            referencedRelation: "production_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_order_steps: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          defect_reason: string | null
+          estimated_time_minutes: number
+          id: string
+          notes: string | null
+          production_order_id: string
+          quantity_pending: number
+          quantity_produced: number
+          quantity_rejected: number
+          realized_time_minutes: number
+          responsible: string | null
+          sequence: number
+          started_at: string | null
+          status: string
+          step_id: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          defect_reason?: string | null
+          estimated_time_minutes?: number
+          id?: string
+          notes?: string | null
+          production_order_id: string
+          quantity_pending?: number
+          quantity_produced?: number
+          quantity_rejected?: number
+          realized_time_minutes?: number
+          responsible?: string | null
+          sequence?: number
+          started_at?: string | null
+          status?: string
+          step_id: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          defect_reason?: string | null
+          estimated_time_minutes?: number
+          id?: string
+          notes?: string | null
+          production_order_id?: string
+          quantity_pending?: number
+          quantity_produced?: number
+          quantity_rejected?: number
+          realized_time_minutes?: number
+          responsible?: string | null
+          sequence?: number
+          started_at?: string | null
+          status?: string
+          step_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_order_steps_production_order_id_fkey"
+            columns: ["production_order_id"]
+            isOneToOne: false
+            referencedRelation: "production_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_orders: {
         Row: {
+          batch_code: string | null
           bom_id: string | null
+          client_id: string | null
+          client_name: string | null
+          color: string | null
           completed_date: string | null
           created_at: string
+          defect_notes: string | null
+          delivery_type: string | null
           due_date: string | null
           estimated_time_minutes: number | null
           id: string
+          model_variant: string | null
           notes: string | null
           operator: string | null
           order_item_id: string | null
           order_number: string
+          partial_delivered_qty: number | null
           priority: string
           produced_quantity: number
           product_code: string
@@ -3705,9 +3982,12 @@ export type Database = {
           product_name: string
           quantity: number
           realized_time_minutes: number | null
+          rejected_quantity: number | null
+          released_at: string | null
           route_id: string | null
           sales_order_id: string | null
           sector: string | null
+          size_grid: string | null
           start_date: string | null
           status: string
           unit: string
@@ -3715,16 +3995,24 @@ export type Database = {
           work_center: string | null
         }
         Insert: {
+          batch_code?: string | null
           bom_id?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          color?: string | null
           completed_date?: string | null
           created_at?: string
+          defect_notes?: string | null
+          delivery_type?: string | null
           due_date?: string | null
           estimated_time_minutes?: number | null
           id?: string
+          model_variant?: string | null
           notes?: string | null
           operator?: string | null
           order_item_id?: string | null
           order_number: string
+          partial_delivered_qty?: number | null
           priority?: string
           produced_quantity?: number
           product_code: string
@@ -3732,9 +4020,12 @@ export type Database = {
           product_name: string
           quantity?: number
           realized_time_minutes?: number | null
+          rejected_quantity?: number | null
+          released_at?: string | null
           route_id?: string | null
           sales_order_id?: string | null
           sector?: string | null
+          size_grid?: string | null
           start_date?: string | null
           status?: string
           unit?: string
@@ -3742,16 +4033,24 @@ export type Database = {
           work_center?: string | null
         }
         Update: {
+          batch_code?: string | null
           bom_id?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          color?: string | null
           completed_date?: string | null
           created_at?: string
+          defect_notes?: string | null
+          delivery_type?: string | null
           due_date?: string | null
           estimated_time_minutes?: number | null
           id?: string
+          model_variant?: string | null
           notes?: string | null
           operator?: string | null
           order_item_id?: string | null
           order_number?: string
+          partial_delivered_qty?: number | null
           priority?: string
           produced_quantity?: number
           product_code?: string
@@ -3759,9 +4058,12 @@ export type Database = {
           product_name?: string
           quantity?: number
           realized_time_minutes?: number | null
+          rejected_quantity?: number | null
+          released_at?: string | null
           route_id?: string | null
           sales_order_id?: string | null
           sector?: string | null
+          size_grid?: string | null
           start_date?: string | null
           status?: string
           unit?: string
@@ -3791,6 +4093,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      production_steps: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          estimated_time_minutes: number
+          id: string
+          is_active: boolean
+          name: string
+          sector: string | null
+          sequence: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          estimated_time_minutes?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          sector?: string | null
+          sequence?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          estimated_time_minutes?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          sector?: string | null
+          sequence?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       products: {
         Row: {
