@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { productionStatusConfig, priorityConfig } from '@/config/production';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowRight, Clock, Factory, CheckCircle, Pause, AlertTriangle } from 'lucide-react';
+import { ArrowRight, Clock, Factory, CheckCircle, Pause, AlertTriangle, QrCode } from 'lucide-react';
+import { QRCodeOPButton } from '@/components/producao/QRCodeOP';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 
