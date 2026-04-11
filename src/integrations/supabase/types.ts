@@ -6244,6 +6244,7 @@ export type Database = {
           code: string
           created_at: string
           current_load: number
+          description: string | null
           id: string
           is_active: boolean
           name: string
@@ -6254,6 +6255,7 @@ export type Database = {
           code: string
           created_at?: string
           current_load?: number
+          description?: string | null
           id?: string
           is_active?: boolean
           name: string
@@ -6264,6 +6266,7 @@ export type Database = {
           code?: string
           created_at?: string
           current_load?: number
+          description?: string | null
           id?: string
           is_active?: boolean
           name?: string
