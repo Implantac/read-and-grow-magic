@@ -84,6 +84,14 @@ const WMSMovementsPage = lazy(() => import("./pages/wms/Movements"));
 const ConferencePage = lazy(() => import("./pages/wms/Conference"));
 const ShipmentsPage = lazy(() => import("./pages/wms/Shipments"));
 const LotsPage = lazy(() => import("./pages/wms/Lots"));
+const WavesPage = lazy(() => import("./pages/wms/Waves"));
+const PutawayPage = lazy(() => import("./pages/wms/Putaway"));
+const ReplenishmentPage = lazy(() => import("./pages/wms/Replenishment"));
+const ReturnsPage = lazy(() => import("./pages/wms/Returns"));
+const DistributionCentersPage = lazy(() => import("./pages/wms/DistributionCenters"));
+const StockBalancesPage = lazy(() => import("./pages/wms/StockBalances"));
+const DocksPage = lazy(() => import("./pages/wms/Docks"));
+const WMSAIPage = lazy(() => import("./pages/wms/WMSAI"));
 
 // RFID
 const RFIDDashboardPage = lazy(() => import("./pages/rfid/Dashboard"));
@@ -284,6 +292,14 @@ const App = () => (
               <Route path="/wms/movimentacoes" element={<WMSMovementsPage />} />
               <Route path="/wms/expedicao" element={<ShipmentsPage />} />
               <Route path="/wms/lotes" element={<LotsPage />} />
+              <Route path="/wms/ondas" element={<WavesPage />} />
+              <Route path="/wms/putaway" element={<PutawayPage />} />
+              <Route path="/wms/reabastecimento" element={<ReplenishmentPage />} />
+              <Route path="/wms/devolucoes" element={<ReturnsPage />} />
+              <Route path="/wms/centros-distribuicao" element={<DistributionCentersPage />} />
+              <Route path="/wms/saldos" element={<StockBalancesPage />} />
+              <Route path="/wms/docas" element={<DocksPage />} />
+              <Route path="/wms/ia" element={<WMSAIPage />} />
               
               {/* RFID Module */}
               <Route path="/rfid/dashboard" element={<RFIDDashboardPage />} />
