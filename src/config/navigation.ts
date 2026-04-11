@@ -87,6 +87,8 @@ export const navigationSections: NavSection[] = [
         icon: 'Factory',
         children: [
           { title: 'Dashboard Industrial', href: '/producao/dashboard-industrial', icon: 'Gauge' },
+          { title: '🏭 Chão de Fábrica', href: '/producao/chao-fabrica', icon: 'Activity' },
+          { title: '📲 Terminal Operador', href: '/producao/terminal', icon: 'Smartphone' },
           { title: 'Painel PCP', href: '/producao/pcp', icon: 'BarChart3' },
           { title: 'Ordens de Produção', href: '/producao/ordens', icon: 'ClipboardCheck' },
           { title: 'Etapas Produtivas', href: '/producao/etapas', icon: 'Layers' },
