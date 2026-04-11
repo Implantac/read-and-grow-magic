@@ -307,6 +307,13 @@ const App = () => (
               <Route path="/rfid/eventos" element={<RFIDEventsPage />} />
               <Route path="/rfid/integracao" element={<RFIDIntegrationPage />} />
               
+              {/* TMS Module */}
+              <Route path="/tms/dashboard" element={<TMSDashboardPage />} />
+              <Route path="/tms/transportadoras" element={<CarriersPage />} />
+              <Route path="/tms/veiculos" element={<VehiclesPage />} />
+              <Route path="/tms/rotas" element={<RoutesPage />} />
+              <Route path="/tms/comprovantes" element={<DeliveryProofPage />} />
+              
               {/* Reports Module */}
               <Route path="/relatorios/vendas" element={<SalesReport />} />
               <Route path="/relatorios/estoque" element={<InventoryReport />} />
