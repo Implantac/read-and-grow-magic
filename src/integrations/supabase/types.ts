@@ -3843,6 +3843,65 @@ export type Database = {
         }
         Relationships: []
       }
+      production_costs: {
+        Row: {
+          calculated_at: string | null
+          created_at: string
+          id: string
+          labor_cost: number | null
+          notes: string | null
+          operational_cost: number | null
+          production_order_id: string | null
+          profit_margin: number | null
+          profit_per_unit: number | null
+          quantity: number | null
+          raw_material_cost: number | null
+          sale_price: number | null
+          total_cost: number | null
+          updated_at: string
+        }
+        Insert: {
+          calculated_at?: string | null
+          created_at?: string
+          id?: string
+          labor_cost?: number | null
+          notes?: string | null
+          operational_cost?: number | null
+          production_order_id?: string | null
+          profit_margin?: number | null
+          profit_per_unit?: number | null
+          quantity?: number | null
+          raw_material_cost?: number | null
+          sale_price?: number | null
+          total_cost?: number | null
+          updated_at?: string
+        }
+        Update: {
+          calculated_at?: string | null
+          created_at?: string
+          id?: string
+          labor_cost?: number | null
+          notes?: string | null
+          operational_cost?: number | null
+          production_order_id?: string | null
+          profit_margin?: number | null
+          profit_per_unit?: number | null
+          quantity?: number | null
+          raw_material_cost?: number | null
+          sale_price?: number | null
+          total_cost?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_costs_production_order_id_fkey"
+            columns: ["production_order_id"]
+            isOneToOne: false
+            referencedRelation: "production_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_logs: {
         Row: {
           created_at: string
@@ -4090,6 +4149,65 @@ export type Database = {
             columns: ["sales_order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_schedule: {
+        Row: {
+          actual_end: string | null
+          actual_start: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          planned_end: string
+          planned_start: string
+          priority: number | null
+          production_order_id: string | null
+          sector: string | null
+          shift: string | null
+          status: string | null
+          updated_at: string
+          work_center: string | null
+        }
+        Insert: {
+          actual_end?: string | null
+          actual_start?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          planned_end: string
+          planned_start: string
+          priority?: number | null
+          production_order_id?: string | null
+          sector?: string | null
+          shift?: string | null
+          status?: string | null
+          updated_at?: string
+          work_center?: string | null
+        }
+        Update: {
+          actual_end?: string | null
+          actual_start?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          planned_end?: string
+          planned_start?: string
+          priority?: number | null
+          production_order_id?: string | null
+          sector?: string | null
+          shift?: string | null
+          status?: string | null
+          updated_at?: string
+          work_center?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_schedule_production_order_id_fkey"
+            columns: ["production_order_id"]
+            isOneToOne: false
+            referencedRelation: "production_orders"
             referencedColumns: ["id"]
           },
         ]
