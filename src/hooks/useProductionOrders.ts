@@ -33,6 +33,11 @@ export interface ProductionOrderRow {
   defect_notes: string | null;
   delivery_type: string;
   partial_delivered_qty: number;
+  color: string | null;
+  size_grid: string | null;
+  model_variant: string | null;
+  released_at: string | null;
+  batch_code: string | null;
 }
 
 export function useProductionOrders() {
