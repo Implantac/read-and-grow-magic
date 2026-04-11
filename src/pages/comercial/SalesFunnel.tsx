@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, DollarSign, Target, TrendingUp, Pencil, MoreHorizontal, Trophy, XCircle, ArrowRight, Clock, BarChart3, AlertTriangle } from 'lucide-react';
 import { useSalesFunnel, useCreateFunnelItem, useUpdateFunnelItem, FUNNEL_STAGES, type DbFunnelItem } from '@/hooks/useSalesFunnel';
+import { PlaybookTips } from '@/components/comercial/PlaybookTips';
 import { useClients } from '@/hooks/useClients';
 import { useSalesReps } from '@/hooks/useSalesReps';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -250,6 +251,7 @@ export default function SalesFunnelPage() {
                       <div className={`w-2.5 h-2.5 rounded-full ${stage.color}`} />
                       <span className="text-xs font-semibold uppercase tracking-wide">{stage.label}</span>
                       <Badge variant="secondary" className="text-[10px] px-1.5">{items.length}</Badge>
+                      <PlaybookTips stage={stage.value} compact />
                     </div>
                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => openNew(stage.value)}>
                       <Plus className="h-3.5 w-3.5" />
