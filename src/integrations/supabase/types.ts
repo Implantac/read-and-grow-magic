@@ -1104,6 +1104,75 @@ export type Database = {
           },
         ]
       }
+      checking_tasks: {
+        Row: {
+          approved: boolean | null
+          approved_by: string | null
+          assigned_to: string | null
+          blind_check: boolean | null
+          check_type: string
+          checked_items: number | null
+          completed_at: string | null
+          created_at: string
+          customer_name: string | null
+          divergent_items: number | null
+          expected_items: number | null
+          id: string
+          notes: string | null
+          order_number: string | null
+          reference_id: string
+          reference_type: string
+          started_at: string | null
+          status: string
+          task_number: string
+          updated_at: string
+        }
+        Insert: {
+          approved?: boolean | null
+          approved_by?: string | null
+          assigned_to?: string | null
+          blind_check?: boolean | null
+          check_type?: string
+          checked_items?: number | null
+          completed_at?: string | null
+          created_at?: string
+          customer_name?: string | null
+          divergent_items?: number | null
+          expected_items?: number | null
+          id?: string
+          notes?: string | null
+          order_number?: string | null
+          reference_id: string
+          reference_type: string
+          started_at?: string | null
+          status?: string
+          task_number: string
+          updated_at?: string
+        }
+        Update: {
+          approved?: boolean | null
+          approved_by?: string | null
+          assigned_to?: string | null
+          blind_check?: boolean | null
+          check_type?: string
+          checked_items?: number | null
+          completed_at?: string | null
+          created_at?: string
+          customer_name?: string | null
+          divergent_items?: number | null
+          expected_items?: number | null
+          id?: string
+          notes?: string | null
+          order_number?: string | null
+          reference_id?: string
+          reference_type?: string
+          started_at?: string | null
+          status?: string
+          task_number?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_timeline: {
         Row: {
           client_id: string
@@ -2150,6 +2219,60 @@ export type Database = {
           },
         ]
       }
+      distribution_centers: {
+        Row: {
+          address: string | null
+          city: string | null
+          code: string
+          created_at: string
+          id: string
+          manager: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          state: string | null
+          status: string
+          total_capacity_m3: number | null
+          updated_at: string
+          used_capacity_m3: number | null
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          code: string
+          created_at?: string
+          id?: string
+          manager?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          state?: string | null
+          status?: string
+          total_capacity_m3?: number | null
+          updated_at?: string
+          used_capacity_m3?: number | null
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          code?: string
+          created_at?: string
+          id?: string
+          manager?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          state?: string | null
+          status?: string
+          total_capacity_m3?: number | null
+          updated_at?: string
+          used_capacity_m3?: number | null
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
       financial_alerts: {
         Row: {
           alert_type: string
@@ -2635,6 +2758,93 @@ export type Database = {
         }
         Relationships: []
       }
+      inventory_sessions: {
+        Row: {
+          abc_class: string | null
+          approved: boolean | null
+          approved_at: string | null
+          approved_by: string | null
+          blind_count: boolean | null
+          completed_at: string | null
+          counted_locations: number | null
+          created_at: string
+          divergent_locations: number | null
+          id: string
+          max_recount: number | null
+          notes: string | null
+          planned_date: string | null
+          session_number: string
+          session_type: string
+          started_at: string | null
+          status: string
+          total_locations: number | null
+          updated_at: string
+          warehouse_id: string | null
+          zone_id: string | null
+        }
+        Insert: {
+          abc_class?: string | null
+          approved?: boolean | null
+          approved_at?: string | null
+          approved_by?: string | null
+          blind_count?: boolean | null
+          completed_at?: string | null
+          counted_locations?: number | null
+          created_at?: string
+          divergent_locations?: number | null
+          id?: string
+          max_recount?: number | null
+          notes?: string | null
+          planned_date?: string | null
+          session_number: string
+          session_type?: string
+          started_at?: string | null
+          status?: string
+          total_locations?: number | null
+          updated_at?: string
+          warehouse_id?: string | null
+          zone_id?: string | null
+        }
+        Update: {
+          abc_class?: string | null
+          approved?: boolean | null
+          approved_at?: string | null
+          approved_by?: string | null
+          blind_count?: boolean | null
+          completed_at?: string | null
+          counted_locations?: number | null
+          created_at?: string
+          divergent_locations?: number | null
+          id?: string
+          max_recount?: number | null
+          notes?: string | null
+          planned_date?: string | null
+          session_number?: string
+          session_type?: string
+          started_at?: string | null
+          status?: string
+          total_locations?: number | null
+          updated_at?: string
+          warehouse_id?: string | null
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_sessions_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_sessions_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "warehouse_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       journal_entries: {
         Row: {
           created_at: string
@@ -2718,6 +2928,77 @@ export type Database = {
             columns: ["journal_entry_id"]
             isOneToOne: false
             referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loading_docks: {
+        Row: {
+          actual_end: string | null
+          actual_start: string | null
+          carrier: string | null
+          created_at: string
+          current_shipment_id: string | null
+          dock_code: string
+          dock_name: string | null
+          dock_type: string
+          driver_document: string | null
+          driver_name: string | null
+          id: string
+          notes: string | null
+          scheduled_end: string | null
+          scheduled_start: string | null
+          status: string
+          updated_at: string
+          vehicle_plate: string | null
+          warehouse_id: string | null
+        }
+        Insert: {
+          actual_end?: string | null
+          actual_start?: string | null
+          carrier?: string | null
+          created_at?: string
+          current_shipment_id?: string | null
+          dock_code: string
+          dock_name?: string | null
+          dock_type?: string
+          driver_document?: string | null
+          driver_name?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_end?: string | null
+          scheduled_start?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_plate?: string | null
+          warehouse_id?: string | null
+        }
+        Update: {
+          actual_end?: string | null
+          actual_start?: string | null
+          carrier?: string | null
+          created_at?: string
+          current_shipment_id?: string | null
+          dock_code?: string
+          dock_name?: string | null
+          dock_type?: string
+          driver_document?: string | null
+          driver_name?: string | null
+          id?: string
+          notes?: string | null
+          scheduled_end?: string | null
+          scheduled_start?: string | null
+          status?: string
+          updated_at?: string
+          vehicle_plate?: string | null
+          warehouse_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loading_docks_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
             referencedColumns: ["id"]
           },
         ]
@@ -3530,6 +3811,183 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      picking_tasks: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          location_code: string
+          location_id: string | null
+          lot_id: string | null
+          lot_number: string | null
+          notes: string | null
+          picked_qty: number
+          picking_order_id: string | null
+          priority: string
+          product_code: string
+          product_id: string | null
+          product_name: string
+          requested_qty: number
+          route_sequence: number | null
+          started_at: string | null
+          status: string
+          task_number: string
+          unit: string
+          wave_id: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          location_code: string
+          location_id?: string | null
+          lot_id?: string | null
+          lot_number?: string | null
+          notes?: string | null
+          picked_qty?: number
+          picking_order_id?: string | null
+          priority?: string
+          product_code: string
+          product_id?: string | null
+          product_name: string
+          requested_qty?: number
+          route_sequence?: number | null
+          started_at?: string | null
+          status?: string
+          task_number: string
+          unit?: string
+          wave_id?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          location_code?: string
+          location_id?: string | null
+          lot_id?: string | null
+          lot_number?: string | null
+          notes?: string | null
+          picked_qty?: number
+          picking_order_id?: string | null
+          priority?: string
+          product_code?: string
+          product_id?: string | null
+          product_name?: string
+          requested_qty?: number
+          route_sequence?: number | null
+          started_at?: string | null
+          status?: string
+          task_number?: string
+          unit?: string
+          wave_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "picking_tasks_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "wms_storage_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "picking_tasks_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "stock_lots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "picking_tasks_picking_order_id_fkey"
+            columns: ["picking_order_id"]
+            isOneToOne: false
+            referencedRelation: "wms_picking_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "picking_tasks_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "picking_tasks_wave_id_fkey"
+            columns: ["wave_id"]
+            isOneToOne: false
+            referencedRelation: "picking_waves"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      picking_waves: {
+        Row: {
+          assigned_to: string | null
+          carrier: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          items_count: number | null
+          name: string | null
+          notes: string | null
+          orders_count: number | null
+          picked_items: number | null
+          priority: string
+          route: string | null
+          shipping_window_end: string | null
+          shipping_window_start: string | null
+          started_at: string | null
+          status: string
+          strategy: string
+          updated_at: string
+          wave_number: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          carrier?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          items_count?: number | null
+          name?: string | null
+          notes?: string | null
+          orders_count?: number | null
+          picked_items?: number | null
+          priority?: string
+          route?: string | null
+          shipping_window_end?: string | null
+          shipping_window_start?: string | null
+          started_at?: string | null
+          status?: string
+          strategy?: string
+          updated_at?: string
+          wave_number: string
+        }
+        Update: {
+          assigned_to?: string | null
+          carrier?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          items_count?: number | null
+          name?: string | null
+          notes?: string | null
+          orders_count?: number | null
+          picked_items?: number | null
+          priority?: string
+          route?: string | null
+          shipping_window_end?: string | null
+          shipping_window_start?: string | null
+          started_at?: string | null
+          status?: string
+          strategy?: string
+          updated_at?: string
+          wave_number?: string
+        }
+        Relationships: []
       }
       plan_features: {
         Row: {
@@ -4504,6 +4962,126 @@ export type Database = {
           },
         ]
       }
+      putaway_tasks: {
+        Row: {
+          actual_location_code: string | null
+          actual_location_id: string | null
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          lot_id: string | null
+          lot_number: string | null
+          notes: string | null
+          priority: string
+          product_code: string
+          product_id: string | null
+          product_name: string
+          quantity: number
+          receiving_order_id: string | null
+          sla_deadline: string | null
+          source_location: string | null
+          started_at: string | null
+          status: string
+          suggested_location_code: string | null
+          suggested_location_id: string | null
+          suggestion_reason: string | null
+          task_number: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          actual_location_code?: string | null
+          actual_location_id?: string | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          lot_id?: string | null
+          lot_number?: string | null
+          notes?: string | null
+          priority?: string
+          product_code: string
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          receiving_order_id?: string | null
+          sla_deadline?: string | null
+          source_location?: string | null
+          started_at?: string | null
+          status?: string
+          suggested_location_code?: string | null
+          suggested_location_id?: string | null
+          suggestion_reason?: string | null
+          task_number: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          actual_location_code?: string | null
+          actual_location_id?: string | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          lot_id?: string | null
+          lot_number?: string | null
+          notes?: string | null
+          priority?: string
+          product_code?: string
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          receiving_order_id?: string | null
+          sla_deadline?: string | null
+          source_location?: string | null
+          started_at?: string | null
+          status?: string
+          suggested_location_code?: string | null
+          suggested_location_id?: string | null
+          suggestion_reason?: string | null
+          task_number?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "putaway_tasks_actual_location_id_fkey"
+            columns: ["actual_location_id"]
+            isOneToOne: false
+            referencedRelation: "wms_storage_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "putaway_tasks_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "stock_lots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "putaway_tasks_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "putaway_tasks_receiving_order_id_fkey"
+            columns: ["receiving_order_id"]
+            isOneToOne: false
+            referencedRelation: "wms_receiving_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "putaway_tasks_suggested_location_id_fkey"
+            columns: ["suggested_location_id"]
+            isOneToOne: false
+            referencedRelation: "wms_storage_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quotation_items: {
         Row: {
           discount: number
@@ -4705,6 +5283,100 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      replenishment_tasks: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          moved_qty: number
+          priority: string
+          product_code: string
+          product_id: string | null
+          product_name: string
+          required_qty: number
+          sla_deadline: string | null
+          source_location_code: string | null
+          source_location_id: string | null
+          started_at: string | null
+          status: string
+          target_location_code: string | null
+          target_location_id: string | null
+          task_number: string
+          trigger_type: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          moved_qty?: number
+          priority?: string
+          product_code: string
+          product_id?: string | null
+          product_name: string
+          required_qty?: number
+          sla_deadline?: string | null
+          source_location_code?: string | null
+          source_location_id?: string | null
+          started_at?: string | null
+          status?: string
+          target_location_code?: string | null
+          target_location_id?: string | null
+          task_number: string
+          trigger_type?: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          moved_qty?: number
+          priority?: string
+          product_code?: string
+          product_id?: string | null
+          product_name?: string
+          required_qty?: number
+          sla_deadline?: string | null
+          source_location_code?: string | null
+          source_location_id?: string | null
+          started_at?: string | null
+          status?: string
+          target_location_code?: string | null
+          target_location_id?: string | null
+          task_number?: string
+          trigger_type?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "replenishment_tasks_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "replenishment_tasks_source_location_id_fkey"
+            columns: ["source_location_id"]
+            isOneToOne: false
+            referencedRelation: "wms_storage_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "replenishment_tasks_target_location_id_fkey"
+            columns: ["target_location_id"]
+            isOneToOne: false
+            referencedRelation: "wms_storage_locations"
             referencedColumns: ["id"]
           },
         ]
@@ -5873,11 +6545,113 @@ export type Database = {
           },
         ]
       }
+      stock_balances: {
+        Row: {
+          available_qty: number | null
+          created_at: string
+          dc_id: string | null
+          id: string
+          last_movement_at: string | null
+          location_code: string | null
+          location_id: string | null
+          lot_id: string | null
+          lot_number: string | null
+          product_code: string
+          product_id: string | null
+          product_name: string
+          quantity: number
+          reserved_qty: number
+          stock_status: string
+          unit: string
+          updated_at: string
+          warehouse_id: string | null
+        }
+        Insert: {
+          available_qty?: number | null
+          created_at?: string
+          dc_id?: string | null
+          id?: string
+          last_movement_at?: string | null
+          location_code?: string | null
+          location_id?: string | null
+          lot_id?: string | null
+          lot_number?: string | null
+          product_code: string
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          reserved_qty?: number
+          stock_status?: string
+          unit?: string
+          updated_at?: string
+          warehouse_id?: string | null
+        }
+        Update: {
+          available_qty?: number | null
+          created_at?: string
+          dc_id?: string | null
+          id?: string
+          last_movement_at?: string | null
+          location_code?: string | null
+          location_id?: string | null
+          lot_id?: string | null
+          lot_number?: string | null
+          product_code?: string
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          reserved_qty?: number
+          stock_status?: string
+          unit?: string
+          updated_at?: string
+          warehouse_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_balances_dc_id_fkey"
+            columns: ["dc_id"]
+            isOneToOne: false
+            referencedRelation: "distribution_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_balances_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "wms_storage_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_balances_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "stock_lots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_balances_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_balances_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_lots: {
         Row: {
+          consumed_qty: number | null
           created_at: string
+          dc_id: string | null
           expiration_date: string | null
           id: string
+          inspection_date: string | null
           location: string | null
           lot_number: string
           manufacture_date: string | null
@@ -5887,7 +6661,9 @@ export type Database = {
           product_code: string
           product_id: string | null
           product_name: string
+          quality_status: string | null
           quantity: number
+          received_qty: number | null
           remaining_qty: number
           status: string
           supplier: string | null
@@ -5895,9 +6671,12 @@ export type Database = {
           warehouse_id: string | null
         }
         Insert: {
+          consumed_qty?: number | null
           created_at?: string
+          dc_id?: string | null
           expiration_date?: string | null
           id?: string
+          inspection_date?: string | null
           location?: string | null
           lot_number: string
           manufacture_date?: string | null
@@ -5907,7 +6686,9 @@ export type Database = {
           product_code: string
           product_id?: string | null
           product_name: string
+          quality_status?: string | null
           quantity?: number
+          received_qty?: number | null
           remaining_qty?: number
           status?: string
           supplier?: string | null
@@ -5915,9 +6696,12 @@ export type Database = {
           warehouse_id?: string | null
         }
         Update: {
+          consumed_qty?: number | null
           created_at?: string
+          dc_id?: string | null
           expiration_date?: string | null
           id?: string
+          inspection_date?: string | null
           location?: string | null
           lot_number?: string
           manufacture_date?: string | null
@@ -5927,7 +6711,9 @@ export type Database = {
           product_code?: string
           product_id?: string | null
           product_name?: string
+          quality_status?: string | null
           quantity?: number
+          received_qty?: number | null
           remaining_qty?: number
           status?: string
           supplier?: string | null
@@ -5935,6 +6721,13 @@ export type Database = {
           warehouse_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "stock_lots_dc_id_fkey"
+            columns: ["dc_id"]
+            isOneToOne: false
+            referencedRelation: "distribution_centers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "stock_lots_product_id_fkey"
             columns: ["product_id"]
@@ -6035,59 +6828,94 @@ export type Database = {
       stock_reservations: {
         Row: {
           created_at: string
+          dc_id: string | null
+          expires_at: string | null
           id: string
           location: string | null
+          lot_id: string | null
           order_id: string
           order_item_id: string | null
           picked_qty: number
+          policy: string | null
+          priority: number | null
           product_code: string
           product_id: string | null
           product_name: string
           released_at: string | null
           requested_qty: number
+          reservation_type: string | null
           reserved_at: string | null
           reserved_by: string | null
           reserved_qty: number
           status: string
           updated_at: string
+          warehouse_id: string | null
         }
         Insert: {
           created_at?: string
+          dc_id?: string | null
+          expires_at?: string | null
           id?: string
           location?: string | null
+          lot_id?: string | null
           order_id: string
           order_item_id?: string | null
           picked_qty?: number
+          policy?: string | null
+          priority?: number | null
           product_code: string
           product_id?: string | null
           product_name: string
           released_at?: string | null
           requested_qty?: number
+          reservation_type?: string | null
           reserved_at?: string | null
           reserved_by?: string | null
           reserved_qty?: number
           status?: string
           updated_at?: string
+          warehouse_id?: string | null
         }
         Update: {
           created_at?: string
+          dc_id?: string | null
+          expires_at?: string | null
           id?: string
           location?: string | null
+          lot_id?: string | null
           order_id?: string
           order_item_id?: string | null
           picked_qty?: number
+          policy?: string | null
+          priority?: number | null
           product_code?: string
           product_id?: string | null
           product_name?: string
           released_at?: string | null
           requested_qty?: number
+          reservation_type?: string | null
           reserved_at?: string | null
           reserved_by?: string | null
           reserved_qty?: number
           status?: string
           updated_at?: string
+          warehouse_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "stock_reservations_dc_id_fkey"
+            columns: ["dc_id"]
+            isOneToOne: false
+            referencedRelation: "distribution_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_reservations_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "stock_lots"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "stock_reservations_order_id_fkey"
             columns: ["order_id"]
@@ -6107,6 +6935,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_reservations_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
             referencedColumns: ["id"]
           },
         ]
@@ -6555,16 +7390,84 @@ export type Database = {
         }
         Relationships: []
       }
+      warehouse_zones: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_bulk_zone: boolean | null
+          is_picking_zone: boolean | null
+          name: string
+          parent_zone_id: string | null
+          priority: number | null
+          status: string
+          temperature_range: string | null
+          updated_at: string
+          warehouse_id: string
+          zone_type: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_bulk_zone?: boolean | null
+          is_picking_zone?: boolean | null
+          name: string
+          parent_zone_id?: string | null
+          priority?: number | null
+          status?: string
+          temperature_range?: string | null
+          updated_at?: string
+          warehouse_id: string
+          zone_type?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_bulk_zone?: boolean | null
+          is_picking_zone?: boolean | null
+          name?: string
+          parent_zone_id?: string | null
+          priority?: number | null
+          status?: string
+          temperature_range?: string | null
+          updated_at?: string
+          warehouse_id?: string
+          zone_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "warehouse_zones_parent_zone_id_fkey"
+            columns: ["parent_zone_id"]
+            isOneToOne: false
+            referencedRelation: "warehouse_zones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "warehouse_zones_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       warehouses: {
         Row: {
           address: string | null
           code: string
           created_at: string
+          distribution_center_id: string | null
           id: string
+          manager: string | null
           name: string
           notes: string | null
+          occupied_locations: number | null
           status: string
           total_capacity: number | null
+          total_locations: number | null
+          type: string | null
           updated_at: string
           used_capacity: number | null
         }
@@ -6572,11 +7475,16 @@ export type Database = {
           address?: string | null
           code: string
           created_at?: string
+          distribution_center_id?: string | null
           id?: string
+          manager?: string | null
           name: string
           notes?: string | null
+          occupied_locations?: number | null
           status?: string
           total_capacity?: number | null
+          total_locations?: number | null
+          type?: string | null
           updated_at?: string
           used_capacity?: number | null
         }
@@ -6584,15 +7492,103 @@ export type Database = {
           address?: string | null
           code?: string
           created_at?: string
+          distribution_center_id?: string | null
           id?: string
+          manager?: string | null
           name?: string
           notes?: string | null
+          occupied_locations?: number | null
           status?: string
           total_capacity?: number | null
+          total_locations?: number | null
+          type?: string | null
           updated_at?: string
           used_capacity?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "warehouses_distribution_center_id_fkey"
+            columns: ["distribution_center_id"]
+            isOneToOne: false
+            referencedRelation: "distribution_centers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wms_ai_insights: {
+        Row: {
+          affected_locations: Json | null
+          affected_products: Json | null
+          category: string
+          created_at: string
+          data_points: Json | null
+          dc_id: string | null
+          description: string | null
+          dismissed_at: string | null
+          dismissed_by: string | null
+          expires_at: string | null
+          id: string
+          insight_type: string
+          recommended_actions: Json | null
+          severity: string
+          status: string
+          title: string
+          warehouse_id: string | null
+        }
+        Insert: {
+          affected_locations?: Json | null
+          affected_products?: Json | null
+          category?: string
+          created_at?: string
+          data_points?: Json | null
+          dc_id?: string | null
+          description?: string | null
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          expires_at?: string | null
+          id?: string
+          insight_type: string
+          recommended_actions?: Json | null
+          severity?: string
+          status?: string
+          title: string
+          warehouse_id?: string | null
+        }
+        Update: {
+          affected_locations?: Json | null
+          affected_products?: Json | null
+          category?: string
+          created_at?: string
+          data_points?: Json | null
+          dc_id?: string | null
+          description?: string | null
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          expires_at?: string | null
+          id?: string
+          insight_type?: string
+          recommended_actions?: Json | null
+          severity?: string
+          status?: string
+          title?: string
+          warehouse_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_ai_insights_dc_id_fkey"
+            columns: ["dc_id"]
+            isOneToOne: false
+            referencedRelation: "distribution_centers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wms_ai_insights_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wms_conference_items: {
         Row: {
@@ -7046,6 +8042,8 @@ export type Database = {
       wms_picking_orders: {
         Row: {
           assigned_to: string | null
+          batch_id: string | null
+          cluster_id: string | null
           completed_at: string | null
           created_at: string
           customer_name: string
@@ -7060,10 +8058,13 @@ export type Database = {
           started_at: string | null
           status: string
           wave_id: string | null
+          wave_id_ref: string | null
           zone_filter: string | null
         }
         Insert: {
           assigned_to?: string | null
+          batch_id?: string | null
+          cluster_id?: string | null
           completed_at?: string | null
           created_at?: string
           customer_name: string
@@ -7078,10 +8079,13 @@ export type Database = {
           started_at?: string | null
           status?: string
           wave_id?: string | null
+          wave_id_ref?: string | null
           zone_filter?: string | null
         }
         Update: {
           assigned_to?: string | null
+          batch_id?: string | null
+          cluster_id?: string | null
           completed_at?: string | null
           created_at?: string
           customer_name?: string
@@ -7096,9 +8100,18 @@ export type Database = {
           started_at?: string | null
           status?: string
           wave_id?: string | null
+          wave_id_ref?: string | null
           zone_filter?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "wms_picking_orders_wave_id_ref_fkey"
+            columns: ["wave_id_ref"]
+            isOneToOne: false
+            referencedRelation: "picking_waves"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wms_receiving_items: {
         Row: {
@@ -7195,6 +8208,89 @@ export type Database = {
         }
         Relationships: []
       }
+      wms_returns: {
+        Row: {
+          approved_items: number | null
+          completed_at: string | null
+          created_at: string
+          customer_name: string | null
+          destination: string | null
+          id: string
+          inspected_at: string | null
+          inspected_by: string | null
+          inspected_items: number | null
+          notes: string | null
+          reason: string | null
+          received_at: string | null
+          received_by: string | null
+          reference_number: string | null
+          rejected_items: number | null
+          return_number: string
+          return_type: string
+          status: string
+          supplier_name: string | null
+          total_items: number | null
+          updated_at: string
+          warehouse_id: string | null
+        }
+        Insert: {
+          approved_items?: number | null
+          completed_at?: string | null
+          created_at?: string
+          customer_name?: string | null
+          destination?: string | null
+          id?: string
+          inspected_at?: string | null
+          inspected_by?: string | null
+          inspected_items?: number | null
+          notes?: string | null
+          reason?: string | null
+          received_at?: string | null
+          received_by?: string | null
+          reference_number?: string | null
+          rejected_items?: number | null
+          return_number: string
+          return_type?: string
+          status?: string
+          supplier_name?: string | null
+          total_items?: number | null
+          updated_at?: string
+          warehouse_id?: string | null
+        }
+        Update: {
+          approved_items?: number | null
+          completed_at?: string | null
+          created_at?: string
+          customer_name?: string | null
+          destination?: string | null
+          id?: string
+          inspected_at?: string | null
+          inspected_by?: string | null
+          inspected_items?: number | null
+          notes?: string | null
+          reason?: string | null
+          received_at?: string | null
+          received_by?: string | null
+          reference_number?: string | null
+          rejected_items?: number | null
+          return_number?: string
+          return_type?: string
+          status?: string
+          supplier_name?: string | null
+          total_items?: number | null
+          updated_at?: string
+          warehouse_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_returns_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wms_shipments: {
         Row: {
           carrier: string | null
@@ -7202,12 +8298,19 @@ export type Database = {
           created_at: string
           customer_name: string
           delivered_at: string | null
+          departure_at: string | null
+          dock_id: string | null
+          driver_document: string | null
+          driver_name: string | null
           id: string
+          loading_completed_at: string | null
+          loading_started_at: string | null
           notes: string | null
           operator: string | null
           order_number: string | null
           packing_order_id: string | null
           romaneio_number: string | null
+          route: string | null
           scheduled_date: string | null
           shipment_number: string
           shipped_at: string | null
@@ -7217,7 +8320,9 @@ export type Database = {
           total_weight: number | null
           tracking_number: string | null
           updated_at: string
+          vehicle_plate: string | null
           volumes: number
+          wave_id: string | null
         }
         Insert: {
           carrier?: string | null
@@ -7225,12 +8330,19 @@ export type Database = {
           created_at?: string
           customer_name: string
           delivered_at?: string | null
+          departure_at?: string | null
+          dock_id?: string | null
+          driver_document?: string | null
+          driver_name?: string | null
           id?: string
+          loading_completed_at?: string | null
+          loading_started_at?: string | null
           notes?: string | null
           operator?: string | null
           order_number?: string | null
           packing_order_id?: string | null
           romaneio_number?: string | null
+          route?: string | null
           scheduled_date?: string | null
           shipment_number: string
           shipped_at?: string | null
@@ -7240,7 +8352,9 @@ export type Database = {
           total_weight?: number | null
           tracking_number?: string | null
           updated_at?: string
+          vehicle_plate?: string | null
           volumes?: number
+          wave_id?: string | null
         }
         Update: {
           carrier?: string | null
@@ -7248,12 +8362,19 @@ export type Database = {
           created_at?: string
           customer_name?: string
           delivered_at?: string | null
+          departure_at?: string | null
+          dock_id?: string | null
+          driver_document?: string | null
+          driver_name?: string | null
           id?: string
+          loading_completed_at?: string | null
+          loading_started_at?: string | null
           notes?: string | null
           operator?: string | null
           order_number?: string | null
           packing_order_id?: string | null
           romaneio_number?: string | null
+          route?: string | null
           scheduled_date?: string | null
           shipment_number?: string
           shipped_at?: string | null
@@ -7263,14 +8384,30 @@ export type Database = {
           total_weight?: number | null
           tracking_number?: string | null
           updated_at?: string
+          vehicle_plate?: string | null
           volumes?: number
+          wave_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "wms_shipments_dock_id_fkey"
+            columns: ["dock_id"]
+            isOneToOne: false
+            referencedRelation: "loading_docks"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "wms_shipments_packing_order_id_fkey"
             columns: ["packing_order_id"]
             isOneToOne: false
             referencedRelation: "wms_packing_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wms_shipments_wave_id_fkey"
+            columns: ["wave_id"]
+            isOneToOne: false
+            referencedRelation: "picking_waves"
             referencedColumns: ["id"]
           },
         ]
@@ -7282,20 +8419,33 @@ export type Database = {
           aisle: string
           capacity: number
           code: string
+          column_pos: string | null
           created_at: string
+          current_volume: number | null
+          current_weight: number | null
+          distance_to_dock: number | null
           id: string
+          last_count_date: string | null
           level: string
+          max_replenish_qty: number | null
           max_volume: number | null
           max_weight: number | null
+          min_replenish_qty: number | null
           occupied: number
+          pick_sequence: number | null
           picking_zone: boolean | null
           position: string
+          position_type: string | null
           rack: string
+          restriction_rules: Json | null
           storage_category: string | null
+          street: string | null
+          subzone: string | null
           type: string
           updated_at: string | null
           warehouse_id: string | null
           zone: string
+          zone_id: string | null
         }
         Insert: {
           abc_class?: string | null
@@ -7303,20 +8453,33 @@ export type Database = {
           aisle: string
           capacity?: number
           code: string
+          column_pos?: string | null
           created_at?: string
+          current_volume?: number | null
+          current_weight?: number | null
+          distance_to_dock?: number | null
           id?: string
+          last_count_date?: string | null
           level: string
+          max_replenish_qty?: number | null
           max_volume?: number | null
           max_weight?: number | null
+          min_replenish_qty?: number | null
           occupied?: number
+          pick_sequence?: number | null
           picking_zone?: boolean | null
           position?: string
+          position_type?: string | null
           rack: string
+          restriction_rules?: Json | null
           storage_category?: string | null
+          street?: string | null
+          subzone?: string | null
           type?: string
           updated_at?: string | null
           warehouse_id?: string | null
           zone: string
+          zone_id?: string | null
         }
         Update: {
           abc_class?: string | null
@@ -7324,20 +8487,33 @@ export type Database = {
           aisle?: string
           capacity?: number
           code?: string
+          column_pos?: string | null
           created_at?: string
+          current_volume?: number | null
+          current_weight?: number | null
+          distance_to_dock?: number | null
           id?: string
+          last_count_date?: string | null
           level?: string
+          max_replenish_qty?: number | null
           max_volume?: number | null
           max_weight?: number | null
+          min_replenish_qty?: number | null
           occupied?: number
+          pick_sequence?: number | null
           picking_zone?: boolean | null
           position?: string
+          position_type?: string | null
           rack?: string
+          restriction_rules?: Json | null
           storage_category?: string | null
+          street?: string | null
+          subzone?: string | null
           type?: string
           updated_at?: string | null
           warehouse_id?: string | null
           zone?: string
+          zone_id?: string | null
         }
         Relationships: [
           {
@@ -7347,7 +8523,62 @@ export type Database = {
             referencedRelation: "warehouses"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "wms_storage_locations_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "warehouse_zones"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      wms_task_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: Json | null
+          duration_seconds: number | null
+          id: string
+          location_code: string | null
+          operator: string | null
+          operator_id: string | null
+          product_code: string | null
+          quantity: number | null
+          task_id: string | null
+          task_number: string | null
+          task_type: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: Json | null
+          duration_seconds?: number | null
+          id?: string
+          location_code?: string | null
+          operator?: string | null
+          operator_id?: string | null
+          product_code?: string | null
+          quantity?: number | null
+          task_id?: string | null
+          task_number?: string | null
+          task_type: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: Json | null
+          duration_seconds?: number | null
+          id?: string
+          location_code?: string | null
+          operator?: string | null
+          operator_id?: string | null
+          product_code?: string | null
+          quantity?: number | null
+          task_id?: string | null
+          task_number?: string | null
+          task_type?: string
+        }
+        Relationships: []
       }
       work_centers: {
         Row: {
