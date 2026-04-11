@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Plus, Building2, Edit } from 'lucide-react';
+import { Plus, Building2, Wallet, TrendingUp } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageLoading } from '@/components/shared/PageLoading';
+import { KPICard } from '@/components/shared/KPICard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -67,9 +68,11 @@ export default function BankAccounts() {
         </Dialog>
       </PageHeader>
 
-      <Card>
-        <CardHeader><CardTitle className="text-base">Saldo Total: {formatCurrency(totalBalance)}</CardTitle></CardHeader>
-      </Card>
+      <div className="grid gap-4 sm:grid-cols-3">
+        <KPICard index={0} title="Saldo Total" value={formatCurrency(totalBalance)} icon={<Wallet className="h-5 w-5" />} accentColor="primary" />
+        <KPICard index={1} title="Contas Ativas" value={accounts.filter(a => a.active).length.toString()} icon={<Building2 className="h-5 w-5" />} accentColor="success" />
+        <KPICard index={2} title="Maior Saldo" value={formatCurrency(accounts.length > 0 ? Math.max(...accounts.map(a => Number(a.balance))) : 0)} icon={<TrendingUp className="h-5 w-5" />} accentColor="info" />
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {accounts.map(acc => (

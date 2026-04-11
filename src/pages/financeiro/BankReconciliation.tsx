@@ -16,6 +16,7 @@ import {
 import { ExportButton } from '@/components/shared/ExportButton';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 import {
   CheckCircle2, XCircle, AlertTriangle, Search, Filter, Link2, Unlink, RefreshCw,
   ArrowUpRight, ArrowDownRight, Building2, Calendar,
@@ -143,57 +144,13 @@ export default function BankReconciliation() {
         />
       </PageHeader>
 
-      {/* Summary Cards */}
+      {/* Summary KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Saldo Banco</CardTitle>
-            <Building2 className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold">{formatCurrency(bankBalance)}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Saldo Sistema</CardTitle>
-            <Building2 className="h-4 w-4 text-chart-1" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold">{formatCurrency(systemBalance)}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Diferença</CardTitle>
-            <AlertTriangle className={`h-4 w-4 ${Math.abs(difference) > 0.01 ? 'text-warning' : 'text-success'}`} />
-          </CardHeader>
-          <CardContent>
-            <div className={`text-xl font-bold ${Math.abs(difference) > 0.01 ? 'text-warning' : 'text-success'}`}>
-              {formatCurrency(difference)}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Conciliados</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold text-success">{reconciledCount}</div>
-            <p className="text-xs text-muted-foreground">{((reconciledCount / bankTransactions.length) * 100).toFixed(0)}%</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Pendentes</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-warning" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-bold text-warning">{pendingCount}</div>
-            <p className="text-xs text-destructive">{divergentCount} divergentes</p>
-          </CardContent>
-        </Card>
+        <KPICard index={0} title="Saldo Banco" value={formatCurrency(bankBalance)} icon={<Building2 className="h-5 w-5" />} accentColor="primary" />
+        <KPICard index={1} title="Saldo Sistema" value={formatCurrency(systemBalance)} icon={<Building2 className="h-5 w-5" />} accentColor="info" />
+        <KPICard index={2} title="Diferença" value={formatCurrency(difference)} icon={<AlertTriangle className="h-5 w-5" />} accentColor={Math.abs(difference) > 0.01 ? 'warning' : 'success'} />
+        <KPICard index={3} title="Conciliados" value={reconciledCount.toString()} subtitle={`${bankTransactions.length > 0 ? ((reconciledCount / bankTransactions.length) * 100).toFixed(0) : 0}%`} icon={<CheckCircle2 className="h-5 w-5" />} accentColor="success" />
+        <KPICard index={4} title="Pendentes" value={pendingCount.toString()} subtitle={`${divergentCount} divergentes`} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" />
       </div>
 
       {/* Filters */}
