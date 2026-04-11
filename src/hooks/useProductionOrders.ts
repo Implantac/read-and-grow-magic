@@ -22,6 +22,17 @@ export interface ProductionOrderRow {
   bom_id: string | null;
   route_id: string | null;
   created_at: string;
+  sales_order_id: string | null;
+  order_item_id: string | null;
+  estimated_time_minutes: number;
+  realized_time_minutes: number;
+  sector: string | null;
+  client_name: string | null;
+  client_id: string | null;
+  rejected_quantity: number;
+  defect_notes: string | null;
+  delivery_type: string;
+  partial_delivered_qty: number;
 }
 
 export function useProductionOrders() {
