@@ -94,6 +94,9 @@ const ProductionOrdersPage = lazy(() => import("./pages/producao/ProductionOrder
 const MaterialConsumptionPage = lazy(() => import("./pages/producao/MaterialConsumption"));
 const TimeEntriesPage = lazy(() => import("./pages/producao/TimeEntries"));
 const PCPPanelPage = lazy(() => import("./pages/producao/PCPPanel"));
+const ProductionStepsPage = lazy(() => import("./pages/producao/ProductionSteps"));
+const ProductionQueuePage = lazy(() => import("./pages/producao/ProductionQueue"));
+const QualityControlPage = lazy(() => import("./pages/producao/QualityControl"));
 
 // Operational Flow
 const OperationalDashboardPage = lazy(() => import("./pages/operacional/OperationalDashboard"));
@@ -231,6 +234,9 @@ const App = () => (
               {/* Production Module */}
               <Route path="/producao/pcp" element={<PCPPanelPage />} />
               <Route path="/producao/ordens" element={<ProductionOrdersPage />} />
+              <Route path="/producao/etapas" element={<ProductionStepsPage />} />
+              <Route path="/producao/fila" element={<ProductionQueuePage />} />
+              <Route path="/producao/qualidade" element={<QualityControlPage />} />
               <Route path="/producao/consumo" element={<MaterialConsumptionPage />} />
               <Route path="/producao/apontamentos" element={<TimeEntriesPage />} />
 

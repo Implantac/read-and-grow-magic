@@ -41,16 +41,16 @@ export function useProductionOrders() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('production_orders').select('*').order('created_at', { ascending: false });
+    const { data, error } = await (supabase as any).from('production_orders').select('*').order('created_at', { ascending: false });
     if (error) { console.error(error); toast.error('Erro ao carregar ordens de produção'); }
-    else setOrders(data || []);
+    else setOrders((data || []) as ProductionOrderRow[]);
     setLoading(false);
   }, []);
 
   useEffect(() => { fetch(); }, [fetch]);
 
   const update = async (id: string, updates: Partial<ProductionOrderRow>) => {
-    const { error } = await supabase.from('production_orders').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await (supabase as any).from('production_orders').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
     if (error) { toast.error('Erro ao atualizar ordem'); return; }
     toast.success('Ordem atualizada');
     await fetch();
