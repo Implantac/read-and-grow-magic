@@ -1,36 +1,38 @@
 import { useState } from 'react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
-  MapPin,
-  Search,
-  Package,
-  Grid3X3,
-  Warehouse,
-  Thermometer,
-  AlertTriangle
+  MapPin, Search, Package, Grid3X3, Warehouse, Thermometer, AlertTriangle, Plus,
 } from 'lucide-react';
-import type { StorageLocation, StorageType } from '@/types/wms';
+import { useWMSStorageLocations } from '@/hooks/useWMSOperations';
+import type { StorageType } from '@/types/wms';
+import { cn } from '@/lib/utils';
 
 const typeConfig: Record<StorageType, { label: string; icon: React.ReactNode; color: string }> = {
   rack: { label: 'Rack', icon: <Grid3X3 className="h-4 w-4" />, color: 'bg-blue-500' },
   shelf: { label: 'Prateleira', icon: <Package className="h-4 w-4" />, color: 'bg-green-500' },
-  floor: { label: 'Piso', icon: <Warehouse className="h-4 w-4" />, color: 'bg-amber-500' },
+  floor: { label: 'Piso', icon: <Warehouse className="h-4 w-4" />, color: 'bg-yellow-500' },
   cold: { label: 'Refrigerado', icon: <Thermometer className="h-4 w-4" />, color: 'bg-cyan-500' },
-  hazardous: { label: 'Perigoso', icon: <AlertTriangle className="h-4 w-4" />, color: 'bg-red-500' }
+  hazardous: { label: 'Perigoso', icon: <AlertTriangle className="h-4 w-4" />, color: 'bg-destructive' },
 };
 
 export default function StoragePage() {
-  const [locations] = useState<StorageLocation[]>([]);
+  const { locations, loading } = useWMSStorageLocations();
   const [searchTerm, setSearchTerm] = useState('');
   const [zoneFilter, setZoneFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
 
-  const zones: string[] = [];
+  const zones = [...new Set(locations.map(l => l.zone))].sort();
 
   const filteredLocations = locations.filter(location => {
     const matchesSearch = location.code.toLowerCase().includes(searchTerm.toLowerCase());
@@ -46,56 +48,15 @@ export default function StoragePage() {
   const fullLocations = locations.filter(l => l.occupied >= l.capacity).length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Endereçamento</h1>
-          <p className="text-muted-foreground">Gerenciamento de locais de armazenamento</p>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader title="Endereçamento" description="Gerenciamento de locais de armazenamento" />
 
-      {/* Summary Cards */}
+      {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Taxa de Ocupação</CardTitle>
-            <Warehouse className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{occupancyRate}%</div>
-            <Progress value={occupancyRate} className="mt-2" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Endereços</CardTitle>
-            <MapPin className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{locations.length}</div>
-            <p className="text-xs text-muted-foreground">{zones.length} zonas</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Endereços Vazios</CardTitle>
-            <Grid3X3 className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{emptyLocations}</div>
-            <p className="text-xs text-muted-foreground">Disponíveis</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Endereços Cheios</CardTitle>
-            <Package className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{fullLocations}</div>
-            <p className="text-xs text-muted-foreground">Capacidade máxima</p>
-          </CardContent>
-        </Card>
+        <KPICard title="Taxa de Ocupação" value={`${occupancyRate}%`} subtitle={`${totalOccupied}/${totalCapacity} posições`} icon={<Warehouse className="h-5 w-5" />} accentColor={occupancyRate > 85 ? 'danger' : 'primary'} index={0} />
+        <KPICard title="Total de Endereços" value={locations.length} subtitle={`${zones.length} zonas`} icon={<MapPin className="h-5 w-5" />} accentColor="info" index={1} />
+        <KPICard title="Endereços Vazios" value={emptyLocations} subtitle="Disponíveis para alocação" icon={<Grid3X3 className="h-5 w-5" />} accentColor="success" index={2} />
+        <KPICard title="Endereços Cheios" value={fullLocations} subtitle="Capacidade máxima" icon={<Package className="h-5 w-5" />} accentColor={fullLocations > 0 ? 'danger' : 'primary'} index={3} />
       </div>
 
       {/* Filters */}
@@ -104,17 +65,10 @@ export default function StoragePage() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por código..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
+              <Input placeholder="Buscar por código..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9" />
             </div>
             <Select value={zoneFilter} onValueChange={setZoneFilter}>
-              <SelectTrigger className="w-full md:w-[150px]">
-                <SelectValue placeholder="Zona" />
-              </SelectTrigger>
+              <SelectTrigger className="w-full md:w-[150px]"><SelectValue placeholder="Zona" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas Zonas</SelectItem>
                 {zones.map(zone => (
@@ -123,9 +77,7 @@ export default function StoragePage() {
               </SelectContent>
             </Select>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Tipo" />
-              </SelectTrigger>
+              <SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Tipo" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos Tipos</SelectItem>
                 {Object.entries(typeConfig).map(([key, config]) => (
@@ -138,20 +90,26 @@ export default function StoragePage() {
       </Card>
 
       {/* Locations Grid */}
-      {filteredLocations.length > 0 ? (
+      {loading ? (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <Card key={i}><CardContent className="p-5"><Skeleton className="h-28 w-full" /></CardContent></Card>
+          ))}
+        </div>
+      ) : filteredLocations.length > 0 ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredLocations.map((location) => {
-            const config = typeConfig[location.type];
-            const occupancyPercent = Math.round((location.occupied / location.capacity) * 100);
-            
+            const config = typeConfig[location.type] || typeConfig.rack;
+            const occupancyPercent = location.capacity > 0 ? Math.round((location.occupied / location.capacity) * 100) : 0;
+
             return (
-              <Card key={location.id} className="relative overflow-hidden">
-                <div className={`absolute left-0 top-0 bottom-0 w-1 ${config.color}`} />
+              <Card key={location.id} className="relative overflow-hidden hover-lift group">
+                <div className={cn('absolute left-0 top-0 bottom-0 w-1', config.color)} />
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg flex items-center gap-2">
                       {config.icon}
-                      {location.code}
+                      <span className="font-mono">{location.code}</span>
                     </CardTitle>
                     <Badge variant={location.active ? 'default' : 'secondary'}>
                       {location.active ? 'Ativo' : 'Inativo'}
@@ -165,19 +123,21 @@ export default function StoragePage() {
                   <div className="space-y-3">
                     <div>
                       <div className="flex justify-between text-sm mb-1">
-                        <span>Ocupação</span>
-                        <span>
+                        <span className="text-muted-foreground">Ocupação</span>
+                        <span className={cn(
+                          'font-semibold tabular-nums',
+                          occupancyPercent > 85 ? 'text-destructive' : occupancyPercent > 60 ? 'text-yellow-600' : 'text-green-600'
+                        )}>
                           {location.occupied}/{location.capacity} ({occupancyPercent}%)
                         </span>
                       </div>
-                      <Progress value={occupancyPercent} />
+                      <Progress value={occupancyPercent} className="h-2" />
                     </div>
-                    
                     <div className="text-sm text-muted-foreground">
-                      {location.products.length > 0 ? (
+                      {location.products && location.products.length > 0 ? (
                         <span>{location.products.length} produto(s) armazenado(s)</span>
                       ) : (
-                        <span>Endereço vazio</span>
+                        <span className="text-green-600">Endereço vazio — disponível</span>
                       )}
                     </div>
                   </div>
@@ -189,12 +149,16 @@ export default function StoragePage() {
       ) : (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum endereço cadastrado</h3>
-            <p>Configure os endereços do armazém para começar.</p>
+            <MapPin className="h-12 w-12 mx-auto mb-4 opacity-30" />
+            <h3 className="text-lg font-semibold mb-2">Nenhum endereço encontrado</h3>
+            <p className="text-sm">
+              {locations.length === 0
+                ? 'Configure os endereços do armazém para começar a operação WMS.'
+                : 'Nenhum endereço corresponde aos filtros aplicados.'}
+            </p>
           </CardContent>
         </Card>
       )}
-    </div>
+    </PageContainer>
   );
 }

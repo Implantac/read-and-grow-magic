@@ -1,8 +1,13 @@
 import { useState } from 'react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
+import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -14,15 +19,14 @@ import {
   ClipboardCheck, Search, MoreHorizontal, PlayCircle, CheckCircle, AlertTriangle, Clock, Eye, ScanBarcode,
 } from 'lucide-react';
 import { useWMSConference, ConferenceItem } from '@/hooks/useWMSConference';
-import { ExportButton } from '@/components/shared/ExportButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: any }> = {
-  pending: { label: 'Pendente', variant: 'secondary', icon: Clock },
-  in_progress: { label: 'Em Andamento', variant: 'default', icon: PlayCircle },
-  completed: { label: 'Concluída', variant: 'outline', icon: CheckCircle },
-  divergence: { label: 'Divergência', variant: 'destructive', icon: AlertTriangle },
+const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+  pending: { label: 'Pendente', variant: 'secondary' },
+  in_progress: { label: 'Em Andamento', variant: 'default' },
+  completed: { label: 'Concluída', variant: 'outline' },
+  divergence: { label: 'Divergência', variant: 'destructive' },
 };
 
 export default function ConferencePage() {
@@ -43,12 +47,6 @@ export default function ConferencePage() {
     const matchesStatus = statusFilter === 'all' || r.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
-
-  const formatDate = (d?: string) => {
-    if (!d) return '-';
-    try { return format(new Date(d), 'dd/MM/yyyy HH:mm', { locale: ptBR }); }
-    catch { return '-'; }
-  };
 
   const handleViewItems = async (id: string, confType: string) => {
     const items = await fetchItems(id);
@@ -86,60 +84,29 @@ export default function ConferencePage() {
   const divergenceCount = records.filter(r => r.status === 'divergence').length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Conferência</h1>
-          <p className="text-muted-foreground">Validação obrigatória de itens recebidos e separados</p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={() => setCreateOpen(true)} className="gap-2">
-            <ClipboardCheck className="h-4 w-4" />
-            Nova Conferência
-          </Button>
-          <ExportButton
-            data={filteredRecords as unknown as Record<string, unknown>[]}
-            columns={[
-              { key: 'conferenceNumber', label: 'Número' },
-              { key: 'referenceNumber', label: 'Referência' },
-              { key: 'conferenceType', label: 'Tipo' },
-              { key: 'status', label: 'Status' },
-              { key: 'divergences', label: 'Divergências' },
-            ]}
-            filename="conferencias_wms"
-          />
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader title="Conferência" description="Validação obrigatória de itens recebidos e separados">
+        <Button onClick={() => setCreateOpen(true)} className="gap-2">
+          <ClipboardCheck className="h-4 w-4" /> Nova Conferência
+        </Button>
+        <ExportButton
+          data={filteredRecords as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'conferenceNumber', label: 'Número' },
+            { key: 'referenceNumber', label: 'Referência' },
+            { key: 'conferenceType', label: 'Tipo' },
+            { key: 'status', label: 'Status' },
+            { key: 'divergences', label: 'Divergências' },
+          ]}
+          filename="conferencias_wms"
+        />
+      </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{pendingCount}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Em Andamento</CardTitle>
-            <PlayCircle className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{inProgressCount}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Divergências</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{divergenceCount}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total</CardTitle>
-            <ClipboardCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{records.length}</div></CardContent>
-        </Card>
+        <KPICard title="Pendentes" value={pendingCount} subtitle="Aguardando conferência" icon={<Clock className="h-5 w-5" />} accentColor="warning" index={0} />
+        <KPICard title="Em Andamento" value={inProgressCount} subtitle="Sendo conferidas" icon={<PlayCircle className="h-5 w-5" />} accentColor="info" index={1} />
+        <KPICard title="Divergências" value={divergenceCount} subtitle="Requerem ação" icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={2} />
+        <KPICard title="Total" value={records.length} subtitle="Conferências registradas" icon={<ClipboardCheck className="h-5 w-5" />} accentColor="primary" index={3} />
       </div>
 
       <Card>
@@ -169,7 +136,7 @@ export default function ConferencePage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="flex items-center justify-center py-8 text-muted-foreground">Carregando...</div>
+            <div className="space-y-3">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}</div>
           ) : (
             <Table>
               <TableHeader>
@@ -189,7 +156,7 @@ export default function ConferencePage() {
                   const cfg = statusConfig[rec.status] || statusConfig.pending;
                   return (
                     <TableRow key={rec.id}>
-                      <TableCell className="font-medium">{rec.conferenceNumber}</TableCell>
+                      <TableCell className="font-medium font-mono">{rec.conferenceNumber}</TableCell>
                       <TableCell>{rec.referenceNumber || '-'}</TableCell>
                       <TableCell>
                         <Badge variant={rec.conferenceType === 'blind' ? 'destructive' : 'outline'}>
@@ -197,7 +164,7 @@ export default function ConferencePage() {
                         </Badge>
                       </TableCell>
                       <TableCell>{rec.operator || '-'}</TableCell>
-                      <TableCell>{rec.checkedItems}/{rec.totalItems}</TableCell>
+                      <TableCell className="tabular-nums">{rec.checkedItems}/{rec.totalItems}</TableCell>
                       <TableCell>
                         {rec.divergences > 0 ? (
                           <Badge variant="destructive">{rec.divergences}</Badge>
@@ -208,9 +175,7 @@ export default function ConferencePage() {
                       <TableCell><Badge variant={cfg.variant}>{cfg.label}</Badge></TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
-                          </DropdownMenuTrigger>
+                          <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleViewItems(rec.id, rec.conferenceType)}>
                               <Eye className="mr-2 h-4 w-4" /> Ver Itens
@@ -233,7 +198,10 @@ export default function ConferencePage() {
                 })}
                 {filteredRecords.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhuma conferência encontrada</TableCell>
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                      <ScanBarcode className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                      Nenhuma conferência encontrada
+                    </TableCell>
                   </TableRow>
                 )}
               </TableBody>
@@ -268,7 +236,7 @@ export default function ConferencePage() {
                 <TableRow key={item.id}>
                   <TableCell className="font-mono text-sm">{item.productCode}</TableCell>
                   <TableCell>{item.productName}</TableCell>
-                  {!isBlind && <TableCell>{item.expectedQty}</TableCell>}
+                  {!isBlind && <TableCell className="tabular-nums">{item.expectedQty}</TableCell>}
                   <TableCell>
                     {item.status === 'pending' ? (
                       <Input
@@ -276,12 +244,10 @@ export default function ConferencePage() {
                         className="w-20"
                         placeholder="Qtd"
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            handleCheckItem(item.id, Number((e.target as HTMLInputElement).value));
-                          }
+                          if (e.key === 'Enter') handleCheckItem(item.id, Number((e.target as HTMLInputElement).value));
                         }}
                       />
-                    ) : item.checkedQty}
+                    ) : <span className="tabular-nums">{item.checkedQty}</span>}
                   </TableCell>
                   {!isBlind && (
                     <TableCell>
@@ -340,15 +306,9 @@ export default function ConferencePage() {
               <Label>Itens</Label>
               {newItems.map((item, i) => (
                 <div key={i} className="grid grid-cols-3 gap-2 mt-2">
-                  <Input placeholder="Código" value={item.product_code} onChange={e => {
-                    const arr = [...newItems]; arr[i].product_code = e.target.value; setNewItems(arr);
-                  }} />
-                  <Input placeholder="Nome" value={item.product_name} onChange={e => {
-                    const arr = [...newItems]; arr[i].product_name = e.target.value; setNewItems(arr);
-                  }} />
-                  <Input type="number" placeholder="Qtd esperada" value={item.expected_qty || ''} onChange={e => {
-                    const arr = [...newItems]; arr[i].expected_qty = Number(e.target.value); setNewItems(arr);
-                  }} />
+                  <Input placeholder="Código" value={item.product_code} onChange={e => { const arr = [...newItems]; arr[i].product_code = e.target.value; setNewItems(arr); }} />
+                  <Input placeholder="Nome" value={item.product_name} onChange={e => { const arr = [...newItems]; arr[i].product_name = e.target.value; setNewItems(arr); }} />
+                  <Input type="number" placeholder="Qtd esperada" value={item.expected_qty || ''} onChange={e => { const arr = [...newItems]; arr[i].expected_qty = Number(e.target.value); setNewItems(arr); }} />
                 </div>
               ))}
               <Button variant="outline" size="sm" className="mt-2" onClick={() => setNewItems([...newItems, { product_code: '', product_name: '', expected_qty: 0 }])}>
@@ -362,6 +322,6 @@ export default function ConferencePage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }
