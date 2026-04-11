@@ -235,6 +235,7 @@ const App = () => (
               <Route path="/contabilidade/balanco" element={<BalanceSheetPage />} />
 
               {/* Fiscal Module */}
+              <Route path="/fiscal" element={<Navigate to="/fiscal/nfe" replace />} />
               <Route path="/fiscal/nfe" element={<NFePage />} />
               <Route path="/fiscal/nfce" element={<NFCePage />} />
               <Route path="/fiscal/relatorios" element={<FiscalReportsPage />} />
