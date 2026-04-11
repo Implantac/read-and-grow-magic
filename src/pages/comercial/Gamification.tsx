@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -49,7 +50,7 @@ export default function GamificationPage() {
   const weeklyMissions = missions.filter(m => m.mission_type === 'weekly');
 
   return (
-    <PageContainer>
+    <PageContainer loading={loadingLB}>
       <PageHeader
         title="🎮 Gamificação Comercial"
         description="Ranking, missões, badges e desafios — venda mais e conquiste recompensas!"
@@ -57,32 +58,11 @@ export default function GamificationPage() {
 
       {/* Top KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <Card className="border-l-4 border-l-amber-500">
-          <CardContent className="pt-4 pb-3">
-            <p className="text-xs text-muted-foreground">Pontos Totais</p>
-            <p className="text-2xl font-bold">{fmt(totalPoints)}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-emerald-500">
-          <CardContent className="pt-4 pb-3">
-            <p className="text-xs text-muted-foreground">Pontos Hoje</p>
-            <p className="text-2xl font-bold">{fmt(todayPoints)}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-blue-500">
-          <CardContent className="pt-4 pb-3">
-            <p className="text-xs text-muted-foreground">Vendedores no Ranking</p>
-            <p className="text-2xl font-bold">{leaderboard.length}</p>
-          </CardContent>
-        </Card>
-        <Card className="border-l-4 border-l-purple-500">
-          <CardContent className="pt-4 pb-3">
-            <p className="text-xs text-muted-foreground">Desafios Ativos</p>
-            <p className="text-2xl font-bold">{challenges.length}</p>
-          </CardContent>
-        </Card>
+        <KPICard index={0} title="Pontos Totais" value={fmt(totalPoints)} icon={<Trophy className="h-5 w-5" />} accentColor="warning" />
+        <KPICard index={1} title="Pontos Hoje" value={fmt(todayPoints)} icon={<Zap className="h-5 w-5" />} accentColor="success" />
+        <KPICard index={2} title="No Ranking" value={leaderboard.length.toString()} icon={<Crown className="h-5 w-5" />} accentColor="info" />
+        <KPICard index={3} title="Desafios Ativos" value={challenges.length.toString()} icon={<Swords className="h-5 w-5" />} accentColor="accent" />
       </div>
-
       <Tabs defaultValue="ranking" className="space-y-4">
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="ranking" className="gap-1"><Trophy className="h-4 w-4" /> Ranking</TabsTrigger>

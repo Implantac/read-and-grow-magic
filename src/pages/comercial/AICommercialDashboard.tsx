@@ -85,15 +85,11 @@ export default function AICommercialDashboard() {
       />
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-        <KPI icon={Users} label="Scored" value={totalScored} />
-        <KPI icon={ShieldAlert} label="Em Risco" value={atRisk} color="text-red-500" />
-        <KPI icon={TrendingDown} label="Em Queda" value={declining} color="text-orange-500" />
-        <KPI icon={Target} label="Alta Prior." value={highPriority} color="text-amber-500" />
-        <KPI icon={Zap} label="Ações Hoje" value={pendingActions} color="text-blue-500" />
-        <KPI icon={CheckCircle} label="Concluídas" value={completedActions} color="text-emerald-500" />
-        <KPI icon={AlertTriangle} label="Deals Risco" value={highRiskDeals} color="text-red-500" />
-        <KPI icon={DollarSign} label="Potencial" value={fmt(totalRecsValue)} color="text-primary" />
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 mb-6">
+        <KPICard index={0} title="Clientes Scored" value={totalScored.toString()} subtitle={`${atRisk} em risco • ${declining} em queda`} icon={<Users className="h-5 w-5" />} accentColor="primary" />
+        <KPICard index={1} title="Ações do Dia" value={pendingActions.toString()} subtitle={`${completedActions} concluídas`} icon={<Zap className="h-5 w-5" />} accentColor="info" />
+        <KPICard index={2} title="Deals em Risco" value={highRiskDeals.toString()} subtitle={`${highPriority} alta prioridade`} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" />
+        <KPICard index={3} title="Potencial Recs" value={fmt(totalRecsValue)} subtitle={`${recommendations.length} recomendações`} icon={<DollarSign className="h-5 w-5" />} accentColor="success" />
       </div>
 
       {/* Forecast Summary */}

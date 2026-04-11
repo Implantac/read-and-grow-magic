@@ -35,10 +35,10 @@ export default function ForecastPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <KPICard title="Confirmado" value={fmt(forecast?.confirmedValue || 0)} icon={<Target className="h-5 w-5" />} index={0} />
-        <KPICard title="Conservador" value={fmt(forecast?.conservative || 0)} icon={<BarChart3 className="h-5 w-5" />} index={1} />
-        <KPICard title="Realista" value={fmt(forecast?.realistic || 0)} icon={<TrendingUp className="h-5 w-5" />} index={2} />
-        <KPICard title="Otimista" value={fmt(forecast?.optimistic || 0)} icon={<Zap className="h-5 w-5" />} index={3} />
+        <KPICard title="Confirmado" value={fmt(forecast?.confirmedValue || 0)} icon={<Target className="h-5 w-5" />} index={0} accentColor="success" />
+        <KPICard title="Conservador" value={fmt(forecast?.conservative || 0)} icon={<BarChart3 className="h-5 w-5" />} index={1} accentColor="warning" />
+        <KPICard title="Realista" value={fmt(forecast?.realistic || 0)} icon={<TrendingUp className="h-5 w-5" />} index={2} accentColor="primary" />
+        <KPICard title="Otimista" value={fmt(forecast?.optimistic || 0)} icon={<Zap className="h-5 w-5" />} index={3} accentColor="info" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
