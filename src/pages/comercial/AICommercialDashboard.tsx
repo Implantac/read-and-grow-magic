@@ -268,19 +268,7 @@ export default function AICommercialDashboard() {
 
 // ─── Sub-components ──────────────────────────────────────────────────────
 
-function KPI({ icon: Icon, label, value, color }: { icon: typeof Users; label: string; value: string | number; color?: string }) {
-  return (
-    <Card>
-      <CardContent className="p-3 flex items-center gap-2">
-        <Icon className={`h-4 w-4 ${color || 'text-muted-foreground'}`} />
-        <div>
-          <div className="text-[10px] text-muted-foreground">{label}</div>
-          <div className="font-semibold text-sm">{value}</div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+// Local KPI removed — using shared KPICard
 
 function DailyActionCard({ action, onComplete }: { action: AIDailyAction; onComplete: (result: string) => void }) {
   const Icon = ACTION_ICONS[action.action_type] || Phone;
