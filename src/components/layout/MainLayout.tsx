@@ -4,6 +4,7 @@ import { useAppStore } from '@/stores/useAppStore';
 import { useAuth } from '@/hooks/useAuth';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
+import { CommandPalette } from './CommandPalette';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
