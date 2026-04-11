@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,13 +13,14 @@ import { Progress } from '@/components/ui/progress';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { useOrders } from '@/hooks/useOrders';
 import { useOrderLifecycle, checkProductionCompletion } from '@/hooks/useOrderLifecycle';
+import { useTimeEntries } from '@/hooks/useTimeEntries';
 import { supabase } from '@/integrations/supabase/client';
 import { productionStatusConfig, priorityConfig } from '@/config/production';
-import { Factory, Clock, CheckCircle, AlertTriangle, Search, Plus, Play, Pause, BarChart3 } from 'lucide-react';
-import { format, differenceInDays, parseISO } from 'date-fns';
+import { Factory, Clock, CheckCircle, AlertTriangle, Search, Plus, Play, Pause, BarChart3, Users, Gauge, Bell, ShieldCheck } from 'lucide-react';
+import { format, differenceInDays, parseISO, differenceInMinutes } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 
 export default function PCPPanel() {
   const { orders: productionOrders, loading, refetch, update } = useProductionOrders();
