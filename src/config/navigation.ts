@@ -88,6 +88,9 @@ export const navigationSections: NavSection[] = [
         children: [
           { title: 'Painel PCP', href: '/producao/pcp', icon: 'BarChart3' },
           { title: 'Ordens de Produção', href: '/producao/ordens', icon: 'ClipboardCheck' },
+          { title: 'Etapas Produtivas', href: '/producao/etapas', icon: 'Layers' },
+          { title: 'Fila de Produção', href: '/producao/fila', icon: 'ListOrdered' },
+          { title: 'Controle de Qualidade', href: '/producao/qualidade', icon: 'ShieldCheck' },
           { title: 'Consumo MP', href: '/producao/consumo', icon: 'PackageMinus' },
           { title: 'Apontamentos', href: '/producao/apontamentos', icon: 'Timer' },
         ],
