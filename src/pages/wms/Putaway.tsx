@@ -1,10 +1,13 @@
 import { useState } from 'react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowDown, Search, MapPin, Clock } from 'lucide-react';
+import { ArrowDown, Search, MapPin, Clock, CheckCircle } from 'lucide-react';
 import { usePutawayTasks } from '@/hooks/usePutawayTasks';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
@@ -29,42 +32,17 @@ export default function PutawayPage() {
 
   const pending = tasks.filter(t => t.status === 'pending').length;
   const inProgress = tasks.filter(t => t.status === 'in_progress').length;
-
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-    </div>
-  );
+  const completed = tasks.filter(t => t.status === 'completed').length;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Put-Away</h1>
-        <p className="text-muted-foreground">Endereçamento inteligente de produtos recebidos</p>
-      </div>
+    <PageContainer loading={loading}>
+      <PageHeader title="Put-Away" description="Endereçamento inteligente de produtos recebidos" />
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total de Tarefas</CardTitle>
-            <ArrowDown className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{tasks.length}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pendentes</CardTitle>
-            <Clock className="h-4 w-4 text-amber-500" />
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{pending}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Em Andamento</CardTitle>
-            <MapPin className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{inProgress}</div></CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-4">
+        <KPICard title="Total de Tarefas" value={tasks.length} icon={ArrowDown} index={0} />
+        <KPICard title="Pendentes" value={pending} icon={Clock} index={1} color={pending > 0 ? 'warning' : undefined} />
+        <KPICard title="Em Andamento" value={inProgress} icon={MapPin} index={2} />
+        <KPICard title="Concluídas" value={completed} icon={CheckCircle} index={3} color="success" />
       </div>
 
       <Card>
@@ -92,7 +70,7 @@ export default function PutawayPage() {
           {filtered.map(task => {
             const cfg = statusConfig[task.status] || statusConfig.pending;
             return (
-              <Card key={task.id}>
+              <Card key={task.id} className="hover-lift">
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <CardTitle className="text-lg">{task.taskNumber}</CardTitle>
@@ -101,26 +79,23 @@ export default function PutawayPage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="text-sm space-y-1">
-                    <p><span className="text-muted-foreground">Produto:</span> {task.productName}</p>
-                    <p><span className="text-muted-foreground">Código:</span> {task.productCode}</p>
-                    <p><span className="text-muted-foreground">Qtd:</span> {task.quantity} {task.unit}</p>
+                    <p className="font-medium">{task.productName}</p>
+                    <p className="text-muted-foreground font-mono text-xs">{task.productCode}</p>
+                    <p><span className="text-muted-foreground">Qtd:</span> <span className="font-semibold">{task.quantity} {task.unit}</span></p>
                     {task.suggestedLocationCode && (
-                      <p><span className="text-muted-foreground">Sugestão:</span> <span className="font-semibold text-primary">{task.suggestedLocationCode}</span></p>
+                      <div className="bg-primary/10 rounded-md p-2 mt-2">
+                        <p className="text-xs text-muted-foreground">Endereço sugerido</p>
+                        <p className="font-semibold text-primary font-mono">{task.suggestedLocationCode}</p>
+                        {task.suggestionReason && <p className="text-xs text-muted-foreground italic mt-1">{task.suggestionReason}</p>}
+                      </div>
                     )}
-                    {task.suggestionReason && (
-                      <p className="text-xs text-muted-foreground italic">{task.suggestionReason}</p>
-                    )}
-                    {task.assignedTo && <p><span className="text-muted-foreground">Operador:</span> {task.assignedTo}</p>}
+                    {task.assignedTo && <p className="text-xs"><span className="text-muted-foreground">Operador:</span> {task.assignedTo}</p>}
                   </div>
                   {task.status === 'pending' && (
-                    <Button size="sm" className="w-full" onClick={() => updateStatus(task.id, 'in_progress')}>
-                      Iniciar Endereçamento
-                    </Button>
+                    <Button size="sm" className="w-full" onClick={() => updateStatus(task.id, 'in_progress')}>Iniciar Endereçamento</Button>
                   )}
                   {task.status === 'in_progress' && (
-                    <Button size="sm" className="w-full" onClick={() => updateStatus(task.id, 'completed', task.suggestedLocationCode || '')}>
-                      Confirmar Endereçamento
-                    </Button>
+                    <Button size="sm" className="w-full" onClick={() => updateStatus(task.id, 'completed', task.suggestedLocationCode || '')}>Confirmar Endereçamento</Button>
                   )}
                 </CardContent>
               </Card>
@@ -136,6 +111,6 @@ export default function PutawayPage() {
           </CardContent>
         </Card>
       )}
-    </div>
+    </PageContainer>
   );
 }

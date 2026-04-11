@@ -1,28 +1,23 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Database, Search, Package } from 'lucide-react';
+import { Database, Search, Package, Lock, CheckCircle } from 'lucide-react';
 import { useStockBalances } from '@/hooks/useStockBalances';
+import { ExportButton } from '@/components/shared/ExportButton';
 
 const statusLabels: Record<string, string> = {
-  available: 'Disponível',
-  reserved: 'Reservado',
-  blocked: 'Bloqueado',
-  quarantine: 'Quarentena',
-  damaged: 'Avariado',
-  in_conference: 'Em Conferência',
-  in_transit: 'Em Trânsito',
+  available: 'Disponível', reserved: 'Reservado', blocked: 'Bloqueado',
+  quarantine: 'Quarentena', damaged: 'Avariado', in_conference: 'Em Conferência', in_transit: 'Em Trânsito',
 };
 
 const statusColors: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  available: 'default',
-  reserved: 'secondary',
-  blocked: 'destructive',
-  quarantine: 'outline',
-  damaged: 'destructive',
+  available: 'default', reserved: 'secondary', blocked: 'destructive', quarantine: 'outline', damaged: 'destructive',
 };
 
 export default function StockBalancesPage() {
@@ -41,45 +36,34 @@ export default function StockBalancesPage() {
   const totalReserved = balances.reduce((s, b) => s + b.reservedQty, 0);
   const totalAvailable = balances.reduce((s, b) => s + b.availableQty, 0);
 
-  if (loading) return (
-    <div className="flex items-center justify-center h-64">
-      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-    </div>
-  );
-
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Saldos de Estoque</h1>
-        <p className="text-muted-foreground">Visão em tempo real por produto, lote, endereço e status</p>
-      </div>
+    <PageContainer loading={loading}>
+      <PageHeader
+        title="Saldos de Estoque"
+        description="Visão em tempo real por produto, lote, endereço e status"
+        actions={
+          <ExportButton
+            data={filtered as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'productCode', label: 'Código' },
+              { key: 'productName', label: 'Produto' },
+              { key: 'lotNumber', label: 'Lote' },
+              { key: 'locationCode', label: 'Endereço' },
+              { key: 'quantity', label: 'Qtd' },
+              { key: 'reservedQty', label: 'Reservado' },
+              { key: 'availableQty', label: 'Disponível' },
+              { key: 'stockStatus', label: 'Status' },
+            ]}
+            filename="saldos_estoque_wms"
+          />
+        }
+      />
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Registros</CardTitle>
-            <Database className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{balances.length}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Qtd Total</CardTitle>
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{totalQty.toLocaleString('pt-BR')}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Reservado</CardTitle>
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold text-amber-500">{totalReserved.toLocaleString('pt-BR')}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Disponível</CardTitle>
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold text-green-500">{totalAvailable.toLocaleString('pt-BR')}</div></CardContent>
-        </Card>
+        <KPICard title="Registros" value={balances.length} icon={Database} index={0} />
+        <KPICard title="Qtd Total" value={totalQty.toLocaleString('pt-BR')} icon={Package} index={1} />
+        <KPICard title="Reservado" value={totalReserved.toLocaleString('pt-BR')} icon={Lock} index={2} color="warning" />
+        <KPICard title="Disponível" value={totalAvailable.toLocaleString('pt-BR')} icon={CheckCircle} index={3} color="success" />
       </div>
 
       <Card>
@@ -93,9 +77,7 @@ export default function StockBalancesPage() {
               <SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Status" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
-                {Object.entries(statusLabels).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>{v}</SelectItem>
-                ))}
+                {Object.entries(statusLabels).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -123,13 +105,11 @@ export default function StockBalancesPage() {
                   {filtered.slice(0, 100).map(b => (
                     <TableRow key={b.id}>
                       <TableCell className="font-medium">{b.productName}</TableCell>
-                      <TableCell>{b.productCode}</TableCell>
-                      <TableCell>{b.lotNumber || '-'}</TableCell>
-                      <TableCell>{b.locationCode || '-'}</TableCell>
+                      <TableCell className="font-mono text-xs">{b.productCode}</TableCell>
+                      <TableCell className="font-mono text-xs">{b.lotNumber || '-'}</TableCell>
+                      <TableCell className="font-mono text-xs">{b.locationCode || '-'}</TableCell>
                       <TableCell>
-                        <Badge variant={statusColors[b.stockStatus] || 'outline'}>
-                          {statusLabels[b.stockStatus] || b.stockStatus}
-                        </Badge>
+                        <Badge variant={statusColors[b.stockStatus] || 'outline'}>{statusLabels[b.stockStatus] || b.stockStatus}</Badge>
                       </TableCell>
                       <TableCell className="text-right">{b.quantity}</TableCell>
                       <TableCell className="text-right">{b.reservedQty}</TableCell>
@@ -139,6 +119,9 @@ export default function StockBalancesPage() {
                 </TableBody>
               </Table>
             </div>
+            {filtered.length > 100 && (
+              <div className="p-4 text-center text-sm text-muted-foreground">Exibindo 100 de {filtered.length} registros. Use os filtros para refinar.</div>
+            )}
           </CardContent>
         </Card>
       ) : (
@@ -150,6 +133,6 @@ export default function StockBalancesPage() {
           </CardContent>
         </Card>
       )}
-    </div>
+    </PageContainer>
   );
 }

@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ExportButton } from '@/components/shared/ExportButton';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Package, AlertTriangle, ClipboardList } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Search, Package, AlertTriangle, ClipboardList, DollarSign } from 'lucide-react';
 import { useWMSInventory } from '@/hooks/useWMSInventory';
 import type { InventoryStatus } from '@/types/wms';
 
@@ -42,84 +44,34 @@ export default function InventoryPage() {
   const lowStockItems = items.filter(i => i.availableQty <= i.minStock).length;
   const expiredItems = items.filter(i => i.status === 'expired').length;
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-10 w-64" />
-        <div className="grid gap-4 md:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24" />)}
-        </div>
-        <Skeleton className="h-96" />
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Inventário</h1>
-          <p className="text-muted-foreground">Controle de estoque e movimentações</p>
-        </div>
-        <ExportButton
-          data={filteredItems as unknown as Record<string, unknown>[]}
-          columns={[
-            { key: 'productCode', label: 'Código' },
-            { key: 'productName', label: 'Produto' },
-            { key: 'category', label: 'Categoria' },
-            { key: 'location', label: 'Localização' },
-            { key: 'quantity', label: 'Quantidade' },
-            { key: 'availableQty', label: 'Disponível' },
-            { key: 'value', label: 'Valor', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
-            { key: 'status', label: 'Status' },
-          ]}
-          filename="inventario_wms"
-        />
-      </div>
+    <PageContainer loading={loading}>
+      <PageHeader
+        title="Inventário WMS"
+        description="Controle de estoque, contagens e rastreabilidade"
+        actions={
+          <ExportButton
+            data={filteredItems as unknown as Record<string, unknown>[]}
+            columns={[
+              { key: 'productCode', label: 'Código' },
+              { key: 'productName', label: 'Produto' },
+              { key: 'category', label: 'Categoria' },
+              { key: 'location', label: 'Localização' },
+              { key: 'quantity', label: 'Quantidade' },
+              { key: 'availableQty', label: 'Disponível' },
+              { key: 'value', label: 'Valor', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+              { key: 'status', label: 'Status' },
+            ]}
+            filename="inventario_wms"
+          />
+        }
+      />
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Valor Total</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValue)}
-            </div>
-            <p className="text-xs text-muted-foreground">{totalItems} itens em estoque</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">SKUs Cadastrados</CardTitle>
-            <ClipboardList className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{items.length}</div>
-            <p className="text-xs text-muted-foreground">{categories.length} categorias</p>
-          </CardContent>
-        </Card>
-        <Card className={lowStockItems > 0 ? 'border-amber-500' : ''}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Estoque Baixo</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-amber-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-amber-500">{lowStockItems}</div>
-            <p className="text-xs text-muted-foreground">Abaixo do mínimo</p>
-          </CardContent>
-        </Card>
-        <Card className={expiredItems > 0 ? 'border-red-500' : ''}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Vencidos</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-500">{expiredItems}</div>
-            <p className="text-xs text-muted-foreground">Produtos vencidos</p>
-          </CardContent>
-        </Card>
+        <KPICard title="Valor Total" value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValue)} description={`${totalItems} itens em estoque`} icon={DollarSign} index={0} />
+        <KPICard title="SKUs Cadastrados" value={items.length} description={`${categories.length} categorias`} icon={ClipboardList} index={1} />
+        <KPICard title="Estoque Baixo" value={lowStockItems} description="Abaixo do mínimo" icon={AlertTriangle} index={2} color={lowStockItems > 0 ? 'warning' : undefined} />
+        <KPICard title="Vencidos" value={expiredItems} description="Produtos vencidos" icon={AlertTriangle} index={3} color={expiredItems > 0 ? 'danger' : undefined} />
       </div>
 
       <Tabs defaultValue="stock" className="space-y-4">
@@ -156,7 +108,7 @@ export default function InventoryPage() {
 
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Package className="h-5 w-5" />Itens em Estoque</CardTitle>
+              <CardTitle className="flex items-center gap-2"><Package className="h-5 w-5" />Itens em Estoque ({filteredItems.length})</CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
@@ -166,30 +118,42 @@ export default function InventoryPage() {
                     <TableHead>Produto</TableHead>
                     <TableHead>Categoria</TableHead>
                     <TableHead>Endereço</TableHead>
+                    <TableHead className="text-right">Qtd</TableHead>
                     <TableHead className="text-right">Disponível</TableHead>
+                    <TableHead>Cobertura</TableHead>
                     <TableHead>Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredItems.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhum item encontrado</TableCell>
+                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhum item encontrado</TableCell>
                     </TableRow>
                   ) : (
-                    filteredItems.map(item => (
-                      <TableRow key={item.id}>
-                        <TableCell className="font-mono text-xs">{item.productCode}</TableCell>
-                        <TableCell>{item.productName}</TableCell>
-                        <TableCell>{item.category}</TableCell>
-                        <TableCell>{item.location}</TableCell>
-                        <TableCell className="text-right">{item.availableQty} {item.unit}</TableCell>
-                        <TableCell>
-                          <Badge variant={statusConfig[item.status]?.variant || 'default'}>
-                            {statusConfig[item.status]?.label || item.status}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))
+                    filteredItems.map(item => {
+                      const coverage = item.maxStock > 0 ? Math.round((item.quantity / item.maxStock) * 100) : 0;
+                      return (
+                        <TableRow key={item.id} className={item.availableQty <= item.minStock ? 'bg-destructive/5' : ''}>
+                          <TableCell className="font-mono text-xs">{item.productCode}</TableCell>
+                          <TableCell className="font-medium">{item.productName}</TableCell>
+                          <TableCell>{item.category}</TableCell>
+                          <TableCell className="font-mono text-xs">{item.location}</TableCell>
+                          <TableCell className="text-right">{item.quantity} {item.unit}</TableCell>
+                          <TableCell className="text-right font-semibold">{item.availableQty} {item.unit}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Progress value={Math.min(coverage, 100)} className="h-2 w-16" />
+                              <span className="text-xs text-muted-foreground">{coverage}%</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={statusConfig[item.status]?.variant || 'default'}>
+                              {statusConfig[item.status]?.label || item.status}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
                   )}
                 </TableBody>
               </Table>
@@ -212,6 +176,7 @@ export default function InventoryPage() {
                       <TableHead>Data Agendada</TableHead>
                       <TableHead>Itens</TableHead>
                       <TableHead>Discrepâncias</TableHead>
+                      <TableHead>Operador</TableHead>
                       <TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -223,7 +188,12 @@ export default function InventoryPage() {
                         <TableCell>{new Date(count.scheduledDate).toLocaleDateString('pt-BR')}</TableCell>
                         <TableCell>{count.itemsCount}</TableCell>
                         <TableCell className={count.discrepancies > 0 ? 'text-destructive font-medium' : ''}>{count.discrepancies}</TableCell>
-                        <TableCell><Badge variant="outline">{count.status}</Badge></TableCell>
+                        <TableCell>{count.operator || '-'}</TableCell>
+                        <TableCell>
+                          <Badge variant={count.status === 'completed' ? 'default' : count.status === 'in_progress' ? 'secondary' : 'outline'}>
+                            {count.status === 'completed' ? 'Concluída' : count.status === 'in_progress' ? 'Em Andamento' : count.status === 'scheduled' ? 'Agendada' : count.status}
+                          </Badge>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -233,6 +203,6 @@ export default function InventoryPage() {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
+    </PageContainer>
   );
 }

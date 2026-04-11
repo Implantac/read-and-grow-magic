@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,18 +10,26 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Package, Plus, Layers } from 'lucide-react';
+import { Search, Package, Plus, Layers, AlertTriangle } from 'lucide-react';
 import { useWMSLots } from '@/hooks/useWMSLots';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const statusColors: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-  available: 'outline',
-  reserved: 'default',
-  consumed: 'secondary',
+  available: 'default',
+  reserved: 'secondary',
+  consumed: 'outline',
   expired: 'destructive',
   blocked: 'destructive',
+};
+
+const statusLabels: Record<string, string> = {
+  available: 'Disponível',
+  reserved: 'Reservado',
+  consumed: 'Consumido',
+  expired: 'Vencido',
+  blocked: 'Bloqueado',
 };
 
 export default function LotsPage() {
@@ -45,6 +56,12 @@ export default function LotsPage() {
     try { return format(new Date(d), 'dd/MM/yyyy', { locale: ptBR }); } catch { return '-'; }
   };
 
+  const nearExpiry = lots.filter(l => {
+    if (!l.expirationDate) return false;
+    const diff = (new Date(l.expirationDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
+    return diff > 0 && diff <= 30;
+  }).length;
+
   const handleCreate = async () => {
     if (!newLot.lot_number || !newLot.product_code) return;
     await create(newLot);
@@ -53,59 +70,34 @@ export default function LotsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Controle de Lotes</h1>
-          <p className="text-muted-foreground">Rastreabilidade completa por lote de produto</p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={() => setCreateOpen(true)} className="gap-2"><Plus className="h-4 w-4" /> Novo Lote</Button>
-          <ExportButton
-            data={filteredLots as unknown as Record<string, unknown>[]}
-            columns={[
-              { key: 'lotNumber', label: 'Lote' },
-              { key: 'productCode', label: 'Código' },
-              { key: 'productName', label: 'Produto' },
-              { key: 'quantity', label: 'Quantidade' },
-              { key: 'remainingQty', label: 'Restante' },
-              { key: 'status', label: 'Status' },
-            ]}
-            filename="lotes_wms"
-          />
-        </div>
-      </div>
+    <PageContainer loading={loading}>
+      <PageHeader
+        title="Controle de Lotes"
+        description="Rastreabilidade completa por lote de produto"
+        actions={
+          <div className="flex gap-2">
+            <Button onClick={() => setCreateOpen(true)} className="gap-2"><Plus className="h-4 w-4" /> Novo Lote</Button>
+            <ExportButton
+              data={filteredLots as unknown as Record<string, unknown>[]}
+              columns={[
+                { key: 'lotNumber', label: 'Lote' },
+                { key: 'productCode', label: 'Código' },
+                { key: 'productName', label: 'Produto' },
+                { key: 'quantity', label: 'Quantidade' },
+                { key: 'remainingQty', label: 'Restante' },
+                { key: 'status', label: 'Status' },
+              ]}
+              filename="lotes_wms"
+            />
+          </div>
+        }
+      />
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Lotes Ativos</CardTitle>
-            <Layers className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{lots.filter(l => l.status === 'available').length}</div></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Próximos a Vencer</CardTitle>
-            <Package className="h-4 w-4 text-warning" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {lots.filter(l => {
-                if (!l.expirationDate) return false;
-                const diff = (new Date(l.expirationDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
-                return diff > 0 && diff <= 30;
-              }).length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Lotes</CardTitle>
-            <Layers className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent><div className="text-2xl font-bold">{lots.length}</div></CardContent>
-        </Card>
+      <div className="grid gap-4 md:grid-cols-4">
+        <KPICard title="Total de Lotes" value={lots.length} icon={Layers} index={0} />
+        <KPICard title="Lotes Ativos" value={lots.filter(l => l.status === 'available').length} icon={Package} index={1} color="success" />
+        <KPICard title="Próximos a Vencer" value={nearExpiry} description="Até 30 dias" icon={AlertTriangle} index={2} color={nearExpiry > 0 ? 'warning' : undefined} />
+        <KPICard title="Vencidos" value={lots.filter(l => l.status === 'expired').length} icon={AlertTriangle} index={3} color="danger" />
       </div>
 
       <Card>
@@ -119,10 +111,7 @@ export default function LotsPage() {
               <SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Status" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="available">Disponível</SelectItem>
-                <SelectItem value="reserved">Reservado</SelectItem>
-                <SelectItem value="consumed">Consumido</SelectItem>
-                <SelectItem value="expired">Vencido</SelectItem>
+                {Object.entries(statusLabels).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -130,49 +119,47 @@ export default function LotsPage() {
       </Card>
 
       <Card>
-        <CardHeader><CardTitle className="flex items-center gap-2"><Layers className="h-5 w-5" /> Lotes</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="flex items-center gap-2"><Layers className="h-5 w-5" /> Lotes ({filteredLots.length})</CardTitle></CardHeader>
         <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center py-8 text-muted-foreground">Carregando...</div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Lote</TableHead>
-                  <TableHead>Código</TableHead>
-                  <TableHead>Produto</TableHead>
-                  <TableHead>Fornecedor</TableHead>
-                  <TableHead>Qtd Original</TableHead>
-                  <TableHead>Restante</TableHead>
-                  <TableHead>Validade</TableHead>
-                  <TableHead>Localização</TableHead>
-                  <TableHead>Origem</TableHead>
-                  <TableHead>Status</TableHead>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Lote</TableHead>
+                <TableHead>Código</TableHead>
+                <TableHead>Produto</TableHead>
+                <TableHead>Fornecedor</TableHead>
+                <TableHead className="text-right">Original</TableHead>
+                <TableHead className="text-right">Restante</TableHead>
+                <TableHead>Validade</TableHead>
+                <TableHead>Endereço</TableHead>
+                <TableHead>Origem</TableHead>
+                <TableHead>Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredLots.map(lot => (
+                <TableRow key={lot.id} className={lot.status === 'expired' ? 'bg-destructive/5' : ''}>
+                  <TableCell className="font-mono font-medium">{lot.lotNumber}</TableCell>
+                  <TableCell className="font-mono text-xs">{lot.productCode}</TableCell>
+                  <TableCell className="font-medium">{lot.productName}</TableCell>
+                  <TableCell>{lot.supplier || '-'}</TableCell>
+                  <TableCell className="text-right">{lot.quantity}</TableCell>
+                  <TableCell className={`text-right ${lot.remainingQty === 0 ? 'text-muted-foreground' : 'font-semibold'}`}>{lot.remainingQty}</TableCell>
+                  <TableCell>{formatDate(lot.expirationDate)}</TableCell>
+                  <TableCell className="font-mono text-xs">{lot.location || '-'}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{lot.origin === 'purchase' ? 'Compra' : lot.origin === 'production' ? 'Produção' : lot.origin}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={statusColors[lot.status] || 'secondary'}>{statusLabels[lot.status] || lot.status}</Badge>
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredLots.map(lot => (
-                  <TableRow key={lot.id}>
-                    <TableCell className="font-mono font-medium">{lot.lotNumber}</TableCell>
-                    <TableCell>{lot.productCode}</TableCell>
-                    <TableCell>{lot.productName}</TableCell>
-                    <TableCell>{lot.supplier || '-'}</TableCell>
-                    <TableCell>{lot.quantity}</TableCell>
-                    <TableCell className={lot.remainingQty === 0 ? 'text-muted-foreground' : 'font-semibold'}>{lot.remainingQty}</TableCell>
-                    <TableCell>{formatDate(lot.expirationDate)}</TableCell>
-                    <TableCell>{lot.location || '-'}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{lot.origin === 'purchase' ? 'Compra' : lot.origin === 'production' ? 'Produção' : lot.origin}</Badge>
-                    </TableCell>
-                    <TableCell><Badge variant={statusColors[lot.status] || 'secondary'}>{lot.status}</Badge></TableCell>
-                  </TableRow>
-                ))}
-                {filteredLots.length === 0 && (
-                  <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Nenhum lote encontrado</TableCell></TableRow>
-                )}
-              </TableBody>
-            </Table>
-          )}
+              ))}
+              {filteredLots.length === 0 && (
+                <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Nenhum lote encontrado</TableCell></TableRow>
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
@@ -208,6 +195,6 @@ export default function LotsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 }
