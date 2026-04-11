@@ -84,7 +84,7 @@ export function usePickingWaves() {
 
   const updateWaveStatus = async (id: string, status: string) => {
     try {
-      const updates: Record<string, unknown> = { status };
+      const updates: { status: string; started_at?: string; completed_at?: string } = { status };
       if (status === 'in_progress') updates.started_at = new Date().toISOString();
       if (status === 'completed') updates.completed_at = new Date().toISOString();
       const { error } = await supabase.from('picking_waves').update(updates).eq('id', id);

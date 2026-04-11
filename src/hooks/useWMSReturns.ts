@@ -82,7 +82,7 @@ export function useWMSReturns() {
 
   const updateStatus = async (id: string, status: string) => {
     try {
-      const updates: Record<string, unknown> = { status };
+      const updates: { status: string; inspected_at?: string; completed_at?: string } = { status };
       if (status === 'inspected') updates.inspected_at = new Date().toISOString();
       if (status === 'completed') updates.completed_at = new Date().toISOString();
       const { error } = await supabase.from('wms_returns').update(updates).eq('id', id);

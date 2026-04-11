@@ -61,7 +61,7 @@ export function useReplenishmentTasks() {
 
   const updateStatus = async (id: string, status: string, movedQty?: number) => {
     try {
-      const updates: Record<string, unknown> = { status };
+      const updates: { status: string; started_at?: string; completed_at?: string; moved_qty?: number } = { status };
       if (status === 'in_progress') updates.started_at = new Date().toISOString();
       if (status === 'completed') updates.completed_at = new Date().toISOString();
       if (movedQty !== undefined) updates.moved_qty = movedQty;
