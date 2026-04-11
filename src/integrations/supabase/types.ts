@@ -5873,6 +5873,84 @@ export type Database = {
           },
         ]
       }
+      stock_lots: {
+        Row: {
+          created_at: string
+          expiration_date: string | null
+          id: string
+          location: string | null
+          lot_number: string
+          manufacture_date: string | null
+          notes: string | null
+          origin: string
+          origin_reference: string | null
+          product_code: string
+          product_id: string | null
+          product_name: string
+          quantity: number
+          remaining_qty: number
+          status: string
+          supplier: string | null
+          updated_at: string
+          warehouse_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          expiration_date?: string | null
+          id?: string
+          location?: string | null
+          lot_number: string
+          manufacture_date?: string | null
+          notes?: string | null
+          origin?: string
+          origin_reference?: string | null
+          product_code: string
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          remaining_qty?: number
+          status?: string
+          supplier?: string | null
+          updated_at?: string
+          warehouse_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          expiration_date?: string | null
+          id?: string
+          location?: string | null
+          lot_number?: string
+          manufacture_date?: string | null
+          notes?: string | null
+          origin?: string
+          origin_reference?: string | null
+          product_code?: string
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          remaining_qty?: number
+          status?: string
+          supplier?: string | null
+          updated_at?: string
+          warehouse_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_lots_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_lots_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_movements: {
         Row: {
           batch: string | null
@@ -6477,6 +6555,161 @@ export type Database = {
         }
         Relationships: []
       }
+      warehouses: {
+        Row: {
+          address: string | null
+          code: string
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          status: string
+          total_capacity: number | null
+          updated_at: string
+          used_capacity: number | null
+        }
+        Insert: {
+          address?: string | null
+          code: string
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          status?: string
+          total_capacity?: number | null
+          updated_at?: string
+          used_capacity?: number | null
+        }
+        Update: {
+          address?: string | null
+          code?: string
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          status?: string
+          total_capacity?: number | null
+          updated_at?: string
+          used_capacity?: number | null
+        }
+        Relationships: []
+      }
+      wms_conference_items: {
+        Row: {
+          barcode: string | null
+          checked_at: string | null
+          checked_qty: number
+          conference_id: string
+          divergence: number | null
+          expected_qty: number
+          id: string
+          lot_number: string | null
+          notes: string | null
+          product_code: string
+          product_name: string
+          status: string
+        }
+        Insert: {
+          barcode?: string | null
+          checked_at?: string | null
+          checked_qty?: number
+          conference_id: string
+          divergence?: number | null
+          expected_qty?: number
+          id?: string
+          lot_number?: string | null
+          notes?: string | null
+          product_code: string
+          product_name: string
+          status?: string
+        }
+        Update: {
+          barcode?: string | null
+          checked_at?: string | null
+          checked_qty?: number
+          conference_id?: string
+          divergence?: number | null
+          expected_qty?: number
+          id?: string
+          lot_number?: string | null
+          notes?: string | null
+          product_code?: string
+          product_name?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_conference_items_conference_id_fkey"
+            columns: ["conference_id"]
+            isOneToOne: false
+            referencedRelation: "wms_conference_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wms_conference_records: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          checked_items: number
+          completed_at: string | null
+          conference_number: string
+          conference_type: string
+          created_at: string
+          divergences: number
+          id: string
+          notes: string | null
+          operator: string | null
+          reference_id: string | null
+          reference_number: string | null
+          reference_type: string
+          started_at: string | null
+          status: string
+          total_items: number
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          checked_items?: number
+          completed_at?: string | null
+          conference_number: string
+          conference_type?: string
+          created_at?: string
+          divergences?: number
+          id?: string
+          notes?: string | null
+          operator?: string | null
+          reference_id?: string | null
+          reference_number?: string | null
+          reference_type?: string
+          started_at?: string | null
+          status?: string
+          total_items?: number
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          checked_items?: number
+          completed_at?: string | null
+          conference_number?: string
+          conference_type?: string
+          created_at?: string
+          divergences?: number
+          id?: string
+          notes?: string | null
+          operator?: string | null
+          reference_id?: string | null
+          reference_number?: string | null
+          reference_type?: string
+          started_at?: string | null
+          status?: string
+          total_items?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       wms_inventory_counts: {
         Row: {
           completed_at: string | null
@@ -6615,6 +6848,45 @@ export type Database = {
           reason?: string | null
           to_location?: string | null
           type?: string
+        }
+        Relationships: []
+      }
+      wms_logs: {
+        Row: {
+          created_at: string
+          details: Json | null
+          entity_id: string | null
+          entity_ref: string | null
+          entity_type: string
+          id: string
+          ip_address: string | null
+          operation: string
+          operator: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_ref?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          operation: string
+          operator?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_ref?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          operation?: string
+          operator?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -6781,10 +7053,14 @@ export type Database = {
           items_count: number
           order_number: string
           picked_items: number
+          picking_strategy: string | null
           priority: string
+          route_sequence: Json | null
           sales_order_id: string | null
           started_at: string | null
           status: string
+          wave_id: string | null
+          zone_filter: string | null
         }
         Insert: {
           assigned_to?: string | null
@@ -6795,10 +7071,14 @@ export type Database = {
           items_count?: number
           order_number: string
           picked_items?: number
+          picking_strategy?: string | null
           priority?: string
+          route_sequence?: Json | null
           sales_order_id?: string | null
           started_at?: string | null
           status?: string
+          wave_id?: string | null
+          zone_filter?: string | null
         }
         Update: {
           assigned_to?: string | null
@@ -6809,10 +7089,14 @@ export type Database = {
           items_count?: number
           order_number?: string
           picked_items?: number
+          picking_strategy?: string | null
           priority?: string
+          route_sequence?: Json | null
           sales_order_id?: string | null
           started_at?: string | null
           status?: string
+          wave_id?: string | null
+          zone_filter?: string | null
         }
         Relationships: []
       }
@@ -6862,45 +7146,138 @@ export type Database = {
       }
       wms_receiving_orders: {
         Row: {
+          conference_type: string | null
           created_at: string
           dock: string | null
           expected_date: string | null
           id: string
+          items_count: number
+          notes: string | null
           operator: string | null
           order_number: string
           purchase_order_id: string | null
           received_date: string | null
+          received_items: number
           status: string
           supplier: string
         }
         Insert: {
+          conference_type?: string | null
           created_at?: string
           dock?: string | null
           expected_date?: string | null
           id?: string
+          items_count?: number
+          notes?: string | null
           operator?: string | null
           order_number: string
           purchase_order_id?: string | null
           received_date?: string | null
+          received_items?: number
           status?: string
           supplier: string
         }
         Update: {
+          conference_type?: string | null
           created_at?: string
           dock?: string | null
           expected_date?: string | null
           id?: string
+          items_count?: number
+          notes?: string | null
           operator?: string | null
           order_number?: string
           purchase_order_id?: string | null
           received_date?: string | null
+          received_items?: number
           status?: string
           supplier?: string
         }
         Relationships: []
       }
+      wms_shipments: {
+        Row: {
+          carrier: string | null
+          carrier_code: string | null
+          created_at: string
+          customer_name: string
+          delivered_at: string | null
+          id: string
+          notes: string | null
+          operator: string | null
+          order_number: string | null
+          packing_order_id: string | null
+          romaneio_number: string | null
+          scheduled_date: string | null
+          shipment_number: string
+          shipped_at: string | null
+          shipping_address: string | null
+          status: string
+          total_value: number | null
+          total_weight: number | null
+          tracking_number: string | null
+          updated_at: string
+          volumes: number
+        }
+        Insert: {
+          carrier?: string | null
+          carrier_code?: string | null
+          created_at?: string
+          customer_name: string
+          delivered_at?: string | null
+          id?: string
+          notes?: string | null
+          operator?: string | null
+          order_number?: string | null
+          packing_order_id?: string | null
+          romaneio_number?: string | null
+          scheduled_date?: string | null
+          shipment_number: string
+          shipped_at?: string | null
+          shipping_address?: string | null
+          status?: string
+          total_value?: number | null
+          total_weight?: number | null
+          tracking_number?: string | null
+          updated_at?: string
+          volumes?: number
+        }
+        Update: {
+          carrier?: string | null
+          carrier_code?: string | null
+          created_at?: string
+          customer_name?: string
+          delivered_at?: string | null
+          id?: string
+          notes?: string | null
+          operator?: string | null
+          order_number?: string | null
+          packing_order_id?: string | null
+          romaneio_number?: string | null
+          scheduled_date?: string | null
+          shipment_number?: string
+          shipped_at?: string | null
+          shipping_address?: string | null
+          status?: string
+          total_value?: number | null
+          total_weight?: number | null
+          tracking_number?: string | null
+          updated_at?: string
+          volumes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_shipments_packing_order_id_fkey"
+            columns: ["packing_order_id"]
+            isOneToOne: false
+            referencedRelation: "wms_packing_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wms_storage_locations: {
         Row: {
+          abc_class: string | null
           active: boolean
           aisle: string
           capacity: number
@@ -6908,13 +7285,20 @@ export type Database = {
           created_at: string
           id: string
           level: string
+          max_volume: number | null
+          max_weight: number | null
           occupied: number
+          picking_zone: boolean | null
           position: string
           rack: string
+          storage_category: string | null
           type: string
+          updated_at: string | null
+          warehouse_id: string | null
           zone: string
         }
         Insert: {
+          abc_class?: string | null
           active?: boolean
           aisle: string
           capacity?: number
@@ -6922,13 +7306,20 @@ export type Database = {
           created_at?: string
           id?: string
           level: string
+          max_volume?: number | null
+          max_weight?: number | null
           occupied?: number
+          picking_zone?: boolean | null
           position?: string
           rack: string
+          storage_category?: string | null
           type?: string
+          updated_at?: string | null
+          warehouse_id?: string | null
           zone: string
         }
         Update: {
+          abc_class?: string | null
           active?: boolean
           aisle?: string
           capacity?: number
@@ -6936,13 +7327,27 @@ export type Database = {
           created_at?: string
           id?: string
           level?: string
+          max_volume?: number | null
+          max_weight?: number | null
           occupied?: number
+          picking_zone?: boolean | null
           position?: string
           rack?: string
+          storage_category?: string | null
           type?: string
+          updated_at?: string | null
+          warehouse_id?: string | null
           zone?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "wms_storage_locations_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       work_centers: {
         Row: {

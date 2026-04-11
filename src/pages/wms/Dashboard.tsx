@@ -3,10 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import {
   Warehouse, Package, PackagePlus, PackageSearch, PackageCheck, Truck,
-  CheckCircle, MapPin, ArrowUpDown
+  CheckCircle, MapPin, ArrowUpDown, ScanBarcode, Layers, ClipboardCheck,
+  AlertTriangle, TrendingUp,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -14,7 +16,7 @@ const kpiCards = [
   { key: 'receiving', label: 'Recebimentos', sub: 'Pendentes/Em andamento', icon: PackagePlus, accent: 'bg-info/10 text-info ring-info/20' },
   { key: 'picking', label: 'Picking', sub: 'Ordens ativas', icon: PackageSearch, accent: 'bg-warning/10 text-warning ring-warning/20' },
   { key: 'packing', label: 'Packing', sub: 'Para embalar', icon: PackageCheck, accent: 'bg-[hsl(263,70%,50%)]/10 text-[hsl(263,70%,50%)] ring-[hsl(263,70%,50%)]/20' },
-  { key: 'shipped', label: 'Prontos p/ Expedição', sub: 'Aguardando envio', icon: Truck, accent: 'bg-success/10 text-success ring-success/20' },
+  { key: 'shipped', label: 'Expedidos', sub: 'Enviados', icon: Truck, accent: 'bg-success/10 text-success ring-success/20' },
 ] as const;
 
 export default function WMSDashboardPage() {
@@ -93,8 +95,7 @@ export default function WMSDashboardPage() {
               </div>
               <Link to="/wms/enderecamento">
                 <Button variant="outline" size="sm" className="w-full gap-2">
-                  <MapPin className="h-4 w-4" />
-                  Ver Endereçamento
+                  <MapPin className="h-4 w-4" /> Ver Endereçamento
                 </Button>
               </Link>
             </div>
@@ -105,39 +106,62 @@ export default function WMSDashboardPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <Package className="h-4 w-4 text-muted-foreground" />
-              Alertas de Estoque
+              <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+              Alertas Operacionais
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 text-success">
-              <CheckCircle className="h-4 w-4" />
-              <span className="text-sm font-medium">Nenhum alerta</span>
+            <div className="space-y-2">
+              {stats.occupancy > 85 ? (
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 text-destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="text-sm font-medium">Ocupação alta ({stats.occupancy}%)</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 text-success">
+                  <CheckCircle className="h-4 w-4" />
+                  <span className="text-sm font-medium">Operação normal</span>
+                </div>
+              )}
+              {stats.picking > 5 && (
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-warning/10 text-warning">
+                  <PackageSearch className="h-4 w-4" />
+                  <span className="text-sm font-medium">{stats.picking} pickings pendentes</span>
+                </div>
+              )}
             </div>
             <Link to="/wms/inventario">
-              <Button variant="outline" size="sm" className="w-full mt-3 gap-2">
-                Ver Inventário
-              </Button>
+              <Button variant="outline" size="sm" className="w-full mt-3 gap-2">Ver Inventário</Button>
             </Link>
           </CardContent>
         </Card>
 
-        {/* Urgent Pickings */}
+        {/* Operational Metrics */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
-              <PackageSearch className="h-4 w-4 text-muted-foreground" />
-              Pickings Urgentes
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              Métricas Operacionais
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-success/10 text-success">
-              <CheckCircle className="h-4 w-4" />
-              <span className="text-sm font-medium">Nenhum picking urgente</span>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Movimentações Recentes</span>
+                <Badge variant="outline">{recentMovements.length}</Badge>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Recebimentos Ativos</span>
+                <Badge variant="outline">{stats.receiving}</Badge>
+              </div>
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Expedições Prontas</span>
+                <Badge variant="outline">{stats.shipped}</Badge>
+              </div>
             </div>
-            <Link to="/wms/picking">
+            <Link to="/wms/conferencia">
               <Button variant="outline" size="sm" className="w-full mt-3 gap-2">
-                Ver Todos Pickings
+                <ClipboardCheck className="h-4 w-4" /> Ver Conferências
               </Button>
             </Link>
           </CardContent>
@@ -158,47 +182,49 @@ export default function WMSDashboardPage() {
               {recentMovements.map((m: any) => (
                 <div key={m.id} className="flex items-center justify-between text-sm border-b border-border pb-2">
                   <span className="font-medium text-foreground">{m.productName}</span>
-                  <span className="text-muted-foreground">{m.type} - {m.quantity} un</span>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={m.type === 'inbound' ? 'default' : m.type === 'outbound' ? 'secondary' : 'outline'}>
+                      {m.type === 'inbound' ? 'Entrada' : m.type === 'outbound' ? 'Saída' : m.type === 'transfer' ? 'Transferência' : m.type}
+                    </Badge>
+                    <span className="text-muted-foreground">{m.quantity} un</span>
+                  </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              Nenhuma movimentação registrada
-            </div>
+            <div className="text-center py-8 text-muted-foreground">Nenhuma movimentação registrada</div>
           )}
         </CardContent>
       </Card>
 
       {/* Quick Actions */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Ações Rápidas</CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle className="text-base">Ações Rápidas</CardTitle></CardHeader>
         <CardContent>
-          <div className="grid gap-3 md:grid-cols-4">
+          <div className="grid gap-3 md:grid-cols-5">
             <Link to="/wms/recebimento">
               <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:border-primary/50 hover:bg-primary/5">
-                <PackagePlus className="h-6 w-6 text-primary" />
-                <span>Novo Recebimento</span>
+                <PackagePlus className="h-6 w-6 text-primary" /><span>Recebimento</span>
               </Button>
             </Link>
             <Link to="/wms/picking">
               <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:border-primary/50 hover:bg-primary/5">
-                <PackageSearch className="h-6 w-6 text-primary" />
-                <span>Iniciar Picking</span>
+                <PackageSearch className="h-6 w-6 text-primary" /><span>Picking</span>
               </Button>
             </Link>
-            <Link to="/wms/movimentacoes">
+            <Link to="/wms/conferencia">
               <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:border-primary/50 hover:bg-primary/5">
-                <ArrowUpDown className="h-6 w-6 text-primary" />
-                <span>Nova Movimentação</span>
+                <ScanBarcode className="h-6 w-6 text-primary" /><span>Conferência</span>
               </Button>
             </Link>
-            <Link to="/wms/inventario">
+            <Link to="/wms/expedicao">
               <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:border-primary/50 hover:bg-primary/5">
-                <Package className="h-6 w-6 text-primary" />
-                <span>Ajuste Inventário</span>
+                <Truck className="h-6 w-6 text-primary" /><span>Expedição</span>
+              </Button>
+            </Link>
+            <Link to="/wms/lotes">
+              <Button variant="outline" className="w-full h-20 flex-col gap-2 hover:border-primary/50 hover:bg-primary/5">
+                <Layers className="h-6 w-6 text-primary" /><span>Lotes</span>
               </Button>
             </Link>
           </div>

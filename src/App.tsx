@@ -81,6 +81,9 @@ const PickingPage = lazy(() => import("./pages/wms/Picking"));
 const PackingPage = lazy(() => import("./pages/wms/Packing"));
 const InventoryPage = lazy(() => import("./pages/wms/Inventory"));
 const WMSMovementsPage = lazy(() => import("./pages/wms/Movements"));
+const ConferencePage = lazy(() => import("./pages/wms/Conference"));
+const ShipmentsPage = lazy(() => import("./pages/wms/Shipments"));
+const LotsPage = lazy(() => import("./pages/wms/Lots"));
 
 // RFID
 const RFIDDashboardPage = lazy(() => import("./pages/rfid/Dashboard"));
@@ -276,8 +279,11 @@ const App = () => (
               <Route path="/wms/enderecamento" element={<StoragePage />} />
               <Route path="/wms/picking" element={<PickingPage />} />
               <Route path="/wms/packing" element={<PackingPage />} />
+              <Route path="/wms/conferencia" element={<ConferencePage />} />
               <Route path="/wms/inventario" element={<InventoryPage />} />
               <Route path="/wms/movimentacoes" element={<WMSMovementsPage />} />
+              <Route path="/wms/expedicao" element={<ShipmentsPage />} />
+              <Route path="/wms/lotes" element={<LotsPage />} />
               
               {/* RFID Module */}
               <Route path="/rfid/dashboard" element={<RFIDDashboardPage />} />
