@@ -1,19 +1,19 @@
 import { useState, useMemo } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useProductionSchedule } from '@/hooks/useProductionSchedule';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { Calendar, Clock, Factory, Plus, AlertTriangle } from 'lucide-react';
-import { format, parseISO, differenceInHours, isAfter, isBefore } from 'date-fns';
+import { format, parseISO, isAfter } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 export default function ProductionSchedulePage() {
@@ -27,77 +27,43 @@ export default function ProductionSchedulePage() {
   const [shift, setShift] = useState('diurno');
 
   const unscheduledOrders = orders.filter(
-    o => ['planned', 'in_progress'].includes(o.status) &&
-      !schedules.some(s => s.production_order_id === o.id)
+    o => ['planned', 'in_progress'].includes(o.status) && !schedules.some(s => s.production_order_id === o.id)
   );
 
   const enriched = useMemo(() => {
-    return schedules.map(s => {
-      const order = orders.find(o => o.id === s.production_order_id);
-      return { ...s, order };
-    }).sort((a, b) => new Date(a.planned_start).getTime() - new Date(b.planned_start).getTime());
+    return schedules.map(s => ({ ...s, order: orders.find(o => o.id === s.production_order_id) }))
+      .sort((a, b) => new Date(a.planned_start).getTime() - new Date(b.planned_start).getTime());
   }, [schedules, orders]);
 
   const now = new Date();
   const lateCount = enriched.filter(s => s.status !== 'completed' && isAfter(now, new Date(s.planned_end))).length;
+  const inExecution = enriched.filter(s => s.actual_start && !s.actual_end).length;
 
   const handleCreate = async () => {
-    if (!selectedOrderId || !plannedStart || !plannedEnd) {
-      toast.error('Preencha todos os campos obrigatórios');
-      return;
-    }
-    await create({
-      production_order_id: selectedOrderId,
-      planned_start: new Date(plannedStart).toISOString(),
-      planned_end: new Date(plannedEnd).toISOString(),
-      sector,
-      shift,
-      status: 'scheduled',
-    });
-    setShowCreate(false);
-    setSelectedOrderId('');
-    setPlannedStart('');
-    setPlannedEnd('');
-    setSector('');
+    if (!selectedOrderId || !plannedStart || !plannedEnd) { toast.error('Preencha todos os campos obrigatórios'); return; }
+    await create({ production_order_id: selectedOrderId, planned_start: new Date(plannedStart).toISOString(), planned_end: new Date(plannedEnd).toISOString(), sector, shift, status: 'scheduled' });
+    setShowCreate(false); setSelectedOrderId(''); setPlannedStart(''); setPlannedEnd(''); setSector('');
   };
 
   const getStatusBadge = (s: any) => {
     const isLate = s.status !== 'completed' && isAfter(now, new Date(s.planned_end));
     if (isLate) return <Badge variant="destructive">Atrasado</Badge>;
-    if (s.status === 'completed') return <Badge className="bg-green-100 text-green-800">Concluído</Badge>;
-    if (s.actual_start) return <Badge className="bg-yellow-100 text-yellow-800">Em Execução</Badge>;
+    if (s.status === 'completed') return <Badge className="bg-success/15 text-success border-success/30">Concluído</Badge>;
+    if (s.actual_start) return <Badge className="bg-warning/15 text-warning border-warning/30">Em Execução</Badge>;
     return <Badge variant="outline">Agendado</Badge>;
   };
 
   return (
-    <PageContainer>
+    <PageContainer loading={loading}>
       <PageHeader title="Agendamento de Produção" description="Programação e sequenciamento de ordens de produção">
-        <Button onClick={() => setShowCreate(true)}>
-          <Plus className="h-4 w-4 mr-2" /> Agendar OP
-        </Button>
+        <Button onClick={() => setShowCreate(true)}><Plus className="h-4 w-4 mr-2" /> Agendar OP</Button>
       </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardContent className="pt-6 text-center">
-          <Calendar className="h-6 w-6 mx-auto mb-2 text-primary" />
-          <p className="text-2xl font-bold">{enriched.length}</p>
-          <p className="text-xs text-muted-foreground">Total Agendados</p>
-        </CardContent></Card>
-        <Card><CardContent className="pt-6 text-center">
-          <Factory className="h-6 w-6 mx-auto mb-2 text-warning" />
-          <p className="text-2xl font-bold">{enriched.filter(s => s.actual_start && !s.actual_end).length}</p>
-          <p className="text-xs text-muted-foreground">Em Execução</p>
-        </CardContent></Card>
-        <Card><CardContent className="pt-6 text-center">
-          <AlertTriangle className="h-6 w-6 mx-auto mb-2 text-destructive" />
-          <p className="text-2xl font-bold">{lateCount}</p>
-          <p className="text-xs text-muted-foreground">Atrasados</p>
-        </CardContent></Card>
-        <Card><CardContent className="pt-6 text-center">
-          <Clock className="h-6 w-6 mx-auto mb-2 text-info" />
-          <p className="text-2xl font-bold">{unscheduledOrders.length}</p>
-          <p className="text-xs text-muted-foreground">Sem Agendamento</p>
-        </CardContent></Card>
+        <KPICard title="Total Agendados" value={enriched.length} icon={<Calendar className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Em Execução" value={inExecution} icon={<Factory className="h-5 w-5" />} accentColor="warning" index={1} />
+        <KPICard title="Atrasados" value={lateCount} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={2} />
+        <KPICard title="Sem Agendamento" value={unscheduledOrders.length} icon={<Clock className="h-5 w-5" />} accentColor="info" index={3} />
       </div>
 
       <Card>
@@ -107,18 +73,11 @@ export default function ProductionSchedulePage() {
             <p className="text-center py-8 text-muted-foreground">Nenhum agendamento criado. Clique em "Agendar OP".</p>
           ) : (
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>OP</TableHead>
-                  <TableHead>Produto</TableHead>
-                  <TableHead>Início Plan.</TableHead>
-                  <TableHead>Fim Plan.</TableHead>
-                  <TableHead>Setor</TableHead>
-                  <TableHead>Turno</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Ações</TableHead>
-                </TableRow>
-              </TableHeader>
+              <TableHeader><TableRow>
+                <TableHead>OP</TableHead><TableHead>Produto</TableHead><TableHead>Início Plan.</TableHead>
+                <TableHead>Fim Plan.</TableHead><TableHead>Setor</TableHead><TableHead>Turno</TableHead>
+                <TableHead>Status</TableHead><TableHead>Ações</TableHead>
+              </TableRow></TableHeader>
               <TableBody>
                 {enriched.map(s => (
                   <TableRow key={s.id}>
@@ -130,16 +89,8 @@ export default function ProductionSchedulePage() {
                     <TableCell><Badge variant="outline">{s.shift}</Badge></TableCell>
                     <TableCell>{getStatusBadge(s)}</TableCell>
                     <TableCell>
-                      {!s.actual_start && (
-                        <Button size="sm" variant="outline" onClick={() => update(s.id, { actual_start: new Date().toISOString(), status: 'in_progress' })}>
-                          Iniciar
-                        </Button>
-                      )}
-                      {s.actual_start && !s.actual_end && (
-                        <Button size="sm" variant="outline" onClick={() => update(s.id, { actual_end: new Date().toISOString(), status: 'completed' })}>
-                          Finalizar
-                        </Button>
-                      )}
+                      {!s.actual_start && <Button size="sm" variant="outline" onClick={() => update(s.id, { actual_start: new Date().toISOString(), status: 'in_progress' })}>Iniciar</Button>}
+                      {s.actual_start && !s.actual_end && <Button size="sm" variant="outline" onClick={() => update(s.id, { actual_end: new Date().toISOString(), status: 'completed' })}>Finalizar</Button>}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -157,37 +108,19 @@ export default function ProductionSchedulePage() {
               <label className="text-sm font-medium">Ordem de Produção</label>
               <Select value={selectedOrderId} onValueChange={setSelectedOrderId}>
                 <SelectTrigger><SelectValue placeholder="Selecione a OP" /></SelectTrigger>
-                <SelectContent>
-                  {unscheduledOrders.map(o => (
-                    <SelectItem key={o.id} value={o.id}>{o.order_number} — {o.product_name}</SelectItem>
-                  ))}
-                </SelectContent>
+                <SelectContent>{unscheduledOrders.map(o => <SelectItem key={o.id} value={o.id}>{o.order_number} — {o.product_name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Início Planejado</label>
-                <Input type="datetime-local" value={plannedStart} onChange={e => setPlannedStart(e.target.value)} />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Fim Planejado</label>
-                <Input type="datetime-local" value={plannedEnd} onChange={e => setPlannedEnd(e.target.value)} />
-              </div>
+              <div><label className="text-sm font-medium">Início Planejado</label><Input type="datetime-local" value={plannedStart} onChange={e => setPlannedStart(e.target.value)} /></div>
+              <div><label className="text-sm font-medium">Fim Planejado</label><Input type="datetime-local" value={plannedEnd} onChange={e => setPlannedEnd(e.target.value)} /></div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">Setor</label>
-                <Input value={sector} onChange={e => setSector(e.target.value)} placeholder="Ex: Costura" />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Turno</label>
+              <div><label className="text-sm font-medium">Setor</label><Input value={sector} onChange={e => setSector(e.target.value)} placeholder="Ex: Costura" /></div>
+              <div><label className="text-sm font-medium">Turno</label>
                 <Select value={shift} onValueChange={setShift}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="diurno">Diurno</SelectItem>
-                    <SelectItem value="noturno">Noturno</SelectItem>
-                    <SelectItem value="misto">Misto</SelectItem>
-                  </SelectContent>
+                  <SelectContent><SelectItem value="diurno">Diurno</SelectItem><SelectItem value="noturno">Noturno</SelectItem><SelectItem value="misto">Misto</SelectItem></SelectContent>
                 </Select>
               </div>
             </div>
