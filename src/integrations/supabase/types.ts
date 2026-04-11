@@ -3267,6 +3267,57 @@ export type Database = {
         }
         Relationships: []
       }
+      playbook_usage_logs: {
+        Row: {
+          action_type: string
+          context: string | null
+          created_at: string
+          id: string
+          objection_id: string | null
+          playbook_id: string | null
+          result: string | null
+          sales_rep_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          context?: string | null
+          created_at?: string
+          id?: string
+          objection_id?: string | null
+          playbook_id?: string | null
+          result?: string | null
+          sales_rep_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          context?: string | null
+          created_at?: string
+          id?: string
+          objection_id?: string | null
+          playbook_id?: string | null
+          result?: string | null
+          sales_rep_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playbook_usage_logs_objection_id_fkey"
+            columns: ["objection_id"]
+            isOneToOne: false
+            referencedRelation: "sales_objections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playbook_usage_logs_playbook_id_fkey"
+            columns: ["playbook_id"]
+            isOneToOne: false
+            referencedRelation: "sales_playbooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_orders: {
         Row: {
           bom_id: string | null
@@ -4547,6 +4598,48 @@ export type Database = {
           },
         ]
       }
+      sales_objections: {
+        Row: {
+          active: boolean | null
+          category: string
+          context: string | null
+          created_at: string
+          id: string
+          objection: string
+          response: string
+          stage: string | null
+          strategy: string | null
+          success_rate: number | null
+          usage_count: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          category?: string
+          context?: string | null
+          created_at?: string
+          id?: string
+          objection: string
+          response: string
+          stage?: string | null
+          strategy?: string | null
+          success_rate?: number | null
+          usage_count?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          category?: string
+          context?: string | null
+          created_at?: string
+          id?: string
+          objection?: string
+          response?: string
+          stage?: string | null
+          strategy?: string | null
+          success_rate?: number | null
+          usage_count?: number | null
+        }
+        Relationships: []
+      }
       sales_opportunities: {
         Row: {
           client_id: string
@@ -4615,6 +4708,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      sales_playbooks: {
+        Row: {
+          actions: Json | null
+          active: boolean | null
+          category: string
+          closing_techniques: Json | null
+          created_at: string
+          id: string
+          ideal_timing: string | null
+          next_steps: Json | null
+          priority: number | null
+          scripts: Json | null
+          stage: string
+          tips: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          actions?: Json | null
+          active?: boolean | null
+          category?: string
+          closing_techniques?: Json | null
+          created_at?: string
+          id?: string
+          ideal_timing?: string | null
+          next_steps?: Json | null
+          priority?: number | null
+          scripts?: Json | null
+          stage: string
+          tips?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          actions?: Json | null
+          active?: boolean | null
+          category?: string
+          closing_techniques?: Json | null
+          created_at?: string
+          id?: string
+          ideal_timing?: string | null
+          next_steps?: Json | null
+          priority?: number | null
+          scripts?: Json | null
+          stage?: string
+          tips?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       sales_reps: {
         Row: {
