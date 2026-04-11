@@ -99,7 +99,14 @@ const RFIDTagsPage = lazy(() => import("./pages/rfid/Tags"));
 const RFIDEventsPage = lazy(() => import("./pages/rfid/Events"));
 const RFIDIntegrationPage = lazy(() => import("./pages/rfid/Integration"));
 
-// Production
+// TMS
+const TMSDashboardPage = lazy(() => import("./pages/tms/TMSDashboard"));
+const CarriersPage = lazy(() => import("./pages/tms/Carriers"));
+const VehiclesPage = lazy(() => import("./pages/tms/Vehicles"));
+const RoutesPage = lazy(() => import("./pages/tms/Routes"));
+const DeliveryProofPage = lazy(() => import("./pages/tms/DeliveryProof"));
+
+
 const ProductionOrdersPage = lazy(() => import("./pages/producao/ProductionOrders"));
 const MaterialConsumptionPage = lazy(() => import("./pages/producao/MaterialConsumption"));
 const TimeEntriesPage = lazy(() => import("./pages/producao/TimeEntries"));
@@ -306,6 +313,13 @@ const App = () => (
               <Route path="/rfid/tags" element={<RFIDTagsPage />} />
               <Route path="/rfid/eventos" element={<RFIDEventsPage />} />
               <Route path="/rfid/integracao" element={<RFIDIntegrationPage />} />
+              
+              {/* TMS Module */}
+              <Route path="/tms/dashboard" element={<TMSDashboardPage />} />
+              <Route path="/tms/transportadoras" element={<CarriersPage />} />
+              <Route path="/tms/veiculos" element={<VehiclesPage />} />
+              <Route path="/tms/rotas" element={<RoutesPage />} />
+              <Route path="/tms/comprovantes" element={<DeliveryProofPage />} />
               
               {/* Reports Module */}
               <Route path="/relatorios/vendas" element={<SalesReport />} />

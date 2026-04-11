@@ -215,6 +215,18 @@ export const navigationSections: NavSection[] = [
           { title: 'Integração WMS', href: '/rfid/integracao', icon: 'ArrowLeftRight' },
         ],
       },
+      {
+        title: 'TMS - Transporte',
+        href: '/tms',
+        icon: 'Truck',
+        children: [
+          { title: 'Dashboard TMS', href: '/tms/dashboard', icon: 'LayoutDashboard' },
+          { title: 'Transportadoras', href: '/tms/transportadoras', icon: 'Building2' },
+          { title: 'Veículos / Frota', href: '/tms/veiculos', icon: 'Truck' },
+          { title: 'Rotas de Entrega', href: '/tms/rotas', icon: 'MapPin' },
+          { title: 'Comprovantes', href: '/tms/comprovantes', icon: 'FileCheck' },
+        ],
+      },
     ],
   },
   {
