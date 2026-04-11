@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, type ElementType } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 
@@ -6,8 +6,10 @@ interface KPICardProps {
   title: string;
   value: string | number;
   subtitle?: string;
-  icon: ReactNode;
+  description?: string;
+  icon: ReactNode | ElementType;
   accentColor?: string;
+  color?: string;
   className?: string;
   index?: number;
 }
@@ -21,8 +23,19 @@ const colorMap: Record<string, { border: string; iconBg: string; iconText: strin
   accent: { border: 'border-l-primary', iconBg: 'bg-accent/10', iconText: 'text-accent-foreground' },
 };
 
-export function KPICard({ title, value, subtitle, icon, accentColor = 'primary', className, index = 0 }: KPICardProps) {
-  const colors = colorMap[accentColor] || colorMap.primary;
+export function KPICard({ title, value, subtitle, description, icon, accentColor, color, className, index = 0 }: KPICardProps) {
+  const resolvedColor = accentColor || color || 'primary';
+  const colors = colorMap[resolvedColor] || colorMap.primary;
+  const resolvedSubtitle = subtitle || description;
+
+  // Support both ReactNode and ElementType (component reference)
+  let iconElement: ReactNode;
+  if (typeof icon === 'function' || (typeof icon === 'object' && icon !== null && 'render' in (icon as any))) {
+    const IconComponent = icon as ElementType;
+    iconElement = <IconComponent className="h-5 w-5" />;
+  } else {
+    iconElement = icon;
+  }
 
   return (
     <Card
@@ -35,12 +48,12 @@ export function KPICard({ title, value, subtitle, icon, accentColor = 'primary',
     >
       <CardContent className="flex items-center gap-4 p-5">
         <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110', colors.iconBg)}>
-          <div className={colors.iconText}>{icon}</div>
+          <div className={colors.iconText}>{iconElement}</div>
         </div>
         <div className="min-w-0">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground truncate">{title}</p>
           <p className="text-xl font-bold text-foreground tabular-nums">{value}</p>
-          {subtitle && <p className="text-[11px] text-muted-foreground truncate">{subtitle}</p>}
+          {resolvedSubtitle && <p className="text-[11px] text-muted-foreground truncate">{resolvedSubtitle}</p>}
         </div>
       </CardContent>
     </Card>
