@@ -100,6 +100,8 @@ const QualityControlPage = lazy(() => import("./pages/producao/QualityControl"))
 const SupplyStockPage = lazy(() => import("./pages/producao/SupplyStock"));
 const ProductCostsPage = lazy(() => import("./pages/producao/ProductCosts"));
 const IndustrialDashboardPage = lazy(() => import("./pages/producao/IndustrialDashboard"));
+const OperatorTerminalPage = lazy(() => import("./pages/producao/OperatorTerminal"));
+const ShopFloorDashboardPage = lazy(() => import("./pages/producao/ShopFloorDashboard"));
 
 // Operational Flow
 const OperationalDashboardPage = lazy(() => import("./pages/operacional/OperationalDashboard"));
@@ -245,7 +247,8 @@ const App = () => (
               <Route path="/producao/insumos" element={<SupplyStockPage />} />
               <Route path="/producao/custos" element={<ProductCostsPage />} />
               <Route path="/producao/dashboard-industrial" element={<IndustrialDashboardPage />} />
-              <Route path="/producao/apontamentos" element={<TimeEntriesPage />} />
+              <Route path="/producao/terminal" element={<OperatorTerminalPage />} />
+              <Route path="/producao/chao-fabrica" element={<ShopFloorDashboardPage />} />
 
               {/* Operational Flow Module */}
               <Route path="/operacional/dashboard" element={<OperationalDashboardPage />} />
