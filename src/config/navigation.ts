@@ -67,6 +67,7 @@ export const navigationSections: NavSection[] = [
           { title: 'Campanhas', href: '/comercial/campanhas', icon: 'Megaphone' },
           { title: 'Performance', href: '/comercial/performance', icon: 'BarChart3' },
           { title: '📘 Playbook', href: '/comercial/playbook', icon: 'BookOpen' },
+          { title: '🎮 Gamificação', href: '/comercial/gamificacao', icon: 'Trophy' },
           { title: '🧠 IA Comercial', href: '/comercial/ia', icon: 'Brain' },
         ],
       },
