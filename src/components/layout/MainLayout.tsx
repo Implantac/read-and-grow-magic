@@ -43,6 +43,7 @@ export function MainLayout() {
 
   return (
     <div className="h-screen overflow-hidden bg-background">
+      <CommandPalette />
       <Sidebar />
       <Topbar />
       <main

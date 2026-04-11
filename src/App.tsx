@@ -176,7 +176,6 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <CommandPalette />
         <Routes>
             <Route path="/login" element={<Login />} />
             <Route
