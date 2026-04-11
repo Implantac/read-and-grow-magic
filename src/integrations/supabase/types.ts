@@ -2528,6 +2528,57 @@ export type Database = {
         }
         Relationships: []
       }
+      industrial_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string
+          description: string | null
+          entity_id: string | null
+          entity_name: string | null
+          entity_type: string | null
+          id: string
+          metric_value: number | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          status: string
+          threshold_value: number | null
+          title: string
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string
+          description?: string | null
+          entity_id?: string | null
+          entity_name?: string | null
+          entity_type?: string | null
+          id?: string
+          metric_value?: number | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          threshold_value?: number | null
+          title: string
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string
+          description?: string | null
+          entity_id?: string | null
+          entity_name?: string | null
+          entity_type?: string | null
+          id?: string
+          metric_value?: number | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          status?: string
+          threshold_value?: number | null
+          title?: string
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           created_at: string
@@ -3563,6 +3614,74 @@ export type Database = {
             columns: ["playbook_id"]
             isOneToOne: false
             referencedRelation: "sales_playbooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_costs: {
+        Row: {
+          created_at: string
+          id: string
+          labor_cost: number
+          labor_rate_per_hour: number
+          last_calculated_at: string
+          notes: string | null
+          operational_cost: number
+          product_code: string
+          product_id: string | null
+          product_name: string
+          production_time_minutes: number
+          profit_margin: number
+          profit_value: number
+          raw_material_cost: number
+          sale_price: number
+          total_cost: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          labor_cost?: number
+          labor_rate_per_hour?: number
+          last_calculated_at?: string
+          notes?: string | null
+          operational_cost?: number
+          product_code: string
+          product_id?: string | null
+          product_name: string
+          production_time_minutes?: number
+          profit_margin?: number
+          profit_value?: number
+          raw_material_cost?: number
+          sale_price?: number
+          total_cost?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          labor_cost?: number
+          labor_rate_per_hour?: number
+          last_calculated_at?: string
+          notes?: string | null
+          operational_cost?: number
+          product_code?: string
+          product_id?: string | null
+          product_name?: string
+          production_time_minutes?: number
+          profit_margin?: number
+          profit_value?: number
+          raw_material_cost?: number
+          sale_price?: number
+          total_cost?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_costs_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -5592,6 +5711,134 @@ export type Database = {
           rating?: number
           status?: string
           trade_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      supply_movements: {
+        Row: {
+          created_at: string
+          direction: string
+          document_number: string | null
+          id: string
+          notes: string | null
+          operator: string | null
+          production_order_id: string | null
+          production_order_number: string | null
+          quantity: number
+          reason: string | null
+          supply_code: string
+          supply_id: string
+          supply_name: string
+          total_cost: number
+          type: string
+          unit_cost: number
+        }
+        Insert: {
+          created_at?: string
+          direction?: string
+          document_number?: string | null
+          id?: string
+          notes?: string | null
+          operator?: string | null
+          production_order_id?: string | null
+          production_order_number?: string | null
+          quantity?: number
+          reason?: string | null
+          supply_code: string
+          supply_id: string
+          supply_name: string
+          total_cost?: number
+          type?: string
+          unit_cost?: number
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          document_number?: string | null
+          id?: string
+          notes?: string | null
+          operator?: string | null
+          production_order_id?: string | null
+          production_order_number?: string | null
+          quantity?: number
+          reason?: string | null
+          supply_code?: string
+          supply_id?: string
+          supply_name?: string
+          total_cost?: number
+          type?: string
+          unit_cost?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "supply_movements_supply_id_fkey"
+            columns: ["supply_id"]
+            isOneToOne: false
+            referencedRelation: "supply_stock"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supply_stock: {
+        Row: {
+          category: string | null
+          code: string
+          created_at: string
+          current_quantity: number
+          description: string | null
+          id: string
+          last_entry_date: string | null
+          last_exit_date: string | null
+          location: string | null
+          max_quantity: number
+          min_quantity: number
+          name: string
+          status: string
+          supplier: string | null
+          total_value: number
+          unit: string
+          unit_cost: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          code: string
+          created_at?: string
+          current_quantity?: number
+          description?: string | null
+          id?: string
+          last_entry_date?: string | null
+          last_exit_date?: string | null
+          location?: string | null
+          max_quantity?: number
+          min_quantity?: number
+          name: string
+          status?: string
+          supplier?: string | null
+          total_value?: number
+          unit?: string
+          unit_cost?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          code?: string
+          created_at?: string
+          current_quantity?: number
+          description?: string | null
+          id?: string
+          last_entry_date?: string | null
+          last_exit_date?: string | null
+          location?: string | null
+          max_quantity?: number
+          min_quantity?: number
+          name?: string
+          status?: string
+          supplier?: string | null
+          total_value?: number
+          unit?: string
+          unit_cost?: number
           updated_at?: string
         }
         Relationships: []
