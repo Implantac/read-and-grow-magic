@@ -33,6 +33,7 @@ const PerformanceDashboardPage = lazy(() => import("./pages/comercial/Performanc
 const AICommercialDashboardPage = lazy(() => import("./pages/comercial/AICommercialDashboard"));
 const SalesExecutionPage = lazy(() => import("./pages/comercial/SalesExecution"));
 const PlaybookPage = lazy(() => import("./pages/comercial/Playbook"));
+const GamificationPage = lazy(() => import("./pages/comercial/Gamification"));
 const ExecutiveDashboardPage = lazy(() => import("./pages/diretoria/ExecutiveDashboard"));
 
 // Credit & Risk
@@ -183,6 +184,7 @@ const App = () => (
               <Route path="/comercial/ia" element={<AICommercialDashboardPage />} />
               <Route path="/comercial/execucao" element={<SalesExecutionPage />} />
               <Route path="/comercial/playbook" element={<PlaybookPage />} />
+              <Route path="/comercial/gamificacao" element={<GamificationPage />} />
               
               {/* Financial Module */}
               <Route path="/financeiro/dashboard" element={<FinancialDashboardPage />} />
