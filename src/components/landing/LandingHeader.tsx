@@ -24,6 +24,7 @@ export default function LandingHeader({ onLogin, onWhatsApp }: Props) {
     { href: '#beneficios', label: 'Benefícios' },
     { href: '#depoimentos', label: 'Depoimentos' },
     { href: '#pricing', label: 'Planos' },
+    { href: '#faq', label: 'FAQ' },
   ];
 
   return (
