@@ -23,10 +23,10 @@ export default function BenefitsSection({ onWhatsApp }: Props) {
       <div className="text-center mb-14">
         <Badge variant="outline" className="mb-4 font-medium">Transformação</Badge>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-          De <span className="text-destructive line-through opacity-60">caos operacional</span> para{' '}
-          <span className="text-gradient-primary">controle total</span>
+          De <span className="text-destructive line-through opacity-60">gestão fragmentada</span> para{' '}
+          <span className="text-gradient-primary">visão completa</span>
         </h2>
-        <p className="text-muted-foreground text-base md:text-lg">O que muda na sua empresa em poucos dias.</p>
+        <p className="text-muted-foreground text-base md:text-lg">O que muda na sua operação com a plataforma USE SISTEMAS.</p>
       </div>
 
       <div className="max-w-3xl mx-auto space-y-2.5 mb-14">

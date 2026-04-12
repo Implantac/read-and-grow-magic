@@ -27,7 +27,7 @@ export default function AgitationSection({ onWhatsApp }: Props) {
             <span className="text-primary">mais do que você imagina</span>
           </h2>
           <p className="text-sm md:text-base opacity-60 mb-10 max-w-2xl">
-            Esses números são de empresas reais que operavam sem sistema integrado.
+            Dados reais de empresas que operavam sem uma plataforma de gestão integrada.
           </p>
 
           <div className="grid sm:grid-cols-3 gap-4 mb-10">
@@ -44,7 +44,7 @@ export default function AgitationSection({ onWhatsApp }: Props) {
 
           <div className="p-5 rounded-2xl bg-primary/10 border border-primary/20 mb-10">
             <p className="text-base md:text-lg font-semibold text-primary text-center leading-relaxed">
-              Empresas com gestão manual perdem em média <span className="text-2xl font-extrabold">12%</span> do faturamento em ineficiência.
+              Empresas sem gestão integrada perdem em média <span className="text-2xl font-extrabold">12%</span> do faturamento em ineficiência operacional.
             </p>
           </div>
 
