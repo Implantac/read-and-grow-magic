@@ -45,7 +45,7 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
             </Badge>
 
             <h1 className="text-3xl sm:text-4xl md:text-[2.75rem] font-extrabold tracking-tight mb-5 leading-[1.15]">
-              A plataforma completa para sua <span className="text-gradient-primary">operação.</span>
+              Sua <span className="text-gradient-primary">operação</span> sob controle total.
             </h1>
 
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0">
