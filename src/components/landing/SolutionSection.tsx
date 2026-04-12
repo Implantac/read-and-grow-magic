@@ -31,12 +31,11 @@ export default function SolutionSection() {
       <div className="text-center mb-16">
         <Badge variant="outline" className="mb-4 font-medium">Solução completa</Badge>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-          Um sistema que controla <span className="text-gradient-primary">tudo</span>,
-          <br className="hidden md:block" />
-          do pedido à entrega
+          Para empresas que produzem, vendem e precisam de{' '}
+          <span className="text-gradient-primary">controle total</span>
         </h2>
         <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-          8 módulos integrados nativamente. IA embarcada. Zero retrabalho entre setores.
+          8 módulos integrados nativamente. IA embarcada. Zero retrabalho entre setores — do pedido à entrega.
         </p>
       </div>
 

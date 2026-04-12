@@ -50,13 +50,13 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] xl:text-[3.5rem] font-extrabold tracking-tight mb-5 leading-[1.08]">
               Controle total da sua
               <br className="hidden sm:block" />
-              <span className="text-gradient-primary">operação industrial</span>
+              <span className="text-gradient-primary">operação industrial e comercial</span>
               <br className="hidden sm:block" />
               em um único sistema.
             </h1>
 
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0">
-              Gerencie vendas, produção, estoque e entregas com a <span className="font-semibold text-foreground">USE SISTEMAS</span> — tecnologia e inteligência aplicada ao seu negócio.
+              Gerencie produção, estoque, vendas e entregas com a <span className="font-semibold text-foreground">USE SISTEMAS</span> — inteligência e precisão aplicadas ao seu negócio.
             </p>
 
             {/* Quick wins */}
