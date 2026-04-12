@@ -3,7 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Brain, Rocket, Factory, ShieldCheck, Gauge, Target } from 'lucide-react';
 
 const diffs = [
-  { icon: Factory, title: 'Feito para indústria', desc: 'Pensado para confecção, produção sob encomenda e distribuição. Não é genérico.' },
+  { icon: Factory, title: 'Feito para quem produz e vende', desc: 'Pensado para indústrias de transformação, produção sob encomenda, atacado e varejo.' },
   { icon: Brain, title: 'IA embarcada', desc: 'Prevê problemas, prioriza clientes, otimiza picking e sugere ações automaticamente.' },
   { icon: Rocket, title: 'Implantação em 7 dias', desc: 'Nada de meses de projeto. Em uma semana você já está operando com suporte dedicado.' },
   { icon: Gauge, title: 'Tudo integrado', desc: 'Comercial, produção, estoque, logística, financeiro e fiscal — zero retrabalho.' },

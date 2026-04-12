@@ -14,7 +14,7 @@ export default function LandingFooter() {
               <span className="font-extrabold text-lg">USE SISTEMAS</span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              Sistema inteligente de gestão empresarial para indústrias e confecções. Controle total, mais lucro e eficiência operacional.
+              Sistema inteligente de gestão para indústrias, atacado e varejo. Controle total, mais lucro e eficiência operacional.
             </p>
           </div>
 
