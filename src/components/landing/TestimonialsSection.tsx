@@ -10,6 +10,7 @@ const testimonials = [
     text: 'Reduzimos 35% do tempo operacional com a automação do pedido ao faturamento. O ROI veio no segundo mês.',
     metric: '-35%',
     metricLabel: 'tempo operacional',
+    avatar: 'CM',
   },
   {
     name: 'Ana Beatriz',
@@ -18,6 +19,7 @@ const testimonials = [
     text: 'O módulo financeiro e a IA mudaram completamente a forma como tomamos decisões estratégicas.',
     metric: '+28%',
     metricLabel: 'margem de lucro',
+    avatar: 'AB',
   },
   {
     name: 'Roberto Lima',
@@ -26,23 +28,25 @@ const testimonials = [
     text: 'A IA comercial aumentou nossa conversão em 28%. A equipe agora sabe exatamente quem ligar e quando.',
     metric: '+28%',
     metricLabel: 'conversão',
+    avatar: 'RL',
   },
 ];
 
 export default function TestimonialsSection() {
   return (
     <section id="depoimentos" className="container mx-auto px-4 lg:px-8 py-20 md:py-28">
-      <div className="text-center mb-16">
-        <Badge variant="outline" className="mb-4 font-medium">Resultados comprovados</Badge>
+      <div className="text-center mb-14">
+        <Badge variant="outline" className="mb-4 font-medium px-4 py-1">Resultados comprovados</Badge>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-          Empresas que já transformaram sua operação
+          Empresas que já transformaram sua <span className="text-gradient-primary">operação</span>
         </h2>
-        <p className="text-muted-foreground text-base md:text-lg">Resultados reais de quem já usa a USE SISTEMAS.</p>
+        <p className="text-muted-foreground text-base md:text-lg">Resultados reais de quem já usa a plataforma USE SISTEMAS.</p>
       </div>
 
       <div className="grid gap-5 md:grid-cols-3 max-w-5xl mx-auto">
         {testimonials.map((t) => (
-          <Card key={t.name} className="bg-card border-border/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+          <Card key={t.name} className="bg-card border-border/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-primary/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <CardContent className="p-6 sm:p-7">
               <div className="flex items-center justify-between mb-5">
                 <div>
@@ -62,8 +66,8 @@ export default function TestimonialsSection() {
 
               <div className="border-t border-border/50 pt-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary font-bold text-sm">
-                    {t.name.charAt(0)}
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center text-primary font-bold text-xs ring-2 ring-primary/10">
+                    {t.avatar}
                   </div>
                   <div>
                     <p className="text-sm font-bold leading-tight">{t.name}</p>
@@ -76,11 +80,11 @@ export default function TestimonialsSection() {
         ))}
       </div>
 
-      <div className="mt-16 text-center">
-        <p className="text-xs text-muted-foreground/50 mb-4 font-semibold uppercase tracking-wider">Empresas que confiam na USE SISTEMAS</p>
-        <div className="flex items-center justify-center gap-8 md:gap-12 flex-wrap opacity-25">
+      <div className="mt-14 text-center">
+        <p className="text-[10px] text-muted-foreground/50 font-bold uppercase tracking-[0.2em] mb-5">Empresas que confiam na USE SISTEMAS</p>
+        <div className="flex items-center justify-center gap-8 md:gap-14 flex-wrap">
           {['MetalForte', 'Nacional', 'TechParts', 'IndusBR', 'LogiPro'].map(name => (
-            <span key={name} className="text-sm font-bold text-muted-foreground tracking-wider">{name}</span>
+            <span key={name} className="text-sm font-bold text-muted-foreground/20 tracking-wider hover:text-muted-foreground/40 transition-colors duration-300">{name}</span>
           ))}
         </div>
       </div>
