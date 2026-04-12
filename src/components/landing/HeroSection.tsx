@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, MessageCircle, Play, Shield, Zap, BarChart3, CheckCircle2 } from 'lucide-react';
+import { MessageCircle, Play, CheckCircle2, Shield, Zap, BarChart3, ArrowRight } from 'lucide-react';
 import dashboardMockup from '@/assets/dashboard-mockup.jpg';
 
 interface Props {
@@ -10,54 +10,54 @@ interface Props {
 
 const stats = [
   { value: '12+', label: 'Módulos integrados', icon: Zap },
-  { value: '35%', label: 'Menos tempo operacional', icon: BarChart3 },
-  { value: '7 dias', label: 'Implantação completa', icon: ArrowRight },
-  { value: '99.9%', label: 'Disponibilidade', icon: Shield },
+  { value: '35%', label: 'Redução de tempo operacional', icon: BarChart3 },
+  { value: '7 dias', label: 'Para estar operando', icon: ArrowRight },
+  { value: '99.9%', label: 'De disponibilidade', icon: Shield },
 ];
 
 const quickWins = [
-  'Gestão completa: vendas, produção, estoque e logística',
-  'IA que antecipa gargalos e sugere ações em tempo real',
-  'Implantação assistida em até 7 dias com suporte dedicado',
+  'Do pedido à entrega: fluxo 100% integrado e rastreável',
+  'IA que antecipa gargalos e recomenda ações em tempo real',
+  'Implantação assistida com acompanhamento dedicado',
 ];
 
 export default function HeroSection({ onLogin, onWhatsApp }: Props) {
   return (
     <section className="relative overflow-hidden">
-      {/* Background */}
+      {/* Background effects */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1100px] h-[800px] bg-[radial-gradient(ellipse_at_center,hsl(36_100%_50%/0.06),transparent_60%)]" />
         <div className="absolute top-60 right-0 w-[600px] h-[600px] bg-[radial-gradient(ellipse_at_center,hsl(207_90%_54%/0.04),transparent_60%)]" />
-        <div className="absolute inset-0 bg-[linear-gradient(hsl(var(--border)/0.2)_1px,transparent_1px),linear-gradient(90deg,hsl(var(--border)/0.2)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(hsl(var(--border)/0.15)_1px,transparent_1px),linear-gradient(90deg,hsl(var(--border)/0.15)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" />
       </div>
 
-      <div className="container mx-auto px-4 pt-10 pb-12 md:pt-16 md:pb-16 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center max-w-6xl mx-auto">
+      <div className="container mx-auto px-4 pt-12 pb-14 md:pt-20 md:pb-20 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center max-w-6xl mx-auto">
           {/* Left - Copy */}
           <div className="text-center lg:text-left">
-            <Badge variant="secondary" className="mb-5 px-4 py-1.5 text-sm font-medium gap-2 border border-border/50 bg-card/80 backdrop-blur-sm inline-flex">
+            <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-sm font-medium gap-2 border border-border/50 bg-card/80 backdrop-blur-sm inline-flex">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
               </span>
-              Implantação assistida — vagas limitadas
+              Vagas limitadas para implantação assistida
             </Badge>
 
-            <h1 className="text-3xl sm:text-4xl md:text-[2.75rem] font-extrabold tracking-tight mb-5 leading-[1.15] text-foreground">
-              Sua operação sob{' '}
-              <span className="text-gradient-primary">controle total.</span>
+            <h1 className="text-[1.75rem] sm:text-4xl md:text-[2.75rem] lg:text-5xl font-extrabold tracking-tight mb-6 leading-[1.1] text-foreground">
+              Controle total da sua operação,{' '}
+              <span className="text-gradient-primary">do pedido à entrega.</span>
             </h1>
 
-            <p className="text-base sm:text-lg text-muted-foreground mb-7 leading-relaxed max-w-xl mx-auto lg:mx-0">
-              Plataforma completa de gestão empresarial para indústrias, atacado e varejo. Produção, estoque, vendas e entregas — tudo integrado com IA.
+            <p className="text-base sm:text-lg text-muted-foreground mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0">
+              A plataforma que conecta vendas, produção, estoque e financeiro em um só lugar — com inteligência artificial para decisões mais rápidas e precisas.
             </p>
 
             {/* Quick wins */}
-            <div className="flex flex-col gap-2.5 mb-7 items-center lg:items-start">
+            <div className="flex flex-col gap-3 mb-8 items-center lg:items-start">
               {quickWins.map((item) => (
-                <div key={item} className="flex items-center gap-2.5 text-sm font-medium text-foreground/80">
-                  <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
-                  {item}
+                <div key={item} className="flex items-start gap-2.5 text-sm font-medium text-foreground/85">
+                  <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
+                  <span>{item}</span>
                 </div>
               ))}
             </div>
@@ -69,7 +69,7 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
                 className="gap-2 text-base px-8 h-14 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all duration-300 font-semibold"
                 onClick={onWhatsApp}
               >
-                <MessageCircle className="h-5 w-5" /> Quero Ver Funcionando
+                <MessageCircle className="h-5 w-5" /> Agendar Demonstração
               </Button>
               <Button
                 size="lg"
@@ -77,18 +77,18 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
                 className="text-base px-8 h-14 gap-2 hover:-translate-y-0.5 transition-all duration-300 font-semibold border-border bg-card/60 backdrop-blur-sm text-foreground"
                 onClick={onLogin}
               >
-                <Play className="h-4 w-4" /> Testar Grátis 14 Dias
+                <Play className="h-4 w-4" /> Testar Grátis por 14 Dias
               </Button>
             </div>
 
             <p className="text-xs sm:text-sm text-muted-foreground">
-              Sem cartão de crédito · Implantação em até 7 dias · Suporte humano
+              Sem cartão de crédito · Setup em até 7 dias · Suporte humano em português
             </p>
           </div>
 
           {/* Right - Dashboard mockup */}
           <div className="lg:order-last">
-            <div className="relative rounded-2xl overflow-hidden border border-border/40 shadow-2xl bg-card max-h-[420px]">
+            <div className="relative rounded-2xl overflow-hidden border border-border/40 shadow-2xl bg-card">
               <div className="flex items-center gap-2 px-4 py-2.5 bg-muted/50 border-b border-border/30">
                 <div className="flex gap-1.5">
                   <div className="h-2.5 w-2.5 rounded-full bg-destructive/40" />
@@ -102,10 +102,10 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
                 </div>
               </div>
               <div className="relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent z-10 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/30 to-transparent z-10 pointer-events-none" />
                 <img
                   src={dashboardMockup}
-                  alt="Dashboard do sistema USE SISTEMAS mostrando métricas de produção, estoque e vendas"
+                  alt="Painel de controle USE SISTEMAS — visão completa de vendas, produção e estoque"
                   className="w-full h-auto"
                   loading="eager"
                 />
@@ -123,18 +123,18 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground">
-                <span className="font-semibold text-foreground">+120 empresas</span> já confiam na USE SISTEMAS
+                <span className="font-semibold text-foreground">+120 empresas</span> operam com a USE SISTEMAS
               </p>
             </div>
           </div>
         </div>
 
         {/* Stats bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-4xl mx-auto mt-12 md:mt-14 px-2 sm:px-4">
-          {stats.map((s, i) => (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-4xl mx-auto mt-14 md:mt-16 px-2 sm:px-4">
+          {stats.map((s) => (
             <div
               key={s.label}
-              className="text-center bg-card/95 backdrop-blur-sm border border-border/40 rounded-xl p-3.5 md:p-5 shadow-md hover:-translate-y-0.5 hover:shadow-lg hover:border-primary/20 transition-all duration-300"
+              className="text-center bg-card/95 backdrop-blur-sm border border-border/40 rounded-xl p-4 md:p-5 shadow-md hover:-translate-y-0.5 hover:shadow-lg hover:border-primary/20 transition-all duration-300"
             >
               <s.icon className="h-4 w-4 text-primary/50 mx-auto mb-2" />
               <p className="text-xl sm:text-2xl md:text-3xl font-extrabold text-primary">{s.value}</p>

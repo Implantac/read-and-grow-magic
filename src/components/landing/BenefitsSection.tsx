@@ -8,25 +8,25 @@ interface Props {
 
 const benefits = [
   { before: 'Produção atrasada', after: 'Entregas no prazo com PCP inteligente' },
-  { before: 'Estoque bagunçado', after: 'Estoque 100% organizado e rastreável' },
-  { before: 'Lucro invisível', after: 'Lucro real de cada pedido na tela' },
-  { before: 'Pedidos perdidos', after: 'Do pedido à entrega, tudo automático' },
-  { before: 'Planilhas manuais', after: 'Dashboards em tempo real para decisões' },
-  { before: 'Decisões no escuro', after: 'IA sugere o que fazer e quando agir' },
-  { before: 'Equipe sem rumo', after: 'Cada um sabe exatamente o que fazer' },
-  { before: 'Crescimento travado', after: 'Escale sem perder o controle' },
+  { before: 'Estoque sem controle', after: 'Estoque 100% organizado e rastreável' },
+  { before: 'Lucro invisível', after: 'Margem real de cada pedido na tela' },
+  { before: 'Pedidos se perdem', after: 'Do pedido à entrega, fluxo automático' },
+  { before: 'Relatórios manuais', after: 'Dashboards em tempo real para decisão' },
+  { before: 'Decisões por achismo', after: 'IA recomenda o que fazer e quando agir' },
+  { before: 'Equipe desorientada', after: 'Cada colaborador sabe sua prioridade' },
+  { before: 'Crescimento travado', after: 'Escale a operação sem perder controle' },
 ];
 
 export default function BenefitsSection({ onWhatsApp }: Props) {
   return (
     <section id="beneficios" className="container mx-auto px-4 lg:px-8 py-20 md:py-28">
       <div className="text-center mb-14">
-        <Badge variant="outline" className="mb-4 font-medium px-4 py-1">Transformação</Badge>
+        <Badge variant="outline" className="mb-4 font-medium px-4 py-1">Resultados</Badge>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-          De <span className="text-destructive line-through opacity-60">gestão fragmentada</span> para{' '}
-          <span className="text-gradient-primary">visão completa</span>
+          O que muda na sua operação{' '}
+          <span className="text-gradient-primary">com a USE SISTEMAS</span>
         </h2>
-        <p className="text-muted-foreground text-base md:text-lg max-w-lg mx-auto">O que muda na sua operação com a plataforma USE SISTEMAS.</p>
+        <p className="text-muted-foreground text-base md:text-lg max-w-lg mx-auto">Mais controle, menos erro, mais eficiência — resultados visíveis desde a primeira semana.</p>
       </div>
 
       <div className="max-w-3xl mx-auto space-y-2 mb-14">
@@ -42,7 +42,7 @@ export default function BenefitsSection({ onWhatsApp }: Props) {
             </span>
             <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/15 hidden sm:block shrink-0 group-hover:text-primary/50 transition-colors" />
             <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
-            <span className="font-semibold text-sm">{b.after}</span>
+            <span className="font-semibold text-sm text-foreground">{b.after}</span>
           </div>
         ))}
       </div>

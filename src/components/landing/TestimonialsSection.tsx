@@ -7,7 +7,7 @@ const testimonials = [
     name: 'Carlos Mendes',
     role: 'Diretor de Operações',
     company: 'Indústria MetalForte',
-    text: 'Reduzimos 35% do tempo operacional com a automação do pedido ao faturamento. O ROI veio no segundo mês.',
+    text: 'Reduzimos 35% do tempo operacional com a automação do pedido ao faturamento. O ROI veio no segundo mês de uso.',
     metric: '-35%',
     metricLabel: 'tempo operacional',
     avatar: 'CM',
@@ -16,7 +16,7 @@ const testimonials = [
     name: 'Ana Beatriz',
     role: 'CFO',
     company: 'Distribuidora Nacional',
-    text: 'O módulo financeiro e a IA mudaram completamente a forma como tomamos decisões estratégicas.',
+    text: 'O módulo financeiro e a inteligência artificial mudaram completamente como tomamos decisões estratégicas na empresa.',
     metric: '+28%',
     metricLabel: 'margem de lucro',
     avatar: 'AB',
@@ -24,10 +24,10 @@ const testimonials = [
   {
     name: 'Roberto Lima',
     role: 'Gerente Comercial',
-    company: 'TechParts',
-    text: 'A IA comercial aumentou nossa conversão em 28%. A equipe agora sabe exatamente quem ligar e quando.',
+    company: 'TechParts Industrial',
+    text: 'A IA comercial nos mostrou quais clientes estavam em risco e onde estavam as melhores oportunidades. Conversão subiu 28%.',
     metric: '+28%',
-    metricLabel: 'conversão',
+    metricLabel: 'taxa de conversão',
     avatar: 'RL',
   },
 ];
@@ -40,7 +40,7 @@ export default function TestimonialsSection() {
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
           Empresas que já transformaram sua <span className="text-gradient-primary">operação</span>
         </h2>
-        <p className="text-muted-foreground text-base md:text-lg">Resultados reais de quem já usa a plataforma USE SISTEMAS.</p>
+        <p className="text-muted-foreground text-base md:text-lg">Resultados reais de quem opera com a plataforma USE SISTEMAS.</p>
       </div>
 
       <div className="grid gap-5 md:grid-cols-3 max-w-5xl mx-auto">
@@ -70,7 +70,7 @@ export default function TestimonialsSection() {
                     {t.avatar}
                   </div>
                   <div>
-                    <p className="text-sm font-bold leading-tight">{t.name}</p>
+                    <p className="text-sm font-bold leading-tight text-foreground">{t.name}</p>
                     <p className="text-xs text-muted-foreground">{t.role}, {t.company}</p>
                   </div>
                 </div>
