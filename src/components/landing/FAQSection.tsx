@@ -1,30 +1,36 @@
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { MessageCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const faqs = [
   {
     q: 'Quanto tempo leva para implantar a plataforma?',
-    a: 'A implantação assistida leva em média 7 dias úteis. Isso inclui configuração, migração de dados, treinamento da equipe e acompanhamento dedicado até a operação estar rodando com segurança.',
+    a: 'A implantação assistida leva em média 7 dias úteis. Isso inclui configuração completa, migração de dados, treinamento da equipe e acompanhamento dedicado até a operação estar rodando com segurança.',
   },
   {
     q: 'Preciso trocar todos os meus sistemas atuais?',
-    a: 'Não necessariamente. A USE SISTEMAS é modular — você pode começar pelos módulos mais críticos e expandir conforme sua operação evolui. Também oferecemos integrações com ferramentas que você já usa.',
+    a: 'Não necessariamente. A USE SISTEMAS é modular — você pode começar pelos módulos mais críticos e expandir conforme evolui. Também oferecemos integrações com ferramentas que você já usa.',
   },
   {
-    q: 'O sistema funciona para empresas de qualquer tamanho?',
+    q: 'Funciona para empresas de qualquer tamanho?',
     a: 'Sim. Temos planos desde pequenas operações até grandes indústrias com múltiplas filiais. A plataforma escala com seu negócio sem necessidade de troca de sistema.',
   },
   {
     q: 'Como funciona a inteligência artificial integrada?',
-    a: 'A IA da USE SISTEMAS analisa dados em tempo real para prever gargalos na produção, sugerir ações comerciais, otimizar picking no estoque e gerar alertas preditivos — tudo automaticamente, sem configuração complexa.',
+    a: 'A IA analisa dados em tempo real para prever gargalos na produção, sugerir ações comerciais, otimizar picking no estoque e gerar alertas preditivos — tudo automaticamente, sem configuração complexa.',
   },
   {
     q: 'Meus dados estão seguros?',
-    a: 'Absolutamente. Utilizamos criptografia SSL/TLS, backup automático diário, infraestrutura em nuvem com 99.9% de disponibilidade e estamos em conformidade com a LGPD.',
+    a: 'Absolutamente. Criptografia SSL/TLS, backup automático diário, infraestrutura em nuvem com 99.9% de disponibilidade e conformidade total com a LGPD.',
   },
   {
-    q: 'Posso cancelar a qualquer momento?',
-    a: 'Sim. Não há fidelidade ou multa de cancelamento. Você pode cancelar quando quiser e seus dados ficam disponíveis para exportação por 30 dias.',
+    q: 'E se eu não gostar? Posso cancelar?',
+    a: 'Sim. Não há fidelidade ou multa. Você testa por 14 dias grátis e pode cancelar quando quiser. Seus dados ficam disponíveis para exportação por 30 dias após o cancelamento.',
+  },
+  {
+    q: 'Vocês oferecem suporte em português?',
+    a: 'Sim, 100%. Suporte humano com especialistas brasileiros que entendem de gestão industrial e operacional. Nada de chatbot genérico.',
   },
 ];
 
@@ -33,7 +39,7 @@ export default function FAQSection() {
     <section id="faq" className="container mx-auto px-4 lg:px-8 py-20 md:py-28">
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-12">
-          <Badge variant="outline" className="mb-4 font-medium px-4 py-1">Dúvidas frequentes</Badge>
+          <Badge variant="outline" className="mb-5 font-medium px-4 py-1.5 text-xs">Dúvidas frequentes</Badge>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight text-foreground">
             Perguntas que empresários{' '}
             <span className="text-gradient-primary">como você</span> fazem
@@ -59,6 +65,10 @@ export default function FAQSection() {
             </AccordionItem>
           ))}
         </Accordion>
+
+        <div className="mt-10 text-center">
+          <p className="text-sm text-muted-foreground mb-3">Ainda tem dúvidas? Fale direto com um especialista.</p>
+        </div>
       </div>
     </section>
   );

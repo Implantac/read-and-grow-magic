@@ -21,12 +21,12 @@ export default function BenefitsSection({ onWhatsApp }: Props) {
   return (
     <section id="beneficios" className="container mx-auto px-4 lg:px-8 py-20 md:py-28">
       <div className="text-center mb-14">
-        <Badge variant="outline" className="mb-4 font-medium px-4 py-1">Resultados</Badge>
+        <Badge variant="outline" className="mb-5 font-medium px-4 py-1.5 text-xs">Resultados reais</Badge>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
           O que muda na sua operação{' '}
           <span className="text-gradient-primary">com a USE SISTEMAS</span>
         </h2>
-        <p className="text-muted-foreground text-base md:text-lg max-w-lg mx-auto">Mais controle, menos erro, mais eficiência — resultados visíveis desde a primeira semana.</p>
+        <p className="text-muted-foreground text-base md:text-lg max-w-lg mx-auto">Resultados visíveis desde a primeira semana. Mais controle, menos erro, mais lucro.</p>
       </div>
 
       <div className="max-w-3xl mx-auto space-y-2 mb-14">
@@ -53,7 +53,7 @@ export default function BenefitsSection({ onWhatsApp }: Props) {
           className="gap-2 text-base px-10 h-14 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-0.5 transition-all duration-300 font-semibold"
           onClick={onWhatsApp}
         >
-          <MessageCircle className="h-5 w-5" /> Quero Esses Resultados
+          <MessageCircle className="h-5 w-5" /> Quero Esses Resultados na Minha Empresa
         </Button>
         <p className="text-xs text-muted-foreground mt-3">Resposta em menos de 2 horas · Sem compromisso</p>
       </div>

@@ -2,18 +2,18 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   BarChart3, Package, TrendingUp, Users, Shield, Brain, Truck, Factory,
-  ChevronRight,
+  ChevronRight, Zap,
 } from 'lucide-react';
 
 const modules = [
-  { icon: Users, label: 'Comercial & CRM', desc: 'Pipeline de vendas, funil, metas, comissões e priorização com IA.' },
-  { icon: Factory, label: 'Produção & PCP', desc: 'Ordens de produção, ficha técnica, apontamento e Kanban em tempo real.' },
-  { icon: Package, label: 'Estoque & WMS', desc: 'Endereçamento, picking, conferência cega, lotes e rastreabilidade.' },
-  { icon: Truck, label: 'Logística & TMS', desc: 'Expedição, roteirização, rastreamento de entregas e comprovação.' },
-  { icon: TrendingUp, label: 'Financeiro', desc: 'Contas a pagar e receber, fluxo de caixa, DRE e conciliação bancária.' },
-  { icon: Shield, label: 'Fiscal & Contábil', desc: 'NF-e, NFC-e, apuração automática, balancete e relatórios fiscais.' },
-  { icon: Brain, label: 'Inteligência Artificial', desc: 'Previsão de demanda, alertas preditivos e assistente gerencial.' },
-  { icon: BarChart3, label: 'Dashboards Executivos', desc: 'Visão 360° da operação com indicadores em tempo real.' },
+  { icon: Users, label: 'Comercial & CRM', desc: 'Pipeline, funil, metas, comissões e priorização inteligente com IA.', highlight: 'Mais vendas' },
+  { icon: Factory, label: 'Produção & PCP', desc: 'Ordens de produção, ficha técnica, apontamento e Kanban em tempo real.', highlight: 'Sem atrasos' },
+  { icon: Package, label: 'Estoque & WMS', desc: 'Endereçamento, picking, conferência cega, lotes e rastreabilidade total.', highlight: 'Estoque preciso' },
+  { icon: Truck, label: 'Logística & TMS', desc: 'Expedição, roteirização, rastreamento de entregas e comprovação digital.', highlight: 'Entrega certa' },
+  { icon: TrendingUp, label: 'Financeiro', desc: 'Contas a pagar/receber, fluxo de caixa, DRE e conciliação bancária.', highlight: 'Lucro visível' },
+  { icon: Shield, label: 'Fiscal & Contábil', desc: 'NF-e, NFC-e, apuração automática, balancete e relatórios fiscais.', highlight: 'Compliance' },
+  { icon: Brain, label: 'Inteligência Artificial', desc: 'Previsão de demanda, alertas preditivos e assistente gerencial 24/7.', highlight: 'Decisão inteligente' },
+  { icon: BarChart3, label: 'Dashboards Executivos', desc: 'Visão 360° da operação com indicadores em tempo real para diretoria.', highlight: 'Controle total' },
 ];
 
 const flow = [
@@ -29,7 +29,7 @@ export default function SolutionSection() {
   return (
     <section id="solucao" className="container mx-auto px-4 lg:px-8 py-20 md:py-28">
       <div className="text-center mb-14">
-        <Badge variant="outline" className="mb-4 font-medium px-4 py-1">A Plataforma</Badge>
+        <Badge variant="outline" className="mb-5 font-medium px-4 py-1.5 text-xs">A Plataforma</Badge>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
           Uma plataforma.{' '}
           <span className="text-gradient-primary">Toda a operação.</span>
@@ -42,7 +42,8 @@ export default function SolutionSection() {
       {/* Flow pipeline */}
       <div className="max-w-4xl mx-auto mb-16">
         <p className="text-center text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-5">Fluxo integrado ponta a ponta</p>
-        <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 p-5 md:p-6 rounded-2xl bg-card border border-border/50 shadow-md">
+        <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 p-5 md:p-6 rounded-2xl bg-card border border-border/50 shadow-md relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
           {flow.map((step, i, arr) => (
             <div key={step.label} className="flex items-center gap-2 md:gap-3">
               <div className="flex flex-col items-center gap-2 group">
@@ -75,7 +76,10 @@ export default function SolutionSection() {
                 <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/12 to-primary/4 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                   <m.icon className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-bold text-sm text-foreground">{m.label}</h3>
+                <div>
+                  <h3 className="font-bold text-sm text-foreground leading-tight">{m.label}</h3>
+                  <span className="text-[10px] font-semibold text-primary/70">{m.highlight}</span>
+                </div>
               </div>
               <p className="text-muted-foreground text-xs leading-relaxed">{m.desc}</p>
             </CardContent>

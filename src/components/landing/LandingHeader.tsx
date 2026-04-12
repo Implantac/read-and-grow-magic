@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, Menu, X, ArrowRight } from 'lucide-react';
+import { MessageCircle, Menu, X, ArrowRight, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -19,10 +19,10 @@ export default function LandingHeader({ onLogin, onWhatsApp }: Props) {
   }, []);
 
   const links = [
-    { href: '#problemas', label: 'Problemas' },
-    { href: '#solucao', label: 'Solução' },
-    { href: '#beneficios', label: 'Benefícios' },
-    { href: '#depoimentos', label: 'Depoimentos' },
+    { href: '#problemas', label: 'Diagnóstico' },
+    { href: '#solucao', label: 'Plataforma' },
+    { href: '#beneficios', label: 'Resultados' },
+    { href: '#depoimentos', label: 'Cases' },
     { href: '#pricing', label: 'Planos' },
     { href: '#faq', label: 'FAQ' },
   ];
@@ -30,7 +30,7 @@ export default function LandingHeader({ onLogin, onWhatsApp }: Props) {
   return (
     <header className={cn(
       'sticky top-0 z-50 transition-all duration-500',
-      scrolled ? 'bg-background/80 backdrop-blur-2xl border-b border-border/50 shadow-sm' : 'bg-transparent'
+      scrolled ? 'bg-background/85 backdrop-blur-2xl border-b border-border/50 shadow-sm' : 'bg-transparent'
     )}>
       <div className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-8">
         <a href="#" className="flex items-center gap-2.5 group">
@@ -39,7 +39,7 @@ export default function LandingHeader({ onLogin, onWhatsApp }: Props) {
           </div>
           <div className="flex flex-col leading-none">
             <span className="text-base font-extrabold tracking-tight text-foreground">USE SISTEMAS</span>
-            <span className="text-[9px] font-medium text-muted-foreground tracking-widest uppercase">Plataforma de Gestão</span>
+            <span className="text-[9px] font-medium text-muted-foreground tracking-widest uppercase">Gestão Empresarial Inteligente</span>
           </div>
         </a>
 
@@ -57,14 +57,14 @@ export default function LandingHeader({ onLogin, onWhatsApp }: Props) {
 
         <div className="hidden lg:flex items-center gap-2.5">
           <Button variant="ghost" size="sm" onClick={onLogin} className="font-medium gap-1.5 text-foreground">
-            Entrar <ArrowRight className="h-3.5 w-3.5" />
+            Acessar Plataforma <ArrowRight className="h-3.5 w-3.5" />
           </Button>
           <Button
             size="sm"
             onClick={onWhatsApp}
             className="gap-1.5 shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-px transition-all duration-300"
           >
-            <MessageCircle className="h-4 w-4" /> Falar com Especialista
+            <MessageCircle className="h-4 w-4" /> Agendar Demo
           </Button>
         </div>
 
@@ -91,9 +91,9 @@ export default function LandingHeader({ onLogin, onWhatsApp }: Props) {
             ))}
           </nav>
           <div className="flex flex-col gap-2">
-            <Button variant="outline" onClick={onLogin} className="w-full h-11 text-foreground">Entrar</Button>
+            <Button variant="outline" onClick={onLogin} className="w-full h-11 text-foreground">Acessar Plataforma</Button>
             <Button onClick={onWhatsApp} className="w-full h-11 gap-1.5">
-              <MessageCircle className="h-4 w-4" /> Falar com Especialista
+              <MessageCircle className="h-4 w-4" /> Agendar Demo
             </Button>
           </div>
         </div>
