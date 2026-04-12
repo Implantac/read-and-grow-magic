@@ -3,28 +3,28 @@ import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle, XCircle, Clock, TrendingUp, Package, CreditCard } from 'lucide-react';
 
 const pains = [
-  { icon: Clock, title: 'Produção atrasada', desc: 'Pedidos saem com atraso e clientes migram para o concorrente.', stat: '23%', statLabel: 'dos pedidos atrasam' },
-  { icon: Package, title: 'Estoque descontrolado', desc: 'Contagem nunca bate, falta material na hora errada.', stat: '18%', statLabel: 'de perda por ruptura' },
-  { icon: CreditCard, title: 'Lucro invisível', desc: 'Você vende, mas não sabe onde está o lucro de cada pedido.', stat: '12%', statLabel: 'do faturamento perdido' },
-  { icon: XCircle, title: 'Pedidos se perdem', desc: 'Vendedor fecha, produção não sabe, estoque não separa.', stat: '3x', statLabel: 'mais retrabalho' },
-  { icon: AlertTriangle, title: 'Erros manuais', desc: 'Planilhas desatualizadas, conferência falha, dados duplicados.', stat: '40h', statLabel: '/mês em retrabalho' },
-  { icon: TrendingUp, title: 'Crescimento travado', desc: 'Quanto mais vende, mais caos. Escalar sem controle é prejuízo.', stat: '2x', statLabel: 'mais caro operar' },
+  { icon: Clock, title: 'Prazos estourados', desc: 'Pedidos atrasam, clientes reclamam e a reputação da empresa é comprometida.', stat: '23%', statLabel: 'dos pedidos atrasam' },
+  { icon: Package, title: 'Estoque sem precisão', desc: 'Contagem não fecha, falta material na produção e sobra produto parado.', stat: '18%', statLabel: 'de perda por ruptura' },
+  { icon: CreditCard, title: 'Lucro que desaparece', desc: 'O faturamento cresce, mas ninguém sabe onde o lucro está — ou se existe.', stat: '12%', statLabel: 'do faturamento invisível' },
+  { icon: XCircle, title: 'Informação fragmentada', desc: 'Cada setor usa uma ferramenta diferente. Nada conversa entre si.', stat: '3x', statLabel: 'mais retrabalho' },
+  { icon: AlertTriangle, title: 'Decisões sem dados', desc: 'Relatórios manuais, desatualizados e que ninguém confia.', stat: '40h', statLabel: '/mês desperdiçadas' },
+  { icon: TrendingUp, title: 'Crescimento que sufoca', desc: 'Quanto mais vende, mais desorganizado fica. Escalar vira um risco.', stat: '2x', statLabel: 'mais caro operar' },
 ];
 
 export default function PainPointsSection() {
   return (
     <section id="problemas" className="container mx-auto px-4 lg:px-8 py-20 md:py-28">
       <div className="text-center mb-14">
-        <Badge variant="destructive" className="mb-4 font-medium px-4 py-1">Diagnóstico operacional</Badge>
+        <Badge variant="destructive" className="mb-4 font-medium px-4 py-1">Diagnóstico</Badge>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-          Sua empresa sofre com <span className="text-destructive">algum desses problemas?</span>
+          Sua operação enfrenta <span className="text-destructive">algum desses cenários?</span>
         </h2>
         <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-          Se identificou com 2 ou mais, sua operação está sangrando dinheiro — provavelmente sem você perceber.
+          Se dois ou mais itens abaixo fazem parte da sua rotina, sua empresa está perdendo dinheiro todos os dias — mesmo sem perceber.
         </p>
       </div>
       <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto">
-        {pains.map((pain, i) => (
+        {pains.map((pain) => (
           <Card
             key={pain.title}
             className="group border-border/50 bg-card hover:border-destructive/30 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden"
@@ -40,7 +40,7 @@ export default function PainPointsSection() {
                   <p className="text-[10px] text-muted-foreground leading-tight mt-0.5">{pain.statLabel}</p>
                 </div>
               </div>
-              <h3 className="text-base font-bold mb-2">{pain.title}</h3>
+              <h3 className="text-base font-bold mb-2 text-foreground">{pain.title}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">{pain.desc}</p>
             </CardContent>
           </Card>

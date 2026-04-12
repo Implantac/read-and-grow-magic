@@ -38,6 +38,7 @@ import { usePlans } from '@/hooks/useSubscription';
 import { cn } from '@/lib/utils';
 import HeroSection from '@/components/landing/HeroSection';
 import PainPointsSection from '@/components/landing/PainPointsSection';
+import BeliefBreakSection from '@/components/landing/BeliefBreakSection';
 import AgitationSection from '@/components/landing/AgitationSection';
 import SolutionSection from '@/components/landing/SolutionSection';
 import DemoSection from '@/components/landing/DemoSection';
@@ -64,6 +65,7 @@ export default function LandingPage() {
       <HeroSection onLogin={handleLogin} onWhatsApp={handleWhatsApp} />
       <TrustBar />
       <PainPointsSection />
+      <BeliefBreakSection />
       <AgitationSection onWhatsApp={handleWhatsApp} />
       <SolutionSection />
       <TargetAudienceSection />

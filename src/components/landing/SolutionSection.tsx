@@ -6,14 +6,14 @@ import {
 } from 'lucide-react';
 
 const modules = [
-  { icon: Users, label: 'Vendas & CRM', desc: 'Pipeline, funil, metas, comissões e IA de priorização.' },
-  { icon: Factory, label: 'Produção & PCP', desc: 'Ordens, ficha técnica, apontamento e Kanban em tempo real.' },
-  { icon: Package, label: 'Estoque & WMS', desc: 'Endereçamento, picking, conferência, lotes e RFID.' },
-  { icon: Truck, label: 'Logística & TMS', desc: 'Expedição, roteirização, rastreamento e prova de entrega.' },
-  { icon: TrendingUp, label: 'Financeiro', desc: 'Contas a pagar/receber, fluxo de caixa, DRE e conciliação.' },
-  { icon: Shield, label: 'Fiscal', desc: 'NF-e, NFC-e, apuração automática e relatórios fiscais.' },
-  { icon: Brain, label: 'IA Integrada', desc: 'Previsão de demanda, alertas preditivos e chat gerencial.' },
-  { icon: BarChart3, label: 'Dashboards', desc: 'Visão 360° em tempo real de toda a operação empresarial.' },
+  { icon: Users, label: 'Comercial & CRM', desc: 'Pipeline de vendas, funil, metas, comissões e priorização com IA.' },
+  { icon: Factory, label: 'Produção & PCP', desc: 'Ordens de produção, ficha técnica, apontamento e Kanban em tempo real.' },
+  { icon: Package, label: 'Estoque & WMS', desc: 'Endereçamento, picking, conferência cega, lotes e rastreabilidade.' },
+  { icon: Truck, label: 'Logística & TMS', desc: 'Expedição, roteirização, rastreamento de entregas e comprovação.' },
+  { icon: TrendingUp, label: 'Financeiro', desc: 'Contas a pagar e receber, fluxo de caixa, DRE e conciliação bancária.' },
+  { icon: Shield, label: 'Fiscal & Contábil', desc: 'NF-e, NFC-e, apuração automática, balancete e relatórios fiscais.' },
+  { icon: Brain, label: 'Inteligência Artificial', desc: 'Previsão de demanda, alertas preditivos e assistente gerencial.' },
+  { icon: BarChart3, label: 'Dashboards Executivos', desc: 'Visão 360° da operação com indicadores em tempo real.' },
 ];
 
 const flow = [
@@ -29,13 +29,13 @@ export default function SolutionSection() {
   return (
     <section id="solucao" className="container mx-auto px-4 lg:px-8 py-20 md:py-28">
       <div className="text-center mb-14">
-        <Badge variant="outline" className="mb-4 font-medium px-4 py-1">Plataforma completa</Badge>
+        <Badge variant="outline" className="mb-4 font-medium px-4 py-1">A Plataforma</Badge>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-          Para empresas que produzem, vendem e precisam de{' '}
-          <span className="text-gradient-primary">controle total</span>
+          Uma plataforma.{' '}
+          <span className="text-gradient-primary">Toda a operação.</span>
         </h2>
         <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-          8 módulos integrados nativamente. IA embarcada. Zero retrabalho entre setores — do pedido à entrega.
+          8 módulos integrados nativamente com IA embarcada. Do pedido à entrega, sem retrabalho entre setores.
         </p>
       </div>
 
@@ -64,7 +64,7 @@ export default function SolutionSection() {
 
       {/* Modules grid */}
       <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
-        {modules.map((m, i) => (
+        {modules.map((m) => (
           <Card
             key={m.label}
             className="group hover:border-primary/25 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-card border-border/50 relative overflow-hidden"
@@ -75,7 +75,7 @@ export default function SolutionSection() {
                 <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/12 to-primary/4 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
                   <m.icon className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-bold text-sm">{m.label}</h3>
+                <h3 className="font-bold text-sm text-foreground">{m.label}</h3>
               </div>
               <p className="text-muted-foreground text-xs leading-relaxed">{m.desc}</p>
             </CardContent>

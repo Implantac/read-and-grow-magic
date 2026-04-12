@@ -17,9 +17,10 @@ export default function FinalCTASection({ onLogin, onWhatsApp }: Props) {
           </div>
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight leading-tight text-background">
-            Leve <span className="text-primary">controle e crescimento</span>
+            Se sua empresa quer crescer{' '}
+            <span className="text-primary">com controle,</span>
             <br className="hidden sm:block" />
-            para sua empresa
+            isso é para você.
           </h2>
           <p className="text-base md:text-lg text-background/60 mb-10 max-w-lg mx-auto">
             Pare de perder dinheiro com desorganização. Comece agora e veja resultado em dias, não meses.
