@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, Menu, X } from 'lucide-react';
+import { MessageCircle, Menu, X, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Props {
@@ -29,20 +29,21 @@ export default function LandingHeader({ onLogin, onWhatsApp }: Props) {
   return (
     <header className={cn(
       'sticky top-0 z-50 transition-all duration-500',
-      scrolled ? 'bg-background/80 backdrop-blur-2xl border-b shadow-sm' : 'bg-transparent'
+      scrolled ? 'bg-background/80 backdrop-blur-2xl border-b border-border/50 shadow-sm' : 'bg-transparent'
     )}>
       <div className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-8">
         <a href="#" className="flex items-center gap-2.5 group">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center shadow-md group-hover:shadow-glow transition-shadow duration-300">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center shadow-md group-hover:shadow-glow transition-all duration-300 group-hover:scale-105">
             <span className="text-primary-foreground font-extrabold text-sm">U</span>
           </div>
           <div className="flex flex-col leading-none">
             <span className="text-base font-extrabold tracking-tight">USE SISTEMAS</span>
+            <span className="text-[9px] font-medium text-muted-foreground tracking-widest uppercase">Gestão Empresarial</span>
           </div>
         </a>
 
         {/* Desktop nav */}
-        <nav className="hidden lg:flex items-center gap-1">
+        <nav className="hidden lg:flex items-center gap-0.5">
           {links.map(l => (
             <a
               key={l.href}
@@ -54,9 +55,9 @@ export default function LandingHeader({ onLogin, onWhatsApp }: Props) {
           ))}
         </nav>
 
-        <div className="hidden lg:flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={onLogin} className="font-medium">
-            Entrar
+        <div className="hidden lg:flex items-center gap-2.5">
+          <Button variant="ghost" size="sm" onClick={onLogin} className="font-medium gap-1.5">
+            Entrar <ArrowRight className="h-3.5 w-3.5" />
           </Button>
           <Button
             size="sm"

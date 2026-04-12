@@ -16,11 +16,12 @@ export default function AgitationSection({ onWhatsApp }: Props) {
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 bg-foreground" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(36_100%_50%/0.06),transparent_50%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(36_100%_50%/0.08),transparent_50%)]" />
+      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
 
       <div className="relative container mx-auto px-4 lg:px-8 py-20 md:py-28 text-background">
         <div className="max-w-4xl mx-auto">
-          <Badge className="mb-6 bg-destructive/90 text-destructive-foreground border-0 text-xs">Impacto financeiro</Badge>
+          <Badge className="mb-6 bg-destructive/90 text-destructive-foreground border-0 text-xs font-semibold">⚠ Impacto financeiro real</Badge>
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 leading-tight">
             Cada dia sem controle custa{' '}
@@ -31,27 +32,27 @@ export default function AgitationSection({ onWhatsApp }: Props) {
           </p>
 
           <div className="grid sm:grid-cols-3 gap-4 mb-10">
-            {impacts.map((item) => (
-              <div key={item.text} className="p-5 rounded-2xl bg-background/[0.04] border border-background/[0.08] hover:bg-background/[0.06] transition-colors duration-200">
-                <div className="h-12 w-12 rounded-2xl bg-primary/15 flex items-center justify-center mb-4">
+            {impacts.map((item, i) => (
+              <div key={item.text} className="p-5 rounded-2xl bg-background/[0.04] border border-background/[0.08] hover:bg-background/[0.07] hover:border-background/[0.12] transition-all duration-300 group">
+                <div className="h-12 w-12 rounded-2xl bg-primary/15 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform duration-300">
                   <item.icon className="h-5 w-5 text-primary" />
                 </div>
-                <p className="text-primary font-extrabold text-2xl mb-1">{item.value}</p>
+                <p className="text-primary font-extrabold text-2xl md:text-3xl mb-1">{item.value}</p>
                 <p className="text-sm opacity-70 leading-relaxed">{item.text}</p>
               </div>
             ))}
           </div>
 
-          <div className="p-5 rounded-2xl bg-primary/10 border border-primary/20 mb-10">
+          <div className="p-5 md:p-6 rounded-2xl bg-primary/10 border border-primary/20 mb-10">
             <p className="text-base md:text-lg font-semibold text-primary text-center leading-relaxed">
-              Empresas sem gestão integrada perdem em média <span className="text-2xl font-extrabold">12%</span> do faturamento em ineficiência operacional.
+              Empresas sem gestão integrada perdem em média <span className="text-3xl font-extrabold align-middle mx-1">12%</span> do faturamento em ineficiência operacional.
             </p>
           </div>
 
           <div className="text-center">
             <Button
               size="lg"
-              className="gap-2 text-base px-10 h-14 hover:-translate-y-0.5 transition-all duration-300"
+              className="gap-2 text-base px-10 h-14 hover:-translate-y-0.5 transition-all duration-300 font-semibold"
               onClick={onWhatsApp}
             >
               <MessageCircle className="h-5 w-5" /> Quero Resolver Isso Agora
