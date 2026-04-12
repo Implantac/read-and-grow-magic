@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSmartSalesQueue, useRepExecutionMetrics, useLostClients, useCreateContactLog, useDailyGoals } from '@/hooks/useSalesExecution';
 import { useSalesReps } from '@/hooks/useSalesReps';
-import { Flame, Phone, Clock, AlertTriangle, Trophy, Target, UserX, Zap, ArrowRight, CheckCircle } from 'lucide-react';
+import { Flame, Phone, Clock, AlertTriangle, Trophy, Target, UserX, Zap, ArrowRight, CheckCircle, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 
 function TodayGoalCards() {
@@ -230,41 +230,71 @@ function RankingTab() {
 function LostClientsTab() {
   const { data: clients, isLoading } = useLostClients();
   if (isLoading) return <div className="animate-pulse h-40 bg-muted rounded" />;
-  if (!clients?.length) return <p className="text-muted-foreground text-center py-8">Nenhum cliente sem compra há 90+ dias.</p>;
+  if (!clients?.length) return <p className="text-muted-foreground text-center py-8">Nenhum cliente sem compra há 90+ dias 🎉</p>;
+
+  const total = clients.reduce((s: number, c: any) => s + (c.total_purchases || 0), 0);
+  const avgDays = Math.round(clients.reduce((s: number, c: any) => s + (c.daysSinceLastPurchase || 0), 0) / clients.length);
 
   return (
     <div className="space-y-4">
+      {/* Recovery KPIs */}
+      <div className="grid grid-cols-3 gap-3">
+        <Card><CardContent className="p-3 text-center">
+          <div className="text-xl font-bold text-destructive">{clients.length}</div>
+          <div className="text-[10px] text-muted-foreground">Clientes Inativos</div>
+        </CardContent></Card>
+        <Card><CardContent className="p-3 text-center">
+          <div className="text-xl font-bold text-primary">R$ {total.toLocaleString('pt-BR')}</div>
+          <div className="text-[10px] text-muted-foreground">Receita Histórica</div>
+        </CardContent></Card>
+        <Card><CardContent className="p-3 text-center">
+          <div className="text-xl font-bold text-muted-foreground">{avgDays}d</div>
+          <div className="text-[10px] text-muted-foreground">Média Sem Compra</div>
+        </CardContent></Card>
+      </div>
+
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <UserX className="h-4 w-4 text-destructive" /> Clientes sem compra há 90+ dias — recupere agora
+        <UserX className="h-4 w-4 text-destructive" /> Clientes sem compra há 90+ dias — contate via WhatsApp ou telefone
       </div>
       <div className="space-y-2">
-        {clients.map((c: any) => (
-          <Card key={c.id} className="border-l-4 border-l-destructive">
-            <CardContent className="py-3 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold">{c.name}</span>
-                  {c.abc_classification && <Badge variant="outline">{c.abc_classification}</Badge>}
+        {clients.map((c: any) => {
+          const phone = (c.cellphone || c.phone || '').replace(/\D/g, '');
+          const whatsMsg = encodeURIComponent(`Olá ${c.trade_name || c.name}! Sentimos sua falta. Temos novidades que podem interessar. Posso te apresentar?`);
+          return (
+            <Card key={c.id} className={`border-l-4 ${c.daysSinceLastPurchase > 180 ? 'border-l-destructive' : 'border-l-amber-500'}`}>
+              <CardContent className="py-3 flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-semibold">{c.name}</span>
+                    {c.abc_classification && <Badge variant={c.abc_classification === 'A' ? 'default' : 'outline'}>{c.abc_classification}</Badge>}
+                    <Badge variant={c.daysSinceLastPurchase > 180 ? 'destructive' : 'secondary'} className="text-[10px]">
+                      {c.daysSinceLastPurchase}d inativo
+                    </Badge>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1 flex gap-4 flex-wrap">
+                    <span>Total: R$ {(c.total_purchases || 0).toLocaleString('pt-BR')}</span>
+                    <span>Ticket: R$ {(c.avg_ticket || 0).toLocaleString('pt-BR')}</span>
+                    {c.segment && <span>• {c.segment}</span>}
+                  </div>
                 </div>
-                <div className="text-xs text-muted-foreground mt-1 flex gap-4">
-                  <span>Última compra: {c.daysSinceLastPurchase}d atrás</span>
-                  <span>Total: R$ {(c.total_purchases || 0).toLocaleString('pt-BR')}</span>
-                  <span>Ticket médio: R$ {(c.avg_ticket || 0).toLocaleString('pt-BR')}</span>
+                <div className="flex gap-1 shrink-0">
+                  {phone && (
+                    <>
+                      <Button size="sm" variant="outline" className="h-8 text-xs" asChild>
+                        <a href={`tel:+55${phone}`}><Phone className="h-3 w-3" /></a>
+                      </Button>
+                      <Button size="sm" variant="outline" className="h-8 text-xs text-emerald-600" asChild>
+                        <a href={`https://wa.me/55${phone}?text=${whatsMsg}`} target="_blank" rel="noopener noreferrer">
+                          <MessageSquare className="h-3 w-3" />
+                        </a>
+                      </Button>
+                    </>
+                  )}
                 </div>
-              </div>
-              <div className="flex gap-2">
-                {c.phone && (
-                  <Button size="sm" variant="outline" asChild>
-                    <a href={`tel:${c.phone}`}><Phone className="h-3 w-3" /></a>
-                  </Button>
-                )}
-                <Button size="sm">
-                  <ArrowRight className="h-3 w-3 mr-1" /> Ação
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );
