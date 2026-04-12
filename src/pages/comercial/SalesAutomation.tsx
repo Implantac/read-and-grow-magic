@@ -21,7 +21,7 @@ import { ptBR } from 'date-fns/locale';
 const today = new Date().toISOString().split('T')[0];
 
 export default function SalesAutomation() {
-  const [activeTab, setActiveTab] = useState('followups');
+  const [activeTab, setActiveTab] = useState('engine');
   
   return (
     <PageContainer>
