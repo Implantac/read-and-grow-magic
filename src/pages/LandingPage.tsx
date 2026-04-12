@@ -58,7 +58,7 @@ export default function LandingPage() {
   const handleWhatsApp = () => window.open('https://wa.me/5500000000000?text=Quero%20ver%20o%20sistema%20funcionando', '_blank');
 
   return (
-    <div className="min-h-screen bg-background overflow-x-hidden">
+    <div className="min-h-screen bg-background overflow-x-hidden dark">
       <LandingHeader onLogin={handleLogin} onWhatsApp={handleWhatsApp} />
       <HeroSection onLogin={handleLogin} onWhatsApp={handleWhatsApp} />
       <TrustBar />
