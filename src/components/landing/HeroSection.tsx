@@ -33,7 +33,7 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
 
       <div className="container mx-auto px-4 pt-10 pb-12 md:pt-16 md:pb-16 lg:px-8">
         {/* Two-column layout */}
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start max-w-6xl mx-auto">
           {/* Left - Copy */}
           <div className="text-center lg:text-left animate-fade-in">
             <Badge variant="secondary" className="mb-5 px-4 py-1.5 text-sm font-medium gap-2 border border-border/50 bg-card/80 backdrop-blur-sm inline-flex">
