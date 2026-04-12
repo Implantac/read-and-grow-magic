@@ -13,7 +13,7 @@ export default function LandingFooter() {
               </div>
               <div>
                 <span className="font-extrabold text-lg block leading-none">USE SISTEMAS</span>
-                <span className="text-[9px] font-medium text-muted-foreground tracking-widest uppercase">Gestão Empresarial</span>
+                <span className="text-[9px] font-medium text-muted-foreground tracking-widest uppercase">Plataforma de Gestão</span>
               </div>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mt-3">

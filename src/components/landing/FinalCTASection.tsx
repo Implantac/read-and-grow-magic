@@ -35,7 +35,7 @@ export default function FinalCTASection({ onLogin, onWhatsApp }: Props) {
             <Button
               size="lg"
               variant="outline"
-              className="gap-2 text-base px-8 h-14 border-background/20 text-background hover:bg-background/10 hover:-translate-y-0.5 transition-all duration-300 font-semibold"
+              className="gap-2 text-base px-8 h-14 border-background/30 text-background bg-background/5 hover:bg-background/15 hover:-translate-y-0.5 transition-all duration-300 font-semibold"
               onClick={onLogin}
             >
               Criar Conta Grátis <ArrowRight className="h-4 w-4" />
