@@ -56,13 +56,73 @@ Crie um plano de follow-up com 3-5 ações sequenciais. Retorne JSON com array "
         break;
       }
 
+      case 'generate_daily_plan': {
+        systemPrompt = `Você é um diretor comercial B2B experiente. Analise o contexto da carteira de clientes e gere um plano de ação diário priorizado. Responda em JSON válido.`;
+        userPrompt = `Dados da carteira:
+- Total de leads ativos: ${context.activeLeads || 0}
+- Leads quentes (score > 80): ${context.hotLeads || 0}
+- Propostas pendentes: ${context.pendingProposals || 0}
+- Clientes em risco de churn: ${context.riskClients || 0}
+- Clientes inativos (+90d): ${context.dormantClients || 0}
+- Follow-ups atrasados: ${context.overdueFollowUps || 0}
+- Follow-ups para hoje: ${context.todayFollowUps || 0}
+- Valor total do pipeline: R$ ${context.pipelineValue || '0'}
+- Clientes prioritários: ${JSON.stringify(context.topClients || [])}
+
+Gere um plano de ação diário em JSON com:
+{
+  "summary": "resumo executivo de 1-2 frases",
+  "priority_actions": [
+    {
+      "order": 1,
+      "action_type": "call|whatsapp|email|visit|proposal",
+      "urgency": "critical|high|medium",
+      "title": "ação concreta",
+      "reason": "por que fazer isso agora",
+      "expected_impact": "resultado esperado em R$",
+      "suggested_message": "mensagem sugerida se aplicável"
+    }
+  ],
+  "recovery_targets": [
+    {
+      "client_name": "nome",
+      "days_inactive": 0,
+      "approach": "abordagem sugerida",
+      "message": "mensagem de reativação"
+    }
+  ],
+  "tips": ["dica estratégica 1", "dica 2"]
+}
+
+Gere no máximo 8 priority_actions e 5 recovery_targets.`;
+        break;
+      }
+
+      case 'suggest_reactivation': {
+        systemPrompt = `Você é um especialista em recuperação de clientes B2B. Crie mensagens de reativação personalizadas e estratégias de abordagem em português brasileiro.`;
+        userPrompt = `Cliente inativo:
+- Nome: ${context.clientName}
+- Dias sem compra: ${context.daysSinceLastPurchase || '90+'}
+- Última compra: R$ ${context.lastPurchaseValue || '0'}
+- Ticket médio: R$ ${context.avgTicket || '0'}
+- Segmento: ${context.segment || 'Não informado'}
+- Classificação ABC: ${context.abcClass || 'N/A'}
+- Produtos anteriores: ${context.previousProducts || 'Não informado'}
+
+Gere:
+1. Uma mensagem de WhatsApp para reativação (máximo 2 parágrafos)
+2. Uma abordagem alternativa por telefone (script curto)
+3. Uma oferta especial sugerida para reconquista`;
+        break;
+      }
+
       default:
         return new Response(JSON.stringify({ error: 'Invalid action' }), {
           status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
     }
 
-    const useJson = action === 'suggest_follow_up_plan';
+    const useJson = ['suggest_follow_up_plan', 'generate_daily_plan'].includes(action);
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',

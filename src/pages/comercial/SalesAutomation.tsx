@@ -13,14 +13,15 @@ import { useFollowUpTasks, useCreateFollowUp, useCompleteFollowUp, useWhatsAppTe
 import { useAIScores } from '@/hooks/useAICommercial';
 import { useCommercialAlerts } from '@/hooks/useCommercialAlerts';
 import { useToast } from '@/hooks/use-toast';
-import { Bot, Phone, MessageSquare, Send, Clock, AlertTriangle, Users, Zap, CheckCircle2, Loader2, Calendar, ChevronRight, Sparkles, RefreshCw } from 'lucide-react';
+import { Bot, Phone, MessageSquare, Send, Clock, AlertTriangle, Users, Zap, CheckCircle2, Loader2, Calendar, ChevronRight, Sparkles, RefreshCw, Brain } from 'lucide-react';
+import DecisionEngineTab from '@/components/comercial/DecisionEngineTab';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const today = new Date().toISOString().split('T')[0];
 
 export default function SalesAutomation() {
-  const [activeTab, setActiveTab] = useState('followups');
+  const [activeTab, setActiveTab] = useState('engine');
   
   return (
     <PageContainer>
@@ -30,14 +31,16 @@ export default function SalesAutomation() {
       />
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-5 w-full max-w-3xl mb-6">
+        <TabsList className="grid grid-cols-6 w-full max-w-4xl mb-6">
+          <TabsTrigger value="engine" className="text-xs">🧠 Motor</TabsTrigger>
           <TabsTrigger value="followups" className="text-xs">📋 Follow-ups</TabsTrigger>
           <TabsTrigger value="whatsapp" className="text-xs">💬 WhatsApp</TabsTrigger>
-          <TabsTrigger value="ai-messages" className="text-xs">🤖 IA Mensagens</TabsTrigger>
+          <TabsTrigger value="ai-messages" className="text-xs">🤖 IA</TabsTrigger>
           <TabsTrigger value="nurturing" className="text-xs">🌱 Nutrição</TabsTrigger>
           <TabsTrigger value="alerts" className="text-xs">🔔 Alertas</TabsTrigger>
         </TabsList>
 
+        <TabsContent value="engine"><DecisionEngineTab /></TabsContent>
         <TabsContent value="followups"><FollowUpTab /></TabsContent>
         <TabsContent value="whatsapp"><WhatsAppTab /></TabsContent>
         <TabsContent value="ai-messages"><AIMessagesTab /></TabsContent>
