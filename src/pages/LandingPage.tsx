@@ -65,6 +65,7 @@ export default function LandingPage() {
       <HeroSection onLogin={handleLogin} onWhatsApp={handleWhatsApp} />
       <TrustBar />
       <PainPointsSection />
+      <BeliefBreakSection />
       <AgitationSection onWhatsApp={handleWhatsApp} />
       <SolutionSection />
       <TargetAudienceSection />
