@@ -21,7 +21,7 @@ export default function DifferentialsSection() {
             Por que a <span className="text-gradient-primary">USE SISTEMAS</span> é diferente?
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
-            Combinamos IA, produção industrial e logística integrada em uma plataforma única.
+            Uma plataforma que combina gestão integrada, inteligência artificial e visão completa do negócio.
           </p>
         </div>
         <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">

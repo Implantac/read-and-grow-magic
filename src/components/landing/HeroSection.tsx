@@ -16,8 +16,8 @@ const stats = [
 ];
 
 const quickWins = [
-  'Integra vendas, produção, estoque e logística',
-  'IA embarcada que antecipa problemas',
+  'Gestão completa: vendas, produção, estoque e logística',
+  'IA que antecipa gargalos e sugere ações',
   'Implantação assistida em até 7 dias',
 ];
 
@@ -50,13 +50,13 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] xl:text-[3.5rem] font-extrabold tracking-tight mb-5 leading-[1.08]">
               Controle total da sua
               <br className="hidden sm:block" />
-              <span className="text-gradient-primary">operação industrial e comercial</span>
+              <span className="text-gradient-primary">operação</span> em uma
               <br className="hidden sm:block" />
-              em um único sistema.
+              única plataforma.
             </h1>
 
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0">
-              Gerencie produção, estoque, vendas e entregas com a <span className="font-semibold text-foreground">USE SISTEMAS</span> — inteligência e precisão aplicadas ao seu negócio.
+              Plataforma completa de gestão empresarial para indústrias, atacado e varejo. Produção, estoque, vendas e entregas — tudo integrado com IA.</p>
             </p>
 
             {/* Quick wins */}
