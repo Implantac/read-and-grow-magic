@@ -6,13 +6,13 @@ import {
 } from 'lucide-react';
 
 const modules = [
-  { icon: Users, label: 'Vendas & CRM', desc: 'Pipeline, funil, metas, comissões e IA de priorização de clientes.' },
-  { icon: Factory, label: 'Produção & PCP', desc: 'Ordens, ficha técnica, apontamento, rastreabilidade e Kanban.' },
-  { icon: Package, label: 'Estoque & WMS', desc: 'Endereçamento, picking, conferência, lotes e inventário cíclico.' },
-  { icon: Truck, label: 'Logística & TMS', desc: 'Expedição, roteirização, rastreio e prova de entrega digital.' },
-  { icon: TrendingUp, label: 'Financeiro', desc: 'Contas a pagar/receber, fluxo de caixa, DRE e conciliação.' },
-  { icon: Shield, label: 'Fiscal', desc: 'NF-e, NFC-e, apuração de impostos e relatórios fiscais.' },
-  { icon: Brain, label: 'IA Integrada', desc: 'Previsão de demanda, alertas inteligentes e chat gerencial.' },
+  { icon: Users, label: 'Vendas & CRM', desc: 'Pipeline, funil, metas, comissões e IA de priorização.' },
+  { icon: Factory, label: 'Produção & PCP', desc: 'Ordens, ficha técnica, apontamento e Kanban.' },
+  { icon: Package, label: 'Estoque & WMS', desc: 'Endereçamento, picking, conferência e lotes.' },
+  { icon: Truck, label: 'Logística & TMS', desc: 'Expedição, roteirização e prova de entrega.' },
+  { icon: TrendingUp, label: 'Financeiro', desc: 'Contas, fluxo de caixa, DRE e conciliação.' },
+  { icon: Shield, label: 'Fiscal', desc: 'NF-e, NFC-e, apuração e relatórios fiscais.' },
+  { icon: Brain, label: 'IA Integrada', desc: 'Previsão de demanda, alertas e chat gerencial.' },
   { icon: BarChart3, label: 'Dashboards', desc: 'Visão 360° em tempo real de toda a operação.' },
 ];
 
@@ -28,7 +28,7 @@ const flow = [
 export default function SolutionSection() {
   return (
     <section id="solucao" className="container mx-auto px-4 lg:px-8 py-20 md:py-28">
-      <div className="text-center mb-14">
+      <div className="text-center mb-16">
         <Badge variant="outline" className="mb-4 font-medium">Solução completa</Badge>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
           Um sistema que controla <span className="text-gradient-primary">tudo</span>,
@@ -36,12 +36,13 @@ export default function SolutionSection() {
           do pedido à entrega
         </h2>
         <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-          Todos os módulos integrados nativamente. IA embarcada. Zero retrabalho.
+          8 módulos integrados nativamente. IA embarcada. Zero retrabalho entre setores.
         </p>
       </div>
 
       {/* Flow pipeline */}
       <div className="max-w-4xl mx-auto mb-16">
+        <p className="text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">Fluxo integrado</p>
         <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 p-5 md:p-6 rounded-2xl bg-card border border-border/50 shadow-sm">
           {flow.map((step, i, arr) => (
             <div key={step.label} className="flex items-center gap-2 md:gap-3">
@@ -60,17 +61,17 @@ export default function SolutionSection() {
       </div>
 
       {/* Modules grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
+      <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto">
         {modules.map((m) => (
           <Card
             key={m.label}
-            className="group hover:border-primary/25 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 bg-card border-border/50"
+            className="group hover:border-primary/25 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 bg-card border-border/50"
           >
-            <CardContent className="p-5">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/12 to-primary/4 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300">
+            <CardContent className="p-5 sm:p-6">
+              <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-primary/12 to-primary/4 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
                 <m.icon className="h-5 w-5 text-primary" />
               </div>
-              <h3 className="font-semibold text-sm mb-1">{m.label}</h3>
+              <h3 className="font-bold text-sm mb-1.5">{m.label}</h3>
               <p className="text-muted-foreground text-xs leading-relaxed">{m.desc}</p>
             </CardContent>
           </Card>

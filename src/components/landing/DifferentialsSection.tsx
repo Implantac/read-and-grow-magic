@@ -15,25 +15,28 @@ export default function DifferentialsSection() {
   return (
     <section className="bg-muted/20 border-y py-20 md:py-28">
       <div className="container mx-auto px-4 lg:px-8">
-        <div className="text-center mb-14">
+        <div className="text-center mb-16">
           <Badge variant="outline" className="mb-4 font-medium">Diferenciais</Badge>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-            Não é mais um sistema genérico.
+            Não é mais um ERP genérico.
             <br className="hidden md:block" />
-            É o <span className="text-gradient-primary">único</span> que você vai precisar.
+            É o <span className="text-gradient-primary">único</span> que sua indústria precisa.
           </h2>
+          <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
+            Combinamos IA, produção industrial e logística integrada em uma plataforma única.
+          </p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+        <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
           {diffs.map((d) => (
             <Card
               key={d.title}
-              className="bg-card border-border/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group"
+              className="bg-card border-border/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
             >
-              <CardContent className="p-5 sm:p-6">
-                <div className="h-11 w-11 rounded-xl bg-primary/8 flex items-center justify-center mb-4 group-hover:bg-primary/12 group-hover:scale-105 transition-all duration-300">
+              <CardContent className="p-6">
+                <div className="h-12 w-12 rounded-2xl bg-primary/8 flex items-center justify-center mb-5 group-hover:bg-primary/12 group-hover:scale-105 transition-all duration-300">
                   <d.icon className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="text-base font-semibold mb-1.5">{d.title}</h3>
+                <h3 className="text-base font-bold mb-2">{d.title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">{d.desc}</p>
               </CardContent>
             </Card>

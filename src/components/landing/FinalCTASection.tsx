@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { ArrowRight, MessageCircle } from 'lucide-react';
+import { ArrowRight, MessageCircle, Zap } from 'lucide-react';
 
 interface Props { onLogin: () => void; onWhatsApp: () => void }
 
@@ -8,15 +8,20 @@ export default function FinalCTASection({ onLogin, onWhatsApp }: Props) {
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 bg-foreground" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,hsl(36_100%_50%/0.06),transparent_50%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(207_90%_54%/0.04),transparent_50%)]" />
 
-      <div className="relative container mx-auto px-4 lg:px-8 py-20 md:py-24 text-background text-center">
+      <div className="relative container mx-auto px-4 lg:px-8 py-20 md:py-28 text-background text-center">
         <div className="max-w-2xl mx-auto">
+          <div className="h-14 w-14 rounded-2xl bg-primary/15 flex items-center justify-center mx-auto mb-6">
+            <Zap className="h-7 w-7 text-primary" />
+          </div>
+
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-            Pronto para ter <span className="text-primary">controle total</span>?
+            Pronto para ter <span className="text-primary">controle total</span>
+            <br className="hidden sm:block" />
+            da sua operação?
           </h2>
-          <p className="text-base md:text-lg opacity-70 mb-10 max-w-lg mx-auto">
-            Pare de perder dinheiro com desorganização. Comece agora e veja resultado em dias.
+          <p className="text-base md:text-lg opacity-60 mb-10 max-w-lg mx-auto">
+            Pare de perder dinheiro com desorganização. Comece agora e veja resultado em dias, não meses.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <Button
