@@ -51,6 +51,7 @@ import FloatingCTA from '@/components/landing/FloatingCTA';
 import LandingHeader from '@/components/landing/LandingHeader';
 import LandingFooter from '@/components/landing/LandingFooter';
 import TrustBar from '@/components/landing/TrustBar';
+import TargetAudienceSection from '@/components/landing/TargetAudienceSection';
 
 export default function LandingPage() {
   const navigate = useNavigate();
