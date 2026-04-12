@@ -47,7 +47,6 @@ export default function AgitationSection({ onWhatsApp }: Props) {
               Empresas sem gestão integrada perdem em média <span className="text-2xl font-extrabold">12%</span> do faturamento em ineficiência operacional.
             </p>
           </div>
-          </div>
 
           <div className="text-center">
             <Button

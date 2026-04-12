@@ -56,7 +56,7 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
             </h1>
 
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0">
-              Plataforma completa de gestão empresarial para indústrias, atacado e varejo. Produção, estoque, vendas e entregas — tudo integrado com IA.</p>
+              Plataforma completa de gestão empresarial para indústrias, atacado e varejo. Produção, estoque, vendas e entregas — tudo integrado com IA.
             </p>
 
             {/* Quick wins */}
