@@ -184,6 +184,6 @@ export default function ChartOfAccountsPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   );
 }
