@@ -48,13 +48,15 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
           {/* Left - Copy */}
           <div className="text-center lg:text-left animate-fade-in">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] xl:text-[3.5rem] font-extrabold tracking-tight mb-5 leading-[1.08]">
-              Pare de perder dinheiro
+              Controle total da sua
               <br className="hidden sm:block" />
-              <span className="text-gradient-primary">na sua operação industrial.</span>
+              <span className="text-gradient-primary">operação industrial</span>
+              <br className="hidden sm:block" />
+              em um único sistema.
             </h1>
 
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0">
-              Controle vendas, produção, estoque e entregas em um único sistema inteligente. Menos retrabalho, mais lucro, decisões em tempo real.
+              Gerencie vendas, produção, estoque e entregas com a <span className="font-semibold text-foreground">USE SISTEMAS</span> — tecnologia e inteligência aplicada ao seu negócio.
             </p>
 
             {/* Quick wins */}
@@ -103,7 +105,7 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
                 </div>
                 <div className="flex-1 flex justify-center">
                   <div className="h-5 w-48 rounded-md bg-muted/60 text-[10px] flex items-center justify-center text-muted-foreground/50 font-medium">
-                    app.erpcloud.com.br
+                    app.usesistemas.com.br
                   </div>
                 </div>
               </div>
@@ -111,7 +113,7 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
                 <div className="absolute inset-0 bg-gradient-to-t from-background/10 to-transparent z-10 pointer-events-none" />
                 <img
                   src={dashboardMockup}
-                  alt="Dashboard do sistema ERP Cloud mostrando métricas de produção, estoque e vendas"
+                  alt="Dashboard do sistema USE SISTEMAS mostrando métricas de produção, estoque e vendas"
                   className="w-full h-auto"
                   loading="eager"
                 />

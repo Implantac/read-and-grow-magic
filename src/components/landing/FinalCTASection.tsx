@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { ArrowRight, MessageCircle, Zap } from 'lucide-react';
+import { ArrowRight, MessageCircle } from 'lucide-react';
 
 interface Props { onLogin: () => void; onWhatsApp: () => void }
 
@@ -12,13 +12,13 @@ export default function FinalCTASection({ onLogin, onWhatsApp }: Props) {
       <div className="relative container mx-auto px-4 lg:px-8 py-20 md:py-28 text-background text-center">
         <div className="max-w-2xl mx-auto">
           <div className="h-14 w-14 rounded-2xl bg-primary/15 flex items-center justify-center mx-auto mb-6">
-            <Zap className="h-7 w-7 text-primary" />
+            <span className="text-primary font-extrabold text-xl">U</span>
           </div>
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-            Pronto para ter <span className="text-primary">controle total</span>
+            Leve <span className="text-primary">controle e crescimento</span>
             <br className="hidden sm:block" />
-            da sua operação?
+            para sua empresa com a USE SISTEMAS
           </h2>
           <p className="text-base md:text-lg opacity-60 mb-10 max-w-lg mx-auto">
             Pare de perder dinheiro com desorganização. Comece agora e veja resultado em dias, não meses.
