@@ -87,7 +87,7 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
           </div>
 
           {/* Right - Dashboard mockup */}
-          <div className="animate-fade-in-up lg:order-last">
+          <div className="animate-fade-in-up lg:order-last max-h-[450px] overflow-hidden">
             <div className="relative rounded-2xl overflow-hidden border border-border/40 shadow-2xl bg-card">
               {/* Browser chrome bar */}
               <div className="flex items-center gap-2 px-4 py-2.5 bg-muted/50 border-b border-border/30">
