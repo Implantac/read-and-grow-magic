@@ -44,10 +44,9 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
               Implantação assistida — vagas limitadas
             </Badge>
 
-            <h1 className="text-3xl sm:text-4xl md:text-[2.75rem] font-extrabold tracking-tight mb-5 leading-[1.15]">
-              Sua{' '}
-              <span className="text-gradient-primary inline">operação</span>
-              {' '}sob controle total.
+            <h1 className="text-3xl sm:text-4xl md:text-[2.5rem] font-extrabold tracking-tight mb-5 leading-tight">
+              <span className="block">Sua <span className="text-gradient-primary">operação</span></span>
+              <span className="block">sob controle total.</span>
             </h1>
 
             <p className="text-base sm:text-lg text-muted-foreground mb-7 leading-relaxed max-w-xl mx-auto lg:mx-0">
