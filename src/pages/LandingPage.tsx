@@ -66,6 +66,7 @@ export default function LandingPage() {
       <PainPointsSection />
       <AgitationSection onWhatsApp={handleWhatsApp} />
       <SolutionSection />
+      <TargetAudienceSection />
       <DemoSection />
       <BenefitsSection onWhatsApp={handleWhatsApp} />
       <DifferentialsSection />
