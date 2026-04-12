@@ -44,10 +44,8 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
               Implantação assistida — vagas limitadas
             </Badge>
 
-            <h1 className="text-3xl sm:text-4xl md:text-[2.75rem] font-extrabold tracking-tight mb-5 leading-[1.12]">
-              Sua <span className="text-gradient-primary">operação</span> sob
-              <br className="hidden sm:block" />
-              controle total.
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.5rem] font-extrabold tracking-tight mb-5 leading-tight text-foreground">
+              Sua <span className="text-gradient-primary">operação</span> sob controle total.
             </h1>
 
             <p className="text-base sm:text-lg text-muted-foreground mb-7 leading-relaxed max-w-xl mx-auto lg:mx-0">
@@ -76,7 +74,7 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
               <Button
                 size="lg"
                 variant="outline"
-                className="text-base px-8 h-14 gap-2 hover:-translate-y-0.5 transition-all duration-300 bg-card/50 backdrop-blur-sm font-semibold"
+                className="text-base px-8 h-14 gap-2 hover:-translate-y-0.5 transition-all duration-300 bg-card/80 backdrop-blur-sm font-semibold border-border"
                 onClick={onLogin}
               >
                 <Play className="h-4 w-4" /> Testar Grátis 14 Dias
