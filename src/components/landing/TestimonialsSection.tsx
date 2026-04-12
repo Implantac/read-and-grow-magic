@@ -23,7 +23,7 @@ const testimonials = [
     name: 'Roberto Lima',
     role: 'Gerente Comercial',
     company: 'TechParts',
-    text: 'A IA comercial aumentou nossa taxa de conversão em 28%. A equipe agora sabe exatamente quem ligar e quando.',
+    text: 'A IA comercial aumentou nossa conversão em 28%. A equipe agora sabe exatamente quem ligar e quando.',
     metric: '+28%',
     metricLabel: 'conversão',
   },
@@ -31,43 +31,61 @@ const testimonials = [
 
 export default function TestimonialsSection() {
   return (
-    <section id="depoimentos" className="container mx-auto px-4 py-24">
-      <div className="text-center mb-16">
+    <section id="depoimentos" className="container mx-auto px-4 lg:px-8 py-20 md:py-28">
+      <div className="text-center mb-14">
         <Badge variant="outline" className="mb-4 font-medium">Resultados comprovados</Badge>
-        <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
           Empresas que já transformaram sua operação
         </h2>
-        <p className="text-muted-foreground text-lg">Resultados reais de quem já usa o sistema.</p>
+        <p className="text-muted-foreground text-base md:text-lg">Resultados reais de quem já usa o sistema.</p>
       </div>
-      <div className="grid gap-6 md:grid-cols-3 max-w-5xl mx-auto">
+
+      <div className="grid gap-5 md:grid-cols-3 max-w-5xl mx-auto">
         {testimonials.map((t) => (
-          <Card key={t.name} className="bg-card border hover:shadow-elevation-3 hover:-translate-y-1 transition-all duration-300 group">
+          <Card key={t.name} className="bg-card border-border/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
             <CardContent className="p-6">
               {/* Metric highlight */}
               <div className="flex items-center justify-between mb-5">
                 <div>
-                  <p className="text-3xl font-extrabold text-primary">{t.metric}</p>
-                  <p className="text-xs text-muted-foreground">{t.metricLabel}</p>
+                  <p className="text-3xl font-extrabold text-primary leading-none">{t.metric}</p>
+                  <p className="text-[11px] text-muted-foreground mt-1">{t.metricLabel}</p>
                 </div>
-                <Quote className="h-8 w-8 text-primary/10 group-hover:text-primary/20 transition-colors" />
+                <Quote className="h-8 w-8 text-primary/8 group-hover:text-primary/15 transition-colors duration-300" />
               </div>
 
               {/* Stars */}
               <div className="flex gap-0.5 mb-4">
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className="h-4 w-4 fill-primary text-primary" />
+                  <Star key={star} className="h-3.5 w-3.5 fill-primary text-primary" />
                 ))}
               </div>
 
               <p className="text-sm text-muted-foreground mb-5 leading-relaxed">&quot;{t.text}&quot;</p>
 
-              <div className="border-t pt-4">
-                <p className="text-sm font-semibold">{t.name}</p>
-                <p className="text-xs text-muted-foreground">{t.role}, {t.company}</p>
+              <div className="border-t border-border/50 pt-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary font-bold text-sm">
+                    {t.name.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold leading-tight">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">{t.role}, {t.company}</p>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Future client logos placeholder */}
+      <div className="mt-16 text-center">
+        <p className="text-xs text-muted-foreground/50 mb-4 font-medium uppercase tracking-wider">Empresas que confiam no ERP Cloud</p>
+        <div className="flex items-center justify-center gap-8 md:gap-12 flex-wrap opacity-30">
+          {['MetalForte', 'Nacional', 'TechParts', 'IndusBR', 'LogiPro'].map(name => (
+            <span key={name} className="text-sm font-bold text-muted-foreground tracking-wider">{name}</span>
+          ))}
+        </div>
       </div>
     </section>
   );
