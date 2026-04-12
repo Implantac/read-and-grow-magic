@@ -24,7 +24,7 @@ export default function PricingSection({ onLogin }: Props) {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
 
   return (
-    <section id="pricing" className="bg-muted/20 border-y border-border/50 py-20 md:py-28">
+    <section id="pricing" className="bg-muted/20 border-y py-20 md:py-28">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="text-center mb-5">
           <Badge variant="outline" className="mb-4 font-medium">Planos</Badge>

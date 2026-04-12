@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
-import { Play, Monitor } from 'lucide-react';
+import { Play } from 'lucide-react';
+import dashboardMockup from '@/assets/dashboard-mockup.jpg';
 
 export default function DemoSection() {
   return (
@@ -14,8 +15,13 @@ export default function DemoSection() {
         </p>
         <div className="max-w-4xl mx-auto">
           <div className="relative aspect-video rounded-2xl bg-card border border-border/50 shadow-xl overflow-hidden group cursor-pointer hover:shadow-2xl hover:shadow-primary/10 hover:border-primary/20 transition-all duration-500">
-            <div className="absolute inset-0 bg-gradient-to-br from-foreground/[0.02] via-transparent to-primary/[0.03]" />
-            <div className="absolute inset-0 bg-[linear-gradient(hsl(var(--border)/0.1)_1px,transparent_1px),linear-gradient(90deg,hsl(var(--border)/0.1)_1px,transparent_1px)] bg-[size:48px_48px] opacity-50" />
+            <img
+              src={dashboardMockup}
+              alt="Demonstração da plataforma USE SISTEMAS"
+              className="w-full h-full object-cover object-top opacity-40 group-hover:opacity-50 transition-opacity duration-500"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-card via-card/60 to-transparent" />
 
             <div className="absolute inset-0 flex items-center justify-center z-10">
               <div className="text-center">

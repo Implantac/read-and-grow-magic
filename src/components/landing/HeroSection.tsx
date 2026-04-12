@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, MessageCircle, Play, Shield, Zap, BarChart3, CheckCircle2, Users } from 'lucide-react';
+import { ArrowRight, MessageCircle, Play, Shield, Zap, BarChart3, CheckCircle2 } from 'lucide-react';
 import dashboardMockup from '@/assets/dashboard-mockup.jpg';
 
 interface Props {
@@ -32,10 +32,9 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
       </div>
 
       <div className="container mx-auto px-4 pt-10 pb-12 md:pt-16 md:pb-16 lg:px-8">
-        {/* Two-column layout */}
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center max-w-6xl mx-auto">
           {/* Left - Copy */}
-          <div className="text-center lg:text-left animate-fade-in">
+          <div className="text-center lg:text-left">
             <Badge variant="secondary" className="mb-5 px-4 py-1.5 text-sm font-medium gap-2 border border-border/50 bg-card/80 backdrop-blur-sm inline-flex">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
@@ -44,8 +43,9 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
               Implantação assistida — vagas limitadas
             </Badge>
 
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.5rem] font-extrabold tracking-tight mb-5 leading-tight text-foreground">
-              Sua <span className="text-gradient-primary">operação</span> sob controle total.
+            <h1 className="text-3xl sm:text-4xl md:text-[2.75rem] font-extrabold tracking-tight mb-5 leading-[1.15] text-foreground">
+              Sua operação sob{' '}
+              <span className="text-gradient-primary">controle total.</span>
             </h1>
 
             <p className="text-base sm:text-lg text-muted-foreground mb-7 leading-relaxed max-w-xl mx-auto lg:mx-0">
@@ -74,7 +74,7 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
               <Button
                 size="lg"
                 variant="outline"
-                className="text-base px-8 h-14 gap-2 hover:-translate-y-0.5 transition-all duration-300 bg-card/80 backdrop-blur-sm font-semibold border-border"
+                className="text-base px-8 h-14 gap-2 hover:-translate-y-0.5 transition-all duration-300 font-semibold border-border bg-card/60 backdrop-blur-sm text-foreground"
                 onClick={onLogin}
               >
                 <Play className="h-4 w-4" /> Testar Grátis 14 Dias
@@ -87,9 +87,8 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
           </div>
 
           {/* Right - Dashboard mockup */}
-          <div className="animate-fade-in-up lg:order-last">
+          <div className="lg:order-last">
             <div className="relative rounded-2xl overflow-hidden border border-border/40 shadow-2xl bg-card max-h-[420px]">
-              {/* Browser chrome bar */}
               <div className="flex items-center gap-2 px-4 py-2.5 bg-muted/50 border-b border-border/30">
                 <div className="flex gap-1.5">
                   <div className="h-2.5 w-2.5 rounded-full bg-destructive/40" />
@@ -112,10 +111,9 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
                 />
               </div>
             </div>
-            {/* Social proof below mockup */}
             <div className="flex items-center justify-center lg:justify-start gap-3 mt-4">
               <div className="flex -space-x-2">
-                {['C', 'A', 'R', 'M'].map((letter, i) => (
+                {['C', 'A', 'R', 'M'].map((letter) => (
                   <div
                     key={letter}
                     className="h-7 w-7 rounded-full border-2 border-background bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center text-[10px] font-bold text-primary"
@@ -131,13 +129,12 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
           </div>
         </div>
 
-        {/* Stats bar below */}
+        {/* Stats bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-4xl mx-auto mt-12 md:mt-14 px-2 sm:px-4">
           {stats.map((s, i) => (
             <div
               key={s.label}
               className="text-center bg-card/95 backdrop-blur-sm border border-border/40 rounded-xl p-3.5 md:p-5 shadow-md hover:-translate-y-0.5 hover:shadow-lg hover:border-primary/20 transition-all duration-300"
-              style={{ animationDelay: `${i * 100}ms` }}
             >
               <s.icon className="h-4 w-4 text-primary/50 mx-auto mb-2" />
               <p className="text-xl sm:text-2xl md:text-3xl font-extrabold text-primary">{s.value}</p>

@@ -37,12 +37,11 @@ export default function LandingHeader({ onLogin, onWhatsApp }: Props) {
             <span className="text-primary-foreground font-extrabold text-sm">U</span>
           </div>
           <div className="flex flex-col leading-none">
-            <span className="text-base font-extrabold tracking-tight">USE SISTEMAS</span>
-            <span className="text-[9px] font-medium text-muted-foreground tracking-widest uppercase">Gestão Empresarial</span>
+            <span className="text-base font-extrabold tracking-tight text-foreground">USE SISTEMAS</span>
+            <span className="text-[9px] font-medium text-muted-foreground tracking-widest uppercase">Plataforma de Gestão</span>
           </div>
         </a>
 
-        {/* Desktop nav */}
         <nav className="hidden lg:flex items-center gap-0.5">
           {links.map(l => (
             <a
@@ -56,7 +55,7 @@ export default function LandingHeader({ onLogin, onWhatsApp }: Props) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-2.5">
-          <Button variant="ghost" size="sm" onClick={onLogin} className="font-medium gap-1.5">
+          <Button variant="ghost" size="sm" onClick={onLogin} className="font-medium gap-1.5 text-foreground">
             Entrar <ArrowRight className="h-3.5 w-3.5" />
           </Button>
           <Button
@@ -68,18 +67,16 @@ export default function LandingHeader({ onLogin, onWhatsApp }: Props) {
           </Button>
         </div>
 
-        {/* Mobile menu toggle */}
         <button className="lg:hidden p-2 rounded-lg hover:bg-muted/50 transition-colors" onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
 
-      {/* Mobile menu */}
       <div className={cn(
         'lg:hidden overflow-hidden transition-all duration-300',
         menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
       )}>
-        <div className="bg-background/95 backdrop-blur-xl border-b px-4 pb-5 pt-2">
+        <div className="bg-background/95 backdrop-blur-xl border-b border-border/50 px-4 pb-5 pt-2">
           <nav className="flex flex-col gap-1 mb-4">
             {links.map(l => (
               <a
@@ -93,7 +90,7 @@ export default function LandingHeader({ onLogin, onWhatsApp }: Props) {
             ))}
           </nav>
           <div className="flex flex-col gap-2">
-            <Button variant="outline" onClick={onLogin} className="w-full h-11">Entrar</Button>
+            <Button variant="outline" onClick={onLogin} className="w-full h-11 text-foreground">Entrar</Button>
             <Button onClick={onWhatsApp} className="w-full h-11 gap-1.5">
               <MessageCircle className="h-4 w-4" /> Falar com Especialista
             </Button>
