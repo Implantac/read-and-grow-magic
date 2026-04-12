@@ -9,7 +9,10 @@ import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedF
 import { getJournalStatusLabel } from '@/config/accounting';
 import { useJournalEntries } from '@/hooks/useJournalEntries';
 import { cn } from '@/lib/utils';
-import { Plus, CheckCircle, Eye, BookOpen } from 'lucide-react';
+import { Plus, CheckCircle, Eye, BookOpen, FileText, Clock } from 'lucide-react';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { JournalEntry } from '@/types/accounting';
@@ -84,38 +87,20 @@ export default function JournalEntriesPage() {
     { key: 'createdBy', label: 'Criado por' },
   ];
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-10 w-64" />
-        <div className="grid gap-4 md:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20" />)}
-        </div>
-        <Skeleton className="h-96" />
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Lançamentos Contábeis</h1>
-          <p className="text-muted-foreground">Registro de partidas dobradas</p>
-        </div>
-        <div className="flex gap-2">
-          <ExportButton data={filteredEntries as unknown as Record<string, unknown>[]} columns={exportColumns} filename="lancamentos_contabeis" />
-          <Button className="gap-2"><Plus className="h-4 w-4" /> Novo Lançamento</Button>
-        </div>
-      </div>
+    <PageContainer loading={loading}>
+      <PageHeader title="Lançamentos Contábeis" description="Registro de partidas dobradas">
+        <ExportButton data={filteredEntries as unknown as Record<string, unknown>[]} columns={exportColumns} filename="lancamentos_contabeis" />
+        <Button className="gap-2"><Plus className="h-4 w-4" /> Novo Lançamento</Button>
+      </PageHeader>
 
       <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Total de Lançamentos</p><p className="text-2xl font-bold">{journalEntries.length}</p></CardContent></Card>
-        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Lançados</p><p className="text-2xl font-bold text-success">{totalPosted}</p></CardContent></Card>
-        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Rascunhos</p><p className="text-2xl font-bold text-warning">{totalDraft}</p></CardContent></Card>
-        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Valor Total Lançado</p><p className="text-2xl font-bold">{formatCurrency(totalValue)}</p></CardContent></Card>
+        <KPICard title="Total de Lançamentos" value={String(journalEntries.length)} icon={<BookOpen className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Lançados" value={String(totalPosted)} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={1} />
+        <KPICard title="Rascunhos" value={String(totalDraft)} icon={<Clock className="h-5 w-5" />} accentColor="warning" index={2} />
+        <KPICard title="Valor Total Lançado" value={formatCurrency(totalValue)} icon={<FileText className="h-5 w-5" />} accentColor="info" index={3} />
       </div>
 
       <Card>
