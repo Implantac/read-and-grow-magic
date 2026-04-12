@@ -31,7 +31,7 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
         <div className="absolute inset-0 bg-[linear-gradient(hsl(var(--border)/0.3)_1px,transparent_1px),linear-gradient(90deg,hsl(var(--border)/0.3)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" />
       </div>
 
-      <div className="container mx-auto px-4 pt-20 pb-12 md:pt-24 md:pb-16 lg:px-8">
+      <div className="container mx-auto px-4 pt-8 pb-12 md:pt-12 md:pb-16 lg:px-8">
         {/* Top badge */}
         <div className="text-center animate-fade-in">
           <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-sm font-medium gap-2 border border-border/50 bg-card/80 backdrop-blur-sm">
@@ -44,7 +44,7 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
         </div>
 
         {/* Two-column layout */}
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start lg:items-center max-w-6xl mx-auto">
           {/* Left - Copy */}
           <div className="text-center lg:text-left animate-fade-in">
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3rem] xl:text-[3.25rem] font-extrabold tracking-tight mb-5 leading-[1.12]">
