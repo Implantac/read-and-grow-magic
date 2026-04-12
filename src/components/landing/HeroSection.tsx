@@ -47,9 +47,8 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start lg:items-center max-w-6xl mx-auto">
           {/* Left - Copy */}
           <div className="text-center lg:text-left animate-fade-in">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3rem] xl:text-[3.25rem] font-extrabold tracking-tight mb-5 leading-[1.12]">
-              Controle total da sua{' '}
-              <span className="text-gradient-primary">operação</span> em uma única plataforma.
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.5rem] xl:text-[2.75rem] font-extrabold tracking-tight mb-5 leading-[1.15]">
+              Controle total da sua <span className="text-gradient-primary">operação</span> em uma única plataforma.
             </h1>
 
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0">
