@@ -8,18 +8,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { useTimeEntries } from '@/hooks/useTimeEntries';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
-import { Play, Pause, CheckCircle, Timer, Package, AlertTriangle, User } from 'lucide-react';
+import { useProductionSteps, useProductionOrderSteps } from '@/hooks/useProductionSteps';
+import { Play, Pause, CheckCircle, Timer, Package, AlertTriangle, User, Layers, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { differenceInMinutes, format } from 'date-fns';
+import { differenceInMinutes, differenceInSeconds, format } from 'date-fns';
+import { toast } from 'sonner';
 
 export default function OperatorTerminalPage() {
   const { entries, loading, create, update } = useTimeEntries();
-  const { orders } = useProductionOrders();
-  const [operatorName, setOperatorName] = useState('');
+  const { orders, update: updateOrder } = useProductionOrders();
+  const { steps } = useProductionSteps();
+  const [operatorName, setOperatorName] = useState(() => localStorage.getItem('operator_name') || '');
   const [selectedOrderId, setSelectedOrderId] = useState('');
+  const [selectedStep, setSelectedStep] = useState('');
   const [producedQty, setProducedQty] = useState(0);
   const [rejectedQty, setRejectedQty] = useState(0);
   const [now, setNow] = useState(new Date());
+
+  // Save operator name
+  useEffect(() => {
+    if (operatorName) localStorage.setItem('operator_name', operatorName);
+  }, [operatorName]);
 
   // Tick every second for live timer
   useEffect(() => {
@@ -27,7 +36,19 @@ export default function OperatorTerminalPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const activeOrders = orders.filter(o => ['planned', 'in_progress'].includes(o.status));
+  // Sort active orders by priority then due date
+  const activeOrders = useMemo(() => {
+    const pMap: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
+    return orders
+      .filter(o => ['planned', 'in_progress'].includes(o.status))
+      .sort((a, b) => {
+        const pDiff = (pMap[a.priority] ?? 9) - (pMap[b.priority] ?? 9);
+        if (pDiff !== 0) return pDiff;
+        if (a.due_date && b.due_date) return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+        return 0;
+      });
+  }, [orders]);
+
   const myActiveEntry = entries.find(e => e.operator === operatorName && e.status === 'started');
   const myPausedEntry = entries.find(e => e.operator === operatorName && e.status === 'paused');
   const currentEntry = myActiveEntry || myPausedEntry;
@@ -36,9 +57,11 @@ export default function OperatorTerminalPage() {
     ? orders.find(o => o.id === currentEntry.production_order_id)
     : selectedOrderId ? orders.find(o => o.id === selectedOrderId) : null;
 
-  const elapsedMin = currentEntry && currentEntry.status === 'started'
-    ? differenceInMinutes(now, new Date(currentEntry.start_time)) - (currentEntry.paused_time || 0)
+  const elapsedSec = currentEntry && currentEntry.status === 'started'
+    ? differenceInSeconds(now, new Date(currentEntry.start_time)) - ((currentEntry.paused_time || 0) * 60)
     : 0;
+
+  const elapsedMin = Math.floor(elapsedSec / 60);
 
   const productivity = currentEntry && elapsedMin > 0
     ? ((currentEntry.produced_quantity / (elapsedMin / 60))).toFixed(1)
@@ -52,11 +75,14 @@ export default function OperatorTerminalPage() {
     if (!operatorName || !selectedOrderId) return;
     const order = orders.find(o => o.id === selectedOrderId);
     if (!order) return;
+
+    const stepName = steps.find(s => s.id === selectedStep)?.name || order.work_center || 'Produção';
+
     await create({
       production_order_id: selectedOrderId,
       order_number: order.order_number,
-      operation_id: null,
-      operation_name: order.work_center || 'Produção',
+      operation_id: selectedStep || null,
+      operation_name: stepName,
       operator: operatorName,
       start_time: new Date().toISOString(),
       end_time: null,
@@ -65,50 +91,91 @@ export default function OperatorTerminalPage() {
       rejected_quantity: 0,
       status: 'started',
       notes: null,
-      work_center: order.work_center,
+      work_center: order.work_center || order.sector,
     });
+
+    // Auto start OP if planned
+    if (order.status === 'planned') {
+      await updateOrder(order.id, { status: 'in_progress', start_date: new Date().toISOString() });
+    }
   };
 
   const handlePause = async () => {
     if (!myActiveEntry) return;
     await update(myActiveEntry.id, { status: 'paused' });
+    toast.info('Produção pausada');
   };
 
   const handleResume = async () => {
     if (!myPausedEntry) return;
-    const pausedAt = new Date(myPausedEntry.start_time); // approximation
     await update(myPausedEntry.id, { status: 'started' });
+    toast.success('Produção retomada');
   };
 
   const handleFinish = async () => {
     if (!currentEntry) return;
+    if (producedQty <= 0) {
+      toast.error('Informe a quantidade produzida');
+      return;
+    }
+
     await update(currentEntry.id, {
       status: 'completed',
       end_time: new Date().toISOString(),
       produced_quantity: producedQty,
       rejected_quantity: rejectedQty,
     });
+
+    // Update OP produced quantity
+    if (currentEntry.production_order_id) {
+      const order = orders.find(o => o.id === currentEntry.production_order_id);
+      if (order) {
+        const newProduced = order.produced_quantity + producedQty;
+        const newRejected = order.rejected_quantity + rejectedQty;
+        const updates: any = {
+          produced_quantity: newProduced,
+          rejected_quantity: newRejected,
+          realized_time_minutes: order.realized_time_minutes + elapsedMin,
+        };
+        // Auto-complete OP if reached quantity
+        if (newProduced >= order.quantity) {
+          updates.status = 'completed';
+          updates.completed_date = new Date().toISOString();
+          toast.success('🎉 Ordem de Produção concluída!');
+        }
+        await updateOrder(order.id, updates);
+      }
+    }
+
     setProducedQty(0);
     setRejectedQty(0);
+    toast.success('Apontamento finalizado');
   };
 
-  const formatTime = (min: number) => {
-    const h = Math.floor(min / 60);
-    const m = min % 60;
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+  const formatTime = (sec: number) => {
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
   // Today's completed entries for this operator
+  const today = new Date().toDateString();
   const todayEntries = entries.filter(e =>
     e.operator === operatorName &&
     e.status === 'completed' &&
-    new Date(e.start_time).toDateString() === new Date().toDateString()
+    new Date(e.start_time).toDateString() === today
   );
   const todayProduced = todayEntries.reduce((s, e) => s + e.produced_quantity, 0);
   const todayRejected = todayEntries.reduce((s, e) => s + e.rejected_quantity, 0);
+  const todayMinutes = todayEntries.reduce((s, e) => {
+    if (e.end_time) return s + differenceInMinutes(new Date(e.end_time), new Date(e.start_time)) - (e.paused_time || 0);
+    return s;
+  }, 0);
+  const todayPcsH = todayMinutes > 0 ? (todayProduced / (todayMinutes / 60)).toFixed(1) : '0';
 
   return (
-    <PageContainer>
+    <PageContainer loading={loading}>
       <div className="max-w-2xl mx-auto space-y-4">
         {/* Operator identification */}
         <Card>
@@ -132,30 +199,67 @@ export default function OperatorTerminalPage() {
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-lg">
-                <Package className="h-5 w-5" /> Selecionar Ordem de Produção
+                <Package className="h-5 w-5" /> Iniciar Produção
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Select value={selectedOrderId} onValueChange={setSelectedOrderId}>
-                <SelectTrigger className="h-12 text-base">
-                  <SelectValue placeholder="Escolha uma OP..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {activeOrders.map(o => (
-                    <SelectItem key={o.id} value={o.id}>
-                      {o.order_number} — {o.product_name} ({o.produced_quantity}/{o.quantity})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Ordem de Produção</label>
+                <Select value={selectedOrderId} onValueChange={setSelectedOrderId}>
+                  <SelectTrigger className="h-12 text-base">
+                    <SelectValue placeholder="Escolha uma OP..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {activeOrders.map(o => {
+                      const isLate = o.due_date && new Date(o.due_date) < new Date();
+                      return (
+                        <SelectItem key={o.id} value={o.id}>
+                          <span className="flex items-center gap-2">
+                            {o.priority === 'urgent' && '🔴'}
+                            {o.priority === 'high' && '🟠'}
+                            {isLate && <AlertTriangle className="h-3 w-3 text-destructive" />}
+                            {o.order_number} — {o.product_name} ({o.produced_quantity}/{o.quantity})
+                          </span>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {steps.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                    <Layers className="h-3.5 w-3.5" /> Etapa
+                  </label>
+                  <Select value={selectedStep} onValueChange={setSelectedStep}>
+                    <SelectTrigger className="h-10">
+                      <SelectValue placeholder="Selecione a etapa (opcional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {steps.filter(s => s.is_active).map(s => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name} {s.sector ? `(${s.sector})` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {currentOrder && (
                 <div className="p-4 rounded-lg bg-muted space-y-2">
                   <p className="font-semibold text-lg">{currentOrder.product_name}</p>
                   <p className="text-sm text-muted-foreground">OP: {currentOrder.order_number}</p>
-                  <p className="text-sm">Meta: <strong>{currentOrder.quantity} {currentOrder.unit}</strong></p>
-                  <p className="text-sm">Produzido: <strong>{currentOrder.produced_quantity}</strong></p>
+                  {currentOrder.client_name && <p className="text-sm">Cliente: <strong>{currentOrder.client_name}</strong></p>}
+                  <p className="text-sm">Meta: <strong>{currentOrder.quantity} {currentOrder.unit}</strong> | Produzido: <strong>{currentOrder.produced_quantity}</strong></p>
                   <p className="text-sm">Setor: {currentOrder.work_center || currentOrder.sector || '-'}</p>
+                  {currentOrder.due_date && (
+                    <p className={cn('text-sm', new Date(currentOrder.due_date) < new Date() ? 'text-destructive font-medium' : '')}>
+                      Prazo: {format(new Date(currentOrder.due_date), 'dd/MM/yyyy')}
+                    </p>
+                  )}
+                  <Progress value={currentOrder.quantity > 0 ? (currentOrder.produced_quantity / currentOrder.quantity) * 100 : 0} className="h-2" />
                 </div>
               )}
 
@@ -190,15 +294,23 @@ export default function OperatorTerminalPage() {
               <div className="p-4 rounded-lg bg-muted space-y-1">
                 <p className="text-sm text-muted-foreground">OP: {currentEntry.order_number}</p>
                 <p className="font-semibold text-lg">{currentOrder?.product_name || currentEntry.operation_name}</p>
-                <p className="text-sm">Etapa: {currentEntry.operation_name}</p>
+                <p className="text-sm flex items-center gap-1">
+                  <Layers className="h-3.5 w-3.5" /> Etapa: {currentEntry.operation_name}
+                </p>
+                {currentOrder?.client_name && <p className="text-sm">Cliente: {currentOrder.client_name}</p>}
               </div>
 
               {/* Timer */}
               <div className="text-center py-4">
-                <p className="text-5xl font-mono font-bold tabular-nums">
-                  {formatTime(elapsedMin)}
+                <p className={cn(
+                  'text-5xl font-mono font-bold tabular-nums',
+                  currentEntry.status === 'started' ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'
+                )}>
+                  {formatTime(currentEntry.status === 'started' ? elapsedSec : 0)}
                 </p>
-                <p className="text-sm text-muted-foreground mt-1">Tempo de produção</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {currentEntry.status === 'started' ? 'Tempo de produção' : '⏸ Pausado'}
+                </p>
               </div>
 
               {/* Progress */}
@@ -256,7 +368,7 @@ export default function OperatorTerminalPage() {
                     <Play className="h-5 w-5 mr-2" /> RETOMAR
                   </Button>
                 )}
-                <Button size="lg" className="h-14 text-lg bg-green-600 hover:bg-green-700" onClick={handleFinish}>
+                <Button size="lg" className="h-14 text-lg bg-green-600 hover:bg-green-700 text-white" onClick={handleFinish}>
                   <CheckCircle className="h-5 w-5 mr-2" /> FINALIZAR
                 </Button>
               </div>
@@ -267,21 +379,25 @@ export default function OperatorTerminalPage() {
         {/* Today's summary */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-lg">📊 Meu Dia</CardTitle>
+            <CardTitle className="text-lg flex items-center gap-2"><Clock className="h-5 w-5" /> Meu Dia</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="grid grid-cols-4 gap-4 text-center">
               <div>
                 <p className="text-2xl font-bold">{todayEntries.length}</p>
                 <p className="text-xs text-muted-foreground">Atividades</p>
               </div>
               <div>
-                <p className="text-2xl font-bold text-green-600">{todayProduced}</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">{todayProduced}</p>
                 <p className="text-xs text-muted-foreground">Peças Boas</p>
               </div>
               <div>
                 <p className="text-2xl font-bold text-destructive">{todayRejected}</p>
                 <p className="text-xs text-muted-foreground">Refugo</p>
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{todayPcsH}</p>
+                <p className="text-xs text-muted-foreground">Peças/h</p>
               </div>
             </div>
           </CardContent>
