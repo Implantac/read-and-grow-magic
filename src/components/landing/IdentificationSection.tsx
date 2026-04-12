@@ -1,49 +1,54 @@
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, Clock, Package, FileWarning, BarChart3 } from 'lucide-react';
+import { AlertCircle, Clock, Package, FileWarning, BarChart3, Users, Truck } from 'lucide-react';
 
 const painItems = [
-  { icon: Clock, text: 'Produção atrasada e sem visibilidade do que está acontecendo no chão de fábrica.' },
-  { icon: Package, text: 'Estoque que não fecha — falta material quando precisa, sobra o que ninguém pediu.' },
-  { icon: FileWarning, text: 'Pedidos que se perdem entre setores, exigindo conferência manual e retrabalho.' },
-  { icon: BarChart3, text: 'Falta de controle real sobre custos, margem e lucratividade por produto.' },
+  { icon: Clock, title: 'Produção atrasada', text: 'Sem visibilidade do chão de fábrica. Prazos estourados, clientes cobrando e ninguém sabe onde está o gargalo.' },
+  { icon: Package, title: 'Estoque descontrolado', text: 'Falta material na hora de produzir, sobra o que ninguém pediu. Capital parado e compras por emergência.' },
+  { icon: FileWarning, title: 'Pedidos que se perdem', text: 'Informação sai de um setor e não chega no outro. Conferência manual, retrabalho e erro humano constante.' },
+  { icon: BarChart3, title: 'Lucro invisível', text: 'Vende muito, mas no fim do mês não sabe para onde foi o dinheiro. Sem custo real, sem margem real.' },
+  { icon: Users, title: 'Equipe sem direção', text: 'Cada setor trabalha isolado. Sem prioridade clara, sem painel único, sem alinhamento operacional.' },
+  { icon: Truck, title: 'Entregas com problema', text: 'Separação errada, nota fiscal atrasada, cliente reclamando. O operacional consome todo o tempo da gestão.' },
 ];
 
 export default function IdentificationSection() {
   return (
-    <section className="container mx-auto px-4 lg:px-8 py-20 md:py-28">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <Badge variant="destructive" className="mb-4 font-medium px-4 py-1">Identificação</Badge>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
+    <section id="problemas" className="container mx-auto px-4 lg:px-8 py-20 md:py-28">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-14">
+          <Badge variant="destructive" className="mb-5 font-medium px-4 py-1.5 text-xs">Diagnóstico</Badge>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-5 tracking-tight">
             Se você vive isso no dia a dia,{' '}
-            <span className="text-destructive">você não está sozinho.</span>
+            <span className="text-destructive">precisa agir agora.</span>
           </h2>
-          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            A maioria das empresas em crescimento enfrenta exatamente esses cenários — e continua tentando resolver com planilha e boa vontade.
+          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+            Esses cenários são comuns em empresas que cresceram rápido demais para seus processos. A boa notícia: todos são resolvíveis.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {painItems.map((item) => (
             <div
-              key={item.text}
-              className="flex items-start gap-4 p-5 rounded-2xl bg-card border border-border/50 hover:border-destructive/20 hover:shadow-lg transition-all duration-300 group"
+              key={item.title}
+              className="flex flex-col gap-3 p-5 rounded-2xl bg-card border border-border/50 hover:border-destructive/25 hover:shadow-lg transition-all duration-300 group"
             >
-              <div className="h-11 w-11 rounded-xl bg-destructive/8 flex items-center justify-center shrink-0 group-hover:bg-destructive/12 transition-colors duration-300">
-                <item.icon className="h-5 w-5 text-destructive" />
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-destructive/8 flex items-center justify-center shrink-0 group-hover:bg-destructive/12 transition-colors duration-300">
+                  <item.icon className="h-5 w-5 text-destructive" />
+                </div>
+                <h3 className="font-bold text-sm text-foreground">{item.title}</h3>
               </div>
-              <p className="text-sm text-foreground/85 leading-relaxed pt-1">{item.text}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{item.text}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-8 p-5 rounded-2xl bg-destructive/5 border border-destructive/15 text-center">
+        <div className="mt-10 p-5 md:p-6 rounded-2xl bg-destructive/5 border border-destructive/15 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <AlertCircle className="h-5 w-5 text-destructive" />
-            <p className="font-bold text-foreground">Quanto mais a empresa cresce, pior fica.</p>
+            <p className="font-bold text-foreground text-base">Quanto mais a empresa cresce, maior o custo da desorganização.</p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Sem integração, cada novo pedido multiplica o problema — e o custo do erro cresce junto com o faturamento.
+          <p className="text-sm text-muted-foreground max-w-lg mx-auto">
+            Sem integração, cada novo pedido multiplica o problema — e o custo do erro cresce mais rápido que o faturamento.
           </p>
         </div>
       </div>

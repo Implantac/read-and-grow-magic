@@ -1,15 +1,15 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MessageCircle, TrendingDown, AlertTriangle, DollarSign } from 'lucide-react';
+import { MessageCircle, TrendingDown, AlertTriangle, DollarSign, Timer } from 'lucide-react';
 
 interface Props {
   onWhatsApp: () => void;
 }
 
 const impacts = [
-  { icon: DollarSign, value: 'R$ 5.000+', text: 'perdidos em cada pedido que atrasa ou precisa ser refeito.' },
-  { icon: TrendingDown, value: '18%', text: 'do capital parado em estoque sem giro — dinheiro travado.' },
-  { icon: AlertTriangle, value: '3 em 10', text: 'clientes não voltam após um problema na entrega.' },
+  { icon: DollarSign, value: 'R$ 5.000+', text: 'perdidos a cada pedido que atrasa, é separado errado ou precisa ser refeito.' },
+  { icon: TrendingDown, value: '18%', text: 'do capital parado em estoque sem giro — dinheiro travado que poderia estar investido.' },
+  { icon: AlertTriangle, value: '3 em 10', text: 'clientes não compram novamente após um problema na entrega ou pós-venda.' },
 ];
 
 export default function AgitationSection({ onWhatsApp }: Props) {
@@ -21,19 +21,19 @@ export default function AgitationSection({ onWhatsApp }: Props) {
 
       <div className="relative container mx-auto px-4 lg:px-8 py-20 md:py-28">
         <div className="max-w-4xl mx-auto">
-          <Badge className="mb-6 bg-destructive/90 text-destructive-foreground border-0 text-xs font-semibold">⚠ Impacto financeiro real</Badge>
+          <Badge className="mb-6 bg-destructive/90 text-destructive-foreground border-0 text-xs font-semibold px-4 py-1.5">⚠ Impacto financeiro real</Badge>
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 leading-tight text-background">
             Cada dia sem integração custa{' '}
-            <span className="text-primary">mais do que você imagina</span>
+            <span className="text-primary">mais do que você imagina.</span>
           </h2>
           <p className="text-sm md:text-base text-background/60 mb-10 max-w-2xl">
-            Esses números são de empresas reais que operavam sem uma plataforma de gestão integrada.
+            Esses números vêm de empresas reais que operavam com sistemas desconectados antes de adotar uma plataforma integrada.
           </p>
 
           <div className="grid sm:grid-cols-3 gap-4 mb-10">
             {impacts.map((item) => (
-              <div key={item.text} className="p-5 rounded-2xl bg-background/[0.04] border border-background/[0.08] hover:bg-background/[0.07] hover:border-background/[0.12] transition-all duration-300 group">
+              <div key={item.value} className="p-5 rounded-2xl bg-background/[0.04] border border-background/[0.08] hover:bg-background/[0.07] hover:border-background/[0.12] transition-all duration-300 group">
                 <div className="h-12 w-12 rounded-2xl bg-primary/15 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform duration-300">
                   <item.icon className="h-5 w-5 text-primary" />
                 </div>
@@ -57,6 +57,7 @@ export default function AgitationSection({ onWhatsApp }: Props) {
             >
               <MessageCircle className="h-5 w-5" /> Quero Resolver Isso Agora
             </Button>
+            <p className="text-xs text-background/40 mt-3">Diagnóstico gratuito · Sem compromisso</p>
           </div>
         </div>
       </div>

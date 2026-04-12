@@ -7,7 +7,7 @@ const testimonials = [
     name: 'Carlos Mendes',
     role: 'Diretor de Operações',
     company: 'Indústria MetalForte',
-    text: 'Reduzimos 35% do tempo operacional com a automação do pedido ao faturamento. O ROI veio no segundo mês de uso.',
+    text: 'Reduzimos 35% do tempo operacional com a automação do pedido ao faturamento. O ROI veio no segundo mês de uso. Nunca mais voltamos ao modelo antigo.',
     metric: '-35%',
     metricLabel: 'tempo operacional',
     avatar: 'CM',
@@ -16,7 +16,7 @@ const testimonials = [
     name: 'Ana Beatriz',
     role: 'CFO',
     company: 'Distribuidora Nacional',
-    text: 'O módulo financeiro e a inteligência artificial mudaram completamente como tomamos decisões estratégicas na empresa.',
+    text: 'O módulo financeiro e a inteligência artificial mudaram completamente como tomamos decisões. Antes era feeling, agora é dado. O fluxo de caixa nunca esteve tão previsível.',
     metric: '+28%',
     metricLabel: 'margem de lucro',
     avatar: 'AB',
@@ -25,8 +25,8 @@ const testimonials = [
     name: 'Roberto Lima',
     role: 'Gerente Comercial',
     company: 'TechParts Industrial',
-    text: 'A IA comercial nos mostrou quais clientes estavam em risco e onde estavam as melhores oportunidades. Conversão subiu 28%.',
-    metric: '+28%',
+    text: 'A IA comercial nos mostrou quais clientes estavam em risco e onde estavam as melhores oportunidades. Conversão subiu, e o time vendedor ficou mais estratégico.',
+    metric: '+42%',
     metricLabel: 'taxa de conversão',
     avatar: 'RL',
   },
@@ -36,11 +36,11 @@ export default function TestimonialsSection() {
   return (
     <section id="depoimentos" className="container mx-auto px-4 lg:px-8 py-20 md:py-28">
       <div className="text-center mb-14">
-        <Badge variant="outline" className="mb-4 font-medium px-4 py-1">Resultados comprovados</Badge>
+        <Badge variant="outline" className="mb-5 font-medium px-4 py-1.5 text-xs">Cases de sucesso</Badge>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
           Empresas que já transformaram sua <span className="text-gradient-primary">operação</span>
         </h2>
-        <p className="text-muted-foreground text-base md:text-lg">Resultados reais de quem opera com a plataforma USE SISTEMAS.</p>
+        <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">Resultados reais de quem opera com a plataforma USE SISTEMAS.</p>
       </div>
 
       <div className="grid gap-5 md:grid-cols-3 max-w-5xl mx-auto">

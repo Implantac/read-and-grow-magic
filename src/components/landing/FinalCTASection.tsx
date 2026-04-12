@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { ArrowRight, MessageCircle, Zap } from 'lucide-react';
+import { ArrowRight, MessageCircle, Zap, CheckCircle2 } from 'lucide-react';
 
 interface Props { onLogin: () => void; onWhatsApp: () => void }
 
@@ -17,14 +17,21 @@ export default function FinalCTASection({ onLogin, onWhatsApp }: Props) {
           </div>
 
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight leading-tight text-background">
-            Se sua empresa quer crescer{' '}
-            <span className="text-primary">com controle,</span>
-            <br className="hidden sm:block" />
-            isso é para você.
+            Sua empresa merece crescer{' '}
+            <span className="text-primary">com controle.</span>
           </h2>
-          <p className="text-base md:text-lg text-background/60 mb-10 max-w-lg mx-auto">
+          <p className="text-base md:text-lg text-background/60 mb-8 max-w-lg mx-auto">
             Pare de perder dinheiro com desorganização. Comece agora e veja resultado em dias, não meses.
           </p>
+
+          <div className="flex flex-wrap gap-3 justify-center mb-8">
+            {['14 dias grátis', 'Sem cartão de crédito', 'Implantação assistida', 'Suporte humano'].map(item => (
+              <span key={item} className="flex items-center gap-1.5 text-xs font-medium text-background/50">
+                <CheckCircle2 className="h-3 w-3 text-primary/70" />{item}
+              </span>
+            ))}
+          </div>
+
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <Button
               size="lg"
@@ -42,9 +49,6 @@ export default function FinalCTASection({ onLogin, onWhatsApp }: Props) {
               Criar Conta Grátis <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
-          <p className="text-xs text-background/40 mt-6">
-            Sem cartão de crédito · Cancele quando quiser · Suporte humano
-          </p>
         </div>
       </div>
     </section>
