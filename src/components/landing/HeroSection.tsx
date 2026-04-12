@@ -34,7 +34,7 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
       <div className="container mx-auto px-4 pt-20 pb-12 md:pt-24 md:pb-16 lg:px-8">
         {/* Top badge */}
         <div className="text-center animate-fade-in">
-          <Badge variant="secondary" className="mb-8 px-4 py-1.5 text-sm font-medium gap-2 border border-border/50 bg-card/80 backdrop-blur-sm">
+          <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-sm font-medium gap-2 border border-border/50 bg-card/80 backdrop-blur-sm">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
