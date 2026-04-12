@@ -47,9 +47,9 @@ export default function OrderBlocks() {
       <PageHeader title="Bloqueios de Pedidos" description="Gestão de bloqueios e liberações comerciais e financeiros" />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <KPICard title="Bloqueios Ativos" value={String(activeBlocks.length)} icon={<Lock className="h-5 w-5" />} />
-        <KPICard title="Liberados" value={String(releasedBlocks.length)} icon={<Unlock className="h-5 w-5" />} />
-        <KPICard title="Aguardando Aprovação" value={String(activeBlocks.filter(b => b.approval_level).length)} icon={<AlertTriangle className="h-5 w-5" />} />
+        <KPICard title="Bloqueios Ativos" value={String(activeBlocks.length)} icon={<Lock className="h-5 w-5" />} accentColor="danger" index={0} />
+        <KPICard title="Liberados" value={String(releasedBlocks.length)} icon={<Unlock className="h-5 w-5" />} accentColor="success" index={1} />
+        <KPICard title="Aguardando Aprovação" value={String(activeBlocks.filter(b => b.approval_level).length)} icon={<AlertTriangle className="h-5 w-5" />} accentColor="warning" index={2} />
       </div>
 
       <Card>

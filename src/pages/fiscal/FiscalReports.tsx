@@ -41,6 +41,7 @@ import { CreateReportDialog } from '@/components/fiscal/CreateReportDialog';
 import type { FiscalReport } from '@/types/fiscal';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 import {
   AreaChart,
   Area,
@@ -150,63 +151,11 @@ export default function FiscalReportsPage() {
         </Button>
       </PageHeader>
 
-      {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Impostos</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totalTaxes)}</div>
-            <p className="text-xs text-muted-foreground">Este mês</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">ICMS</CardTitle>
-            <div className="h-3 w-3 rounded-full bg-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(taxBreakdown.icms)}</div>
-            <Progress value={(taxBreakdown.icms / totalTaxes) * 100} className="mt-2 h-1" />
-            <p className="text-xs text-muted-foreground mt-1">
-              {((taxBreakdown.icms / totalTaxes) * 100).toFixed(1)}% do total
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">COFINS</CardTitle>
-            <div className="h-3 w-3 rounded-full bg-info" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(taxBreakdown.cofins)}</div>
-            <Progress value={(taxBreakdown.cofins / totalTaxes) * 100} className="mt-2 h-1" />
-            <p className="text-xs text-muted-foreground mt-1">
-              {((taxBreakdown.cofins / totalTaxes) * 100).toFixed(1)}% do total
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">PIS + IPI</CardTitle>
-            <div className="flex gap-1">
-              <div className="h-3 w-3 rounded-full bg-warning" />
-              <div className="h-3 w-3 rounded-full bg-success" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(taxBreakdown.pis + taxBreakdown.ipi)}</div>
-            <Progress value={((taxBreakdown.pis + taxBreakdown.ipi) / totalTaxes) * 100} className="mt-2 h-1" />
-            <p className="text-xs text-muted-foreground mt-1">
-              {(((taxBreakdown.pis + taxBreakdown.ipi) / totalTaxes) * 100).toFixed(1)}% do total
-            </p>
-          </CardContent>
-        </Card>
+        <KPICard title="Total Impostos" value={formatCurrency(totalTaxes)} icon={<TrendingUp className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="ICMS" value={formatCurrency(taxBreakdown.icms)} description={`${totalTaxes > 0 ? ((taxBreakdown.icms / totalTaxes) * 100).toFixed(1) : '0'}% do total`} icon={<BarChart3 className="h-5 w-5" />} accentColor="warning" index={1} />
+        <KPICard title="COFINS" value={formatCurrency(taxBreakdown.cofins)} description={`${totalTaxes > 0 ? ((taxBreakdown.cofins / totalTaxes) * 100).toFixed(1) : '0'}% do total`} icon={<BarChart3 className="h-5 w-5" />} accentColor="info" index={2} />
+        <KPICard title="PIS + IPI" value={formatCurrency(taxBreakdown.pis + taxBreakdown.ipi)} description={`${totalTaxes > 0 ? (((taxBreakdown.pis + taxBreakdown.ipi) / totalTaxes) * 100).toFixed(1) : '0'}% do total`} icon={<BarChart3 className="h-5 w-5" />} accentColor="success" index={3} />
       </div>
 
       {/* Charts */}

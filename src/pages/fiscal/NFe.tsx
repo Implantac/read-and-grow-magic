@@ -61,6 +61,7 @@ import { generateDANFE, generateNFeXML } from '@/lib/fiscalDocuments';
 import type { NFe } from '@/types/fiscal';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 
 const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ className?: string }> }> = {
   draft: { color: 'bg-muted text-muted-foreground', icon: FileText },
@@ -177,51 +178,11 @@ export default function NFePage() {
         </Button>
       </PageHeader>
 
-      {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">NF-e Emitidas</CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{nfes.filter(n => n.status === 'authorized').length}</div>
-            <p className="text-xs text-muted-foreground">Este mês</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Faturado</CardTitle>
-            <CheckCircle className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(nfes.filter(n => n.status === 'authorized').reduce((s, n) => s + n.total, 0))}</div>
-            <p className="text-xs text-muted-foreground">Em NF-e autorizadas</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Canceladas</CardTitle>
-            <XCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{nfes.filter(n => n.status === 'cancelled').length}</div>
-            <p className="text-xs text-muted-foreground">Este mês</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Impostos</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-warning" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(nfes.reduce((s, n) => s + n.icms + n.ipi + n.pis + n.cofins, 0))}</div>
-            <p className="text-xs text-muted-foreground">ICMS + IPI + PIS + COFINS</p>
-          </CardContent>
-        </Card>
+        <KPICard title="NF-e Emitidas" value={String(nfes.filter(n => n.status === 'authorized').length)} icon={<FileText className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Total Faturado" value={formatCurrency(nfes.filter(n => n.status === 'authorized').reduce((s, n) => s + n.total, 0))} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={1} />
+        <KPICard title="Canceladas" value={String(nfes.filter(n => n.status === 'cancelled').length)} icon={<XCircle className="h-5 w-5" />} accentColor="danger" index={2} />
+        <KPICard title="Total Impostos" value={formatCurrency(nfes.reduce((s, n) => s + n.icms + n.ipi + n.pis + n.cofins, 0))} icon={<AlertTriangle className="h-5 w-5" />} accentColor="warning" index={3} />
       </div>
 
       {/* Filters */}

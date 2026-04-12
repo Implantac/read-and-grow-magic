@@ -57,6 +57,7 @@ import { PDVDialog } from '@/components/fiscal/PDVDialog';
 import type { NFCe } from '@/types/fiscal';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 
 const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ className?: string }> }> = {
   authorized: { color: 'bg-success/10 text-success', icon: CheckCircle },
@@ -186,53 +187,11 @@ export default function NFCePage() {
         </Button>
       </PageHeader>
 
-      {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">NFC-e Emitidas</CardTitle>
-            <Receipt className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{nfces.length}</div>
-            <p className="text-xs text-muted-foreground">Este mês</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ticket Médio</CardTitle>
-            <CreditCard className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(nfces.length > 0 ? nfces.reduce((s, n) => s + n.total, 0) / nfces.length : 0)}</div>
-            <p className="text-xs text-muted-foreground">Valor médio por venda</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Canceladas</CardTitle>
-            <XCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{nfces.filter(n => n.status === 'cancelled').length}</div>
-            <p className="text-xs text-muted-foreground">Este mês</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Taxa Aprovação</CardTitle>
-            <CheckCircle className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {nfces.length > 0 ? (((nfces.length - nfces.filter(n => n.status === 'cancelled').length) / nfces.length) * 100).toFixed(1) : '0.0'}%
-            </div>
-            <p className="text-xs text-muted-foreground">De vendas válidas</p>
-          </CardContent>
-        </Card>
+        <KPICard title="NFC-e Emitidas" value={String(nfces.length)} icon={<Receipt className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Ticket Médio" value={formatCurrency(nfces.length > 0 ? nfces.reduce((s, n) => s + n.total, 0) / nfces.length : 0)} icon={<CreditCard className="h-5 w-5" />} accentColor="info" index={1} />
+        <KPICard title="Canceladas" value={String(nfces.filter(n => n.status === 'cancelled').length)} icon={<XCircle className="h-5 w-5" />} accentColor="danger" index={2} />
+        <KPICard title="Taxa Aprovação" value={`${nfces.length > 0 ? (((nfces.length - nfces.filter(n => n.status === 'cancelled').length) / nfces.length) * 100).toFixed(1) : '0.0'}%`} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={3} />
       </div>
 
       {/* Filters */}

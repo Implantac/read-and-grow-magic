@@ -69,10 +69,10 @@ export default function CreditAnalysis() {
       <PageHeader title="Análise de Crédito" description="Gestão de limites, scores e risco comercial" />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <KPICard title="Limite Total" value={fmt(totalLimit)} icon={<Shield className="h-5 w-5" />} />
-        <KPICard title="Limite Utilizado" value={fmt(totalUsed)} icon={<ShieldAlert className="h-5 w-5" />} />
-        <KPICard title="Clientes Bloqueados" value={String(blockedCount)} icon={<ShieldX className="h-5 w-5" />} />
-        <KPICard title="Alto Risco" value={String(highRiskCount)} icon={<ShieldCheck className="h-5 w-5" />} />
+        <KPICard title="Limite Total" value={fmt(totalLimit)} icon={<Shield className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Limite Utilizado" value={fmt(totalUsed)} icon={<ShieldAlert className="h-5 w-5" />} accentColor="warning" index={1} />
+        <KPICard title="Clientes Bloqueados" value={String(blockedCount)} icon={<ShieldX className="h-5 w-5" />} accentColor="danger" index={2} />
+        <KPICard title="Alto Risco" value={String(highRiskCount)} icon={<ShieldCheck className="h-5 w-5" />} accentColor="warning" index={3} />
       </div>
 
       <Card>

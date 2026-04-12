@@ -9,9 +9,12 @@ import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedF
 import { getAccountTypeLabel } from '@/config/accounting';
 import { useChartOfAccounts } from '@/hooks/useChartOfAccounts';
 import { cn } from '@/lib/utils';
-import { Search, ChevronRight, ChevronDown, BookOpen, Plus, FolderTree } from 'lucide-react';
+import { Search, ChevronRight, ChevronDown, BookOpen, Plus, FolderTree, DollarSign } from 'lucide-react';
 import type { ExportColumn } from '@/lib/exportUtils';
 import type { ChartOfAccount } from '@/types/accounting';
+import { PageContainer } from '@/components/shared/PageContainer';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { KPICard } from '@/components/shared/KPICard';
 
 const typeColorMap: Record<string, string> = {
   asset: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
@@ -141,70 +144,18 @@ export default function ChartOfAccountsPage() {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <Skeleton className="h-10 w-64" />
-        <div className="grid gap-4 md:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20" />)}
-        </div>
-        <Skeleton className="h-96" />
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Plano de Contas</h1>
-          <p className="text-muted-foreground">Estrutura hierárquica das contas contábeis</p>
-        </div>
-        <div className="flex gap-2">
-          <ExportButton data={accounts as unknown as Record<string, unknown>[]} columns={exportColumns} filename="plano_de_contas" />
-          <Button className="gap-2"><Plus className="h-4 w-4" /> Nova Conta</Button>
-        </div>
-      </div>
+    <PageContainer loading={loading}>
+      <PageHeader title="Plano de Contas" description="Estrutura hierárquica das contas contábeis">
+        <ExportButton data={accounts as unknown as Record<string, unknown>[]} columns={exportColumns} filename="plano_de_contas" />
+        <Button className="gap-2"><Plus className="h-4 w-4" /> Nova Conta</Button>
+      </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-primary/10 p-2"><BookOpen className="h-5 w-5 text-primary" /></div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total de Contas</p>
-                <p className="text-xl font-bold">{accounts.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-blue-500/10 p-2"><FolderTree className="h-5 w-5 text-blue-500" /></div>
-              <div>
-                <p className="text-sm text-muted-foreground">Contas Analíticas</p>
-                <p className="text-xl font-bold">{analyticalCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Ativo Total</p>
-              <p className="text-xl font-bold text-blue-600">{formatCurrency(totalAssets)}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Passivo + PL</p>
-              <p className="text-xl font-bold text-purple-600">{formatCurrency(totalLiabilitiesEquity)}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <KPICard title="Total de Contas" value={String(accounts.length)} icon={<BookOpen className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Contas Analíticas" value={String(analyticalCount)} icon={<FolderTree className="h-5 w-5" />} accentColor="info" index={1} />
+        <KPICard title="Ativo Total" value={formatCurrency(totalAssets)} icon={<DollarSign className="h-5 w-5" />} accentColor="success" index={2} />
+        <KPICard title="Passivo + PL" value={formatCurrency(totalLiabilitiesEquity)} icon={<DollarSign className="h-5 w-5" />} accentColor="warning" index={3} />
       </div>
 
       <Card>
@@ -233,6 +184,6 @@ export default function ChartOfAccountsPage() {
           )}
         </CardContent>
       </Card>
-    </div>
+    </PageContainer>
   );
 }
