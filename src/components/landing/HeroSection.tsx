@@ -76,7 +76,7 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
               <Button
                 size="lg"
                 variant="outline"
-                className="text-base px-8 h-14 gap-2 hover:-translate-y-0.5 transition-all duration-300 bg-card/50 backdrop-blur-sm font-semibold"
+                className="text-base px-8 h-14 gap-2 hover:-translate-y-0.5 transition-all duration-300 bg-card/80 backdrop-blur-sm font-semibold border-border"
                 onClick={onLogin}
               >
                 <Play className="h-4 w-4" /> Testar Grátis 14 Dias
