@@ -1,4 +1,4 @@
-import { Zap, Shield } from 'lucide-react';
+import { Shield } from 'lucide-react';
 
 export default function LandingFooter() {
   return (
@@ -9,12 +9,12 @@ export default function LandingFooter() {
           <div>
             <div className="flex items-center gap-2.5 mb-3">
               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center">
-                <Zap className="h-4 w-4 text-primary-foreground" />
+                <span className="text-primary-foreground font-extrabold text-xs">U</span>
               </div>
-              <span className="font-bold text-lg">ERP Cloud</span>
+              <span className="font-extrabold text-lg">USE SISTEMAS</span>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              O sistema completo para indústrias que querem crescer com controle, eficiência e inteligência artificial.
+              Sistema inteligente de gestão empresarial para indústrias e confecções. Controle total, mais lucro e eficiência operacional.
             </p>
           </div>
 
@@ -43,8 +43,8 @@ export default function LandingFooter() {
         </div>
 
         <div className="border-t border-border/50 pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-xs text-muted-foreground/60">© {new Date().getFullYear()} ERP Cloud. Todos os direitos reservados.</p>
-          <p className="text-xs text-muted-foreground/60">Feito com tecnologia de ponta para indústrias brasileiras.</p>
+          <p className="text-xs text-muted-foreground/60">© {new Date().getFullYear()} USE SISTEMAS. Todos os direitos reservados.</p>
+          <p className="text-xs text-muted-foreground/60">Tecnologia de ponta para indústrias brasileiras.</p>
         </div>
       </div>
     </footer>

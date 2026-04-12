@@ -18,9 +18,7 @@ export default function DifferentialsSection() {
         <div className="text-center mb-16">
           <Badge variant="outline" className="mb-4 font-medium">Diferenciais</Badge>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-            Não é mais um ERP genérico.
-            <br className="hidden md:block" />
-            É o <span className="text-gradient-primary">único</span> que sua indústria precisa.
+            Por que a <span className="text-gradient-primary">USE SISTEMAS</span> é diferente?
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
             Combinamos IA, produção industrial e logística integrada em uma plataforma única.

@@ -37,7 +37,7 @@ export default function TestimonialsSection() {
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
           Empresas que já transformaram sua operação
         </h2>
-        <p className="text-muted-foreground text-base md:text-lg">Resultados reais de quem já usa o sistema.</p>
+        <p className="text-muted-foreground text-base md:text-lg">Resultados reais de quem já usa a USE SISTEMAS.</p>
       </div>
 
       <div className="grid gap-5 md:grid-cols-3 max-w-5xl mx-auto">
@@ -77,7 +77,7 @@ export default function TestimonialsSection() {
       </div>
 
       <div className="mt-16 text-center">
-        <p className="text-xs text-muted-foreground/50 mb-4 font-semibold uppercase tracking-wider">Empresas que confiam no ERP Cloud</p>
+        <p className="text-xs text-muted-foreground/50 mb-4 font-semibold uppercase tracking-wider">Empresas que confiam na USE SISTEMAS</p>
         <div className="flex items-center justify-center gap-8 md:gap-12 flex-wrap opacity-25">
           {['MetalForte', 'Nacional', 'TechParts', 'IndusBR', 'LogiPro'].map(name => (
             <span key={name} className="text-sm font-bold text-muted-foreground tracking-wider">{name}</span>
