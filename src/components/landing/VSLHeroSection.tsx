@@ -88,13 +88,32 @@ export default function VSLHeroSection({ onLogin, onWhatsApp }: Props) {
           </div>
 
           {/* Proof points */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-6 justify-center items-center mb-12">
             {proofPoints.map((point) => (
               <div key={point} className="flex items-center gap-2 text-sm text-muted-foreground">
                 <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
                 <span>{point}</span>
               </div>
             ))}
+          </div>
+
+          {/* Copy reinforcement below video */}
+          <div className="grid sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
+            <div className="text-center p-5 rounded-2xl bg-card/80 border border-border/40">
+              <p className="text-2xl font-extrabold text-destructive mb-1">😤</p>
+              <p className="text-sm font-bold text-foreground mb-1">O problema</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">Quanto mais vende, mais desorganizado fica. Retrabalho, atraso e perda de lucro.</p>
+            </div>
+            <div className="text-center p-5 rounded-2xl bg-card/80 border border-border/40">
+              <p className="text-2xl font-extrabold text-primary mb-1">⚡</p>
+              <p className="text-sm font-bold text-foreground mb-1">A solução</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">Uma plataforma que conecta vendas, produção, estoque e financeiro com IA.</p>
+            </div>
+            <div className="text-center p-5 rounded-2xl bg-card/80 border border-border/40">
+              <p className="text-2xl font-extrabold text-success mb-1">📈</p>
+              <p className="text-sm font-bold text-foreground mb-1">O resultado</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">Controle total, menos erro, mais eficiência e lucro visível por pedido.</p>
+            </div>
           </div>
         </div>
       </div>
