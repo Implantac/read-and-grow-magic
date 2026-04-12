@@ -2557,6 +2557,100 @@ export type Database = {
         }
         Relationships: []
       }
+      follow_up_tasks: {
+        Row: {
+          action_type: string
+          ai_generated: boolean | null
+          channel: string | null
+          client_id: string | null
+          client_name: string
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          funnel_id: string | null
+          id: string
+          next_follow_up_id: string | null
+          order_id: string | null
+          priority: string
+          result: string | null
+          sales_rep_id: string | null
+          scheduled_date: string
+          scheduled_time: string | null
+          status: string
+          suggested_message: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          action_type?: string
+          ai_generated?: boolean | null
+          channel?: string | null
+          client_id?: string | null
+          client_name: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          funnel_id?: string | null
+          id?: string
+          next_follow_up_id?: string | null
+          order_id?: string | null
+          priority?: string
+          result?: string | null
+          sales_rep_id?: string | null
+          scheduled_date: string
+          scheduled_time?: string | null
+          status?: string
+          suggested_message?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          ai_generated?: boolean | null
+          channel?: string | null
+          client_id?: string | null
+          client_name?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          funnel_id?: string | null
+          id?: string
+          next_follow_up_id?: string | null
+          order_id?: string | null
+          priority?: string
+          result?: string | null
+          sales_rep_id?: string | null
+          scheduled_date?: string
+          scheduled_time?: string | null
+          status?: string
+          suggested_message?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "follow_up_tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_up_tasks_funnel_id_fkey"
+            columns: ["funnel_id"]
+            isOneToOne: false
+            referencedRelation: "sales_funnel"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "follow_up_tasks_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follow_ups: {
         Row: {
           client_id: string
@@ -3113,6 +3207,102 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      lead_nurturing_enrollments: {
+        Row: {
+          client_id: string
+          completed_at: string | null
+          converted: boolean | null
+          created_at: string
+          current_step: number | null
+          enrolled_at: string
+          id: string
+          last_action_at: string | null
+          sequence_id: string
+          status: string
+        }
+        Insert: {
+          client_id: string
+          completed_at?: string | null
+          converted?: boolean | null
+          created_at?: string
+          current_step?: number | null
+          enrolled_at?: string
+          id?: string
+          last_action_at?: string | null
+          sequence_id: string
+          status?: string
+        }
+        Update: {
+          client_id?: string
+          completed_at?: string | null
+          converted?: boolean | null
+          created_at?: string
+          current_step?: number | null
+          enrolled_at?: string
+          id?: string
+          last_action_at?: string | null
+          sequence_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_nurturing_enrollments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_nurturing_enrollments_sequence_id_fkey"
+            columns: ["sequence_id"]
+            isOneToOne: false
+            referencedRelation: "lead_nurturing_sequences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_nurturing_sequences: {
+        Row: {
+          conversion_rate: number | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          steps: Json
+          target_segment: string | null
+          total_enrolled: number | null
+          trigger_event: string
+          updated_at: string
+        }
+        Insert: {
+          conversion_rate?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          steps?: Json
+          target_segment?: string | null
+          total_enrolled?: number | null
+          trigger_event?: string
+          updated_at?: string
+        }
+        Update: {
+          conversion_rate?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          steps?: Json
+          target_segment?: string | null
+          total_enrolled?: number | null
+          trigger_event?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       loading_docks: {
         Row: {
@@ -7835,6 +8025,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      whatsapp_templates: {
+        Row: {
+          body: string
+          category: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          name: string
+          subject: string | null
+          updated_at: string
+          usage_count: number | null
+          variables: string[] | null
+        }
+        Insert: {
+          body: string
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          subject?: string | null
+          updated_at?: string
+          usage_count?: number | null
+          variables?: string[] | null
+        }
+        Update: {
+          body?: string
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          subject?: string | null
+          updated_at?: string
+          usage_count?: number | null
+          variables?: string[] | null
+        }
+        Relationships: []
       }
       wms_ai_insights: {
         Row: {
