@@ -7,8 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import {
   DollarSign, ShoppingCart, Users, TrendingUp, AlertTriangle, Target,
   ArrowUpRight, Clock, CheckCircle, MapPin, Zap, BarChart3, ShieldAlert,
-  UserX, TrendingDown,
+  UserX, TrendingDown, Brain, Sparkles, RefreshCw,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useOrders } from '@/hooks/useOrders';
 import { useClients } from '@/hooks/useClients';
 import { useSalesFunnel } from '@/hooks/useSalesFunnel';
@@ -16,6 +17,7 @@ import { useSalesReps } from '@/hooks/useSalesReps';
 import { useCommercialAlerts } from '@/hooks/useCommercialAlerts';
 import { useSales } from '@/hooks/useSales';
 import { useCommercialInsights } from '@/hooks/useCommercialRules';
+import { useAIDailyActions, useAIRecommendations, useRunAIEngine } from '@/hooks/useAICommercial';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts';
 import { startOfMonth, endOfMonth, isToday, differenceInDays, subMonths, format, startOfDay, eachDayOfInterval, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -39,6 +41,9 @@ export default function CommercialDashboard() {
   const { data: sales = [] } = useSales();
 
   const insights = useCommercialInsights(clients, orders);
+  const { data: aiActions = [] } = useAIDailyActions();
+  const { data: aiRecs = [] } = useAIRecommendations('pending');
+  const runAIEngine = useRunAIEngine();
   const loading = lo || lc || lf;
 
   const stats = useMemo(() => {
@@ -397,6 +402,51 @@ export default function CommercialDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      {/* AI Insights Panel */}
+      {(aiActions.length > 0 || aiRecs.length > 0) && (
+        <Card className="mt-6 border-primary/20">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <Brain className="h-4 w-4 text-primary" />
+                Inteligência Artificial — Resumo do Dia
+              </CardTitle>
+              <Button size="sm" variant="outline" onClick={() => runAIEngine.mutate('full_analysis')} disabled={runAIEngine.isPending}>
+                <RefreshCw className={`h-3 w-3 mr-1 ${runAIEngine.isPending ? 'animate-spin' : ''}`} /> Atualizar IA
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2">
+              {aiActions.filter(a => a.status === 'pending').slice(0, 4).map(action => (
+                <div key={action.id} className="flex items-start gap-3 p-3 rounded-lg border bg-muted/30">
+                  <Sparkles className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{action.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{action.description}</p>
+                    {action.estimated_value > 0 && (
+                      <Badge variant="secondary" className="mt-1 text-[10px]">{fmt(action.estimated_value)}</Badge>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {aiRecs.slice(0, 4).map(rec => (
+                <div key={rec.id} className="flex items-start gap-3 p-3 rounded-lg border bg-primary/5">
+                  <Brain className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{rec.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{rec.description}</p>
+                    {rec.estimated_value > 0 && (
+                      <Badge variant="secondary" className="mt-1 text-[10px]">{fmt(rec.estimated_value)}</Badge>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </PageContainer>
   );
 }

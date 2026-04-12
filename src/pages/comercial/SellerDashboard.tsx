@@ -336,6 +336,15 @@ export default function SellerDashboard() {
                           <Badge variant="outline" className="text-[10px]">
                             {OPPORTUNITY_LABELS[insight.opportunityType] || insight.opportunityType}
                           </Badge>
+                          <Button size="sm" variant="ghost" className="h-7 text-xs text-emerald-600" onClick={() => {
+                            const client = clients.find(c => c.id === insight.clientId);
+                            const phone = client?.cellphone || client?.phone || '';
+                            const cleanPhone = phone.replace(/\D/g, '');
+                            const msg = encodeURIComponent(`Olá${client?.trade_name ? ' ' + client.trade_name : ''}, tudo bem? Gostaria de conversar sobre uma oportunidade.`);
+                            window.open(`https://wa.me/55${cleanPhone}?text=${msg}`, '_blank');
+                          }}>
+                            💬 WhatsApp
+                          </Button>
                           <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setScriptClient(insight); setScriptOpen(true); }}>
                             📋 Script
                           </Button>
