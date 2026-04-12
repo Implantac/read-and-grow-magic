@@ -31,22 +31,19 @@ export default function HeroSection({ onLogin, onWhatsApp }: Props) {
         <div className="absolute inset-0 bg-[linear-gradient(hsl(var(--border)/0.3)_1px,transparent_1px),linear-gradient(90deg,hsl(var(--border)/0.3)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" />
       </div>
 
-      <div className="container mx-auto px-4 pt-8 pb-12 md:pt-12 md:pb-16 lg:px-8">
-        {/* Top badge */}
-        <div className="text-center animate-fade-in">
-          <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-sm font-medium gap-2 border border-border/50 bg-card/80 backdrop-blur-sm">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
-            </span>
-            Implantação assistida — vagas limitadas em Abril
-          </Badge>
-        </div>
-
+      <div className="container mx-auto px-4 pt-10 pb-12 md:pt-16 md:pb-16 lg:px-8">
         {/* Two-column layout */}
-        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-start lg:items-center max-w-6xl mx-auto">
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center max-w-6xl mx-auto">
           {/* Left - Copy */}
           <div className="text-center lg:text-left animate-fade-in">
+            <Badge variant="secondary" className="mb-5 px-4 py-1.5 text-sm font-medium gap-2 border border-border/50 bg-card/80 backdrop-blur-sm inline-flex">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
+              </span>
+              Implantação assistida — vagas limitadas
+            </Badge>
+
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.5rem] xl:text-[2.75rem] font-extrabold tracking-tight mb-5 leading-[1.15]">
               Controle total da sua <span className="text-gradient-primary">operação</span> em uma única plataforma.
             </h1>
