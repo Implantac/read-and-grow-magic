@@ -1,71 +1,128 @@
+import { useMemo } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Progress } from '@/components/ui/progress';
 import { useProductCosts } from '@/hooks/useProductCosts';
 import { useSupplyStock } from '@/hooks/useSupplyStock';
 import { useIndustrialAlerts } from '@/hooks/useIndustrialAlerts';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
+import { useTimeEntries } from '@/hooks/useTimeEntries';
 import { KPICard } from '@/components/shared/KPICard';
-import { DollarSign, TrendingUp, AlertTriangle, Factory, Package, Gauge, CheckCircle, XCircle } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line, CartesianGrid } from 'recharts';
+import { DollarSign, TrendingUp, AlertTriangle, Factory, Package, Gauge, CheckCircle, XCircle, Clock, Users, Activity, Zap } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line, CartesianGrid, AreaChart, Area } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { differenceInDays, differenceInMinutes, format, parseISO, subDays } from 'date-fns';
 
 export default function IndustrialDashboard() {
   const { costs, avgMargin, totalRevenue, totalCostSum, lowMarginProducts, highCostProducts } = useProductCosts();
   const { supplies, lowStockItems } = useSupplyStock();
   const { activeAlerts, resolveAlert } = useIndustrialAlerts();
   const { orders: productionOrders } = useProductionOrders();
+  const { entries } = useTimeEntries();
 
+  // === PRODUCTION KPIs ===
+  const totalOPs = productionOrders.length;
+  const completedOPs = productionOrders.filter(o => o.status === 'completed').length;
+  const inProgressOPs = productionOrders.filter(o => o.status === 'in_progress').length;
+  const plannedOPs = productionOrders.filter(o => o.status === 'planned').length;
+  const pausedOPs = productionOrders.filter(o => o.status === 'paused').length;
+  const lateOPs = productionOrders.filter(o => o.due_date && differenceInDays(new Date(), parseISO(o.due_date)) > 0 && !['completed', 'cancelled'].includes(o.status)).length;
+
+  // On-time delivery rate
+  const completedWithDates = productionOrders.filter(o => o.status === 'completed' && o.completed_date && o.due_date);
+  const onTimeCount = completedWithDates.filter(o => new Date(o.completed_date!) <= new Date(o.due_date!)).length;
+  const onTimePct = completedWithDates.length > 0 ? (onTimeCount / completedWithDates.length) * 100 : 0;
+
+  // OEE approximation (availability * performance * quality)
+  const totalEstimated = productionOrders.reduce((s, o) => s + o.estimated_time_minutes, 0);
+  const totalRealized = productionOrders.reduce((s, o) => s + o.realized_time_minutes, 0);
+  const totalProduced = productionOrders.reduce((s, o) => s + o.produced_quantity, 0);
+  const totalTarget = productionOrders.filter(o => ['completed', 'in_progress'].includes(o.status)).reduce((s, o) => s + o.quantity, 0);
+  const totalRejected = productionOrders.reduce((s, o) => s + o.rejected_quantity, 0);
+  const availability = totalEstimated > 0 ? Math.min((totalRealized / totalEstimated), 1) : 0;
+  const performance = totalTarget > 0 ? Math.min((totalProduced / totalTarget), 1) : 0;
+  const quality = totalProduced > 0 ? ((totalProduced - totalRejected) / totalProduced) : 1;
+  const oee = (availability * performance * quality) * 100;
+
+  // Average lead time (days from start to completion)
+  const avgLeadTime = useMemo(() => {
+    const completed = productionOrders.filter(o => o.start_date && o.completed_date);
+    if (completed.length === 0) return 0;
+    const totalDays = completed.reduce((s, o) => s + differenceInDays(new Date(o.completed_date!), new Date(o.start_date!)), 0);
+    return totalDays / completed.length;
+  }, [productionOrders]);
+
+  // Throughput trend (last 14 days)
+  const throughputTrend = useMemo(() => {
+    const days: { date: string; completed: number; produced: number }[] = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = subDays(new Date(), i);
+      const dayStr = format(d, 'yyyy-MM-dd');
+      const label = format(d, 'dd/MM');
+      const dayCompleted = productionOrders.filter(o => o.completed_date && format(parseISO(o.completed_date), 'yyyy-MM-dd') === dayStr).length;
+      const dayProduced = productionOrders.filter(o => o.completed_date && format(parseISO(o.completed_date), 'yyyy-MM-dd') === dayStr).reduce((s, o) => s + o.produced_quantity, 0);
+      days.push({ date: label, completed: dayCompleted, produced: dayProduced });
+    }
+    return days;
+  }, [productionOrders]);
+
+  // Efficiency by sector
+  const sectorEfficiency = useMemo(() => {
+    const sectors = [...new Set(productionOrders.map(o => o.sector || o.work_center).filter(Boolean))];
+    return sectors.map(sector => {
+      const sOPs = productionOrders.filter(o => (o.sector || o.work_center) === sector);
+      const sCompleted = sOPs.filter(o => o.status === 'completed').length;
+      const sTotal = sOPs.length;
+      const sProduced = sOPs.reduce((s, o) => s + o.produced_quantity, 0);
+      const sRejected = sOPs.reduce((s, o) => s + o.rejected_quantity, 0);
+      const sQuality = sProduced > 0 ? ((sProduced - sRejected) / sProduced) * 100 : 100;
+      return { sector: sector!, ops: sTotal, completed: sCompleted, efficiency: sTotal > 0 ? (sCompleted / sTotal) * 100 : 0, quality: sQuality, produced: sProduced };
+    }).sort((a, b) => b.ops - a.ops);
+  }, [productionOrders]);
+
+  // OP status distribution
+  const statusDistribution = [
+    { name: 'Planejadas', value: plannedOPs, color: 'hsl(var(--info))' },
+    { name: 'Em Produção', value: inProgressOPs, color: 'hsl(var(--primary))' },
+    { name: 'Pausadas', value: pausedOPs, color: 'hsl(var(--warning))' },
+    { name: 'Concluídas', value: completedOPs, color: 'hsl(var(--success, 142 71% 45%))' },
+  ].filter(d => d.value > 0);
+
+  // Cost data
   const totalProfit = totalRevenue - totalCostSum;
   const overallMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
   const supplyValue = supplies.reduce((s, i) => s + i.total_value, 0);
-  const completedOPs = productionOrders.filter(o => o.status === 'completed').length;
-  const inProgressOPs = productionOrders.filter(o => o.status === 'in_progress').length;
 
-  // Cost breakdown chart
   const costBreakdown = costs.length > 0 ? [
     { name: 'Mat. Prima', value: costs.reduce((s, c) => s + Number(c.raw_material_cost), 0) },
     { name: 'Mão de Obra', value: costs.reduce((s, c) => s + Number(c.labor_cost), 0) },
     { name: 'Operacional', value: costs.reduce((s, c) => s + Number(c.operational_cost), 0) },
   ] : [];
-
   const COLORS = ['hsl(var(--primary))', 'hsl(var(--warning))', 'hsl(var(--info))'];
 
-  // Top 10 products by margin
   const topProducts = [...costs].sort((a, b) => b.profit_margin - a.profit_margin).slice(0, 10).map(c => ({
     name: c.product_name.length > 15 ? c.product_name.slice(0, 15) + '...' : c.product_name,
     margem: Number(c.profit_margin.toFixed(1)),
-    custo: Number(c.total_cost),
-    venda: Number(c.sale_price),
   }));
 
-  // Margin distribution
-  const marginDist = [
-    { name: '< 0%', value: costs.filter(c => c.profit_margin < 0).length },
-    { name: '0-15%', value: costs.filter(c => c.profit_margin >= 0 && c.profit_margin < 15).length },
-    { name: '15-30%', value: costs.filter(c => c.profit_margin >= 15 && c.profit_margin < 30).length },
-    { name: '30-50%', value: costs.filter(c => c.profit_margin >= 30 && c.profit_margin < 50).length },
-    { name: '> 50%', value: costs.filter(c => c.profit_margin >= 50).length },
-  ].filter(d => d.value > 0);
-
-  const MARGIN_COLORS = ['#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#8b5cf6'];
-
+  // Alerts
   const allAlerts = [
+    ...productionOrders.filter(o => o.due_date && differenceInDays(new Date(), parseISO(o.due_date)) > 0 && !['completed', 'cancelled'].includes(o.status)).map(o => ({
+      id: `late-${o.id}`, type: 'Atraso', severity: 'critical' as const,
+      title: `OP ${o.order_number} atrasada ${differenceInDays(new Date(), parseISO(o.due_date!))}d`, detail: o.product_name,
+    })),
     ...lowStockItems.map(s => ({
       id: `stock-${s.id}`, type: 'Falta de Material', severity: 'critical' as const,
       title: `${s.name} em estoque crítico`, detail: `${s.current_quantity} ${s.unit} (mín: ${s.min_quantity})`,
     })),
     ...lowMarginProducts.map(c => ({
       id: `margin-${c.id}`, type: 'Margem Baixa', severity: 'warning' as const,
-      title: `${c.product_name} com margem de ${c.profit_margin.toFixed(1)}%`, detail: `Custo: R$ ${c.total_cost.toFixed(2)} | Venda: R$ ${c.sale_price.toFixed(2)}`,
-    })),
-    ...highCostProducts.map(c => ({
-      id: `cost-${c.id}`, type: 'Custo Elevado', severity: 'warning' as const,
-      title: `${c.product_name} com custo elevado`, detail: `Custo: R$ ${c.total_cost.toFixed(2)} (>${(c.sale_price * 0.8).toFixed(2)})`,
+      title: `${c.product_name} com margem de ${c.profit_margin.toFixed(1)}%`, detail: `Custo: R$ ${c.total_cost.toFixed(2)}`,
     })),
     ...activeAlerts.map(a => ({
       id: a.id, type: a.alert_type, severity: a.severity as any,
@@ -74,39 +131,112 @@ export default function IndustrialDashboard() {
   ];
 
   const severityConfig: Record<string, { color: string; icon: React.ReactNode }> = {
-    critical: { color: 'bg-red-100 text-red-800', icon: <XCircle className="h-4 w-4 text-destructive" /> },
-    warning: { color: 'bg-yellow-100 text-yellow-800', icon: <AlertTriangle className="h-4 w-4 text-warning" /> },
-    info: { color: 'bg-blue-100 text-blue-800', icon: <CheckCircle className="h-4 w-4 text-info" /> },
+    critical: { color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300', icon: <XCircle className="h-4 w-4 text-destructive" /> },
+    warning: { color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300', icon: <AlertTriangle className="h-4 w-4 text-warning" /> },
+    info: { color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300', icon: <CheckCircle className="h-4 w-4 text-info" /> },
   };
-
-  if (costs.length === 0 && supplies.length === 0) {
-    return (
-      <PageContainer>
-        <PageHeader title="Dashboard Industrial" description="Controle total de custo, lucro e eficiência produtiva" />
-        <Card><CardContent className="py-12 text-center">
-          <Factory className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-          <h3 className="text-lg font-semibold mb-2">Cadastre custos e insumos</h3>
-          <p className="text-muted-foreground">Acesse "Custo e Lucro" e "Estoque de Insumos" para começar a análise.</p>
-        </CardContent></Card>
-      </PageContainer>
-    );
-  }
 
   return (
     <PageContainer>
-      <PageHeader title="Dashboard Industrial" description="Controle total de custo, lucro e eficiência produtiva" />
+      <PageHeader title="Dashboard Industrial" description="Visão completa: produção, eficiência, custos e alertas" />
 
-      {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-6">
-        <KPICard title="Receita Total" value={`R$ ${(totalRevenue / 1000).toFixed(1)}k`} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="Custo Total" value={`R$ ${(totalCostSum / 1000).toFixed(1)}k`} icon={<Factory className="h-5 w-5" />} accentColor="info" index={1} />
-        <KPICard title="Lucro" value={`R$ ${(totalProfit / 1000).toFixed(1)}k`} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={2} />
-        <KPICard title="Margem Geral" value={`${overallMargin.toFixed(1)}%`} icon={<Gauge className="h-5 w-5" />} accentColor={overallMargin >= 20 ? 'success' : 'warning'} index={3} />
-        <KPICard title="Estoque Insumos" value={`R$ ${(supplyValue / 1000).toFixed(1)}k`} icon={<Package className="h-5 w-5" />} accentColor="info" index={4} />
-        <KPICard title="Alertas" value={allAlerts.length} icon={<AlertTriangle className="h-5 w-5" />} accentColor={allAlerts.length > 0 ? 'warning' : 'success'} index={5} />
+      {/* Production KPIs Row */}
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
+        <KPICard title="OEE" value={`${oee.toFixed(0)}%`} icon={<Gauge className="h-5 w-5" />} accentColor={oee >= 60 ? 'success' : oee >= 40 ? 'warning' : 'danger'} index={0} />
+        <KPICard title="Em Produção" value={inProgressOPs} icon={<Factory className="h-5 w-5" />} accentColor="primary" index={1} />
+        <KPICard title="Na Fila" value={plannedOPs} icon={<Clock className="h-5 w-5" />} accentColor="info" index={2} />
+        <KPICard title="Atrasadas" value={lateOPs} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={3} />
+        <KPICard title="Prazo %" value={`${onTimePct.toFixed(0)}%`} icon={<CheckCircle className="h-5 w-5" />} accentColor={onTimePct >= 80 ? 'success' : 'warning'} index={4} />
+        <KPICard title="Lead Time" value={`${avgLeadTime.toFixed(1)}d`} icon={<Activity className="h-5 w-5" />} accentColor="info" index={5} />
+        <KPICard title="Qualidade" value={`${(quality * 100).toFixed(0)}%`} icon={<Zap className="h-5 w-5" />} accentColor={quality >= 0.95 ? 'success' : 'warning'} index={6} />
+        <KPICard title="Alertas" value={allAlerts.length} icon={<AlertTriangle className="h-5 w-5" />} accentColor={allAlerts.length > 0 ? 'danger' : 'success'} index={7} />
       </div>
 
-      {/* Charts Row */}
+      {/* Charts Row 1: Throughput + Status */}
+      <div className="grid md:grid-cols-3 gap-6">
+        <Card className="md:col-span-2">
+          <CardHeader><CardTitle className="flex items-center gap-2"><TrendingUp className="h-5 w-5" /> Throughput — Últimos 14 dias</CardTitle></CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={260}>
+              <AreaChart data={throughputTrend}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                <YAxis />
+                <Tooltip />
+                <Area type="monotone" dataKey="produced" name="Peças Produzidas" fill="hsl(var(--primary) / 0.2)" stroke="hsl(var(--primary))" strokeWidth={2} />
+                <Area type="monotone" dataKey="completed" name="OPs Concluídas" fill="hsl(var(--info) / 0.2)" stroke="hsl(var(--info))" strokeWidth={2} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>Status das OPs</CardTitle></CardHeader>
+          <CardContent>
+            {statusDistribution.length > 0 ? (
+              <ResponsiveContainer width="100%" height={260}>
+                <PieChart>
+                  <Pie data={statusDistribution} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
+                    {statusDistribution.map((d, idx) => <Cell key={idx} fill={d.color} />)}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : <p className="text-center py-12 text-muted-foreground">Sem OPs</p>}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Sector Efficiency */}
+      {sectorEfficiency.length > 0 && (
+        <Card>
+          <CardHeader><CardTitle className="flex items-center gap-2"><Users className="h-5 w-5" /> Eficiência por Setor</CardTitle></CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>Setor</TableHead>
+                <TableHead className="text-center">OPs</TableHead>
+                <TableHead className="text-center">Concluídas</TableHead>
+                <TableHead className="text-center">Peças</TableHead>
+                <TableHead>Eficiência</TableHead>
+                <TableHead>Qualidade</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {sectorEfficiency.map(s => (
+                  <TableRow key={s.sector}>
+                    <TableCell className="font-medium">{s.sector}</TableCell>
+                    <TableCell className="text-center">{s.ops}</TableCell>
+                    <TableCell className="text-center">{s.completed}</TableCell>
+                    <TableCell className="text-center">{s.produced.toLocaleString()}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Progress value={s.efficiency} className="w-20 h-2" />
+                        <span className="text-sm">{s.efficiency.toFixed(0)}%</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={cn(s.quality >= 95 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300')}>
+                        {s.quality.toFixed(1)}%
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Financial Row */}
+      <div className="grid gap-4 md:grid-cols-5">
+        <KPICard title="Receita" value={`R$ ${(totalRevenue / 1000).toFixed(1)}k`} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Custo" value={`R$ ${(totalCostSum / 1000).toFixed(1)}k`} icon={<Factory className="h-5 w-5" />} accentColor="info" index={1} />
+        <KPICard title="Lucro" value={`R$ ${(totalProfit / 1000).toFixed(1)}k`} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={2} />
+        <KPICard title="Margem" value={`${overallMargin.toFixed(1)}%`} icon={<Gauge className="h-5 w-5" />} accentColor={overallMargin >= 20 ? 'success' : 'warning'} index={3} />
+        <KPICard title="Insumos" value={`R$ ${(supplyValue / 1000).toFixed(1)}k`} icon={<Package className="h-5 w-5" />} accentColor="info" index={4} />
+      </div>
+
+      {/* Charts Row 2: Costs + Top Products */}
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
           <CardHeader><CardTitle>Composição de Custos</CardTitle></CardHeader>
@@ -121,50 +251,36 @@ export default function IndustrialDashboard() {
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
-            ) : <p className="text-center py-8 text-muted-foreground">Sem dados</p>}
+            ) : <p className="text-center py-8 text-muted-foreground">Cadastre custos para ver</p>}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader><CardTitle>Distribuição de Margens</CardTitle></CardHeader>
-          <CardContent>
-            {marginDist.length > 0 ? (
+        {topProducts.length > 0 && (
+          <Card>
+            <CardHeader><CardTitle>Top 10 Produtos por Margem</CardTitle></CardHeader>
+            <CardContent>
               <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie data={marginDist} cx="50%" cy="50%" outerRadius={80} dataKey="value" label>
-                    {marginDist.map((_, idx) => <Cell key={idx} fill={MARGIN_COLORS[idx]} />)}
-                  </Pie>
+                <BarChart data={topProducts} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 11 }} />
                   <Tooltip />
-                  <Legend />
-                </PieChart>
+                  <Bar dataKey="margem" fill="hsl(var(--primary))" name="Margem %" radius={[0, 4, 4, 0]} />
+                </BarChart>
               </ResponsiveContainer>
-            ) : <p className="text-center py-8 text-muted-foreground">Sem dados</p>}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
-
-      {/* Top Products */}
-      {topProducts.length > 0 && (
-        <Card>
-          <CardHeader><CardTitle>Top 10 Produtos por Margem</CardTitle></CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={topProducts} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(v: number) => v.toFixed(1)} />
-                <Bar dataKey="margem" fill="hsl(var(--primary))" name="Margem %" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Alerts */}
       {allAlerts.length > 0 && (
-        <Card className="border-warning/30">
-          <CardHeader><CardTitle className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-warning" /> Alertas Inteligentes ({allAlerts.length})</CardTitle></CardHeader>
+        <Card className="border-destructive/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-destructive" /> Alertas Inteligentes ({allAlerts.length})
+            </CardTitle>
+          </CardHeader>
           <CardContent>
             <Table>
               <TableHeader><TableRow>
