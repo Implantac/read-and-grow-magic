@@ -705,14 +705,27 @@ async function executeAcao(supabase: any, args: any, user_id?: string) {
     };
   }
   const params = args.parametros || {};
+  const logAction = async (actionName: string, result: string) => {
+    if (user_id) {
+      await supabase.from("ai_action_logs").insert({
+        user_id,
+        action_type: "execution",
+        module: args.modulo,
+        action_name: actionName,
+        parameters: params,
+        context: JSON.stringify({ modulo: args.modulo }),
+        result,
+      }).catch(() => {});
+    }
+  };
+
   switch (args.acao) {
     case "registrar_pagamento": {
       if (!params.id) return { erro: "ID da conta não informado" };
       const table = params.tipo === "receber" ? "accounts_receivable" : "accounts_payable";
       const { error } = await supabase.from(table).update({ status: "paid", payment_date: new Date().toISOString().split("T")[0], paid_amount: params.valor }).eq("id", params.id);
       if (error) return { erro: error.message };
-      // Log action
-      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: registrar_pagamento | table=${table} | id=${params.id} | valor=${params.valor}`, metadata: { action: "registrar_pagamento", params } });
+      await logAction("registrar_pagamento", "sucesso");
       return { status: "sucesso", mensagem: "✅ Pagamento registrado com sucesso." };
     }
     case "adiar_vencimento": {
@@ -720,7 +733,7 @@ async function executeAcao(supabase: any, args: any, user_id?: string) {
       const table = params.tipo === "receber" ? "accounts_receivable" : "accounts_payable";
       const { error } = await supabase.from(table).update({ due_date: params.nova_data }).eq("id", params.id);
       if (error) return { erro: error.message };
-      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: adiar_vencimento | table=${table} | id=${params.id} | nova_data=${params.nova_data}`, metadata: { action: "adiar_vencimento", params } });
+      await logAction("adiar_vencimento", "sucesso");
       return { status: "sucesso", mensagem: `✅ Vencimento adiado para ${params.nova_data}.` };
     }
     case "criar_conta_pagar": {
@@ -733,7 +746,7 @@ async function executeAcao(supabase: any, args: any, user_id?: string) {
         status: "pending",
       });
       if (error) return { erro: error.message };
-      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: criar_conta_pagar | valor=${params.valor} | fornecedor=${params.fornecedor}`, metadata: { action: "criar_conta_pagar", params } });
+      await logAction("criar_conta_pagar", "sucesso");
       return { status: "sucesso", mensagem: `✅ Conta a pagar criada: R$ ${(params.valor || 0).toLocaleString("pt-BR")} para ${params.fornecedor || "N/A"}.` };
     }
     case "criar_conta_receber": {
@@ -746,28 +759,28 @@ async function executeAcao(supabase: any, args: any, user_id?: string) {
         status: "pending",
       });
       if (error) return { erro: error.message };
-      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: criar_conta_receber | valor=${params.valor} | cliente=${params.cliente}`, metadata: { action: "criar_conta_receber", params } });
+      await logAction("criar_conta_receber", "sucesso");
       return { status: "sucesso", mensagem: `✅ Conta a receber criada: R$ ${(params.valor || 0).toLocaleString("pt-BR")} de ${params.cliente || "N/A"}.` };
     }
     case "alterar_status_pedido": {
       if (!params.id || !params.novo_status) return { erro: "ID e novo status obrigatórios" };
       const { error } = await supabase.from("orders").update({ status: params.novo_status }).eq("id", params.id);
       if (error) return { erro: error.message };
-      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: alterar_status_pedido | id=${params.id} | status=${params.novo_status}`, metadata: { action: "alterar_status_pedido", params } });
+      await logAction("alterar_status_pedido", "sucesso");
       return { status: "sucesso", mensagem: `✅ Pedido atualizado para "${params.novo_status}".` };
     }
     case "alterar_status_op": {
       if (!params.id || !params.novo_status) return { erro: "ID e novo status obrigatórios" };
       const { error } = await supabase.from("production_orders").update({ status: params.novo_status }).eq("id", params.id);
       if (error) return { erro: error.message };
-      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: alterar_status_op | id=${params.id} | status=${params.novo_status}`, metadata: { action: "alterar_status_op", params } });
+      await logAction("alterar_status_op", "sucesso");
       return { status: "sucesso", mensagem: `✅ OP atualizada para "${params.novo_status}".` };
     }
     case "priorizar_op": {
       if (!params.id) return { erro: "ID da OP não informado" };
       const { error } = await supabase.from("production_orders").update({ priority: params.prioridade || "urgent" }).eq("id", params.id);
       if (error) return { erro: error.message };
-      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: priorizar_op | id=${params.id} | prioridade=${params.prioridade || "urgent"}`, metadata: { action: "priorizar_op", params } });
+      await logAction("priorizar_op", "sucesso");
       return { status: "sucesso", mensagem: `✅ OP priorizada como "${params.prioridade || "urgent"}".` };
     }
     case "ajustar_estoque": {
@@ -777,7 +790,6 @@ async function executeAcao(supabase: any, args: any, user_id?: string) {
       const newStock = (prod.stock_current || 0) + (params.quantidade || 0);
       const { error } = await supabase.from("products").update({ stock_current: newStock }).eq("id", params.product_id);
       if (error) return { erro: error.message };
-      // Create movement
       await supabase.from("stock_movements").insert({
         document_number: `IA-ADJ-${Date.now()}`,
         product_id: prod.id,
@@ -790,7 +802,7 @@ async function executeAcao(supabase: any, args: any, user_id?: string) {
         source: "erp",
         notes: params.motivo || "Ajuste via IA Executiva",
       });
-      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: ajustar_estoque | product=${prod.name} | qty=${params.quantidade} | new_stock=${newStock}`, metadata: { action: "ajustar_estoque", params } });
+      await logAction("ajustar_estoque", "sucesso");
       return { status: "sucesso", mensagem: `✅ Estoque de "${prod.name}" ajustado: ${prod.stock_current} → ${newStock} unidades.` };
     }
     default: return { erro: "Ação não implementada" };
