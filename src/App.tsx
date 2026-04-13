@@ -130,6 +130,9 @@ const MRPPage = lazy(() => import("./pages/producao/MRPPage"));
 const BIIndustrialPage = lazy(() => import("./pages/producao/BIIndustrial"));
 const DigitalTwinPage = lazy(() => import("./pages/producao/DigitalTwin"));
 const APSPageComponent = lazy(() => import("./pages/producao/APSPage"));
+const IoTDashboardPage = lazy(() => import("./pages/producao/IoTDashboard"));
+const OEEDashboardPage = lazy(() => import("./pages/producao/OEEDashboard"));
+const MLPredictionsPage = lazy(() => import("./pages/producao/MLPredictions"));
 
 // Operational Flow
 const OperationalDashboardPage = lazy(() => import("./pages/operacional/OperationalDashboard"));
@@ -288,6 +291,9 @@ const App = () => (
               <Route path="/producao/bi" element={<BIIndustrialPage />} />
               <Route path="/producao/digital-twin" element={<DigitalTwinPage />} />
               <Route path="/producao/aps" element={<APSPageComponent />} />
+              <Route path="/producao/iot" element={<IoTDashboardPage />} />
+              <Route path="/producao/oee" element={<OEEDashboardPage />} />
+              <Route path="/producao/ml" element={<MLPredictionsPage />} />
 
               {/* Operational Flow Module */}
               <Route path="/operacional/dashboard" element={<OperationalDashboardPage />} />
