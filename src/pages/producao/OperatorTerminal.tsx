@@ -22,9 +22,11 @@ export default function OperatorTerminalPage() {
   const { entries, loading, create, update } = useTimeEntries();
   const { orders, update: updateOrder } = useProductionOrders();
   const { steps } = useProductionSteps();
+  const { activeMachines } = useProductionMachines();
   const [operatorName, setOperatorName] = useState(() => localStorage.getItem('operator_name') || '');
   const [selectedOrderId, setSelectedOrderId] = useState('');
   const [selectedStep, setSelectedStep] = useState('');
+  const [selectedMachineId, setSelectedMachineId] = useState('');
   const [producedQty, setProducedQty] = useState(0);
   const [rejectedQty, setRejectedQty] = useState(0);
   const [now, setNow] = useState(new Date());
