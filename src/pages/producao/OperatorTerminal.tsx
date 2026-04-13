@@ -392,9 +392,64 @@ export default function OperatorTerminalPage() {
                   <CheckCircle className="h-7 w-7 mr-2" /> FINALIZAR
                 </Button>
               </div>
+
+              {/* Report Problem */}
+              <Button
+                size="lg"
+                variant="destructive"
+                className="w-full h-14 text-lg font-bold"
+                onClick={() => setProblemOpen(true)}
+              >
+                <AlertOctagon className="h-6 w-6 mr-2" /> REPORTAR PROBLEMA
+              </Button>
             </CardContent>
           </Card>
         )}
+
+        {/* Report Problem Dialog */}
+        <Dialog open={problemOpen} onOpenChange={setProblemOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertOctagon className="h-5 w-5 text-destructive" /> Reportar Problema
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Categoria</label>
+                <Select value={problemCategory} onValueChange={setProblemCategory}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="machine_stop">🔧 Parada de Máquina</SelectItem>
+                    <SelectItem value="quality_issue">🔍 Problema de Qualidade</SelectItem>
+                    <SelectItem value="material_shortage">📦 Falta de Material</SelectItem>
+                    <SelectItem value="safety">⚠️ Segurança</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Descrição do problema</label>
+                <Textarea
+                  value={problemDesc}
+                  onChange={e => setProblemDesc(e.target.value)}
+                  placeholder="Descreva o que aconteceu..."
+                  className="min-h-[100px]"
+                />
+              </div>
+              {currentEntry && (
+                <p className="text-sm text-muted-foreground">
+                  ⚠️ A produção será pausada automaticamente ao reportar.
+                </p>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setProblemOpen(false)}>Cancelar</Button>
+              <Button variant="destructive" onClick={handleReportProblem} disabled={reportingProblem}>
+                {reportingProblem ? 'Enviando...' : 'Enviar Problema'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Today's summary — enhanced */}
         <Card>
