@@ -60,7 +60,7 @@ export default function DigitalTwinPage() {
       sectors[sector].current += Math.max(0, o.quantity - o.produced_quantity);
     });
     capacities.forEach(c => {
-      const sector = c.sector || c.name || 'Geral';
+      const sector = c.sector || 'Geral';
       if (!sectors[sector]) sectors[sector] = { current: 0, capacity: 0 };
       sectors[sector].capacity += (c.capacity_per_hour || 0) * 8 * 22; // monthly
     });

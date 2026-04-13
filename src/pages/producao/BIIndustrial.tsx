@@ -34,7 +34,7 @@ export default function BIIndustrialPage() {
         revenue: c.sale_price,
         cost: c.total_cost,
         profit: c.sale_price - c.total_cost,
-        margin: c.margin_pct,
+        margin: c.profit_margin,
       }))
       .sort((a, b) => b.profit - a.profit)
       .slice(0, 15);
@@ -105,10 +105,10 @@ export default function BIIndustrialPage() {
       { label: '30%+', count: 0 },
     ];
     costs.forEach(c => {
-      if (c.margin_pct < 0) brackets[0].count++;
-      else if (c.margin_pct < 10) brackets[1].count++;
-      else if (c.margin_pct < 20) brackets[2].count++;
-      else if (c.margin_pct < 30) brackets[3].count++;
+      if (c.profit_margin < 0) brackets[0].count++;
+      else if (c.profit_margin < 10) brackets[1].count++;
+      else if (c.profit_margin < 20) brackets[2].count++;
+      else if (c.profit_margin < 30) brackets[3].count++;
       else brackets[4].count++;
     });
     return brackets;
@@ -187,7 +187,7 @@ export default function BIIndustrialPage() {
                         <TableCell className="font-medium">{p.product_name}</TableCell>
                         <TableCell className="text-right">{fmt(p.sale_price)}</TableCell>
                         <TableCell className="text-right">{fmt(p.total_cost)}</TableCell>
-                        <TableCell className="text-right"><span className={cn('font-bold', p.margin_pct < 0 ? 'text-destructive' : 'text-warning')}>{p.margin_pct.toFixed(1)}%</span></TableCell>
+                        <TableCell className="text-right"><span className={cn('font-bold', p.profit_margin < 0 ? 'text-destructive' : 'text-warning')}>{p.profit_margin.toFixed(1)}%</span></TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
