@@ -8,17 +8,20 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useTimeEntries } from '@/hooks/useTimeEntries';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { useProductionMachines } from '@/hooks/useProductionMachines';
+import { useProductionEvents } from '@/hooks/useProductionEvents';
 import { supabase } from '@/integrations/supabase/client';
 import { Users, Factory, AlertTriangle, TrendingUp, Activity, Radio, Cpu, Zap } from 'lucide-react';
 import { differenceInMinutes } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Progress } from '@/components/ui/progress';
+import ShopFloorEventFeed from '@/components/producao/ShopFloorEventFeed';
 
 export default function ShopFloorDashboardPage() {
   const { entries, loading, refetch } = useTimeEntries();
   const { orders, refetch: refetchOrders } = useProductionOrders();
   const { machines, runningMachines, stoppedMachines } = useProductionMachines();
+  const { todayEvents, criticalEvents } = useProductionEvents(30);
   const [now, setNow] = useState(new Date());
   const [realtimeActive, setRealtimeActive] = useState(false);
 
@@ -125,7 +128,7 @@ export default function ShopFloorDashboardPage() {
         <KPICard title="Máquinas Rodando" value={runningMachines.length} icon={<Cpu className="h-5 w-5" />} accentColor="success" index={1} />
         <KPICard title="Pausados" value={pausedEntries.length} icon={<Activity className="h-5 w-5" />} accentColor="warning" index={2} />
         <KPICard title="Peças Hoje" value={totalProducedToday} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={3} />
-        <KPICard title="Gargalos" value={bottlenecks.length} icon={<Zap className="h-5 w-5" />} accentColor={bottlenecks.length > 0 ? 'danger' : 'success'} index={4} />
+        <KPICard title="Eventos Críticos" value={criticalEvents.length} icon={<Zap className="h-5 w-5" />} accentColor={criticalEvents.length > 0 ? 'danger' : 'success'} index={4} />
       </div>
 
       {allAlerts.length > 0 && (
@@ -141,7 +144,6 @@ export default function ShopFloorDashboardPage() {
         </Card>
       )}
 
-      {/* Machines Panel */}
       {machines.length > 0 && (
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><Cpu className="h-4 w-4" /> Status das Máquinas</CardTitle></CardHeader>
@@ -155,9 +157,7 @@ export default function ShopFloorDashboardPage() {
                     {m.status === 'running' ? '▶ Rodando' : m.status === 'available' ? '● Disponível' : m.status === 'maintenance' ? '🔧 Manutenção' : '⏸ Parada'}
                   </Badge>
                   {m.current_operator && <p className="text-xs mt-1 truncate">{m.current_operator}</p>}
-                  {m.capacity_per_hour > 0 && (
-                    <p className="text-xs text-muted-foreground">{m.capacity_per_hour} un/h</p>
-                  )}
+                  {m.capacity_per_hour > 0 && <p className="text-xs text-muted-foreground">{m.capacity_per_hour} un/h</p>}
                 </div>
               ))}
             </div>
@@ -200,6 +200,9 @@ export default function ShopFloorDashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Event Feed */}
+      <ShopFloorEventFeed events={todayEvents} />
 
       <Card>
         <CardHeader><CardTitle className="text-base">Operadores — Detalhamento</CardTitle></CardHeader>
