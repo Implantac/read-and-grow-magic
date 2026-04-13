@@ -15,7 +15,7 @@ export default function OEEDashboard() {
   const { orders } = useProductionOrders();
   const { machines } = useProductionMachines();
   const { capacities } = useProductionCapacity();
-  const { timeEntries } = useTimeEntries();
+  const { entries: timeEntries } = useTimeEntries();
 
   const oeeData = useMemo(() => {
     // Availability: (Running Time / Planned Production Time) × 100

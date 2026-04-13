@@ -206,7 +206,7 @@ export default function MLPredictions() {
                       stroke="hsl(var(--primary))"
                       fill="hsl(var(--primary)/0.2)"
                       name="Quantidade"
-                      strokeDasharray={(entry: any) => entry?.week?.includes('*') ? '5 5' : '0'}
+                      strokeDasharray="0"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
