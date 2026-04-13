@@ -110,13 +110,15 @@ export default function OperatorTerminalPage() {
     const order = orders.find(o => o.id === selectedOrderId);
     if (!order) return;
     const stepName = steps.find(s => s.id === selectedStep)?.name || order.work_center || 'Produção';
+    const machine = activeMachines.find(m => m.id === selectedMachineId);
     await create({
       production_order_id: selectedOrderId, order_number: order.order_number,
       operation_id: selectedStep || null, operation_name: stepName, operator: operatorName,
       start_time: new Date().toISOString(), end_time: null, paused_time: 0,
       produced_quantity: 0, rejected_quantity: 0, status: 'started', notes: null,
       work_center: order.work_center || order.sector,
-    });
+      machine_id: machine?.id || null, machine_name: machine?.name || null,
+    } as any);
     if (order.status === 'planned') {
       await updateOrder(order.id, { status: 'in_progress', start_date: new Date().toISOString() });
     }
