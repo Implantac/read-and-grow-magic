@@ -211,6 +211,7 @@ export default function PCPPanel() {
           <GanttTimeline orders={productionOrders} />
         </TabsContent>
 
+        <TabsContent value="demand" className="mt-4">
           <Card>
             <CardHeader><CardTitle>Pedidos Aguardando Produção</CardTitle></CardHeader>
             <CardContent>
