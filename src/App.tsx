@@ -133,6 +133,10 @@ const APSPageComponent = lazy(() => import("./pages/producao/APSPage"));
 const IoTDashboardPage = lazy(() => import("./pages/producao/IoTDashboard"));
 const OEEDashboardPage = lazy(() => import("./pages/producao/OEEDashboard"));
 const MLPredictionsPage = lazy(() => import("./pages/producao/MLPredictions"));
+const ProductionSectorsPage = lazy(() => import("./pages/producao/ProductionSectors"));
+const ProductionLinesPage = lazy(() => import("./pages/producao/ProductionLinesPage"));
+const ProductionResourcesPage = lazy(() => import("./pages/producao/ProductionResourcesPage"));
+const ProductionRoutesPage = lazy(() => import("./pages/producao/ProductionRoutesPage"));
 
 // Operational Flow
 const OperationalDashboardPage = lazy(() => import("./pages/operacional/OperationalDashboard"));
