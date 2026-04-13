@@ -12,12 +12,15 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const lovableKey = Deno.env.get("LOVABLE_API_KEY")!;
+    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+    if (!lovableKey) throw new Error("LOVABLE_API_KEY is not configured");
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const { action, messages } = await req.json();
 
     if (action === "chat") return await handleChat(messages, supabase, lovableKey, corsHeaders);
+    if (action === "assistant_chat") return await handleAssistantChat(messages, supabase, lovableKey, corsHeaders);
+    if (action === "daily_summary") return await handleDailySummary(supabase, lovableKey, corsHeaders);
     if (action === "generate_insights") return await handleGenerateInsights(supabase, lovableKey, corsHeaders);
     if (action === "generate_scenarios") return await handleGenerateScenarios(supabase, lovableKey, corsHeaders);
     return await handleDashboardData(supabase, corsHeaders);
