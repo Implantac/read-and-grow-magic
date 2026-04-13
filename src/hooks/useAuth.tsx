@@ -35,7 +35,8 @@ function mapSupabaseUser(user: SupabaseUser, profileName?: string, role?: string
   };
 }
 
-export function useAuth({ initialize = true }: UseAuthOptions = {}) {
+export function useAuth(options: UseAuthOptions = {}) {
+  const { initialize = true } = options;
   const { setUser, setUserRole, setActiveCompany, logout: storeLogout } = useAppStore();
   const [loading, setLoading] = useState(initialize);
 
