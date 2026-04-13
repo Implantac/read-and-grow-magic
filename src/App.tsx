@@ -281,6 +281,7 @@ const App = () => (
               <Route path="/producao/rastreabilidade" element={<ProductionTraceabilityPage />} />
               <Route path="/producao/ia" element={<AIProductionPage />} />
               <Route path="/producao/agendamento" element={<ProductionSchedulePage />} />
+              <Route path="/producao/mrp" element={<MRPPage />} />
 
               {/* Operational Flow Module */}
               <Route path="/operacional/dashboard" element={<OperationalDashboardPage />} />
