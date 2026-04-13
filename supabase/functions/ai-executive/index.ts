@@ -693,7 +693,7 @@ async function executeConsultaEstoque(supabase: any, args: any) {
   }
 }
 
-async function executeAcao(supabase: any, args: any) {
+async function executeAcao(supabase: any, args: any, user_id?: string) {
   if (!args.confirmado) {
     return {
       status: "aguardando_confirmacao",
