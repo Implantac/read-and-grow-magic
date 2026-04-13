@@ -20,7 +20,7 @@ const emptyRoute: Partial<ProductionRouteRow> = { code: '', product_id: null, pr
 
 export default function ProductionRoutesPage() {
   const { routes, loading, create, update, remove } = useProductionRoutes();
-  const { products } = useProducts();
+  const { data: products = [] } = useProducts();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<ProductionRouteRow | null>(null);
   const [form, setForm] = useState<Partial<ProductionRouteRow>>(emptyRoute);
