@@ -25,9 +25,9 @@ export default function TransformationSection() {
       <div className="container mx-auto px-4 lg:px-8">
         <div className="text-center mb-14">
           <Badge variant="outline" className="mb-5 font-medium px-4 py-1.5 text-xs">Antes vs. Depois</Badge>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight text-foreground">
             De caos operacional para{' '}
-            <span className="text-gradient-primary">controle total.</span>
+            <span className="text-primary inline">controle total.</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
             Veja a transformação real quando toda a operação está conectada em uma única plataforma inteligente.
