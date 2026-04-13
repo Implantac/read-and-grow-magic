@@ -78,6 +78,21 @@ export default function ExecutiveDashboard() {
   const [chatInput, setChatInput] = useState('');
   const [assistantInput, setAssistantInput] = useState('');
 
+  const handleAssistantSend = () => {
+    if (!assistantInput.trim() || assistantLoading) return;
+    sendAssistantMessage(assistantInput.trim());
+    setAssistantInput('');
+  };
+
+  const assistantQuickActions = [
+    { label: '💰 Resumo Financeiro', prompt: 'Qual o resumo financeiro de hoje? Saldos, vencimentos e inadimplência.' },
+    { label: '📊 Vencimentos Hoje', prompt: 'Quais contas vencem hoje? Quanto vou receber e pagar?' },
+    { label: '🛒 Status Comercial', prompt: 'Como está o comercial? Pedidos recentes, funil e metas.' },
+    { label: '🏭 Produção', prompt: 'Qual o status da produção? Ordens ativas, atrasadas e eficiência.' },
+    { label: '📦 Estoque Crítico', prompt: 'Quais produtos estão abaixo do mínimo?' },
+    { label: '⚠️ Contas Atrasadas', prompt: 'Liste todas as contas atrasadas.' },
+  ];
+
   const handleSend = () => {
     if (!chatInput.trim()) return;
     sendMessage(chatInput.trim());
