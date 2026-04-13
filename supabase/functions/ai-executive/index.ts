@@ -18,8 +18,8 @@ serve(async (req) => {
 
     const { action, messages } = await req.json();
 
-    if (action === "chat") return await handleChat(messages, supabase, lovableKey, corsHeaders);
-    if (action === "assistant_chat") return await handleAssistantChat(messages, supabase, lovableKey, corsHeaders);
+    if (action === "chat") return await handleUnifiedChat(messages, supabase, lovableKey, corsHeaders);
+    if (action === "assistant_chat") return await handleUnifiedChat(messages, supabase, lovableKey, corsHeaders);
     if (action === "daily_summary") return await handleDailySummary(supabase, lovableKey, corsHeaders);
     if (action === "generate_insights") return await handleGenerateInsights(supabase, lovableKey, corsHeaders);
     if (action === "generate_scenarios") return await handleGenerateScenarios(supabase, lovableKey, corsHeaders);
@@ -86,13 +86,11 @@ function computeKPIs(d: any) {
   const completedStatuses = ['completed', 'invoiced', 'shipped', 'delivered'];
   const now = new Date();
 
-  // Revenue
   const totalRevenue = d.orders.filter((o: any) => completedStatuses.includes(o.status)).reduce((s: number, o: any) => s + (o.total || 0), 0);
   const totalCosts = d.payables.filter((p: any) => p.status === 'paid').reduce((s: number, p: any) => s + (p.amount || 0), 0);
   const grossProfit = totalRevenue - totalCosts;
   const grossMargin = totalRevenue > 0 ? (grossProfit / totalRevenue * 100) : 0;
 
-  // Receivables & Payables
   const overdueReceivable = d.receivables.filter((r: any) => r.status === 'overdue' || (r.status === 'pending' && new Date(r.due_date) < now)).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
   const overduePayable = d.payables.filter((p: any) => p.status === 'overdue' || (p.status === 'pending' && new Date(p.due_date) < now)).reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0);
   const totalReceivable = d.receivables.filter((r: any) => r.status === 'pending').reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
@@ -102,7 +100,6 @@ function computeKPIs(d: any) {
   const lowStockProducts = d.products.filter((p: any) => p.stock_current <= p.stock_min && p.status === 'active').length;
   const defaultRate = totalReceivable > 0 ? (overdueReceivable / (totalReceivable + overdueReceivable) * 100) : 0;
 
-  // Revenue by month (last 6 months)
   const revenueByMonth: any[] = [];
   for (let i = 5; i >= 0; i--) {
     const dt = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -116,7 +113,6 @@ function computeKPIs(d: any) {
     });
   }
 
-  // Top clients
   const clientRevenue: Record<string, number> = {};
   d.orders.forEach((o: any) => {
     if (completedStatuses.includes(o.status)) {
@@ -129,13 +125,11 @@ function computeKPIs(d: any) {
   const top3Revenue = topClients.slice(0, 3).reduce((s, c) => s + c.revenue, 0);
   const concentrationPct = totalClientRevenue > 0 ? (top3Revenue / totalClientRevenue * 100) : 0;
 
-  // Expense breakdown
   const expenseByCategory: Record<string, number> = {};
   d.payables.forEach((p: any) => {
     expenseByCategory[p.category || 'Outros'] = (expenseByCategory[p.category || 'Outros'] || 0) + (p.amount || 0);
   });
 
-  // Sales rep performance
   const repPerformance: Record<string, { orders: number; revenue: number; name: string; discount: number }> = {};
   d.orders.forEach((o: any) => {
     if (o.sales_rep_id && completedStatuses.includes(o.status)) {
@@ -149,7 +143,6 @@ function computeKPIs(d: any) {
     .map(([id, v]) => ({ id, ...v, avgTicket: v.orders > 0 ? +(v.revenue / v.orders).toFixed(0) : 0, discountPct: v.revenue > 0 ? +((v.discount / (v.revenue + v.discount)) * 100).toFixed(1) : 0 }))
     .sort((a, b) => b.revenue - a.revenue).slice(0, 10);
 
-  // Funnel summary
   const funnelByStage: Record<string, { count: number; value: number }> = {};
   d.funnel.filter((f: any) => f.status === 'active' || !f.status).forEach((f: any) => {
     const stage = f.stage || 'unknown';
@@ -158,7 +151,6 @@ function computeKPIs(d: any) {
     funnelByStage[stage].value += f.value || 0;
   });
 
-  // Production
   const prodCompleted = d.production.filter((p: any) => p.status === 'completed');
   const prodInProgress = d.production.filter((p: any) => p.status === 'in_progress');
   const prodPlanned = d.production.filter((p: any) => p.status === 'planned' || p.status === 'pending');
@@ -166,7 +158,6 @@ function computeKPIs(d: any) {
     ? prodCompleted.reduce((s: number, p: any) => s + (p.produced_quantity || 0), 0) / prodCompleted.reduce((s: number, p: any) => s + (p.planned_quantity || 1), 0) * 100
     : 0;
 
-  // Cash flow projection
   const futureReceivables = d.receivables.filter((r: any) => {
     const dd = new Date(r.due_date);
     return r.status === 'pending' && dd >= now && dd <= new Date(now.getTime() + 30 * 86400000);
@@ -176,23 +167,19 @@ function computeKPIs(d: any) {
     return p.status === 'pending' && dd >= now && dd <= new Date(now.getTime() + 30 * 86400000);
   }).reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0);
 
-  // Revenue growth
   const lastTwoMonths = revenueByMonth.slice(-2);
   const revenueGrowth = lastTwoMonths.length === 2 && lastTwoMonths[0].revenue > 0
     ? ((lastTwoMonths[1].revenue - lastTwoMonths[0].revenue) / lastTwoMonths[0].revenue * 100) : 0;
 
-  // Avg ticket
   const completedOrders = d.orders.filter((o: any) => completedStatuses.includes(o.status));
   const avgTicket = completedOrders.length > 0 ? totalRevenue / completedOrders.length : 0;
 
-  // Clients at risk
   const clientsAtRisk = d.clients.filter((c: any) => {
     if (c.status !== 'active') return false;
     if (!c.last_purchase_date) return true;
     return (now.getTime() - new Date(c.last_purchase_date).getTime()) / 86400000 > 60;
   }).length;
 
-  // ── Product Margin Analysis ──
   const productMap: Record<string, { name: string; price: number; cost: number; stock: number }> = {};
   d.products.forEach((p: any) => { productMap[p.id] = { name: p.name, price: p.price || 0, cost: p.cost || 0, stock: p.stock_current || 0 }; });
 
@@ -213,21 +200,9 @@ function computeKPIs(d: any) {
   });
   productMargins.sort((a, b) => b.revenue - a.revenue);
 
-  // Top profitable & unprofitable
   const topProfitable = [...productMargins].sort((a, b) => b.margin - a.margin).slice(0, 5);
   const lowMarginProducts = productMargins.filter(p => p.marginPct < 15 && p.revenue > 0).slice(0, 5);
 
-  // ── Client margin analysis ──
-  const clientMargins: Record<string, { revenue: number; orders: number }> = {};
-  d.orders.forEach((o: any) => {
-    if (completedStatuses.includes(o.status) && o.client_name) {
-      if (!clientMargins[o.client_name]) clientMargins[o.client_name] = { revenue: 0, orders: 0 };
-      clientMargins[o.client_name].revenue += o.total || 0;
-      clientMargins[o.client_name].orders++;
-    }
-  });
-
-  // ── Revenue by region ──
   const revenueByRegion: Record<string, number> = {};
   const clientRegionMap: Record<string, string> = {};
   d.clients.forEach((c: any) => { if (c.region) clientRegionMap[c.name] = c.region; });
@@ -238,7 +213,6 @@ function computeKPIs(d: any) {
     }
   });
 
-  // ── Sales targets vs achieved ──
   const targetsSummary = d.salesTargets.reduce((acc: any, t: any) => {
     acc.target += t.target_value || 0;
     acc.achieved += t.achieved_value || 0;
@@ -246,12 +220,11 @@ function computeKPIs(d: any) {
   }, { target: 0, achieved: 0 });
   const targetAttainment = targetsSummary.target > 0 ? +(targetsSummary.achieved / targetsSummary.target * 100).toFixed(1) : 0;
 
-  // ── Auto-generate alerts ──
   const autoAlerts: any[] = [];
   if (defaultRate > 10) autoAlerts.push({ type: 'financial_risk', severity: 'critical', title: 'Inadimplência acima de 10%', description: `Taxa atual: ${defaultRate.toFixed(1)}%. Ação imediata necessária.`, metric: 'default_rate', value: defaultRate });
   if (concentrationPct > 60) autoAlerts.push({ type: 'revenue_concentration', severity: 'high', title: 'Concentração excessiva de receita', description: `Top 3 clientes representam ${concentrationPct.toFixed(0)}% da receita.`, metric: 'concentration', value: concentrationPct });
   if (revenueGrowth < -10) autoAlerts.push({ type: 'revenue_decline', severity: 'critical', title: 'Queda acentuada de receita', description: `Receita caiu ${Math.abs(revenueGrowth).toFixed(1)}% vs mês anterior.`, metric: 'revenue_growth', value: revenueGrowth });
-  if ((kpis => kpis < 0)(futureReceivables - futurePayables)) autoAlerts.push({ type: 'cash_flow_risk', severity: 'high', title: 'Fluxo de caixa negativo projetado', description: `Projeção 30d: déficit de R$ ${Math.abs(futureReceivables - futurePayables).toLocaleString('pt-BR')}.`, metric: 'cash_flow_30d', value: futureReceivables - futurePayables });
+  if ((futureReceivables - futurePayables) < 0) autoAlerts.push({ type: 'cash_flow_risk', severity: 'high', title: 'Fluxo de caixa negativo projetado', description: `Projeção 30d: déficit de R$ ${Math.abs(futureReceivables - futurePayables).toLocaleString('pt-BR')}.`, metric: 'cash_flow_30d', value: futureReceivables - futurePayables });
   if (lowStockProducts > 3) autoAlerts.push({ type: 'stock_critical', severity: 'medium', title: `${lowStockProducts} produtos abaixo do estoque mínimo`, description: 'Risco de ruptura e perda de vendas.', metric: 'low_stock', value: lowStockProducts });
   if (clientsAtRisk > 5) autoAlerts.push({ type: 'client_churn', severity: 'high', title: `${clientsAtRisk} clientes em risco de perda`, description: 'Clientes ativos sem compra há mais de 60 dias.', metric: 'clients_at_risk', value: clientsAtRisk });
   if (targetAttainment > 0 && targetAttainment < 70) autoAlerts.push({ type: 'target_risk', severity: 'high', title: 'Meta de vendas em risco', description: `Atingimento atual: ${targetAttainment}% da meta.`, metric: 'target_attainment', value: targetAttainment });
@@ -369,7 +342,6 @@ Gere insights estratégicos: { "insights": [...] }`;
   try { parsed = JSON.parse(content); } catch { parsed = { insights: [] }; }
   const insights = parsed.insights || [];
 
-  // Expire old active insights before inserting new ones
   await supabase.from("ai_executive_insights").update({ status: "expired" }).eq("status", "active");
 
   for (const ins of insights) {
@@ -453,80 +425,7 @@ RECEITA REGIÃO: ${JSON.stringify(computed.revenueByRegion)}`;
   });
 }
 
-// ─── Chat ────────────────────────────────────────────────────────
-
-async function handleChat(messages: any[], supabase: any, lovableKey: string, corsHeaders: any) {
-  const d = await fetchAllData(supabase);
-  const computed = computeKPIs(d);
-  const k = computed.kpis;
-
-  const systemPrompt = `Você é o CEO AI, diretor executivo digital de uma empresa brasileira. Responda com dados reais do sistema. Seja estratégico, direto e acionável.
-
-DADOS ATUAIS DA EMPRESA:
-📊 RECEITA E LUCRO:
-- Receita Total: R$ ${k.totalRevenue.toLocaleString('pt-BR')} | Lucro Bruto: R$ ${k.grossProfit.toLocaleString('pt-BR')} | Margem: ${k.grossMargin}%
-- Crescimento: ${k.revenueGrowth}% vs mês anterior | Ticket Médio: R$ ${k.avgTicket}
-- Meta: ${k.targetAttainment}% atingida (R$ ${k.totalAchieved?.toLocaleString('pt-BR')} de R$ ${k.totalTarget?.toLocaleString('pt-BR')})
-
-💰 FINANCEIRO:
-- A Receber: R$ ${k.totalReceivable.toLocaleString('pt-BR')} | A Pagar: R$ ${k.totalPayable.toLocaleString('pt-BR')}
-- Inadimplência: R$ ${k.overdueReceivable.toLocaleString('pt-BR')} (${k.defaultRate}%)
-- Posição Líquida: R$ ${k.netPosition.toLocaleString('pt-BR')}
-- Projeção Caixa 30d: R$ ${k.cashFlowProjection30d.toLocaleString('pt-BR')}
-
-👥 COMERCIAL:
-- Clientes Ativos: ${k.activeClients} | Em Risco: ${k.clientsAtRisk}
-- Concentração Top3: ${k.concentrationPct}%
-
-🏭 OPERACIONAL:
-- Eficiência Produção: ${k.prodEfficiency}% | Em Andamento: ${k.prodInProgress} | Planejadas: ${k.prodPlanned}
-- Estoque Baixo: ${k.lowStockProducts} produtos
-
-📦 PRODUTOS (MARGEM):
-${computed.productMargins?.slice(0, 5).map((p: any) => `- ${p.name}: Margem ${p.marginPct}% (Receita R$ ${p.revenue.toLocaleString('pt-BR')})`).join('\n') || 'Sem dados'}
-
-${computed.lowMarginProducts?.length ? `⚠️ PRODUTOS BAIXA MARGEM:\n${computed.lowMarginProducts.map((p: any) => `- ${p.name}: Margem ${p.marginPct}%`).join('\n')}` : ''}
-
-TOP CLIENTES: ${JSON.stringify(computed.topClients)}
-RECEITA MENSAL: ${JSON.stringify(computed.revenueByMonth)}
-VENDEDORES: ${JSON.stringify(computed.salesRepStats)}
-FUNIL: ${JSON.stringify(computed.funnelByStage)}
-DESPESAS: ${JSON.stringify(computed.expenseByCategory)}
-RECEITA POR REGIÃO: ${JSON.stringify(computed.revenueByRegion)}
-
-REGRAS:
-- Português brasileiro, direto, estratégico
-- Use SEMPRE dados reais acima
-- Sugira ações concretas com impacto estimado
-- Use markdown para formatação
-- Explique o "porquê" de cada recomendação (IA explicável)
-- Analise tendências, riscos e oportunidades
-- Quando perguntado sobre um vendedor, compare com a média
-- Quando perguntado sobre custos, detalhe por categoria`;
-
-  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
-      messages: [{ role: "system", content: systemPrompt }, ...messages],
-      stream: true,
-    }),
-  });
-
-  if (!resp.ok) {
-    const status = resp.status;
-    if (status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded" }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    if (status === 402) return new Response(JSON.stringify({ error: "Payment required" }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    return new Response(JSON.stringify({ error: "AI error" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-  }
-
-  return new Response(resp.body, {
-    headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
-  });
-}
-
-// ─── ERP Tools for Assistant Chat ────────────────────────────────
+// ─── ERP Tools (Unified) ────────────────────────────────────────
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
@@ -554,7 +453,7 @@ const ERP_TOOLS = [
       parameters: {
         type: "object",
         properties: {
-          tipo: { type: "string", enum: ["resumo", "clientes_ativos", "pedidos_recentes", "funil", "metas", "top_clientes", "clientes_risco"], description: "Tipo de consulta comercial" },
+          tipo: { type: "string", enum: ["resumo", "clientes_ativos", "pedidos_recentes", "funil", "metas", "top_clientes", "clientes_risco", "vendedores"], description: "Tipo de consulta comercial" },
           limite: { type: "number", description: "Limite de registros (padrão 10)" },
         },
         required: ["tipo"],
@@ -594,20 +493,36 @@ const ERP_TOOLS = [
     type: "function",
     function: {
       name: "executar_acao",
-      description: "Executa ações no ERP como registrar pagamento, alterar status. SEMPRE confirmar com usuário antes.",
+      description: "Executa ações no ERP: registrar pagamento, adiar conta, alterar status de pedido/OP, criar conta a pagar/receber, priorizar OP, ajustar estoque. SEMPRE peça confirmação ao usuário antes de executar com confirmado=true.",
       parameters: {
         type: "object",
         properties: {
           modulo: { type: "string", enum: ["financeiro", "comercial", "producao", "estoque"] },
-          acao: { type: "string", enum: ["registrar_pagamento", "criar_conta_pagar", "criar_conta_receber", "alterar_status_pedido", "alterar_status_op"] },
+          acao: { type: "string", enum: ["registrar_pagamento", "adiar_vencimento", "criar_conta_pagar", "criar_conta_receber", "alterar_status_pedido", "alterar_status_op", "priorizar_op", "ajustar_estoque"] },
           parametros: { type: "object", description: "Parâmetros da ação" },
-          confirmado: { type: "boolean", description: "Se o usuário já confirmou a ação" },
+          confirmado: { type: "boolean", description: "Se o usuário já confirmou a ação. Use false na primeira chamada para pedir confirmação." },
         },
         required: ["modulo", "acao", "parametros"],
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "analise_estrategica",
+      description: "Gera análise estratégica detalhada com KPIs, tendências e recomendações da empresa toda",
+      parameters: {
+        type: "object",
+        properties: {
+          foco: { type: "string", enum: ["geral", "financeiro", "comercial", "producao", "margem", "risco"], description: "Foco da análise" },
+        },
+        required: ["foco"],
+      },
+    },
+  },
 ];
+
+// ─── Tool Executors ─────────────────────────────────────────────
 
 async function executeConsultaFinanceiro(supabase: any, args: any) {
   const now = new Date();
@@ -702,6 +617,23 @@ async function executeConsultaComercial(supabase: any, args: any) {
       const { data } = await supabase.from("sales_funnel").select("id, client_name, stage, value, probability, status").eq("status", "active").order("value", { ascending: false }).limit(limite);
       return { oportunidades: data || [] };
     }
+    case "vendedores": {
+      const [repsRes, ordersRes] = await Promise.all([
+        supabase.from("sales_reps").select("id, name, region, status").eq("status", "active").limit(50),
+        supabase.from("orders").select("sales_rep_id, sales_rep_name, total, status").in("status", ["completed", "invoiced", "shipped", "delivered"]).limit(500),
+      ]);
+      const reps = repsRes.data || [];
+      const orders = ordersRes.data || [];
+      const repMap: Record<string, { name: string; revenue: number; orders: number }> = {};
+      orders.forEach((o: any) => {
+        if (o.sales_rep_id) {
+          if (!repMap[o.sales_rep_id]) repMap[o.sales_rep_id] = { name: o.sales_rep_name || '', revenue: 0, orders: 0 };
+          repMap[o.sales_rep_id].revenue += o.total || 0;
+          repMap[o.sales_rep_id].orders++;
+        }
+      });
+      return { vendedores: reps.map((r: any) => ({ ...r, ...(repMap[r.id] || { revenue: 0, orders: 0 }) })) };
+    }
     default: return { clientes_ativos: 0 };
   }
 }
@@ -760,31 +692,123 @@ async function executeConsultaEstoque(supabase: any, args: any) {
 
 async function executeAcao(supabase: any, args: any) {
   if (!args.confirmado) {
-    return { status: "aguardando_confirmacao", mensagem: `⚠️ Ação pendente: ${args.acao} no módulo ${args.modulo}`, detalhes: args.parametros, instrucao: "Confirme dizendo 'sim, confirmo' para executar." };
+    return {
+      status: "aguardando_confirmacao",
+      mensagem: `⚠️ **Ação pendente de confirmação**`,
+      acao: args.acao,
+      modulo: args.modulo,
+      detalhes: args.parametros,
+      instrucao: "Responda **'sim, confirmo'** para executar ou **'cancelar'** para desistir.",
+    };
   }
   const params = args.parametros || {};
   switch (args.acao) {
     case "registrar_pagamento": {
       if (!params.id) return { erro: "ID da conta não informado" };
-      const table = args.modulo === "financeiro" && params.tipo === "receber" ? "accounts_receivable" : "accounts_payable";
+      const table = params.tipo === "receber" ? "accounts_receivable" : "accounts_payable";
       const { error } = await supabase.from(table).update({ status: "paid", payment_date: new Date().toISOString().split("T")[0], paid_amount: params.valor }).eq("id", params.id);
       if (error) return { erro: error.message };
-      return { status: "sucesso", mensagem: "✅ Pagamento registrado." };
+      // Log action
+      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: registrar_pagamento | table=${table} | id=${params.id} | valor=${params.valor}`, metadata: { action: "registrar_pagamento", params } });
+      return { status: "sucesso", mensagem: "✅ Pagamento registrado com sucesso." };
+    }
+    case "adiar_vencimento": {
+      if (!params.id || !params.nova_data) return { erro: "ID e nova data são obrigatórios" };
+      const table = params.tipo === "receber" ? "accounts_receivable" : "accounts_payable";
+      const { error } = await supabase.from(table).update({ due_date: params.nova_data }).eq("id", params.id);
+      if (error) return { erro: error.message };
+      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: adiar_vencimento | table=${table} | id=${params.id} | nova_data=${params.nova_data}`, metadata: { action: "adiar_vencimento", params } });
+      return { status: "sucesso", mensagem: `✅ Vencimento adiado para ${params.nova_data}.` };
+    }
+    case "criar_conta_pagar": {
+      const { error } = await supabase.from("accounts_payable").insert({
+        description: params.descricao || "Conta via IA",
+        supplier: params.fornecedor || "N/A",
+        amount: params.valor || 0,
+        due_date: params.vencimento || new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
+        category: params.categoria || "Geral",
+        status: "pending",
+      });
+      if (error) return { erro: error.message };
+      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: criar_conta_pagar | valor=${params.valor} | fornecedor=${params.fornecedor}`, metadata: { action: "criar_conta_pagar", params } });
+      return { status: "sucesso", mensagem: `✅ Conta a pagar criada: R$ ${(params.valor || 0).toLocaleString("pt-BR")} para ${params.fornecedor || "N/A"}.` };
+    }
+    case "criar_conta_receber": {
+      const { error } = await supabase.from("accounts_receivable").insert({
+        description: params.descricao || "Conta via IA",
+        client_name: params.cliente || "N/A",
+        amount: params.valor || 0,
+        due_date: params.vencimento || new Date(Date.now() + 30 * 86400000).toISOString().split("T")[0],
+        category: params.categoria || "Vendas",
+        status: "pending",
+      });
+      if (error) return { erro: error.message };
+      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: criar_conta_receber | valor=${params.valor} | cliente=${params.cliente}`, metadata: { action: "criar_conta_receber", params } });
+      return { status: "sucesso", mensagem: `✅ Conta a receber criada: R$ ${(params.valor || 0).toLocaleString("pt-BR")} de ${params.cliente || "N/A"}.` };
     }
     case "alterar_status_pedido": {
       if (!params.id || !params.novo_status) return { erro: "ID e novo status obrigatórios" };
       const { error } = await supabase.from("orders").update({ status: params.novo_status }).eq("id", params.id);
       if (error) return { erro: error.message };
-      return { status: "sucesso", mensagem: `✅ Pedido atualizado para ${params.novo_status}.` };
+      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: alterar_status_pedido | id=${params.id} | status=${params.novo_status}`, metadata: { action: "alterar_status_pedido", params } });
+      return { status: "sucesso", mensagem: `✅ Pedido atualizado para "${params.novo_status}".` };
     }
     case "alterar_status_op": {
       if (!params.id || !params.novo_status) return { erro: "ID e novo status obrigatórios" };
       const { error } = await supabase.from("production_orders").update({ status: params.novo_status }).eq("id", params.id);
       if (error) return { erro: error.message };
-      return { status: "sucesso", mensagem: `✅ OP atualizada para ${params.novo_status}.` };
+      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: alterar_status_op | id=${params.id} | status=${params.novo_status}`, metadata: { action: "alterar_status_op", params } });
+      return { status: "sucesso", mensagem: `✅ OP atualizada para "${params.novo_status}".` };
+    }
+    case "priorizar_op": {
+      if (!params.id) return { erro: "ID da OP não informado" };
+      const { error } = await supabase.from("production_orders").update({ priority: params.prioridade || "urgent" }).eq("id", params.id);
+      if (error) return { erro: error.message };
+      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: priorizar_op | id=${params.id} | prioridade=${params.prioridade || "urgent"}`, metadata: { action: "priorizar_op", params } });
+      return { status: "sucesso", mensagem: `✅ OP priorizada como "${params.prioridade || "urgent"}".` };
+    }
+    case "ajustar_estoque": {
+      if (!params.product_id || params.quantidade == null) return { erro: "ID do produto e quantidade obrigatórios" };
+      const { data: prod } = await supabase.from("products").select("id, name, code, stock_current").eq("id", params.product_id).single();
+      if (!prod) return { erro: "Produto não encontrado" };
+      const newStock = (prod.stock_current || 0) + (params.quantidade || 0);
+      const { error } = await supabase.from("products").update({ stock_current: newStock }).eq("id", params.product_id);
+      if (error) return { erro: error.message };
+      // Create movement
+      await supabase.from("stock_movements").insert({
+        document_number: `IA-ADJ-${Date.now()}`,
+        product_id: prod.id,
+        product_code: prod.code,
+        product_name: prod.name,
+        type: "adjustment",
+        direction: params.quantidade > 0 ? "in" : "out",
+        quantity: Math.abs(params.quantidade),
+        operator: "IA Executiva",
+        source: "erp",
+        notes: params.motivo || "Ajuste via IA Executiva",
+      });
+      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: ajustar_estoque | product=${prod.name} | qty=${params.quantidade} | new_stock=${newStock}`, metadata: { action: "ajustar_estoque", params } });
+      return { status: "sucesso", mensagem: `✅ Estoque de "${prod.name}" ajustado: ${prod.stock_current} → ${newStock} unidades.` };
     }
     default: return { erro: "Ação não implementada" };
   }
+}
+
+async function executeAnaliseEstrategica(supabase: any, args: any) {
+  const d = await fetchAllData(supabase);
+  const computed = computeKPIs(d);
+  const k = computed.kpis;
+
+  const focusData: Record<string, any> = {
+    geral: { kpis: k, topClients: computed.topClients, revenueByMonth: computed.revenueByMonth, salesRepStats: computed.salesRepStats, funnelByStage: computed.funnelByStage, autoAlerts: computed.autoAlerts },
+    financeiro: { receita: k.totalRevenue, custos: k.totalCosts, lucro: k.grossProfit, margem: k.grossMargin, inadimplencia: k.overdueReceivable, taxa_inadimplencia: k.defaultRate, posicao_liquida: k.netPosition, fluxo_caixa_30d: k.cashFlowProjection30d, receber: k.totalReceivable, pagar: k.totalPayable, despesas: computed.expenseByCategory },
+    comercial: { clientes_ativos: k.activeClients, clientes_risco: k.clientsAtRisk, concentracao: k.concentrationPct, ticket_medio: k.avgTicket, meta_atingimento: k.targetAttainment, topClients: computed.topClients, vendedores: computed.salesRepStats, funil: computed.funnelByStage, crescimento: k.revenueGrowth },
+    producao: { eficiencia: k.prodEfficiency, em_andamento: k.prodInProgress, planejadas: k.prodPlanned, concluidas: k.prodCompleted, estoque_critico: k.lowStockProducts },
+    margem: { margens: computed.productMargins, top_rentaveis: computed.topProfitable, baixa_margem: computed.lowMarginProducts, margem_bruta: k.grossMargin },
+    risco: { inadimplencia: k.defaultRate, concentracao: k.concentrationPct, estoque_critico: k.lowStockProducts, clientes_risco: k.clientsAtRisk, fluxo_caixa: k.cashFlowProjection30d, alertas: computed.autoAlerts },
+  };
+
+  return focusData[args.foco] || focusData.geral;
 }
 
 const TOOL_EXECUTORS: Record<string, (supabase: any, args: any) => Promise<any>> = {
@@ -793,34 +817,69 @@ const TOOL_EXECUTORS: Record<string, (supabase: any, args: any) => Promise<any>>
   consultar_producao: executeConsultaProducao,
   consultar_estoque: executeConsultaEstoque,
   executar_acao: executeAcao,
+  analise_estrategica: executeAnaliseEstrategica,
 };
 
-// ─── Assistant Chat with Tool Calling ────────────────────────────
+// ─── Unified Chat with Tool Calling ─────────────────────────────
 
-async function handleAssistantChat(messages: any[], supabase: any, lovableKey: string, corsHeaders: any) {
-  const systemPrompt = `Você é o **Assistente ERP Inteligente** — um sistema autônomo de nível executivo integrado ao Diretor Digital.
+async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: string, corsHeaders: any) {
+  const systemPrompt = `Você é o **Diretor Digital** — o assistente executivo unificado do sistema ERP. Você combina inteligência estratégica com capacidade operacional.
 
-PERSONALIDADE:
-- Profissional, direto e eficiente
-- Usa emojis estratégicos para clareza visual (📊💰🏭📦⚠️✅)
-- Formata valores em R$ com separador de milhar brasileiro
+## PERSONALIDADE
+- Profissional, direto e executivo
+- Usa emojis estratégicos para clareza visual (📊💰🏭📦⚠️✅❌🎯)
+- Formata valores em R$ com separador brasileiro
 - Responde em português brasileiro
+- Tom confiante e decisivo
 
-CAPACIDADES:
-1. **Consultas em tempo real** — Financeiro, Comercial, Produção, Estoque
-2. **Execução de ações** — Registrar pagamentos, alterar status, atualizar dados
-3. **Análise inteligente** — Identifica riscos, oportunidades e tendências
+## MODOS DE OPERAÇÃO (automáticos)
 
-REGRAS DE SEGURANÇA:
-- Para QUALQUER ação que modifique dados, SEMPRE use a tool executar_acao com confirmado=false primeiro
-- Só execute com confirmado=true APÓS o usuário confirmar explicitamente
-- Nunca invente dados — sempre consulte o sistema
+### 🔍 MODO CONSULTA
+Quando o usuário faz perguntas ou pede informações:
+- Use as tools de consulta para buscar dados REAIS
+- Apresente de forma clara com tabelas/listas markdown
+- Adicione análise e recomendações proativas
+- Compare com benchmarks quando possível
 
-FORMATO:
-- Use markdown para organizar
-- Tabelas quando houver múltiplos registros
-- Destaque valores críticos em negrito
-- Inclua recomendações proativas quando relevante`;
+### ⚙️ MODO AÇÃO
+Quando o usuário pede para fazer algo:
+1. Identifique a ação necessária
+2. Use executar_acao com confirmado=false PRIMEIRO (mostra prévia)
+3. Aguarde confirmação explícita do usuário
+4. Só então execute com confirmado=true
+
+### 🧠 MODO ESTRATÉGICO
+Para perguntas amplas sobre a empresa:
+- Use analise_estrategica para obter visão completa
+- Cruze dados entre módulos
+- Identifique padrões e tendências
+- Sugira ações priorizadas por impacto
+
+## AÇÕES DISPONÍVEIS
+- **Financeiro**: registrar pagamento, adiar vencimento, criar conta a pagar/receber
+- **Comercial**: alterar status de pedido
+- **Produção**: alterar status de OP, priorizar OP
+- **Estoque**: ajustar estoque de produto
+
+## SEGURANÇA
+- NUNCA execute ações sem confirmação explícita do usuário
+- Para ações críticas, mostre SEMPRE a prévia antes de executar
+- Registre todas as ações no log do sistema
+
+## INTELIGÊNCIA PROATIVA
+Ao responder consultas, quando detectar problemas:
+- Alerte sobre riscos identificados
+- Sugira ações corretivas
+- Pergunte se o usuário quer que você execute a ação
+  Exemplo: "⚠️ Detectei 3 contas vencidas totalizando R$ 15.000. Deseja que eu liste os detalhes?"
+
+## FORMATO DE RESPOSTA
+- Sempre claro, direto e executivo
+- Use markdown (negrito, tabelas, listas)
+- Para ações concluídas: "✅ [descrição do que foi feito]"
+- Para erros: "❌ [explicação clara]"
+- Para alertas: "⚠️ [alerta com recomendação]"
+- Inclua sempre timestamp quando relevante`;
 
   const aiMessages = [{ role: "system", content: systemPrompt }, ...messages];
 
@@ -834,8 +893,8 @@ FORMATO:
     const status = firstResp.status;
     const body = await firstResp.text();
     console.error("AI gateway error:", status, body);
-    if (status === 429) return new Response(JSON.stringify({ error: "Rate limit excedido." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    if (status === 402) return new Response(JSON.stringify({ error: "Créditos insuficientes." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (status === 429) return new Response(JSON.stringify({ error: "Rate limit excedido. Tente novamente em alguns minutos." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (status === 402) return new Response(JSON.stringify({ error: "Créditos insuficientes. Adicione créditos em Configurações > Workspace." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     return new Response(JSON.stringify({ error: "Erro no processamento de IA" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 
@@ -843,7 +902,7 @@ FORMATO:
   let choice = result.choices?.[0];
   let rounds = 0;
 
-  while (choice?.finish_reason === "tool_calls" && choice?.message?.tool_calls && rounds < 5) {
+  while (choice?.finish_reason === "tool_calls" && choice?.message?.tool_calls && rounds < 8) {
     rounds++;
     const assistantMsg = choice.message;
     aiMessages.push(assistantMsg);
