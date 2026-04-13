@@ -106,6 +106,9 @@ export const navigationSections: NavSection[] = [
           { title: '🧠 IA Produção', href: '/producao/ia', icon: 'Brain' },
           { title: '📦 MRP', href: '/producao/mrp', icon: 'Package' },
           { title: 'Agendamento', href: '/producao/agendamento', icon: 'CalendarClock' },
+          { title: '📊 BI Industrial', href: '/producao/bi', icon: 'BarChart3' },
+          { title: '🔮 Digital Twin', href: '/producao/digital-twin', icon: 'Cpu' },
+          { title: '🚀 APS', href: '/producao/aps', icon: 'Zap' },
         ],
       },
       {

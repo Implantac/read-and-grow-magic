@@ -285,6 +285,9 @@ const App = () => (
               <Route path="/producao/ia" element={<AIProductionPage />} />
               <Route path="/producao/agendamento" element={<ProductionSchedulePage />} />
               <Route path="/producao/mrp" element={<MRPPage />} />
+              <Route path="/producao/bi" element={<BIIndustrialPage />} />
+              <Route path="/producao/digital-twin" element={<DigitalTwinPage />} />
+              <Route path="/producao/aps" element={<APSPageComponent />} />
 
               {/* Operational Flow Module */}
               <Route path="/operacional/dashboard" element={<OperationalDashboardPage />} />
