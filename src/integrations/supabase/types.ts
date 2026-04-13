@@ -3431,6 +3431,94 @@ export type Database = {
           },
         ]
       }
+      material_requirements: {
+        Row: {
+          available_quantity: number
+          component_code: string
+          component_id: string | null
+          component_name: string
+          created_at: string
+          due_date: string | null
+          id: string
+          notes: string | null
+          order_number: string | null
+          product_id: string | null
+          production_order_id: string | null
+          purchase_order_id: string | null
+          required_quantity: number
+          status: string
+          to_purchase_quantity: number
+          total_cost: number
+          unit: string
+          unit_cost: number
+          updated_at: string
+        }
+        Insert: {
+          available_quantity?: number
+          component_code: string
+          component_id?: string | null
+          component_name: string
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          order_number?: string | null
+          product_id?: string | null
+          production_order_id?: string | null
+          purchase_order_id?: string | null
+          required_quantity?: number
+          status?: string
+          to_purchase_quantity?: number
+          total_cost?: number
+          unit?: string
+          unit_cost?: number
+          updated_at?: string
+        }
+        Update: {
+          available_quantity?: number
+          component_code?: string
+          component_id?: string | null
+          component_name?: string
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          notes?: string | null
+          order_number?: string | null
+          product_id?: string | null
+          production_order_id?: string | null
+          purchase_order_id?: string | null
+          required_quantity?: number
+          status?: string
+          to_purchase_quantity?: number
+          total_cost?: number
+          unit?: string
+          unit_cost?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "material_requirements_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_requirements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "material_requirements_production_order_id_fkey"
+            columns: ["production_order_id"]
+            isOneToOne: false
+            referencedRelation: "production_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nfce: {
         Row: {
           access_key: string | null
@@ -4572,6 +4660,81 @@ export type Database = {
           },
         ]
       }
+      product_materials: {
+        Row: {
+          component_code: string
+          component_id: string | null
+          component_name: string
+          created_at: string
+          id: string
+          is_active: boolean
+          is_optional: boolean
+          notes: string | null
+          product_code: string
+          product_id: string | null
+          product_name: string
+          quantity: number
+          sequence: number
+          unit: string
+          unit_cost: number
+          updated_at: string
+          waste_percentage: number
+        }
+        Insert: {
+          component_code: string
+          component_id?: string | null
+          component_name: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_optional?: boolean
+          notes?: string | null
+          product_code: string
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          sequence?: number
+          unit?: string
+          unit_cost?: number
+          updated_at?: string
+          waste_percentage?: number
+        }
+        Update: {
+          component_code?: string
+          component_id?: string | null
+          component_name?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_optional?: boolean
+          notes?: string | null
+          product_code?: string
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          sequence?: number
+          unit?: string
+          unit_cost?: number
+          updated_at?: string
+          waste_percentage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_materials_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_materials_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       product_technical_sheets: {
         Row: {
           created_at: string
@@ -4728,6 +4891,113 @@ export type Database = {
             columns: ["production_order_id"]
             isOneToOne: false
             referencedRelation: "production_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_indicators: {
+        Row: {
+          availability: number | null
+          avg_lead_time_hours: number | null
+          completed_orders: number | null
+          cost_per_unit: number | null
+          created_at: string
+          efficiency: number | null
+          id: string
+          labor_cost: number | null
+          line_id: string | null
+          line_name: string | null
+          material_cost: number | null
+          mtbf_hours: number | null
+          mttr_hours: number | null
+          notes: string | null
+          oee: number | null
+          on_time_delivery_pct: number | null
+          performance: number | null
+          period: string
+          period_end: string
+          period_start: string
+          productivity: number | null
+          quality: number | null
+          rejection_rate: number | null
+          sector: string | null
+          total_cost: number | null
+          total_downtime_minutes: number | null
+          total_orders: number | null
+          total_produced: number | null
+          total_rejected: number | null
+          updated_at: string
+        }
+        Insert: {
+          availability?: number | null
+          avg_lead_time_hours?: number | null
+          completed_orders?: number | null
+          cost_per_unit?: number | null
+          created_at?: string
+          efficiency?: number | null
+          id?: string
+          labor_cost?: number | null
+          line_id?: string | null
+          line_name?: string | null
+          material_cost?: number | null
+          mtbf_hours?: number | null
+          mttr_hours?: number | null
+          notes?: string | null
+          oee?: number | null
+          on_time_delivery_pct?: number | null
+          performance?: number | null
+          period: string
+          period_end: string
+          period_start: string
+          productivity?: number | null
+          quality?: number | null
+          rejection_rate?: number | null
+          sector?: string | null
+          total_cost?: number | null
+          total_downtime_minutes?: number | null
+          total_orders?: number | null
+          total_produced?: number | null
+          total_rejected?: number | null
+          updated_at?: string
+        }
+        Update: {
+          availability?: number | null
+          avg_lead_time_hours?: number | null
+          completed_orders?: number | null
+          cost_per_unit?: number | null
+          created_at?: string
+          efficiency?: number | null
+          id?: string
+          labor_cost?: number | null
+          line_id?: string | null
+          line_name?: string | null
+          material_cost?: number | null
+          mtbf_hours?: number | null
+          mttr_hours?: number | null
+          notes?: string | null
+          oee?: number | null
+          on_time_delivery_pct?: number | null
+          performance?: number | null
+          period?: string
+          period_end?: string
+          period_start?: string
+          productivity?: number | null
+          quality?: number | null
+          rejection_rate?: number | null
+          sector?: string | null
+          total_cost?: number | null
+          total_downtime_minutes?: number | null
+          total_orders?: number | null
+          total_produced?: number | null
+          total_rejected?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_indicators_line_id_fkey"
+            columns: ["line_id"]
+            isOneToOne: false
+            referencedRelation: "production_lines"
             referencedColumns: ["id"]
           },
         ]
