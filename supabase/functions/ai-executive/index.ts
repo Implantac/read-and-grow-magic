@@ -16,10 +16,13 @@ serve(async (req) => {
     if (!lovableKey) throw new Error("LOVABLE_API_KEY is not configured");
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { action, messages } = await req.json();
+    const { action, messages, user_id, clear_history } = await req.json();
 
-    if (action === "chat") return await handleUnifiedChat(messages, supabase, lovableKey, corsHeaders);
-    if (action === "assistant_chat") return await handleUnifiedChat(messages, supabase, lovableKey, corsHeaders);
+    if (action === "clear_history" && user_id) {
+      await supabase.from("ai_executive_chat").delete().eq("user_id", user_id);
+      return new Response(JSON.stringify({ ok: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    if (action === "chat" || action === "assistant_chat") return await handleUnifiedChat(messages, supabase, lovableKey, corsHeaders, user_id);
     if (action === "daily_summary") return await handleDailySummary(supabase, lovableKey, corsHeaders);
     if (action === "generate_insights") return await handleGenerateInsights(supabase, lovableKey, corsHeaders);
     if (action === "generate_scenarios") return await handleGenerateScenarios(supabase, lovableKey, corsHeaders);
@@ -822,7 +825,53 @@ const TOOL_EXECUTORS: Record<string, (supabase: any, args: any) => Promise<any>>
 
 // ─── Unified Chat with Tool Calling ─────────────────────────────
 
-async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: string, corsHeaders: any) {
+async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: string, corsHeaders: any, user_id?: string) {
+  // ─── Server-side Memory: Load recent history for context ───
+  let serverHistory: any[] = [];
+  if (user_id) {
+    const { data: recentMsgs } = await supabase
+      .from("ai_executive_chat")
+      .select("role, content, created_at")
+      .eq("user_id", user_id)
+      .order("created_at", { ascending: true })
+      .limit(40);
+    if (recentMsgs && recentMsgs.length > 0) {
+      serverHistory = recentMsgs.map((m: any) => ({ role: m.role, content: m.content }));
+    }
+  }
+
+  // ─── Persist incoming user message ───
+  const lastUserMsg = messages?.filter((m: any) => m.role === "user").pop();
+  if (user_id && lastUserMsg) {
+    await supabase.from("ai_executive_chat").insert({
+      user_id,
+      role: "user",
+      content: lastUserMsg.content,
+    });
+  }
+
+  // ─── Build context: server history + current session messages ───
+  // Deduplicate: if client sent full history, use it; otherwise merge with server history
+  const clientMsgCount = (messages || []).filter((m: any) => m.role !== "system").length;
+  const contextMessages = clientMsgCount > 2 ? messages : [...serverHistory, ...(messages || [])];
+
+  // ─── Extract operational context summary for the system prompt ───
+  const recentContext = contextMessages.slice(-10);
+  const mentionedEntities: string[] = [];
+  for (const m of recentContext) {
+    if (m.role === "user" || m.role === "assistant") {
+      const text = m.content || "";
+      // Track mentioned clients, OPs, accounts
+      const clientMatch = text.match(/cliente\s+(\w+)/gi);
+      const opMatch = text.match(/OP[-\s]?\d+/gi);
+      if (clientMatch) mentionedEntities.push(...clientMatch);
+      if (opMatch) mentionedEntities.push(...opMatch);
+    }
+  }
+  const contextSummary = mentionedEntities.length > 0
+    ? `\n\n## CONTEXTO ATIVO DA CONVERSA\nEntidades mencionadas recentemente: ${[...new Set(mentionedEntities)].join(", ")}\nUse essas referências quando o usuário falar "esse", "aquele", "o mesmo", etc.`
+    : "";
+
   const systemPrompt = `Você é o **Diretor Digital** — o assistente executivo unificado do sistema ERP. Você combina inteligência estratégica com capacidade operacional.
 
 ## PERSONALIDADE
@@ -836,26 +885,32 @@ async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: str
 
 Você DEVE manter contexto completo da conversa. Isso significa:
 
-### Respostas curtas
-- "sim", "ok", "confirma", "pode", "faz isso" → Execute a última ação pendente SEM repetir perguntas
-- "não", "cancela", "deixa" → Cancele a ação pendente e pergunte o que mais pode ajudar
-- "esse", "aquele", "o mesmo", "dele" → Resolva referências usando o contexto anterior
+### Respostas curtas — REGRA DE OURO
+- "sim", "ok", "confirma", "pode", "faz isso", "manda", "vai" → Execute a última ação pendente SEM repetir perguntas, SEM pedir confirmação novamente
+- "não", "cancela", "deixa", "para" → Cancele a ação pendente e pergunte o que mais pode ajudar
+- "esse", "aquele", "o mesmo", "dele", "dela" → Resolva referências usando o contexto anterior
+- "quanto?", "quando?", "qual?" → Responda sobre a última entidade/valor discutido
 
-### Continuidade de ações
-- Se o usuário mencionou um cliente, produto ou conta ANTERIORMENTE, use esse contexto nas próximas mensagens
-- NÃO pergunte novamente informações já fornecidas
-- Se uma ação foi solicitada e confirmada, execute imediatamente
-
-### Entendimento contextual
-- "e o estoque?" → entenda que o usuário quer saber do estoque (provavelmente do mesmo contexto/cliente)
-- "quanto?" → responda sobre o último valor/entidade discutida
-- "mais detalhes" → expanda a última resposta com mais dados
-- "agora registra" → execute a ação implícita do contexto
+### Continuidade de ações — NUNCA REPITA
+- Se o usuário mencionou um cliente, produto ou conta ANTERIORMENTE, use esse contexto
+- NÃO pergunte novamente informações já fornecidas na conversa
+- Se uma ação foi proposta e o usuário confirmou, execute IMEDIATAMENTE com confirmado=true
+- Quando o usuário confirma, a resposta deve ser a EXECUÇÃO, não outra pergunta
 
 ### Memória operacional
 - Lembre QUAL cliente/conta/OP está sendo discutida
 - Lembre QUAL ação está pendente de confirmação
 - Lembre O QUE foi consultado recentemente para cruzar dados
+- Mantenha um "estado mental" da conversa: entidade ativa + ação pendente + último resultado
+
+### Entendimento contextual avançado
+- "e o estoque?" → consulte estoque no contexto atual
+- "quanto?" → último valor/entidade discutida
+- "mais detalhes" → expanda a última resposta
+- "agora registra" → execute a ação implícita do contexto
+- "do mesmo cliente" → use o último cliente mencionado
+- "faz a mesma coisa pro próximo" → repita a ação com a próxima entidade
+${contextSummary}
 
 ## MODOS DE OPERAÇÃO (automáticos)
 
@@ -905,7 +960,8 @@ Ao responder consultas, quando detectar problemas:
 - Para erros: "❌ [explicação clara]"
 - Para alertas: "⚠️ [alerta com recomendação]"
 - Inclua sempre timestamp quando relevante`;
-  const aiMessages = [{ role: "system", content: systemPrompt }, ...messages];
+
+  const aiMessages = [{ role: "system", content: systemPrompt }, ...contextMessages];
 
   const firstResp = await fetch(GATEWAY_URL, {
     method: "POST",
@@ -955,6 +1011,27 @@ Ao responder consultas, quando detectar problemas:
   }
 
   const content = choice?.message?.content || "Não foi possível processar sua solicitação.";
+
+  // ─── Persist assistant response ───
+  if (user_id) {
+    await supabase.from("ai_executive_chat").insert({
+      user_id,
+      role: "assistant",
+      content,
+    });
+
+    // ─── Trim old messages (keep last 60 per user) ───
+    const { data: allMsgs } = await supabase
+      .from("ai_executive_chat")
+      .select("id")
+      .eq("user_id", user_id)
+      .order("created_at", { ascending: true });
+    if (allMsgs && allMsgs.length > 60) {
+      const toDelete = allMsgs.slice(0, allMsgs.length - 60).map((m: any) => m.id);
+      await supabase.from("ai_executive_chat").delete().in("id", toDelete);
+    }
+  }
+
   return new Response(JSON.stringify({ content }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 }
 
