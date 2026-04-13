@@ -30,9 +30,9 @@ export default function SolutionSection() {
     <section id="solucao" className="container mx-auto px-4 lg:px-8 py-20 md:py-28">
       <div className="text-center mb-14">
         <Badge variant="outline" className="mb-5 font-medium px-4 py-1.5 text-xs">A Plataforma</Badge>
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight text-foreground leading-snug overflow-visible">
           Uma plataforma.{' '}
-          <span className="text-primary inline">Toda a operação.</span>
+          <span className="text-gradient-primary">Toda a operação.</span>
         </h2>
         <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
           8 módulos integrados nativamente com IA embarcada. Do pedido à entrega, sem retrabalho entre setores.

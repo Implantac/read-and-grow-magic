@@ -22,9 +22,9 @@ export default function BenefitsSection({ onWhatsApp }: Props) {
     <section id="beneficios" className="container mx-auto px-4 lg:px-8 py-20 md:py-28">
       <div className="text-center mb-14">
         <Badge variant="outline" className="mb-5 font-medium px-4 py-1.5 text-xs">Resultados reais</Badge>
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight text-foreground leading-snug overflow-visible">
           O que muda na sua operação{' '}
-          <span className="text-primary inline">com a USE SISTEMAS</span>
+          <span className="text-gradient-primary">com a USE SISTEMAS</span>
         </h2>
         <p className="text-muted-foreground text-base md:text-lg max-w-lg mx-auto">Resultados visíveis desde a primeira semana. Mais controle, menos erro, mais lucro.</p>
       </div>
