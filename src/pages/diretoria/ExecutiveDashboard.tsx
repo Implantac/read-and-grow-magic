@@ -73,7 +73,10 @@ export default function ExecutiveDashboard() {
   const generateInsights = useGenerateInsights();
   const generateScenarios = useGenerateScenarios();
   const { messages, isLoading: chatLoading, sendMessage, clearChat } = useExecutiveChat();
+  const { messages: assistantMessages, isLoading: assistantLoading, sendMessage: sendAssistantMessage, clearChat: clearAssistant } = useAssistantChat();
+  const dailySummary = useDailySummary();
   const [chatInput, setChatInput] = useState('');
+  const [assistantInput, setAssistantInput] = useState('');
 
   const handleSend = () => {
     if (!chatInput.trim()) return;
