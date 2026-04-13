@@ -90,8 +90,17 @@ export default function ProductionKanban() {
       paused: ['in_progress'],
       completed: [],
     };
+    const statusLabels: Record<string, string> = {
+      planned: 'Planejada', in_progress: 'Em Produção', paused: 'Pausada', completed: 'Finalizada',
+    };
     if (!validTransitions[order.status]?.includes(newStatus)) {
-      toast.error(`Não é possível mover de "${order.status}" para "${newStatus}"`);
+      const from = statusLabels[order.status] || order.status;
+      const to = statusLabels[newStatus] || newStatus;
+      toast.error(`Transição inválida: "${from}" → "${to}"`, {
+        description: order.status === 'completed'
+          ? 'Ordens finalizadas não podem ser movidas.'
+          : `De "${from}" você pode ir para: ${(validTransitions[order.status] || []).map(s => statusLabels[s]).join(', ') || 'nenhum'}.`,
+      });
       return;
     }
 
