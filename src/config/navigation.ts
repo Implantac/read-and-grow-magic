@@ -104,6 +104,7 @@ export const navigationSections: NavSection[] = [
           { title: 'Consumo MP', href: '/producao/consumo', icon: 'PackageMinus' },
           { title: 'Apontamentos', href: '/producao/apontamentos', icon: 'Timer' },
           { title: '🧠 IA Produção', href: '/producao/ia', icon: 'Brain' },
+          { title: '📦 MRP', href: '/producao/mrp', icon: 'Package' },
           { title: 'Agendamento', href: '/producao/agendamento', icon: 'CalendarClock' },
         ],
       },
