@@ -11,12 +11,14 @@ import { useSupplyStock } from '@/hooks/useSupplyStock';
 import { useIndustrialAlerts } from '@/hooks/useIndustrialAlerts';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { useTimeEntries } from '@/hooks/useTimeEntries';
+import { useProductionCapacity } from '@/hooks/useProductionCapacity';
 import { KPICard } from '@/components/shared/KPICard';
-import { DollarSign, TrendingUp, AlertTriangle, Factory, Package, Gauge, CheckCircle, XCircle, Clock, Users, Activity, Zap } from 'lucide-react';
+import { DollarSign, TrendingUp, AlertTriangle, Factory, Package, Gauge, CheckCircle, XCircle, Clock, Users, Activity, Zap, Layers, Timer, Wrench } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line, CartesianGrid, AreaChart, Area } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { differenceInDays, differenceInMinutes, format, parseISO, subDays } from 'date-fns';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function IndustrialDashboard() {
   const { costs, avgMargin, totalRevenue, totalCostSum, lowMarginProducts, highCostProducts } = useProductCosts();
@@ -24,6 +26,7 @@ export default function IndustrialDashboard() {
   const { activeAlerts, resolveAlert } = useIndustrialAlerts();
   const { orders: productionOrders } = useProductionOrders();
   const { entries } = useTimeEntries();
+  const { capacities } = useProductionCapacity();
 
   // === PRODUCTION KPIs ===
   const totalOPs = productionOrders.length;
@@ -32,6 +35,11 @@ export default function IndustrialDashboard() {
   const plannedOPs = productionOrders.filter(o => o.status === 'planned').length;
   const pausedOPs = productionOrders.filter(o => o.status === 'paused').length;
   const lateOPs = productionOrders.filter(o => o.due_date && differenceInDays(new Date(), parseISO(o.due_date)) > 0 && !['completed', 'cancelled'].includes(o.status)).length;
+
+  // WIP (Work In Progress) - sum of pending quantities on active OPs
+  const wipUnits = productionOrders
+    .filter(o => o.status === 'in_progress' || o.status === 'paused')
+    .reduce((s, o) => s + Math.max(0, o.quantity - o.produced_quantity), 0);
 
   // On-time delivery rate
   const completedWithDates = productionOrders.filter(o => o.status === 'completed' && o.completed_date && o.due_date);
@@ -57,6 +65,30 @@ export default function IndustrialDashboard() {
     return totalDays / completed.length;
   }, [productionOrders]);
 
+  // MTTR (Mean Time To Repair) - average paused time of completed entries
+  const mttr = useMemo(() => {
+    const withPause = entries.filter(e => e.status === 'completed' && e.paused_time > 0);
+    if (withPause.length === 0) return 0;
+    return withPause.reduce((s, e) => s + e.paused_time, 0) / withPause.length;
+  }, [entries]);
+
+  // Average cycle time per piece (minutes)
+  const avgCycleTime = useMemo(() => {
+    const completedEntries = entries.filter(e => e.status === 'completed' && e.end_time && e.produced_quantity > 0);
+    if (completedEntries.length === 0) return 0;
+    const totalMin = completedEntries.reduce((s, e) => {
+      const elapsed = differenceInMinutes(new Date(e.end_time!), new Date(e.start_time)) - (e.paused_time || 0);
+      return s + Math.max(0, elapsed);
+    }, 0);
+    const totalPcs = completedEntries.reduce((s, e) => s + e.produced_quantity, 0);
+    return totalPcs > 0 ? totalMin / totalPcs : 0;
+  }, [entries]);
+
+  // Capacity utilization
+  const avgCapLoad = capacities.length > 0 
+    ? capacities.filter(c => c.is_active).reduce((s, c) => s + c.current_load_pct, 0) / capacities.filter(c => c.is_active).length 
+    : 0;
+
   // Throughput trend (last 14 days)
   const throughputTrend = useMemo(() => {
     const days: { date: string; completed: number; produced: number }[] = [];
@@ -81,7 +113,8 @@ export default function IndustrialDashboard() {
       const sProduced = sOPs.reduce((s, o) => s + o.produced_quantity, 0);
       const sRejected = sOPs.reduce((s, o) => s + o.rejected_quantity, 0);
       const sQuality = sProduced > 0 ? ((sProduced - sRejected) / sProduced) * 100 : 100;
-      return { sector: sector!, ops: sTotal, completed: sCompleted, efficiency: sTotal > 0 ? (sCompleted / sTotal) * 100 : 0, quality: sQuality, produced: sProduced };
+      const sWIP = sOPs.filter(o => ['in_progress', 'paused'].includes(o.status)).reduce((s, o) => s + Math.max(0, o.quantity - o.produced_quantity), 0);
+      return { sector: sector!, ops: sTotal, completed: sCompleted, efficiency: sTotal > 0 ? (sCompleted / sTotal) * 100 : 0, quality: sQuality, produced: sProduced, wip: sWIP };
     }).sort((a, b) => b.ops - a.ops);
   }, [productionOrders]);
 
@@ -140,169 +173,196 @@ export default function IndustrialDashboard() {
     <PageContainer>
       <PageHeader title="Dashboard Industrial" description="Visão completa: produção, eficiência, custos e alertas" />
 
-      {/* Production KPIs Row */}
+      {/* Production KPIs Row 1 - Operational */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
         <KPICard title="OEE" value={`${oee.toFixed(0)}%`} icon={<Gauge className="h-5 w-5" />} accentColor={oee >= 60 ? 'success' : oee >= 40 ? 'warning' : 'danger'} index={0} />
         <KPICard title="Em Produção" value={inProgressOPs} icon={<Factory className="h-5 w-5" />} accentColor="primary" index={1} />
         <KPICard title="Na Fila" value={plannedOPs} icon={<Clock className="h-5 w-5" />} accentColor="info" index={2} />
         <KPICard title="Atrasadas" value={lateOPs} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={3} />
         <KPICard title="Prazo %" value={`${onTimePct.toFixed(0)}%`} icon={<CheckCircle className="h-5 w-5" />} accentColor={onTimePct >= 80 ? 'success' : 'warning'} index={4} />
-        <KPICard title="Lead Time" value={`${avgLeadTime.toFixed(1)}d`} icon={<Activity className="h-5 w-5" />} accentColor="info" index={5} />
+        <KPICard title="WIP" value={`${wipUnits.toLocaleString()} un`} icon={<Layers className="h-5 w-5" />} accentColor="info" index={5} />
         <KPICard title="Qualidade" value={`${(quality * 100).toFixed(0)}%`} icon={<Zap className="h-5 w-5" />} accentColor={quality >= 0.95 ? 'success' : 'warning'} index={6} />
         <KPICard title="Alertas" value={allAlerts.length} icon={<AlertTriangle className="h-5 w-5" />} accentColor={allAlerts.length > 0 ? 'danger' : 'success'} index={7} />
       </div>
 
-      {/* Charts Row 1: Throughput + Status */}
-      <div className="grid md:grid-cols-3 gap-6">
-        <Card className="md:col-span-2">
-          <CardHeader><CardTitle className="flex items-center gap-2"><TrendingUp className="h-5 w-5" /> Throughput — Últimos 14 dias</CardTitle></CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={260}>
-              <AreaChart data={throughputTrend}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                <YAxis />
-                <Tooltip />
-                <Area type="monotone" dataKey="produced" name="Peças Produzidas" fill="hsl(var(--primary) / 0.2)" stroke="hsl(var(--primary))" strokeWidth={2} />
-                <Area type="monotone" dataKey="completed" name="OPs Concluídas" fill="hsl(var(--info) / 0.2)" stroke="hsl(var(--info))" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader><CardTitle>Status das OPs</CardTitle></CardHeader>
-          <CardContent>
-            {statusDistribution.length > 0 ? (
-              <ResponsiveContainer width="100%" height={260}>
-                <PieChart>
-                  <Pie data={statusDistribution} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
-                    {statusDistribution.map((d, idx) => <Cell key={idx} fill={d.color} />)}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : <p className="text-center py-12 text-muted-foreground">Sem OPs</p>}
-          </CardContent>
-        </Card>
+      {/* Production KPIs Row 2 - Performance */}
+      <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
+        <KPICard title="Lead Time" value={`${avgLeadTime.toFixed(1)}d`} icon={<Activity className="h-5 w-5" />} accentColor="info" index={0} />
+        <KPICard title="Ciclo/Peça" value={`${avgCycleTime.toFixed(1)} min`} icon={<Timer className="h-5 w-5" />} accentColor="primary" index={1} />
+        <KPICard title="MTTR" value={`${mttr.toFixed(0)} min`} icon={<Wrench className="h-5 w-5" />} accentColor={mttr > 30 ? 'warning' : 'success'} index={2} />
+        <KPICard title="Capacidade" value={`${avgCapLoad.toFixed(0)}%`} icon={<Gauge className="h-5 w-5" />} accentColor={avgCapLoad > 90 ? 'danger' : avgCapLoad > 70 ? 'warning' : 'success'} index={3} />
+        <KPICard title="Produzidas" value={totalProduced.toLocaleString()} icon={<Package className="h-5 w-5" />} accentColor="success" index={4} />
+        <KPICard title="Refugo" value={totalRejected.toLocaleString()} icon={<XCircle className="h-5 w-5" />} accentColor={totalRejected > 0 ? 'danger' : 'success'} index={5} />
       </div>
 
-      {/* Sector Efficiency */}
-      {sectorEfficiency.length > 0 && (
-        <Card>
-          <CardHeader><CardTitle className="flex items-center gap-2"><Users className="h-5 w-5" /> Eficiência por Setor</CardTitle></CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader><TableRow>
-                <TableHead>Setor</TableHead>
-                <TableHead className="text-center">OPs</TableHead>
-                <TableHead className="text-center">Concluídas</TableHead>
-                <TableHead className="text-center">Peças</TableHead>
-                <TableHead>Eficiência</TableHead>
-                <TableHead>Qualidade</TableHead>
-              </TableRow></TableHeader>
-              <TableBody>
-                {sectorEfficiency.map(s => (
-                  <TableRow key={s.sector}>
-                    <TableCell className="font-medium">{s.sector}</TableCell>
-                    <TableCell className="text-center">{s.ops}</TableCell>
-                    <TableCell className="text-center">{s.completed}</TableCell>
-                    <TableCell className="text-center">{s.produced.toLocaleString()}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Progress value={s.efficiency} className="w-20 h-2" />
-                        <span className="text-sm">{s.efficiency.toFixed(0)}%</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={cn(s.quality >= 95 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300')}>
-                        {s.quality.toFixed(1)}%
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
+      <Tabs defaultValue="production">
+        <TabsList>
+          <TabsTrigger value="production">Produção</TabsTrigger>
+          <TabsTrigger value="financial">Financeiro</TabsTrigger>
+          <TabsTrigger value="alerts">Alertas ({allAlerts.length})</TabsTrigger>
+        </TabsList>
 
-      {/* Financial Row */}
-      <div className="grid gap-4 md:grid-cols-5">
-        <KPICard title="Receita" value={`R$ ${(totalRevenue / 1000).toFixed(1)}k`} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="Custo" value={`R$ ${(totalCostSum / 1000).toFixed(1)}k`} icon={<Factory className="h-5 w-5" />} accentColor="info" index={1} />
-        <KPICard title="Lucro" value={`R$ ${(totalProfit / 1000).toFixed(1)}k`} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={2} />
-        <KPICard title="Margem" value={`${overallMargin.toFixed(1)}%`} icon={<Gauge className="h-5 w-5" />} accentColor={overallMargin >= 20 ? 'success' : 'warning'} index={3} />
-        <KPICard title="Insumos" value={`R$ ${(supplyValue / 1000).toFixed(1)}k`} icon={<Package className="h-5 w-5" />} accentColor="info" index={4} />
-      </div>
+        <TabsContent value="production" className="space-y-6">
+          {/* Charts Row 1: Throughput + Status */}
+          <div className="grid md:grid-cols-3 gap-6">
+            <Card className="md:col-span-2">
+              <CardHeader><CardTitle className="flex items-center gap-2"><TrendingUp className="h-5 w-5" /> Throughput — Últimos 14 dias</CardTitle></CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={260}>
+                  <AreaChart data={throughputTrend}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                    <YAxis />
+                    <Tooltip />
+                    <Area type="monotone" dataKey="produced" name="Peças Produzidas" fill="hsl(var(--primary) / 0.2)" stroke="hsl(var(--primary))" strokeWidth={2} />
+                    <Area type="monotone" dataKey="completed" name="OPs Concluídas" fill="hsl(var(--info) / 0.2)" stroke="hsl(var(--info))" strokeWidth={2} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
 
-      {/* Charts Row 2: Costs + Top Products */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader><CardTitle>Composição de Custos</CardTitle></CardHeader>
-          <CardContent>
-            {costBreakdown.length > 0 ? (
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie data={costBreakdown} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
-                    {costBreakdown.map((_, idx) => <Cell key={idx} fill={COLORS[idx]} />)}
-                  </Pie>
-                  <Tooltip formatter={(v: number) => `R$ ${v.toFixed(2)}`} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : <p className="text-center py-8 text-muted-foreground">Cadastre custos para ver</p>}
-          </CardContent>
-        </Card>
+            <Card>
+              <CardHeader><CardTitle>Status das OPs</CardTitle></CardHeader>
+              <CardContent>
+                {statusDistribution.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={260}>
+                    <PieChart>
+                      <Pie data={statusDistribution} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>
+                        {statusDistribution.map((d, idx) => <Cell key={idx} fill={d.color} />)}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-center py-12 text-muted-foreground">Sem OPs</p>}
+              </CardContent>
+            </Card>
+          </div>
 
-        {topProducts.length > 0 && (
-          <Card>
-            <CardHeader><CardTitle>Top 10 Produtos por Margem</CardTitle></CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={topProducts} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis type="number" />
-                  <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 11 }} />
-                  <Tooltip />
-                  <Bar dataKey="margem" fill="hsl(var(--primary))" name="Margem %" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+          {/* Sector Efficiency */}
+          {sectorEfficiency.length > 0 && (
+            <Card>
+              <CardHeader><CardTitle className="flex items-center gap-2"><Users className="h-5 w-5" /> Eficiência por Setor</CardTitle></CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader><TableRow>
+                    <TableHead>Setor</TableHead>
+                    <TableHead className="text-center">OPs</TableHead>
+                    <TableHead className="text-center">Concluídas</TableHead>
+                    <TableHead className="text-center">Peças</TableHead>
+                    <TableHead className="text-center">WIP</TableHead>
+                    <TableHead>Eficiência</TableHead>
+                    <TableHead>Qualidade</TableHead>
+                  </TableRow></TableHeader>
+                  <TableBody>
+                    {sectorEfficiency.map(s => (
+                      <TableRow key={s.sector}>
+                        <TableCell className="font-medium">{s.sector}</TableCell>
+                        <TableCell className="text-center">{s.ops}</TableCell>
+                        <TableCell className="text-center">{s.completed}</TableCell>
+                        <TableCell className="text-center">{s.produced.toLocaleString()}</TableCell>
+                        <TableCell className="text-center font-mono">{s.wip > 0 ? s.wip.toLocaleString() : '—'}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Progress value={s.efficiency} className="w-20 h-2" />
+                            <span className="text-sm">{s.efficiency.toFixed(0)}%</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={cn(s.quality >= 95 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300')}>
+                            {s.quality.toFixed(1)}%
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
 
-      {/* Alerts */}
-      {allAlerts.length > 0 && (
-        <Card className="border-destructive/30">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" /> Alertas Inteligentes ({allAlerts.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader><TableRow>
-                <TableHead>Tipo</TableHead><TableHead>Alerta</TableHead><TableHead>Detalhe</TableHead><TableHead>Severidade</TableHead>
-              </TableRow></TableHeader>
-              <TableBody>
-                {allAlerts.slice(0, 20).map(a => {
-                  const sev = severityConfig[a.severity] || severityConfig.warning;
-                  return (
-                    <TableRow key={a.id}>
-                      <TableCell>{a.type}</TableCell>
-                      <TableCell className="font-medium">{a.title}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{a.detail}</TableCell>
-                      <TableCell><Badge className={sev.color}>{a.severity}</Badge></TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
+        <TabsContent value="financial" className="space-y-6">
+          {/* Financial Row */}
+          <div className="grid gap-4 md:grid-cols-5">
+            <KPICard title="Receita" value={`R$ ${(totalRevenue / 1000).toFixed(1)}k`} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
+            <KPICard title="Custo" value={`R$ ${(totalCostSum / 1000).toFixed(1)}k`} icon={<Factory className="h-5 w-5" />} accentColor="info" index={1} />
+            <KPICard title="Lucro" value={`R$ ${(totalProfit / 1000).toFixed(1)}k`} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={2} />
+            <KPICard title="Margem" value={`${overallMargin.toFixed(1)}%`} icon={<Gauge className="h-5 w-5" />} accentColor={overallMargin >= 20 ? 'success' : 'warning'} index={3} />
+            <KPICard title="Insumos" value={`R$ ${(supplyValue / 1000).toFixed(1)}k`} icon={<Package className="h-5 w-5" />} accentColor="info" index={4} />
+          </div>
+
+          {/* Charts Row 2: Costs + Top Products */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader><CardTitle>Composição de Custos</CardTitle></CardHeader>
+              <CardContent>
+                {costBreakdown.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={250}>
+                    <PieChart>
+                      <Pie data={costBreakdown} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
+                        {costBreakdown.map((_, idx) => <Cell key={idx} fill={COLORS[idx]} />)}
+                      </Pie>
+                      <Tooltip formatter={(v: number) => `R$ ${v.toFixed(2)}`} />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-center py-8 text-muted-foreground">Cadastre custos para ver</p>}
+              </CardContent>
+            </Card>
+
+            {topProducts.length > 0 && (
+              <Card>
+                <CardHeader><CardTitle>Top 10 Produtos por Margem</CardTitle></CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <BarChart data={topProducts} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" />
+                      <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 11 }} />
+                      <Tooltip />
+                      <Bar dataKey="margem" fill="hsl(var(--primary))" name="Margem %" radius={[0, 4, 4, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="alerts" className="space-y-4">
+          {allAlerts.length === 0 ? (
+            <Card><CardContent className="py-12 text-center"><CheckCircle className="h-12 w-12 mx-auto text-green-500 mb-4" /><p className="text-lg font-medium">Nenhum alerta ativo</p></CardContent></Card>
+          ) : (
+            <Card className="border-destructive/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-destructive" /> Alertas Inteligentes ({allAlerts.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader><TableRow>
+                    <TableHead>Tipo</TableHead><TableHead>Alerta</TableHead><TableHead>Detalhe</TableHead><TableHead>Severidade</TableHead>
+                  </TableRow></TableHeader>
+                  <TableBody>
+                    {allAlerts.slice(0, 20).map(a => {
+                      const sev = severityConfig[a.severity] || severityConfig.warning;
+                      return (
+                        <TableRow key={a.id}>
+                          <TableCell>{a.type}</TableCell>
+                          <TableCell className="font-medium">{a.title}</TableCell>
+                          <TableCell className="text-sm text-muted-foreground">{a.detail}</TableCell>
+                          <TableCell><Badge className={sev.color}>{a.severity}</Badge></TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </PageContainer>
   );
 }
