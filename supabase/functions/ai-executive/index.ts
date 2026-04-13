@@ -693,7 +693,7 @@ async function executeConsultaEstoque(supabase: any, args: any) {
   }
 }
 
-async function executeAcao(supabase: any, args: any) {
+async function executeAcao(supabase: any, args: any, user_id?: string) {
   if (!args.confirmado) {
     return {
       status: "aguardando_confirmacao",
@@ -705,14 +705,27 @@ async function executeAcao(supabase: any, args: any) {
     };
   }
   const params = args.parametros || {};
+  const logAction = async (actionName: string, result: string) => {
+    if (user_id) {
+      await supabase.from("ai_action_logs").insert({
+        user_id,
+        action_type: "execution",
+        module: args.modulo,
+        action_name: actionName,
+        parameters: params,
+        context: JSON.stringify({ modulo: args.modulo }),
+        result,
+      }).catch(() => {});
+    }
+  };
+
   switch (args.acao) {
     case "registrar_pagamento": {
       if (!params.id) return { erro: "ID da conta não informado" };
       const table = params.tipo === "receber" ? "accounts_receivable" : "accounts_payable";
       const { error } = await supabase.from(table).update({ status: "paid", payment_date: new Date().toISOString().split("T")[0], paid_amount: params.valor }).eq("id", params.id);
       if (error) return { erro: error.message };
-      // Log action
-      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: registrar_pagamento | table=${table} | id=${params.id} | valor=${params.valor}`, metadata: { action: "registrar_pagamento", params } });
+      await logAction("registrar_pagamento", "sucesso");
       return { status: "sucesso", mensagem: "✅ Pagamento registrado com sucesso." };
     }
     case "adiar_vencimento": {
@@ -720,7 +733,7 @@ async function executeAcao(supabase: any, args: any) {
       const table = params.tipo === "receber" ? "accounts_receivable" : "accounts_payable";
       const { error } = await supabase.from(table).update({ due_date: params.nova_data }).eq("id", params.id);
       if (error) return { erro: error.message };
-      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: adiar_vencimento | table=${table} | id=${params.id} | nova_data=${params.nova_data}`, metadata: { action: "adiar_vencimento", params } });
+      await logAction("adiar_vencimento", "sucesso");
       return { status: "sucesso", mensagem: `✅ Vencimento adiado para ${params.nova_data}.` };
     }
     case "criar_conta_pagar": {
@@ -733,7 +746,7 @@ async function executeAcao(supabase: any, args: any) {
         status: "pending",
       });
       if (error) return { erro: error.message };
-      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: criar_conta_pagar | valor=${params.valor} | fornecedor=${params.fornecedor}`, metadata: { action: "criar_conta_pagar", params } });
+      await logAction("criar_conta_pagar", "sucesso");
       return { status: "sucesso", mensagem: `✅ Conta a pagar criada: R$ ${(params.valor || 0).toLocaleString("pt-BR")} para ${params.fornecedor || "N/A"}.` };
     }
     case "criar_conta_receber": {
@@ -746,28 +759,28 @@ async function executeAcao(supabase: any, args: any) {
         status: "pending",
       });
       if (error) return { erro: error.message };
-      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: criar_conta_receber | valor=${params.valor} | cliente=${params.cliente}`, metadata: { action: "criar_conta_receber", params } });
+      await logAction("criar_conta_receber", "sucesso");
       return { status: "sucesso", mensagem: `✅ Conta a receber criada: R$ ${(params.valor || 0).toLocaleString("pt-BR")} de ${params.cliente || "N/A"}.` };
     }
     case "alterar_status_pedido": {
       if (!params.id || !params.novo_status) return { erro: "ID e novo status obrigatórios" };
       const { error } = await supabase.from("orders").update({ status: params.novo_status }).eq("id", params.id);
       if (error) return { erro: error.message };
-      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: alterar_status_pedido | id=${params.id} | status=${params.novo_status}`, metadata: { action: "alterar_status_pedido", params } });
+      await logAction("alterar_status_pedido", "sucesso");
       return { status: "sucesso", mensagem: `✅ Pedido atualizado para "${params.novo_status}".` };
     }
     case "alterar_status_op": {
       if (!params.id || !params.novo_status) return { erro: "ID e novo status obrigatórios" };
       const { error } = await supabase.from("production_orders").update({ status: params.novo_status }).eq("id", params.id);
       if (error) return { erro: error.message };
-      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: alterar_status_op | id=${params.id} | status=${params.novo_status}`, metadata: { action: "alterar_status_op", params } });
+      await logAction("alterar_status_op", "sucesso");
       return { status: "sucesso", mensagem: `✅ OP atualizada para "${params.novo_status}".` };
     }
     case "priorizar_op": {
       if (!params.id) return { erro: "ID da OP não informado" };
       const { error } = await supabase.from("production_orders").update({ priority: params.prioridade || "urgent" }).eq("id", params.id);
       if (error) return { erro: error.message };
-      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: priorizar_op | id=${params.id} | prioridade=${params.prioridade || "urgent"}`, metadata: { action: "priorizar_op", params } });
+      await logAction("priorizar_op", "sucesso");
       return { status: "sucesso", mensagem: `✅ OP priorizada como "${params.prioridade || "urgent"}".` };
     }
     case "ajustar_estoque": {
@@ -777,7 +790,6 @@ async function executeAcao(supabase: any, args: any) {
       const newStock = (prod.stock_current || 0) + (params.quantidade || 0);
       const { error } = await supabase.from("products").update({ stock_current: newStock }).eq("id", params.product_id);
       if (error) return { erro: error.message };
-      // Create movement
       await supabase.from("stock_movements").insert({
         document_number: `IA-ADJ-${Date.now()}`,
         product_id: prod.id,
@@ -790,7 +802,7 @@ async function executeAcao(supabase: any, args: any) {
         source: "erp",
         notes: params.motivo || "Ajuste via IA Executiva",
       });
-      await supabase.from("ai_executive_chat").insert({ role: "system", content: `ACTION_LOG: ajustar_estoque | product=${prod.name} | qty=${params.quantidade} | new_stock=${newStock}`, metadata: { action: "ajustar_estoque", params } });
+      await logAction("ajustar_estoque", "sucesso");
       return { status: "sucesso", mensagem: `✅ Estoque de "${prod.name}" ajustado: ${prod.stock_current} → ${newStock} unidades.` };
     }
     default: return { erro: "Ação não implementada" };
@@ -814,7 +826,8 @@ async function executeAnaliseEstrategica(supabase: any, args: any) {
   return focusData[args.foco] || focusData.geral;
 }
 
-const TOOL_EXECUTORS: Record<string, (supabase: any, args: any) => Promise<any>> = {
+// TOOL_EXECUTORS are called with (supabase, args, user_id) — see tool call loop below
+const TOOL_EXECUTORS: Record<string, (supabase: any, args: any, user_id?: string) => Promise<any>> = {
   consultar_financeiro: executeConsultaFinanceiro,
   consultar_comercial: executeConsultaComercial,
   consultar_producao: executeConsultaProducao,
@@ -822,6 +835,65 @@ const TOOL_EXECUTORS: Record<string, (supabase: any, args: any) => Promise<any>>
   executar_acao: executeAcao,
   analise_estrategica: executeAnaliseEstrategica,
 };
+
+// ─── Pattern Analysis ───────────────────────────────────────────
+
+async function analyzeUserPatterns(supabase: any, user_id: string): Promise<string> {
+  const { data: logs } = await supabase
+    .from("ai_action_logs")
+    .select("module, action_name, created_at")
+    .eq("user_id", user_id)
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (!logs || logs.length < 3) return "";
+
+  // Count action frequencies
+  const freq: Record<string, number> = {};
+  for (const log of logs) {
+    const key = `${log.module}/${log.action_name}`;
+    freq[key] = (freq[key] || 0) + 1;
+  }
+
+  const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
+  const patterns: string[] = [];
+
+  for (const [action, count] of sorted.slice(0, 5)) {
+    if (count >= 3) {
+      patterns.push(`- "${action}" executada ${count}x`);
+    }
+  }
+
+  // Detect time-based patterns (actions done at similar times)
+  const hourFreq: Record<number, number> = {};
+  for (const log of logs) {
+    const h = new Date(log.created_at).getHours();
+    hourFreq[h] = (hourFreq[h] || 0) + 1;
+  }
+  const peakHour = Object.entries(hourFreq).sort((a, b) => b[1] - a[1])[0];
+  if (peakHour && Number(peakHour[1]) >= 5) {
+    patterns.push(`- Horário de pico de uso: ${peakHour[0]}h (${peakHour[1]} ações)`);
+  }
+
+  // Detect daily routine patterns
+  const recentDays = new Set(logs.slice(0, 20).map((l: any) => new Date(l.created_at).toISOString().split("T")[0]));
+  const dailyActions = sorted.filter(([, c]) => c >= recentDays.size * 0.7);
+  for (const [action] of dailyActions.slice(0, 2)) {
+    patterns.push(`- "${action}" parece ser uma rotina diária`);
+  }
+
+  if (patterns.length === 0) return "";
+
+  return `\n\n## 🤖 APRENDIZADO ADAPTATIVO
+Padrões detectados no comportamento deste usuário:
+${patterns.join("\n")}
+
+Com base nesses padrões:
+- Sugira proativamente ações que o usuário costuma fazer
+- Se detectar rotina, pergunte: "Percebi que você faz [ação] com frequência. Deseja que eu automatize?"
+- Antecipe necessidades baseadas no histórico
+- Priorize módulos que o usuário mais utiliza`;
+}
 
 // ─── Unified Chat with Tool Calling ─────────────────────────────
 
@@ -871,6 +943,24 @@ async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: str
   const contextSummary = mentionedEntities.length > 0
     ? `\n\n## CONTEXTO ATIVO DA CONVERSA\nEntidades mencionadas recentemente: ${[...new Set(mentionedEntities)].join(", ")}\nUse essas referências quando o usuário falar "esse", "aquele", "o mesmo", etc.`
     : "";
+
+  // ─── Adaptive Learning: Analyze user patterns ───
+  const patternInsights = user_id ? await analyzeUserPatterns(supabase, user_id) : "";
+
+  // ─── Log consultation queries for learning ───
+  if (user_id && lastUserMsg) {
+    const queryText = lastUserMsg.content.toLowerCase();
+    const consultModules = ["financeiro", "comercial", "produção", "producao", "estoque"];
+    const detectedModule = consultModules.find(m => queryText.includes(m)) || "geral";
+    await supabase.from("ai_action_logs").insert({
+      user_id,
+      action_type: "query",
+      module: detectedModule,
+      action_name: "consulta_chat",
+      parameters: { query_preview: queryText.slice(0, 200) },
+      context: "chat",
+    }).catch(() => {});
+  }
 
   const systemPrompt = `Você é o **Diretor Digital** — o assistente executivo unificado do sistema ERP. Você combina inteligência estratégica com capacidade operacional.
 
@@ -959,7 +1049,8 @@ Ao responder consultas, quando detectar problemas:
 - Para ações concluídas: "✅ [descrição do que foi feito]"
 - Para erros: "❌ [explicação clara]"
 - Para alertas: "⚠️ [alerta com recomendação]"
-- Inclua sempre timestamp quando relevante`;
+- Inclua sempre timestamp quando relevante
+${patternInsights}`;
 
   const aiMessages = [{ role: "system", content: systemPrompt }, ...contextMessages];
 
@@ -993,7 +1084,7 @@ Ao responder consultas, quando detectar problemas:
       let toolResult: any;
       try {
         const args = typeof fn.arguments === "string" ? JSON.parse(fn.arguments) : fn.arguments;
-        toolResult = executor ? await executor(supabase, args) : { erro: `Função ${fn.name} não encontrada` };
+        toolResult = executor ? await executor(supabase, args, user_id) : { erro: `Função ${fn.name} não encontrada` };
       } catch (e) {
         toolResult = { erro: `Erro: ${e.message}` };
       }

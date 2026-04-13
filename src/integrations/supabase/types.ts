@@ -209,6 +209,42 @@ export type Database = {
           },
         ]
       }
+      ai_action_logs: {
+        Row: {
+          action_name: string
+          action_type: string
+          context: string | null
+          created_at: string
+          id: string
+          module: string
+          parameters: Json | null
+          result: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_name: string
+          action_type: string
+          context?: string | null
+          created_at?: string
+          id?: string
+          module: string
+          parameters?: Json | null
+          result?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_name?: string
+          action_type?: string
+          context?: string | null
+          created_at?: string
+          id?: string
+          module?: string
+          parameters?: Json | null
+          result?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       ai_daily_actions: {
         Row: {
           action_date: string
