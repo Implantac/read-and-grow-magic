@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -15,8 +16,9 @@ import {
   Send, MessageSquare, Lightbulb, ShieldAlert, BarChart3,
   ArrowUpRight, ArrowDownRight, Wallet, PieChart, Activity,
   Target, Factory, Layers, Zap, MapPin, Package, Flame,
+  Bot, FileText, Loader2, Trash2, Sparkles, ShoppingCart,
 } from 'lucide-react';
-import { useExecutiveDashboard, useGenerateInsights, useGenerateScenarios, useExecutiveChat } from '@/hooks/useExecutiveAI';
+import { useExecutiveDashboard, useGenerateInsights, useGenerateScenarios, useExecutiveChat, useAssistantChat, useDailySummary } from '@/hooks/useExecutiveAI';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell, PieChart as RPieChart, Pie } from 'recharts';
 import ReactMarkdown from 'react-markdown';
