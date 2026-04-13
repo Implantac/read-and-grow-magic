@@ -4732,6 +4732,56 @@ export type Database = {
           },
         ]
       }
+      production_lines: {
+        Row: {
+          capacity_per_hour: number
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          responsible: string | null
+          sector_id: string | null
+          shift: string
+          updated_at: string
+        }
+        Insert: {
+          capacity_per_hour?: number
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          responsible?: string | null
+          sector_id?: string | null
+          shift?: string
+          updated_at?: string
+        }
+        Update: {
+          capacity_per_hour?: number
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          responsible?: string | null
+          sector_id?: string | null
+          shift?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_lines_sector_id_fkey"
+            columns: ["sector_id"]
+            isOneToOne: false
+            referencedRelation: "production_sectors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_logs: {
         Row: {
           created_at: string
@@ -5039,6 +5089,180 @@ export type Database = {
           },
         ]
       }
+      production_resources: {
+        Row: {
+          capacity_per_hour: number
+          code: string
+          cost_per_hour: number
+          created_at: string
+          id: string
+          is_active: boolean
+          line_id: string | null
+          name: string
+          notes: string | null
+          resource_type: string
+          sector_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          capacity_per_hour?: number
+          code: string
+          cost_per_hour?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          line_id?: string | null
+          name: string
+          notes?: string | null
+          resource_type?: string
+          sector_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          capacity_per_hour?: number
+          code?: string
+          cost_per_hour?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          line_id?: string | null
+          name?: string
+          notes?: string | null
+          resource_type?: string
+          sector_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_resources_line_id_fkey"
+            columns: ["line_id"]
+            isOneToOne: false
+            referencedRelation: "production_lines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_resources_sector_id_fkey"
+            columns: ["sector_id"]
+            isOneToOne: false
+            referencedRelation: "production_sectors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_route_steps: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          operation_time_minutes: number
+          resource_id: string | null
+          route_id: string
+          sector_id: string | null
+          sequence: number
+          setup_time_minutes: number
+          step_name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          operation_time_minutes?: number
+          resource_id?: string | null
+          route_id: string
+          sector_id?: string | null
+          sequence?: number
+          setup_time_minutes?: number
+          step_name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          operation_time_minutes?: number
+          resource_id?: string | null
+          route_id?: string
+          sector_id?: string | null
+          sequence?: number
+          setup_time_minutes?: number
+          step_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_route_steps_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "production_resources"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_route_steps_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "production_routes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_route_steps_sector_id_fkey"
+            columns: ["sector_id"]
+            isOneToOne: false
+            referencedRelation: "production_sectors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_routes: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          product_code: string | null
+          product_id: string | null
+          product_name: string | null
+          total_time_minutes: number
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          product_code?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          total_time_minutes?: number
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          product_code?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          total_time_minutes?: number
+          updated_at?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_routes_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_schedule: {
         Row: {
           actual_end: string | null
@@ -5097,6 +5321,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      production_sectors: {
+        Row: {
+          code: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          responsible: string | null
+          sector_type: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          responsible?: string | null
+          sector_type?: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          responsible?: string | null
+          sector_type?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       production_steps: {
         Row: {
