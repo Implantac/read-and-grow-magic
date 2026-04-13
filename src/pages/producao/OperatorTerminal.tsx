@@ -271,6 +271,7 @@ export default function OperatorTerminalPage() {
               )}
 
               {currentOrder && (
+                <div className="p-4 rounded-xl bg-muted space-y-2">
                   <p className="font-semibold text-lg">{currentOrder.product_name}</p>
                   <p className="text-sm text-muted-foreground">OP: {currentOrder.order_number}</p>
                   {currentOrder.client_name && <p className="text-sm">Cliente: <strong>{currentOrder.client_name}</strong></p>}
