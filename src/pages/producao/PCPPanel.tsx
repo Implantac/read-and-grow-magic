@@ -207,7 +207,10 @@ export default function PCPPanel() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="demand" className="mt-4">
+        <TabsContent value="gantt" className="mt-4">
+          <GanttTimeline orders={productionOrders} />
+        </TabsContent>
+
           <Card>
             <CardHeader><CardTitle>Pedidos Aguardando Produção</CardTitle></CardHeader>
             <CardContent>
