@@ -3121,6 +3121,50 @@ export type Database = {
           },
         ]
       }
+      iot_telemetry: {
+        Row: {
+          created_at: string
+          device_id: string
+          device_type: string
+          id: string
+          machine_id: string | null
+          metadata: Json | null
+          metric_name: string
+          metric_value: number
+          unit: string | null
+        }
+        Insert: {
+          created_at?: string
+          device_id: string
+          device_type?: string
+          id?: string
+          machine_id?: string | null
+          metadata?: Json | null
+          metric_name: string
+          metric_value: number
+          unit?: string | null
+        }
+        Update: {
+          created_at?: string
+          device_id?: string
+          device_type?: string
+          id?: string
+          machine_id?: string | null
+          metadata?: Json | null
+          metric_name?: string
+          metric_value?: number
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iot_telemetry_machine_id_fkey"
+            columns: ["machine_id"]
+            isOneToOne: false
+            referencedRelation: "production_machines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       journal_entries: {
         Row: {
           created_at: string
@@ -4891,6 +4935,68 @@ export type Database = {
             columns: ["production_order_id"]
             isOneToOne: false
             referencedRelation: "production_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_events: {
+        Row: {
+          created_at: string
+          entity_id: string | null
+          entity_name: string | null
+          entity_type: string | null
+          event_type: string
+          id: string
+          machine_id: string | null
+          operator: string | null
+          payload: Json | null
+          processed: boolean
+          processed_at: string | null
+          processing_result: Json | null
+          sector: string | null
+          severity: string
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id?: string | null
+          entity_name?: string | null
+          entity_type?: string | null
+          event_type?: string
+          id?: string
+          machine_id?: string | null
+          operator?: string | null
+          payload?: Json | null
+          processed?: boolean
+          processed_at?: string | null
+          processing_result?: Json | null
+          sector?: string | null
+          severity?: string
+          source?: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string | null
+          entity_name?: string | null
+          entity_type?: string | null
+          event_type?: string
+          id?: string
+          machine_id?: string | null
+          operator?: string | null
+          payload?: Json | null
+          processed?: boolean
+          processed_at?: string | null
+          processing_result?: Json | null
+          sector?: string | null
+          severity?: string
+          source?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_events_machine_id_fkey"
+            columns: ["machine_id"]
+            isOneToOne: false
+            referencedRelation: "production_machines"
             referencedColumns: ["id"]
           },
         ]
