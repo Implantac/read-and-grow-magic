@@ -16,7 +16,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { differenceInDays, differenceInMinutes, parseISO, subDays, format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
-import { ExportButton } from '@/components/shared/ExportButton';
+
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))', 'hsl(var(--muted-foreground))'];
 
@@ -187,7 +187,7 @@ export default function BIIndustrialPage() {
               <SelectItem value="90">90 dias</SelectItem>
             </SelectContent>
           </Select>
-          <ExportButton data={exportData} filename="bi-industrial" />
+          
         </div>
       </PageHeader>
 
