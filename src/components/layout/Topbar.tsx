@@ -26,7 +26,7 @@ const typeColors = {
 
 export function Topbar() {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut } = useAuth({ initialize: false });
   const { 
     user, activeCompany, activeBranch, sidebarCollapsed, theme,
     toggleSidebar, setActiveCompany, setActiveBranch, toggleTheme,

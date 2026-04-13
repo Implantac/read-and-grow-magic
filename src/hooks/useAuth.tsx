@@ -6,6 +6,25 @@ const mockCompanies: Company[] = [];
 import type { User as AppUser } from '@/types';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
+interface UseAuthOptions {
+  initialize?: boolean;
+}
+
+function isAuthSessionError(error?: { status?: number; message?: string } | null) {
+  if (!error) return false;
+
+  const message = error.message?.toLowerCase() || '';
+
+  return (
+    error.status === 401 ||
+    error.status === 403 ||
+    message.includes('jwt') ||
+    message.includes('token') ||
+    message.includes('session') ||
+    message.includes('not authenticated')
+  );
+}
+
 function mapSupabaseUser(user: SupabaseUser, profileName?: string, role?: string): AppUser {
   return {
     id: user.id,
@@ -16,32 +35,56 @@ function mapSupabaseUser(user: SupabaseUser, profileName?: string, role?: string
   };
 }
 
-export function useAuth() {
+export function useAuth({ initialize = true }: UseAuthOptions = {}) {
   const { setUser, setUserRole, setActiveCompany, logout: storeLogout } = useAppStore();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(initialize);
+
+  const clearInvalidSession = useCallback(async () => {
+    await supabase.auth.signOut().catch(() => undefined);
+    storeLogout();
+  }, [storeLogout]);
 
   const syncAuthState = useCallback(async (sessionUser: SupabaseUser | null) => {
-    if (sessionUser) {
-      const [profileResponse, roleResponse] = await Promise.all([
-        supabase
-          .from('profiles')
-          .select('name')
-          .eq('id', sessionUser.id)
-          .single(),
-        supabase.rpc('get_user_role', { _user_id: sessionUser.id })
-      ]);
-
-      const role = roleResponse.data || 'viewer';
-      const appUser = mapSupabaseUser(sessionUser, profileResponse.data?.name, role);
-      setUser(appUser);
-      setUserRole(role);
-      setActiveCompany(mockCompanies[0] ?? null);
-    } else {
+    if (!sessionUser) {
       storeLogout();
+      return;
     }
-  }, [setUser, setUserRole, setActiveCompany, storeLogout]);
+
+    const { data: userResponse, error: userError } = await supabase.auth.getUser();
+    const verifiedUser = userResponse.user;
+
+    if (userError || !verifiedUser || verifiedUser.id !== sessionUser.id) {
+      await clearInvalidSession();
+      return;
+    }
+
+    const [profileResponse, roleResponse] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('name')
+        .eq('id', verifiedUser.id)
+        .maybeSingle(),
+      supabase.rpc('get_user_role', { _user_id: verifiedUser.id })
+    ]);
+
+    if (isAuthSessionError(profileResponse.error) || isAuthSessionError(roleResponse.error)) {
+      await clearInvalidSession();
+      return;
+    }
+
+    const role = roleResponse.data || 'viewer';
+    const appUser = mapSupabaseUser(verifiedUser, profileResponse.data?.name, role);
+    setUser(appUser);
+    setUserRole(role);
+    setActiveCompany(mockCompanies[0] ?? null);
+  }, [clearInvalidSession, setUser, setUserRole, setActiveCompany, storeLogout]);
 
   useEffect(() => {
+    if (!initialize) {
+      setLoading(false);
+      return;
+    }
+
     let mounted = true;
 
     const runSync = async (sessionUser: SupabaseUser | null) => {
@@ -67,7 +110,7 @@ export function useAuth() {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, [syncAuthState]);
+  }, [initialize, syncAuthState]);
 
   const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -84,7 +127,7 @@ export function useAuth() {
   }, []);
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
+    await supabase.auth.signOut().catch(() => undefined);
     storeLogout();
   }, [storeLogout]);
 
