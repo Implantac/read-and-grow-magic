@@ -34,7 +34,7 @@ export default function LandingHeader({ onLogin, onWhatsApp }: Props) {
   return (
     <header className={cn(
       'sticky top-0 z-50 transition-all duration-500',
-      scrolled ? 'bg-background/85 backdrop-blur-2xl border-b border-border/50 shadow-sm' : 'bg-transparent'
+      scrolled ? 'bg-background/95 backdrop-blur-2xl border-b border-border/50 shadow-lg' : 'bg-background/80 backdrop-blur-xl border-b border-border/30'
     )}>
       <div className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-8">
         <a href="#" className="flex items-center gap-2.5 group">
