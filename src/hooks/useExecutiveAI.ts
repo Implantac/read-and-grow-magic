@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -142,7 +142,6 @@ export function useGenerateScenarios() {
 }
 
 export function useDailySummary() {
-  const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke('ai-executive', {
@@ -154,13 +153,82 @@ export function useDailySummary() {
   });
 }
 
-// ─── Unified Chat (Tool-Calling) ────────────────────────────────
+// ─── Session Persistence Helpers ────────────────────────────────
+
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes inactivity timeout
+const SESSION_KEY = 'executive_chat_session';
+
+interface SessionData {
+  messages: { role: 'user' | 'assistant'; content: string; timestamp: string }[];
+  lastActivity: string;
+}
+
+function loadSession(): ChatMessage[] {
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY);
+    if (!raw) return [];
+    const session: SessionData = JSON.parse(raw);
+    const lastActivity = new Date(session.lastActivity).getTime();
+    if (Date.now() - lastActivity > SESSION_TIMEOUT_MS) {
+      sessionStorage.removeItem(SESSION_KEY);
+      return [];
+    }
+    return session.messages.map(m => ({
+      id: crypto.randomUUID(),
+      role: m.role,
+      content: m.content,
+      timestamp: new Date(m.timestamp),
+    }));
+  } catch {
+    return [];
+  }
+}
+
+function saveSession(messages: ChatMessage[]) {
+  try {
+    const session: SessionData = {
+      messages: messages.map(m => ({
+        role: m.role,
+        content: m.content,
+        timestamp: m.timestamp.toISOString(),
+      })),
+      lastActivity: new Date().toISOString(),
+    };
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  } catch { /* ignore storage errors */ }
+}
+
+// ─── Unified Chat (Tool-Calling + Memory) ───────────────────────
 
 export function useUnifiedChat() {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>(() => loadSession());
   const [isLoading, setIsLoading] = useState(false);
+  const inactivityTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Persist messages to sessionStorage on every change
+  useEffect(() => {
+    saveSession(messages);
+  }, [messages]);
+
+  // Reset inactivity timer on every interaction
+  const resetInactivityTimer = useCallback(() => {
+    if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+    inactivityTimer.current = setTimeout(() => {
+      setMessages([]);
+      sessionStorage.removeItem(SESSION_KEY);
+    }, SESSION_TIMEOUT_MS);
+  }, []);
+
+  // Clear timer on unmount
+  useEffect(() => {
+    return () => {
+      if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+    };
+  }, []);
 
   const sendMessage = useCallback(async (input: string) => {
+    resetInactivityTimer();
+
     const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
       role: 'user',
@@ -172,6 +240,7 @@ export function useUnifiedChat() {
     setIsLoading(true);
 
     try {
+      // Send FULL conversation history for context continuity
       const chatHistory = [...messages, userMsg].map(m => ({
         role: m.role,
         content: m.content,
@@ -210,9 +279,13 @@ export function useUnifiedChat() {
     } finally {
       setIsLoading(false);
     }
-  }, [messages]);
+  }, [messages, resetInactivityTimer]);
 
-  const clearChat = useCallback(() => setMessages([]), []);
+  const clearChat = useCallback(() => {
+    setMessages([]);
+    sessionStorage.removeItem(SESSION_KEY);
+    if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
+  }, []);
 
   return { messages, isLoading, sendMessage, clearChat };
 }
