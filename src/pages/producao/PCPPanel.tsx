@@ -133,8 +133,9 @@ export default function PCPPanel() {
       </div>
 
       <Tabs defaultValue="orders">
-        <TabsList>
+        <TabsList className="flex-wrap">
           <TabsTrigger value="orders">Ordens de Produção</TabsTrigger>
+          <TabsTrigger value="gantt"><GanttChart className="h-4 w-4 mr-1" /> Timeline</TabsTrigger>
           <TabsTrigger value="demand">Demanda Comercial ({ordersAwaitingProduction.length})</TabsTrigger>
           <TabsTrigger value="capacity">Capacidade {delayedOPs.length > 0 && <Badge variant="destructive" className="ml-1 h-5 text-[10px]">{delayedOPs.length}</Badge>}</TabsTrigger>
           <TabsTrigger value="productivity">Produtividade</TabsTrigger>
