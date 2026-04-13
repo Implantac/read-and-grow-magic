@@ -707,15 +707,17 @@ async function executeAcao(supabase: any, args: any, user_id?: string) {
   const params = args.parametros || {};
   const logAction = async (actionName: string, result: string) => {
     if (user_id) {
-      await supabase.from("ai_action_logs").insert({
-        user_id,
-        action_type: "execution",
-        module: args.modulo,
-        action_name: actionName,
-        parameters: params,
-        context: JSON.stringify({ modulo: args.modulo }),
-        result,
-      }).catch(() => {});
+      try {
+        await supabase.from("ai_action_logs").insert({
+          user_id,
+          action_type: "execution",
+          module: args.modulo,
+          action_name: actionName,
+          parameters: params,
+          context: JSON.stringify({ modulo: args.modulo }),
+          result,
+        });
+      } catch { /* ignore */ }
     }
   };
 
@@ -952,14 +954,16 @@ async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: str
     const queryText = lastUserMsg.content.toLowerCase();
     const consultModules = ["financeiro", "comercial", "produção", "producao", "estoque"];
     const detectedModule = consultModules.find(m => queryText.includes(m)) || "geral";
-    await supabase.from("ai_action_logs").insert({
-      user_id,
-      action_type: "query",
-      module: detectedModule,
-      action_name: "consulta_chat",
-      parameters: { query_preview: queryText.slice(0, 200) },
-      context: "chat",
-    }).catch(() => {});
+    try {
+      await supabase.from("ai_action_logs").insert({
+        user_id,
+        action_type: "query",
+        module: detectedModule,
+        action_name: "consulta_chat",
+        parameters: { query_preview: queryText.slice(0, 200) },
+        context: "chat",
+      });
+    } catch { /* ignore */ }
   }
 
   const systemPrompt = `Você é a **IA Executiva oficial da USE SISTEMAS** — o Diretor Digital, assistente executivo inteligente de alto nível da plataforma de gestão empresarial.
