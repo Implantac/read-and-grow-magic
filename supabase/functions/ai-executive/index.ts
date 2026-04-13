@@ -1049,7 +1049,8 @@ Ao responder consultas, quando detectar problemas:
 - Para ações concluídas: "✅ [descrição do que foi feito]"
 - Para erros: "❌ [explicação clara]"
 - Para alertas: "⚠️ [alerta com recomendação]"
-- Inclua sempre timestamp quando relevante`;
+- Inclua sempre timestamp quando relevante
+${patternInsights}`;
 
   const aiMessages = [{ role: "system", content: systemPrompt }, ...contextMessages];
 
@@ -1083,7 +1084,7 @@ Ao responder consultas, quando detectar problemas:
       let toolResult: any;
       try {
         const args = typeof fn.arguments === "string" ? JSON.parse(fn.arguments) : fn.arguments;
-        toolResult = executor ? await executor(supabase, args) : { erro: `Função ${fn.name} não encontrada` };
+        toolResult = executor ? await executor(supabase, args, user_id) : { erro: `Função ${fn.name} não encontrada` };
       } catch (e) {
         toolResult = { erro: `Erro: ${e.message}` };
       }
