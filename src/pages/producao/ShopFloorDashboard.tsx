@@ -80,7 +80,12 @@ export default function ShopFloorDashboardPage() {
 
   return (
     <PageContainer loading={loading}>
-      <PageHeader title="🏭 Chão de Fábrica — Tempo Real" description="Monitoramento de operadores, setores e produtividade" />
+      <PageHeader title="🏭 Chão de Fábrica — Tempo Real" description="Monitoramento de operadores, setores e produtividade">
+        <Badge variant={realtimeActive ? 'default' : 'secondary'} className="flex items-center gap-1.5">
+          <Radio className={cn('h-3 w-3', realtimeActive && 'animate-pulse text-green-400')} />
+          {realtimeActive ? 'Ao Vivo' : 'Conectando...'}
+        </Badge>
+      </PageHeader>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <KPICard title="Operadores Ativos" value={activeEntries.length} icon={<Users className="h-5 w-5" />} accentColor="primary" index={0} />
