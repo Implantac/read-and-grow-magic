@@ -4776,6 +4776,62 @@ export type Database = {
           },
         ]
       }
+      production_machines: {
+        Row: {
+          active: boolean
+          capacity_per_hour: number | null
+          code: string
+          created_at: string
+          current_operator: string | null
+          current_order_id: string | null
+          id: string
+          name: string
+          notes: string | null
+          sector: string | null
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          capacity_per_hour?: number | null
+          code: string
+          created_at?: string
+          current_operator?: string | null
+          current_order_id?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          sector?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          capacity_per_hour?: number | null
+          code?: string
+          created_at?: string
+          current_operator?: string | null
+          current_order_id?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          sector?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_machines_current_order_id_fkey"
+            columns: ["current_order_id"]
+            isOneToOne: false
+            referencedRelation: "production_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_order_steps: {
         Row: {
           completed_at: string | null
@@ -7661,6 +7717,8 @@ export type Database = {
           created_at: string
           end_time: string | null
           id: string
+          machine_id: string | null
+          machine_name: string | null
           notes: string | null
           operation_id: string | null
           operation_name: string
@@ -7678,6 +7736,8 @@ export type Database = {
           created_at?: string
           end_time?: string | null
           id?: string
+          machine_id?: string | null
+          machine_name?: string | null
           notes?: string | null
           operation_id?: string | null
           operation_name: string
@@ -7695,6 +7755,8 @@ export type Database = {
           created_at?: string
           end_time?: string | null
           id?: string
+          machine_id?: string | null
+          machine_name?: string | null
           notes?: string | null
           operation_id?: string | null
           operation_name?: string
@@ -7709,6 +7771,13 @@ export type Database = {
           work_center?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "time_entries_machine_id_fkey"
+            columns: ["machine_id"]
+            isOneToOne: false
+            referencedRelation: "production_machines"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "time_entries_production_order_id_fkey"
             columns: ["production_order_id"]

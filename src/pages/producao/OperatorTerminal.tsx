@@ -12,7 +12,8 @@ import { useTimeEntries } from '@/hooks/useTimeEntries';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { useProductionSteps } from '@/hooks/useProductionSteps';
 import { supabase } from '@/integrations/supabase/client';
-import { Play, Pause, CheckCircle, Timer, Package, AlertTriangle, User, Layers, Clock, Plus, Minus, AlertOctagon } from 'lucide-react';
+import { useProductionMachines } from '@/hooks/useProductionMachines';
+import { Play, Pause, CheckCircle, Timer, Package, AlertTriangle, User, Layers, Clock, Plus, Minus, AlertOctagon, Cpu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { differenceInMinutes, differenceInSeconds, format } from 'date-fns';
 import { toast } from 'sonner';
@@ -21,9 +22,11 @@ export default function OperatorTerminalPage() {
   const { entries, loading, create, update } = useTimeEntries();
   const { orders, update: updateOrder } = useProductionOrders();
   const { steps } = useProductionSteps();
+  const { activeMachines } = useProductionMachines();
   const [operatorName, setOperatorName] = useState(() => localStorage.getItem('operator_name') || '');
   const [selectedOrderId, setSelectedOrderId] = useState('');
   const [selectedStep, setSelectedStep] = useState('');
+  const [selectedMachineId, setSelectedMachineId] = useState('');
   const [producedQty, setProducedQty] = useState(0);
   const [rejectedQty, setRejectedQty] = useState(0);
   const [now, setNow] = useState(new Date());
@@ -107,13 +110,15 @@ export default function OperatorTerminalPage() {
     const order = orders.find(o => o.id === selectedOrderId);
     if (!order) return;
     const stepName = steps.find(s => s.id === selectedStep)?.name || order.work_center || 'Produção';
+    const machine = activeMachines.find(m => m.id === selectedMachineId);
     await create({
       production_order_id: selectedOrderId, order_number: order.order_number,
       operation_id: selectedStep || null, operation_name: stepName, operator: operatorName,
       start_time: new Date().toISOString(), end_time: null, paused_time: 0,
       produced_quantity: 0, rejected_quantity: 0, status: 'started', notes: null,
       work_center: order.work_center || order.sector,
-    });
+      machine_id: machine?.id || null, machine_name: machine?.name || null,
+    } as any);
     if (order.status === 'planned') {
       await updateOrder(order.id, { status: 'in_progress', start_date: new Date().toISOString() });
     }
@@ -239,6 +244,26 @@ export default function OperatorTerminalPage() {
                     <SelectContent>
                       {steps.filter(s => s.is_active).map(s => (
                         <SelectItem key={s.id} value={s.id}>{s.name} {s.sector ? `(${s.sector})` : ''}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              {activeMachines.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                    <Cpu className="h-3.5 w-3.5" /> Máquina
+                  </label>
+                  <Select value={selectedMachineId} onValueChange={setSelectedMachineId}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Selecione a máquina (opcional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {activeMachines.filter(m => m.status === 'available').map(m => (
+                        <SelectItem key={m.id} value={m.id}>
+                          {m.name} ({m.code}) {m.sector ? `— ${m.sector}` : ''}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
