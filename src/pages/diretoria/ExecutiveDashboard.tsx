@@ -718,6 +718,108 @@ export default function ExecutiveDashboard() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {/* ── Assistant Tab (Tool-Calling) ── */}
+        <TabsContent value="assistant">
+          <div className="flex gap-4">
+            {/* Sidebar Quick Actions */}
+            <div className="hidden lg:flex flex-col w-56 shrink-0 gap-3">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2"><Sparkles className="h-4 w-4" /> Ações Rápidas</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {assistantQuickActions.map((action, i) => (
+                    <Button key={i} variant="ghost" size="sm" className="w-full justify-start text-left h-auto py-2 px-3" onClick={() => !assistantLoading && sendAssistantMessage(action.prompt)} disabled={assistantLoading}>
+                      <span className="text-xs leading-tight">{action.label}</span>
+                    </Button>
+                  ))}
+                  <Separator className="my-2" />
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => dailySummary.mutateAsync().then(r => r?.resumo_executivo && sendAssistantMessage('Gere o resumo executivo diário.'))} disabled={dailySummary.isPending || assistantLoading}>
+                    <FileText className="h-4 w-4 mr-1" />{dailySummary.isPending ? 'Gerando...' : 'Resumo do Dia'}
+                  </Button>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4">
+                  <p className="text-xs text-muted-foreground mb-2 font-medium">Exemplos:</p>
+                  <ul className="text-xs text-muted-foreground space-y-1.5">
+                    <li>"Fluxo de caixa dos próximos 15 dias?"</li>
+                    <li>"Top 5 clientes por faturamento"</li>
+                    <li>"OPs atrasadas?"</li>
+                    <li>"Buscar produto 'Parafuso M8'"</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Assistant Chat */}
+            <Card className="flex-1 h-[600px] flex flex-col">
+              <CardHeader className="pb-2 border-b">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-sm flex items-center gap-2"><Bot className="h-4 w-4 text-primary" />Assistente ERP — Consultas e Ações</CardTitle>
+                  {assistantMessages.length > 0 && <Button variant="ghost" size="sm" onClick={clearAssistant} className="text-xs gap-1"><Trash2 className="h-3 w-3" />Limpar</Button>}
+                </div>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+                <ScrollArea className="flex-1 p-4">
+                  {assistantMessages.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-center py-12">
+                      <Bot className="h-16 w-16 text-muted-foreground/20 mb-4" />
+                      <p className="text-sm font-medium mb-1">Assistente ERP Inteligente</p>
+                      <p className="text-xs text-muted-foreground mb-6 max-w-sm">Consulte dados financeiros, comerciais, de produção e estoque em tempo real. Execute ações no sistema por linguagem natural.</p>
+                      <div className="grid gap-2 md:grid-cols-2 lg:hidden max-w-lg">
+                        {assistantQuickActions.map(a => (
+                          <Button key={a.label} variant="outline" size="sm" className="text-xs h-auto py-2" onClick={() => sendAssistantMessage(a.prompt)}>{a.label}</Button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {assistantMessages.map(msg => (
+                        <div key={msg.id} className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
+                          <div className={cn('max-w-[85%] rounded-2xl px-4 py-3', msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                            {msg.role === 'assistant' ? (
+                              <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                                <ReactMarkdown>{msg.content}</ReactMarkdown>
+                              </div>
+                            ) : (
+                              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                            )}
+                            <p className={cn('text-[10px] mt-1', msg.role === 'user' ? 'text-primary-foreground/60' : 'text-muted-foreground')}>
+                              {msg.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                      {assistantLoading && (
+                        <div className="flex justify-start">
+                          <div className="bg-muted rounded-2xl px-4 py-3 flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span className="text-sm text-muted-foreground">Consultando sistema...</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </ScrollArea>
+                <div className="border-t p-3 flex gap-2">
+                  <Input
+                    value={assistantInput}
+                    onChange={(e) => setAssistantInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleAssistantSend()}
+                    placeholder="Digite um comando ou pergunta..."
+                    disabled={assistantLoading}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleAssistantSend} disabled={assistantLoading || !assistantInput.trim()} size="icon">
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
       </Tabs>
     </PageContainer>
   );
