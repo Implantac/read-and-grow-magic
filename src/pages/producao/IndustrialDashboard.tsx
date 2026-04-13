@@ -149,6 +149,67 @@ export default function IndustrialDashboard() {
     { name: 'Concluídas', value: completedOPs, color: 'hsl(var(--success, 142 71% 45%))' },
   ].filter(d => d.value > 0);
 
+  // === DELAY PREDICTION ENGINE ===
+  const delayPredictions = useMemo(() => {
+    return productionOrders
+      .filter(o => ['in_progress', 'planned'].includes(o.status) && o.due_date)
+      .map(order => {
+        const daysLeft = differenceInDays(parseISO(order.due_date!), new Date());
+        const progressPct = order.quantity > 0 ? (order.produced_quantity / order.quantity) * 100 : 0;
+        const estimatedVsRealized = order.estimated_time_minutes > 0
+          ? (order.realized_time_minutes / order.estimated_time_minutes) * 100
+          : 0;
+
+        // Simple prediction: if realized time already exceeds 80% of estimated and progress < 50%, high risk
+        let risk: 'low' | 'medium' | 'high' | 'critical' = 'low';
+        let reason = '';
+        if (daysLeft < 0) {
+          risk = 'critical';
+          reason = `Atrasada ${Math.abs(daysLeft)} dias`;
+        } else if (daysLeft <= 1 && progressPct < 70) {
+          risk = 'critical';
+          reason = `Prazo amanhã e apenas ${progressPct.toFixed(0)}% concluído`;
+        } else if (estimatedVsRealized > 80 && progressPct < 50) {
+          risk = 'high';
+          reason = `Consumiu ${estimatedVsRealized.toFixed(0)}% do tempo com ${progressPct.toFixed(0)}% produzido`;
+        } else if (daysLeft <= 3 && progressPct < 50) {
+          risk = 'high';
+          reason = `${daysLeft}d restantes e ${progressPct.toFixed(0)}% concluído`;
+        } else if (daysLeft <= 5 && progressPct < 30) {
+          risk = 'medium';
+          reason = `${daysLeft}d restantes e ${progressPct.toFixed(0)}% concluído`;
+        }
+
+        return { order, daysLeft, progressPct, risk, reason };
+      })
+      .filter(p => p.risk !== 'low')
+      .sort((a, b) => {
+        const riskOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+        return riskOrder[a.risk] - riskOrder[b.risk];
+      });
+  }, [productionOrders]);
+
+  // === BOTTLENECK DETECTION ===
+  const bottleneckAnalysis = useMemo(() => {
+    const sectorQueue: Record<string, number> = {};
+    const sectorActive: Record<string, number> = {};
+    productionOrders.filter(o => ['in_progress', 'planned', 'paused'].includes(o.status)).forEach(o => {
+      const sector = o.sector || o.work_center || 'Geral';
+      sectorQueue[sector] = (sectorQueue[sector] || 0) + 1;
+      if (o.status === 'in_progress') sectorActive[sector] = (sectorActive[sector] || 0) + 1;
+    });
+    return Object.entries(sectorQueue)
+      .map(([sector, queue]) => ({
+        sector,
+        queue,
+        active: sectorActive[sector] || 0,
+        ratio: (sectorActive[sector] || 0) > 0 ? queue / sectorActive[sector]! : queue,
+        isBottleneck: queue >= 5,
+      }))
+      .filter(b => b.isBottleneck || b.ratio > 3)
+      .sort((a, b) => b.queue - a.queue);
+  }, [productionOrders]);
+
   // Cost data
   const totalProfit = totalRevenue - totalCostSum;
   const overallMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
