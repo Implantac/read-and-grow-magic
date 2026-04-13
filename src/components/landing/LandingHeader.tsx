@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Menu, X, ArrowRight, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import logoUseSistemas from '@/assets/logo.png';
 
 interface Props {
   onLogin: () => void;
@@ -34,8 +35,8 @@ export default function LandingHeader({ onLogin, onWhatsApp }: Props) {
     )}>
       <div className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-8">
         <a href="#" className="flex items-center gap-2.5 group">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center shadow-md group-hover:shadow-glow transition-all duration-300 group-hover:scale-105">
-            <span className="text-primary-foreground font-extrabold text-sm">U</span>
+          <div className="h-10 w-10 rounded-xl flex items-center justify-center group-hover:scale-105 transition-all duration-300">
+            <img src={logoUseSistemas} alt="Use Sistemas" className="h-10 w-10 object-contain" />
           </div>
           <div className="flex flex-col leading-none">
             <span className="text-base font-extrabold tracking-tight text-foreground">USE SISTEMAS</span>
