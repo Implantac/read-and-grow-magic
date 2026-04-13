@@ -269,7 +269,8 @@ export default function OperatorTerminalPage() {
                   </Select>
                 </div>
               )}
-                <div className="p-4 rounded-xl bg-muted space-y-2">
+
+              {currentOrder && (
                   <p className="font-semibold text-lg">{currentOrder.product_name}</p>
                   <p className="text-sm text-muted-foreground">OP: {currentOrder.order_number}</p>
                   {currentOrder.client_name && <p className="text-sm">Cliente: <strong>{currentOrder.client_name}</strong></p>}
