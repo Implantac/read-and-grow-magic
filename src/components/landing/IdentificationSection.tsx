@@ -16,9 +16,9 @@ export default function IdentificationSection() {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-14">
           <Badge variant="destructive" className="mb-5 font-medium px-4 py-1.5 text-xs">Diagnóstico</Badge>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-5 tracking-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-5 tracking-tight text-foreground">
             Se você vive isso no dia a dia,{' '}
-            <span className="text-destructive">precisa agir agora.</span>
+            <span className="text-primary">precisa agir agora.</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
             Esses cenários são comuns em empresas que cresceram rápido demais para seus processos. A boa notícia: todos são resolvíveis.
