@@ -27,6 +27,37 @@ export default function OperatorTerminalPage() {
   const [producedQty, setProducedQty] = useState(0);
   const [rejectedQty, setRejectedQty] = useState(0);
   const [now, setNow] = useState(new Date());
+  const [problemOpen, setProblemOpen] = useState(false);
+  const [problemDesc, setProblemDesc] = useState('');
+  const [problemCategory, setProblemCategory] = useState('machine_stop');
+  const [reportingProblem, setReportingProblem] = useState(false);
+
+  const handleReportProblem = async () => {
+    if (!problemDesc.trim()) { toast.error('Descreva o problema'); return; }
+    setReportingProblem(true);
+    try {
+      await (supabase as any).from('industrial_alerts').insert({
+        alert_type: problemCategory,
+        severity: problemCategory === 'machine_stop' ? 'critical' : 'high',
+        title: `Problema reportado: ${problemCategory === 'machine_stop' ? 'Parada de Máquina' : problemCategory === 'quality_issue' ? 'Problema de Qualidade' : problemCategory === 'material_shortage' ? 'Falta de Material' : 'Segurança'}`,
+        description: `Operador: ${operatorName}. ${currentEntry ? `OP: ${currentEntry.order_number}.` : ''} ${problemDesc}`,
+        entity_type: 'operator_report',
+        entity_name: operatorName,
+        entity_id: currentEntry?.production_order_id || null,
+        status: 'active',
+      });
+      if (currentEntry && currentEntry.status === 'started') {
+        await update(currentEntry.id, { status: 'paused' });
+      }
+      toast.success('Problema reportado com sucesso. Supervisão notificada.');
+      setProblemOpen(false);
+      setProblemDesc('');
+    } catch (e) {
+      toast.error('Erro ao reportar problema');
+    } finally {
+      setReportingProblem(false);
+    }
+  };
 
   useEffect(() => {
     if (operatorName) localStorage.setItem('operator_name', operatorName);
