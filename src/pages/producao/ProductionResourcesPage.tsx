@@ -9,17 +9,26 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Plus, Pencil, Trash2, Search, Wrench } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, Pencil, Trash2, Search, Wrench, Cog, User, Monitor, AlertTriangle, DollarSign } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 
-const typeLabels: Record<string,string> = { machine: 'Máquina', operator: 'Operador', workstation: 'Posto de Trabalho' };
-const statusLabels: Record<string,string> = { available: 'Disponível', running: 'Em Uso', maintenance: 'Manutenção', inactive: 'Inativo' };
-const statusColors: Record<string,'default'|'secondary'|'destructive'|'outline'> = { available: 'default', running: 'secondary', maintenance: 'destructive', inactive: 'outline' };
+const typeLabels: Record<string, string> = { machine: 'Máquina', operator: 'Operador', workstation: 'Posto de Trabalho' };
+const typeIcons: Record<string, any> = { machine: Cog, operator: User, workstation: Monitor };
+const statusLabels: Record<string, string> = { available: 'Disponível', running: 'Em Uso', maintenance: 'Manutenção', inactive: 'Inativo' };
+const statusStyles: Record<string, string> = {
+  available: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+  running: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+  maintenance: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+  inactive: 'bg-red-500/10 text-red-600 border-red-500/20',
+};
 
-const emptyResource: Partial<ProductionResource> = { code: '', name: '', resource_type: 'machine', sector_id: null, line_id: null, capacity_per_hour: 0, cost_per_hour: 0, status: 'available', is_active: true };
+const emptyResource: Partial<ProductionResource> = { code: '', name: '', resource_type: 'machine', sector_id: null, line_id: null, capacity_per_hour: 0, cost_per_hour: 0, status: 'available', is_active: true, notes: '' };
 
 export default function ProductionResourcesPage() {
   const { resources, loading, create, update, remove } = useProductionResources();
@@ -30,12 +39,16 @@ export default function ProductionResourcesPage() {
   const [form, setForm] = useState<Partial<ProductionResource>>(emptyResource);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const filtered = resources.filter(r => {
     const matchSearch = r.name.toLowerCase().includes(search.toLowerCase()) || r.code.toLowerCase().includes(search.toLowerCase());
     const matchType = typeFilter === 'all' || r.resource_type === typeFilter;
     return matchSearch && matchType;
   });
+
+  const totalCostHour = resources.reduce((s, r) => s + r.cost_per_hour, 0);
+  const totalCapacity = resources.reduce((s, r) => s + r.capacity_per_hour, 0);
 
   const openNew = () => { setEditing(null); setForm(emptyResource); setOpen(true); };
   const openEdit = (r: ProductionResource) => { setEditing(r); setForm(r); setOpen(true); };
@@ -45,113 +58,199 @@ export default function ProductionResourcesPage() {
     if (ok) setOpen(false);
   };
 
+  const handleDelete = async () => {
+    if (deleteId) { await remove(deleteId); setDeleteId(null); }
+  };
+
   return (
     <PageContainer>
       <PageHeader title="Recursos Produtivos" description="Máquinas, operadores e postos de trabalho" />
 
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        {[
+          { label: 'Total Recursos', value: resources.length, icon: Wrench, color: 'text-primary' },
+          { label: 'Máquinas', value: resources.filter(r => r.resource_type === 'machine').length, icon: Cog, color: 'text-info' },
+          { label: 'Cap. Total/h', value: totalCapacity.toLocaleString('pt-BR'), icon: Monitor, color: 'text-success' },
+          { label: 'Custo/h Total', value: `R$ ${totalCostHour.toFixed(0)}`, icon: DollarSign, color: 'text-warning' },
+        ].map((kpi, i) => (
+          <Card key={i} className="border-border/50 bg-card/80 backdrop-blur-sm">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className={`h-10 w-10 rounded-lg bg-muted flex items-center justify-center ${kpi.color}`}>
+                <kpi.icon className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold">{kpi.value}</p>
+                <p className="text-xs text-muted-foreground">{kpi.label}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Type Tabs */}
       <Tabs value={typeFilter} onValueChange={setTypeFilter} className="mb-4">
         <TabsList>
           <TabsTrigger value="all">Todos</TabsTrigger>
-          <TabsTrigger value="machine">Máquinas</TabsTrigger>
-          <TabsTrigger value="operator">Operadores</TabsTrigger>
-          <TabsTrigger value="workstation">Postos</TabsTrigger>
+          <TabsTrigger value="machine" className="gap-1"><Cog className="h-3.5 w-3.5" />Máquinas</TabsTrigger>
+          <TabsTrigger value="operator" className="gap-1"><User className="h-3.5 w-3.5" />Operadores</TabsTrigger>
+          <TabsTrigger value="workstation" className="gap-1"><Monitor className="h-3.5 w-3.5" />Postos</TabsTrigger>
         </TabsList>
       </Tabs>
 
+      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Buscar recurso..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+          <Input placeholder="Buscar recurso por nome ou código..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild><Button onClick={openNew}><Plus className="h-4 w-4 mr-2" />Novo Recurso</Button></DialogTrigger>
-          <DialogContent className="max-w-lg">
-            <DialogHeader><DialogTitle>{editing ? 'Editar Recurso' : 'Novo Recurso'}</DialogTitle></DialogHeader>
-            <div className="grid gap-4 py-2">
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>Código</Label><Input value={form.code || ''} onChange={e => setForm({ ...form, code: e.target.value })} /></div>
-                <div><Label>Nome</Label><Input value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <Label>Tipo</Label>
-                  <Select value={form.resource_type || 'machine'} onValueChange={v => setForm({ ...form, resource_type: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="machine">Máquina</SelectItem>
-                      <SelectItem value="operator">Operador</SelectItem>
-                      <SelectItem value="workstation">Posto de Trabalho</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Setor</Label>
-                  <Select value={form.sector_id || ''} onValueChange={v => setForm({ ...form, sector_id: v })}>
-                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                    <SelectContent>{activeSectors.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label>Linha</Label>
-                  <Select value={form.line_id || ''} onValueChange={v => setForm({ ...form, line_id: v })}>
-                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                    <SelectContent>{lines.map(l => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>Capacidade/Hora</Label><Input type="number" value={form.capacity_per_hour || 0} onChange={e => setForm({ ...form, capacity_per_hour: Number(e.target.value) })} /></div>
-                <div><Label>Custo/Hora (R$)</Label><Input type="number" step="0.01" value={form.cost_per_hour || 0} onChange={e => setForm({ ...form, cost_per_hour: Number(e.target.value) })} /></div>
-              </div>
-              <Button onClick={handleSave}>Salvar</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" />Novo Recurso</Button>
       </div>
 
+      {/* Table */}
       {loading ? (
-        <div className="space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-12 w-full" />)}</div>
+        <div className="space-y-2">{[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}</div>
       ) : (
-        <div className="rounded-md border">
+        <div className="rounded-lg border border-border/50 overflow-hidden">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Código</TableHead>
-                <TableHead>Nome</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Setor</TableHead>
-                <TableHead>Linha</TableHead>
-                <TableHead>Cap./h</TableHead>
-                <TableHead>R$/h</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="w-[100px]">Ações</TableHead>
+              <TableRow className="bg-muted/30 hover:bg-muted/30">
+                <TableHead className="font-semibold">Código</TableHead>
+                <TableHead className="font-semibold">Nome</TableHead>
+                <TableHead className="font-semibold">Tipo</TableHead>
+                <TableHead className="font-semibold">Setor</TableHead>
+                <TableHead className="font-semibold">Linha</TableHead>
+                <TableHead className="font-semibold">Cap./h</TableHead>
+                <TableHead className="font-semibold">R$/h</TableHead>
+                <TableHead className="font-semibold">Status</TableHead>
+                <TableHead className="w-[100px] font-semibold">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground"><Wrench className="h-8 w-8 mx-auto mb-2 opacity-50" />Nenhum recurso cadastrado</TableCell></TableRow>
-              ) : filtered.map(r => (
-                <TableRow key={r.id}>
-                  <TableCell className="font-mono font-medium">{r.code}</TableCell>
-                  <TableCell className="font-medium">{r.name}</TableCell>
-                  <TableCell><Badge variant="outline">{typeLabels[r.resource_type] || r.resource_type}</Badge></TableCell>
-                  <TableCell>{r.sector_name || '—'}</TableCell>
-                  <TableCell>{r.line_name || '—'}</TableCell>
-                  <TableCell>{r.capacity_per_hour}</TableCell>
-                  <TableCell>R$ {r.cost_per_hour.toFixed(2)}</TableCell>
-                  <TableCell><Badge variant={statusColors[r.status] || 'outline'}>{statusLabels[r.status] || r.status}</Badge></TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" onClick={() => openEdit(r)}><Pencil className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => remove(r.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                    </div>
+                <TableRow>
+                  <TableCell colSpan={9} className="text-center py-12 text-muted-foreground">
+                    <Wrench className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                    <p className="font-medium">Nenhum recurso encontrado</p>
+                    <p className="text-sm mt-1">Cadastre máquinas, operadores ou postos de trabalho</p>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : filtered.map(r => {
+                const TypeIcon = typeIcons[r.resource_type] || Wrench;
+                return (
+                  <TableRow key={r.id} className="group">
+                    <TableCell className="font-mono font-semibold text-primary">{r.code}</TableCell>
+                    <TableCell className="font-medium">{r.name}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="gap-1">
+                        <TypeIcon className="h-3 w-3" />
+                        {typeLabels[r.resource_type] || r.resource_type}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{r.sector_name || <span className="text-muted-foreground italic">—</span>}</TableCell>
+                    <TableCell>{r.line_name || <span className="text-muted-foreground italic">—</span>}</TableCell>
+                    <TableCell><span className="font-mono">{r.capacity_per_hour}</span></TableCell>
+                    <TableCell><span className="font-mono">R$ {r.cost_per_hour.toFixed(2)}</span></TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusStyles[r.status] || ''}`}>
+                        {statusLabels[r.status] || r.status}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(r)}><Pencil className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteId(r.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </div>
       )}
+
+      {/* Create/Edit Dialog */}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{editing ? 'Editar Recurso' : 'Novo Recurso'}</DialogTitle>
+            <DialogDescription>Cadastre máquinas, operadores ou postos de trabalho</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5"><Label>Código *</Label><Input value={form.code || ''} onChange={e => setForm({ ...form, code: e.target.value })} placeholder="REC-001" /></div>
+              <div className="space-y-1.5"><Label>Nome *</Label><Input value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Torno CNC 01" /></div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1.5">
+                <Label>Tipo *</Label>
+                <Select value={form.resource_type || 'machine'} onValueChange={v => setForm({ ...form, resource_type: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="machine">Máquina</SelectItem>
+                    <SelectItem value="operator">Operador</SelectItem>
+                    <SelectItem value="workstation">Posto de Trabalho</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Setor</Label>
+                <Select value={form.sector_id || ''} onValueChange={v => setForm({ ...form, sector_id: v })}>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>{activeSectors.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Linha</Label>
+                <Select value={form.line_id || ''} onValueChange={v => setForm({ ...form, line_id: v })}>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>{lines.map(l => <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="space-y-1.5"><Label>Capacidade/h</Label><Input type="number" value={form.capacity_per_hour || 0} onChange={e => setForm({ ...form, capacity_per_hour: Number(e.target.value) })} /></div>
+              <div className="space-y-1.5"><Label>Custo/Hora (R$)</Label><Input type="number" step="0.01" value={form.cost_per_hour || 0} onChange={e => setForm({ ...form, cost_per_hour: Number(e.target.value) })} /></div>
+              <div className="space-y-1.5">
+                <Label>Status</Label>
+                <Select value={form.status || 'available'} onValueChange={v => setForm({ ...form, status: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="available">Disponível</SelectItem>
+                    <SelectItem value="running">Em Uso</SelectItem>
+                    <SelectItem value="maintenance">Manutenção</SelectItem>
+                    <SelectItem value="inactive">Inativo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-1.5"><Label>Observações</Label><Textarea value={form.notes || ''} onChange={e => setForm({ ...form, notes: e.target.value })} rows={2} /></div>
+            <div className="flex items-center gap-2">
+              <Switch checked={form.is_active ?? true} onCheckedChange={v => setForm({ ...form, is_active: v })} />
+              <Label>Recurso ativo</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSave} disabled={!form.code || !form.name}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-destructive" />Confirmar Exclusão</DialogTitle>
+            <DialogDescription>Esta ação não pode ser desfeita. Deseja realmente excluir este recurso?</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteId(null)}>Cancelar</Button>
+            <Button variant="destructive" onClick={handleDelete}>Excluir</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
