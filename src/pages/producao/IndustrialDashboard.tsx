@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,20 +13,43 @@ import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { useTimeEntries } from '@/hooks/useTimeEntries';
 import { useProductionCapacity } from '@/hooks/useProductionCapacity';
 import { KPICard } from '@/components/shared/KPICard';
-import { DollarSign, TrendingUp, AlertTriangle, Factory, Package, Gauge, CheckCircle, XCircle, Clock, Users, Activity, Zap, Layers, Timer, Wrench } from 'lucide-react';
+import { DollarSign, TrendingUp, AlertTriangle, Factory, Package, Gauge, CheckCircle, XCircle, Clock, Users, Activity, Zap, Layers, Timer, Wrench, Radio, Brain, RefreshCw } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line, CartesianGrid, AreaChart, Area } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { differenceInDays, differenceInMinutes, format, parseISO, subDays } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function IndustrialDashboard() {
   const { costs, avgMargin, totalRevenue, totalCostSum, lowMarginProducts, highCostProducts } = useProductCosts();
   const { supplies, lowStockItems } = useSupplyStock();
   const { activeAlerts, resolveAlert } = useIndustrialAlerts();
-  const { orders: productionOrders } = useProductionOrders();
-  const { entries } = useTimeEntries();
+  const { orders: productionOrders, refetch: refetchOrders } = useProductionOrders();
+  const { entries, refetch: refetchEntries } = useTimeEntries();
   const { capacities } = useProductionCapacity();
+  const [realtimeActive, setRealtimeActive] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState(new Date());
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetchOrders();
+      refetchEntries();
+      setLastRefresh(new Date());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [refetchOrders, refetchEntries]);
+
+  // Realtime subscriptions
+  useEffect(() => {
+    const channel = supabase
+      .channel('industrial-dashboard-rt')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'production_orders' }, () => { refetchOrders(); setLastRefresh(new Date()); })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'time_entries' }, () => { refetchEntries(); setLastRefresh(new Date()); })
+      .subscribe((status) => { setRealtimeActive(status === 'SUBSCRIBED'); });
+    return () => { supabase.removeChannel(channel); };
+  }, [refetchOrders, refetchEntries]);
 
   // === PRODUCTION KPIs ===
   const totalOPs = productionOrders.length;
@@ -126,6 +149,67 @@ export default function IndustrialDashboard() {
     { name: 'Concluídas', value: completedOPs, color: 'hsl(var(--success, 142 71% 45%))' },
   ].filter(d => d.value > 0);
 
+  // === DELAY PREDICTION ENGINE ===
+  const delayPredictions = useMemo(() => {
+    return productionOrders
+      .filter(o => ['in_progress', 'planned'].includes(o.status) && o.due_date)
+      .map(order => {
+        const daysLeft = differenceInDays(parseISO(order.due_date!), new Date());
+        const progressPct = order.quantity > 0 ? (order.produced_quantity / order.quantity) * 100 : 0;
+        const estimatedVsRealized = order.estimated_time_minutes > 0
+          ? (order.realized_time_minutes / order.estimated_time_minutes) * 100
+          : 0;
+
+        // Simple prediction: if realized time already exceeds 80% of estimated and progress < 50%, high risk
+        let risk: 'low' | 'medium' | 'high' | 'critical' = 'low';
+        let reason = '';
+        if (daysLeft < 0) {
+          risk = 'critical';
+          reason = `Atrasada ${Math.abs(daysLeft)} dias`;
+        } else if (daysLeft <= 1 && progressPct < 70) {
+          risk = 'critical';
+          reason = `Prazo amanhã e apenas ${progressPct.toFixed(0)}% concluído`;
+        } else if (estimatedVsRealized > 80 && progressPct < 50) {
+          risk = 'high';
+          reason = `Consumiu ${estimatedVsRealized.toFixed(0)}% do tempo com ${progressPct.toFixed(0)}% produzido`;
+        } else if (daysLeft <= 3 && progressPct < 50) {
+          risk = 'high';
+          reason = `${daysLeft}d restantes e ${progressPct.toFixed(0)}% concluído`;
+        } else if (daysLeft <= 5 && progressPct < 30) {
+          risk = 'medium';
+          reason = `${daysLeft}d restantes e ${progressPct.toFixed(0)}% concluído`;
+        }
+
+        return { order, daysLeft, progressPct, risk, reason };
+      })
+      .filter(p => p.risk !== 'low')
+      .sort((a, b) => {
+        const riskOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+        return riskOrder[a.risk] - riskOrder[b.risk];
+      });
+  }, [productionOrders]);
+
+  // === BOTTLENECK DETECTION ===
+  const bottleneckAnalysis = useMemo(() => {
+    const sectorQueue: Record<string, number> = {};
+    const sectorActive: Record<string, number> = {};
+    productionOrders.filter(o => ['in_progress', 'planned', 'paused'].includes(o.status)).forEach(o => {
+      const sector = o.sector || o.work_center || 'Geral';
+      sectorQueue[sector] = (sectorQueue[sector] || 0) + 1;
+      if (o.status === 'in_progress') sectorActive[sector] = (sectorActive[sector] || 0) + 1;
+    });
+    return Object.entries(sectorQueue)
+      .map(([sector, queue]) => ({
+        sector,
+        queue,
+        active: sectorActive[sector] || 0,
+        ratio: (sectorActive[sector] || 0) > 0 ? queue / sectorActive[sector]! : queue,
+        isBottleneck: queue >= 5,
+      }))
+      .filter(b => b.isBottleneck || b.ratio > 3)
+      .sort((a, b) => b.queue - a.queue);
+  }, [productionOrders]);
+
   // Cost data
   const totalProfit = totalRevenue - totalCostSum;
   const overallMargin = totalRevenue > 0 ? (totalProfit / totalRevenue) * 100 : 0;
@@ -171,7 +255,20 @@ export default function IndustrialDashboard() {
 
   return (
     <PageContainer>
-      <PageHeader title="Dashboard Industrial" description="Visão completa: produção, eficiência, custos e alertas" />
+      <PageHeader title="Dashboard Industrial" description="Visão completa: produção, eficiência, custos e alertas — tempo real">
+        <div className="flex items-center gap-3">
+          <Badge variant={realtimeActive ? 'default' : 'secondary'} className="flex items-center gap-1.5">
+            <Radio className={cn('h-3 w-3', realtimeActive && 'animate-pulse text-green-400')} />
+            {realtimeActive ? 'Ao Vivo' : 'Conectando...'}
+          </Badge>
+          <span className="text-xs text-muted-foreground">
+            {format(lastRefresh, 'HH:mm:ss')}
+          </span>
+          <Button size="sm" variant="ghost" onClick={() => { refetchOrders(); refetchEntries(); setLastRefresh(new Date()); }}>
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
+      </PageHeader>
 
       {/* Production KPIs Row 1 - Operational */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
@@ -195,12 +292,111 @@ export default function IndustrialDashboard() {
         <KPICard title="Refugo" value={totalRejected.toLocaleString()} icon={<XCircle className="h-5 w-5" />} accentColor={totalRejected > 0 ? 'danger' : 'success'} index={5} />
       </div>
 
-      <Tabs defaultValue="production">
+      <Tabs defaultValue="intelligence">
         <TabsList>
+          <TabsTrigger value="intelligence">🧠 Inteligência</TabsTrigger>
           <TabsTrigger value="production">Produção</TabsTrigger>
           <TabsTrigger value="financial">Financeiro</TabsTrigger>
           <TabsTrigger value="alerts">Alertas ({allAlerts.length})</TabsTrigger>
         </TabsList>
+
+        {/* INTELLIGENCE TAB - Delay Predictions + Bottlenecks + Decisions */}
+        <TabsContent value="intelligence" className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-3">
+            <KPICard title="Risco de Atraso" value={delayPredictions.length} icon={<Brain className="h-5 w-5" />} accentColor={delayPredictions.length > 0 ? 'danger' : 'success'} index={0} />
+            <KPICard title="Gargalos Detectados" value={bottleneckAnalysis.length} icon={<Zap className="h-5 w-5" />} accentColor={bottleneckAnalysis.length > 0 ? 'warning' : 'success'} index={1} />
+            <KPICard title="OPs Críticas" value={delayPredictions.filter(p => p.risk === 'critical').length} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={2} />
+          </div>
+
+          {/* Delay Predictions */}
+          {delayPredictions.length > 0 && (
+            <Card className="border-destructive/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-destructive" /> Previsão de Atrasos — Motor Preditivo
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Risco</TableHead>
+                      <TableHead>OP</TableHead>
+                      <TableHead>Produto</TableHead>
+                      <TableHead>Progresso</TableHead>
+                      <TableHead>Prazo</TableHead>
+                      <TableHead>Diagnóstico</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {delayPredictions.slice(0, 15).map(p => (
+                      <TableRow key={p.order.id}>
+                        <TableCell>
+                          <Badge className={cn(
+                            p.risk === 'critical' ? 'bg-destructive/15 text-destructive' :
+                            p.risk === 'high' ? 'bg-warning/15 text-warning' :
+                            'bg-info/15 text-info'
+                          )}>
+                            {p.risk === 'critical' ? '🔴 Crítico' : p.risk === 'high' ? '🟠 Alto' : '🟡 Médio'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-mono font-medium">{p.order.order_number}</TableCell>
+                        <TableCell className="max-w-[150px] truncate">{p.order.product_name}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Progress value={p.progressPct} className="w-16 h-2" />
+                            <span className="text-sm font-mono">{p.progressPct.toFixed(0)}%</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className={cn('font-mono', p.daysLeft < 0 ? 'text-destructive font-bold' : '')}>
+                          {p.daysLeft < 0 ? `${Math.abs(p.daysLeft)}d atrás` : `${p.daysLeft}d`}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground max-w-[200px]">{p.reason}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Bottleneck Detection */}
+          {bottleneckAnalysis.length > 0 && (
+            <Card className="border-warning/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-warning" /> Gargalos Detectados
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                  {bottleneckAnalysis.map(b => (
+                    <div key={b.sector} className="p-4 rounded-lg border bg-warning/5 border-warning/20">
+                      <p className="font-semibold text-lg">{b.sector}</p>
+                      <div className="flex items-center gap-4 mt-2 text-sm">
+                        <span className="text-muted-foreground">Na fila: <strong className="text-foreground">{b.queue} OPs</strong></span>
+                        <span className="text-muted-foreground">Ativas: <strong className="text-foreground">{b.active}</strong></span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        💡 Sugestão: {b.queue > 8 ? 'Redistribuir OPs para outros setores ou adicionar turno extra' : b.active === 0 ? 'Iniciar produção — há OPs aguardando' : 'Avaliar capacidade e priorizar OPs urgentes'}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {delayPredictions.length === 0 && bottleneckAnalysis.length === 0 && (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <CheckCircle className="h-12 w-12 mx-auto text-green-500 mb-4" />
+                <p className="text-lg font-medium">Operação saudável</p>
+                <p className="text-sm text-muted-foreground">Nenhum risco de atraso ou gargalo detectado</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
 
         <TabsContent value="production" className="space-y-6">
           {/* Charts Row 1: Throughput + Status */}

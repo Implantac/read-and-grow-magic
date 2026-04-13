@@ -16,8 +16,38 @@ serve(async (req) => {
     const lovableKey = Deno.env.get("LOVABLE_API_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Helper to call AI
+    const callAI = async (systemPrompt: string, userPrompt: string) => {
+      const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${lovableKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3-flash-preview",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+        }),
+      });
+
+      if (!aiResponse.ok) {
+        const status = aiResponse.status;
+        if (status === 429) return { error: "Rate limit exceeded", status: 429 };
+        if (status === 402) return { error: "Payment required", status: 402 };
+        throw new Error(`AI gateway error: ${status}`);
+      }
+
+      const aiData = await aiResponse.json();
+      let content = aiData.choices?.[0]?.message?.content || "[]";
+      content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+      return { content };
+    };
+
+    // === ACTION: generate_insights ===
     if (action === "generate_insights") {
-      // Fetch production data
       const { data: orders } = await supabase
         .from("production_orders")
         .select("*")
@@ -59,50 +89,33 @@ Gere de 3 a 5 insights. Cada insight deve ter:
 
 Responda APENAS com JSON array, sem markdown.`;
 
-      const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${lovableKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
-          messages: [
-            { role: "system", content: "Você é um especialista em PCP industrial. Responda apenas com JSON válido." },
-            { role: "user", content: prompt },
-          ],
-        }),
-      });
+      const result = await callAI(
+        "Você é um especialista em PCP industrial. Responda apenas com JSON válido.",
+        prompt
+      );
 
-      if (!aiResponse.ok) {
-        const status = aiResponse.status;
-        if (status === 429) return new Response(JSON.stringify({ error: "Rate limit exceeded" }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        if (status === 402) return new Response(JSON.stringify({ error: "Payment required" }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        throw new Error(`AI gateway error: ${status}`);
+      if ("error" in result) {
+        return new Response(JSON.stringify({ error: result.error }), {
+          status: result.status,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
       }
-
-      const aiData = await aiResponse.json();
-      let content = aiData.choices?.[0]?.message?.content || "[]";
-      
-      // Clean markdown code blocks if present
-      content = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
       let insights: any[] = [];
       try {
-        insights = JSON.parse(content);
+        insights = JSON.parse(result.content);
         if (!Array.isArray(insights)) insights = [insights];
       } catch {
-        console.error("Failed to parse AI response:", content);
+        console.error("Failed to parse AI response:", result.content);
         insights = [{
           insight_type: "capacity_optimization",
           severity: "medium",
           title: "Análise gerada",
-          description: content.slice(0, 500),
+          description: result.content.slice(0, 500),
           recommended_action: "Revisar dados de produção",
         }];
       }
 
-      // Insert insights
       for (const insight of insights) {
         await supabase.from("ai_production_insights").insert({
           insight_type: insight.insight_type || "bottleneck",
@@ -117,6 +130,126 @@ Responda APENAS com JSON array, sem markdown.`;
       }
 
       return new Response(JSON.stringify({ success: true, count: insights.length }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // === ACTION: decision_engine ===
+    if (action === "decision_engine") {
+      const { data: orders } = await supabase
+        .from("production_orders")
+        .select("*")
+        .in("status", ["planned", "in_progress", "paused"])
+        .order("due_date");
+
+      const { data: capacity } = await supabase
+        .from("production_capacity")
+        .select("*")
+        .eq("is_active", true);
+
+      const { data: supplies } = await supabase
+        .from("supply_stock")
+        .select("*")
+        .order("current_quantity");
+
+      const prompt = `Você é um gerente de PCP com 20 anos de experiência.
+
+Analise a situação atual e forneça DECISÕES ESTRATÉGICAS em JSON.
+
+ORDENS ATIVAS (${orders?.length || 0}):
+${JSON.stringify(orders?.slice(0, 25) || [], null, 2)}
+
+CAPACIDADE:
+${JSON.stringify(capacity?.slice(0, 10) || [], null, 2)}
+
+ESTOQUE DE INSUMOS (menores quantidades):
+${JSON.stringify(supplies?.slice(0, 15) || [], null, 2)}
+
+Gere um objeto JSON com:
+{
+  "priority_sequence": [{"order_number": "...", "reason": "...", "suggested_action": "..."}],
+  "rebalancing": [{"from_sector": "...", "to_sector": "...", "reason": "..."}],
+  "material_alerts": [{"material": "...", "action": "...", "urgency": "high|medium|low"}],
+  "summary": "resumo executivo em 2-3 frases"
+}
+
+Responda APENAS com JSON, sem markdown.`;
+
+      const result = await callAI(
+        "Você é um diretor industrial. Responda apenas com JSON válido.",
+        prompt
+      );
+
+      if ("error" in result) {
+        return new Response(JSON.stringify({ error: result.error }), {
+          status: result.status,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      let decisions: any = {};
+      try {
+        decisions = JSON.parse(result.content);
+      } catch {
+        decisions = { summary: result.content.slice(0, 500), priority_sequence: [], rebalancing: [], material_alerts: [] };
+      }
+
+      return new Response(JSON.stringify({ success: true, decisions }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // === ACTION: operator_suggestions ===
+    if (action === "operator_suggestions") {
+      const { data: activeOPs } = await supabase
+        .from("production_orders")
+        .select("*")
+        .in("status", ["in_progress", "planned"])
+        .order("priority")
+        .limit(10);
+
+      const { data: activeEntries } = await supabase
+        .from("time_entries")
+        .select("*")
+        .eq("status", "started");
+
+      const prompt = `Você é um supervisor de produção.
+
+Analise as OPs ativas e sugira a melhor sequência de trabalho para os operadores.
+
+OPS ATIVAS:
+${JSON.stringify(activeOPs || [], null, 2)}
+
+APONTAMENTOS EM ANDAMENTO:
+${JSON.stringify(activeEntries || [], null, 2)}
+
+Gere um JSON array com sugestões:
+[{"order_number": "...", "suggestion": "...", "priority": "urgent|high|normal", "reason": "..."}]
+
+Foque em: urgência de prazo, balanceamento de carga, OPs paradas.
+Responda APENAS com JSON, sem markdown.`;
+
+      const result = await callAI(
+        "Supervisor industrial. JSON válido apenas.",
+        prompt
+      );
+
+      if ("error" in result) {
+        return new Response(JSON.stringify({ error: result.error }), {
+          status: result.status,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      let suggestions: any[] = [];
+      try {
+        suggestions = JSON.parse(result.content);
+        if (!Array.isArray(suggestions)) suggestions = [suggestions];
+      } catch {
+        suggestions = [];
+      }
+
+      return new Response(JSON.stringify({ success: true, suggestions }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
