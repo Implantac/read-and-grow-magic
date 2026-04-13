@@ -29,7 +29,7 @@ export default function PricingSection({ onLogin }: Props) {
         <div className="text-center mb-5">
           <Badge variant="outline" className="mb-4 font-medium">Planos</Badge>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-            Invista menos do que o custo de <span className="text-destructive">um erro</span>
+            Invista menos do que o custo de <span className="text-primary inline">um erro</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg mb-8">
             Comece grátis. Escale conforme cresce. Cancele quando quiser.

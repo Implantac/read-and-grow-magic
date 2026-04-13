@@ -29,7 +29,7 @@ export default function DemoSection() {
         <div className="text-center mb-10">
           <Badge variant="outline" className="mb-4 font-medium px-4 py-1">Veja na prática</Badge>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 tracking-tight">
-            Conheça cada módulo <span className="text-gradient-primary">por dentro</span>
+            Conheça cada módulo <span className="text-primary inline">por dentro</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
             Explore as telas reais da plataforma — tudo integrado, tudo em um lugar.

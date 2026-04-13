@@ -38,7 +38,7 @@ export default function TestimonialsSection() {
       <div className="text-center mb-14">
         <Badge variant="outline" className="mb-5 font-medium px-4 py-1.5 text-xs">Cases de sucesso</Badge>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-          Empresas que já transformaram sua <span className="text-gradient-primary">operação</span>
+          Empresas que já transformaram sua <span className="text-primary inline">operação</span>
         </h2>
         <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">Resultados reais de quem opera com a plataforma USE SISTEMAS.</p>
       </div>

@@ -21,7 +21,7 @@ export default function ConsultiveOfferSection({ onWhatsApp }: Props) {
           <Badge variant="outline" className="mb-5 font-medium px-4 py-1.5 text-xs">Abordagem consultiva</Badge>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
             Não é só software.{' '}
-            <span className="text-gradient-primary">É a estruturação da sua empresa.</span>
+            <span className="text-primary inline">É a estruturação da sua empresa.</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
             A USE SISTEMAS entrega uma solução consultiva: entendemos sua operação, configuramos tudo e acompanhamos até funcionar no seu contexto.

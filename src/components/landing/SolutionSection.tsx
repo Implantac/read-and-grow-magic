@@ -32,7 +32,7 @@ export default function SolutionSection() {
         <Badge variant="outline" className="mb-5 font-medium px-4 py-1.5 text-xs">A Plataforma</Badge>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
           Uma plataforma.{' '}
-          <span className="text-gradient-primary">Toda a operação.</span>
+          <span className="text-primary inline">Toda a operação.</span>
         </h2>
         <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
           8 módulos integrados nativamente com IA embarcada. Do pedido à entrega, sem retrabalho entre setores.

@@ -17,7 +17,7 @@ export default function TargetAudienceSection() {
         <div className="text-center mb-12">
           <Badge variant="outline" className="mb-4 font-medium px-4 py-1">Para quem é</Badge>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-            Indicado para <span className="text-gradient-primary">diversos segmentos</span>
+            Indicado para <span className="text-primary inline">diversos segmentos</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
             Uma plataforma robusta, completa e escalável — independente do tamanho ou segmento da sua operação.
