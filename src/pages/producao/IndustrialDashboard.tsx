@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,20 +13,43 @@ import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { useTimeEntries } from '@/hooks/useTimeEntries';
 import { useProductionCapacity } from '@/hooks/useProductionCapacity';
 import { KPICard } from '@/components/shared/KPICard';
-import { DollarSign, TrendingUp, AlertTriangle, Factory, Package, Gauge, CheckCircle, XCircle, Clock, Users, Activity, Zap, Layers, Timer, Wrench } from 'lucide-react';
+import { DollarSign, TrendingUp, AlertTriangle, Factory, Package, Gauge, CheckCircle, XCircle, Clock, Users, Activity, Zap, Layers, Timer, Wrench, Radio, Brain, RefreshCw } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line, CartesianGrid, AreaChart, Area } from 'recharts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { differenceInDays, differenceInMinutes, format, parseISO, subDays } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function IndustrialDashboard() {
   const { costs, avgMargin, totalRevenue, totalCostSum, lowMarginProducts, highCostProducts } = useProductCosts();
   const { supplies, lowStockItems } = useSupplyStock();
   const { activeAlerts, resolveAlert } = useIndustrialAlerts();
-  const { orders: productionOrders } = useProductionOrders();
-  const { entries } = useTimeEntries();
+  const { orders: productionOrders, refetch: refetchOrders } = useProductionOrders();
+  const { entries, refetch: refetchEntries } = useTimeEntries();
   const { capacities } = useProductionCapacity();
+  const [realtimeActive, setRealtimeActive] = useState(false);
+  const [lastRefresh, setLastRefresh] = useState(new Date());
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetchOrders();
+      refetchEntries();
+      setLastRefresh(new Date());
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [refetchOrders, refetchEntries]);
+
+  // Realtime subscriptions
+  useEffect(() => {
+    const channel = supabase
+      .channel('industrial-dashboard-rt')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'production_orders' }, () => { refetchOrders(); setLastRefresh(new Date()); })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'time_entries' }, () => { refetchEntries(); setLastRefresh(new Date()); })
+      .subscribe((status) => { setRealtimeActive(status === 'SUBSCRIBED'); });
+    return () => { supabase.removeChannel(channel); };
+  }, [refetchOrders, refetchEntries]);
 
   // === PRODUCTION KPIs ===
   const totalOPs = productionOrders.length;
