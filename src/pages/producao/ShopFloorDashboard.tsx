@@ -7,17 +7,31 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useTimeEntries } from '@/hooks/useTimeEntries';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
-import { Users, Factory, AlertTriangle, TrendingUp, Activity } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Users, Factory, AlertTriangle, TrendingUp, Activity, Radio } from 'lucide-react';
 import { differenceInMinutes } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 export default function ShopFloorDashboardPage() {
-  const { entries, loading } = useTimeEntries();
-  const { orders } = useProductionOrders();
+  const { entries, loading, refetch } = useTimeEntries();
+  const { orders, refetch: refetchOrders } = useProductionOrders();
   const [now, setNow] = useState(new Date());
+  const [realtimeActive, setRealtimeActive] = useState(false);
 
+  // Timer for live clock
   useEffect(() => { const interval = setInterval(() => setNow(new Date()), 5000); return () => clearInterval(interval); }, []);
+
+  // Realtime subscription for live production updates
+  useEffect(() => {
+    const channel = supabase
+      .channel('shopfloor-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'time_entries' }, () => { refetch(); })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'production_orders' }, () => { refetchOrders(); })
+      .subscribe((status) => { setRealtimeActive(status === 'SUBSCRIBED'); });
+
+    return () => { supabase.removeChannel(channel); };
+  }, [refetch, refetchOrders]);
 
   const activeEntries = entries.filter(e => e.status === 'started');
   const pausedEntries = entries.filter(e => e.status === 'paused');
@@ -66,7 +80,12 @@ export default function ShopFloorDashboardPage() {
 
   return (
     <PageContainer loading={loading}>
-      <PageHeader title="🏭 Chão de Fábrica — Tempo Real" description="Monitoramento de operadores, setores e produtividade" />
+      <PageHeader title="🏭 Chão de Fábrica — Tempo Real" description="Monitoramento de operadores, setores e produtividade">
+        <Badge variant={realtimeActive ? 'default' : 'secondary'} className="flex items-center gap-1.5">
+          <Radio className={cn('h-3 w-3', realtimeActive && 'animate-pulse text-green-400')} />
+          {realtimeActive ? 'Ao Vivo' : 'Conectando...'}
+        </Badge>
+      </PageHeader>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <KPICard title="Operadores Ativos" value={activeEntries.length} icon={<Users className="h-5 w-5" />} accentColor="primary" index={0} />

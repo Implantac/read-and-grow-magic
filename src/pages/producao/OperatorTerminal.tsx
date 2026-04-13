@@ -6,10 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useTimeEntries } from '@/hooks/useTimeEntries';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { useProductionSteps } from '@/hooks/useProductionSteps';
-import { Play, Pause, CheckCircle, Timer, Package, AlertTriangle, User, Layers, Clock, Plus, Minus } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Play, Pause, CheckCircle, Timer, Package, AlertTriangle, User, Layers, Clock, Plus, Minus, AlertOctagon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { differenceInMinutes, differenceInSeconds, format } from 'date-fns';
 import { toast } from 'sonner';
@@ -24,6 +27,37 @@ export default function OperatorTerminalPage() {
   const [producedQty, setProducedQty] = useState(0);
   const [rejectedQty, setRejectedQty] = useState(0);
   const [now, setNow] = useState(new Date());
+  const [problemOpen, setProblemOpen] = useState(false);
+  const [problemDesc, setProblemDesc] = useState('');
+  const [problemCategory, setProblemCategory] = useState('machine_stop');
+  const [reportingProblem, setReportingProblem] = useState(false);
+
+  const handleReportProblem = async () => {
+    if (!problemDesc.trim()) { toast.error('Descreva o problema'); return; }
+    setReportingProblem(true);
+    try {
+      await (supabase as any).from('industrial_alerts').insert({
+        alert_type: problemCategory,
+        severity: problemCategory === 'machine_stop' ? 'critical' : 'high',
+        title: `Problema reportado: ${problemCategory === 'machine_stop' ? 'Parada de Máquina' : problemCategory === 'quality_issue' ? 'Problema de Qualidade' : problemCategory === 'material_shortage' ? 'Falta de Material' : 'Segurança'}`,
+        description: `Operador: ${operatorName}. ${currentEntry ? `OP: ${currentEntry.order_number}.` : ''} ${problemDesc}`,
+        entity_type: 'operator_report',
+        entity_name: operatorName,
+        entity_id: currentEntry?.production_order_id || null,
+        status: 'active',
+      });
+      if (currentEntry && currentEntry.status === 'started') {
+        await update(currentEntry.id, { status: 'paused' });
+      }
+      toast.success('Problema reportado com sucesso. Supervisão notificada.');
+      setProblemOpen(false);
+      setProblemDesc('');
+    } catch (e) {
+      toast.error('Erro ao reportar problema');
+    } finally {
+      setReportingProblem(false);
+    }
+  };
 
   useEffect(() => {
     if (operatorName) localStorage.setItem('operator_name', operatorName);
@@ -358,9 +392,64 @@ export default function OperatorTerminalPage() {
                   <CheckCircle className="h-7 w-7 mr-2" /> FINALIZAR
                 </Button>
               </div>
+
+              {/* Report Problem */}
+              <Button
+                size="lg"
+                variant="destructive"
+                className="w-full h-14 text-lg font-bold"
+                onClick={() => setProblemOpen(true)}
+              >
+                <AlertOctagon className="h-6 w-6 mr-2" /> REPORTAR PROBLEMA
+              </Button>
             </CardContent>
           </Card>
         )}
+
+        {/* Report Problem Dialog */}
+        <Dialog open={problemOpen} onOpenChange={setProblemOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertOctagon className="h-5 w-5 text-destructive" /> Reportar Problema
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Categoria</label>
+                <Select value={problemCategory} onValueChange={setProblemCategory}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="machine_stop">🔧 Parada de Máquina</SelectItem>
+                    <SelectItem value="quality_issue">🔍 Problema de Qualidade</SelectItem>
+                    <SelectItem value="material_shortage">📦 Falta de Material</SelectItem>
+                    <SelectItem value="safety">⚠️ Segurança</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Descrição do problema</label>
+                <Textarea
+                  value={problemDesc}
+                  onChange={e => setProblemDesc(e.target.value)}
+                  placeholder="Descreva o que aconteceu..."
+                  className="min-h-[100px]"
+                />
+              </div>
+              {currentEntry && (
+                <p className="text-sm text-muted-foreground">
+                  ⚠️ A produção será pausada automaticamente ao reportar.
+                </p>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setProblemOpen(false)}>Cancelar</Button>
+              <Button variant="destructive" onClick={handleReportProblem} disabled={reportingProblem}>
+                {reportingProblem ? 'Enviando...' : 'Enviar Problema'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Today's summary — enhanced */}
         <Card>
