@@ -21,7 +21,7 @@ const afterItems = [
 
 export default function TransformationSection() {
   return (
-    <section className="bg-muted/20 border-y border-border/50 py-20 md:py-28">
+    <section id="transformacao" className="bg-muted/20 border-y border-border/50 py-20 md:py-28">
       <div className="container mx-auto px-4 lg:px-8">
         <div className="text-center mb-14">
           <Badge variant="outline" className="mb-5 font-medium px-4 py-1.5 text-xs">Antes vs. Depois</Badge>
