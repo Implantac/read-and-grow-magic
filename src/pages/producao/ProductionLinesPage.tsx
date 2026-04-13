@@ -11,15 +11,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, Pencil, Trash2, Search, Layers, Gauge, Users, AlertTriangle } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Layers, Gauge, Users, AlertTriangle, Activity } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 
 const shiftLabels: Record<string, string> = { morning: 'Manhã', afternoon: 'Tarde', night: 'Noite', integral: 'Integral' };
-const shiftColors: Record<string, string> = { morning: 'bg-amber-500/10 text-amber-600', afternoon: 'bg-blue-500/10 text-blue-600', night: 'bg-indigo-500/10 text-indigo-600', integral: 'bg-emerald-500/10 text-emerald-600' };
+const shiftColors: Record<string, string> = {
+  morning: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+  afternoon: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
+  night: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+  integral: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+};
 
 const emptyLine: Partial<ProductionLine> = { code: '', name: '', sector_id: null, capacity_per_hour: 0, shift: 'integral', responsible: '', description: '', is_active: true };
+
+const kpiConfig = [
+  { label: 'Total Linhas', icon: Layers, color: 'text-primary', ring: 'ring-primary/20' },
+  { label: 'Ativas', icon: Activity, color: 'text-success', ring: 'ring-success/20' },
+  { label: 'Cap. Total/h', icon: Gauge, color: 'text-info', ring: 'ring-info/20' },
+  { label: 'Setores Vinc.', icon: Users, color: 'text-warning', ring: 'ring-warning/20' },
+];
 
 export default function ProductionLinesPage() {
   const { lines, loading, create, update, remove } = useProductionLines();
@@ -37,55 +49,45 @@ export default function ProductionLinesPage() {
     return matchSearch && matchShift;
   });
 
-  const totalCapacity = lines.reduce((sum, l) => sum + l.capacity_per_hour, 0);
-  const activeLines = lines.filter(l => l.is_active).length;
+  const kpiValues = [
+    lines.length,
+    lines.filter(l => l.is_active).length,
+    lines.reduce((sum, l) => sum + l.capacity_per_hour, 0).toLocaleString('pt-BR'),
+    new Set(lines.map(l => l.sector_id).filter(Boolean)).size,
+  ];
 
   const openNew = () => { setEditing(null); setForm(emptyLine); setOpen(true); };
   const openEdit = (l: ProductionLine) => { setEditing(l); setForm(l); setOpen(true); };
-
-  const handleSave = async () => {
-    const ok = editing ? await update(editing.id, form) : await create(form);
-    if (ok) setOpen(false);
-  };
-
-  const handleDelete = async () => {
-    if (deleteId) { await remove(deleteId); setDeleteId(null); }
-  };
+  const handleSave = async () => { const ok = editing ? await update(editing.id, form) : await create(form); if (ok) setOpen(false); };
+  const handleDelete = async () => { if (deleteId) { await remove(deleteId); setDeleteId(null); } };
 
   return (
     <PageContainer>
       <PageHeader title="Linhas Produtivas" description="Cadastro das linhas de produção vinculadas aos setores" />
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        {[
-          { label: 'Total Linhas', value: lines.length, icon: Layers, color: 'text-primary' },
-          { label: 'Ativas', value: activeLines, icon: Layers, color: 'text-success' },
-          { label: 'Cap. Total/h', value: totalCapacity.toLocaleString('pt-BR'), icon: Gauge, color: 'text-info' },
-          { label: 'Setores Vinc.', value: new Set(lines.map(l => l.sector_id).filter(Boolean)).size, icon: Users, color: 'text-warning' },
-        ].map((kpi, i) => (
-          <Card key={i} className="border-border/50 bg-card/80 backdrop-blur-sm">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        {kpiConfig.map((kpi, i) => (
+          <Card key={i} className="border-border/40 bg-card/80 backdrop-blur-sm hover-lift" style={{ animationDelay: `${i * 80}ms` }}>
             <CardContent className="p-4 flex items-center gap-3">
-              <div className={`h-10 w-10 rounded-lg bg-muted flex items-center justify-center ${kpi.color}`}>
+              <div className={`h-11 w-11 rounded-xl bg-muted/60 flex items-center justify-center ${kpi.color} ring-2 ${kpi.ring}`}>
                 <kpi.icon className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{kpi.value}</p>
-                <p className="text-xs text-muted-foreground">{kpi.label}</p>
+                <p className="text-2xl font-bold tracking-tight">{kpiValues[i]}</p>
+                <p className="text-xs text-muted-foreground font-medium">{kpi.label}</p>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Buscar linha por nome ou código..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
         </div>
         <Select value={shiftFilter} onValueChange={setShiftFilter}>
-          <SelectTrigger className="w-[160px]"><SelectValue placeholder="Turno" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[160px]"><SelectValue placeholder="Turno" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos os turnos</SelectItem>
             <SelectItem value="morning">Manhã</SelectItem>
@@ -94,54 +96,53 @@ export default function ProductionLinesPage() {
             <SelectItem value="integral">Integral</SelectItem>
           </SelectContent>
         </Select>
-        <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" />Nova Linha</Button>
+        <Button onClick={openNew} className="shrink-0"><Plus className="h-4 w-4 mr-2" />Nova Linha</Button>
       </div>
 
-      {/* Table */}
       {loading ? (
-        <div className="space-y-2">{[1, 2, 3].map(i => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}</div>
+        <div className="space-y-2">{[1, 2, 3].map(i => <Skeleton key={i} className="h-14 w-full rounded-lg" />)}</div>
       ) : (
-        <div className="rounded-lg border border-border/50 overflow-hidden">
+        <div className="rounded-xl border border-border/40 overflow-hidden shadow-sm">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/30 hover:bg-muted/30">
                 <TableHead className="font-semibold">Código</TableHead>
                 <TableHead className="font-semibold">Nome</TableHead>
-                <TableHead className="font-semibold">Setor</TableHead>
+                <TableHead className="font-semibold hidden md:table-cell">Setor</TableHead>
                 <TableHead className="font-semibold">Turno</TableHead>
-                <TableHead className="font-semibold">Cap./Hora</TableHead>
-                <TableHead className="font-semibold">Responsável</TableHead>
+                <TableHead className="font-semibold hidden sm:table-cell">Cap./h</TableHead>
+                <TableHead className="font-semibold hidden lg:table-cell">Responsável</TableHead>
                 <TableHead className="font-semibold">Status</TableHead>
-                <TableHead className="w-[100px] font-semibold">Ações</TableHead>
+                <TableHead className="w-[100px] font-semibold text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-12 text-muted-foreground">
-                    <Layers className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                    <p className="font-medium">Nenhuma linha encontrada</p>
+                  <TableCell colSpan={8} className="text-center py-16 text-muted-foreground">
+                    <Layers className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                    <p className="font-semibold text-base">Nenhuma linha encontrada</p>
                     <p className="text-sm mt-1">Cadastre a primeira linha produtiva</p>
                   </TableCell>
                 </TableRow>
               ) : filtered.map(l => (
-                <TableRow key={l.id} className="group">
-                  <TableCell className="font-mono font-semibold text-primary">{l.code}</TableCell>
+                <TableRow key={l.id} className="group hover:bg-muted/30">
+                  <TableCell className="font-mono font-bold text-primary">{l.code}</TableCell>
                   <TableCell className="font-medium">{l.name}</TableCell>
-                  <TableCell>{l.sector_name || <span className="text-muted-foreground italic">—</span>}</TableCell>
+                  <TableCell className="hidden md:table-cell">{l.sector_name || <span className="text-muted-foreground italic text-xs">—</span>}</TableCell>
                   <TableCell>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${shiftColors[l.shift] || ''}`}>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${shiftColors[l.shift] || ''}`}>
                       {shiftLabels[l.shift] || l.shift}
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <span className="font-mono font-semibold">{l.capacity_per_hour}</span>
                     <span className="text-muted-foreground text-xs ml-1">un/h</span>
                   </TableCell>
-                  <TableCell>{l.responsible || <span className="text-muted-foreground italic">—</span>}</TableCell>
+                  <TableCell className="hidden lg:table-cell">{l.responsible || <span className="text-muted-foreground italic text-xs">—</span>}</TableCell>
                   <TableCell><Badge variant={l.is_active ? 'default' : 'destructive'}>{l.is_active ? 'Ativa' : 'Inativa'}</Badge></TableCell>
                   <TableCell>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex gap-1 justify-end sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(l)}><Pencil className="h-4 w-4" /></Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setDeleteId(l.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                     </div>
@@ -153,11 +154,13 @@ export default function ProductionLinesPage() {
         </div>
       )}
 
-      {/* Create/Edit Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{editing ? 'Editar Linha' : 'Nova Linha'}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center"><Layers className="h-4 w-4 text-primary" /></div>
+              {editing ? 'Editar Linha' : 'Nova Linha'}
+            </DialogTitle>
             <DialogDescription>Cadastre ou edite uma linha produtiva</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-2">
@@ -203,7 +206,6 @@ export default function ProductionLinesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation */}
       <Dialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
