@@ -29,11 +29,6 @@ export const navigationSections: NavSection[] = [
         href: '/diretoria/executive',
         icon: 'Brain',
       },
-      {
-        title: '🤖 Assistente ERP',
-        href: '/assistente',
-        icon: 'Bot',
-      },
     ],
   },
   {

@@ -205,3 +205,83 @@ export function useExecutiveChat() {
 
   return { messages, isLoading, sendMessage, clearChat };
 }
+
+// ─── Assistant Chat (Tool-Calling, non-streaming) ────────────────
+
+export interface AssistantMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+}
+
+export function useAssistantChat() {
+  const [messages, setMessages] = useState<AssistantMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const sendMessage = useCallback(async (input: string) => {
+    const userMsg: AssistantMessage = {
+      id: crypto.randomUUID(),
+      role: 'user',
+      content: input,
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, userMsg]);
+    setIsLoading(true);
+
+    try {
+      const chatHistory = [...messages, userMsg].map(m => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      const { data, error } = await supabase.functions.invoke('ai-executive', {
+        body: { action: 'assistant_chat', messages: chatHistory },
+      });
+
+      if (error) throw error;
+
+      const assistantMsg: AssistantMessage = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: data?.content || 'Não foi possível processar.',
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, assistantMsg]);
+    } catch (e) {
+      console.error('Assistant error:', e);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: '❌ Erro ao processar. Tente novamente.',
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [messages]);
+
+  const clearChat = useCallback(() => setMessages([]), []);
+
+  return { messages, isLoading, sendMessage, clearChat };
+}
+
+// ─── Daily Summary ──────────────────────────────────────────────
+
+export function useDailySummary() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('ai-executive', {
+        body: { action: 'daily_summary' },
+      });
+      if (error) throw error;
+      return data;
+    },
+  });
+}

@@ -162,7 +162,7 @@ const UsersPage = lazy(() => import("./pages/admin/Users"));
 const CompaniesPage = lazy(() => import("./pages/admin/Companies"));
 const ParametersPage = lazy(() => import("./pages/admin/Parameters"));
 const SuperAdminPage = lazy(() => import("./pages/admin/SuperAdmin"));
-const ERPAssistantPage = lazy(() => import("./pages/admin/ERPAssistant"));
+
 
 // SaaS
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -357,7 +357,7 @@ const App = () => (
               <Route path="/admin/empresas" element={<CompaniesPage />} />
               <Route path="/admin/parametros" element={<ParametersPage />} />
               <Route path="/admin/super" element={<SuperAdminPage />} />
-              <Route path="/assistente" element={<ERPAssistantPage />} />
+              
 
               {/* Profile & Notifications */}
               <Route path="/perfil" element={<ProfilePage />} />
