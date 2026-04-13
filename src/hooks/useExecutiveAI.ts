@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useAuth } from '@/hooks/useAuth';
 
 // ─── Types ──────────────────────────────────────────────────────
 
@@ -205,8 +204,14 @@ export function useUnifiedChat() {
   const [messages, setMessages] = useState<ChatMessage[]>(() => loadSession());
   const [isLoading, setIsLoading] = useState(false);
   const inactivityTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { user } = useAuth();
-  const userId = user?.id;
+  const [userId, setUserId] = useState<string | null>(null);
+
+  // Get current user ID
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setUserId(data.user?.id || null);
+    });
+  }, []);
 
   // Persist messages to sessionStorage on every change
   useEffect(() => {
