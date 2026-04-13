@@ -250,7 +250,25 @@ export default function OperatorTerminalPage() {
                 </div>
               )}
 
-              {currentOrder && (
+              {activeMachines.length > 0 && (
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground flex items-center gap-1">
+                    <Cpu className="h-3.5 w-3.5" /> Máquina
+                  </label>
+                  <Select value={selectedMachineId} onValueChange={setSelectedMachineId}>
+                    <SelectTrigger className="h-12">
+                      <SelectValue placeholder="Selecione a máquina (opcional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {activeMachines.filter(m => m.status === 'available').map(m => (
+                        <SelectItem key={m.id} value={m.id}>
+                          {m.name} ({m.code}) {m.sector ? `— ${m.sector}` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
                 <div className="p-4 rounded-xl bg-muted space-y-2">
                   <p className="font-semibold text-lg">{currentOrder.product_name}</p>
                   <p className="text-sm text-muted-foreground">OP: {currentOrder.order_number}</p>
