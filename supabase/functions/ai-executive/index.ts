@@ -826,7 +826,8 @@ async function executeAnaliseEstrategica(supabase: any, args: any) {
   return focusData[args.foco] || focusData.geral;
 }
 
-const TOOL_EXECUTORS: Record<string, (supabase: any, args: any) => Promise<any>> = {
+// TOOL_EXECUTORS are called with (supabase, args, user_id) — see tool call loop below
+const TOOL_EXECUTORS: Record<string, (supabase: any, args: any, user_id?: string) => Promise<any>> = {
   consultar_financeiro: executeConsultaFinanceiro,
   consultar_comercial: executeConsultaComercial,
   consultar_producao: executeConsultaProducao,
@@ -834,6 +835,65 @@ const TOOL_EXECUTORS: Record<string, (supabase: any, args: any) => Promise<any>>
   executar_acao: executeAcao,
   analise_estrategica: executeAnaliseEstrategica,
 };
+
+// ─── Pattern Analysis ───────────────────────────────────────────
+
+async function analyzeUserPatterns(supabase: any, user_id: string): Promise<string> {
+  const { data: logs } = await supabase
+    .from("ai_action_logs")
+    .select("module, action_name, created_at")
+    .eq("user_id", user_id)
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (!logs || logs.length < 3) return "";
+
+  // Count action frequencies
+  const freq: Record<string, number> = {};
+  for (const log of logs) {
+    const key = `${log.module}/${log.action_name}`;
+    freq[key] = (freq[key] || 0) + 1;
+  }
+
+  const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]);
+  const patterns: string[] = [];
+
+  for (const [action, count] of sorted.slice(0, 5)) {
+    if (count >= 3) {
+      patterns.push(`- "${action}" executada ${count}x`);
+    }
+  }
+
+  // Detect time-based patterns (actions done at similar times)
+  const hourFreq: Record<number, number> = {};
+  for (const log of logs) {
+    const h = new Date(log.created_at).getHours();
+    hourFreq[h] = (hourFreq[h] || 0) + 1;
+  }
+  const peakHour = Object.entries(hourFreq).sort((a, b) => b[1] - a[1])[0];
+  if (peakHour && Number(peakHour[1]) >= 5) {
+    patterns.push(`- Horário de pico de uso: ${peakHour[0]}h (${peakHour[1]} ações)`);
+  }
+
+  // Detect daily routine patterns
+  const recentDays = new Set(logs.slice(0, 20).map((l: any) => new Date(l.created_at).toISOString().split("T")[0]));
+  const dailyActions = sorted.filter(([, c]) => c >= recentDays.size * 0.7);
+  for (const [action] of dailyActions.slice(0, 2)) {
+    patterns.push(`- "${action}" parece ser uma rotina diária`);
+  }
+
+  if (patterns.length === 0) return "";
+
+  return `\n\n## 🤖 APRENDIZADO ADAPTATIVO
+Padrões detectados no comportamento deste usuário:
+${patterns.join("\n")}
+
+Com base nesses padrões:
+- Sugira proativamente ações que o usuário costuma fazer
+- Se detectar rotina, pergunte: "Percebi que você faz [ação] com frequência. Deseja que eu automatize?"
+- Antecipe necessidades baseadas no histórico
+- Priorize módulos que o usuário mais utiliza`;
+}
 
 // ─── Unified Chat with Tool Calling ─────────────────────────────
 
