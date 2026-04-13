@@ -260,6 +260,7 @@ export default function ExecutiveDashboard() {
           <TabsTrigger value="alerts" className="gap-1.5"><ShieldAlert className="h-3.5 w-3.5" />Alertas & Riscos</TabsTrigger>
           <TabsTrigger value="scenarios" className="gap-1.5"><Layers className="h-3.5 w-3.5" />Cenários</TabsTrigger>
           <TabsTrigger value="chat" className="gap-1.5"><MessageSquare className="h-3.5 w-3.5" />Chat Gerencial</TabsTrigger>
+          <TabsTrigger value="assistant" className="gap-1.5"><Bot className="h-3.5 w-3.5" />Assistente ERP</TabsTrigger>
         </TabsList>
 
         {/* ── Insights Tab ── */}
