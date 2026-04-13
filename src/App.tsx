@@ -298,6 +298,10 @@ const App = () => (
               <Route path="/producao/iot" element={<IoTDashboardPage />} />
               <Route path="/producao/oee" element={<OEEDashboardPage />} />
               <Route path="/producao/ml" element={<MLPredictionsPage />} />
+              <Route path="/producao/setores" element={<ProductionSectorsPage />} />
+              <Route path="/producao/linhas" element={<ProductionLinesPage />} />
+              <Route path="/producao/recursos" element={<ProductionResourcesPage />} />
+              <Route path="/producao/rotas" element={<ProductionRoutesPage />} />
 
               {/* Operational Flow Module */}
               <Route path="/operacional/dashboard" element={<OperationalDashboardPage />} />
