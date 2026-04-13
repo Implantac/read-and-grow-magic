@@ -81,7 +81,7 @@ export function ClientDetailDialog({ client, open, onOpenChange }: Props) {
 
   const creditUsage = client.credit_limit > 0 ? (client.current_balance / client.credit_limit) * 100 : 0;
   const daysSinceLastPurchase = client.last_purchase_date ? differenceInDays(new Date(), new Date(client.last_purchase_date)) : null;
-  const scoreConfig = SCORE_CONFIG[client.client_score || 'medium'];
+  const scoreConfig = SCORE_CONFIG[client.client_score as string] || SCORE_CONFIG['medium'];
 
   const totalReceivable = clientReceivables.filter(r => r.status === 'pending').reduce((s, r) => s + r.amount, 0);
   const overdueReceivable = clientReceivables.filter(r => r.status === 'overdue' || (r.status === 'pending' && new Date(r.due_date) < new Date())).reduce((s, r) => s + r.amount, 0);
