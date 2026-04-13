@@ -255,7 +255,20 @@ export default function IndustrialDashboard() {
 
   return (
     <PageContainer>
-      <PageHeader title="Dashboard Industrial" description="Visão completa: produção, eficiência, custos e alertas" />
+      <PageHeader title="Dashboard Industrial" description="Visão completa: produção, eficiência, custos e alertas — tempo real">
+        <div className="flex items-center gap-3">
+          <Badge variant={realtimeActive ? 'default' : 'secondary'} className="flex items-center gap-1.5">
+            <Radio className={cn('h-3 w-3', realtimeActive && 'animate-pulse text-green-400')} />
+            {realtimeActive ? 'Ao Vivo' : 'Conectando...'}
+          </Badge>
+          <span className="text-xs text-muted-foreground">
+            {format(lastRefresh, 'HH:mm:ss')}
+          </span>
+          <Button size="sm" variant="ghost" onClick={() => { refetchOrders(); refetchEntries(); setLastRefresh(new Date()); }}>
+            <RefreshCw className="h-4 w-4" />
+          </Button>
+        </div>
+      </PageHeader>
 
       {/* Production KPIs Row 1 - Operational */}
       <div className="grid gap-4 grid-cols-2 md:grid-cols-4 lg:grid-cols-8">
@@ -279,12 +292,111 @@ export default function IndustrialDashboard() {
         <KPICard title="Refugo" value={totalRejected.toLocaleString()} icon={<XCircle className="h-5 w-5" />} accentColor={totalRejected > 0 ? 'danger' : 'success'} index={5} />
       </div>
 
-      <Tabs defaultValue="production">
+      <Tabs defaultValue="intelligence">
         <TabsList>
+          <TabsTrigger value="intelligence">🧠 Inteligência</TabsTrigger>
           <TabsTrigger value="production">Produção</TabsTrigger>
           <TabsTrigger value="financial">Financeiro</TabsTrigger>
           <TabsTrigger value="alerts">Alertas ({allAlerts.length})</TabsTrigger>
         </TabsList>
+
+        {/* INTELLIGENCE TAB - Delay Predictions + Bottlenecks + Decisions */}
+        <TabsContent value="intelligence" className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-3">
+            <KPICard title="Risco de Atraso" value={delayPredictions.length} icon={<Brain className="h-5 w-5" />} accentColor={delayPredictions.length > 0 ? 'danger' : 'success'} index={0} />
+            <KPICard title="Gargalos Detectados" value={bottleneckAnalysis.length} icon={<Zap className="h-5 w-5" />} accentColor={bottleneckAnalysis.length > 0 ? 'warning' : 'success'} index={1} />
+            <KPICard title="OPs Críticas" value={delayPredictions.filter(p => p.risk === 'critical').length} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={2} />
+          </div>
+
+          {/* Delay Predictions */}
+          {delayPredictions.length > 0 && (
+            <Card className="border-destructive/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-destructive" /> Previsão de Atrasos — Motor Preditivo
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Risco</TableHead>
+                      <TableHead>OP</TableHead>
+                      <TableHead>Produto</TableHead>
+                      <TableHead>Progresso</TableHead>
+                      <TableHead>Prazo</TableHead>
+                      <TableHead>Diagnóstico</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {delayPredictions.slice(0, 15).map(p => (
+                      <TableRow key={p.order.id}>
+                        <TableCell>
+                          <Badge className={cn(
+                            p.risk === 'critical' ? 'bg-destructive/15 text-destructive' :
+                            p.risk === 'high' ? 'bg-warning/15 text-warning' :
+                            'bg-info/15 text-info'
+                          )}>
+                            {p.risk === 'critical' ? '🔴 Crítico' : p.risk === 'high' ? '🟠 Alto' : '🟡 Médio'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="font-mono font-medium">{p.order.order_number}</TableCell>
+                        <TableCell className="max-w-[150px] truncate">{p.order.product_name}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Progress value={p.progressPct} className="w-16 h-2" />
+                            <span className="text-sm font-mono">{p.progressPct.toFixed(0)}%</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className={cn('font-mono', p.daysLeft < 0 ? 'text-destructive font-bold' : '')}>
+                          {p.daysLeft < 0 ? `${Math.abs(p.daysLeft)}d atrás` : `${p.daysLeft}d`}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground max-w-[200px]">{p.reason}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Bottleneck Detection */}
+          {bottleneckAnalysis.length > 0 && (
+            <Card className="border-warning/30">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Zap className="h-5 w-5 text-warning" /> Gargalos Detectados
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                  {bottleneckAnalysis.map(b => (
+                    <div key={b.sector} className="p-4 rounded-lg border bg-warning/5 border-warning/20">
+                      <p className="font-semibold text-lg">{b.sector}</p>
+                      <div className="flex items-center gap-4 mt-2 text-sm">
+                        <span className="text-muted-foreground">Na fila: <strong className="text-foreground">{b.queue} OPs</strong></span>
+                        <span className="text-muted-foreground">Ativas: <strong className="text-foreground">{b.active}</strong></span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        💡 Sugestão: {b.queue > 8 ? 'Redistribuir OPs para outros setores ou adicionar turno extra' : b.active === 0 ? 'Iniciar produção — há OPs aguardando' : 'Avaliar capacidade e priorizar OPs urgentes'}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {delayPredictions.length === 0 && bottleneckAnalysis.length === 0 && (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <CheckCircle className="h-12 w-12 mx-auto text-green-500 mb-4" />
+                <p className="text-lg font-medium">Operação saudável</p>
+                <p className="text-sm text-muted-foreground">Nenhum risco de atraso ou gargalo detectado</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
 
         <TabsContent value="production" className="space-y-6">
           {/* Charts Row 1: Throughput + Status */}
