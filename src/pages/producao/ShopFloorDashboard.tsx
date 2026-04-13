@@ -7,29 +7,29 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useTimeEntries } from '@/hooks/useTimeEntries';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
+import { useProductionMachines } from '@/hooks/useProductionMachines';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, Factory, AlertTriangle, TrendingUp, Activity, Radio } from 'lucide-react';
+import { Users, Factory, AlertTriangle, TrendingUp, Activity, Radio, Cpu, Zap } from 'lucide-react';
 import { differenceInMinutes } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { Progress } from '@/components/ui/progress';
 
 export default function ShopFloorDashboardPage() {
   const { entries, loading, refetch } = useTimeEntries();
   const { orders, refetch: refetchOrders } = useProductionOrders();
+  const { machines, runningMachines, stoppedMachines } = useProductionMachines();
   const [now, setNow] = useState(new Date());
   const [realtimeActive, setRealtimeActive] = useState(false);
 
-  // Timer for live clock
   useEffect(() => { const interval = setInterval(() => setNow(new Date()), 5000); return () => clearInterval(interval); }, []);
 
-  // Realtime subscription for live production updates
   useEffect(() => {
     const channel = supabase
       .channel('shopfloor-realtime')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'time_entries' }, () => { refetch(); })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'production_orders' }, () => { refetchOrders(); })
       .subscribe((status) => { setRealtimeActive(status === 'SUBSCRIBED'); });
-
     return () => { supabase.removeChannel(channel); };
   }, [refetch, refetchOrders]);
 
@@ -68,6 +68,30 @@ export default function ShopFloorDashboardPage() {
     });
   }, [entries, today]);
 
+  // Bottleneck detection
+  const bottlenecks = useMemo(() => {
+    const list: { type: string; entity: string; message: string; severity: 'warning' | 'error' }[] = [];
+    // Sectors with high reject rate
+    sectorStats.forEach(s => {
+      if (s.produced > 0 && s.rejected > 0) {
+        const rejectRate = (s.rejected / (s.produced + s.rejected)) * 100;
+        if (rejectRate > 10) list.push({ type: 'quality', entity: s.sector, message: `${s.sector}: ${rejectRate.toFixed(0)}% refugo — possível problema de qualidade`, severity: rejectRate > 20 ? 'error' : 'warning' });
+      }
+    });
+    // Operators with very low productivity compared to average
+    const avgPcsH = operatorStats.length > 0 ? operatorStats.reduce((s, o) => s + o.pcsPerHour, 0) / operatorStats.length : 0;
+    operatorStats.forEach(op => {
+      if (op.pcsPerHour > 0 && avgPcsH > 0 && op.pcsPerHour < avgPcsH * 0.5) {
+        list.push({ type: 'productivity', entity: op.operator, message: `${op.operator}: ${op.pcsPerHour.toFixed(1)} peças/h — 50%+ abaixo da média (${avgPcsH.toFixed(1)})`, severity: 'warning' });
+      }
+    });
+    // Machines stopped
+    stoppedMachines.forEach(m => {
+      list.push({ type: 'machine', entity: m.name, message: `Máquina ${m.name} (${m.code}) — ${m.status === 'maintenance' ? 'em manutenção' : 'parada'}`, severity: m.status === 'maintenance' ? 'error' : 'warning' });
+    });
+    return list;
+  }, [sectorStats, operatorStats, stoppedMachines]);
+
   const alerts = useMemo(() => {
     const list: { type: string; message: string; severity: 'warning' | 'error' }[] = [];
     operatorStats.forEach(op => { if (op.pcsPerHour > 0 && op.pcsPerHour < 10) list.push({ type: 'low_productivity', message: `${op.operator}: ${op.pcsPerHour.toFixed(1)} peças/h — produtividade baixa`, severity: 'warning' }); });
@@ -75,39 +99,73 @@ export default function ShopFloorDashboardPage() {
     return list;
   }, [operatorStats, pausedEntries, now]);
 
+  const allAlerts = [...alerts, ...bottlenecks.map(b => ({ type: b.type, message: b.message, severity: b.severity }))];
+
   const chartData = operatorStats.slice(0, 10).map(o => ({ name: o.operator.split(' ')[0], pcsH: Number(o.pcsPerHour.toFixed(1)) }));
   const totalProducedToday = todayCompleted.reduce((s, e) => s + e.produced_quantity, 0);
 
+  const machineStatusColors: Record<string, string> = {
+    running: 'bg-success/15 border-success/30',
+    available: 'bg-muted border-border',
+    stopped: 'bg-warning/15 border-warning/30',
+    maintenance: 'bg-destructive/15 border-destructive/30',
+  };
+
   return (
     <PageContainer loading={loading}>
-      <PageHeader title="🏭 Chão de Fábrica — Tempo Real" description="Monitoramento de operadores, setores e produtividade">
+      <PageHeader title="🏭 Chão de Fábrica — Tempo Real" description="Monitoramento de operadores, máquinas, setores e gargalos">
         <Badge variant={realtimeActive ? 'default' : 'secondary'} className="flex items-center gap-1.5">
           <Radio className={cn('h-3 w-3', realtimeActive && 'animate-pulse text-green-400')} />
           {realtimeActive ? 'Ao Vivo' : 'Conectando...'}
         </Badge>
       </PageHeader>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <KPICard title="Operadores Ativos" value={activeEntries.length} icon={<Users className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="Pausados" value={pausedEntries.length} icon={<Activity className="h-5 w-5" />} accentColor="warning" index={1} />
-        <KPICard title="Peças Hoje" value={totalProducedToday} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={2} />
-        <KPICard title="Alertas" value={alerts.length} icon={<AlertTriangle className="h-5 w-5" />} accentColor={alerts.length > 0 ? 'danger' : 'success'} index={3} />
+        <KPICard title="Máquinas Rodando" value={runningMachines.length} icon={<Cpu className="h-5 w-5" />} accentColor="success" index={1} />
+        <KPICard title="Pausados" value={pausedEntries.length} icon={<Activity className="h-5 w-5" />} accentColor="warning" index={2} />
+        <KPICard title="Peças Hoje" value={totalProducedToday} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={3} />
+        <KPICard title="Gargalos" value={bottlenecks.length} icon={<Zap className="h-5 w-5" />} accentColor={bottlenecks.length > 0 ? 'danger' : 'success'} index={4} />
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
-        {alerts.length > 0 && (
-          <Card className="md:col-span-2">
-            <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-destructive" /> Alertas em Tempo Real</CardTitle></CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {alerts.map((a, i) => (
-                  <div key={i} className={cn('p-3 rounded-lg text-sm', a.severity === 'error' ? 'bg-destructive/10 text-destructive' : 'bg-warning/10 text-warning')}>⚠️ {a.message}</div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      {allAlerts.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-destructive" /> Alertas e Gargalos</CardTitle></CardHeader>
+          <CardContent>
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              {allAlerts.map((a, i) => (
+                <div key={i} className={cn('p-3 rounded-lg text-sm', a.severity === 'error' ? 'bg-destructive/10 text-destructive' : 'bg-warning/10 text-warning')}>⚠️ {a.message}</div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
+      {/* Machines Panel */}
+      {machines.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-base flex items-center gap-2"><Cpu className="h-4 w-4" /> Status das Máquinas</CardTitle></CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {machines.filter(m => m.active).map(m => (
+                <div key={m.id} className={cn('p-3 rounded-lg border-2 text-center', machineStatusColors[m.status] || 'bg-muted')}>
+                  <p className="font-bold text-sm truncate">{m.name}</p>
+                  <p className="text-xs text-muted-foreground font-mono">{m.code}</p>
+                  <Badge variant="outline" className="text-xs mt-1">
+                    {m.status === 'running' ? '▶ Rodando' : m.status === 'available' ? '● Disponível' : m.status === 'maintenance' ? '🔧 Manutenção' : '⏸ Parada'}
+                  </Badge>
+                  {m.current_operator && <p className="text-xs mt-1 truncate">{m.current_operator}</p>}
+                  {m.capacity_per_hour > 0 && (
+                    <p className="text-xs text-muted-foreground">{m.capacity_per_hour} un/h</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <div className="grid md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-base">Produtividade por Operador (peças/h)</CardTitle></CardHeader>
           <CardContent>
@@ -127,12 +185,16 @@ export default function ShopFloorDashboardPage() {
           <CardContent>
             {sectorStats.length > 0 ? (
               <div className="space-y-3">
-                {sectorStats.map(s => (
-                  <div key={s.sector} className="p-3 rounded-lg bg-muted">
-                    <div className="flex justify-between items-center mb-1"><span className="font-medium">{s.sector}</span><Badge variant="outline" className="text-xs">{s.active} ativos</Badge></div>
-                    <p className="text-sm text-muted-foreground">{s.produced} peças produzidas • {s.rejected} refugo</p>
-                  </div>
-                ))}
+                {sectorStats.map(s => {
+                  const rejectPct = (s.produced + s.rejected) > 0 ? (s.rejected / (s.produced + s.rejected)) * 100 : 0;
+                  return (
+                    <div key={s.sector} className="p-3 rounded-lg bg-muted">
+                      <div className="flex justify-between items-center mb-1"><span className="font-medium">{s.sector}</span><Badge variant="outline" className="text-xs">{s.active} ativos</Badge></div>
+                      <p className="text-sm text-muted-foreground">{s.produced} peças • {s.rejected} refugo</p>
+                      <Progress value={100 - rejectPct} className="h-1.5 mt-1" />
+                    </div>
+                  );
+                })}
               </div>
             ) : <p className="text-center text-muted-foreground py-8">Sem atividade nos setores</p>}
           </CardContent>
