@@ -127,6 +127,9 @@ const ProductionTraceabilityPage = lazy(() => import("./pages/producao/Productio
 const AIProductionPage = lazy(() => import("./pages/producao/AIProductionPage"));
 const ProductionSchedulePage = lazy(() => import("./pages/producao/ProductionSchedule"));
 const MRPPage = lazy(() => import("./pages/producao/MRPPage"));
+const BIIndustrialPage = lazy(() => import("./pages/producao/BIIndustrial"));
+const DigitalTwinPage = lazy(() => import("./pages/producao/DigitalTwin"));
+const APSPageComponent = lazy(() => import("./pages/producao/APSPage"));
 
 // Operational Flow
 const OperationalDashboardPage = lazy(() => import("./pages/operacional/OperationalDashboard"));
