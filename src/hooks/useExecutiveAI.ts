@@ -1,6 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useState, useCallback } from 'react';
+
+// ─── Types ──────────────────────────────────────────────────────
 
 export interface ExecutiveKPIs {
   totalRevenue: number;
@@ -83,9 +85,13 @@ export interface ExecutiveDashboardData {
 }
 
 export interface ChatMessage {
+  id: string;
   role: 'user' | 'assistant';
   content: string;
+  timestamp: Date;
 }
+
+// ─── Dashboard Query ────────────────────────────────────────────
 
 export function useExecutiveDashboard() {
   return useQuery({
@@ -100,6 +106,8 @@ export function useExecutiveDashboard() {
     refetchInterval: 120_000,
   });
 }
+
+// ─── Mutations ──────────────────────────────────────────────────
 
 export function useGenerateInsights() {
   const qc = useQueryClient();
@@ -133,94 +141,27 @@ export function useGenerateScenarios() {
   });
 }
 
-export function useExecutiveChat() {
+export function useDailySummary() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('ai-executive', {
+        body: { action: 'daily_summary' },
+      });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+// ─── Unified Chat (Tool-Calling) ────────────────────────────────
+
+export function useUnifiedChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const sendMessage = useCallback(async (input: string) => {
-    const userMsg: ChatMessage = { role: 'user', content: input };
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
-    setIsLoading(true);
-
-    let assistantSoFar = '';
-
-    try {
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-executive`;
-      const resp = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({ action: 'chat', messages: newMessages }),
-      });
-
-      if (!resp.ok || !resp.body) {
-        throw new Error(`Chat failed: ${resp.status}`);
-      }
-
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-
-        let idx: number;
-        while ((idx = buffer.indexOf('\n')) !== -1) {
-          let line = buffer.slice(0, idx);
-          buffer = buffer.slice(idx + 1);
-          if (line.endsWith('\r')) line = line.slice(0, -1);
-          if (!line.startsWith('data: ')) continue;
-          const json = line.slice(6).trim();
-          if (json === '[DONE]') break;
-          try {
-            const parsed = JSON.parse(json);
-            const content = parsed.choices?.[0]?.delta?.content;
-            if (content) {
-              assistantSoFar += content;
-              setMessages(prev => {
-                const last = prev[prev.length - 1];
-                if (last?.role === 'assistant') {
-                  return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: assistantSoFar } : m);
-                }
-                return [...prev, { role: 'assistant', content: assistantSoFar }];
-              });
-            }
-          } catch { /* partial */ }
-        }
-      }
-    } catch (e) {
-      console.error('Chat error:', e);
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Erro ao processar sua pergunta. Tente novamente.' }]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [messages]);
-
-  const clearChat = useCallback(() => setMessages([]), []);
-
-  return { messages, isLoading, sendMessage, clearChat };
-}
-
-// ─── Assistant Chat (Tool-Calling, non-streaming) ────────────────
-
-export interface AssistantMessage {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-}
-
-export function useAssistantChat() {
-  const [messages, setMessages] = useState<AssistantMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const sendMessage = useCallback(async (input: string) => {
-    const userMsg: AssistantMessage = {
+    const userMsg: ChatMessage = {
       id: crypto.randomUUID(),
       role: 'user',
       content: input,
@@ -242,7 +183,7 @@ export function useAssistantChat() {
 
       if (error) throw error;
 
-      const assistantMsg: AssistantMessage = {
+      const assistantMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
         content: data?.content || 'Não foi possível processar.',
@@ -251,13 +192,18 @@ export function useAssistantChat() {
 
       setMessages(prev => [...prev, assistantMsg]);
     } catch (e) {
-      console.error('Assistant error:', e);
+      console.error('Chat error:', e);
+      const errMsg = e instanceof Error ? e.message : '';
+      let content = '❌ Erro ao processar. Tente novamente.';
+      if (errMsg.includes('429')) content = '⏳ Limite de requisições excedido. Aguarde alguns minutos.';
+      else if (errMsg.includes('402')) content = '💳 Créditos insuficientes. Adicione créditos em Configurações > Workspace.';
+      
       setMessages(prev => [
         ...prev,
         {
           id: crypto.randomUUID(),
           role: 'assistant',
-          content: '❌ Erro ao processar. Tente novamente.',
+          content,
           timestamp: new Date(),
         },
       ]);
@@ -269,19 +215,4 @@ export function useAssistantChat() {
   const clearChat = useCallback(() => setMessages([]), []);
 
   return { messages, isLoading, sendMessage, clearChat };
-}
-
-// ─── Daily Summary ──────────────────────────────────────────────
-
-export function useDailySummary() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke('ai-executive', {
-        body: { action: 'daily_summary' },
-      });
-      if (error) throw error;
-      return data;
-    },
-  });
 }
