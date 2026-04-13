@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import PageContainer from '@/components/shared/PageContainer';
+import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useProductionResources, ProductionResource } from '@/hooks/useProductionResources';
 import { useProductionSectors } from '@/hooks/useProductionSectors';
