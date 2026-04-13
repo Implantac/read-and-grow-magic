@@ -126,6 +126,7 @@ const ProductionCapacityPage = lazy(() => import("./pages/producao/ProductionCap
 const ProductionTraceabilityPage = lazy(() => import("./pages/producao/ProductionTraceability"));
 const AIProductionPage = lazy(() => import("./pages/producao/AIProductionPage"));
 const ProductionSchedulePage = lazy(() => import("./pages/producao/ProductionSchedule"));
+const MRPPage = lazy(() => import("./pages/producao/MRPPage"));
 
 // Operational Flow
 const OperationalDashboardPage = lazy(() => import("./pages/operacional/OperationalDashboard"));
@@ -280,6 +281,7 @@ const App = () => (
               <Route path="/producao/rastreabilidade" element={<ProductionTraceabilityPage />} />
               <Route path="/producao/ia" element={<AIProductionPage />} />
               <Route path="/producao/agendamento" element={<ProductionSchedulePage />} />
+              <Route path="/producao/mrp" element={<MRPPage />} />
 
               {/* Operational Flow Module */}
               <Route path="/operacional/dashboard" element={<OperationalDashboardPage />} />
