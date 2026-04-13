@@ -282,6 +282,29 @@ function RouteStepsPanel({ routeId, onClose }: { routeId: string; onClose: () =>
           </div>
         ) : (
           <div className="space-y-0">
+            {/* Horizontal Flow Summary */}
+            {steps.length > 1 && (
+              <div className="flex items-center gap-1 mb-6 overflow-x-auto pb-2 px-1">
+                {steps.map((s, i) => (
+                  <div key={s.id} className="flex items-center shrink-0">
+                    <div className="flex flex-col items-center">
+                      <div className="h-9 px-3 rounded-lg bg-primary/10 border border-primary/20 flex items-center gap-1.5">
+                        <span className="text-xs font-bold text-primary">{s.sequence}</span>
+                        <span className="text-xs font-medium text-foreground whitespace-nowrap">{s.step_name}</span>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground mt-0.5 font-mono">
+                        {(s.setup_time_minutes || 0) + (s.operation_time_minutes || 0)}min
+                      </span>
+                    </div>
+                    {i < steps.length - 1 && (
+                      <ChevronRight className="h-4 w-4 text-primary/40 shrink-0 mx-0.5" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Detailed Steps */}
             {steps.map((s, i) => (
               <div key={s.id}>
                 <div className="relative flex items-stretch gap-3 group">
