@@ -18,7 +18,7 @@ export default function DifferentialsSection() {
         <div className="text-center mb-14">
           <Badge variant="outline" className="mb-5 font-medium px-4 py-1.5 text-xs">Por que a USE SISTEMAS</Badge>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
-            O que nos torna <span className="text-gradient-primary">diferentes</span>
+            O que nos torna <span className="text-primary inline">diferentes</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
             Não é só um sistema. É uma plataforma que combina gestão integrada, inteligência artificial e visão 360° do negócio.

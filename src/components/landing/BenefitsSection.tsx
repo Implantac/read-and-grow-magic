@@ -24,7 +24,7 @@ export default function BenefitsSection({ onWhatsApp }: Props) {
         <Badge variant="outline" className="mb-5 font-medium px-4 py-1.5 text-xs">Resultados reais</Badge>
         <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 tracking-tight">
           O que muda na sua operação{' '}
-          <span className="text-gradient-primary">com a USE SISTEMAS</span>
+          <span className="text-primary inline">com a USE SISTEMAS</span>
         </h2>
         <p className="text-muted-foreground text-base md:text-lg max-w-lg mx-auto">Resultados visíveis desde a primeira semana. Mais controle, menos erro, mais lucro.</p>
       </div>
