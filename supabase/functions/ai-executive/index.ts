@@ -944,6 +944,24 @@ async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: str
     ? `\n\n## CONTEXTO ATIVO DA CONVERSA\nEntidades mencionadas recentemente: ${[...new Set(mentionedEntities)].join(", ")}\nUse essas referências quando o usuário falar "esse", "aquele", "o mesmo", etc.`
     : "";
 
+  // ─── Adaptive Learning: Analyze user patterns ───
+  const patternInsights = user_id ? await analyzeUserPatterns(supabase, user_id) : "";
+
+  // ─── Log consultation queries for learning ───
+  if (user_id && lastUserMsg) {
+    const queryText = lastUserMsg.content.toLowerCase();
+    const consultModules = ["financeiro", "comercial", "produção", "producao", "estoque"];
+    const detectedModule = consultModules.find(m => queryText.includes(m)) || "geral";
+    await supabase.from("ai_action_logs").insert({
+      user_id,
+      action_type: "query",
+      module: detectedModule,
+      action_name: "consulta_chat",
+      parameters: { query_preview: queryText.slice(0, 200) },
+      context: "chat",
+    }).catch(() => {});
+  }
+
   const systemPrompt = `Você é o **Diretor Digital** — o assistente executivo unificado do sistema ERP. Você combina inteligência estratégica com capacidade operacional.
 
 ## PERSONALIDADE
