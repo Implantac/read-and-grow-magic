@@ -21,8 +21,11 @@ export default function LandingHeader({ onLogin, onWhatsApp }: Props) {
 
   const links = [
     { href: '#problemas', label: 'Diagnóstico' },
+    { href: '#transformacao', label: 'Transformação' },
     { href: '#solucao', label: 'Plataforma' },
+    { href: '#demo', label: 'Demo' },
     { href: '#beneficios', label: 'Resultados' },
+    { href: '#diferenciais', label: 'Diferenciais' },
     { href: '#depoimentos', label: 'Cases' },
     { href: '#pricing', label: 'Planos' },
     { href: '#faq', label: 'FAQ' },
