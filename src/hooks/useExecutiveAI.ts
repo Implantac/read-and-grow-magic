@@ -205,11 +205,36 @@ export function useUnifiedChat() {
   const [messages, setMessages] = useState<ChatMessage[]>(() => loadSession());
   const [isLoading, setIsLoading] = useState(false);
   const inactivityTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { user } = useAuth();
+  const userId = user?.id;
 
   // Persist messages to sessionStorage on every change
   useEffect(() => {
     saveSession(messages);
   }, [messages]);
+
+  // Load server-side history on mount if session is empty
+  useEffect(() => {
+    if (messages.length === 0 && userId) {
+      supabase
+        .from('ai_executive_chat')
+        .select('role, content, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: true })
+        .limit(30)
+        .then(({ data }) => {
+          if (data && data.length > 0) {
+            const restored = data.map((m: any) => ({
+              id: crypto.randomUUID(),
+              role: m.role as 'user' | 'assistant',
+              content: m.content,
+              timestamp: new Date(m.created_at),
+            }));
+            setMessages(restored);
+          }
+        });
+    }
+  }, [userId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reset inactivity timer on every interaction
   const resetInactivityTimer = useCallback(() => {
@@ -248,7 +273,7 @@ export function useUnifiedChat() {
       }));
 
       const { data, error } = await supabase.functions.invoke('ai-executive', {
-        body: { action: 'assistant_chat', messages: chatHistory },
+        body: { action: 'assistant_chat', messages: chatHistory, user_id: userId },
       });
 
       if (error) throw error;
@@ -280,13 +305,19 @@ export function useUnifiedChat() {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, resetInactivityTimer]);
+  }, [messages, resetInactivityTimer, userId]);
 
   const clearChat = useCallback(() => {
     setMessages([]);
     sessionStorage.removeItem(SESSION_KEY);
     if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
-  }, []);
+    // Clear server-side history
+    if (userId) {
+      supabase.functions.invoke('ai-executive', {
+        body: { action: 'clear_history', user_id: userId },
+      }).catch(() => {});
+    }
+  }, [userId]);
 
   return { messages, isLoading, sendMessage, clearChat };
 }
