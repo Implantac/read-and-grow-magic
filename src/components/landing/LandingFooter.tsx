@@ -1,4 +1,5 @@
 import { Shield, Globe, Lock, Server } from 'lucide-react';
+import logoUseSistemas from '@/assets/logo.png';
 
 export default function LandingFooter() {
   return (
@@ -8,9 +9,7 @@ export default function LandingFooter() {
           {/* Brand */}
           <div className="md:col-span-2">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-primary-glow flex items-center justify-center shadow-sm">
-                <span className="text-primary-foreground font-extrabold text-xs">U</span>
-              </div>
+              <img src={logoUseSistemas} alt="USE SISTEMAS" className="h-8 w-8 object-contain" />
               <div>
                 <span className="font-extrabold text-lg block leading-none">USE SISTEMAS</span>
                 <span className="text-[9px] font-medium text-muted-foreground tracking-widest uppercase">Gestão Empresarial Inteligente</span>
