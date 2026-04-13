@@ -16,9 +16,9 @@ import {
   Send, MessageSquare, Lightbulb, ShieldAlert, BarChart3,
   ArrowUpRight, ArrowDownRight, Wallet, PieChart, Activity,
   Target, Factory, Layers, Zap, MapPin, Package, Flame,
-  Bot, FileText, Loader2, Trash2, Sparkles, ShoppingCart,
+  Bot, FileText, Loader2, Trash2, Sparkles,
 } from 'lucide-react';
-import { useExecutiveDashboard, useGenerateInsights, useGenerateScenarios, useExecutiveChat, useAssistantChat, useDailySummary } from '@/hooks/useExecutiveAI';
+import { useExecutiveDashboard, useGenerateInsights, useGenerateScenarios, useUnifiedChat, useDailySummary } from '@/hooks/useExecutiveAI';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell, PieChart as RPieChart, Pie } from 'recharts';
 import ReactMarkdown from 'react-markdown';
@@ -72,32 +72,26 @@ export default function ExecutiveDashboard() {
   const { data, isLoading } = useExecutiveDashboard();
   const generateInsights = useGenerateInsights();
   const generateScenarios = useGenerateScenarios();
-  const { messages, isLoading: chatLoading, sendMessage, clearChat } = useExecutiveChat();
-  const { messages: assistantMessages, isLoading: assistantLoading, sendMessage: sendAssistantMessage, clearChat: clearAssistant } = useAssistantChat();
+  const { messages, isLoading: chatLoading, sendMessage, clearChat } = useUnifiedChat();
   const dailySummary = useDailySummary();
   const [chatInput, setChatInput] = useState('');
-  const [assistantInput, setAssistantInput] = useState('');
 
-  const handleAssistantSend = () => {
-    if (!assistantInput.trim() || assistantLoading) return;
-    sendAssistantMessage(assistantInput.trim());
-    setAssistantInput('');
+  const handleSend = () => {
+    if (!chatInput.trim() || chatLoading) return;
+    sendMessage(chatInput.trim());
+    setChatInput('');
   };
 
-  const assistantQuickActions = [
+  const quickActions = [
     { label: '💰 Resumo Financeiro', prompt: 'Qual o resumo financeiro de hoje? Saldos, vencimentos e inadimplência.' },
     { label: '📊 Vencimentos Hoje', prompt: 'Quais contas vencem hoje? Quanto vou receber e pagar?' },
     { label: '🛒 Status Comercial', prompt: 'Como está o comercial? Pedidos recentes, funil e metas.' },
     { label: '🏭 Produção', prompt: 'Qual o status da produção? Ordens ativas, atrasadas e eficiência.' },
     { label: '📦 Estoque Crítico', prompt: 'Quais produtos estão abaixo do mínimo?' },
-    { label: '⚠️ Contas Atrasadas', prompt: 'Liste todas as contas atrasadas.' },
+    { label: '⚠️ Contas Atrasadas', prompt: 'Liste todas as contas atrasadas com valores.' },
+    { label: '🎯 Análise Estratégica', prompt: 'Faça uma análise estratégica completa da empresa com riscos e oportunidades.' },
+    { label: '📈 Performance', prompt: 'Como está a performance da empresa? Receita, margem, crescimento e metas.' },
   ];
-
-  const handleSend = () => {
-    if (!chatInput.trim()) return;
-    sendMessage(chatInput.trim());
-    setChatInput('');
-  };
 
   if (isLoading) {
     return (
@@ -136,22 +130,11 @@ export default function ExecutiveDashboard() {
     { label: 'Posição Líquida', value: fmt(kpis?.netPosition || 0), icon: Wallet, color: (kpis?.netPosition || 0) >= 0 ? 'text-emerald-600' : 'text-destructive', bg: (kpis?.netPosition || 0) >= 0 ? 'bg-emerald-500/10' : 'bg-destructive/10' },
   ];
 
-  const quickQuestions = [
-    'Como está o desempenho da empresa?',
-    'Onde estamos perdendo dinheiro?',
-    'Quais clientes estão em risco?',
-    'O que fazer para aumentar lucro?',
-    'Qual vendedor precisa de atenção?',
-    'Como está o fluxo de caixa?',
-    'Quais produtos têm margem baixa?',
-    'Como está a meta de vendas?',
-  ];
-
   const latestScenario = scenarios[0];
 
   return (
     <PageContainer>
-      <PageHeader title="🧠 IA Executiva" description="Diretor Digital — Visão estratégica com inteligência artificial">
+      <PageHeader title="🧠 Diretor Digital" description="Assistente executivo unificado — consulte dados, execute ações e tome decisões">
         <div className="flex gap-2">
           <Button onClick={() => generateInsights.mutate()} disabled={generateInsights.isPending} variant="outline" size="sm" className="gap-2">
             <Brain className={cn('h-4 w-4', generateInsights.isPending && 'animate-spin')} />
@@ -184,7 +167,7 @@ export default function ExecutiveDashboard() {
         ))}
       </div>
 
-      {/* ── Secondary KPIs with Target Progress ── */}
+      {/* ── Secondary KPIs ── */}
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-6">
         <Card><CardContent className="p-4 flex items-center gap-3">
           <Users className="h-4 w-4 text-primary" />
@@ -232,7 +215,7 @@ export default function ExecutiveDashboard() {
         </Card>
       )}
 
-      {/* ── Proactive Auto-Alerts (always visible) ── */}
+      {/* ── Proactive Auto-Alerts ── */}
       {autoAlerts.length > 0 && (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {autoAlerts.map((alert: any, i: number) => (
@@ -252,16 +235,145 @@ export default function ExecutiveDashboard() {
         </div>
       )}
 
-      <Tabs defaultValue="insights" className="space-y-4">
+      <Tabs defaultValue="assistant" className="space-y-4">
         <TabsList className="flex-wrap h-auto gap-1">
+          <TabsTrigger value="assistant" className="gap-1.5"><Bot className="h-3.5 w-3.5" />Diretor Digital</TabsTrigger>
           <TabsTrigger value="insights" className="gap-1.5"><Lightbulb className="h-3.5 w-3.5" />Insights</TabsTrigger>
           <TabsTrigger value="charts" className="gap-1.5"><BarChart3 className="h-3.5 w-3.5" />Análises</TabsTrigger>
           <TabsTrigger value="margins" className="gap-1.5"><DollarSign className="h-3.5 w-3.5" />Margens</TabsTrigger>
           <TabsTrigger value="alerts" className="gap-1.5"><ShieldAlert className="h-3.5 w-3.5" />Alertas & Riscos</TabsTrigger>
           <TabsTrigger value="scenarios" className="gap-1.5"><Layers className="h-3.5 w-3.5" />Cenários</TabsTrigger>
-          <TabsTrigger value="chat" className="gap-1.5"><MessageSquare className="h-3.5 w-3.5" />Chat Gerencial</TabsTrigger>
-          <TabsTrigger value="assistant" className="gap-1.5"><Bot className="h-3.5 w-3.5" />Assistente ERP</TabsTrigger>
         </TabsList>
+
+        {/* ── Unified Assistant Tab ── */}
+        <TabsContent value="assistant">
+          <div className="flex gap-4">
+            {/* Sidebar Quick Actions */}
+            <div className="hidden lg:flex flex-col w-60 shrink-0 gap-3">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Ações Rápidas</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1.5">
+                  {quickActions.map((action, i) => (
+                    <Button key={i} variant="ghost" size="sm" className="w-full justify-start text-left h-auto py-2 px-3" onClick={() => !chatLoading && sendMessage(action.prompt)} disabled={chatLoading}>
+                      <span className="text-xs leading-tight">{action.label}</span>
+                    </Button>
+                  ))}
+                  <Separator className="my-2" />
+                  <Button variant="outline" size="sm" className="w-full" onClick={() => dailySummary.mutateAsync().then(r => r?.resumo_executivo && sendMessage('Gere o resumo executivo diário.'))} disabled={dailySummary.isPending || chatLoading}>
+                    <FileText className="h-4 w-4 mr-1" />{dailySummary.isPending ? 'Gerando...' : 'Resumo do Dia'}
+                  </Button>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4 space-y-3">
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1.5">🔍 Consultas</p>
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      <li>"Fluxo de caixa dos próximos 15 dias"</li>
+                      <li>"Quais OPs estão atrasadas?"</li>
+                      <li>"Top 5 clientes por faturamento"</li>
+                    </ul>
+                  </div>
+                  <Separator />
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1.5">⚙️ Ações</p>
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      <li>"Registrar pagamento da conta X"</li>
+                      <li>"Priorizar OP-2024001"</li>
+                      <li>"Adiar vencimento para dia 30"</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Chat */}
+            <Card className="flex-1 h-[650px] flex flex-col">
+              <CardHeader className="pb-2 border-b">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Brain className="h-4 w-4 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-sm">Diretor Digital</CardTitle>
+                      <p className="text-[10px] text-muted-foreground">Consultas · Ações · Análises Estratégicas</p>
+                    </div>
+                  </div>
+                  {messages.length > 0 && (
+                    <Button variant="ghost" size="sm" onClick={clearChat} className="text-xs gap-1">
+                      <Trash2 className="h-3 w-3" />Limpar
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+                <ScrollArea className="flex-1 p-4">
+                  {messages.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-center py-12">
+                      <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                        <Brain className="h-10 w-10 text-primary/40" />
+                      </div>
+                      <p className="text-sm font-medium mb-1">Diretor Digital</p>
+                      <p className="text-xs text-muted-foreground mb-6 max-w-md">
+                        Seu assistente executivo unificado. Faça perguntas, peça análises ou execute ações no sistema — tudo por linguagem natural.
+                      </p>
+                      <div className="grid gap-2 md:grid-cols-2 max-w-lg">
+                        {quickActions.slice(0, 6).map(a => (
+                          <Button key={a.label} variant="outline" size="sm" className="text-xs h-auto py-2" onClick={() => sendMessage(a.prompt)}>
+                            {a.label}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {messages.map(msg => (
+                        <div key={msg.id} className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
+                          <div className={cn('max-w-[85%] rounded-2xl px-4 py-3', msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                            {msg.role === 'assistant' ? (
+                              <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                                <ReactMarkdown>{msg.content}</ReactMarkdown>
+                              </div>
+                            ) : (
+                              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                            )}
+                            <p className={cn('text-[10px] mt-1', msg.role === 'user' ? 'text-primary-foreground/60' : 'text-muted-foreground')}>
+                              {msg.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                      {chatLoading && (
+                        <div className="flex justify-start">
+                          <div className="bg-muted rounded-2xl px-4 py-3 flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                            <span className="text-sm text-muted-foreground">Processando...</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </ScrollArea>
+                <div className="border-t p-3 flex gap-2">
+                  <Input
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
+                    placeholder="Pergunte, analise ou execute ações..."
+                    disabled={chatLoading}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleSend} disabled={chatLoading || !chatInput.trim()} size="icon">
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
         {/* ── Insights Tab ── */}
         <TabsContent value="insights" className="space-y-4">
@@ -376,7 +488,6 @@ export default function ExecutiveDashboard() {
               </CardContent>
             </Card>
 
-            {/* Revenue by Region */}
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" />Receita por Região</CardTitle>
@@ -402,7 +513,6 @@ export default function ExecutiveDashboard() {
             </Card>
           </div>
 
-          {/* Sales Rep & Funnel */}
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader className="pb-2">
@@ -452,7 +562,6 @@ export default function ExecutiveDashboard() {
         {/* ── Margins Tab ── */}
         <TabsContent value="margins" className="space-y-4">
           <div className="grid gap-4 lg:grid-cols-2">
-            {/* Top Profitable Products */}
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2"><TrendingUp className="h-4 w-4 text-emerald-600" />Produtos Mais Rentáveis</CardTitle>
@@ -483,7 +592,6 @@ export default function ExecutiveDashboard() {
               </CardContent>
             </Card>
 
-            {/* Low Margin Products */}
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm flex items-center gap-2"><TrendingDown className="h-4 w-4 text-destructive" />Produtos com Margem Baixa (&lt;15%)</CardTitle>
@@ -512,7 +620,6 @@ export default function ExecutiveDashboard() {
             </Card>
           </div>
 
-          {/* Margin Chart */}
           {productMargins.length > 0 && (
             <Card>
               <CardHeader className="pb-2">
@@ -649,176 +756,6 @@ export default function ExecutiveDashboard() {
               )}
             </>
           )}
-        </TabsContent>
-
-        {/* ── Chat Tab ── */}
-        <TabsContent value="chat">
-          <Card className="h-[600px] flex flex-col">
-            <CardHeader className="pb-2 border-b">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-sm flex items-center gap-2"><Brain className="h-4 w-4 text-primary" />CEO AI — Chat Gerencial</CardTitle>
-                {messages.length > 0 && <Button variant="ghost" size="sm" onClick={clearChat} className="text-xs">Limpar</Button>}
-              </div>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-              <ScrollArea className="flex-1 p-4">
-                {messages.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-center py-12">
-                    <Brain className="h-16 w-16 text-muted-foreground/20 mb-4" />
-                    <p className="text-sm font-medium text-foreground mb-1">Pergunte ao CEO AI</p>
-                    <p className="text-xs text-muted-foreground mb-6 max-w-sm">Faça perguntas estratégicas sobre a empresa usando dados reais do sistema</p>
-                    <div className="grid gap-2 md:grid-cols-2 max-w-lg">
-                      {quickQuestions.map(q => (
-                        <Button key={q} variant="outline" size="sm" className="text-xs h-auto py-2 px-3 whitespace-normal text-left" onClick={() => sendMessage(q)}>
-                          {q}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {messages.map((msg, i) => (
-                      <div key={i} className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
-                        <div className={cn('max-w-[80%] rounded-xl px-4 py-3 text-sm', msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
-                          {msg.role === 'assistant' ? (
-                            <div className="prose prose-sm dark:prose-invert max-w-none">
-                              <ReactMarkdown>{msg.content}</ReactMarkdown>
-                            </div>
-                          ) : msg.content}
-                        </div>
-                      </div>
-                    ))}
-                    {chatLoading && messages[messages.length - 1]?.role === 'user' && (
-                      <div className="flex justify-start">
-                        <div className="bg-muted rounded-xl px-4 py-3">
-                          <div className="flex gap-1">
-                            <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: '0ms' }} />
-                            <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: '150ms' }} />
-                            <span className="w-2 h-2 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: '300ms' }} />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </ScrollArea>
-              <div className="border-t p-3 flex gap-2">
-                <Input
-                  value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-                  placeholder="Pergunte ao CEO AI..."
-                  disabled={chatLoading}
-                  className="flex-1"
-                />
-                <Button onClick={handleSend} disabled={chatLoading || !chatInput.trim()} size="icon">
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* ── Assistant Tab (Tool-Calling) ── */}
-        <TabsContent value="assistant">
-          <div className="flex gap-4">
-            {/* Sidebar Quick Actions */}
-            <div className="hidden lg:flex flex-col w-56 shrink-0 gap-3">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm flex items-center gap-2"><Sparkles className="h-4 w-4" /> Ações Rápidas</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {assistantQuickActions.map((action, i) => (
-                    <Button key={i} variant="ghost" size="sm" className="w-full justify-start text-left h-auto py-2 px-3" onClick={() => !assistantLoading && sendAssistantMessage(action.prompt)} disabled={assistantLoading}>
-                      <span className="text-xs leading-tight">{action.label}</span>
-                    </Button>
-                  ))}
-                  <Separator className="my-2" />
-                  <Button variant="outline" size="sm" className="w-full" onClick={() => dailySummary.mutateAsync().then(r => r?.resumo_executivo && sendAssistantMessage('Gere o resumo executivo diário.'))} disabled={dailySummary.isPending || assistantLoading}>
-                    <FileText className="h-4 w-4 mr-1" />{dailySummary.isPending ? 'Gerando...' : 'Resumo do Dia'}
-                  </Button>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-4">
-                  <p className="text-xs text-muted-foreground mb-2 font-medium">Exemplos:</p>
-                  <ul className="text-xs text-muted-foreground space-y-1.5">
-                    <li>"Fluxo de caixa dos próximos 15 dias?"</li>
-                    <li>"Top 5 clientes por faturamento"</li>
-                    <li>"OPs atrasadas?"</li>
-                    <li>"Buscar produto 'Parafuso M8'"</li>
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Assistant Chat */}
-            <Card className="flex-1 h-[600px] flex flex-col">
-              <CardHeader className="pb-2 border-b">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm flex items-center gap-2"><Bot className="h-4 w-4 text-primary" />Assistente ERP — Consultas e Ações</CardTitle>
-                  {assistantMessages.length > 0 && <Button variant="ghost" size="sm" onClick={clearAssistant} className="text-xs gap-1"><Trash2 className="h-3 w-3" />Limpar</Button>}
-                </div>
-              </CardHeader>
-              <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-                <ScrollArea className="flex-1 p-4">
-                  {assistantMessages.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center text-center py-12">
-                      <Bot className="h-16 w-16 text-muted-foreground/20 mb-4" />
-                      <p className="text-sm font-medium mb-1">Assistente ERP Inteligente</p>
-                      <p className="text-xs text-muted-foreground mb-6 max-w-sm">Consulte dados financeiros, comerciais, de produção e estoque em tempo real. Execute ações no sistema por linguagem natural.</p>
-                      <div className="grid gap-2 md:grid-cols-2 lg:hidden max-w-lg">
-                        {assistantQuickActions.map(a => (
-                          <Button key={a.label} variant="outline" size="sm" className="text-xs h-auto py-2" onClick={() => sendAssistantMessage(a.prompt)}>{a.label}</Button>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {assistantMessages.map(msg => (
-                        <div key={msg.id} className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
-                          <div className={cn('max-w-[85%] rounded-2xl px-4 py-3', msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
-                            {msg.role === 'assistant' ? (
-                              <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                                <ReactMarkdown>{msg.content}</ReactMarkdown>
-                              </div>
-                            ) : (
-                              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                            )}
-                            <p className={cn('text-[10px] mt-1', msg.role === 'user' ? 'text-primary-foreground/60' : 'text-muted-foreground')}>
-                              {msg.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                      {assistantLoading && (
-                        <div className="flex justify-start">
-                          <div className="bg-muted rounded-2xl px-4 py-3 flex items-center gap-2">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            <span className="text-sm text-muted-foreground">Consultando sistema...</span>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </ScrollArea>
-                <div className="border-t p-3 flex gap-2">
-                  <Input
-                    value={assistantInput}
-                    onChange={(e) => setAssistantInput(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleAssistantSend()}
-                    placeholder="Digite um comando ou pergunta..."
-                    disabled={assistantLoading}
-                    className="flex-1"
-                  />
-                  <Button onClick={handleAssistantSend} disabled={assistantLoading || !assistantInput.trim()} size="icon">
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </TabsContent>
       </Tabs>
     </PageContainer>
