@@ -460,6 +460,16 @@ export default function PCPPanel() {
             </Card>
           ))}
         </TabsContent>
+
+        <TabsContent value="kpis" className="mt-4">
+          <PCPKPIPanel
+            orders={productionOrders}
+            timeEntries={timeEntries}
+            capacities={capacities}
+            sheets={sheets}
+            supplies={supplies}
+          />
+        </TabsContent>
       </Tabs>
 
       {/* Generate OP Dialog */}
