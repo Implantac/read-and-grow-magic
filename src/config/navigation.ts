@@ -96,7 +96,7 @@ export const navigationSections: NavSection[] = [
           { title: 'Chão de Fábrica', href: '/producao/chao-fabrica', icon: 'Activity' },
           { title: '📲 Terminal Operador', href: '/producao/terminal', icon: 'Smartphone' },
           { title: 'Apontamentos', href: '/producao/apontamentos', icon: 'Timer' },
-          { title: '🏗️ Setores', href: '/producao/setores', icon: 'Building2' },
+          { title: 'Setores', href: '/producao/setores', icon: 'Building2' },
           { title: '📏 Linhas Produtivas', href: '/producao/linhas', icon: 'Rows3' },
           { title: '🔧 Recursos', href: '/producao/recursos', icon: 'Wrench' },
           { title: '🗺️ Rotas Produtivas', href: '/producao/rotas', icon: 'Route' },
