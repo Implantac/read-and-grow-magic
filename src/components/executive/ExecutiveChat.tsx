@@ -130,15 +130,30 @@ export function ExecutiveChat({ messages, isLoading, sendMessage, clearChat, onD
               <div className="space-y-4">
                 {messages.map(msg => (
                   <div key={msg.id} className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
-                    <div className={cn('max-w-[85%] rounded-2xl px-4 py-3', msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                    <div className={cn('max-w-[90%] rounded-2xl px-4 py-3', msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
                       {msg.role === 'assistant' ? (
-                        <div className="prose prose-sm dark:prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                        <div className="prose prose-sm dark:prose-invert max-w-none 
+                          [&>*:first-child]:mt-0 [&>*:last-child]:mb-0
+                          [&_h2]:text-sm [&_h2]:font-bold [&_h2]:mt-3 [&_h2]:mb-1.5 [&_h2]:text-foreground
+                          [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:mt-2.5 [&_h3]:mb-1 [&_h3]:text-foreground
+                          [&_p]:text-xs [&_p]:leading-relaxed [&_p]:mb-1.5
+                          [&_strong]:text-foreground [&_strong]:font-semibold
+                          [&_table]:text-[11px] [&_table]:w-full [&_table]:border-collapse [&_table]:my-2
+                          [&_th]:bg-muted-foreground/10 [&_th]:text-left [&_th]:px-2 [&_th]:py-1 [&_th]:border [&_th]:border-border/50 [&_th]:font-semibold [&_th]:text-foreground
+                          [&_td]:px-2 [&_td]:py-1 [&_td]:border [&_td]:border-border/50
+                          [&_ul]:text-xs [&_ul]:space-y-0.5 [&_ul]:my-1.5 [&_ul]:pl-4
+                          [&_ol]:text-xs [&_ol]:space-y-0.5 [&_ol]:my-1.5 [&_ol]:pl-4
+                          [&_li]:leading-relaxed
+                          [&_hr]:my-2.5 [&_hr]:border-border/40
+                          [&_blockquote]:border-l-2 [&_blockquote]:border-primary/40 [&_blockquote]:pl-3 [&_blockquote]:italic [&_blockquote]:text-xs
+                          [&_code]:text-[10px] [&_code]:bg-muted-foreground/10 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded
+                        ">
                           <ReactMarkdown>{msg.content}</ReactMarkdown>
                         </div>
                       ) : (
                         <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                       )}
-                      <p className={cn('text-[10px] mt-1', msg.role === 'user' ? 'text-primary-foreground/60' : 'text-muted-foreground')}>
+                      <p className={cn('text-[10px] mt-1.5 pt-1 border-t border-current/10', msg.role === 'user' ? 'text-primary-foreground/60' : 'text-muted-foreground')}>
                         {msg.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
