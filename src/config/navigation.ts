@@ -263,6 +263,7 @@ export const navigationSections: NavSection[] = [
           { title: 'Usuários', href: '/admin/usuarios', icon: 'Users' },
           { title: 'Empresas', href: '/admin/empresas', icon: 'Building' },
           { title: 'Parâmetros', href: '/admin/parametros', icon: 'Sliders' },
+          { title: 'Relatório Diário', href: '/admin/relatorio-diario', icon: 'FileText' },
         ],
       },
     ],

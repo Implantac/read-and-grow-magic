@@ -2262,6 +2262,33 @@ export type Database = {
           },
         ]
       }
+      daily_executive_reports: {
+        Row: {
+          created_at: string
+          generated_at: string
+          generated_by: string | null
+          id: string
+          report_data: Json
+          report_date: string
+        }
+        Insert: {
+          created_at?: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          report_data?: Json
+          report_date?: string
+        }
+        Update: {
+          created_at?: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          report_data?: Json
+          report_date?: string
+        }
+        Relationships: []
+      }
       delivery_proof: {
         Row: {
           created_at: string
