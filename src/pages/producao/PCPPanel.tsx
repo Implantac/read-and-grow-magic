@@ -16,8 +16,12 @@ import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { useOrders } from '@/hooks/useOrders';
 import { useOrderLifecycle, checkProductionCompletion } from '@/hooks/useOrderLifecycle';
 import { useTimeEntries } from '@/hooks/useTimeEntries';
+import { useProductionCapacity } from '@/hooks/useProductionCapacity';
+import { useTechnicalSheets } from '@/hooks/useTechnicalSheets';
+import { useSupplyStock } from '@/hooks/useSupplyStock';
 import { supabase } from '@/integrations/supabase/client';
 import { productionStatusConfig, priorityConfig } from '@/config/production';
+import PCPKPIPanel from '@/components/producao/PCPKPIPanel';
 import { Factory, Clock, CheckCircle, AlertTriangle, Search, Plus, Play, Pause, BarChart3, Users, Gauge, Bell, ShieldCheck, GanttChart } from 'lucide-react';
 import { format, differenceInDays, parseISO, differenceInMinutes, addDays, startOfDay, endOfDay, max as dateMax, min as dateMin } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -158,6 +162,9 @@ export default function PCPPanel() {
   const { orders: productionOrders, loading, refetch, update } = useProductionOrders();
   const { data: salesOrders } = useOrders();
   const { entries: timeEntries } = useTimeEntries();
+  const { capacities } = useProductionCapacity();
+  const { sheets } = useTechnicalSheets();
+  const { supplies } = useSupplyStock();
   const lifecycle = useOrderLifecycle();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -269,6 +276,7 @@ export default function PCPPanel() {
           <TabsTrigger value="demand">Demanda Comercial ({ordersAwaitingProduction.length})</TabsTrigger>
           <TabsTrigger value="capacity">Capacidade {delayedOPs.length > 0 && <Badge variant="destructive" className="ml-1 h-5 text-[10px]">{delayedOPs.length}</Badge>}</TabsTrigger>
           <TabsTrigger value="productivity">Produtividade</TabsTrigger>
+          <TabsTrigger value="kpis">📊 KPIs & Sugestões</TabsTrigger>
           <TabsTrigger value="alerts">Alertas</TabsTrigger>
         </TabsList>
 
@@ -451,6 +459,16 @@ export default function PCPPanel() {
               </CardContent>
             </Card>
           ))}
+        </TabsContent>
+
+        <TabsContent value="kpis" className="mt-4">
+          <PCPKPIPanel
+            orders={productionOrders}
+            timeEntries={timeEntries}
+            capacities={capacities}
+            sheets={sheets}
+            supplies={supplies}
+          />
         </TabsContent>
       </Tabs>
 
