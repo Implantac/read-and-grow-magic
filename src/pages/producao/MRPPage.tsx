@@ -11,11 +11,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { useTechnicalSheets } from '@/hooks/useTechnicalSheets';
 import { useSupplyStock } from '@/hooks/useSupplyStock';
+import { useProductionCapacity } from '@/hooks/useProductionCapacity';
 import { supabase } from '@/integrations/supabase/client';
-import { AlertTriangle, Package, Calculator, ShoppingCart, CheckCircle, XCircle, Layers, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Package, Calculator, ShoppingCart, CheckCircle, XCircle, Layers, RefreshCw, FlaskConical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import MRPSimulation from '@/components/producao/MRPSimulation';
 
 interface MaterialNeed {
   materialCode: string;
