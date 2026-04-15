@@ -1052,7 +1052,7 @@ ${patternInsights}`;
   const firstResp = await fetch(GATEWAY_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "google/gemini-2.5-flash", messages: aiMessages, tools: ERP_TOOLS, stream: false }),
+    body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: aiMessages, tools: ERP_TOOLS, stream: false }),
   });
 
   if (!firstResp.ok) {
@@ -1089,7 +1089,7 @@ ${patternInsights}`;
     const nextResp = await fetch(GATEWAY_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "google/gemini-2.5-flash", messages: aiMessages, tools: ERP_TOOLS, stream: false }),
+      body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: aiMessages, tools: ERP_TOOLS, stream: false }),
     });
     if (!nextResp.ok) break;
     result = await nextResp.json();
