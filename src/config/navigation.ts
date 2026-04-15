@@ -93,7 +93,7 @@ export const navigationSections: NavSection[] = [
           { title: '📋 Kanban', href: '/producao/kanban', icon: 'Columns' },
           { title: 'Fila de Produção', href: '/producao/fila', icon: 'ListOrdered' },
           { title: 'Agendamento', href: '/producao/agendamento', icon: 'CalendarClock' },
-          { title: '🏭 Chão de Fábrica', href: '/producao/chao-fabrica', icon: 'Activity' },
+          { title: 'Chão de Fábrica', href: '/producao/chao-fabrica', icon: 'Activity' },
           { title: '📲 Terminal Operador', href: '/producao/terminal', icon: 'Smartphone' },
           { title: 'Apontamentos', href: '/producao/apontamentos', icon: 'Timer' },
           { title: '🏗️ Setores', href: '/producao/setores', icon: 'Building2' },
