@@ -32,7 +32,7 @@ export function useDailyReports() {
         .order('report_date', { ascending: false })
         .limit(30);
       if (error) throw error;
-      return data as DailyReport[];
+      return data as unknown as DailyReport[];
     },
   });
 }
