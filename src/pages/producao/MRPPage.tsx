@@ -38,6 +38,7 @@ export default function MRPPage() {
   const { orders, loading: loadingOrders } = useProductionOrders();
   const { sheets, loading: loadingSheets } = useTechnicalSheets();
   const { supplies, loading: loadingSupplies } = useSupplyStock();
+  const { capacities } = useProductionCapacity();
   const [selectedTab, setSelectedTab] = useState('needs');
   const [generatingPO, setGeneratingPO] = useState(false);
 
@@ -214,6 +215,7 @@ export default function MRPPage() {
           <TabsTrigger value="needs">Necessidades de Material</TabsTrigger>
           <TabsTrigger value="ops">OPs × Materiais</TabsTrigger>
           <TabsTrigger value="purchase">Sugestão de Compra</TabsTrigger>
+          <TabsTrigger value="simulation"><FlaskConical className="h-4 w-4 mr-1" /> Simulação What-If</TabsTrigger>
         </TabsList>
 
         <TabsContent value="needs">
@@ -409,6 +411,10 @@ export default function MRPPage() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="simulation">
+          <MRPSimulation orders={orders} sheets={sheets} supplies={supplies} capacities={capacities} />
         </TabsContent>
       </Tabs>
     </PageContainer>
