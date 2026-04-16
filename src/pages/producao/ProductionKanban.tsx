@@ -74,6 +74,7 @@ export default function ProductionKanban() {
   const { sheets } = useTechnicalSheets();
   const { supplies } = useSupplyStock();
   const { capacities } = useProductionCapacity();
+  const { workCenters } = useWorkCenters();
   const intelligence = usePCPIntelligence();
 
   // Realtime
