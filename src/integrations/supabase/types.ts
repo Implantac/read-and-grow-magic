@@ -4306,6 +4306,84 @@ export type Database = {
           },
         ]
       }
+      outsourcing_orders: {
+        Row: {
+          actual_return_date: string | null
+          created_at: string
+          expected_return_date: string | null
+          id: string
+          notes: string | null
+          order_number: string
+          production_order_id: string
+          quantity_rejected: number | null
+          quantity_returned: number | null
+          quantity_sent: number
+          sent_date: string
+          service_description: string | null
+          status: string
+          supplier_id: string | null
+          supplier_name: string
+          total_cost: number | null
+          unit_cost: number | null
+          updated_at: string
+        }
+        Insert: {
+          actual_return_date?: string | null
+          created_at?: string
+          expected_return_date?: string | null
+          id?: string
+          notes?: string | null
+          order_number: string
+          production_order_id: string
+          quantity_rejected?: number | null
+          quantity_returned?: number | null
+          quantity_sent?: number
+          sent_date?: string
+          service_description?: string | null
+          status?: string
+          supplier_id?: string | null
+          supplier_name: string
+          total_cost?: number | null
+          unit_cost?: number | null
+          updated_at?: string
+        }
+        Update: {
+          actual_return_date?: string | null
+          created_at?: string
+          expected_return_date?: string | null
+          id?: string
+          notes?: string | null
+          order_number?: string
+          production_order_id?: string
+          quantity_rejected?: number | null
+          quantity_returned?: number | null
+          quantity_sent?: number
+          sent_date?: string
+          service_description?: string | null
+          status?: string
+          supplier_id?: string | null
+          supplier_name?: string
+          total_cost?: number | null
+          unit_cost?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outsourcing_orders_production_order_id_fkey"
+            columns: ["production_order_id"]
+            isOneToOne: false
+            referencedRelation: "production_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "outsourcing_orders_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_records: {
         Row: {
           amount: number
