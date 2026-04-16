@@ -137,6 +137,7 @@ const ProductionSectorsPage = lazy(() => import("./pages/producao/ProductionSect
 const ProductionLinesPage = lazy(() => import("./pages/producao/ProductionLinesPage"));
 const ProductionResourcesPage = lazy(() => import("./pages/producao/ProductionResourcesPage"));
 const ProductionRoutesPage = lazy(() => import("./pages/producao/ProductionRoutesPage"));
+const OutsourcingPage = lazy(() => import("./pages/producao/OutsourcingPage"));
 
 // Operational Flow
 const OperationalDashboardPage = lazy(() => import("./pages/operacional/OperationalDashboard"));
@@ -288,6 +289,7 @@ const App = () => (
               <Route path="/producao/terminal" element={<OperatorTerminalPage />} />
               <Route path="/producao/chao-fabrica" element={<ShopFloorDashboardPage />} />
               <Route path="/producao/kanban" element={<ProductionKanbanPage />} />
+              <Route path="/producao/terceirizacao" element={<OutsourcingPage />} />
               <Route path="/producao/fichas-tecnicas" element={<TechnicalSheetsPage />} />
               <Route path="/producao/capacidade" element={<ProductionCapacityPage />} />
               <Route path="/producao/rastreabilidade" element={<ProductionTraceabilityPage />} />

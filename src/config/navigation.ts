@@ -91,6 +91,7 @@ export const navigationSections: NavSection[] = [
           { title: 'Painel PCP', href: '/producao/pcp', icon: 'BarChart3' },
           { title: 'Ordens de Produção', href: '/producao/ordens', icon: 'ClipboardCheck' },
           { title: '📋 Kanban', href: '/producao/kanban', icon: 'Columns' },
+          { title: '🏭 Terceirização', href: '/producao/terceirizacao', icon: 'Truck' },
           { title: 'Fila de Produção', href: '/producao/fila', icon: 'ListOrdered' },
           { title: 'Agendamento', href: '/producao/agendamento', icon: 'CalendarClock' },
           { title: 'Chão de Fábrica', href: '/producao/chao-fabrica', icon: 'Activity' },
