@@ -137,6 +137,7 @@ const ProductionSectorsPage = lazy(() => import("./pages/producao/ProductionSect
 const ProductionLinesPage = lazy(() => import("./pages/producao/ProductionLinesPage"));
 const ProductionResourcesPage = lazy(() => import("./pages/producao/ProductionResourcesPage"));
 const ProductionRoutesPage = lazy(() => import("./pages/producao/ProductionRoutesPage"));
+const OutsourcingPage = lazy(() => import("./pages/producao/OutsourcingPage"));
 
 // Operational Flow
 const OperationalDashboardPage = lazy(() => import("./pages/operacional/OperationalDashboard"));
