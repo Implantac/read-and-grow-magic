@@ -70,6 +70,9 @@ export default function ProductionKanban() {
   const [sequenceResult, setSequenceResult] = useState<any>(null);
   const [sequenceLoading, setSequenceLoading] = useState(false);
   const [applyingSequence, setApplyingSequence] = useState(false);
+  const [bottleneckData, setBottleneckData] = useState<any>(null);
+  const [bottleneckLoading, setBottleneckLoading] = useState(false);
+  const [bottleneckOpen, setBottleneckOpen] = useState(false);
 
   const { sheets } = useTechnicalSheets();
   const { supplies } = useSupplyStock();
