@@ -55,6 +55,7 @@ const VALID_TRANSITIONS: Record<string, string[]> = {
 
 export default function ProductionKanban() {
   const { orders, loading, update, refetch } = useProductionOrders();
+  const timeLogs = useProductionTimeLogs();
   const { orders: outsourcingOrders, lateOrders: lateOutsourcing } = useOutsourcingOrders();
   const [searchTerm, setSearchTerm] = useState('');
   const [sectorFilter, setSectorFilter] = useState('all');
