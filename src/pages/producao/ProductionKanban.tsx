@@ -29,6 +29,7 @@ import { WarModeService, type WarModeResult as LocalWarModeResult } from '@/lib/
 import { useTechnicalSheets } from '@/hooks/useTechnicalSheets';
 import { useSupplyStock } from '@/hooks/useSupplyStock';
 import { useProductionCapacity } from '@/hooks/useProductionCapacity';
+import { useWorkCenters } from '@/hooks/useWorkCenters';
 import { QRCodeOPButton } from '@/components/producao/QRCodeOP';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -73,6 +74,7 @@ export default function ProductionKanban() {
   const { sheets } = useTechnicalSheets();
   const { supplies } = useSupplyStock();
   const { capacities } = useProductionCapacity();
+  const { workCenters } = useWorkCenters();
   const intelligence = usePCPIntelligence();
 
   // Realtime
@@ -144,12 +146,39 @@ export default function ProductionKanban() {
   const completedToday = orders.filter(o => o.status === 'completed' && o.completed_date && new Date(o.completed_date).toDateString() === new Date().toDateString()).length;
   const waitingMaterialCount = orders.filter(o => o.status === 'waiting_material').length;
 
+  // Capacity load per work center
+  const capacityLoad = useMemo(() => {
+    const load: Record<string, { name: string; capacity: number; allocated: number }> = {};
+    workCenters.filter(wc => wc.is_active).forEach(wc => {
+      load[wc.id] = { name: wc.name, capacity: wc.capacity, allocated: 0 };
+    });
+    orders.filter(o => ['planned', 'in_progress', 'waiting_material'].includes(o.status)).forEach(o => {
+      const wcId = (o as any).work_center_id;
+      if (wcId && load[wcId]) {
+        load[wcId].allocated += o.quantity;
+      }
+    });
+    return load;
+  }, [workCenters, orders]);
+
   const moveOrder = useCallback(async (orderId: string, newStatus: string) => {
+    // Capacity alert (non-blocking)
+    const order = orders.find(o => o.id === orderId);
+    const wcId = order && (order as any).work_center_id;
+    if (wcId && capacityLoad[wcId]) {
+      const cl = capacityLoad[wcId];
+      if (cl.allocated + (order?.quantity || 0) > cl.capacity) {
+        toast.warning(`⚠️ Capacidade excedida no centro "${cl.name}"`, {
+          description: `Alocado: ${cl.allocated + (order?.quantity || 0)} / Capacidade: ${cl.capacity}. Operação permitida, mas requer atenção.`,
+        });
+      }
+    }
+
     const updates: any = { status: newStatus };
     if (newStatus === 'in_progress' || newStatus === 'outsourced') updates.start_date = updates.start_date || new Date().toISOString();
     if (newStatus === 'completed') updates.completed_date = new Date().toISOString();
     await update(orderId, updates);
-  }, [update]);
+  }, [update, orders, capacityLoad]);
 
   const handleDragEnd = useCallback(async (result: DropResult) => {
     const { draggableId, destination } = result;
@@ -202,6 +231,16 @@ export default function ProductionKanban() {
       list.push({ icon: '📦', text: `OP ${o.order_number} aguardando material → verificar estoque`, severity: 'info' });
     });
 
+    // Capacity alerts
+    Object.values(capacityLoad).forEach(cl => {
+      const pct = cl.capacity > 0 ? (cl.allocated / cl.capacity) * 100 : 0;
+      if (pct > 100) {
+        list.push({ icon: '🔴', text: `Centro "${cl.name}" com ${pct.toFixed(0)}% de carga (${cl.allocated}/${cl.capacity}) → sobrecarga`, severity: 'critical' });
+      } else if (pct >= 85) {
+        list.push({ icon: '🟡', text: `Centro "${cl.name}" com ${pct.toFixed(0)}% de carga → próximo do limite`, severity: 'warning' });
+      }
+    });
+
     // WIP limit warnings
     columns.forEach(col => {
       if (col.wipLimit > 0 && col.items.length >= col.wipLimit * 0.9 && col.items.length < col.wipLimit) {
@@ -210,7 +249,7 @@ export default function ProductionKanban() {
     });
 
     return list;
-  }, [orders, lateOutsourcing, columns]);
+  }, [orders, lateOutsourcing, columns, capacityLoad]);
 
   // Recalculate priorities
   const handleRecalculate = async () => {

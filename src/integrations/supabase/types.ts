@@ -5566,6 +5566,7 @@ export type Database = {
           unit: string
           updated_at: string
           work_center: string | null
+          work_center_id: string | null
         }
         Insert: {
           batch_code?: string | null
@@ -5606,6 +5607,7 @@ export type Database = {
           unit?: string
           updated_at?: string
           work_center?: string | null
+          work_center_id?: string | null
         }
         Update: {
           batch_code?: string | null
@@ -5646,6 +5648,7 @@ export type Database = {
           unit?: string
           updated_at?: string
           work_center?: string | null
+          work_center_id?: string | null
         }
         Relationships: [
           {
@@ -5667,6 +5670,13 @@ export type Database = {
             columns: ["sales_order_id"]
             isOneToOne: false
             referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_orders_work_center_id_fkey"
+            columns: ["work_center_id"]
+            isOneToOne: false
+            referencedRelation: "work_centers"
             referencedColumns: ["id"]
           },
         ]
