@@ -231,6 +231,16 @@ export default function ProductionKanban() {
       list.push({ icon: '📦', text: `OP ${o.order_number} aguardando material → verificar estoque`, severity: 'info' });
     });
 
+    // Capacity alerts
+    Object.values(capacityLoad).forEach(cl => {
+      const pct = cl.capacity > 0 ? (cl.allocated / cl.capacity) * 100 : 0;
+      if (pct > 100) {
+        list.push({ icon: '🔴', text: `Centro "${cl.name}" com ${pct.toFixed(0)}% de carga (${cl.allocated}/${cl.capacity}) → sobrecarga`, severity: 'critical' });
+      } else if (pct >= 85) {
+        list.push({ icon: '🟡', text: `Centro "${cl.name}" com ${pct.toFixed(0)}% de carga → próximo do limite`, severity: 'warning' });
+      }
+    });
+
     // WIP limit warnings
     columns.forEach(col => {
       if (col.wipLimit > 0 && col.items.length >= col.wipLimit * 0.9 && col.items.length < col.wipLimit) {
@@ -239,7 +249,7 @@ export default function ProductionKanban() {
     });
 
     return list;
-  }, [orders, lateOutsourcing, columns]);
+  }, [orders, lateOutsourcing, columns, capacityLoad]);
 
   // Recalculate priorities
   const handleRecalculate = async () => {
