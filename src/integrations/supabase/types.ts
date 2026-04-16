@@ -5559,6 +5559,7 @@ export type Database = {
           route_id: string | null
           sales_order_id: string | null
           sector: string | null
+          sequence_order: number | null
           size_grid: string | null
           start_date: string | null
           status: string
@@ -5598,6 +5599,7 @@ export type Database = {
           route_id?: string | null
           sales_order_id?: string | null
           sector?: string | null
+          sequence_order?: number | null
           size_grid?: string | null
           start_date?: string | null
           status?: string
@@ -5637,6 +5639,7 @@ export type Database = {
           route_id?: string | null
           sales_order_id?: string | null
           sector?: string | null
+          sequence_order?: number | null
           size_grid?: string | null
           start_date?: string | null
           status?: string
