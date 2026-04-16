@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { Brain, Send, Loader2, Trash2, Sparkles, FileText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import type { ChatMessage } from '@/hooks/useExecutiveAI';
 
 const quickActions = [
