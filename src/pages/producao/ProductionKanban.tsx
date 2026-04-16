@@ -460,6 +460,36 @@ export default function ProductionKanban() {
         <KPICard title="Concluídas Hoje" value={completedToday} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={4} />
       </div>
 
+      {/* WIP Panel */}
+      <Card className="border-primary/30 bg-primary/5">
+        <CardContent className="py-3 px-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Layers className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium">WIP — Material em Processo</span>
+            <Badge variant="outline" className="ml-auto text-[10px]">{wipMetrics.totalOrders} OPs</Badge>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="text-center">
+              <p className="text-lg font-bold text-primary">{wipMetrics.totalQty.toLocaleString('pt-BR')}</p>
+              <p className="text-[10px] text-muted-foreground uppercase">Unidades em Processo</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold text-emerald-400">R$ {wipMetrics.totalCost.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+              <p className="text-[10px] text-muted-foreground uppercase">Custo Estimado WIP</p>
+            </div>
+            {Object.entries(wipMetrics.byColumn).slice(0, 2).map(([status, data]) => {
+              const label = KANBAN_COLUMNS.find(c => c.key === status)?.label || status;
+              return (
+                <div key={status} className="text-center">
+                  <p className="text-lg font-bold text-foreground">{data.count}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase truncate">{label}</p>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Suggestions */}
       {suggestions.length > 0 && (
         <Card className="border-warning/30 bg-warning/5">
