@@ -769,6 +769,60 @@ function KanbanCard({ order, dragHandleProps, isDragging, columnKey, onMove, out
           </p>
         )}
 
+        {/* Timer Controls */}
+        {!['completed', 'cancelled'].includes(columnKey) && (() => {
+          const activeLog = timeLogs.getActiveLog(order.id);
+          const pausedLog = timeLogs.getPausedLog(order.id);
+          const totalFinished = timeLogs.getTotalElapsed(order.id);
+          const isRunning = !!activeLog;
+          const isPaused = !!pausedLog;
+
+          return (
+            <div className="space-y-1 pt-0.5">
+              {(isRunning || isPaused || totalFinished > 0) && (
+                <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                  <Timer className="h-2.5 w-2.5" />
+                  {isRunning && <span className="text-emerald-400 font-medium animate-pulse">● Rodando</span>}
+                  {isPaused && <span className="text-warning font-medium">⏸ Pausado ({formatElapsed(pausedLog!.elapsed_seconds)})</span>}
+                  {totalFinished > 0 && <span className="ml-auto">Total: {formatElapsed(totalFinished)}</span>}
+                </div>
+              )}
+              <div className="flex gap-1">
+                {!isRunning && !isPaused && (
+                  <Button size="sm" variant="outline" className="text-[10px] h-6 flex-1 px-1 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
+                    onClick={() => timeLogs.startTimer(order.id)}>
+                    <Play className="h-2.5 w-2.5 mr-0.5" /> Iniciar
+                  </Button>
+                )}
+                {isRunning && (
+                  <>
+                    <Button size="sm" variant="outline" className="text-[10px] h-6 flex-1 px-1 text-warning border-warning/30 hover:bg-warning/10"
+                      onClick={() => timeLogs.pauseTimer(order.id)}>
+                      <Pause className="h-2.5 w-2.5 mr-0.5" /> Pausar
+                    </Button>
+                    <Button size="sm" variant="outline" className="text-[10px] h-6 flex-1 px-1 text-destructive border-destructive/30 hover:bg-destructive/10"
+                      onClick={() => timeLogs.finishTimer(order.id)}>
+                      <Square className="h-2.5 w-2.5 mr-0.5" /> Finalizar
+                    </Button>
+                  </>
+                )}
+                {isPaused && (
+                  <>
+                    <Button size="sm" variant="outline" className="text-[10px] h-6 flex-1 px-1 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
+                      onClick={() => timeLogs.resumeTimer(order.id)}>
+                      <Play className="h-2.5 w-2.5 mr-0.5" /> Retomar
+                    </Button>
+                    <Button size="sm" variant="outline" className="text-[10px] h-6 flex-1 px-1 text-destructive border-destructive/30 hover:bg-destructive/10"
+                      onClick={() => timeLogs.finishTimer(order.id)}>
+                      <Square className="h-2.5 w-2.5 mr-0.5" /> Finalizar
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Actions */}
         {actions.length > 0 && (
           <div className="flex gap-1 pt-0.5">
