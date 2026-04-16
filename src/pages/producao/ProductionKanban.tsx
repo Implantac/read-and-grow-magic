@@ -331,6 +331,10 @@ export default function ProductionKanban() {
             <Swords className="h-4 w-4 mr-1" />
             Modo Guerra
           </Button>
+          <Button variant="secondary" size="sm" onClick={handleOptimizeSequence} disabled={sequenceLoading}>
+            <ListOrdered className={cn('h-4 w-4 mr-1', sequenceLoading && 'animate-pulse')} />
+            Otimizar Sequência
+          </Button>
         </div>
       </PageHeader>
 
