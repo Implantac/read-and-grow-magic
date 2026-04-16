@@ -160,11 +160,25 @@ export default function ProductionKanban() {
     });
     return load;
   }, [workCenters, orders]);
+
+  const moveOrder = useCallback(async (orderId: string, newStatus: string) => {
+    // Capacity alert (non-blocking)
+    const order = orders.find(o => o.id === orderId);
+    const wcId = order && (order as any).work_center_id;
+    if (wcId && capacityLoad[wcId]) {
+      const cl = capacityLoad[wcId];
+      if (cl.allocated + (order?.quantity || 0) > cl.capacity) {
+        toast.warning(`⚠️ Capacidade excedida no centro "${cl.name}"`, {
+          description: `Alocado: ${cl.allocated + (order?.quantity || 0)} / Capacidade: ${cl.capacity}. Operação permitida, mas requer atenção.`,
+        });
+      }
+    }
+
     const updates: any = { status: newStatus };
     if (newStatus === 'in_progress' || newStatus === 'outsourced') updates.start_date = updates.start_date || new Date().toISOString();
     if (newStatus === 'completed') updates.completed_date = new Date().toISOString();
     await update(orderId, updates);
-  }, [update]);
+  }, [update, orders, capacityLoad]);
 
   const handleDragEnd = useCallback(async (result: DropResult) => {
     const { draggableId, destination } = result;
