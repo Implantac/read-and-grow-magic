@@ -448,6 +448,7 @@ export default function ProductionKanban() {
                                 columnKey={col.key}
                                 onMove={moveOrder}
                                 outsourcingData={outsourcingByOP[order.id]}
+                                timeLogs={timeLogs}
                               />
                             </div>
                           )}
