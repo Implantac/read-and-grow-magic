@@ -12,6 +12,8 @@ import { useIndustrialAlerts } from '@/hooks/useIndustrialAlerts';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { useTimeEntries } from '@/hooks/useTimeEntries';
 import { useProductionCapacity } from '@/hooks/useProductionCapacity';
+import { usePCPIntelligence } from '@/hooks/usePCPIntelligence';
+import PCPIntelligencePanel from '@/components/producao/PCPIntelligencePanel';
 import { KPICard } from '@/components/shared/KPICard';
 import { DollarSign, TrendingUp, AlertTriangle, Factory, Package, Gauge, CheckCircle, XCircle, Clock, Users, Activity, Zap, Layers, Timer, Wrench, Radio, Brain, RefreshCw } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line, CartesianGrid, AreaChart, Area } from 'recharts';
@@ -28,6 +30,7 @@ export default function IndustrialDashboard() {
   const { orders: productionOrders, refetch: refetchOrders } = useProductionOrders();
   const { entries, refetch: refetchEntries } = useTimeEntries();
   const { capacities } = useProductionCapacity();
+  const pcpIntel = usePCPIntelligence();
   const [realtimeActive, setRealtimeActive] = useState(false);
   const [lastRefresh, setLastRefresh] = useState(new Date());
 
@@ -302,6 +305,9 @@ export default function IndustrialDashboard() {
 
         {/* INTELLIGENCE TAB - Delay Predictions + Bottlenecks + Decisions */}
         <TabsContent value="intelligence" className="space-y-6">
+          {/* PCP Intelligence Panel - Proactive Suggestions */}
+          <PCPIntelligencePanel suggestions={pcpIntel.suggestions} summary={pcpIntel.summary} />
+
           <div className="grid gap-4 md:grid-cols-3">
             <KPICard title="Risco de Atraso" value={delayPredictions.length} icon={<Brain className="h-5 w-5" />} accentColor={delayPredictions.length > 0 ? 'danger' : 'success'} index={0} />
             <KPICard title="Gargalos Detectados" value={bottleneckAnalysis.length} icon={<Zap className="h-5 w-5" />} accentColor={bottleneckAnalysis.length > 0 ? 'warning' : 'success'} index={1} />
