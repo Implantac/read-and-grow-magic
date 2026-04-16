@@ -29,6 +29,7 @@ import { WarModeService, type WarModeResult as LocalWarModeResult } from '@/lib/
 import { useTechnicalSheets } from '@/hooks/useTechnicalSheets';
 import { useSupplyStock } from '@/hooks/useSupplyStock';
 import { useProductionCapacity } from '@/hooks/useProductionCapacity';
+import { useWorkCenters } from '@/hooks/useWorkCenters';
 import { QRCodeOPButton } from '@/components/producao/QRCodeOP';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
