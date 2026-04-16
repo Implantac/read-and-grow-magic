@@ -329,7 +329,7 @@ function ScoreCard({ score }: { score: AIScore }) {
             <span>📅 {score.days_since_purchase}d</span>
             <span>{trendIcons[score.purchase_trend] || '➡️'} {score.purchase_trend}</span>
             <span className={score.churn_probability > 0.5 ? 'text-red-500 font-medium' : ''}>
-              Churn: {Math.round(score.churn_probability * 100)}%
+              Cancelamento: {Math.round(score.churn_probability * 100)}%
             </span>
             <span className={score.recompra_probability > 0.7 ? 'text-emerald-500 font-medium' : ''}>
               Recompra: {Math.round(score.recompra_probability * 100)}%

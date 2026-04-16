@@ -77,7 +77,7 @@ export default function SuperAdmin() {
         <KPICard title="MRR" value={formatCurrency(mrr)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={2} />
         <KPICard title="ARR" value={formatCurrency(arr)} icon={<TrendingUp className="h-5 w-5" />} accentColor="info" index={3} />
         <KPICard title="Em Trial" value={trialCount.toString()} icon={<Users className="h-5 w-5" />} accentColor="warning" index={4} />
-        <KPICard title="Churn" value={`${churnRate.toFixed(1)}%`} icon={<Ban className="h-5 w-5" />} accentColor="danger" index={5} />
+        <KPICard title="Cancelamento" value={`${churnRate.toFixed(1)}%`} icon={<Ban className="h-5 w-5" />} accentColor="danger" index={5} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

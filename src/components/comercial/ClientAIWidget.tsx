@@ -104,7 +104,7 @@ export function ClientAIWidget({ clientId }: Props) {
             <div className="font-semibold">{score.days_since_purchase}d</div>
           </div>
           <div className="text-center p-1.5 bg-muted/50 rounded">
-            <div className="text-muted-foreground">Churn</div>
+            <div className="text-muted-foreground">Cancelamento</div>
             <div className={`font-semibold ${score.churn_probability > 0.5 ? 'text-red-500' : ''}`}>
               {Math.round(score.churn_probability * 100)}%
             </div>
