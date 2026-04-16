@@ -12,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
+import { useProductionTimeLogs, formatElapsed } from '@/hooks/useProductionTimeLogs';
 import { useOutsourcingOrders } from '@/hooks/useOutsourcingOrders';
 import { priorityConfig } from '@/config/production';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,7 +21,8 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   ArrowRight, Clock, Factory, CheckCircle, Pause, AlertTriangle,
   Search, Package, TrendingUp, GripVertical, User, Calendar,
-  PackageX, Truck, Wrench, Star, Swords, RefreshCw, Zap, Shield, Lightbulb, ListOrdered
+  PackageX, Truck, Wrench, Star, Swords, RefreshCw, Zap, Shield, Lightbulb, ListOrdered,
+  Play, Square, Timer
 } from 'lucide-react';
 import { usePCPIntelligence } from '@/hooks/usePCPIntelligence';
 import { WarModeService, type WarModeResult as LocalWarModeResult } from '@/lib/pcpServices';
@@ -53,6 +55,7 @@ const VALID_TRANSITIONS: Record<string, string[]> = {
 
 export default function ProductionKanban() {
   const { orders, loading, update, refetch } = useProductionOrders();
+  const timeLogs = useProductionTimeLogs();
   const { orders: outsourcingOrders, lateOrders: lateOutsourcing } = useOutsourcingOrders();
   const [searchTerm, setSearchTerm] = useState('');
   const [sectorFilter, setSectorFilter] = useState('all');
@@ -445,6 +448,7 @@ export default function ProductionKanban() {
                                 columnKey={col.key}
                                 onMove={moveOrder}
                                 outsourcingData={outsourcingByOP[order.id]}
+                                timeLogs={timeLogs}
                               />
                             </div>
                           )}
@@ -647,9 +651,10 @@ interface KanbanCardProps {
   columnKey: string;
   onMove: (id: string, status: string) => void;
   outsourcingData?: any[];
+  timeLogs: ReturnType<typeof useProductionTimeLogs>;
 }
 
-function KanbanCard({ order, dragHandleProps, isDragging, columnKey, onMove, outsourcingData }: KanbanCardProps) {
+function KanbanCard({ order, dragHandleProps, isDragging, columnKey, onMove, outsourcingData, timeLogs }: KanbanCardProps) {
   const progress = order.quantity > 0 ? (order.produced_quantity / order.quantity) * 100 : 0;
   const isLate = order.due_date && differenceInDays(new Date(), parseISO(order.due_date)) > 0 && order.status !== 'completed';
   const daysLate = order.due_date ? differenceInDays(new Date(), parseISO(order.due_date)) : 0;
@@ -763,6 +768,60 @@ function KanbanCard({ order, dragHandleProps, isDragging, columnKey, onMove, out
             {format(parseISO(order.due_date), 'dd/MM')}
           </p>
         )}
+
+        {/* Timer Controls */}
+        {!['completed', 'cancelled'].includes(columnKey) && (() => {
+          const activeLog = timeLogs.getActiveLog(order.id);
+          const pausedLog = timeLogs.getPausedLog(order.id);
+          const totalFinished = timeLogs.getTotalElapsed(order.id);
+          const isRunning = !!activeLog;
+          const isPaused = !!pausedLog;
+
+          return (
+            <div className="space-y-1 pt-0.5">
+              {(isRunning || isPaused || totalFinished > 0) && (
+                <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                  <Timer className="h-2.5 w-2.5" />
+                  {isRunning && <span className="text-emerald-400 font-medium animate-pulse">● Rodando</span>}
+                  {isPaused && <span className="text-warning font-medium">⏸ Pausado ({formatElapsed(pausedLog!.elapsed_seconds)})</span>}
+                  {totalFinished > 0 && <span className="ml-auto">Total: {formatElapsed(totalFinished)}</span>}
+                </div>
+              )}
+              <div className="flex gap-1">
+                {!isRunning && !isPaused && (
+                  <Button size="sm" variant="outline" className="text-[10px] h-6 flex-1 px-1 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
+                    onClick={() => timeLogs.startTimer(order.id)}>
+                    <Play className="h-2.5 w-2.5 mr-0.5" /> Iniciar
+                  </Button>
+                )}
+                {isRunning && (
+                  <>
+                    <Button size="sm" variant="outline" className="text-[10px] h-6 flex-1 px-1 text-warning border-warning/30 hover:bg-warning/10"
+                      onClick={() => timeLogs.pauseTimer(order.id)}>
+                      <Pause className="h-2.5 w-2.5 mr-0.5" /> Pausar
+                    </Button>
+                    <Button size="sm" variant="outline" className="text-[10px] h-6 flex-1 px-1 text-destructive border-destructive/30 hover:bg-destructive/10"
+                      onClick={() => timeLogs.finishTimer(order.id)}>
+                      <Square className="h-2.5 w-2.5 mr-0.5" /> Finalizar
+                    </Button>
+                  </>
+                )}
+                {isPaused && (
+                  <>
+                    <Button size="sm" variant="outline" className="text-[10px] h-6 flex-1 px-1 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
+                      onClick={() => timeLogs.resumeTimer(order.id)}>
+                      <Play className="h-2.5 w-2.5 mr-0.5" /> Retomar
+                    </Button>
+                    <Button size="sm" variant="outline" className="text-[10px] h-6 flex-1 px-1 text-destructive border-destructive/30 hover:bg-destructive/10"
+                      onClick={() => timeLogs.finishTimer(order.id)}>
+                      <Square className="h-2.5 w-2.5 mr-0.5" /> Finalizar
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Actions */}
         {actions.length > 0 && (
