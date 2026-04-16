@@ -139,90 +139,148 @@ export default function OutsourcingPage() {
         </Card>
       )}
 
-      {/* Filters + Create */}
-      <Card>
-        <CardContent className="pt-4 pb-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Buscar OS ou fornecedor..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-[200px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos Status</SelectItem>
-                {Object.entries(outsourcingStatusConfig).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>{v.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button onClick={() => setShowCreateDialog(true)}>
-              <Plus className="h-4 w-4 mr-1" /> Nova OS Terceirizada
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="orders" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="orders">Ordens de Serviço</TabsTrigger>
+          <TabsTrigger value="metrics">Métricas de Fornecedores</TabsTrigger>
+        </TabsList>
 
-      {/* Table */}
-      <Card>
-        <CardContent className="pt-4">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nº OS</TableHead>
-                <TableHead>Fornecedor</TableHead>
-                <TableHead>OP Vinculada</TableHead>
-                <TableHead>Qtde</TableHead>
-                <TableHead>Envio</TableHead>
-                <TableHead>Prev. Retorno</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Custo</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Nenhuma OS encontrada</TableCell></TableRow>
-              ) : filtered.map(o => {
-                const isLate = o.expected_return_date && new Date(o.expected_return_date) < new Date() && o.status !== 'returned';
-                const sc = outsourcingStatusConfig[isLate ? 'late' : o.status] || { label: o.status, color: '' };
-                const linkedOP = productionOrders.find(p => p.id === o.production_order_id);
-                return (
-                  <TableRow key={o.id} className={cn(isLate && 'bg-destructive/5')}>
-                    <TableCell className="font-mono text-sm">{o.order_number}</TableCell>
-                    <TableCell>{o.supplier_name}</TableCell>
-                    <TableCell className="font-mono text-xs">{linkedOP?.order_number || '-'}</TableCell>
-                    <TableCell>{o.quantity_sent}</TableCell>
-                    <TableCell>{format(new Date(o.sent_date), 'dd/MM/yyyy')}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        {o.expected_return_date ? format(new Date(o.expected_return_date), 'dd/MM/yyyy') : '-'}
-                        {isLate && <AlertTriangle className="h-3 w-3 text-destructive" />}
-                      </div>
-                    </TableCell>
-                    <TableCell><Badge className={cn('text-xs', sc.color)}>{sc.label}</Badge></TableCell>
-                    <TableCell>R$ {(o.total_cost || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex gap-1 justify-end">
-                        {o.status === 'sent' && (
-                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'in_production')}>
-                            Em Produção
-                          </Button>
-                        )}
-                        {(o.status === 'sent' || o.status === 'in_production') && (
-                          <Button size="sm" className="h-7 text-xs" onClick={() => setEditingOrder(o)}>
-                            Receber
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
+        <TabsContent value="orders" className="space-y-4">
+          {/* Filters + Create */}
+          <Card>
+            <CardContent className="pt-4 pb-4">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input placeholder="Buscar OS ou fornecedor..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+                </div>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger className="w-full md:w-[200px]"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos Status</SelectItem>
+                    {Object.entries(outsourcingStatusConfig).map(([k, v]) => (
+                      <SelectItem key={k} value={k}>{v.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button onClick={() => setShowCreateDialog(true)}>
+                  <Plus className="h-4 w-4 mr-1" /> Nova OS Terceirizada
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Table */}
+          <Card>
+            <CardContent className="pt-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nº OS</TableHead>
+                    <TableHead>Fornecedor</TableHead>
+                    <TableHead>OP Vinculada</TableHead>
+                    <TableHead>Qtde</TableHead>
+                    <TableHead>Envio</TableHead>
+                    <TableHead>Prev. Retorno</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Custo</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {filtered.length === 0 ? (
+                    <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Nenhuma OS encontrada</TableCell></TableRow>
+                  ) : filtered.map(o => {
+                    const isLate = o.expected_return_date && new Date(o.expected_return_date) < new Date() && o.status !== 'returned';
+                    const sc = outsourcingStatusConfig[isLate ? 'late' : o.status] || { label: o.status, color: '' };
+                    const linkedOP = productionOrders.find(p => p.id === o.production_order_id);
+                    return (
+                      <TableRow key={o.id} className={cn(isLate && 'bg-destructive/5')}>
+                        <TableCell className="font-mono text-sm">{o.order_number}</TableCell>
+                        <TableCell>{o.supplier_name}</TableCell>
+                        <TableCell className="font-mono text-xs">{linkedOP?.order_number || '-'}</TableCell>
+                        <TableCell>{o.quantity_sent}</TableCell>
+                        <TableCell>{format(new Date(o.sent_date), 'dd/MM/yyyy')}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            {o.expected_return_date ? format(new Date(o.expected_return_date), 'dd/MM/yyyy') : '-'}
+                            {isLate && <AlertTriangle className="h-3 w-3 text-destructive" />}
+                          </div>
+                        </TableCell>
+                        <TableCell><Badge className={cn('text-xs', sc.color)}>{sc.label}</Badge></TableCell>
+                        <TableCell>R$ {(o.total_cost || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex gap-1 justify-end">
+                            {o.status === 'sent' && (
+                              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'in_production')}>
+                                Em Produção
+                              </Button>
+                            )}
+                            {(o.status === 'sent' || o.status === 'in_production') && (
+                              <Button size="sm" className="h-7 text-xs" onClick={() => setEditingOrder(o)}>
+                                Receber
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="metrics" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <BarChart3 className="h-5 w-5" /> Performance de Fornecedores
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {supplierMetrics.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">Nenhum dado de fornecedor disponível ainda.</p>
+              ) : (
+                <div className="space-y-4">
+                  {supplierMetrics.map(sm => (
+                    <Card key={sm.supplierName} className="border-border/50">
+                      <CardContent className="pt-4 pb-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <h4 className="font-semibold text-sm">{sm.supplierName}</h4>
+                            <p className="text-xs text-muted-foreground">{sm.totalOrders} OS total · {sm.returnedOnTime} no prazo · {sm.returnedLate} atrasadas</p>
+                          </div>
+                          <Badge className={cn('text-xs', sm.onTimeRate >= 80 ? 'bg-green-500/20 text-green-400' : sm.onTimeRate >= 50 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400')}>
+                            {sm.onTimeRate}% no prazo
+                          </Badge>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Taxa Pontualidade</p>
+                            <Progress value={sm.onTimeRate} className="h-2 mt-1" />
+                            <p className="text-xs font-medium mt-0.5">{sm.onTimeRate}%</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Atraso Médio</p>
+                            <p className="text-lg font-bold">{sm.avgDelayDays}d</p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Qualidade</p>
+                            <Progress value={sm.avgQualityRate} className="h-2 mt-1" />
+                            <p className="text-xs font-medium mt-0.5">{sm.avgQualityRate}%</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       {/* Create Dialog */}
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
