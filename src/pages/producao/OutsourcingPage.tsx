@@ -11,11 +11,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useOutsourcingOrders, type OutsourcingOrderRow } from '@/hooks/useOutsourcingOrders';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { outsourcingStatusConfig } from '@/config/production';
-import { Truck, AlertTriangle, Plus, Calendar, DollarSign, Package, Clock, CheckCircle, Search } from 'lucide-react';
+import { KanbanService } from '@/lib/pcpServices';
+import { Truck, AlertTriangle, Plus, Calendar, DollarSign, Package, Clock, CheckCircle, Search, BarChart3, TrendingUp } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 

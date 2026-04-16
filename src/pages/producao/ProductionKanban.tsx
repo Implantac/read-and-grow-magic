@@ -408,7 +408,7 @@ export default function ProductionKanban() {
               <Swords className="h-5 w-5" /> Modo Guerra — Resultado da Análise
             </DialogTitle>
             <DialogDescription>
-              Revisão completa de prioridades. Confirme para aplicar as mudanças.
+              Revisão completa de prioridades, movimentações sugeridas e alertas críticos.
             </DialogDescription>
           </DialogHeader>
           {warModeResult && (
@@ -416,6 +416,21 @@ export default function ProductionKanban() {
               <div className="space-y-4">
                 <p className="text-sm font-medium">{warModeResult.summary}</p>
 
+                {/* Critical Alerts */}
+                {warModeResult.criticalAlerts?.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1 text-destructive">
+                      <AlertTriangle className="h-4 w-4" /> Alertas Críticos
+                    </h4>
+                    <div className="space-y-1">
+                      {warModeResult.criticalAlerts.map((alert: string, i: number) => (
+                        <p key={i} className="text-xs text-destructive bg-destructive/10 p-2 rounded">🔴 {alert}</p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Priority changes */}
                 {warModeResult.priorityChanges?.length > 0 ? (
                   <div>
                     <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
@@ -427,6 +442,9 @@ export default function ProductionKanban() {
                           <div>
                             <span className="font-mono font-medium">{c.order_number}</span>
                             <span className="text-muted-foreground ml-2">Score: {c.score}</span>
+                            {c.factors?.length > 0 && (
+                              <p className="text-[10px] text-muted-foreground mt-0.5">{c.factors.join(' · ')}</p>
+                            )}
                           </div>
                           <div className="flex items-center gap-1">
                             <Badge variant="outline" className="text-[10px]">{c.oldPriority}</Badge>
@@ -439,6 +457,26 @@ export default function ProductionKanban() {
                   </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">✅ Todas as prioridades já estão corretas.</p>
+                )}
+
+                {/* Kanban Reorganization Suggestions */}
+                {warModeResult.kanbanReorg?.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
+                      <ArrowRight className="h-4 w-4 text-primary" /> Movimentações Sugeridas ({warModeResult.kanbanReorg.length})
+                    </h4>
+                    <div className="space-y-1.5">
+                      {warModeResult.kanbanReorg.map((r: any, i: number) => (
+                        <div key={i} className="p-2 rounded-lg bg-primary/5 text-xs flex items-center justify-between">
+                          <div>
+                            <span className="font-mono font-medium">{r.opNumber}</span>
+                            <span className="text-muted-foreground ml-2">→ {r.suggestedStatus}</span>
+                          </div>
+                          <span className="text-[10px] text-muted-foreground">{r.reason}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             </ScrollArea>
