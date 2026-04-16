@@ -355,7 +355,21 @@ export default function ProductionKanban() {
     }
   };
 
-  if (loading) {
+  const handleBottleneckAnalysis = async () => {
+    setBottleneckLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('pcp-bottlenecks');
+      if (error) throw error;
+      setBottleneckData(data);
+      setBottleneckOpen(true);
+    } catch (e: any) {
+      toast.error('Erro ao analisar gargalos');
+      console.error(e);
+    } finally {
+      setBottleneckLoading(false);
+    }
+  };
+
     return (
       <PageContainer>
         <Skeleton className="h-10 w-64 mb-4" />
