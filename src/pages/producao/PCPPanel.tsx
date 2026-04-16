@@ -448,7 +448,10 @@ export default function PCPPanel() {
         </TabsContent>
 
         <TabsContent value="alerts" className="mt-4 space-y-4">
-          {delayedOPs.length === 0 && (
+          {/* PCP Intelligence - Proactive Suggestions */}
+          <PCPIntelligencePanel suggestions={pcpIntel.suggestions} summary={pcpIntel.summary} />
+
+          {delayedOPs.length === 0 && pcpIntel.suggestions.length === 0 && (
             <Card><CardContent className="py-12 text-center"><ShieldCheck className="h-12 w-12 mx-auto text-success mb-4" /><p className="text-lg font-medium">Nenhum alerta ativo</p><p className="text-sm text-muted-foreground">Todas as OPs estão dentro do prazo</p></CardContent></Card>
           )}
           {delayedOPs.map(o => (
