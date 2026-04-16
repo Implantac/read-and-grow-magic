@@ -40,6 +40,7 @@ export interface ProductionOrderRow {
   batch_code: string | null;
   priority_score: number;
   sequence_order: number;
+  work_center_id: string | null;
 }
 
 export function useProductionOrders() {
