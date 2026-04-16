@@ -12,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
+import { useProductionTimeLogs, formatElapsed } from '@/hooks/useProductionTimeLogs';
 import { useOutsourcingOrders } from '@/hooks/useOutsourcingOrders';
 import { priorityConfig } from '@/config/production';
 import { Skeleton } from '@/components/ui/skeleton';
