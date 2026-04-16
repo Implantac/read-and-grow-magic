@@ -227,11 +227,22 @@ export default function ProductionKanban() {
   const handleWarMode = async () => {
     setWarModeLoading(true);
     try {
+      // Use local WarModeService for rich analysis (kanbanReorg, criticalAlerts)
+      const localResult = WarModeService.execute(orders, intelligence.materialNeeds, capacities);
+      
+      // Also call edge function for server-side score calculation
       const { data, error } = await supabase.functions.invoke('pcp-priority', {
         body: { action: 'war_mode', confirm: false },
       });
       if (error) throw error;
-      setWarModeResult(data);
+      
+      // Merge: use edge function scores + local kanbanReorg and criticalAlerts
+      setWarModeResult({
+        ...data,
+        kanbanReorg: localResult.kanbanReorg,
+        criticalAlerts: localResult.criticalAlerts,
+        summary: localResult.summary,
+      });
       setWarModeOpen(true);
     } catch (e: any) {
       toast.error('Erro ao executar Modo Guerra');
