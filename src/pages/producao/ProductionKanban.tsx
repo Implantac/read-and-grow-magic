@@ -20,8 +20,13 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   ArrowRight, Clock, Factory, CheckCircle, Pause, AlertTriangle,
   Search, Package, TrendingUp, GripVertical, User, Calendar,
-  PackageX, Truck, Wrench, Star, Swords, RefreshCw, Zap, Shield
+  PackageX, Truck, Wrench, Star, Swords, RefreshCw, Zap, Shield, Lightbulb
 } from 'lucide-react';
+import { usePCPIntelligence } from '@/hooks/usePCPIntelligence';
+import { WarModeService, type WarModeResult as LocalWarModeResult } from '@/lib/pcpServices';
+import { useTechnicalSheets } from '@/hooks/useTechnicalSheets';
+import { useSupplyStock } from '@/hooks/useSupplyStock';
+import { useProductionCapacity } from '@/hooks/useProductionCapacity';
 import { QRCodeOPButton } from '@/components/producao/QRCodeOP';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
