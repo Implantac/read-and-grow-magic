@@ -274,7 +274,41 @@ export default function ProductionKanban() {
     }
   };
 
-  if (loading) {
+  // Optimize Sequence
+  const handleOptimizeSequence = async () => {
+    setSequenceLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('pcp-schedule', {
+        body: { action: 'suggest' },
+      });
+      if (error) throw error;
+      setSequenceResult(data);
+      setSequenceOpen(true);
+    } catch (e: any) {
+      toast.error('Erro ao otimizar sequência');
+      console.error(e);
+    } finally {
+      setSequenceLoading(false);
+    }
+  };
+
+  const handleApplySequence = async () => {
+    setApplyingSequence(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('pcp-schedule', {
+        body: { action: 'apply' },
+      });
+      if (error) throw error;
+      toast.success(`Sequência aplicada: ${data.ordersUpdated} OPs atualizadas`);
+      setSequenceOpen(false);
+      setSequenceResult(null);
+      await refetch();
+    } catch (e: any) {
+      toast.error('Erro ao aplicar sequência');
+    } finally {
+      setApplyingSequence(false);
+    }
+  };
     return (
       <PageContainer>
         <Skeleton className="h-10 w-64 mb-4" />
