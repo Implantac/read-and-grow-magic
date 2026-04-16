@@ -180,6 +180,29 @@ export default function ProductionKanban() {
     return load;
   }, [workCenters, orders]);
 
+  // WIP (Work In Progress) metrics
+  const wipMetrics = useMemo(() => {
+    const wipStatuses = ['planned', 'waiting_material', 'in_progress', 'outsourced', 'finishing', 'paused'];
+    const wipOrders = orders.filter(o => wipStatuses.includes(o.status));
+    const totalQty = wipOrders.reduce((s, o) => s + (o.quantity - o.produced_quantity), 0);
+    const totalCost = wipOrders.reduce((s, o) => {
+      const unitCost = o.product_id ? (productCosts[o.product_id] || 0) : 0;
+      return s + (o.quantity - o.produced_quantity) * unitCost;
+    }, 0);
+
+    const byColumn: Record<string, { count: number; qty: number; cost: number }> = {};
+    wipOrders.forEach(o => {
+      if (!byColumn[o.status]) byColumn[o.status] = { count: 0, qty: 0, cost: 0 };
+      const remaining = o.quantity - o.produced_quantity;
+      const unitCost = o.product_id ? (productCosts[o.product_id] || 0) : 0;
+      byColumn[o.status].count++;
+      byColumn[o.status].qty += remaining;
+      byColumn[o.status].cost += remaining * unitCost;
+    });
+
+    return { totalOrders: wipOrders.length, totalQty, totalCost, byColumn };
+  }, [orders, productCosts]);
+
   const moveOrder = useCallback(async (orderId: string, newStatus: string) => {
     // Capacity alert (non-blocking)
     const order = orders.find(o => o.id === orderId);
