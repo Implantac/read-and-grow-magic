@@ -22,7 +22,7 @@ import {
   ArrowRight, Clock, Factory, CheckCircle, Pause, AlertTriangle,
   Search, Package, TrendingUp, GripVertical, User, Calendar,
   PackageX, Truck, Wrench, Star, Swords, RefreshCw, Zap, Shield, Lightbulb, ListOrdered,
-  Play, Square, Timer
+  Play, Square, Timer, Activity
 } from 'lucide-react';
 import { usePCPIntelligence } from '@/hooks/usePCPIntelligence';
 import { WarModeService, type WarModeResult as LocalWarModeResult } from '@/lib/pcpServices';
@@ -70,6 +70,9 @@ export default function ProductionKanban() {
   const [sequenceResult, setSequenceResult] = useState<any>(null);
   const [sequenceLoading, setSequenceLoading] = useState(false);
   const [applyingSequence, setApplyingSequence] = useState(false);
+  const [bottleneckData, setBottleneckData] = useState<any>(null);
+  const [bottleneckLoading, setBottleneckLoading] = useState(false);
+  const [bottleneckOpen, setBottleneckOpen] = useState(false);
 
   const { sheets } = useTechnicalSheets();
   const { supplies } = useSupplyStock();
@@ -352,6 +355,21 @@ export default function ProductionKanban() {
     }
   };
 
+  const handleBottleneckAnalysis = async () => {
+    setBottleneckLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('pcp-bottlenecks');
+      if (error) throw error;
+      setBottleneckData(data);
+      setBottleneckOpen(true);
+    } catch (e: any) {
+      toast.error('Erro ao analisar gargalos');
+      console.error(e);
+    } finally {
+      setBottleneckLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <PageContainer>
@@ -376,6 +394,10 @@ export default function ProductionKanban() {
           <Button variant="secondary" size="sm" onClick={handleOptimizeSequence} disabled={sequenceLoading}>
             <ListOrdered className={cn('h-4 w-4 mr-1', sequenceLoading && 'animate-pulse')} />
             Otimizar Sequência
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleBottleneckAnalysis} disabled={bottleneckLoading}>
+            <Activity className={cn('h-4 w-4 mr-1', bottleneckLoading && 'animate-pulse')} />
+            Gargalos
           </Button>
         </div>
       </PageHeader>
@@ -676,6 +698,125 @@ export default function ProductionKanban() {
               <ListOrdered className="h-4 w-4 mr-1" />
               {applyingSequence ? 'Aplicando...' : 'Aplicar Sequência'}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bottleneck Dialog */}
+      <Dialog open={bottleneckOpen} onOpenChange={setBottleneckOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5 text-destructive" /> Gargalos da Produção
+            </DialogTitle>
+            <DialogDescription>
+              Análise automática baseada em tempo real, etapas e filas de produção.
+            </DialogDescription>
+          </DialogHeader>
+          {bottleneckData && (
+            <ScrollArea className="max-h-[55vh] pr-4">
+              <div className="space-y-4">
+                <p className="text-sm font-medium">{bottleneckData.summary}</p>
+
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <Card className="border-primary/30 bg-primary/5">
+                    <CardContent className="py-3 px-2">
+                      <p className="text-2xl font-bold text-primary">{bottleneckData.totalEntriesAnalyzed}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase">Apontamentos</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-warning/30 bg-warning/5">
+                    <CardContent className="py-3 px-2">
+                      <p className="text-2xl font-bold text-warning">{bottleneckData.totalStepsAnalyzed}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase">Etapas</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-destructive/30 bg-destructive/5">
+                    <CardContent className="py-3 px-2">
+                      <p className="text-2xl font-bold text-destructive">{bottleneckData.totalOrdersActive}</p>
+                      <p className="text-[10px] text-muted-foreground uppercase">OPs Ativas</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Work Center Bottlenecks */}
+                {bottleneckData.workCenterBottlenecks?.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
+                      <Factory className="h-4 w-4 text-destructive" /> Centros com Maior Tempo Médio
+                    </h4>
+                    <div className="space-y-1.5">
+                      {bottleneckData.workCenterBottlenecks.map((b: any, i: number) => (
+                        <div key={i} className={cn(
+                          'p-2.5 rounded-lg text-xs flex items-center justify-between',
+                          i === 0 ? 'bg-destructive/10 border border-destructive/20' : 'bg-muted/50'
+                        )}>
+                          <div>
+                            <span className="font-medium">{b.name}</span>
+                            <span className="text-muted-foreground ml-2">({b.entries} registros)</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={i === 0 ? 'destructive' : 'outline'} className="text-[10px]">
+                              <Clock className="h-2.5 w-2.5 mr-0.5" /> {b.avgMinutes}min
+                            </Badge>
+                            {b.rejectRate > 0 && (
+                              <Badge className="text-[10px] bg-warning/20 text-warning">
+                                {b.rejectRate}% refugo
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Step Bottlenecks */}
+                {bottleneckData.stepBottlenecks?.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
+                      <AlertTriangle className="h-4 w-4 text-warning" /> Etapas que Excedem Estimativa
+                    </h4>
+                    <div className="space-y-1.5">
+                      {bottleneckData.stepBottlenecks.map((s: any, i: number) => (
+                        <div key={i} className={cn(
+                          'p-2.5 rounded-lg text-xs flex items-center justify-between',
+                          i === 0 ? 'bg-warning/10 border border-warning/20' : 'bg-muted/50'
+                        )}>
+                          <div>
+                            <span className="font-medium">{s.name}</span>
+                            <span className="text-muted-foreground ml-2">({s.entries} vezes)</span>
+                          </div>
+                          <Badge variant="outline" className="text-[10px]">
+                            +{s.avgOverrunMin}min excedido
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Queue Bottlenecks */}
+                {bottleneckData.queueBottlenecks?.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
+                      <PackageX className="h-4 w-4 text-primary" /> Filas por Setor/Status
+                    </h4>
+                    <div className="space-y-1.5">
+                      {bottleneckData.queueBottlenecks.map((q: any, i: number) => (
+                        <div key={i} className="p-2.5 rounded-lg text-xs flex items-center justify-between bg-muted/50">
+                          <span className="font-medium">{q.name}</span>
+                          <Badge variant="outline" className="text-[10px]">{q.queueSize} OPs</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBottleneckOpen(false)}>Fechar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
