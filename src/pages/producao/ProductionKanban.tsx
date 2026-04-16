@@ -21,7 +21,8 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   ArrowRight, Clock, Factory, CheckCircle, Pause, AlertTriangle,
   Search, Package, TrendingUp, GripVertical, User, Calendar,
-  PackageX, Truck, Wrench, Star, Swords, RefreshCw, Zap, Shield, Lightbulb, ListOrdered
+  PackageX, Truck, Wrench, Star, Swords, RefreshCw, Zap, Shield, Lightbulb, ListOrdered,
+  Play, Square, Timer
 } from 'lucide-react';
 import { usePCPIntelligence } from '@/hooks/usePCPIntelligence';
 import { WarModeService, type WarModeResult as LocalWarModeResult } from '@/lib/pcpServices';
