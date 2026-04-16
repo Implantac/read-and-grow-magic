@@ -22,7 +22,7 @@ import {
   ArrowRight, Clock, Factory, CheckCircle, Pause, AlertTriangle,
   Search, Package, TrendingUp, GripVertical, User, Calendar,
   PackageX, Truck, Wrench, Star, Swords, RefreshCw, Zap, Shield, Lightbulb, ListOrdered,
-  Play, Square, Timer, Activity
+  Play, Square, Timer, Activity, DollarSign, Layers
 } from 'lucide-react';
 import { usePCPIntelligence } from '@/hooks/usePCPIntelligence';
 import { WarModeService, type WarModeResult as LocalWarModeResult } from '@/lib/pcpServices';
@@ -79,6 +79,22 @@ export default function ProductionKanban() {
   const { capacities } = useProductionCapacity();
   const { workCenters } = useWorkCenters();
   const intelligence = usePCPIntelligence();
+
+  const [productCosts, setProductCosts] = useState<Record<string, number>>({});
+
+  // Fetch product costs for WIP calculation
+  useEffect(() => {
+    const productIds = [...new Set(orders.map(o => o.product_id).filter(Boolean))];
+    if (productIds.length === 0) return;
+    (async () => {
+      const { data } = await supabase.from('products').select('id, cost_price').in('id', productIds as string[]);
+      if (data) {
+        const map: Record<string, number> = {};
+        data.forEach((p: any) => { map[p.id] = Number(p.cost_price) || 0; });
+        setProductCosts(map);
+      }
+    })();
+  }, [orders]);
 
   // Realtime
   useEffect(() => {
@@ -163,6 +179,29 @@ export default function ProductionKanban() {
     });
     return load;
   }, [workCenters, orders]);
+
+  // WIP (Work In Progress) metrics
+  const wipMetrics = useMemo(() => {
+    const wipStatuses = ['planned', 'waiting_material', 'in_progress', 'outsourced', 'finishing', 'paused'];
+    const wipOrders = orders.filter(o => wipStatuses.includes(o.status));
+    const totalQty = wipOrders.reduce((s, o) => s + (o.quantity - o.produced_quantity), 0);
+    const totalCost = wipOrders.reduce((s, o) => {
+      const unitCost = o.product_id ? (productCosts[o.product_id] || 0) : 0;
+      return s + (o.quantity - o.produced_quantity) * unitCost;
+    }, 0);
+
+    const byColumn: Record<string, { count: number; qty: number; cost: number }> = {};
+    wipOrders.forEach(o => {
+      if (!byColumn[o.status]) byColumn[o.status] = { count: 0, qty: 0, cost: 0 };
+      const remaining = o.quantity - o.produced_quantity;
+      const unitCost = o.product_id ? (productCosts[o.product_id] || 0) : 0;
+      byColumn[o.status].count++;
+      byColumn[o.status].qty += remaining;
+      byColumn[o.status].cost += remaining * unitCost;
+    });
+
+    return { totalOrders: wipOrders.length, totalQty, totalCost, byColumn };
+  }, [orders, productCosts]);
 
   const moveOrder = useCallback(async (orderId: string, newStatus: string) => {
     // Capacity alert (non-blocking)
@@ -251,8 +290,18 @@ export default function ProductionKanban() {
       }
     });
 
+    // WIP excess alerts
+    if (wipMetrics.totalCost > 0) {
+      Object.entries(wipMetrics.byColumn).forEach(([status, data]) => {
+        if (data.count > 10) {
+          const statusLabel = KANBAN_COLUMNS.find(c => c.key === status)?.label || status;
+          list.push({ icon: '🏭', text: `${statusLabel}: ${data.count} OPs com ${data.qty} un em WIP (R$ ${data.cost.toLocaleString('pt-BR', { minimumFractionDigits: 0 })})`, severity: 'warning' });
+        }
+      });
+    }
+
     return list;
-  }, [orders, lateOutsourcing, columns, capacityLoad]);
+  }, [orders, lateOutsourcing, columns, capacityLoad, wipMetrics]);
 
   // Recalculate priorities
   const handleRecalculate = async () => {
@@ -410,6 +459,36 @@ export default function ProductionKanban() {
         <KPICard title="Atrasadas" value={lateCount} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={3} />
         <KPICard title="Concluídas Hoje" value={completedToday} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={4} />
       </div>
+
+      {/* WIP Panel */}
+      <Card className="border-primary/30 bg-primary/5">
+        <CardContent className="py-3 px-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Layers className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium">WIP — Material em Processo</span>
+            <Badge variant="outline" className="ml-auto text-[10px]">{wipMetrics.totalOrders} OPs</Badge>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="text-center">
+              <p className="text-lg font-bold text-primary">{wipMetrics.totalQty.toLocaleString('pt-BR')}</p>
+              <p className="text-[10px] text-muted-foreground uppercase">Unidades em Processo</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold text-emerald-400">R$ {wipMetrics.totalCost.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+              <p className="text-[10px] text-muted-foreground uppercase">Custo Estimado WIP</p>
+            </div>
+            {Object.entries(wipMetrics.byColumn).slice(0, 2).map(([status, data]) => {
+              const label = KANBAN_COLUMNS.find(c => c.key === status)?.label || status;
+              return (
+                <div key={status} className="text-center">
+                  <p className="text-lg font-bold text-foreground">{data.count}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase truncate">{label}</p>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Suggestions */}
       {suggestions.length > 0 && (
