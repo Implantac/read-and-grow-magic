@@ -651,9 +651,10 @@ interface KanbanCardProps {
   columnKey: string;
   onMove: (id: string, status: string) => void;
   outsourcingData?: any[];
+  timeLogs: ReturnType<typeof useProductionTimeLogs>;
 }
 
-function KanbanCard({ order, dragHandleProps, isDragging, columnKey, onMove, outsourcingData }: KanbanCardProps) {
+function KanbanCard({ order, dragHandleProps, isDragging, columnKey, onMove, outsourcingData, timeLogs }: KanbanCardProps) {
   const progress = order.quantity > 0 ? (order.produced_quantity / order.quantity) * 100 : 0;
   const isLate = order.due_date && differenceInDays(new Date(), parseISO(order.due_date)) > 0 && order.status !== 'completed';
   const daysLate = order.due_date ? differenceInDays(new Date(), parseISO(order.due_date)) : 0;
