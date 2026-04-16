@@ -140,7 +140,7 @@ export default function ProductionOrdersPage() {
           <Table>
             <TableHeader><TableRow>
               <TableHead>Ordem</TableHead><TableHead>Produto</TableHead><TableHead>Cliente</TableHead>
-              <TableHead>Progresso</TableHead><TableHead>Prazo</TableHead><TableHead>Prioridade</TableHead>
+              <TableHead>Progresso</TableHead><TableHead>Etapas</TableHead><TableHead>Prazo</TableHead><TableHead>Prioridade</TableHead>
               <TableHead>Status</TableHead><TableHead className="text-right">Ações</TableHead>
             </TableRow></TableHeader>
             <TableBody>
@@ -162,6 +162,9 @@ export default function ProductionOrdersPage() {
                         <Progress value={progress} className="w-16 h-2" />
                         <span className="text-xs text-muted-foreground">{order.produced_quantity}/{order.quantity}</span>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <StepProgressPipeline orderId={order.id} compact />
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
