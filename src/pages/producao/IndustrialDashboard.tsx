@@ -305,6 +305,9 @@ export default function IndustrialDashboard() {
 
         {/* INTELLIGENCE TAB - Delay Predictions + Bottlenecks + Decisions */}
         <TabsContent value="intelligence" className="space-y-6">
+          {/* PCP Intelligence Panel - Proactive Suggestions */}
+          <PCPIntelligencePanel suggestions={pcpIntel.suggestions} summary={pcpIntel.summary} />
+
           <div className="grid gap-4 md:grid-cols-3">
             <KPICard title="Risco de Atraso" value={delayPredictions.length} icon={<Brain className="h-5 w-5" />} accentColor={delayPredictions.length > 0 ? 'danger' : 'success'} index={0} />
             <KPICard title="Gargalos Detectados" value={bottleneckAnalysis.length} icon={<Zap className="h-5 w-5" />} accentColor={bottleneckAnalysis.length > 0 ? 'warning' : 'success'} index={1} />
