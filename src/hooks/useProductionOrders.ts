@@ -39,6 +39,7 @@ export interface ProductionOrderRow {
   released_at: string | null;
   batch_code: string | null;
   priority_score: number;
+  sequence_order: number;
 }
 
 export function useProductionOrders() {
