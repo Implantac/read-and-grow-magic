@@ -30,6 +30,7 @@ export default function IndustrialDashboard() {
   const { orders: productionOrders, refetch: refetchOrders } = useProductionOrders();
   const { entries, refetch: refetchEntries } = useTimeEntries();
   const { capacities } = useProductionCapacity();
+  const pcpIntel = usePCPIntelligence();
   const [realtimeActive, setRealtimeActive] = useState(false);
   const [lastRefresh, setLastRefresh] = useState(new Date());
 
