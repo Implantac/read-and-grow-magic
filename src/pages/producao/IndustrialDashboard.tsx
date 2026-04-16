@@ -12,6 +12,8 @@ import { useIndustrialAlerts } from '@/hooks/useIndustrialAlerts';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { useTimeEntries } from '@/hooks/useTimeEntries';
 import { useProductionCapacity } from '@/hooks/useProductionCapacity';
+import { usePCPIntelligence } from '@/hooks/usePCPIntelligence';
+import PCPIntelligencePanel from '@/components/producao/PCPIntelligencePanel';
 import { KPICard } from '@/components/shared/KPICard';
 import { DollarSign, TrendingUp, AlertTriangle, Factory, Package, Gauge, CheckCircle, XCircle, Clock, Users, Activity, Zap, Layers, Timer, Wrench, Radio, Brain, RefreshCw } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line, CartesianGrid, AreaChart, Area } from 'recharts';
