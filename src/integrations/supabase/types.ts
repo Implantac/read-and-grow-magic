@@ -5979,6 +5979,53 @@ export type Database = {
         }
         Relationships: []
       }
+      production_time_logs: {
+        Row: {
+          action: string
+          created_at: string
+          elapsed_seconds: number
+          finished_at: string | null
+          id: string
+          notes: string | null
+          operator: string | null
+          order_id: string
+          paused_at: string | null
+          started_at: string | null
+        }
+        Insert: {
+          action?: string
+          created_at?: string
+          elapsed_seconds?: number
+          finished_at?: string | null
+          id?: string
+          notes?: string | null
+          operator?: string | null
+          order_id: string
+          paused_at?: string | null
+          started_at?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          elapsed_seconds?: number
+          finished_at?: string | null
+          id?: string
+          notes?: string | null
+          operator?: string | null
+          order_id?: string
+          paused_at?: string | null
+          started_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_time_logs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "production_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           abc_classification: string | null
