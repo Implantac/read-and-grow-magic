@@ -106,6 +106,8 @@ export default function OutsourcingPage() {
     setEditingOrder(null);
   };
 
+  const supplierMetrics = useMemo(() => KanbanService.calculateSupplierMetrics(outsourcingOrders), [outsourcingOrders]);
+
   return (
     <PageContainer loading={loading}>
       <PageHeader title="Terceirização" description="Controle de ordens enviadas para fornecedores terceirizados" />
