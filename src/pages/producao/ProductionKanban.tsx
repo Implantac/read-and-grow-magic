@@ -395,6 +395,10 @@ export default function ProductionKanban() {
             <ListOrdered className={cn('h-4 w-4 mr-1', sequenceLoading && 'animate-pulse')} />
             Otimizar Sequência
           </Button>
+          <Button variant="outline" size="sm" onClick={handleBottleneckAnalysis} disabled={bottleneckLoading}>
+            <Activity className={cn('h-4 w-4 mr-1', bottleneckLoading && 'animate-pulse')} />
+            Gargalos
+          </Button>
         </div>
       </PageHeader>
 
