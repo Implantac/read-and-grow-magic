@@ -766,3 +766,218 @@ export class BottleneckDetectionService {
     return bottlenecks.sort((a, b) => (a.severity === 'critical' ? 0 : 1) - (b.severity === 'critical' ? 0 : 1));
   }
 }
+
+// ─── Suggestion Engine Service ───────────────────────────────
+
+export interface SmartSuggestion {
+  id: string;
+  type: 'DELAY_RISK' | 'MATERIAL_SHORTAGE' | 'SUPPLIER_LATE' | 'OVERLOAD' | 'IDLE' | 'MOVE_TO_PRODUCTION' | 'QUALITY_ALERT';
+  severity: 'critical' | 'warning' | 'info';
+  message: string;
+  action: 'PRIORITIZE' | 'PURCHASE' | 'REDISTRIBUTE' | 'MOVE' | 'INVESTIGATE' | 'ALERT';
+  relatedEntity?: string;
+  actionLabel?: string;
+  actionPayload?: { orderId?: string; newStatus?: string; targetSector?: string };
+}
+
+export class SuggestionEngine {
+  /**
+   * Generate unified, actionable suggestions from all PCP data sources
+   */
+  static generate(
+    orders: any[],
+    materialNeeds: MaterialNeed[],
+    capacities: any[],
+    outsourcingOrders: any[],
+    timeEntries: any[]
+  ): SmartSuggestion[] {
+    const suggestions: SmartSuggestion[] = [];
+    const now = new Date();
+    const activeOPs = orders.filter(o => ['planned', 'in_progress', 'paused', 'waiting_material', 'outsourced'].includes(o.status));
+
+    // 1. Delay risk
+    activeOPs.filter(o => o.due_date && new Date(o.due_date) < now).forEach(o => {
+      const days = differenceInDays(now, new Date(o.due_date));
+      suggestions.push({
+        id: `delay-${o.id}`,
+        type: 'DELAY_RISK',
+        severity: days > 5 ? 'critical' : 'warning',
+        message: `OP ${o.order_number} atrasada ${days}d — ${o.product_name}`,
+        action: 'PRIORITIZE',
+        relatedEntity: o.order_number,
+        actionLabel: 'Priorizar',
+        actionPayload: { orderId: o.id },
+      });
+    });
+
+    // 2. About to be late
+    activeOPs.filter(o => {
+      if (!o.due_date) return false;
+      const daysLeft = differenceInDays(new Date(o.due_date), now);
+      if (daysLeft <= 0 || daysLeft > 5) return false;
+      const remaining = Math.max(0, o.quantity - o.produced_quantity);
+      const avgTime = o.estimated_time_minutes / Math.max(o.quantity, 1);
+      const estDays = (remaining * avgTime) / (8 * 60);
+      return estDays > daysLeft;
+    }).forEach(o => {
+      suggestions.push({
+        id: `risk-${o.id}`,
+        type: 'DELAY_RISK',
+        severity: 'warning',
+        message: `OP ${o.order_number} pode atrasar — produção insuficiente para o prazo`,
+        action: 'PRIORITIZE',
+        relatedEntity: o.order_number,
+        actionLabel: 'Antecipar',
+        actionPayload: { orderId: o.id },
+      });
+    });
+
+    // 3. Material shortages
+    materialNeeds.filter(m => m.status === 'critical').slice(0, 5).forEach(m => {
+      suggestions.push({
+        id: `mat-${m.materialCode}`,
+        type: 'MATERIAL_SHORTAGE',
+        severity: 'critical',
+        message: `${m.materialName} com apenas ${m.coveragePct}% de cobertura — afeta ${m.relatedOPs.length} OP(s)`,
+        action: 'PURCHASE',
+        relatedEntity: m.materialCode,
+        actionLabel: 'Solicitar Compra',
+      });
+    });
+
+    // 4. Supplier late
+    outsourcingOrders.filter((oo: any) => oo.status !== 'returned' && oo.expected_return_date && new Date(oo.expected_return_date) < now).forEach((oo: any) => {
+      const days = differenceInDays(now, new Date(oo.expected_return_date));
+      suggestions.push({
+        id: `supplier-${oo.id}`,
+        type: 'SUPPLIER_LATE',
+        severity: days > 5 ? 'critical' : 'warning',
+        message: `Fornecedor ${oo.supplier_name} com ${days}d de atraso — OS ${oo.order_number}`,
+        action: 'ALERT',
+        relatedEntity: oo.supplier_name,
+        actionLabel: 'Cobrar Fornecedor',
+      });
+    });
+
+    // 5. OPs waiting_material that might have stock now
+    activeOPs.filter(o => o.status === 'waiting_material').forEach(o => {
+      const hasCritical = materialNeeds.some(m => m.status === 'critical' && m.relatedOPs.includes(o.order_number));
+      if (!hasCritical) {
+        suggestions.push({
+          id: `move-${o.id}`,
+          type: 'MOVE_TO_PRODUCTION',
+          severity: 'info',
+          message: `OP ${o.order_number} pode ter material disponível — mover para produção`,
+          action: 'MOVE',
+          relatedEntity: o.order_number,
+          actionLabel: 'Mover para Produção',
+          actionPayload: { orderId: o.id, newStatus: 'in_progress' },
+        });
+      }
+    });
+
+    // 6. Paused OPs that are late
+    activeOPs.filter(o => o.status === 'paused' && o.due_date && new Date(o.due_date) < now).forEach(o => {
+      suggestions.push({
+        id: `resume-${o.id}`,
+        type: 'DELAY_RISK',
+        severity: 'critical',
+        message: `OP ${o.order_number} pausada e atrasada — retomar imediatamente`,
+        action: 'MOVE',
+        relatedEntity: o.order_number,
+        actionLabel: 'Retomar',
+        actionPayload: { orderId: o.id, newStatus: 'in_progress' },
+      });
+    });
+
+    // 7. Bottleneck alerts
+    const bottlenecks = BottleneckDetectionService.detect(orders, capacities, timeEntries);
+    bottlenecks.forEach(b => {
+      suggestions.push({
+        id: `bottleneck-${b.sector}-${b.type}`,
+        type: b.type === 'quality' ? 'QUALITY_ALERT' : 'OVERLOAD',
+        severity: b.severity,
+        message: b.message,
+        action: b.type === 'quality' ? 'INVESTIGATE' : 'REDISTRIBUTE',
+        relatedEntity: b.sector,
+        actionLabel: b.suggestion.split('—')[0].trim(),
+      });
+    });
+
+    return suggestions.sort((a, b) => {
+      const sev = { critical: 0, warning: 1, info: 2 };
+      return (sev[a.severity] ?? 2) - (sev[b.severity] ?? 2);
+    });
+  }
+}
+
+// ─── Kanban Service ──────────────────────────────────────────
+
+export class KanbanService {
+  static readonly VALID_TRANSITIONS: Record<string, string[]> = {
+    planned: ['waiting_material', 'in_progress', 'outsourced'],
+    waiting_material: ['planned', 'in_progress'],
+    in_progress: ['paused', 'outsourced', 'finishing', 'completed'],
+    outsourced: ['in_progress', 'finishing'],
+    paused: ['in_progress'],
+    finishing: ['completed', 'in_progress'],
+    completed: [],
+    cancelled: [],
+    draft: ['planned'],
+  };
+
+  static canTransition(from: string, to: string): boolean {
+    return (this.VALID_TRANSITIONS[from] || []).includes(to);
+  }
+
+  static getNextStatuses(currentStatus: string): string[] {
+    return this.VALID_TRANSITIONS[currentStatus] || [];
+  }
+
+  /**
+   * Calculate supplier performance metrics from outsourcing orders
+   */
+  static calculateSupplierMetrics(outsourcingOrders: any[]): {
+    supplierName: string;
+    totalOrders: number;
+    returnedOnTime: number;
+    returnedLate: number;
+    avgDelayDays: number;
+    onTimeRate: number;
+    avgQualityRate: number;
+  }[] {
+    const bySupplier: Record<string, any[]> = {};
+    outsourcingOrders.forEach(o => {
+      if (!bySupplier[o.supplier_name]) bySupplier[o.supplier_name] = [];
+      bySupplier[o.supplier_name].push(o);
+    });
+
+    return Object.entries(bySupplier).map(([name, orders]) => {
+      const returned = orders.filter(o => o.status === 'returned');
+      let totalDelay = 0;
+      let onTimeCount = 0;
+      let totalQuality = 0;
+
+      returned.forEach(o => {
+        if (o.actual_return_date && o.expected_return_date) {
+          const delay = differenceInDays(new Date(o.actual_return_date), new Date(o.expected_return_date));
+          if (delay <= 0) onTimeCount++;
+          totalDelay += Math.max(0, delay);
+        }
+        if (o.quantity_returned > 0) {
+          totalQuality += ((o.quantity_returned - (o.quantity_rejected || 0)) / o.quantity_returned) * 100;
+        }
+      });
+
+      return {
+        supplierName: name,
+        totalOrders: orders.length,
+        returnedOnTime: onTimeCount,
+        returnedLate: returned.length - onTimeCount,
+        avgDelayDays: returned.length > 0 ? +(totalDelay / returned.length).toFixed(1) : 0,
+        onTimeRate: returned.length > 0 ? Math.round((onTimeCount / returned.length) * 100) : 0,
+        avgQualityRate: returned.length > 0 ? Math.round(totalQuality / returned.length) : 100,
+      };
+    }).sort((a, b) => a.onTimeRate - b.onTimeRate);
+  }
+}
