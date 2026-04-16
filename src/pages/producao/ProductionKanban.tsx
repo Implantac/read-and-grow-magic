@@ -146,7 +146,20 @@ export default function ProductionKanban() {
   const completedToday = orders.filter(o => o.status === 'completed' && o.completed_date && new Date(o.completed_date).toDateString() === new Date().toDateString()).length;
   const waitingMaterialCount = orders.filter(o => o.status === 'waiting_material').length;
 
-  const moveOrder = useCallback(async (orderId: string, newStatus: string) => {
+  // Capacity load per work center
+  const capacityLoad = useMemo(() => {
+    const load: Record<string, { name: string; capacity: number; allocated: number }> = {};
+    workCenters.filter(wc => wc.is_active).forEach(wc => {
+      load[wc.id] = { name: wc.name, capacity: wc.capacity, allocated: 0 };
+    });
+    orders.filter(o => ['planned', 'in_progress', 'waiting_material'].includes(o.status)).forEach(o => {
+      const wcId = (o as any).work_center_id;
+      if (wcId && load[wcId]) {
+        load[wcId].allocated += o.quantity;
+      }
+    });
+    return load;
+  }, [workCenters, orders]);
     const updates: any = { status: newStatus };
     if (newStatus === 'in_progress' || newStatus === 'outsourced') updates.start_date = updates.start_date || new Date().toISOString();
     if (newStatus === 'completed') updates.completed_date = new Date().toISOString();
