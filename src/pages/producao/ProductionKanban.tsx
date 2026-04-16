@@ -290,8 +290,18 @@ export default function ProductionKanban() {
       }
     });
 
+    // WIP excess alerts
+    if (wipMetrics.totalCost > 0) {
+      Object.entries(wipMetrics.byColumn).forEach(([status, data]) => {
+        if (data.count > 10) {
+          const statusLabel = KANBAN_COLUMNS.find(c => c.key === status)?.label || status;
+          list.push({ icon: '🏭', text: `${statusLabel}: ${data.count} OPs com ${data.qty} un em WIP (R$ ${data.cost.toLocaleString('pt-BR', { minimumFractionDigits: 0 })})`, severity: 'warning' });
+        }
+      });
+    }
+
     return list;
-  }, [orders, lateOutsourcing, columns, capacityLoad]);
+  }, [orders, lateOutsourcing, columns, capacityLoad, wipMetrics]);
 
   // Recalculate priorities
   const handleRecalculate = async () => {
