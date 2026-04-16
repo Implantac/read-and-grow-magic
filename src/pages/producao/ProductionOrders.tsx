@@ -25,6 +25,7 @@ import { KPICard } from '@/components/shared/KPICard';
 import { QRCodeOPButton } from '@/components/producao/QRCodeOP';
 import { cn } from '@/lib/utils';
 import { ProductionOrderRow } from '@/hooks/useProductionOrders';
+import { StepProgressPipeline } from '@/components/producao/StepProgressPipeline';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   draft: { label: 'Rascunho', variant: 'secondary' },
