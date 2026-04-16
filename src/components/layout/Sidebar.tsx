@@ -16,6 +16,9 @@ import {
   Radio, Wifi, Tag, Activity, Brain, Gauge, Columns, ListOrdered,
   CalendarClock, Smartphone, Rows3, Wrench, Route, Layers, Zap,
   ShieldCheck, Search, Boxes, PieChart, CircleGauge, Sparkles, Cpu, Rocket,
+  Filter, UserCheck, DollarSign, Target, Megaphone, Trophy, Bot,
+  Eye, Truck, RefreshCw, Shield, Lock, Phone,
+  ArrowDown, Database, ScanBarcode, DoorOpen, RotateCcw,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -29,7 +32,9 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Plug, BookOpen, Scale, Radio, Wifi, Tag, Activity, Brain, Gauge,
   Columns, ListOrdered, CalendarClock, Smartphone, Rows3, Wrench, Route,
   Layers, Zap, ShieldCheck, Search, Boxes, PieChart, CircleGauge,
-  Sparkles, Cpu, Rocket,
+  Sparkles, Cpu, Rocket, Filter, UserCheck, DollarSign, Target,
+  Megaphone, Trophy, Bot, Eye, Truck, RefreshCw,
+  Shield, Lock, Phone, ArrowDown, Database, ScanBarcode, DoorOpen, RotateCcw,
 };
 
 function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, expandedItems, toggleExpanded }: {
