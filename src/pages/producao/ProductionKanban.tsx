@@ -370,6 +370,7 @@ export default function ProductionKanban() {
     }
   };
 
+  if (loading) {
     return (
       <PageContainer>
         <Skeleton className="h-10 w-64 mb-4" />
