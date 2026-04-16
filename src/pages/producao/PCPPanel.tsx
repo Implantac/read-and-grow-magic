@@ -22,6 +22,8 @@ import { useSupplyStock } from '@/hooks/useSupplyStock';
 import { supabase } from '@/integrations/supabase/client';
 import { productionStatusConfig, priorityConfig } from '@/config/production';
 import PCPKPIPanel from '@/components/producao/PCPKPIPanel';
+import PCPIntelligencePanel from '@/components/producao/PCPIntelligencePanel';
+import { usePCPIntelligence } from '@/hooks/usePCPIntelligence';
 import { Factory, Clock, CheckCircle, AlertTriangle, Search, Plus, Play, Pause, BarChart3, Users, Gauge, Bell, ShieldCheck, GanttChart } from 'lucide-react';
 import { format, differenceInDays, parseISO, differenceInMinutes, addDays, startOfDay, endOfDay, max as dateMax, min as dateMin } from 'date-fns';
 import { cn } from '@/lib/utils';
