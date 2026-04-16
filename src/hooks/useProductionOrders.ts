@@ -38,6 +38,7 @@ export interface ProductionOrderRow {
   model_variant: string | null;
   released_at: string | null;
   batch_code: string | null;
+  priority_score: number;
 }
 
 export function useProductionOrders() {

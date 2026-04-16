@@ -2,13 +2,15 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
 import { useOutsourcingOrders } from '@/hooks/useOutsourcingOrders';
 import { priorityConfig } from '@/config/production';
@@ -18,7 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   ArrowRight, Clock, Factory, CheckCircle, Pause, AlertTriangle,
   Search, Package, TrendingUp, GripVertical, User, Calendar,
-  PackageX, Truck, Wrench, Star
+  PackageX, Truck, Wrench, Star, Swords, RefreshCw, Zap, Shield
 } from 'lucide-react';
 import { QRCodeOPButton } from '@/components/producao/QRCodeOP';
 import { format, parseISO, differenceInDays } from 'date-fns';
@@ -50,6 +52,11 @@ export default function ProductionKanban() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sectorFilter, setSectorFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
+  const [wipLimits, setWipLimits] = useState<Record<string, number>>({});
+  const [warModeOpen, setWarModeOpen] = useState(false);
+  const [warModeResult, setWarModeResult] = useState<any>(null);
+  const [warModeLoading, setWarModeLoading] = useState(false);
+  const [recalculating, setRecalculating] = useState(false);
 
   // Realtime
   useEffect(() => {
@@ -59,6 +66,18 @@ export default function ProductionKanban() {
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [refetch]);
+
+  // Load WIP limits
+  useEffect(() => {
+    (async () => {
+      const { data } = await (supabase as any).from('kanban_limits').select('*');
+      if (data) {
+        const map: Record<string, number> = {};
+        data.forEach((r: any) => { map[r.column_name] = r.wip_limit; });
+        setWipLimits(map);
+      }
+    })();
+  }, []);
 
   const sectors = useMemo(() => [...new Set(orders.map(o => o.sector || o.work_center).filter(Boolean))], [orders]);
 
@@ -90,14 +109,17 @@ export default function ProductionKanban() {
       ...col,
       items: filteredOrders.filter(o => o.status === col.key)
         .sort((a, b) => {
+          // Sort by priority_score first (desc), then by priority enum, then by due_date
+          if ((b.priority_score || 0) !== (a.priority_score || 0)) return (b.priority_score || 0) - (a.priority_score || 0);
           const pMap: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
           const pDiff = (pMap[a.priority] ?? 9) - (pMap[b.priority] ?? 9);
           if (pDiff !== 0) return pDiff;
           if (a.due_date && b.due_date) return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
           return 0;
         }),
+      wipLimit: wipLimits[col.key] || 0,
     }));
-  }, [filteredOrders]);
+  }, [filteredOrders, wipLimits]);
 
   const lateCount = orders.filter(o => o.due_date && differenceInDays(new Date(), parseISO(o.due_date)) > 0 && !['completed', 'cancelled'].includes(o.status)).length;
   const inProgressCount = orders.filter(o => o.status === 'in_progress').length;
@@ -124,17 +146,27 @@ export default function ProductionKanban() {
     statusLabels['paused'] = 'Pausada';
 
     if (!VALID_TRANSITIONS[order.status]?.includes(newStatus)) {
-      const from = statusLabels[order.status] || order.status;
-      const to = statusLabels[newStatus] || newStatus;
-      toast.error(`Transição inválida: "${from}" → "${to}"`, {
-        description: `De "${from}" você pode ir para: ${(VALID_TRANSITIONS[order.status] || []).map(s => statusLabels[s] || s).join(', ') || 'nenhum'}.`,
+      toast.error(`Transição inválida: "${statusLabels[order.status] || order.status}" → "${statusLabels[newStatus] || newStatus}"`, {
+        description: `De "${statusLabels[order.status]}" você pode ir para: ${(VALID_TRANSITIONS[order.status] || []).map(s => statusLabels[s] || s).join(', ') || 'nenhum'}.`,
       });
       return;
     }
 
+    // WIP limit check
+    const wipLimit = wipLimits[newStatus];
+    if (wipLimit && wipLimit > 0) {
+      const currentCount = orders.filter(o => o.status === newStatus).length;
+      if (currentCount >= wipLimit) {
+        toast.warning(`Limite WIP atingido para "${statusLabels[newStatus]}"`, {
+          description: `Máximo de ${wipLimit} OPs. Remova uma antes de adicionar.`,
+        });
+        return;
+      }
+    }
+
     await moveOrder(draggableId, newStatus);
     toast.success(`OP ${order.order_number} movida para ${statusLabels[newStatus]}`);
-  }, [orders, moveOrder]);
+  }, [orders, moveOrder, wipLimits]);
 
   // Suggestions
   const suggestions = useMemo(() => {
@@ -142,20 +174,80 @@ export default function ProductionKanban() {
     
     orders.filter(o => o.due_date && differenceInDays(new Date(), parseISO(o.due_date)) > 0 && !['completed', 'cancelled'].includes(o.status))
       .slice(0, 3).forEach(o => {
-        list.push({ icon: '🔴', text: `OP ${o.order_number} atrasada → priorizar`, severity: 'critical' });
+        list.push({ icon: '🔴', text: `OP ${o.order_number} atrasada ${differenceInDays(new Date(), parseISO(o.due_date))}d → priorizar`, severity: 'critical' });
       });
 
     lateOutsourcing.slice(0, 2).forEach(oo => {
       list.push({ icon: '🟠', text: `Fornecedor ${oo.supplier_name} em atraso → risco de parada`, severity: 'warning' });
     });
 
-    // Orders waiting_material too long
     orders.filter(o => o.status === 'waiting_material').slice(0, 2).forEach(o => {
       list.push({ icon: '📦', text: `OP ${o.order_number} aguardando material → verificar estoque`, severity: 'info' });
     });
 
+    // WIP limit warnings
+    columns.forEach(col => {
+      if (col.wipLimit > 0 && col.items.length >= col.wipLimit * 0.9 && col.items.length < col.wipLimit) {
+        list.push({ icon: '⚡', text: `"${col.label}" próximo do limite WIP (${col.items.length}/${col.wipLimit})`, severity: 'warning' });
+      }
+    });
+
     return list;
-  }, [orders, lateOutsourcing]);
+  }, [orders, lateOutsourcing, columns]);
+
+  // Recalculate priorities
+  const handleRecalculate = async () => {
+    setRecalculating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('pcp-priority', {
+        body: { action: 'recalculate' },
+      });
+      if (error) throw error;
+      toast.success(`Prioridades recalculadas: ${data.ordersUpdated} OPs atualizadas`);
+      await refetch();
+    } catch (e: any) {
+      toast.error('Erro ao recalcular prioridades');
+      console.error(e);
+    } finally {
+      setRecalculating(false);
+    }
+  };
+
+  // War Mode
+  const handleWarMode = async () => {
+    setWarModeLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('pcp-priority', {
+        body: { action: 'war_mode', confirm: false },
+      });
+      if (error) throw error;
+      setWarModeResult(data);
+      setWarModeOpen(true);
+    } catch (e: any) {
+      toast.error('Erro ao executar Modo Guerra');
+      console.error(e);
+    } finally {
+      setWarModeLoading(false);
+    }
+  };
+
+  const handleConfirmWarMode = async () => {
+    setWarModeLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('pcp-priority', {
+        body: { action: 'war_mode', confirm: true },
+      });
+      if (error) throw error;
+      toast.success(`Modo Guerra aplicado: ${data.priorityChanges?.length || 0} OPs repriorizadas`);
+      setWarModeOpen(false);
+      setWarModeResult(null);
+      await refetch();
+    } catch (e: any) {
+      toast.error('Erro ao aplicar Modo Guerra');
+    } finally {
+      setWarModeLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -168,7 +260,18 @@ export default function ProductionKanban() {
 
   return (
     <PageContainer>
-      <PageHeader title="Kanban de Produção" description="Arraste as OPs entre colunas — visão completa com terceirização e materiais" />
+      <PageHeader title="Kanban de Produção" description="Arraste as OPs entre colunas — priorização automática, WIP limits e Modo Guerra">
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleRecalculate} disabled={recalculating}>
+            <RefreshCw className={cn('h-4 w-4 mr-1', recalculating && 'animate-spin')} />
+            Recalcular
+          </Button>
+          <Button variant="destructive" size="sm" onClick={handleWarMode} disabled={warModeLoading}>
+            <Swords className="h-4 w-4 mr-1" />
+            Modo Guerra
+          </Button>
+        </div>
+      </PageHeader>
 
       {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -232,15 +335,23 @@ export default function ProductionKanban() {
         <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-3">
           {columns.map(col => {
             const Icon = col.icon;
+            const isOverWip = col.wipLimit > 0 && col.items.length >= col.wipLimit;
+            const isNearWip = col.wipLimit > 0 && col.items.length >= col.wipLimit * 0.9 && !isOverWip;
             return (
               <div key={col.key} className="space-y-2">
                 <div className={cn(
                   'flex items-center gap-2 p-2.5 rounded-xl border-t-2 bg-gradient-to-b',
-                  col.gradient, col.border
+                  col.gradient, col.border,
+                  isOverWip && 'ring-2 ring-destructive/40'
                 )}>
                   <Icon className="h-4 w-4 text-muted-foreground" />
                   <span className="font-semibold text-xs">{col.label}</span>
-                  <Badge className={cn('ml-auto text-[10px] font-bold', col.badge)}>{col.items.length}</Badge>
+                  <Badge className={cn('ml-auto text-[10px] font-bold', col.badge)}>
+                    {col.items.length}
+                    {col.wipLimit > 0 && <span className="opacity-60">/{col.wipLimit}</span>}
+                  </Badge>
+                  {isOverWip && <span className="text-[10px] text-destructive">⚠</span>}
+                  {isNearWip && <span className="text-[10px] text-warning">⚡</span>}
                 </div>
 
                 <Droppable droppableId={col.key}>
@@ -250,7 +361,8 @@ export default function ProductionKanban() {
                       {...provided.droppableProps}
                       className={cn(
                         'space-y-2 min-h-[200px] rounded-xl p-1.5 transition-colors duration-200',
-                        snapshot.isDraggingOver && 'bg-primary/5 ring-2 ring-primary/20 ring-dashed'
+                        snapshot.isDraggingOver && 'bg-primary/5 ring-2 ring-primary/20 ring-dashed',
+                        isOverWip && snapshot.isDraggingOver && 'ring-destructive/30 bg-destructive/5'
                       )}
                     >
                       {col.items.map((order, index) => (
@@ -287,6 +399,59 @@ export default function ProductionKanban() {
           })}
         </div>
       </DragDropContext>
+
+      {/* War Mode Dialog */}
+      <Dialog open={warModeOpen} onOpenChange={setWarModeOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <Swords className="h-5 w-5" /> Modo Guerra — Resultado da Análise
+            </DialogTitle>
+            <DialogDescription>
+              Revisão completa de prioridades. Confirme para aplicar as mudanças.
+            </DialogDescription>
+          </DialogHeader>
+          {warModeResult && (
+            <ScrollArea className="max-h-[50vh] pr-4">
+              <div className="space-y-4">
+                <p className="text-sm font-medium">{warModeResult.summary}</p>
+
+                {warModeResult.priorityChanges?.length > 0 ? (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
+                      <Zap className="h-4 w-4 text-warning" /> Repriorização ({warModeResult.priorityChanges.length})
+                    </h4>
+                    <div className="space-y-1.5">
+                      {warModeResult.priorityChanges.map((c: any, i: number) => (
+                        <div key={i} className="p-2 rounded-lg bg-muted text-xs flex items-center justify-between">
+                          <div>
+                            <span className="font-mono font-medium">{c.order_number}</span>
+                            <span className="text-muted-foreground ml-2">Score: {c.score}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Badge variant="outline" className="text-[10px]">{c.oldPriority}</Badge>
+                            <ArrowRight className="h-3 w-3" />
+                            <Badge variant={c.newPriority === 'urgent' ? 'destructive' : 'default'} className="text-[10px]">{c.newPriority}</Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">✅ Todas as prioridades já estão corretas.</p>
+                )}
+              </div>
+            </ScrollArea>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setWarModeOpen(false)}>Cancelar</Button>
+            <Button variant="destructive" onClick={handleConfirmWarMode} disabled={warModeLoading || !warModeResult?.priorityChanges?.length}>
+              <Swords className="h-4 w-4 mr-1" />
+              {warModeLoading ? 'Aplicando...' : 'Confirmar e Aplicar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
@@ -307,6 +472,7 @@ function KanbanCard({ order, dragHandleProps, isDragging, columnKey, onMove, out
   const pCfg = priorityConfig[order.priority] || { label: order.priority, color: 'bg-gray-100 text-gray-800' };
   const hasOutsourcing = outsourcingData && outsourcingData.length > 0;
   const outsourcingLate = outsourcingData?.some(o => o.expected_return_date && new Date(o.expected_return_date) < new Date() && o.status !== 'returned');
+  const hasScore = order.priority_score > 0;
 
   const priorityIndicator: Record<string, string> = {
     urgent: 'border-l-red-500',
@@ -357,6 +523,18 @@ function KanbanCard({ order, dragHandleProps, isDragging, columnKey, onMove, out
             <GripVertical className="h-3.5 w-3.5 text-muted-foreground" />
           </div>
           <span className="font-mono text-[10px] text-muted-foreground flex-1">{order.order_number}</span>
+          {hasScore && (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Badge variant="outline" className="text-[9px] h-4 px-1 font-mono">
+                    <Shield className="h-2.5 w-2.5 mr-0.5" />{order.priority_score}
+                  </Badge>
+                </TooltipTrigger>
+                <TooltipContent><p className="text-xs">Score de prioridade: {order.priority_score}</p></TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
           {isLate && (
             <Badge variant="destructive" className="text-[9px] gap-0.5 px-1 h-4">
               <AlertTriangle className="h-2.5 w-2.5" /> {daysLate}d

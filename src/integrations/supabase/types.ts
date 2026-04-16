@@ -3315,6 +3315,30 @@ export type Database = {
           },
         ]
       }
+      kanban_limits: {
+        Row: {
+          column_name: string
+          created_at: string
+          id: string
+          updated_at: string
+          wip_limit: number
+        }
+        Insert: {
+          column_name: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          wip_limit?: number
+        }
+        Update: {
+          column_name?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          wip_limit?: number
+        }
+        Relationships: []
+      }
       lead_nurturing_enrollments: {
         Row: {
           client_id: string
@@ -4139,6 +4163,41 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_stage_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          from_status: string | null
+          id: string
+          order_id: string
+          to_status: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          from_status?: string | null
+          id?: string
+          order_id: string
+          to_status: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          from_status?: string | null
+          id?: string
+          order_id?: string
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_stage_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "production_orders"
             referencedColumns: ["id"]
           },
         ]
@@ -5488,6 +5547,7 @@ export type Database = {
           order_number: string
           partial_delivered_qty: number | null
           priority: string
+          priority_score: number | null
           produced_quantity: number
           product_code: string
           product_id: string | null
@@ -5526,6 +5586,7 @@ export type Database = {
           order_number: string
           partial_delivered_qty?: number | null
           priority?: string
+          priority_score?: number | null
           produced_quantity?: number
           product_code: string
           product_id?: string | null
@@ -5564,6 +5625,7 @@ export type Database = {
           order_number?: string
           partial_delivered_qty?: number | null
           priority?: string
+          priority_score?: number | null
           produced_quantity?: number
           product_code?: string
           product_id?: string | null
@@ -8242,6 +8304,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      supplier_metrics: {
+        Row: {
+          avg_delay_days: number | null
+          created_at: string
+          id: string
+          last_calculated_at: string | null
+          late_orders: number | null
+          on_time_rate: number | null
+          supplier_name: string
+          total_orders: number | null
+          updated_at: string
+        }
+        Insert: {
+          avg_delay_days?: number | null
+          created_at?: string
+          id?: string
+          last_calculated_at?: string | null
+          late_orders?: number | null
+          on_time_rate?: number | null
+          supplier_name: string
+          total_orders?: number | null
+          updated_at?: string
+        }
+        Update: {
+          avg_delay_days?: number | null
+          created_at?: string
+          id?: string
+          last_calculated_at?: string | null
+          late_orders?: number | null
+          on_time_rate?: number | null
+          supplier_name?: string
+          total_orders?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       suppliers: {
         Row: {
