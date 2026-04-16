@@ -20,7 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   ArrowRight, Clock, Factory, CheckCircle, Pause, AlertTriangle,
   Search, Package, TrendingUp, GripVertical, User, Calendar,
-  PackageX, Truck, Wrench, Star, Swords, RefreshCw, Zap, Shield, Lightbulb
+  PackageX, Truck, Wrench, Star, Swords, RefreshCw, Zap, Shield, Lightbulb, ListOrdered
 } from 'lucide-react';
 import { usePCPIntelligence } from '@/hooks/usePCPIntelligence';
 import { WarModeService, type WarModeResult as LocalWarModeResult } from '@/lib/pcpServices';
@@ -62,6 +62,10 @@ export default function ProductionKanban() {
   const [warModeResult, setWarModeResult] = useState<any>(null);
   const [warModeLoading, setWarModeLoading] = useState(false);
   const [recalculating, setRecalculating] = useState(false);
+  const [sequenceOpen, setSequenceOpen] = useState(false);
+  const [sequenceResult, setSequenceResult] = useState<any>(null);
+  const [sequenceLoading, setSequenceLoading] = useState(false);
+  const [applyingSequence, setApplyingSequence] = useState(false);
 
   const { sheets } = useTechnicalSheets();
   const { supplies } = useSupplyStock();
