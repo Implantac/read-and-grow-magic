@@ -168,6 +168,7 @@ export default function PCPPanel() {
   const { sheets } = useTechnicalSheets();
   const { supplies } = useSupplyStock();
   const lifecycle = useOrderLifecycle();
+  const pcpIntel = usePCPIntelligence();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [generatingFor, setGeneratingFor] = useState<any>(null);
