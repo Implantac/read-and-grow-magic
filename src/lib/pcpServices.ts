@@ -531,3 +531,238 @@ export class PCPMetricsService {
     };
   }
 }
+
+// ─── Priority Engine Service ─────────────────────────────────
+
+export class PriorityEngineService {
+  /**
+   * Calculate priority score for each OP based on urgency, delay, material availability, and client importance.
+   * Higher score = higher priority.
+   */
+  static calculateScores(
+    orders: any[],
+    materialNeeds?: MaterialNeed[]
+  ): { opId: string; opNumber: string; score: number; factors: string[] }[] {
+    const now = new Date();
+
+    return orders
+      .filter(o => ['planned', 'in_progress', 'paused', 'waiting_material'].includes(o.status))
+      .map(o => {
+        let score = 0;
+        const factors: string[] = [];
+
+        // 1. Priority base weight
+        const priorityWeights: Record<string, number> = { urgent: 40, high: 25, medium: 10, low: 0 };
+        score += priorityWeights[o.priority] ?? 5;
+        if (o.priority === 'urgent') factors.push('Prioridade urgente (+40)');
+
+        // 2. Deadline urgency (closer = higher score)
+        if (o.due_date) {
+          const dueDate = new Date(o.due_date);
+          const hoursUntilDue = (dueDate.getTime() - now.getTime()) / 3600000;
+          if (hoursUntilDue < 0) {
+            const hoursLate = Math.abs(hoursUntilDue);
+            const delayScore = Math.min(50, 20 + (hoursLate / 24) * 5);
+            score += delayScore;
+            factors.push(`Atrasada ${Math.ceil(hoursLate / 24)}d (+${delayScore.toFixed(0)})`);
+          } else if (hoursUntilDue < 48) {
+            score += 15;
+            factors.push('Prazo em < 48h (+15)');
+          } else if (hoursUntilDue < 120) {
+            score += 8;
+            factors.push('Prazo em < 5d (+8)');
+          }
+        }
+
+        // 3. Completion progress (less done = more urgent)
+        const remaining = Math.max(0, o.quantity - o.produced_quantity);
+        const progressPct = o.quantity > 0 ? o.produced_quantity / o.quantity : 0;
+        if (progressPct < 0.1 && o.status === 'in_progress') {
+          score += 10;
+          factors.push('< 10% concluído em produção (+10)');
+        }
+
+        // 4. Material risk
+        if (materialNeeds) {
+          const opsWithDeficit = materialNeeds.filter(m => m.status === 'critical' && m.relatedOPs.includes(o.order_number));
+          if (opsWithDeficit.length > 0) {
+            score += 5;
+            factors.push(`Material crítico (${opsWithDeficit.length} itens, +5)`);
+          }
+        }
+
+        // 5. Client orders (has sales_order_id = customer waiting)
+        if (o.sales_order_id) {
+          score += 5;
+          factors.push('Pedido de cliente (+5)');
+        }
+
+        return { opId: o.id, opNumber: o.order_number, score: Math.round(score * 100) / 100, factors };
+      })
+      .sort((a, b) => b.score - a.score);
+  }
+
+  /**
+   * Auto-assign priority labels based on score thresholds
+   */
+  static scoreToPriority(score: number): string {
+    if (score >= 50) return 'urgent';
+    if (score >= 30) return 'high';
+    if (score >= 15) return 'medium';
+    return 'low';
+  }
+}
+
+// ─── War Mode Service ────────────────────────────────────────
+
+export interface WarModeResult {
+  timestamp: string;
+  ordersAnalyzed: number;
+  priorityChanges: { opId: string; opNumber: string; oldPriority: string; newPriority: string; score: number; factors: string[] }[];
+  kanbanReorg: { opNumber: string; suggestedStatus: string; reason: string }[];
+  criticalAlerts: string[];
+  summary: string;
+}
+
+export class WarModeService {
+  /**
+   * Execute War Mode: full recalculation + reorganization suggestion.
+   * Does NOT persist — returns a plan for user confirmation.
+   */
+  static execute(
+    orders: any[],
+    materialNeeds: MaterialNeed[],
+    capacities: any[]
+  ): WarModeResult {
+    const scores = PriorityEngineService.calculateScores(orders, materialNeeds);
+    const activeOPs = orders.filter(o => ['planned', 'in_progress', 'paused', 'waiting_material', 'outsourced'].includes(o.status));
+    const now = new Date();
+
+    // Priority changes
+    const priorityChanges = scores
+      .map(s => {
+        const order = orders.find(o => o.id === s.opId);
+        if (!order) return null;
+        const newPriority = PriorityEngineService.scoreToPriority(s.score);
+        if (newPriority === order.priority) return null;
+        return { opId: s.opId, opNumber: s.opNumber, oldPriority: order.priority, newPriority, score: s.score, factors: s.factors };
+      })
+      .filter(Boolean) as WarModeResult['priorityChanges'];
+
+    // Kanban reorganization suggestions
+    const kanbanReorg: WarModeResult['kanbanReorg'] = [];
+
+    // OPs waiting_material that have materials available → suggest moving to planned/in_progress
+    activeOPs.filter(o => o.status === 'waiting_material').forEach(o => {
+      const hasCritical = materialNeeds.some(m => m.status === 'critical' && m.relatedOPs.includes(o.order_number));
+      if (!hasCritical) {
+        kanbanReorg.push({ opNumber: o.order_number, suggestedStatus: 'in_progress', reason: 'Material disponível — iniciar produção' });
+      }
+    });
+
+    // Paused OPs that are late → suggest resuming
+    activeOPs.filter(o => o.status === 'paused' && o.due_date && new Date(o.due_date) < now).forEach(o => {
+      kanbanReorg.push({ opNumber: o.order_number, suggestedStatus: 'in_progress', reason: 'OP atrasada e pausada — retomar imediatamente' });
+    });
+
+    // Critical alerts
+    const criticalAlerts: string[] = [];
+    const lateUrgent = activeOPs.filter(o => o.due_date && new Date(o.due_date) < now && o.priority === 'urgent');
+    if (lateUrgent.length > 0) {
+      criticalAlerts.push(`${lateUrgent.length} OP(s) urgente(s) atrasada(s) — ação imediata necessária`);
+    }
+    const criticalMaterials = materialNeeds.filter(m => m.status === 'critical');
+    if (criticalMaterials.length > 0) {
+      criticalAlerts.push(`${criticalMaterials.length} material(is) em estado crítico — risco de parada`);
+    }
+    const overloadedSectors = SchedulingService.calculateResourceLoad(
+      SchedulingService.sequenceOPs(activeOPs, capacities), capacities
+    ).filter(r => r.isOverloaded);
+    if (overloadedSectors.length > 0) {
+      criticalAlerts.push(`${overloadedSectors.length} setor(es) sobrecarregado(s) — redistribuir carga`);
+    }
+
+    const summary = `Modo Guerra: ${scores.length} OPs analisadas, ${priorityChanges.length} repriorização(ões), ${kanbanReorg.length} sugestão(ões) de movimentação, ${criticalAlerts.length} alerta(s) crítico(s).`;
+
+    return {
+      timestamp: now.toISOString(),
+      ordersAnalyzed: scores.length,
+      priorityChanges,
+      kanbanReorg,
+      criticalAlerts,
+      summary,
+    };
+  }
+}
+
+// ─── Bottleneck Detection Service ────────────────────────────
+
+export class BottleneckDetectionService {
+  static detect(
+    orders: any[],
+    capacities: any[],
+    timeEntries: any[]
+  ): { sector: string; type: string; severity: 'warning' | 'critical'; message: string; suggestion: string }[] {
+    const bottlenecks: { sector: string; type: string; severity: 'warning' | 'critical'; message: string; suggestion: string }[] = [];
+    const activeOPs = orders.filter(o => ['planned', 'in_progress'].includes(o.status));
+
+    // Sector overload
+    const sectorLoad: Record<string, { ops: number; hours: number; capacity: number }> = {};
+    capacities.forEach((c: any) => {
+      const s = c.sector || 'Geral';
+      if (!sectorLoad[s]) sectorLoad[s] = { ops: 0, hours: 0, capacity: 0 };
+      sectorLoad[s].capacity += (c.capacity_per_hour || 0) * (c.max_hours_per_day || 8);
+    });
+    activeOPs.forEach(o => {
+      const s = o.sector || o.work_center || 'Geral';
+      if (!sectorLoad[s]) sectorLoad[s] = { ops: 0, hours: 0, capacity: 0 };
+      sectorLoad[s].ops += 1;
+      sectorLoad[s].hours += (o.estimated_time_minutes || 0) / 60;
+    });
+
+    Object.entries(sectorLoad).forEach(([sector, v]) => {
+      const dailyCap = v.capacity;
+      if (dailyCap > 0) {
+        const loadPct = (v.hours / dailyCap) * 100;
+        if (loadPct > 120) {
+          bottlenecks.push({
+            sector, type: 'overload', severity: 'critical',
+            message: `Setor "${sector}" com ${loadPct.toFixed(0)}% de carga (${v.ops} OPs, ${v.hours.toFixed(0)}h)`,
+            suggestion: 'Redistribuir OPs para outros setores ou habilitar hora extra',
+          });
+        } else if (loadPct > 90) {
+          bottlenecks.push({
+            sector, type: 'near_capacity', severity: 'warning',
+            message: `Setor "${sector}" próximo do limite (${loadPct.toFixed(0)}%)`,
+            suggestion: 'Monitorar — considere antecipar OPs de menor prioridade',
+          });
+        }
+      }
+    });
+
+    // Quality issues (high reject rate)
+    const todayStr = new Date().toDateString();
+    const todayEntries = timeEntries.filter((e: any) => new Date(e.start_time).toDateString() === todayStr);
+    const sectorRejects: Record<string, { produced: number; rejected: number }> = {};
+    todayEntries.forEach((e: any) => {
+      const s = e.work_center || 'Geral';
+      if (!sectorRejects[s]) sectorRejects[s] = { produced: 0, rejected: 0 };
+      sectorRejects[s].produced += e.produced_quantity || 0;
+      sectorRejects[s].rejected += e.rejected_quantity || 0;
+    });
+    Object.entries(sectorRejects).forEach(([sector, v]) => {
+      if (v.produced > 0 && v.rejected > 0) {
+        const rejectRate = (v.rejected / (v.produced + v.rejected)) * 100;
+        if (rejectRate > 15) {
+          bottlenecks.push({
+            sector, type: 'quality', severity: 'critical',
+            message: `Setor "${sector}" com ${rejectRate.toFixed(0)}% de refugo hoje`,
+            suggestion: 'Investigar causa raiz — parar lote se necessário',
+          });
+        }
+      }
+    });
+
+    return bottlenecks.sort((a, b) => (a.severity === 'critical' ? 0 : 1) - (b.severity === 'critical' ? 0 : 1));
+  }
+}
