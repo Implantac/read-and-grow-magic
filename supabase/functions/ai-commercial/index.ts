@@ -765,6 +765,10 @@ serve(async (req) => {
   try {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
+    // Auth check
+    const authErr = await requireAuth(req);
+    if (authErr) return authErr;
+
     const { action } = await req.json();
 
     let result: any;
