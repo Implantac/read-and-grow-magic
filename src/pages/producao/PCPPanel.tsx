@@ -22,6 +22,8 @@ import { useSupplyStock } from '@/hooks/useSupplyStock';
 import { supabase } from '@/integrations/supabase/client';
 import { productionStatusConfig, priorityConfig } from '@/config/production';
 import PCPKPIPanel from '@/components/producao/PCPKPIPanel';
+import PCPIntelligencePanel from '@/components/producao/PCPIntelligencePanel';
+import { usePCPIntelligence } from '@/hooks/usePCPIntelligence';
 import { Factory, Clock, CheckCircle, AlertTriangle, Search, Plus, Play, Pause, BarChart3, Users, Gauge, Bell, ShieldCheck, GanttChart } from 'lucide-react';
 import { format, differenceInDays, parseISO, differenceInMinutes, addDays, startOfDay, endOfDay, max as dateMax, min as dateMin } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -166,6 +168,7 @@ export default function PCPPanel() {
   const { sheets } = useTechnicalSheets();
   const { supplies } = useSupplyStock();
   const lifecycle = useOrderLifecycle();
+  const pcpIntel = usePCPIntelligence();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [generatingFor, setGeneratingFor] = useState<any>(null);
@@ -445,7 +448,10 @@ export default function PCPPanel() {
         </TabsContent>
 
         <TabsContent value="alerts" className="mt-4 space-y-4">
-          {delayedOPs.length === 0 && (
+          {/* PCP Intelligence - Proactive Suggestions */}
+          <PCPIntelligencePanel suggestions={pcpIntel.suggestions} summary={pcpIntel.summary} />
+
+          {delayedOPs.length === 0 && pcpIntel.suggestions.length === 0 && (
             <Card><CardContent className="py-12 text-center"><ShieldCheck className="h-12 w-12 mx-auto text-success mb-4" /><p className="text-lg font-medium">Nenhum alerta ativo</p><p className="text-sm text-muted-foreground">Todas as OPs estão dentro do prazo</p></CardContent></Card>
           )}
           {delayedOPs.map(o => (
