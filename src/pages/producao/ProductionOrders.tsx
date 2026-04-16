@@ -25,6 +25,7 @@ import { KPICard } from '@/components/shared/KPICard';
 import { QRCodeOPButton } from '@/components/producao/QRCodeOP';
 import { cn } from '@/lib/utils';
 import { ProductionOrderRow } from '@/hooks/useProductionOrders';
+import { StepProgressPipeline } from '@/components/producao/StepProgressPipeline';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   draft: { label: 'Rascunho', variant: 'secondary' },
@@ -139,7 +140,7 @@ export default function ProductionOrdersPage() {
           <Table>
             <TableHeader><TableRow>
               <TableHead>Ordem</TableHead><TableHead>Produto</TableHead><TableHead>Cliente</TableHead>
-              <TableHead>Progresso</TableHead><TableHead>Prazo</TableHead><TableHead>Prioridade</TableHead>
+              <TableHead>Progresso</TableHead><TableHead>Etapas</TableHead><TableHead>Prazo</TableHead><TableHead>Prioridade</TableHead>
               <TableHead>Status</TableHead><TableHead className="text-right">Ações</TableHead>
             </TableRow></TableHeader>
             <TableBody>
@@ -161,6 +162,9 @@ export default function ProductionOrdersPage() {
                         <Progress value={progress} className="w-16 h-2" />
                         <span className="text-xs text-muted-foreground">{order.produced_quantity}/{order.quantity}</span>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <StepProgressPipeline orderId={order.id} compact />
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
@@ -191,7 +195,7 @@ export default function ProductionOrdersPage() {
                 );
               })}
               {filteredOrders.length === 0 && (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhuma ordem encontrada</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Nenhuma ordem encontrada</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
@@ -255,6 +259,14 @@ function OrderDetailContent({ order }: { order: ProductionOrderRow }) {
               {order.rejected_quantity > 0 && (
                 <p className="text-xs text-destructive">⚠ {order.rejected_quantity} rejeitadas — {order.defect_notes || 'sem detalhes'}</p>
               )}
+            </CardContent>
+          </Card>
+
+          {/* Step Pipeline */}
+          <Card>
+            <CardContent className="pt-4">
+              <p className="text-xs text-muted-foreground mb-2 font-medium">Fluxo de Etapas</p>
+              <StepProgressPipeline orderId={order.id} />
             </CardContent>
           </Card>
 
