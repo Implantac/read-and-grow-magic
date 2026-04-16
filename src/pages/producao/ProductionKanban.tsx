@@ -63,6 +63,11 @@ export default function ProductionKanban() {
   const [warModeLoading, setWarModeLoading] = useState(false);
   const [recalculating, setRecalculating] = useState(false);
 
+  const { sheets } = useTechnicalSheets();
+  const { supplies } = useSupplyStock();
+  const { capacities } = useProductionCapacity();
+  const intelligence = usePCPIntelligence();
+
   // Realtime
   useEffect(() => {
     const channel = supabase
