@@ -14,6 +14,7 @@ import {
 import { useExecutiveDashboard, useGenerateInsights, useGenerateScenarios, useUnifiedChat, useDailySummary } from '@/hooks/useExecutiveAI';
 import { PrimaryKPICards, SecondaryKPICards, TargetAttainmentBar } from '@/components/executive/ExecutiveKPICards';
 import { ExecutiveChat } from '@/components/executive/ExecutiveChat';
+import { CEOStrategicChat } from '@/components/executive/CEOStrategicChat';
 import { ExecutiveChartsTab } from '@/components/executive/ExecutiveChartsTab';
 import { ExecutiveMarginsTab } from '@/components/executive/ExecutiveMarginsTab';
 import { ExecutiveAlertsTab } from '@/components/executive/ExecutiveAlertsTab';
