@@ -1518,6 +1518,73 @@ PROIBIDO:
   };
 
   let ceoAnalysis = "";
+  let ceoStructured: any = null;
+
+  // Tool/schema para extrair resposta executiva estruturada (cards visuais)
+  const ceoTool = {
+    type: "function",
+    function: {
+      name: "ceo_response",
+      description: "Resposta executiva estruturada para renderização em dashboard (cards, alertas, blocos).",
+      parameters: {
+        type: "object",
+        properties: {
+          veredicto: { type: "string", description: "Resumo executivo direto em 2-3 linhas." },
+          kpis: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                nome: { type: "string" },
+                valor: { type: "string", description: "Valor formatado (ex: R$ 185.352, 23%)." },
+                trend: { type: "string", enum: ["up", "down", "neutral"] },
+                status: { type: "string", enum: ["ok", "alerta", "critico"] },
+              },
+              required: ["nome", "valor", "trend", "status"],
+              additionalProperties: false,
+            },
+          },
+          riscos: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                titulo: { type: "string" },
+                impacto: { type: "string" },
+                acao: { type: "string" },
+              },
+              required: ["titulo", "impacto", "acao"],
+              additionalProperties: false,
+            },
+          },
+          plano: {
+            type: "object",
+            properties: {
+              metas: { type: "array", items: { type: "string" } },
+              acoes: { type: "array", items: { type: "string" } },
+            },
+            required: ["metas", "acoes"],
+            additionalProperties: false,
+          },
+          decisoes: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                prioridade: { type: "string", enum: ["alta", "media", "baixa"] },
+                acao: { type: "string" },
+              },
+              required: ["prioridade", "acao"],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ["veredicto", "kpis", "riscos", "plano", "decisoes"],
+        additionalProperties: false,
+      },
+    },
+  };
+
   try {
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -1525,9 +1592,11 @@ PROIBIDO:
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: ceoPrompt },
+          { role: "system", content: ceoPrompt + "\n\nIMPORTANTE: Sempre chame a função ceo_response com o JSON estruturado para renderização visual em cards." },
           { role: "user", content: `Dados executivos para análise:\n${JSON.stringify(userPayload, null, 2)}` },
         ],
+        tools: [ceoTool],
+        tool_choice: { type: "function", function: { name: "ceo_response" } },
       }),
     });
     if (aiResp.status === 429) {
@@ -1540,12 +1609,19 @@ PROIBIDO:
     }
     if (aiResp.ok) {
       const j = await aiResp.json();
-      ceoAnalysis = j.choices?.[0]?.message?.content || "";
+      const msg = j.choices?.[0]?.message;
+      ceoAnalysis = msg?.content || "";
+      const toolCall = msg?.tool_calls?.[0];
+      if (toolCall?.function?.arguments) {
+        try { ceoStructured = JSON.parse(toolCall.function.arguments); }
+        catch (e) { console.error("Falha ao parsear ceo_response:", e); }
+      }
     }
   } catch (e) { console.error("CEO AI call failed:", e); }
 
   return new Response(JSON.stringify({
     ceo_analysis: ceoAnalysis,
+    ceo_structured: ceoStructured,
     context: ctx,
     kpis: kpiRows,
     forecast, risks, plan, decisions,
