@@ -294,15 +294,29 @@ function computeKPIs(d: any) {
   };
 }
 
+// Helper: detecta se há dados reais suficientes para análise por IA
+function checkHasRealData(d: any): boolean {
+  return (
+    (d.orders?.length ?? 0) > 0 ||
+    (d.sales?.length ?? 0) > 0 ||
+    (d.receivables?.length ?? 0) > 0 ||
+    (d.payables?.length ?? 0) > 0
+  );
+}
+
+const INSUFFICIENT_DATA_MSG = "Dados insuficientes para análise confiável. Cadastre vendas, pedidos, contas a pagar ou receber para que a IA possa gerar diagnóstico baseado em dados reais.";
+
 async function handleDashboardData(supabase: any, corsHeaders: any) {
   const d = await fetchAllData(supabase);
   const computed = computeKPIs(d);
+  const hasRealData = checkHasRealData(d);
 
   return new Response(JSON.stringify({
     ...computed,
     insights: d.insights,
     alerts: d.alerts,
     scenarios: d.scenarios,
+    data_status: hasRealData ? "ok" : "insufficient",
   }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
@@ -314,11 +328,24 @@ async function handleGenerateInsights(supabase: any, lovableKey: string, corsHea
   const d = await fetchAllData(supabase);
   const computed = computeKPIs(d);
 
-  const systemPrompt = `Você é um Diretor Executivo Digital (CEO AI) de uma empresa brasileira. Analise os dados e gere insights estratégicos acionáveis.
+  // Guard: sem dados reais, não chama LLM (evita alucinação)
+  if (!checkHasRealData(d)) {
+    return new Response(JSON.stringify({
+      insights: [],
+      generated: 0,
+      data_status: "insufficient",
+      message: INSUFFICIENT_DATA_MSG,
+    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
 
-REGRAS:
+  const systemPrompt = `Você é um Diretor Executivo Digital (CEO AI) de uma empresa brasileira. Analise APENAS os dados reais fornecidos e gere insights estratégicos acionáveis.
+
+REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO:
+- NUNCA invente números, percentuais ou tendências que não estejam nos dados
+- NUNCA estime sem base — cite o KPI/valor exato dos dados como evidência
+- Se um indicador não tiver dados suficientes, OMITA o insight sobre ele
 - Responda APENAS com JSON válido
-- Gere entre 6-10 insights cobrindo TODAS as áreas: receita, lucro, custos, risco financeiro, eficiência operacional, performance comercial
+- Gere entre 4-10 insights (somente os que tiverem evidência real) cobrindo: receita, lucro, custos, risco financeiro, eficiência operacional, performance comercial
 - Cada insight: { type (revenue|profit|cost|risk|operational|commercial), severity (critical|high|medium|low), title, description, explanation, impact_estimate, recommended_actions (array de strings, máx 3), module }
 - FOCO EM AÇÃO: cada insight deve ter recomendações concretas e mensuráveis
 - Inclua análise de: tendência de receita, concentração de clientes, margem por produto, risco de inadimplência, eficiência produtiva, performance de vendedores
@@ -391,9 +418,20 @@ async function handleGenerateScenarios(supabase: any, lovableKey: string, corsHe
   const d = await fetchAllData(supabase);
   const computed = computeKPIs(d);
 
-  const systemPrompt = `Você é um analista estratégico sênior. Com base nos dados, gere 3 cenários (otimista, realista, pessimista) para os próximos 3 meses.
+  // Guard: sem dados reais, não simula cenários
+  if (!checkHasRealData(d)) {
+    return new Response(JSON.stringify({
+      scenarios: null,
+      data_status: "insufficient",
+      message: INSUFFICIENT_DATA_MSG,
+    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
 
-REGRAS:
+  const systemPrompt = `Você é um analista estratégico sênior. Com base APENAS nos dados reais fornecidos, gere 3 cenários (otimista, realista, pessimista) para os próximos 3 meses.
+
+REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO:
+- NUNCA invente números — projete a partir de tendências reais (receita mensal, pipeline, margem)
+- Se a base histórica for curta (<3 meses), reduza confiança e cite a limitação em "assumptions"
 - Responda APENAS com JSON válido
 - Formato: { "scenarios": { "optimistic": { "revenue", "profit", "margin", "growth", "description", "key_actions": [...] }, "realistic": {...}, "pessimistic": {...} }, "assumptions": [...], "recommendations": [...], "risks": [...] }
 - Use dados reais para projetar - considere tendência de receita, pipeline, inadimplência e capacidade produtiva
@@ -1233,7 +1271,17 @@ async function handleDailySummary(supabase: any, lovableKey: string, corsHeaders
   const recebHoje = recHoje.data || [];
   const pagarHoje = pagHoje.data || [];
   const rec = recRes.data || [];
+  const pag = pagRes.data || [];
   const ops = opsRes.data || [];
+
+  // Guard: sem nenhum dado financeiro/operacional, não chama LLM
+  if (rec.length === 0 && pag.length === 0 && banks.length === 0 && ops.length === 0) {
+    return new Response(JSON.stringify({
+      data_status: "insufficient",
+      resumo_executivo: INSUFFICIENT_DATA_MSG,
+      message: INSUFFICIENT_DATA_MSG,
+    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
 
   const saldoBancario = banks.reduce((s: number, b: any) => s + (b.balance || 0), 0);
   const totalReceberHoje = recebHoje.reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
