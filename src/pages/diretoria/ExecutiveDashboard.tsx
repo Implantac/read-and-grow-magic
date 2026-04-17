@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import {
   Brain, Lightbulb, ShieldAlert, BarChart3, DollarSign,
-  Bot, Layers, Flame,
+  Bot, Layers, Flame, AlertTriangle,
 } from 'lucide-react';
 import { useExecutiveDashboard, useGenerateInsights, useGenerateScenarios, useUnifiedChat, useDailySummary } from '@/hooks/useExecutiveAI';
 import { PrimaryKPICards, SecondaryKPICards, TargetAttainmentBar } from '@/components/executive/ExecutiveKPICards';
@@ -68,6 +68,8 @@ export default function ExecutiveDashboard() {
   const autoAlerts = (data as any)?.autoAlerts || [];
   const productMargins = (data as any)?.productMargins || [];
   const lowMarginProducts = (data as any)?.lowMarginProducts || [];
+  const dataStatus = (data as any)?.data_status;
+  const isInsufficient = dataStatus === 'insufficient';
 
   return (
     <PageContainer>
@@ -83,6 +85,20 @@ export default function ExecutiveDashboard() {
           </Button>
         </div>
       </PageHeader>
+
+      {isInsufficient && (
+        <Card className="border-l-4 border-l-warning bg-warning/5">
+          <CardContent className="p-4 flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold">Dados insuficientes para análise confiável</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Cadastre vendas, pedidos, contas a pagar ou receber para que a IA Executiva gere diagnóstico, insights e cenários baseados em dados reais. Nenhum número será inventado.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <PrimaryKPICards kpis={kpis} />
       <SecondaryKPICards kpis={kpis} />
