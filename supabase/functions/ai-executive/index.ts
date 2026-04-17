@@ -1271,7 +1271,17 @@ async function handleDailySummary(supabase: any, lovableKey: string, corsHeaders
   const recebHoje = recHoje.data || [];
   const pagarHoje = pagHoje.data || [];
   const rec = recRes.data || [];
+  const pag = pagRes.data || [];
   const ops = opsRes.data || [];
+
+  // Guard: sem nenhum dado financeiro/operacional, não chama LLM
+  if (rec.length === 0 && pag.length === 0 && banks.length === 0 && ops.length === 0) {
+    return new Response(JSON.stringify({
+      data_status: "insufficient",
+      resumo_executivo: INSUFFICIENT_DATA_MSG,
+      message: INSUFFICIENT_DATA_MSG,
+    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
 
   const saldoBancario = banks.reduce((s: number, b: any) => s + (b.balance || 0), 0);
   const totalReceberHoje = recebHoje.reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
