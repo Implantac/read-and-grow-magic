@@ -25,6 +25,8 @@ const trendIcon = (t: string) =>
 export function CEOBriefPanel() {
   const [data, setData] = useState<CEOBriefResult | null>(null);
   const { mutate, isPending } = useGenerateCEOBrief();
+  const executeDecisions = useExecuteDecisions();
+  const autoPilot = useAutoPilotRun();
 
   const handleGenerate = () => {
     mutate(undefined, {
@@ -43,6 +45,24 @@ export function CEOBriefPanel() {
     });
   };
 
+  const handleApproveDecisions = () => {
+    if (!data?.decisions?.length) return;
+    executeDecisions.mutate(
+      { decisions: data.decisions, auto_execute: false },
+      {
+        onSuccess: (res) => toast.success(`${res.executed} decisão(ões) registradas para execução`),
+        onError: () => toast.error('Falha ao registrar decisões'),
+      },
+    );
+  };
+
+  const handleAutoPilot = () => {
+    autoPilot.mutate(undefined, {
+      onSuccess: (res: any) => toast.success(res?.summary || 'AutoPilot executado'),
+      onError: () => toast.error('Falha ao rodar AutoPilot'),
+    });
+  };
+
   return (
     <Card className="border-primary/20">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -55,10 +75,16 @@ export function CEOBriefPanel() {
             </p>
           </div>
         </div>
-        <Button onClick={handleGenerate} disabled={isPending} size="sm">
-          {isPending ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Brain className="h-4 w-4 mr-2" />}
-          {data ? 'Atualizar análise' : 'Gerar análise CEO'}
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleAutoPilot} disabled={autoPilot.isPending} size="sm" variant="outline">
+            {autoPilot.isPending ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Bot className="h-4 w-4 mr-2" />}
+            AutoPilot
+          </Button>
+          <Button onClick={handleGenerate} disabled={isPending} size="sm">
+            {isPending ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Brain className="h-4 w-4 mr-2" />}
+            {data ? 'Atualizar análise' : 'Gerar análise CEO'}
+          </Button>
+        </div>
       </CardHeader>
 
       <CardContent className="space-y-6">
