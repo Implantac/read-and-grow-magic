@@ -163,7 +163,11 @@ Deno.serve(async (req) => {
 
     throw new Error('Invalid action');
   } catch (error) {
-    return new Response(JSON.stringify({ error: (error as Error).message }), {
+    console.error('admin-users error:', error);
+    const msg = (error as Error).message;
+    // Preserve safe known validation messages, otherwise return generic
+    const safe = msg === 'Invalid action' || msg === 'Forbidden' || msg === 'Unauthorized' ? msg : 'An internal error occurred. Please try again.';
+    return new Response(JSON.stringify({ error: safe }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

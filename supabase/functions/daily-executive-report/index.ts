@@ -179,7 +179,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error("Error generating report:", error);
     return new Response(
-      JSON.stringify({ success: false, error: String(error) }),
+      JSON.stringify({ success: false, error: "An internal error occurred. Please try again." }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,

@@ -205,8 +205,8 @@ Deno.serve(async (req) => {
         });
     }
   } catch (err: any) {
-    console.error(err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    console.error('production-events error:', err);
+    return new Response(JSON.stringify({ error: 'An internal error occurred. Please try again.' }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
