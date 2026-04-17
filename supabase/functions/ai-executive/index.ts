@@ -41,7 +41,7 @@ serve(async (req) => {
     return await handleDashboardData(supabase, corsHeaders);
   } catch (e) {
     console.error("ai-executive error:", e);
-    return new Response(JSON.stringify({ error: e.message }), {
+    return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
