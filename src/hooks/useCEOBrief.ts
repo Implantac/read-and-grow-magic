@@ -16,10 +16,12 @@ export interface CEOKPI { snapshot_date: string; kpi_name: string; category: str
 export interface CEOStructuredKPI { nome: string; valor: string; trend: 'up' | 'down' | 'neutral'; status: 'ok' | 'alerta' | 'critico'; }
 export interface CEOStructuredRisk { titulo: string; impacto: string; acao: string; }
 export interface CEOStructuredDecision { prioridade: 'alta' | 'media' | 'baixa'; acao: string; }
+export interface CEOStructuredInsight { titulo: string; descricao: string; tipo: 'tendencia' | 'oportunidade' | 'risco' | 'operacional' | string; }
 export interface CEOStructured {
   veredicto: string;
   kpis: CEOStructuredKPI[];
   riscos: CEOStructuredRisk[];
+  insights?: CEOStructuredInsight[];
   plano: { metas: string[]; acoes: string[] };
   decisoes: CEOStructuredDecision[];
 }
@@ -34,6 +36,7 @@ export interface CEOBriefResult {
   plan: CEOPlanItem[];
   decisions: CEODecision[];
   generated_at: string;
+  data_status?: 'ok' | 'insufficient' | string;
 }
 
 export function useGenerateCEOBrief() {

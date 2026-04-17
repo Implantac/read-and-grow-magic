@@ -138,7 +138,20 @@ export function CEOBriefPanel() {
             {/* ═══ Bloco Estruturado da IA CEO (cards visuais) ═══ */}
             {structured && (
               <div className="space-y-4">
-                {structured.veredicto && (
+                {/* Estado: dados insuficientes */}
+                {data.data_status === 'insufficient' && (
+                  <div className="rounded-lg border-l-4 border-l-warning bg-warning/5 p-4 flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">Dados insuficientes para análise confiável</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Cadastre vendas, pedidos ou contas no sistema para que a IA CEO possa gerar diagnóstico estratégico baseado em dados reais.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {structured.veredicto && data.data_status !== 'insufficient' && (
                   <div className="rounded-lg border-l-4 border-l-primary bg-primary/5 p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <Brain className="h-4 w-4 text-primary" />
@@ -187,6 +200,31 @@ export function CEOBriefPanel() {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  </div>
+                )}
+
+                {(structured.insights?.length ?? 0) > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                      <Lightbulb className="h-4 w-4 text-primary" /> Insights ({structured.insights!.length})
+                    </h4>
+                    <div className="grid md:grid-cols-2 gap-2">
+                      {structured.insights!.map((it, i) => {
+                        const tipoColor =
+                          it.tipo === 'risco' ? 'border-l-destructive' :
+                          it.tipo === 'oportunidade' ? 'border-l-success' :
+                          it.tipo === 'tendencia' ? 'border-l-primary' : 'border-l-muted-foreground';
+                        return (
+                          <div key={i} className={`p-3 rounded-lg border bg-card border-l-4 ${tipoColor}`}>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-sm font-semibold text-foreground">{it.titulo}</span>
+                              <Badge variant="outline" className="text-[10px] uppercase">{it.tipo}</Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">{it.descricao}</p>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

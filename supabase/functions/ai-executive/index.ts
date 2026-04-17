@@ -1432,6 +1432,14 @@ async function handleCEOBrief(supabase: any, lovableKey: string, corsHeaders: an
   const kpiRows = await persistKPIs(supabase, kpis, forecast);
   await recordLearning(supabase, data);
 
+  // Detecta se há dados reais suficientes para análise confiável
+  const hasRealData = (
+    (data.orders?.length ?? 0) > 0 ||
+    (data.sales?.length ?? 0) > 0 ||
+    (data.receivable?.length ?? 0) > 0 ||
+    (data.payable?.length ?? 0) > 0
+  );
+
   const ceoPrompt = `Você é a IA CEO desta empresa. Pense e fale como o dono do negócio.
 
 PRIORIDADES (nesta ordem):
@@ -1440,10 +1448,15 @@ PRIORIDADES (nesta ordem):
 3. Antecipar problemas — prevenção custa menos que correção
 4. Decidir, não descrever — toda análise termina em ação concreta
 
-REGRAS DE CONTEÚDO:
-- Use APENAS os dados fornecidos. Nunca invente.
+REGRAS DE CONTEÚDO (CRÍTICO):
+- Use APENAS os dados fornecidos no payload. NUNCA invente, estime sem base ou crie números fictícios.
+- Se um KPI não tiver dados reais, NÃO o inclua. Não preencha com valores genéricos.
+- Se TODOS os dados estiverem vazios ou insuficientes, responda APENAS:
+  veredicto = "Dados insuficientes para análise confiável."
+  kpis = [], riscos = [], insights = [], plano = { metas: [], acoes: [] }, decisoes = []
 - Valores em **R$ X.XXX,XX** (formato BR), porcentagens em **negrito**.
 - Tom direto de dono — sem "talvez", sem "pode ser", sem rodeios.
+- Toda afirmação deve ser rastreável a um número do payload.
 
 REGRAS DE FORMATAÇÃO (OBRIGATÓRIO):
 - NÃO use blocos longos de texto — máximo 2 linhas por parágrafo
@@ -1566,6 +1579,20 @@ PROIBIDO:
             required: ["metas", "acoes"],
             additionalProperties: false,
           },
+          insights: {
+            type: "array",
+            description: "Tendências reais detectadas nos dados (não invente).",
+            items: {
+              type: "object",
+              properties: {
+                titulo: { type: "string" },
+                descricao: { type: "string" },
+                tipo: { type: "string", enum: ["tendencia", "oportunidade", "risco", "operacional"] },
+              },
+              required: ["titulo", "descricao", "tipo"],
+              additionalProperties: false,
+            },
+          },
           decisoes: {
             type: "array",
             items: {
@@ -1579,11 +1606,28 @@ PROIBIDO:
             },
           },
         },
-        required: ["veredicto", "kpis", "riscos", "plano", "decisoes"],
+        required: ["veredicto", "kpis", "riscos", "insights", "plano", "decisoes"],
         additionalProperties: false,
       },
     },
   };
+
+  // Short-circuit: sem dados reais não chama a IA
+  if (!hasRealData) {
+    return new Response(JSON.stringify({
+      ceo_analysis: "**Dados insuficientes para análise confiável.**\n\nCadastre vendas, pedidos ou contas para que a IA CEO possa gerar diagnóstico estratégico.",
+      ceo_structured: {
+        veredicto: "Dados insuficientes para análise confiável.",
+        kpis: [], riscos: [], insights: [],
+        plano: { metas: [], acoes: [] }, decisoes: [],
+      },
+      context: ctx,
+      kpis: kpiRows,
+      forecast, risks: [], plan: [], decisions: [],
+      generated_at: new Date().toISOString(),
+      data_status: "insufficient",
+    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
 
   try {
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -1592,7 +1636,7 @@ PROIBIDO:
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: ceoPrompt + "\n\nIMPORTANTE: Sempre chame a função ceo_response com o JSON estruturado para renderização visual em cards." },
+          { role: "system", content: ceoPrompt + "\n\nIMPORTANTE: Sempre chame a função ceo_response com o JSON estruturado para renderização visual em cards. Se faltarem dados, retorne arrays vazios e veredicto='Dados insuficientes para análise confiável.'" },
           { role: "user", content: `Dados executivos para análise:\n${JSON.stringify(userPayload, null, 2)}` },
         ],
         tools: [ceoTool],
