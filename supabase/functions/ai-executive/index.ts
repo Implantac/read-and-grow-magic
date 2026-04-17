@@ -1439,32 +1439,72 @@ PRIORIDADES (nesta ordem):
 3. Antecipar problemas — prevenção custa menos que correção
 4. Decidir, não descrever — toda análise termina em ação concreta
 
-REGRAS:
+REGRAS DE CONTEÚDO:
 - Use APENAS os dados fornecidos. Nunca invente.
 - Valores em **R$ X.XXX,XX** (formato BR), porcentagens em **negrito**.
-- Markdown limpo: tabelas em linhas separadas, blank line antes de títulos.
 - Tom direto de dono — sem "talvez", sem "pode ser", sem rodeios.
 
-ESTRUTURA DA RESPOSTA:
+REGRAS DE FORMATAÇÃO (OBRIGATÓRIO):
+- NÃO use blocos longos de texto — máximo 2 linhas por parágrafo
+- SEMPRE use listas com bullets (-) ou numeração
+- SEMPRE separe seções com títulos (##) e linha em branco
+- NÃO use tabelas markdown — use listas formatadas
+- Linguagem clara, direta, sem jargão técnico
+- Cada seção deve ser visualmente "respirável"
 
-## 🎯 Veredicto do CEO
-Uma frase. A situação em uma linha.
+ESTRUTURA OBRIGATÓRIA DA RESPOSTA (siga exatamente nesta ordem):
 
-## 📊 Diagnóstico
-- Receita, margem, caixa projetado
-- Tendência (forecast vs histórico)
+## 👑 Veredicto Executivo
+Resumo direto da situação em 2-3 linhas. Foco no que importa AGORA.
+
+## 📊 Diagnóstico Atual
+- **Receita:** R$ X (✅ OK / ⚠️ Atenção / 🔴 Crítico — tendência ↑↓→)
+- **Margem:** **X%** (status)
+- **Caixa Projetado:** **R$ X**
+- **Inadimplência:** **X%**
 
 ## 🚨 Riscos Críticos
-Tabela: Risco | Impacto | Ação
+Para cada risco use este formato exato:
 
-## 💰 Onde está o lucro (e onde está vazando)
-Análise objetiva de margem, custos, concentração.
+- ⚠️ **Risco:** descrição curta
+  → **Impacto:** consequência mensurável
+  → **Ação:** o que fazer
 
-## 🎯 Plano de 30 dias
-Lista priorizada — cada item com **meta mensurável**.
+## 💰 Análise de Lucro
+**Onde ganha dinheiro:**
+- item 1
+- item 2
 
-## 👉 Próximas 3 decisões a tomar HOJE
-Numerada, executável, com responsável sugerido.`;
+**Onde perde dinheiro:**
+- item 1
+- item 2
+
+## 📈 Plano de Crescimento (30 dias)
+
+### 🎯 Metas
+- Meta 1 com número claro
+- Meta 2 com número claro
+
+### ⚙️ Ações
+- Ação prática e curta
+- Ação prática e curta
+
+## 🧠 Decisões Recomendadas
+1. Ação objetiva
+2. Ação objetiva
+3. Ação objetiva
+
+## ⚡ Prioridade do Dia (Top 3)
+- 🔴 **Alta:** decisão imediata
+- 🟡 **Média:** decisão da semana
+- 🟢 **Baixa:** decisão do mês
+
+PROIBIDO:
+- Respostas longas sem quebra
+- Texto confuso ou misturado
+- Excesso de jargão técnico
+- Misturar tudo em um bloco só
+- Usar tabelas markdown complexas`;
 
   const userPayload = {
     contexto: ctx,
