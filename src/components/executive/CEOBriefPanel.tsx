@@ -175,9 +175,15 @@ export function CEOBriefPanel() {
             {/* Decisões sugeridas */}
             {data.decisions.length > 0 && (
               <div>
-                <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                  <Lightbulb className="h-4 w-4 text-warning" /> Decisões sugeridas (requerem aprovação)
-                </h4>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">
+                    <Lightbulb className="h-4 w-4 text-warning" /> Decisões sugeridas (requerem aprovação)
+                  </h4>
+                  <Button onClick={handleApproveDecisions} disabled={executeDecisions.isPending} size="sm" variant="outline" className="h-7">
+                    {executeDecisions.isPending ? <RefreshCw className="h-3 w-3 mr-1 animate-spin" /> : <CheckCircle2 className="h-3 w-3 mr-1" />}
+                    Aprovar e registrar
+                  </Button>
+                </div>
                 <div className="space-y-1.5">
                   {data.decisions.map((d, i) => (
                     <div key={i} className="text-sm p-2 rounded border bg-muted/30 flex items-center justify-between gap-2">
