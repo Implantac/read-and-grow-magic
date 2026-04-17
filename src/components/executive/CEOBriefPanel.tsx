@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Brain, RefreshCw, TrendingUp, TrendingDown, Minus, AlertTriangle, Target, Lightbulb } from 'lucide-react';
+import { Brain, RefreshCw, TrendingUp, TrendingDown, Minus, AlertTriangle, Target, Lightbulb, CheckCircle2, Bot } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { useGenerateCEOBrief, type CEOBriefResult } from '@/hooks/useCEOBrief';
+import { useGenerateCEOBrief, useExecuteDecisions, useAutoPilotRun, type CEOBriefResult } from '@/hooks/useCEOBrief';
 
 const fmtBRL = (v: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(v || 0);
