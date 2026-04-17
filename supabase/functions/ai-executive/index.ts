@@ -1264,3 +1264,248 @@ async function handleDailySummary(supabase: any, lovableKey: string, corsHeaders
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 }
+
+// ─── CEO Intelligence Layer ─────────────────────────────────────
+
+function buildContext(d: any, kpis: any) {
+  const lowStock = d.products
+    .filter((p: any) => (p.stock_current ?? 0) <= (p.stock_min ?? 0) && p.status === "active")
+    .slice(0, 20)
+    .map((p: any) => ({ id: p.id, name: p.name, current: p.stock_current, min: p.stock_min }));
+  const stockTotal = d.products.reduce(
+    (s: number, p: any) => s + (Number(p.stock_current) || 0) * (Number(p.cost) || 0), 0
+  );
+  const cashIn30d = d.receivables.filter((r: any) => r.status === "pending")
+    .reduce((s: number, r: any) => s + (Number(r.open_amount) || Number(r.amount) || 0), 0);
+  const cashOut30d = d.payables.filter((p: any) => p.status === "pending")
+    .reduce((s: number, p: any) => s + (Number(p.open_amount) || Number(p.amount) || 0), 0);
+  return {
+    estoque_valor_total: stockTotal,
+    produtos_baixo_estoque: lowStock,
+    produtos_total: d.products.length,
+    vendas_recentes_count: d.orders.length,
+    financeiro: {
+      receita_total: kpis.totalRevenue,
+      custo_total: kpis.totalCosts,
+      lucro_bruto: kpis.grossProfit,
+      margem_bruta_pct: kpis.grossMargin,
+      saldo_projetado_30d: cashIn30d - cashOut30d,
+      receber_30d: cashIn30d,
+      pagar_30d: cashOut30d,
+      inadimplencia_pct: kpis.defaultRate,
+    },
+    clientes_ativos: kpis.activeClients,
+    concentracao_top3_pct: kpis.concentrationPct,
+  };
+}
+
+function predictRevenue(revenueByMonth: { month: string; revenue: number }[]) {
+  const series = (revenueByMonth || []).map((r) => Number(r.revenue) || 0);
+  const valid = series.filter((v) => v > 0);
+  const avg = valid.length > 0 ? valid.reduce((a, b) => a + b, 0) / valid.length : 0;
+  const last = series[series.length - 1] || 0;
+  const trend = last > avg * 1.05 ? "up" : last < avg * 0.95 ? "down" : "stable";
+  return { previsao_proximo_mes: Math.round(avg), media_movel_6m: Math.round(avg), ultimo_mes: Math.round(last), trend };
+}
+
+function analyzeRisks(ctx: any, kpis: any) {
+  const risks: any[] = [];
+  if (ctx.financeiro.saldo_projetado_30d < 0) {
+    risks.push({ tipo: "financeiro", impacto: "alto", titulo: "Caixa projetado negativo em 30 dias",
+      detalhe: `Receber R$ ${ctx.financeiro.receber_30d.toFixed(2)} vs Pagar R$ ${ctx.financeiro.pagar_30d.toFixed(2)}` });
+  }
+  if (kpis.defaultRate > 10) {
+    risks.push({ tipo: "credito", impacto: kpis.defaultRate > 20 ? "alto" : "medio",
+      titulo: "Inadimplência elevada", detalhe: `${kpis.defaultRate.toFixed(1)}% da carteira em atraso` });
+  }
+  if (ctx.produtos_baixo_estoque.length > 0) {
+    risks.push({ tipo: "estoque", impacto: ctx.produtos_baixo_estoque.length > 10 ? "alto" : "medio",
+      titulo: `${ctx.produtos_baixo_estoque.length} produto(s) abaixo do mínimo`,
+      detalhe: ctx.produtos_baixo_estoque.slice(0, 3).map((p: any) => p.name).join(", ") });
+  }
+  if (kpis.concentrationPct > 50) {
+    risks.push({ tipo: "concentracao", impacto: "medio", titulo: "Concentração de receita nos top 3",
+      detalhe: `${kpis.concentrationPct.toFixed(1)}% da receita vem de poucos clientes` });
+  }
+  if (kpis.grossMargin < 15 && kpis.totalRevenue > 0) {
+    risks.push({ tipo: "rentabilidade", impacto: "alto", titulo: "Margem bruta baixa",
+      detalhe: `Margem atual ${kpis.grossMargin.toFixed(1)}% — revisar pricing/custos` });
+  }
+  return risks;
+}
+
+function generateGrowthPlan(ctx: any, forecast: any, kpis: any) {
+  const plan: any[] = [];
+  plan.push({ tipo: "meta",
+    titulo: `Meta: faturar R$ ${Math.round(forecast.previsao_proximo_mes * 1.2).toLocaleString("pt-BR")} no próximo mês`,
+    detalhe: `+20% sobre média histórica de R$ ${forecast.previsao_proximo_mes.toLocaleString("pt-BR")}` });
+  if (ctx.produtos_baixo_estoque.length > 0)
+    plan.push({ tipo: "acao", titulo: "Repor estoque crítico", detalhe: `${ctx.produtos_baixo_estoque.length} SKU(s) em ruptura iminente` });
+  if (kpis.defaultRate > 5)
+    plan.push({ tipo: "acao", titulo: "Acionar régua de cobrança", detalhe: `Reduzir inadimplência de ${kpis.defaultRate.toFixed(1)}%` });
+  if (kpis.concentrationPct > 40)
+    plan.push({ tipo: "acao", titulo: "Diversificar carteira", detalhe: "Prospectar para reduzir dependência dos top 3" });
+  if (forecast.trend === "down")
+    plan.push({ tipo: "acao", titulo: "Lançar campanha comercial", detalhe: "Tendência de queda nos últimos meses" });
+  return plan;
+}
+
+async function recordLearning(supabase: any, d: any) {
+  try {
+    const productSales: Record<string, number> = {};
+    (d.orderItems || []).forEach((it: any) => {
+      if (!it.product_id) return;
+      productSales[it.product_id] = (productSales[it.product_id] || 0) + (Number(it.quantity) || 0);
+    });
+    const top = Object.entries(productSales).sort((a, b) => b[1] - a[1]).slice(0, 30);
+    for (const [productId, qty] of top) {
+      await supabase.from("ai_learning").upsert({
+        pattern_type: "product_sales",
+        pattern_key: `produto_${productId}`,
+        value: qty,
+        frequency: 1,
+        metadata: { observed_at: new Date().toISOString() },
+        last_updated: new Date().toISOString(),
+      }, { onConflict: "pattern_type,pattern_key" });
+    }
+  } catch (e) { console.error("recordLearning warn:", e); }
+}
+
+async function persistKPIs(supabase: any, kpis: any, forecast: any) {
+  const today = new Date().toISOString().slice(0, 10);
+  const rows = [
+    { snapshot_date: today, kpi_name: "receita_mes", category: "financial",
+      current_value: kpis.totalRevenue, target_value: forecast.previsao_proximo_mes * 1.2,
+      status: kpis.totalRevenue >= forecast.previsao_proximo_mes ? "ok" : "alerta",
+      trend: forecast.trend, explanation: "Receita acumulada vs meta (+20% sobre média 6m)" },
+    { snapshot_date: today, kpi_name: "margem_bruta", category: "financial",
+      current_value: kpis.grossMargin, target_value: 25,
+      status: kpis.grossMargin >= 25 ? "ok" : kpis.grossMargin >= 15 ? "alerta" : "critico",
+      trend: null, explanation: "Margem bruta % — meta mínima 25%" },
+    { snapshot_date: today, kpi_name: "inadimplencia", category: "financial",
+      current_value: kpis.defaultRate, target_value: 5,
+      status: kpis.defaultRate <= 5 ? "ok" : kpis.defaultRate <= 10 ? "alerta" : "critico",
+      trend: null, explanation: "% da carteira em atraso — meta máx 5%" },
+    { snapshot_date: today, kpi_name: "ruptura_estoque", category: "inventory",
+      current_value: kpis.lowStockProducts, target_value: 0,
+      status: kpis.lowStockProducts === 0 ? "ok" : kpis.lowStockProducts < 5 ? "alerta" : "critico",
+      trend: null, explanation: "Nº de SKUs abaixo do mínimo" },
+  ];
+  try {
+    await supabase.from("ai_kpis").delete()
+      .eq("snapshot_date", today).in("kpi_name", rows.map((r) => r.kpi_name));
+    await supabase.from("ai_kpis").insert(rows);
+  } catch (e) { console.error("persistKPIs warn:", e); }
+  return rows;
+}
+
+function suggestDecisions(ctx: any, forecast: any, risks: any[]) {
+  const decisions: any[] = [];
+  if (ctx.produtos_baixo_estoque.length > 0)
+    decisions.push({ type: "repor_estoque", priority: "alta",
+      action: `Criar pedido de compra para ${ctx.produtos_baixo_estoque.length} SKU(s)`, requires_approval: true });
+  for (const r of risks) {
+    if (r.tipo === "financeiro")
+      decisions.push({ type: "ajuste_financeiro", priority: "alta",
+        action: "Antecipar recebíveis ou renegociar pagáveis para zerar gap de caixa", requires_approval: true });
+    if (r.tipo === "credito")
+      decisions.push({ type: "cobranca", priority: "media",
+        action: "Acionar régua de cobrança nos clientes inadimplentes", requires_approval: true });
+  }
+  if (forecast.previsao_proximo_mes > 0 && forecast.trend === "down")
+    decisions.push({ type: "promocao", priority: "media",
+      action: "Criar campanha em produtos de maior margem", requires_approval: true });
+  return decisions;
+}
+
+async function handleCEOBrief(supabase: any, lovableKey: string, corsHeaders: any) {
+  const data = await fetchAllData(supabase);
+  const kpis = computeKPIs(data);
+  const ctx = buildContext(data, kpis);
+  const forecast = predictRevenue(kpis.revenueByMonth || []);
+  const risks = analyzeRisks(ctx, kpis);
+  const plan = generateGrowthPlan(ctx, forecast, kpis);
+  const decisions = suggestDecisions(ctx, forecast, risks);
+  const kpiRows = await persistKPIs(supabase, kpis, forecast);
+  await recordLearning(supabase, data);
+
+  const ceoPrompt = `Você é a IA CEO desta empresa. Pense e fale como o dono do negócio.
+
+PRIORIDADES (nesta ordem):
+1. Proteger o caixa — nunca permita prejuízo silencioso
+2. Maximizar lucro — margem importa mais que volume
+3. Antecipar problemas — prevenção custa menos que correção
+4. Decidir, não descrever — toda análise termina em ação concreta
+
+REGRAS:
+- Use APENAS os dados fornecidos. Nunca invente.
+- Valores em **R$ X.XXX,XX** (formato BR), porcentagens em **negrito**.
+- Markdown limpo: tabelas em linhas separadas, blank line antes de títulos.
+- Tom direto de dono — sem "talvez", sem "pode ser", sem rodeios.
+
+ESTRUTURA DA RESPOSTA:
+
+## 🎯 Veredicto do CEO
+Uma frase. A situação em uma linha.
+
+## 📊 Diagnóstico
+- Receita, margem, caixa projetado
+- Tendência (forecast vs histórico)
+
+## 🚨 Riscos Críticos
+Tabela: Risco | Impacto | Ação
+
+## 💰 Onde está o lucro (e onde está vazando)
+Análise objetiva de margem, custos, concentração.
+
+## 🎯 Plano de 30 dias
+Lista priorizada — cada item com **meta mensurável**.
+
+## 👉 Próximas 3 decisões a tomar HOJE
+Numerada, executável, com responsável sugerido.`;
+
+  const userPayload = {
+    contexto: ctx,
+    kpis_calculados: { totalRevenue: kpis.totalRevenue, grossMargin: kpis.grossMargin, defaultRate: kpis.defaultRate, concentrationPct: kpis.concentrationPct, lowStockProducts: kpis.lowStockProducts, activeClients: kpis.activeClients },
+    kpis_historicos_hoje: kpiRows,
+    previsao_receita: forecast,
+    riscos_detectados: risks,
+    plano_crescimento: plan,
+    decisoes_sugeridas: decisions,
+  };
+
+  let ceoAnalysis = "";
+  try {
+    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: ceoPrompt },
+          { role: "user", content: `Dados executivos para análise:\n${JSON.stringify(userPayload, null, 2)}` },
+        ],
+      }),
+    });
+    if (aiResp.status === 429) {
+      return new Response(JSON.stringify({ error: "Limite de requisições excedido. Aguarde alguns minutos." }),
+        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    if (aiResp.status === 402) {
+      return new Response(JSON.stringify({ error: "Créditos insuficientes. Adicione créditos em Configurações > Workspace." }),
+        { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    if (aiResp.ok) {
+      const j = await aiResp.json();
+      ceoAnalysis = j.choices?.[0]?.message?.content || "";
+    }
+  } catch (e) { console.error("CEO AI call failed:", e); }
+
+  return new Response(JSON.stringify({
+    ceo_analysis: ceoAnalysis,
+    context: ctx,
+    kpis: kpiRows,
+    forecast, risks, plan, decisions,
+    generated_at: new Date().toISOString(),
+  }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+}
