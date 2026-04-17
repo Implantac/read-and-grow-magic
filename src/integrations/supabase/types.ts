@@ -19,6 +19,7 @@ export type Database = {
           amount: number
           bank_account_id: string | null
           category: string
+          company_id: string | null
           cost_center_id: string | null
           created_at: string
           description: string
@@ -45,6 +46,7 @@ export type Database = {
           amount?: number
           bank_account_id?: string | null
           category?: string
+          company_id?: string | null
           cost_center_id?: string | null
           created_at?: string
           description: string
@@ -71,6 +73,7 @@ export type Database = {
           amount?: number
           bank_account_id?: string | null
           category?: string
+          company_id?: string | null
           cost_center_id?: string | null
           created_at?: string
           description?: string
@@ -102,6 +105,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "accounts_payable_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "accounts_payable_cost_center_id_fkey"
             columns: ["cost_center_id"]
             isOneToOne: false
@@ -116,6 +126,7 @@ export type Database = {
           category: string
           client_id: string | null
           client_name: string
+          company_id: string | null
           created_at: string
           description: string
           discount_amount: number | null
@@ -143,6 +154,7 @@ export type Database = {
           category?: string
           client_id?: string | null
           client_name: string
+          company_id?: string | null
           created_at?: string
           description: string
           discount_amount?: number | null
@@ -170,6 +182,7 @@ export type Database = {
           category?: string
           client_id?: string | null
           client_name?: string
+          company_id?: string | null
           created_at?: string
           description?: string
           discount_amount?: number | null
@@ -198,6 +211,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounts_receivable_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
           {
