@@ -2544,6 +2544,36 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_flags: {
+        Row: {
+          created_at: string
+          description: string | null
+          enabled: boolean
+          flag_key: string
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          flag_key: string
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          flag_key?: string
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       financial_alerts: {
         Row: {
           alert_type: string
@@ -3540,6 +3570,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      lot_migration_audit: {
+        Row: {
+          created_at: string
+          details: Json
+          event_type: string
+          id: string
+          lot_id: string | null
+          product_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          event_type: string
+          id?: string
+          lot_id?: string | null
+          product_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          event_type?: string
+          id?: string
+          lot_id?: string | null
+          product_id?: string | null
+        }
+        Relationships: []
       }
       material_consumptions: {
         Row: {
@@ -8064,18 +8121,22 @@ export type Database = {
       }
       stock_lots: {
         Row: {
+          auto_generated: boolean
           consumed_qty: number | null
           created_at: string
           dc_id: string | null
           expiration_date: string | null
           id: string
+          initial_quantity: number | null
           inspection_date: string | null
+          is_consigned: boolean
           location: string | null
           lot_number: string
           manufacture_date: string | null
           notes: string | null
           origin: string
           origin_reference: string | null
+          origin_type: string
           product_code: string
           product_id: string | null
           product_name: string
@@ -8085,22 +8146,28 @@ export type Database = {
           remaining_qty: number
           status: string
           supplier: string | null
+          supplier_id: string | null
+          unit_cost: number
           updated_at: string
           warehouse_id: string | null
         }
         Insert: {
+          auto_generated?: boolean
           consumed_qty?: number | null
           created_at?: string
           dc_id?: string | null
           expiration_date?: string | null
           id?: string
+          initial_quantity?: number | null
           inspection_date?: string | null
+          is_consigned?: boolean
           location?: string | null
           lot_number: string
           manufacture_date?: string | null
           notes?: string | null
           origin?: string
           origin_reference?: string | null
+          origin_type?: string
           product_code: string
           product_id?: string | null
           product_name: string
@@ -8110,22 +8177,28 @@ export type Database = {
           remaining_qty?: number
           status?: string
           supplier?: string | null
+          supplier_id?: string | null
+          unit_cost?: number
           updated_at?: string
           warehouse_id?: string | null
         }
         Update: {
+          auto_generated?: boolean
           consumed_qty?: number | null
           created_at?: string
           dc_id?: string | null
           expiration_date?: string | null
           id?: string
+          initial_quantity?: number | null
           inspection_date?: string | null
+          is_consigned?: boolean
           location?: string | null
           lot_number?: string
           manufacture_date?: string | null
           notes?: string | null
           origin?: string
           origin_reference?: string | null
+          origin_type?: string
           product_code?: string
           product_id?: string | null
           product_name?: string
@@ -8135,6 +8208,8 @@ export type Database = {
           remaining_qty?: number
           status?: string
           supplier?: string | null
+          supplier_id?: string | null
+          unit_cost?: number
           updated_at?: string
           warehouse_id?: string | null
         }
@@ -8154,6 +8229,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "stock_lots_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "stock_lots_warehouse_id_fkey"
             columns: ["warehouse_id"]
             isOneToOne: false
@@ -8166,12 +8248,15 @@ export type Database = {
         Row: {
           batch: string | null
           created_at: string
+          destination: string | null
           direction: string
           document_number: string
           from_warehouse: string | null
           id: string
+          lot_id: string | null
           notes: string | null
           operator: string
+          origin: string | null
           product_code: string
           product_id: string | null
           product_name: string
@@ -8187,12 +8272,15 @@ export type Database = {
         Insert: {
           batch?: string | null
           created_at?: string
+          destination?: string | null
           direction?: string
           document_number?: string
           from_warehouse?: string | null
           id?: string
+          lot_id?: string | null
           notes?: string | null
           operator?: string
+          origin?: string | null
           product_code: string
           product_id?: string | null
           product_name: string
@@ -8208,12 +8296,15 @@ export type Database = {
         Update: {
           batch?: string | null
           created_at?: string
+          destination?: string | null
           direction?: string
           document_number?: string
           from_warehouse?: string | null
           id?: string
+          lot_id?: string | null
           notes?: string | null
           operator?: string
+          origin?: string | null
           product_code?: string
           product_id?: string | null
           product_name?: string
@@ -8227,6 +8318,13 @@ export type Database = {
           wms_movement_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "stock_movements_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "stock_lots"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "stock_movements_product_id_fkey"
             columns: ["product_id"]
@@ -10377,6 +10475,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      backfill_default_lots: { Args: never; Returns: Json }
       get_user_company_id: { Args: { _user_id: string }; Returns: string }
       get_user_role: {
         Args: { _user_id: string }
@@ -10388,6 +10487,16 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      validate_lot_stock_consistency: {
+        Args: never
+        Returns: {
+          diff: number
+          lot_sum: number
+          product_code: string
+          product_id: string
+          stock_balance: number
+        }[]
       }
     }
     Enums: {
