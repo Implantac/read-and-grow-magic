@@ -28,13 +28,17 @@ serve(async (req) => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseKey);
-    const { action, messages, user_id, clear_history } = await req.json();
+    // SECURITY: Always use the authenticated user's ID from the verified JWT claims.
+    // Never trust a user_id supplied in the request body — that would allow IDOR
+    // (reading/writing/deleting another user's chat history).
+    const authenticatedUserId = claimsData.claims.sub as string;
+    const { action, messages } = await req.json();
 
-    if (action === "clear_history" && user_id) {
-      await supabase.from("ai_executive_chat").delete().eq("user_id", user_id);
+    if (action === "clear_history") {
+      await supabase.from("ai_executive_chat").delete().eq("user_id", authenticatedUserId);
       return new Response(JSON.stringify({ ok: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-    if (action === "chat" || action === "assistant_chat") return await handleUnifiedChat(messages, supabase, lovableKey, corsHeaders, user_id);
+    if (action === "chat" || action === "assistant_chat") return await handleUnifiedChat(messages, supabase, lovableKey, corsHeaders, authenticatedUserId);
     if (action === "daily_summary") return await handleDailySummary(supabase, lovableKey, corsHeaders);
     if (action === "generate_insights") return await handleGenerateInsights(supabase, lovableKey, corsHeaders);
     if (action === "generate_scenarios") return await handleGenerateScenarios(supabase, lovableKey, corsHeaders);
