@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Brain, RefreshCw, TrendingUp, TrendingDown, Minus, AlertTriangle, Target, Lightbulb } from 'lucide-react';
+import { Brain, RefreshCw, TrendingUp, TrendingDown, Minus, AlertTriangle, Target, Lightbulb, CheckCircle2, Bot } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import { useGenerateCEOBrief, type CEOBriefResult } from '@/hooks/useCEOBrief';
+import { useGenerateCEOBrief, useExecuteDecisions, useAutoPilotRun, type CEOBriefResult } from '@/hooks/useCEOBrief';
 
 const fmtBRL = (v: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(v || 0);
@@ -25,6 +25,8 @@ const trendIcon = (t: string) =>
 export function CEOBriefPanel() {
   const [data, setData] = useState<CEOBriefResult | null>(null);
   const { mutate, isPending } = useGenerateCEOBrief();
+  const executeDecisions = useExecuteDecisions();
+  const autoPilot = useAutoPilotRun();
 
   const handleGenerate = () => {
     mutate(undefined, {
@@ -43,6 +45,24 @@ export function CEOBriefPanel() {
     });
   };
 
+  const handleApproveDecisions = () => {
+    if (!data?.decisions?.length) return;
+    executeDecisions.mutate(
+      { decisions: data.decisions, auto_execute: false },
+      {
+        onSuccess: (res) => toast.success(`${res.executed} decisão(ões) registradas para execução`),
+        onError: () => toast.error('Falha ao registrar decisões'),
+      },
+    );
+  };
+
+  const handleAutoPilot = () => {
+    autoPilot.mutate(undefined, {
+      onSuccess: (res: any) => toast.success(res?.summary || 'AutoPilot executado'),
+      onError: () => toast.error('Falha ao rodar AutoPilot'),
+    });
+  };
+
   return (
     <Card className="border-primary/20">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -55,10 +75,16 @@ export function CEOBriefPanel() {
             </p>
           </div>
         </div>
-        <Button onClick={handleGenerate} disabled={isPending} size="sm">
-          {isPending ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Brain className="h-4 w-4 mr-2" />}
-          {data ? 'Atualizar análise' : 'Gerar análise CEO'}
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleAutoPilot} disabled={autoPilot.isPending} size="sm" variant="outline">
+            {autoPilot.isPending ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Bot className="h-4 w-4 mr-2" />}
+            AutoPilot
+          </Button>
+          <Button onClick={handleGenerate} disabled={isPending} size="sm">
+            {isPending ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Brain className="h-4 w-4 mr-2" />}
+            {data ? 'Atualizar análise' : 'Gerar análise CEO'}
+          </Button>
+        </div>
       </CardHeader>
 
       <CardContent className="space-y-6">
@@ -149,9 +175,15 @@ export function CEOBriefPanel() {
             {/* Decisões sugeridas */}
             {data.decisions.length > 0 && (
               <div>
-                <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                  <Lightbulb className="h-4 w-4 text-warning" /> Decisões sugeridas (requerem aprovação)
-                </h4>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-sm font-semibold flex items-center gap-2">
+                    <Lightbulb className="h-4 w-4 text-warning" /> Decisões sugeridas (requerem aprovação)
+                  </h4>
+                  <Button onClick={handleApproveDecisions} disabled={executeDecisions.isPending} size="sm" variant="outline" className="h-7">
+                    {executeDecisions.isPending ? <RefreshCw className="h-3 w-3 mr-1 animate-spin" /> : <CheckCircle2 className="h-3 w-3 mr-1" />}
+                    Aprovar e registrar
+                  </Button>
+                </div>
                 <div className="space-y-1.5">
                   {data.decisions.map((d, i) => (
                     <div key={i} className="text-sm p-2 rounded border bg-muted/30 flex items-center justify-between gap-2">

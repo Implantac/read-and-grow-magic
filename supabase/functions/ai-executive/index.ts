@@ -43,6 +43,8 @@ serve(async (req) => {
     if (action === "generate_insights") return await handleGenerateInsights(supabase, lovableKey, corsHeaders);
     if (action === "generate_scenarios") return await handleGenerateScenarios(supabase, lovableKey, corsHeaders);
     if (action === "ceo_brief") return await handleCEOBrief(supabase, lovableKey, corsHeaders);
+    if (action === "execute_decisions") return await handleExecuteDecisions(supabase, body, corsHeaders, authenticatedUserId);
+    if (action === "autopilot_run") return await handleAutoPilotRun(supabase, lovableKey, corsHeaders);
     return await handleDashboardData(supabase, corsHeaders);
   } catch (e) {
     console.error("ai-executive error:", e);
@@ -1508,4 +1510,115 @@ Numerada, executável, com responsável sugerido.`;
     forecast, risks, plan, decisions,
     generated_at: new Date().toISOString(),
   }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+}
+
+// ─── AdvancedActionEngine ───────────────────────────────────────
+// Executa decisões aprovadas — registra em ai_action_logs (suggestion-first, não muta dados de negócio sem flag)
+async function executeAdvancedActions(supabase: any, decisions: any[], userId?: string, autoExecute = false) {
+  const results: any[] = [];
+  for (const d of decisions || []) {
+    let result = "";
+    try {
+      switch (d.type) {
+        case "repor_estoque":
+          result = autoExecute
+            ? "Sugestão de reposição registrada para o módulo de Compras"
+            : "Reposição sugerida — aguardando aprovação";
+          break;
+        case "promocao":
+          result = autoExecute
+            ? "Campanha sugerida registrada para o módulo Comercial"
+            : "Promoção recomendada — aguardando aprovação";
+          break;
+        case "ajuste_financeiro":
+          result = autoExecute
+            ? "Plano de ajuste de caixa registrado para o Financeiro"
+            : "Ajuste financeiro recomendado — aguardando aprovação";
+          break;
+        case "cobranca":
+          result = autoExecute
+            ? "Régua de cobrança acionada para inadimplentes"
+            : "Cobrança recomendada — aguardando aprovação";
+          break;
+        default:
+          result = `Decisão registrada: ${d.action || d.type}`;
+      }
+      await supabase.from("ai_action_logs").insert({
+        action_type: "decision_execution",
+        action_name: d.type,
+        module: "executive_ai",
+        context: autoExecute ? "autopilot" : "manual_approval",
+        parameters: d,
+        result,
+        user_id: userId || null,
+      });
+      results.push({ ...d, result, executed_at: new Date().toISOString() });
+    } catch (e) {
+      console.error("executeAdvancedActions warn:", e);
+      results.push({ ...d, result: "Falha ao registrar ação", error: String(e) });
+    }
+  }
+  return results;
+}
+
+async function handleExecuteDecisions(supabase: any, body: any, corsHeaders: any, userId?: string) {
+  const decisions = body?.decisions || [];
+  const autoExecute = !!body?.auto_execute;
+  if (!Array.isArray(decisions) || decisions.length === 0) {
+    return new Response(JSON.stringify({ error: "Nenhuma decisão fornecida" }),
+      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
+  const results = await executeAdvancedActions(supabase, decisions, userId, autoExecute);
+  return new Response(JSON.stringify({ executed: results.length, results }),
+    { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+}
+
+// ─── AutoPilotService ───────────────────────────────────────────
+// Orquestração CRON: contexto → forecast → riscos → decisões → registro
+async function handleAutoPilotRun(supabase: any, _lovableKey: string, corsHeaders: any) {
+  try {
+    const data = await fetchAllData(supabase);
+    const kpis = computeKPIs(data);
+    const ctx = buildContext(data, kpis);
+    const forecast = predictRevenue(kpis.revenueByMonth || []);
+    const risks = analyzeRisks(ctx, kpis);
+    const decisions = suggestDecisions(ctx, forecast, risks);
+    await persistKPIs(supabase, kpis, forecast);
+    await recordLearning(supabase, data);
+
+    // Auto-registra apenas decisões de prioridade média (não muta dados críticos sozinha)
+    const safeDecisions = decisions.filter((d: any) => d.priority !== "alta");
+    const executed = await executeAdvancedActions(supabase, safeDecisions, undefined, true);
+
+    // Riscos críticos viram alertas executivos
+    for (const r of risks.filter((x: any) => x.impacto === "alto")) {
+      await supabase.from("ai_executive_alerts").insert({
+        alert_type: "autopilot_risk",
+        severity: "critical",
+        title: r.titulo,
+        description: r.detalhe,
+        module: r.tipo,
+        status: "active",
+      });
+    }
+
+    await supabase.from("ai_action_logs").insert({
+      action_type: "autopilot_cycle",
+      action_name: "autopilot_run",
+      module: "executive_ai",
+      context: "scheduled",
+      parameters: { risks_count: risks.length, decisions_count: decisions.length },
+      result: `Ciclo completo: ${executed.length} ações registradas, ${risks.filter((r:any)=>r.impacto==="alto").length} alertas críticos`,
+    });
+
+    return new Response(JSON.stringify({
+      ran_at: new Date().toISOString(),
+      forecast, risks, decisions, executed,
+      summary: `AutoPilot: ${executed.length} ações + ${risks.length} riscos analisados`,
+    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  } catch (e) {
+    console.error("AutoPilot error:", e);
+    return new Response(JSON.stringify({ error: "AutoPilot falhou", detail: String(e) }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
 }
