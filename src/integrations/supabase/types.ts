@@ -2121,6 +2121,7 @@ export type Database = {
       credit_audit_logs: {
         Row: {
           action: string
+          company_id: string | null
           entity_id: string
           entity_type: string
           id: string
@@ -2133,6 +2134,7 @@ export type Database = {
         }
         Insert: {
           action: string
+          company_id?: string | null
           entity_id: string
           entity_type: string
           id?: string
@@ -2145,6 +2147,7 @@ export type Database = {
         }
         Update: {
           action?: string
+          company_id?: string | null
           entity_id?: string
           entity_type?: string
           id?: string
@@ -2155,7 +2158,15 @@ export type Database = {
           performed_at?: string
           performed_by?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "credit_audit_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       credit_policies: {
         Row: {
