@@ -1342,6 +1342,7 @@ export type Database = {
           client_score: string | null
           code: string
           commercial_notes: string | null
+          company_id: string | null
           created_at: string
           credit_limit: number
           current_balance: number
@@ -1381,6 +1382,7 @@ export type Database = {
           client_score?: string | null
           code: string
           commercial_notes?: string | null
+          company_id?: string | null
           created_at?: string
           credit_limit?: number
           current_balance?: number
@@ -1420,6 +1422,7 @@ export type Database = {
           client_score?: string | null
           code?: string
           commercial_notes?: string | null
+          company_id?: string | null
           created_at?: string
           credit_limit?: number
           current_balance?: number
@@ -2445,6 +2448,7 @@ export type Database = {
       }
       delivery_tracking: {
         Row: {
+          company_id: string | null
           created_at: string
           description: string
           event_type: string
@@ -2455,6 +2459,7 @@ export type Database = {
           shipment_id: string
         }
         Insert: {
+          company_id?: string | null
           created_at?: string
           description: string
           event_type?: string
@@ -2465,6 +2470,7 @@ export type Database = {
           shipment_id: string
         }
         Update: {
+          company_id?: string | null
           created_at?: string
           description?: string
           event_type?: string
@@ -2737,6 +2743,7 @@ export type Database = {
       follow_ups: {
         Row: {
           client_id: string
+          company_id: string | null
           completed_at: string | null
           created_at: string
           description: string | null
@@ -2754,6 +2761,7 @@ export type Database = {
         }
         Insert: {
           client_id: string
+          company_id?: string | null
           completed_at?: string | null
           created_at?: string
           description?: string | null
@@ -2771,6 +2779,7 @@ export type Database = {
         }
         Update: {
           client_id?: string
+          company_id?: string | null
           completed_at?: string | null
           created_at?: string
           description?: string | null
@@ -3069,6 +3078,7 @@ export type Database = {
       industrial_alerts: {
         Row: {
           alert_type: string
+          company_id: string | null
           created_at: string
           description: string | null
           entity_id: string | null
@@ -3085,6 +3095,7 @@ export type Database = {
         }
         Insert: {
           alert_type: string
+          company_id?: string | null
           created_at?: string
           description?: string | null
           entity_id?: string | null
@@ -3101,6 +3112,7 @@ export type Database = {
         }
         Update: {
           alert_type?: string
+          company_id?: string | null
           created_at?: string
           description?: string | null
           entity_id?: string | null
@@ -3206,6 +3218,7 @@ export type Database = {
       }
       iot_telemetry: {
         Row: {
+          company_id: string | null
           created_at: string
           device_id: string
           device_type: string
@@ -3217,6 +3230,7 @@ export type Database = {
           unit: string | null
         }
         Insert: {
+          company_id?: string | null
           created_at?: string
           device_id: string
           device_type?: string
@@ -3228,6 +3242,7 @@ export type Database = {
           unit?: string | null
         }
         Update: {
+          company_id?: string | null
           created_at?: string
           device_id?: string
           device_type?: string
@@ -4388,6 +4403,7 @@ export type Database = {
       outsourcing_orders: {
         Row: {
           actual_return_date: string | null
+          company_id: string | null
           created_at: string
           expected_return_date: string | null
           id: string
@@ -4408,6 +4424,7 @@ export type Database = {
         }
         Insert: {
           actual_return_date?: string | null
+          company_id?: string | null
           created_at?: string
           expected_return_date?: string | null
           id?: string
@@ -4428,6 +4445,7 @@ export type Database = {
         }
         Update: {
           actual_return_date?: string | null
+          company_id?: string | null
           created_at?: string
           expected_return_date?: string | null
           id?: string
@@ -5161,6 +5179,7 @@ export type Database = {
       }
       production_events: {
         Row: {
+          company_id: string | null
           created_at: string
           entity_id: string | null
           entity_name: string | null
@@ -5178,6 +5197,7 @@ export type Database = {
           source: string
         }
         Insert: {
+          company_id?: string | null
           created_at?: string
           entity_id?: string | null
           entity_name?: string | null
@@ -5195,6 +5215,7 @@ export type Database = {
           source?: string
         }
         Update: {
+          company_id?: string | null
           created_at?: string
           entity_id?: string | null
           entity_name?: string | null
@@ -5380,6 +5401,7 @@ export type Database = {
       }
       production_logs: {
         Row: {
+          company_id: string | null
           created_at: string
           description: string | null
           event_type: string
@@ -5391,6 +5413,7 @@ export type Database = {
           step_id: string | null
         }
         Insert: {
+          company_id?: string | null
           created_at?: string
           description?: string | null
           event_type?: string
@@ -5402,6 +5425,7 @@ export type Database = {
           step_id?: string | null
         }
         Update: {
+          company_id?: string | null
           created_at?: string
           description?: string | null
           event_type?: string
@@ -5427,6 +5451,7 @@ export type Database = {
           active: boolean
           capacity_per_hour: number | null
           code: string
+          company_id: string | null
           created_at: string
           current_operator: string | null
           current_order_id: string | null
@@ -5442,6 +5467,7 @@ export type Database = {
           active?: boolean
           capacity_per_hour?: number | null
           code: string
+          company_id?: string | null
           created_at?: string
           current_operator?: string | null
           current_order_id?: string | null
@@ -5457,6 +5483,7 @@ export type Database = {
           active?: boolean
           capacity_per_hour?: number | null
           code?: string
+          company_id?: string | null
           created_at?: string
           current_operator?: string | null
           current_order_id?: string | null
@@ -5480,6 +5507,7 @@ export type Database = {
       }
       production_order_steps: {
         Row: {
+          company_id: string | null
           completed_at: string | null
           created_at: string
           defect_reason: string | null
@@ -5499,6 +5527,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          company_id?: string | null
           completed_at?: string | null
           created_at?: string
           defect_reason?: string | null
@@ -5518,6 +5547,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          company_id?: string | null
           completed_at?: string | null
           created_at?: string
           defect_reason?: string | null
@@ -5553,6 +5583,7 @@ export type Database = {
           client_id: string | null
           client_name: string | null
           color: string | null
+          company_id: string | null
           completed_date: string | null
           created_at: string
           defect_notes: string | null
@@ -5594,6 +5625,7 @@ export type Database = {
           client_id?: string | null
           client_name?: string | null
           color?: string | null
+          company_id?: string | null
           completed_date?: string | null
           created_at?: string
           defect_notes?: string | null
@@ -5635,6 +5667,7 @@ export type Database = {
           client_id?: string | null
           client_name?: string | null
           color?: string | null
+          company_id?: string | null
           completed_date?: string | null
           created_at?: string
           defect_notes?: string | null
@@ -6513,6 +6546,7 @@ export type Database = {
         Row: {
           client_id: string | null
           client_name: string
+          company_id: string | null
           created_at: string
           date: string
           discount: number
@@ -6530,6 +6564,7 @@ export type Database = {
         Insert: {
           client_id?: string | null
           client_name: string
+          company_id?: string | null
           created_at?: string
           date?: string
           discount?: number
@@ -6547,6 +6582,7 @@ export type Database = {
         Update: {
           client_id?: string | null
           client_name?: string
+          company_id?: string | null
           created_at?: string
           date?: string
           discount?: number
@@ -6761,6 +6797,7 @@ export type Database = {
         Row: {
           action_taken: string | null
           antenna: number | null
+          company_id: string | null
           created_at: string
           event_type: string
           id: string
@@ -6778,6 +6815,7 @@ export type Database = {
         Insert: {
           action_taken?: string | null
           antenna?: number | null
+          company_id?: string | null
           created_at?: string
           event_type?: string
           id?: string
@@ -6795,6 +6833,7 @@ export type Database = {
         Update: {
           action_taken?: string | null
           antenna?: number | null
+          company_id?: string | null
           created_at?: string
           event_type?: string
           id?: string
@@ -7518,6 +7557,7 @@ export type Database = {
       sales_opportunities: {
         Row: {
           client_id: string
+          company_id: string | null
           contacted_at: string | null
           created_at: string
           description: string | null
@@ -7535,6 +7575,7 @@ export type Database = {
         }
         Insert: {
           client_id: string
+          company_id?: string | null
           contacted_at?: string | null
           created_at?: string
           description?: string | null
@@ -7552,6 +7593,7 @@ export type Database = {
         }
         Update: {
           client_id?: string
+          company_id?: string | null
           contacted_at?: string | null
           created_at?: string
           description?: string | null
@@ -8680,6 +8722,7 @@ export type Database = {
       }
       time_entries: {
         Row: {
+          company_id: string | null
           created_at: string
           end_time: string | null
           id: string
@@ -8699,6 +8742,7 @@ export type Database = {
           work_center: string | null
         }
         Insert: {
+          company_id?: string | null
           created_at?: string
           end_time?: string | null
           id?: string
@@ -8718,6 +8762,7 @@ export type Database = {
           work_center?: string | null
         }
         Update: {
+          company_id?: string | null
           created_at?: string
           end_time?: string | null
           id?: string
