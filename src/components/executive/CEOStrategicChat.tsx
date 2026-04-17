@@ -68,8 +68,14 @@ export function CEOStrategicChat({ messages, isLoading, sendMessage, clearChat }
               </p>
               <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 max-w-lg w-full">
                 {strategicPrompts.map(p => (
-                  <Button key={p} variant="outline" size="sm" className="text-xs h-auto py-2 text-left justify-start" onClick={() => sendMessage(p)}>
-                    {p}
+                  <Button
+                    key={p}
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-auto min-h-[44px] py-2 px-3 text-left justify-start whitespace-normal leading-snug break-words"
+                    onClick={() => sendMessage(p)}
+                  >
+                    <span className="block w-full">{p}</span>
                   </Button>
                 ))}
               </div>
