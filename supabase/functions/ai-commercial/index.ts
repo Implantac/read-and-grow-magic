@@ -813,7 +813,8 @@ serve(async (req) => {
     console.error("ai-commercial error:", e);
     const msg = (e as Error).message || "Unknown error";
     const status = msg.includes("429") ? 429 : msg.includes("402") ? 402 : 500;
-    return new Response(JSON.stringify({ error: msg }), {
+    const safe = status === 429 ? "Rate limit exceeded. Please try again shortly." : status === 402 ? "AI usage quota exceeded. Please check your plan." : "An internal error occurred. Please try again.";
+    return new Response(JSON.stringify({ error: safe }), {
       status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
