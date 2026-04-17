@@ -4221,6 +4221,7 @@ export type Database = {
       }
       order_items: {
         Row: {
+          company_id: string | null
           discount: number
           id: string
           order_id: string
@@ -4232,6 +4233,7 @@ export type Database = {
           unit_price: number
         }
         Insert: {
+          company_id?: string | null
           discount?: number
           id?: string
           order_id: string
@@ -4243,6 +4245,7 @@ export type Database = {
           unit_price?: number
         }
         Update: {
+          company_id?: string | null
           discount?: number
           id?: string
           order_id?: string
@@ -4254,6 +4257,13 @@ export type Database = {
           unit_price?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "order_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "order_items_order_id_fkey"
             columns: ["order_id"]
@@ -4359,6 +4369,7 @@ export type Database = {
           commercial_approval: string | null
           commission_rate: number | null
           commission_value: number | null
+          company_id: string | null
           conference_status: string | null
           created_at: string
           date: string
@@ -4395,6 +4406,7 @@ export type Database = {
           commercial_approval?: string | null
           commission_rate?: number | null
           commission_value?: number | null
+          company_id?: string | null
           conference_status?: string | null
           created_at?: string
           date?: string
@@ -4431,6 +4443,7 @@ export type Database = {
           commercial_approval?: string | null
           commission_rate?: number | null
           commission_value?: number | null
+          company_id?: string | null
           conference_status?: string | null
           created_at?: string
           date?: string
@@ -4464,6 +4477,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
