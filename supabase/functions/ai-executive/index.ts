@@ -1579,6 +1579,20 @@ PROIBIDO:
             required: ["metas", "acoes"],
             additionalProperties: false,
           },
+          insights: {
+            type: "array",
+            description: "Tendências reais detectadas nos dados (não invente).",
+            items: {
+              type: "object",
+              properties: {
+                titulo: { type: "string" },
+                descricao: { type: "string" },
+                tipo: { type: "string", enum: ["tendencia", "oportunidade", "risco", "operacional"] },
+              },
+              required: ["titulo", "descricao", "tipo"],
+              additionalProperties: false,
+            },
+          },
           decisoes: {
             type: "array",
             items: {
@@ -1592,11 +1606,28 @@ PROIBIDO:
             },
           },
         },
-        required: ["veredicto", "kpis", "riscos", "plano", "decisoes"],
+        required: ["veredicto", "kpis", "riscos", "insights", "plano", "decisoes"],
         additionalProperties: false,
       },
     },
   };
+
+  // Short-circuit: sem dados reais não chama a IA
+  if (!hasRealData) {
+    return new Response(JSON.stringify({
+      ceo_analysis: "**Dados insuficientes para análise confiável.**\n\nCadastre vendas, pedidos ou contas para que a IA CEO possa gerar diagnóstico estratégico.",
+      ceo_structured: {
+        veredicto: "Dados insuficientes para análise confiável.",
+        kpis: [], riscos: [], insights: [],
+        plano: { metas: [], acoes: [] }, decisoes: [],
+      },
+      context: ctx,
+      kpis: kpiRows,
+      forecast, risks: [], plan: [], decisions: [],
+      generated_at: new Date().toISOString(),
+      data_status: "insufficient",
+    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
 
   try {
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -1605,7 +1636,7 @@ PROIBIDO:
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: ceoPrompt + "\n\nIMPORTANTE: Sempre chame a função ceo_response com o JSON estruturado para renderização visual em cards." },
+          { role: "system", content: ceoPrompt + "\n\nIMPORTANTE: Sempre chame a função ceo_response com o JSON estruturado para renderização visual em cards. Se faltarem dados, retorne arrays vazios e veredicto='Dados insuficientes para análise confiável.'" },
           { role: "user", content: `Dados executivos para análise:\n${JSON.stringify(userPayload, null, 2)}` },
         ],
         tools: [ceoTool],
