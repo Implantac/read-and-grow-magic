@@ -17,10 +17,26 @@ const impactColor = (impacto: string) => {
   return 'outline';
 };
 
-const trendIcon = (t: string) =>
-  t === 'up' ? <TrendingUp className="h-4 w-4 text-success" /> :
-  t === 'down' ? <TrendingDown className="h-4 w-4 text-destructive" /> :
-  <Minus className="h-4 w-4 text-muted-foreground" />;
+const trendIcon = (t?: string | null) => {
+  const v = t ?? 'neutral';
+  if (v === 'up') return <TrendingUp className="h-4 w-4 text-success" />;
+  if (v === 'down') return <TrendingDown className="h-4 w-4 text-destructive" />;
+  return <Minus className="h-4 w-4 text-muted-foreground" />;
+};
+
+// Normaliza um KPI vindo do backend, tolerante a campos ausentes
+function normalizeKPI(k: any) {
+  return {
+    kpi_name: k?.kpi_name ?? k?.name ?? 'kpi',
+    category: k?.category ?? 'general',
+    current_value: Number(k?.current_value ?? k?.value ?? 0),
+    target_value: Number(k?.target_value ?? 0),
+    status: k?.status ?? 'ok',
+    trend: k?.trend ?? 'neutral',
+    explanation: k?.explanation ?? '',
+    snapshot_date: k?.snapshot_date ?? '',
+  };
+}
 
 export function CEOBriefPanel() {
   const [data, setData] = useState<CEOBriefResult | null>(null);
@@ -102,20 +118,28 @@ export function CEOBriefPanel() {
           </div>
         )}
 
-        {data && (
+        {data && (() => {
+          // Hardening: normaliza e protege contra dados ausentes vindos do backend
+          const forecast = data.forecast ?? { trend: 'neutral', previsao_proximo_mes: 0, ultimo_mes: 0, media_movel_6m: 0 } as any;
+          const kpis = (data.kpis ?? []).map(normalizeKPI);
+          const risks = data.risks ?? [];
+          const plan = data.plan ?? [];
+          const decisions = data.decisions ?? [];
+
+          return (
           <>
             {/* Forecast + KPIs */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="p-3 rounded-lg border bg-card">
                 <div className="text-xs text-muted-foreground flex items-center gap-1">
-                  Previsão próx. mês {trendIcon(data.forecast.trend)}
+                  Previsão próx. mês {trendIcon(forecast?.trend)}
                 </div>
-                <div className="text-xl font-bold mt-1">{fmtBRL(data.forecast.previsao_proximo_mes)}</div>
+                <div className="text-xl font-bold mt-1">{fmtBRL(forecast?.previsao_proximo_mes ?? 0)}</div>
                 <div className="text-[10px] text-muted-foreground">
-                  Último: {fmtBRL(data.forecast.ultimo_mes)}
+                  Último: {fmtBRL(forecast?.ultimo_mes ?? 0)}
                 </div>
               </div>
-              {data.kpis.slice(0, 3).map((k) => (
+              {kpis.slice(0, 3).map((k) => (
                 <div key={k.kpi_name} className="p-3 rounded-lg border bg-card">
                   <div className="text-xs text-muted-foreground capitalize">{k.kpi_name.replace(/_/g, ' ')}</div>
                   <div className="text-xl font-bold mt-1">
@@ -130,22 +154,27 @@ export function CEOBriefPanel() {
                   </Badge>
                 </div>
               ))}
+              {kpis.length === 0 && (
+                <div className="col-span-3 p-3 rounded-lg border bg-muted/30 text-xs text-muted-foreground text-center">
+                  Nenhum KPI disponível ainda — gere a análise novamente em alguns minutos.
+                </div>
+              )}
             </div>
 
             {/* Riscos */}
-            {data.risks.length > 0 && (
+            {risks.length > 0 && (
               <div>
                 <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                  <AlertTriangle className="h-4 w-4 text-destructive" /> Riscos detectados ({data.risks.length})
+                  <AlertTriangle className="h-4 w-4 text-destructive" /> Riscos detectados ({risks.length})
                 </h4>
                 <div className="space-y-2">
-                  {data.risks.map((r, i) => (
+                  {risks.map((r, i) => (
                     <div key={i} className="flex items-start justify-between gap-2 p-2 rounded border bg-muted/30">
                       <div className="flex-1">
-                        <div className="text-sm font-medium">{r.titulo}</div>
-                        <div className="text-xs text-muted-foreground">{r.detalhe}</div>
+                        <div className="text-sm font-medium">{r?.titulo ?? 'Risco'}</div>
+                        <div className="text-xs text-muted-foreground">{r?.detalhe ?? ''}</div>
                       </div>
-                      <Badge variant={impactColor(r.impacto) as any}>{r.impacto}</Badge>
+                      <Badge variant={impactColor(r?.impacto ?? 'baixo') as any}>{r?.impacto ?? 'baixo'}</Badge>
                     </div>
                   ))}
                 </div>
@@ -153,18 +182,18 @@ export function CEOBriefPanel() {
             )}
 
             {/* Plano */}
-            {data.plan.length > 0 && (
+            {plan.length > 0 && (
               <div>
                 <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
                   <Target className="h-4 w-4 text-primary" /> Plano de crescimento
                 </h4>
                 <ul className="space-y-1.5">
-                  {data.plan.map((p, i) => (
+                  {plan.map((p, i) => (
                     <li key={i} className="text-sm flex gap-2">
-                      <Badge variant="outline" className="text-[10px] h-5">{p.tipo}</Badge>
+                      <Badge variant="outline" className="text-[10px] h-5">{p?.tipo ?? 'acao'}</Badge>
                       <div>
-                        <span className="font-medium">{p.titulo}</span>
-                        <span className="text-muted-foreground"> — {p.detalhe}</span>
+                        <span className="font-medium">{p?.titulo ?? ''}</span>
+                        <span className="text-muted-foreground"> — {p?.detalhe ?? ''}</span>
                       </div>
                     </li>
                   ))}
@@ -173,7 +202,7 @@ export function CEOBriefPanel() {
             )}
 
             {/* Decisões sugeridas */}
-            {data.decisions.length > 0 && (
+            {decisions.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="text-sm font-semibold flex items-center gap-2">
@@ -185,10 +214,10 @@ export function CEOBriefPanel() {
                   </Button>
                 </div>
                 <div className="space-y-1.5">
-                  {data.decisions.map((d, i) => (
+                  {decisions.map((d, i) => (
                     <div key={i} className="text-sm p-2 rounded border bg-muted/30 flex items-center justify-between gap-2">
-                      <span>{d.action}</span>
-                      <Badge variant={d.priority === 'alta' ? 'destructive' : 'secondary'}>{d.priority}</Badge>
+                      <span>{d?.action ?? d?.type ?? 'Decisão'}</span>
+                      <Badge variant={d?.priority === 'alta' ? 'destructive' : 'secondary'}>{d?.priority ?? 'media'}</Badge>
                     </div>
                   ))}
                 </div>
@@ -203,10 +232,11 @@ export function CEOBriefPanel() {
             )}
 
             <div className="text-[10px] text-muted-foreground text-right">
-              Gerado em {new Date(data.generated_at).toLocaleString('pt-BR')}
+              Gerado em {data.generated_at ? new Date(data.generated_at).toLocaleString('pt-BR') : '—'}
             </div>
           </>
-        )}
+          );
+        })()}
       </CardContent>
     </Card>
   );
