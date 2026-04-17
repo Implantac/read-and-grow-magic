@@ -549,6 +549,81 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_kpis: {
+        Row: {
+          category: string
+          created_at: string
+          current_value: number | null
+          explanation: string | null
+          id: string
+          kpi_name: string
+          metadata: Json | null
+          snapshot_date: string
+          status: string
+          target_value: number | null
+          trend: string | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          current_value?: number | null
+          explanation?: string | null
+          id?: string
+          kpi_name: string
+          metadata?: Json | null
+          snapshot_date?: string
+          status?: string
+          target_value?: number | null
+          trend?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          current_value?: number | null
+          explanation?: string | null
+          id?: string
+          kpi_name?: string
+          metadata?: Json | null
+          snapshot_date?: string
+          status?: string
+          target_value?: number | null
+          trend?: string | null
+        }
+        Relationships: []
+      }
+      ai_learning: {
+        Row: {
+          created_at: string
+          frequency: number
+          id: string
+          last_updated: string
+          metadata: Json | null
+          pattern_key: string
+          pattern_type: string
+          value: number | null
+        }
+        Insert: {
+          created_at?: string
+          frequency?: number
+          id?: string
+          last_updated?: string
+          metadata?: Json | null
+          pattern_key: string
+          pattern_type: string
+          value?: number | null
+        }
+        Update: {
+          created_at?: string
+          frequency?: number
+          id?: string
+          last_updated?: string
+          metadata?: Json | null
+          pattern_key?: string
+          pattern_type?: string
+          value?: number | null
+        }
+        Relationships: []
+      }
       ai_opportunity_predictions: {
         Row: {
           client_id: string | null
