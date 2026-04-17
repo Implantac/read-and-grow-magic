@@ -232,10 +232,11 @@ export function CEOBriefPanel() {
             )}
 
             <div className="text-[10px] text-muted-foreground text-right">
-              Gerado em {new Date(data.generated_at).toLocaleString('pt-BR')}
+              Gerado em {data.generated_at ? new Date(data.generated_at).toLocaleString('pt-BR') : '—'}
             </div>
           </>
-        )}
+          );
+        })()}
       </CardContent>
     </Card>
   );
