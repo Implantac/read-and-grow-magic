@@ -204,6 +204,31 @@ export function CEOBriefPanel() {
                   </div>
                 )}
 
+                {(structured.insights?.length ?? 0) > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                      <Lightbulb className="h-4 w-4 text-primary" /> Insights ({structured.insights!.length})
+                    </h4>
+                    <div className="grid md:grid-cols-2 gap-2">
+                      {structured.insights!.map((it, i) => {
+                        const tipoColor =
+                          it.tipo === 'risco' ? 'border-l-destructive' :
+                          it.tipo === 'oportunidade' ? 'border-l-success' :
+                          it.tipo === 'tendencia' ? 'border-l-primary' : 'border-l-muted-foreground';
+                        return (
+                          <div key={i} className={`p-3 rounded-lg border bg-card border-l-4 ${tipoColor}`}>
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="text-sm font-semibold text-foreground">{it.titulo}</span>
+                              <Badge variant="outline" className="text-[10px] uppercase">{it.tipo}</Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">{it.descricao}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 {structured.plano && ((structured.plano.metas?.length ?? 0) > 0 || (structured.plano.acoes?.length ?? 0) > 0) && (
                   <div className="grid md:grid-cols-2 gap-3">
                     {(structured.plano.metas?.length ?? 0) > 0 && (
