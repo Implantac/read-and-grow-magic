@@ -56,3 +56,32 @@ export function useKPIHistory(days = 30) {
     staleTime: 5 * 60 * 1000,
   });
 }
+
+export function useExecuteDecisions() {
+  return useMutation({
+    mutationFn: async (params: { decisions: CEODecision[]; auto_execute?: boolean }) => {
+      const { data, error } = await supabase.functions.invoke('ai-executive', {
+        body: { action: 'execute_decisions', ...params },
+      });
+      if (error) throw error;
+      return data as { executed: number; results: any[] };
+    },
+  });
+}
+
+export function useAutoPilotRun() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('ai-executive', {
+        body: { action: 'autopilot_run' },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['executive-dashboard'] });
+      qc.invalidateQueries({ queryKey: ['ai-kpis-history'] });
+    },
+  });
+}
