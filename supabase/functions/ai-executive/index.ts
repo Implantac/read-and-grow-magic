@@ -43,6 +43,8 @@ serve(async (req) => {
     if (action === "generate_insights") return await handleGenerateInsights(supabase, lovableKey, corsHeaders);
     if (action === "generate_scenarios") return await handleGenerateScenarios(supabase, lovableKey, corsHeaders);
     if (action === "ceo_brief") return await handleCEOBrief(supabase, lovableKey, corsHeaders);
+    if (action === "execute_decisions") return await handleExecuteDecisions(supabase, body, corsHeaders, authenticatedUserId);
+    if (action === "autopilot_run") return await handleAutoPilotRun(supabase, lovableKey, corsHeaders);
     return await handleDashboardData(supabase, corsHeaders);
   } catch (e) {
     console.error("ai-executive error:", e);
