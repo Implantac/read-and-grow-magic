@@ -17,10 +17,26 @@ const impactColor = (impacto: string) => {
   return 'outline';
 };
 
-const trendIcon = (t: string) =>
-  t === 'up' ? <TrendingUp className="h-4 w-4 text-success" /> :
-  t === 'down' ? <TrendingDown className="h-4 w-4 text-destructive" /> :
-  <Minus className="h-4 w-4 text-muted-foreground" />;
+const trendIcon = (t?: string | null) => {
+  const v = t ?? 'neutral';
+  if (v === 'up') return <TrendingUp className="h-4 w-4 text-success" />;
+  if (v === 'down') return <TrendingDown className="h-4 w-4 text-destructive" />;
+  return <Minus className="h-4 w-4 text-muted-foreground" />;
+};
+
+// Normaliza um KPI vindo do backend, tolerante a campos ausentes
+function normalizeKPI(k: any) {
+  return {
+    kpi_name: k?.kpi_name ?? k?.name ?? 'kpi',
+    category: k?.category ?? 'general',
+    current_value: Number(k?.current_value ?? k?.value ?? 0),
+    target_value: Number(k?.target_value ?? 0),
+    status: k?.status ?? 'ok',
+    trend: k?.trend ?? 'neutral',
+    explanation: k?.explanation ?? '',
+    snapshot_date: k?.snapshot_date ?? '',
+  };
+}
 
 export function CEOBriefPanel() {
   const [data, setData] = useState<CEOBriefResult | null>(null);
