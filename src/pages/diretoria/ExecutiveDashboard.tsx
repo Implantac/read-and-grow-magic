@@ -14,6 +14,7 @@ import {
 import { useExecutiveDashboard, useGenerateInsights, useGenerateScenarios, useUnifiedChat, useDailySummary } from '@/hooks/useExecutiveAI';
 import { PrimaryKPICards, SecondaryKPICards, TargetAttainmentBar } from '@/components/executive/ExecutiveKPICards';
 import { ExecutiveChat } from '@/components/executive/ExecutiveChat';
+import { CEOStrategicChat } from '@/components/executive/CEOStrategicChat';
 import { ExecutiveChartsTab } from '@/components/executive/ExecutiveChartsTab';
 import { ExecutiveMarginsTab } from '@/components/executive/ExecutiveMarginsTab';
 import { ExecutiveAlertsTab } from '@/components/executive/ExecutiveAlertsTab';
@@ -148,21 +149,12 @@ export default function ExecutiveDashboard() {
 
         <TabsContent value="ceo" className="space-y-4">
           <CEOBriefPanel />
-          <div>
-            <div className="flex items-center gap-2 mb-3 mt-2">
-              <Brain className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-semibold">Chat Estratégico com IA CEO</h3>
-              <span className="text-xs text-muted-foreground">— discuta decisões, simule cenários e valide hipóteses</span>
-            </div>
-            <ExecutiveChat
-              messages={messages}
-              isLoading={chatLoading}
-              sendMessage={sendMessage}
-              clearChat={clearChat}
-              onDailySummary={() => dailySummary.mutateAsync().then(r => r?.resumo_executivo && sendMessage('Gere o resumo executivo diário.'))}
-              dailySummaryPending={dailySummary.isPending}
-            />
-          </div>
+          <CEOStrategicChat
+            messages={messages}
+            isLoading={chatLoading}
+            sendMessage={sendMessage}
+            clearChat={clearChat}
+          />
         </TabsContent>
 
         <TabsContent value="insights" className="space-y-4">
