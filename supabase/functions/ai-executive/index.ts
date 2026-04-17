@@ -1432,6 +1432,14 @@ async function handleCEOBrief(supabase: any, lovableKey: string, corsHeaders: an
   const kpiRows = await persistKPIs(supabase, kpis, forecast);
   await recordLearning(supabase, data);
 
+  // Detecta se há dados reais suficientes para análise confiável
+  const hasRealData = (
+    (data.orders?.length ?? 0) > 0 ||
+    (data.sales?.length ?? 0) > 0 ||
+    (data.receivable?.length ?? 0) > 0 ||
+    (data.payable?.length ?? 0) > 0
+  );
+
   const ceoPrompt = `Você é a IA CEO desta empresa. Pense e fale como o dono do negócio.
 
 PRIORIDADES (nesta ordem):
@@ -1440,10 +1448,15 @@ PRIORIDADES (nesta ordem):
 3. Antecipar problemas — prevenção custa menos que correção
 4. Decidir, não descrever — toda análise termina em ação concreta
 
-REGRAS DE CONTEÚDO:
-- Use APENAS os dados fornecidos. Nunca invente.
+REGRAS DE CONTEÚDO (CRÍTICO):
+- Use APENAS os dados fornecidos no payload. NUNCA invente, estime sem base ou crie números fictícios.
+- Se um KPI não tiver dados reais, NÃO o inclua. Não preencha com valores genéricos.
+- Se TODOS os dados estiverem vazios ou insuficientes, responda APENAS:
+  veredicto = "Dados insuficientes para análise confiável."
+  kpis = [], riscos = [], insights = [], plano = { metas: [], acoes: [] }, decisoes = []
 - Valores em **R$ X.XXX,XX** (formato BR), porcentagens em **negrito**.
 - Tom direto de dono — sem "talvez", sem "pode ser", sem rodeios.
+- Toda afirmação deve ser rastreável a um número do payload.
 
 REGRAS DE FORMATAÇÃO (OBRIGATÓRIO):
 - NÃO use blocos longos de texto — máximo 2 linhas por parágrafo
