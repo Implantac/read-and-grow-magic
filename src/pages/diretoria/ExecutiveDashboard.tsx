@@ -18,6 +18,7 @@ import { ExecutiveChartsTab } from '@/components/executive/ExecutiveChartsTab';
 import { ExecutiveMarginsTab } from '@/components/executive/ExecutiveMarginsTab';
 import { ExecutiveAlertsTab } from '@/components/executive/ExecutiveAlertsTab';
 import { ExecutiveScenariosTab } from '@/components/executive/ExecutiveScenariosTab';
+import { CEOBriefPanel } from '@/components/executive/CEOBriefPanel';
 
 const severityColor: Record<string, string> = {
   critical: 'bg-destructive text-destructive-foreground',
@@ -110,6 +111,7 @@ export default function ExecutiveDashboard() {
       <Tabs defaultValue="assistant" className="space-y-4">
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="assistant" className="gap-1.5"><Bot className="h-3.5 w-3.5" />Diretor Digital</TabsTrigger>
+          <TabsTrigger value="ceo" className="gap-1.5"><Brain className="h-3.5 w-3.5" />IA CEO</TabsTrigger>
           <TabsTrigger value="insights" className="gap-1.5"><Lightbulb className="h-3.5 w-3.5" />Insights</TabsTrigger>
           <TabsTrigger value="charts" className="gap-1.5"><BarChart3 className="h-3.5 w-3.5" />Análises</TabsTrigger>
           <TabsTrigger value="margins" className="gap-1.5"><DollarSign className="h-3.5 w-3.5" />Margens</TabsTrigger>
@@ -126,6 +128,10 @@ export default function ExecutiveDashboard() {
             onDailySummary={() => dailySummary.mutateAsync().then(r => r?.resumo_executivo && sendMessage('Gere o resumo executivo diário.'))}
             dailySummaryPending={dailySummary.isPending}
           />
+        </TabsContent>
+
+        <TabsContent value="ceo">
+          <CEOBriefPanel />
         </TabsContent>
 
         <TabsContent value="insights" className="space-y-4">
