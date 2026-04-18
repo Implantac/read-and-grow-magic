@@ -2820,41 +2820,57 @@ export type Database = {
       financial_categories: {
         Row: {
           active: boolean
+          chart_account_id: string | null
           code: string
           color: string | null
           company_id: string | null
           created_at: string
+          dre_section: string | null
           id: string
           name: string
           parent_id: string | null
+          sort_order: number | null
           type: string
           updated_at: string
         }
         Insert: {
           active?: boolean
+          chart_account_id?: string | null
           code: string
           color?: string | null
           company_id?: string | null
           created_at?: string
+          dre_section?: string | null
           id?: string
           name: string
           parent_id?: string | null
+          sort_order?: number | null
           type: string
           updated_at?: string
         }
         Update: {
           active?: boolean
+          chart_account_id?: string | null
           code?: string
           color?: string | null
           company_id?: string | null
           created_at?: string
+          dre_section?: string | null
           id?: string
           name?: string
           parent_id?: string | null
+          sort_order?: number | null
           type?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "financial_categories_chart_account_id_fkey"
+            columns: ["chart_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "financial_categories_company_id_fkey"
             columns: ["company_id"]
@@ -2877,6 +2893,7 @@ export type Database = {
           bank_account_id: string | null
           bank_transaction_id: string | null
           category_id: string | null
+          chart_account_id: string | null
           company_id: string | null
           created_at: string
           created_by: string | null
@@ -2896,6 +2913,7 @@ export type Database = {
           bank_account_id?: string | null
           bank_transaction_id?: string | null
           category_id?: string | null
+          chart_account_id?: string | null
           company_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -2915,6 +2933,7 @@ export type Database = {
           bank_account_id?: string | null
           bank_transaction_id?: string | null
           category_id?: string | null
+          chart_account_id?: string | null
           company_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -2949,6 +2968,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "financial_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_ledger_chart_account_id_fkey"
+            columns: ["chart_account_id"]
+            isOneToOne: false
+            referencedRelation: "chart_of_accounts"
             referencedColumns: ["id"]
           },
           {
@@ -10840,6 +10866,22 @@ export type Database = {
     }
     Functions: {
       backfill_default_lots: { Args: never; Returns: Json }
+      get_dre: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          category_id: string
+          category_name: string
+          section: string
+          total: number
+        }[]
+      }
+      get_dre_summary: {
+        Args: { _from: string; _to: string }
+        Returns: {
+          section: string
+          total: number
+        }[]
+      }
       get_user_company_id: { Args: { _user_id: string }; Returns: string }
       get_user_role: {
         Args: { _user_id: string }
