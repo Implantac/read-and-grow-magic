@@ -2935,6 +2935,57 @@ export type Database = {
           },
         ]
       }
+      financial_health_scores: {
+        Row: {
+          cash_runway_days: number | null
+          cashflow_score: number | null
+          created_at: string
+          current_ratio: number | null
+          delinquency_rate: number | null
+          delinquency_score: number | null
+          details: Json | null
+          growth_score: number | null
+          id: string
+          liquidity_score: number | null
+          recommendations: Json | null
+          reference_date: string
+          score_grade: string
+          score_total: number
+        }
+        Insert: {
+          cash_runway_days?: number | null
+          cashflow_score?: number | null
+          created_at?: string
+          current_ratio?: number | null
+          delinquency_rate?: number | null
+          delinquency_score?: number | null
+          details?: Json | null
+          growth_score?: number | null
+          id?: string
+          liquidity_score?: number | null
+          recommendations?: Json | null
+          reference_date?: string
+          score_grade: string
+          score_total: number
+        }
+        Update: {
+          cash_runway_days?: number | null
+          cashflow_score?: number | null
+          created_at?: string
+          current_ratio?: number | null
+          delinquency_rate?: number | null
+          delinquency_score?: number | null
+          details?: Json | null
+          growth_score?: number | null
+          id?: string
+          liquidity_score?: number | null
+          recommendations?: Json | null
+          reference_date?: string
+          score_grade?: string
+          score_total?: number
+        }
+        Relationships: []
+      }
       financial_ledger: {
         Row: {
           amount: number
@@ -3033,6 +3084,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      financial_predictive_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_type: string
+          created_at: string
+          description: string | null
+          details: Json | null
+          id: string
+          predicted_amount: number | null
+          predicted_date: string | null
+          recommended_action: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          title: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type: string
+          created_at?: string
+          description?: string | null
+          details?: Json | null
+          id?: string
+          predicted_amount?: number | null
+          predicted_date?: string | null
+          recommended_action?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          created_at?: string
+          description?: string | null
+          details?: Json | null
+          id?: string
+          predicted_amount?: number | null
+          predicted_date?: string | null
+          recommended_action?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
       }
       fiscal_reports: {
         Row: {
@@ -4507,6 +4609,68 @@ export type Database = {
         }
         Relationships: []
       }
+      open_finance_connections: {
+        Row: {
+          access_token_encrypted: string | null
+          active: boolean
+          bank_account_id: string | null
+          bank_name: string | null
+          consent_id: string | null
+          created_at: string
+          id: string
+          last_sync_at: string | null
+          last_sync_status: string | null
+          metadata: Json | null
+          provider: string
+          refresh_token_encrypted: string | null
+          sync_frequency_minutes: number | null
+          token_expires_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token_encrypted?: string | null
+          active?: boolean
+          bank_account_id?: string | null
+          bank_name?: string | null
+          consent_id?: string | null
+          created_at?: string
+          id?: string
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          metadata?: Json | null
+          provider: string
+          refresh_token_encrypted?: string | null
+          sync_frequency_minutes?: number | null
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token_encrypted?: string | null
+          active?: boolean
+          bank_account_id?: string | null
+          bank_name?: string | null
+          consent_id?: string | null
+          created_at?: string
+          id?: string
+          last_sync_at?: string | null
+          last_sync_status?: string | null
+          metadata?: Json | null
+          provider?: string
+          refresh_token_encrypted?: string | null
+          sync_frequency_minutes?: number | null
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "open_finance_connections_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_approvals: {
         Row: {
           approval_type: string
@@ -5223,6 +5387,142 @@ export type Database = {
           strategy?: string
           updated_at?: string
           wave_number?: string
+        }
+        Relationships: []
+      }
+      pix_charges: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          client_document: string | null
+          client_id: string | null
+          client_name: string | null
+          copy_paste: string | null
+          created_at: string
+          description: string | null
+          end_to_end_id: string | null
+          expires_at: string | null
+          external_id: string | null
+          id: string
+          metadata: Json | null
+          paid_at: string | null
+          payer_document: string | null
+          payer_name: string | null
+          qr_code: string | null
+          qr_code_image: string | null
+          receivable_id: string | null
+          status: string
+          txid: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          bank_account_id?: string | null
+          client_document?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          copy_paste?: string | null
+          created_at?: string
+          description?: string | null
+          end_to_end_id?: string | null
+          expires_at?: string | null
+          external_id?: string | null
+          id?: string
+          metadata?: Json | null
+          paid_at?: string | null
+          payer_document?: string | null
+          payer_name?: string | null
+          qr_code?: string | null
+          qr_code_image?: string | null
+          receivable_id?: string | null
+          status?: string
+          txid?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          client_document?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          copy_paste?: string | null
+          created_at?: string
+          description?: string | null
+          end_to_end_id?: string | null
+          expires_at?: string | null
+          external_id?: string | null
+          id?: string
+          metadata?: Json | null
+          paid_at?: string | null
+          payer_document?: string | null
+          payer_name?: string | null
+          qr_code?: string | null
+          qr_code_image?: string | null
+          receivable_id?: string | null
+          status?: string
+          txid?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pix_charges_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pix_charges_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pix_charges_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_receivable"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pix_webhook_events: {
+        Row: {
+          created_at: string
+          end_to_end_id: string | null
+          error_message: string | null
+          event_id: string | null
+          id: string
+          payload: Json
+          processed: boolean
+          processed_at: string | null
+          signature: string | null
+          txid: string | null
+        }
+        Insert: {
+          created_at?: string
+          end_to_end_id?: string | null
+          error_message?: string | null
+          event_id?: string | null
+          id?: string
+          payload: Json
+          processed?: boolean
+          processed_at?: string | null
+          signature?: string | null
+          txid?: string | null
+        }
+        Update: {
+          created_at?: string
+          end_to_end_id?: string | null
+          error_message?: string | null
+          event_id?: string | null
+          id?: string
+          payload?: Json
+          processed?: boolean
+          processed_at?: string | null
+          signature?: string | null
+          txid?: string | null
         }
         Relationships: []
       }
@@ -10914,6 +11214,8 @@ export type Database = {
     }
     Functions: {
       backfill_default_lots: { Args: never; Returns: Json }
+      calculate_financial_health_score: { Args: never; Returns: Json }
+      detect_cashflow_risks: { Args: never; Returns: Json }
       get_dre: {
         Args: { _from: string; _to: string }
         Returns: {
@@ -10941,6 +11243,16 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      match_bank_transaction: { Args: { _bank_tx_id: string }; Returns: Json }
+      process_pix_payment: {
+        Args: {
+          _e2e_id: string
+          _payer_doc: string
+          _payer_name: string
+          _pix_charge_id: string
+        }
+        Returns: Json
       }
       recalc_bank_balance: {
         Args: { _bank_account_id: string }
