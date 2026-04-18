@@ -52,6 +52,7 @@ const BankAccountsPage = lazy(() => import("./pages/financeiro/BankAccounts"));
 const CostCentersPage = lazy(() => import("./pages/financeiro/CostCenters"));
 const RenegotiationsPage = lazy(() => import("./pages/financeiro/Renegotiations"));
 const DRELedgerPage = lazy(() => import("./pages/financeiro/DRELedger"));
+const FinancialAuditPage = lazy(() => import("./pages/financeiro/FinancialAudit"));
 
 // Accounting
 const ChartOfAccountsPage = lazy(() => import("./pages/contabilidade/ChartOfAccounts"));
@@ -243,6 +244,7 @@ const App = () => (
               <Route path="/financeiro/renegociacoes" element={<RenegotiationsPage />} />
               <Route path="/financeiro/conciliacao" element={<BankReconciliation />} />
               <Route path="/financeiro/dre" element={<DRELedgerPage />} />
+              <Route path="/financeiro/auditoria" element={<FinancialAuditPage />} />
               
               {/* Credit & Risk Module */}
               <Route path="/credito/dashboard" element={<RiskDashboardPage />} />
