@@ -123,6 +123,12 @@ export default function FinancialDashboard() {
         <KPICard title="Lucro Estimado" value={formatCompact(monthlyRevenue.length > 0 ? monthlyRevenue[monthlyRevenue.length - 1].lucro : 0)} subtitle="Mês atual" icon={<BarChart3 className="h-5 w-5" />} accentColor="primary" index={7} />
       </div>
 
+      {/* IA Financeira + Fluxo Real/Projetado */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <FinancialAIPanel />
+        <CashFlowPanel currentBalance={totalBankBalance} />
+      </div>
+
       {/* Revenue Trend */}
       <Card>
         <CardHeader><CardTitle className="text-base">Receitas vs Despesas (últimos 6 meses)</CardTitle></CardHeader>
