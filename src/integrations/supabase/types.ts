@@ -19,6 +19,7 @@ export type Database = {
           amount: number
           bank_account_id: string | null
           category: string
+          category_id: string | null
           company_id: string | null
           cost_center_id: string | null
           created_at: string
@@ -37,6 +38,7 @@ export type Database = {
           payment_date: string | null
           payment_method: string | null
           penalty: number | null
+          recurrence: string | null
           status: string
           supplier: string
           total_installments: number | null
@@ -46,6 +48,7 @@ export type Database = {
           amount?: number
           bank_account_id?: string | null
           category?: string
+          category_id?: string | null
           company_id?: string | null
           cost_center_id?: string | null
           created_at?: string
@@ -64,6 +67,7 @@ export type Database = {
           payment_date?: string | null
           payment_method?: string | null
           penalty?: number | null
+          recurrence?: string | null
           status?: string
           supplier: string
           total_installments?: number | null
@@ -73,6 +77,7 @@ export type Database = {
           amount?: number
           bank_account_id?: string | null
           category?: string
+          category_id?: string | null
           company_id?: string | null
           cost_center_id?: string | null
           created_at?: string
@@ -91,6 +96,7 @@ export type Database = {
           payment_date?: string | null
           payment_method?: string | null
           penalty?: number | null
+          recurrence?: string | null
           status?: string
           supplier?: string
           total_installments?: number | null
@@ -102,6 +108,13 @@ export type Database = {
             columns: ["bank_account_id"]
             isOneToOne: false
             referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounts_payable_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "financial_categories"
             referencedColumns: ["id"]
           },
           {
@@ -123,7 +136,9 @@ export type Database = {
       accounts_receivable: {
         Row: {
           amount: number
+          bank_account_id: string | null
           category: string
+          category_id: string | null
           client_id: string | null
           client_name: string
           company_id: string | null
@@ -145,13 +160,16 @@ export type Database = {
           payment_date: string | null
           payment_method: string | null
           penalty: number | null
+          recurrence: string | null
           status: string
           total_installments: number | null
           updated_at: string
         }
         Insert: {
           amount?: number
+          bank_account_id?: string | null
           category?: string
+          category_id?: string | null
           client_id?: string | null
           client_name: string
           company_id?: string | null
@@ -173,13 +191,16 @@ export type Database = {
           payment_date?: string | null
           payment_method?: string | null
           penalty?: number | null
+          recurrence?: string | null
           status?: string
           total_installments?: number | null
           updated_at?: string
         }
         Update: {
           amount?: number
+          bank_account_id?: string | null
           category?: string
+          category_id?: string | null
           client_id?: string | null
           client_name?: string
           company_id?: string | null
@@ -201,11 +222,26 @@ export type Database = {
           payment_date?: string | null
           payment_method?: string | null
           penalty?: number | null
+          recurrence?: string | null
           status?: string
           total_installments?: number | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "accounts_receivable_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounts_receivable_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "financial_categories"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "accounts_receivable_client_id_fkey"
             columns: ["client_id"]
@@ -2660,6 +2696,85 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_advances: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          client_id: string | null
+          company_id: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          party_name: string
+          party_type: string
+          payment_method: string | null
+          received_date: string
+          remaining_amount: number | null
+          status: string
+          supplier_id: string | null
+          updated_at: string
+          used_amount: number
+        }
+        Insert: {
+          amount: number
+          bank_account_id?: string | null
+          client_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          party_name: string
+          party_type: string
+          payment_method?: string | null
+          received_date?: string
+          remaining_amount?: number | null
+          status?: string
+          supplier_id?: string | null
+          updated_at?: string
+          used_amount?: number
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          client_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          party_name?: string
+          party_type?: string
+          payment_method?: string | null
+          received_date?: string
+          remaining_amount?: number | null
+          status?: string
+          supplier_id?: string | null
+          updated_at?: string
+          used_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_advances_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_advances_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_advances_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_alerts: {
         Row: {
           alert_type: string
@@ -2701,6 +2816,149 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      financial_categories: {
+        Row: {
+          active: boolean
+          code: string
+          color: string | null
+          company_id: string | null
+          created_at: string
+          id: string
+          name: string
+          parent_id: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          color?: string | null
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          parent_id?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          color?: string | null
+          company_id?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          parent_id?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_categories_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "financial_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_ledger: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          bank_transaction_id: string | null
+          category_id: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          entry_date: string
+          id: string
+          notes: string | null
+          payment_method: string | null
+          reconciled: boolean
+          reference: string | null
+          source: string
+          source_id: string | null
+          type: string
+        }
+        Insert: {
+          amount: number
+          bank_account_id?: string | null
+          bank_transaction_id?: string | null
+          category_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description: string
+          entry_date?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          reconciled?: boolean
+          reference?: string | null
+          source: string
+          source_id?: string | null
+          type: string
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          bank_transaction_id?: string | null
+          category_id?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          entry_date?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string | null
+          reconciled?: boolean
+          reference?: string | null
+          source?: string
+          source_id?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_ledger_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_ledger_bank_transaction_id_fkey"
+            columns: ["bank_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "bank_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_ledger_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "financial_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_ledger_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fiscal_reports: {
         Row: {
@@ -10593,6 +10851,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      recalc_bank_balance: {
+        Args: { _bank_account_id: string }
+        Returns: number
       }
       validate_lot_stock_consistency: {
         Args: never

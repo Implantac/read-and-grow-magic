@@ -14,6 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { format, differenceInDays, eachMonthOfInterval, startOfMonth, endOfMonth, subMonths, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { FinancialAIPanel } from '@/components/financeiro/FinancialAIPanel';
+import { CashFlowPanel } from '@/components/financeiro/CashFlowPanel';
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -119,6 +121,12 @@ export default function FinancialDashboard() {
         <KPICard title="Projeção 30d" value={formatCompact(projectedBalance)} subtitle="Saldo projetado" icon={<Wallet className="h-5 w-5" />} accentColor={projectedBalance >= 0 ? 'info' : 'danger'} index={5} />
         <KPICard title="CP Vencido" value={formatCompact(overduePayable)} subtitle="Fornecedores" icon={<AlertTriangle className="h-5 w-5" />} accentColor="warning" index={6} />
         <KPICard title="Lucro Estimado" value={formatCompact(monthlyRevenue.length > 0 ? monthlyRevenue[monthlyRevenue.length - 1].lucro : 0)} subtitle="Mês atual" icon={<BarChart3 className="h-5 w-5" />} accentColor="primary" index={7} />
+      </div>
+
+      {/* IA Financeira + Fluxo Real/Projetado */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <FinancialAIPanel />
+        <CashFlowPanel currentBalance={totalBankBalance} />
       </div>
 
       {/* Revenue Trend */}
