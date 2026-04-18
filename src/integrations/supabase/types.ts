@@ -2817,6 +2817,54 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_audit_logs: {
+        Row: {
+          affected_amount: number | null
+          affected_count: number | null
+          audit_run_id: string
+          auto_fixed: boolean | null
+          category: string
+          check_name: string
+          created_at: string
+          description: string
+          details: Json | null
+          id: string
+          level: string
+          resolved_at: string | null
+          status: string
+        }
+        Insert: {
+          affected_amount?: number | null
+          affected_count?: number | null
+          audit_run_id: string
+          auto_fixed?: boolean | null
+          category: string
+          check_name: string
+          created_at?: string
+          description: string
+          details?: Json | null
+          id?: string
+          level: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Update: {
+          affected_amount?: number | null
+          affected_count?: number | null
+          audit_run_id?: string
+          auto_fixed?: boolean | null
+          category?: string
+          check_name?: string
+          created_at?: string
+          description?: string
+          details?: Json | null
+          id?: string
+          level?: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       financial_categories: {
         Row: {
           active: boolean
@@ -10898,6 +10946,7 @@ export type Database = {
         Args: { _bank_account_id: string }
         Returns: number
       }
+      run_financial_audit: { Args: { _mode?: string }; Returns: Json }
       validate_lot_stock_consistency: {
         Args: never
         Returns: {
