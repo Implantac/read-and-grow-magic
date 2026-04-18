@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useBankAccounts, useCreateBankAccount } from '@/hooks/useBankAccounts';
+import { TransferDialog } from '@/components/financeiro/TransferDialog';
 
 const formatCurrency = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
@@ -33,6 +34,7 @@ export default function BankAccounts() {
   return (
     <PageContainer>
       <PageHeader title="Tesouraria" description="Controle de contas bancárias e saldos">
+        <TransferDialog />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild><Button className="gap-2"><Plus className="h-4 w-4" />Nova Conta</Button></DialogTrigger>
           <DialogContent>
