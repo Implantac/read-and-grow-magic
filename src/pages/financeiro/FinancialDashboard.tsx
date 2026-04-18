@@ -14,6 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { format, differenceInDays, eachMonthOfInterval, startOfMonth, endOfMonth, subMonths, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { FinancialAIPanel } from '@/components/financeiro/FinancialAIPanel';
+import { CashFlowPanel } from '@/components/financeiro/CashFlowPanel';
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
