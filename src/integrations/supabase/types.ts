@@ -2935,6 +2935,51 @@ export type Database = {
           },
         ]
       }
+      financial_fraud_rules: {
+        Row: {
+          action: string
+          config: Json | null
+          created_at: string
+          description: string | null
+          enabled: boolean
+          id: string
+          name: string
+          rule_key: string
+          severity: string
+          threshold: number | null
+          updated_at: string
+          window_minutes: number | null
+        }
+        Insert: {
+          action?: string
+          config?: Json | null
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name: string
+          rule_key: string
+          severity?: string
+          threshold?: number | null
+          updated_at?: string
+          window_minutes?: number | null
+        }
+        Update: {
+          action?: string
+          config?: Json | null
+          created_at?: string
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name?: string
+          rule_key?: string
+          severity?: string
+          threshold?: number | null
+          updated_at?: string
+          window_minutes?: number | null
+        }
+        Relationships: []
+      }
       financial_health_scores: {
         Row: {
           cash_runway_days: number | null
@@ -3133,6 +3178,141 @@ export type Database = {
           severity?: string
           status?: string
           title?: string
+        }
+        Relationships: []
+      }
+      financial_risk_profiles: {
+        Row: {
+          anomalies_count: number
+          avg_ticket: number
+          behavior_signature: Json | null
+          blocked_count: number
+          created_at: string
+          entity_id: string | null
+          entity_label: string | null
+          entity_type: string
+          id: string
+          last_anomaly_at: string | null
+          last_transaction_at: string | null
+          max_ticket: number
+          notes: string | null
+          risk_level: string
+          risk_score: number
+          total_transactions: number
+          total_volume: number
+          updated_at: string
+        }
+        Insert: {
+          anomalies_count?: number
+          avg_ticket?: number
+          behavior_signature?: Json | null
+          blocked_count?: number
+          created_at?: string
+          entity_id?: string | null
+          entity_label?: string | null
+          entity_type: string
+          id?: string
+          last_anomaly_at?: string | null
+          last_transaction_at?: string | null
+          max_ticket?: number
+          notes?: string | null
+          risk_level?: string
+          risk_score?: number
+          total_transactions?: number
+          total_volume?: number
+          updated_at?: string
+        }
+        Update: {
+          anomalies_count?: number
+          avg_ticket?: number
+          behavior_signature?: Json | null
+          blocked_count?: number
+          created_at?: string
+          entity_id?: string | null
+          entity_label?: string | null
+          entity_type?: string
+          id?: string
+          last_anomaly_at?: string | null
+          last_transaction_at?: string | null
+          max_ticket?: number
+          notes?: string | null
+          risk_level?: string
+          risk_score?: number
+          total_transactions?: number
+          total_volume?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      financial_security_logs: {
+        Row: {
+          amount: number | null
+          category: string
+          created_at: string
+          decision: string | null
+          description: string | null
+          details: Json | null
+          entity_id: string | null
+          entity_type: string | null
+          event_type: string
+          id: string
+          reference_id: string | null
+          reference_table: string | null
+          resolved: boolean
+          resolved_at: string | null
+          resolved_by: string | null
+          risk_score: number | null
+          severity: string
+          source_ip: string | null
+          title: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          category?: string
+          created_at?: string
+          decision?: string | null
+          description?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type: string
+          id?: string
+          reference_id?: string | null
+          reference_table?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          risk_score?: number | null
+          severity?: string
+          source_ip?: string | null
+          title: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          category?: string
+          created_at?: string
+          decision?: string | null
+          description?: string | null
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          event_type?: string
+          id?: string
+          reference_id?: string | null
+          reference_table?: string | null
+          resolved?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
+          risk_score?: number | null
+          severity?: string
+          source_ip?: string | null
+          title?: string
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -11216,6 +11396,16 @@ export type Database = {
       backfill_default_lots: { Args: never; Returns: Json }
       calculate_financial_health_score: { Args: never; Returns: Json }
       detect_cashflow_risks: { Args: never; Returns: Json }
+      evaluate_transaction_risk: {
+        Args: {
+          _amount: number
+          _entity_id?: string
+          _entity_type?: string
+          _payment_method?: string
+          _source?: string
+        }
+        Returns: Json
+      }
       get_dre: {
         Args: { _from: string; _to: string }
         Returns: {
@@ -11259,6 +11449,16 @@ export type Database = {
         Returns: number
       }
       run_financial_audit: { Args: { _mode?: string }; Returns: Json }
+      update_entity_risk_profile: {
+        Args: {
+          _amount: number
+          _entity_id: string
+          _entity_label: string
+          _entity_type: string
+          _is_anomaly?: boolean
+        }
+        Returns: undefined
+      }
       validate_lot_stock_consistency: {
         Args: never
         Returns: {

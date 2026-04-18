@@ -55,6 +55,9 @@ const DRELedgerPage = lazy(() => import("./pages/financeiro/DRELedger"));
 const FinancialAuditPage = lazy(() => import("./pages/financeiro/FinancialAudit"));
 const PixChargesPage = lazy(() => import("./pages/financeiro/PixCharges"));
 const FinancialIntelligencePage = lazy(() => import("./pages/financeiro/FinancialIntelligence"));
+const FinancialBIPage = lazy(() => import("./pages/financeiro/FinancialBI"));
+const FinancialAntifraudPage = lazy(() => import("./pages/financeiro/FinancialAntifraud"));
+const BankStatementImportPage = lazy(() => import("./pages/financeiro/BankStatementImport"));
 
 // Accounting
 const ChartOfAccountsPage = lazy(() => import("./pages/contabilidade/ChartOfAccounts"));
@@ -249,6 +252,9 @@ const App = () => (
               <Route path="/financeiro/auditoria" element={<FinancialAuditPage />} />
               <Route path="/financeiro/pix" element={<PixChargesPage />} />
               <Route path="/financeiro/inteligencia" element={<FinancialIntelligencePage />} />
+              <Route path="/financeiro/bi" element={<FinancialBIPage />} />
+              <Route path="/financeiro/antifraude" element={<FinancialAntifraudPage />} />
+              <Route path="/financeiro/importar-extrato" element={<BankStatementImportPage />} />
               
               {/* Credit & Risk Module */}
               <Route path="/credito/dashboard" element={<RiskDashboardPage />} />
