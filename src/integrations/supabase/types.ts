@@ -26,6 +26,7 @@ export type Database = {
           description: string
           discount_amount: number | null
           due_date: string
+          expected_payment_date: string | null
           expense_type: string | null
           id: string
           installment_number: number | null
@@ -38,6 +39,7 @@ export type Database = {
           payment_date: string | null
           payment_method: string | null
           penalty: number | null
+          priority: string | null
           recurrence: string | null
           status: string
           supplier: string
@@ -55,6 +57,7 @@ export type Database = {
           description: string
           discount_amount?: number | null
           due_date: string
+          expected_payment_date?: string | null
           expense_type?: string | null
           id?: string
           installment_number?: number | null
@@ -67,6 +70,7 @@ export type Database = {
           payment_date?: string | null
           payment_method?: string | null
           penalty?: number | null
+          priority?: string | null
           recurrence?: string | null
           status?: string
           supplier: string
@@ -84,6 +88,7 @@ export type Database = {
           description?: string
           discount_amount?: number | null
           due_date?: string
+          expected_payment_date?: string | null
           expense_type?: string | null
           id?: string
           installment_number?: number | null
@@ -96,6 +101,7 @@ export type Database = {
           payment_date?: string | null
           payment_method?: string | null
           penalty?: number | null
+          priority?: string | null
           recurrence?: string | null
           status?: string
           supplier?: string
@@ -146,6 +152,7 @@ export type Database = {
           description: string
           discount_amount: number | null
           due_date: string
+          expected_date: string | null
           id: string
           installment_number: number | null
           interest: number | null
@@ -177,6 +184,7 @@ export type Database = {
           description: string
           discount_amount?: number | null
           due_date: string
+          expected_date?: string | null
           id?: string
           installment_number?: number | null
           interest?: number | null
@@ -208,6 +216,7 @@ export type Database = {
           description?: string
           discount_amount?: number | null
           due_date?: string
+          expected_date?: string | null
           id?: string
           installment_number?: number | null
           interest?: number | null
@@ -1068,6 +1077,80 @@ export type Database = {
           type?: string
         }
         Relationships: []
+      }
+      bank_transfers: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          description: string | null
+          fees: number | null
+          from_account_id: string
+          id: string
+          inflow_ledger_id: string | null
+          outflow_ledger_id: string | null
+          status: string
+          to_account_id: string
+          transfer_date: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          fees?: number | null
+          from_account_id: string
+          id?: string
+          inflow_ledger_id?: string | null
+          outflow_ledger_id?: string | null
+          status?: string
+          to_account_id: string
+          transfer_date?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          fees?: number | null
+          from_account_id?: string
+          id?: string
+          inflow_ledger_id?: string | null
+          outflow_ledger_id?: string | null
+          status?: string
+          to_account_id?: string
+          transfer_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_transfers_from_account_id_fkey"
+            columns: ["from_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_transfers_inflow_ledger_id_fkey"
+            columns: ["inflow_ledger_id"]
+            isOneToOne: false
+            referencedRelation: "financial_ledger"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_transfers_outflow_ledger_id_fkey"
+            columns: ["outflow_ledger_id"]
+            isOneToOne: false
+            referencedRelation: "financial_ledger"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_transfers_to_account_id_fkey"
+            columns: ["to_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       billing_queue: {
         Row: {
@@ -2696,6 +2779,63 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_advance_transactions: {
+        Row: {
+          advance_id: string
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          ledger_id: string | null
+          notes: string | null
+          reference_id: string | null
+          reference_type: string | null
+          transaction_date: string
+          transaction_type: string
+        }
+        Insert: {
+          advance_id: string
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          ledger_id?: string | null
+          notes?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_date?: string
+          transaction_type: string
+        }
+        Update: {
+          advance_id?: string
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          ledger_id?: string | null
+          notes?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_date?: string
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_advance_transactions_advance_id_fkey"
+            columns: ["advance_id"]
+            isOneToOne: false
+            referencedRelation: "financial_advances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_advance_transactions_ledger_id_fkey"
+            columns: ["ledger_id"]
+            isOneToOne: false
+            referencedRelation: "financial_ledger"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_advances: {
         Row: {
           amount: number
@@ -3130,6 +3270,39 @@ export type Database = {
           },
         ]
       }
+      financial_operations_log: {
+        Row: {
+          amount: number | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          operation_type: string
+          payload: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          operation_type: string
+          payload?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          operation_type?: string
+          payload?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       financial_predictive_alerts: {
         Row: {
           acknowledged_at: string | null
@@ -3315,6 +3488,94 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      financial_settlements: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          created_at: string
+          created_by: string | null
+          discount: number | null
+          id: string
+          interest: number | null
+          ledger_id: string | null
+          notes: string | null
+          payment_method: string | null
+          payment_record_id: string | null
+          penalty: number | null
+          reversed_at: string | null
+          reversed_by: string | null
+          settlement_date: string
+          source_id: string
+          source_type: string
+          status: string
+          total_settled: number
+        }
+        Insert: {
+          amount: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount?: number | null
+          id?: string
+          interest?: number | null
+          ledger_id?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          payment_record_id?: string | null
+          penalty?: number | null
+          reversed_at?: string | null
+          reversed_by?: string | null
+          settlement_date?: string
+          source_id: string
+          source_type: string
+          status?: string
+          total_settled: number
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          discount?: number | null
+          id?: string
+          interest?: number | null
+          ledger_id?: string | null
+          notes?: string | null
+          payment_method?: string | null
+          payment_record_id?: string | null
+          penalty?: number | null
+          reversed_at?: string | null
+          reversed_by?: string | null
+          settlement_date?: string
+          source_id?: string
+          source_type?: string
+          status?: string
+          total_settled?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_settlements_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_settlements_ledger_id_fkey"
+            columns: ["ledger_id"]
+            isOneToOne: false
+            referencedRelation: "financial_ledger"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_settlements_payment_record_id_fkey"
+            columns: ["payment_record_id"]
+            isOneToOne: false
+            referencedRelation: "payment_records"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fiscal_reports: {
         Row: {
@@ -11448,7 +11709,20 @@ export type Database = {
         Args: { _bank_account_id: string }
         Returns: number
       }
+      reverse_settlement: {
+        Args: { _reason?: string; _settlement_id: string }
+        Returns: Json
+      }
       run_financial_audit: { Args: { _mode?: string }; Returns: Json }
+      transfer_between_accounts: {
+        Args: {
+          _amount: number
+          _description?: string
+          _from_account: string
+          _to_account: string
+        }
+        Returns: Json
+      }
       update_entity_risk_profile: {
         Args: {
           _amount: number
@@ -11458,6 +11732,16 @@ export type Database = {
           _is_anomaly?: boolean
         }
         Returns: undefined
+      }
+      use_advance: {
+        Args: {
+          _advance_id: string
+          _amount: number
+          _notes?: string
+          _source_id: string
+          _source_type: string
+        }
+        Returns: Json
       }
       validate_lot_stock_consistency: {
         Args: never
