@@ -1,296 +1,424 @@
-import { useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { PageLoading } from '@/components/shared/PageLoading';
-import { KPICard } from '@/components/shared/KPICard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
+  PieChart, Pie, Cell, Legend, ReferenceLine,
+} from 'recharts';
+import {
+  Wallet, ArrowDownCircle, ArrowUpCircle, TrendingUp, AlertTriangle,
+  Sparkles, Target, RefreshCw, ArrowRight,
+} from 'lucide-react';
+import { useBankAccounts } from '@/hooks/useBankAccounts';
+import { useFinancialLedger, type LedgerEntryRow } from '@/hooks/useFinancialLedger';
+import { useFinancialCategories } from '@/hooks/useFinancialCategories';
+import { useFinancialInsights } from '@/hooks/useFinancialInsights';
 import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/useAccountsPayable';
-import { useCashFlowEntries } from '@/hooks/useCashFlow';
-import { useBankAccounts } from '@/hooks/useBankAccounts';
-import { DollarSign, TrendingUp, TrendingDown, AlertTriangle, Wallet, Users, Building2, BarChart3 } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
-import { format, differenceInDays, eachMonthOfInterval, startOfMonth, endOfMonth, subMonths, isWithinInterval } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-import { FinancialAIPanel } from '@/components/financeiro/FinancialAIPanel';
-import { CashFlowPanel } from '@/components/financeiro/CashFlowPanel';
 
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-const formatCompact = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(value);
+const fmtBRL = (v: number) =>
+  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v ?? 0);
+const fmtCompact = (v: number) =>
+  new Intl.NumberFormat('pt-BR', { notation: 'compact', maximumFractionDigits: 1 }).format(v ?? 0);
+const fmtDate = (s: string) => new Date(s).toLocaleDateString('pt-BR');
+const isoDay = (d: Date) => d.toISOString().slice(0, 10);
 
-const AGING_BUCKETS = [
-  { label: '1-7 dias', min: 1, max: 7, color: 'hsl(var(--chart-1))' },
-  { label: '8-15 dias', min: 8, max: 15, color: 'hsl(var(--chart-2))' },
-  { label: '16-30 dias', min: 16, max: 30, color: 'hsl(var(--chart-3))' },
-  { label: '31-60 dias', min: 31, max: 60, color: 'hsl(var(--chart-4))' },
-  { label: '+60 dias', min: 61, max: 9999, color: 'hsl(var(--chart-5))' },
-];
+type RangePreset = '30' | 'mtd' | '90';
+
+function getRange(preset: RangePreset): { from: string; to: string; label: string } {
+  const today = new Date();
+  const to = isoDay(today);
+  if (preset === 'mtd') {
+    const first = new Date(today.getFullYear(), today.getMonth(), 1);
+    return { from: isoDay(first), to, label: 'Mês atual' };
+  }
+  if (preset === '90') {
+    const d = new Date(today); d.setDate(d.getDate() - 90);
+    return { from: isoDay(d), to, label: 'Últimos 90 dias' };
+  }
+  const d = new Date(today); d.setDate(d.getDate() - 30);
+  return { from: isoDay(d), to, label: 'Últimos 30 dias' };
+}
+
+const SEVERITY_BADGE: Record<string, { bg: string; label: string }> = {
+  critical: { bg: 'bg-destructive text-destructive-foreground', label: 'Crítico' },
+  high: { bg: 'bg-destructive/80 text-destructive-foreground', label: 'Alto' },
+  medium: { bg: 'bg-warning/80 text-warning-foreground', label: 'Médio' },
+  low: { bg: 'bg-muted text-muted-foreground', label: 'Baixo' },
+};
 
 export default function FinancialDashboard() {
-  const { data: receivables = [], isLoading: loadingR } = useAccountsReceivable();
-  const { data: payables = [], isLoading: loadingP } = useAccountsPayable();
-  const { data: cashFlow = [], isLoading: loadingCF } = useCashFlowEntries();
-  const { data: bankAccounts = [], isLoading: loadingBA } = useBankAccounts();
+  const [preset, setPreset] = useState<RangePreset>('30');
+  const range = useMemo(() => getRange(preset), [preset]);
 
-  const now = new Date();
+  const { data: banks = [], isLoading: loadingBanks } = useBankAccounts();
+  const { data: categories = [] } = useFinancialCategories();
+  const { data: ledger = [], isLoading: loadingLedger, refetch: refetchLedger } =
+    useFinancialLedger({ from: range.from, to: range.to });
+  const { data: insights, isLoading: loadingInsights, refetch: refetchInsights } = useFinancialInsights();
+  const { data: receivables = [] } = useAccountsReceivable();
+  const { data: payables = [] } = useAccountsPayable();
 
-  // KPIs
-  const totalReceivable = receivables.filter(r => r.status !== 'paid' && r.status !== 'cancelled').reduce((s, r) => s + Number(r.open_amount ?? r.amount), 0);
-  const totalPayable = payables.filter(p => p.status !== 'paid' && p.status !== 'cancelled').reduce((s, p) => s + Number(p.open_amount ?? p.amount), 0);
-  const overdueReceivable = receivables.filter(r => r.status !== 'paid' && r.status !== 'cancelled' && new Date(r.due_date) < now).reduce((s, r) => s + Number(r.open_amount ?? r.amount), 0);
-  const overduePayable = payables.filter(p => p.status !== 'paid' && p.status !== 'cancelled' && new Date(p.due_date) < now).reduce((s, p) => s + Number(p.open_amount ?? p.amount), 0);
+  const currentBalance = useMemo(
+    () => banks.reduce((s, b) => s + Number(b.balance ?? 0), 0),
+    [banks],
+  );
 
-  const totalBankBalance = bankAccounts.filter(b => b.active).reduce((s, b) => s + Number(b.balance), 0);
-  const netPosition = totalReceivable - totalPayable;
+  const { inflow, outflow, net } = useMemo(() => {
+    let i = 0, o = 0;
+    for (const e of ledger) {
+      if (e.type === 'inflow') i += Number(e.amount); else o += Number(e.amount);
+    }
+    return { inflow: i, outflow: o, net: i - o };
+  }, [ledger]);
 
-  // Projected 30d
-  const futureDate = new Date(now);
-  futureDate.setDate(futureDate.getDate() + 30);
-  const proj30Income = receivables.filter(r => r.status !== 'paid' && r.status !== 'cancelled' && new Date(r.due_date) <= futureDate).reduce((s, r) => s + Number(r.open_amount ?? r.amount), 0);
-  const proj30Expense = payables.filter(p => p.status !== 'paid' && p.status !== 'cancelled' && new Date(p.due_date) <= futureDate).reduce((s, p) => s + Number(p.open_amount ?? p.amount), 0);
-  const projectedBalance = totalBankBalance + proj30Income - proj30Expense;
-
-  // Aging List
-  const overdueItems = receivables.filter(r => r.status !== 'paid' && r.status !== 'cancelled' && new Date(r.due_date) < now);
-  const agingData = AGING_BUCKETS.map(bucket => {
-    const items = overdueItems.filter(r => {
-      const days = differenceInDays(now, new Date(r.due_date));
-      return days >= bucket.min && days <= bucket.max;
+  const cashflowSeries = useMemo(() => {
+    const map = new Map<string, { date: string; entradas: number; saidas: number; saldo: number; label: string }>();
+    const start = new Date(range.from);
+    const end = new Date(range.to);
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      const k = isoDay(d);
+      map.set(k, {
+        date: k, entradas: 0, saidas: 0, saldo: 0,
+        label: new Date(k).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+      });
+    }
+    for (const e of ledger) {
+      const k = e.entry_date.slice(0, 10);
+      const row = map.get(k);
+      if (!row) continue;
+      if (e.type === 'inflow') row.entradas += Number(e.amount);
+      else row.saidas += Number(e.amount);
+    }
+    let acc = 0;
+    return Array.from(map.values()).map(r => {
+      acc += r.entradas - r.saidas;
+      return { ...r, saldo: acc };
     });
-    return { name: bucket.label, value: items.reduce((s, r) => s + Number(r.open_amount ?? r.amount), 0), count: items.length, color: bucket.color };
-  });
+  }, [ledger, range]);
 
-  // Top devedores
-  const clientDebts = new Map<string, { name: string; total: number; count: number }>();
-  overdueItems.forEach(r => {
-    const existing = clientDebts.get(r.client_name) || { name: r.client_name, total: 0, count: 0 };
-    existing.total += Number(r.open_amount ?? r.amount);
-    existing.count += 1;
-    clientDebts.set(r.client_name, existing);
-  });
-  const topDebtors = Array.from(clientDebts.values()).sort((a, b) => b.total - a.total).slice(0, 5);
+  const categoryPie = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const e of ledger) {
+      if (e.type !== 'outflow') continue;
+      const cat = categories.find(c => c.id === e.category_id);
+      const name = cat?.name ?? 'Sem categoria';
+      m.set(name, (m.get(name) ?? 0) + Number(e.amount));
+    }
+    return Array.from(m.entries())
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 7);
+  }, [ledger, categories]);
 
-  // Despesas por categoria
-  const catMap = new Map<string, number>();
-  payables.filter(p => p.status !== 'cancelled').forEach(p => catMap.set(p.category, (catMap.get(p.category) || 0) + Number(p.amount)));
-  const expenseByCategory = Array.from(catMap.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
-  const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
+  const PIE_COLORS = [
+    'hsl(var(--primary))', 'hsl(var(--destructive))', 'hsl(var(--warning))',
+    'hsl(var(--success))', 'hsl(var(--accent))', 'hsl(var(--secondary))', 'hsl(var(--muted-foreground))',
+  ];
 
-  // Monthly revenue trend
-  const monthlyRevenue = useMemo(() => {
-    const months = eachMonthOfInterval({ start: subMonths(now, 5), end: now });
-    return months.map(m => {
-      const ms = startOfMonth(m);
-      const me = endOfMonth(m);
-      const received = receivables.filter(r => r.status === 'paid' && r.payment_date && isWithinInterval(new Date(r.payment_date), { start: ms, end: me })).reduce((s, r) => s + Number(r.paid_amount ?? r.amount), 0);
-      const paid = payables.filter(p => p.status === 'paid' && p.payment_date && isWithinInterval(new Date(p.payment_date), { start: ms, end: me })).reduce((s, p) => s + Number(p.paid_amount ?? p.amount), 0);
-      return { month: format(m, 'MMM/yy', { locale: ptBR }), receitas: received, despesas: paid, lucro: received - paid };
+  const projection = useMemo(() => {
+    const today = new Date();
+    const todayIso = isoDay(today);
+    const limits = [30, 60, 90].map(d => {
+      const x = new Date(today); x.setDate(x.getDate() + d);
+      return { days: d, iso: isoDay(x) };
     });
-  }, [receivables, payables]);
+    const rec = receivables.filter((r: any) => (r.status ?? 'pending') !== 'paid');
+    const pay = payables.filter((p: any) => (p.status ?? 'pending') !== 'paid');
+    const sumIn = (limit: string) =>
+      rec.filter((r: any) => {
+        const d = (r.dueDate ?? r.due_date ?? '').slice(0, 10);
+        return d >= todayIso && d <= limit;
+      }).reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
+    const sumOut = (limit: string) =>
+      pay.filter((p: any) => {
+        const d = (p.dueDate ?? p.due_date ?? '').slice(0, 10);
+        return d >= todayIso && d <= limit;
+      }).reduce((s: number, p: any) => s + Number(p.amount ?? 0), 0);
+    return limits.map(l => ({
+      label: `${l.days}d`,
+      saldo: currentBalance + sumIn(l.iso) - sumOut(l.iso),
+      entradas: sumIn(l.iso),
+      saidas: sumOut(l.iso),
+    }));
+  }, [receivables, payables, currentBalance]);
 
-  // DRE Gerencial simplificado
-  const dreData = useMemo(() => {
-    const paidReceivables = receivables.filter(r => r.status === 'paid');
-    const paidPayables = payables.filter(p => p.status === 'paid');
-    const totalRevenue = paidReceivables.reduce((s, r) => s + Number(r.paid_amount ?? r.amount), 0);
-    const totalCosts = paidPayables.filter(p => p.category === 'Fornecedores').reduce((s, p) => s + Number(p.paid_amount ?? p.amount), 0);
-    const grossProfit = totalRevenue - totalCosts;
-    const totalExpenses = paidPayables.filter(p => p.category !== 'Fornecedores').reduce((s, p) => s + Number(p.paid_amount ?? p.amount), 0);
-    const netProfit = grossProfit - totalExpenses;
-    const grossMargin = totalRevenue > 0 ? (grossProfit / totalRevenue * 100) : 0;
-    const netMargin = totalRevenue > 0 ? (netProfit / totalRevenue * 100) : 0;
-    return { totalRevenue, totalCosts, grossProfit, totalExpenses, netProfit, grossMargin, netMargin };
-  }, [receivables, payables]);
+  const projected30 = projection[0]?.saldo ?? currentBalance;
+  const handleRefresh = () => { refetchLedger(); refetchInsights(); };
 
-  if (loadingR || loadingP || loadingCF || loadingBA) return <PageLoading message="Carregando dashboard financeiro..." />;
+  if (loadingBanks && loadingLedger) {
+    return (
+      <PageContainer>
+        <Skeleton className="h-10 w-72" />
+        <div className="grid gap-4 md:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28" />)}
+        </div>
+        <Skeleton className="h-80" />
+      </PageContainer>
+    );
+  }
 
   return (
     <PageContainer>
-      <PageHeader title="Dashboard Financeiro" description="Visão gerencial completa do financeiro" />
+      <PageHeader
+        title="Painel Financeiro Executivo"
+        description={`Visão consolidada do ledger · ${range.label}`}
+      >
+        <Select value={preset} onValueChange={(v) => setPreset(v as RangePreset)}>
+          <SelectTrigger className="w-[180px]"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="30">Últimos 30 dias</SelectItem>
+            <SelectItem value="mtd">Mês atual</SelectItem>
+            <SelectItem value="90">Últimos 90 dias</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button variant="outline" size="sm" onClick={handleRefresh} className="gap-2">
+          <RefreshCw className="h-4 w-4" /> Atualizar
+        </Button>
+      </PageHeader>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-        <KPICard title="Saldo Bancário" value={formatCompact(totalBankBalance)} subtitle={`${bankAccounts.filter(b => b.active).length} contas`} icon={<Building2 className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="A Receber" value={formatCompact(totalReceivable)} subtitle={`${receivables.filter(r => r.status !== 'paid' && r.status !== 'cancelled').length} títulos`} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={1} />
-        <KPICard title="A Pagar" value={formatCompact(totalPayable)} subtitle={`${payables.filter(p => p.status !== 'paid' && p.status !== 'cancelled').length} títulos`} icon={<TrendingDown className="h-5 w-5" />} accentColor="warning" index={2} />
-        <KPICard title="Inadimplência" value={formatCompact(overdueReceivable)} subtitle={`${overdueItems.length} vencidos`} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={3} />
-        <KPICard title="Posição Líquida" value={formatCompact(netPosition)} subtitle="Receber - Pagar" icon={<DollarSign className="h-5 w-5" />} accentColor={netPosition >= 0 ? 'success' : 'danger'} index={4} />
-        <KPICard title="Projeção 30d" value={formatCompact(projectedBalance)} subtitle="Saldo projetado" icon={<Wallet className="h-5 w-5" />} accentColor={projectedBalance >= 0 ? 'info' : 'danger'} index={5} />
-        <KPICard title="CP Vencido" value={formatCompact(overduePayable)} subtitle="Fornecedores" icon={<AlertTriangle className="h-5 w-5" />} accentColor="warning" index={6} />
-        <KPICard title="Lucro Estimado" value={formatCompact(monthlyRevenue.length > 0 ? monthlyRevenue[monthlyRevenue.length - 1].lucro : 0)} subtitle="Mês atual" icon={<BarChart3 className="h-5 w-5" />} accentColor="primary" index={7} />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <KpiCard title="Saldo Atual" value={fmtBRL(currentBalance)}
+          subtitle={`${banks.length} contas ativas`}
+          icon={<Wallet className="h-5 w-5" />} tone={currentBalance < 0 ? 'danger' : 'primary'} />
+        <KpiCard title="Entradas" value={fmtBRL(inflow)} subtitle={range.label}
+          icon={<ArrowDownCircle className="h-5 w-5" />} tone="success" />
+        <KpiCard title="Saídas" value={fmtBRL(outflow)} subtitle={range.label}
+          icon={<ArrowUpCircle className="h-5 w-5" />} tone="warning" />
+        <KpiCard title="Saldo Projetado 30d" value={fmtBRL(projected30)}
+          subtitle={`Líquido período: ${fmtBRL(net)}`}
+          icon={<TrendingUp className="h-5 w-5" />} tone={projected30 < 0 ? 'danger' : 'success'} />
       </div>
 
-      {/* IA Financeira + Fluxo Real/Projetado */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        <FinancialAIPanel />
-        <CashFlowPanel currentBalance={totalBankBalance} />
-      </div>
-
-      {/* Revenue Trend */}
-      <Card>
-        <CardHeader><CardTitle className="text-base">Receitas vs Despesas (últimos 6 meses)</CardTitle></CardHeader>
-        <CardContent>
-          {monthlyRevenue.some(m => m.receitas > 0 || m.despesas > 0) ? (
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={monthlyRevenue}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                <YAxis tickFormatter={(v) => formatCompact(v)} tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(v: number) => formatCurrency(v)} />
-                <Bar dataKey="receitas" name="Receitas" fill="hsl(var(--success))" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="despesas" name="Despesas" fill="hsl(var(--destructive))" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-[280px] flex items-center justify-center text-muted-foreground">Sem dados realizados</div>
-          )}
-        </CardContent>
-      </Card>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader><CardTitle className="text-base">Aging List - Inadimplência</CardTitle></CardHeader>
-          <CardContent>
-            {agingData.some(d => d.value > 0) ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={agingData}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                  <YAxis tickFormatter={(v) => formatCompact(v)} tick={{ fontSize: 11 }} />
-                  <Tooltip formatter={(v: number) => formatCurrency(v)} />
-                  <Bar dataKey="value" name="Valor Vencido" radius={[4, 4, 0, 0]}>
-                    {agingData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[280px] flex items-center justify-center text-muted-foreground">Nenhuma inadimplência</div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader><CardTitle className="text-base">Despesas por Categoria</CardTitle></CardHeader>
-          <CardContent>
-            {expenseByCategory.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Pie data={expenseByCategory} cx="50%" cy="50%" outerRadius={100} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
-                    {expenseByCategory.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip formatter={(v: number) => formatCurrency(v)} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[280px] flex items-center justify-center text-muted-foreground">Nenhum dado</div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* DRE Gerencial */}
-      <Card>
-        <CardHeader><CardTitle className="text-base flex items-center gap-2"><BarChart3 className="h-4 w-4" /> DRE Gerencial Simplificado</CardTitle></CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Conta</TableHead>
-                <TableHead className="text-right">Valor</TableHead>
-                <TableHead className="text-right">%</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell className="font-semibold">Receita Bruta</TableCell>
-                <TableCell className="text-right font-medium">{formatCurrency(dreData.totalRevenue)}</TableCell>
-                <TableCell className="text-right text-muted-foreground">100%</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="pl-6">(-) Custo dos Produtos/Serviços</TableCell>
-                <TableCell className="text-right text-destructive">{formatCurrency(dreData.totalCosts)}</TableCell>
-                <TableCell className="text-right text-muted-foreground">{dreData.totalRevenue > 0 ? (dreData.totalCosts / dreData.totalRevenue * 100).toFixed(1) : '0'}%</TableCell>
-              </TableRow>
-              <TableRow className="bg-muted/50">
-                <TableCell className="font-semibold">= Lucro Bruto</TableCell>
-                <TableCell className={`text-right font-bold ${dreData.grossProfit >= 0 ? 'text-success' : 'text-destructive'}`}>{formatCurrency(dreData.grossProfit)}</TableCell>
-                <TableCell className="text-right font-medium">{dreData.grossMargin.toFixed(1)}%</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="pl-6">(-) Despesas Operacionais</TableCell>
-                <TableCell className="text-right text-destructive">{formatCurrency(dreData.totalExpenses)}</TableCell>
-                <TableCell className="text-right text-muted-foreground">{dreData.totalRevenue > 0 ? (dreData.totalExpenses / dreData.totalRevenue * 100).toFixed(1) : '0'}%</TableCell>
-              </TableRow>
-              <TableRow className="bg-muted/50 border-t-2">
-                <TableCell className="font-bold text-base">= Lucro Líquido</TableCell>
-                <TableCell className={`text-right font-bold text-base ${dreData.netProfit >= 0 ? 'text-success' : 'text-destructive'}`}>{formatCurrency(dreData.netProfit)}</TableCell>
-                <TableCell className="text-right font-bold">{dreData.netMargin.toFixed(1)}%</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      {/* Bank Accounts Summary */}
-      {bankAccounts.length > 0 && (
-        <Card>
-          <CardHeader><CardTitle className="text-base flex items-center gap-2"><Building2 className="h-4 w-4" /> Contas Bancárias</CardTitle></CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Conta</TableHead>
-                  <TableHead>Banco</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead className="text-right">Saldo</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {bankAccounts.map(ba => (
-                  <TableRow key={ba.id}>
-                    <TableCell className="font-medium">{ba.name}</TableCell>
-                    <TableCell>{ba.bank_name}</TableCell>
-                    <TableCell className="capitalize">{ba.account_type}</TableCell>
-                    <TableCell className={`text-right font-medium ${Number(ba.balance) >= 0 ? 'text-success' : 'text-destructive'}`}>{formatCurrency(Number(ba.balance))}</TableCell>
-                    <TableCell><Badge variant={ba.active ? 'default' : 'secondary'}>{ba.active ? 'Ativa' : 'Inativa'}</Badge></TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+      {insights && (
+        <Card className="border-primary/20">
+          <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0 pb-3">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-primary/10 p-2 text-primary">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Saúde Financeira (IA)</CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  Score baseado em saldo, projeção e inadimplência reais
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <div className="text-3xl font-bold leading-none">{insights.score}</div>
+                <div className="text-xs text-muted-foreground">/100</div>
+              </div>
+              <Badge variant="outline" className="text-base px-3 py-1">{insights.scoreGrade}</Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="grid gap-2 md:grid-cols-2">
+            {insights.insights.slice(0, 4).map((ins, i) => {
+              const sev = SEVERITY_BADGE[ins.severity] ?? SEVERITY_BADGE.low;
+              return (
+                <div key={i} className="flex gap-3 rounded-lg border p-3">
+                  <AlertTriangle className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium text-sm">{ins.title}</span>
+                      <Badge className={`${sev.bg} text-[10px] px-1.5 py-0`}>{sev.label}</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{ins.description}</p>
+                  </div>
+                </div>
+              );
+            })}
           </CardContent>
         </Card>
       )}
+      {loadingInsights && <Skeleton className="h-32" />}
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Fluxo de Caixa Real</CardTitle>
+            <p className="text-xs text-muted-foreground">Saldo acumulado no período (ledger)</p>
+          </CardHeader>
+          <CardContent className="h-[320px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={cashflowSeries} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="gradSaldo" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="label" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tickFormatter={fmtCompact} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                <Tooltip
+                  contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8 }}
+                  formatter={(v: any) => fmtBRL(Number(v))}
+                />
+                <ReferenceLine y={0} stroke="hsl(var(--destructive))" strokeDasharray="3 3" />
+                <Area type="monotone" dataKey="saldo" stroke="hsl(var(--primary))" fill="url(#gradSaldo)" strokeWidth={2} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Despesas por Categoria</CardTitle>
+            <p className="text-xs text-muted-foreground">Top 7 do período</p>
+          </CardHeader>
+          <CardContent className="h-[320px]">
+            {categoryPie.length === 0 ? (
+              <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                Sem despesas categorizadas no período.
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={categoryPie} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={2}>
+                    {categoryPie.map((_, i) => (
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(v: any) => fmtBRL(Number(v))}
+                    contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8 }} />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
       <Card>
-        <CardHeader><CardTitle className="text-base flex items-center gap-2"><Users className="h-4 w-4" /> Top Clientes Devedores</CardTitle></CardHeader>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Cliente</TableHead>
-                <TableHead className="text-right">Títulos</TableHead>
-                <TableHead className="text-right">Total em Atraso</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {topDebtors.map((d, i) => (
-                <TableRow key={i}>
-                  <TableCell className="font-medium">{d.name}</TableCell>
-                  <TableCell className="text-right">{d.count}</TableCell>
-                  <TableCell className="text-right font-medium text-destructive">{formatCurrency(d.total)}</TableCell>
-                </TableRow>
-              ))}
-              {topDebtors.length === 0 && (
-                <TableRow><TableCell colSpan={3} className="h-20 text-center text-muted-foreground">Nenhum cliente inadimplente</TableCell></TableRow>
-              )}
-            </TableBody>
-          </Table>
+        <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+          <div>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Target className="h-4 w-4 text-primary" />
+              Projeção de Saldo (Contas em aberto)
+            </CardTitle>
+            <p className="text-xs text-muted-foreground">Baseado em recebíveis e a pagar não liquidados</p>
+          </div>
+          <Button asChild variant="ghost" size="sm" className="gap-1">
+            <Link to="/financeiro/fluxo">Ver fluxo completo <ArrowRight className="h-3 w-3" /></Link>
+          </Button>
+        </CardHeader>
+        <CardContent className="grid gap-3 md:grid-cols-3">
+          {projection.map((p) => (
+            <div key={p.label} className="rounded-lg border p-4">
+              <div className="text-xs text-muted-foreground">Em {p.label}</div>
+              <div className={`mt-1 text-2xl font-bold ${p.saldo < 0 ? 'text-destructive' : 'text-foreground'}`}>
+                {fmtBRL(p.saldo)}
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                <div className="text-success">+ {fmtBRL(p.entradas)}</div>
+                <div className="text-destructive">− {fmtBRL(p.saidas)}</div>
+              </div>
+            </div>
+          ))}
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <Tabs defaultValue="all">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <CardTitle className="text-base">Movimentações do Ledger</CardTitle>
+              <TabsList>
+                <TabsTrigger value="all">Todas</TabsTrigger>
+                <TabsTrigger value="in">Entradas</TabsTrigger>
+                <TabsTrigger value="out">Saídas</TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent value="all" className="mt-3"><LedgerTable rows={ledger} /></TabsContent>
+            <TabsContent value="in" className="mt-3"><LedgerTable rows={ledger.filter(l => l.type === 'inflow')} /></TabsContent>
+            <TabsContent value="out" className="mt-3"><LedgerTable rows={ledger.filter(l => l.type === 'outflow')} /></TabsContent>
+          </Tabs>
+        </CardHeader>
+      </Card>
     </PageContainer>
+  );
+}
+
+function KpiCard({
+  title, value, subtitle, icon, tone,
+}: {
+  title: string; value: string; subtitle?: string;
+  icon: React.ReactNode; tone: 'primary' | 'success' | 'warning' | 'danger';
+}) {
+  const toneCls = {
+    primary: 'bg-primary/10 text-primary',
+    success: 'bg-success/10 text-success',
+    warning: 'bg-warning/10 text-warning',
+    danger: 'bg-destructive/10 text-destructive',
+  }[tone];
+  return (
+    <Card>
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between">
+          <div className="min-w-0">
+            <p className="text-sm text-muted-foreground">{title}</p>
+            <p className={`mt-1 text-2xl font-bold ${tone === 'danger' ? 'text-destructive' : 'text-foreground'}`}>
+              {value}
+            </p>
+            {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
+          </div>
+          <div className={`rounded-lg p-2 ${toneCls}`}>{icon}</div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function LedgerTable({ rows }: { rows: LedgerEntryRow[] }) {
+  if (rows.length === 0) {
+    return (
+      <div className="py-10 text-center text-sm text-muted-foreground">
+        Nenhuma movimentação no período.
+      </div>
+    );
+  }
+  return (
+    <div className="rounded-md border overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Data</TableHead>
+            <TableHead>Descrição</TableHead>
+            <TableHead>Origem</TableHead>
+            <TableHead>Método</TableHead>
+            <TableHead className="text-right">Valor</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.slice(0, 50).map((r) => (
+            <TableRow key={r.id}>
+              <TableCell className="text-sm">{fmtDate(r.entry_date)}</TableCell>
+              <TableCell className="text-sm max-w-[360px] truncate">{r.description}</TableCell>
+              <TableCell className="text-xs">
+                <Badge variant="outline" className="capitalize">{r.source}</Badge>
+              </TableCell>
+              <TableCell className="text-xs text-muted-foreground">{r.payment_method ?? '—'}</TableCell>
+              <TableCell className={`text-right font-semibold ${r.type === 'inflow' ? 'text-success' : 'text-destructive'}`}>
+                {r.type === 'inflow' ? '+' : '−'} {fmtBRL(Number(r.amount))}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      {rows.length > 50 && (
+        <div className="border-t p-2 text-center text-xs text-muted-foreground">
+          Exibindo 50 de {rows.length} lançamentos
+        </div>
+      )}
+    </div>
   );
 }
