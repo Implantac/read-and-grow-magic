@@ -164,8 +164,8 @@ export default function DRELedgerPage() {
 function KPI({ title, value, subtitle, icon, tone }: { title: string; value: number; subtitle?: string; icon: React.ReactNode; tone: 'primary' | 'success' | 'warning' | 'danger' }) {
   const toneCls = {
     primary: 'text-primary bg-primary/10',
-    success: 'text-emerald-500 bg-emerald-500/10',
-    warning: 'text-amber-500 bg-amber-500/10',
+    success: 'text-success bg-success/10',
+    warning: 'text-warning bg-warning/10',
     danger: 'text-destructive bg-destructive/10',
   }[tone];
   return (
@@ -192,7 +192,7 @@ function DRELine({ label, value, bold, highlight }: { label: string; value: numb
         'text-right tabular-nums',
         bold && 'font-semibold',
         value < 0 && 'text-destructive',
-        value > 0 && highlight && 'text-emerald-500'
+        value > 0 && highlight && 'text-success'
       )}>
         {fmt(value)}
       </TableCell>
