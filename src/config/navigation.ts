@@ -150,6 +150,8 @@ export const navigationSections: NavSection[] = [
           { title: 'Centros de Custo', href: '/financeiro/centros-custo', icon: 'FolderTree' },
           { title: 'Renegociações', href: '/financeiro/renegociacoes', icon: 'RefreshCw' },
           { title: 'Conciliação', href: '/financeiro/conciliacao', icon: 'CheckCircle' },
+          { title: 'Cobranças PIX', href: '/financeiro/pix', icon: 'QrCode' },
+          { title: 'Inteligência IA', href: '/financeiro/inteligencia', icon: 'Brain' },
           { title: 'Auditoria Contínua', href: '/financeiro/auditoria', icon: 'ShieldCheck' },
         ],
       },
