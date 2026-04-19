@@ -22,6 +22,7 @@ import { useAccountsReceivable, useCreateAccountReceivable, useUpdateAccountRece
 import { useCreatePaymentRecord } from '@/hooks/usePaymentRecords';
 import { useBankAccounts } from '@/hooks/useBankAccounts';
 import { useClients } from '@/hooks/useClients';
+import { SettlementDialog, type SettlementTarget } from '@/components/financeiro/SettlementDialog';
 import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -50,6 +51,7 @@ export default function AccountsReceivable() {
   const [isReceiveDialogOpen, setIsReceiveDialogOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<typeof accounts[0] | null>(null);
+  const [settlementTarget, setSettlementTarget] = useState<SettlementTarget | null>(null);
 
   // Create form
   const [formData, setFormData] = useState({
@@ -145,14 +147,15 @@ export default function AccountsReceivable() {
   const resetForm = () => setFormData({ description: '', clientId: '', category: '', amount: '', dueDate: '', invoiceNumber: '', notes: '', installments: '1' });
 
   const openReceiveDialog = (account: typeof accounts[0]) => {
-    setSelectedAccount(account);
-    const openAmt = Number(account.open_amount ?? account.amount);
-    setPayForm({
-      amount: openAmt.toString(), interest: '0', penalty: '0', discount: '0',
-      paymentMethod: 'pix', bankAccountId: '', notes: '',
-      paymentDate: new Date().toISOString().split('T')[0],
+    setSettlementTarget({
+      source_type: 'receivable',
+      source_id: account.id,
+      description: account.description,
+      party_name: account.client_name,
+      party_id: account.client_id,
+      amount_total: Number(account.amount),
+      paid_amount: Number(account.paid_amount || 0),
     });
-    setIsReceiveDialogOpen(true);
   };
 
   const handleReceive = () => {
@@ -559,6 +562,12 @@ export default function AccountsReceivable() {
           )}
         </DialogContent>
       </Dialog>
+
+      <SettlementDialog
+        open={!!settlementTarget}
+        onOpenChange={(v) => !v && setSettlementTarget(null)}
+        target={settlementTarget}
+      />
     </PageContainer>
   );
 }
