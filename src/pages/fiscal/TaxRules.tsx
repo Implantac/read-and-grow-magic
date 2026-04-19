@@ -69,7 +69,6 @@ export default function TaxRulesPage() {
       <PageHeader
         title="Regras Fiscais"
         description="Cadastro de regras de tributação por NCM, CFOP e regime"
-        icon={Calculator}
       />
 
       <div className="flex items-center justify-between gap-4">

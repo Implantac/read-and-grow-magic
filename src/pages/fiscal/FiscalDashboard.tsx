@@ -88,7 +88,6 @@ export default function FiscalDashboardPage() {
       <PageHeader
         title="Painel Fiscal"
         description="Visão consolidada de NF-e, NFC-e e impostos apurados no mês"
-        icon={FileCheck}
       />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
