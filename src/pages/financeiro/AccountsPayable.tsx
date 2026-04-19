@@ -494,6 +494,58 @@ export default function AccountsPayable() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Batch Pay Dialog */}
+      <Dialog open={isBatchPayOpen} onOpenChange={setIsBatchPayOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Pagar em Lote</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="rounded-lg bg-muted p-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-xs text-muted-foreground">Títulos selecionados</p>
+                  <p className="text-2xl font-bold">{selectedIds.size}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Total a pagar</p>
+                  <p className="text-2xl font-bold text-primary">{formatCurrency(selectedTotal)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-1.5">
+              <Label className="text-xs">Forma de Pagamento *</Label>
+              <Select value={batchForm.paymentMethod} onValueChange={(v) => setBatchForm({ ...batchForm, paymentMethod: v as PaymentMethod })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{Object.entries(paymentMethods).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-1.5">
+              <Label className="text-xs">Conta Bancária *</Label>
+              <Select value={batchForm.bankAccountId} onValueChange={(v) => setBatchForm({ ...batchForm, bankAccountId: v })}>
+                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>{bankAccounts.map(b => <SelectItem key={b.id} value={b.id}>{b.name} — {formatCurrency(Number(b.balance))}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-1.5">
+              <Label className="text-xs">Observações</Label>
+              <Textarea value={batchForm.notes} onChange={(e) => setBatchForm({ ...batchForm, notes: e.target.value })} className="h-16" placeholder="Opcional" />
+            </div>
+
+            <div className="rounded-md border border-warning/30 bg-warning/5 p-3 text-xs text-muted-foreground">
+              Ao confirmar, todos os títulos selecionados serão quitados pelo valor em aberto na conta escolhida.
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsBatchPayOpen(false)}>Cancelar</Button>
+            <Button onClick={handleBatchPay} disabled={batchPay.isPending} className="gap-2">
+              <Zap className="h-4 w-4" />Confirmar Pagamento
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
