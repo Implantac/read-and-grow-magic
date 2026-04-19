@@ -4,18 +4,24 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Upload, FileText, CheckCircle2 } from 'lucide-react';
+import { Upload, FileText, CheckCircle2, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { parseCSV, parseOFX, useImportBankStatement, type ParsedTx } from '@/hooks/useBankStatementImport';
+import { parseCSV, parseOFX, useImportBankStatement, useAutoMatch, type ParsedTx } from '@/hooks/useBankStatementImport';
+import { useBankAccounts } from '@/hooks/useBankAccounts';
 
 const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
 export default function BankStatementImport() {
   const [parsed, setParsed] = useState<ParsedTx[]>([]);
   const [filename, setFilename] = useState<string | null>(null);
+  const [bankAccountId, setBankAccountId] = useState<string>('');
   const fileRef = useRef<HTMLInputElement>(null);
   const importMut = useImportBankStatement();
+  const autoMatch = useAutoMatch();
+  const { data: bankAccounts = [] } = useBankAccounts();
   const { toast } = useToast();
 
   async function handleFile(file: File) {
@@ -29,18 +35,51 @@ export default function BankStatementImport() {
         return;
       }
       setParsed(txs);
-      toast({ title: `${txs.length} transações lidas`, description: 'Revise antes de importar.' });
+      toast({ title: `${txs.length} transações lidas`, description: 'Selecione a conta bancária e importe.' });
     } catch (e: any) {
       toast({ title: 'Erro ao ler arquivo', description: e.message, variant: 'destructive' });
     }
   }
 
+  function handleImport() {
+    if (!bankAccountId) {
+      toast({ title: 'Selecione uma conta bancária', variant: 'destructive' });
+      return;
+    }
+    importMut.mutate({ txs: parsed, bankAccountId }, {
+      onSuccess: () => { setParsed([]); setFilename(null); }
+    });
+  }
+
   return (
     <PageContainer>
-      <PageHeader title="Importação de Extrato" description="CSV ou OFX — match automático com o ledger" />
+      <PageHeader
+        title="Open Finance — Importação de Extrato"
+        description="CSV ou OFX com match automático contra o ledger financeiro"
+        actions={
+          <Button variant="outline" onClick={() => autoMatch.mutate(bankAccountId || undefined)} disabled={autoMatch.isPending} className="gap-2">
+            <Zap className="h-4 w-4" /> Re-conciliar pendentes
+          </Button>
+        }
+      />
 
       <Card>
-        <CardHeader><CardTitle>1. Selecione o arquivo</CardTitle></CardHeader>
+        <CardHeader><CardTitle>1. Conta bancária de destino</CardTitle></CardHeader>
+        <CardContent>
+          <Label>Conta</Label>
+          <Select value={bankAccountId} onValueChange={setBankAccountId}>
+            <SelectTrigger className="max-w-md"><SelectValue placeholder="Selecione a conta..." /></SelectTrigger>
+            <SelectContent>
+              {(bankAccounts as any[]).map((a: any) => (
+                <SelectItem key={a.id} value={a.id}>{a.name} — {a.bank_name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle>2. Selecione o arquivo</CardTitle></CardHeader>
         <CardContent className="space-y-4">
           <div
             className="border-2 border-dashed border-border rounded-lg p-10 text-center cursor-pointer hover:bg-muted/50 transition"
@@ -63,8 +102,8 @@ export default function BankStatementImport() {
       {parsed.length > 0 && (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>2. Pré-visualização ({parsed.length} transações)</CardTitle>
-            <Button onClick={() => importMut.mutate({ txs: parsed })} disabled={importMut.isPending} className="gap-2">
+            <CardTitle>3. Pré-visualização ({parsed.length} transações)</CardTitle>
+            <Button onClick={handleImport} disabled={importMut.isPending || !bankAccountId} className="gap-2">
               <CheckCircle2 className="h-4 w-4" /> Importar e conciliar
             </Button>
           </CardHeader>
