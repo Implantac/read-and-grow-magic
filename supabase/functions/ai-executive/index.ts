@@ -595,12 +595,27 @@ const ERP_TOOLS = [
   {
     type: "function",
     function: {
+      name: "consultar_fiscal",
+      description: "Consulta dados fiscais: NF-e emitidas/autorizadas/rejeitadas, total de impostos, carga tributária, regras fiscais ativas e SPED gerados.",
+      parameters: {
+        type: "object",
+        properties: {
+          tipo: { type: "string", enum: ["resumo", "nfe_recentes", "nfe_rejeitadas", "impostos_periodo", "regras_ativas", "sped"], description: "Tipo de consulta fiscal" },
+          periodo_dias: { type: "number", description: "Período em dias (padrão 30)" },
+        },
+        required: ["tipo"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "analise_estrategica",
       description: "Gera análise estratégica detalhada com KPIs, tendências e recomendações da empresa toda",
       parameters: {
         type: "object",
         properties: {
-          foco: { type: "string", enum: ["geral", "financeiro", "comercial", "producao", "margem", "risco"], description: "Foco da análise" },
+          foco: { type: "string", enum: ["geral", "financeiro", "comercial", "producao", "margem", "risco", "fiscal"], description: "Foco da análise" },
         },
         required: ["foco"],
       },
