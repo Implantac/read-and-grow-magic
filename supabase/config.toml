@@ -2,3 +2,6 @@ project_id = "arcuhqdiydlvekanychw"
 
 [functions.rfid-webhook]
 verify_jwt = false
+
+[functions.daily-bank-reconciliation]
+verify_jwt = false
