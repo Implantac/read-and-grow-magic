@@ -9805,6 +9805,48 @@ export type Database = {
           },
         ]
       }
+      sped_files: {
+        Row: {
+          content: string
+          created_at: string
+          end_date: string
+          generated_at: string
+          generated_by: string | null
+          id: string
+          period: string
+          start_date: string
+          total_records: number
+          total_value: number
+          type: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          end_date: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          period: string
+          start_date: string
+          total_records?: number
+          total_value?: number
+          type: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          end_date?: string
+          generated_at?: string
+          generated_by?: string | null
+          id?: string
+          period?: string
+          start_date?: string
+          total_records?: number
+          total_value?: number
+          type?: string
+        }
+        Relationships: []
+      }
       stock_balances: {
         Row: {
           available_qty: number | null
@@ -12404,6 +12446,22 @@ export type Database = {
         Returns: Json
       }
       generate_recurring_entries: { Args: never; Returns: Json }
+      generate_sped_contribuicoes: {
+        Args: { p_end: string; p_start: string }
+        Returns: {
+          content: string
+          total_records: number
+          total_value: number
+        }[]
+      }
+      generate_sped_fiscal: {
+        Args: { p_end: string; p_start: string }
+        Returns: {
+          content: string
+          total_records: number
+          total_value: number
+        }[]
+      }
       get_account_statement: {
         Args: {
           _entity_id: string
