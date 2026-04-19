@@ -3177,6 +3177,42 @@ export type Database = {
           },
         ]
       }
+      financial_category_suggestions: {
+        Row: {
+          category_id: string | null
+          category_name: string | null
+          confidence: number
+          created_at: string
+          id: string
+          last_used_at: string
+          party_kind: string
+          party_name: string
+          usage_count: number
+        }
+        Insert: {
+          category_id?: string | null
+          category_name?: string | null
+          confidence?: number
+          created_at?: string
+          id?: string
+          last_used_at?: string
+          party_kind: string
+          party_name: string
+          usage_count?: number
+        }
+        Update: {
+          category_id?: string | null
+          category_name?: string | null
+          confidence?: number
+          created_at?: string
+          id?: string
+          last_used_at?: string
+          party_kind?: string
+          party_name?: string
+          usage_count?: number
+        }
+        Relationships: []
+      }
       financial_charges_log: {
         Row: {
           amount: number
@@ -12254,6 +12290,7 @@ export type Database = {
         Returns: Json
       }
       detect_cashflow_risks: { Args: never; Returns: Json }
+      detect_financial_alerts: { Args: never; Returns: Json }
       evaluate_transaction_risk: {
         Args: {
           _amount: number
@@ -12282,8 +12319,35 @@ export type Database = {
           running_balance: number
         }[]
       }
+      get_cashflow_scenarios: {
+        Args: { _days?: number }
+        Returns: {
+          balance_optimistic: number
+          balance_pessimistic: number
+          balance_real: number
+          day: string
+          inflow_optimistic: number
+          inflow_real: number
+          outflow_pessimistic: number
+          outflow_real: number
+        }[]
+      }
       get_dre: {
         Args: { _from: string; _to: string }
+        Returns: {
+          category_id: string
+          category_name: string
+          section: string
+          total: number
+        }[]
+      }
+      get_dre_dynamic: {
+        Args: {
+          _channel?: string
+          _cost_center_id?: string
+          _from: string
+          _to: string
+        }
         Returns: {
           category_id: string
           category_name: string
@@ -12343,6 +12407,15 @@ export type Database = {
           _splits: Json
         }
         Returns: Json
+      }
+      suggest_category: {
+        Args: { _party_kind: string; _party_name: string }
+        Returns: {
+          category_id: string
+          category_name: string
+          confidence: number
+          usage_count: number
+        }[]
       }
       transfer_between_accounts: {
         Args: {
