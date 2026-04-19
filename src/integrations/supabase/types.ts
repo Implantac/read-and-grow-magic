@@ -3005,6 +3005,96 @@ export type Database = {
         }
         Relationships: []
       }
+      financial_boletos: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          barcode: string | null
+          client_id: string | null
+          client_name: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          digitable_line: string | null
+          document_number: string | null
+          due_date: string
+          external_id: string | null
+          id: string
+          notes: string | null
+          our_number: string | null
+          paid_amount: number | null
+          paid_at: string | null
+          pdf_url: string | null
+          provider: string
+          receivable_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          bank_account_id?: string | null
+          barcode?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          digitable_line?: string | null
+          document_number?: string | null
+          due_date: string
+          external_id?: string | null
+          id?: string
+          notes?: string | null
+          our_number?: string | null
+          paid_amount?: number | null
+          paid_at?: string | null
+          pdf_url?: string | null
+          provider?: string
+          receivable_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          barcode?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          digitable_line?: string | null
+          document_number?: string | null
+          due_date?: string
+          external_id?: string | null
+          id?: string
+          notes?: string | null
+          our_number?: string | null
+          paid_amount?: number | null
+          paid_at?: string | null
+          pdf_url?: string | null
+          provider?: string
+          receivable_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_boletos_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_boletos_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_receivable"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_categories: {
         Row: {
           active: boolean
@@ -3071,6 +3161,112 @@ export type Database = {
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "financial_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_checks: {
+        Row: {
+          account: string | null
+          agency: string | null
+          amount: number
+          bank_account_id: string | null
+          bank_code: string | null
+          bank_name: string | null
+          check_number: string
+          check_type: string
+          clear_date: string | null
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          deposit_date: string | null
+          due_date: string | null
+          id: string
+          issue_date: string
+          issuer_document: string | null
+          issuer_name: string | null
+          ledger_id: string | null
+          notes: string | null
+          payable_id: string | null
+          receivable_id: string | null
+          settlement_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          account?: string | null
+          agency?: string | null
+          amount: number
+          bank_account_id?: string | null
+          bank_code?: string | null
+          bank_name?: string | null
+          check_number: string
+          check_type: string
+          clear_date?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deposit_date?: string | null
+          due_date?: string | null
+          id?: string
+          issue_date?: string
+          issuer_document?: string | null
+          issuer_name?: string | null
+          ledger_id?: string | null
+          notes?: string | null
+          payable_id?: string | null
+          receivable_id?: string | null
+          settlement_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          account?: string | null
+          agency?: string | null
+          amount?: number
+          bank_account_id?: string | null
+          bank_code?: string | null
+          bank_name?: string | null
+          check_number?: string
+          check_type?: string
+          clear_date?: string | null
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          deposit_date?: string | null
+          due_date?: string | null
+          id?: string
+          issue_date?: string
+          issuer_document?: string | null
+          issuer_name?: string | null
+          ledger_id?: string | null
+          notes?: string | null
+          payable_id?: string | null
+          receivable_id?: string | null
+          settlement_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_checks_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_checks_payable_id_fkey"
+            columns: ["payable_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_payable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_checks_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_receivable"
             referencedColumns: ["id"]
           },
         ]
@@ -11655,7 +11851,25 @@ export type Database = {
     }
     Functions: {
       backfill_default_lots: { Args: never; Returns: Json }
+      batch_pay_payables: {
+        Args: {
+          _bank_account_id: string
+          _notes?: string
+          _payable_ids: string[]
+          _payment_date?: string
+          _payment_method: string
+        }
+        Returns: Json
+      }
       calculate_financial_health_score: { Args: never; Returns: Json }
+      compensate_check: {
+        Args: {
+          _bank_account_id?: string
+          _check_id: string
+          _clear_date?: string
+        }
+        Returns: Json
+      }
       detect_cashflow_risks: { Args: never; Returns: Json }
       evaluate_transaction_risk: {
         Args: {
