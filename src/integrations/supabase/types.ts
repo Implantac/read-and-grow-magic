@@ -1057,38 +1057,55 @@ export type Database = {
       bank_transactions: {
         Row: {
           amount: number
+          bank_account_id: string | null
           bank_reference: string | null
           created_at: string
           date: string
           description: string
           id: string
+          imported_at: string | null
           matched_entry_id: string | null
+          source: string | null
           status: string
           type: string
         }
         Insert: {
           amount?: number
+          bank_account_id?: string | null
           bank_reference?: string | null
           created_at?: string
           date?: string
           description: string
           id?: string
+          imported_at?: string | null
           matched_entry_id?: string | null
+          source?: string | null
           status?: string
           type?: string
         }
         Update: {
           amount?: number
+          bank_account_id?: string | null
           bank_reference?: string | null
           created_at?: string
           date?: string
           description?: string
           id?: string
+          imported_at?: string | null
           matched_entry_id?: string | null
+          source?: string | null
           status?: string
           type?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bank_transactions_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       bank_transfers: {
         Row: {
@@ -12392,6 +12409,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      auto_match_bank_transactions: {
+        Args: { p_bank_account_id?: string; p_tolerance_days?: number }
+        Returns: {
+          matched: number
+          total_pending: number
+        }[]
+      }
       backfill_default_lots: { Args: never; Returns: Json }
       batch_pay_payables: {
         Args: {
@@ -12532,6 +12556,17 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      import_bank_statement_batch: {
+        Args: { p_bank_account_id: string; p_transactions: Json }
+        Returns: {
+          inserted: number
+          skipped: number
+        }[]
+      }
+      manual_match_transaction: {
+        Args: { p_bank_transaction_id: string; p_ledger_entry_id: string }
         Returns: boolean
       }
       match_bank_transaction: { Args: { _bank_tx_id: string }; Returns: Json }
