@@ -41,6 +41,8 @@ export type Database = {
           penalty: number | null
           priority: string | null
           recurrence: string | null
+          source_id: string | null
+          source_type: string | null
           status: string
           supplier: string
           total_installments: number | null
@@ -72,6 +74,8 @@ export type Database = {
           penalty?: number | null
           priority?: string | null
           recurrence?: string | null
+          source_id?: string | null
+          source_type?: string | null
           status?: string
           supplier: string
           total_installments?: number | null
@@ -103,6 +107,8 @@ export type Database = {
           penalty?: number | null
           priority?: string | null
           recurrence?: string | null
+          source_id?: string | null
+          source_type?: string | null
           status?: string
           supplier?: string
           total_installments?: number | null
@@ -168,6 +174,8 @@ export type Database = {
           payment_method: string | null
           penalty: number | null
           recurrence: string | null
+          source_id: string | null
+          source_type: string | null
           status: string
           total_installments: number | null
           updated_at: string
@@ -200,6 +208,8 @@ export type Database = {
           payment_method?: string | null
           penalty?: number | null
           recurrence?: string | null
+          source_id?: string | null
+          source_type?: string | null
           status?: string
           total_installments?: number | null
           updated_at?: string
@@ -232,6 +242,8 @@ export type Database = {
           payment_method?: string | null
           penalty?: number | null
           recurrence?: string | null
+          source_id?: string | null
+          source_type?: string | null
           status?: string
           total_installments?: number | null
           updated_at?: string
@@ -3466,6 +3478,74 @@ export type Database = {
           },
         ]
       }
+      financial_offsets: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          offset_date: string
+          payable_id: string
+          payable_settlement_id: string | null
+          receivable_id: string
+          receivable_settlement_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          offset_date?: string
+          payable_id: string
+          payable_settlement_id?: string | null
+          receivable_id: string
+          receivable_settlement_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          offset_date?: string
+          payable_id?: string
+          payable_settlement_id?: string | null
+          receivable_id?: string
+          receivable_settlement_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_offsets_payable_id_fkey"
+            columns: ["payable_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_payable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_offsets_payable_settlement_id_fkey"
+            columns: ["payable_settlement_id"]
+            isOneToOne: false
+            referencedRelation: "financial_settlements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_offsets_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_receivable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_offsets_receivable_settlement_id_fkey"
+            columns: ["receivable_settlement_id"]
+            isOneToOne: false
+            referencedRelation: "financial_settlements"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_operations_log: {
         Row: {
           amount: number | null
@@ -3498,6 +3578,54 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      financial_payment_split: {
+        Row: {
+          amount: number
+          bank_account_id: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          payment_method: string
+          reference: string | null
+          settlement_id: string
+        }
+        Insert: {
+          amount: number
+          bank_account_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_method: string
+          reference?: string | null
+          settlement_id: string
+        }
+        Update: {
+          amount?: number
+          bank_account_id?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          payment_method?: string
+          reference?: string | null
+          settlement_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_payment_split_bank_account_id_fkey"
+            columns: ["bank_account_id"]
+            isOneToOne: false
+            referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_payment_split_settlement_id_fkey"
+            columns: ["settlement_id"]
+            isOneToOne: false
+            referencedRelation: "financial_settlements"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       financial_predictive_alerts: {
         Row: {
@@ -11862,6 +11990,15 @@ export type Database = {
         Returns: Json
       }
       calculate_financial_health_score: { Args: never; Returns: Json }
+      compensate_accounts: {
+        Args: {
+          _amount: number
+          _notes?: string
+          _payable_id: string
+          _receivable_id: string
+        }
+        Returns: Json
+      }
       compensate_check: {
         Args: {
           _bank_account_id?: string
@@ -11880,6 +12017,23 @@ export type Database = {
           _source?: string
         }
         Returns: Json
+      }
+      get_account_statement: {
+        Args: {
+          _entity_id: string
+          _entity_type: string
+          _from?: string
+          _to?: string
+        }
+        Returns: {
+          amount: number
+          category: string
+          description: string
+          entry_date: string
+          kind: string
+          reference: string
+          running_balance: number
+        }[]
       }
       get_dre: {
         Args: { _from: string; _to: string }
@@ -11928,6 +12082,19 @@ export type Database = {
         Returns: Json
       }
       run_financial_audit: { Args: { _mode?: string }; Returns: Json }
+      settle_account: {
+        Args: {
+          _discount?: number
+          _interest?: number
+          _notes?: string
+          _penalty?: number
+          _settlement_date?: string
+          _source_id: string
+          _source_type: string
+          _splits: Json
+        }
+        Returns: Json
+      }
       transfer_between_accounts: {
         Args: {
           _amount: number
