@@ -10603,6 +10603,96 @@ export type Database = {
         }
         Relationships: []
       }
+      tax_rules: {
+        Row: {
+          active: boolean
+          cfop: string | null
+          cofins_cst: string | null
+          cofins_rate: number | null
+          created_at: string
+          description: string | null
+          icms_cst: string | null
+          icms_rate: number | null
+          icms_reduction_base: number | null
+          icms_st_mva: number | null
+          icms_st_rate: number | null
+          id: string
+          ipi_cst: string | null
+          ipi_rate: number | null
+          name: string
+          ncm: string | null
+          notes: string | null
+          operation_type: string | null
+          pis_cst: string | null
+          pis_rate: number | null
+          priority: number
+          tax_regime: string | null
+          uf_destination: string | null
+          uf_origin: string | null
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          active?: boolean
+          cfop?: string | null
+          cofins_cst?: string | null
+          cofins_rate?: number | null
+          created_at?: string
+          description?: string | null
+          icms_cst?: string | null
+          icms_rate?: number | null
+          icms_reduction_base?: number | null
+          icms_st_mva?: number | null
+          icms_st_rate?: number | null
+          id?: string
+          ipi_cst?: string | null
+          ipi_rate?: number | null
+          name: string
+          ncm?: string | null
+          notes?: string | null
+          operation_type?: string | null
+          pis_cst?: string | null
+          pis_rate?: number | null
+          priority?: number
+          tax_regime?: string | null
+          uf_destination?: string | null
+          uf_origin?: string | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          active?: boolean
+          cfop?: string | null
+          cofins_cst?: string | null
+          cofins_rate?: number | null
+          created_at?: string
+          description?: string | null
+          icms_cst?: string | null
+          icms_rate?: number | null
+          icms_reduction_base?: number | null
+          icms_st_mva?: number | null
+          icms_st_rate?: number | null
+          id?: string
+          ipi_cst?: string | null
+          ipi_rate?: number | null
+          name?: string
+          ncm?: string | null
+          notes?: string | null
+          operation_type?: string | null
+          pis_cst?: string | null
+          pis_rate?: number | null
+          priority?: number
+          tax_regime?: string | null
+          uf_destination?: string | null
+          uf_origin?: string | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       time_entries: {
         Row: {
           company_id: string | null
@@ -12272,6 +12362,18 @@ export type Database = {
         Returns: Json
       }
       calculate_financial_health_score: { Args: never; Returns: Json }
+      calculate_nfe_item_taxes: {
+        Args: {
+          _cfop: string
+          _discount?: number
+          _ncm: string
+          _quantity: number
+          _uf_destination?: string
+          _uf_origin?: string
+          _unit_price: number
+        }
+        Returns: Json
+      }
       compensate_accounts: {
         Args: {
           _amount: number
