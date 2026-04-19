@@ -64,6 +64,7 @@ const priorityConfig: Record<string, StatusConfig> = {
 const paymentStatusConfig: Record<PaymentStatus, StatusConfig> = {
   paid: { label: 'Pago', variant: 'success' },
   pending: { label: 'Pendente', variant: 'warning' },
+  partial: { label: 'Parcial', variant: 'info' },
   overdue: { label: 'Vencido', variant: 'destructive' },
   cancelled: { label: 'Cancelado', variant: 'secondary' },
 };
