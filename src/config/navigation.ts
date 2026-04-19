@@ -204,6 +204,7 @@ export const navigationSections: NavSection[] = [
           { title: 'NF-e', href: '/fiscal/nfe', icon: 'FileText' },
           { title: 'NFC-e', href: '/fiscal/nfce', icon: 'Receipt' },
           { title: '⚙️ Regras Fiscais', href: '/fiscal/regras-fiscais', icon: 'Calculator' },
+          { title: 'SPED Fiscal/Contrib.', href: '/fiscal/sped', icon: 'FileDown' },
           { title: 'Relatórios Fiscais', href: '/fiscal/relatorios', icon: 'BarChart3' },
         ],
       },
