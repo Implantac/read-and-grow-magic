@@ -44,13 +44,16 @@ export default function AccountsPayable() {
   const updateMutation = useUpdateAccountPayable();
   const deleteMutation = useDeleteAccountPayable();
   const createPayment = useCreatePaymentRecord();
+  const batchPay = useBatchPayPayables();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPayDialogOpen, setIsPayDialogOpen] = useState(false);
+  const [isBatchPayOpen, setIsBatchPayOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<typeof accounts[0] | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const [formData, setFormData] = useState({
     description: '', supplier: '', category: '', amount: '', dueDate: '',
@@ -58,6 +61,9 @@ export default function AccountsPayable() {
   });
   const [payForm, setPayForm] = useState({
     amount: '', interest: '0', penalty: '0', discount: '0',
+    paymentMethod: 'pix' as PaymentMethod, bankAccountId: '', notes: '',
+  });
+  const [batchForm, setBatchForm] = useState({
     paymentMethod: 'pix' as PaymentMethod, bankAccountId: '', notes: '',
   });
 
