@@ -54,6 +54,8 @@ const RenegotiationsPage = lazy(() => import("./pages/financeiro/Renegotiations"
 const DRELedgerPage = lazy(() => import("./pages/financeiro/DRELedger"));
 const FinancialAuditPage = lazy(() => import("./pages/financeiro/FinancialAudit"));
 const PixChargesPage = lazy(() => import("./pages/financeiro/PixCharges"));
+const ChecksPage = lazy(() => import("./pages/financeiro/Checks"));
+const BoletosPage = lazy(() => import("./pages/financeiro/Boletos"));
 const FinancialIntelligencePage = lazy(() => import("./pages/financeiro/FinancialIntelligence"));
 const FinancialBIPage = lazy(() => import("./pages/financeiro/FinancialBI"));
 const FinancialAntifraudPage = lazy(() => import("./pages/financeiro/FinancialAntifraud"));
@@ -252,6 +254,8 @@ const App = () => (
               <Route path="/financeiro/dre" element={<DRELedgerPage />} />
               <Route path="/financeiro/auditoria" element={<FinancialAuditPage />} />
               <Route path="/financeiro/pix" element={<PixChargesPage />} />
+              <Route path="/financeiro/cheques" element={<ChecksPage />} />
+              <Route path="/financeiro/boletos" element={<BoletosPage />} />
               <Route path="/financeiro/inteligencia" element={<FinancialIntelligencePage />} />
               <Route path="/financeiro/bi" element={<FinancialBIPage />} />
               <Route path="/financeiro/antifraude" element={<FinancialAntifraudPage />} />
