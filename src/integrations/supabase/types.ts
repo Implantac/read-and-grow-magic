@@ -3177,6 +3177,120 @@ export type Database = {
           },
         ]
       }
+      financial_charges_log: {
+        Row: {
+          amount: number
+          channel: string
+          client_id: string | null
+          client_name: string | null
+          created_at: string
+          days_until_due: number | null
+          due_date: string | null
+          error: string | null
+          id: string
+          message: string
+          metadata: Json | null
+          receivable_id: string | null
+          rule_id: string | null
+          sent_at: string | null
+          severity: string
+          status: string
+          trigger_type: string
+        }
+        Insert: {
+          amount?: number
+          channel: string
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string
+          days_until_due?: number | null
+          due_date?: string | null
+          error?: string | null
+          id?: string
+          message: string
+          metadata?: Json | null
+          receivable_id?: string | null
+          rule_id?: string | null
+          sent_at?: string | null
+          severity?: string
+          status?: string
+          trigger_type: string
+        }
+        Update: {
+          amount?: number
+          channel?: string
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string
+          days_until_due?: number | null
+          due_date?: string | null
+          error?: string | null
+          id?: string
+          message?: string
+          metadata?: Json | null
+          receivable_id?: string | null
+          rule_id?: string | null
+          sent_at?: string | null
+          severity?: string
+          status?: string
+          trigger_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_charges_log_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "accounts_receivable"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_charges_log_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "financial_charges_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_charges_rules: {
+        Row: {
+          active: boolean
+          channel: string
+          created_at: string
+          days_offset: number
+          id: string
+          message_template: string
+          name: string
+          severity: string
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          channel?: string
+          created_at?: string
+          days_offset?: number
+          id?: string
+          message_template?: string
+          name: string
+          severity?: string
+          trigger_type: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          channel?: string
+          created_at?: string
+          days_offset?: number
+          id?: string
+          message_template?: string
+          name?: string
+          severity?: string
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       financial_checks: {
         Row: {
           account: string | null
@@ -3282,6 +3396,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      financial_default_score: {
+        Row: {
+          avg_delay_days: number
+          client_id: string
+          client_name: string | null
+          computed_at: string
+          id: string
+          last_payment_date: string | null
+          max_delay_days: number
+          overdue_amount: number
+          overdue_count: number
+          risk_level: string
+          score_numeric: number
+          total_billed: number
+          total_paid_on_time: number
+          updated_at: string
+        }
+        Insert: {
+          avg_delay_days?: number
+          client_id: string
+          client_name?: string | null
+          computed_at?: string
+          id?: string
+          last_payment_date?: string | null
+          max_delay_days?: number
+          overdue_amount?: number
+          overdue_count?: number
+          risk_level?: string
+          score_numeric?: number
+          total_billed?: number
+          total_paid_on_time?: number
+          updated_at?: string
+        }
+        Update: {
+          avg_delay_days?: number
+          client_id?: string
+          client_name?: string | null
+          computed_at?: string
+          id?: string
+          last_payment_date?: string | null
+          max_delay_days?: number
+          overdue_amount?: number
+          overdue_count?: number
+          risk_level?: string
+          score_numeric?: number
+          total_billed?: number
+          total_paid_on_time?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       financial_fraud_rules: {
         Row: {
@@ -3675,6 +3840,87 @@ export type Database = {
           severity?: string
           status?: string
           title?: string
+        }
+        Relationships: []
+      }
+      financial_recurring: {
+        Row: {
+          adjustment_index: string | null
+          adjustment_percent: number | null
+          amount: number
+          bank_account_id: string | null
+          category_id: string | null
+          client_id: string | null
+          created_at: string
+          created_by: string | null
+          day_of_month: number | null
+          description: string
+          end_date: string | null
+          frequency: string
+          id: string
+          kind: string
+          last_adjustment_at: string | null
+          max_occurrences: number | null
+          next_run_date: string
+          notes: string | null
+          occurrences_generated: number
+          party_name: string
+          start_date: string
+          status: string
+          supplier_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          adjustment_index?: string | null
+          adjustment_percent?: number | null
+          amount?: number
+          bank_account_id?: string | null
+          category_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          day_of_month?: number | null
+          description: string
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          kind: string
+          last_adjustment_at?: string | null
+          max_occurrences?: number | null
+          next_run_date?: string
+          notes?: string | null
+          occurrences_generated?: number
+          party_name: string
+          start_date?: string
+          status?: string
+          supplier_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adjustment_index?: string | null
+          adjustment_percent?: number | null
+          amount?: number
+          bank_account_id?: string | null
+          category_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          day_of_month?: number | null
+          description?: string
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          kind?: string
+          last_adjustment_at?: string | null
+          max_occurrences?: number | null
+          next_run_date?: string
+          notes?: string | null
+          occurrences_generated?: number
+          party_name?: string
+          start_date?: string
+          status?: string
+          supplier_id?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -12018,6 +12264,7 @@ export type Database = {
         }
         Returns: Json
       }
+      generate_recurring_entries: { Args: never; Returns: Json }
       get_account_statement: {
         Args: {
           _entity_id: string
@@ -12064,6 +12311,7 @@ export type Database = {
         Returns: boolean
       }
       match_bank_transaction: { Args: { _bank_tx_id: string }; Returns: Json }
+      process_charges_ruler: { Args: never; Returns: Json }
       process_pix_payment: {
         Args: {
           _e2e_id: string
@@ -12077,6 +12325,7 @@ export type Database = {
         Args: { _bank_account_id: string }
         Returns: number
       }
+      recompute_default_scores: { Args: never; Returns: Json }
       reverse_settlement: {
         Args: { _reason?: string; _settlement_id: string }
         Returns: Json
