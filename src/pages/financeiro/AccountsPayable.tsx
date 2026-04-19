@@ -351,11 +351,31 @@ export default function AccountsPayable() {
         </CardContent>
       </Card>
 
+      {selectedIds.size > 0 && (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardContent className="flex items-center justify-between gap-3 py-3">
+            <div className="text-sm">
+              <span className="font-semibold">{selectedIds.size}</span> selecionado(s) · Total{' '}
+              <span className="font-semibold text-primary">{formatCurrency(selectedTotal)}</span>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>Limpar</Button>
+              <Button size="sm" className="gap-2" onClick={() => setIsBatchPayOpen(true)}>
+                <Zap className="h-4 w-4" />Pagar em Lote
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-10">
+                  <Checkbox checked={allSelected} onCheckedChange={toggleAll} aria-label="Selecionar tudo" />
+                </TableHead>
                 <TableHead>Descrição</TableHead>
                 <TableHead>Fornecedor</TableHead>
                 <TableHead>Vencimento</TableHead>
@@ -367,8 +387,19 @@ export default function AccountsPayable() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredAccounts.map((account) => (
-                <TableRow key={account.id}>
+              {filteredAccounts.map((account) => {
+                const selectable = account.status !== 'paid' && account.status !== 'cancelled';
+                return (
+                <TableRow key={account.id} data-state={selectedIds.has(account.id) ? 'selected' : undefined}>
+                  <TableCell>
+                    {selectable && (
+                      <Checkbox
+                        checked={selectedIds.has(account.id)}
+                        onCheckedChange={() => toggleOne(account.id)}
+                        aria-label="Selecionar conta"
+                      />
+                    )}
+                  </TableCell>
                   <TableCell>
                     <div>
                       <div className="font-medium">{account.description}</div>
@@ -390,7 +421,7 @@ export default function AccountsPayable() {
                   <TableCell><StatusBadge type="payment" status={account.status} /></TableCell>
                   <TableCell>
                     <div className="flex justify-end gap-1">
-                      {account.status !== 'paid' && account.status !== 'cancelled' && (
+                      {selectable && (
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-success hover:text-success" onClick={() => openPayDialog(account)}>
                           <DollarSign className="h-4 w-4" />
                         </Button>
@@ -401,9 +432,9 @@ export default function AccountsPayable() {
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+              )})}
               {filteredAccounts.length === 0 && (
-                <TableRow><TableCell colSpan={8} className="h-24 text-center text-muted-foreground">Nenhuma conta encontrada</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="h-24 text-center text-muted-foreground">Nenhuma conta encontrada</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
