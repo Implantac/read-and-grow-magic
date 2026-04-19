@@ -27,7 +27,7 @@ import { ptBR } from 'date-fns/locale';
 
 const paymentMethods: Record<PaymentMethod, string> = {
   pix: 'PIX', boleto: 'Boleto', credit_card: 'Cartão de Crédito',
-  debit_card: 'Cartão de Débito', transfer: 'Transferência', cash: 'Dinheiro',
+  debit_card: 'Cartão de Débito', transfer: 'Transferência', cash: 'Dinheiro', check: 'Cheque',
 };
 
 const formatCurrency = (value: number) =>
