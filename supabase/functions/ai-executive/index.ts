@@ -82,6 +82,14 @@ async function fetchAllData(supabase: any) {
     supabase.from("commissions").select("id, sales_rep_id, sales_rep_name, calculated_value, status, period").limit(200),
   ]);
 
+  // Fiscal data (NF-e, taxes, SPED) — used by AI as MCP-fiscal context
+  const [nfeRes, nfeItemsRes, taxRulesRes, spedRes] = await Promise.all([
+    supabase.from("nfe").select("id, number, series, status, total_amount, total_tax, issue_date, customer_name, authorization_protocol, access_key").order("issue_date", { ascending: false }).limit(300).then((r: any) => r).catch(() => ({ data: [] })),
+    supabase.from("nfe_items").select("id, nfe_id, product_name, quantity, unit_price, total, icms_value, ipi_value, pis_value, cofins_value").limit(1000).then((r: any) => r).catch(() => ({ data: [] })),
+    supabase.from("tax_rules").select("id, name, tax_type, rate, active, ncm, cfop").limit(200).then((r: any) => r).catch(() => ({ data: [] })),
+    supabase.from("sped_files").select("id, file_type, period, status, generated_at, total_records").order("generated_at", { ascending: false }).limit(50).then((r: any) => r).catch(() => ({ data: [] })),
+  ]);
+
   return {
     orders: ordersRes.data || [],
     receivables: receivableRes.data || [],
@@ -99,6 +107,10 @@ async function fetchAllData(supabase: any) {
     salesTargets: salesTargetsRes.data || [],
     orderItems: orderItemsRes.data || [],
     commissions: commissionRes.data || [],
+    nfe: nfeRes.data || [],
+    nfeItems: nfeItemsRes.data || [],
+    taxRules: taxRulesRes.data || [],
+    spedFiles: spedRes.data || [],
   };
 }
 
@@ -273,6 +285,20 @@ function computeKPIs(d: any) {
       targetAttainment,
       totalTarget: targetsSummary.target,
       totalAchieved: targetsSummary.achieved,
+      // Fiscal KPIs (MCP-fiscal)
+      nfeIssuedCount: d.nfe.length,
+      nfeAuthorizedCount: d.nfe.filter((n: any) => n.status === 'authorized' || n.status === 'autorizada').length,
+      nfeRejectedCount: d.nfe.filter((n: any) => n.status === 'rejected' || n.status === 'rejeitada').length,
+      nfeTotalAmount: d.nfe.reduce((s: number, n: any) => s + (n.total_amount || 0), 0),
+      totalTaxAmount: d.nfe.reduce((s: number, n: any) => s + (n.total_tax || 0), 0),
+      taxBurdenPct: (() => {
+        const rev = d.nfe.reduce((s: number, n: any) => s + (n.total_amount || 0), 0);
+        const tax = d.nfe.reduce((s: number, n: any) => s + (n.total_tax || 0), 0);
+        return rev > 0 ? +(tax / rev * 100).toFixed(2) : 0;
+      })(),
+      activeTaxRules: d.taxRules.filter((t: any) => t.active).length,
+      spedFilesGenerated: d.spedFiles.length,
+      lastSpedDate: d.spedFiles[0]?.generated_at || null,
     },
     revenueByMonth,
     topClients,
@@ -569,12 +595,27 @@ const ERP_TOOLS = [
   {
     type: "function",
     function: {
+      name: "consultar_fiscal",
+      description: "Consulta dados fiscais: NF-e emitidas/autorizadas/rejeitadas, total de impostos, carga tributária, regras fiscais ativas e SPED gerados.",
+      parameters: {
+        type: "object",
+        properties: {
+          tipo: { type: "string", enum: ["resumo", "nfe_recentes", "nfe_rejeitadas", "impostos_periodo", "regras_ativas", "sped"], description: "Tipo de consulta fiscal" },
+          periodo_dias: { type: "number", description: "Período em dias (padrão 30)" },
+        },
+        required: ["tipo"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "analise_estrategica",
       description: "Gera análise estratégica detalhada com KPIs, tendências e recomendações da empresa toda",
       parameters: {
         type: "object",
         properties: {
-          foco: { type: "string", enum: ["geral", "financeiro", "comercial", "producao", "margem", "risco"], description: "Foco da análise" },
+          foco: { type: "string", enum: ["geral", "financeiro", "comercial", "producao", "margem", "risco", "fiscal"], description: "Foco da análise" },
         },
         required: ["foco"],
       },
@@ -880,9 +921,80 @@ async function executeAnaliseEstrategica(supabase: any, args: any) {
     producao: { eficiencia: k.prodEfficiency, em_andamento: k.prodInProgress, planejadas: k.prodPlanned, concluidas: k.prodCompleted, estoque_critico: k.lowStockProducts },
     margem: { margens: computed.productMargins, top_rentaveis: computed.topProfitable, baixa_margem: computed.lowMarginProducts, margem_bruta: k.grossMargin },
     risco: { inadimplencia: k.defaultRate, concentracao: k.concentrationPct, estoque_critico: k.lowStockProducts, clientes_risco: k.clientsAtRisk, fluxo_caixa: k.cashFlowProjection30d, alertas: computed.autoAlerts },
+    fiscal: {
+      nfe_emitidas: k.nfeIssuedCount,
+      nfe_autorizadas: k.nfeAuthorizedCount,
+      nfe_rejeitadas: k.nfeRejectedCount,
+      faturamento_nfe: k.nfeTotalAmount,
+      total_impostos: k.totalTaxAmount,
+      carga_tributaria_pct: k.taxBurdenPct,
+      regras_fiscais_ativas: k.activeTaxRules,
+      sped_gerados: k.spedFilesGenerated,
+      ultimo_sped: k.lastSpedDate,
+    },
   };
 
   return focusData[args.foco] || focusData.geral;
+}
+
+// MCP-Fiscal: tool executor
+async function executeConsultaFiscal(supabase: any, args: any) {
+  const periodoDias = args.periodo_dias || 30;
+  const since = new Date(Date.now() - periodoDias * 24 * 3600 * 1000).toISOString();
+
+  switch (args.tipo) {
+    case "resumo": {
+      const [nfeRes, taxRes, spedRes] = await Promise.all([
+        supabase.from("nfe").select("id, status, total_amount, total_tax, issue_date").gte("issue_date", since).limit(500),
+        supabase.from("tax_rules").select("id, active").limit(200),
+        supabase.from("sped_files").select("id, period, generated_at, status").order("generated_at", { ascending: false }).limit(10),
+      ]);
+      const nfes = nfeRes.data || [];
+      const totalAmount = nfes.reduce((s: number, n: any) => s + (n.total_amount || 0), 0);
+      const totalTax = nfes.reduce((s: number, n: any) => s + (n.total_tax || 0), 0);
+      return {
+        periodo_dias: periodoDias,
+        nfe_emitidas: nfes.length,
+        nfe_autorizadas: nfes.filter((n: any) => ['authorized', 'autorizada'].includes(n.status)).length,
+        nfe_rejeitadas: nfes.filter((n: any) => ['rejected', 'rejeitada'].includes(n.status)).length,
+        faturamento_nfe: totalAmount,
+        total_impostos: totalTax,
+        carga_tributaria_pct: totalAmount > 0 ? +(totalTax / totalAmount * 100).toFixed(2) : 0,
+        regras_fiscais_ativas: (taxRes.data || []).filter((t: any) => t.active).length,
+        sped_recentes: spedRes.data || [],
+      };
+    }
+    case "nfe_recentes": {
+      const { data } = await supabase.from("nfe").select("id, number, series, status, total_amount, total_tax, issue_date, customer_name, access_key").order("issue_date", { ascending: false }).limit(20);
+      return { nfe_recentes: data || [] };
+    }
+    case "nfe_rejeitadas": {
+      const { data } = await supabase.from("nfe").select("id, number, series, status, customer_name, issue_date, rejection_reason").in("status", ["rejected", "rejeitada"]).order("issue_date", { ascending: false }).limit(20);
+      return { nfe_rejeitadas: data || [] };
+    }
+    case "impostos_periodo": {
+      const { data } = await supabase.from("nfe").select("issue_date, total_tax, total_amount").gte("issue_date", since).limit(1000);
+      const items = data || [];
+      const byMonth: Record<string, { tax: number; amount: number }> = {};
+      items.forEach((n: any) => {
+        const key = (n.issue_date || '').substring(0, 7);
+        if (!byMonth[key]) byMonth[key] = { tax: 0, amount: 0 };
+        byMonth[key].tax += n.total_tax || 0;
+        byMonth[key].amount += n.total_amount || 0;
+      });
+      return { por_mes: byMonth, periodo_dias: periodoDias };
+    }
+    case "regras_ativas": {
+      const { data } = await supabase.from("tax_rules").select("*").eq("active", true).limit(100);
+      return { regras: data || [] };
+    }
+    case "sped": {
+      const { data } = await supabase.from("sped_files").select("*").order("generated_at", { ascending: false }).limit(20);
+      return { sped_files: data || [] };
+    }
+    default:
+      return { erro: "tipo desconhecido" };
+  }
 }
 
 // TOOL_EXECUTORS are called with (supabase, args, user_id) — see tool call loop below
@@ -891,6 +1003,7 @@ const TOOL_EXECUTORS: Record<string, (supabase: any, args: any, user_id?: string
   consultar_comercial: executeConsultaComercial,
   consultar_producao: executeConsultaProducao,
   consultar_estoque: executeConsultaEstoque,
+  consultar_fiscal: executeConsultaFiscal,
   executar_acao: executeAcao,
   analise_estrategica: executeAnaliseEstrategica,
 };
