@@ -200,8 +200,10 @@ export const navigationSections: NavSection[] = [
         href: '/fiscal',
         icon: 'FileCheck',
         children: [
+          { title: 'Painel Fiscal', href: '/fiscal/dashboard', icon: 'BarChart3' },
           { title: 'NF-e', href: '/fiscal/nfe', icon: 'FileText' },
           { title: 'NFC-e', href: '/fiscal/nfce', icon: 'Receipt' },
+          { title: '⚙️ Regras Fiscais', href: '/fiscal/regras-fiscais', icon: 'Calculator' },
           { title: 'Relatórios Fiscais', href: '/fiscal/relatorios', icon: 'BarChart3' },
         ],
       },

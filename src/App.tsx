@@ -84,6 +84,8 @@ const AccountingDashboardPage = lazy(() => import("./pages/contabilidade/Account
 const NFePage = lazy(() => import("./pages/fiscal/NFe"));
 const NFCePage = lazy(() => import("./pages/fiscal/NFCe"));
 const FiscalReportsPage = lazy(() => import("./pages/fiscal/FiscalReports"));
+const FiscalDashboardPage = lazy(() => import("./pages/fiscal/FiscalDashboard"));
+const TaxRulesPage = lazy(() => import("./pages/fiscal/TaxRules"));
 
 // Inventory
 const InventoryProductsPage = lazy(() => import("./pages/estoque/Products"));
@@ -296,10 +298,12 @@ const App = () => (
               <Route path="/contabilidade/balanco" element={<BalanceSheetPage />} />
 
               {/* Fiscal Module */}
-              <Route path="/fiscal" element={<Navigate to="/fiscal/nfe" replace />} />
+              <Route path="/fiscal" element={<Navigate to="/fiscal/dashboard" replace />} />
+              <Route path="/fiscal/dashboard" element={<FiscalDashboardPage />} />
               <Route path="/fiscal/nfe" element={<NFePage />} />
               <Route path="/fiscal/nfce" element={<NFCePage />} />
               <Route path="/fiscal/relatorios" element={<FiscalReportsPage />} />
+              <Route path="/fiscal/regras-fiscais" element={<TaxRulesPage />} />
 
               {/* Inventory Module */}
               <Route path="/estoque/produtos" element={<InventoryProductsPage />} />
