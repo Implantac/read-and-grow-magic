@@ -24,6 +24,7 @@ import { useAccountsPayable, useCreateAccountPayable, useUpdateAccountPayable, u
 import { useCreatePaymentRecord } from '@/hooks/usePaymentRecords';
 import { useBankAccounts } from '@/hooks/useBankAccounts';
 import { useCostCenters } from '@/hooks/useCostCenters';
+import { SettlementDialog, type SettlementTarget } from '@/components/financeiro/SettlementDialog';
 import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -54,6 +55,7 @@ export default function AccountsPayable() {
   const [isBatchPayOpen, setIsBatchPayOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<typeof accounts[0] | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [settlementTarget, setSettlementTarget] = useState<SettlementTarget | null>(null);
 
   const [formData, setFormData] = useState({
     description: '', supplier: '', category: '', amount: '', dueDate: '',
@@ -126,14 +128,15 @@ export default function AccountsPayable() {
   };
 
   const openPayDialog = (account: typeof accounts[0]) => {
-    setSelectedAccount(account);
-    const openAmt = Number(account.open_amount ?? account.amount);
-    setPayForm({
-      amount: openAmt.toString(), interest: '0', penalty: '0', discount: '0',
-      paymentMethod: 'pix', bankAccountId: '', notes: '',
-      paymentDate: new Date().toISOString().split('T')[0],
+    setSettlementTarget({
+      source_type: 'payable',
+      source_id: account.id,
+      description: account.description,
+      party_name: account.supplier,
+      party_id: null,
+      amount_total: Number(account.amount),
+      paid_amount: Number(account.paid_amount || 0),
     });
-    setIsPayDialogOpen(true);
   };
 
   const handlePay = () => {
@@ -550,6 +553,12 @@ export default function AccountsPayable() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <SettlementDialog
+        open={!!settlementTarget}
+        onOpenChange={(v) => !v && setSettlementTarget(null)}
+        target={settlementTarget}
+      />
     </PageContainer>
   );
 }

@@ -145,6 +145,8 @@ export const navigationSections: NavSection[] = [
           { title: 'Dashboard', href: '/financeiro/dashboard', icon: 'BarChart3' },
           { title: 'Contas a Pagar', href: '/financeiro/pagar', icon: 'ArrowUpCircle' },
           { title: 'Contas a Receber', href: '/financeiro/receber', icon: 'ArrowDownCircle' },
+          { title: '👤 Conta Corrente', href: '/financeiro/conta-corrente', icon: 'Users' },
+          { title: '🔁 Compensação', href: '/financeiro/compensacao', icon: 'ArrowLeftRight' },
           { title: 'Fluxo de Caixa', href: '/financeiro/fluxo', icon: 'TrendingUp' },
           { title: 'DRE (Ledger)', href: '/financeiro/dre', icon: 'LineChart' },
           { title: 'Tesouraria', href: '/financeiro/tesouraria', icon: 'Building2' },

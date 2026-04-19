@@ -562,6 +562,12 @@ export default function AccountsReceivable() {
           )}
         </DialogContent>
       </Dialog>
+
+      <SettlementDialog
+        open={!!settlementTarget}
+        onOpenChange={(v) => !v && setSettlementTarget(null)}
+        target={settlementTarget}
+      />
     </PageContainer>
   );
 }
