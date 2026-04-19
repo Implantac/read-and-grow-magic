@@ -1,6 +1,6 @@
-export type PaymentStatus = 'pending' | 'paid' | 'overdue' | 'cancelled';
+export type PaymentStatus = 'pending' | 'paid' | 'overdue' | 'cancelled' | 'partial';
 export type TransactionType = 'income' | 'expense';
-export type PaymentMethod = 'pix' | 'boleto' | 'credit_card' | 'debit_card' | 'transfer' | 'cash';
+export type PaymentMethod = 'pix' | 'boleto' | 'credit_card' | 'debit_card' | 'transfer' | 'cash' | 'check';
 
 export interface AccountPayable {
   id: string;
@@ -63,3 +63,33 @@ export interface FinancialCategory {
   type: TransactionType;
   color: string;
 }
+
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  pix: 'PIX',
+  boleto: 'Boleto',
+  credit_card: 'Cartão de Crédito',
+  debit_card: 'Cartão de Débito',
+  transfer: 'Transferência',
+  cash: 'Dinheiro',
+  check: 'Cheque',
+};
+
+export type CheckStatus = 'received' | 'deposited' | 'cleared' | 'bounced' | 'cancelled' | 'issued';
+export type BoletoStatus = 'pending' | 'registered' | 'paid' | 'cancelled' | 'expired';
+
+export const CHECK_STATUS_LABELS: Record<CheckStatus, string> = {
+  received: 'Recebido',
+  deposited: 'Depositado',
+  cleared: 'Compensado',
+  bounced: 'Devolvido',
+  cancelled: 'Cancelado',
+  issued: 'Emitido',
+};
+
+export const BOLETO_STATUS_LABELS: Record<BoletoStatus, string> = {
+  pending: 'Pendente',
+  registered: 'Registrado',
+  paid: 'Pago',
+  cancelled: 'Cancelado',
+  expired: 'Expirado',
+};
