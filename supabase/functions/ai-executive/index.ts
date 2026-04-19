@@ -82,6 +82,14 @@ async function fetchAllData(supabase: any) {
     supabase.from("commissions").select("id, sales_rep_id, sales_rep_name, calculated_value, status, period").limit(200),
   ]);
 
+  // Fiscal data (NF-e, taxes, SPED) — used by AI as MCP-fiscal context
+  const [nfeRes, nfeItemsRes, taxRulesRes, spedRes] = await Promise.all([
+    supabase.from("nfe").select("id, number, series, status, total_amount, total_tax, issue_date, customer_name, authorization_protocol, access_key").order("issue_date", { ascending: false }).limit(300).then((r: any) => r).catch(() => ({ data: [] })),
+    supabase.from("nfe_items").select("id, nfe_id, product_name, quantity, unit_price, total, icms_value, ipi_value, pis_value, cofins_value").limit(1000).then((r: any) => r).catch(() => ({ data: [] })),
+    supabase.from("tax_rules").select("id, name, tax_type, rate, active, ncm, cfop").limit(200).then((r: any) => r).catch(() => ({ data: [] })),
+    supabase.from("sped_files").select("id, file_type, period, status, generated_at, total_records").order("generated_at", { ascending: false }).limit(50).then((r: any) => r).catch(() => ({ data: [] })),
+  ]);
+
   return {
     orders: ordersRes.data || [],
     receivables: receivableRes.data || [],
