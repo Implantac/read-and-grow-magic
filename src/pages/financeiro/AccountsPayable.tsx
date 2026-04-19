@@ -193,7 +193,34 @@ export default function AccountsPayable() {
     return <Badge variant="outline" className="text-destructive border-destructive/30 bg-destructive/5 text-xs">{days}d</Badge>;
   };
 
-  if (isLoading) return <PageLoading message="Carregando contas a pagar..." />;
+  const selectableAccounts = filteredAccounts.filter(a => a.status !== 'paid' && a.status !== 'cancelled');
+  const selectableIds = selectableAccounts.map(a => a.id);
+  const allSelected = selectableIds.length > 0 && selectableIds.every(id => selectedIds.has(id));
+  const toggleAll = () => {
+    if (allSelected) setSelectedIds(new Set());
+    else setSelectedIds(new Set(selectableIds));
+  };
+  const toggleOne = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setSelectedIds(next);
+  };
+  const selectedTotal = selectableAccounts
+    .filter(a => selectedIds.has(a.id))
+    .reduce((s, a) => s + Number(a.open_amount ?? a.amount), 0);
+
+  const handleBatchPay = () => {
+    if (!batchForm.bankAccountId) {
+      toast({ title: 'Erro', description: 'Selecione a conta bancária', variant: 'destructive' });
+      return;
+    }
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    batchPay.mutate(
+      { ids, bank_account_id: batchForm.bankAccountId, payment_method: batchForm.paymentMethod, notes: batchForm.notes || undefined },
+      { onSuccess: () => { setIsBatchPayOpen(false); setSelectedIds(new Set()); setBatchForm({ paymentMethod: 'pix', bankAccountId: '', notes: '' }); } }
+    );
+  };
 
   return (
     <PageContainer>
