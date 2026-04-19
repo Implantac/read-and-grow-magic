@@ -67,6 +67,9 @@ const FinancialOffsetPage = lazy(() => import("./pages/financeiro/FinancialOffse
 const ChargesRulerPage = lazy(() => import("./pages/financeiro/ChargesRuler"));
 const RecurringPage = lazy(() => import("./pages/financeiro/RecurringPage"));
 const DefaultManagementPage = lazy(() => import("./pages/financeiro/DefaultManagement"));
+const CashflowScenariosPage = lazy(() => import("./pages/financeiro/CashflowScenarios"));
+const FinancialAlertsPage = lazy(() => import("./pages/financeiro/FinancialAlerts"));
+const DREDynamicPage = lazy(() => import("./pages/financeiro/DREDynamicPage"));
 
 // Accounting
 const ChartOfAccountsPage = lazy(() => import("./pages/contabilidade/ChartOfAccounts"));
@@ -273,6 +276,9 @@ const App = () => (
               <Route path="/financeiro/cobranca-automatica" element={<ChargesRulerPage />} />
               <Route path="/financeiro/recorrencias" element={<RecurringPage />} />
               <Route path="/financeiro/inadimplencia" element={<DefaultManagementPage />} />
+              <Route path="/financeiro/cenarios" element={<CashflowScenariosPage />} />
+              <Route path="/financeiro/alertas" element={<FinancialAlertsPage />} />
+              <Route path="/financeiro/dre-dinamica" element={<DREDynamicPage />} />
               
               {/* Credit & Risk Module */}
               <Route path="/credito/dashboard" element={<RiskDashboardPage />} />
