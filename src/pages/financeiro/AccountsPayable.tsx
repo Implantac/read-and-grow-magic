@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Plus, Search, Eye, Trash2, DollarSign, AlertTriangle, Clock, CheckCircle } from 'lucide-react';
+import { Plus, Search, Eye, Trash2, DollarSign, AlertTriangle, Clock, CheckCircle, Zap } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useBatchPayPayables } from '@/hooks/useBatchPay';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageLoading } from '@/components/shared/PageLoading';
@@ -42,13 +44,16 @@ export default function AccountsPayable() {
   const updateMutation = useUpdateAccountPayable();
   const deleteMutation = useDeleteAccountPayable();
   const createPayment = useCreatePaymentRecord();
+  const batchPay = useBatchPayPayables();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isPayDialogOpen, setIsPayDialogOpen] = useState(false);
+  const [isBatchPayOpen, setIsBatchPayOpen] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<typeof accounts[0] | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const [formData, setFormData] = useState({
     description: '', supplier: '', category: '', amount: '', dueDate: '',
@@ -56,6 +61,9 @@ export default function AccountsPayable() {
   });
   const [payForm, setPayForm] = useState({
     amount: '', interest: '0', penalty: '0', discount: '0',
+    paymentMethod: 'pix' as PaymentMethod, bankAccountId: '', notes: '',
+  });
+  const [batchForm, setBatchForm] = useState({
     paymentMethod: 'pix' as PaymentMethod, bankAccountId: '', notes: '',
   });
 
@@ -183,6 +191,35 @@ export default function AccountsPayable() {
     if (days <= 7) return <Badge variant="outline" className="text-warning border-warning/30 bg-warning/10 text-xs">{days}d</Badge>;
     if (days <= 30) return <Badge variant="outline" className="text-warning border-warning/50 bg-warning/20 text-xs">{days}d</Badge>;
     return <Badge variant="outline" className="text-destructive border-destructive/30 bg-destructive/5 text-xs">{days}d</Badge>;
+  };
+
+  const selectableAccounts = filteredAccounts.filter(a => a.status !== 'paid' && a.status !== 'cancelled');
+  const selectableIds = selectableAccounts.map(a => a.id);
+  const allSelected = selectableIds.length > 0 && selectableIds.every(id => selectedIds.has(id));
+  const toggleAll = () => {
+    if (allSelected) setSelectedIds(new Set());
+    else setSelectedIds(new Set(selectableIds));
+  };
+  const toggleOne = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setSelectedIds(next);
+  };
+  const selectedTotal = selectableAccounts
+    .filter(a => selectedIds.has(a.id))
+    .reduce((s, a) => s + Number(a.open_amount ?? a.amount), 0);
+
+  const handleBatchPay = () => {
+    if (!batchForm.bankAccountId) {
+      toast({ title: 'Erro', description: 'Selecione a conta bancária', variant: 'destructive' });
+      return;
+    }
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    batchPay.mutate(
+      { ids, bank_account_id: batchForm.bankAccountId, payment_method: batchForm.paymentMethod, notes: batchForm.notes || undefined },
+      { onSuccess: () => { setIsBatchPayOpen(false); setSelectedIds(new Set()); setBatchForm({ paymentMethod: 'pix', bankAccountId: '', notes: '' }); } }
+    );
   };
 
   if (isLoading) return <PageLoading message="Carregando contas a pagar..." />;
@@ -314,11 +351,31 @@ export default function AccountsPayable() {
         </CardContent>
       </Card>
 
+      {selectedIds.size > 0 && (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardContent className="flex items-center justify-between gap-3 py-3">
+            <div className="text-sm">
+              <span className="font-semibold">{selectedIds.size}</span> selecionado(s) · Total{' '}
+              <span className="font-semibold text-primary">{formatCurrency(selectedTotal)}</span>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>Limpar</Button>
+              <Button size="sm" className="gap-2" onClick={() => setIsBatchPayOpen(true)}>
+                <Zap className="h-4 w-4" />Pagar em Lote
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-10">
+                  <Checkbox checked={allSelected} onCheckedChange={toggleAll} aria-label="Selecionar tudo" />
+                </TableHead>
                 <TableHead>Descrição</TableHead>
                 <TableHead>Fornecedor</TableHead>
                 <TableHead>Vencimento</TableHead>
@@ -330,8 +387,19 @@ export default function AccountsPayable() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredAccounts.map((account) => (
-                <TableRow key={account.id}>
+              {filteredAccounts.map((account) => {
+                const selectable = account.status !== 'paid' && account.status !== 'cancelled';
+                return (
+                <TableRow key={account.id} data-state={selectedIds.has(account.id) ? 'selected' : undefined}>
+                  <TableCell>
+                    {selectable && (
+                      <Checkbox
+                        checked={selectedIds.has(account.id)}
+                        onCheckedChange={() => toggleOne(account.id)}
+                        aria-label="Selecionar conta"
+                      />
+                    )}
+                  </TableCell>
                   <TableCell>
                     <div>
                       <div className="font-medium">{account.description}</div>
@@ -353,7 +421,7 @@ export default function AccountsPayable() {
                   <TableCell><StatusBadge type="payment" status={account.status} /></TableCell>
                   <TableCell>
                     <div className="flex justify-end gap-1">
-                      {account.status !== 'paid' && account.status !== 'cancelled' && (
+                      {selectable && (
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-success hover:text-success" onClick={() => openPayDialog(account)}>
                           <DollarSign className="h-4 w-4" />
                         </Button>
@@ -364,9 +432,9 @@ export default function AccountsPayable() {
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+              )})}
               {filteredAccounts.length === 0 && (
-                <TableRow><TableCell colSpan={8} className="h-24 text-center text-muted-foreground">Nenhuma conta encontrada</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="h-24 text-center text-muted-foreground">Nenhuma conta encontrada</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
@@ -423,6 +491,58 @@ export default function AccountsPayable() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsPayDialogOpen(false)}>Cancelar</Button>
             <Button onClick={handlePay} disabled={createPayment.isPending} className="gap-2"><CheckCircle className="h-4 w-4" />Confirmar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Batch Pay Dialog */}
+      <Dialog open={isBatchPayOpen} onOpenChange={setIsBatchPayOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Pagar em Lote</DialogTitle></DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="rounded-lg bg-muted p-4">
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-xs text-muted-foreground">Títulos selecionados</p>
+                  <p className="text-2xl font-bold">{selectedIds.size}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground">Total a pagar</p>
+                  <p className="text-2xl font-bold text-primary">{formatCurrency(selectedTotal)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-1.5">
+              <Label className="text-xs">Forma de Pagamento *</Label>
+              <Select value={batchForm.paymentMethod} onValueChange={(v) => setBatchForm({ ...batchForm, paymentMethod: v as PaymentMethod })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{Object.entries(paymentMethods).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-1.5">
+              <Label className="text-xs">Conta Bancária *</Label>
+              <Select value={batchForm.bankAccountId} onValueChange={(v) => setBatchForm({ ...batchForm, bankAccountId: v })}>
+                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                <SelectContent>{bankAccounts.map(b => <SelectItem key={b.id} value={b.id}>{b.name} — {formatCurrency(Number(b.balance))}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-1.5">
+              <Label className="text-xs">Observações</Label>
+              <Textarea value={batchForm.notes} onChange={(e) => setBatchForm({ ...batchForm, notes: e.target.value })} className="h-16" placeholder="Opcional" />
+            </div>
+
+            <div className="rounded-md border border-warning/30 bg-warning/5 p-3 text-xs text-muted-foreground">
+              Ao confirmar, todos os títulos selecionados serão quitados pelo valor em aberto na conta escolhida.
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsBatchPayOpen(false)}>Cancelar</Button>
+            <Button onClick={handleBatchPay} disabled={batchPay.isPending} className="gap-2">
+              <Zap className="h-4 w-4" />Confirmar Pagamento
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
