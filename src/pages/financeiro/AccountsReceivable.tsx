@@ -61,6 +61,7 @@ export default function AccountsReceivable() {
   const [payForm, setPayForm] = useState({
     amount: '', interest: '0', penalty: '0', discount: '0',
     paymentMethod: 'pix' as PaymentMethod, bankAccountId: '', notes: '',
+    paymentDate: new Date().toISOString().split('T')[0],
   });
 
   const now = new Date();
@@ -146,7 +147,11 @@ export default function AccountsReceivable() {
   const openReceiveDialog = (account: typeof accounts[0]) => {
     setSelectedAccount(account);
     const openAmt = Number(account.open_amount ?? account.amount);
-    setPayForm({ amount: openAmt.toString(), interest: '0', penalty: '0', discount: '0', paymentMethod: 'pix', bankAccountId: '', notes: '' });
+    setPayForm({
+      amount: openAmt.toString(), interest: '0', penalty: '0', discount: '0',
+      paymentMethod: 'pix', bankAccountId: '', notes: '',
+      paymentDate: new Date().toISOString().split('T')[0],
+    });
     setIsReceiveDialogOpen(true);
   };
 
@@ -163,36 +168,32 @@ export default function AccountsReceivable() {
       toast({ title: 'Erro', description: 'Informe o valor do recebimento', variant: 'destructive' });
       return;
     }
+    if (amount > openAmount + 0.01) {
+      toast({ title: 'Atenção', description: `Valor maior que o saldo em aberto (${formatCurrency(openAmount)})`, variant: 'destructive' });
+      return;
+    }
+    if (!payForm.bankAccountId) {
+      toast({ title: 'Erro', description: 'Selecione a conta bancária', variant: 'destructive' });
+      return;
+    }
 
+    // O trigger process_payment_record já atualiza accounts_receivable + financial_ledger automaticamente.
+    // Não duplicar UPDATE no cliente — isso causava paid_amount em dobro.
     createPayment.mutate({
       receivable_id: selectedAccount.id,
       payable_id: null,
       amount, interest, penalty, discount, total_paid: totalPaid,
       payment_method: payForm.paymentMethod,
-      payment_date: new Date().toISOString().split('T')[0],
-      bank_account_id: payForm.bankAccountId || null,
+      payment_date: payForm.paymentDate,
+      bank_account_id: payForm.bankAccountId,
       notes: payForm.notes || null,
       created_by: null,
     }, {
       onSuccess: () => {
-        const newPaidAmount = Number(selectedAccount.paid_amount ?? 0) + amount;
-        const newOpenAmount = openAmount - amount;
-        const newStatus = newOpenAmount <= 0.01 ? 'paid' : 'partial';
-
-        updateMutation.mutate({
-          id: selectedAccount.id,
-          paid_amount: newPaidAmount,
-          open_amount: Math.max(0, newOpenAmount),
-          status: newStatus,
-          payment_date: newStatus === 'paid' ? new Date().toISOString() : selectedAccount.payment_date,
-          payment_method: payForm.paymentMethod,
-          interest: Number(selectedAccount.interest ?? 0) + interest,
-          penalty: Number(selectedAccount.penalty ?? 0) + penalty,
-          discount_amount: Number(selectedAccount.discount_amount ?? 0) + discount,
-        });
+        const isFull = openAmount - amount <= 0.01;
         setIsReceiveDialogOpen(false);
         setSelectedAccount(null);
-        toast({ title: 'Sucesso', description: newStatus === 'paid' ? 'Título quitado com sucesso' : 'Baixa parcial registrada com sucesso' });
+        toast({ title: 'Sucesso', description: isFull ? 'Título quitado com sucesso' : 'Baixa parcial registrada com sucesso' });
       }
     });
   };
@@ -499,18 +500,22 @@ export default function AccountsReceivable() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="grid gap-1.5">
-                  <Label className="text-xs">Forma de Recebimento</Label>
+                  <Label className="text-xs">Forma de Recebimento *</Label>
                   <Select value={payForm.paymentMethod} onValueChange={(v) => setPayForm({ ...payForm, paymentMethod: v as PaymentMethod })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>{Object.entries(paymentMethods).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div className="grid gap-1.5">
-                  <Label className="text-xs">Conta Bancária</Label>
+                  <Label className="text-xs">Conta Bancária *</Label>
                   <Select value={payForm.bankAccountId} onValueChange={(v) => setPayForm({ ...payForm, bankAccountId: v })}>
                     <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                     <SelectContent>{bankAccounts.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}</SelectContent>
                   </Select>
+                </div>
+                <div className="grid gap-1.5">
+                  <Label className="text-xs">Data do Recebimento *</Label>
+                  <Input type="date" value={payForm.paymentDate} onChange={(e) => setPayForm({ ...payForm, paymentDate: e.target.value })} />
                 </div>
               </div>
 
