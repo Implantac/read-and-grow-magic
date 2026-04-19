@@ -222,6 +222,8 @@ export default function AccountsPayable() {
     );
   };
 
+  if (isLoading) return <PageLoading message="Carregando contas a pagar..." />;
+
   return (
     <PageContainer>
       <PageHeader title="Contas a Pagar" description="Gerencie suas obrigações financeiras">
