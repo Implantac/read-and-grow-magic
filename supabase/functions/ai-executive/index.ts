@@ -906,6 +906,17 @@ async function executeAnaliseEstrategica(supabase: any, args: any) {
     producao: { eficiencia: k.prodEfficiency, em_andamento: k.prodInProgress, planejadas: k.prodPlanned, concluidas: k.prodCompleted, estoque_critico: k.lowStockProducts },
     margem: { margens: computed.productMargins, top_rentaveis: computed.topProfitable, baixa_margem: computed.lowMarginProducts, margem_bruta: k.grossMargin },
     risco: { inadimplencia: k.defaultRate, concentracao: k.concentrationPct, estoque_critico: k.lowStockProducts, clientes_risco: k.clientsAtRisk, fluxo_caixa: k.cashFlowProjection30d, alertas: computed.autoAlerts },
+    fiscal: {
+      nfe_emitidas: k.nfeIssuedCount,
+      nfe_autorizadas: k.nfeAuthorizedCount,
+      nfe_rejeitadas: k.nfeRejectedCount,
+      faturamento_nfe: k.nfeTotalAmount,
+      total_impostos: k.totalTaxAmount,
+      carga_tributaria_pct: k.taxBurdenPct,
+      regras_fiscais_ativas: k.activeTaxRules,
+      sped_gerados: k.spedFilesGenerated,
+      ultimo_sped: k.lastSpedDate,
+    },
   };
 
   return focusData[args.foco] || focusData.geral;
