@@ -285,6 +285,20 @@ function computeKPIs(d: any) {
       targetAttainment,
       totalTarget: targetsSummary.target,
       totalAchieved: targetsSummary.achieved,
+      // Fiscal KPIs (MCP-fiscal)
+      nfeIssuedCount: d.nfe.length,
+      nfeAuthorizedCount: d.nfe.filter((n: any) => n.status === 'authorized' || n.status === 'autorizada').length,
+      nfeRejectedCount: d.nfe.filter((n: any) => n.status === 'rejected' || n.status === 'rejeitada').length,
+      nfeTotalAmount: d.nfe.reduce((s: number, n: any) => s + (n.total_amount || 0), 0),
+      totalTaxAmount: d.nfe.reduce((s: number, n: any) => s + (n.total_tax || 0), 0),
+      taxBurdenPct: (() => {
+        const rev = d.nfe.reduce((s: number, n: any) => s + (n.total_amount || 0), 0);
+        const tax = d.nfe.reduce((s: number, n: any) => s + (n.total_tax || 0), 0);
+        return rev > 0 ? +(tax / rev * 100).toFixed(2) : 0;
+      })(),
+      activeTaxRules: d.taxRules.filter((t: any) => t.active).length,
+      spedFilesGenerated: d.spedFiles.length,
+      lastSpedDate: d.spedFiles[0]?.generated_at || null,
     },
     revenueByMonth,
     topClients,
