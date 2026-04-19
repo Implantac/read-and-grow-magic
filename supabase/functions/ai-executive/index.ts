@@ -937,12 +937,73 @@ async function executeAnaliseEstrategica(supabase: any, args: any) {
   return focusData[args.foco] || focusData.geral;
 }
 
+// MCP-Fiscal: tool executor
+async function executeConsultaFiscal(supabase: any, args: any) {
+  const periodoDias = args.periodo_dias || 30;
+  const since = new Date(Date.now() - periodoDias * 24 * 3600 * 1000).toISOString();
+
+  switch (args.tipo) {
+    case "resumo": {
+      const [nfeRes, taxRes, spedRes] = await Promise.all([
+        supabase.from("nfe").select("id, status, total_amount, total_tax, issue_date").gte("issue_date", since).limit(500),
+        supabase.from("tax_rules").select("id, active").limit(200),
+        supabase.from("sped_files").select("id, period, generated_at, status").order("generated_at", { ascending: false }).limit(10),
+      ]);
+      const nfes = nfeRes.data || [];
+      const totalAmount = nfes.reduce((s: number, n: any) => s + (n.total_amount || 0), 0);
+      const totalTax = nfes.reduce((s: number, n: any) => s + (n.total_tax || 0), 0);
+      return {
+        periodo_dias: periodoDias,
+        nfe_emitidas: nfes.length,
+        nfe_autorizadas: nfes.filter((n: any) => ['authorized', 'autorizada'].includes(n.status)).length,
+        nfe_rejeitadas: nfes.filter((n: any) => ['rejected', 'rejeitada'].includes(n.status)).length,
+        faturamento_nfe: totalAmount,
+        total_impostos: totalTax,
+        carga_tributaria_pct: totalAmount > 0 ? +(totalTax / totalAmount * 100).toFixed(2) : 0,
+        regras_fiscais_ativas: (taxRes.data || []).filter((t: any) => t.active).length,
+        sped_recentes: spedRes.data || [],
+      };
+    }
+    case "nfe_recentes": {
+      const { data } = await supabase.from("nfe").select("id, number, series, status, total_amount, total_tax, issue_date, customer_name, access_key").order("issue_date", { ascending: false }).limit(20);
+      return { nfe_recentes: data || [] };
+    }
+    case "nfe_rejeitadas": {
+      const { data } = await supabase.from("nfe").select("id, number, series, status, customer_name, issue_date, rejection_reason").in("status", ["rejected", "rejeitada"]).order("issue_date", { ascending: false }).limit(20);
+      return { nfe_rejeitadas: data || [] };
+    }
+    case "impostos_periodo": {
+      const { data } = await supabase.from("nfe").select("issue_date, total_tax, total_amount").gte("issue_date", since).limit(1000);
+      const items = data || [];
+      const byMonth: Record<string, { tax: number; amount: number }> = {};
+      items.forEach((n: any) => {
+        const key = (n.issue_date || '').substring(0, 7);
+        if (!byMonth[key]) byMonth[key] = { tax: 0, amount: 0 };
+        byMonth[key].tax += n.total_tax || 0;
+        byMonth[key].amount += n.total_amount || 0;
+      });
+      return { por_mes: byMonth, periodo_dias: periodoDias };
+    }
+    case "regras_ativas": {
+      const { data } = await supabase.from("tax_rules").select("*").eq("active", true).limit(100);
+      return { regras: data || [] };
+    }
+    case "sped": {
+      const { data } = await supabase.from("sped_files").select("*").order("generated_at", { ascending: false }).limit(20);
+      return { sped_files: data || [] };
+    }
+    default:
+      return { erro: "tipo desconhecido" };
+  }
+}
+
 // TOOL_EXECUTORS are called with (supabase, args, user_id) — see tool call loop below
 const TOOL_EXECUTORS: Record<string, (supabase: any, args: any, user_id?: string) => Promise<any>> = {
   consultar_financeiro: executeConsultaFinanceiro,
   consultar_comercial: executeConsultaComercial,
   consultar_producao: executeConsultaProducao,
   consultar_estoque: executeConsultaEstoque,
+  consultar_fiscal: executeConsultaFiscal,
   executar_acao: executeAcao,
   analise_estrategica: executeAnaliseEstrategica,
 };
