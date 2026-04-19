@@ -70,37 +70,67 @@ export function useImportBankStatement() {
   const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ txs, bankAccountId }: { txs: ParsedTx[]; bankAccountId?: string }) => {
-      // Inserir bank_transactions evitando duplicidade por bank_reference
-      let inserted = 0;
-      let skipped = 0;
-      for (const tx of txs) {
-        if (tx.bank_reference) {
-          const { data: dup } = await supabase.from('bank_transactions')
-            .select('id').eq('bank_reference', tx.bank_reference).maybeSingle();
-          if (dup) { skipped++; continue; }
+      if (!bankAccountId) throw new Error('Selecione uma conta bancária');
+      // 1) Importação em lote (idempotente via RPC)
+      const { data: importData, error: impErr } = await supabase.rpc(
+        'import_bank_statement_batch' as any,
+        {
+          p_bank_account_id: bankAccountId,
+          p_transactions: txs.map(t => ({
+            date: t.date,
+            description: t.description,
+            amount: t.amount,
+            type: t.type,
+            bank_reference: t.bank_reference ?? null,
+            source: 'import',
+          })),
         }
-        const { error } = await supabase.from('bank_transactions').insert({
-          date: tx.date, amount: tx.amount, type: tx.type,
-          description: tx.description, bank_reference: tx.bank_reference ?? null, status: 'unmatched',
-        });
-        if (!error) inserted++;
-      }
-      // Tentar match automático
-      const { data: pendings } = await supabase.from('bank_transactions')
-        .select('id').eq('status', 'unmatched').order('created_at', { ascending: false }).limit(inserted);
-      let matched = 0;
-      for (const p of pendings ?? []) {
-        const { data: r } = await supabase.rpc('match_bank_transaction', { _bank_tx_id: p.id });
-        if ((r as any)?.ok) matched++;
-      }
+      );
+      if (impErr) throw impErr;
+      const row: any = Array.isArray(importData) ? importData[0] : importData;
+      const inserted = row?.inserted ?? 0;
+      const skipped = row?.skipped ?? 0;
+
+      // 2) Match automático (ledger ↔ bank_transactions)
+      const { data: matchData, error: matchErr } = await supabase.rpc(
+        'auto_match_bank_transactions' as any,
+        { p_bank_account_id: bankAccountId, p_tolerance_days: 3 }
+      );
+      if (matchErr) throw matchErr;
+      const mrow: any = Array.isArray(matchData) ? matchData[0] : matchData;
+      const matched = mrow?.matched ?? 0;
+
       return { inserted, skipped, matched };
     },
     onSuccess: (r) => {
       qc.invalidateQueries({ queryKey: ['bank_transactions'] });
       qc.invalidateQueries({ queryKey: ['financial_ledger'] });
-      toast({ title: 'Extrato importado', description: `${r.inserted} transações · ${r.matched} conciliadas · ${r.skipped} duplicadas ignoradas` });
+      qc.invalidateQueries({ queryKey: ['bank_accounts'] });
+      toast({ title: 'Extrato importado', description: `${r.inserted} novas · ${r.matched} conciliadas · ${r.skipped} duplicadas ignoradas` });
     },
     onError: (e: any) => toast({ title: 'Erro na importação', description: e.message, variant: 'destructive' }),
+  });
+}
+
+export function useAutoMatch() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  return useMutation({
+    mutationFn: async (bankAccountId?: string) => {
+      const { data, error } = await supabase.rpc(
+        'auto_match_bank_transactions' as any,
+        { p_bank_account_id: bankAccountId ?? null, p_tolerance_days: 3 }
+      );
+      if (error) throw error;
+      const row: any = Array.isArray(data) ? data[0] : data;
+      return { matched: row?.matched ?? 0, total: row?.total_pending ?? 0 };
+    },
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: ['bank_transactions'] });
+      qc.invalidateQueries({ queryKey: ['financial_ledger'] });
+      toast({ title: 'Match automático', description: `${r.matched} de ${r.total} transações conciliadas` });
+    },
+    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
   });
 }
 
