@@ -141,6 +141,7 @@ export const navigationSections: NavSection[] = [
         href: '/financeiro',
         icon: 'Wallet',
         children: [
+          { title: 'Central Financeira', href: '/financeiro/central', icon: 'Zap' },
           { title: 'Dashboard', href: '/financeiro/dashboard', icon: 'BarChart3' },
           { title: 'Contas a Pagar', href: '/financeiro/pagar', icon: 'ArrowUpCircle' },
           { title: 'Contas a Receber', href: '/financeiro/receber', icon: 'ArrowDownCircle' },
