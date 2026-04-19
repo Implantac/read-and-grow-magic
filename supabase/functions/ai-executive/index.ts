@@ -107,6 +107,10 @@ async function fetchAllData(supabase: any) {
     salesTargets: salesTargetsRes.data || [],
     orderItems: orderItemsRes.data || [],
     commissions: commissionRes.data || [],
+    nfe: nfeRes.data || [],
+    nfeItems: nfeItemsRes.data || [],
+    taxRules: taxRulesRes.data || [],
+    spedFiles: spedRes.data || [],
   };
 }
 
