@@ -152,6 +152,8 @@ export const navigationSections: NavSection[] = [
           { title: 'Renegociações', href: '/financeiro/renegociacoes', icon: 'RefreshCw' },
           { title: 'Conciliação', href: '/financeiro/conciliacao', icon: 'CheckCircle' },
           { title: 'Cobranças PIX', href: '/financeiro/pix', icon: 'QrCode' },
+          { title: 'Boletos', href: '/financeiro/boletos', icon: 'Receipt' },
+          { title: 'Cheques', href: '/financeiro/cheques', icon: 'FileCheck' },
           { title: 'Inteligência IA', href: '/financeiro/inteligencia', icon: 'Brain' },
           { title: 'BI Executivo', href: '/financeiro/bi', icon: 'BarChart3' },
           { title: 'Antifraude', href: '/financeiro/antifraude', icon: 'ShieldAlert' },
