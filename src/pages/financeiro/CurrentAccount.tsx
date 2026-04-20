@@ -62,7 +62,7 @@ function CurrentAccountTable({ rows, search }: { rows: Row[]; search: string }) 
           <CardContent className="p-0">
             <div className="px-4 py-3 border-b flex items-center justify-between bg-muted/40">
               <div className="font-semibold">{g.party}</div>
-              <div className={`font-mono font-semibold ${g.total > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
+              <div className={`font-mono font-semibold ${g.total > 0 ? 'text-warning' : 'text-success'}`}>
                 Saldo: {formatBRL(g.total)}
               </div>
             </div>
@@ -87,13 +87,13 @@ function CurrentAccountTable({ rows, search }: { rows: Row[]; search: string }) 
                       <TableCell className="text-sm font-mono">{r.invoice_number || '—'}</TableCell>
                       <TableCell className="text-sm">{r.description}</TableCell>
                       <TableCell className="text-right font-mono">{formatBRL(r.debit)}</TableCell>
-                      <TableCell className="text-right font-mono text-emerald-600">{formatBRL(r.credit)}</TableCell>
+                      <TableCell className="text-right font-mono text-success">{formatBRL(r.credit)}</TableCell>
                       <TableCell className="text-right font-mono font-semibold">{formatBRL(r.balance)}</TableCell>
                       <TableCell>
-                        {r.status === 'paid' && <Badge className="bg-emerald-500/15 text-emerald-700">Pago</Badge>}
+                        {r.status === 'paid' && <Badge className="bg-success/15 text-success">Pago</Badge>}
                         {r.status === 'pending' && <Badge variant="outline">Pendente</Badge>}
                         {r.status === 'overdue' && <Badge variant="destructive">Vencido</Badge>}
-                        {r.status === 'partial' && <Badge className="bg-amber-500/15 text-amber-700">Parcial</Badge>}
+                        {r.status === 'partial' && <Badge className="bg-warning/15 text-warning">Parcial</Badge>}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -153,7 +153,6 @@ export default function CurrentAccount() {
       <PageHeader
         title="Conta Corrente"
         description="Extrato e saldo acumulado por cliente e fornecedor"
-        icon={Wallet}
       />
 
       <div className="relative">

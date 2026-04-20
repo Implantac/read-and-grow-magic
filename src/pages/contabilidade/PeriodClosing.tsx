@@ -83,7 +83,6 @@ export default function PeriodClosing() {
       <PageHeader
         title="Fechamento Contábil"
         description="Bloqueia o período para evitar alterações em movimentações já contabilizadas"
-        icon={Lock}
       />
 
       <Card>
@@ -120,10 +119,10 @@ export default function PeriodClosing() {
                   <TableCell className="font-medium">{row.name}/{year}</TableCell>
                   <TableCell>
                     {row.status === 'open' && <Badge variant="outline">Aberto</Badge>}
-                    {row.status === 'closed' && <Badge className="bg-amber-500/15 text-amber-700">Fechado</Badge>}
+                    {row.status === 'closed' && <Badge className="bg-warning/15 text-warning">Fechado</Badge>}
                     {row.status === 'locked' && <Badge variant="destructive">Bloqueado</Badge>}
                   </TableCell>
-                  <TableCell className={`text-right font-mono ${row.result >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                  <TableCell className={`text-right font-mono ${row.result >= 0 ? 'text-success' : 'text-destructive'}`}>
                     {formatBRL(row.result)}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
