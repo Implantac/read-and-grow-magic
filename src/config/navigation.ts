@@ -193,6 +193,7 @@ export const navigationSections: NavSection[] = [
           { title: 'Balancete', href: '/contabilidade/balancete', icon: 'Scale' },
           { title: 'DRE', href: '/contabilidade/dre', icon: 'TrendingUp' },
           { title: 'Balanço Patrimonial', href: '/contabilidade/balanco', icon: 'Building2' },
+          { title: 'Fechamento Contábil', href: '/contabilidade/fechamento', icon: 'Lock' },
         ],
       },
       {
