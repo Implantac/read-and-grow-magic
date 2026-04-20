@@ -37,6 +37,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Sparkles, Cpu, Rocket, Filter, UserCheck, DollarSign, Target,
   Megaphone, Trophy, Bot, Eye, Truck, RefreshCw,
   Shield, Lock, Phone, ArrowDown, Database, ScanBarcode, DoorOpen, RotateCcw,
+  Bell, Repeat, TrendingDown, LineChart, AlertTriangle, ShieldAlert, Upload, QrCode,
 };
 
 function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, expandedItems, toggleExpanded }: {
