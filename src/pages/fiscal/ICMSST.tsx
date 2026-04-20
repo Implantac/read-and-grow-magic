@@ -29,7 +29,6 @@ export default function ICMSSTPage() {
       <PageHeader
         title="ICMS Substituição Tributária"
         description="Regras de cálculo automático de ICMS ST por NCM/UF"
-        icon={Percent}
         actions={
           <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing({ name: '', mva_original: 0, internal_rate: 18, interstate_rate: 12, active: true, priority: 0 }); }}>
             <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" />Nova Regra</Button></DialogTrigger>

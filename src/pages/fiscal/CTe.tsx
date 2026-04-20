@@ -53,7 +53,6 @@ export default function CTePage() {
       <PageHeader
         title="CT-e — Conhecimento de Transporte"
         description="Emita CT-e vinculado a NF-e e transportadoras"
-        icon={Truck}
         actions={
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>

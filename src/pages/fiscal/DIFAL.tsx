@@ -29,7 +29,6 @@ export default function DIFALPage() {
       <PageHeader
         title="DIFAL — Diferencial de Alíquota"
         description="Cálculo automático em vendas interestaduais a consumidor final"
-        icon={Globe}
         actions={
           <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing({ name: '', uf_origin: '', uf_destination: '', internal_rate_destination: 18, interstate_rate: 12, fcp_rate: 0, active: true }); }}>
             <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" />Nova Regra DIFAL</Button></DialogTrigger>

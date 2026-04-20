@@ -41,7 +41,6 @@ export default function MDFePage() {
       <PageHeader
         title="MDF-e — Manifesto de Documentos Fiscais"
         description="Agrupe NF-e/CT-e por viagem e encerre automaticamente ao final"
-        icon={PackageCheck}
         actions={
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button><Plus className="mr-2 h-4 w-4" />Novo MDF-e</Button></DialogTrigger>
