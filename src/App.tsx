@@ -89,6 +89,10 @@ const FiscalReportsPage = lazy(() => import("./pages/fiscal/FiscalReports"));
 const FiscalDashboardPage = lazy(() => import("./pages/fiscal/FiscalDashboard"));
 const TaxRulesPage = lazy(() => import("./pages/fiscal/TaxRules"));
 const SpedFilesPage = lazy(() => import("./pages/fiscal/SpedFiles"));
+const CTePage = lazy(() => import("./pages/fiscal/CTe"));
+const MDFePage = lazy(() => import("./pages/fiscal/MDFe"));
+const ICMSSTPage = lazy(() => import("./pages/fiscal/ICMSST"));
+const DIFALPage = lazy(() => import("./pages/fiscal/DIFAL"));
 
 // Inventory
 const InventoryProductsPage = lazy(() => import("./pages/estoque/Products"));
@@ -310,6 +314,10 @@ const App = () => (
               <Route path="/fiscal/relatorios" element={<FiscalReportsPage />} />
               <Route path="/fiscal/regras-fiscais" element={<TaxRulesPage />} />
               <Route path="/fiscal/sped" element={<SpedFilesPage />} />
+              <Route path="/fiscal/cte" element={<CTePage />} />
+              <Route path="/fiscal/mdfe" element={<MDFePage />} />
+              <Route path="/fiscal/icms-st" element={<ICMSSTPage />} />
+              <Route path="/fiscal/difal" element={<DIFALPage />} />
 
               {/* Inventory Module */}
               <Route path="/estoque/produtos" element={<InventoryProductsPage />} />
