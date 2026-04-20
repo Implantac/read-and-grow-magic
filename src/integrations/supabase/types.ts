@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounting_periods: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          created_at: string
+          id: string
+          month: number
+          notes: string | null
+          result_amount: number | null
+          status: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          id?: string
+          month: number
+          notes?: string | null
+          result_amount?: number | null
+          status?: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          id?: string
+          month?: number
+          notes?: string | null
+          result_amount?: number | null
+          status?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
+      }
       accounts_payable: {
         Row: {
           amount: number
@@ -1740,6 +1779,13 @@ export type Database = {
             referencedRelation: "accounts_receivable"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "collection_actions_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "client_current_account"
+            referencedColumns: ["document_id"]
+          },
         ]
       }
       commercial_alerts: {
@@ -3122,6 +3168,13 @@ export type Database = {
             referencedRelation: "accounts_receivable"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "financial_boletos_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "client_current_account"
+            referencedColumns: ["document_id"]
+          },
         ]
       }
       financial_categories: {
@@ -3297,6 +3350,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "financial_charges_log_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "client_current_account"
+            referencedColumns: ["document_id"]
+          },
+          {
             foreignKeyName: "financial_charges_log_rule_id_fkey"
             columns: ["rule_id"]
             isOneToOne: false
@@ -3442,11 +3502,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "financial_checks_payable_id_fkey"
+            columns: ["payable_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_current_account"
+            referencedColumns: ["document_id"]
+          },
+          {
             foreignKeyName: "financial_checks_receivable_id_fkey"
             columns: ["receivable_id"]
             isOneToOne: false
             referencedRelation: "accounts_receivable"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_checks_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "client_current_account"
+            referencedColumns: ["document_id"]
           },
         ]
       }
@@ -3742,6 +3816,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "financial_offsets_payable_id_fkey"
+            columns: ["payable_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_current_account"
+            referencedColumns: ["document_id"]
+          },
+          {
             foreignKeyName: "financial_offsets_payable_settlement_id_fkey"
             columns: ["payable_settlement_id"]
             isOneToOne: false
@@ -3754,6 +3835,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "accounts_receivable"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_offsets_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "client_current_account"
+            referencedColumns: ["document_id"]
           },
           {
             foreignKeyName: "financial_offsets_receivable_settlement_id_fkey"
@@ -6269,11 +6357,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "payment_records_payable_id_fkey"
+            columns: ["payable_id"]
+            isOneToOne: false
+            referencedRelation: "supplier_current_account"
+            referencedColumns: ["document_id"]
+          },
+          {
             foreignKeyName: "payment_records_receivable_id_fkey"
             columns: ["receivable_id"]
             isOneToOne: false
             referencedRelation: "accounts_receivable"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_records_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "client_current_account"
+            referencedColumns: ["document_id"]
           },
         ]
       }
@@ -6548,6 +6650,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "accounts_receivable"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pix_charges_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "client_current_account"
+            referencedColumns: ["document_id"]
           },
         ]
       }
@@ -8492,6 +8601,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "accounts_receivable"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "renegotiation_items_receivable_id_fkey"
+            columns: ["receivable_id"]
+            isOneToOne: false
+            referencedRelation: "client_current_account"
+            referencedColumns: ["document_id"]
           },
           {
             foreignKeyName: "renegotiation_items_renegotiation_id_fkey"
@@ -12406,7 +12522,101 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      client_current_account: {
+        Row: {
+          balance: number | null
+          client_id: string | null
+          client_name: string | null
+          created_at: string | null
+          credit: number | null
+          date: string | null
+          debit: number | null
+          description: string | null
+          document_id: string | null
+          document_type: string | null
+          invoice_number: string | null
+          status: string | null
+        }
+        Insert: {
+          balance?: never
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string | null
+          credit?: never
+          date?: string | null
+          debit?: number | null
+          description?: string | null
+          document_id?: string | null
+          document_type?: never
+          invoice_number?: string | null
+          status?: string | null
+        }
+        Update: {
+          balance?: never
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string | null
+          credit?: never
+          date?: string | null
+          debit?: number | null
+          description?: string | null
+          document_id?: string | null
+          document_type?: never
+          invoice_number?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounts_receivable_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      supplier_current_account: {
+        Row: {
+          balance: number | null
+          created_at: string | null
+          credit: number | null
+          date: string | null
+          debit: number | null
+          description: string | null
+          document_id: string | null
+          document_type: string | null
+          invoice_number: string | null
+          status: string | null
+          supplier_name: string | null
+        }
+        Insert: {
+          balance?: never
+          created_at?: string | null
+          credit?: never
+          date?: string | null
+          debit?: number | null
+          description?: string | null
+          document_id?: string | null
+          document_type?: never
+          invoice_number?: string | null
+          status?: string | null
+          supplier_name?: string | null
+        }
+        Update: {
+          balance?: never
+          created_at?: string | null
+          credit?: never
+          date?: string | null
+          debit?: number | null
+          description?: string | null
+          document_id?: string | null
+          document_type?: never
+          invoice_number?: string | null
+          status?: string | null
+          supplier_name?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       auto_match_bank_transactions: {
@@ -12438,6 +12648,10 @@ export type Database = {
           _uf_origin?: string
           _unit_price: number
         }
+        Returns: Json
+      }
+      close_accounting_period: {
+        Args: { _month: number; _year: number }
         Returns: Json
       }
       compensate_accounts: {
@@ -12585,6 +12799,26 @@ export type Database = {
         Returns: number
       }
       recompute_default_scores: { Args: never; Returns: Json }
+      reopen_accounting_period: {
+        Args: { _month: number; _year: number }
+        Returns: Json
+      }
+      resolve_accounting_pair: {
+        Args: {
+          _bank_account_id: string
+          _category_id: string
+          _chart_account_id: string
+          _ledger_type: string
+        }
+        Returns: {
+          cash_account_id: string
+          cash_code: string
+          cash_name: string
+          result_account_id: string
+          result_code: string
+          result_name: string
+        }[]
+      }
       reverse_settlement: {
         Args: { _reason?: string; _settlement_id: string }
         Returns: Json
