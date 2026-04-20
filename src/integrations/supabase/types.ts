@@ -2488,6 +2488,170 @@ export type Database = {
         }
         Relationships: []
       }
+      cte: {
+        Row: {
+          access_key: string | null
+          authorization_date: string | null
+          cancellation_date: string | null
+          cancellation_reason: string | null
+          cargo_value: number
+          carrier_document: string | null
+          carrier_id: string | null
+          carrier_name: string
+          created_at: string
+          cte_type: string
+          destination_city: string | null
+          freight_value: number
+          icms_base: number
+          icms_rate: number
+          icms_value: number
+          id: string
+          issue_date: string
+          modal: string
+          notes: string | null
+          number: string
+          origin_city: string | null
+          protocol: string | null
+          recipient_document: string | null
+          recipient_name: string
+          recipient_uf: string | null
+          sender_document: string | null
+          sender_name: string
+          sender_uf: string | null
+          series: string
+          service_type: string
+          status: string
+          total: number
+          updated_at: string
+          xml_content: string | null
+        }
+        Insert: {
+          access_key?: string | null
+          authorization_date?: string | null
+          cancellation_date?: string | null
+          cancellation_reason?: string | null
+          cargo_value?: number
+          carrier_document?: string | null
+          carrier_id?: string | null
+          carrier_name: string
+          created_at?: string
+          cte_type?: string
+          destination_city?: string | null
+          freight_value?: number
+          icms_base?: number
+          icms_rate?: number
+          icms_value?: number
+          id?: string
+          issue_date?: string
+          modal?: string
+          notes?: string | null
+          number: string
+          origin_city?: string | null
+          protocol?: string | null
+          recipient_document?: string | null
+          recipient_name: string
+          recipient_uf?: string | null
+          sender_document?: string | null
+          sender_name: string
+          sender_uf?: string | null
+          series?: string
+          service_type?: string
+          status?: string
+          total?: number
+          updated_at?: string
+          xml_content?: string | null
+        }
+        Update: {
+          access_key?: string | null
+          authorization_date?: string | null
+          cancellation_date?: string | null
+          cancellation_reason?: string | null
+          cargo_value?: number
+          carrier_document?: string | null
+          carrier_id?: string | null
+          carrier_name?: string
+          created_at?: string
+          cte_type?: string
+          destination_city?: string | null
+          freight_value?: number
+          icms_base?: number
+          icms_rate?: number
+          icms_value?: number
+          id?: string
+          issue_date?: string
+          modal?: string
+          notes?: string | null
+          number?: string
+          origin_city?: string | null
+          protocol?: string | null
+          recipient_document?: string | null
+          recipient_name?: string
+          recipient_uf?: string | null
+          sender_document?: string | null
+          sender_name?: string
+          sender_uf?: string | null
+          series?: string
+          service_type?: string
+          status?: string
+          total?: number
+          updated_at?: string
+          xml_content?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cte_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "carriers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cte_nfe_links: {
+        Row: {
+          created_at: string
+          cte_id: string
+          id: string
+          nfe_access_key: string | null
+          nfe_id: string | null
+          nfe_number: string | null
+          nfe_value: number
+        }
+        Insert: {
+          created_at?: string
+          cte_id: string
+          id?: string
+          nfe_access_key?: string | null
+          nfe_id?: string | null
+          nfe_number?: string | null
+          nfe_value?: number
+        }
+        Update: {
+          created_at?: string
+          cte_id?: string
+          id?: string
+          nfe_access_key?: string | null
+          nfe_id?: string | null
+          nfe_number?: string | null
+          nfe_value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cte_nfe_links_cte_id_fkey"
+            columns: ["cte_id"]
+            isOneToOne: false
+            referencedRelation: "cte"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cte_nfe_links_nfe_id_fkey"
+            columns: ["nfe_id"]
+            isOneToOne: false
+            referencedRelation: "nfe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_credit_profiles: {
         Row: {
           analysis_notes: string | null
@@ -5414,6 +5578,154 @@ export type Database = {
           },
         ]
       }
+      mdfe: {
+        Row: {
+          access_key: string | null
+          authorization_date: string | null
+          cancellation_date: string | null
+          carrier_id: string | null
+          closure_date: string | null
+          created_at: string
+          driver_cpf: string | null
+          driver_name: string | null
+          id: string
+          issue_date: string
+          loading_city: string | null
+          modal: string
+          notes: string | null
+          number: string
+          protocol: string | null
+          series: string
+          status: string
+          total_cargo_value: number
+          total_documents: number
+          total_weight: number
+          uf_destination: string
+          uf_origin: string
+          unloading_cities: string[] | null
+          updated_at: string
+          vehicle_plate: string | null
+          vehicle_renavam: string | null
+          vehicle_uf: string | null
+          xml_content: string | null
+        }
+        Insert: {
+          access_key?: string | null
+          authorization_date?: string | null
+          cancellation_date?: string | null
+          carrier_id?: string | null
+          closure_date?: string | null
+          created_at?: string
+          driver_cpf?: string | null
+          driver_name?: string | null
+          id?: string
+          issue_date?: string
+          loading_city?: string | null
+          modal?: string
+          notes?: string | null
+          number: string
+          protocol?: string | null
+          series?: string
+          status?: string
+          total_cargo_value?: number
+          total_documents?: number
+          total_weight?: number
+          uf_destination: string
+          uf_origin: string
+          unloading_cities?: string[] | null
+          updated_at?: string
+          vehicle_plate?: string | null
+          vehicle_renavam?: string | null
+          vehicle_uf?: string | null
+          xml_content?: string | null
+        }
+        Update: {
+          access_key?: string | null
+          authorization_date?: string | null
+          cancellation_date?: string | null
+          carrier_id?: string | null
+          closure_date?: string | null
+          created_at?: string
+          driver_cpf?: string | null
+          driver_name?: string | null
+          id?: string
+          issue_date?: string
+          loading_city?: string | null
+          modal?: string
+          notes?: string | null
+          number?: string
+          protocol?: string | null
+          series?: string
+          status?: string
+          total_cargo_value?: number
+          total_documents?: number
+          total_weight?: number
+          uf_destination?: string
+          uf_origin?: string
+          unloading_cities?: string[] | null
+          updated_at?: string
+          vehicle_plate?: string | null
+          vehicle_renavam?: string | null
+          vehicle_uf?: string | null
+          xml_content?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mdfe_carrier_id_fkey"
+            columns: ["carrier_id"]
+            isOneToOne: false
+            referencedRelation: "carriers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mdfe_documents: {
+        Row: {
+          access_key: string | null
+          created_at: string
+          document_id: string | null
+          document_number: string
+          document_type: string
+          document_value: number
+          document_weight: number
+          id: string
+          mdfe_id: string
+          unloading_city: string | null
+        }
+        Insert: {
+          access_key?: string | null
+          created_at?: string
+          document_id?: string | null
+          document_number: string
+          document_type: string
+          document_value?: number
+          document_weight?: number
+          id?: string
+          mdfe_id: string
+          unloading_city?: string | null
+        }
+        Update: {
+          access_key?: string | null
+          created_at?: string
+          document_id?: string | null
+          document_number?: string
+          document_type?: string
+          document_value?: number
+          document_weight?: number
+          id?: string
+          mdfe_id?: string
+          unloading_city?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mdfe_documents_mdfe_id_fkey"
+            columns: ["mdfe_id"]
+            isOneToOne: false
+            referencedRelation: "mdfe"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nfce: {
         Row: {
           access_key: string | null
@@ -5559,9 +5871,13 @@ export type Database = {
           client_id: string | null
           client_name: string
           cofins: number
+          consumer_final: boolean
           created_at: string
+          difal_total: number
           discount: number
+          fcp_total: number
           icms: number
+          icms_st_total: number
           id: string
           ipi: number
           issue_date: string
@@ -5575,6 +5891,8 @@ export type Database = {
           status: string
           subtotal: number
           total: number
+          uf_destination: string | null
+          uf_origin: string | null
           updated_at: string
         }
         Insert: {
@@ -5586,9 +5904,13 @@ export type Database = {
           client_id?: string | null
           client_name: string
           cofins?: number
+          consumer_final?: boolean
           created_at?: string
+          difal_total?: number
           discount?: number
+          fcp_total?: number
           icms?: number
+          icms_st_total?: number
           id?: string
           ipi?: number
           issue_date?: string
@@ -5602,6 +5924,8 @@ export type Database = {
           status?: string
           subtotal?: number
           total?: number
+          uf_destination?: string | null
+          uf_origin?: string | null
           updated_at?: string
         }
         Update: {
@@ -5613,9 +5937,13 @@ export type Database = {
           client_id?: string | null
           client_name?: string
           cofins?: number
+          consumer_final?: boolean
           created_at?: string
+          difal_total?: number
           discount?: number
+          fcp_total?: number
           icms?: number
+          icms_st_total?: number
           id?: string
           ipi?: number
           issue_date?: string
@@ -5629,6 +5957,8 @@ export type Database = {
           status?: string
           subtotal?: number
           total?: number
+          uf_destination?: string | null
+          uf_origin?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -5643,12 +5973,20 @@ export type Database = {
       }
       nfe_items: {
         Row: {
+          cest: string | null
           cfop: string | null
           cofins_rate: number
           cofins_value: number
+          difal_base: number
+          difal_destination_rate: number
+          difal_value: number
           discount: number
+          fcp_value: number
           icms_base: number
           icms_rate: number
+          icms_st_base: number
+          icms_st_mva: number
+          icms_st_value: number
           icms_value: number
           id: string
           ipi_rate: number
@@ -5666,12 +6004,20 @@ export type Database = {
           unit_price: number
         }
         Insert: {
+          cest?: string | null
           cfop?: string | null
           cofins_rate?: number
           cofins_value?: number
+          difal_base?: number
+          difal_destination_rate?: number
+          difal_value?: number
           discount?: number
+          fcp_value?: number
           icms_base?: number
           icms_rate?: number
+          icms_st_base?: number
+          icms_st_mva?: number
+          icms_st_value?: number
           icms_value?: number
           id?: string
           ipi_rate?: number
@@ -5689,12 +6035,20 @@ export type Database = {
           unit_price?: number
         }
         Update: {
+          cest?: string | null
           cfop?: string | null
           cofins_rate?: number
           cofins_value?: number
+          difal_base?: number
+          difal_destination_rate?: number
+          difal_value?: number
           discount?: number
+          fcp_value?: number
           icms_base?: number
           icms_rate?: number
+          icms_st_base?: number
+          icms_st_mva?: number
+          icms_st_value?: number
           icms_value?: number
           id?: string
           ipi_rate?: number
@@ -10778,6 +11132,123 @@ export type Database = {
         }
         Relationships: []
       }
+      tax_difal_rules: {
+        Row: {
+          active: boolean
+          created_at: string
+          fcp_rate: number | null
+          id: string
+          internal_rate_destination: number
+          interstate_rate: number
+          name: string
+          notes: string | null
+          partilha_destination: number | null
+          partilha_origin: number | null
+          uf_destination: string
+          uf_origin: string
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          fcp_rate?: number | null
+          id?: string
+          internal_rate_destination?: number
+          interstate_rate?: number
+          name: string
+          notes?: string | null
+          partilha_destination?: number | null
+          partilha_origin?: number | null
+          uf_destination: string
+          uf_origin: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          fcp_rate?: number | null
+          id?: string
+          internal_rate_destination?: number
+          interstate_rate?: number
+          name?: string
+          notes?: string | null
+          partilha_destination?: number | null
+          partilha_origin?: number | null
+          uf_destination?: string
+          uf_origin?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
+      tax_icms_st_rules: {
+        Row: {
+          active: boolean
+          cest: string | null
+          created_at: string
+          id: string
+          internal_rate: number
+          interstate_rate: number
+          mva_adjusted: number | null
+          mva_original: number
+          name: string
+          ncm: string | null
+          notes: string | null
+          priority: number
+          reduction_base: number | null
+          uf_destination: string | null
+          uf_origin: string | null
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          active?: boolean
+          cest?: string | null
+          created_at?: string
+          id?: string
+          internal_rate?: number
+          interstate_rate?: number
+          mva_adjusted?: number | null
+          mva_original?: number
+          name: string
+          ncm?: string | null
+          notes?: string | null
+          priority?: number
+          reduction_base?: number | null
+          uf_destination?: string | null
+          uf_origin?: string | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          active?: boolean
+          cest?: string | null
+          created_at?: string
+          id?: string
+          internal_rate?: number
+          interstate_rate?: number
+          mva_adjusted?: number | null
+          mva_original?: number
+          name?: string
+          ncm?: string | null
+          notes?: string | null
+          priority?: number
+          reduction_base?: number | null
+          uf_destination?: string | null
+          uf_origin?: string | null
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       tax_rules: {
         Row: {
           active: boolean
@@ -12637,7 +13108,21 @@ export type Database = {
         }
         Returns: Json
       }
+      calculate_difal: {
+        Args: { _base: number; _uf_destination: string; _uf_origin: string }
+        Returns: Json
+      }
       calculate_financial_health_score: { Args: never; Returns: Json }
+      calculate_icms_st: {
+        Args: {
+          _base: number
+          _icms_value: number
+          _ncm: string
+          _uf_destination: string
+          _uf_origin: string
+        }
+        Returns: Json
+      }
       calculate_nfe_item_taxes: {
         Args: {
           _cfop: string
