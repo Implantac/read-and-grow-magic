@@ -79,6 +79,8 @@ const TrialBalancePage = lazy(() => import("./pages/contabilidade/TrialBalance")
 const DREPage = lazy(() => import("./pages/contabilidade/DRE"));
 const BalanceSheetPage = lazy(() => import("./pages/contabilidade/BalanceSheet"));
 const AccountingDashboardPage = lazy(() => import("./pages/contabilidade/AccountingDashboard"));
+const PeriodClosingPage = lazy(() => import("./pages/contabilidade/PeriodClosing"));
+const CurrentAccountPage = lazy(() => import("./pages/financeiro/CurrentAccount"));
 
 // Fiscal
 const NFePage = lazy(() => import("./pages/fiscal/NFe"));
@@ -297,6 +299,8 @@ const App = () => (
               <Route path="/contabilidade/balancete" element={<TrialBalancePage />} />
               <Route path="/contabilidade/dre" element={<DREPage />} />
               <Route path="/contabilidade/balanco" element={<BalanceSheetPage />} />
+              <Route path="/contabilidade/fechamento" element={<PeriodClosingPage />} />
+              <Route path="/financeiro/extrato-contas" element={<CurrentAccountPage />} />
 
               {/* Fiscal Module */}
               <Route path="/fiscal" element={<Navigate to="/fiscal/dashboard" replace />} />
