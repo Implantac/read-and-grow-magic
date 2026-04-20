@@ -19,6 +19,8 @@ import {
   Filter, UserCheck, DollarSign, Target, Megaphone, Trophy, Bot,
   Eye, Truck, RefreshCw, Shield, Lock, Phone,
   ArrowDown, Database, ScanBarcode, DoorOpen, RotateCcw,
+  Bell, Repeat, TrendingDown, LineChart, AlertTriangle,
+  ShieldAlert, Upload, QrCode, FileCheck2, FileDown, QrCode as QrCodeIcon,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -35,6 +37,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Sparkles, Cpu, Rocket, Filter, UserCheck, DollarSign, Target,
   Megaphone, Trophy, Bot, Eye, Truck, RefreshCw,
   Shield, Lock, Phone, ArrowDown, Database, ScanBarcode, DoorOpen, RotateCcw,
+  Bell, Repeat, TrendingDown, LineChart, AlertTriangle, ShieldAlert, Upload, QrCode,
 };
 
 function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, expandedItems, toggleExpanded }: {
