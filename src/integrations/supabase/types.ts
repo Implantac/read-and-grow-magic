@@ -2488,6 +2488,54 @@ export type Database = {
         }
         Relationships: []
       }
+      cross_module_events: {
+        Row: {
+          affected_modules: string[]
+          affected_records: Json | null
+          affected_tables: string[]
+          created_at: string
+          description: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          source_id: string | null
+          source_module: string
+          source_reference: string | null
+          source_table: string
+          status: string
+        }
+        Insert: {
+          affected_modules?: string[]
+          affected_records?: Json | null
+          affected_tables?: string[]
+          created_at?: string
+          description?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          source_id?: string | null
+          source_module: string
+          source_reference?: string | null
+          source_table: string
+          status?: string
+        }
+        Update: {
+          affected_modules?: string[]
+          affected_records?: Json | null
+          affected_tables?: string[]
+          created_at?: string
+          description?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          source_id?: string | null
+          source_module?: string
+          source_reference?: string | null
+          source_table?: string
+          status?: string
+        }
+        Relationships: []
+      }
       cte: {
         Row: {
           access_key: string | null
