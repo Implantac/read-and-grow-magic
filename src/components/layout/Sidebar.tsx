@@ -22,6 +22,7 @@ import {
   Bell, Repeat, TrendingDown, LineChart, AlertTriangle,
   ShieldAlert, Upload, QrCode, FileCheck2, FileDown,
   Percent, Globe, ScrollText, ArrowRightLeft,
+  BellRing, RotateCw, AlertOctagon, GitBranch, Siren,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
