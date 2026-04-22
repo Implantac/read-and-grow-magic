@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { NFe, NFeItem } from '@/types/fiscal';
@@ -6,6 +7,18 @@ import type { NFe, NFeItem } from '@/types/fiscal';
 export function useNFe() {
   const [nfes, setNfes] = useState<NFe[]>([]);
   const [loading, setLoading] = useState(true);
+  const qc = useQueryClient();
+
+  // Invalida queries cross-módulo afetadas por NF-e (triggers no banco geram AR/ledger/accounting)
+  const invalidateCrossModule = useCallback(() => {
+    qc.invalidateQueries({ queryKey: ['accounts_receivable'] });
+    qc.invalidateQueries({ queryKey: ['financial_ledger'] });
+    qc.invalidateQueries({ queryKey: ['bank_accounts'] });
+    qc.invalidateQueries({ queryKey: ['journal_entries'] });
+    qc.invalidateQueries({ queryKey: ['dre_summary'] });
+    qc.invalidateQueries({ queryKey: ['dre_detailed'] });
+    qc.invalidateQueries({ queryKey: ['fiscal_reports'] });
+  }, [qc]);
 
   const fetchNFes = useCallback(async () => {
     setLoading(true);
@@ -145,8 +158,9 @@ export function useNFe() {
     if (error) { toast.error('Erro ao transmitir NF-e'); return false; }
     toast.success('NF-e autorizada na SEFAZ (simulação)');
     await fetchNFes();
+    invalidateCrossModule();
     return true;
-  }, [fetchNFes]);
+  }, [fetchNFes, invalidateCrossModule]);
 
   const cancel = useCallback(async (id: string, reason: string) => {
     const { error } = await supabase.from('nfe').update({
@@ -158,8 +172,9 @@ export function useNFe() {
     if (error) { toast.error('Erro ao cancelar NF-e'); return false; }
     toast.success('NF-e cancelada com sucesso');
     await fetchNFes();
+    invalidateCrossModule();
     return true;
-  }, [fetchNFes]);
+  }, [fetchNFes, invalidateCrossModule]);
 
   const sendToPending = useCallback(async (id: string) => {
     const { error } = await supabase.from('nfe').update({ status: 'pending' }).eq('id', id);
