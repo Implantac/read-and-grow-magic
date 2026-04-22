@@ -292,6 +292,7 @@ export const navigationSections: NavSection[] = [
           { title: 'Empresas', href: '/admin/empresas', icon: 'Building' },
           { title: 'Parâmetros', href: '/admin/parametros', icon: 'Sliders' },
           { title: 'Relatório Diário', href: '/admin/relatorio-diario', icon: 'FileText' },
+          { title: 'Auditoria Cross-Módulos', href: '/admin/auditoria-cross', icon: 'Activity' },
         ],
       },
     ],

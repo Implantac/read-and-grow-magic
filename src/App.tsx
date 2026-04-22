@@ -192,6 +192,7 @@ const CompaniesPage = lazy(() => import("./pages/admin/Companies"));
 const ParametersPage = lazy(() => import("./pages/admin/Parameters"));
 const SuperAdminPage = lazy(() => import("./pages/admin/SuperAdmin"));
 const DailyReportsPage = lazy(() => import("./pages/admin/DailyReports"));
+const CrossModuleAuditPage = lazy(() => import("./pages/admin/CrossModuleAudit"));
 
 
 // SaaS
@@ -417,6 +418,7 @@ const App = () => (
               <Route path="/admin/parametros" element={<ParametersPage />} />
               <Route path="/admin/super" element={<SuperAdminPage />} />
               <Route path="/admin/relatorio-diario" element={<DailyReportsPage />} />
+              <Route path="/admin/auditoria-cross" element={<CrossModuleAuditPage />} />
               
 
               {/* Profile & Notifications */}
