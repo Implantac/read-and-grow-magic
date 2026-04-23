@@ -404,12 +404,13 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="h-10 px-3 text-xs gap-1"
+                          className="h-10 px-3 text-xs gap-1 border-dashed hover:border-solid transition-all"
                           onClick={() => {
                             setSearchTerm('');
                             setDiagnosisFilter('all');
                           }}
                         >
+                          <X className="h-3 w-3" />
                           Limpar
                         </Button>
                       )}
