@@ -396,7 +396,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
 
                   <ScrollArea className="h-[calc(100vh-210px)] pr-4">
                     <div className="space-y-6">
-                      {(diagnosisFilter === 'all' || diagnosisFilter === 'errors') && allIssues.errors.length > 0 && (
+                      {(diagnosisFilter === 'all' || diagnosisFilter === 'errors') && hasFilteredErrors && (
                         <div className="space-y-4">
                           <div className="flex items-center gap-2 text-destructive font-bold text-[10px] uppercase tracking-widest bg-destructive/5 p-2 rounded-t-lg border-b border-destructive/10">
                             <AlertCircle className="h-3.5 w-3.5" />
@@ -428,7 +428,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                         </div>
                       )}
 
-                      {(diagnosisFilter === 'all' || diagnosisFilter === 'warnings') && allIssues.warnings.length > 0 && (
+                      {(diagnosisFilter === 'all' || diagnosisFilter === 'warnings') && hasFilteredWarnings && (
                         <div className="space-y-4 pt-4">
                           <div className="flex items-center gap-2 text-amber-700 font-bold text-[10px] uppercase tracking-widest bg-amber-50 p-2 rounded-t-lg border-b border-amber-200/50">
                             <AlertTriangle className="h-3.5 w-3.5" />
@@ -459,12 +459,19 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                           </div>
                         </div>
                       )}
-                      {((diagnosisFilter === 'all' && allIssues.total === 0) || 
-                        (diagnosisFilter === 'errors' && allIssues.errors.length === 0) || 
-                        (diagnosisFilter === 'warnings' && allIssues.warnings.length === 0)) && (
+                      {nothingFoundInView && (
                         <div className="py-20 text-center space-y-3">
-                          <CheckCircle2 className="h-12 w-12 mx-auto text-success opacity-20" />
-                          <p className="text-sm text-muted-foreground font-medium">Nenhuma inconsistência detectada!</p>
+                          {diagnosisSearch ? (
+                            <>
+                              <Search className="h-12 w-12 mx-auto text-muted-foreground opacity-20" />
+                              <p className="text-sm text-muted-foreground font-medium">Nenhum resultado para "{diagnosisSearch}"</p>
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 className="h-12 w-12 mx-auto text-success opacity-20" />
+                              <p className="text-sm text-muted-foreground font-medium">Nenhuma inconsistência detectada!</p>
+                            </>
+                          )}
                         </div>
                       )}
                     </div>
