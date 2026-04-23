@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Send, Ban, Plus, Truck, MapPin, DollarSign, ClipboardCheck, ArrowLeft, ArrowRight, FileText, Search, Sparkles, Receipt, ChevronRight, Calculator } from 'lucide-react';
+import { Send, Ban, Plus, Truck, MapPin, DollarSign, ClipboardCheck, ArrowLeft, ArrowRight, FileText, Search, Sparkles, Receipt, ChevronRight, Calculator, ListChecks, AlertCircle, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useCTes, useCreateCTe, useTransmitCTe, useCancelCTe } from '@/hooks/useCTe';
 import { useNFe } from '@/hooks/useNFe';
@@ -17,6 +17,9 @@ import { FiscalStepper } from '@/components/fiscal/FiscalStepper';
 import { FiscalStatusBadge } from '@/components/fiscal/FiscalStatusBadge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SmartSelect } from '@/components/fiscal/SmartSelect';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 const STEPS = [
   { id: 'import', label: 'Importar NF-e', icon: FileText },
