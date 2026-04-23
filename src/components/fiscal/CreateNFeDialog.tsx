@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import {
   Plus, Trash2, FileText, Users, Package, Calculator,
   Truck, CreditCard, ClipboardCheck, ArrowLeft, ArrowRight, Send, Sparkles,
-  Info, AlertCircle, CheckCircle2, ChevronRight, Scale, Receipt
+  Info, AlertCircle, CheckCircle2, ChevronRight, Scale, Receipt, AlertTriangle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,7 @@ import { TaxSummaryCard } from './TaxSummaryCard';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface NFeItemForm {
   productCode: string;
@@ -201,10 +202,50 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
   const totalIpi = items.reduce((s, i) => s + (i.ipi || 0), 0);
   const total = subtotal - discount + shipping;
 
-  const handleNext = () => setStep((s) => Math.min(s + 1, STEPS.length - 1));
+  const validation = useMemo(() => {
+    const currentErrors: string[] = [];
+    const currentWarnings: string[] = [];
+
+    // Validação por etapa
+    if (step >= 0) {
+      if (!naturezaOp.trim()) currentErrors.push("Natureza da operação é obrigatória.");
+    }
+    
+    if (step >= 1) {
+      if (!clientId) currentErrors.push("Um destinatário deve ser selecionado.");
+      if (clientDocument && clientDocument.replace(/\D/g, '').length < 11) {
+        currentErrors.push("Documento do destinatário inválido.");
+      }
+    }
+
+    if (step >= 2) {
+      if (items.length === 0) currentErrors.push("Adicione pelo menos um produto à nota.");
+      items.forEach((item, idx) => {
+        if (!item.cfop) currentErrors.push(`Item ${idx + 1} (${item.productName}): CFOP não definido.`);
+        if (!item.ncm) currentWarnings.push(`Item ${idx + 1}: NCM ausente. Recomendado para emissão oficial.`);
+        if (item.quantity <= 0) currentErrors.push(`Item ${idx + 1}: Quantidade deve ser superior a zero.`);
+        if (item.unitPrice <= 0) currentErrors.push(`Item ${idx + 1}: Valor unitário deve ser superior a zero.`);
+      });
+    }
+
+    if (step >= 5) {
+      if (!paymentMethod) currentErrors.push("Selecione uma forma de pagamento.");
+    }
+
+    return { errors: currentErrors, warnings: currentWarnings };
+  }, [step, naturezaOp, clientId, clientDocument, items, paymentMethod]);
+
+  const hasBlockingErrors = validation.errors.length > 0;
+
+  const handleNext = () => {
+    if (hasBlockingErrors) return;
+    setStep((s) => Math.min(s + 1, STEPS.length - 1));
+  };
+  
   const handlePrev = () => setStep((s) => Math.max(s - 1, 0));
 
   const handleSubmit = async () => {
+    if (hasBlockingErrors) return;
     setSaving(true);
     await onCreate({
       clientName,
@@ -257,6 +298,23 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
         <div className="flex-1 overflow-hidden relative">
           <ScrollArea className="h-full">
             <div className="px-8 py-6 max-w-5xl mx-auto">
+              <div className="mb-6 space-y-3">
+                {validation.errors.map((err, i) => (
+                  <Alert key={`err-${i}`} variant="destructive" className="animate-in fade-in slide-in-from-top-2 duration-300">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Inconsistência Fiscal</AlertTitle>
+                    <AlertDescription>{err}</AlertDescription>
+                  </Alert>
+                ))}
+                {validation.warnings.map((warn, i) => (
+                  <Alert key={`warn-${i}`} className="bg-amber-50 border-amber-200 text-amber-800 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <AlertTriangle className="h-4 w-4 text-amber-600" />
+                    <AlertTitle className="text-amber-800">Sugestão de Correção</AlertTitle>
+                    <AlertDescription>{warn}</AlertDescription>
+                  </Alert>
+                ))}
+              </div>
+
               {step === 0 && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -667,11 +725,25 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
               </Button>
             )}
             {step < STEPS.length - 1 ? (
-              <Button onClick={handleNext} className="px-8 h-11 gap-2 shadow-lg shadow-primary/20">
+              <Button 
+                onClick={handleNext} 
+                disabled={hasBlockingErrors}
+                className={cn(
+                  "px-8 h-11 gap-2 shadow-lg transition-all",
+                  hasBlockingErrors ? "opacity-50 grayscale cursor-not-allowed" : "shadow-primary/20"
+                )}
+              >
                 Avançar <ChevronRight className="h-4 w-4" />
               </Button>
             ) : (
-              <Button onClick={handleSubmit} disabled={saving} className="px-10 h-11 gap-2 bg-success hover:bg-success/90 shadow-lg shadow-success/20">
+              <Button 
+                onClick={handleSubmit} 
+                disabled={saving || hasBlockingErrors} 
+                className={cn(
+                  "px-10 h-11 gap-2 bg-success hover:bg-success/90 shadow-lg transition-all",
+                  hasBlockingErrors ? "opacity-50 grayscale cursor-not-allowed" : "shadow-success/20"
+                )}
+              >
                 {saving ? 'Processando...' : <><Send className="h-4 w-4" /> Gerar NF-e</>}
               </Button>
             )}
