@@ -1708,7 +1708,7 @@ PROIBIDO:
 
   const userPayload = {
     contexto: ctx,
-    kpis_calculados: { totalRevenue: kpis.totalRevenue, grossMargin: kpis.grossMargin, defaultRate: kpis.defaultRate, concentrationPct: kpis.concentrationPct, lowStockProducts: kpis.lowStockProducts, activeClients: kpis.activeClients },
+    kpis_calculados: { totalRevenue: kpis.kpis.totalRevenue, grossMargin: kpis.kpis.grossMargin, defaultRate: kpis.kpis.defaultRate, concentrationPct: kpis.kpis.concentrationPct, lowStockProducts: kpis.kpis.lowStockProducts, activeClients: kpis.kpis.activeClients },
     kpis_historicos_hoje: kpiRows,
     previsao_receita: forecast,
     riscos_detectados: risks,
