@@ -3,7 +3,7 @@ import {
   Search, Plus, Minus, Trash2, ShoppingCart, CreditCard, 
   Banknote, QrCode, User, Package, X, CheckCircle2, 
   ChevronRight, Receipt, Printer, ArrowLeft, MoreHorizontal,
-  Monitor, Calculator
+  Monitor, Calculator, Send
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
