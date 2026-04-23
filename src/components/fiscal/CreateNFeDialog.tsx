@@ -395,8 +395,8 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                       <Input 
                         placeholder="Filtrar por texto das inconsistências..." 
                         className="pl-9"
-                        value={diagnosisSearch}
-                        onChange={(e) => setDiagnosisSearch(e.target.value)}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                       />
                     </div>
                     <Tabs value={diagnosisFilter} onValueChange={(v: any) => setDiagnosisFilter(v)} className="w-full">
