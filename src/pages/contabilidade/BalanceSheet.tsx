@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ExportButton } from '@/components/shared/ExportButton';
@@ -6,8 +6,10 @@ import { cn } from '@/lib/utils';
 import { Scale, Building2, Landmark, PiggyBank } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { PageLoading } from '@/components/shared/PageLoading';
 import { EquityEvolutionChart } from '@/components/contabilidade/EquityEvolutionChart';
 import { FinancialIndicatorsPanel } from '@/components/contabilidade/FinancialIndicatorsPanel';
+import { useBalanceSheet } from '@/hooks/useBalanceSheet';
 import {
   Table,
   TableBody,
@@ -30,7 +32,7 @@ const exportColumns: ExportColumn[] = [
 ];
 
 export default function BalanceSheetPage() {
-  const [balanceSheet] = useState<BalanceSheetItem[]>([]);
+  const { balanceSheet, loading } = useBalanceSheet();
   
   const assets = balanceSheet.filter((i) => i.section === 'asset');
   const liabilities = balanceSheet.filter((i) => i.section === 'liability');
@@ -82,6 +84,8 @@ export default function BalanceSheetPage() {
       </CardContent>
     </Card>
   );
+
+  if (loading) return <PageLoading message="Calculando Balanço Patrimonial..." />;
 
   return (
     <PageContainer>
