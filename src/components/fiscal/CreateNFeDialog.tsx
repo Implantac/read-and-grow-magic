@@ -390,14 +390,29 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                   </SheetHeader>
 
                   <div className="mt-6 space-y-4">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input 
-                        placeholder="Filtrar por texto das inconsistências..." 
-                        className="pl-9"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                      />
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                          placeholder="Filtrar por texto das inconsistências..." 
+                          className="pl-9"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                      </div>
+                      {(searchTerm || diagnosisFilter !== 'all') && (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-10 px-3 text-xs gap-1"
+                          onClick={() => {
+                            setSearchTerm('');
+                            setDiagnosisFilter('all');
+                          }}
+                        >
+                          Limpar
+                        </Button>
+                      )}
                     </div>
                     <Tabs value={diagnosisFilter} onValueChange={(v: any) => setDiagnosisFilter(v)} className="w-full">
                       <TabsList className="grid w-full grid-cols-3">
