@@ -9,7 +9,8 @@ interface HighlightTextProps {
 export const HighlightText = ({ text, search, className = "bg-yellow-100 text-yellow-900 rounded-sm px-0.5 font-bold" }: HighlightTextProps) => {
   if (!search) return <>{text}</>;
   
-  const parts = text.split(new RegExp(`(${search})`, 'gi'));
+  const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const parts = text.split(new RegExp(`(${escapedSearch})`, 'gi'));
   
   return (
     <>
