@@ -28,6 +28,27 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface NFeItemForm {
   productCode: string;
+// ...
+}
+
+const highlightText = (text: string, search: string) => {
+  if (!search) return text;
+  const parts = text.split(new RegExp(`(${search})`, 'gi'));
+  return (
+    <>
+      {parts.map((part, i) => 
+        part.toLowerCase() === search.toLowerCase() ? (
+          <mark key={i} className="bg-yellow-200 text-yellow-900 rounded-sm px-0.5 font-bold">
+            {part}
+          </mark>
+        ) : (
+          part
+        )
+      )}
+    </>
+  );
+};
+
   productName: string;
   productId?: string;
   ncm: string;
@@ -418,7 +439,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                                   {filteredErrors.map((err, i) => (
                                     <div key={`err-${idx}-${i}`} className="flex gap-2 text-xs text-destructive pl-1">
                                       <div className="w-1 h-1 rounded-full bg-destructive mt-1.5 shrink-0" />
-                                      <span>{err}</span>
+                                      <span>{highlightText(err, diagnosisSearch)}</span>
                                     </div>
                                   ))}
                                 </div>
@@ -450,7 +471,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                                   {filteredWarnings.map((warn, i) => (
                                     <div key={`warn-${idx}-${i}`} className="flex gap-2 text-xs text-amber-700 pl-1">
                                       <div className="w-1 h-1 rounded-full bg-amber-500 mt-1.5 shrink-0" />
-                                      <span>{warn}</span>
+                                      <span>{highlightText(warn, diagnosisSearch)}</span>
                                     </div>
                                   ))}
                                 </div>
