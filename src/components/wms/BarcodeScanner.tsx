@@ -87,7 +87,7 @@ export function BarcodeScanner({ onScan, placeholder = 'Escaneie ou digite o có
   };
 
   const feedbackColor = feedback?.type === 'success'
-    ? 'border-green-500 bg-green-500/10'
+    ? 'border-primary bg-primary/10'
     : feedback?.type === 'error'
       ? 'border-destructive bg-destructive/10'
       : 'border-primary bg-primary/10';
@@ -132,7 +132,7 @@ export function BarcodeScanner({ onScan, placeholder = 'Escaneie ou digite o có
         {feedback && (
           <div className={cn(
             'flex items-center gap-2 p-2 rounded-md text-sm font-medium',
-            feedback.type === 'success' && 'text-green-700 dark:text-green-400',
+            feedback.type === 'success' && 'text-primary',
             feedback.type === 'error' && 'text-destructive',
             feedback.type === 'info' && 'text-primary'
           )}>
