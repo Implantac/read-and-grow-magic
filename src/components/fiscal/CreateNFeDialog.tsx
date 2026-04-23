@@ -286,84 +286,106 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
           <FiscalStepper steps={STEPS} currentStep={step} onStepClick={setStep} />
         </div>
 
-        <div className="px-6 py-4 min-h-[380px]">
-          {/* ETAPA 1: DADOS DA NOTA */}
-          {step === 0 && (
-            <div className="space-y-4 max-w-2xl mx-auto">
-              <h3 className="text-base font-semibold">Dados principais da nota</h3>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Tipo de operação</Label>
-                  <Select value={operationType} onValueChange={setOperationType}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="saida">Saída (venda/remessa)</SelectItem>
-                      <SelectItem value="entrada">Entrada (compra/devolução)</SelectItem>
-                    </SelectContent>
-                  </Select>
+        <div className="px-6 py-4 min-h-[420px]">
+          <ScrollArea className="h-full pr-4">
+            {/* ETAPA 1: DADOS DA NOTA */}
+            {step === 0 && (
+              <div className="space-y-6 max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="flex items-center gap-2 border-b pb-2">
+                  <div className="bg-primary/10 p-2 rounded-lg text-primary">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-lg font-semibold">Configurações Gerais</h3>
                 </div>
-                <div className="space-y-2">
-                  <Label>CFOP padrão (sugerido)</Label>
-                  <Select value={defaultCfop} onValueChange={setDefaultCfop}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {cfopOptions.map((c) => (
-                        <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    <Sparkles className="inline h-3 w-3 mr-1" />
-                    Atualizado automaticamente conforme UF do cliente
-                  </p>
-                </div>
-                <div className="space-y-2 sm:col-span-2">
-                  <Label>Natureza da operação</Label>
-                  <Input value={naturezaOp} onChange={(e) => setNaturezaOp(e.target.value)} placeholder="Ex: Venda de mercadoria" />
-                </div>
-              </div>
-            </div>
-          )}
+                
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Tipo de Operação</Label>
+                    <Select value={operationType} onValueChange={setOperationType}>
+                      <SelectTrigger className="h-11 shadow-sm"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="saida">Saída (Venda, Remessa, Devolução de Compra)</SelectItem>
+                        <SelectItem value="entrada">Entrada (Compra, Devolução de Venda)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Finalidade de Emissão</Label>
+                    <Select defaultValue="1">
+                      <SelectTrigger className="h-11 shadow-sm"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1 - NF-e normal</SelectItem>
+                        <SelectItem value="2">2 - NF-e complementar</SelectItem>
+                        <SelectItem value="3">3 - NF-e de ajuste</SelectItem>
+                        <SelectItem value="4">4 - Devolução de mercadoria</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
 
-          {/* ETAPA 2: CLIENTE */}
-          {step === 1 && (
-            <div className="space-y-4 max-w-2xl mx-auto">
-              <h3 className="text-base font-semibold">Cliente / Destinatário</h3>
-              <div className="space-y-2">
-                <Label>Selecionar cliente</Label>
-                <SmartSelect
-                  options={clientOptions}
-                  value={clientId}
-                  onChange={(id) => handleSelectClient(id)}
-                  placeholder="Buscar por nome, CNPJ ou cidade..."
-                />
-              </div>
-              {clientName && (
-                <Card className="p-4 bg-muted/30">
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div>
-                      <Label className="text-xs">Nome</Label>
-                      <Input value={clientName} onChange={(e) => setClientName(e.target.value)} />
-                    </div>
-                    <div>
-                      <Label className="text-xs">CNPJ/CPF</Label>
-                      <Input value={clientDocument} onChange={(e) => setClientDocument(e.target.value)} />
-                    </div>
-                    <div>
-                      <Label className="text-xs">UF</Label>
-                      <Input value={clientUF} onChange={(e) => setClientUF(e.target.value.toUpperCase())} maxLength={2} />
+                  <div className="space-y-2 md:col-span-2">
+                    <Label className="text-sm font-medium">Natureza da Operação</Label>
+                    <div className="relative">
+                      <Input 
+                        value={naturezaOp} 
+                        onChange={(e) => setNaturezaOp(e.target.value)} 
+                        placeholder="Ex: Venda de mercadoria adquirida de terceiros" 
+                        className="h-11 pl-4 shadow-sm"
+                      />
+                      <Sparkles className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary opacity-50" />
                     </div>
                   </div>
-                  {clientUF && clientUF !== 'SP' && (
-                    <p className="text-xs text-warning mt-3">
-                      <Sparkles className="inline h-3 w-3 mr-1" />
-                      Operação interestadual — DIFAL será calculado automaticamente
-                    </p>
-                  )}
-                </Card>
-              )}
-            </div>
-          )}
+                </div>
+              </div>
+            )}
+
+            {/* ETAPA 2: CLIENTE */}
+            {step === 1 && (
+              <div className="space-y-6 max-w-3xl mx-auto animate-in fade-in slide-in-from-right-4 duration-300">
+                <div className="flex items-center gap-2 border-b pb-2">
+                  <div className="bg-primary/10 p-2 rounded-lg text-primary">
+                    <Users className="h-5 w-5" />
+                  </div>
+                  <h3 className="text-lg font-semibold">Dados do Destinatário</h3>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Buscar Cliente no Cadastro</Label>
+                    <SmartSelect
+                      options={clientOptions}
+                      value={clientId}
+                      onChange={(id) => handleSelectClient(id)}
+                      placeholder="Busque por Nome, CPF/CNPJ ou Razão Social..."
+                    />
+                  </div>
+
+                  {clientName ? (
+                    <Card className="border-primary/20 shadow-md overflow-hidden">
+                      <CardHeader className="bg-primary/5 py-3 border-b flex flex-row items-center justify-between">
+                        <CardTitle className="text-sm font-bold flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-success" />
+                          Dados Selecionados
+                        </CardTitle>
+                        <Button variant="ghost" size="sm" onClick={() => setClientId('')} className="h-7 text-xs">Trocar Cliente</Button>
+                      </CardHeader>
+                      <CardContent className="pt-4 pb-2">
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="space-y-1">
+                            <Label className="text-[10px] uppercase text-muted-foreground">Nome / Razão Social</Label>
+                            <Input value={clientName} onChange={(e) => setClientName(e.target.value)} className="h-9 border-none bg-muted/30 font-medium" />
+                          </div>
+                          <div className="space-y-1">
+                            <Label className="text-[10px] uppercase text-muted-foreground">CNPJ / CPF</Label>
+                            <Input value={clientDocument} onChange={(e) => setClientDocument(e.target.value)} className="h-9 border-none bg-muted/30 font-medium" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ) : null}
+                </div>
+              </div>
+            )}
 
           {/* ETAPA 3: PRODUTOS */}
           {step === 2 && (
