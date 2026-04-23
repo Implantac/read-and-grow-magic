@@ -358,9 +358,9 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                   <div className="mt-6 mb-4">
                     <Tabs value={diagnosisFilter} onValueChange={(v: any) => setDiagnosisFilter(v)} className="w-full">
                       <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="all" className="text-xs">Tudo</TabsTrigger>
-                        <TabsTrigger value="errors" className="text-xs">Erros</TabsTrigger>
-                        <TabsTrigger value="warnings" className="text-xs">Sugestões</TabsTrigger>
+                        <TabsTrigger value="all" className="text-xs">Tudo ({allIssues.total})</TabsTrigger>
+                        <TabsTrigger value="errors" className="text-xs">Erros ({allIssues.errors.length})</TabsTrigger>
+                        <TabsTrigger value="warnings" className="text-xs">Sugestões ({allIssues.warnings.length})</TabsTrigger>
                       </TabsList>
                     </Tabs>
                   </div>
