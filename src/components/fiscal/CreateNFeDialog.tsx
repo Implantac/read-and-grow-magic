@@ -25,6 +25,8 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { HighlightText } from '@/components/shared/HighlightText';
+
 
 interface NFeItemForm {
   productCode: string;
@@ -40,6 +42,10 @@ interface NFeItemForm {
   cofins?: number;
   ipi?: number;
 }
+
+const highlightText = (text: string, search: string) => <HighlightText text={text} search={search} />;
+
+
 
 interface CreateNFeDialogProps {
   open: boolean;
@@ -418,7 +424,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                                   {filteredErrors.map((err, i) => (
                                     <div key={`err-${idx}-${i}`} className="flex gap-2 text-xs text-destructive pl-1">
                                       <div className="w-1 h-1 rounded-full bg-destructive mt-1.5 shrink-0" />
-                                      <span>{err}</span>
+                                      <span>{highlightText(err, diagnosisSearch)}</span>
                                     </div>
                                   ))}
                                 </div>
@@ -450,7 +456,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                                   {filteredWarnings.map((warn, i) => (
                                     <div key={`warn-${idx}-${i}`} className="flex gap-2 text-xs text-amber-700 pl-1">
                                       <div className="w-1 h-1 rounded-full bg-amber-500 mt-1.5 shrink-0" />
-                                      <span>{warn}</span>
+                                      <span>{highlightText(warn, diagnosisSearch)}</span>
                                     </div>
                                   ))}
                                 </div>

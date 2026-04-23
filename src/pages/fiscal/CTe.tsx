@@ -19,6 +19,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { SmartSelect } from '@/components/fiscal/SmartSelect';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
+import { HighlightText } from '@/components/shared/HighlightText';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -40,7 +41,9 @@ export default function CTePage() {
   const cancel = useCancelCTe();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
-  const [selectedNFeId, setSelectedNFeId] = useState('');
+   const [selectedNFeId, setSelectedNFeId] = useState('');
+  const [diagnosisSearch, setDiagnosisSearch] = useState('');
+
   const [form, setForm] = useState({
     carrier_name: 'TRANSPORTADORA LOGISTICA LTDA', carrier_document: '12.345.678/0001-90',
     sender_name: '', sender_document: '', sender_uf: 'SP',
@@ -173,11 +176,31 @@ export default function CTePage() {
                           Resumo das validações pendentes para a emissão do CT-e.
                         </SheetDescription>
                       </SheetHeader>
-                      <ScrollArea className="h-[calc(100vh-150px)] mt-6 pr-4">
+                      <div className="mt-6 space-y-4">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            placeholder="Filtrar por texto das inconsistências..." 
+                            className="pl-9"
+                            value={diagnosisSearch}
+                            onChange={(e) => setDiagnosisSearch(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <ScrollArea className="h-[calc(100vh-210px)] mt-6 pr-4">
                         <div className="space-y-6">
                           {STEPS.map((s, idx) => {
                             const stepIssues = validationByStep[idx];
-                            if (stepIssues.errors.length === 0 && stepIssues.warnings.length === 0) return null;
+                            const filteredErrors = stepIssues.errors.filter(err => 
+                              err.toLowerCase().includes(diagnosisSearch.toLowerCase())
+                            );
+                            const filteredWarnings = stepIssues.warnings.filter(warn => 
+                              warn.toLowerCase().includes(diagnosisSearch.toLowerCase())
+                            );
+
+                            if (filteredErrors.length === 0 && filteredWarnings.length === 0) return null;
+                            
                             return (
                               <div key={idx} className="space-y-3">
                                 <div className="flex items-center gap-2 border-b pb-1">
@@ -185,25 +208,37 @@ export default function CTePage() {
                                   <h4 className="text-sm font-bold uppercase tracking-wider">{s.label}</h4>
                                   <Button variant="ghost" size="sm" onClick={() => { setStep(idx); }} className="ml-auto text-[10px] h-6">Corrigir</Button>
                                 </div>
-                                {stepIssues.errors.map((err, i) => (
+                                {filteredErrors.map((err, i) => (
                                   <div key={`err-${idx}-${i}`} className="flex gap-2 text-xs text-destructive bg-destructive/5 p-2 rounded-md">
                                     <AlertCircle className="h-3 w-3 mt-0.5 shrink-0" />
-                                    <span>{err}</span>
+                                    <span><HighlightText text={err} search={diagnosisSearch} /></span>
                                   </div>
                                 ))}
-                                {stepIssues.warnings.map((warn, i) => (
+                                {filteredWarnings.map((warn, i) => (
                                   <div key={`warn-${idx}-${i}`} className="flex gap-2 text-xs text-amber-700 bg-amber-50 p-2 rounded-md">
                                     <AlertTriangle className="h-3 w-3 mt-0.5 shrink-0" />
-                                    <span>{warn}</span>
+                                    <span><HighlightText text={warn} search={diagnosisSearch} /></span>
                                   </div>
                                 ))}
                               </div>
                             );
                           })}
-                          {allIssues.total === 0 && (
+                          {(allIssues.total === 0 || (diagnosisSearch && !STEPS.some((_, idx) => 
+                            validationByStep[idx].errors.some(err => err.toLowerCase().includes(diagnosisSearch.toLowerCase())) ||
+                            validationByStep[idx].warnings.some(warn => warn.toLowerCase().includes(diagnosisSearch.toLowerCase()))
+                          ))) && (
                             <div className="py-20 text-center space-y-3">
-                              <CheckCircle2 className="h-12 w-12 mx-auto text-success opacity-20" />
-                              <p className="text-sm text-muted-foreground font-medium">Nenhuma inconsistência detectada!</p>
+                              {diagnosisSearch ? (
+                                <>
+                                  <Search className="h-12 w-12 mx-auto text-muted-foreground opacity-20" />
+                                  <p className="text-sm text-muted-foreground font-medium">Nenhum resultado para "{diagnosisSearch}"</p>
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle2 className="h-12 w-12 mx-auto text-success opacity-20" />
+                                  <p className="text-sm text-muted-foreground font-medium">Nenhuma inconsistência detectada!</p>
+                                </>
+                              )}
                             </div>
                           )}
                         </div>
