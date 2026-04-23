@@ -51,7 +51,11 @@ function createMockSupabase(tableData: Record<string, any[]> = {}) {
         inserts.push({ table, row });
         return Promise.resolve({ data: row, error: null });
       },
-      delete: () => ({ eq: () => Promise.resolve({ data: null, error: null }) }),
+      delete: () => ({
+        eq: () => ({
+          in: () => Promise.resolve({ data: null, error: null }),
+        }),
+      }),
     }),
     _inserts: inserts,
   };
