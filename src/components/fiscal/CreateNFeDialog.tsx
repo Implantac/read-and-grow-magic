@@ -25,6 +25,8 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { HighlightText } from '@/components/shared/HighlightText';
+
 
 interface NFeItemForm {
   productCode: string;
@@ -41,23 +43,8 @@ interface NFeItemForm {
   ipi?: number;
 }
 
-const highlightText = (text: string, search: string) => {
-  if (!search) return text;
-  const parts = text.split(new RegExp(`(${search})`, 'gi'));
-  return (
-    <>
-      {parts.map((part, i) => 
-        part.toLowerCase() === search.toLowerCase() ? (
-          <mark key={i} className="bg-yellow-100 text-yellow-900 rounded-sm px-0.5 font-bold">
-            {part}
-          </mark>
-        ) : (
-          part
-        )
-      )}
-    </>
-  );
-};
+const highlightText = (text: string, search: string) => <HighlightText text={text} search={search} />;
+
 
 
 interface CreateNFeDialogProps {
