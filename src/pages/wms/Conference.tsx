@@ -19,6 +19,7 @@ import {
   ClipboardCheck, Search, MoreHorizontal, PlayCircle, CheckCircle, AlertTriangle, Clock, Eye, ScanBarcode,
 } from 'lucide-react';
 import { useWMSConference, ConferenceItem } from '@/hooks/useWMSConference';
+import { BarcodeScanner, ScanFeedback } from '@/components/wms/BarcodeScanner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -30,7 +31,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export default function ConferencePage() {
-  const { records, loading, startConference, completeConference, fetchItems, checkItem, createConference } = useWMSConference();
+  const { records, loading, startConference, completeConference, fetchItems, checkItem, scanBarcode, createConference } = useWMSConference();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [detailOpen, setDetailOpen] = useState(false);
@@ -62,6 +63,21 @@ export default function ConferencePage() {
       const items = await fetchItems(selectedRecord);
       setSelectedItems(items);
     }
+  };
+
+  const handleScan = async (code: string): Promise<ScanFeedback> => {
+    if (!selectedRecord) {
+      return { type: 'error', message: 'Nenhuma conferência selecionada', code };
+    }
+    const result = await scanBarcode(selectedRecord, code);
+    // Refresh items
+    const items = await fetchItems(selectedRecord);
+    setSelectedItems(items);
+    return {
+      type: result.success ? 'success' : 'error',
+      message: result.message,
+      code,
+    };
   };
 
   const handleCreate = async () => {
