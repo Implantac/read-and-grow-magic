@@ -208,6 +208,16 @@ export function useDashboardData() {
         time: o.created_at,
       }));
 
+      // === PERFORMANCE DATA ===
+      const modulePerformance = [
+        { name: 'Comercial', value: Math.min(100, (currentRevenue / 10000) * 100), color: 'hsl(var(--primary))' },
+        { name: 'Financeiro', value: Math.min(100, (totalReceivable / (totalPayable || 1)) * 50), color: 'hsl(var(--success))' },
+        { name: 'Estoque', value: Math.min(100, (skuCount / 10) * 10), color: 'hsl(var(--info))' },
+        { name: 'WMS', value: Math.min(100, (stockMoves.length / 5) * 10), color: 'hsl(var(--warning))' },
+        { name: 'Produção', value: Number(prodEfficiency.toFixed(1)), color: 'hsl(142, 76%, 36%)' },
+        { name: 'Compras', value: Math.min(100, (authorizedNfes.length / 2) * 20), color: 'hsl(262, 83%, 58%)' },
+      ];
+
       return {
         mainKPIs,
         commercialKPIs,
@@ -217,6 +227,7 @@ export function useDashboardData() {
         purchasingKPIs,
         wmsKPIs,
         statusDistribution,
+        modulePerformance,
         alerts,
         recentActivities,
       };

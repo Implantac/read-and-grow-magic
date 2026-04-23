@@ -3,6 +3,7 @@ import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -25,9 +26,9 @@ import {
   ArrowUpCircle,
   TrendingUp,
   Package,
-  Download,
   Printer,
   Calendar,
+  Loader2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -36,15 +37,23 @@ import {
 } from '@/config/inventory';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
-import type { ProductKardex, KardexEntry, MovementType } from '@/types/inventory';
+import { useKardex, useKardexProducts } from '@/hooks/useKardex';
+import type { MovementType } from '@/types/inventory';
 
 export default function KardexPage() {
   const [selectedProductId, setSelectedProductId] = useState<string>('');
-  const [kardexData, setKardexData] = useState<ProductKardex | null>(null);
+  const [startDate, setStartDate] = useState<string>(format(new Date().setDate(1), 'yyyy-MM-dd'));
+  const [endDate, setEndDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
+
+  const { data: products, isLoading: isLoadingProducts } = useKardexProducts();
+  const { data: kardexData, isLoading: isLoadingKardex } = useKardex(
+    selectedProductId,
+    startDate ? new Date(startDate).toISOString() : undefined,
+    endDate ? new Date(endDate).toISOString() : undefined
+  );
 
   const handleProductChange = (productId: string) => {
     setSelectedProductId(productId);
-    setKardexData(null);
   };
 
   const getTypeBadge = (type: MovementType) => {
@@ -106,12 +115,19 @@ export default function KardexPage() {
           <div className="grid gap-4 md:grid-cols-4">
             <div className="md:col-span-2 space-y-2">
               <Label>Produto</Label>
-              <Select value={selectedProductId} onValueChange={handleProductChange}>
+              <Select value={selectedProductId} onValueChange={handleProductChange} disabled={isLoadingProducts}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione um produto" />
+                  <SelectValue placeholder={isLoadingProducts ? "Carregando produtos..." : "Selecione um produto"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="empty">Nenhum produto cadastrado</SelectItem>
+                  {products?.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.code} - {p.name}
+                    </SelectItem>
+                  ))}
+                  {(!products || products.length === 0) && !isLoadingProducts && (
+                    <SelectItem value="empty">Nenhum produto cadastrado</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -122,7 +138,8 @@ export default function KardexPage() {
                 <input
                   type="date"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background"
-                  defaultValue="2024-01-01"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
                 />
               </div>
             </div>
@@ -133,13 +150,21 @@ export default function KardexPage() {
                 <input
                   type="date"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background"
-                  defaultValue="2024-01-31"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
                 />
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {isLoadingKardex && (
+        <div className="flex items-center justify-center p-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2">Carregando dados do Kardex...</span>
+        </div>
+      )}
 
       {kardexData && (
         <>
