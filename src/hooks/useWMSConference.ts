@@ -222,5 +222,5 @@ export function useWMSConference() {
   };
 
   useEffect(() => { fetchRecords(); }, [fetchRecords]);
-  return { records, loading, refetch: fetchRecords, fetchItems, createConference, checkItem, startConference, completeConference };
+  return { records, loading, refetch: fetchRecords, fetchItems, createConference, checkItem, scanBarcode, startConference, completeConference };
 }
