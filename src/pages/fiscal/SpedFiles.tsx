@@ -9,9 +9,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useSpedFiles } from '@/hooks/useSpedFiles';
-import { Download, Trash2, FileText, Loader2, Calendar, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Download, Trash2, FileText, Loader2, Calendar, Sparkles, CheckCircle2, AlertCircle, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
-import { Separator } from '@/components/ui/separator';
+import { cn } from '@/lib/utils';
 
 export default function SpedFiles() {
   const { files, loading, generating, generate, download, remove } = useSpedFiles();
@@ -56,11 +56,11 @@ export default function SpedFiles() {
                 </Label>
                 <div className="grid gap-2">
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">DE</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground uppercase">De</span>
                     <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="pl-10 h-11" />
                   </div>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">ATÉ</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground uppercase">Até</span>
                     <Input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="pl-10 h-11" />
                   </div>
                 </div>
@@ -115,24 +115,6 @@ export default function SpedFiles() {
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
-
-      <Card>
-        <CardHeader><CardTitle>Arquivos Gerados</CardTitle></CardHeader>
-        <CardContent>
-          {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> : files.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">Nenhum arquivo SPED gerado ainda.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Período</TableHead>
-                  <TableHead>Registros</TableHead>
-                  <TableHead>Valor Total</TableHead>
-                  <TableHead>Gerado em</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
                 <TableBody>
                   {files.map((f) => (
                     <TableRow key={f.id} className="group hover:bg-muted/20 transition-colors">
@@ -181,8 +163,4 @@ export default function SpedFiles() {
       </div>
     </PageContainer>
   );
-}
-
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
 }
