@@ -430,8 +430,8 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                           </Button>
                         )}
                       </div>
-                      <p className="text-[10px] text-muted-foreground/80 px-1 font-medium italic">
-                        Dica: Pressione <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 mx-1 shadow-sm">Esc</kbd> para limpar a busca e voltar o filtro para Tudo
+                      <p className="text-[11px] text-muted-foreground mt-1 px-1 font-medium italic leading-none">
+                        Dica: Pressione <kbd className="pointer-events-none inline-flex h-4.5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 mx-1 shadow-sm">Esc</kbd> para limpar a busca e voltar o filtro para Tudo
                       </p>
 
                     </div>
