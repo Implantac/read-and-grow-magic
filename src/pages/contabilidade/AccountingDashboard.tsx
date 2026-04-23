@@ -13,11 +13,15 @@ import { PeriodSelector } from '@/components/contabilidade/PeriodSelector';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 
+import { useAccountingDashboardData } from '@/hooks/useAccountingDashboard';
+
 export default function AccountingDashboard() {
+  const { data: dashboardData, isLoading } = useAccountingDashboardData();
   const [selectedPeriod, setSelectedPeriod] = useState('jan-24');
   const [comparePeriod, setComparePeriod] = useState('dez-23');
   const [isExporting, setIsExporting] = useState(false);
   const dashboardRef = useRef<HTMLDivElement>(null);
+
 
   const navigate = useNavigate();
 
