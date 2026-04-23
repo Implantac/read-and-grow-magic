@@ -356,7 +356,16 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                     </SheetDescription>
                   </SheetHeader>
 
-                  <div className="mt-6 mb-4">
+                  <div className="mt-6 space-y-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        placeholder="Filtrar por texto das inconsistências..." 
+                        className="pl-9"
+                        value={diagnosisSearch}
+                        onChange={(e) => setDiagnosisSearch(e.target.value)}
+                      />
+                    </div>
                     <Tabs value={diagnosisFilter} onValueChange={(v: any) => setDiagnosisFilter(v)} className="w-full">
                       <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="all" className="text-xs">Tudo ({allIssues.total})</TabsTrigger>
