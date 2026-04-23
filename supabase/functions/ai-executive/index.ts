@@ -1120,6 +1120,34 @@ async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: str
   // ─── Adaptive Learning: Analyze user patterns ───
   const patternInsights = user_id ? await analyzeUserPatterns(supabase, user_id) : "";
 
+  // ─── Real Data Snapshot: injetar contagens reais no system prompt ───
+  // Garante que o modelo SAIBA quais módulos têm dados antes de responder.
+  let realDataSnapshot = "";
+  try {
+    const [ordC, recC, payC, prodC, cliC, opC] = await Promise.all([
+      supabase.from("orders").select("id", { count: "exact", head: true }),
+      supabase.from("accounts_receivable").select("id", { count: "exact", head: true }),
+      supabase.from("accounts_payable").select("id", { count: "exact", head: true }),
+      supabase.from("products").select("id", { count: "exact", head: true }),
+      supabase.from("clients").select("id", { count: "exact", head: true }),
+      supabase.from("production_orders").select("id", { count: "exact", head: true }),
+    ]);
+    const counts = {
+      pedidos: ordC.count ?? 0,
+      contas_receber: recC.count ?? 0,
+      contas_pagar: payC.count ?? 0,
+      produtos: prodC.count ?? 0,
+      clientes: cliC.count ?? 0,
+      ops_producao: opC.count ?? 0,
+    };
+    const totalRecords = Object.values(counts).reduce((a, b) => a + b, 0);
+    realDataSnapshot = totalRecords === 0
+      ? `\n\n# 🚨 ESTADO DOS DADOS\nO sistema NÃO possui registros reais cadastrados ainda. Responda APENAS:\n"Ainda não há dados reais cadastrados no sistema. Para que eu possa diagnosticar o negócio, cadastre primeiro: clientes, pedidos, contas a pagar/receber ou ordens de produção."\nNUNCA invente números, nomes ou métricas.`
+      : `\n\n# 📊 ESTADO ATUAL DOS DADOS REAIS\nRegistros disponíveis no banco: ${JSON.stringify(counts)}\nUse APENAS esses módulos via tools. Se um módulo está com 0 registros, NÃO invente dados sobre ele — diga "sem dados nesse módulo".`;
+  } catch (e) {
+    console.error("realDataSnapshot error:", e);
+  }
+
   // ─── Log consultation queries for learning ───
   if (user_id && lastUserMsg) {
     const queryText = lastUserMsg.content.toLowerCase();
@@ -1291,7 +1319,7 @@ SEMPRE peça confirmação antes de executar (confirmado=false primeiro)
 
 # SEGURANÇA
 NUNCA execute sem confirmação. Mostre prévia. Registre no log.
-${patternInsights}`;
+${patternInsights}${realDataSnapshot}`;
 
   const aiMessages = [{ role: "system", content: systemPrompt }, ...contextMessages];
 
