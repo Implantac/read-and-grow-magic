@@ -450,11 +450,15 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <TaxSummaryCard label="Total de ICMS" value={totalIcms} color="primary" icon={Scale} />
-                    <TaxSummaryCard label="Total de IPI" value={totalIpi} color="indigo" icon={Scale} />
-                    <TaxSummaryCard label="Total de PIS" value={totalPis} color="blue" icon={Scale} />
-                    <TaxSummaryCard label="Total de COFINS" value={totalCofins} color="cyan" icon={Scale} />
+                  <div className="w-full">
+                    <TaxSummaryCard 
+                      icms={totalIcms}
+                      pis={totalPis}
+                      cofins={totalCofins}
+                      ipi={totalIpi}
+                      total={total}
+                      totalTaxes={totalIcms + totalIpi + totalPis + totalCofins}
+                    />
                   </div>
 
                   <Card className="bg-muted/30">
