@@ -21,8 +21,6 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescri
 import { Badge } from '@/components/ui/badge';
 import { HighlightText } from '@/components/shared/HighlightText';
 import { cn } from '@/lib/utils';
-
-import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const STEPS = [
