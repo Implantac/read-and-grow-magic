@@ -28,27 +28,6 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface NFeItemForm {
   productCode: string;
-// ...
-}
-
-const highlightText = (text: string, search: string) => {
-  if (!search) return text;
-  const parts = text.split(new RegExp(`(${search})`, 'gi'));
-  return (
-    <>
-      {parts.map((part, i) => 
-        part.toLowerCase() === search.toLowerCase() ? (
-          <mark key={i} className="bg-yellow-200 text-yellow-900 rounded-sm px-0.5 font-bold">
-            {part}
-          </mark>
-        ) : (
-          part
-        )
-      )}
-    </>
-  );
-};
-
   productName: string;
   productId?: string;
   ncm: string;
@@ -61,6 +40,25 @@ const highlightText = (text: string, search: string) => {
   cofins?: number;
   ipi?: number;
 }
+
+const highlightText = (text: string, search: string) => {
+  if (!search) return text;
+  const parts = text.split(new RegExp(`(${search})`, 'gi'));
+  return (
+    <>
+      {parts.map((part, i) => 
+        part.toLowerCase() === search.toLowerCase() ? (
+          <mark key={i} className="bg-yellow-100 text-yellow-900 rounded-sm px-0.5 font-bold">
+            {part}
+          </mark>
+        ) : (
+          part
+        )
+      )}
+    </>
+  );
+};
+
 
 interface CreateNFeDialogProps {
   open: boolean;
