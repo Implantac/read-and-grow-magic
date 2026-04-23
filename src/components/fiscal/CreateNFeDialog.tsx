@@ -108,6 +108,14 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
   const [discount, setDiscount] = useState(0);
   const [diagnosisFilter, setDiagnosisFilter] = useState<'all' | 'errors' | 'warnings'>('all');
   const [diagnosisSearch, setDiagnosisSearch] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDiagnosisSearch(searchTerm);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   useEffect(() => {
     if (!clientUF) return;
