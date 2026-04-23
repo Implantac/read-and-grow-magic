@@ -115,12 +115,19 @@ export default function KardexPage() {
           <div className="grid gap-4 md:grid-cols-4">
             <div className="md:col-span-2 space-y-2">
               <Label>Produto</Label>
-              <Select value={selectedProductId} onValueChange={handleProductChange}>
+              <Select value={selectedProductId} onValueChange={handleProductChange} disabled={isLoadingProducts}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione um produto" />
+                  <SelectValue placeholder={isLoadingProducts ? "Carregando produtos..." : "Selecione um produto"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="empty">Nenhum produto cadastrado</SelectItem>
+                  {products?.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.code} - {p.name}
+                    </SelectItem>
+                  ))}
+                  {(!products || products.length === 0) && !isLoadingProducts && (
+                    <SelectItem value="empty">Nenhum produto cadastrado</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
