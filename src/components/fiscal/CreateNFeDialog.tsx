@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import {
   Plus, Trash2, FileText, Users, Package, Calculator,
-  Truck, CreditCard, ClipboardCheck, ArrowLeft, ArrowRight, Send, Sparkles
+  Truck, CreditCard, ClipboardCheck, ArrowLeft, ArrowRight, Send, Sparkles,
+  Info, AlertCircle, CheckCircle2, MoreHorizontal
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,8 +10,9 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cfopOptions } from '@/config/fiscal';
 import { useClients } from '@/hooks/useClients';
 import { useProducts } from '@/hooks/useProducts';
@@ -18,6 +20,8 @@ import { calculateItemTaxes } from '@/hooks/useTaxRules';
 import { FiscalStepper } from './FiscalStepper';
 import { SmartSelect, SmartSelectOption } from './SmartSelect';
 import { TaxSummaryCard } from './TaxSummaryCard';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface NFeItemForm {
   productCode: string;
@@ -33,6 +37,8 @@ interface NFeItemForm {
   pis?: number;
   cofins?: number;
   ipi?: number;
+  vOutro?: number;
+  vDesc?: number;
 }
 
 interface CreateNFeDialogProps {
@@ -53,9 +59,9 @@ const STEPS = [
   { id: 'info', label: 'Dados', icon: FileText },
   { id: 'client', label: 'Cliente', icon: Users },
   { id: 'products', label: 'Produtos', icon: Package },
-  { id: 'taxes', label: 'Impostos', icon: Calculator },
-  { id: 'transport', label: 'Transporte', icon: Truck },
-  { id: 'finance', label: 'Financeiro', icon: CreditCard },
+  { id: 'taxes', label: 'Tributos', icon: Calculator },
+  { id: 'transport', label: 'Logística', icon: Truck },
+  { id: 'finance', label: 'Pagamento', icon: CreditCard },
   { id: 'review', label: 'Revisão', icon: ClipboardCheck },
 ];
 
