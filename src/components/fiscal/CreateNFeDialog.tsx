@@ -208,32 +208,41 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
 
     // Validação por etapa
     if (step >= 0) {
-      if (!naturezaOp.trim()) currentErrors.push("Natureza da operação é obrigatória.");
+      if (!naturezaOp.trim()) currentErrors.push("Natureza da operação é obrigatória para a validade jurídica da NF-e.");
     }
     
     if (step >= 1) {
-      if (!clientId) currentErrors.push("Um destinatário deve ser selecionado.");
+      if (!clientId) currentErrors.push("O destinatário é obrigatório. Selecione um cliente da base ou cadastre um novo.");
       if (clientDocument && clientDocument.replace(/\D/g, '').length < 11) {
-        currentErrors.push("Documento do destinatário inválido.");
+        currentErrors.push("O documento do destinatário (CPF/CNPJ) parece estar incompleto ou inválido.");
       }
+      if (!clientUF) currentErrors.push("UF do destinatário não identificada. Verifique o cadastro do cliente.");
     }
 
     if (step >= 2) {
-      if (items.length === 0) currentErrors.push("Adicione pelo menos um produto à nota.");
+      if (items.length === 0) currentErrors.push("A nota precisa conter pelo menos um item para ser emitida.");
       items.forEach((item, idx) => {
-        if (!item.cfop) currentErrors.push(`Item ${idx + 1} (${item.productName}): CFOP não definido.`);
-        if (!item.ncm) currentWarnings.push(`Item ${idx + 1}: NCM ausente. Recomendado para emissão oficial.`);
-        if (item.quantity <= 0) currentErrors.push(`Item ${idx + 1}: Quantidade deve ser superior a zero.`);
-        if (item.unitPrice <= 0) currentErrors.push(`Item ${idx + 1}: Valor unitário deve ser superior a zero.`);
+        if (!item.cfop) currentErrors.push(`Item ${idx + 1} (${item.productName}): O código CFOP é obrigatório para definir a tributação.`);
+        if (!item.ncm) currentWarnings.push(`Item ${idx + 1}: NCM (Nomenclatura Comum do Mercosul) não informado. Isso pode causar rejeição pela SEFAZ.`);
+        if (item.quantity <= 0) currentErrors.push(`Item ${idx + 1}: A quantidade faturada deve ser maior que zero.`);
+        if (item.unitPrice <= 0) currentErrors.push(`Item ${idx + 1}: O valor unitário do produto não pode ser zero ou negativo.`);
       });
     }
 
+    if (step >= 3) {
+      const totalTax = totalIcms + totalIpi + totalPis + totalCofins;
+      if (totalTax === 0 && subtotal > 0) {
+        currentWarnings.push("Atenção: O valor total de impostos está zerado. Verifique se as regras fiscais estão aplicadas corretamente.");
+      }
+    }
+
     if (step >= 5) {
-      if (!paymentMethod) currentErrors.push("Selecione uma forma de pagamento.");
+      if (!paymentMethod) currentErrors.push("Informe o meio de pagamento utilizado na transação.");
+      if (installments < 1) currentErrors.push("O número de parcelas deve ser pelo menos 1.");
     }
 
     return { errors: currentErrors, warnings: currentWarnings };
-  }, [step, naturezaOp, clientId, clientDocument, items, paymentMethod]);
+  }, [step, naturezaOp, clientId, clientDocument, items, paymentMethod, totalIcms, totalIpi, totalPis, totalCofins, subtotal, installments]);
 
   const hasBlockingErrors = validation.errors.length > 0;
 
