@@ -335,6 +335,60 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
               <DialogDescription>Fluxo automatizado com cálculo de impostos em tempo real</DialogDescription>
             </div>
             <div className="flex items-center gap-3">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm" className={cn("gap-2", allIssues.total > 0 ? "border-warning text-warning hover:bg-warning/5" : "border-success text-success hover:bg-success/5")}>
+                    <ListChecks className="h-4 w-4" />
+                    Inconsistências ({allIssues.total})
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="w-[400px] sm:w-[540px]">
+                  <SheetHeader>
+                    <SheetTitle className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-warning" />
+                      Diagnóstico de Emissão
+                    </SheetTitle>
+                    <SheetDescription>
+                      Resumo de todas as validações pendentes para a autorização da nota.
+                    </SheetDescription>
+                  </SheetHeader>
+                  <ScrollArea className="h-[calc(100vh-150px)] mt-6 pr-4">
+                    <div className="space-y-6">
+                      {STEPS.map((s, idx) => {
+                        const stepIssues = validationByStep[idx];
+                        if (stepIssues.errors.length === 0 && stepIssues.warnings.length === 0) return null;
+                        return (
+                          <div key={idx} className="space-y-3">
+                            <div className="flex items-center gap-2 border-b pb-1">
+                              <Badge variant="outline" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">{idx + 1}</Badge>
+                              <h4 className="text-sm font-bold uppercase tracking-wider">{s.label}</h4>
+                              <Button variant="ghost" size="sm" onClick={() => { setStep(idx); }} className="ml-auto text-[10px] h-6">Corrigir</Button>
+                            </div>
+                            {stepIssues.errors.map((err, i) => (
+                              <div key={`err-${idx}-${i}`} className="flex gap-2 text-xs text-destructive bg-destructive/5 p-2 rounded-md">
+                                <AlertCircle className="h-3 w-3 mt-0.5 shrink-0" />
+                                <span>{err}</span>
+                              </div>
+                            ))}
+                            {stepIssues.warnings.map((warn, i) => (
+                              <div key={`warn-${idx}-${i}`} className="flex gap-2 text-xs text-amber-700 bg-amber-50 p-2 rounded-md">
+                                <AlertTriangle className="h-3 w-3 mt-0.5 shrink-0" />
+                                <span>{warn}</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })}
+                      {allIssues.total === 0 && (
+                        <div className="py-20 text-center space-y-3">
+                          <CheckCircle2 className="h-12 w-12 mx-auto text-success opacity-20" />
+                          <p className="text-sm text-muted-foreground font-medium">Nenhuma inconsistência detectada!</p>
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </SheetContent>
+              </Sheet>
               <Badge variant="outline" className="bg-background">Série: 001</Badge>
               <Badge variant="outline" className="bg-background">Ambiente: Homologação</Badge>
             </div>
@@ -349,14 +403,14 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
           <ScrollArea className="h-full">
             <div className="px-8 py-6 max-w-5xl mx-auto">
               <div className="mb-6 space-y-3">
-                {validation.errors.map((err, i) => (
+                {currentStepValidation.errors.map((err, i) => (
                   <Alert key={`err-${i}`} variant="destructive" className="animate-in fade-in slide-in-from-top-2 duration-300">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Inconsistência Fiscal</AlertTitle>
                     <AlertDescription>{err}</AlertDescription>
                   </Alert>
                 ))}
-                {validation.warnings.map((warn, i) => (
+                {currentStepValidation.warnings.map((warn, i) => (
                   <Alert key={`warn-${i}`} className="bg-amber-50 border-amber-200 text-amber-800 animate-in fade-in slide-in-from-top-2 duration-300">
                     <AlertTriangle className="h-4 w-4 text-amber-600" />
                     <AlertTitle className="text-amber-800">Sugestão de Correção</AlertTitle>
