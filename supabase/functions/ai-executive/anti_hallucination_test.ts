@@ -87,7 +87,7 @@ Deno.test("Guard: apenas contas a pagar JÁ libera análise", () => {
 
 const INSUFFICIENT_DATA_MSG = "Dados insuficientes para análise confiável. Cadastre vendas, pedidos, contas a pagar ou receber para que a IA possa gerar diagnóstico baseado em dados reais.";
 
-function simulateHandlerResponse(handlerName: string, data: any) {
+function simulateHandlerResponse(handlerName: string, data: any): any {
   if (!checkHasRealData(data)) {
     switch (handlerName) {
       case "ceo_brief":
