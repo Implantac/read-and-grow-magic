@@ -302,6 +302,13 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
   const hasBlockingErrors = currentStepValidation.errors.length > 0;
   const hasAnyBlockingErrors = allIssues.errors.length > 0;
 
+  const nothingFoundInView = useMemo(() => {
+    if (diagnosisFilter === 'all') return !hasFilteredErrors && !hasFilteredWarnings;
+    if (diagnosisFilter === 'errors') return !hasFilteredErrors;
+    if (diagnosisFilter === 'warnings') return !hasFilteredWarnings;
+    return true;
+  }, [diagnosisFilter, hasFilteredErrors, hasFilteredWarnings]);
+
   const handleNext = () => {
     if (hasBlockingErrors) return;
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
