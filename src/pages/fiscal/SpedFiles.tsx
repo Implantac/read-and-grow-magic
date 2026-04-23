@@ -133,33 +133,56 @@ export default function SpedFiles() {
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
-              <TableBody>
-                {files.map((f) => (
-                  <TableRow key={f.id}>
-                    <TableCell>
-                      <Badge variant={f.type === 'sped_fiscal' ? 'default' : 'secondary'}>
-                        {f.type === 'sped_fiscal' ? 'SPED Fiscal' : 'SPED Contribuições'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{f.startDate} → {f.endDate}</TableCell>
-                    <TableCell>{f.totalRecords}</TableCell>
-                    <TableCell>{f.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</TableCell>
-                    <TableCell>{format(new Date(f.generatedAt), 'dd/MM/yyyy HH:mm')}</TableCell>
-                    <TableCell className="text-right space-x-2">
-                      <Button variant="outline" size="sm" onClick={() => download(f.id)}>
-                        <Download className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => remove(f.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                <TableBody>
+                  {files.map((f) => (
+                    <TableRow key={f.id} className="group hover:bg-muted/20 transition-colors">
+                      <TableCell className="py-4">
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            "p-2 rounded-lg",
+                            f.type === 'sped_fiscal' ? "bg-primary/10 text-primary" : "bg-indigo-500/10 text-indigo-500"
+                          )}>
+                            <FileText className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <div className="font-bold text-sm">
+                              {f.type === 'sped_fiscal' ? 'SPED Fiscal (ICMS/IPI)' : 'SPED Contribuições (PIS/COFINS)'}
+                            </div>
+                            <div className="text-[10px] text-muted-foreground uppercase tracking-widest mt-0.5">
+                              ID: {f.id.slice(0, 8)} • GERADO EM {format(new Date(f.generatedAt), 'dd/MM/yyyy HH:mm')}
+                            </div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-[10px] py-0 px-2 font-mono bg-background border-muted">
+                          {f.startDate} ➜ {f.endDate}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right font-mono font-bold">{f.totalRecords.toLocaleString()}</TableCell>
+                      <TableCell className="text-right font-black tabular-nums text-primary">{f.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button variant="ghost" size="icon" onClick={() => download(f.id)} className="h-8 w-8 text-primary hover:bg-primary/10">
+                            <Download className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => remove(f.id)} className="h-8 w-8 text-destructive hover:bg-destructive/10">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </PageContainer>
   );
+}
+
+function cn(...inputs: any[]) {
+  return inputs.filter(Boolean).join(' ');
 }
