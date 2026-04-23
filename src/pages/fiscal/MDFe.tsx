@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,35 +6,56 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
-import { Send, CheckSquare, Plus, MapPin, Truck, ClipboardCheck, ArrowLeft, ArrowRight, ScrollText } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Send, CheckSquare, Plus, MapPin, Truck, ClipboardCheck, ArrowLeft, ArrowRight, ScrollText, FileText, User, Trash2, ChevronRight, Info } from 'lucide-react';
 import { useMDFes, useCreateMDFe, useTransmitMDFe, useCloseMDFe } from '@/hooks/useMDFe';
+import { useNFe } from '@/hooks/useNFe';
+import { useCTes } from '@/hooks/useCTe';
 import { format } from 'date-fns';
 import { FiscalStepper } from '@/components/fiscal/FiscalStepper';
 import { FiscalStatusBadge } from '@/components/fiscal/FiscalStatusBadge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const STEPS = [
+  { id: 'docs', label: 'Documentos', icon: FileText },
   { id: 'route', label: 'Rota', icon: MapPin },
-  { id: 'vehicle', label: 'Veículo & Motorista', icon: Truck },
+  { id: 'vehicle', label: 'Veículo', icon: Truck },
   { id: 'review', label: 'Revisão', icon: ClipboardCheck },
 ];
 
 export default function MDFePage() {
   const { data: mdfes = [], isLoading } = useMDFes();
+  const { nfes } = useNFe();
+  const { data: ctes = [] } = useCTes();
   const create = useCreateMDFe();
   const transmit = useTransmitMDFe();
   const close = useCloseMDFe();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
+  const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [form, setForm] = useState({
-    uf_origin: 'SP', uf_destination: 'RJ', loading_city: '',
+    uf_origin: 'SP', uf_destination: 'RJ', loading_city: 'SÃO PAULO',
     vehicle_plate: '', vehicle_uf: 'SP', driver_name: '', driver_cpf: '',
   });
 
+  const availableDocs = useMemo(() => {
+    const authorizedNFes = nfes.filter(n => n.status === 'authorized').map(n => ({ id: n.id, number: n.number, type: 'NF-e', client: n.clientName, value: n.total }));
+    const authorizedCTes = ctes.filter(c => c.status === 'authorized').map(c => ({ id: c.id, number: c.number, type: 'CT-e', client: c.recipient_name, value: Number(c.freight_value) }));
+    return [...authorizedNFes, ...authorizedCTes];
+  }, [nfes, ctes]);
+
+  const handleToggleDoc = (id: string) => {
+    setSelectedDocs(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
   const handleCreate = async () => {
-    await create.mutateAsync(form as any);
+    await create.mutateAsync({ ...form, documents: selectedDocs } as any);
     setOpen(false);
     setStep(0);
+    setSelectedDocs([]);
   };
 
   return (
