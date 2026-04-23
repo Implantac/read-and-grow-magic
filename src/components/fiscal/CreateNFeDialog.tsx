@@ -371,14 +371,28 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
               <DialogDescription>Fluxo automatizado com cálculo de impostos em tempo real</DialogDescription>
             </div>
             <div className="flex items-center gap-3">
-              <Sheet>
+              <Sheet onOpenChange={(open) => {
+                if (!open) {
+                  setSearchTerm('');
+                  setDiagnosisFilter('all');
+                }
+              }}>
                 <SheetTrigger asChild>
                   <Button variant="outline" size="sm" className={cn("gap-2", allIssues.total > 0 ? "border-warning text-warning hover:bg-warning/5" : "border-success text-success hover:bg-success/5")}>
                     <ListChecks className="h-4 w-4" />
                     Inconsistências ({allIssues.total})
                   </Button>
                 </SheetTrigger>
-                <SheetContent className="w-[400px] sm:w-[540px]">
+                <SheetContent 
+                  className="w-[400px] sm:w-[540px]"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape' && (searchTerm || diagnosisFilter !== 'all')) {
+                      setSearchTerm('');
+                      setDiagnosisFilter('all');
+                      e.preventDefault();
+                    }
+                  }}
+                >
                   <SheetHeader>
                     <SheetTitle className="flex items-center gap-2">
                       <AlertTriangle className="h-5 w-5 text-warning" />
