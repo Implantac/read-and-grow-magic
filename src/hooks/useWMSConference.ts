@@ -131,14 +131,69 @@ export function useWMSConference() {
   };
 
   const checkItem = async (itemId: string, checkedQty: number) => {
+    // Compute divergence: read expected_qty first
+    const { data: itemData } = await supabase
+      .from('wms_conference_items')
+      .select('expected_qty')
+      .eq('id', itemId)
+      .single();
+    const expected = Number(itemData?.expected_qty || 0);
+    const divergence = checkedQty - expected;
+
     const { error } = await supabase.from('wms_conference_items').update({
       checked_qty: checkedQty,
+      divergence,
       status: 'checked',
       checked_at: new Date().toISOString(),
     }).eq('id', itemId);
     
     if (error) { toast.error('Erro ao conferir item'); return false; }
     return true;
+  };
+
+  /**
+   * Scan a barcode against the conference items.
+   * Strategy: increment checkedQty by 1 per scan; auto-check when reaches expected.
+   * Matches by exact barcode OR by productCode if barcode is null.
+   */
+  const scanBarcode = async (conferenceId: string, barcode: string): Promise<{
+    success: boolean;
+    message: string;
+    item?: ConferenceItem;
+  }> => {
+    const items = await fetchItems(conferenceId);
+    const match = items.find(i =>
+      (i.barcode && i.barcode === barcode) || i.productCode === barcode
+    );
+
+    if (!match) {
+      return { success: false, message: `Código "${barcode}" não pertence a esta conferência` };
+    }
+
+    if (match.status === 'checked' && match.checkedQty >= match.expectedQty) {
+      return { success: false, message: `${match.productName} já totalmente conferido (${match.checkedQty}/${match.expectedQty})` };
+    }
+
+    const newQty = (match.checkedQty || 0) + 1;
+    const divergence = newQty - match.expectedQty;
+    const newStatus = newQty >= match.expectedQty ? 'checked' : 'pending';
+
+    const { error } = await supabase.from('wms_conference_items').update({
+      checked_qty: newQty,
+      divergence,
+      status: newStatus,
+      checked_at: newStatus === 'checked' ? new Date().toISOString() : null,
+    }).eq('id', match.id);
+
+    if (error) {
+      return { success: false, message: 'Erro ao registrar leitura' };
+    }
+
+    return {
+      success: true,
+      message: `${match.productName} (${newQty}/${match.expectedQty})`,
+      item: { ...match, checkedQty: newQty, status: newStatus, divergence },
+    };
   };
 
   const startConference = async (id: string, operator: string) => {
@@ -167,5 +222,5 @@ export function useWMSConference() {
   };
 
   useEffect(() => { fetchRecords(); }, [fetchRecords]);
-  return { records, loading, refetch: fetchRecords, fetchItems, createConference, checkItem, startConference, completeConference };
+  return { records, loading, refetch: fetchRecords, fetchItems, createConference, checkItem, scanBarcode, startConference, completeConference };
 }

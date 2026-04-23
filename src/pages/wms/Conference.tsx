@@ -19,6 +19,7 @@ import {
   ClipboardCheck, Search, MoreHorizontal, PlayCircle, CheckCircle, AlertTriangle, Clock, Eye, ScanBarcode,
 } from 'lucide-react';
 import { useWMSConference, ConferenceItem } from '@/hooks/useWMSConference';
+import { BarcodeScanner, ScanFeedback } from '@/components/wms/BarcodeScanner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -30,7 +31,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export default function ConferencePage() {
-  const { records, loading, startConference, completeConference, fetchItems, checkItem, createConference } = useWMSConference();
+  const { records, loading, startConference, completeConference, fetchItems, checkItem, scanBarcode, createConference } = useWMSConference();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [detailOpen, setDetailOpen] = useState(false);
@@ -62,6 +63,21 @@ export default function ConferencePage() {
       const items = await fetchItems(selectedRecord);
       setSelectedItems(items);
     }
+  };
+
+  const handleScan = async (code: string): Promise<ScanFeedback> => {
+    if (!selectedRecord) {
+      return { type: 'error', message: 'Nenhuma conferência selecionada', code };
+    }
+    const result = await scanBarcode(selectedRecord, code);
+    // Refresh items
+    const items = await fetchItems(selectedRecord);
+    setSelectedItems(items);
+    return {
+      type: result.success ? 'success' : 'error',
+      message: result.message,
+      code,
+    };
   };
 
   const handleCreate = async () => {
@@ -212,13 +228,32 @@ export default function ConferencePage() {
 
       {/* Detail Dialog */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ScanBarcode className="h-5 w-5" />
               Itens da Conferência {isBlind && <Badge variant="destructive">Cega</Badge>}
             </DialogTitle>
           </DialogHeader>
+
+          {/* Barcode Scanner */}
+          <BarcodeScanner onScan={handleScan} placeholder="Escaneie o código do produto..." autoFocus />
+
+          {/* Progress summary */}
+          <div className="flex items-center justify-between rounded-md border p-3 text-sm">
+            <span className="text-muted-foreground">Progresso da conferência</span>
+            <div className="flex gap-3">
+              <span className="font-medium">
+                {selectedItems.filter(i => i.status === 'checked').length}/{selectedItems.length} itens
+              </span>
+              {selectedItems.some(i => i.divergence !== 0 && i.status === 'checked') && (
+                <Badge variant="destructive">
+                  {selectedItems.filter(i => i.divergence !== 0 && i.status === 'checked').length} divergência(s)
+                </Badge>
+              )}
+            </div>
+          </div>
+
           <Table>
             <TableHeader>
               <TableRow>
