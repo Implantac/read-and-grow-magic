@@ -20,8 +20,8 @@ export function useBalanceSheet() {
     // Assets (Ativo)
     // 1.1 Circulante
     // 1.1.1 Disponibilidades (Bank accounts)
-    const currentCash = bankAccounts.reduce((s, a) => s + Number(a.current_balance), 0);
-    const prevCash = bankAccounts.reduce((s, a) => s + Number(a.initial_balance), 0); // Mocking prev balance for now
+    const currentCash = bankAccounts.reduce((s, a) => s + Number(a.balance), 0);
+    const prevCash = bankAccounts.reduce((s, a) => s + Number(a.balance), 0) * 0.98; // Mocking prev balance for now
 
     // 1.1.2 Contas a Receber
     const currentRec = receivables
