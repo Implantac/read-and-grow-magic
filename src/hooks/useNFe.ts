@@ -144,36 +144,47 @@ export function useNFe() {
   }, [fetchNFes]);
 
   const transmit = useCallback(async (id: string) => {
-    // Simulate SEFAZ authorization (generates access key and protocol)
-    const accessKey = Array.from({ length: 44 }, () => Math.floor(Math.random() * 10)).join('');
-    const protocol = '1' + Date.now().toString().slice(-14);
+    try {
+      const { data, error } = await supabase.functions.invoke('fiscal-transmitter', {
+        body: { nfeId: id, action: 'transmit' }
+      });
 
-    const { error } = await supabase.from('nfe').update({
-      status: 'authorized',
-      access_key: accessKey,
-      protocol,
-      authorization_date: new Date().toISOString(),
-    }).eq('id', id);
+      if (error) {
+        const errorData = await error.context?.json();
+        toast.error(errorData?.error || 'Erro ao transmitir NF-e');
+        return false;
+      }
 
-    if (error) { toast.error('Erro ao transmitir NF-e'); return false; }
-    toast.success('NF-e autorizada na SEFAZ (simulação)');
-    await fetchNFes();
-    invalidateCrossModule();
-    return true;
+      toast.success('NF-e autorizada na SEFAZ');
+      await fetchNFes();
+      invalidateCrossModule();
+      return true;
+    } catch (e: any) {
+      toast.error(e.message || 'Erro na comunicação com o transmissor');
+      return false;
+    }
   }, [fetchNFes, invalidateCrossModule]);
 
   const cancel = useCallback(async (id: string, reason: string) => {
-    const { error } = await supabase.from('nfe').update({
-      status: 'cancelled',
-      cancellation_date: new Date().toISOString(),
-      cancellation_reason: reason,
-    }).eq('id', id);
+    try {
+      const { error } = await supabase.functions.invoke('fiscal-transmitter', {
+        body: { nfeId: id, action: 'cancel', reason }
+      });
 
-    if (error) { toast.error('Erro ao cancelar NF-e'); return false; }
-    toast.success('NF-e cancelada com sucesso');
-    await fetchNFes();
-    invalidateCrossModule();
-    return true;
+      if (error) {
+        const errorData = await error.context?.json();
+        toast.error(errorData?.error || 'Erro ao cancelar NF-e');
+        return false;
+      }
+
+      toast.success('NF-e cancelada com sucesso');
+      await fetchNFes();
+      invalidateCrossModule();
+      return true;
+    } catch (e: any) {
+      toast.error(e.message || 'Erro na comunicação com o transmissor');
+      return false;
+    }
   }, [fetchNFes, invalidateCrossModule]);
 
   const sendToPending = useCallback(async (id: string) => {
