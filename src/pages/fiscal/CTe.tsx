@@ -20,6 +20,7 @@ import { SmartSelect } from '@/components/fiscal/SmartSelect';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const STEPS = [
   { id: 'import', label: 'Importar NF-e', icon: FileText },
