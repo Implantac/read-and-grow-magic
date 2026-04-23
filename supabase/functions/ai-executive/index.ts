@@ -32,7 +32,8 @@ serve(async (req) => {
     // Never trust a user_id supplied in the request body — that would allow IDOR
     // (reading/writing/deleting another user's chat history).
     const authenticatedUserId = claimsData.claims.sub as string;
-    const { action, messages } = await req.json();
+    const body = await req.json();
+    const { action, messages } = body;
 
     if (action === "clear_history") {
       await supabase.from("ai_executive_chat").delete().eq("user_id", authenticatedUserId);
@@ -1594,12 +1595,8 @@ async function handleCEOBrief(supabase: any, lovableKey: string, corsHeaders: an
   await recordLearning(supabase, data);
 
   // Detecta se há dados reais suficientes para análise confiável
-  const hasRealData = (
-    (data.orders?.length ?? 0) > 0 ||
-    (data.sales?.length ?? 0) > 0 ||
-    (data.receivable?.length ?? 0) > 0 ||
-    (data.payable?.length ?? 0) > 0
-  );
+  // Usa o helper compartilhado (campos plurais conforme fetchAllData)
+  const hasRealData = checkHasRealData(data);
 
   const ceoPrompt = `Você é a IA CEO desta empresa. Pense e fale como o dono do negócio.
 
@@ -1900,6 +1897,18 @@ async function handleExecuteDecisions(supabase: any, body: any, corsHeaders: any
 async function handleAutoPilotRun(supabase: any, _lovableKey: string, corsHeaders: any) {
   try {
     const data = await fetchAllData(supabase);
+
+    // Guard: AutoPilot só roda com dados reais — evita gerar alertas/ações fictícias
+    if (!checkHasRealData(data)) {
+      return new Response(JSON.stringify({
+        ran_at: new Date().toISOString(),
+        data_status: "insufficient",
+        message: INSUFFICIENT_DATA_MSG,
+        forecast: null, risks: [], decisions: [], executed: [],
+        summary: "AutoPilot pausado: sem dados reais no sistema.",
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const kpis = computeKPIs(data);
     const ctx = buildContext(data, kpis);
     const forecast = predictRevenue(kpis.revenueByMonth || []);
