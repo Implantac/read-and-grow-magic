@@ -418,14 +418,17 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                           <div className="space-y-5 px-1">
                             {STEPS.map((s, idx) => {
                               const stepIssues = validationByStep[idx];
-                              if (stepIssues.warnings.length === 0) return null;
+                              const filteredWarnings = stepIssues.warnings.filter(warn => 
+                                warn.toLowerCase().includes(diagnosisSearch.toLowerCase())
+                              );
+                              if (filteredWarnings.length === 0) return null;
                               return (
                                 <div key={`warn-group-${idx}`} className="space-y-2">
                                   <div className="flex items-center gap-2 border-b border-dashed pb-1">
                                     <Badge variant="outline" className="h-5 text-[10px] px-1.5">{s.label}</Badge>
                                     <Button variant="ghost" size="sm" onClick={() => { setStep(idx); }} className="ml-auto text-[10px] h-5">Corrigir</Button>
                                   </div>
-                                  {stepIssues.warnings.map((warn, i) => (
+                                  {filteredWarnings.map((warn, i) => (
                                     <div key={`warn-${idx}-${i}`} className="flex gap-2 text-xs text-amber-700 pl-1">
                                       <div className="w-1 h-1 rounded-full bg-amber-500 mt-1.5 shrink-0" />
                                       <span>{warn}</span>
