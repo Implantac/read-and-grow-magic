@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Send, Ban, Plus, Truck, MapPin, DollarSign, ClipboardCheck, ArrowLeft, ArrowRight, FileText, Search, Sparkles, Receipt, ChevronRight, Calculator } from 'lucide-react';
+import { Send, Ban, Plus, Truck, MapPin, DollarSign, ClipboardCheck, ArrowLeft, ArrowRight, FileText, Search, Sparkles, Receipt, ChevronRight, Calculator, ListChecks, AlertCircle, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useCTes, useCreateCTe, useTransmitCTe, useCancelCTe } from '@/hooks/useCTe';
 import { useNFe } from '@/hooks/useNFe';
@@ -17,6 +17,10 @@ import { FiscalStepper } from '@/components/fiscal/FiscalStepper';
 import { FiscalStatusBadge } from '@/components/fiscal/FiscalStatusBadge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SmartSelect } from '@/components/fiscal/SmartSelect';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const STEPS = [
   { id: 'import', label: 'Importar NF-e', icon: FileText },
@@ -44,6 +48,48 @@ export default function CTePage() {
     origin_city: '', destination_city: '',
     cargo_value: 0, freight_value: 0, icms_rate: 12, modal: 'rodoviario',
   });
+
+  const validationByStep = useMemo(() => {
+    const steps: Record<number, { errors: string[]; warnings: string[] }> = {};
+    STEPS.forEach((_, i) => (steps[i] = { errors: [], warnings: [] }));
+
+    // Etapa 0 — Importação
+    if (step > 0 && !selectedNFeId) {
+      steps[0].warnings.push("CT-e criado sem importar dados de NF-e. Certifique-se de que os dados manuais estão corretos.");
+    }
+
+    // Etapa 1 — Participantes
+    if (!form.sender_name) steps[1].errors.push("O remetente é obrigatório.");
+    if (!form.recipient_name) steps[1].errors.push("O destinatário é obrigatório.");
+    if (form.sender_document && form.sender_document.replace(/\D/g, '').length < 11) {
+      steps[1].warnings.push("Documento do remetente parece inválido.");
+    }
+
+    // Etapa 2 — Rota
+    if (!form.sender_uf) steps[2].errors.push("UF de origem é obrigatória.");
+    if (!form.recipient_uf) steps[2].errors.push("UF de destino é obrigatória.");
+    if (!form.origin_city) steps[2].errors.push("Cidade de origem é obrigatória.");
+    if (!form.destination_city) steps[2].errors.push("Cidade de destino é obrigatória.");
+
+    // Etapa 3 — Valores
+    if (form.cargo_value <= 0) steps[3].errors.push("O valor da carga deve ser maior que zero.");
+    if (form.freight_value <= 0) steps[3].errors.push("O valor do frete é obrigatório.");
+    if (form.icms_rate <= 0) steps[3].warnings.push("Alíquota de ICMS zerada. Verifique se há isenção.");
+
+    return steps;
+  }, [form, selectedNFeId]);
+
+  const allIssues = useMemo(() => {
+    const errors: { step: number; message: string }[] = [];
+    const warnings: { step: number; message: string }[] = [];
+    Object.entries(validationByStep).forEach(([s, data]) => {
+      const stepIdx = Number(s);
+      data.errors.forEach((m) => errors.push({ step: stepIdx, message: m }));
+      data.warnings.forEach((m) => warnings.push({ step: stepIdx, message: m }));
+    });
+    return { errors, warnings, total: errors.length + warnings.length };
+  }, [validationByStep]);
+
 
   const nfeOptions = useMemo(() => 
     nfes.filter(n => n.status === 'authorized').map(n => ({
@@ -109,6 +155,62 @@ export default function CTePage() {
                   </DialogTitle>
                   <DialogDescription>Conhecimento de Transporte Eletrônico guiado</DialogDescription>
                 </div>
+                <div className="flex items-center gap-3">
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" size="sm" className={cn("gap-2", allIssues.total > 0 ? "border-warning text-warning hover:bg-warning/5" : "border-success text-success hover:bg-success/5")}>
+                        <ListChecks className="h-4 w-4" />
+                        Inconsistências ({allIssues.total})
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent className="w-[400px] sm:w-[540px]">
+                      <SheetHeader>
+                        <SheetTitle className="flex items-center gap-2">
+                          <AlertTriangle className="h-5 w-5 text-warning" />
+                          Diagnóstico de CT-e
+                        </SheetTitle>
+                        <SheetDescription>
+                          Resumo das validações pendentes para a emissão do CT-e.
+                        </SheetDescription>
+                      </SheetHeader>
+                      <ScrollArea className="h-[calc(100vh-150px)] mt-6 pr-4">
+                        <div className="space-y-6">
+                          {STEPS.map((s, idx) => {
+                            const stepIssues = validationByStep[idx];
+                            if (stepIssues.errors.length === 0 && stepIssues.warnings.length === 0) return null;
+                            return (
+                              <div key={idx} className="space-y-3">
+                                <div className="flex items-center gap-2 border-b pb-1">
+                                  <Badge variant="outline" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">{idx + 1}</Badge>
+                                  <h4 className="text-sm font-bold uppercase tracking-wider">{s.label}</h4>
+                                  <Button variant="ghost" size="sm" onClick={() => { setStep(idx); }} className="ml-auto text-[10px] h-6">Corrigir</Button>
+                                </div>
+                                {stepIssues.errors.map((err, i) => (
+                                  <div key={`err-${idx}-${i}`} className="flex gap-2 text-xs text-destructive bg-destructive/5 p-2 rounded-md">
+                                    <AlertCircle className="h-3 w-3 mt-0.5 shrink-0" />
+                                    <span>{err}</span>
+                                  </div>
+                                ))}
+                                {stepIssues.warnings.map((warn, i) => (
+                                  <div key={`warn-${idx}-${i}`} className="flex gap-2 text-xs text-amber-700 bg-amber-50 p-2 rounded-md">
+                                    <AlertTriangle className="h-3 w-3 mt-0.5 shrink-0" />
+                                    <span>{warn}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          })}
+                          {allIssues.total === 0 && (
+                            <div className="py-20 text-center space-y-3">
+                              <CheckCircle2 className="h-12 w-12 mx-auto text-success opacity-20" />
+                              <p className="text-sm text-muted-foreground font-medium">Nenhuma inconsistência detectada!</p>
+                            </div>
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </SheetContent>
+                  </Sheet>
+                </div>
               </DialogHeader>
 
               <div className="px-10 py-6 border-b">
@@ -118,6 +220,22 @@ export default function CTePage() {
               <div className="flex-1 overflow-hidden relative">
                 <ScrollArea className="h-full">
                   <div className="px-8 py-6 max-w-3xl mx-auto">
+                    <div className="mb-6 space-y-3">
+                      {validationByStep[step]?.errors.map((err, i) => (
+                        <Alert key={`err-${i}`} variant="destructive" className="animate-in fade-in slide-in-from-top-2 duration-300">
+                          <AlertCircle className="h-4 w-4" />
+                          <AlertTitle>Inconsistência Fiscal</AlertTitle>
+                          <AlertDescription>{err}</AlertDescription>
+                        </Alert>
+                      ))}
+                      {validationByStep[step]?.warnings.map((warn, i) => (
+                        <Alert key={`warn-${i}`} className="bg-amber-50 border-amber-200 text-amber-800 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <AlertTriangle className="h-4 w-4 text-amber-600" />
+                          <AlertTitle className="text-amber-800">Sugestão de Correção</AlertTitle>
+                          <AlertDescription>{warn}</AlertDescription>
+                        </Alert>
+                      ))}
+                    </div>
                     {step === 0 && (
                       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div className="text-center space-y-4 py-8 border-2 border-dashed rounded-3xl bg-muted/10">

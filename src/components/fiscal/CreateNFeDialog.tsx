@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import {
   Plus, Trash2, FileText, Users, Package, Calculator,
   Truck, CreditCard, ClipboardCheck, ArrowLeft, ArrowRight, Send, Sparkles,
-  Info, AlertCircle, CheckCircle2, ChevronRight, Scale, Receipt, AlertTriangle
+  Info, AlertCircle, CheckCircle2, ChevronRight, Scale, Receipt, AlertTriangle, ListChecks
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +23,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 
 interface NFeItemForm {
   productCode: string;
@@ -202,49 +203,89 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
   const totalIpi = items.reduce((s, i) => s + (i.ipi || 0), 0);
   const total = subtotal - discount + shipping;
 
-  const validation = useMemo(() => {
-    const currentErrors: string[] = [];
-    const currentWarnings: string[] = [];
+  const validationByStep = useMemo(() => {
+    const steps: Record<number, { errors: string[]; warnings: string[] }> = {};
+    STEPS.forEach((_, i) => (steps[i] = { errors: [], warnings: [] }));
 
-    // Validação por etapa
-    if (step >= 0) {
-      if (!naturezaOp.trim()) currentErrors.push("Natureza da operação é obrigatória para a validade jurídica da NF-e.");
+    // Etapa 0 — Dados
+    if (!naturezaOp.trim()) {
+      steps[0].errors.push("Natureza da operação é obrigatória para a validade jurídica da NF-e.");
     }
-    
-    if (step >= 1) {
-      if (!clientId) currentErrors.push("O destinatário é obrigatório. Selecione um cliente da base ou cadastre um novo.");
-      if (clientDocument && clientDocument.replace(/\D/g, '').length < 11) {
-        currentErrors.push("O documento do destinatário (CPF/CNPJ) parece estar incompleto ou inválido.");
+
+    // Etapa 1 — Cliente
+    if (!clientId) {
+      steps[1].errors.push("O destinatário é obrigatório. Selecione um cliente da base.");
+    }
+    if (clientDocument && clientDocument.replace(/\D/g, "").length < 11) {
+      steps[1].errors.push("O documento do destinatário (CPF/CNPJ) parece estar incompleto.");
+    }
+    if (!clientUF) {
+      steps[1].errors.push("UF do destinatário não identificada. Verifique o cadastro.");
+    }
+
+    // Etapa 2 — Produtos
+    if (items.length === 0) {
+      steps[2].errors.push("A nota precisa conter pelo menos um item para ser emitida.");
+    }
+    items.forEach((item, idx) => {
+      if (!item.cfop) {
+        steps[2].errors.push(`Item ${idx + 1} (${item.productName}): O código CFOP é obrigatório.`);
       }
-      if (!clientUF) currentErrors.push("UF do destinatário não identificada. Verifique o cadastro do cliente.");
-    }
-
-    if (step >= 2) {
-      if (items.length === 0) currentErrors.push("A nota precisa conter pelo menos um item para ser emitida.");
-      items.forEach((item, idx) => {
-        if (!item.cfop) currentErrors.push(`Item ${idx + 1} (${item.productName}): O código CFOP é obrigatório para definir a tributação.`);
-        if (!item.ncm) currentWarnings.push(`Item ${idx + 1}: NCM (Nomenclatura Comum do Mercosul) não informado. Isso pode causar rejeição pela SEFAZ.`);
-        if (item.quantity <= 0) currentErrors.push(`Item ${idx + 1}: A quantidade faturada deve ser maior que zero.`);
-        if (item.unitPrice <= 0) currentErrors.push(`Item ${idx + 1}: O valor unitário do produto não pode ser zero ou negativo.`);
-      });
-    }
-
-    if (step >= 3) {
-      const totalTax = totalIcms + totalIpi + totalPis + totalCofins;
-      if (totalTax === 0 && subtotal > 0) {
-        currentWarnings.push("Atenção: O valor total de impostos está zerado. Verifique se as regras fiscais estão aplicadas corretamente.");
+      if (!item.ncm) {
+        steps[2].warnings.push(`Item ${idx + 1}: NCM não informado. Isso pode causar rejeição pela SEFAZ.`);
       }
+      if (item.quantity <= 0) {
+        steps[2].errors.push(`Item ${idx + 1}: A quantidade deve ser maior que zero.`);
+      }
+      if (item.unitPrice <= 0) {
+        steps[2].errors.push(`Item ${idx + 1}: O valor unitário não pode ser zero.`);
+      }
+    });
+
+    // Etapa 3 — Tributos
+    const totalTax = totalIcms + totalIpi + totalPis + totalCofins;
+    if (totalTax === 0 && subtotal > 0) {
+      steps[3].warnings.push("Atenção: O valor total de impostos está zerado. Verifique as regras.");
     }
 
-    if (step >= 5) {
-      if (!paymentMethod) currentErrors.push("Informe o meio de pagamento utilizado na transação.");
-      if (installments < 1) currentErrors.push("O número de parcelas deve ser pelo menos 1.");
+    // Etapa 5 — Pagamento
+    if (!paymentMethod) {
+      steps[5].errors.push("Informe o meio de pagamento utilizado.");
+    }
+    if (installments < 1) {
+      steps[5].errors.push("O número de parcelas deve ser pelo menos 1.");
     }
 
-    return { errors: currentErrors, warnings: currentWarnings };
-  }, [step, naturezaOp, clientId, clientDocument, items, paymentMethod, totalIcms, totalIpi, totalPis, totalCofins, subtotal, installments]);
+    return steps;
+  }, [
+    naturezaOp,
+    clientId,
+    clientDocument,
+    clientUF,
+    items,
+    paymentMethod,
+    totalIcms,
+    totalIpi,
+    totalPis,
+    totalCofins,
+    subtotal,
+    installments,
+  ]);
 
-  const hasBlockingErrors = validation.errors.length > 0;
+  const allIssues = useMemo(() => {
+    const errors: { step: number; message: string }[] = [];
+    const warnings: { step: number; message: string }[] = [];
+    Object.entries(validationByStep).forEach(([s, data]) => {
+      const stepIdx = Number(s);
+      data.errors.forEach((m) => errors.push({ step: stepIdx, message: m }));
+      data.warnings.forEach((m) => warnings.push({ step: stepIdx, message: m }));
+    });
+    return { errors, warnings, total: errors.length + warnings.length };
+  }, [validationByStep]);
+
+  const currentStepValidation = validationByStep[step] || { errors: [], warnings: [] };
+  const hasBlockingErrors = currentStepValidation.errors.length > 0;
+  const hasAnyBlockingErrors = allIssues.errors.length > 0;
 
   const handleNext = () => {
     if (hasBlockingErrors) return;
@@ -294,6 +335,60 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
               <DialogDescription>Fluxo automatizado com cálculo de impostos em tempo real</DialogDescription>
             </div>
             <div className="flex items-center gap-3">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm" className={cn("gap-2", allIssues.total > 0 ? "border-warning text-warning hover:bg-warning/5" : "border-success text-success hover:bg-success/5")}>
+                    <ListChecks className="h-4 w-4" />
+                    Inconsistências ({allIssues.total})
+                  </Button>
+                </SheetTrigger>
+                <SheetContent className="w-[400px] sm:w-[540px]">
+                  <SheetHeader>
+                    <SheetTitle className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-warning" />
+                      Diagnóstico de Emissão
+                    </SheetTitle>
+                    <SheetDescription>
+                      Resumo de todas as validações pendentes para a autorização da nota.
+                    </SheetDescription>
+                  </SheetHeader>
+                  <ScrollArea className="h-[calc(100vh-150px)] mt-6 pr-4">
+                    <div className="space-y-6">
+                      {STEPS.map((s, idx) => {
+                        const stepIssues = validationByStep[idx];
+                        if (stepIssues.errors.length === 0 && stepIssues.warnings.length === 0) return null;
+                        return (
+                          <div key={idx} className="space-y-3">
+                            <div className="flex items-center gap-2 border-b pb-1">
+                              <Badge variant="outline" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">{idx + 1}</Badge>
+                              <h4 className="text-sm font-bold uppercase tracking-wider">{s.label}</h4>
+                              <Button variant="ghost" size="sm" onClick={() => { setStep(idx); }} className="ml-auto text-[10px] h-6">Corrigir</Button>
+                            </div>
+                            {stepIssues.errors.map((err, i) => (
+                              <div key={`err-${idx}-${i}`} className="flex gap-2 text-xs text-destructive bg-destructive/5 p-2 rounded-md">
+                                <AlertCircle className="h-3 w-3 mt-0.5 shrink-0" />
+                                <span>{err}</span>
+                              </div>
+                            ))}
+                            {stepIssues.warnings.map((warn, i) => (
+                              <div key={`warn-${idx}-${i}`} className="flex gap-2 text-xs text-amber-700 bg-amber-50 p-2 rounded-md">
+                                <AlertTriangle className="h-3 w-3 mt-0.5 shrink-0" />
+                                <span>{warn}</span>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })}
+                      {allIssues.total === 0 && (
+                        <div className="py-20 text-center space-y-3">
+                          <CheckCircle2 className="h-12 w-12 mx-auto text-success opacity-20" />
+                          <p className="text-sm text-muted-foreground font-medium">Nenhuma inconsistência detectada!</p>
+                        </div>
+                      )}
+                    </div>
+                  </ScrollArea>
+                </SheetContent>
+              </Sheet>
               <Badge variant="outline" className="bg-background">Série: 001</Badge>
               <Badge variant="outline" className="bg-background">Ambiente: Homologação</Badge>
             </div>
@@ -308,14 +403,14 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
           <ScrollArea className="h-full">
             <div className="px-8 py-6 max-w-5xl mx-auto">
               <div className="mb-6 space-y-3">
-                {validation.errors.map((err, i) => (
+                {currentStepValidation.errors.map((err, i) => (
                   <Alert key={`err-${i}`} variant="destructive" className="animate-in fade-in slide-in-from-top-2 duration-300">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle>Inconsistência Fiscal</AlertTitle>
                     <AlertDescription>{err}</AlertDescription>
                   </Alert>
                 ))}
-                {validation.warnings.map((warn, i) => (
+                {currentStepValidation.warnings.map((warn, i) => (
                   <Alert key={`warn-${i}`} className="bg-amber-50 border-amber-200 text-amber-800 animate-in fade-in slide-in-from-top-2 duration-300">
                     <AlertTriangle className="h-4 w-4 text-amber-600" />
                     <AlertTitle className="text-amber-800">Sugestão de Correção</AlertTitle>
