@@ -286,6 +286,18 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
     return { errors, warnings, total: errors.length + warnings.length };
   }, [validationByStep]);
 
+  const hasFilteredErrors = useMemo(() => {
+    return Object.values(validationByStep).some(data => 
+      data.errors.some(err => err.toLowerCase().includes(diagnosisSearch.toLowerCase()))
+    );
+  }, [validationByStep, diagnosisSearch]);
+
+  const hasFilteredWarnings = useMemo(() => {
+    return Object.values(validationByStep).some(data => 
+      data.warnings.some(warn => warn.toLowerCase().includes(diagnosisSearch.toLowerCase()))
+    );
+  }, [validationByStep, diagnosisSearch]);
+
   const currentStepValidation = validationByStep[step] || { errors: [], warnings: [] };
   const hasBlockingErrors = currentStepValidation.errors.length > 0;
   const hasAnyBlockingErrors = allIssues.errors.length > 0;
