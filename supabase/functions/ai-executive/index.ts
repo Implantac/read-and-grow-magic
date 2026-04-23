@@ -1611,7 +1611,7 @@ function suggestDecisions(ctx: any, forecast: any, risks: any[]) {
   return decisions;
 }
 
-async function handleCEOBrief(supabase: any, lovableKey: string, corsHeaders: any) {
+export async function handleCEOBrief(supabase: any, lovableKey: string, corsHeaders: any) {
   const data = await fetchAllData(supabase);
   const kpis = computeKPIs(data);
   const ctx = buildContext(data, kpis);
@@ -1922,7 +1922,7 @@ async function handleExecuteDecisions(supabase: any, body: any, corsHeaders: any
 
 // ─── AutoPilotService ───────────────────────────────────────────
 // Orquestração CRON: contexto → forecast → riscos → decisões → registro
-async function handleAutoPilotRun(supabase: any, _lovableKey: string, corsHeaders: any) {
+export async function handleAutoPilotRun(supabase: any, _lovableKey: string, corsHeaders: any) {
   try {
     const data = await fetchAllData(supabase);
 
