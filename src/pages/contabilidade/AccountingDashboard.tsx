@@ -13,11 +13,15 @@ import { PeriodSelector } from '@/components/contabilidade/PeriodSelector';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 
+import { useAccountingDashboardData } from '@/hooks/useAccountingDashboard';
+
 export default function AccountingDashboard() {
+  const { data: dashboardData, isLoading } = useAccountingDashboardData();
   const [selectedPeriod, setSelectedPeriod] = useState('jan-24');
   const [comparePeriod, setComparePeriod] = useState('dez-23');
   const [isExporting, setIsExporting] = useState(false);
   const dashboardRef = useRef<HTMLDivElement>(null);
+
 
   const navigate = useNavigate();
 
@@ -78,24 +82,27 @@ export default function AccountingDashboard() {
       </PageHeader>
 
       <div ref={dashboardRef} className="space-y-6">
-        {/* Empty state message */}
-        <Card>
-          <CardContent className="p-8 text-center">
-            <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum dado contábil disponível</h3>
-            <p className="text-muted-foreground mb-4">
-              Cadastre lançamentos contábeis para visualizar os indicadores do painel executivo.
-            </p>
-            <Button onClick={() => navigate('/contabilidade/lancamentos')}>
-              Ir para Lançamentos
-            </Button>
-          </CardContent>
-        </Card>
+        {(!dashboardData?.entries || dashboardData.entries.length === 0) && (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-semibold mb-2">Nenhum dado contábil disponível</h3>
+              <p className="text-muted-foreground mb-4">
+                Cadastre lançamentos contábeis para visualizar os indicadores do painel executivo.
+              </p>
+              <Button onClick={() => navigate('/contabilidade/lancamentos')}>
+                Ir para Lançamentos
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Charts Row 1: Revenue & Equity */}
         <div className="grid gap-6 lg:grid-cols-2">
-          <RevenueExpenseTrendChart />
-          <EquityEvolutionChart />
+          <RevenueExpenseTrendChart 
+            data={dashboardData?.revenueExpenseTrend?.map(t => ({ ...t, profit: t.revenue - t.expenses }))} 
+          />
+          <EquityEvolutionChart data={dashboardData?.monthlyEquityEvolution} />
         </div>
 
         {/* Charts Row 2: Margins & Expenses */}
@@ -103,6 +110,7 @@ export default function AccountingDashboard() {
           <MarginTrendChart />
           <ExpenseBreakdownChart />
         </div>
+
 
         {/* Charts Row 3: Trial Balance */}
         <TrialBalanceChart />

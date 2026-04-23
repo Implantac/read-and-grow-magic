@@ -17,19 +17,27 @@ const formatCurrency = (value: number) =>
 const formatFull = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
-// Empty data - will be populated from database
-const revenueVsExpenseTrend: { month: string; revenue: number; expenses: number; profit: number }[] = [];
+interface TrendData {
+  month: string;
+  revenue: number;
+  expenses: number;
+  profit: number;
+}
 
-export function RevenueExpenseTrendChart() {
+interface RevenueExpenseTrendChartProps {
+  data?: TrendData[];
+}
+
+export function RevenueExpenseTrendChart({ data = [] }: RevenueExpenseTrendChartProps) {
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Receitas vs Despesas</CardTitle>
       </CardHeader>
       <CardContent>
-        {revenueVsExpenseTrend.length > 0 ? (
+        {data.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
-            <ComposedChart data={revenueVsExpenseTrend}>
+            <ComposedChart data={data}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey="month" tick={{ fontSize: 11 }} />
               <YAxis tickFormatter={formatCurrency} tick={{ fontSize: 11 }} />

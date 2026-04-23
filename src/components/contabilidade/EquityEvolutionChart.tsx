@@ -13,19 +13,27 @@ import {
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(value);
 
-// Empty data - will be populated from database
-const monthlyEquityEvolution: { month: string; assets: number; liabilities: number; equity: number }[] = [];
+interface EquityData {
+  month: string;
+  assets: number;
+  liabilities: number;
+  equity: number;
+}
 
-export function EquityEvolutionChart() {
+interface EquityEvolutionChartProps {
+  data?: EquityData[];
+}
+
+export function EquityEvolutionChart({ data = [] }: EquityEvolutionChartProps) {
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Evolução Patrimonial</CardTitle>
       </CardHeader>
       <CardContent>
-        {monthlyEquityEvolution.length > 0 ? (
+        {data.length > 0 ? (
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={monthlyEquityEvolution}>
+            <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey="month" tick={{ fontSize: 11 }} />
               <YAxis tickFormatter={formatCurrency} tick={{ fontSize: 11 }} />
