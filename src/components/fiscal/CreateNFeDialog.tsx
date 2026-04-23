@@ -415,22 +415,26 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                             onChange={(e) => setSearchTerm(e.target.value)}
                           />
                         </div>
-
-                      {(searchTerm || diagnosisFilter !== 'all') && (
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="h-10 px-3 text-xs gap-1 border-dashed hover:border-solid transition-all"
-                          onClick={() => {
-                            setSearchTerm('');
-                            setDiagnosisFilter('all');
-                          }}
-                        >
-                          <X className="h-3 w-3" />
-                          Limpar
-                        </Button>
-                      )}
+                        {(searchTerm || diagnosisFilter !== 'all') && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-10 px-3 text-xs gap-1 border-dashed hover:border-solid transition-all"
+                            onClick={() => {
+                              setSearchTerm('');
+                              setDiagnosisFilter('all');
+                            }}
+                          >
+                            <X className="h-3 w-3" />
+                            Limpar
+                          </Button>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-muted-foreground px-1">
+                        Dica: Pressione <kbd className="pointer-events-none inline-flex h-4 select-none items-center gap-1 rounded border bg-muted px-1 font-mono text-[9px] font-medium opacity-100">Esc</kbd> para limpar a busca e voltar para Tudo
+                      </p>
                     </div>
+
                     <Tabs value={diagnosisFilter} onValueChange={(v: any) => setDiagnosisFilter(v)} className="w-full">
                       <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="all" className="text-xs">Tudo ({allIssues.total})</TabsTrigger>
