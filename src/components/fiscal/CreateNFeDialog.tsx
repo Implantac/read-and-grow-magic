@@ -430,9 +430,10 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                           </Button>
                         )}
                       </div>
-                      <p className="text-[10px] text-muted-foreground px-1">
-                        Dica: Pressione <kbd className="pointer-events-none inline-flex h-4 select-none items-center gap-1 rounded border bg-muted px-1 font-mono text-[9px] font-medium opacity-100">Esc</kbd> para limpar a busca e voltar para Tudo
+                      <p className="text-[10px] text-muted-foreground/80 px-1 font-medium italic">
+                        Dica: Pressione <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 mx-1 shadow-sm">Esc</kbd> para limpar a busca e voltar o filtro para Tudo
                       </p>
+
                     </div>
 
                     <Tabs value={diagnosisFilter} onValueChange={(v: any) => setDiagnosisFilter(v)} className="w-full">
