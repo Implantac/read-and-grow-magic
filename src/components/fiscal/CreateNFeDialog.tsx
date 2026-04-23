@@ -202,49 +202,89 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
   const totalIpi = items.reduce((s, i) => s + (i.ipi || 0), 0);
   const total = subtotal - discount + shipping;
 
-  const validation = useMemo(() => {
-    const currentErrors: string[] = [];
-    const currentWarnings: string[] = [];
+  const validationByStep = useMemo(() => {
+    const steps: Record<number, { errors: string[]; warnings: string[] }> = {};
+    STEPS.forEach((_, i) => (steps[i] = { errors: [], warnings: [] }));
 
-    // Validação por etapa
-    if (step >= 0) {
-      if (!naturezaOp.trim()) currentErrors.push("Natureza da operação é obrigatória para a validade jurídica da NF-e.");
+    // Etapa 0 — Dados
+    if (!naturezaOp.trim()) {
+      steps[0].errors.push("Natureza da operação é obrigatória para a validade jurídica da NF-e.");
     }
-    
-    if (step >= 1) {
-      if (!clientId) currentErrors.push("O destinatário é obrigatório. Selecione um cliente da base ou cadastre um novo.");
-      if (clientDocument && clientDocument.replace(/\D/g, '').length < 11) {
-        currentErrors.push("O documento do destinatário (CPF/CNPJ) parece estar incompleto ou inválido.");
+
+    // Etapa 1 — Cliente
+    if (!clientId) {
+      steps[1].errors.push("O destinatário é obrigatório. Selecione um cliente da base.");
+    }
+    if (clientDocument && clientDocument.replace(/\D/g, "").length < 11) {
+      steps[1].errors.push("O documento do destinatário (CPF/CNPJ) parece estar incompleto.");
+    }
+    if (!clientUF) {
+      steps[1].errors.push("UF do destinatário não identificada. Verifique o cadastro.");
+    }
+
+    // Etapa 2 — Produtos
+    if (items.length === 0) {
+      steps[2].errors.push("A nota precisa conter pelo menos um item para ser emitida.");
+    }
+    items.forEach((item, idx) => {
+      if (!item.cfop) {
+        steps[2].errors.push(`Item ${idx + 1} (${item.productName}): O código CFOP é obrigatório.`);
       }
-      if (!clientUF) currentErrors.push("UF do destinatário não identificada. Verifique o cadastro do cliente.");
-    }
-
-    if (step >= 2) {
-      if (items.length === 0) currentErrors.push("A nota precisa conter pelo menos um item para ser emitida.");
-      items.forEach((item, idx) => {
-        if (!item.cfop) currentErrors.push(`Item ${idx + 1} (${item.productName}): O código CFOP é obrigatório para definir a tributação.`);
-        if (!item.ncm) currentWarnings.push(`Item ${idx + 1}: NCM (Nomenclatura Comum do Mercosul) não informado. Isso pode causar rejeição pela SEFAZ.`);
-        if (item.quantity <= 0) currentErrors.push(`Item ${idx + 1}: A quantidade faturada deve ser maior que zero.`);
-        if (item.unitPrice <= 0) currentErrors.push(`Item ${idx + 1}: O valor unitário do produto não pode ser zero ou negativo.`);
-      });
-    }
-
-    if (step >= 3) {
-      const totalTax = totalIcms + totalIpi + totalPis + totalCofins;
-      if (totalTax === 0 && subtotal > 0) {
-        currentWarnings.push("Atenção: O valor total de impostos está zerado. Verifique se as regras fiscais estão aplicadas corretamente.");
+      if (!item.ncm) {
+        steps[2].warnings.push(`Item ${idx + 1}: NCM não informado. Isso pode causar rejeição pela SEFAZ.`);
       }
+      if (item.quantity <= 0) {
+        steps[2].errors.push(`Item ${idx + 1}: A quantidade deve ser maior que zero.`);
+      }
+      if (item.unitPrice <= 0) {
+        steps[2].errors.push(`Item ${idx + 1}: O valor unitário não pode ser zero.`);
+      }
+    });
+
+    // Etapa 3 — Tributos
+    const totalTax = totalIcms + totalIpi + totalPis + totalCofins;
+    if (totalTax === 0 && subtotal > 0) {
+      steps[3].warnings.push("Atenção: O valor total de impostos está zerado. Verifique as regras.");
     }
 
-    if (step >= 5) {
-      if (!paymentMethod) currentErrors.push("Informe o meio de pagamento utilizado na transação.");
-      if (installments < 1) currentErrors.push("O número de parcelas deve ser pelo menos 1.");
+    // Etapa 5 — Pagamento
+    if (!paymentMethod) {
+      steps[5].errors.push("Informe o meio de pagamento utilizado.");
+    }
+    if (installments < 1) {
+      steps[5].errors.push("O número de parcelas deve ser pelo menos 1.");
     }
 
-    return { errors: currentErrors, warnings: currentWarnings };
-  }, [step, naturezaOp, clientId, clientDocument, items, paymentMethod, totalIcms, totalIpi, totalPis, totalCofins, subtotal, installments]);
+    return steps;
+  }, [
+    naturezaOp,
+    clientId,
+    clientDocument,
+    clientUF,
+    items,
+    paymentMethod,
+    totalIcms,
+    totalIpi,
+    totalPis,
+    totalCofins,
+    subtotal,
+    installments,
+  ]);
 
-  const hasBlockingErrors = validation.errors.length > 0;
+  const allIssues = useMemo(() => {
+    const errors: { step: number; message: string }[] = [];
+    const warnings: { step: number; message: string }[] = [];
+    Object.entries(validationByStep).forEach(([s, data]) => {
+      const stepIdx = Number(s);
+      data.errors.forEach((m) => errors.push({ step: stepIdx, message: m }));
+      data.warnings.forEach((m) => warnings.push({ step: stepIdx, message: m }));
+    });
+    return { errors, warnings, total: errors.length + warnings.length };
+  }, [validationByStep]);
+
+  const currentStepValidation = validationByStep[step] || { errors: [], warnings: [] };
+  const hasBlockingErrors = currentStepValidation.errors.length > 0;
+  const hasAnyBlockingErrors = allIssues.errors.length > 0;
 
   const handleNext = () => {
     if (hasBlockingErrors) return;
