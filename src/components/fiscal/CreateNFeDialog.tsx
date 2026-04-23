@@ -354,31 +354,63 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                   </SheetHeader>
                   <ScrollArea className="h-[calc(100vh-150px)] mt-6 pr-4">
                     <div className="space-y-6">
-                      {STEPS.map((s, idx) => {
-                        const stepIssues = validationByStep[idx];
-                        if (stepIssues.errors.length === 0 && stepIssues.warnings.length === 0) return null;
-                        return (
-                          <div key={idx} className="space-y-3">
-                            <div className="flex items-center gap-2 border-b pb-1">
-                              <Badge variant="outline" className="w-6 h-6 rounded-full p-0 flex items-center justify-center">{idx + 1}</Badge>
-                              <h4 className="text-sm font-bold uppercase tracking-wider">{s.label}</h4>
-                              <Button variant="ghost" size="sm" onClick={() => { setStep(idx); }} className="ml-auto text-[10px] h-6">Corrigir</Button>
-                            </div>
-                            {stepIssues.errors.map((err, i) => (
-                              <div key={`err-${idx}-${i}`} className="flex gap-2 text-xs text-destructive bg-destructive/5 p-2 rounded-md">
-                                <AlertCircle className="h-3 w-3 mt-0.5 shrink-0" />
-                                <span>{err}</span>
-                              </div>
-                            ))}
-                            {stepIssues.warnings.map((warn, i) => (
-                              <div key={`warn-${idx}-${i}`} className="flex gap-2 text-xs text-amber-700 bg-amber-50 p-2 rounded-md">
-                                <AlertTriangle className="h-3 w-3 mt-0.5 shrink-0" />
-                                <span>{warn}</span>
-                              </div>
-                            ))}
+                      {allIssues.errors.length > 0 && (
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2 text-destructive font-bold text-[10px] uppercase tracking-widest bg-destructive/5 p-2 rounded-t-lg border-b border-destructive/10">
+                            <AlertCircle className="h-3.5 w-3.5" />
+                            Erros Críticos (Bloqueantes)
                           </div>
-                        );
-                      })}
+                          <div className="space-y-5 px-1">
+                            {STEPS.map((s, idx) => {
+                              const stepIssues = validationByStep[idx];
+                              if (stepIssues.errors.length === 0) return null;
+                              return (
+                                <div key={`err-group-${idx}`} className="space-y-2">
+                                  <div className="flex items-center gap-2 border-b border-dashed pb-1">
+                                    <Badge variant="outline" className="h-5 text-[10px] px-1.5">{s.label}</Badge>
+                                    <Button variant="ghost" size="sm" onClick={() => { setStep(idx); }} className="ml-auto text-[10px] h-5">Corrigir</Button>
+                                  </div>
+                                  {stepIssues.errors.map((err, i) => (
+                                    <div key={`err-${idx}-${i}`} className="flex gap-2 text-xs text-destructive pl-1">
+                                      <div className="w-1 h-1 rounded-full bg-destructive mt-1.5 shrink-0" />
+                                      <span>{err}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {allIssues.warnings.length > 0 && (
+                        <div className="space-y-4 pt-4">
+                          <div className="flex items-center gap-2 text-amber-700 font-bold text-[10px] uppercase tracking-widest bg-amber-50 p-2 rounded-t-lg border-b border-amber-200/50">
+                            <AlertTriangle className="h-3.5 w-3.5" />
+                            Sugestões de Melhoria
+                          </div>
+                          <div className="space-y-5 px-1">
+                            {STEPS.map((s, idx) => {
+                              const stepIssues = validationByStep[idx];
+                              if (stepIssues.warnings.length === 0) return null;
+                              return (
+                                <div key={`warn-group-${idx}`} className="space-y-2">
+                                  <div className="flex items-center gap-2 border-b border-dashed pb-1">
+                                    <Badge variant="outline" className="h-5 text-[10px] px-1.5">{s.label}</Badge>
+                                    <Button variant="ghost" size="sm" onClick={() => { setStep(idx); }} className="ml-auto text-[10px] h-5">Corrigir</Button>
+                                  </div>
+                                  {stepIssues.warnings.map((warn, i) => (
+                                    <div key={`warn-${idx}-${i}`} className="flex gap-2 text-xs text-amber-700 pl-1">
+                                      <div className="w-1 h-1 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                                      <span>{warn}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
                       {allIssues.total === 0 && (
                         <div className="py-20 text-center space-y-3">
                           <CheckCircle2 className="h-12 w-12 mx-auto text-success opacity-20" />
