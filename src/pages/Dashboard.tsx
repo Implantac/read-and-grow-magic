@@ -148,7 +148,7 @@ export default function Dashboard() {
 
       {/* Gráficos Consolidados */}
       <ConsolidatedCharts
-        modulePerformance={emptyModulePerformance}
+        modulePerformance={data?.modulePerformance || emptyModulePerformance}
         statusDistribution={statusDistribution}
       />
 
