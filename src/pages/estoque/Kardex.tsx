@@ -3,6 +3,7 @@ import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -25,9 +26,9 @@ import {
   ArrowUpCircle,
   TrendingUp,
   Package,
-  Download,
   Printer,
   Calendar,
+  Loader2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -36,15 +37,23 @@ import {
 } from '@/config/inventory';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
-import type { ProductKardex, KardexEntry, MovementType } from '@/types/inventory';
+import { useKardex, useKardexProducts } from '@/hooks/useKardex';
+import type { MovementType } from '@/types/inventory';
 
 export default function KardexPage() {
   const [selectedProductId, setSelectedProductId] = useState<string>('');
-  const [kardexData, setKardexData] = useState<ProductKardex | null>(null);
+  const [startDate, setStartDate] = useState<string>(format(new Date().setDate(1), 'yyyy-MM-dd'));
+  const [endDate, setEndDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'));
+
+  const { data: products, isLoading: isLoadingProducts } = useKardexProducts();
+  const { data: kardexData, isLoading: isLoadingKardex } = useKardex(
+    selectedProductId,
+    startDate ? new Date(startDate).toISOString() : undefined,
+    endDate ? new Date(endDate).toISOString() : undefined
+  );
 
   const handleProductChange = (productId: string) => {
     setSelectedProductId(productId);
-    setKardexData(null);
   };
 
   const getTypeBadge = (type: MovementType) => {
