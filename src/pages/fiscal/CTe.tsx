@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,18 +6,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Send, Ban, Plus, Truck, MapPin, DollarSign, ClipboardCheck, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Send, Ban, Plus, Truck, MapPin, DollarSign, ClipboardCheck, ArrowLeft, ArrowRight, FileText, Search, Sparkles, Receipt } from 'lucide-react';
 import { useCTes, useCreateCTe, useTransmitCTe, useCancelCTe } from '@/hooks/useCTe';
+import { useNFe } from '@/hooks/useNFe';
 import { format } from 'date-fns';
 import { FiscalStepper } from '@/components/fiscal/FiscalStepper';
 import { FiscalStatusBadge } from '@/components/fiscal/FiscalStatusBadge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { SmartSelect } from '@/components/fiscal/SmartSelect';
 
 const STEPS = [
+  { id: 'import', label: 'Importar NF-e', icon: FileText },
   { id: 'parts', label: 'Participantes', icon: Truck },
   { id: 'route', label: 'Rota', icon: MapPin },
-  { id: 'freight', label: 'Frete', icon: DollarSign },
+  { id: 'freight', label: 'Valores', icon: DollarSign },
   { id: 'review', label: 'Revisão', icon: ClipboardCheck },
 ];
 
@@ -25,23 +29,52 @@ const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', c
 
 export default function CTePage() {
   const { data: ctes = [], isLoading } = useCTes();
+  const { nfes } = useNFe();
   const createCTe = useCreateCTe();
   const transmit = useTransmitCTe();
   const cancel = useCancelCTe();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(0);
+  const [selectedNFeId, setSelectedNFeId] = useState('');
   const [form, setForm] = useState({
-    carrier_name: '', carrier_document: '',
+    carrier_name: 'TRANSPORTADORA LOGISTICA LTDA', carrier_document: '12.345.678/0001-90',
     sender_name: '', sender_document: '', sender_uf: 'SP',
     recipient_name: '', recipient_document: '', recipient_uf: 'RJ',
     origin_city: '', destination_city: '',
     cargo_value: 0, freight_value: 0, icms_rate: 12, modal: 'rodoviario',
   });
 
+  const nfeOptions = useMemo(() => 
+    nfes.filter(n => n.status === 'authorized').map(n => ({
+      value: n.id,
+      label: `NF-e ${n.number} - ${n.clientName}`,
+      description: `Valor: ${fmt(n.total)}`,
+      meta: n.issueDate
+    })), [nfes]);
+
+  const handleImportNFe = (id: string) => {
+    const nfe = nfes.find(n => n.id === id);
+    if (!nfe) return;
+    setSelectedNFeId(id);
+    setForm(prev => ({
+      ...prev,
+      sender_name: 'NOSSA EMPRESA LTDA', // Emitente da NFe é o remetente do CTe
+      sender_document: '00.111.222/0001-33',
+      sender_uf: 'SP',
+      recipient_name: nfe.clientName,
+      recipient_document: nfe.clientDocument,
+      recipient_uf: 'RJ', // Simplificado
+      cargo_value: nfe.total,
+      freight_value: nfe.total * 0.05, // Sugestão 5%
+    }));
+    setStep(1);
+  };
+
   const handleCreate = async () => {
     await createCTe.mutateAsync(form as any);
     setOpen(false);
     setStep(0);
+    setSelectedNFeId('');
   };
 
   const totals = ctes.reduce(
