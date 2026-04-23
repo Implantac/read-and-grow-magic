@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import {
   Plus, Trash2, FileText, Users, Package, Calculator,
   Truck, CreditCard, ClipboardCheck, ArrowLeft, ArrowRight, Send, Sparkles,
-  Info, AlertCircle, CheckCircle2, ChevronRight, Scale, Receipt, AlertTriangle, ListChecks
+  Info, AlertCircle, CheckCircle2, ChevronRight, Scale, Receipt, AlertTriangle, ListChecks, Filter
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +24,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface NFeItemForm {
   productCode: string;
@@ -99,6 +100,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
   const [paymentMethod, setPaymentMethod] = useState('99');
   const [installments, setInstallments] = useState(1);
   const [discount, setDiscount] = useState(0);
+  const [diagnosisFilter, setDiagnosisFilter] = useState<'all' | 'errors' | 'warnings'>('all');
 
   useEffect(() => {
     if (!clientUF) return;
@@ -352,9 +354,20 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                       Resumo de todas as validações pendentes para a autorização da nota.
                     </SheetDescription>
                   </SheetHeader>
-                  <ScrollArea className="h-[calc(100vh-150px)] mt-6 pr-4">
+
+                  <div className="mt-6 mb-4">
+                    <Tabs value={diagnosisFilter} onValueChange={(v: any) => setDiagnosisFilter(v)} className="w-full">
+                      <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="all" className="text-xs">Tudo ({allIssues.total})</TabsTrigger>
+                        <TabsTrigger value="errors" className="text-xs">Erros ({allIssues.errors.length})</TabsTrigger>
+                        <TabsTrigger value="warnings" className="text-xs">Sugestões ({allIssues.warnings.length})</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  </div>
+
+                  <ScrollArea className="h-[calc(100vh-210px)] pr-4">
                     <div className="space-y-6">
-                      {allIssues.errors.length > 0 && (
+                      {(diagnosisFilter === 'all' || diagnosisFilter === 'errors') && allIssues.errors.length > 0 && (
                         <div className="space-y-4">
                           <div className="flex items-center gap-2 text-destructive font-bold text-[10px] uppercase tracking-widest bg-destructive/5 p-2 rounded-t-lg border-b border-destructive/10">
                             <AlertCircle className="h-3.5 w-3.5" />
@@ -383,7 +396,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                         </div>
                       )}
 
-                      {allIssues.warnings.length > 0 && (
+                      {(diagnosisFilter === 'all' || diagnosisFilter === 'warnings') && allIssues.warnings.length > 0 && (
                         <div className="space-y-4 pt-4">
                           <div className="flex items-center gap-2 text-amber-700 font-bold text-[10px] uppercase tracking-widest bg-amber-50 p-2 rounded-t-lg border-b border-amber-200/50">
                             <AlertTriangle className="h-3.5 w-3.5" />
@@ -411,7 +424,9 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                           </div>
                         </div>
                       )}
-                      {allIssues.total === 0 && (
+                      {((diagnosisFilter === 'all' && allIssues.total === 0) || 
+                        (diagnosisFilter === 'errors' && allIssues.errors.length === 0) || 
+                        (diagnosisFilter === 'warnings' && allIssues.warnings.length === 0)) && (
                         <div className="py-20 text-center space-y-3">
                           <CheckCircle2 className="h-12 w-12 mx-auto text-success opacity-20" />
                           <p className="text-sm text-muted-foreground font-medium">Nenhuma inconsistência detectada!</p>
