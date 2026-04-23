@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import {
   Plus, Trash2, FileText, Users, Package, Calculator,
   Truck, CreditCard, ClipboardCheck, ArrowLeft, ArrowRight, Send, Sparkles,
-  Info, AlertCircle, CheckCircle2, ChevronRight, Scale, Receipt, AlertTriangle, ListChecks, Filter
+  Info, AlertCircle, CheckCircle2, ChevronRight, Scale, Receipt, AlertTriangle, ListChecks, Filter, Search
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
