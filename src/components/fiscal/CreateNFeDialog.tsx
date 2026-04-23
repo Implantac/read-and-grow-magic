@@ -404,31 +404,38 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                   </SheetHeader>
 
                   <div className="mt-6 space-y-4">
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                          placeholder="Filtrar por texto das inconsistências..." 
-                          className="pl-9"
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            placeholder="Filtrar por texto das inconsistências..." 
+                            className="pl-9"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                          />
+                        </div>
+                        {(searchTerm || diagnosisFilter !== 'all') && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-10 px-3 text-xs gap-1 border-dashed hover:border-solid transition-all"
+                            onClick={() => {
+                              setSearchTerm('');
+                              setDiagnosisFilter('all');
+                            }}
+                          >
+                            <X className="h-3 w-3" />
+                            Limpar
+                          </Button>
+                        )}
                       </div>
-                      {(searchTerm || diagnosisFilter !== 'all') && (
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="h-10 px-3 text-xs gap-1 border-dashed hover:border-solid transition-all"
-                          onClick={() => {
-                            setSearchTerm('');
-                            setDiagnosisFilter('all');
-                          }}
-                        >
-                          <X className="h-3 w-3" />
-                          Limpar
-                        </Button>
-                      )}
+                      <p className="text-[10px] text-muted-foreground/80 px-1 font-medium italic">
+                        Dica: Pressione <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 mx-1 shadow-sm">Esc</kbd> para limpar a busca e voltar o filtro para Tudo
+                      </p>
+
                     </div>
+
                     <Tabs value={diagnosisFilter} onValueChange={(v: any) => setDiagnosisFilter(v)} className="w-full">
                       <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="all" className="text-xs">Tudo ({allIssues.total})</TabsTrigger>
