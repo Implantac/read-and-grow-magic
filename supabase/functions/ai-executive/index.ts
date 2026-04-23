@@ -32,7 +32,8 @@ serve(async (req) => {
     // Never trust a user_id supplied in the request body — that would allow IDOR
     // (reading/writing/deleting another user's chat history).
     const authenticatedUserId = claimsData.claims.sub as string;
-    const { action, messages } = await req.json();
+    const body = await req.json();
+    const { action, messages } = body;
 
     if (action === "clear_history") {
       await supabase.from("ai_executive_chat").delete().eq("user_id", authenticatedUserId);
@@ -1119,6 +1120,34 @@ async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: str
   // ─── Adaptive Learning: Analyze user patterns ───
   const patternInsights = user_id ? await analyzeUserPatterns(supabase, user_id) : "";
 
+  // ─── Real Data Snapshot: injetar contagens reais no system prompt ───
+  // Garante que o modelo SAIBA quais módulos têm dados antes de responder.
+  let realDataSnapshot = "";
+  try {
+    const [ordC, recC, payC, prodC, cliC, opC] = await Promise.all([
+      supabase.from("orders").select("id", { count: "exact", head: true }),
+      supabase.from("accounts_receivable").select("id", { count: "exact", head: true }),
+      supabase.from("accounts_payable").select("id", { count: "exact", head: true }),
+      supabase.from("products").select("id", { count: "exact", head: true }),
+      supabase.from("clients").select("id", { count: "exact", head: true }),
+      supabase.from("production_orders").select("id", { count: "exact", head: true }),
+    ]);
+    const counts = {
+      pedidos: ordC.count ?? 0,
+      contas_receber: recC.count ?? 0,
+      contas_pagar: payC.count ?? 0,
+      produtos: prodC.count ?? 0,
+      clientes: cliC.count ?? 0,
+      ops_producao: opC.count ?? 0,
+    };
+    const totalRecords = Object.values(counts).reduce((a, b) => a + b, 0);
+    realDataSnapshot = totalRecords === 0
+      ? `\n\n# 🚨 ESTADO DOS DADOS\nO sistema NÃO possui registros reais cadastrados ainda. Responda APENAS:\n"Ainda não há dados reais cadastrados no sistema. Para que eu possa diagnosticar o negócio, cadastre primeiro: clientes, pedidos, contas a pagar/receber ou ordens de produção."\nNUNCA invente números, nomes ou métricas.`
+      : `\n\n# 📊 ESTADO ATUAL DOS DADOS REAIS\nRegistros disponíveis no banco: ${JSON.stringify(counts)}\nUse APENAS esses módulos via tools. Se um módulo está com 0 registros, NÃO invente dados sobre ele — diga "sem dados nesse módulo".`;
+  } catch (e) {
+    console.error("realDataSnapshot error:", e);
+  }
+
   // ─── Log consultation queries for learning ───
   if (user_id && lastUserMsg) {
     const queryText = lastUserMsg.content.toLowerCase();
@@ -1290,7 +1319,7 @@ SEMPRE peça confirmação antes de executar (confirmado=false primeiro)
 
 # SEGURANÇA
 NUNCA execute sem confirmação. Mostre prévia. Registre no log.
-${patternInsights}`;
+${patternInsights}${realDataSnapshot}`;
 
   const aiMessages = [{ role: "system", content: systemPrompt }, ...contextMessages];
 
@@ -1594,12 +1623,8 @@ async function handleCEOBrief(supabase: any, lovableKey: string, corsHeaders: an
   await recordLearning(supabase, data);
 
   // Detecta se há dados reais suficientes para análise confiável
-  const hasRealData = (
-    (data.orders?.length ?? 0) > 0 ||
-    (data.sales?.length ?? 0) > 0 ||
-    (data.receivable?.length ?? 0) > 0 ||
-    (data.payable?.length ?? 0) > 0
-  );
+  // Usa o helper compartilhado (campos plurais conforme fetchAllData)
+  const hasRealData = checkHasRealData(data);
 
   const ceoPrompt = `Você é a IA CEO desta empresa. Pense e fale como o dono do negócio.
 
@@ -1683,7 +1708,7 @@ PROIBIDO:
 
   const userPayload = {
     contexto: ctx,
-    kpis_calculados: { totalRevenue: kpis.totalRevenue, grossMargin: kpis.grossMargin, defaultRate: kpis.defaultRate, concentrationPct: kpis.concentrationPct, lowStockProducts: kpis.lowStockProducts, activeClients: kpis.activeClients },
+    kpis_calculados: { totalRevenue: kpis.kpis.totalRevenue, grossMargin: kpis.kpis.grossMargin, defaultRate: kpis.kpis.defaultRate, concentrationPct: kpis.kpis.concentrationPct, lowStockProducts: kpis.kpis.lowStockProducts, activeClients: kpis.kpis.activeClients },
     kpis_historicos_hoje: kpiRows,
     previsao_receita: forecast,
     riscos_detectados: risks,
@@ -1900,6 +1925,18 @@ async function handleExecuteDecisions(supabase: any, body: any, corsHeaders: any
 async function handleAutoPilotRun(supabase: any, _lovableKey: string, corsHeaders: any) {
   try {
     const data = await fetchAllData(supabase);
+
+    // Guard: AutoPilot só roda com dados reais — evita gerar alertas/ações fictícias
+    if (!checkHasRealData(data)) {
+      return new Response(JSON.stringify({
+        ran_at: new Date().toISOString(),
+        data_status: "insufficient",
+        message: INSUFFICIENT_DATA_MSG,
+        forecast: null, risks: [], decisions: [], executed: [],
+        summary: "AutoPilot pausado: sem dados reais no sistema.",
+      }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const kpis = computeKPIs(data);
     const ctx = buildContext(data, kpis);
     const forecast = predictRevenue(kpis.revenueByMonth || []);
