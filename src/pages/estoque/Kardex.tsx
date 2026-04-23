@@ -150,7 +150,8 @@ export default function KardexPage() {
                 <input
                   type="date"
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 pl-10 text-sm ring-offset-background"
-                  defaultValue="2024-01-31"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
                 />
               </div>
             </div>
