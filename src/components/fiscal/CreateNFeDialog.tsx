@@ -101,6 +101,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
   const [installments, setInstallments] = useState(1);
   const [discount, setDiscount] = useState(0);
   const [diagnosisFilter, setDiagnosisFilter] = useState<'all' | 'errors' | 'warnings'>('all');
+  const [diagnosisSearch, setDiagnosisSearch] = useState('');
 
   useEffect(() => {
     if (!clientUF) return;
