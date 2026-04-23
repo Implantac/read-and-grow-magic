@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import {
   Plus, Trash2, FileText, Users, Package, Calculator,
   Truck, CreditCard, ClipboardCheck, ArrowLeft, ArrowRight, Send, Sparkles,
-  Info, AlertCircle, CheckCircle2, ChevronRight, Scale, Receipt, AlertTriangle
+  Info, AlertCircle, CheckCircle2, ChevronRight, Scale, Receipt, AlertTriangle, ListChecks
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +23,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 
 interface NFeItemForm {
   productCode: string;
