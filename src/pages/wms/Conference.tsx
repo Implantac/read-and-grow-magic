@@ -228,13 +228,32 @@ export default function ConferencePage() {
 
       {/* Detail Dialog */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ScanBarcode className="h-5 w-5" />
               Itens da Conferência {isBlind && <Badge variant="destructive">Cega</Badge>}
             </DialogTitle>
           </DialogHeader>
+
+          {/* Barcode Scanner */}
+          <BarcodeScanner onScan={handleScan} placeholder="Escaneie o código do produto..." autoFocus />
+
+          {/* Progress summary */}
+          <div className="flex items-center justify-between rounded-md border p-3 text-sm">
+            <span className="text-muted-foreground">Progresso da conferência</span>
+            <div className="flex gap-3">
+              <span className="font-medium">
+                {selectedItems.filter(i => i.status === 'checked').length}/{selectedItems.length} itens
+              </span>
+              {selectedItems.some(i => i.divergence !== 0 && i.status === 'checked') && (
+                <Badge variant="destructive">
+                  {selectedItems.filter(i => i.divergence !== 0 && i.status === 'checked').length} divergência(s)
+                </Badge>
+              )}
+            </div>
+          </div>
+
           <Table>
             <TableHeader>
               <TableRow>
