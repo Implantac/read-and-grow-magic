@@ -219,6 +219,22 @@ export default function CTePage() {
               <div className="flex-1 overflow-hidden relative">
                 <ScrollArea className="h-full">
                   <div className="px-8 py-6 max-w-3xl mx-auto">
+                    <div className="mb-6 space-y-3">
+                      {validationByStep[step]?.errors.map((err, i) => (
+                        <Alert key={`err-${i}`} variant="destructive" className="animate-in fade-in slide-in-from-top-2 duration-300">
+                          <AlertCircle className="h-4 w-4" />
+                          <AlertTitle>Inconsistência Fiscal</AlertTitle>
+                          <AlertDescription>{err}</AlertDescription>
+                        </Alert>
+                      ))}
+                      {validationByStep[step]?.warnings.map((warn, i) => (
+                        <Alert key={`warn-${i}`} className="bg-amber-50 border-amber-200 text-amber-800 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <AlertTriangle className="h-4 w-4 text-amber-600" />
+                          <AlertTitle className="text-amber-800">Sugestão de Correção</AlertTitle>
+                          <AlertDescription>{warn}</AlertDescription>
+                        </Alert>
+                      ))}
+                    </div>
                     {step === 0 && (
                       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div className="text-center space-y-4 py-8 border-2 border-dashed rounded-3xl bg-muted/10">
