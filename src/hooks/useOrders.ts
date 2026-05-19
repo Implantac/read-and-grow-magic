@@ -226,13 +226,16 @@ export function useDeleteOrder() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['orders'] });
-      toast({ title: 'Pedido removido com sucesso!' });
+      toast({ 
+        title: 'Pedido removido com sucesso!',
+        description: 'O registro foi permanentemente excluído do sistema.'
+      });
     },
     onError: (e: any) => {
       console.error('Error deleting order:', e);
       toast({ 
         title: 'Erro ao remover pedido', 
-        description: e.message, 
+        description: e.message || 'Não foi possível excluir o pedido no momento.', 
         variant: 'destructive' 
       });
     },
