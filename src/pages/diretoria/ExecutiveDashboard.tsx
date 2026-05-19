@@ -46,7 +46,8 @@ const insightIcon: Record<string, any> = {
 };
 
 export default function ExecutiveDashboard() {
-  const { data, isLoading } = useExecutiveDashboard();
+  const [period, setPeriod] = useState<number>(12);
+  const { data, isLoading } = useExecutiveDashboard(period);
   const generateInsights = useGenerateInsights();
   const generateScenarios = useGenerateScenarios();
   const { messages, isLoading: chatLoading, sendMessage, clearChat } = useUnifiedChat();
@@ -85,6 +86,19 @@ export default function ExecutiveDashboard() {
             <Layers className={cn('h-4 w-4', generateScenarios.isPending && 'animate-spin')} />
             Cenários
           </Button>
+          <div className="flex bg-muted rounded-md p-1 ml-2">
+            {[6, 12, 24].map((m) => (
+              <Button
+                key={m}
+                variant={period === m ? 'secondary' : 'ghost'}
+                size="sm"
+                className="h-7 px-2 text-[10px]"
+                onClick={() => setPeriod(m)}
+              >
+                {m}m
+              </Button>
+            ))}
+          </div>
         </div>
       </PageHeader>
 

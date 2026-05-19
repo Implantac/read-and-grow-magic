@@ -98,12 +98,12 @@ export interface ChatMessage {
 
 // ─── Dashboard Query ────────────────────────────────────────────
 
-export function useExecutiveDashboard() {
+export function useExecutiveDashboard(months: number = 12) {
   return useQuery({
-    queryKey: ['executive-dashboard'],
+    queryKey: ['executive-dashboard', months],
     queryFn: async (): Promise<ExecutiveDashboardData> => {
       const { data, error } = await supabase.functions.invoke('ai-executive', {
-        body: { action: 'dashboard' },
+        body: { action: 'dashboard', months },
       });
       if (error) throw error;
       return data;
