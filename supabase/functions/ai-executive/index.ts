@@ -163,11 +163,10 @@ function computeKPIs(d: any) {
     // MoM: (Current - Previous) / Previous
     const moM = prev.revenue > 0 ? ((current.revenue - prev.revenue) / prev.revenue * 100) : 0;
     
-    // For YoY we'd ideally need 24 months, but we'll approximate or use what we have
-    // If we only have 13 months, revenueByMonth[0] is same month last year for revenueByMonth[12]
+    // YoY: Compare with 12 months ago if available
     let yoY = 0;
-    if (i === revenueByMonth.length - 1) {
-      const sameMonthLastYear = revenueByMonth[0];
+    if (i >= 12) {
+      const sameMonthLastYear = revenueByMonth[i - 12];
       yoY = sameMonthLastYear.revenue > 0 ? ((current.revenue - sameMonthLastYear.revenue) / sameMonthLastYear.revenue * 100) : 0;
     }
 
@@ -179,35 +178,18 @@ function computeKPIs(d: any) {
     });
   }
 
-  // Final KPIs
-  const currentMonthData = revenueByMonth[revenueByMonth.length - 1];
-  const lastMonthData = revenueByMonth[revenueByMonth.length - 2];
-  
-  const moMGrowth = lastMonthData.revenue > 0 ? ((currentMonthData.revenue - lastMonthData.revenue) / lastMonthData.revenue * 100) : 0;
-  const yoYGrowth = growthTrends[growthTrends.length - 1]?.revenueYoY || 0;
-
   // Financial health
   const totalReceivable = d.receivables.filter((r: any) => r.status === 'pending').reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
   const overdueReceivable = d.receivables.filter((r: any) => r.status === 'overdue' || (r.status === 'pending' && new Date(r.due_date) < now)).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
   const defaultRate = (totalReceivable + overdueReceivable) > 0 ? (overdueReceivable / (totalReceivable + overdueReceivable) * 100) : 0;
 
-  // Client Churn Approximation
-  const activeClients = d.clients.filter((c: any) => c.status === 'active').length;
-  const inactiveClients = d.clients.filter((c: any) => {
-    if (!c.last_purchase_date) return true;
-    return (now.getTime() - new Date(c.last_purchase_date).getTime()) / 86400000 > 180; // 6 months inactive
-  }).length;
-  const churnRate = (activeClients + inactiveClients) > 0 ? (inactiveClients / (activeClients + inactiveClients) * 100) : 0;
+  // Financial Projections
+  const futureReceivablesTotal = d.receivables.filter((r: any) => r.status === 'pending' && new Date(r.due_date) > now).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
+  const futurePayablesTotal = d.payables.filter((p: any) => p.status === 'pending' && new Date(p.due_date) > now).reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0);
 
-  // Production Efficiency
-  const prodCompleted = d.production.filter((p: any) => p.status === 'completed');
-  const prodEfficiency = prodCompleted.length > 0
-    ? prodCompleted.reduce((s: number, p: any) => s + (p.produced_quantity || 0), 0) / prodCompleted.reduce((s: number, p: any) => s + (p.planned_quantity || 1), 0) * 100
-    : 0;
-  
   // Liquidity ratios
-  const currentRatio = futurePayables > 0 ? futureReceivables / futurePayables : 2; // Default to healthy if no debt
-  const quickRatio = futurePayables > 0 ? (futureReceivables * 0.8) / futurePayables : 1.5;
+  const currentRatio = futurePayablesTotal > 0 ? futureReceivablesTotal / futurePayablesTotal : 2; 
+  const quickRatio = futurePayablesTotal > 0 ? (futureReceivablesTotal * 0.8) / futurePayablesTotal : 1.5;
 
   // Financial Projections
   const futureReceivablesTotal = d.receivables.filter((r: any) => r.status === 'pending' && new Date(r.due_date) > now).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
@@ -238,10 +220,10 @@ function computeKPIs(d: any) {
     kpis: {
       totalRevenue, grossProfit, 
       grossMargin: +grossMargin.toFixed(1),
-      moMGrowth: +moMGrowth.toFixed(1),
-      yoYGrowth: +yoYGrowth.toFixed(1),
+      moMGrowth: growthTrends[growthTrends.length - 1]?.revenueMoM || 0,
+      yoYGrowth: growthTrends[growthTrends.length - 1]?.revenueYoY || 0,
       defaultRate: +defaultRate.toFixed(1),
-      churnRate: +churnRate.toFixed(1),
+      churnRate: +((activeClients + inactiveClients) > 0 ? (inactiveClients / (activeClients + inactiveClients) * 100) : 0).toFixed(1),
       avgDailyRevenue: +(totalRevenue / 30).toFixed(0),
       cashFlowProjection30d: futureReceivablesTotal - futurePayablesTotal,
       futureReceivables: futureReceivablesTotal, 
