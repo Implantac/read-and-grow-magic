@@ -9,8 +9,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import {
   Brain, Lightbulb, ShieldAlert, BarChart3, DollarSign,
-  Bot, Layers, Flame, AlertTriangle,
+  Bot, Layers, Flame, AlertTriangle, Calendar,
 } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
 import { useExecutiveDashboard, useGenerateInsights, useGenerateScenarios, useUnifiedChat, useDailySummary } from '@/hooks/useExecutiveAI';
 import { PrimaryKPICards, SecondaryKPICards, TargetAttainmentBar } from '@/components/executive/ExecutiveKPICards';
 import { ExecutiveChat } from '@/components/executive/ExecutiveChat';
@@ -86,18 +87,19 @@ export default function ExecutiveDashboard() {
             <Layers className={cn('h-4 w-4', generateScenarios.isPending && 'animate-spin')} />
             Cenários
           </Button>
-          <div className="flex bg-muted rounded-md p-1 ml-2">
-            {[6, 12, 24].map((m) => (
-              <Button
-                key={m}
-                variant={period === m ? 'secondary' : 'ghost'}
-                size="sm"
-                className="h-7 px-2 text-[10px]"
-                onClick={() => setPeriod(m)}
-              >
-                {m}m
-              </Button>
-            ))}
+          <div className="flex items-center gap-4 bg-muted/50 rounded-lg px-3 py-1.5 ml-2 border border-border/50">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">Período: <span className="text-foreground">{period}m</span></span>
+            </div>
+            <Slider
+              value={[period]}
+              onValueChange={(val) => setPeriod(val[0])}
+              min={3}
+              max={36}
+              step={1}
+              className="w-24 lg:w-32"
+            />
           </div>
         </div>
       </PageHeader>
