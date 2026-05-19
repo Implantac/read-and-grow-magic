@@ -464,3 +464,67 @@ Deno.test("deleted_orders_archive cleanup trigger - timezone offset consistency"
   // Cleanup
   await supabase.from("deleted_orders_archive").delete().in("original_order_id", [futureOffsetId, triggerId]);
 });
+
+Deno.test("deleted_orders_archive cleanup trigger - millisecond truncation across timezones", async () => {
+  if (!supabaseKey) {
+    console.log("SKIP: SUPABASE_SERVICE_ROLE_KEY not available, skipping test execution.");
+    return;
+  }
+  
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  // 1. Prepare a timestamp for "now" truncated to seconds
+  const now = new Date();
+  now.setMilliseconds(0);
+  
+  // 2. Insert two records with different timezone offsets but same physical time (truncated)
+  // One using UTC (Z), one using an offset (+01:00)
+  const baseIso = now.toISOString().split('.')[0]; // "YYYY-MM-DDTHH:MM:SS"
+  
+  const utcTimestamp = `${baseIso}Z`;
+  
+  // Calculate +01:00 offset timestamp for the same physical time
+  // If UTC is 12:00:00, then 13:00:00+01:00 is the same physical time
+  const plusOneDate = new Date(now.getTime() + 3600000);
+  // We need the string representation of that date without the Z, then add the offset
+  const plusOneIso = plusOneDate.toISOString().split('.')[0];
+  const offsetTimestamp = `${plusOneIso}+01:00`;
+
+  const utcId = "77777777-0000-4444-8888-000000000001";
+  const offsetId = "77777777-0000-4444-8888-000000000002";
+
+  await supabase.from("deleted_orders_archive").insert([
+    {
+      original_order_id: utcId,
+      order_data: { test: "trunc_utc" },
+      expires_at: utcTimestamp,
+    },
+    {
+      original_order_id: offsetId,
+      order_data: { test: "trunc_offset" },
+      expires_at: offsetTimestamp,
+    }
+  ]);
+
+  // 3. Wait to ensure Postgres now() is definitely later
+  await new Promise(resolve => setTimeout(resolve, 100));
+
+  // 4. Trigger cleanup
+  const triggerId = "77777777-9999-4444-8888-999999999999";
+  await supabase.from("deleted_orders_archive").insert({
+    original_order_id: triggerId,
+    order_data: { test: "trunc_tz_trigger" },
+    expires_at: new Date(Date.now() + 600000).toISOString(),
+  });
+
+  // 5. Verify both are removed (since both represent the same past point in time)
+  const { data: records } = await supabase
+    .from("deleted_orders_archive")
+    .select("original_order_id")
+    .in("original_order_id", [utcId, offsetId]);
+
+  assertEquals(records?.length || 0, 0, "Both truncated timezone records should have been removed");
+
+  // Cleanup
+  await supabase.from("deleted_orders_archive").delete().eq("original_order_id", triggerId);
+});
