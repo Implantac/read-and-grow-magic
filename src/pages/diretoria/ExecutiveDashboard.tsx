@@ -20,6 +20,7 @@ import { ExecutiveMarginsTab } from '@/components/executive/ExecutiveMarginsTab'
 import { ExecutiveAlertsTab } from '@/components/executive/ExecutiveAlertsTab';
 import { ExecutiveScenariosTab } from '@/components/executive/ExecutiveScenariosTab';
 import { CEOBriefPanel } from '@/components/executive/CEOBriefPanel';
+import { ExecutiveActionsPanel } from '@/components/executive/ExecutiveActionsPanel';
 
 const severityColor: Record<string, string> = {
   critical: 'bg-destructive text-destructive-foreground',
@@ -99,6 +100,19 @@ export default function ExecutiveDashboard() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {insights.length > 0 && (
+        <ExecutiveActionsPanel 
+          actions={insights.slice(0, 3).map((ins: any) => ({
+            title: ins.title,
+            description: ins.description,
+            impact: ins.impact_estimate,
+            priority: ins.severity,
+            module: ins.module
+          }))}
+          onExecute={sendMessage}
+        />
       )}
 
       <PrimaryKPICards kpis={kpis} />

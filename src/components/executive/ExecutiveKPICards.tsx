@@ -2,7 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import {
   TrendingUp, DollarSign, AlertTriangle, Wallet, Users, Target,
-  Factory, Activity, Package,
+  Factory, Activity, Package, Scale,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { ExecutiveKPIs } from '@/hooks/useExecutiveAI';
@@ -21,9 +21,25 @@ interface Props {
 
 export function PrimaryKPICards({ kpis }: Props) {
   const kpiCards = [
-    { label: 'Receita Total', value: fmt(kpis?.totalRevenue || 0), icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-500/10', sub: `${(kpis?.revenueGrowth ?? 0) >= 0 ? '+' : ''}${kpis?.revenueGrowth || 0}% vs mês anterior` },
-    { label: 'Lucro Bruto', value: fmt(kpis?.grossProfit || 0), icon: DollarSign, color: 'text-primary', bg: 'bg-primary/10', sub: `Margem ${kpis?.grossMargin || 0}%` },
-    { label: 'Inadimplência', value: fmt(kpis?.overdueReceivable || 0), icon: AlertTriangle, color: kpis?.defaultRate && kpis.defaultRate > 10 ? 'text-destructive' : 'text-orange-500', bg: kpis?.defaultRate && kpis.defaultRate > 10 ? 'bg-destructive/10' : 'bg-orange-500/10', sub: `${kpis?.defaultRate || 0}% da carteira` },
+    { 
+      label: 'Receita Total', 
+      value: fmt(kpis?.totalRevenue || 0), 
+      icon: TrendingUp, 
+      color: 'text-emerald-600', 
+      bg: 'bg-emerald-500/10', 
+      sub: (
+        <div className="flex flex-col gap-0.5 mt-1">
+          <span className={cn('text-[10px]', (kpis?.moMGrowth ?? 0) >= 0 ? 'text-emerald-600' : 'text-destructive')}>
+            MoM: {(kpis?.moMGrowth ?? 0) >= 0 ? '+' : ''}{kpis?.moMGrowth || 0}%
+          </span>
+          <span className={cn('text-[10px]', (kpis?.yoYGrowth ?? 0) >= 0 ? 'text-emerald-600' : 'text-destructive')}>
+            YoY: {(kpis?.yoYGrowth ?? 0) >= 0 ? '+' : ''}{kpis?.yoYGrowth || 0}%
+          </span>
+        </div>
+      )
+    },
+    { label: 'Lucro Bruto', value: fmt(kpis?.grossProfit || 0), icon: DollarSign, color: 'text-primary', bg: 'bg-primary/10', sub: <span className="text-[10px] text-muted-foreground">Margem {kpis?.grossMargin || 0}%</span> },
+    { label: 'Liquidez Corrente', value: (kpis?.currentRatio || 0).toFixed(2), icon: Scale, color: (kpis?.currentRatio || 0) >= 1 ? 'text-emerald-600' : 'text-destructive', bg: (kpis?.currentRatio || 0) >= 1 ? 'bg-emerald-500/10' : 'bg-destructive/10', sub: <span className="text-[10px] text-muted-foreground">Saúde de curto prazo</span> },
     { label: 'Posição Líquida', value: fmt(kpis?.netPosition || 0), icon: Wallet, color: (kpis?.netPosition || 0) >= 0 ? 'text-emerald-600' : 'text-destructive', bg: (kpis?.netPosition || 0) >= 0 ? 'bg-emerald-500/10' : 'bg-destructive/10' },
   ];
 

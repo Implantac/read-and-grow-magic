@@ -20,10 +20,14 @@ export interface ExecutiveKPIs {
   concentrationPct: number;
   avgTicket: number;
   revenueGrowth: number;
+  moMGrowth: number;
+  yoYGrowth: number;
   clientsAtRisk: number;
   cashFlowProjection30d: number;
   futureReceivables: number;
   futurePayables: number;
+  currentRatio: number;
+  quickRatio: number;
   prodEfficiency: number;
   prodInProgress: number;
   prodPlanned: number;

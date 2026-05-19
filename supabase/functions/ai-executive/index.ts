@@ -167,10 +167,14 @@ function computeKPIs(d: any) {
   const prodEfficiency = prodCompleted.length > 0
     ? prodCompleted.reduce((s: number, p: any) => s + (p.produced_quantity || 0), 0) / prodCompleted.reduce((s: number, p: any) => s + (p.planned_quantity || 1), 0) * 100
     : 0;
+  
+  // Liquidity ratios
+  const currentRatio = futurePayables > 0 ? futureReceivables / futurePayables : 2; // Default to healthy if no debt
+  const quickRatio = futurePayables > 0 ? (futureReceivables * 0.8) / futurePayables : 1.5;
 
   // Financial Projections
-  const futureReceivables = d.receivables.filter((r: any) => r.status === 'pending' && new Date(r.due_date) > now).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
-  const futurePayables = d.payables.filter((p: any) => p.status === 'pending' && new Date(p.due_date) > now).reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0);
+  const futureReceivablesTotal = d.receivables.filter((r: any) => r.status === 'pending' && new Date(r.due_date) > now).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
+  const futurePayablesTotal = d.payables.filter((p: any) => p.status === 'pending' && new Date(p.due_date) > now).reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0);
 
   // Sales Targets
   const targetsSummary = d.salesTargets.reduce((acc: any, t: any) => ({ target: acc.target + (t.target_value || 0), achieved: acc.achieved + (t.achieved_value || 0) }), { target: 0, achieved: 0 });
@@ -202,8 +206,11 @@ function computeKPIs(d: any) {
       defaultRate: +defaultRate.toFixed(1),
       churnRate: +churnRate.toFixed(1),
       avgDailyRevenue: +(totalRevenue / 30).toFixed(0),
-      cashFlowProjection30d: futureReceivables - futurePayables,
-      futureReceivables, futurePayables,
+      cashFlowProjection30d: futureReceivablesTotal - futurePayablesTotal,
+      futureReceivables: futureReceivablesTotal, 
+      futurePayables: futurePayablesTotal,
+      currentRatio: +currentRatio.toFixed(2),
+      quickRatio: +quickRatio.toFixed(2),
       prodEfficiency: +prodEfficiency.toFixed(1),
       prodInProgress: d.production.filter((p: any) => p.status === 'in_progress').length,
       prodPlanned: d.production.filter((p: any) => p.status === 'planned').length,
