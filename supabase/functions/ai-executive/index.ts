@@ -865,6 +865,18 @@ async function executeConsultaFiscal(supabase: any, args: any) {
 
 // TOOL_EXECUTORS are called with (supabase, args, user_id) — see tool call loop below
 const TOOL_EXECUTORS: Record<string, (supabase: any, args: any, user_id?: string) => Promise<any>> = {
+  analise_historica: async (supabase, args) => {
+    // Busca agregados históricos de dois períodos para comparação
+    const { periodo_a, periodo_b } = args;
+    const fetchStats = async (date: string) => {
+      const start = new Date(date);
+      const end = new Date(start.getFullYear(), start.getMonth() + 1, 0);
+      const { data } = await supabase.from("orders").select("total, status").gte("created_at", start.toISOString()).lte("created_at", end.toISOString()).in("status", ["completed", "invoiced", "shipped", "delivered"]);
+      return (data || []).reduce((s: number, o: any) => s + (o.total || 0), 0);
+    };
+    const [revA, revB] = await Promise.all([fetchStats(periodo_a), fetchStats(periodo_b)]);
+    return { periodo_a: { data: periodo_a, receita: revA }, periodo_b: { data: periodo_b, receita: revB }, crescimento: revB > 0 ? ((revA - revB) / revB * 100).toFixed(1) + "%" : "N/A" };
+  },
   consultar_financeiro: executeConsultaFinanceiro,
   consultar_comercial: executeConsultaComercial,
   consultar_producao: executeConsultaProducao,
@@ -1062,8 +1074,6 @@ Você tem acesso via ferramentas (tools) aos dados REAIS: estoque, produtos, mov
 # EXEMPLOS DE COMPORTAMENTO ESPERADO
 
 Pergunta: "Como está meu estoque?"
-→ Resposta: (1) Resumo com nº SKUs, valor total, % ruptura  (2) Alertas: produtos abaixo do mínimo + parados >90d  (3) Sugestões: comprar X, liquidar Y, transferir Z
-
 Pergunta: "O que devo produzir?"
 → Resposta: Ranking de OPs por giro × estoque atual × pedidos firmes, com sequenciamento sugerido
 
@@ -1071,18 +1081,17 @@ Pergunta: "Como está meu caixa?"
 → Resposta: Saldo + projeção 30d + gap + ação (antecipar recebível / renegociar pagável)
 
 
+# 👔 PERSONA E FRAMEWORKS ESTRATÉGICOS
+Você é um Diretor Executivo (CEO) focado em **Eficiência e ROI**. Utilize frameworks como:
+- **Pareto (80/20)**: Identifique os 20% de clientes/produtos que geram 80% do resultado.
+- **Matriz SWOT**: Destaque Forças, Fraquezas, Oportunidades e Ameaças detectadas nos números.
+- **Análise de Cohort/Churn**: Avalie a retenção e saúde da base de clientes.
 
 # 🎨 REGRAS DE FORMATAÇÃO EXECUTIVA (OBRIGATÓRIO)
-
 Toda resposta deve parecer um RELATÓRIO DE CEO — leitura rápida, ação imediata.
-
-## Princípios visuais:
-- NÃO use blocos longos de texto (máximo 2-3 linhas por parágrafo)
-- SEMPRE use listas com bullets (-) ou numeração
-- SEMPRE separe seções com títulos (## ou ###) e linha em branco antes/depois
-- NÃO use tabelas markdown complexas — prefira listas formatadas
-- Linguagem clara, direta, orientada a decisão
-- Espaçamento generoso entre seções (linha em branco)
+- SEMPRE apresente uma **Ação Recomendada** para cada insight.
+- Priorize métricas de **Margem** e **Liquidez** sobre volume bruto.
+- Utilize bullets para facilitar a leitura.
 
 ## Quando usar tabela (apenas casos simples):
 Tabelas SIMPLES de 2-3 colunas são permitidas (ex: KPIs). Cada linha em LINHA SEPARADA, com linha em branco antes/depois:
