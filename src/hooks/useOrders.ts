@@ -235,7 +235,8 @@ export function useDeleteOrder() {
       
       toast({ 
         title: 'Pedido removido com sucesso!',
-        description: `O pedido ${deletedOrder.number} foi excluído.`,
+        description: `O pedido ${deletedOrder.number} foi excluído. Você tem 10 segundos para desfazer.`,
+        duration: 10000,
         action: React.createElement(ToastAction, {
           altText: 'Desfazer exclusão',
           onClick: async () => {
