@@ -1,5 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.131.0/testing/asserts.ts";
-import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-client@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
 const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -17,10 +17,6 @@ Deno.test("deleted_orders_archive cleanup trigger", async () => {
     });
 
   if (insertExpiredError) throw insertExpiredError;
-
-  // Verify it exists (trigger is BEFORE INSERT, so it clears existing ones but NOT the one being inserted)
-  // Wait, the trigger is BEFORE INSERT FOR EACH STATEMENT.
-  // Actually, to test the trigger cleaning up OLD records, we need to insert another one.
 
   // 2. Insert a fresh record to trigger cleanup
   const freshId = "11111111-1111-1111-1111-111111111111";
