@@ -111,9 +111,19 @@ export default function ProductsPage() {
     };
 
     if (selectedProduct) {
-      updateProduct.mutate({ id: selectedProduct.id, ...payload }, { onSuccess: () => setIsFormOpen(false) });
+      updateProduct.mutate({ id: selectedProduct.id, ...payload }, { 
+        onSuccess: () => {
+          setIsFormOpen(false);
+          setSelectedProduct(null);
+        }
+      });
     } else {
-      createProduct.mutate(payload, { onSuccess: () => setIsFormOpen(false) });
+      createProduct.mutate(payload, { 
+        onSuccess: () => {
+          setIsFormOpen(false);
+          setSelectedProduct(null);
+        }
+      });
     }
   };
 
