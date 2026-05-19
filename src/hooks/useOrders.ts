@@ -89,7 +89,6 @@ export function useCreateOrder() {
   const { toast } = useToast();
   return useMutation({
     mutationFn: async (input: CreateOrderInput) => {
-      // 1. Get next order number with a more robust check
       const { data: lastOrder } = await supabase
         .from('orders')
         .select('number')
@@ -100,13 +99,11 @@ export function useCreateOrder() {
       const lastNum = lastOrder?.number?.replace('PED', '') || '0';
       const nextNum = `PED${String(parseInt(lastNum) + 1).padStart(4, '0')}`;
 
-      // 2. Calculate totals
       const subtotal = input.items.reduce((s, i) => s + (i.quantity * i.unit_price), 0);
       const discount = input.items.reduce((s, i) => s + i.discount, 0);
       const shipping = input.shipping || 0;
       const total = subtotal - discount + shipping;
 
-      // 3. Insert order
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -129,7 +126,6 @@ export function useCreateOrder() {
 
       if (orderError) throw orderError;
 
-      // 4. Insert items
       const items = input.items.map((item) => ({
         order_id: order.id,
         product_id: item.product_id || null,
@@ -143,7 +139,6 @@ export function useCreateOrder() {
 
       const { error: itemsError } = await supabase.from('order_items').insert(items);
       if (itemsError) {
-        // Cleanup order if items fail (basic transaction simulation)
         await supabase.from('orders').delete().eq('id', order.id);
         throw itemsError;
       }
@@ -222,13 +217,16 @@ export function useDeleteOrder() {
   const { toast } = useToast();
   return useMutation({
     mutationFn: async (id: string) => {
-      // 1. Fetch the order and items first for potential "Undo" or logging
-      const { data: order } = await supabase.from('orders').select('*, order_items(*)').eq('id', id).single();
-      if (!order) throw new Error('Pedido não encontrado');
+      const { data: order, error: fetchError } = await supabase
+        .from('orders')
+        .select('*, order_items(*)')
+        .eq('id', id)
+        .single();
+      
+      if (fetchError || !order) throw new Error('Pedido não encontrado');
 
-      // 2. Delete the order (items should cascade)
-      const { error } = await supabase.from('orders').delete().eq('id', id);
-      if (error) throw error;
+      const { error: deleteError } = await supabase.from('orders').delete().eq('id', id);
+      if (deleteError) throw deleteError;
 
       return order;
     },
@@ -238,32 +236,26 @@ export function useDeleteOrder() {
       toast({ 
         title: 'Pedido removido com sucesso!',
         description: `O pedido ${deletedOrder.number} foi excluído.`,
-        action: (
-          <ToastAction
-            altText="Desfazer exclusão"
-            onClick={async () => {
-              try {
-                // Restore logic: Re-insert order and then items
-                // Note: deletedOrder from Supabase has 'order_items' instead of 'items'
-                const { order_items, ...orderData } = deletedOrder;
-                const { data: restored, error: restError } = await supabase.from('orders').insert(orderData).select().single();
-                if (restError) throw restError;
+        action: React.createElement(ToastAction, {
+          altText: 'Desfazer exclusão',
+          onClick: async () => {
+            try {
+              const { order_items, ...orderData } = deletedOrder;
+              const { data: restored, error: restError } = await supabase.from('orders').insert(orderData).select().single();
+              if (restError) throw restError;
 
-                if (order_items && order_items.length > 0) {
-                  const { error: itemsError } = await supabase.from('order_items').insert(order_items);
-                  if (itemsError) throw itemsError;
-                }
-
-                qc.invalidateQueries({ queryKey: ['orders'] });
-                toast({ title: 'Pedido restaurado com sucesso!' });
-              } catch (err: any) {
-                toast({ title: 'Erro ao restaurar pedido', description: err.message, variant: 'destructive' });
+              if (order_items && order_items.length > 0) {
+                const { error: itemsError } = await supabase.from('order_items').insert(order_items);
+                if (itemsError) throw itemsError;
               }
-            }}
-          >
-            Desfazer
-          </ToastAction>
-        ) as React.ReactElement
+
+              qc.invalidateQueries({ queryKey: ['orders'] });
+              toast({ title: 'Pedido restaurado com sucesso!' });
+            } catch (err: any) {
+              toast({ title: 'Erro ao restaurar pedido', description: err.message, variant: 'destructive' });
+            }
+          }
+        }, 'Desfazer')
       });
     },
     onError: (e: any) => {
