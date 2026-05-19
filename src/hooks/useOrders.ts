@@ -255,7 +255,7 @@ export function useDeleteOrder() {
               toast({ title: 'Erro ao restaurar pedido', description: err.message, variant: 'destructive' });
             }
           }
-        }, 'Desfazer')
+        }, 'Desfazer') as unknown as any
       });
     },
     onError: (e: any) => {
