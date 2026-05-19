@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
+import { useSystemParameters } from './useSystemParameters';
 
 export interface DbOrderItem {
   id: string;
@@ -215,6 +216,7 @@ export function useUpdateOrderFields() {
 export function useDeleteOrder() {
   const qc = useQueryClient();
   const { toast } = useToast();
+  const { getParameter } = useSystemParameters();
   return useMutation({
     mutationFn: async (id: string) => {
       const { data: order, error: fetchError } = await supabase
@@ -233,10 +235,13 @@ export function useDeleteOrder() {
     onSuccess: (deletedOrder) => {
       qc.invalidateQueries({ queryKey: ['orders'] });
       
+      const undoSeconds = Number(getParameter('undo_duration_seconds', 10));
+      const durationMs = undoSeconds * 1000;
+
       toast({ 
         title: 'Pedido removido com sucesso!',
-        description: `O pedido ${deletedOrder.number} foi excluído. Você tem 10 segundos para desfazer.`,
-        duration: 10000,
+        description: `O pedido ${deletedOrder.number} foi excluído. Você tem ${undoSeconds} segundos para desfazer.`,
+        duration: durationMs,
         action: React.createElement(ToastAction, {
           altText: 'Desfazer exclusão',
           onClick: async () => {
