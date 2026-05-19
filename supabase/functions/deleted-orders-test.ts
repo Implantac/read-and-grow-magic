@@ -400,8 +400,67 @@ Deno.test("deleted_orders_archive cleanup trigger - millisecond truncation bound
     .select("original_order_id")
     .eq("original_order_id", truncatedId);
 
-  assertEquals(records?.length, 0, "Truncated timestamp (past) should have been removed by trigger");
+  assertEquals(records?.length, 0, \"Truncated timestamp (past) should have been removed by trigger\");
 
   // Cleanup
-  await supabase.from("deleted_orders_archive").delete().eq("original_order_id", triggerId);
+  await supabase.from(\"deleted_orders_archive\").delete().eq(\"original_order_id\", triggerId);
+});
+
+Deno.test(\"deleted_orders_archive cleanup trigger - timezone offset consistency\", async () => {
+  if (!supabaseKey) {
+    console.log(\"SKIP: SUPABASE_SERVICE_ROLE_KEY not available, skipping test execution.\");
+    return;
+  }
+  
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  // 1. Record in the past with a positive offset (+05:00)
+  // Current time in UTC - 1 hour, expressed with +05:00 offset
+  const pastTime = new Date(Date.now() - 3600000); 
+  // Manual offset string construction to ensure precise test of database offset parsing
+  // We use a date in the past and manually set an offset
+  const pastOffsetStr = \"2020-01-01T00:00:00+05:00\"; // Definitely in the past
+  const pastOffsetId = \"abc12345-0000-0000-0000-000000000000\";
+
+  // 2. Record in the future with a negative offset (-05:00)
+  // Definitely in the future
+  const futureOffsetStr = \"2099-01-01T00:00:00-05:00\";
+  const futureOffsetId = \"def67890-0000-0000-0000-000000000000\";
+
+  const { error: insertError } = await supabase.from(\"deleted_orders_archive\").insert([
+    {
+      original_order_id: pastOffsetId,
+      order_data: { test: \"past_offset\" },
+      expires_at: pastOffsetStr,
+    },
+    {
+      original_order_id: futureOffsetId,
+      order_data: { test: \"future_offset\" },
+      expires_at: futureOffsetStr,
+    }
+  ]);
+
+  if (insertError) throw insertError;
+
+  // 3. Trigger cleanup
+  const triggerId = \"11111111-2222-3333-4444-555555555555\";
+  await supabase.from(\"deleted_orders_archive\").insert({
+    original_order_id: triggerId,
+    order_data: { test: \"timezone_trigger\" },
+    expires_at: new Date(Date.now() + 600000).toISOString(),
+  });
+
+  // 4. Verify
+  const { data: records } = await supabase
+    .from(\"deleted_orders_archive\")
+    .select(\"original_order_id\")
+    .in(\"original_order_id\", [pastOffsetId, futureOffsetId]);
+
+  const ids = records?.map(r => r.original_order_id) || [];
+  
+  assertEquals(ids.includes(pastOffsetId), false, \"Record with past offset should have been removed\");
+  assertEquals(ids.includes(futureOffsetId), true, \"Record with future offset should still exist\");
+
+  // Cleanup
+  await supabase.from(\"deleted_orders_archive\").delete().in(\"original_order_id\", [futureOffsetId, triggerId]);
 });
