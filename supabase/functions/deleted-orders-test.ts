@@ -321,3 +321,42 @@ Deno.test("deleted_orders_archive cleanup trigger - preserve record set slightly
   // Cleanup
   await supabase.from("deleted_orders_archive").delete().in("original_order_id", [futureId, triggerId]);
 });
+
+Deno.test("deleted_orders_archive cleanup trigger - precise current timestamp boundary", async () => {
+  if (!supabaseKey) {
+    console.log("SKIP: SUPABASE_SERVICE_ROLE_KEY not available, skipping test execution.");
+    return;
+  }
+  
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  // 1. Insert a record with expires_at set to 'now' + 500ms 
+  // to ensure it is considered 'future' when the trigger runs immediately after.
+  const preciseId = "12345678-1234-1234-1234-123456789012";
+  const nowPlusTiny = new Date(Date.now() + 500).toISOString();
+  
+  await supabase.from("deleted_orders_archive").insert({
+    original_order_id: preciseId,
+    order_data: { test: "precise_boundary" },
+    expires_at: nowPlusTiny,
+  });
+
+  // 2. Trigger cleanup immediately
+  const triggerId = "fedcba98-7654-3210-fedc-ba9876543210";
+  await supabase.from("deleted_orders_archive").insert({
+    original_order_id: triggerId,
+    order_data: { test: "precise_trigger" },
+    expires_at: new Date(Date.now() + 600000).toISOString(),
+  });
+
+  // 3. Verify it is preserved
+  const { data: records } = await supabase
+    .from("deleted_orders_archive")
+    .select("original_order_id")
+    .eq("original_order_id", preciseId);
+
+  assertEquals(records?.length, 1, "Record with expires_at slightly in the future (boundary) should be preserved");
+
+  // Cleanup
+  await supabase.from("deleted_orders_archive").delete().in("original_order_id", [preciseId, triggerId]);
+});
