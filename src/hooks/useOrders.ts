@@ -241,18 +241,15 @@ export function useDeleteOrder() {
       let timeLeft = undoSeconds;
       let interval: any;
 
-      const { id, update } = toast({ 
-        title: 'Pedido removido com sucesso!',
-        description: `O pedido ${deletedOrder.number} foi excluído. Você tem ${timeLeft} segundos para desfazer.`,
-        duration: durationMs,
-        action: React.createElement(ToastAction, {
+      const createAction = (disabled = false) => 
+        React.createElement(ToastAction, {
           altText: 'Desfazer exclusão',
+          disabled: disabled,
           onClick: async () => {
             if (interval) clearInterval(interval);
             try {
               const { order_items, ...orderData } = deletedOrder;
               
-              // Ensure we restore order_items with the restored order ID
               const { data: restored, error: restError } = await supabase.from('orders').insert(orderData).select().single();
               if (restError) throw restError;
 
@@ -271,13 +268,24 @@ export function useDeleteOrder() {
               toast({ title: 'Erro ao restaurar pedido', description: err.message, variant: 'destructive' });
             }
           }
-        }, 'Desfazer') as unknown as any
+        }, 'Desfazer');
+
+      const { id, update } = toast({ 
+        title: 'Pedido removido com sucesso!',
+        description: `O pedido ${deletedOrder.number} foi excluído. Você tem ${timeLeft} segundos para desfazer.`,
+        duration: durationMs,
+        action: createAction() as unknown as any
       });
 
       interval = setInterval(() => {
         timeLeft -= 1;
         if (timeLeft <= 0) {
           clearInterval(interval);
+          update({
+            id,
+            description: `O pedido ${deletedOrder.number} foi excluído permanentemente.`,
+            action: createAction(true) as unknown as any,
+          } as any);
         } else {
           update({
             id,
