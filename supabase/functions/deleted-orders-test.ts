@@ -5,7 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "https://arcuhqdiydlvekanychw.supabase.co";
 const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-Deno.test("deleted_orders_archive cleanup trigger", async () => {
+Deno.test("deleted_orders_archive cleanup trigger - remove old then check", async () => {
   if (!supabaseKey) {
     console.log("SKIP: SUPABASE_SERVICE_ROLE_KEY not available, skipping test execution.");
     return;
@@ -57,4 +57,41 @@ Deno.test("deleted_orders_archive cleanup trigger", async () => {
 
   // Cleanup fresh test record
   await supabase.from("deleted_orders_archive").delete().eq("original_order_id", freshId);
+});
+
+Deno.test("deleted_orders_archive cleanup trigger - direct cleanup on insert", async () => {
+  if (!supabaseKey) {
+    console.log("SKIP: SUPABASE_SERVICE_ROLE_KEY not available, skipping test execution.");
+    return;
+  }
+  
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  // Insert a record that is already expired
+  // The trigger runs BEFORE INSERT on the table, so it should clean up any records that meet the criteria
+  // before the new one is added.
+  const oldId = "22222222-2222-2222-2222-222222222222";
+  await supabase.from("deleted_orders_archive").insert({
+    original_order_id: oldId,
+    order_data: { test: "old" },
+    expires_at: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+  });
+
+  const nextId = "33333333-3333-3333-3333-333333333333";
+  await supabase.from("deleted_orders_archive").insert({
+    original_order_id: nextId,
+    order_data: { test: "next" },
+    expires_at: new Date(Date.now() + 600000).toISOString(),
+  });
+
+  const { data: records } = await supabase
+    .from("deleted_orders_archive")
+    .select("original_order_id");
+
+  const ids = records?.map(r => r.original_order_id) || [];
+  assertEquals(ids.includes(oldId), false, "Older expired record should have been removed");
+  assertEquals(ids.includes(nextId), true, "New record should exist");
+
+  // Cleanup
+  await supabase.from("deleted_orders_archive").delete().eq("original_order_id", nextId);
 });
