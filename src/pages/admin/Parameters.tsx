@@ -257,8 +257,8 @@ const Parameters = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={`${parameterCategoryConfig[param.category].bgColor} ${parameterCategoryConfig[param.category].color} border-0`}>
-                          {parameterCategoryConfig[param.category].label}
+                        <Badge className={`${parameterCategoryConfig[param.category as ParameterCategory]?.bgColor || 'bg-gray-100'} ${parameterCategoryConfig[param.category as ParameterCategory]?.color || 'text-gray-700'} border-0`}>
+                          {parameterCategoryConfig[param.category as ParameterCategory]?.label || param.category}
                         </Badge>
                       </TableCell>
                       <TableCell>
