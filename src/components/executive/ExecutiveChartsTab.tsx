@@ -49,16 +49,21 @@ export function ExecutiveChartsTab({ data }: Props) {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2"><Activity className="h-4 w-4 text-blue-600" />Tendência de Crescimento (MoM %)</CardTitle>
+            <CardTitle className="text-sm flex items-center gap-2"><Activity className="h-4 w-4 text-blue-600" />Tendência de Crescimento (MoM vs YoY %)</CardTitle>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={{ revenueMoM: { label: 'MoM %', color: 'hsl(var(--chart-2))' } }} className="h-[250px]">
+            <ChartContainer config={{ 
+              revenueMoM: { label: 'MoM %', color: 'hsl(var(--chart-2))' },
+              revenueYoY: { label: 'YoY %', color: 'hsl(var(--chart-5))' }
+            }} className="h-[250px]">
               <LineChart data={growthTrends}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
                 <XAxis dataKey="month" className="text-xs" />
                 <YAxis tickFormatter={(v) => `${v}%`} className="text-xs" />
-                <ChartTooltip content={<ChartTooltipContent formatter={(v) => `${v}%`} />} />
-                <Line type="monotone" dataKey="revenueMoM" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                <ChartTooltip content={<ChartTooltipContent formatter={(v, name) => [`${v}%`, name === 'revenueMoM' ? 'MoM' : 'YoY']} />} />
+                <Legend />
+                <Line name="revenueMoM" type="monotone" dataKey="revenueMoM" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                <Line name="revenueYoY" type="monotone" dataKey="revenueYoY" stroke="hsl(var(--chart-5))" strokeWidth={2} strokeDasharray="5 5" dot={{ r: 4 }} activeDot={{ r: 6 }} />
               </LineChart>
             </ChartContainer>
           </CardContent>
