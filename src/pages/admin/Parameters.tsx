@@ -59,7 +59,7 @@ const Parameters = () => {
     let filtered = parameters;
     
     if (category !== 'all') {
-      filtered = filtered.filter(p => p.category === category);
+      filtered = filtered.filter(p => p.category === category || (p.category === 'system' && category === 'general'));
     }
     
     if (filter.search) {
