@@ -238,13 +238,17 @@ export function useDeleteOrder() {
       const undoSeconds = Number(getParameter('undo_duration_seconds', '10'));
       const durationMs = undoSeconds * 1000;
 
-      toast({ 
+      let timeLeft = undoSeconds;
+      let interval: any;
+
+      const { id, update } = toast({ 
         title: 'Pedido removido com sucesso!',
-        description: `O pedido ${deletedOrder.number} foi excluído. Você tem ${undoSeconds} segundos para desfazer.`,
+        description: `O pedido ${deletedOrder.number} foi excluído. Você tem ${timeLeft} segundos para desfazer.`,
         duration: durationMs,
         action: React.createElement(ToastAction, {
           altText: 'Desfazer exclusão',
           onClick: async () => {
+            if (interval) clearInterval(interval);
             try {
               const { order_items, ...orderData } = deletedOrder;
               
@@ -269,6 +273,18 @@ export function useDeleteOrder() {
           }
         }, 'Desfazer') as unknown as any
       });
+
+      interval = setInterval(() => {
+        timeLeft -= 1;
+        if (timeLeft <= 0) {
+          clearInterval(interval);
+        } else {
+          update({
+            id,
+            description: `O pedido ${deletedOrder.number} foi excluído. Você tem ${timeLeft} segundos para desfazer.`,
+          } as any);
+        }
+      }, 1000);
     },
     onError: (e: any) => {
       console.error('Error deleting order:', e);
