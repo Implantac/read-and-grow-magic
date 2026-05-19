@@ -78,6 +78,7 @@ export interface SalesRepStat {
 export interface ExecutiveDashboardData {
   kpis: ExecutiveKPIs;
   revenueByMonth: { month: string; revenue: number }[];
+  growthTrends: { month: string; revenueMoM: number; revenueYoY: number; margin: number }[];
   topClients: { name: string; revenue: number }[];
   expenseByCategory: Record<string, number>;
   salesRepStats: SalesRepStat[];

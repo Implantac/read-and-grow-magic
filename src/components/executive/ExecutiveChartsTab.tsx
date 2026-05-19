@@ -1,9 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { TrendingUp, Users, PieChart, MapPin, Zap, Target } from 'lucide-react';
+import { TrendingUp, Users, PieChart, MapPin, Zap, Target, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell, PieChart as RPieChart, Pie } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell, PieChart as RPieChart, Pie, LineChart, Line, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { fmt } from './ExecutiveKPICards';
 import type { ExecutiveDashboardData } from '@/hooks/useExecutiveAI';
 
@@ -16,6 +16,7 @@ interface Props {
 export function ExecutiveChartsTab({ data }: Props) {
   const revenueByMonth = data?.revenueByMonth || [];
   const topClients = data?.topClients || [];
+  const growthTrends = (data as any)?.growthTrends || [];
   const expenseByCategory = data?.expenseByCategory || {};
   const salesRepStats = data?.salesRepStats || [];
   const funnelByStage = data?.funnelByStage || {};
@@ -45,6 +46,39 @@ export function ExecutiveChartsTab({ data }: Props) {
             </ChartContainer>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2"><Activity className="h-4 w-4 text-blue-600" />Tendência de Crescimento (MoM %)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={{ revenueMoM: { label: 'MoM %', color: 'hsl(var(--chart-2))' } }} className="h-[250px]">
+              <LineChart data={growthTrends}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                <XAxis dataKey="month" className="text-xs" />
+                <YAxis tickFormatter={(v) => `${v}%`} className="text-xs" />
+                <ChartTooltip content={<ChartTooltipContent formatter={(v) => `${v}%`} />} />
+                <Line type="monotone" dataKey="revenueMoM" stroke="hsl(var(--chart-2))" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+              </LineChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2"><TrendingUp className="h-4 w-4 text-indigo-600" />Evolução da Margem (%)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ChartContainer config={{ margin: { label: 'Margem %', color: 'hsl(var(--chart-4))' } }} className="h-[250px]">
+              <LineChart data={growthTrends}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border/30" />
+                <XAxis dataKey="month" className="text-xs" />
+                <YAxis tickFormatter={(v) => `${v}%`} className="text-xs" />
+                <ChartTooltip content={<ChartTooltipContent formatter={(v) => `${v}%`} />} />
+                <Line type="stepAfter" dataKey="margin" stroke="hsl(var(--chart-4))" strokeWidth={2} dot={{ r: 3 }} />
+              </LineChart>
+            </ChartContainer>
+          </CardContent>
 
         <Card>
           <CardHeader className="pb-2">

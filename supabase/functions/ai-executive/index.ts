@@ -233,7 +233,8 @@ function computeKPIs(d: any) {
       spedFilesGenerated: d.spedFiles.length,
       lastSpedDate: d.spedFiles[0]?.generated_at || null,
     },
-    revenueByMonth,
+    revenueByMonth: revenueByMonth.slice(1), // Remove the extra month used for base calculation
+    growthTrends,
     topClients: d.clients.sort((a: any, b: any) => (b.total_purchases || 0) - (a.total_purchases || 0)).slice(0, 5),
     expenseByCategory: d.payables.reduce((acc: any, p: any) => ({ ...acc, [p.category || 'Outros']: (acc[p.category || 'Outros'] || 0) + (p.amount || 0) }), {}),
     salesRepStats: d.salesReps.map((r: any) => ({ name: r.name, revenue: d.orders.filter((o: any) => o.sales_rep_id === r.id).reduce((s: number, o: any) => s + (o.total || 0), 0) })),
