@@ -79,6 +79,7 @@ export function ExecutiveChartsTab({ data }: Props) {
               </LineChart>
             </ChartContainer>
           </CardContent>
+        </Card>
 
         <Card>
           <CardHeader className="pb-2">

@@ -127,27 +127,64 @@ function computeKPIs(d: any) {
   const grossProfit = totalRevenue - totalCosts;
   const grossMargin = totalRevenue > 0 ? (grossProfit / totalRevenue * 100) : 0;
 
-  // Time-based revenue aggregation
+  // Time-based aggregation for trends (13 months to have base for 12 MoM points)
   const revenueByMonth = [];
-  for (let i = 11; i >= 0; i--) {
+  const growthTrends = [];
+  
+  for (let i = 12; i >= 0; i--) {
     const dt = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const monthOrders = d.orders.filter((o: any) => {
       const od = new Date(o.created_at);
       return od.getMonth() === dt.getMonth() && od.getFullYear() === dt.getFullYear() && completedStatuses.includes(o.status);
     });
+    
+    const monthPayables = d.payables.filter((p: any) => {
+      const pd = new Date(p.due_date);
+      return pd.getMonth() === dt.getMonth() && pd.getFullYear() === dt.getFullYear() && p.status === 'paid';
+    });
+
+    const rev = monthOrders.reduce((s: number, o: any) => s + (o.total || 0), 0);
+    const cost = monthPayables.reduce((s: number, p: any) => s + (p.amount || 0), 0);
+    const profit = rev - cost;
+    const margin = rev > 0 ? (profit / rev * 100) : 0;
+
     revenueByMonth.push({
       month: dt.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }),
-      revenue: monthOrders.reduce((s: number, o: any) => s + (o.total || 0), 0),
+      revenue: rev,
+      margin: +margin.toFixed(1)
     });
   }
 
-  // YoY and MoM Growth
-  const currentMonthRev = revenueByMonth[revenueByMonth.length - 1].revenue;
-  const lastMonthRev = revenueByMonth[revenueByMonth.length - 2].revenue;
-  const sameMonthLastYearRev = revenueByMonth[0].revenue;
+  // Calculate MoM and YoY trends from the aggregated data
+  for (let i = 1; i < revenueByMonth.length; i++) {
+    const current = revenueByMonth[i];
+    const prev = revenueByMonth[i - 1];
+    
+    // MoM: (Current - Previous) / Previous
+    const moM = prev.revenue > 0 ? ((current.revenue - prev.revenue) / prev.revenue * 100) : 0;
+    
+    // For YoY we'd ideally need 24 months, but we'll approximate or use what we have
+    // If we only have 13 months, revenueByMonth[0] is same month last year for revenueByMonth[12]
+    let yoY = 0;
+    if (i === revenueByMonth.length - 1) {
+      const sameMonthLastYear = revenueByMonth[0];
+      yoY = sameMonthLastYear.revenue > 0 ? ((current.revenue - sameMonthLastYear.revenue) / sameMonthLastYear.revenue * 100) : 0;
+    }
+
+    growthTrends.push({
+      month: current.month,
+      revenueMoM: +moM.toFixed(1),
+      revenueYoY: +yoY.toFixed(1),
+      margin: current.margin
+    });
+  }
+
+  // Final KPIs
+  const currentMonthData = revenueByMonth[revenueByMonth.length - 1];
+  const lastMonthData = revenueByMonth[revenueByMonth.length - 2];
   
-  const moMGrowth = lastMonthRev > 0 ? ((currentMonthRev - lastMonthRev) / lastMonthRev * 100) : 0;
-  const yoYGrowth = sameMonthLastYearRev > 0 ? ((currentMonthRev - sameMonthLastYearRev) / sameMonthLastYearRev * 100) : 0;
+  const moMGrowth = lastMonthData.revenue > 0 ? ((currentMonthData.revenue - lastMonthData.revenue) / lastMonthData.revenue * 100) : 0;
+  const yoYGrowth = growthTrends[growthTrends.length - 1]?.revenueYoY || 0;
 
   // Financial health
   const totalReceivable = d.receivables.filter((r: any) => r.status === 'pending').reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
