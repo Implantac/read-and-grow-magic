@@ -33,7 +33,7 @@ serve(async (req) => {
     // (reading/writing/deleting another user's chat history).
     const authenticatedUserId = claimsData.claims.sub as string;
     const body = await req.json();
-    const { action, messages } = body;
+    const { action, messages, months = 12 } = body;
 
     if (action === "clear_history") {
       await supabase.from("ai_executive_chat").delete().eq("user_id", authenticatedUserId);
@@ -46,7 +46,7 @@ serve(async (req) => {
     if (action === "ceo_brief") return await handleCEOBrief(supabase, lovableKey, corsHeaders);
     if (action === "execute_decisions") return await handleExecuteDecisions(supabase, body, corsHeaders, authenticatedUserId);
     if (action === "autopilot_run") return await handleAutoPilotRun(supabase, lovableKey, corsHeaders);
-    return await handleDashboardData(supabase, corsHeaders);
+    return await handleDashboardData(supabase, corsHeaders, months);
   } catch (e) {
     console.error("ai-executive error:", e);
     return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
@@ -117,7 +117,7 @@ async function fetchAllData(supabase: any) {
 
 // ─── KPI Computation ──────────────────────────────────────────────
 
-function computeKPIs(d: any) {
+function computeKPIs(d: any, months: number = 12) {
   const completedStatuses = ['completed', 'invoiced', 'shipped', 'delivered'];
   const now = new Date();
   
@@ -131,7 +131,7 @@ function computeKPIs(d: any) {
   const revenueByMonth = [];
   const growthTrends = [];
   
-  for (let i = 12; i >= 0; i--) {
+  for (let i = months; i >= 0; i--) {
     const dt = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const monthOrders = d.orders.filter((o: any) => {
       const od = new Date(o.created_at);
@@ -285,7 +285,7 @@ function checkHasRealData(d: any): boolean {
 
 const INSUFFICIENT_DATA_MSG = "Dados insuficientes para análise confiável. Cadastre vendas, pedidos, contas a pagar ou receber para que a IA possa gerar diagnóstico baseado em dados reais.";
 
-async function handleDashboardData(supabase: any, corsHeaders: any) {
+async function handleDashboardData(supabase: any, corsHeaders: any, months: number = 12) {
   const d = await fetchAllData(supabase);
   const computed = computeKPIs(d);
   const hasRealData = checkHasRealData(d);
@@ -305,7 +305,7 @@ async function handleDashboardData(supabase: any, corsHeaders: any) {
 
 async function handleGenerateInsights(supabase: any, lovableKey: string, corsHeaders: any) {
   const d = await fetchAllData(supabase);
-  const computed = computeKPIs(d);
+  const computed = computeKPIs(d, months);
 
   // Guard: sem dados reais, não chama LLM (evita alucinação)
   if (!checkHasRealData(d)) {
