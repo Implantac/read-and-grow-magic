@@ -2804,6 +2804,30 @@ export type Database = {
         }
         Relationships: []
       }
+      deleted_orders_archive: {
+        Row: {
+          created_at: string | null
+          expires_at: string
+          id: string
+          order_data: Json
+          original_order_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          order_data: Json
+          original_order_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          order_data?: Json
+          original_order_id?: string
+        }
+        Relationships: []
+      }
       delivery_proof: {
         Row: {
           created_at: string
@@ -13183,6 +13207,7 @@ export type Database = {
         }
         Returns: Json
       }
+      cleanup_expired_deleted_orders: { Args: never; Returns: undefined }
       close_accounting_period: {
         Args: { _month: number; _year: number }
         Returns: Json
