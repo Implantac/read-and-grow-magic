@@ -220,15 +220,43 @@ export function useDeleteOrder() {
   const { toast } = useToast();
   return useMutation({
     mutationFn: async (id: string) => {
-      // Items are deleted automatically via FK cascade (assumed) or manual delete
+      // 1. Fetch the order and items first for potential "Undo" or logging
+      const { data: order } = await supabase.from('orders').select('*, order_items(*)').eq('id', id).single();
+      if (!order) throw new Error('Pedido não encontrado');
+
+      // 2. Delete the order (items should cascade)
       const { error } = await supabase.from('orders').delete().eq('id', id);
       if (error) throw error;
+
+      return order;
     },
-    onSuccess: () => {
+    onSuccess: (deletedOrder) => {
       qc.invalidateQueries({ queryKey: ['orders'] });
+      
       toast({ 
         title: 'Pedido removido com sucesso!',
-        description: 'O registro foi permanentemente excluído do sistema.'
+        description: `O pedido ${deletedOrder.number} foi excluído.`,
+        action: {
+          label: 'Desfazer',
+          onClick: async () => {
+            try {
+              // Restore logic: Re-insert order and then items
+              const { items, ...orderData } = deletedOrder;
+              const { data: restored, error: restError } = await supabase.from('orders').insert(orderData).select().single();
+              if (restError) throw restError;
+
+              if (items && items.length > 0) {
+                const { error: itemsError } = await supabase.from('order_items').insert(items);
+                if (itemsError) throw itemsError;
+              }
+
+              qc.invalidateQueries({ queryKey: ['orders'] });
+              toast({ title: 'Pedido restaurado com sucesso!' });
+            } catch (err: any) {
+              toast({ title: 'Erro ao restaurar pedido', description: err.message, variant: 'destructive' });
+            }
+          }
+        }
       });
     },
     onError: (e: any) => {
