@@ -20,28 +20,46 @@ import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { parameterCategoryConfig } from '@/config/administration';
 import { SystemParameter, ParameterCategory, ParameterFilter } from '@/types/administration';
+import { useSystemParameters } from '@/hooks/useSystemParameters';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Parameters = () => {
-  const [parameters, setParameters] = useState<SystemParameter[]>([]);
+  const { parameters: dbParameters, isLoading, updateParameter } = useSystemParameters();
   const [filter, setFilter] = useState<ParameterFilter>({ category: 'all' });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingParameter, setEditingParameter] = useState<SystemParameter | null>(null);
+  const [editingParameter, setEditingParameter] = useState<any | null>(null);
   const [showSensitive, setShowSensitive] = useState<Record<string, boolean>>({});
   const [activeCategory, setActiveCategory] = useState<ParameterCategory | 'all'>('all');
+
+  const parameters = (dbParameters || []).map(p => ({
+    id: p.id,
+    code: p.code,
+    name: p.name,
+    description: p.description,
+    category: p.category as ParameterCategory,
+    type: p.type as any,
+    value: p.value,
+    defaultValue: p.default_value,
+    updatedAt: p.updated_at,
+    updatedBy: p.updated_by || 'Sistema',
+    required: p.required,
+    sensitive: p.sensitive,
+    options: p.options as string[]
+  }));
 
   // Group parameters by category
   const parametersByCategory = parameters.reduce((acc, param) => {
     if (!acc[param.category]) acc[param.category] = [];
     acc[param.category].push(param);
     return acc;
-  }, {} as Record<ParameterCategory, SystemParameter[]>);
+  }, {} as Record<ParameterCategory, any[]>);
 
   // Filter parameters
   const getFilteredParameters = (category: ParameterCategory | 'all') => {
     let filtered = parameters;
     
     if (category !== 'all') {
-      filtered = filtered.filter(p => p.category === category);
+      filtered = filtered.filter(p => (p.category as string) === category || ((p.category as string) === 'system' && category === 'general'));
     }
     
     if (filter.search) {
@@ -55,21 +73,21 @@ const Parameters = () => {
     return filtered;
   };
 
-  const handleEditParameter = (param: SystemParameter) => {
+  const handleEditParameter = (param: any) => {
     setEditingParameter(param);
     setIsDialogOpen(true);
   };
 
-  const handleResetToDefault = (param: SystemParameter) => {
-    setParameters(prev => prev.map(p => 
-      p.id === param.id 
-        ? { ...p, value: p.defaultValue, updatedAt: new Date().toISOString(), updatedBy: 'Usuário Atual' }
-        : p
-    ));
-    toast.success(`Parâmetro "${param.name}" restaurado para valor padrão!`);
+  const handleResetToDefault = async (param: any) => {
+    try {
+      await updateParameter({ code: param.code, value: param.defaultValue });
+      toast.success(`Parâmetro "${param.name}" restaurado para valor padrão!`);
+    } catch (error) {
+      // Error handled by hook
+    }
   };
 
-  const handleSaveParameter = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSaveParameter = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
@@ -77,21 +95,20 @@ const Parameters = () => {
     
     const newValue = formData.get('value') as string;
     
-    setParameters(prev => prev.map(p => 
-      p.id === editingParameter.id 
-        ? { ...p, value: newValue, updatedAt: new Date().toISOString(), updatedBy: 'Usuário Atual' }
-        : p
-    ));
-    
-    toast.success(`Parâmetro "${editingParameter.name}" atualizado com sucesso!`);
-    setIsDialogOpen(false);
+    try {
+      await updateParameter({ code: editingParameter.code, value: newValue });
+      toast.success(`Parâmetro "${editingParameter.name}" atualizado com sucesso!`);
+      setIsDialogOpen(false);
+    } catch (error) {
+      // Error handled by hook
+    }
   };
 
   const toggleSensitive = (paramId: string) => {
     setShowSensitive(prev => ({ ...prev, [paramId]: !prev[paramId] }));
   };
 
-  const renderValue = (param: SystemParameter) => {
+  const renderValue = (param: any) => {
     if (param.sensitive && !showSensitive[param.id]) {
       return '********';
     }
@@ -103,7 +120,7 @@ const Parameters = () => {
     return param.value;
   };
 
-  const renderValueInput = (param: SystemParameter) => {
+  const renderValueInput = (param: any) => {
     switch (param.type) {
       case 'boolean':
         return (
@@ -214,7 +231,13 @@ const Parameters = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {getFilteredParameters(activeCategory).map((param) => (
+                  {isLoading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell colSpan={5}><Skeleton className="h-12 w-full" /></TableCell>
+                      </TableRow>
+                    ))
+                  ) : getFilteredParameters(activeCategory).map((param) => (
                     <TableRow key={param.id}>
                       <TableCell>
                         <div className="space-y-1">
@@ -234,8 +257,8 @@ const Parameters = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge className={`${parameterCategoryConfig[param.category].bgColor} ${parameterCategoryConfig[param.category].color} border-0`}>
-                          {parameterCategoryConfig[param.category].label}
+                        <Badge className={`${parameterCategoryConfig[param.category as ParameterCategory]?.bgColor || 'bg-gray-100'} ${parameterCategoryConfig[param.category as ParameterCategory]?.color || 'text-gray-700'} border-0`}>
+                          {parameterCategoryConfig[param.category as ParameterCategory]?.label || param.category}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -294,7 +317,7 @@ const Parameters = () => {
                       </TableCell>
                     </TableRow>
                   ))}
-                  {getFilteredParameters(activeCategory).length === 0 && (
+                  {!isLoading && getFilteredParameters(activeCategory).length === 0 && (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                         Nenhum parâmetro encontrado
