@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import {
   Plus, Eye, MoreHorizontal, FileText, XCircle, CheckCircle, Loader2,
   Package, DollarSign, Clock, TruckIcon, ArrowRight, CalendarDays, User, CreditCard, Hash, MapPin, StickyNote,
-  ShieldCheck, ShieldAlert, AlertTriangle,
+  ShieldCheck, ShieldAlert, AlertTriangle, Trash2
 } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -28,7 +28,7 @@ import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { getPaymentMethodLabel, getOrderStatusLabel } from '@/config/commercial';
-import { useOrders, useCreateOrder, useUpdateOrderStatus, useUpdateOrderFields, type DbOrder } from '@/hooks/useOrders';
+import { useOrders, useCreateOrder, useUpdateOrderStatus, useUpdateOrderFields, useDeleteOrder, type DbOrder } from '@/hooks/useOrders';
 import { useClients } from '@/hooks/useClients';
 import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
@@ -131,6 +131,7 @@ export default function OrdersPage() {
   const createOrder = useCreateOrder();
   const updateStatus = useUpdateOrderStatus();
   const updateFields = useUpdateOrderFields();
+  const deleteOrder = useDeleteOrder();
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -208,6 +209,10 @@ export default function OrdersPage() {
         }
       },
     });
+  };
+
+  const handleDelete = (id: string) => {
+    deleteOrder.mutate(id);
   };
 
   const filteredOrders = orders.filter((order) => {
@@ -310,6 +315,9 @@ export default function OrdersPage() {
           {order.status !== 'cancelled' && order.status !== 'delivered' && (
             <>
               <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(order.id)}>
+                <Trash2 className="mr-2 h-4 w-4" />Excluir Pedido
+              </DropdownMenuItem>
               <DropdownMenuItem className="text-destructive" onClick={() => { setSelectedOrder(order); setIsCancelOpen(true); }}>
                 <XCircle className="mr-2 h-4 w-4" />Cancelar Pedido
               </DropdownMenuItem>

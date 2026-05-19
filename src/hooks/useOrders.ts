@@ -87,31 +87,47 @@ export function useCreateOrder() {
   const { toast } = useToast();
   return useMutation({
     mutationFn: async (input: CreateOrderInput) => {
-      const { data: countData } = await supabase.from('orders').select('id', { count: 'exact', head: true });
-      const nextNum = `PED${String((countData as any)?.length || 0 + 1).padStart(4, '0')}`;
+      // 1. Get next order number with a more robust check
+      const { data: lastOrder } = await supabase
+        .from('orders')
+        .select('number')
+        .order('number', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-      const subtotal = input.items.reduce((s, i) => s + (i.quantity * i.unit_price - i.discount), 0);
+      const lastNum = lastOrder?.number?.replace('PED', '') || '0';
+      const nextNum = `PED${String(parseInt(lastNum) + 1).padStart(4, '0')}`;
+
+      // 2. Calculate totals
+      const subtotal = input.items.reduce((s, i) => s + (i.quantity * i.unit_price), 0);
       const discount = input.items.reduce((s, i) => s + i.discount, 0);
       const shipping = input.shipping || 0;
-      const total = subtotal + shipping;
+      const total = subtotal - discount + shipping;
 
-      const { data: order, error: orderError } = await supabase.from('orders').insert({
-        number: nextNum,
-        client_id: input.client_id || null,
-        client_name: input.client_name,
-        delivery_date: input.delivery_date || null,
-        payment_method: input.payment_method,
-        payment_condition: input.payment_condition,
-        priority: input.priority,
-        subtotal,
-        discount,
-        shipping,
-        total,
-        notes: input.notes || null,
-        status: 'pending',
-      }).select().single();
+      // 3. Insert order
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          number: nextNum,
+          client_id: input.client_id || null,
+          client_name: input.client_name,
+          delivery_date: input.delivery_date || null,
+          payment_method: input.payment_method,
+          payment_condition: input.payment_condition,
+          priority: input.priority,
+          subtotal,
+          discount,
+          shipping,
+          total,
+          notes: input.notes || null,
+          status: 'pending',
+        })
+        .select()
+        .single();
+
       if (orderError) throw orderError;
 
+      // 4. Insert items
       const items = input.items.map((item) => ({
         order_id: order.id,
         product_id: item.product_id || null,
@@ -120,11 +136,15 @@ export function useCreateOrder() {
         quantity: item.quantity,
         unit_price: item.unit_price,
         discount: item.discount,
-        total: item.quantity * item.unit_price - item.discount,
+        total: (item.quantity * item.unit_price) - item.discount,
       }));
 
       const { error: itemsError } = await supabase.from('order_items').insert(items);
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        // Cleanup order if items fail (basic transaction simulation)
+        await supabase.from('orders').delete().eq('id', order.id);
+        throw itemsError;
+      }
 
       return order;
     },
@@ -132,7 +152,14 @@ export function useCreateOrder() {
       qc.invalidateQueries({ queryKey: ['orders'] });
       toast({ title: 'Pedido criado com sucesso!' });
     },
-    onError: (e: any) => toast({ title: 'Erro ao criar pedido', description: e.message, variant: 'destructive' }),
+    onError: (e: any) => {
+      console.error('Error creating order:', e);
+      toast({ 
+        title: 'Erro ao criar pedido', 
+        description: e.message || 'Ocorreu um erro inesperado', 
+        variant: 'destructive' 
+      });
+    },
   });
 }
 
@@ -141,14 +168,24 @@ export function useUpdateOrderStatus() {
   const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase.from('orders').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
+      const { error } = await supabase
+        .from('orders')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['orders'] });
       toast({ title: 'Status do pedido atualizado!' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: (e: any) => {
+      console.error('Error updating order status:', e);
+      toast({ 
+        title: 'Erro ao atualizar status', 
+        description: e.message, 
+        variant: 'destructive' 
+      });
+    },
   });
 }
 
@@ -157,13 +194,47 @@ export function useUpdateOrderFields() {
   const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, ...fields }: { id: string; [key: string]: any }) => {
-      const { error } = await supabase.from('orders').update({ ...fields, updated_at: new Date().toISOString() } as any).eq('id', id);
+      const { error } = await supabase
+        .from('orders')
+        .update({ ...fields, updated_at: new Date().toISOString() } as any)
+        .eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['orders'] });
       toast({ title: 'Pedido atualizado!' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: (e: any) => {
+      console.error('Error updating order fields:', e);
+      toast({ 
+        title: 'Erro ao atualizar pedido', 
+        description: e.message, 
+        variant: 'destructive' 
+      });
+    },
+  });
+}
+
+export function useDeleteOrder() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      // Items are deleted automatically via FK cascade (assumed) or manual delete
+      const { error } = await supabase.from('orders').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['orders'] });
+      toast({ title: 'Pedido removido com sucesso!' });
+    },
+    onError: (e: any) => {
+      console.error('Error deleting order:', e);
+      toast({ 
+        title: 'Erro ao remover pedido', 
+        description: e.message, 
+        variant: 'destructive' 
+      });
+    },
   });
 }
