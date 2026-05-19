@@ -360,3 +360,48 @@ Deno.test("deleted_orders_archive cleanup trigger - precise current timestamp bo
   // Cleanup
   await supabase.from("deleted_orders_archive").delete().in("original_order_id", [preciseId, triggerId]);
 });
+
+Deno.test("deleted_orders_archive cleanup trigger - millisecond truncation boundary", async () => {
+  if (!supabaseKey) {
+    console.log("SKIP: SUPABASE_SERVICE_ROLE_KEY not available, skipping test execution.");
+    return;
+  }
+  
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  // 1. Insert a record with expires_at set to exactly 'now' truncated to seconds
+  // This helps test behavior when milliseconds are zeroed out
+  const truncatedId = "aaaabbbb-cccc-dddd-eeee-ffff00001111";
+  const now = new Date();
+  now.setMilliseconds(0);
+  const truncatedTimestamp = now.toISOString();
+  
+  await supabase.from("deleted_orders_archive").insert({
+    original_order_id: truncatedId,
+    order_data: { test: "truncated_boundary" },
+    expires_at: truncatedTimestamp,
+  });
+
+  // 2. Wait a tiny bit to ensure Postgres 'now()' will be greater
+  await new Promise(resolve => setTimeout(resolve, 50));
+
+  // 3. Trigger cleanup
+  const triggerId = "11112222-3333-4444-5555-666677778888";
+  await supabase.from("deleted_orders_archive").insert({
+    original_order_id: triggerId,
+    order_data: { test: "truncated_trigger" },
+    expires_at: new Date(Date.now() + 600000).toISOString(),
+  });
+
+  // 4. Verify - Since expires_at was set to a point that is now in the past (even if truncated),
+  // it should be removed by the `expires_at < now()` condition.
+  const { data: records } = await supabase
+    .from("deleted_orders_archive")
+    .select("original_order_id")
+    .eq("original_order_id", truncatedId);
+
+  assertEquals(records?.length, 0, "Truncated timestamp (past) should have been removed by trigger");
+
+  // Cleanup
+  await supabase.from("deleted_orders_archive").delete().eq("original_order_id", triggerId);
+});
