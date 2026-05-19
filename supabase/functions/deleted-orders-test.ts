@@ -245,3 +245,41 @@ Deno.test("deleted_orders_archive cleanup trigger - exactly now boundary", async
   // Cleanup
   await supabase.from("deleted_orders_archive").delete().eq("original_order_id", triggerId);
 });
+
+Deno.test("deleted_orders_archive cleanup trigger - remove record with expires_at just in the past", async () => {
+  if (!supabaseKey) {
+    console.log("SKIP: SUPABASE_SERVICE_ROLE_KEY not available, skipping test execution.");
+    return;
+  }
+  
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  // 1. Insert a record with expires_at slightly in the past (e.g., 100ms ago)
+  const pastId = "dddddddd-dddd-dddd-dddd-dddddddddddd";
+  const slightlyPast = new Date(Date.now() - 100).toISOString();
+  
+  await supabase.from("deleted_orders_archive").insert({
+    original_order_id: pastId,
+    order_data: { test: "slightly_past" },
+    expires_at: slightlyPast,
+  });
+
+  // 2. Trigger cleanup
+  const triggerId = "eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee";
+  await supabase.from("deleted_orders_archive").insert({
+    original_order_id: triggerId,
+    order_data: { test: "past_trigger" },
+    expires_at: new Date(Date.now() + 600000).toISOString(),
+  });
+
+  // 3. Verify it was removed
+  const { data: records } = await supabase
+    .from("deleted_orders_archive")
+    .select("original_order_id")
+    .eq("original_order_id", pastId);
+
+  assertEquals(records?.length, 0, "Record with expires_at just in the past should have been removed");
+
+  // Cleanup
+  await supabase.from("deleted_orders_archive").delete().eq("original_order_id", triggerId);
+});
