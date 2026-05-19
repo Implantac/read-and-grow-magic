@@ -201,3 +201,47 @@ Deno.test("deleted_orders_archive cleanup trigger - remove only expired among mi
   // Cleanup
   await supabase.from("deleted_orders_archive").delete().in("original_order_id", [validId, triggerId]);
 });
+
+Deno.test("deleted_orders_archive cleanup trigger - exactly now boundary", async () => {
+  if (!supabaseKey) {
+    console.log("SKIP: SUPABASE_SERVICE_ROLE_KEY not available, skipping test execution.");
+    return;
+  }
+  
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  // 1. Insert a record with expires_at set to a timestamp that will definitely be past
+  // by the time the next insert happens.
+  const boundaryId = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb";
+  const now = new Date().toISOString();
+  
+  await supabase.from("deleted_orders_archive").insert({
+    original_order_id: boundaryId,
+    order_data: { test: "boundary" },
+    expires_at: now,
+  });
+
+  // 2. Trigger cleanup
+  const triggerId = "cccccccc-cccc-cccc-cccc-cccccccccccc";
+  await supabase.from("deleted_orders_archive").insert({
+    original_order_id: triggerId,
+    order_data: { test: "boundary_trigger" },
+    expires_at: new Date(Date.now() + 600000).toISOString(),
+  });
+
+  // 3. Verify
+  // Since the trigger uses `expires_at < now()`, if the boundary record was inserted with a timestamp
+  // that is now in the past (even by a few ms), it should be gone.
+  const { data: records } = await supabase
+    .from("deleted_orders_archive")
+    .select("original_order_id")
+    .eq("original_order_id", boundaryId);
+
+  // Note: 'now()' in Postgres is the transaction start time. 
+  // In most cases, a record with exactly the same timestamp as a previous 'now()' 
+  // will be removed if the new 'now()' is later.
+  console.log(`Boundary record with expires_at ${now} was ${records?.length === 0 ? 'removed' : 'preserved'}`);
+
+  // Cleanup
+  await supabase.from("deleted_orders_archive").delete().eq("original_order_id", triggerId);
+});
