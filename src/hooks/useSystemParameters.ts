@@ -18,11 +18,11 @@ export function useSystemParameters() {
   });
 
   const updateParameterMutation = useMutation({
-    mutationFn: async ({ key, value }: { key: string; value: any }) => {
+    mutationFn: async ({ code, value }: { code: string; value: string }) => {
       const { data, error } = await supabase
         .from('system_parameters')
-        .update({ value: JSON.stringify(value), updated_at: new Date().toISOString() })
-        .eq('key', key)
+        .update({ value, updated_at: new Date().toISOString() })
+        .eq('code', code)
         .select()
         .single();
       if (error) throw error;
@@ -41,15 +41,9 @@ export function useSystemParameters() {
     },
   });
 
-  const getParameter = (key: string, defaultValue: any = null) => {
-    const param = parametersQuery.data?.find(p => p.key === key);
-    if (!param) return defaultValue;
-    try {
-      // Supabase returns jsonb which might already be parsed or stringified
-      return typeof param.value === 'string' ? JSON.parse(param.value) : param.value;
-    } catch (e) {
-      return param.value;
-    }
+  const getParameter = (code: string, defaultValue: string = '') => {
+    const param = parametersQuery.data?.find(p => p.code === code);
+    return param?.value ?? defaultValue;
   };
 
   return {
