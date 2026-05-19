@@ -1,6 +1,8 @@
+import * as React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { ToastAction } from '@/components/ui/toast';
 
 export interface DbOrderItem {
   id: string;
@@ -236,17 +238,18 @@ export function useDeleteOrder() {
       toast({ 
         title: 'Pedido removido com sucesso!',
         description: `O pedido ${deletedOrder.number} foi excluído.`,
-        action: {
-          label: 'Desfazer',
+        action: React.createElement(ToastAction, {
+          altText: 'Desfazer exclusão',
           onClick: async () => {
             try {
               // Restore logic: Re-insert order and then items
-              const { items, ...orderData } = deletedOrder;
+              // Note: deletedOrder from Supabase has 'order_items' instead of 'items'
+              const { order_items, ...orderData } = deletedOrder;
               const { data: restored, error: restError } = await supabase.from('orders').insert(orderData).select().single();
               if (restError) throw restError;
 
-              if (items && items.length > 0) {
-                const { error: itemsError } = await supabase.from('order_items').insert(items);
+              if (order_items && order_items.length > 0) {
+                const { error: itemsError } = await supabase.from('order_items').insert(order_items);
                 if (itemsError) throw itemsError;
               }
 
@@ -256,7 +259,7 @@ export function useDeleteOrder() {
               toast({ title: 'Erro ao restaurar pedido', description: err.message, variant: 'destructive' });
             }
           }
-        }
+        }, 'Desfazer')
       });
     },
     onError: (e: any) => {
