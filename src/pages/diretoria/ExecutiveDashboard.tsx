@@ -92,11 +92,11 @@ export default function ExecutiveDashboard() {
             <div className="flex items-center gap-4 w-full lg:w-auto">
               <div className="flex items-center gap-2">
                 <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">Período: <span className="text-foreground font-bold">{period}m</span></span>
+                <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">Período: <span className="text-foreground font-bold">{tempPeriod}m</span></span>
               </div>
               <Slider
-                value={[period]}
-                onValueChange={(val) => setPeriod(val[0])}
+                value={[tempPeriod]}
+                onValueChange={(val) => setTempPeriod(val[0])}
                 min={3}
                 max={36}
                 step={1}
@@ -108,18 +108,26 @@ export default function ExecutiveDashboard() {
               {[3, 6, 12, 18, 24, 36].map((m) => (
                 <Button
                   key={m}
-                  variant={period === m ? 'secondary' : 'ghost'}
+                  variant={tempPeriod === m ? 'secondary' : 'ghost'}
                   size="sm"
                   className={cn(
                     "h-6 px-1.5 text-[9px] font-bold transition-all",
-                    period === m ? "bg-background shadow-sm scale-105" : "hover:bg-background/50"
+                    tempPeriod === m ? "bg-background shadow-sm scale-105" : "hover:bg-background/50"
                   )}
-                  onClick={() => setPeriod(m)}
+                  onClick={() => setTempPeriod(m)}
                 >
                   {m}m
                 </Button>
               ))}
             </div>
+            <Button 
+              size="sm" 
+              className="h-7 text-[10px] px-3 font-bold ml-1 bg-primary hover:bg-primary/90 transition-all shrink-0"
+              onClick={() => setPeriod(tempPeriod)}
+              disabled={period === tempPeriod}
+            >
+              Aplicar período
+            </Button>
           </div>
         </div>
       </PageHeader>
