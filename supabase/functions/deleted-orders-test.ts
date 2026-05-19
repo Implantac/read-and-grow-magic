@@ -152,3 +152,52 @@ Deno.test("deleted_orders_archive cleanup trigger - remove multiple expired reco
   // Cleanup
   await supabase.from("deleted_orders_archive").delete().eq("original_order_id", freshId);
 });
+
+Deno.test("deleted_orders_archive cleanup trigger - remove only expired among mixed records", async () => {
+  if (!supabaseKey) {
+    console.log("SKIP: SUPABASE_SERVICE_ROLE_KEY not available, skipping test execution.");
+    return;
+  }
+  
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  // 1. Setup mixed existing records
+  const expiredId = "88888888-8888-8888-8888-888888888888";
+  const validId = "99999999-9999-9999-9999-999999999999";
+  
+  await supabase.from("deleted_orders_archive").insert([
+    {
+      original_order_id: expiredId,
+      order_data: { test: "mixed_expired" },
+      expires_at: new Date(Date.now() - 300000).toISOString(), // 5 minutes ago
+    },
+    {
+      original_order_id: validId,
+      order_data: { test: "mixed_valid" },
+      expires_at: new Date(Date.now() + 300000).toISOString(), // 5 minutes from now
+    }
+  ]);
+
+  // 2. Trigger cleanup with a new insert
+  const triggerId = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+  await supabase.from("deleted_orders_archive").insert({
+    original_order_id: triggerId,
+    order_data: { test: "mixed_trigger" },
+    expires_at: new Date(Date.now() + 600000).toISOString(),
+  });
+
+  // 3. Verify
+  const { data: records } = await supabase
+    .from("deleted_orders_archive")
+    .select("original_order_id")
+    .in("original_order_id", [expiredId, validId, triggerId]);
+
+  const ids = records?.map(r => r.original_order_id) || [];
+  
+  assertEquals(ids.includes(expiredId), false, "Expired record should have been removed");
+  assertEquals(ids.includes(validId), true, "Valid record should still exist");
+  assertEquals(ids.includes(triggerId), true, "Triggering record should exist");
+
+  // Cleanup
+  await supabase.from("deleted_orders_archive").delete().in("original_order_id", [validId, triggerId]);
+});
