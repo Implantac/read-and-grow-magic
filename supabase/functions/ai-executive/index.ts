@@ -162,6 +162,37 @@ function computeKPIs(d: any) {
   }).length;
   const churnRate = (activeClients + inactiveClients) > 0 ? (inactiveClients / (activeClients + inactiveClients) * 100) : 0;
 
+  // Production Efficiency
+  const prodCompleted = d.production.filter((p: any) => p.status === 'completed');
+  const prodEfficiency = prodCompleted.length > 0
+    ? prodCompleted.reduce((s: number, p: any) => s + (p.produced_quantity || 0), 0) / prodCompleted.reduce((s: number, p: any) => s + (p.planned_quantity || 1), 0) * 100
+    : 0;
+
+  // Financial Projections
+  const futureReceivables = d.receivables.filter((r: any) => r.status === 'pending' && new Date(r.due_date) > now).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
+  const futurePayables = d.payables.filter((p: any) => p.status === 'pending' && new Date(p.due_date) > now).reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0);
+
+  // Sales Targets
+  const targetsSummary = d.salesTargets.reduce((acc: any, t: any) => ({ target: acc.target + (t.target_value || 0), achieved: acc.achieved + (t.achieved_value || 0) }), { target: 0, achieved: 0 });
+  const targetAttainment = targetsSummary.target > 0 ? (targetsSummary.achieved / targetsSummary.target * 100) : 0;
+
+  // Product Margins
+  const productMap: Record<string, any> = {};
+  d.products.forEach((p: any) => { productMap[p.id] = { name: p.name, cost: p.cost || 0 }; });
+  const productSales: Record<string, any> = {};
+  d.orderItems.forEach((item: any) => {
+    if (!item.product_id || !productMap[item.product_id]) return;
+    if (!productSales[item.product_id]) productSales[item.product_id] = { revenue: 0, cost: 0, qty: 0, name: productMap[item.product_id].name };
+    productSales[item.product_id].revenue += item.total || 0;
+    productSales[item.product_id].cost += (productMap[item.product_id].cost || 0) * (item.quantity || 0);
+    productSales[item.product_id].qty += item.quantity || 0;
+  });
+  const productMargins = Object.values(productSales).map((v: any) => ({
+    ...v,
+    margin: v.revenue - v.cost,
+    marginPct: v.revenue > 0 ? +((v.revenue - v.cost) / v.revenue * 100).toFixed(1) : 0
+  })).sort((a, b) => b.revenue - a.revenue);
+
   return {
     kpis: {
       totalRevenue, grossProfit, 
@@ -171,16 +202,11 @@ function computeKPIs(d: any) {
       defaultRate: +defaultRate.toFixed(1),
       churnRate: +churnRate.toFixed(1),
       avgDailyRevenue: +(totalRevenue / 30).toFixed(0),
-    },
-    revenueByMonth,
-    // ... rest of previous computed fields preserved logic
-  };
-}
       cashFlowProjection30d: futureReceivables - futurePayables,
       futureReceivables, futurePayables,
       prodEfficiency: +prodEfficiency.toFixed(1),
-      prodInProgress: prodInProgress.length,
-      prodPlanned: prodPlanned.length,
+      prodInProgress: d.production.filter((p: any) => p.status === 'in_progress').length,
+      prodPlanned: d.production.filter((p: any) => p.status === 'planned').length,
       prodCompleted: prodCompleted.length,
       targetAttainment,
       totalTarget: targetsSummary.target,
@@ -201,15 +227,15 @@ function computeKPIs(d: any) {
       lastSpedDate: d.spedFiles[0]?.generated_at || null,
     },
     revenueByMonth,
-    topClients,
-    expenseByCategory,
-    salesRepStats,
-    funnelByStage,
+    topClients: d.clients.sort((a: any, b: any) => (b.total_purchases || 0) - (a.total_purchases || 0)).slice(0, 5),
+    expenseByCategory: d.payables.reduce((acc: any, p: any) => ({ ...acc, [p.category || 'Outros']: (acc[p.category || 'Outros'] || 0) + (p.amount || 0) }), {}),
+    salesRepStats: d.salesReps.map((r: any) => ({ name: r.name, revenue: d.orders.filter((o: any) => o.sales_rep_id === r.id).reduce((s: number, o: any) => s + (o.total || 0), 0) })),
+    funnelByStage: d.funnel.reduce((acc: any, f: any) => ({ ...acc, [f.stage || 'Outros']: (acc[f.stage || 'Outros'] || 0) + (f.value || 0) }), {}),
     productMargins: productMargins.slice(0, 10),
-    topProfitable,
-    lowMarginProducts,
-    revenueByRegion,
-    autoAlerts,
+    topProfitable: productMargins.sort((a: any, b: any) => b.margin - a.margin).slice(0, 5),
+    lowMarginProducts: productMargins.filter((p: any) => p.marginPct < 10).slice(0, 5),
+    revenueByRegion: d.clients.reduce((acc: any, c: any) => ({ ...acc, [c.region || 'Outros']: (acc[c.region || 'Outros'] || 0) + (c.total_purchases || 0) }), {}),
+    autoAlerts: d.alerts,
     summary: {
       totalOrders: d.orders.length,
       totalProducts: d.products.length,
@@ -446,23 +472,72 @@ const ERP_TOOLS = [
       },
     },
   },
-...
   {
     type: "function",
     function: {
-      name: "consultar_fiscal",
-      description: "Consulta dados fiscais: NF-e emitidas/autorizadas/rejeitadas, total de impostos, carga tributária, regras fiscais ativas e SPED gerados.",
+      name: "consultar_comercial",
+      description: "Consulta resumo comercial: clientes, pedidos, funil, metas, vendedores",
       parameters: {
         type: "object",
         properties: {
-          tipo: { type: "string", enum: ["resumo", "nfe_recentes", "nfe_rejeitadas", "impostos_periodo", "regras_ativas", "sped"], description: "Tipo de consulta fiscal" },
-          periodo_dias: { type: "number", description: "Período em dias (padrão 30)" },
+          tipo: { type: "string", enum: ["resumo", "pedidos_recentes", "top_clientes", "clientes_risco", "metas", "funil", "vendedores"], description: "Tipo de consulta comercial" },
+          limite: { type: "number", description: "Limite de registros (padrão 10)" },
         },
         required: ["tipo"],
       },
     },
   },
-];
+  {
+    type: "function",
+    function: {
+      name: "consultar_producao",
+      description: "Consulta resumo de produção: OPs ativas, atrasadas, eficiência",
+      parameters: {
+        type: "object",
+        properties: {
+          tipo: { type: "string", enum: ["resumo", "ordens_ativas", "atrasadas", "eficiencia"], description: "Tipo de consulta produção" },
+        },
+        required: ["tipo"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "consultar_estoque",
+      description: "Consulta resumo de estoque: produtos, ruptura, movimentações",
+      parameters: {
+        type: "object",
+        properties: {
+          tipo: { type: "string", enum: ["resumo", "baixo_estoque", "movimentacoes_recentes", "produto_especifico"], description: "Tipo de consulta estoque" },
+          produto_nome: { type: "string", description: "Nome do produto para busca" },
+        },
+        required: ["tipo"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "executar_acao",
+      description: "Executa ações operacionais: registrar pagamentos, alterar status, ajustar estoque",
+      parameters: {
+        type: "object",
+        properties: {
+          acao: { type: "string", enum: ["registrar_pagamento", "adiar_vencimento", "criar_conta_pagar", "criar_conta_receber", "alterar_status_pedido", "alterar_status_op", "priorizar_op", "ajustar_estoque"], description: "Ação a executar" },
+          modulo: { type: "string", enum: ["financeiro", "comercial", "producao", "estoque"], description: "Módulo da ação" },
+          parametros: { type: "object", description: "Parâmetros da ação (ex: {id, valor, novo_status})" },
+          confirmado: { type: "boolean", description: "Confirmação do usuário" },
+        },
+        required: ["acao", "modulo", "parametros", "confirmado"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "consultar_fiscal",
+      description: "Consulta dados fiscais: NF-e emitidas/autorizadas/rejeitadas, total de impostos, carga tributária, regras fiscais ativas e SPED gerados.",
       parameters: {
         type: "object",
         properties: {
