@@ -242,11 +242,17 @@ export function useDeleteOrder() {
           onClick: async () => {
             try {
               const { order_items, ...orderData } = deletedOrder;
+              
+              // Ensure we restore order_items with the restored order ID
               const { data: restored, error: restError } = await supabase.from('orders').insert(orderData).select().single();
               if (restError) throw restError;
 
               if (order_items && order_items.length > 0) {
-                const { error: itemsError } = await supabase.from('order_items').insert(order_items);
+                const restoredItems = order_items.map((item: any) => ({
+                  ...item,
+                  order_id: restored.id
+                }));
+                const { error: itemsError } = await supabase.from('order_items').insert(restoredItems);
                 if (itemsError) throw itemsError;
               }
 
