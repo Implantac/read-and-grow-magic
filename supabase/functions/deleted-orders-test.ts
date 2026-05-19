@@ -7,7 +7,7 @@ const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 Deno.test("deleted_orders_archive cleanup trigger", async () => {
   if (!supabaseKey) {
-    console.warn("Skipping test: SUPABASE_SERVICE_ROLE_KEY not set");
+    console.log("SKIP: SUPABASE_SERVICE_ROLE_KEY not available, skipping test execution.");
     return;
   }
   
