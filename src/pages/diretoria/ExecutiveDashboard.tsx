@@ -47,6 +47,7 @@ const insightIcon: Record<string, any> = {
 };
 
 export default function ExecutiveDashboard() {
+  const [tempPeriod, setTempPeriod] = useState<number>(12);
   const [period, setPeriod] = useState<number>(12);
   const { data, isLoading } = useExecutiveDashboard(period);
   const generateInsights = useGenerateInsights();
