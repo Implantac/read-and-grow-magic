@@ -137,6 +137,7 @@ export default function OrdersPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<DbOrder | null>(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   // Form state
   const [formClient, setFormClient] = useState<{ id: string | null; name: string }>({ id: null, name: '' });
@@ -211,8 +212,15 @@ export default function OrdersPage() {
     });
   };
 
-  const handleDelete = (id: string) => {
-    deleteOrder.mutate(id);
+  const confirmDelete = () => {
+    if (selectedOrder) {
+      deleteOrder.mutate(selectedOrder.id, {
+        onSuccess: () => {
+          setIsDeleteConfirmOpen(false);
+          setSelectedOrder(null);
+        }
+      });
+    }
   };
 
   const filteredOrders = orders.filter((order) => {
@@ -315,7 +323,7 @@ export default function OrdersPage() {
           {order.status !== 'cancelled' && order.status !== 'delivered' && (
             <>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive" onClick={() => handleDelete(order.id)}>
+              <DropdownMenuItem className="text-destructive" onClick={() => { setSelectedOrder(order); setIsDeleteConfirmOpen(true); }}>
                 <Trash2 className="mr-2 h-4 w-4" />Excluir Pedido
               </DropdownMenuItem>
               <DropdownMenuItem className="text-destructive" onClick={() => { setSelectedOrder(order); setIsCancelOpen(true); }}>
@@ -736,6 +744,32 @@ export default function OrdersPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* ========== Delete Confirmation Dialog ========== */}
+      <AlertDialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Confirmar Exclusão
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o pedido <span className="font-mono font-bold text-foreground">{selectedOrder?.number}</span>? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSelectedOrder(null)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteOrder.isPending}
+            >
+              {deleteOrder.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
+              Confirmar Exclusão
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Cancel Confirmation */}
       <AlertDialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
