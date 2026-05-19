@@ -68,8 +68,6 @@ Deno.test("deleted_orders_archive cleanup trigger - direct cleanup on insert", a
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   // Insert a record that is already expired
-  // The trigger runs BEFORE INSERT on the table, so it should clean up any records that meet the criteria
-  // before the new one is added.
   const oldId = "22222222-2222-2222-2222-222222222222";
   await supabase.from("deleted_orders_archive").insert({
     original_order_id: oldId,
@@ -94,4 +92,63 @@ Deno.test("deleted_orders_archive cleanup trigger - direct cleanup on insert", a
 
   // Cleanup
   await supabase.from("deleted_orders_archive").delete().eq("original_order_id", nextId);
+});
+
+Deno.test("deleted_orders_archive cleanup trigger - remove multiple expired records", async () => {
+  if (!supabaseKey) {
+    console.log("SKIP: SUPABASE_SERVICE_ROLE_KEY not available, skipping test execution.");
+    return;
+  }
+  
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  // 1. Insert multiple expired records
+  const expiredIds = [
+    "44444444-4444-4444-4444-444444444444",
+    "55555555-5555-5555-5555-555555555555",
+    "66666666-6666-6666-6666-666666666666"
+  ];
+  
+  const expiredEntries = expiredIds.map(id => ({
+    original_order_id: id,
+    order_data: { test: "multiple_expired" },
+    expires_at: new Date(Date.now() - 120000).toISOString(), // 2 minutes ago
+  }));
+
+  const { error: insertExpiredError } = await supabase
+    .from("deleted_orders_archive")
+    .insert(expiredEntries);
+
+  if (insertExpiredError) throw insertExpiredError;
+
+  // 2. Insert one fresh record to trigger cleanup of ALL expired records
+  const freshId = "77777777-7777-7777-7777-777777777777";
+  const { error: insertFreshError } = await supabase
+    .from("deleted_orders_archive")
+    .insert({
+      original_order_id: freshId,
+      order_data: { test: "trigger_all" },
+      expires_at: new Date(Date.now() + 600000).toISOString(),
+    });
+
+  if (insertFreshError) throw insertFreshError;
+
+  // 3. Verify all expired records are gone
+  const { data: remainingExpired } = await supabase
+    .from("deleted_orders_archive")
+    .select("original_order_id")
+    .in("original_order_id", expiredIds);
+
+  assertEquals(remainingExpired?.length, 0, "All multiple expired records should have been removed");
+
+  // 4. Verify fresh record still exists
+  const { data: freshRecord } = await supabase
+    .from("deleted_orders_archive")
+    .select("id")
+    .eq("original_order_id", freshId);
+
+  assertEquals(freshRecord?.length, 1, "Fresh record should still exist");
+
+  // Cleanup
+  await supabase.from("deleted_orders_archive").delete().eq("original_order_id", freshId);
 });
