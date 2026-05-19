@@ -304,9 +304,14 @@ export default function OrdersPage() {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8" disabled={deleteOrder.isPending && selectedOrder?.id === order.id}>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className={`h-8 w-8 ${deleteOrder.isPending && selectedOrder?.id === order.id ? 'opacity-50' : ''}`} 
+            disabled={deleteOrder.isPending}
+          >
             {deleteOrder.isPending && selectedOrder?.id === order.id ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
             ) : (
               <MoreHorizontal className="h-4 w-4" />
             )}
