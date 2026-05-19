@@ -3,7 +3,7 @@ import * as React from "react";
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
 
 const TOAST_LIMIT = 1;
-const TOAST_REMOVE_DELAY = 10000; // Increased to 10 seconds to give more time for "Undo"
+const TOAST_REMOVE_DELAY = 1000000; // Restore to long delay as specific durations are handled per toast
 
 type ToasterToast = ToastProps & {
   id: string;
