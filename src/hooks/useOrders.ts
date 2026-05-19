@@ -235,7 +235,7 @@ export function useDeleteOrder() {
     onSuccess: (deletedOrder) => {
       qc.invalidateQueries({ queryKey: ['orders'] });
       
-      const undoSeconds = Number(getParameter('undo_duration_seconds', 10));
+      const undoSeconds = Number(getParameter('undo_duration_seconds', '10'));
       const durationMs = undoSeconds * 1000;
 
       toast({ 
