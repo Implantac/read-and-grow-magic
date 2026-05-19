@@ -120,23 +120,16 @@ async function fetchAllData(supabase: any) {
 function computeKPIs(d: any) {
   const completedStatuses = ['completed', 'invoiced', 'shipped', 'delivered'];
   const now = new Date();
-
+  
+  // Base metrics
   const totalRevenue = d.orders.filter((o: any) => completedStatuses.includes(o.status)).reduce((s: number, o: any) => s + (o.total || 0), 0);
   const totalCosts = d.payables.filter((p: any) => p.status === 'paid').reduce((s: number, p: any) => s + (p.amount || 0), 0);
   const grossProfit = totalRevenue - totalCosts;
   const grossMargin = totalRevenue > 0 ? (grossProfit / totalRevenue * 100) : 0;
 
-  const overdueReceivable = d.receivables.filter((r: any) => r.status === 'overdue' || (r.status === 'pending' && new Date(r.due_date) < now)).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
-  const overduePayable = d.payables.filter((p: any) => p.status === 'overdue' || (p.status === 'pending' && new Date(p.due_date) < now)).reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0);
-  const totalReceivable = d.receivables.filter((r: any) => r.status === 'pending').reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
-  const totalPayable = d.payables.filter((p: any) => p.status === 'pending').reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0);
-
-  const activeClients = d.clients.filter((c: any) => c.status === 'active').length;
-  const lowStockProducts = d.products.filter((p: any) => p.stock_current <= p.stock_min && p.status === 'active').length;
-  const defaultRate = totalReceivable > 0 ? (overdueReceivable / (totalReceivable + overdueReceivable) * 100) : 0;
-
-  const revenueByMonth: any[] = [];
-  for (let i = 5; i >= 0; i--) {
+  // Time-based revenue aggregation
+  const revenueByMonth = [];
+  for (let i = 11; i >= 0; i--) {
     const dt = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const monthOrders = d.orders.filter((o: any) => {
       const od = new Date(o.created_at);
@@ -148,140 +141,72 @@ function computeKPIs(d: any) {
     });
   }
 
-  const clientRevenue: Record<string, number> = {};
-  d.orders.forEach((o: any) => {
-    if (completedStatuses.includes(o.status)) {
-      clientRevenue[o.client_name] = (clientRevenue[o.client_name] || 0) + (o.total || 0);
-    }
-  });
-  const topClients = Object.entries(clientRevenue).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, revenue]) => ({ name, revenue }));
+  // YoY and MoM Growth
+  const currentMonthRev = revenueByMonth[revenueByMonth.length - 1].revenue;
+  const lastMonthRev = revenueByMonth[revenueByMonth.length - 2].revenue;
+  const sameMonthLastYearRev = revenueByMonth[0].revenue;
+  
+  const moMGrowth = lastMonthRev > 0 ? ((currentMonthRev - lastMonthRev) / lastMonthRev * 100) : 0;
+  const yoYGrowth = sameMonthLastYearRev > 0 ? ((currentMonthRev - sameMonthLastYearRev) / sameMonthLastYearRev * 100) : 0;
 
-  const totalClientRevenue = Object.values(clientRevenue).reduce((a, b) => a + b, 0);
-  const top3Revenue = topClients.slice(0, 3).reduce((s, c) => s + c.revenue, 0);
-  const concentrationPct = totalClientRevenue > 0 ? (top3Revenue / totalClientRevenue * 100) : 0;
+  // Financial health
+  const totalReceivable = d.receivables.filter((r: any) => r.status === 'pending').reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
+  const overdueReceivable = d.receivables.filter((r: any) => r.status === 'overdue' || (r.status === 'pending' && new Date(r.due_date) < now)).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
+  const defaultRate = (totalReceivable + overdueReceivable) > 0 ? (overdueReceivable / (totalReceivable + overdueReceivable) * 100) : 0;
 
-  const expenseByCategory: Record<string, number> = {};
-  d.payables.forEach((p: any) => {
-    expenseByCategory[p.category || 'Outros'] = (expenseByCategory[p.category || 'Outros'] || 0) + (p.amount || 0);
-  });
+  // Client Churn Approximation
+  const activeClients = d.clients.filter((c: any) => c.status === 'active').length;
+  const inactiveClients = d.clients.filter((c: any) => {
+    if (!c.last_purchase_date) return true;
+    return (now.getTime() - new Date(c.last_purchase_date).getTime()) / 86400000 > 180; // 6 months inactive
+  }).length;
+  const churnRate = (activeClients + inactiveClients) > 0 ? (inactiveClients / (activeClients + inactiveClients) * 100) : 0;
 
-  const repPerformance: Record<string, { orders: number; revenue: number; name: string; discount: number }> = {};
-  d.orders.forEach((o: any) => {
-    if (o.sales_rep_id && completedStatuses.includes(o.status)) {
-      if (!repPerformance[o.sales_rep_id]) repPerformance[o.sales_rep_id] = { orders: 0, revenue: 0, name: o.sales_rep_name || 'N/A', discount: 0 };
-      repPerformance[o.sales_rep_id].orders++;
-      repPerformance[o.sales_rep_id].revenue += o.total || 0;
-      repPerformance[o.sales_rep_id].discount += o.discount || 0;
-    }
-  });
-  const salesRepStats = Object.entries(repPerformance)
-    .map(([id, v]) => ({ id, ...v, avgTicket: v.orders > 0 ? +(v.revenue / v.orders).toFixed(0) : 0, discountPct: v.revenue > 0 ? +((v.discount / (v.revenue + v.discount)) * 100).toFixed(1) : 0 }))
-    .sort((a, b) => b.revenue - a.revenue).slice(0, 10);
-
-  const funnelByStage: Record<string, { count: number; value: number }> = {};
-  d.funnel.filter((f: any) => f.status === 'active' || !f.status).forEach((f: any) => {
-    const stage = f.stage || 'unknown';
-    if (!funnelByStage[stage]) funnelByStage[stage] = { count: 0, value: 0 };
-    funnelByStage[stage].count++;
-    funnelByStage[stage].value += f.value || 0;
-  });
-
+  // Production Efficiency
   const prodCompleted = d.production.filter((p: any) => p.status === 'completed');
-  const prodInProgress = d.production.filter((p: any) => p.status === 'in_progress');
-  const prodPlanned = d.production.filter((p: any) => p.status === 'planned' || p.status === 'pending');
   const prodEfficiency = prodCompleted.length > 0
     ? prodCompleted.reduce((s: number, p: any) => s + (p.produced_quantity || 0), 0) / prodCompleted.reduce((s: number, p: any) => s + (p.planned_quantity || 1), 0) * 100
     : 0;
 
-  const futureReceivables = d.receivables.filter((r: any) => {
-    const dd = new Date(r.due_date);
-    return r.status === 'pending' && dd >= now && dd <= new Date(now.getTime() + 30 * 86400000);
-  }).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
-  const futurePayables = d.payables.filter((p: any) => {
-    const dd = new Date(p.due_date);
-    return p.status === 'pending' && dd >= now && dd <= new Date(now.getTime() + 30 * 86400000);
-  }).reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0);
+  // Financial Projections
+  const futureReceivables = d.receivables.filter((r: any) => r.status === 'pending' && new Date(r.due_date) > now).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
+  const futurePayables = d.payables.filter((p: any) => p.status === 'pending' && new Date(p.due_date) > now).reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0);
 
-  const lastTwoMonths = revenueByMonth.slice(-2);
-  const revenueGrowth = lastTwoMonths.length === 2 && lastTwoMonths[0].revenue > 0
-    ? ((lastTwoMonths[1].revenue - lastTwoMonths[0].revenue) / lastTwoMonths[0].revenue * 100) : 0;
+  // Sales Targets
+  const targetsSummary = d.salesTargets.reduce((acc: any, t: any) => ({ target: acc.target + (t.target_value || 0), achieved: acc.achieved + (t.achieved_value || 0) }), { target: 0, achieved: 0 });
+  const targetAttainment = targetsSummary.target > 0 ? (targetsSummary.achieved / targetsSummary.target * 100) : 0;
 
-  const completedOrders = d.orders.filter((o: any) => completedStatuses.includes(o.status));
-  const avgTicket = completedOrders.length > 0 ? totalRevenue / completedOrders.length : 0;
-
-  const clientsAtRisk = d.clients.filter((c: any) => {
-    if (c.status !== 'active') return false;
-    if (!c.last_purchase_date) return true;
-    return (now.getTime() - new Date(c.last_purchase_date).getTime()) / 86400000 > 60;
-  }).length;
-
-  const productMap: Record<string, { name: string; price: number; cost: number; stock: number }> = {};
-  d.products.forEach((p: any) => { productMap[p.id] = { name: p.name, price: p.price || 0, cost: p.cost || 0, stock: p.stock_current || 0 }; });
-
-  const productMargins: { name: string; revenue: number; cost: number; margin: number; marginPct: number; qty: number }[] = [];
-  const productSales: Record<string, { revenue: number; cost: number; qty: number; name: string }> = {};
+  // Product Margins
+  const productMap: Record<string, any> = {};
+  d.products.forEach((p: any) => { productMap[p.id] = { name: p.name, cost: p.cost || 0 }; });
+  const productSales: Record<string, any> = {};
   d.orderItems.forEach((item: any) => {
-    if (!item.product_id) return;
-    const prod = productMap[item.product_id];
-    if (!prod) return;
-    if (!productSales[item.product_id]) productSales[item.product_id] = { revenue: 0, cost: 0, qty: 0, name: prod.name };
+    if (!item.product_id || !productMap[item.product_id]) return;
+    if (!productSales[item.product_id]) productSales[item.product_id] = { revenue: 0, cost: 0, qty: 0, name: productMap[item.product_id].name };
     productSales[item.product_id].revenue += item.total || 0;
-    productSales[item.product_id].cost += (prod.cost || 0) * (item.quantity || 0);
+    productSales[item.product_id].cost += (productMap[item.product_id].cost || 0) * (item.quantity || 0);
     productSales[item.product_id].qty += item.quantity || 0;
   });
-  Object.entries(productSales).forEach(([, v]) => {
-    const margin = v.revenue - v.cost;
-    productMargins.push({ name: v.name, revenue: v.revenue, cost: v.cost, margin, marginPct: v.revenue > 0 ? +(margin / v.revenue * 100).toFixed(1) : 0, qty: v.qty });
-  });
-  productMargins.sort((a, b) => b.revenue - a.revenue);
-
-  const topProfitable = [...productMargins].sort((a, b) => b.margin - a.margin).slice(0, 5);
-  const lowMarginProducts = productMargins.filter(p => p.marginPct < 15 && p.revenue > 0).slice(0, 5);
-
-  const revenueByRegion: Record<string, number> = {};
-  const clientRegionMap: Record<string, string> = {};
-  d.clients.forEach((c: any) => { if (c.region) clientRegionMap[c.name] = c.region; });
-  d.orders.forEach((o: any) => {
-    if (completedStatuses.includes(o.status)) {
-      const region = clientRegionMap[o.client_name] || 'Não definida';
-      revenueByRegion[region] = (revenueByRegion[region] || 0) + (o.total || 0);
-    }
-  });
-
-  const targetsSummary = d.salesTargets.reduce((acc: any, t: any) => {
-    acc.target += t.target_value || 0;
-    acc.achieved += t.achieved_value || 0;
-    return acc;
-  }, { target: 0, achieved: 0 });
-  const targetAttainment = targetsSummary.target > 0 ? +(targetsSummary.achieved / targetsSummary.target * 100).toFixed(1) : 0;
-
-  const autoAlerts: any[] = [];
-  if (defaultRate > 10) autoAlerts.push({ type: 'financial_risk', severity: 'critical', title: 'Inadimplência acima de 10%', description: `Taxa atual: ${defaultRate.toFixed(1)}%. Ação imediata necessária.`, metric: 'default_rate', value: defaultRate });
-  if (concentrationPct > 60) autoAlerts.push({ type: 'revenue_concentration', severity: 'high', title: 'Concentração excessiva de receita', description: `Top 3 clientes representam ${concentrationPct.toFixed(0)}% da receita.`, metric: 'concentration', value: concentrationPct });
-  if (revenueGrowth < -10) autoAlerts.push({ type: 'revenue_decline', severity: 'critical', title: 'Queda acentuada de receita', description: `Receita caiu ${Math.abs(revenueGrowth).toFixed(1)}% vs mês anterior.`, metric: 'revenue_growth', value: revenueGrowth });
-  if ((futureReceivables - futurePayables) < 0) autoAlerts.push({ type: 'cash_flow_risk', severity: 'high', title: 'Fluxo de caixa negativo projetado', description: `Projeção 30d: déficit de R$ ${Math.abs(futureReceivables - futurePayables).toLocaleString('pt-BR')}.`, metric: 'cash_flow_30d', value: futureReceivables - futurePayables });
-  if (lowStockProducts > 3) autoAlerts.push({ type: 'stock_critical', severity: 'medium', title: `${lowStockProducts} produtos abaixo do estoque mínimo`, description: 'Risco de ruptura e perda de vendas.', metric: 'low_stock', value: lowStockProducts });
-  if (clientsAtRisk > 5) autoAlerts.push({ type: 'client_churn', severity: 'high', title: `${clientsAtRisk} clientes em risco de perda`, description: 'Clientes ativos sem compra há mais de 60 dias.', metric: 'clients_at_risk', value: clientsAtRisk });
-  if (targetAttainment > 0 && targetAttainment < 70) autoAlerts.push({ type: 'target_risk', severity: 'high', title: 'Meta de vendas em risco', description: `Atingimento atual: ${targetAttainment}% da meta.`, metric: 'target_attainment', value: targetAttainment });
+  const productMargins = Object.values(productSales).map((v: any) => ({
+    ...v,
+    margin: v.revenue - v.cost,
+    marginPct: v.revenue > 0 ? +((v.revenue - v.cost) / v.revenue * 100).toFixed(1) : 0
+  })).sort((a, b) => b.revenue - a.revenue);
 
   return {
     kpis: {
-      totalRevenue, totalCosts, grossProfit,
+      totalRevenue, grossProfit, 
       grossMargin: +grossMargin.toFixed(1),
-      overdueReceivable, overduePayable,
-      totalReceivable, totalPayable,
-      netPosition: totalReceivable - totalPayable,
-      activeClients, lowStockProducts,
+      moMGrowth: +moMGrowth.toFixed(1),
+      yoYGrowth: +yoYGrowth.toFixed(1),
       defaultRate: +defaultRate.toFixed(1),
-      concentrationPct: +concentrationPct.toFixed(1),
-      avgTicket: +avgTicket.toFixed(0),
-      revenueGrowth: +revenueGrowth.toFixed(1),
-      clientsAtRisk,
+      churnRate: +churnRate.toFixed(1),
+      avgDailyRevenue: +(totalRevenue / 30).toFixed(0),
       cashFlowProjection30d: futureReceivables - futurePayables,
       futureReceivables, futurePayables,
       prodEfficiency: +prodEfficiency.toFixed(1),
-      prodInProgress: prodInProgress.length,
-      prodPlanned: prodPlanned.length,
+      prodInProgress: d.production.filter((p: any) => p.status === 'in_progress').length,
+      prodPlanned: d.production.filter((p: any) => p.status === 'planned').length,
       prodCompleted: prodCompleted.length,
       targetAttainment,
       totalTarget: targetsSummary.target,
@@ -302,15 +227,15 @@ function computeKPIs(d: any) {
       lastSpedDate: d.spedFiles[0]?.generated_at || null,
     },
     revenueByMonth,
-    topClients,
-    expenseByCategory,
-    salesRepStats,
-    funnelByStage,
+    topClients: d.clients.sort((a: any, b: any) => (b.total_purchases || 0) - (a.total_purchases || 0)).slice(0, 5),
+    expenseByCategory: d.payables.reduce((acc: any, p: any) => ({ ...acc, [p.category || 'Outros']: (acc[p.category || 'Outros'] || 0) + (p.amount || 0) }), {}),
+    salesRepStats: d.salesReps.map((r: any) => ({ name: r.name, revenue: d.orders.filter((o: any) => o.sales_rep_id === r.id).reduce((s: number, o: any) => s + (o.total || 0), 0) })),
+    funnelByStage: d.funnel.reduce((acc: any, f: any) => ({ ...acc, [f.stage || 'Outros']: (acc[f.stage || 'Outros'] || 0) + (f.value || 0) }), {}),
     productMargins: productMargins.slice(0, 10),
-    topProfitable,
-    lowMarginProducts,
-    revenueByRegion,
-    autoAlerts,
+    topProfitable: productMargins.sort((a: any, b: any) => b.margin - a.margin).slice(0, 5),
+    lowMarginProducts: productMargins.filter((p: any) => p.marginPct < 10).slice(0, 5),
+    revenueByRegion: d.clients.reduce((acc: any, c: any) => ({ ...acc, [c.region || 'Outros']: (acc[c.region || 'Outros'] || 0) + (c.total_purchases || 0) }), {}),
+    autoAlerts: d.alerts,
     summary: {
       totalOrders: d.orders.length,
       totalProducts: d.products.length,
@@ -520,6 +445,21 @@ const ERP_TOOLS = [
   {
     type: "function",
     function: {
+      name: "analise_historica",
+      description: "Compara performance de períodos (ex: último mês vs mês anterior ou ano passado).",
+      parameters: {
+        type: "object",
+        properties: {
+          periodo_a: { type: "string", description: "Data inicial período A (YYYY-MM-DD)" },
+          periodo_b: { type: "string", description: "Data inicial período B (YYYY-MM-DD)" },
+        },
+        required: ["periodo_a", "periodo_b"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "consultar_financeiro",
       description: "Consulta resumo financeiro: contas a pagar, receber, vencimentos, saldos, inadimplência",
       parameters: {
@@ -536,11 +476,11 @@ const ERP_TOOLS = [
     type: "function",
     function: {
       name: "consultar_comercial",
-      description: "Consulta dados comerciais: clientes, pedidos, vendas, funil, metas, representantes",
+      description: "Consulta resumo comercial: clientes, pedidos, funil, metas, vendedores",
       parameters: {
         type: "object",
         properties: {
-          tipo: { type: "string", enum: ["resumo", "clientes_ativos", "pedidos_recentes", "funil", "metas", "top_clientes", "clientes_risco", "vendedores"], description: "Tipo de consulta comercial" },
+          tipo: { type: "string", enum: ["resumo", "pedidos_recentes", "top_clientes", "clientes_risco", "metas", "funil", "vendedores"], description: "Tipo de consulta comercial" },
           limite: { type: "number", description: "Limite de registros (padrão 10)" },
         },
         required: ["tipo"],
@@ -551,11 +491,11 @@ const ERP_TOOLS = [
     type: "function",
     function: {
       name: "consultar_producao",
-      description: "Consulta produção: ordens, status, eficiência, atrasos, filas",
+      description: "Consulta resumo de produção: OPs ativas, atrasadas, eficiência",
       parameters: {
         type: "object",
         properties: {
-          tipo: { type: "string", enum: ["resumo", "ordens_ativas", "atrasadas", "concluidas_recentes", "eficiencia"], description: "Tipo de consulta de produção" },
+          tipo: { type: "string", enum: ["resumo", "ordens_ativas", "atrasadas", "eficiencia"], description: "Tipo de consulta produção" },
         },
         required: ["tipo"],
       },
@@ -565,12 +505,12 @@ const ERP_TOOLS = [
     type: "function",
     function: {
       name: "consultar_estoque",
-      description: "Consulta estoque: saldos, produtos abaixo do mínimo, movimentações recentes",
+      description: "Consulta resumo de estoque: produtos, ruptura, movimentações",
       parameters: {
         type: "object",
         properties: {
-          tipo: { type: "string", enum: ["resumo", "baixo_estoque", "movimentacoes_recentes", "produto_especifico"], description: "Tipo de consulta de estoque" },
-          produto_nome: { type: "string", description: "Nome do produto para busca específica" },
+          tipo: { type: "string", enum: ["resumo", "baixo_estoque", "movimentacoes_recentes", "produto_especifico"], description: "Tipo de consulta estoque" },
+          produto_nome: { type: "string", description: "Nome do produto para busca" },
         },
         required: ["tipo"],
       },
@@ -580,16 +520,16 @@ const ERP_TOOLS = [
     type: "function",
     function: {
       name: "executar_acao",
-      description: "Executa ações no ERP: registrar pagamento, adiar conta, alterar status de pedido/OP, criar conta a pagar/receber, priorizar OP, ajustar estoque. SEMPRE peça confirmação ao usuário antes de executar com confirmado=true.",
+      description: "Executa ações operacionais: registrar pagamentos, alterar status, ajustar estoque",
       parameters: {
         type: "object",
         properties: {
-          modulo: { type: "string", enum: ["financeiro", "comercial", "producao", "estoque"] },
-          acao: { type: "string", enum: ["registrar_pagamento", "adiar_vencimento", "criar_conta_pagar", "criar_conta_receber", "alterar_status_pedido", "alterar_status_op", "priorizar_op", "ajustar_estoque"] },
-          parametros: { type: "object", description: "Parâmetros da ação" },
-          confirmado: { type: "boolean", description: "Se o usuário já confirmou a ação. Use false na primeira chamada para pedir confirmação." },
+          acao: { type: "string", enum: ["registrar_pagamento", "adiar_vencimento", "criar_conta_pagar", "criar_conta_receber", "alterar_status_pedido", "alterar_status_op", "priorizar_op", "ajustar_estoque"], description: "Ação a executar" },
+          modulo: { type: "string", enum: ["financeiro", "comercial", "producao", "estoque"], description: "Módulo da ação" },
+          parametros: { type: "object", description: "Parâmetros da ação (ex: {id, valor, novo_status})" },
+          confirmado: { type: "boolean", description: "Confirmação do usuário" },
         },
-        required: ["modulo", "acao", "parametros"],
+        required: ["acao", "modulo", "parametros", "confirmado"],
       },
     },
   },
@@ -1000,6 +940,18 @@ async function executeConsultaFiscal(supabase: any, args: any) {
 
 // TOOL_EXECUTORS are called with (supabase, args, user_id) — see tool call loop below
 const TOOL_EXECUTORS: Record<string, (supabase: any, args: any, user_id?: string) => Promise<any>> = {
+  analise_historica: async (supabase, args) => {
+    // Busca agregados históricos de dois períodos para comparação
+    const { periodo_a, periodo_b } = args;
+    const fetchStats = async (date: string) => {
+      const start = new Date(date);
+      const end = new Date(start.getFullYear(), start.getMonth() + 1, 0);
+      const { data } = await supabase.from("orders").select("total, status").gte("created_at", start.toISOString()).lte("created_at", end.toISOString()).in("status", ["completed", "invoiced", "shipped", "delivered"]);
+      return (data || []).reduce((s: number, o: any) => s + (o.total || 0), 0);
+    };
+    const [revA, revB] = await Promise.all([fetchStats(periodo_a), fetchStats(periodo_b)]);
+    return { periodo_a: { data: periodo_a, receita: revA }, periodo_b: { data: periodo_b, receita: revB }, crescimento: revB > 0 ? ((revA - revB) / revB * 100).toFixed(1) + "%" : "N/A" };
+  },
   consultar_financeiro: executeConsultaFinanceiro,
   consultar_comercial: executeConsultaComercial,
   consultar_producao: executeConsultaProducao,
@@ -1197,8 +1149,6 @@ Você tem acesso via ferramentas (tools) aos dados REAIS: estoque, produtos, mov
 # EXEMPLOS DE COMPORTAMENTO ESPERADO
 
 Pergunta: "Como está meu estoque?"
-→ Resposta: (1) Resumo com nº SKUs, valor total, % ruptura  (2) Alertas: produtos abaixo do mínimo + parados >90d  (3) Sugestões: comprar X, liquidar Y, transferir Z
-
 Pergunta: "O que devo produzir?"
 → Resposta: Ranking de OPs por giro × estoque atual × pedidos firmes, com sequenciamento sugerido
 
@@ -1206,18 +1156,17 @@ Pergunta: "Como está meu caixa?"
 → Resposta: Saldo + projeção 30d + gap + ação (antecipar recebível / renegociar pagável)
 
 
+# 👔 PERSONA E FRAMEWORKS ESTRATÉGICOS
+Você é um Diretor Executivo (CEO) focado em **Eficiência e ROI**. Utilize frameworks como:
+- **Pareto (80/20)**: Identifique os 20% de clientes/produtos que geram 80% do resultado.
+- **Matriz SWOT**: Destaque Forças, Fraquezas, Oportunidades e Ameaças detectadas nos números.
+- **Análise de Cohort/Churn**: Avalie a retenção e saúde da base de clientes.
 
 # 🎨 REGRAS DE FORMATAÇÃO EXECUTIVA (OBRIGATÓRIO)
-
 Toda resposta deve parecer um RELATÓRIO DE CEO — leitura rápida, ação imediata.
-
-## Princípios visuais:
-- NÃO use blocos longos de texto (máximo 2-3 linhas por parágrafo)
-- SEMPRE use listas com bullets (-) ou numeração
-- SEMPRE separe seções com títulos (## ou ###) e linha em branco antes/depois
-- NÃO use tabelas markdown complexas — prefira listas formatadas
-- Linguagem clara, direta, orientada a decisão
-- Espaçamento generoso entre seções (linha em branco)
+- SEMPRE apresente uma **Ação Recomendada** para cada insight.
+- Priorize métricas de **Margem** e **Liquidez** sobre volume bruto.
+- Utilize bullets para facilitar a leitura.
 
 ## Quando usar tabela (apenas casos simples):
 Tabelas SIMPLES de 2-3 colunas são permitidas (ex: KPIs). Cada linha em LINHA SEPARADA, com linha em branco antes/depois:
