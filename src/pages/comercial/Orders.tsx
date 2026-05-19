@@ -313,14 +313,22 @@ export default function OrdersPage() {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={() => { setSelectedOrder(order); setIsViewOpen(true); }}>
+          <DropdownMenuItem 
+            onClick={() => { setSelectedOrder(order); setIsViewOpen(true); }}
+            disabled={deleteOrder.isPending}
+          >
             <Eye className="mr-2 h-4 w-4" />Visualizar
           </DropdownMenuItem>
-          <DropdownMenuItem><FileText className="mr-2 h-4 w-4" />Imprimir</DropdownMenuItem>
+          <DropdownMenuItem disabled={deleteOrder.isPending}>
+            <FileText className="mr-2 h-4 w-4" />Imprimir
+          </DropdownMenuItem>
           {canAdvance && (
             <>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleAdvanceStatus(order)}>
+              <DropdownMenuItem 
+                onClick={() => handleAdvanceStatus(order)}
+                disabled={deleteOrder.isPending || updateStatus.isPending}
+              >
                 <ArrowRight className="mr-2 h-4 w-4 text-primary" />
                 Avançar para {getOrderStatusLabel(nextStatus as any)}
               </DropdownMenuItem>
@@ -329,10 +337,18 @@ export default function OrdersPage() {
           {order.status !== 'cancelled' && order.status !== 'delivered' && (
             <>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive" onClick={() => { setSelectedOrder(order); setIsDeleteConfirmOpen(true); }}>
+              <DropdownMenuItem 
+                className="text-destructive" 
+                onClick={() => { setSelectedOrder(order); setIsDeleteConfirmOpen(true); }}
+                disabled={deleteOrder.isPending}
+              >
                 <Trash2 className="mr-2 h-4 w-4" />Excluir Pedido
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive" onClick={() => { setSelectedOrder(order); setIsCancelOpen(true); }}>
+              <DropdownMenuItem 
+                className="text-destructive" 
+                onClick={() => { setSelectedOrder(order); setIsCancelOpen(true); }}
+                disabled={deleteOrder.isPending}
+              >
                 <XCircle className="mr-2 h-4 w-4" />Cancelar Pedido
               </DropdownMenuItem>
             </>
