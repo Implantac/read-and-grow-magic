@@ -238,28 +238,32 @@ export function useDeleteOrder() {
       toast({ 
         title: 'Pedido removido com sucesso!',
         description: `O pedido ${deletedOrder.number} foi excluído.`,
-        action: React.createElement(ToastAction, {
-          altText: 'Desfazer exclusão',
-          onClick: async () => {
-            try {
-              // Restore logic: Re-insert order and then items
-              // Note: deletedOrder from Supabase has 'order_items' instead of 'items'
-              const { order_items, ...orderData } = deletedOrder;
-              const { data: restored, error: restError } = await supabase.from('orders').insert(orderData).select().single();
-              if (restError) throw restError;
+        action: (
+          <ToastAction
+            altText="Desfazer exclusão"
+            onClick={async () => {
+              try {
+                // Restore logic: Re-insert order and then items
+                // Note: deletedOrder from Supabase has 'order_items' instead of 'items'
+                const { order_items, ...orderData } = deletedOrder;
+                const { data: restored, error: restError } = await supabase.from('orders').insert(orderData).select().single();
+                if (restError) throw restError;
 
-              if (order_items && order_items.length > 0) {
-                const { error: itemsError } = await supabase.from('order_items').insert(order_items);
-                if (itemsError) throw itemsError;
+                if (order_items && order_items.length > 0) {
+                  const { error: itemsError } = await supabase.from('order_items').insert(order_items);
+                  if (itemsError) throw itemsError;
+                }
+
+                qc.invalidateQueries({ queryKey: ['orders'] });
+                toast({ title: 'Pedido restaurado com sucesso!' });
+              } catch (err: any) {
+                toast({ title: 'Erro ao restaurar pedido', description: err.message, variant: 'destructive' });
               }
-
-              qc.invalidateQueries({ queryKey: ['orders'] });
-              toast({ title: 'Pedido restaurado com sucesso!' });
-            } catch (err: any) {
-              toast({ title: 'Erro ao restaurar pedido', description: err.message, variant: 'destructive' });
-            }
-          }
-        }, 'Desfazer')
+            }}
+          >
+            Desfazer
+          </ToastAction>
+        ) as React.ReactElement
       });
     },
     onError: (e: any) => {
