@@ -227,17 +227,34 @@ export function useDeleteOrder() {
       
       if (fetchError || !order) throw new Error('Pedido não encontrado');
 
-      const { error: deleteError } = await supabase.from('orders').delete().eq('id', id);
-      if (deleteError) throw deleteError;
+      const undoSeconds = Number(getParameter('undo_duration_seconds', '10'));
+      const expiresAt = new Date(Date.now() + undoSeconds * 1000).toISOString();
 
-      return order;
+      const { data: archiveData, error: archiveError } = await supabase
+        .from('deleted_orders_archive')
+        .insert({
+          original_order_id: id,
+          order_data: order,
+          expires_at: expiresAt
+        })
+        .select()
+        .single();
+
+      if (archiveError) throw archiveError;
+
+      const { error: deleteError } = await supabase.from('orders').delete().eq('id', id);
+      if (deleteError) {
+        await supabase.from('deleted_orders_archive').delete().eq('id', archiveData.id);
+        throw deleteError;
+      }
+
+      return { order, archiveId: archiveData.id };
     },
-    onSuccess: (deletedOrder) => {
+    onSuccess: ({ order: deletedOrder, archiveId }) => {
       qc.invalidateQueries({ queryKey: ['orders'] });
       
       const undoSeconds = Number(getParameter('undo_duration_seconds', '10'));
       const durationMs = undoSeconds * 1000;
-
       let timeLeft = undoSeconds;
       let interval: any;
 
@@ -248,6 +265,17 @@ export function useDeleteOrder() {
           onClick: async () => {
             if (interval) clearInterval(interval);
             try {
+              const { data: archive, error: checkError } = await supabase
+                .from('deleted_orders_archive')
+                .select('*')
+                .eq('id', archiveId)
+                .gt('expires_at', new Date().toISOString())
+                .maybeSingle();
+
+              if (checkError || !archive) {
+                throw new Error('Tempo para desfazer expirou ou registro não encontrado no servidor.');
+              }
+
               const { order_items, ...orderData } = deletedOrder;
               
               const { data: restored, error: restError } = await supabase.from('orders').insert(orderData).select().single();
@@ -261,6 +289,8 @@ export function useDeleteOrder() {
                 const { error: itemsError } = await supabase.from('order_items').insert(restoredItems);
                 if (itemsError) throw itemsError;
               }
+
+              await supabase.from('deleted_orders_archive').delete().eq('id', archiveId);
 
               qc.invalidateQueries({ queryKey: ['orders'] });
               toast({ title: 'Pedido restaurado com sucesso!' });
