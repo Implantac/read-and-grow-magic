@@ -1,41 +1,93 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 
 export function useSuppliers() {
-  const [suppliers, setSuppliers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  const fetch = useCallback(async () => {
-    setLoading(true);
-    const { data, error } = await supabase.from('suppliers').select('*').order('name');
-    if (error) { console.error(error); toast.error('Erro ao carregar fornecedores'); }
-    else setSuppliers(data || []);
-    setLoading(false);
-  }, []);
+  const suppliersQuery = useQuery({
+    queryKey: ['suppliers'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('suppliers')
+        .select('*')
+        .order('name');
+      if (error) throw error;
+      return data;
+    },
+  });
 
-  useEffect(() => { fetch(); }, [fetch]);
+  const createMutation = useMutation({
+    mutationFn: async (supplier: any) => {
+      const { data, error } = await supabase.from('suppliers').insert(supplier).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+      toast({ title: 'Fornecedor criado com sucesso!' });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Erro ao criar fornecedor', 
+        description: error.message, 
+        variant: 'destructive' 
+      });
+    },
+  });
 
-  const create = async (supplier: any) => {
-    const { error } = await supabase.from('suppliers').insert(supplier);
-    if (error) { toast.error('Erro ao criar fornecedor'); return; }
-    toast.success('Fornecedor criado');
-    await fetch();
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
+      const { data, error } = await supabase
+        .from('suppliers')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+      toast({ title: 'Fornecedor atualizado com sucesso!' });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Erro ao atualizar fornecedor', 
+        description: error.message, 
+        variant: 'destructive' 
+      });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('suppliers').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+      toast({ title: 'Fornecedor excluído com sucesso!' });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Erro ao excluir fornecedor', 
+        description: error.message, 
+        variant: 'destructive' 
+      });
+    },
+  });
+
+  return { 
+    suppliers: suppliersQuery.data || [], 
+    loading: suppliersQuery.isLoading, 
+    refetch: suppliersQuery.refetch, 
+    create: (s: any) => createMutation.mutateAsync(s), 
+    update: (id: string, u: any) => updateMutation.mutateAsync({ id, updates: u }), 
+    remove: (id: string) => deleteMutation.mutateAsync(id),
+    isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
+    isRemoving: deleteMutation.isPending
   };
-
-  const update = async (id: string, updates: any) => {
-    const { error } = await supabase.from('suppliers').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
-    if (error) { toast.error('Erro ao atualizar fornecedor'); return; }
-    toast.success('Fornecedor atualizado');
-    await fetch();
-  };
-
-  const remove = async (id: string) => {
-    const { error } = await supabase.from('suppliers').delete().eq('id', id);
-    if (error) { toast.error('Erro ao excluir fornecedor'); return; }
-    toast.success('Fornecedor excluído');
-    await fetch();
-  };
-
-  return { suppliers, loading, refetch: fetch, create, update, remove };
 }
