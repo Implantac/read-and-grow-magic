@@ -38,6 +38,13 @@ export default function ReceivingPage() {
   const { orders, loading, refetch, update } = useWMSReceiving();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [qualityCheck, setQualityCheck] = useState({ 
+    damaged: false, 
+    qtyMismatch: false, 
+    tempChecked: true 
+  });
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch =
@@ -52,6 +59,7 @@ export default function ReceivingPage() {
   const completedCount = orders.filter(o => o.status === 'completed').length;
 
   const formatDate = (date: string) => {
+    if (!date) return '-';
     try { return format(new Date(date), 'dd/MM/yyyy', { locale: ptBR }); }
     catch { return '-'; }
   };
@@ -63,7 +71,13 @@ export default function ReceivingPage() {
 
   const handleComplete = async (id: string) => {
     await update(id, { status: 'completed', received_date: new Date().toISOString() });
+    setIsDetailsOpen(false);
     refetch();
+  };
+
+  const openDetails = (order: any) => {
+    setSelectedOrder(order);
+    setIsDetailsOpen(true);
   };
 
   return (
