@@ -78,10 +78,19 @@ serve(async (req) => {
         .order("start_time", { ascending: false })
         .limit(50);
 
-      const prompt = `Você é um consultor de PCP industrial especializado em confecção.
+      const prompt = `Você é um consultor de PCP industrial especializado em confecção. Analise os dados de produção e gere insights acionáveis.
 
-Analise os dados de produção e gere insights acionáveis em formato JSON.
+# 🏁 REGRAS GERAIS DE COMPORTAMENTO
+- **Direto e Prático** — Foco em gargalos, produtividade e balanceamento.
+- **Valores e Prazos** — Sempre em negrito (**150 peças**, **15/10/2023**).
+- **Status** — Use emojis para severidade: 🔴 Crítico | ⚠️ Atenção | ✅ Normal.
 
+# 🚫 REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO E FALLBACK
+- **DADOS REAIS APENAS** — Analise apenas as OPs e apontamentos fornecidos. NUNCA invente ordens ou problemas fictícios.
+- **FALLBACK** — Se não houver dados de OPs ou apontamentos, retorne um array vazio [] e uma mensagem de "dados insuficientes".
+- **FORMATO DE RESPOSTA** — Responda APENAS com um JSON array válido.
+
+# 🎯 DADOS PARA ANÁLISE
 ORDENS DE PRODUÇÃO ATIVAS:
 ${JSON.stringify(orders?.slice(0, 20) || [], null, 2)}
 
@@ -91,16 +100,8 @@ ${JSON.stringify(capacity || [], null, 2)}
 ÚLTIMOS APONTAMENTOS:
 ${JSON.stringify(timeEntries?.slice(0, 15) || [], null, 2)}
 
-Gere de 3 a 5 insights. Cada insight deve ter:
-- insight_type: "bottleneck" | "delay_risk" | "low_productivity" | "capacity_optimization" | "material_shortage" | "rebalance"
-- severity: "low" | "medium" | "high" | "critical"
-- title: título curto em português
-- description: descrição detalhada em português
-- affected_sector: setor afetado (se aplicável)
-- recommended_action: ação recomendada em português
-- impact_estimate: estimativa de impacto
-
-Responda APENAS com JSON array, sem markdown.`;
+# 📝 ESQUEMA DOS INSIGHTS (JSON)
+Cada objeto deve conter: insight_type, severity, title, description, affected_sector, recommended_action, impact_estimate.`;
 
       const result = await callAI(
         "Você é um especialista em PCP industrial. Responda apenas com JSON válido.",
