@@ -126,16 +126,27 @@ export function ExecutiveSWOT({ data, isLoading }: Props) {
           ))}
         </div>
         
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={resetFilters}
-          disabled={activeFilters.length === 4}
-          className="h-8 gap-2 text-[10px] font-bold uppercase text-muted-foreground hover:text-foreground"
-        >
-          <RotateCcw className="h-3.5 w-3.5" />
-          Redefinir
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setActiveFilters(['strengths', 'weaknesses', 'opportunities', 'threats'])}
+            disabled={activeFilters.length === 4}
+            className="h-8 gap-2 text-[10px] font-bold uppercase text-muted-foreground hover:text-foreground"
+          >
+            Marcar todos
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setActiveFilters([sections[0].id])}
+            disabled={activeFilters.length === 1}
+            className="h-8 gap-2 text-[10px] font-bold uppercase text-muted-foreground hover:text-foreground"
+          >
+            Desmarcar outros
+          </Button>
+        </div>
+
       </div>
 
 
