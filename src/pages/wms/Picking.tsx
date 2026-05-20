@@ -45,6 +45,8 @@ export default function PickingPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [startDialog, setStartDialog] = useState<string | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [operator, setOperator] = useState('');
 
   const filteredOrders = orders.filter(order => {
@@ -67,6 +69,12 @@ export default function PickingPage() {
     await startPicking(startDialog, operator);
     setStartDialog(null);
     setOperator('');
+    setIsDetailsOpen(false);
+  };
+
+  const openDetails = (order: any) => {
+    setSelectedOrder(order);
+    setIsDetailsOpen(true);
   };
 
   return (
