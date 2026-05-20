@@ -335,16 +335,10 @@ async function generateInsights() {
 
   const regionSummary = Object.entries(regionTotals).map(([r, v]) => `${r}: R$${v.toFixed(0)}`).join("; ");
 
-  const systemPrompt = `Você é um analista de inteligência comercial sênior. Gere insights acionáveis em português para diferentes níveis hierárquicos.
-
-Para cada insight:
-- Título curto e impactante (máx 60 chars)
-- Descrição detalhada com números específicos
-- Severidade precisa: critical (precisa de ação imediata), warning (atenção), info (informativo), success (bom resultado)
-- Ações sugeridas práticas e específicas
-- Target role correto: seller (vendedor), supervisor, manager (gerente), director (diretoria)
-
-Priorize insights que podem gerar ação imediata e impacto em vendas.`;
+  const systemPrompt = getSystemPrompt('SALES_CONSULTANT', `Gere insights acionáveis para diferentes níveis hierárquicos (vendedor, supervisor, gerente, diretoria).
+- Severidade: critical, warning, info, success.
+- Foque em ações imediatas para aumentar vendas ou reduzir riscos comerciais.
+- Utilize a função 'generate_insights'.`);
 
   const tools = [{
     type: "function",
