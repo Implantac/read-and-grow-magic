@@ -64,14 +64,18 @@ const UsersPage = () => {
   };
 
   // Filter users
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = !filter.search || 
-      user.name.toLowerCase().includes(filter.search.toLowerCase()) ||
-      user.email.toLowerCase().includes(filter.search.toLowerCase());
-    const matchesRole = filter.role === 'all' || user.role === filter.role;
-    const matchesStatus = filter.status === 'all' || user.status === filter.status;
-    return matchesSearch && matchesRole && matchesStatus;
-  });
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => {
+      const matchesSearch = !filter.search || 
+        user.name.toLowerCase().includes(filter.search.toLowerCase()) ||
+        user.email.toLowerCase().includes(filter.search.toLowerCase()) ||
+        user.department?.toLowerCase().includes(filter.search.toLowerCase());
+      const matchesRole = filter.role === 'all' || user.role === filter.role;
+      const matchesStatus = filter.status === 'all' || user.status === filter.status;
+      const matchesBranch = !filter.branchId || user.branchId === filter.branchId;
+      return matchesSearch && matchesRole && matchesStatus && matchesBranch;
+    });
+  }, [users, filter]);
 
   const handleCreateUser = () => {
     setEditingUser(null);
@@ -284,6 +288,22 @@ const UsersPage = () => {
               </SelectContent>
             </Select>
             <Select
+              value={filter.branchId || 'all'}
+              onValueChange={(value) => setFilter(prev => ({ ...prev, branchId: value === 'all' ? undefined : value }))}
+            >
+              <SelectTrigger className="w-full sm:w-44">
+                <SelectValue placeholder="Filial" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas as Filiais</SelectItem>
+                {companies?.map((company) => (
+                  <SelectItem key={company.id} value={company.id}>
+                    {company.trade_name || company.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
               value={filter.status || 'all'}
               onValueChange={(value) => setFilter(prev => ({ ...prev, status: value as UserStatus | 'all' }))}
             >
@@ -308,8 +328,7 @@ const UsersPage = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Usuário</TableHead>
-                <TableHead>Perfil</TableHead>
-                <TableHead>Filial</TableHead>
+                <TableHead>Organização</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Último Acesso</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
@@ -327,17 +346,35 @@ const UsersPage = () => {
                       </div>
                       <div>
                         <p className="font-medium">{user.name}</p>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Mail className="h-3 w-3" />
+                          {user.email}
+                        </div>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge className={`${userRoleConfig[user.role].bgColor} ${userRoleConfig[user.role].color} border-0`}>
-                      {userRoleConfig[user.role].label}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-sm">{user.branchName || '-'}</span>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <Badge className={`${userRoleConfig[user.role].bgColor} ${userRoleConfig[user.role].color} border-0`}>
+                          {userRoleConfig[user.role].label}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
+                        {user.department && (
+                          <span className="flex items-center gap-1">
+                            <Briefcase className="h-3 w-3" />
+                            {user.department}
+                          </span>
+                        )}
+                        {user.branchId && (
+                          <span className="flex items-center gap-1">
+                            <Building2 className="h-3 w-3" />
+                            {companies?.find(c => c.id === user.branchId)?.trade_name || 'Unidade'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </TableCell>
                   <TableCell>
                     <Badge className={`${userStatusConfig[user.status].bgColor} ${userStatusConfig[user.status].color} border-0`}>
@@ -405,7 +442,14 @@ const UsersPage = () => {
       </Card>
 
       {/* Create/Edit User Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          setIsDialogOpen(false);
+          setEditingUser(null);
+        } else {
+          setIsDialogOpen(true);
+        }
+      }}>
         <DialogContent className="max-w-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
