@@ -61,7 +61,7 @@ Sugira uma resposta profissional para essa objeção.`;
       }
 
       case 'suggest_follow_up_plan': {
-        systemPrompt = `Você é um estrategista comercial B2B. Crie planos de follow-up com datas e ações específicas em português brasileiro. Retorne em formato JSON.`;
+        systemPrompt = getSystemPrompt('SALES_CONSULTANT', `Crie planos de follow-up com datas e ações específicas. Retorne em formato JSON.`);
         userPrompt = `Cliente: ${context.clientName}
 Score: ${context.score || 'N/A'}
 Última interação: ${context.lastInteraction || 'Desconhecida'}
