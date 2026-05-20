@@ -12,7 +12,7 @@ import {
   Warehouse, PackagePlus, PackageSearch, PackageCheck, Truck,
   CheckCircle, MapPin, ArrowUpDown, ScanBarcode, Layers, ClipboardCheck,
   AlertTriangle, TrendingUp, BarChart3, Timer, Activity, Zap, Box,
-  Clock, ArrowRight, ExternalLink
+  Clock, ArrowRight, ExternalLink, Info
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { WarehouseMap } from '@/components/wms/WarehouseMap';
