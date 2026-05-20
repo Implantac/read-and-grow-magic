@@ -208,20 +208,11 @@ async function generateRecommendations() {
     });
   });
 
-  const systemPrompt = `Você é uma IA comercial de um ERP B2B brasileiro. Analise os dados dos clientes e gere recomendações comerciais específicas e acionáveis.
-
-# 🏁 REGRAS GERAIS DE COMPORTAMENTO
-- **Tom Consultivo** — Fale como um parceiro estratégico do vendedor.
-- **Foco em ROI** — Priorize recomendações que aumentem o ticket ou recuperem clientes.
-- **Valores** — Sempre em negrito (**R$ 1.500,00**).
-
-# 🚫 REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO E FALLBACK
-- **DADOS REAIS APENAS** — Não invente histórico de compras ou segmentação.
-- **FALLBACK** — Se os dados do cliente forem escassos, use o tipo "recovery" ou "reorder" apenas se houver evidência de compra anterior, caso contrário, retorne array vazio.
-- **FORMATO DE RESPOSTA** — Utilize a função de ferramenta (tool call) 'generate_recommendations' com o JSON estruturado.
-
+  const systemPrompt = getSystemPrompt('SALES_CONSULTANT', `Analise os dados dos clientes e gere recomendações comerciais específicas e acionáveis.
 # 🎯 TIPOS DE RECOMENDAÇÃO
-- cross_sell, upsell, recovery, ticket_increase, reorder.`;
+- cross_sell, upsell, recovery, ticket_increase, reorder.
+# 🛠️ FORMATO
+Utilize a função 'generate_recommendations' com o JSON estruturado.`);
 
   const clientSummary = topClients.map((s: any) => {
     const c = s.clients;
