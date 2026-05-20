@@ -1,3 +1,5 @@
+import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 /**
  * Centralized AI Prompts Template System
 export const PROMPT_VERSION = "1.1.0";
@@ -28,7 +30,13 @@ const PERSONA_DESCRIPTIONS: Record<AIPersona, string> = {
   CFO: `Você é o Diretor Financeiro (CFO). Especialista em fluxo de caixa, inadimplência, margens e saúde financeira.`,
 };
 
-export function getSystemPrompt(persona: AIPersona, specificInstructions: string) {
+export async function getSystemPrompt(
+  persona: AIPersona, 
+  specificInstructions: string, 
+  supabase?: SupabaseClient, 
+  functionName?: string, 
+  userId?: string
+) {
   const prompt = `
 ${PERSONA_DESCRIPTIONS[persona]}
 
@@ -39,6 +47,20 @@ ${specificInstructions}
 `.trim();
 
   console.log(`[AI-PROMPT] Executing Persona: ${persona} | Version: ${PROMPT_VERSION}`);
+
+  if (supabase && functionName) {
+    try {
+      await supabase.from('ai_prompt_audit_logs').insert({
+        function_name: functionName,
+        persona,
+        prompt_version: PROMPT_VERSION,
+        user_id: userId,
+        metadata: { timestamp: new Date().toISOString() }
+      });
+    } catch (e) {
+      console.error("[AI-PROMPT] Failed to log audit:", e);
+    }
+  }
   
   return prompt;
 }

@@ -336,10 +336,10 @@ async function handleGenerateInsights(supabase: any, lovableKey: string, corsHea
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 
-  const systemPrompt = getSystemPrompt('CEO', `Analise APENAS os dados reais fornecidos e gere insights estratégicos acionáveis.
+  const systemPrompt = await getSystemPrompt('CEO', `Analise APENAS os dados reais fornecidos e gere insights estratégicos acionáveis.
 - Gere entre 4-10 insights cobrindo: receita, lucro, custos, risco financeiro, eficiência operacional e comercial.
 - Cada insight deve seguir o esquema JSON: { type, severity, title, description, explanation, impact_estimate, recommended_actions, module }.
-- Toda recomendação deve ser concreta e mensurável.`);
+- Toda recomendação deve ser concreta e mensurável.`, supabase, 'ai-executive-insights', authenticatedUserId);
 
   const userPrompt = `DADOS DA EMPRESA:
 KPIs: ${JSON.stringify(computed.kpis)}
@@ -416,9 +416,9 @@ async function handleGenerateScenarios(supabase: any, lovableKey: string, corsHe
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 
-  const systemPrompt = getSystemPrompt('CEO', `Com base APENAS nos dados reais fornecidos, gere 3 cenários (otimista, realista, pessimista) para os próximos 3 meses.
+  const systemPrompt = await getSystemPrompt('CEO', `Com base APENAS nos dados reais fornecidos, gere 3 cenários (otimista, realista, pessimista) para os próximos 3 meses.
 - Formato JSON: { "scenarios": { "optimistic": { "revenue", "profit", "margin", "growth", "description", "key_actions": [...] }, "realistic": {...}, "pessimistic": {...} }, "assumptions": [...], "recommendations": [...], "risks": [...] }
-- Cada cenário deve ter ações específicas e mensuráveis.`);
+- Cada cenário deve ter ações específicas e mensuráveis.`, supabase, 'ai-executive-scenarios', authenticatedUserId);
 
   const userPrompt = `KPIs: ${JSON.stringify(computed.kpis)}
 RECEITA MENSAL: ${JSON.stringify(computed.revenueByMonth)}
@@ -1146,7 +1146,7 @@ async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: str
     } catch { /* ignore */ }
   }
 
-  const systemPrompt = getSystemPrompt('CEO', `Você é o Diretor Digital — IA Executiva de um sistema ERP completo.
+  const systemPrompt = await getSystemPrompt('CEO', `Você é o Diretor Digital — IA Executiva de um sistema ERP completo.
 Papéis: Administrador, Contador (margens, impostos), CFO (caixa, inadimplência), WMS (estoque), COO (produção, logística).
 
 ## CAPACIDADES OPERACIONAIS
@@ -1176,6 +1176,7 @@ Comercial: alterar status pedido | Produção: alterar/priorizar OP | Estoque: a
 SEMPRE peça confirmação antes de executar (confirmado=false primeiro).
 ${patternInsights}${realDataSnapshot}`);
 
+  const systemPrompt = await getSystemPrompt('CEO', `Você é o Diretor Digital — IA Executiva de um sistema ERP completo.`, supabase, 'ai-executive-chat', user_id);
   const aiMessages = [{ role: "system", content: systemPrompt }, ...contextMessages];
 
   const firstResp = await fetch(GATEWAY_URL, {
@@ -1295,13 +1296,13 @@ async function handleDailySummary(supabase: any, lovableKey: string, corsHeaders
     body: JSON.stringify({
       model: "google/gemini-2.0-flash-exp",
       messages: [
-        { role: "system", content: getSystemPrompt('CFO', `Gere um RESUMO EXECUTIVO DIÁRIO em markdown, direto e objetivo.
+        { role: "system", content: await getSystemPrompt('CFO', `Gere um RESUMO EXECUTIVO DIÁRIO em markdown, direto e objetivo.
 Formato:
 1. 💰 Saldo e Posição
 2. 📥 Recebimentos
 3. 📤 Pagamentos
 4. ⚠️ Alertas
-5. 🎯 Recomendações`) },
+5. 🎯 Recomendações`, supabase, 'ai-executive-daily-summary') },
         { role: "user", content: `Dados de hoje (${today}):\n${JSON.stringify(summary, null, 2)}` },
       ],
       stream: false,
@@ -1487,7 +1488,7 @@ export async function handleCEOBrief(supabase: any, lovableKey: string, corsHead
   // Usa o helper compartilhado (campos plurais conforme fetchAllData)
   const hasRealData = checkHasRealData(data);
 
-  const ceoPrompt = getSystemPrompt('CEO', `Prioridades: Proteger caixa, maximizar lucro, antecipar problemas, decidir (não descrever).
+  const ceoPrompt = await getSystemPrompt('CEO', `Prioridades: Proteger caixa, maximizar lucro, antecipar problemas, decidir (não descrever).
 
 ## ESTRUTURA OBRIGATÓRIA DA RESPOSTA (JSON/Markdown)
 ## 👑 Veredicto Executivo
@@ -1499,7 +1500,7 @@ export async function handleCEOBrief(supabase: any, lovableKey: string, corsHead
 ## ⚡ Prioridade do Dia (Top 3)
 
 - Valores em **R$ X.XXX,XX**, porcentagens em **negrito**.
-- Tom direto de dono.`);
+- Tom direto de dono.`, supabase, 'ai-executive-ceo-brief');
 
   const userPayload = {
     contexto: ctx,

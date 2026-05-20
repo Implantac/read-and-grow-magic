@@ -208,11 +208,11 @@ async function generateRecommendations() {
     });
   });
 
-  const systemPrompt = getSystemPrompt('SALES_CONSULTANT', `Analise os dados dos clientes e gere recomendações comerciais específicas e acionáveis.
+  const systemPrompt = await getSystemPrompt('SALES_CONSULTANT', `Analise os dados dos clientes e gere recomendações comerciais específicas e acionáveis.
 # 🎯 TIPOS DE RECOMENDAÇÃO
 - cross_sell, upsell, recovery, ticket_increase, reorder.
 # 🛠️ FORMATO
-Utilize a função 'generate_recommendations' com o JSON estruturado.`);
+Utilize a função 'generate_recommendations' com o JSON estruturado.`, supabase, 'ai-commercial-recommendations');
 
   const clientSummary = topClients.map((s: any) => {
     const c = s.clients;
@@ -335,10 +335,10 @@ async function generateInsights() {
 
   const regionSummary = Object.entries(regionTotals).map(([r, v]) => `${r}: R$${v.toFixed(0)}`).join("; ");
 
-  const systemPrompt = getSystemPrompt('SALES_CONSULTANT', `Gere insights acionáveis para diferentes níveis hierárquicos (vendedor, supervisor, gerente, diretoria).
+  const systemPrompt = await getSystemPrompt('SALES_CONSULTANT', `Gere insights acionáveis para diferentes níveis hierárquicos (vendedor, supervisor, gerente, diretoria).
 - Severidade: critical, warning, info, success.
 - Foque em ações imediatas para aumentar vendas ou reduzir riscos comerciais.
-- Utilize a função 'generate_insights'.`);
+- Utilize a função 'generate_insights'.`, supabase, 'ai-commercial-insights');
 
   const tools = [{
     type: "function",
