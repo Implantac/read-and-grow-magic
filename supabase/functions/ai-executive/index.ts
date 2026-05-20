@@ -368,7 +368,7 @@ Gere insights estratégicos: { "insights": [...] }`;
     method: "POST",
     headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
+      model: "google/gemini-2.0-flash-exp",
       messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
       response_format: { type: "json_object" },
     }),
@@ -447,7 +447,7 @@ RECEITA REGIÃO: ${JSON.stringify(computed.revenueByRegion)}`;
     method: "POST",
     headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
+      model: "google/gemini-2.0-flash-exp",
       messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
       response_format: { type: "json_object" },
     }),
@@ -1320,7 +1320,7 @@ ${patternInsights}${realDataSnapshot}`;
   const firstResp = await fetch(GATEWAY_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: aiMessages, tools: ERP_TOOLS, stream: false }),
+    body: JSON.stringify({ model: "google/gemini-2.0-flash-exp", messages: aiMessages, tools: ERP_TOOLS, stream: false }),
   });
 
   if (!firstResp.ok) {
@@ -1357,7 +1357,7 @@ ${patternInsights}${realDataSnapshot}`;
     const nextResp = await fetch(GATEWAY_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "google/gemini-3-flash-preview", messages: aiMessages, tools: ERP_TOOLS, stream: false }),
+      body: JSON.stringify({ model: "google/gemini-2.0-flash-exp", messages: aiMessages, tools: ERP_TOOLS, stream: false }),
     });
     if (!nextResp.ok) break;
     result = await nextResp.json();
@@ -1432,7 +1432,7 @@ async function handleDailySummary(supabase: any, lovableKey: string, corsHeaders
     method: "POST",
     headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-3-flash-preview",
+      model: "google/gemini-2.0-flash-exp",
       messages: [
         { role: "system", content: `Você é o CFO Digital. Gere um RESUMO EXECUTIVO DIÁRIO em markdown, direto e objetivo.\nUse emojis. Formato:\n1. 💰 Saldo e Posição\n2. 📥 Recebimentos\n3. 📤 Pagamentos\n4. ⚠️ Alertas\n5. 🎯 Recomendações\nValores em R$ formatados.` },
         { role: "user", content: `Dados de hoje (${today}):\n${JSON.stringify(summary, null, 2)}` },
@@ -1814,7 +1814,7 @@ PROIBIDO:
       method: "POST",
       headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.0-flash-exp",
         messages: [
           { role: "system", content: ceoPrompt + "\n\nIMPORTANTE: Sempre chame a função ceo_response com o JSON estruturado para renderização visual em cards. Se faltarem dados, retorne arrays vazios e veredicto='Dados insuficientes para análise confiável.'" },
           { role: "user", content: `Dados executivos para análise:\n${JSON.stringify(userPayload, null, 2)}` },
