@@ -9,10 +9,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import {
   Brain, Lightbulb, ShieldAlert, BarChart3, DollarSign,
-  Bot, Layers, Flame, AlertTriangle, Calendar,
+  Bot, Layers, Flame, AlertTriangle, Calendar, Activity,
 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { useExecutiveDashboard, useGenerateInsights, useGenerateScenarios, useUnifiedChat, useDailySummary } from '@/hooks/useExecutiveAI';
+import { ExecutiveSWOT } from '@/components/executive/ExecutiveSWOT';
+import { ExecutiveIntelligenceStatus } from '@/components/executive/ExecutiveIntelligenceStatus';
 import { PrimaryKPICards, SecondaryKPICards, TargetAttainmentBar } from '@/components/executive/ExecutiveKPICards';
 import { ExecutiveChat } from '@/components/executive/ExecutiveChat';
 import { CEOStrategicChat } from '@/components/executive/CEOStrategicChat';
@@ -78,8 +80,15 @@ export default function ExecutiveDashboard() {
 
   return (
     <PageContainer>
-      <PageHeader title="🧠 Diretor Digital" description="Assistente executivo unificado — consulte dados, execute ações e tome decisões">
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+        <PageHeader 
+          title="🧠 Diretor Digital" 
+          description="Assistente executivo unificado — consulte dados, execute ações e tome decisões"
+        />
+        <ExecutiveIntelligenceStatus qualityScore={isInsufficient ? 15 : 94} />
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 border-b pb-4">
+        <div className="flex items-center gap-2">
           <Button onClick={() => generateInsights.mutate()} disabled={generateInsights.isPending} variant="outline" size="sm" className="gap-2">
             <Brain className={cn('h-4 w-4', generateInsights.isPending && 'animate-spin')} />
             Gerar Insights
@@ -130,7 +139,7 @@ export default function ExecutiveDashboard() {
             </Button>
           </div>
         </div>
-      </PageHeader>
+      </div>
 
       {isInsufficient && (
         <Card className="border-l-4 border-l-warning bg-warning/5">
@@ -191,6 +200,7 @@ export default function ExecutiveDashboard() {
           <TabsTrigger value="charts" className="gap-1.5"><BarChart3 className="h-3.5 w-3.5" />Análises</TabsTrigger>
           <TabsTrigger value="margins" className="gap-1.5"><DollarSign className="h-3.5 w-3.5" />Margens</TabsTrigger>
           <TabsTrigger value="alerts" className="gap-1.5"><ShieldAlert className="h-3.5 w-3.5" />Alertas & Riscos</TabsTrigger>
+          <TabsTrigger value="swot" className="gap-1.5"><Activity className="h-3.5 w-3.5" />Radar SWOT</TabsTrigger>
           <TabsTrigger value="scenarios" className="gap-1.5"><Layers className="h-3.5 w-3.5" />Cenários</TabsTrigger>
         </TabsList>
 
@@ -271,6 +281,13 @@ export default function ExecutiveDashboard() {
 
         <TabsContent value="alerts">
           <ExecutiveAlertsTab kpis={kpis} alerts={alerts} />
+        </TabsContent>
+
+        <TabsContent value="swot">
+          <ExecutiveSWOT 
+            data={(data as any)?.swot} 
+            isLoading={isLoading} 
+          />
         </TabsContent>
 
         <TabsContent value="scenarios">
