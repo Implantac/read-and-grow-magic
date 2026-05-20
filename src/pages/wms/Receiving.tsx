@@ -395,12 +395,12 @@ export default function ReceivingPage() {
             {selectedOrder?.status === 'in_progress' && (
               <Button 
                 onClick={() => handleComplete(selectedOrder.id)}
-                disabled={qualityCheck.damaged || qualityCheck.qtyMismatch}
+                disabled={selectedOrder.receivedItems < selectedOrder.itemsCount}
                 className={cn(
-                  qualityCheck.damaged || qualityCheck.qtyMismatch ? "bg-muted text-muted-foreground" : "bg-green-600 hover:bg-green-700"
+                  selectedOrder.receivedItems < selectedOrder.itemsCount ? "bg-muted text-muted-foreground" : "bg-green-600 hover:bg-green-700"
                 )}
               >
-                <CheckCircle className="mr-2 h-4 w-4" /> Finalizar Conferência
+                <CheckCircle className="mr-2 h-4 w-4" /> Finalizar Recebimento
               </Button>
             )}
           </DialogFooter>
