@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -12,11 +12,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  MapPin, Search, Package, Grid3X3, Warehouse, Thermometer, AlertTriangle, Plus,
+  MapPin, Search, Package, Grid3X3, Warehouse, Thermometer, AlertTriangle, Plus, FilterX
 } from 'lucide-react';
 import { useWMSStorageLocations } from '@/hooks/useWMSOperations';
 import type { StorageType } from '@/types/wms';
 import { cn } from '@/lib/utils';
+import { WarehouseMap } from '@/components/wms/WarehouseMap';
 
 const typeConfig: Record<StorageType, { label: string; icon: React.ReactNode; color: string }> = {
   rack: { label: 'Rack', icon: <Grid3X3 className="h-4 w-4" />, color: 'bg-blue-500' },
@@ -34,6 +35,19 @@ export default function StoragePage() {
 
   const zones = [...new Set(locations.map(l => l.zone))].sort();
 
+  // Prepare data for the map
+  const zoneStats = zones.map(zone => {
+    const zoneLocations = locations.filter(l => l.zone === zone);
+    const totalCap = zoneLocations.reduce((s, l) => s + l.capacity, 0);
+    const totalOcc = zoneLocations.reduce((s, l) => s + l.occupied, 0);
+    return {
+      zone,
+      occupancy: totalCap > 0 ? Math.round((totalOcc / totalCap) * 100) : 0,
+      totalLocations: zoneLocations.length,
+      type: zoneLocations[0]?.type || 'rack'
+    };
+  });
+
   const filteredLocations = locations.filter(location => {
     const matchesSearch = location.code.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesZone = zoneFilter === 'all' || location.zone === zoneFilter;
@@ -49,14 +63,22 @@ export default function StoragePage() {
 
   return (
     <PageContainer>
-      <PageHeader title="Endereçamento" description="Gerenciamento de locais de armazenamento" />
+      <PageHeader title="Endereçamento" description="Gerenciamento visual e lógico de locais de armazenamento" />
 
-      {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <KPICard title="Taxa de Ocupação" value={`${occupancyRate}%`} subtitle={`${totalOccupied}/${totalCapacity} posições`} icon={<Warehouse className="h-5 w-5" />} accentColor={occupancyRate > 85 ? 'danger' : 'primary'} index={0} />
-        <KPICard title="Total de Endereços" value={locations.length} subtitle={`${zones.length} zonas`} icon={<MapPin className="h-5 w-5" />} accentColor="info" index={1} />
-        <KPICard title="Endereços Vazios" value={emptyLocations} subtitle="Disponíveis para alocação" icon={<Grid3X3 className="h-5 w-5" />} accentColor="success" index={2} />
-        <KPICard title="Endereços Cheios" value={fullLocations} subtitle="Capacidade máxima" icon={<Package className="h-5 w-5" />} accentColor={fullLocations > 0 ? 'danger' : 'primary'} index={3} />
+      <div className="grid gap-6 lg:grid-cols-3 mb-6">
+        <div className="lg:col-span-2">
+          <WarehouseMap 
+            zones={zoneStats} 
+            selectedZone={zoneFilter === 'all' ? null : zoneFilter}
+            onZoneClick={(zone) => setZoneFilter(prev => prev === zone ? 'all' : zone)}
+            className="h-full border-none shadow-sm"
+          />
+        </div>
+        <div className="grid gap-4">
+          <KPICard title="Ocupação Total" value={`${occupancyRate}%`} subtitle={`${totalOccupied}/${totalCapacity} posições`} icon={<Warehouse className="h-5 w-5" />} accentColor={occupancyRate > 85 ? 'danger' : 'primary'} index={0} />
+          <KPICard title="Endereços Vazios" value={emptyLocations} subtitle="Prontos para alocação" icon={<Grid3X3 className="h-5 w-5" />} accentColor="success" index={1} />
+          <KPICard title="Endereços Cheios" value={fullLocations} subtitle="Capacidade esgotada" icon={<Package className="h-5 w-5" />} accentColor={fullLocations > 0 ? 'danger' : 'primary'} index={2} />
+        </div>
       </div>
 
       {/* Filters */}
@@ -85,6 +107,16 @@ export default function StoragePage() {
                 ))}
               </SelectContent>
             </Select>
+            {(searchTerm || zoneFilter !== 'all' || typeFilter !== 'all') && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => { setSearchTerm(''); setZoneFilter('all'); setTypeFilter('all'); }}
+                className="gap-2 text-muted-foreground"
+              >
+                <FilterX className="h-4 w-4" /> Limpar
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
