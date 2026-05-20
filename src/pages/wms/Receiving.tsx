@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
+import { supabase } from '@/integrations/supabase/client';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
 import { ExportButton } from '@/components/shared/ExportButton';
@@ -42,6 +43,7 @@ export default function ReceivingPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [scannedItems, setScannedItems] = useState<Record<string, number>>({});
   const [qualityCheck, setQualityCheck] = useState({ 
     damaged: false, 
     qtyMismatch: false, 
@@ -80,6 +82,7 @@ export default function ReceivingPage() {
   const openDetails = (order: any) => {
     setSelectedOrder(order);
     setIsDetailsOpen(true);
+    setScannedItems({}); // Reset scanner progress
   };
 
   return (
@@ -259,8 +262,36 @@ export default function ReceivingPage() {
                   <BarcodeScanner 
                     autoFocus 
                     onScan={async (code) => {
-                      // Logic for SKU validation would go here
-                      return { type: 'success', message: `SKU ${code} confirmado!`, code };
+                      // Validation logic: Find product by barcode or code
+                      const { data: product, error } = await supabase
+                        .from('products')
+                        .select('id, code, name, status')
+                        .or(`barcode.eq.${code},code.eq.${code}`)
+                        .maybeSingle();
+
+                      if (error) return { type: 'error', message: 'Erro ao consultar produto.' };
+                      if (!product) return { type: 'error', message: `SKU/EAN ${code} não encontrado.` };
+                      if (product.status !== 'active') return { type: 'error', message: `Produto ${product.code} está inativo.` };
+
+                      // In a real scenario, we'd check if the SKU belongs to the order.
+                      // Here we simulate the validation against the order's expected count.
+                      const currentCount = (scannedItems[product.code] || 0) + 1;
+                      
+                      if (currentCount > selectedOrder.itemsCount) {
+                        return { type: 'error', message: `Quantidade máxima excedida para ${product.code}.` };
+                      }
+
+                      setScannedItems(prev => ({ ...prev, [product.code]: currentCount }));
+                      
+                      // Update main order progress (optimistic update)
+                      if (selectedOrder.receivedItems < selectedOrder.itemsCount) {
+                        setSelectedOrder((prev: any) => ({
+                          ...prev,
+                          receivedItems: (prev.receivedItems || 0) + 1
+                        }));
+                      }
+
+                      return { type: 'success', message: `${product.name} (1 un) validado.`, code: product.code };
                     }}
                     placeholder="Escaneie o EAN do produto..."
                   />
@@ -364,12 +395,12 @@ export default function ReceivingPage() {
             {selectedOrder?.status === 'in_progress' && (
               <Button 
                 onClick={() => handleComplete(selectedOrder.id)}
-                disabled={qualityCheck.damaged || qualityCheck.qtyMismatch}
+                disabled={selectedOrder.receivedItems < selectedOrder.itemsCount}
                 className={cn(
-                  qualityCheck.damaged || qualityCheck.qtyMismatch ? "bg-muted text-muted-foreground" : "bg-green-600 hover:bg-green-700"
+                  selectedOrder.receivedItems < selectedOrder.itemsCount ? "bg-muted text-muted-foreground" : "bg-green-600 hover:bg-green-700"
                 )}
               >
-                <CheckCircle className="mr-2 h-4 w-4" /> Finalizar Conferência
+                <CheckCircle className="mr-2 h-4 w-4" /> Finalizar Recebimento
               </Button>
             )}
           </DialogFooter>
