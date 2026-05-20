@@ -33,16 +33,10 @@ serve(async (req) => {
 
     switch (action) {
       case 'suggest_message': {
-        systemPrompt = `Você é um consultor comercial B2B especialista. Gere mensagens de WhatsApp profissionais, curtas e persuasivas.
-
-# 🏁 REGRAS DE FORMATO
+        systemPrompt = getSystemPrompt('SALES_CONSULTANT', `Gere mensagens de WhatsApp profissionais, curtas e persuasivas.
 - Máximo 3 parágrafos.
-- Tom consultivo e direto.
-- Inclua CTA (Chamada para Ação) claro.
-- Valores monetários em negrito (**R$ 1.000,00**).
-
-# 🚫 FALLBACK
-- Se o contexto do cliente estiver vazio, use uma abordagem genérica de apresentação da empresa.`;
+- Inclua CTA claro.
+- Fallback: Use abordagem genérica de apresentação se os dados do cliente forem escassos.`);
         userPrompt = `Contexto do cliente:
 - Nome: ${context.clientName}
 - Segmento: ${context.segment || 'Não informado'}
