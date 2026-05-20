@@ -79,7 +79,7 @@ serve(async (req) => {
         .order("start_time", { ascending: false })
         .limit(50);
 
-      const prompt = getSystemPrompt('PCP_CONSULTANT', `Analise os dados de produção e gere insights acionáveis.
+      const prompt = await getSystemPrompt('PCP_CONSULTANT', `Analise os dados de produção e gere insights acionáveis.
 ORDENS DE PRODUÇÃO ATIVAS:
 ${JSON.stringify(orders?.slice(0, 20) || [], null, 2)}
 
@@ -90,7 +90,7 @@ ${JSON.stringify(capacity || [], null, 2)}
 ${JSON.stringify(timeEntries?.slice(0, 15) || [], null, 2)}
 
 # 📝 ESQUEMA DOS INSIGHTS (JSON)
-Cada objeto deve conter: insight_type, severity, title, description, affected_sector, recommended_action, impact_estimate.`);
+Cada objeto deve conter: insight_type, severity, title, description, affected_sector, recommended_action, impact_estimate.`, supabase, 'ai-production-insights');
 
       const result = await callAI(
         "Você é um especialista em PCP industrial. Responda apenas com JSON válido.",
@@ -155,7 +155,7 @@ Cada objeto deve conter: insight_type, severity, title, description, affected_se
         .select("*")
         .order("current_quantity");
 
-      const prompt = getSystemPrompt('PCP_CONSULTANT', `Analise a situação atual e forneça DECISÕES ESTRATÉGICAS em JSON.
+      const prompt = await getSystemPrompt('PCP_CONSULTANT', `Analise a situação atual e forneça DECISÕES ESTRATÉGICAS em JSON.
 ORDENS ATIVAS (${orders?.length || 0}):
 ${JSON.stringify(orders?.slice(0, 25) || [], null, 2)}
 
@@ -171,7 +171,7 @@ Gere um objeto JSON com:
   "rebalancing": [{"from_sector": "...", "to_sector": "...", "reason": "..."}],
   "material_alerts": [{"material": "...", "action": "...", "urgency": "high|medium|low"}],
   "summary": "resumo executivo em 2-3 frases"
-}`);
+}`, supabase, 'ai-production-decision-engine');
 
       const result = await callAI(
         "Você é um diretor industrial. Responda apenas com JSON válido.",
@@ -211,7 +211,7 @@ Gere um objeto JSON com:
         .select("*")
         .eq("status", "started");
 
-      const prompt = getSystemPrompt('PCP_CONSULTANT', `Analise as OPs ativas e sugira a melhor sequência de trabalho para os operadores.
+      const prompt = await getSystemPrompt('PCP_CONSULTANT', `Analise as OPs ativas e sugira a melhor sequência de trabalho para os operadores.
 OPS ATIVAS:
 ${JSON.stringify(activeOPs || [], null, 2)}
 
@@ -220,7 +220,7 @@ ${JSON.stringify(activeEntries || [], null, 2)}
 
 Gere um JSON array com sugestões:
 [{"order_number": "...", "suggestion": "...", "priority": "urgent|high|normal", "reason": "..."}]
-Foque em: urgência de prazo, balanceamento de carga, OPs paradas.`);
+Foque em: urgência de prazo, balanceamento de carga, OPs paradas.`, supabase, 'ai-production-operator-suggestions');
 
       const result = await callAI(
         "Supervisor industrial. JSON válido apenas.",
