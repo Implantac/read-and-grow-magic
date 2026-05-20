@@ -155,10 +155,7 @@ Cada objeto deve conter: insight_type, severity, title, description, affected_se
         .select("*")
         .order("current_quantity");
 
-      const prompt = `Você é um gerente de PCP com 20 anos de experiência.
-
-Analise a situação atual e forneça DECISÕES ESTRATÉGICAS em JSON.
-
+      const prompt = getSystemPrompt('PCP_CONSULTANT', `Analise a situação atual e forneça DECISÕES ESTRATÉGICAS em JSON.
 ORDENS ATIVAS (${orders?.length || 0}):
 ${JSON.stringify(orders?.slice(0, 25) || [], null, 2)}
 
@@ -174,9 +171,7 @@ Gere um objeto JSON com:
   "rebalancing": [{"from_sector": "...", "to_sector": "...", "reason": "..."}],
   "material_alerts": [{"material": "...", "action": "...", "urgency": "high|medium|low"}],
   "summary": "resumo executivo em 2-3 frases"
-}
-
-Responda APENAS com JSON, sem markdown.`;
+}`);
 
       const result = await callAI(
         "Você é um diretor industrial. Responda apenas com JSON válido.",
