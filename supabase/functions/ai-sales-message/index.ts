@@ -73,7 +73,7 @@ Crie um plano de follow-up com 3-5 ações sequenciais. Retorne JSON com array "
       }
 
       case 'generate_daily_plan': {
-        systemPrompt = `Você é um diretor comercial B2B experiente. Analise o contexto da carteira de clientes e gere um plano de ação diário priorizado. Responda em JSON válido.`;
+        systemPrompt = getSystemPrompt('SALES_CONSULTANT', `Analise o contexto da carteira de clientes e gere um plano de ação diário priorizado. Responda em JSON válido.`);
         userPrompt = `Dados da carteira:
 - Total de leads ativos: ${context.activeLeads || 0}
 - Leads quentes (score > 80): ${context.hotLeads || 0}
