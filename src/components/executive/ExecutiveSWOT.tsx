@@ -142,6 +142,7 @@ export function ExecutiveSWOT({ data, isLoading }: Props) {
           </CardContent>
         </Card>
       ))}
+      </div>
     </div>
   );
 }
