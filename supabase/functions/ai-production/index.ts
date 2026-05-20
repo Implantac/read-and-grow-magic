@@ -211,10 +211,7 @@ Gere um objeto JSON com:
         .select("*")
         .eq("status", "started");
 
-      const prompt = `Você é um supervisor de produção.
-
-Analise as OPs ativas e sugira a melhor sequência de trabalho para os operadores.
-
+      const prompt = getSystemPrompt('PCP_CONSULTANT', `Analise as OPs ativas e sugira a melhor sequência de trabalho para os operadores.
 OPS ATIVAS:
 ${JSON.stringify(activeOPs || [], null, 2)}
 
@@ -223,9 +220,7 @@ ${JSON.stringify(activeEntries || [], null, 2)}
 
 Gere um JSON array com sugestões:
 [{"order_number": "...", "suggestion": "...", "priority": "urgent|high|normal", "reason": "..."}]
-
-Foque em: urgência de prazo, balanceamento de carga, OPs paradas.
-Responda APENAS com JSON, sem markdown.`;
+Foque em: urgência de prazo, balanceamento de carga, OPs paradas.`);
 
       const result = await callAI(
         "Supervisor industrial. JSON válido apenas.",
