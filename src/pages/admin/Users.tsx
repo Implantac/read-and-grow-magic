@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,13 +7,14 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
 } from '@/components/ui/table';
 import { 
   Search, Plus, Edit2, Trash2, UserCheck, UserX, Shield, 
-  Users as UsersIcon, UserPlus, Clock, MoreVertical, Key, Loader2
+  Users as UsersIcon, UserPlus, Clock, MoreVertical, Key, Loader2,
+  Phone, Building2, Mail, User, Briefcase, Building
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -32,9 +33,20 @@ import {
 } from '@/config/administration';
 import { SystemUser, UserRole, UserStatus, UserFilter } from '@/types/administration';
 import { useUsers } from '@/hooks/useUsers';
+import { supabase } from '@/integrations/supabase/client';
+import { useQuery } from '@tanstack/react-query';
 
 const UsersPage = () => {
-  const { users, isLoading, inviteUser, deleteUser, changeRole, toggleBan, resetPassword } = useUsers();
+  const { users, isLoading, inviteUser, deleteUser, changeRole, toggleBan, resetPassword, isInviting, isChangingRole } = useUsers();
+  
+  const { data: companies } = useQuery({
+    queryKey: ['companies-list'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('companies').select('id, trade_name, name');
+      if (error) throw error;
+      return data;
+    }
+  });
   
   const [filter, setFilter] = useState<UserFilter>({ role: 'all', status: 'all' });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -110,16 +122,32 @@ const UsersPage = () => {
     const formData = new FormData(e.currentTarget);
     
     const role = formData.get('role') as UserRole;
+    const phone = formData.get('phone') as string;
+    const department = formData.get('department') as string;
+    const branch_id = formData.get('branch_id') as string;
     
     try {
       if (editingUser) {
-        await changeRole({ user_id: editingUser.id, role });
+        await changeRole({ 
+          user_id: editingUser.id, 
+          role,
+          phone,
+          department,
+          branch_id: branch_id || null
+        });
         toast.success('Perfil atualizado com sucesso!');
       } else {
         const name = formData.get('name') as string;
         const email = formData.get('email') as string;
         
-        await inviteUser({ email, name, role });
+        await inviteUser({ 
+          email, 
+          name, 
+          role,
+          phone,
+          department,
+          branch_id: branch_id || null
+        });
         toast.success('Usuário convidado com sucesso!');
       }
       setIsDialogOpen(false);
@@ -377,58 +405,131 @@ const UsersPage = () => {
 
       {/* Create/Edit User Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-xl">
           <DialogHeader>
-            <DialogTitle>{editingUser ? 'Editar Perfil do Usuário' : 'Convidar Novo Usuário'}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              {editingUser ? <Edit2 className="h-5 w-5 text-primary" /> : <UserPlus className="h-5 w-5 text-primary" />}
+              {editingUser ? 'Editar Perfil do Usuário' : 'Convidar Novo Usuário'}
+            </DialogTitle>
             {!editingUser && (
               <DialogDescription>
                 Um convite será enviado para o email informado para que o usuário defina sua senha.
               </DialogDescription>
             )}
           </DialogHeader>
-          <form onSubmit={handleSaveUser} className="space-y-4 mt-4">
-            <div className="grid grid-cols-1 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome Completo *</Label>
-                <Input 
-                  id="name" 
-                  name="name" 
-                  defaultValue={editingUser?.name}
-                  disabled={!!editingUser}
-                  required={!editingUser}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email *</Label>
-                <Input 
-                  id="email" 
-                  name="email" 
-                  type="email"
-                  defaultValue={editingUser?.email}
-                  disabled={!!editingUser}
-                  required={!editingUser}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="role">Perfil *</Label>
-                <Select name="role" defaultValue={editingUser?.role || 'viewer'}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione o perfil" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(userRoleConfig).map(([key, config]) => (
-                      <SelectItem key={key} value={key}>{config.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
+          
+          <form onSubmit={handleSaveUser}>
+            <Tabs defaultValue="basic" className="mt-4">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="basic">Dados Básicos</TabsTrigger>
+                <TabsTrigger value="access">Acesso e Organização</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="basic" className="space-y-4 pt-4">
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="flex items-center gap-2">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      Nome Completo *
+                    </Label>
+                    <Input 
+                      id="name" 
+                      name="name" 
+                      defaultValue={editingUser?.name}
+                      disabled={!!editingUser}
+                      required={!editingUser}
+                      placeholder="Ex: João Silva"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      Email *
+                    </Label>
+                    <Input 
+                      id="email" 
+                      name="email" 
+                      type="email"
+                      defaultValue={editingUser?.email}
+                      disabled={!!editingUser}
+                      required={!editingUser}
+                      placeholder="joao.silva@empresa.com"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      Telefone
+                    </Label>
+                    <Input 
+                      id="phone" 
+                      name="phone" 
+                      defaultValue={editingUser?.phone}
+                      placeholder="(00) 00000-0000"
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="access" className="space-y-4 pt-4">
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="role" className="flex items-center gap-2">
+                      <Shield className="h-4 w-4 text-muted-foreground" />
+                      Perfil de Acesso *
+                    </Label>
+                    <Select name="role" defaultValue={editingUser?.role || 'viewer'}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o perfil" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(userRoleConfig).map(([key, config]) => (
+                          <SelectItem key={key} value={key}>{config.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="department" className="flex items-center gap-2">
+                      <Briefcase className="h-4 w-4 text-muted-foreground" />
+                      Departamento
+                    </Label>
+                    <Input 
+                      id="department" 
+                      name="department" 
+                      defaultValue={editingUser?.department}
+                      placeholder="Ex: Financeiro, TI, Vendas"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="branch_id" className="flex items-center gap-2">
+                      <Building className="h-4 w-4 text-muted-foreground" />
+                      Filial / Unidade
+                    </Label>
+                    <Select name="branch_id" defaultValue={editingUser?.branchId || undefined}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a unidade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {companies?.map((company) => (
+                          <SelectItem key={company.id} value={company.id}>
+                            {company.trade_name || company.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <DialogFooter className="mt-6">
               <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                 Cancelar
               </Button>
-              <Button type="submit">
-                {editingUser ? 'Salvar' : 'Criar Usuário'}
+              <Button type="submit" disabled={isInviting || isChangingRole}>
+                {(isInviting || isChangingRole) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                {editingUser ? 'Salvar Alterações' : 'Convidar Usuário'}
               </Button>
             </DialogFooter>
           </form>
