@@ -1,7 +1,6 @@
 /**
  * Centralized AI Prompts Template System
- * Version: 1.0.0
- */
+export const PROMPT_VERSION = "1.1.0";
 
 export const SHARED_PROMPT_RULES = `
 # 🏁 REGRAS GERAIS DE COMPORTAMENTO
@@ -30,7 +29,7 @@ const PERSONA_DESCRIPTIONS: Record<AIPersona, string> = {
 };
 
 export function getSystemPrompt(persona: AIPersona, specificInstructions: string) {
-  return `
+  const prompt = `
 ${PERSONA_DESCRIPTIONS[persona]}
 
 ${SHARED_PROMPT_RULES}
@@ -38,4 +37,8 @@ ${SHARED_PROMPT_RULES}
 # 🎯 INSTRUÇÕES ESPECÍFICAS
 ${specificInstructions}
 `.trim();
+
+  console.log(`[AI-PROMPT] Executing Persona: ${persona} | Version: ${PROMPT_VERSION}`);
+  
+  return prompt;
 }
