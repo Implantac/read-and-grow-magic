@@ -115,7 +115,7 @@ Gere no máximo 8 priority_actions e 5 recovery_targets.`;
       }
 
       case 'suggest_reactivation': {
-        systemPrompt = `Você é um especialista em recuperação de clientes B2B. Crie mensagens de reativação personalizadas e estratégias de abordagem em português brasileiro.`;
+        systemPrompt = getSystemPrompt('SALES_CONSULTANT', `Crie mensagens de reativação personalizadas e estratégias de abordagem.`);
         userPrompt = `Cliente inativo:
 - Nome: ${context.clientName}
 - Dias sem compra: ${context.daysSinceLastPurchase || '90+'}
