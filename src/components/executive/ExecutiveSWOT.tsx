@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,8 +23,17 @@ interface Props {
   isLoading?: boolean;
 }
 
+const SWOT_FILTERS_KEY = 'executive-swot-filters';
+
 export function ExecutiveSWOT({ data, isLoading }: Props) {
-  const [activeFilters, setActiveFilters] = useState<string[]>(['strengths', 'weaknesses', 'opportunities', 'threats']);
+  const [activeFilters, setActiveFilters] = useState<string[]>(() => {
+    const saved = localStorage.getItem(SWOT_FILTERS_KEY);
+    return saved ? JSON.parse(saved) : ['strengths', 'weaknesses', 'opportunities', 'threats'];
+  });
+
+  useEffect(() => {
+    localStorage.setItem(SWOT_FILTERS_KEY, JSON.stringify(activeFilters));
+  }, [activeFilters]);
 
   const toggleFilter = (id: string) => {
     setActiveFilters(prev => 
@@ -33,6 +42,7 @@ export function ExecutiveSWOT({ data, isLoading }: Props) {
         : [...prev, id]
     );
   };
+
 
   if (isLoading) {
     return (
