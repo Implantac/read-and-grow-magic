@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
+import { supabase } from '@/integrations/supabase/client';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
 import { ExportButton } from '@/components/shared/ExportButton';
@@ -48,6 +49,7 @@ export default function PickingPage() {
   const [startDialog, setStartDialog] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [scannedItems, setScannedItems] = useState<Record<string, number>>({});
   const [operator, setOperator] = useState('');
 
   const filteredOrders = orders.filter(order => {
@@ -76,6 +78,7 @@ export default function PickingPage() {
   const openDetails = (order: any) => {
     setSelectedOrder(order);
     setIsDetailsOpen(true);
+    setScannedItems({}); // Reset scanner progress
   };
 
   return (
@@ -334,7 +337,34 @@ export default function PickingPage() {
                   </div>
                   <BarcodeScanner 
                     onScan={async (code) => {
-                      return { type: 'success', message: 'Item validado com sucesso!', code };
+                      // Validation logic: Find product by barcode or code
+                      const { data: product, error } = await supabase
+                        .from('products')
+                        .select('id, code, name, status')
+                        .or(`barcode.eq.${code},code.eq.${code}`)
+                        .maybeSingle();
+
+                      if (error) return { type: 'error', message: 'Erro ao consultar produto.' };
+                      if (!product) return { type: 'error', message: `SKU/EAN ${code} não encontrado.` };
+                      if (product.status !== 'active') return { type: 'error', message: `Produto ${product.code} está inativo.` };
+
+                      const currentCount = (scannedItems[product.code] || 0) + 1;
+                      
+                      if (currentCount > selectedOrder.itemsCount) {
+                        return { type: 'error', message: `Quantidade máxima excedida para ${product.code}.` };
+                      }
+
+                      setScannedItems(prev => ({ ...prev, [product.code]: currentCount }));
+                      
+                      // Update main order progress (optimistic update)
+                      if (selectedOrder.pickedItems < selectedOrder.itemsCount) {
+                        setSelectedOrder((prev: any) => ({
+                          ...prev,
+                          pickedItems: (prev.pickedItems || 0) + 1
+                        }));
+                      }
+
+                      return { type: 'success', message: `${product.name} coletado com sucesso!`, code: product.code };
                     }}
                     placeholder="Leia o código do item..."
                   />
@@ -395,7 +425,11 @@ export default function PickingPage() {
               </Button>
             )}
             {selectedOrder?.status === 'in_progress' && (
-              <Button onClick={() => { completePicking(selectedOrder.id); setIsDetailsOpen(false); }} className="bg-green-600 hover:bg-green-700">
+              <Button 
+                disabled={selectedOrder.pickedItems < selectedOrder.itemsCount}
+                onClick={() => { completePicking(selectedOrder.id); setIsDetailsOpen(false); }} 
+                className="bg-green-600 hover:bg-green-700"
+              >
                 <CheckCircle className="mr-2 h-4 w-4" /> Finalizar Separação
               </Button>
             )}
