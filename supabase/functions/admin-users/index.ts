@@ -82,13 +82,18 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'invite') {
-      const { email, name, role = 'viewer' } = params;
+      const { email, name, role = 'viewer', phone, department, branch_id } = params;
       if (!email) throw new Error('Email is required');
 
       const origin = req.headers.get('origin') || Deno.env.get('SITE_URL') || '';
 
       const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-        data: { name: name || '' },
+        data: { 
+          name: name || '',
+          phone: phone || '',
+          department: department || '',
+          branch_id: branch_id || null
+        },
         redirectTo: `${origin}/login`,
       });
       if (error) throw error;
@@ -119,14 +124,29 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'change_role') {
-      const { user_id, role } = params;
-      if (user_id === user.id) throw new Error('Cannot change your own role');
+      const { user_id, role, phone, department, branch_id } = params;
+      if (user_id === user.id && role) throw new Error('Cannot change your own role');
 
-      const { error } = await supabaseAdmin
-        .from('user_roles')
-        .update({ role })
-        .eq('user_id', user_id);
-      if (error) throw error;
+      if (role) {
+        const { error: roleError } = await supabaseAdmin
+          .from('user_roles')
+          .update({ role })
+          .eq('user_id', user_id);
+        if (roleError) throw roleError;
+      }
+
+      const profileUpdates: any = {};
+      if (phone !== undefined) profileUpdates.phone = phone;
+      if (department !== undefined) profileUpdates.department = department;
+      if (branch_id !== undefined) profileUpdates.branch_id = branch_id;
+
+      if (Object.keys(profileUpdates).length > 0) {
+        const { error: profileError } = await supabaseAdmin
+          .from('profiles')
+          .update(profileUpdates)
+          .eq('id', user_id);
+        if (profileError) throw profileError;
+      }
 
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

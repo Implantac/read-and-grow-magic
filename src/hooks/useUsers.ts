@@ -20,11 +20,17 @@ interface InviteUserData {
   email: string;
   name: string;
   role: 'admin' | 'manager' | 'operator' | 'viewer';
+  phone?: string;
+  department?: string;
+  branch_id?: string | null;
 }
 
 interface ChangeRoleData {
   user_id: string;
-  role: 'admin' | 'manager' | 'operator' | 'viewer';
+  role?: 'admin' | 'manager' | 'operator' | 'viewer';
+  phone?: string;
+  department?: string;
+  branch_id?: string | null;
 }
 
 async function callAdminUsers(action: string, params?: any) {
@@ -36,7 +42,7 @@ async function callAdminUsers(action: string, params?: any) {
   return data;
 }
 
-function mapToSystemUser(user: AdminUserResponse): SystemUser {
+function mapToSystemUser(user: any): SystemUser {
   return {
     id: user.id,
     name: user.name,
@@ -44,14 +50,14 @@ function mapToSystemUser(user: AdminUserResponse): SystemUser {
     avatar: user.avatar_url,
     role: user.role,
     status: user.status,
-    permissions: [], // We'll handle permissions separately if needed
+    permissions: [],
     lastLogin: user.last_sign_in_at,
     createdAt: user.created_at,
     updatedAt: user.updated_at,
-    phone: '',
-    department: '',
-    branchId: '',
-    branchName: '',
+    phone: user.phone || '',
+    department: user.department || '',
+    branchId: user.branch_id || '',
+    branchName: '', // This would need a join in the edge function or hydration here
   };
 }
 

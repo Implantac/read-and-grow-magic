@@ -8626,32 +8626,48 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          branch_id: string | null
           company_id: string | null
           created_at: string
+          department: string | null
           email: string | null
           id: string
           name: string
+          phone: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
+          branch_id?: string | null
           company_id?: string | null
           created_at?: string
+          department?: string | null
           email?: string | null
           id: string
           name?: string
+          phone?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
+          branch_id?: string | null
           company_id?: string | null
           created_at?: string
+          department?: string | null
           email?: string | null
           id?: string
           name?: string
+          phone?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_company_id_fkey"
             columns: ["company_id"]
