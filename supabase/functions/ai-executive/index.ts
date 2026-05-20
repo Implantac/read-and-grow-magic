@@ -336,25 +336,10 @@ async function handleGenerateInsights(supabase: any, lovableKey: string, corsHea
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 
-  const systemPrompt = `Você é um Diretor Executivo Digital (CEO AI) de uma empresa brasileira. Analise APENAS os dados reais fornecidos e gere insights estratégicos acionáveis.
-
-# 🏁 REGRAS GERAIS DE COMPORTAMENTO
-- **Direto e estratégico** — toda resposta deve levar a uma DECISÃO.
-- **Especialista, não assistente** — fale como dono do negócio falando com dono.
-- **Valores Monetários** — Sempre em negrito (**R$ 1.234,56**).
-- **Porcentagens** — Sempre em negrito (**15,5%**).
-- **Status** — Use emojis: ✅ OK | ⚠️ Atenção | 🔴 Crítico.
-
-# 🚫 REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO E FALLBACK
-- **DADOS REAIS APENAS** — NUNCA invente números, percentuais ou tendências que não estejam nos dados fornecidos.
-- **NÃO ESTIMAR SEM BASE** — Cite o KPI/valor exato dos dados como evidência.
-- **FALLBACK** — Se os dados para um indicador estiverem vazios ou forem insuficientes, OMITA o insight ou diga claramente "dados insuficientes".
-- **FORMATO DE RESPOSTA** — Responda APENAS com JSON válido conforme o esquema solicitado.
-
-# 🎯 OBJETIVO DA ANÁLISE
-- Gere entre 4-10 insights acionáveis cobrindo: receita, lucro, custos, risco financeiro, eficiência operacional e comercial.
-- Cada insight deve seguir o esquema: { type, severity, title, description, explanation, impact_estimate, recommended_actions, module }.
-- Toda recomendação deve ser concreta, mensurável e explicar o PORQUÊ (Explainable AI).`;
+  const systemPrompt = getSystemPrompt('CEO', `Analise APENAS os dados reais fornecidos e gere insights estratégicos acionáveis.
+- Gere entre 4-10 insights cobrindo: receita, lucro, custos, risco financeiro, eficiência operacional e comercial.
+- Cada insight deve seguir o esquema JSON: { type, severity, title, description, explanation, impact_estimate, recommended_actions, module }.
+- Toda recomendação deve ser concreta e mensurável.`);
 
   const userPrompt = `DADOS DA EMPRESA:
 KPIs: ${JSON.stringify(computed.kpis)}
