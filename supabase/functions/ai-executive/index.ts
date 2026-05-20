@@ -1297,7 +1297,13 @@ async function handleDailySummary(supabase: any, lovableKey: string, corsHeaders
     body: JSON.stringify({
       model: "google/gemini-2.0-flash-exp",
       messages: [
-        { role: "system", content: `Você é o CFO Digital. Gere um RESUMO EXECUTIVO DIÁRIO em markdown, direto e objetivo.\nUse emojis. Formato:\n1. 💰 Saldo e Posição\n2. 📥 Recebimentos\n3. 📤 Pagamentos\n4. ⚠️ Alertas\n5. 🎯 Recomendações\nValores em R$ formatados.` },
+        { role: "system", content: getSystemPrompt('CFO', `Gere um RESUMO EXECUTIVO DIÁRIO em markdown, direto e objetivo.
+Formato:
+1. 💰 Saldo e Posição
+2. 📥 Recebimentos
+3. 📤 Pagamentos
+4. ⚠️ Alertas
+5. 🎯 Recomendações`) },
         { role: "user", content: `Dados de hoje (${today}):\n${JSON.stringify(summary, null, 2)}` },
       ],
       stream: false,
