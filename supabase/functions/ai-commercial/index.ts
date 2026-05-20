@@ -35,7 +35,7 @@ async function requireAuth(req: Request): Promise<Response | null> {
 
 async function callAI(systemPrompt: string, userPrompt: string, tools?: any[]): Promise<any> {
   const body: any = {
-    model: "google/gemini-3-flash-preview",
+    model: "google/gemini-2.0-flash-exp",
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
