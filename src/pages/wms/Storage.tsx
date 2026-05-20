@@ -107,6 +107,16 @@ export default function StoragePage() {
                 ))}
               </SelectContent>
             </Select>
+            {(searchTerm || zoneFilter !== 'all' || typeFilter !== 'all') && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => { setSearchTerm(''); setZoneFilter('all'); setTypeFilter('all'); }}
+                className="gap-2 text-muted-foreground"
+              >
+                <FilterX className="h-4 w-4" /> Limpar
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
