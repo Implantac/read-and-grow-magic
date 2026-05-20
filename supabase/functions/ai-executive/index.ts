@@ -418,18 +418,9 @@ async function handleGenerateScenarios(supabase: any, lovableKey: string, corsHe
 
   const systemPrompt = `Você é um analista estratégico sênior. Com base APENAS nos dados reais fornecidos, gere 3 cenários (otimista, realista, pessimista) para os próximos 3 meses.
 
-# 🏁 REGRAS GERAIS DE COMPORTAMENTO
-- **Valores Monetários** — Sempre em negrito (**R$ 1.234,56**).
-- **Porcentagens** — Sempre em negrito (**15,5%**).
-
-# 🚫 REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO E FALLBACK
-- **NUNCA INVENTAR NÚMEROS** — Projete a partir de tendências reais (receita mensal, pipeline, margem).
-- **FALLBACK** — Se a base histórica for curta (<3 meses), reduza a confiança da projeção e cite a limitação explicitamente em "assumptions".
-- **FORMATO DE RESPOSTA** — Responda APENAS com JSON válido.
-
-# 🎯 ESQUEMA DE DADOS
-- Formato: { "scenarios": { "optimistic": { "revenue", "profit", "margin", "growth", "description", "key_actions": [...] }, "realistic": {...}, "pessimistic": {...} }, "assumptions": [...], "recommendations": [...], "risks": [...] }
-- Cada cenário deve ter ações específicas e mensuráveis.`;
+  const systemPrompt = getSystemPrompt('CEO', `Com base APENAS nos dados reais fornecidos, gere 3 cenários (otimista, realista, pessimista) para os próximos 3 meses.
+- Formato JSON: { "scenarios": { "optimistic": { "revenue", "profit", "margin", "growth", "description", "key_actions": [...] }, "realistic": {...}, "pessimistic": {...} }, "assumptions": [...], "recommendations": [...], "risks": [...] }
+- Cada cenário deve ter ações específicas e mensuráveis.`);
 
   const userPrompt = `KPIs: ${JSON.stringify(computed.kpis)}
 RECEITA MENSAL: ${JSON.stringify(computed.revenueByMonth)}
