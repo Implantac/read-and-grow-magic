@@ -84,7 +84,6 @@ export default function ExecutiveDashboard() {
         <PageHeader 
           title="🧠 Diretor Digital" 
           description="Assistente executivo unificado — consulte dados, execute ações e tome decisões"
-          className="m-0"
         />
         <ExecutiveIntelligenceStatus qualityScore={isInsufficient ? 15 : 94} />
       </div>
