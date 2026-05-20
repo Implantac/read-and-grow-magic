@@ -106,24 +106,38 @@ export function ExecutiveSWOT({ data, isLoading }: Props) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-2 mb-2">
-        {sections.map(section => (
-          <Button
-            key={section.id}
-            variant={activeFilters.includes(section.id) ? "secondary" : "outline"}
-            size="sm"
-            onClick={() => toggleFilter(section.id)}
-            className={cn(
-              "h-8 gap-2 text-[10px] font-bold uppercase tracking-wider transition-all",
-              activeFilters.includes(section.id) ? "opacity-100 shadow-sm" : "opacity-50 grayscale"
-            )}
-          >
-            <section.icon className={cn("h-3.5 w-3.5", section.color)} />
-            {section.title}
-            {activeFilters.includes(section.id) && <Check className="h-3 w-3 ml-1 opacity-50" />}
-          </Button>
-        ))}
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+        <div className="flex flex-wrap gap-2">
+          {sections.map(section => (
+            <Button
+              key={section.id}
+              variant={activeFilters.includes(section.id) ? "secondary" : "outline"}
+              size="sm"
+              onClick={() => toggleFilter(section.id)}
+              className={cn(
+                "h-8 gap-2 text-[10px] font-bold uppercase tracking-wider transition-all",
+                activeFilters.includes(section.id) ? "opacity-100 shadow-sm" : "opacity-50 grayscale"
+              )}
+            >
+              <section.icon className={cn("h-3.5 w-3.5", section.color)} />
+              {section.title}
+              {activeFilters.includes(section.id) && <Check className="h-3 w-3 ml-1 opacity-50" />}
+            </Button>
+          ))}
+        </div>
+        
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={resetFilters}
+          disabled={activeFilters.length === 4}
+          className="h-8 gap-2 text-[10px] font-bold uppercase text-muted-foreground hover:text-foreground"
+        >
+          <RotateCcw className="h-3.5 w-3.5" />
+          Redefinir
+        </Button>
       </div>
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredSections.map((section, idx) => (
