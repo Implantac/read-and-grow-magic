@@ -35,6 +35,19 @@ export default function StoragePage() {
 
   const zones = [...new Set(locations.map(l => l.zone))].sort();
 
+  // Prepare data for the map
+  const zoneStats = zones.map(zone => {
+    const zoneLocations = locations.filter(l => l.zone === zone);
+    const totalCap = zoneLocations.reduce((s, l) => s + l.capacity, 0);
+    const totalOcc = zoneLocations.reduce((s, l) => s + l.occupied, 0);
+    return {
+      zone,
+      occupancy: totalCap > 0 ? Math.round((totalOcc / totalCap) * 100) : 0,
+      totalLocations: zoneLocations.length,
+      type: zoneLocations[0]?.type || 'rack'
+    };
+  });
+
   const filteredLocations = locations.filter(location => {
     const matchesSearch = location.code.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesZone = zoneFilter === 'all' || location.zone === zoneFilter;
@@ -50,14 +63,22 @@ export default function StoragePage() {
 
   return (
     <PageContainer>
-      <PageHeader title="Endereçamento" description="Gerenciamento de locais de armazenamento" />
+      <PageHeader title="Endereçamento" description="Gerenciamento visual e lógico de locais de armazenamento" />
 
-      {/* KPIs */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <KPICard title="Taxa de Ocupação" value={`${occupancyRate}%`} subtitle={`${totalOccupied}/${totalCapacity} posições`} icon={<Warehouse className="h-5 w-5" />} accentColor={occupancyRate > 85 ? 'danger' : 'primary'} index={0} />
-        <KPICard title="Total de Endereços" value={locations.length} subtitle={`${zones.length} zonas`} icon={<MapPin className="h-5 w-5" />} accentColor="info" index={1} />
-        <KPICard title="Endereços Vazios" value={emptyLocations} subtitle="Disponíveis para alocação" icon={<Grid3X3 className="h-5 w-5" />} accentColor="success" index={2} />
-        <KPICard title="Endereços Cheios" value={fullLocations} subtitle="Capacidade máxima" icon={<Package className="h-5 w-5" />} accentColor={fullLocations > 0 ? 'danger' : 'primary'} index={3} />
+      <div className="grid gap-6 lg:grid-cols-3 mb-6">
+        <div className="lg:col-span-2">
+          <WarehouseMap 
+            zones={zoneStats} 
+            selectedZone={zoneFilter === 'all' ? null : zoneFilter}
+            onZoneClick={(zone) => setZoneFilter(prev => prev === zone ? 'all' : zone)}
+            className="h-full border-none shadow-sm"
+          />
+        </div>
+        <div className="grid gap-4">
+          <KPICard title="Ocupação Total" value={`${occupancyRate}%`} subtitle={`${totalOccupied}/${totalCapacity} posições`} icon={<Warehouse className="h-5 w-5" />} accentColor={occupancyRate > 85 ? 'danger' : 'primary'} index={0} />
+          <KPICard title="Endereços Vazios" value={emptyLocations} subtitle="Prontos para alocação" icon={<Grid3X3 className="h-5 w-5" />} accentColor="success" index={1} />
+          <KPICard title="Endereços Cheios" value={fullLocations} subtitle="Capacidade esgotada" icon={<Package className="h-5 w-5" />} accentColor={fullLocations > 0 ? 'danger' : 'primary'} index={2} />
+        </div>
       </div>
 
       {/* Filters */}
