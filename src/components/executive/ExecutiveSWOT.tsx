@@ -35,6 +35,17 @@ export function ExecutiveSWOT({ data, isLoading }: Props) {
     localStorage.setItem(SWOT_FILTERS_KEY, JSON.stringify(activeFilters));
   }, [activeFilters]);
 
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === SWOT_FILTERS_KEY && e.newValue) {
+        setActiveFilters(JSON.parse(e.newValue));
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   const toggleFilter = (id: string) => {
     setActiveFilters(prev => 
       prev.includes(id) 
