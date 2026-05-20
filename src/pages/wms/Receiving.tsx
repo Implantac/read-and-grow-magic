@@ -181,9 +181,17 @@ export default function ReceivingPage() {
                                 <PlayCircle className="mr-2 h-4 w-4" /> Iniciar Recebimento
                               </DropdownMenuItem>
                             )}
+                            <DropdownMenuItem onClick={() => openDetails(order)}>
+                              <Info className="mr-2 h-4 w-4" /> Detalhes & Conferência
+                            </DropdownMenuItem>
+                            {order.status === 'pending' && (
+                              <DropdownMenuItem onClick={() => handleStart(order.id)}>
+                                <PlayCircle className="mr-2 h-4 w-4 text-primary" /> Iniciar Recebimento
+                              </DropdownMenuItem>
+                            )}
                             {order.status === 'in_progress' && (
                               <DropdownMenuItem onClick={() => handleComplete(order.id)}>
-                                <CheckCircle className="mr-2 h-4 w-4" /> Concluir Recebimento
+                                <CheckCircle className="mr-2 h-4 w-4 text-green-500" /> Concluir Recebimento
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>
@@ -192,19 +200,159 @@ export default function ReceivingPage() {
                     </TableRow>
                   );
                 })}
-                {filteredOrders.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      <PackagePlus className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                      Nenhuma ordem encontrada
-                    </TableCell>
-                  </TableRow>
-                )}
               </TableBody>
             </Table>
           )}
         </CardContent>
       </Card>
+
+      {/* Order Details & Conference Dialog */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-center gap-2 mb-2">
+              <Badge variant={selectedOrder ? (statusConfig[selectedOrder.status]?.variant || 'outline') : 'outline'}>
+                {selectedOrder && statusConfig[selectedOrder.status]?.label}
+              </Badge>
+              <span className="text-xs text-muted-foreground font-mono">#{selectedOrder?.id?.slice(0, 8)}</span>
+            </div>
+            <DialogTitle className="text-2xl flex items-center gap-2">
+              <Truck className="h-6 w-6 text-primary" />
+              Recebimento: {selectedOrder?.orderNumber}
+            </DialogTitle>
+            <DialogDescription>
+              Conferência de mercadorias do fornecedor <strong>{selectedOrder?.supplier}</strong>
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedOrder && (
+            <div className="space-y-6 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Doca de Descarga</Label>
+                  <div className="flex items-center gap-2 font-semibold">
+                    <LayoutGrid className="h-4 w-4 text-muted-foreground" />
+                    {selectedOrder.dock || 'Não atribuída'}
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Previsão de Entrega</Label>
+                  <div className="flex items-center gap-2 font-semibold">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    {formatDate(selectedOrder.expectedDate)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Progress and Items */}
+              <div className="p-4 rounded-xl bg-muted/30 border border-muted space-y-4">
+                <div className="flex justify-between items-end">
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold">Progresso da Conferência</p>
+                    <p className="text-xs text-muted-foreground">{selectedOrder.receivedItems || 0} de {selectedOrder.itemsCount || 0} itens conferidos</p>
+                  </div>
+                  <span className="text-2xl font-black tabular-nums">
+                    {Math.round(((selectedOrder.receivedItems || 0) / (selectedOrder.itemsCount || 1)) * 100)}%
+                  </span>
+                </div>
+                <Progress 
+                  value={((selectedOrder.receivedItems || 0) / (selectedOrder.itemsCount || 1)) * 100} 
+                  className="h-3" 
+                />
+              </div>
+
+              {/* Quality Check Section */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-bold flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-green-500" />
+                  Checklist de Qualidade (QA)
+                </h4>
+                <div className="grid grid-cols-1 gap-2">
+                  <div className={cn(
+                    "flex items-center justify-between p-3 rounded-lg border transition-colors",
+                    qualityCheck.damaged ? "bg-destructive/5 border-destructive/20" : "bg-card border-border"
+                  )}>
+                    <div className="flex items-center gap-3">
+                      <Checkbox 
+                        id="damaged" 
+                        checked={qualityCheck.damaged} 
+                        onCheckedChange={(v) => setQualityCheck(prev => ({ ...prev, damaged: !!v }))} 
+                      />
+                      <Label htmlFor="damaged" className="cursor-pointer">Existem itens avariados/danificados?</Label>
+                    </div>
+                    {qualityCheck.damaged && <AlertCircle className="h-4 w-4 text-destructive" />}
+                  </div>
+
+                  <div className={cn(
+                    "flex items-center justify-between p-3 rounded-lg border transition-colors",
+                    qualityCheck.qtyMismatch ? "bg-destructive/5 border-destructive/20" : "bg-card border-border"
+                  )}>
+                    <div className="flex items-center gap-3">
+                      <Checkbox 
+                        id="mismatch" 
+                        checked={qualityCheck.qtyMismatch} 
+                        onCheckedChange={(v) => setQualityCheck(prev => ({ ...prev, qtyMismatch: !!v }))} 
+                      />
+                      <Label htmlFor="mismatch" className="cursor-pointer">Divergência entre NF e Físico?</Label>
+                    </div>
+                    {qualityCheck.qtyMismatch && <AlertCircle className="h-4 w-4 text-destructive" />}
+                  </div>
+                </div>
+              </div>
+
+              {/* Simulation of Items List */}
+              <div className="space-y-3">
+                <h4 className="text-sm font-bold flex items-center gap-2">
+                  <Box className="h-4 w-4 text-blue-500" />
+                  Itens na Ordem
+                </h4>
+                <div className="border rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader className="bg-muted/50">
+                      <TableRow>
+                        <TableHead className="h-8 text-[10px] uppercase font-bold">Produto</TableHead>
+                        <TableHead className="h-8 text-[10px] uppercase font-bold text-center">Esperado</TableHead>
+                        <TableHead className="h-8 text-[10px] uppercase font-bold text-center">Recebido</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="py-2">
+                          <p className="text-xs font-bold">Produto SKU-001</p>
+                          <p className="text-[10px] text-muted-foreground">Caixa com 12 unidades</p>
+                        </TableCell>
+                        <TableCell className="text-center py-2 text-xs font-mono">{selectedOrder.itemsCount}</TableCell>
+                        <TableCell className="text-center py-2 text-xs font-mono font-bold text-primary">{selectedOrder.receivedItems}</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>Cancelar</Button>
+            {selectedOrder?.status === 'pending' && (
+              <Button onClick={() => handleStart(selectedOrder.id)}>
+                <PlayCircle className="mr-2 h-4 w-4" /> Iniciar Recebimento
+              </Button>
+            )}
+            {selectedOrder?.status === 'in_progress' && (
+              <Button 
+                onClick={() => handleComplete(selectedOrder.id)}
+                disabled={qualityCheck.damaged || qualityCheck.qtyMismatch}
+                className={cn(
+                  qualityCheck.damaged || qualityCheck.qtyMismatch ? "bg-muted text-muted-foreground" : "bg-green-600 hover:bg-green-700"
+                )}
+              >
+                <CheckCircle className="mr-2 h-4 w-4" /> Finalizar Conferência
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
+
