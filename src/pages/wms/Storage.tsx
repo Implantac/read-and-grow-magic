@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -12,11 +12,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  MapPin, Search, Package, Grid3X3, Warehouse, Thermometer, AlertTriangle, Plus,
+  MapPin, Search, Package, Grid3X3, Warehouse, Thermometer, AlertTriangle, Plus, FilterX
 } from 'lucide-react';
 import { useWMSStorageLocations } from '@/hooks/useWMSOperations';
 import type { StorageType } from '@/types/wms';
 import { cn } from '@/lib/utils';
+import { WarehouseMap } from '@/components/wms/WarehouseMap';
 
 const typeConfig: Record<StorageType, { label: string; icon: React.ReactNode; color: string }> = {
   rack: { label: 'Rack', icon: <Grid3X3 className="h-4 w-4" />, color: 'bg-blue-500' },
