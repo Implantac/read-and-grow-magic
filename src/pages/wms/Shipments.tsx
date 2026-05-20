@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
@@ -125,7 +126,7 @@ export default function ShipmentsPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nº Expedição</TableHead>
-                  <TableHead>Romaneio</TableHead>
+                  <TableHead>Progresso</TableHead>
                   <TableHead>Cliente</TableHead>
                   <TableHead>Transportadora</TableHead>
                   <TableHead>Volumes</TableHead>
@@ -138,26 +139,58 @@ export default function ShipmentsPage() {
               <TableBody>
                 {filteredShipments.map(s => {
                   const cfg = statusConfig[s.status] || statusConfig.pending;
+                  const progressValue = s.status === 'delivered' ? 100 : s.status === 'shipped' ? 75 : s.status === 'ready' ? 50 : 25;
+                  
                   return (
-                    <TableRow key={s.id}>
-                      <TableCell className="font-medium font-mono">{s.shipmentNumber}</TableCell>
-                      <TableCell>
-                        {s.romaneioNumber ? (
-                          <Badge variant="outline" className="gap-1"><FileText className="h-3 w-3" />{s.romaneioNumber}</Badge>
-                        ) : '-'}
+                    <TableRow key={s.id} className="group hover:bg-muted/30">
+                      <TableCell className="font-medium font-mono">
+                        <div className="flex flex-col">
+                          <span>{s.shipmentNumber}</span>
+                          {s.romaneioNumber && (
+                            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                              <FileText className="h-2.5 w-2.5" /> {s.romaneioNumber}
+                            </span>
+                          )}
+                        </div>
                       </TableCell>
-                      <TableCell>{s.customerName}</TableCell>
-                      <TableCell>{s.carrier || '-'}</TableCell>
-                      <TableCell className="tabular-nums">{s.volumes}</TableCell>
-                      <TableCell className="tabular-nums">{s.totalWeight > 0 ? s.totalWeight.toFixed(1) : '-'}</TableCell>
+                      <TableCell className="min-w-[120px]">
+                        <div className="space-y-1.5">
+                          <div className="flex justify-between items-center text-[10px]">
+                            <span className="text-muted-foreground font-medium uppercase tracking-tighter">Fluxo</span>
+                            <span className="font-bold">{progressValue}%</span>
+                          </div>
+                          <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden flex">
+                            <div 
+                              className={cn(
+                                "h-full transition-all duration-1000",
+                                s.status === 'cancelled' ? 'bg-destructive' : 'bg-primary'
+                              )} 
+                              style={{ width: `${progressValue}%` }} 
+                            />
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="font-medium text-sm">{s.customerName}</div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="font-normal">{s.carrier || 'FOB'}</Badge>
+                      </TableCell>
+                      <TableCell className="tabular-nums">
+                        <div className="flex items-center gap-1">
+                          <PackageCheck className="h-3 w-3 text-muted-foreground" />
+                          {s.volumes}
+                        </div>
+                      </TableCell>
+                      <TableCell className="tabular-nums font-mono text-xs">{s.totalWeight > 0 ? `${s.totalWeight.toFixed(1)}kg` : '-'}</TableCell>
                       <TableCell>
                         {s.trackingNumber ? (
-                          <Badge variant="outline" className="gap-1 font-mono text-xs">
-                            <MapPin className="h-3 w-3" />{s.trackingNumber}
-                          </Badge>
+                          <div className="flex items-center gap-1 font-mono text-[10px] bg-muted px-2 py-0.5 rounded-md border border-border/50">
+                            <MapPin className="h-2.5 w-2.5 text-primary" />{s.trackingNumber}
+                          </div>
                         ) : '-'}
                       </TableCell>
-                      <TableCell><Badge variant={cfg.variant}>{cfg.label}</Badge></TableCell>
+                      <TableCell><Badge variant={cfg.variant} className="text-[10px] uppercase font-bold tracking-tight">{cfg.label}</Badge></TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>

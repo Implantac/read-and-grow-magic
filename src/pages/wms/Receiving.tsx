@@ -21,9 +21,10 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Package, Search, Truck, CheckCircle, Clock, PlayCircle, MoreHorizontal, ShoppingCart, PackagePlus,
-  FileText, ShieldCheck, AlertCircle, Info, Box, LayoutGrid
+  FileText, ShieldCheck, AlertCircle, Info, Box, LayoutGrid, ScanBarcode, Zap, CheckCircle2
 } from 'lucide-react';
 import { useWMSReceiving } from '@/hooks/useWMSOperations';
+import { BarcodeScanner, ScanFeedback } from '@/components/wms/BarcodeScanner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -244,6 +245,27 @@ export default function ReceivingPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Barcode Integration */}
+              {selectedOrder.status === 'in_progress' && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-bold flex items-center gap-2">
+                      <ScanBarcode className="h-4 w-4 text-primary" />
+                      Conferência por Coletor
+                    </h4>
+                    <Badge variant="outline" className="text-[10px] animate-pulse bg-primary/5">AGUARDANDO LEITURA</Badge>
+                  </div>
+                  <BarcodeScanner 
+                    autoFocus 
+                    onScan={async (code) => {
+                      // Logic for SKU validation would go here
+                      return { type: 'success', message: `SKU ${code} confirmado!`, code };
+                    }}
+                    placeholder="Escaneie o EAN do produto..."
+                  />
+                </div>
+              )}
 
               {/* Progress and Items */}
               <div className="p-4 rounded-xl bg-muted/30 border border-muted space-y-4">

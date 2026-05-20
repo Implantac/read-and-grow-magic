@@ -16,13 +16,14 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Search, Package, Clock, CheckCircle, PlayCircle, ClipboardList, AlertTriangle, Zap, PackageSearch,
-  Route, MapPin, Box, ArrowRight, User, Info, Layers
+  Route, MapPin, Box, ArrowRight, User, Info, Layers, ScanBarcode, ChevronRight, CheckCircle2
 } from 'lucide-react';
 import { useWMSPicking } from '@/hooks/useWMSOperations';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { PickingStatus } from '@/types/wms';
 import { cn } from '@/lib/utils';
+import { BarcodeScanner } from '@/components/wms/BarcodeScanner';
 
 const statusConfig: Record<PickingStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   pending: { label: 'Pendente', variant: 'secondary' },
@@ -93,7 +94,6 @@ export default function PickingPage() {
         />
       </PageHeader>
 
-      {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-4">
         <KPICard title="Pendentes" value={pendingCount} subtitle="Aguardando separação" icon={<Clock className="h-5 w-5" />} accentColor="warning" index={0} />
         <KPICard title="Em Andamento" value={inProgressCount} subtitle="Sendo separados" icon={<PlayCircle className="h-5 w-5" />} accentColor="info" index={1} />
@@ -101,7 +101,6 @@ export default function PickingPage() {
         <KPICard title="Urgentes" value={urgentCount} subtitle="Prioridade máxima" icon={<AlertTriangle className="h-5 w-5" />} accentColor={urgentCount > 0 ? 'danger' : 'primary'} index={3} />
       </div>
 
-      {/* Filters */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center">
@@ -133,7 +132,6 @@ export default function PickingPage() {
         </CardContent>
       </Card>
 
-      {/* Table & Tabs */}
       <Tabs defaultValue="list" className="space-y-4">
         <TabsList>
           <TabsTrigger value="list" className="gap-2"><ClipboardList className="h-4 w-4" /> Lista de Pedidos</TabsTrigger>
@@ -277,7 +275,7 @@ export default function PickingPage() {
                 </div>
               </div>
 
-              {/* Picking Route Visualization Simulation */}
+              {/* Picking Route Visualization */}
               <div className="space-y-3">
                 <h4 className="text-sm font-bold flex items-center gap-2">
                   <Route className="h-4 w-4 text-blue-500" />
@@ -307,17 +305,6 @@ export default function PickingPage() {
                       <div className="absolute top-1/2 left-0 w-full -translate-y-1/2 border-t-2 border-dashed border-primary/30" />
                     </div>
 
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="h-10 w-10 rounded-full bg-card border-2 border-primary/50 flex items-center justify-center text-primary shadow-md">
-                        <Box className="h-5 w-5" />
-                      </div>
-                      <span className="text-[10px] font-bold uppercase">Zona B (B-05-12)</span>
-                    </div>
-
-                    <div className="h-[2px] flex-1 bg-dashed bg-muted-foreground/30 relative mx-2">
-                      <div className="absolute top-1/2 left-0 w-full -translate-y-1/2 border-t-2 border-dashed border-primary/30" />
-                    </div>
-
                     <div className="flex flex-col items-center gap-2 opacity-50">
                       <div className="h-10 w-10 rounded-full bg-muted border-2 border-muted-foreground/30 flex items-center justify-center text-muted-foreground">
                         <CheckCircle className="h-5 w-5" />
@@ -329,6 +316,30 @@ export default function PickingPage() {
                 </div>
                 <p className="text-[10px] text-muted-foreground text-center italic">IA calculou uma rota 15% mais rápida baseada na geolocalização dos itens</p>
               </div>
+
+              {/* Picking Execution via Barcode */}
+              {selectedOrder.status === 'in_progress' && (
+                <div className="space-y-4 p-4 rounded-xl border bg-muted/20 border-primary/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-bold flex items-center gap-2">
+                        <ScanBarcode className="h-4 w-4 text-primary" />
+                        Confirmação de Picking
+                      </h4>
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mt-0.5">
+                        Próximo: <span className="text-primary">A-01-01</span> • SKU-001
+                      </p>
+                    </div>
+                    <Badge className="bg-primary hover:bg-primary font-mono">1/12</Badge>
+                  </div>
+                  <BarcodeScanner 
+                    onScan={async (code) => {
+                      return { type: 'success', message: 'Item validado com sucesso!', code };
+                    }}
+                    placeholder="Leia o código do item..."
+                  />
+                </div>
+              )}
 
               {/* Items Table */}
               <div className="space-y-3">
@@ -419,4 +430,3 @@ export default function PickingPage() {
     </PageContainer>
   );
 }
-
