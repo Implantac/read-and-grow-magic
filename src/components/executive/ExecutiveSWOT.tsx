@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, TrendingDown, ShieldAlert, Zap, Check, RotateCcw } from 'lucide-react';
+import { TrendingUp, TrendingDown, ShieldAlert, Zap, Check, RotateCcw, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SWOTItem {
@@ -30,6 +30,7 @@ export function ExecutiveSWOT({ data, isLoading }: Props) {
     const saved = localStorage.getItem(SWOT_FILTERS_KEY);
     return saved ? JSON.parse(saved) : ['strengths', 'weaknesses', 'opportunities', 'threats'];
   });
+  const [showSyncBadge, setShowSyncBadge] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(SWOT_FILTERS_KEY, JSON.stringify(activeFilters));
@@ -38,7 +39,10 @@ export function ExecutiveSWOT({ data, isLoading }: Props) {
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === SWOT_FILTERS_KEY && e.newValue) {
-        setActiveFilters(JSON.parse(e.newValue));
+        const newValue = JSON.parse(e.newValue);
+        setActiveFilters(newValue);
+        setShowSyncBadge(true);
+        setTimeout(() => setShowSyncBadge(false), 3000);
       }
     };
 
@@ -116,7 +120,13 @@ export function ExecutiveSWOT({ data, isLoading }: Props) {
   const filteredSections = sections.filter(s => activeFilters.includes(s.id));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 relative">
+      {showSyncBadge && (
+        <div className="absolute -top-8 right-0 flex items-center gap-1.5 bg-primary/10 text-primary px-2 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider animate-in fade-in slide-in-from-top-1 duration-300 border border-primary/20 shadow-sm z-50">
+          <RefreshCw className="h-3 w-3 animate-spin" />
+          Sincronizado
+        </div>
+      )}
       <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
         <div className="flex flex-wrap gap-2">
           {sections.map(section => (
