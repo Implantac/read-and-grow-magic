@@ -849,6 +849,36 @@ export type Database = {
           },
         ]
       }
+      ai_prompt_audit_logs: {
+        Row: {
+          function_name: string
+          id: string
+          metadata: Json | null
+          persona: string
+          prompt_version: string
+          timestamp: string
+          user_id: string | null
+        }
+        Insert: {
+          function_name: string
+          id?: string
+          metadata?: Json | null
+          persona: string
+          prompt_version: string
+          timestamp?: string
+          user_id?: string | null
+        }
+        Update: {
+          function_name?: string
+          id?: string
+          metadata?: Json | null
+          persona?: string
+          prompt_version?: string
+          timestamp?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       ai_recommendations: {
         Row: {
           acted_at: string | null
