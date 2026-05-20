@@ -2,7 +2,7 @@ import { useWMSDashboardStats } from '@/hooks/useWMSOperations';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,17 +11,20 @@ import { Link } from 'react-router-dom';
 import {
   Warehouse, PackagePlus, PackageSearch, PackageCheck, Truck,
   CheckCircle, MapPin, ArrowUpDown, ScanBarcode, Layers, ClipboardCheck,
-  AlertTriangle, TrendingUp, BarChart3, Timer, Activity,
+  AlertTriangle, TrendingUp, BarChart3, Timer, Activity, Zap, Box,
+  Clock, ArrowRight, ExternalLink
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { WarehouseMap } from '@/components/wms/WarehouseMap';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const quickActions = [
-  { to: '/wms/recebimento', icon: PackagePlus, label: 'Recebimento' },
-  { to: '/wms/picking', icon: PackageSearch, label: 'Picking' },
-  { to: '/wms/conferencia', icon: ScanBarcode, label: 'Conferência' },
-  { to: '/wms/packing', icon: PackageCheck, label: 'Packing' },
-  { to: '/wms/expedicao', icon: Truck, label: 'Expedição' },
-  { to: '/wms/lotes', icon: Layers, label: 'Lotes' },
+  { to: '/wms/recebimento', icon: PackagePlus, label: 'Recebimento', color: 'text-blue-500', bg: 'bg-blue-500/10' },
+  { to: '/wms/picking', icon: PackageSearch, label: 'Picking', color: 'text-orange-500', bg: 'bg-orange-500/10' },
+  { to: '/wms/conferencia', icon: ScanBarcode, label: 'Conferência', color: 'text-purple-500', bg: 'bg-purple-500/10' },
+  { to: '/wms/packing', icon: PackageCheck, label: 'Packing', color: 'text-pink-500', bg: 'bg-pink-500/10' },
+  { to: '/wms/expedicao', icon: Truck, label: 'Expedição', color: 'text-green-500', bg: 'bg-green-500/10' },
+  { to: '/wms/lotes', icon: Layers, label: 'Lotes', color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
 ];
 
 export default function WMSDashboardPage() {
