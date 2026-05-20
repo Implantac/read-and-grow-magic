@@ -416,8 +416,6 @@ async function handleGenerateScenarios(supabase: any, lovableKey: string, corsHe
     }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 
-  const systemPrompt = `Você é um analista estratégico sênior. Com base APENAS nos dados reais fornecidos, gere 3 cenários (otimista, realista, pessimista) para os próximos 3 meses.
-
   const systemPrompt = getSystemPrompt('CEO', `Com base APENAS nos dados reais fornecidos, gere 3 cenários (otimista, realista, pessimista) para os próximos 3 meses.
 - Formato JSON: { "scenarios": { "optimistic": { "revenue", "profit", "margin", "growth", "description", "key_actions": [...] }, "realistic": {...}, "pessimistic": {...} }, "assumptions": [...], "recommendations": [...], "risks": [...] }
 - Cada cenário deve ter ações específicas e mensuráveis.`);
