@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, TrendingDown, ShieldAlert, Zap, Check } from 'lucide-react';
+import { TrendingUp, TrendingDown, ShieldAlert, Zap, Check, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SWOTItem {
@@ -42,6 +42,11 @@ export function ExecutiveSWOT({ data, isLoading }: Props) {
         : [...prev, id]
     );
   };
+
+  const resetFilters = () => {
+    setActiveFilters(['strengths', 'weaknesses', 'opportunities', 'threats']);
+  };
+
 
 
   if (isLoading) {
