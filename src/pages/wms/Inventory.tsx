@@ -69,9 +69,9 @@ export default function InventoryPage() {
 
       <div className="grid gap-4 md:grid-cols-4">
         <KPICard title="Valor Total" value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValue)} description={`${totalItems} itens em estoque`} icon={DollarSign} index={0} />
-        <KPICard title="SKUs Cadastrados" value={items.length} description={`${categories.length} categorias`} icon={ClipboardList} index={1} />
-        <KPICard title="Estoque Baixo" value={lowStockItems} description="Abaixo do mínimo" icon={AlertTriangle} index={2} color={lowStockItems > 0 ? 'warning' : undefined} />
-        <KPICard title="Vencidos" value={expiredItems} description="Produtos vencidos" icon={AlertTriangle} index={3} color={expiredItems > 0 ? 'danger' : undefined} />
+        <KPICard title="Health Score" value={`${Math.round(100 - (lowStockItems / (items.length || 1) * 100))}%`} description="Disponibilidade Global" icon={Package} accentColor="success" index={1} />
+        <KPICard title="Estoque Baixo" value={lowStockItems} description="Abaixo do mínimo" icon={AlertTriangle} index={2} accentColor={lowStockItems > 0 ? 'warning' : 'info'} />
+        <KPICard title="Vencidos" value={expiredItems} description="Ação imediata" icon={AlertTriangle} index={3} accentColor={expiredItems > 0 ? 'danger' : 'info'} />
       </div>
 
       <Tabs defaultValue="stock" className="space-y-4">
