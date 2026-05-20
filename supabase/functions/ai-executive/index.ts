@@ -337,17 +337,23 @@ async function handleGenerateInsights(supabase: any, lovableKey: string, corsHea
 
   const systemPrompt = `Você é um Diretor Executivo Digital (CEO AI) de uma empresa brasileira. Analise APENAS os dados reais fornecidos e gere insights estratégicos acionáveis.
 
-REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO:
-- NUNCA invente números, percentuais ou tendências que não estejam nos dados
-- NUNCA estime sem base — cite o KPI/valor exato dos dados como evidência
-- Se um indicador não tiver dados suficientes, OMITA o insight sobre ele
-- Responda APENAS com JSON válido
-- Gere entre 4-10 insights (somente os que tiverem evidência real) cobrindo: receita, lucro, custos, risco financeiro, eficiência operacional, performance comercial
-- Cada insight: { type (revenue|profit|cost|risk|operational|commercial), severity (critical|high|medium|low), title, description, explanation, impact_estimate, recommended_actions (array de strings, máx 3), module }
-- FOCO EM AÇÃO: cada insight deve ter recomendações concretas e mensuráveis
-- Inclua análise de: tendência de receita, concentração de clientes, margem por produto, risco de inadimplência, eficiência produtiva, performance de vendedores
-- Priorize problemas que impactam caixa e lucro
-- Toda recomendação deve explicar POR QUE e QUAL o impacto esperado (Explainable AI)`;
+# 🏁 REGRAS GERAIS DE COMPORTAMENTO
+- **Direto e estratégico** — toda resposta deve levar a uma DECISÃO.
+- **Especialista, não assistente** — fale como dono do negócio falando com dono.
+- **Valores Monetários** — Sempre em negrito (**R$ 1.234,56**).
+- **Porcentagens** — Sempre em negrito (**15,5%**).
+- **Status** — Use emojis: ✅ OK | ⚠️ Atenção | 🔴 Crítico.
+
+# 🚫 REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO E FALLBACK
+- **DADOS REAIS APENAS** — NUNCA invente números, percentuais ou tendências que não estejam nos dados fornecidos.
+- **NÃO ESTIMAR SEM BASE** — Cite o KPI/valor exato dos dados como evidência.
+- **FALLBACK** — Se os dados para um indicador estiverem vazios ou forem insuficientes, OMITA o insight ou diga claramente "dados insuficientes".
+- **FORMATO DE RESPOSTA** — Responda APENAS com JSON válido conforme o esquema solicitado.
+
+# 🎯 OBJETIVO DA ANÁLISE
+- Gere entre 4-10 insights acionáveis cobrindo: receita, lucro, custos, risco financeiro, eficiência operacional e comercial.
+- Cada insight deve seguir o esquema: { type, severity, title, description, explanation, impact_estimate, recommended_actions, module }.
+- Toda recomendação deve ser concreta, mensurável e explicar o PORQUÊ (Explainable AI).`;
 
   const userPrompt = `DADOS DA EMPRESA:
 KPIs: ${JSON.stringify(computed.kpis)}
@@ -426,15 +432,18 @@ async function handleGenerateScenarios(supabase: any, lovableKey: string, corsHe
 
   const systemPrompt = `Você é um analista estratégico sênior. Com base APENAS nos dados reais fornecidos, gere 3 cenários (otimista, realista, pessimista) para os próximos 3 meses.
 
-REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO:
-- NUNCA invente números — projete a partir de tendências reais (receita mensal, pipeline, margem)
-- Se a base histórica for curta (<3 meses), reduza confiança e cite a limitação em "assumptions"
-- Responda APENAS com JSON válido
+# 🏁 REGRAS GERAIS DE COMPORTAMENTO
+- **Valores Monetários** — Sempre em negrito (**R$ 1.234,56**).
+- **Porcentagens** — Sempre em negrito (**15,5%**).
+
+# 🚫 REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO E FALLBACK
+- **NUNCA INVENTAR NÚMEROS** — Projete a partir de tendências reais (receita mensal, pipeline, margem).
+- **FALLBACK** — Se a base histórica for curta (<3 meses), reduza a confiança da projeção e cite a limitação explicitamente em "assumptions".
+- **FORMATO DE RESPOSTA** — Responda APENAS com JSON válido.
+
+# 🎯 ESQUEMA DE DADOS
 - Formato: { "scenarios": { "optimistic": { "revenue", "profit", "margin", "growth", "description", "key_actions": [...] }, "realistic": {...}, "pessimistic": {...} }, "assumptions": [...], "recommendations": [...], "risks": [...] }
-- Use dados reais para projetar - considere tendência de receita, pipeline, inadimplência e capacidade produtiva
-- Cada cenário deve ter ações específicas e mensuráveis
-- Valores em reais (números)
-- Inclua riscos e recomendações prioritárias`;
+- Cada cenário deve ter ações específicas e mensuráveis.`;
 
   const userPrompt = `KPIs: ${JSON.stringify(computed.kpis)}
 RECEITA MENSAL: ${JSON.stringify(computed.revenueByMonth)}
