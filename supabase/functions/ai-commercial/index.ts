@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getSystemPrompt } from "../_shared/ai-prompts.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -207,20 +208,11 @@ async function generateRecommendations() {
     });
   });
 
-  const systemPrompt = `Você é uma IA comercial de um ERP B2B brasileiro. Analise os dados dos clientes e gere recomendações comerciais específicas e acionáveis.
-
-# 🏁 REGRAS GERAIS DE COMPORTAMENTO
-- **Tom Consultivo** — Fale como um parceiro estratégico do vendedor.
-- **Foco em ROI** — Priorize recomendações que aumentem o ticket ou recuperem clientes.
-- **Valores** — Sempre em negrito (**R$ 1.500,00**).
-
-# 🚫 REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO E FALLBACK
-- **DADOS REAIS APENAS** — Não invente histórico de compras ou segmentação.
-- **FALLBACK** — Se os dados do cliente forem escassos, use o tipo "recovery" ou "reorder" apenas se houver evidência de compra anterior, caso contrário, retorne array vazio.
-- **FORMATO DE RESPOSTA** — Utilize a função de ferramenta (tool call) 'generate_recommendations' com o JSON estruturado.
-
+  const systemPrompt = getSystemPrompt('SALES_CONSULTANT', `Analise os dados dos clientes e gere recomendações comerciais específicas e acionáveis.
 # 🎯 TIPOS DE RECOMENDAÇÃO
-- cross_sell, upsell, recovery, ticket_increase, reorder.`;
+- cross_sell, upsell, recovery, ticket_increase, reorder.
+# 🛠️ FORMATO
+Utilize a função 'generate_recommendations' com o JSON estruturado.`);
 
   const clientSummary = topClients.map((s: any) => {
     const c = s.clients;
@@ -343,16 +335,10 @@ async function generateInsights() {
 
   const regionSummary = Object.entries(regionTotals).map(([r, v]) => `${r}: R$${v.toFixed(0)}`).join("; ");
 
-  const systemPrompt = `Você é um analista de inteligência comercial sênior. Gere insights acionáveis em português para diferentes níveis hierárquicos.
-
-Para cada insight:
-- Título curto e impactante (máx 60 chars)
-- Descrição detalhada com números específicos
-- Severidade precisa: critical (precisa de ação imediata), warning (atenção), info (informativo), success (bom resultado)
-- Ações sugeridas práticas e específicas
-- Target role correto: seller (vendedor), supervisor, manager (gerente), director (diretoria)
-
-Priorize insights que podem gerar ação imediata e impacto em vendas.`;
+  const systemPrompt = getSystemPrompt('SALES_CONSULTANT', `Gere insights acionáveis para diferentes níveis hierárquicos (vendedor, supervisor, gerente, diretoria).
+- Severidade: critical, warning, info, success.
+- Foque em ações imediatas para aumentar vendas ou reduzir riscos comerciais.
+- Utilize a função 'generate_insights'.`);
 
   const tools = [{
     type: "function",

@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getSystemPrompt } from "../_shared/ai-prompts.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -78,19 +79,7 @@ serve(async (req) => {
         .order("start_time", { ascending: false })
         .limit(50);
 
-      const prompt = `Você é um consultor de PCP industrial especializado em confecção. Analise os dados de produção e gere insights acionáveis.
-
-# 🏁 REGRAS GERAIS DE COMPORTAMENTO
-- **Direto e Prático** — Foco em gargalos, produtividade e balanceamento.
-- **Valores e Prazos** — Sempre em negrito (**150 peças**, **15/10/2023**).
-- **Status** — Use emojis para severidade: 🔴 Crítico | ⚠️ Atenção | ✅ Normal.
-
-# 🚫 REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO E FALLBACK
-- **DADOS REAIS APENAS** — Analise apenas as OPs e apontamentos fornecidos. NUNCA invente ordens ou problemas fictícios.
-- **FALLBACK** — Se não houver dados de OPs ou apontamentos, retorne um array vazio [] e uma mensagem de "dados insuficientes".
-- **FORMATO DE RESPOSTA** — Responda APENAS com um JSON array válido.
-
-# 🎯 DADOS PARA ANÁLISE
+      const prompt = getSystemPrompt('PCP_CONSULTANT', `Analise os dados de produção e gere insights acionáveis.
 ORDENS DE PRODUÇÃO ATIVAS:
 ${JSON.stringify(orders?.slice(0, 20) || [], null, 2)}
 
@@ -101,7 +90,7 @@ ${JSON.stringify(capacity || [], null, 2)}
 ${JSON.stringify(timeEntries?.slice(0, 15) || [], null, 2)}
 
 # 📝 ESQUEMA DOS INSIGHTS (JSON)
-Cada objeto deve conter: insight_type, severity, title, description, affected_sector, recommended_action, impact_estimate.`;
+Cada objeto deve conter: insight_type, severity, title, description, affected_sector, recommended_action, impact_estimate.`);
 
       const result = await callAI(
         "Você é um especialista em PCP industrial. Responda apenas com JSON válido.",
@@ -166,10 +155,7 @@ Cada objeto deve conter: insight_type, severity, title, description, affected_se
         .select("*")
         .order("current_quantity");
 
-      const prompt = `Você é um gerente de PCP com 20 anos de experiência.
-
-Analise a situação atual e forneça DECISÕES ESTRATÉGICAS em JSON.
-
+      const prompt = getSystemPrompt('PCP_CONSULTANT', `Analise a situação atual e forneça DECISÕES ESTRATÉGICAS em JSON.
 ORDENS ATIVAS (${orders?.length || 0}):
 ${JSON.stringify(orders?.slice(0, 25) || [], null, 2)}
 
@@ -185,9 +171,7 @@ Gere um objeto JSON com:
   "rebalancing": [{"from_sector": "...", "to_sector": "...", "reason": "..."}],
   "material_alerts": [{"material": "...", "action": "...", "urgency": "high|medium|low"}],
   "summary": "resumo executivo em 2-3 frases"
-}
-
-Responda APENAS com JSON, sem markdown.`;
+}`);
 
       const result = await callAI(
         "Você é um diretor industrial. Responda apenas com JSON válido.",
@@ -227,10 +211,7 @@ Responda APENAS com JSON, sem markdown.`;
         .select("*")
         .eq("status", "started");
 
-      const prompt = `Você é um supervisor de produção.
-
-Analise as OPs ativas e sugira a melhor sequência de trabalho para os operadores.
-
+      const prompt = getSystemPrompt('PCP_CONSULTANT', `Analise as OPs ativas e sugira a melhor sequência de trabalho para os operadores.
 OPS ATIVAS:
 ${JSON.stringify(activeOPs || [], null, 2)}
 
@@ -239,9 +220,7 @@ ${JSON.stringify(activeEntries || [], null, 2)}
 
 Gere um JSON array com sugestões:
 [{"order_number": "...", "suggestion": "...", "priority": "urgent|high|normal", "reason": "..."}]
-
-Foque em: urgência de prazo, balanceamento de carga, OPs paradas.
-Responda APENAS com JSON, sem markdown.`;
+Foque em: urgência de prazo, balanceamento de carga, OPs paradas.`);
 
       const result = await callAI(
         "Supervisor industrial. JSON válido apenas.",

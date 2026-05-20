@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { getSystemPrompt } from "../_shared/ai-prompts.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -32,16 +33,10 @@ serve(async (req) => {
 
     switch (action) {
       case 'suggest_message': {
-        systemPrompt = `Você é um consultor comercial B2B especialista. Gere mensagens de WhatsApp profissionais, curtas e persuasivas.
-
-# 🏁 REGRAS DE FORMATO
+        systemPrompt = getSystemPrompt('SALES_CONSULTANT', `Gere mensagens de WhatsApp profissionais, curtas e persuasivas.
 - Máximo 3 parágrafos.
-- Tom consultivo e direto.
-- Inclua CTA (Chamada para Ação) claro.
-- Valores monetários em negrito (**R$ 1.000,00**).
-
-# 🚫 FALLBACK
-- Se o contexto do cliente estiver vazio, use uma abordagem genérica de apresentação da empresa.`;
+- Inclua CTA claro.
+- Fallback: Use abordagem genérica de apresentação se os dados do cliente forem escassos.`);
         userPrompt = `Contexto do cliente:
 - Nome: ${context.clientName}
 - Segmento: ${context.segment || 'Não informado'}
@@ -56,7 +51,7 @@ Gere uma mensagem de WhatsApp para ${context.situation || 'follow-up'}.`;
       }
 
       case 'suggest_objection_response': {
-        systemPrompt = `Você é um especialista em vendas B2B. Sugira respostas para objeções de clientes de forma empática e persuasiva em português brasileiro. Máximo 2 parágrafos.`;
+        systemPrompt = getSystemPrompt('SALES_CONSULTANT', `Sugira respostas para objeções de forma empática e persuasiva. Máximo 2 parágrafos.`);
         userPrompt = `Objeção do cliente: "${context.objection}"
 Produto/serviço: ${context.product || 'ERP integrado'}
 Contexto: ${context.additionalContext || 'Nenhum contexto adicional'}
@@ -66,7 +61,7 @@ Sugira uma resposta profissional para essa objeção.`;
       }
 
       case 'suggest_follow_up_plan': {
-        systemPrompt = `Você é um estrategista comercial B2B. Crie planos de follow-up com datas e ações específicas em português brasileiro. Retorne em formato JSON.`;
+        systemPrompt = getSystemPrompt('SALES_CONSULTANT', `Crie planos de follow-up com datas e ações específicas. Retorne em formato JSON.`);
         userPrompt = `Cliente: ${context.clientName}
 Score: ${context.score || 'N/A'}
 Última interação: ${context.lastInteraction || 'Desconhecida'}
@@ -78,7 +73,7 @@ Crie um plano de follow-up com 3-5 ações sequenciais. Retorne JSON com array "
       }
 
       case 'generate_daily_plan': {
-        systemPrompt = `Você é um diretor comercial B2B experiente. Analise o contexto da carteira de clientes e gere um plano de ação diário priorizado. Responda em JSON válido.`;
+        systemPrompt = getSystemPrompt('SALES_CONSULTANT', `Analise o contexto da carteira de clientes e gere um plano de ação diário priorizado. Responda em JSON válido.`);
         userPrompt = `Dados da carteira:
 - Total de leads ativos: ${context.activeLeads || 0}
 - Leads quentes (score > 80): ${context.hotLeads || 0}
@@ -120,7 +115,7 @@ Gere no máximo 8 priority_actions e 5 recovery_targets.`;
       }
 
       case 'suggest_reactivation': {
-        systemPrompt = `Você é um especialista em recuperação de clientes B2B. Crie mensagens de reativação personalizadas e estratégias de abordagem em português brasileiro.`;
+        systemPrompt = getSystemPrompt('SALES_CONSULTANT', `Crie mensagens de reativação personalizadas e estratégias de abordagem.`);
         userPrompt = `Cliente inativo:
 - Nome: ${context.clientName}
 - Dias sem compra: ${context.daysSinceLastPurchase || '90+'}
