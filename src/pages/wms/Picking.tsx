@@ -19,11 +19,11 @@ import {
   Route, MapPin, Box, ArrowRight, User, Info, Layers, ScanBarcode, ChevronRight, CheckCircle2
 } from 'lucide-react';
 import { useWMSPicking } from '@/hooks/useWMSOperations';
-import { BarcodeScanner } from '@/components/wms/BarcodeScanner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { PickingStatus } from '@/types/wms';
 import { cn } from '@/lib/utils';
+import { BarcodeScanner } from '@/components/wms/BarcodeScanner';
 
 const statusConfig: Record<PickingStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   pending: { label: 'Pendente', variant: 'secondary' },
@@ -94,7 +94,6 @@ export default function PickingPage() {
         />
       </PageHeader>
 
-      {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-4">
         <KPICard title="Pendentes" value={pendingCount} subtitle="Aguardando separação" icon={<Clock className="h-5 w-5" />} accentColor="warning" index={0} />
         <KPICard title="Em Andamento" value={inProgressCount} subtitle="Sendo separados" icon={<PlayCircle className="h-5 w-5" />} accentColor="info" index={1} />
@@ -102,7 +101,6 @@ export default function PickingPage() {
         <KPICard title="Urgentes" value={urgentCount} subtitle="Prioridade máxima" icon={<AlertTriangle className="h-5 w-5" />} accentColor={urgentCount > 0 ? 'danger' : 'primary'} index={3} />
       </div>
 
-      {/* Filters */}
       <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center">
@@ -134,7 +132,6 @@ export default function PickingPage() {
         </CardContent>
       </Card>
 
-      {/* Table & Tabs */}
       <Tabs defaultValue="list" className="space-y-4">
         <TabsList>
           <TabsTrigger value="list" className="gap-2"><ClipboardList className="h-4 w-4" /> Lista de Pedidos</TabsTrigger>
@@ -278,7 +275,7 @@ export default function PickingPage() {
                 </div>
               </div>
 
-              {/* Picking Route Visualization Simulation */}
+              {/* Picking Route Visualization */}
               <div className="space-y-3">
                 <h4 className="text-sm font-bold flex items-center gap-2">
                   <Route className="h-4 w-4 text-blue-500" />
@@ -308,17 +305,6 @@ export default function PickingPage() {
                       <div className="absolute top-1/2 left-0 w-full -translate-y-1/2 border-t-2 border-dashed border-primary/30" />
                     </div>
 
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="h-10 w-10 rounded-full bg-card border-2 border-primary/50 flex items-center justify-center text-primary shadow-md">
-                        <Box className="h-5 w-5" />
-                      </div>
-                      <span className="text-[10px] font-bold uppercase">Zona B (B-05-12)</span>
-                    </div>
-
-                    <div className="h-[2px] flex-1 bg-dashed bg-muted-foreground/30 relative mx-2">
-                      <div className="absolute top-1/2 left-0 w-full -translate-y-1/2 border-t-2 border-dashed border-primary/30" />
-                    </div>
-
                     <div className="flex flex-col items-center gap-2 opacity-50">
                       <div className="h-10 w-10 rounded-full bg-muted border-2 border-muted-foreground/30 flex items-center justify-center text-muted-foreground">
                         <CheckCircle className="h-5 w-5" />
@@ -328,6 +314,7 @@ export default function PickingPage() {
                   </div>
                   <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,#fff,rgba(255,255,255,0.6))] dark:bg-grid-slate-700/25" />
                 </div>
+                <p className="text-[10px] text-muted-foreground text-center italic">IA calculou uma rota 15% mais rápida baseada na geolocalização dos itens</p>
               </div>
 
               {/* Picking Execution via Barcode */}
@@ -353,67 +340,6 @@ export default function PickingPage() {
                   />
                 </div>
               )}
-
-              {/* Items List */}
-              <div className="space-y-3">
-                <h4 className="text-sm font-bold flex items-center gap-2">
-                  <Layers className="h-4 w-4 text-purple-500" />
-                  Lista de Separação
-                </h4>
-                <div className="border rounded-lg overflow-hidden">
-                  <Table>
-                    <TableHeader className="bg-muted/50">
-                      <TableRow>
-                        <TableHead className="h-8 text-[10px] uppercase font-bold">Local</TableHead>
-                        <TableHead className="h-8 text-[10px] uppercase font-bold">Produto</TableHead>
-                        <TableHead className="h-8 text-[10px] uppercase font-bold text-right">Qtd</TableHead>
-                        <TableHead className="h-8 text-[10px] uppercase font-bold text-center">Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow className="group">
-                        <TableCell className="py-2">
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-3 w-3 text-primary" />
-                            <span className="font-mono text-xs font-bold">A-01-01</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="py-2">
-                          <p className="text-xs font-bold">Produto SKU-001</p>
-                          <p className="text-[10px] text-muted-foreground">EAN: 789123456789</p>
-                        </TableCell>
-                        <TableCell className="text-right py-2 font-mono text-xs font-bold">01/01</TableCell>
-                        <TableCell className="text-center py-2">
-                          <CheckCircle2 className="h-4 w-4 text-green-500 mx-auto" />
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>Cancelar</Button>
-            {selectedOrder?.status === 'pending' && (
-              <Button onClick={() => setStartDialog(selectedOrder.id)}>
-                <PlayCircle className="mr-2 h-4 w-4" /> Iniciar Separação
-              </Button>
-            )}
-            {selectedOrder?.status === 'in_progress' && (
-              <Button 
-                onClick={() => completePicking(selectedOrder.id)}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <CheckCircle className="mr-2 h-4 w-4" /> Finalizar Picking
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-                <p className="text-[10px] text-muted-foreground text-center italic">IA calculou uma rota 15% mais rápida baseada na geolocalização dos itens</p>
-              </div>
 
               {/* Items Table */}
               <div className="space-y-3">
@@ -504,4 +430,3 @@ export default function PickingPage() {
     </PageContainer>
   );
 }
-
