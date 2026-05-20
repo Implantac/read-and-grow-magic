@@ -51,7 +51,7 @@ Gere uma mensagem de WhatsApp para ${context.situation || 'follow-up'}.`;
       }
 
       case 'suggest_objection_response': {
-        systemPrompt = `Você é um especialista em vendas B2B. Sugira respostas para objeções de clientes de forma empática e persuasiva em português brasileiro. Máximo 2 parágrafos.`;
+        systemPrompt = getSystemPrompt('SALES_CONSULTANT', `Sugira respostas para objeções de forma empática e persuasiva. Máximo 2 parágrafos.`);
         userPrompt = `Objeção do cliente: "${context.objection}"
 Produto/serviço: ${context.product || 'ERP integrado'}
 Contexto: ${context.additionalContext || 'Nenhum contexto adicional'}
