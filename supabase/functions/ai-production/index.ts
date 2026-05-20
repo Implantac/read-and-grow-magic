@@ -79,19 +79,7 @@ serve(async (req) => {
         .order("start_time", { ascending: false })
         .limit(50);
 
-      const prompt = `Você é um consultor de PCP industrial especializado em confecção. Analise os dados de produção e gere insights acionáveis.
-
-# 🏁 REGRAS GERAIS DE COMPORTAMENTO
-- **Direto e Prático** — Foco em gargalos, produtividade e balanceamento.
-- **Valores e Prazos** — Sempre em negrito (**150 peças**, **15/10/2023**).
-- **Status** — Use emojis para severidade: 🔴 Crítico | ⚠️ Atenção | ✅ Normal.
-
-# 🚫 REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO E FALLBACK
-- **DADOS REAIS APENAS** — Analise apenas as OPs e apontamentos fornecidos. NUNCA invente ordens ou problemas fictícios.
-- **FALLBACK** — Se não houver dados de OPs ou apontamentos, retorne um array vazio [] e uma mensagem de "dados insuficientes".
-- **FORMATO DE RESPOSTA** — Responda APENAS com um JSON array válido.
-
-# 🎯 DADOS PARA ANÁLISE
+      const prompt = getSystemPrompt('PCP_CONSULTANT', `Analise os dados de produção e gere insights acionáveis.
 ORDENS DE PRODUÇÃO ATIVAS:
 ${JSON.stringify(orders?.slice(0, 20) || [], null, 2)}
 
@@ -102,7 +90,7 @@ ${JSON.stringify(capacity || [], null, 2)}
 ${JSON.stringify(timeEntries?.slice(0, 15) || [], null, 2)}
 
 # 📝 ESQUEMA DOS INSIGHTS (JSON)
-Cada objeto deve conter: insight_type, severity, title, description, affected_sector, recommended_action, impact_estimate.`;
+Cada objeto deve conter: insight_type, severity, title, description, affected_sector, recommended_action, impact_estimate.`);
 
       const result = await callAI(
         "Você é um especialista em PCP industrial. Responda apenas com JSON válido.",
