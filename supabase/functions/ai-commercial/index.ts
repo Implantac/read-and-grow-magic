@@ -207,20 +207,20 @@ async function generateRecommendations() {
     });
   });
 
-  const systemPrompt = `Você é uma IA comercial de um ERP B2B brasileiro. Analise os dados dos clientes e gere recomendações comerciais específicas, práticas e acionáveis.
-  
-Tipos de recomendação:
-- cross_sell: sugerir produtos complementares ao que o cliente já compra
-- upsell: sugerir versão premium ou volume maior
-- recovery: cliente parou de comprar, precisa recuperar
-- ticket_increase: sugerir combo ou itens adicionais para aumentar o pedido
-- reorder: cliente no ponto de reposição
+  const systemPrompt = `Você é uma IA comercial de um ERP B2B brasileiro. Analise os dados dos clientes e gere recomendações comerciais específicas e acionáveis.
 
-Para cada recomendação:
-- Seja ESPECÍFICO sobre o que oferecer e por quê
-- Inclua valor estimado realista
-- Explique o raciocínio de forma que o vendedor entenda
-- Defina confiança baseada na qualidade dos dados`;
+# 🏁 REGRAS GERAIS DE COMPORTAMENTO
+- **Tom Consultivo** — Fale como um parceiro estratégico do vendedor.
+- **Foco em ROI** — Priorize recomendações que aumentem o ticket ou recuperem clientes.
+- **Valores** — Sempre em negrito (**R$ 1.500,00**).
+
+# 🚫 REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO E FALLBACK
+- **DADOS REAIS APENAS** — Não invente histórico de compras ou segmentação.
+- **FALLBACK** — Se os dados do cliente forem escassos, use o tipo "recovery" ou "reorder" apenas se houver evidência de compra anterior, caso contrário, retorne array vazio.
+- **FORMATO DE RESPOSTA** — Utilize a função de ferramenta (tool call) 'generate_recommendations' com o JSON estruturado.
+
+# 🎯 TIPOS DE RECOMENDAÇÃO
+- cross_sell, upsell, recovery, ticket_increase, reorder.`;
 
   const clientSummary = topClients.map((s: any) => {
     const c = s.clients;
