@@ -1488,7 +1488,7 @@ export async function handleCEOBrief(supabase: any, lovableKey: string, corsHead
   // Usa o helper compartilhado (campos plurais conforme fetchAllData)
   const hasRealData = checkHasRealData(data);
 
-  const ceoPrompt = await getSystemPrompt('CEO', `Prioridades: Proteger caixa, maximizar lucro, antecipar problemas, decidir (não descrever).`, supabase, 'ai-executive-ceo-brief');
+  const ceoPrompt = await getSystemPrompt('CEO', `Prioridades: Proteger caixa, maximizar lucro, antecipar problemas, decidir (não descrever).
 
 ## ESTRUTURA OBRIGATÓRIA DA RESPOSTA (JSON/Markdown)
 ## 👑 Veredicto Executivo
@@ -1500,7 +1500,7 @@ export async function handleCEOBrief(supabase: any, lovableKey: string, corsHead
 ## ⚡ Prioridade do Dia (Top 3)
 
 - Valores em **R$ X.XXX,XX**, porcentagens em **negrito**.
-- Tom direto de dono.`);
+- Tom direto de dono.`, supabase, 'ai-executive-ceo-brief');
 
   const userPayload = {
     contexto: ctx,
