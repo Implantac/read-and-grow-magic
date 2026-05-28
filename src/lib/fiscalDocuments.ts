@@ -46,7 +46,7 @@ export function generateDANFE(nfe: NFe): void {
   // Right: Type
   const typeLabel = nfe.operationType === 'saida' ? '1 - SAÍDA' : '0 - ENTRADA';
   addText(typeLabel, margin + contentWidth - 3, y + 8, { size: 9, bold: true, align: 'right' });
-  addText(`Emissão: ${formatDate(nfe.issueDate)}`, margin + contentWidth - 3, y + 14, { size: 7, align: 'right' });
+  addText(`Emissão: ${formatDateTime(nfe.issueDate)}`, margin + contentWidth - 3, y + 14, { size: 7, align: 'right' });
 
   // Status badge
   if (nfe.status === 'authorized') {
@@ -67,7 +67,7 @@ export function generateDANFE(nfe: NFe): void {
   if (nfe.protocol) {
     drawRect(margin, y, contentWidth, 8);
     addText('PROTOCOLO DE AUTORIZAÇÃO', margin + 3, y + 4, { size: 6 });
-    addText(`${nfe.protocol} - ${formatDate(nfe.authorizationDate || '')}`, margin + 3, y + 7.5, { size: 7, bold: true });
+    addText(`${nfe.protocol} - ${formatDateTime(nfe.authorizationDate || '')}`, margin + 3, y + 7.5, { size: 7, bold: true });
     y += 10;
   }
 
@@ -189,7 +189,7 @@ export function generateDANFE(nfe: NFe): void {
     addText('NOTA FISCAL CANCELADA', margin + 3, y + 5, { size: 9, bold: true });
     addText(`Motivo: ${nfe.cancellationReason}`, margin + 3, y + 10, { size: 7 });
     if (nfe.cancellationDate) {
-      addText(`Data: ${formatDate(nfe.cancellationDate)}`, margin + 3, y + 13, { size: 6 });
+      addText(`Data: ${formatDateTime(nfe.cancellationDate)}`, margin + 3, y + 13, { size: 6 });
     }
   }
 
