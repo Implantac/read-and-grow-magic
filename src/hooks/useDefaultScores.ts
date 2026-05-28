@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { handleMutationError } from '@/lib/toastHelpers';
 export interface DefaultScoreRow {
   id: string;
   client_id: string;
@@ -61,6 +62,6 @@ export function useRecomputeDefaultScores() {
       qc.invalidateQueries({ queryKey: ['financial_default_score'] });
       toast({ title: 'Scores recalculados', description: `${data.clients_scored} clientes` });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }

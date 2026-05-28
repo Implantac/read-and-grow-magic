@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { handleMutationError } from '@/lib/toastHelpers';
 export const FUNNEL_STAGES = [
   { value: 'lead', label: 'Lead', color: 'bg-slate-500' },
   { value: 'opportunity', label: 'Oportunidade', color: 'bg-blue-500' },
@@ -67,7 +68,7 @@ export function useCreateFunnelItem() {
       qc.invalidateQueries({ queryKey: ['sales_funnel'] });
       toast({ title: 'Oportunidade criada' });
     },
-    onError: (e: Error) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -95,6 +96,6 @@ export function useDeleteFunnelItem() {
       qc.invalidateQueries({ queryKey: ['sales_funnel'] });
       toast({ title: 'Oportunidade removida' });
     },
-    onError: (e: Error) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }

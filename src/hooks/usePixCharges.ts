@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { handleMutationError } from '@/lib/toastHelpers';
 export interface PixCharge {
   id: string;
   external_id: string | null;
@@ -48,7 +49,7 @@ export function useCreatePixCharge() {
       qc.invalidateQueries({ queryKey: ['pix_charges'] });
       toast({ title: 'Cobrança PIX gerada' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -68,6 +69,6 @@ export function useSimulatePixPayment() {
       qc.invalidateQueries({ queryKey: ['bank_accounts'] });
       toast({ title: 'Pagamento PIX simulado com sucesso' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }

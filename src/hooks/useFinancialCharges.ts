@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { handleMutationError } from '@/lib/toastHelpers';
 export interface ChargeRule {
   id: string;
   name: string;
@@ -79,7 +80,7 @@ export function useRunChargesRuler() {
       qc.invalidateQueries({ queryKey: ['financial_charges_log'] });
       toast({ title: 'Régua executada', description: `${data.inserted} cobranças geradas` });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -98,6 +99,6 @@ export function useToggleChargeRule() {
       qc.invalidateQueries({ queryKey: ['financial_charges_rules'] });
       toast({ title: 'Regra atualizada' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }

@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { CheckStatus } from '@/types/financial';
 
+import { handleMutationError } from '@/lib/toastHelpers';
 export interface FinancialCheck {
   id: string;
   check_type: 'received' | 'issued';
@@ -56,7 +57,7 @@ export function useCreateCheck() {
       qc.invalidateQueries({ queryKey: ['financial_checks'] });
       toast({ title: 'Cheque registrado' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -75,7 +76,7 @@ export function useUpdateCheckStatus() {
       qc.invalidateQueries({ queryKey: ['financial_checks'] });
       toast({ title: 'Status atualizado' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -101,7 +102,7 @@ export function useCompensateCheck() {
       qc.invalidateQueries({ queryKey: ['financial_settlements'] });
       toast({ title: 'Cheque compensado', description: 'Lançamento gerado no caixa' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -117,6 +118,6 @@ export function useDeleteCheck() {
       qc.invalidateQueries({ queryKey: ['financial_checks'] });
       toast({ title: 'Cheque removido' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }

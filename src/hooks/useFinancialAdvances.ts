@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { handleMutationError } from '@/lib/toastHelpers';
 export interface FinancialAdvanceRow {
   id: string;
   party_type: 'client' | 'supplier';
@@ -60,6 +61,6 @@ export function useCreateAdvance() {
       qc.invalidateQueries({ queryKey: ['bank_accounts'] });
       toast({ title: 'Adiantamento registrado' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }

@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { handleMutationError } from '@/lib/toastHelpers';
 export interface ParsedTx {
   date: string;
   amount: number;
@@ -130,7 +131,7 @@ export function useAutoMatch() {
       qc.invalidateQueries({ queryKey: ['financial_ledger'] });
       toast({ title: 'Match automático', description: `${r.matched} de ${r.total} transações conciliadas` });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -151,6 +152,6 @@ export function useManualReconcile() {
       qc.invalidateQueries({ queryKey: ['financial_ledger'] });
       toast({ title: 'Conciliado manualmente' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }

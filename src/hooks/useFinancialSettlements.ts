@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { handleMutationError } from '@/lib/toastHelpers';
 export interface SettlementRow {
   id: string;
   source_type: 'receivable' | 'payable' | 'advance';
@@ -82,7 +83,7 @@ export function useUseAdvance() {
       qc.invalidateQueries({ queryKey: ['accounts_payable'] });
       toast({ title: 'Adiantamento aplicado' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -106,7 +107,7 @@ export function useTransferBetweenAccounts() {
       qc.invalidateQueries({ queryKey: ['bank_transfers'] });
       toast({ title: 'Transferência realizada' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
