@@ -370,10 +370,11 @@ export default function MRPPage() {
                   <div className="mb-4 p-3 rounded-lg bg-muted/50 border">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Total de itens faltantes: <strong className="text-foreground">{materialNeeds.filter(m => m.deficit > 0).length}</strong></span>
-                      <span className="text-muted-foreground">Custo estimado total: <strong className="text-foreground">R$ {materialNeeds.filter(m => m.deficit > 0).reduce((s, m) => {
+                      <span className="text-muted-foreground">Custo estimado total: <strong className="text-foreground">{formatBRL(materialNeeds.filter(m => m.deficit > 0).reduce((s, m) => {
                         const supply = supplies.find(su => su.code === m.materialCode || su.name === m.materialName);
                         return s + m.deficit * (supply?.unit_cost || 0);
-                      }, formatNumber(0), 2)}</strong></span>
+                      }, 0))}</strong></span>
+
                     </div>
                   </div>
                   <Table>
