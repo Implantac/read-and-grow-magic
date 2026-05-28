@@ -7,9 +7,6 @@ import { usePlans } from '@/hooks/useSubscription';
 import { cn } from '@/lib/utils';
 
 import { formatBRL } from '@/lib/formatters';
-const formatCurrency = (value: number) =>
-  formatBRL(value);
-
 const moduleLabels: Record<string, string> = {
   comercial: 'Comercial', estoque: 'Estoque', financeiro: 'Financeiro',
   producao: 'Produção', fiscal: 'Fiscal', compras: 'Compras',
@@ -86,10 +83,10 @@ export default function PricingSection({ onLogin }: Props) {
                 </CardHeader>
                 <CardContent className="text-center px-5 pb-6">
                   <div className="mb-6">
-                    <span className="text-3xl md:text-4xl font-extrabold">{formatCurrency(price)}</span>
+                    <span className="text-3xl md:text-4xl font-extrabold">{formatBRL(price)}</span>
                     <span className="text-sm text-muted-foreground">/mês</span>
                     {billingCycle === 'annual' && (
-                      <p className="text-[11px] text-muted-foreground mt-1">Cobrado {formatCurrency(plan.price_annual)}/ano</p>
+                      <p className="text-[11px] text-muted-foreground mt-1">Cobrado {formatBRL(plan.price_annual)}/ano</p>
                     )}
                   </div>
                   <Button

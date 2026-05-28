@@ -22,8 +22,6 @@ import { startOfMonth, endOfMonth, subMonths, isWithinInterval, format, eachMont
 import { ptBR } from 'date-fns/locale';
 import type { ExportColumn } from '@/lib/exportUtils';
 
-const formatCurrency = (value: number) =>
-  formatBRL(value);
 const formatCompact = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(value);
 
@@ -111,8 +109,8 @@ export default function DREPage() {
 
   const exportColumns: ExportColumn[] = [
     { key: 'description', label: 'Descrição' },
-    { key: 'current', label: 'Período Atual', format: (v) => formatCurrency(Number(v)) },
-    { key: 'previous', label: 'Período Anterior', format: (v) => formatCurrency(Number(v)) },
+    { key: 'current', label: 'Período Atual', format: (v) => formatBRL(Number(v)) },
+    { key: 'previous', label: 'Período Anterior', format: (v) => formatBRL(Number(v)) },
     { key: 'variation', label: 'Variação %' },
   ];
   const exportData = dreRows.map(r => ({ ...r, variation: `${variation(r.current, r.previous).toFixed(1)}%` }));
@@ -142,7 +140,7 @@ export default function DREPage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Receita Bruta</p>
-            <p className="text-2xl font-bold">{formatCurrency(current.revenue)}</p>
+            <p className="text-2xl font-bold">{formatBRL(current.revenue)}</p>
             <div className={cn('flex items-center gap-1 text-xs mt-1', revenueVar >= 0 ? 'text-success' : 'text-destructive')}>
               {revenueVar >= 0 ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
               {Math.abs(revenueVar).toFixed(1)}% vs anterior
@@ -152,14 +150,14 @@ export default function DREPage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Lucro Bruto</p>
-            <p className="text-2xl font-bold">{formatCurrency(current.grossProfit)}</p>
+            <p className="text-2xl font-bold">{formatBRL(current.grossProfit)}</p>
             <p className="text-xs text-muted-foreground mt-1">Margem: {grossMargin}%</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Lucro Líquido</p>
-            <p className={cn('text-2xl font-bold', current.netProfit >= 0 ? 'text-success' : 'text-destructive')}>{formatCurrency(current.netProfit)}</p>
+            <p className={cn('text-2xl font-bold', current.netProfit >= 0 ? 'text-success' : 'text-destructive')}>{formatBRL(current.netProfit)}</p>
             <p className="text-xs text-muted-foreground mt-1">Margem: {netMargin}%</p>
           </CardContent>
         </Card>
@@ -194,8 +192,8 @@ export default function DREPage() {
                   return (
                     <TableRow key={item.id} className={cn(item.isTotal && 'bg-muted/50 font-bold')}>
                       <TableCell style={{ paddingLeft: `${item.level * 24 + 16}px` }}>{item.description}</TableCell>
-                      <TableCell className={cn('text-right', item.current < 0 && 'text-destructive')}>{formatCurrency(item.current)}</TableCell>
-                      <TableCell className={cn('text-right', item.previous < 0 && 'text-destructive')}>{formatCurrency(item.previous)}</TableCell>
+                      <TableCell className={cn('text-right', item.current < 0 && 'text-destructive')}>{formatBRL(item.current)}</TableCell>
+                      <TableCell className={cn('text-right', item.previous < 0 && 'text-destructive')}>{formatBRL(item.previous)}</TableCell>
                       <TableCell className="text-right">
                         <span className={cn('text-xs', var_ > 0 ? 'text-success' : var_ < 0 ? 'text-destructive' : 'text-muted-foreground')}>
                           {var_ > 0 ? '+' : ''}{var_.toFixed(1)}%
@@ -222,7 +220,7 @@ export default function DREPage() {
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis type="number" tickFormatter={(v) => formatCompact(v)} tick={{ fontSize: 10 }} />
                   <YAxis dataKey="month" type="category" tick={{ fontSize: 11 }} width={60} />
-                  <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                  <Tooltip formatter={(v: number) => formatBRL(v)} />
                   <Legend />
                   <Bar dataKey="receitas" name="Receitas" fill="hsl(var(--success))" radius={[0, 4, 4, 0]} />
                   <Bar dataKey="despesas" name="Despesas" fill="hsl(var(--destructive))" radius={[0, 4, 4, 0]} />

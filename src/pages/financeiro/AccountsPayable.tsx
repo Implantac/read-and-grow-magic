@@ -34,9 +34,6 @@ const paymentMethods: Record<PaymentMethod, string> = {
   debit_card: 'Cartão de Débito', transfer: 'Transferência', cash: 'Dinheiro', check: 'Cheque',
 };
 
-const formatCurrency = (value: number) =>
-  formatBRL(value);
-
 export default function AccountsPayable() {
   const { toast } = useToast();
   const { data: accounts = [], isLoading } = useAccountsPayable();
@@ -154,7 +151,7 @@ export default function AccountsPayable() {
       return;
     }
     if (amount > openAmount + 0.01) {
-      toast({ title: 'Atenção', description: `Valor maior que o saldo em aberto (${formatCurrency(openAmount)})`, variant: 'destructive' });
+      toast({ title: 'Atenção', description: `Valor maior que o saldo em aberto (${formatBRL(openAmount)})`, variant: 'destructive' });
       return;
     }
     if (!payForm.bankAccountId) {
@@ -307,10 +304,10 @@ export default function AccountsPayable() {
       </PageHeader>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KPICard title="Total em Aberto" value={formatCurrency(summaryData.total)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="A Vencer" value={formatCurrency(summaryData.pending)} subtitle={`${accounts.filter(a => a.status === 'pending').length} títulos`} icon={<Clock className="h-5 w-5" />} accentColor="warning" index={1} />
-        <KPICard title="Vencido" value={formatCurrency(summaryData.overdue)} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={2} />
-        <KPICard title="Pago" value={formatCurrency(summaryData.paid)} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={3} />
+        <KPICard title="Total em Aberto" value={formatBRL(summaryData.total)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="A Vencer" value={formatBRL(summaryData.pending)} subtitle={`${accounts.filter(a => a.status === 'pending').length} títulos`} icon={<Clock className="h-5 w-5" />} accentColor="warning" index={1} />
+        <KPICard title="Vencido" value={formatBRL(summaryData.overdue)} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={2} />
+        <KPICard title="Pago" value={formatBRL(summaryData.paid)} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={3} />
       </div>
 
       <Card>
@@ -345,8 +342,8 @@ export default function AccountsPayable() {
                 { key: 'supplier', label: 'Fornecedor' },
                 { key: 'category', label: 'Categoria' },
                 { key: 'due_date', label: 'Vencimento', format: (v) => formatDate(v as string) },
-                { key: 'amount', label: 'Valor Original', format: (v) => formatCurrency(Number(v)) },
-                { key: 'open_amount', label: 'Em Aberto', format: (v) => formatCurrency(Number(v ?? 0)) },
+                { key: 'amount', label: 'Valor Original', format: (v) => formatBRL(Number(v)) },
+                { key: 'open_amount', label: 'Em Aberto', format: (v) => formatBRL(Number(v ?? 0)) },
                 { key: 'status', label: 'Status' },
               ]}
               filename="contas_pagar"
@@ -360,7 +357,7 @@ export default function AccountsPayable() {
           <CardContent className="flex items-center justify-between gap-3 py-3">
             <div className="text-sm">
               <span className="font-semibold">{selectedIds.size}</span> selecionado(s) · Total{' '}
-              <span className="font-semibold text-primary">{formatCurrency(selectedTotal)}</span>
+              <span className="font-semibold text-primary">{formatBRL(selectedTotal)}</span>
             </div>
             <div className="flex gap-2">
               <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>Limpar</Button>
@@ -417,8 +414,8 @@ export default function AccountsPayable() {
                       {getAgingBadge(account.due_date, account.status)}
                     </div>
                   </TableCell>
-                  <TableCell className="text-right text-sm">{formatCurrency(Number(account.original_amount ?? account.amount))}</TableCell>
-                  <TableCell className="text-right text-sm font-medium">{formatCurrency(Number(account.open_amount ?? account.amount))}</TableCell>
+                  <TableCell className="text-right text-sm">{formatBRL(Number(account.original_amount ?? account.amount))}</TableCell>
+                  <TableCell className="text-right text-sm font-medium">{formatBRL(Number(account.open_amount ?? account.amount))}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {account.total_installments && account.total_installments > 1 ? `${account.installment_number}/${account.total_installments}` : '-'}
                   </TableCell>
@@ -455,8 +452,8 @@ export default function AccountsPayable() {
                 <p className="font-medium">{selectedAccount.description}</p>
                 <p className="text-sm text-muted-foreground">{selectedAccount.supplier}</p>
                 <div className="mt-2 flex justify-between">
-                  <div><p className="text-xs text-muted-foreground">Original</p><p className="font-medium">{formatCurrency(Number(selectedAccount.original_amount ?? selectedAccount.amount))}</p></div>
-                  <div className="text-right"><p className="text-xs text-muted-foreground">Em Aberto</p><p className="text-xl font-bold text-primary">{formatCurrency(Number(selectedAccount.open_amount ?? selectedAccount.amount))}</p></div>
+                  <div><p className="text-xs text-muted-foreground">Original</p><p className="font-medium">{formatBRL(Number(selectedAccount.original_amount ?? selectedAccount.amount))}</p></div>
+                  <div className="text-right"><p className="text-xs text-muted-foreground">Em Aberto</p><p className="text-xl font-bold text-primary">{formatBRL(Number(selectedAccount.open_amount ?? selectedAccount.amount))}</p></div>
                 </div>
               </div>
 
@@ -469,7 +466,7 @@ export default function AccountsPayable() {
 
               <div className="rounded-md border p-3 bg-accent/50">
                 <p className="text-xs text-muted-foreground">Total Líquido</p>
-                <p className="text-lg font-bold">{formatCurrency((parseFloat(payForm.amount) || 0) + (parseFloat(payForm.interest) || 0) + (parseFloat(payForm.penalty) || 0) - (parseFloat(payForm.discount) || 0))}</p>
+                <p className="text-lg font-bold">{formatBRL((parseFloat(payForm.amount) || 0) + (parseFloat(payForm.interest) || 0) + (parseFloat(payForm.penalty) || 0) - (parseFloat(payForm.discount) || 0))}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -516,7 +513,7 @@ export default function AccountsPayable() {
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-muted-foreground">Total a pagar</p>
-                  <p className="text-2xl font-bold text-primary">{formatCurrency(selectedTotal)}</p>
+                  <p className="text-2xl font-bold text-primary">{formatBRL(selectedTotal)}</p>
                 </div>
               </div>
             </div>
@@ -533,7 +530,7 @@ export default function AccountsPayable() {
               <Label className="text-xs">Conta Bancária *</Label>
               <Select value={batchForm.bankAccountId} onValueChange={(v) => setBatchForm({ ...batchForm, bankAccountId: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent>{bankAccounts.map(b => <SelectItem key={b.id} value={b.id}>{b.name} — {formatCurrency(Number(b.balance))}</SelectItem>)}</SelectContent>
+                <SelectContent>{bankAccounts.map(b => <SelectItem key={b.id} value={b.id}>{b.name} — {formatBRL(Number(b.balance))}</SelectItem>)}</SelectContent>
               </Select>
             </div>
 

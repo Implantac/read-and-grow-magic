@@ -22,14 +22,11 @@ import {
 import type { ExportColumn } from '@/lib/exportUtils';
 import type { BalanceSheetItem } from '@/types/accounting';
 
-const formatCurrency = (value: number) =>
-  formatBRL(value);
-
 const exportColumns: ExportColumn[] = [
   { key: 'code', label: 'Código' },
   { key: 'description', label: 'Descrição' },
-  { key: 'currentPeriod', label: 'Período Atual', format: (v) => formatCurrency(Number(v)) },
-  { key: 'previousPeriod', label: 'Período Anterior', format: (v) => formatCurrency(Number(v)) },
+  { key: 'currentPeriod', label: 'Período Atual', format: (v) => formatBRL(Number(v)) },
+  { key: 'previousPeriod', label: 'Período Anterior', format: (v) => formatBRL(Number(v)) },
 ];
 
 export default function BalanceSheetPage() {
@@ -67,8 +64,8 @@ export default function BalanceSheetPage() {
                 return (
                   <TableRow key={item.id} className={cn(item.isTotal && 'bg-muted/50 font-bold')}>
                     <TableCell style={{ paddingLeft: `${item.level * 20 + 16}px` }}>{item.description}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(item.currentPeriod)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(item.previousPeriod)}</TableCell>
+                    <TableCell className="text-right">{formatBRL(item.currentPeriod)}</TableCell>
+                    <TableCell className="text-right">{formatBRL(item.previousPeriod)}</TableCell>
                     <TableCell className="text-right">
                       <span className={cn('text-xs', variation > 0 ? 'text-success' : variation < 0 ? 'text-destructive' : 'text-muted-foreground')}>
                         {variation > 0 ? '+' : ''}{variation.toFixed(1)}%
@@ -99,19 +96,19 @@ export default function BalanceSheetPage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Ativo Total</p>
-            <p className="text-2xl font-bold text-blue-600">{formatCurrency(totalAssets)}</p>
+            <p className="text-2xl font-bold text-blue-600">{formatBRL(totalAssets)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Passivo Total</p>
-            <p className="text-2xl font-bold text-red-600">{formatCurrency(totalLiabilities)}</p>
+            <p className="text-2xl font-bold text-red-600">{formatBRL(totalLiabilities)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Patrimônio Líquido</p>
-            <p className="text-2xl font-bold text-purple-600">{formatCurrency(totalEquity)}</p>
+            <p className="text-2xl font-bold text-purple-600">{formatBRL(totalEquity)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -119,7 +116,7 @@ export default function BalanceSheetPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Equilíbrio</p>
-                <p className="text-lg font-bold">{formatCurrency(Math.abs(totalAssets - totalLiabilities - totalEquity))}</p>
+                <p className="text-lg font-bold">{formatBRL(Math.abs(totalAssets - totalLiabilities - totalEquity))}</p>
               </div>
               <Badge className="bg-success text-success-foreground"><Scale className="h-3 w-3 mr-1" /> OK</Badge>
             </div>

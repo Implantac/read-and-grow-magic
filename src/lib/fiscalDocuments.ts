@@ -3,9 +3,6 @@ import type { NFe, NFeItem } from '@/types/fiscal';
 
 import { formatDateTime, formatBRL } from '@/lib/formatters';
 
-const formatCurrency = (v: number) => formatBRL(v);
-
-
 export function generateDANFE(nfe: NFe): void {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pageWidth = 210;
@@ -131,9 +128,9 @@ export function generateDANFE(nfe: NFe): void {
     addText(item.cfop || '', cols[3].x + 1, y + 4, { size: 5 });
     addText(item.unit || 'UN', cols[4].x + 1, y + 4, { size: 5 });
     addText(String(item.quantity), cols[5].x + 1, y + 4, { size: 5 });
-    addText(formatCurrency(item.unitPrice), cols[6].x + 1, y + 4, { size: 5 });
-    addText(formatCurrency(item.total), cols[7].x + 1, y + 4, { size: 5 });
-    addText(formatCurrency(item.icmsValue || 0), cols[8].x + 1, y + 4, { size: 5 });
+    addText(formatBRL(item.unitPrice), cols[6].x + 1, y + 4, { size: 5 });
+    addText(formatBRL(item.total), cols[7].x + 1, y + 4, { size: 5 });
+    addText(formatBRL(item.icmsValue || 0), cols[8].x + 1, y + 4, { size: 5 });
 
     y += rowHeight;
   });
@@ -154,30 +151,30 @@ export function generateDANFE(nfe: NFe): void {
 
   // Row 1
   addText('Base ICMS', margin + 3, taxY, { size: 5 });
-  addText(formatCurrency(nfe.icms), margin + 3, taxY + 3.5, { size: 7, bold: true });
+  addText(formatBRL(nfe.icms), margin + 3, taxY + 3.5, { size: 7, bold: true });
 
   addText('Valor ICMS', margin + taxCol + 3, taxY, { size: 5 });
-  addText(formatCurrency(nfe.icms), margin + taxCol + 3, taxY + 3.5, { size: 7, bold: true });
+  addText(formatBRL(nfe.icms), margin + taxCol + 3, taxY + 3.5, { size: 7, bold: true });
 
   addText('Valor IPI', margin + taxCol * 2 + 3, taxY, { size: 5 });
-  addText(formatCurrency(nfe.ipi), margin + taxCol * 2 + 3, taxY + 3.5, { size: 7, bold: true });
+  addText(formatBRL(nfe.ipi), margin + taxCol * 2 + 3, taxY + 3.5, { size: 7, bold: true });
 
   addText('Valor Total NF-e', margin + taxCol * 3 + 3, taxY, { size: 5 });
-  addText(formatCurrency(nfe.total), margin + taxCol * 3 + 3, taxY + 3.5, { size: 9, bold: true });
+  addText(formatBRL(nfe.total), margin + taxCol * 3 + 3, taxY + 3.5, { size: 9, bold: true });
 
   // Row 2
   const taxY2 = taxY + 9;
   addText('Valor PIS', margin + 3, taxY2, { size: 5 });
-  addText(formatCurrency(nfe.pis), margin + 3, taxY2 + 3.5, { size: 7, bold: true });
+  addText(formatBRL(nfe.pis), margin + 3, taxY2 + 3.5, { size: 7, bold: true });
 
   addText('Valor COFINS', margin + taxCol + 3, taxY2, { size: 5 });
-  addText(formatCurrency(nfe.cofins), margin + taxCol + 3, taxY2 + 3.5, { size: 7, bold: true });
+  addText(formatBRL(nfe.cofins), margin + taxCol + 3, taxY2 + 3.5, { size: 7, bold: true });
 
   addText('Desconto', margin + taxCol * 2 + 3, taxY2, { size: 5 });
-  addText(formatCurrency(nfe.discount), margin + taxCol * 2 + 3, taxY2 + 3.5, { size: 7, bold: true });
+  addText(formatBRL(nfe.discount), margin + taxCol * 2 + 3, taxY2 + 3.5, { size: 7, bold: true });
 
   addText('Frete', margin + taxCol * 3 + 3, taxY2, { size: 5 });
-  addText(formatCurrency(nfe.shipping), margin + taxCol * 3 + 3, taxY2 + 3.5, { size: 7, bold: true });
+  addText(formatBRL(nfe.shipping), margin + taxCol * 3 + 3, taxY2 + 3.5, { size: 7, bold: true });
 
   y += 26;
 

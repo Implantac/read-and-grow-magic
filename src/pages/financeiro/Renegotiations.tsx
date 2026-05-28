@@ -12,8 +12,6 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 import { formatBRL } from '@/lib/formatters';
-const formatCurrency = (v: number) => formatBRL(v);
-
 const statusMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   pending: { label: 'Pendente', variant: 'secondary' },
   approved: { label: 'Aprovada', variant: 'default' },
@@ -53,8 +51,8 @@ export default function Renegotiations() {
                 return (
                   <TableRow key={r.id}>
                     <TableCell className="font-medium">{r.client_name}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(Number(r.original_total))}</TableCell>
-                    <TableCell className="text-right font-medium">{formatCurrency(Number(r.new_total))}</TableCell>
+                    <TableCell className="text-right">{formatBRL(Number(r.original_total))}</TableCell>
+                    <TableCell className="text-right font-medium">{formatBRL(Number(r.new_total))}</TableCell>
                     <TableCell>{r.installments}x</TableCell>
                     <TableCell>{Number(r.interest_rate).toFixed(1)}%</TableCell>
                     <TableCell><Badge variant={st.variant}>{st.label}</Badge></TableCell>

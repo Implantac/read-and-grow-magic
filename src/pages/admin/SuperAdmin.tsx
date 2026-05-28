@@ -17,9 +17,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, PieChart, Pie, Cell } from 'recharts';
 
 import { formatBRL } from '@/lib/formatters';
-const formatCurrency = (value: number) =>
-  formatBRL(value);
-
 export default function SuperAdmin() {
   const { companies, loading: loadingC } = useCompanies();
   const { data: plans = [], isLoading: loadingP } = usePlans();
@@ -75,8 +72,8 @@ export default function SuperAdmin() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
         <KPICard title="Empresas" value={companies.length.toString()} icon={<Building2 className="h-5 w-5" />} accentColor="primary" index={0} />
         <KPICard title="Assinaturas Ativas" value={activeSubscriptions.length.toString()} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={1} />
-        <KPICard title="MRR" value={formatCurrency(mrr)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={2} />
-        <KPICard title="ARR" value={formatCurrency(arr)} icon={<TrendingUp className="h-5 w-5" />} accentColor="info" index={3} />
+        <KPICard title="MRR" value={formatBRL(mrr)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={2} />
+        <KPICard title="ARR" value={formatBRL(arr)} icon={<TrendingUp className="h-5 w-5" />} accentColor="info" index={3} />
         <KPICard title="Em Trial" value={trialCount.toString()} icon={<Users className="h-5 w-5" />} accentColor="warning" index={4} />
         <KPICard title="Cancelamento" value={`${churnRate.toFixed(1)}%`} icon={<Ban className="h-5 w-5" />} accentColor="danger" index={5} />
       </div>
@@ -113,7 +110,7 @@ export default function SuperAdmin() {
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis dataKey="name" />
                   <YAxis tickFormatter={v => `R$${(v/1000).toFixed(0)}k`} />
-                  <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                  <Tooltip formatter={(v: number) => formatBRL(v)} />
                   <Bar dataKey="receita" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>

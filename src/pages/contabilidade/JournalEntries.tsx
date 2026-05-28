@@ -35,9 +35,6 @@ const exportColumns: ExportColumn[] = [
   { key: 'createdBy', label: 'Criado por' },
 ];
 
-const formatCurrency = (value: number) =>
-  formatBRL(value);
-
 const filterFields: FilterField[] = [
   {
     key: 'status', label: 'Status', type: 'select',
@@ -75,8 +72,8 @@ export default function JournalEntriesPage() {
     { key: 'number', label: 'Número', sortable: true },
     { key: 'date', label: 'Data', sortable: true, render: (v) => new Date(String(v)).toLocaleDateString('pt-BR') },
     { key: 'description', label: 'Descrição', sortable: true },
-    { key: 'totalDebit', label: 'Débito', sortable: true, className: 'text-right', render: (v) => formatCurrency(Number(v)) },
-    { key: 'totalCredit', label: 'Crédito', sortable: true, className: 'text-right', render: (v) => formatCurrency(Number(v)) },
+    { key: 'totalDebit', label: 'Débito', sortable: true, className: 'text-right', render: (v) => formatBRL(Number(v)) },
+    { key: 'totalCredit', label: 'Crédito', sortable: true, className: 'text-right', render: (v) => formatBRL(Number(v)) },
     {
       key: 'status', label: 'Status',
       render: (v) => (
@@ -101,7 +98,7 @@ export default function JournalEntriesPage() {
         <KPICard title="Total de Lançamentos" value={String(journalEntries.length)} icon={<BookOpen className="h-5 w-5" />} accentColor="primary" index={0} />
         <KPICard title="Lançados" value={String(totalPosted)} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={1} />
         <KPICard title="Rascunhos" value={String(totalDraft)} icon={<Clock className="h-5 w-5" />} accentColor="warning" index={2} />
-        <KPICard title="Valor Total Lançado" value={formatCurrency(totalValue)} icon={<FileText className="h-5 w-5" />} accentColor="info" index={3} />
+        <KPICard title="Valor Total Lançado" value={formatBRL(totalValue)} icon={<FileText className="h-5 w-5" />} accentColor="info" index={3} />
       </div>
 
       <Card>
@@ -156,14 +153,14 @@ export default function JournalEntriesPage() {
                     <TableRow key={line.id}>
                       <TableCell className="font-mono text-xs">{line.accountCode} - {line.accountName}</TableCell>
                       <TableCell>{line.description}</TableCell>
-                      <TableCell className="text-right">{line.debit > 0 ? formatCurrency(line.debit) : '-'}</TableCell>
-                      <TableCell className="text-right">{line.credit > 0 ? formatCurrency(line.credit) : '-'}</TableCell>
+                      <TableCell className="text-right">{line.debit > 0 ? formatBRL(line.debit) : '-'}</TableCell>
+                      <TableCell className="text-right">{line.credit > 0 ? formatBRL(line.credit) : '-'}</TableCell>
                     </TableRow>
                   ))}
                   <TableRow className="font-bold bg-muted/50">
                     <TableCell colSpan={2}>TOTAL</TableCell>
-                    <TableCell className="text-right">{formatCurrency(selectedEntry.totalDebit)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(selectedEntry.totalCredit)}</TableCell>
+                    <TableCell className="text-right">{formatBRL(selectedEntry.totalDebit)}</TableCell>
+                    <TableCell className="text-right">{formatBRL(selectedEntry.totalCredit)}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>

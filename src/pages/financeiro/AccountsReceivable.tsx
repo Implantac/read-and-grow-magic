@@ -32,9 +32,6 @@ const paymentMethods: Record<PaymentMethod, string> = {
   debit_card: 'Cartão de Débito', transfer: 'Transferência', cash: 'Dinheiro', check: 'Cheque',
 };
 
-const formatCurrency = (value: number) =>
-  formatBRL(value);
-
 export default function AccountsReceivable() {
   const { toast } = useToast();
   const { data: accounts = [], isLoading } = useAccountsReceivable();
@@ -173,7 +170,7 @@ export default function AccountsReceivable() {
       return;
     }
     if (amount > openAmount + 0.01) {
-      toast({ title: 'Atenção', description: `Valor maior que o saldo em aberto (${formatCurrency(openAmount)})`, variant: 'destructive' });
+      toast({ title: 'Atenção', description: `Valor maior que o saldo em aberto (${formatBRL(openAmount)})`, variant: 'destructive' });
       return;
     }
     if (!payForm.bankAccountId) {
@@ -267,7 +264,7 @@ export default function AccountsReceivable() {
               </div>
               {parseInt(formData.installments) > 1 && formData.amount && (
                 <div className="rounded-md bg-muted p-3 text-sm">
-                  <p className="font-medium">Parcelamento: {formData.installments}x de {formatCurrency(parseFloat(formData.amount) / parseInt(formData.installments))}</p>
+                  <p className="font-medium">Parcelamento: {formData.installments}x de {formatBRL(parseFloat(formData.amount) / parseInt(formData.installments))}</p>
                   <p className="text-muted-foreground">Parcelas com vencimento mensal a partir de {formData.dueDate}</p>
                 </div>
               )}
@@ -289,10 +286,10 @@ export default function AccountsReceivable() {
       </PageHeader>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KPICard title="Total em Aberto" value={formatCurrency(summaryData.total)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="A Vencer" value={formatCurrency(summaryData.pending)} subtitle={`${accounts.filter(a => a.status === 'pending').length} títulos`} icon={<Clock className="h-5 w-5" />} accentColor="warning" index={1} />
-        <KPICard title="Vencido" value={formatCurrency(summaryData.overdue)} subtitle={`${accounts.filter(a => a.status === 'overdue' || (a.status === 'pending' && new Date(a.due_date) < now)).length} títulos`} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={2} />
-        <KPICard title="Recebido" value={formatCurrency(summaryData.received)} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={3} />
+        <KPICard title="Total em Aberto" value={formatBRL(summaryData.total)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="A Vencer" value={formatBRL(summaryData.pending)} subtitle={`${accounts.filter(a => a.status === 'pending').length} títulos`} icon={<Clock className="h-5 w-5" />} accentColor="warning" index={1} />
+        <KPICard title="Vencido" value={formatBRL(summaryData.overdue)} subtitle={`${accounts.filter(a => a.status === 'overdue' || (a.status === 'pending' && new Date(a.due_date) < now)).length} títulos`} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={2} />
+        <KPICard title="Recebido" value={formatBRL(summaryData.received)} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={3} />
       </div>
 
       {/* Aging Summary Bar */}
@@ -316,18 +313,18 @@ export default function AccountsReceivable() {
             <CardContent className="py-3 px-4">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5"><FileText className="h-3.5 w-3.5" /> Aging List</p>
-                <p className="text-sm font-bold text-destructive">{formatCurrency(totalOverdue)}</p>
+                <p className="text-sm font-bold text-destructive">{formatBRL(totalOverdue)}</p>
               </div>
               <div className="flex h-5 w-full rounded-full overflow-hidden">
                 {bucketData.map((b, i) => (
-                  <div key={i} className={`${b.className} relative group`} style={{ width: `${(b.value / totalOverdue) * 100}%` }} title={`${b.label}: ${formatCurrency(b.value)} (${b.count} títulos)`}>
+                  <div key={i} className={`${b.className} relative group`} style={{ width: `${(b.value / totalOverdue) * 100}%` }} title={`${b.label}: ${formatBRL(b.value)} (${b.count} títulos)`}>
                     <span className="absolute inset-0 flex items-center justify-center text-[10px] font-medium text-white opacity-0 group-hover:opacity-100 transition-opacity">{b.label}</span>
                   </div>
                 ))}
               </div>
               <div className="flex gap-3 mt-1.5 flex-wrap">
                 {bucketData.map((b, i) => (
-                  <span key={i} className="text-[10px] text-muted-foreground">{b.label}: {formatCurrency(b.value)} ({b.count})</span>
+                  <span key={i} className="text-[10px] text-muted-foreground">{b.label}: {formatBRL(b.value)} ({b.count})</span>
                 ))}
               </div>
             </CardContent>
@@ -368,9 +365,9 @@ export default function AccountsReceivable() {
                 { key: 'client_name', label: 'Cliente' },
                 { key: 'category', label: 'Categoria' },
                 { key: 'due_date', label: 'Vencimento', format: (v) => formatDate(v as string) },
-                { key: 'amount', label: 'Valor Original', format: (v) => formatCurrency(Number(v)) },
-                { key: 'open_amount', label: 'Em Aberto', format: (v) => formatCurrency(Number(v ?? 0)) },
-                { key: 'paid_amount', label: 'Pago', format: (v) => formatCurrency(Number(v ?? 0)) },
+                { key: 'amount', label: 'Valor Original', format: (v) => formatBRL(Number(v)) },
+                { key: 'open_amount', label: 'Em Aberto', format: (v) => formatBRL(Number(v ?? 0)) },
+                { key: 'paid_amount', label: 'Pago', format: (v) => formatBRL(Number(v ?? 0)) },
                 { key: 'status', label: 'Status' },
               ]}
               filename="contas_receber"
@@ -411,9 +408,9 @@ export default function AccountsReceivable() {
                       {getAgingBadge(account.due_date, account.status)}
                     </div>
                   </TableCell>
-                  <TableCell className="text-right text-sm">{formatCurrency(Number(account.original_amount ?? account.amount))}</TableCell>
-                  <TableCell className="text-right text-sm font-medium">{formatCurrency(Number(account.open_amount ?? account.amount))}</TableCell>
-                  <TableCell className="text-right text-sm text-success">{formatCurrency(Number(account.paid_amount ?? 0))}</TableCell>
+                  <TableCell className="text-right text-sm">{formatBRL(Number(account.original_amount ?? account.amount))}</TableCell>
+                  <TableCell className="text-right text-sm font-medium">{formatBRL(Number(account.open_amount ?? account.amount))}</TableCell>
+                  <TableCell className="text-right text-sm text-success">{formatBRL(Number(account.paid_amount ?? 0))}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">
                     {account.total_installments && account.total_installments > 1
                       ? `${account.installment_number}/${account.total_installments}`
@@ -465,11 +462,11 @@ export default function AccountsReceivable() {
                 <div className="mt-2 flex justify-between">
                   <div>
                     <p className="text-xs text-muted-foreground">Original</p>
-                    <p className="font-medium">{formatCurrency(Number(selectedAccount.original_amount ?? selectedAccount.amount))}</p>
+                    <p className="font-medium">{formatBRL(Number(selectedAccount.original_amount ?? selectedAccount.amount))}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-xs text-muted-foreground">Em Aberto</p>
-                    <p className="text-xl font-bold text-primary">{formatCurrency(Number(selectedAccount.open_amount ?? selectedAccount.amount))}</p>
+                    <p className="text-xl font-bold text-primary">{formatBRL(Number(selectedAccount.open_amount ?? selectedAccount.amount))}</p>
                   </div>
                 </div>
               </div>
@@ -496,7 +493,7 @@ export default function AccountsReceivable() {
               <div className="rounded-md border p-3 bg-accent/50">
                 <p className="text-xs text-muted-foreground">Total Líquido</p>
                 <p className="text-lg font-bold">
-                  {formatCurrency(
+                  {formatBRL(
                     (parseFloat(payForm.amount) || 0) + (parseFloat(payForm.interest) || 0) + (parseFloat(payForm.penalty) || 0) - (parseFloat(payForm.discount) || 0)
                   )}
                 </p>
@@ -551,12 +548,12 @@ export default function AccountsReceivable() {
                 <div><p className="text-muted-foreground">Nota Fiscal</p><p>{selectedAccount.invoice_number || '-'}</p></div>
                 <div><p className="text-muted-foreground">Vencimento</p><p>{format(new Date(selectedAccount.due_date), 'dd/MM/yyyy', { locale: ptBR })}</p></div>
                 <div><p className="text-muted-foreground">Parcela</p><p>{selectedAccount.total_installments && selectedAccount.total_installments > 1 ? `${selectedAccount.installment_number}/${selectedAccount.total_installments}` : 'Única'}</p></div>
-                <div><p className="text-muted-foreground">Valor Original</p><p className="font-medium">{formatCurrency(Number(selectedAccount.original_amount ?? selectedAccount.amount))}</p></div>
-                <div><p className="text-muted-foreground">Em Aberto</p><p className="font-medium text-primary">{formatCurrency(Number(selectedAccount.open_amount ?? selectedAccount.amount))}</p></div>
-                <div><p className="text-muted-foreground">Pago</p><p className="text-success">{formatCurrency(Number(selectedAccount.paid_amount ?? 0))}</p></div>
-                <div><p className="text-muted-foreground">Juros</p><p>{formatCurrency(Number(selectedAccount.interest ?? 0))}</p></div>
-                <div><p className="text-muted-foreground">Multa</p><p>{formatCurrency(Number(selectedAccount.penalty ?? 0))}</p></div>
-                <div><p className="text-muted-foreground">Desconto</p><p>{formatCurrency(Number(selectedAccount.discount_amount ?? 0))}</p></div>
+                <div><p className="text-muted-foreground">Valor Original</p><p className="font-medium">{formatBRL(Number(selectedAccount.original_amount ?? selectedAccount.amount))}</p></div>
+                <div><p className="text-muted-foreground">Em Aberto</p><p className="font-medium text-primary">{formatBRL(Number(selectedAccount.open_amount ?? selectedAccount.amount))}</p></div>
+                <div><p className="text-muted-foreground">Pago</p><p className="text-success">{formatBRL(Number(selectedAccount.paid_amount ?? 0))}</p></div>
+                <div><p className="text-muted-foreground">Juros</p><p>{formatBRL(Number(selectedAccount.interest ?? 0))}</p></div>
+                <div><p className="text-muted-foreground">Multa</p><p>{formatBRL(Number(selectedAccount.penalty ?? 0))}</p></div>
+                <div><p className="text-muted-foreground">Desconto</p><p>{formatBRL(Number(selectedAccount.discount_amount ?? 0))}</p></div>
               </div>
               {selectedAccount.notes && <div><p className="text-muted-foreground">Observações</p><p>{selectedAccount.notes}</p></div>}
             </div>

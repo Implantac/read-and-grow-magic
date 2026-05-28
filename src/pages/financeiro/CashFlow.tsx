@@ -23,9 +23,6 @@ const chartConfig = {
   saldo: { label: 'Saldo', color: 'hsl(var(--primary))' },
 };
 
-const formatCurrency = (value: number) =>
-  formatBRL(value);
-
 const formatCompact = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(value);
 
@@ -138,10 +135,10 @@ export default function CashFlow() {
       </PageHeader>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KPICard title="Saldo Atual" value={formatCurrency(currentBalance)} icon={<Wallet className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="Entradas (Período)" value={formatCurrency(totalIncome)} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={1} />
-        <KPICard title="Saídas (Período)" value={formatCurrency(totalExpense)} icon={<TrendingDown className="h-5 w-5" />} accentColor="danger" index={2} />
-        <KPICard title="Saldo Projetado 30d" value={formatCurrency(projectedBalance)} subtitle={`+${formatCompact(projectedIncome)} / -${formatCompact(projectedExpense)}`} icon={<Wallet className="h-5 w-5" />} accentColor={projectedBalance >= 0 ? 'info' : 'danger'} index={3} />
+        <KPICard title="Saldo Atual" value={formatBRL(currentBalance)} icon={<Wallet className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Entradas (Período)" value={formatBRL(totalIncome)} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={1} />
+        <KPICard title="Saídas (Período)" value={formatBRL(totalExpense)} icon={<TrendingDown className="h-5 w-5" />} accentColor="danger" index={2} />
+        <KPICard title="Saldo Projetado 30d" value={formatBRL(projectedBalance)} subtitle={`+${formatCompact(projectedIncome)} / -${formatCompact(projectedExpense)}`} icon={<Wallet className="h-5 w-5" />} accentColor={projectedBalance >= 0 ? 'info' : 'danger'} index={3} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -210,7 +207,7 @@ export default function CashFlow() {
                   <Pie data={expenseByCat} cx="50%" cy="50%" outerRadius={90} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
                     {expenseByCat.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Pie>
-                  <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                  <Tooltip formatter={(v: number) => formatBRL(v)} />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
@@ -282,9 +279,9 @@ export default function CashFlow() {
                   <TableCell>{entry.category}</TableCell>
                   <TableCell className="text-muted-foreground">{entry.reference || '-'}</TableCell>
                   <TableCell className={`text-right font-medium ${entry.type === 'income' ? 'text-success' : 'text-destructive'}`}>
-                    {entry.type === 'income' ? '+' : '-'} {formatCurrency(Number(entry.amount))}
+                    {entry.type === 'income' ? '+' : '-'} {formatBRL(Number(entry.amount))}
                   </TableCell>
-                  <TableCell className="text-right font-medium">{formatCurrency(Number(entry.balance))}</TableCell>
+                  <TableCell className="text-right font-medium">{formatBRL(Number(entry.balance))}</TableCell>
                 </TableRow>
               ))}
               {filteredEntries.length === 0 && (

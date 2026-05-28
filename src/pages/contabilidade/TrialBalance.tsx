@@ -13,9 +13,6 @@ import type { ExportColumn } from '@/lib/exportUtils';
 import type { TrialBalanceItem } from '@/types/accounting';
 
 import { formatBRL } from '@/lib/formatters';
-const formatCurrency = (value: number) =>
-  formatBRL(value);
-
 const typeColors: Record<string, string> = {
   asset: 'text-blue-600',
   liability: 'text-red-600',
@@ -28,8 +25,8 @@ const exportColumns: ExportColumn[] = [
   { key: 'accountCode', label: 'Código' },
   { key: 'accountName', label: 'Conta' },
   { key: 'type', label: 'Tipo', format: (v) => getAccountTypeLabel(String(v)) },
-  { key: 'currentDebit', label: 'Saldo Atual Débito', format: (v) => formatCurrency(Number(v)) },
-  { key: 'currentCredit', label: 'Saldo Atual Crédito', format: (v) => formatCurrency(Number(v)) },
+  { key: 'currentDebit', label: 'Saldo Atual Débito', format: (v) => formatBRL(Number(v)) },
+  { key: 'currentCredit', label: 'Saldo Atual Crédito', format: (v) => formatBRL(Number(v)) },
 ];
 
 export default function TrialBalancePage() {
@@ -95,13 +92,13 @@ export default function TrialBalancePage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Total Débitos Atuais</p>
-            <p className="text-2xl font-bold text-blue-600">{formatCurrency(totals.currentDebit)}</p>
+            <p className="text-2xl font-bold text-blue-600">{formatBRL(totals.currentDebit)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Total Créditos Atuais</p>
-            <p className="text-2xl font-bold text-red-600">{formatCurrency(totals.currentCredit)}</p>
+            <p className="text-2xl font-bold text-red-600">{formatBRL(totals.currentCredit)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -109,7 +106,7 @@ export default function TrialBalancePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Equilíbrio</p>
-                <p className="text-2xl font-bold">{formatCurrency(Math.abs(totals.currentDebit - totals.currentCredit))}</p>
+                <p className="text-2xl font-bold">{formatBRL(Math.abs(totals.currentDebit - totals.currentCredit))}</p>
               </div>
               <Badge variant={isBalanced ? 'default' : 'destructive'} className={cn(isBalanced && 'bg-success text-success-foreground')}>
                 <Scale className="h-3 w-3 mr-1" />
@@ -159,22 +156,22 @@ export default function TrialBalancePage() {
                       <TableCell className="font-mono text-xs">{item.accountCode}</TableCell>
                       <TableCell>{item.accountName}</TableCell>
                       <TableCell><span className={cn('text-xs font-medium', typeColors[item.type])}>{getAccountTypeLabel(item.type)}</span></TableCell>
-                      <TableCell className="text-right border-l">{item.previousDebit > 0 ? formatCurrency(item.previousDebit) : '-'}</TableCell>
-                      <TableCell className="text-right border-r">{item.previousCredit > 0 ? formatCurrency(item.previousCredit) : '-'}</TableCell>
-                      <TableCell className="text-right border-l">{item.periodDebit > 0 ? formatCurrency(item.periodDebit) : '-'}</TableCell>
-                      <TableCell className="text-right border-r">{item.periodCredit > 0 ? formatCurrency(item.periodCredit) : '-'}</TableCell>
-                      <TableCell className="text-right font-medium">{item.currentDebit > 0 ? formatCurrency(item.currentDebit) : '-'}</TableCell>
-                      <TableCell className="text-right font-medium">{item.currentCredit > 0 ? formatCurrency(item.currentCredit) : '-'}</TableCell>
+                      <TableCell className="text-right border-l">{item.previousDebit > 0 ? formatBRL(item.previousDebit) : '-'}</TableCell>
+                      <TableCell className="text-right border-r">{item.previousCredit > 0 ? formatBRL(item.previousCredit) : '-'}</TableCell>
+                      <TableCell className="text-right border-l">{item.periodDebit > 0 ? formatBRL(item.periodDebit) : '-'}</TableCell>
+                      <TableCell className="text-right border-r">{item.periodCredit > 0 ? formatBRL(item.periodCredit) : '-'}</TableCell>
+                      <TableCell className="text-right font-medium">{item.currentDebit > 0 ? formatBRL(item.currentDebit) : '-'}</TableCell>
+                      <TableCell className="text-right font-medium">{item.currentCredit > 0 ? formatBRL(item.currentCredit) : '-'}</TableCell>
                     </TableRow>
                   ))}
                   <TableRow className="font-bold bg-muted/50">
                     <TableCell colSpan={3}>TOTAIS</TableCell>
-                    <TableCell className="text-right border-l">{formatCurrency(totals.previousDebit)}</TableCell>
-                    <TableCell className="text-right border-r">{formatCurrency(totals.previousCredit)}</TableCell>
-                    <TableCell className="text-right border-l">{formatCurrency(totals.periodDebit)}</TableCell>
-                    <TableCell className="text-right border-r">{formatCurrency(totals.periodCredit)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(totals.currentDebit)}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(totals.currentCredit)}</TableCell>
+                    <TableCell className="text-right border-l">{formatBRL(totals.previousDebit)}</TableCell>
+                    <TableCell className="text-right border-r">{formatBRL(totals.previousCredit)}</TableCell>
+                    <TableCell className="text-right border-l">{formatBRL(totals.periodDebit)}</TableCell>
+                    <TableCell className="text-right border-r">{formatBRL(totals.periodCredit)}</TableCell>
+                    <TableCell className="text-right">{formatBRL(totals.currentDebit)}</TableCell>
+                    <TableCell className="text-right">{formatBRL(totals.currentCredit)}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>

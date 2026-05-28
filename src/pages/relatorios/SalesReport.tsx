@@ -9,9 +9,7 @@ import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
 
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(value);
-
+const formatCurrency = (value: number) => formatBRLCompact(value);
 export default function SalesReport() {
   const [period, setPeriod] = useState('monthly');
   const [loading, setLoading] = useState(true);
