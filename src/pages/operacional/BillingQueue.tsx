@@ -10,7 +10,7 @@ import { useOrderLifecycle } from '@/hooks/useOrderLifecycle';
 import { FileText, Clock, CheckCircle, DollarSign, Play, Ban } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { formatNumber } from '@/lib/formatters';
+import { formatBRL, formatNumber } from '@/lib/formatters';
 
 const billingStatusConfig: Record<string, { label: string; color: string }> = {
   awaiting_billing: { label: 'Aguardando', color: 'bg-warning/10 text-warning' },
@@ -104,9 +104,10 @@ export default function BillingQueuePage() {
                   <TableRow key={item.id}>
                     <TableCell><Badge variant="outline" className={cn('font-medium border', sc.color)}>{sc.label}</Badge></TableCell>
                     <TableCell>{item.billing_type === 'full' ? 'Total' : 'Parcial'}</TableCell>
-                    <TableCell>R$ {formatNumber(item.amount?, 2)}</TableCell>
-                    <TableCell>R$ {formatNumber(item.billed_amount?, 2)}</TableCell>
-                    <TableCell>R$ {formatNumber(item.pending_amount?, 2)}</TableCell>
+                    <TableCell>{formatBRL(item.amount)}</TableCell>
+                    <TableCell>{formatBRL(item.billed_amount)}</TableCell>
+                    <TableCell>{formatBRL(item.pending_amount)}</TableCell>
+
                     <TableCell>{item.invoice_number || '-'}</TableCell>
                     <TableCell>{format(new Date(item.created_at), 'dd/MM/yyyy')}</TableCell>
                     <TableCell className="text-right">
