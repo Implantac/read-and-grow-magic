@@ -82,7 +82,7 @@ export default function FinancialAntifraud() {
                         <TableCell><Badge variant="outline">{l.decision ?? '—'}</Badge></TableCell>
                         <TableCell className="font-mono text-xs">{l.risk_score ?? '—'}</TableCell>
                         <TableCell className="font-mono text-xs">{fmtCur(l.amount)}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground">{new formatNumber(Date(l.created_at))}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{formatDateTime(l.created_at)}</TableCell>
                         <TableCell>
                           <Button size="sm" variant="ghost" onClick={() => resolve.mutate(l.id)}><Check className="h-3 w-3" /></Button>
                         </TableCell>

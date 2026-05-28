@@ -126,7 +126,7 @@ export default function PeriodClosing() {
                     {formatBRL(row.result)}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {row.closed_at ? new formatNumber(Date(row.closed_at)) : '—'}
+                    {row.closed_at ? formatDateTime(row.closed_at) : '—'}
                   </TableCell>
                   <TableCell className="text-right">
                     {row.status === 'open' ? (

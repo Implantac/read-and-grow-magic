@@ -97,7 +97,7 @@ export function FinancialAIPanel() {
         </div>
 
         <p className="text-[10px] text-muted-foreground text-right">
-          Análise gerada com base em dados reais do sistema · {new formatNumber(Date(data.computedAt))}
+          Análise gerada com base em dados reais do sistema · {formatDateTime(data.computedAt)}
         </p>
       </CardContent>
     </Card>

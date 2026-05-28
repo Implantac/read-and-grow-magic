@@ -164,7 +164,7 @@ export default function JournalEntriesPage() {
                   </TableRow>
                 </TableBody>
               </Table>
-              <div className="text-xs text-muted-foreground">Criado por {selectedEntry.createdBy} em {new formatNumber(Date(selectedEntry.createdAt))}</div>
+              <div className="text-xs text-muted-foreground">Criado por {selectedEntry.createdBy} em {formatDateTime(selectedEntry.createdAt)}</div>
             </div>
           )}
         </DialogContent>
