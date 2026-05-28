@@ -18,7 +18,7 @@ import { Search, Eye, ArrowRight, Clock, CheckCircle, XCircle, AlertTriangle, Pa
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { formatNumber } from '@/lib/formatters';
+import { formatBRL, formatNumber } from '@/lib/formatters';
 
 function OrderFlowBadge({ status }: { status: string }) {
   const s = getOrderFlowStatus(status);

@@ -77,8 +77,8 @@ export default function FiscalDashboardPage() {
   const cards = [
     { title: 'NF-e Autorizadas (mês)', value: s.nfeIssued, icon: FileCheck, color: 'text-success' },
     { title: 'NFC-e Autorizadas (mês)', value: s.nfceIssued, icon: Receipt, color: 'text-primary' },
-    { title: 'Faturamento NF-e', value: fmt(s.totalNFe), icon: FileText, color: 'text-foreground' },
-    { title: 'Total Impostos', value: fmt(s.totalTaxes), icon: Landmark, color: 'text-warning' },
+    { title: 'Faturamento NF-e', value: formatBRL(s.totalNFe), icon: FileText, color: 'text-foreground' },
+    { title: 'Total Impostos', value: formatBRL(s.totalTaxes), icon: Landmark, color: 'text-warning' },
   ];
 
   return (
@@ -120,12 +120,12 @@ export default function FiscalDashboardPage() {
             ].map((t) => (
               <div key={t.label} className="flex items-center justify-between border-b pb-2 last:border-0">
                 <span className="font-medium">{t.label}</span>
-                <span className="font-mono">{fmt(t.value)}</span>
+                <span className="font-mono">{formatBRL(t.value)}</span>
               </div>
             ))}
             <div className="flex items-center justify-between pt-3 border-t-2 font-bold">
               <span>Total</span>
-              <span className="font-mono text-warning">{fmt(s.totalTaxes)}</span>
+              <span className="font-mono text-warning">{formatBRL(s.totalTaxes)}</span>
             </div>
           </CardContent>
         </Card>
@@ -147,7 +147,7 @@ export default function FiscalDashboardPage() {
             </div>
             <div className="flex items-center justify-between">
               <span>Faturamento NFC-e</span>
-              <span className="font-mono">{fmt(s.totalNFCe)}</span>
+              <span className="font-mono">{formatBRL(s.totalNFCe)}</span>
             </div>
             {s.nfeRejected > 0 && (
               <div className="flex items-start gap-2 mt-3 p-3 rounded-md bg-destructive/10 text-destructive text-sm">
@@ -190,10 +190,10 @@ export default function FiscalDashboardPage() {
                         {n.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right font-mono">{fmt(Number(n.total))}</TableCell>
-                    <TableCell className="text-right font-mono">{fmt(Number(n.icms))}</TableCell>
+                    <TableCell className="text-right font-mono">{formatBRL(Number(n.total))}</TableCell>
+                    <TableCell className="text-right font-mono">{formatBRL(Number(n.icms))}</TableCell>
                     <TableCell className="text-right font-mono">
-                      {fmt(Number(n.pis) + Number(n.cofins))}
+                      {formatBRL(Number(n.pis) + Number(n.cofins))}
                     </TableCell>
                   </TableRow>
                 ))

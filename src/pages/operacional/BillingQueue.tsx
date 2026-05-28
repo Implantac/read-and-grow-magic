@@ -10,7 +10,7 @@ import { useOrderLifecycle } from '@/hooks/useOrderLifecycle';
 import { FileText, Clock, CheckCircle, DollarSign, Play, Ban } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { formatNumber } from '@/lib/formatters';
+import { formatBRL, formatNumber } from '@/lib/formatters';
 
 const billingStatusConfig: Record<string, { label: string; color: string }> = {
   awaiting_billing: { label: 'Aguardando', color: 'bg-warning/10 text-warning' },

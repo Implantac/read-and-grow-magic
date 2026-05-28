@@ -194,14 +194,14 @@ export default function BIIndustrialPage() {
 
       {/* Executive Scorecards */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
-        <KPICard title="Receita Total" value={fmt(totalRevenue)} icon={<DollarSign className="h-4 w-4" />} accentColor="success" index={0} />
-        <KPICard title="Lucro Bruto" value={fmt(strategicIndicators.grossProfit)} icon={<TrendingUp className="h-4 w-4" />} accentColor={strategicIndicators.grossProfit > 0 ? 'success' : 'danger'} index={1} />
+        <KPICard title="Receita Total" value={formatBRL(totalRevenue)} icon={<DollarSign className="h-4 w-4" />} accentColor="success" index={0} />
+        <KPICard title="Lucro Bruto" value={formatBRL(strategicIndicators.grossProfit)} icon={<TrendingUp className="h-4 w-4" />} accentColor={strategicIndicators.grossProfit > 0 ? 'success' : 'danger'} index={1} />
         <KPICard title="Margem Média" value={`${avgMargin.toFixed(1)}%`} icon={<BarChart3 className="h-4 w-4" />} accentColor={avgMargin >= 20 ? 'success' : 'warning'} index={2} />
         <KPICard title="OEE Global" value={`${oee.toFixed(1)}%`} icon={<Gauge className="h-4 w-4" />} accentColor={oee >= 70 ? 'success' : oee >= 50 ? 'warning' : 'danger'} index={3} />
         <KPICard title="On-Time" value={`${onTimePct.toFixed(0)}%`} icon={<Target className="h-4 w-4" />} accentColor={onTimePct >= 90 ? 'success' : 'warning'} index={4} />
         <KPICard title="Lead Time" value={`${avgLeadTime.toFixed(1)}d`} icon={<Activity className="h-4 w-4" />} accentColor={avgLeadTime <= 5 ? 'success' : 'warning'} index={5} />
         <KPICard title="Utilização" value={`${capacityUtilization.toFixed(0)}%`} icon={<Factory className="h-4 w-4" />} accentColor={capacityUtilization > 90 ? 'danger' : 'success'} index={6} />
-        <KPICard title="Custo Refugo" value={fmt(strategicIndicators.scrapCostEstimate)} icon={<AlertTriangle className="h-4 w-4" />} accentColor={strategicIndicators.scrapRate > 5 ? 'danger' : 'success'} index={7} />
+        <KPICard title="Custo Refugo" value={formatBRL(strategicIndicators.scrapCostEstimate)} icon={<AlertTriangle className="h-4 w-4" />} accentColor={strategicIndicators.scrapRate > 5 ? 'danger' : 'success'} index={7} />
       </div>
 
       <Tabs defaultValue="executive" className="space-y-4">
@@ -221,14 +221,14 @@ export default function BIIndustrialPage() {
             <Card>
               <CardContent className="pt-6 text-center space-y-2">
                 <p className="text-sm text-muted-foreground">Receita por Hora Trabalhada</p>
-                <p className="text-4xl font-black text-primary">{fmt(strategicIndicators.revenuePerHour)}</p>
+                <p className="text-4xl font-black text-primary">{formatBRL(strategicIndicators.revenuePerHour)}</p>
                 <p className="text-xs text-muted-foreground">Eficiência monetária da produção</p>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="pt-6 text-center space-y-2">
                 <p className="text-sm text-muted-foreground">Custo Médio por Peça</p>
-                <p className="text-4xl font-black">{fmt(strategicIndicators.costPerPiece)}</p>
+                <p className="text-4xl font-black">{formatBRL(strategicIndicators.costPerPiece)}</p>
                 <p className="text-xs text-muted-foreground">Considerando custo total</p>
               </CardContent>
             </Card>
@@ -315,7 +315,7 @@ export default function BIIndustrialPage() {
                   <CardContent className="pt-6 text-center space-y-2">
                     <Badge variant={cls === 'A' ? 'default' : cls === 'B' ? 'secondary' : 'outline'} className="text-lg px-4 py-1">Classe {cls}</Badge>
                     <p className="text-3xl font-bold">{items.length} produtos</p>
-                    <p className="text-sm text-muted-foreground">Lucro: {fmt(totalP)}</p>
+                    <p className="text-sm text-muted-foreground">Lucro: {formatBRL(totalP)}</p>
                     <p className="text-xs text-muted-foreground">{cls === 'A' ? '80% do lucro total' : cls === 'B' ? '15% do lucro total' : '5% do lucro total'}</p>
                   </CardContent>
                 </Card>
@@ -336,7 +336,7 @@ export default function BIIndustrialPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis type="number" fontSize={11} tickFormatter={v => `R$${v}`} />
                       <YAxis dataKey="product" type="category" width={120} fontSize={11} />
-                      <Tooltip formatter={(v: number) => fmt(v)} />
+                      <Tooltip formatter={(v: number) => formatBRL(v)} />
                       <Bar dataKey="profit" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]}>
                         {profitByProduct.map((entry, i) => (
                           <Cell key={i} fill={entry.margin < 10 ? 'hsl(var(--destructive))' : entry.margin < 20 ? 'hsl(var(--chart-3))' : 'hsl(var(--primary))'} />
@@ -357,7 +357,7 @@ export default function BIIndustrialPage() {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis type="number" fontSize={11} tickFormatter={v => `R$${v}`} />
                       <YAxis dataKey="product" type="category" width={120} fontSize={11} />
-                      <Tooltip formatter={(v: number) => fmt(v)} />
+                      <Tooltip formatter={(v: number) => formatBRL(v)} />
                       <Legend />
                       <Bar dataKey="revenue" name="Receita" fill="hsl(var(--chart-2))" stackId="a" radius={[0, 0, 0, 0]} />
                       <Bar dataKey="cost" name="Custo" fill="hsl(var(--destructive))" stackId="b" radius={[0, 0, 0, 0]} />
@@ -381,8 +381,8 @@ export default function BIIndustrialPage() {
                     {lowMarginProducts.slice(0, 10).map(p => (
                       <TableRow key={p.product_code}>
                         <TableCell className="font-medium">{p.product_name}</TableCell>
-                        <TableCell className="text-right">{fmt(p.sale_price)}</TableCell>
-                        <TableCell className="text-right">{fmt(p.total_cost)}</TableCell>
+                        <TableCell className="text-right">{formatBRL(p.sale_price)}</TableCell>
+                        <TableCell className="text-right">{formatBRL(p.total_cost)}</TableCell>
                         <TableCell className="text-right"><span className={cn('font-bold', p.profit_margin < 0 ? 'text-destructive' : 'text-warning')}>{p.profit_margin.toFixed(1)}%</span></TableCell>
                         <TableCell><Badge variant="outline" className="text-xs">{p.profit_margin < 0 ? '🔴 Revisar preço' : '🟡 Otimizar custo'}</Badge></TableCell>
                       </TableRow>
@@ -544,8 +544,8 @@ export default function BIIndustrialPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               { label: 'MTTR (Tempo Reparo)', value: '—', desc: 'Requer dados de manutenção', icon: <Activity className="h-6 w-6 text-primary" /> },
-              { label: 'Custo de Não-Qualidade', value: fmt(strategicIndicators.scrapCostEstimate), desc: `${totalRejected} peças × ${fmt(strategicIndicators.costPerPiece)}/peça`, icon: <AlertTriangle className="h-6 w-6 text-destructive" /> },
-              { label: 'Valor Agregado/Hora', value: fmt(strategicIndicators.revenuePerHour), desc: 'Receita por hora produtiva', icon: <DollarSign className="h-6 w-6 text-success" /> },
+              { label: 'Custo de Não-Qualidade', value: formatBRL(strategicIndicators.scrapCostEstimate), desc: `${totalRejected} peças × ${formatBRL(strategicIndicators.costPerPiece)}/peça`, icon: <AlertTriangle className="h-6 w-6 text-destructive" /> },
+              { label: 'Valor Agregado/Hora', value: formatBRL(strategicIndicators.revenuePerHour), desc: 'Receita por hora produtiva', icon: <DollarSign className="h-6 w-6 text-success" /> },
               { label: 'On-Time Delivery', value: `${onTimePct.toFixed(0)}%`, desc: `${onTime} de ${completedOPs.length} OPs no prazo`, icon: <Target className="h-6 w-6 text-primary" /> },
             ].map((item, i) => (
               <Card key={i}>
