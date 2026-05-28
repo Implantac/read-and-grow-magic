@@ -289,7 +289,8 @@ export default function OrderTracking() {
                           <TableCell className="font-mono">{i.product_code}</TableCell>
                           <TableCell>{i.product_name}</TableCell>
                           <TableCell>{i.quantity}</TableCell>
-                          <TableCell>R$ {formatNumber(i.total?, 2)}</TableCell>
+                          <TableCell>{formatBRL(i.total)}</TableCell>
+
                         </TableRow>
                       ))}
                     </TableBody>
