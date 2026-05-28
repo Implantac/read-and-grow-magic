@@ -12,6 +12,7 @@ import { FUNNEL_STAGES } from '@/hooks/useSalesFunnel';
 import { BookOpen, MessageSquare, Target, CheckCircle2, Copy, ThumbsUp, Clock, Shield, TrendingUp, Users, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
+import { formatDate } from '@/lib/formatters';
 const objectionCategories = [
   { value: 'price', label: 'Preço', icon: '💰' },
   { value: 'stall', label: 'Enrolação', icon: '⏳' },
@@ -343,7 +344,7 @@ export default function PlaybookPage() {
                     {usageLogs.slice(0, 50).map((log: any) => (
                       <div key={log.id} className="flex items-center justify-between text-sm p-2 rounded hover:bg-muted/50">
                         <span>{log.action_type === 'copy_script' ? '📋 Script copiado' : '👍 Objeção utilizada'}</span>
-                        <span className="text-muted-foreground text-xs">{new Date(log.created_at).toLocaleDateString('pt-BR')}</span>
+                        <span className="text-muted-foreground text-xs">{formatDate(log.created_at)}</span>
                       </div>
                     ))}
                   </div>

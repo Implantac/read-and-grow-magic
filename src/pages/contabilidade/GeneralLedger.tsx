@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import type { ExportColumn } from '@/lib/exportUtils';
 import type { LedgerEntry } from '@/types/accounting';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 const formatCurrency = (value: number) =>
   formatBRL(value);
 
@@ -179,7 +179,7 @@ export default function GeneralLedgerPage() {
               <TableBody>
                 {filteredEntries.map((entry) => (
                   <TableRow key={entry.id}>
-                    <TableCell>{new Date(entry.date).toLocaleDateString('pt-BR')}</TableCell>
+                    <TableCell>{formatDate(entry.date)}</TableCell>
                     <TableCell className="font-mono text-xs">{entry.journalNumber}</TableCell>
                     <TableCell>{entry.description}</TableCell>
                     <TableCell className="text-right">{entry.debit > 0 ? formatCurrency(entry.debit) : '-'}</TableCell>

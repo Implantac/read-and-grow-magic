@@ -14,7 +14,7 @@ import { useFinancialLedger, useCreateManualLedger } from '@/hooks/useFinancialL
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 const fmt = (v: number) => formatBRL(v || 0);
 
 type QuickAction = 'receive' | 'pay' | null;
@@ -219,7 +219,7 @@ export default function FinancialHub() {
                       <div className="min-w-0">
                         <p className="font-medium truncate">{l.description}</p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(l.entry_date).toLocaleDateString('pt-BR')}
+                          {formatDate(l.entry_date)}
                           {l.payment_method && <> · {l.payment_method.toUpperCase()}</>}
                           {l.source !== 'manual' && <> · {l.source}</>}
                         </p>

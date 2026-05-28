@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 import {
   Brain, Zap, Target, AlertTriangle, TrendingUp, Users, Phone, CheckCircle,
   DollarSign, ShieldAlert, Sparkles, RefreshCw, ArrowRight, Clock,
@@ -406,7 +406,7 @@ function PredictionCard({ prediction }: { prediction: AIPrediction }) {
               {prediction.predicted_close_date && (
                 <span className="text-muted-foreground">
                   <CalendarDays className="h-3 w-3 inline mr-1" />
-                  {new Date(prediction.predicted_close_date).toLocaleDateString('pt-BR')}
+                  {formatDate(prediction.predicted_close_date)}
                 </span>
               )}
             </div>
@@ -470,7 +470,7 @@ function ForecastCard({ forecast }: { forecast: AIForecast }) {
         <CardTitle className="text-sm flex items-center gap-2">
           <BarChart3 className="h-4 w-4 text-primary" />
           Forecast — {forecast.period}
-          <span className="text-xs text-muted-foreground ml-auto">{new Date(forecast.forecast_date).toLocaleDateString('pt-BR')}</span>
+          <span className="text-xs text-muted-foreground ml-auto">{formatDate(forecast.forecast_date)}</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

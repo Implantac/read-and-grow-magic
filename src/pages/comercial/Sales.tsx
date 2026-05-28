@@ -22,7 +22,7 @@ import { useSales, useCreateSale, type DbSale } from '@/hooks/useSales';
 import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 const filterFields: FilterField[] = [
   { key: 'status', label: 'Status', type: 'select', options: [
     { value: 'completed', label: 'Concluída' }, { value: 'cancelled', label: 'Cancelada' }, { value: 'refunded', label: 'Devolvida' },
@@ -122,7 +122,7 @@ export default function SalesPage() {
             data={filteredSales as unknown as Record<string, unknown>[]}
             columns={[
               { key: 'number', label: 'Número' }, { key: 'client_name', label: 'Cliente' },
-              { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+              { key: 'date', label: 'Data', format: (v) => formatDate(v as string) },
               { key: 'payment_method', label: 'Pagamento', format: (v) => getPaymentMethodLabel(v as any) },
               { key: 'total', label: 'Total', format: (v) => formatBRL(Number(v)) },
               { key: 'status', label: 'Status' },

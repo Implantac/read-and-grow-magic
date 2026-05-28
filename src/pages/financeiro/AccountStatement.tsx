@@ -12,7 +12,7 @@ import { useSuppliers } from '@/hooks/useSuppliers';
 import { useAccountStatement } from '@/hooks/useSettlement';
 import { ArrowDownCircle, ArrowUpCircle, Wallet } from 'lucide-react';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 const fmt = (v: number) =>
   formatBRL(Number(v) || 0);
 
@@ -103,7 +103,7 @@ export default function AccountStatement() {
                   )}
                   {rows.map((r, i) => (
                     <TableRow key={i}>
-                      <TableCell>{new Date(r.entry_date).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell>{formatDate(r.entry_date)}</TableCell>
                       <TableCell>
                         <Badge variant={r.kind === 'debit' ? 'destructive' : 'default'}>
                           {r.kind === 'debit' ? 'Débito' : 'Crédito'}

@@ -6,6 +6,7 @@ import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatDate } from '@/lib/formatters';
 import {
   Table,
   TableBody,
@@ -148,7 +149,7 @@ export default function QuotationsPage() {
           columns={[
             { key: 'number', label: 'Número' },
             { key: 'title', label: 'Título' },
-            { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+            { key: 'date', label: 'Data', format: (v) => formatDate(v as string) },
             { key: 'status', label: 'Status' },
             { key: 'priority', label: 'Prioridade' },
           ]}

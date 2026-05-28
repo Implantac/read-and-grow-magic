@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 import {
   Table,
   TableBody,
@@ -128,7 +128,7 @@ export default function MovementsPage() {
             { key: 'unitCost', label: 'Custo Unit.', format: (v) => formatBRL(Number(v)) },
             { key: 'totalCost', label: 'Total', format: (v) => formatBRL(Number(v)) },
             { key: 'operator', label: 'Operador' },
-            { key: 'createdAt', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+            { key: 'createdAt', label: 'Data', format: (v) => formatDate(v as string) },
           ]}
           filename="movimentacoes_estoque"
         />

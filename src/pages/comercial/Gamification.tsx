@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { formatDate } from '@/lib/formatters';
 import {
   useLeaderboard, useBadges, useBadgeAwards, useMissions,
   useMissionProgress, useChallenges, useChallengeParticipants,
@@ -226,7 +227,7 @@ export default function GamificationPage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex gap-4 text-xs text-muted-foreground">
-                    <span>📅 {new Date(ch.start_date).toLocaleDateString('pt-BR')} — {new Date(ch.end_date).toLocaleDateString('pt-BR')}</span>
+                    <span>📅 {formatDate(ch.start_date)} — {formatDate(ch.end_date)}</span>
                     <span>🏆 {ch.prize_description}</span>
                     <span>⭐ +{ch.bonus_points} pts bônus</span>
                   </div>

@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { parseCSV, parseOFX, useImportBankStatement, useAutoMatch, type ParsedTx } from '@/hooks/useBankStatementImport';
 import { useBankAccounts } from '@/hooks/useBankAccounts';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 const fmt = (v: number) => formatBRL(v);
 
 export default function BankStatementImport() {
@@ -123,7 +123,7 @@ export default function BankStatementImport() {
                 <TableBody>
                   {parsed.slice(0, 100).map((t, i) => (
                     <TableRow key={i}>
-                      <TableCell className="text-xs">{new Date(t.date).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell className="text-xs">{formatDate(t.date)}</TableCell>
                       <TableCell className="text-sm">{t.description}</TableCell>
                       <TableCell><Badge variant={t.type === 'credit' ? 'default' : 'destructive'}>{t.type}</Badge></TableCell>
                       <TableCell className="text-right font-mono text-sm">{fmt(t.amount)}</TableCell>

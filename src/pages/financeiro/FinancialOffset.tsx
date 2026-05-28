@@ -12,7 +12,7 @@ import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/useAccountsPayable';
 import { useCompensateAccounts } from '@/hooks/useSettlement';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 const fmt = (v: number) =>
   formatBRL(Number(v) || 0);
 
@@ -67,7 +67,7 @@ export default function FinancialOffset() {
             {recv && (
               <div className="rounded-md border p-3 text-sm space-y-1">
                 <div className="flex justify-between"><span className="text-muted-foreground">Cliente:</span><strong>{recv.client_name}</strong></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Vence:</span><span>{new Date(recv.due_date).toLocaleDateString('pt-BR')}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Vence:</span><span>{formatDate(recv.due_date)}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Em aberto:</span><Badge>{fmt(recvOpen)}</Badge></div>
               </div>
             )}
@@ -90,7 +90,7 @@ export default function FinancialOffset() {
             {pay && (
               <div className="rounded-md border p-3 text-sm space-y-1">
                 <div className="flex justify-between"><span className="text-muted-foreground">Fornecedor:</span><strong>{pay.supplier}</strong></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Vence:</span><span>{new Date(pay.due_date).toLocaleDateString('pt-BR')}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Vence:</span><span>{formatDate(pay.due_date)}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Em aberto:</span><Badge>{fmt(payOpen)}</Badge></div>
               </div>
             )}

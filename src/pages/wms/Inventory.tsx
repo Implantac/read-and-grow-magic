@@ -14,7 +14,7 @@ import { Search, Package, AlertTriangle, ClipboardList, DollarSign } from 'lucid
 import { useWMSInventory } from '@/hooks/useWMSInventory';
 import type { InventoryStatus } from '@/types/wms';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 const statusConfig: Record<InventoryStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   available: { label: 'Disponível', variant: 'default' },
   reserved: { label: 'Reservado', variant: 'secondary' },
@@ -186,7 +186,7 @@ export default function InventoryPage() {
                       <TableRow key={count.id}>
                         <TableCell className="font-mono">{count.countNumber}</TableCell>
                         <TableCell>{count.zone || '-'}</TableCell>
-                        <TableCell>{new Date(count.scheduledDate).toLocaleDateString('pt-BR')}</TableCell>
+                        <TableCell>{formatDate(count.scheduledDate)}</TableCell>
                         <TableCell>{count.itemsCount}</TableCell>
                         <TableCell className={count.discrepancies > 0 ? 'text-destructive font-medium' : ''}>{count.discrepancies}</TableCell>
                         <TableCell>{count.operator || '-'}</TableCell>

@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Phone, Plus, Search, AlertCircle, Clock, DollarSign } from 'lucide-react';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 const actionLabels: Record<string, string> = {
   contact: 'Contato', promise: 'Promessa', renegotiation: 'Renegociação', agreement: 'Acordo', note: 'Observação', follow_up: 'Follow-up',
 };
@@ -136,9 +136,9 @@ export default function Collections() {
                   <TableCell><Badge variant="outline">{actionLabels[a.action_type] || a.action_type}</Badge></TableCell>
                   <TableCell className="max-w-xs truncate">{a.description}</TableCell>
                   <TableCell>{a.responsible || '—'}</TableCell>
-                  <TableCell className="text-xs">{a.next_action_date ? new Date(a.next_action_date).toLocaleDateString('pt-BR') : '—'}</TableCell>
+                  <TableCell className="text-xs">{a.next_action_date ? formatDate(a.next_action_date) : '—'}</TableCell>
                   <TableCell><Badge variant={a.status === 'open' ? 'default' : 'secondary'}>{a.status === 'open' ? 'Aberta' : 'Concluída'}</Badge></TableCell>
-                  <TableCell className="text-xs">{new Date(a.created_at).toLocaleDateString('pt-BR')}</TableCell>
+                  <TableCell className="text-xs">{formatDate(a.created_at)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { RefreshCw, FileText, AlertTriangle, DollarSign, TrendingUp, TrendingDown, CalendarDays, Loader2 } from 'lucide-react';
 import { useDailyReports, useGenerateReport, DailyReport, DailyReportData } from '@/hooks/useDailyReport';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 const fmt = (v: number) =>
   formatBRL(v);
 
@@ -73,7 +73,7 @@ function ReportDetail({ data }: { data: DailyReportData }) {
                   <TableRow key={r.id}>
                     <TableCell>{r.description}</TableCell>
                     <TableCell>{r.client_name}</TableCell>
-                    <TableCell><Badge variant="destructive">{new Date(r.due_date).toLocaleDateString('pt-BR')}</Badge></TableCell>
+                    <TableCell><Badge variant="destructive">{formatDate(r.due_date)}</Badge></TableCell>
                     <TableCell className="text-right font-medium">{fmt(r.amount)}</TableCell>
                   </TableRow>
                 ))}
@@ -182,7 +182,7 @@ export default function DailyReports() {
               className="gap-1"
             >
               <CalendarDays className="h-3 w-3" />
-              {new Date(r.report_date).toLocaleDateString('pt-BR')}
+              {formatDate(r.report_date)}
             </Button>
           ))}
         </div>

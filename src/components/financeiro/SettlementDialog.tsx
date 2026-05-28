@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
@@ -169,7 +169,7 @@ export function SettlementDialog({ open, onOpenChange, target, onSettled }: Prop
                 <SelectContent>
                   {partyAdvances.map((a) => (
                     <SelectItem key={a.id} value={a.id}>
-                      {fmt(a.remaining_amount)} • {new Date(a.received_date).toLocaleDateString('pt-BR')}
+                      {fmt(a.remaining_amount)} • {formatDate(a.received_date)}
                     </SelectItem>
                   ))}
                 </SelectContent>

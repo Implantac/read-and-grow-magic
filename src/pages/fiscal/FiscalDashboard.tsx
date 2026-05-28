@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { FileCheck, FileText, Receipt, Landmark, AlertCircle } from 'lucide-react';
 
+import { formatDate } from '@/lib/formatters';
 const fmt = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
@@ -186,7 +187,7 @@ export default function FiscalDashboardPage() {
               ) : (
                 s.recentNFes.map((n: any) => (
                   <TableRow key={n.issue_date + n.total}>
-                    <TableCell>{new Date(n.issue_date).toLocaleDateString('pt-BR')}</TableCell>
+                    <TableCell>{formatDate(n.issue_date)}</TableCell>
                     <TableCell>
                       <Badge variant={n.status === 'authorized' ? 'default' : 'secondary'}>
                         {n.status}
