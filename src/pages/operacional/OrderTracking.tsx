@@ -265,8 +265,9 @@ export default function OrderTracking() {
                     <div><span className="text-muted-foreground">Status:</span> <OrderFlowBadge status={selectedOrder.status} /></div>
                     <div><span className="text-muted-foreground">Data:</span> {format(new Date(selectedOrder.date), 'dd/MM/yyyy')}</div>
                     <div><span className="text-muted-foreground">Entrega:</span> {selectedOrder.delivery_date ? format(new Date(selectedOrder.delivery_date), 'dd/MM/yyyy') : '-'}</div>
-                    <div><span className="text-muted-foreground">Subtotal:</span> R$ {formatNumber(selectedOrder.subtotal?, 2)}</div>
-                    <div><span className="text-muted-foreground">Total:</span> R$ {formatNumber(selectedOrder.total?, 2)}</div>
+                    <div><span className="text-muted-foreground">Subtotal:</span> {formatBRL(selectedOrder.subtotal)}</div>
+                    <div><span className="text-muted-foreground">Total:</span> {formatBRL(selectedOrder.total)}</div>
+
                     <div><span className="text-muted-foreground">Pgto:</span> {selectedOrder.payment_method}</div>
                     <div><span className="text-muted-foreground">Condição:</span> {selectedOrder.payment_condition}</div>
                     <div><span className="text-muted-foreground">Aprov. Comercial:</span> {selectedOrder.commercial_approval || 'Pendente'}</div>
