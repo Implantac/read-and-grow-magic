@@ -7,9 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { useGenerateCEOBrief, useExecuteDecisions, useAutoPilotRun, type CEOBriefResult } from '@/hooks/useCEOBrief';
+import { formatBRL, formatNumber } from '@/lib/formatters';
 
 const fmtBRL = (v: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(v || 0);
+  formatBRL(v || 0);
 
 const impactColor = (impacto: string) => {
   if (impacto === 'alto') return 'destructive';
@@ -393,7 +394,7 @@ export function CEOBriefPanel() {
             )}
 
             <div className="text-[10px] text-muted-foreground text-right">
-              Gerado em {data.generated_at ? new Date(data.generated_at).toLocaleString('pt-BR') : '—'}
+              Gerado em {data.generated_at ? new formatNumber(Date(data.generated_at)) : '—'}
             </div>
           </>
           );

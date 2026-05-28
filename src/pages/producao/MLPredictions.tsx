@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 import { differenceInMinutes, format, subDays } from 'date-fns';
+import { formatNumber } from '@/lib/formatters';
 
 export default function MLPredictions() {
   const { orders } = useProductionOrders();
@@ -247,7 +248,7 @@ export default function MLPredictions() {
             <TrendingUp className="h-8 w-8 text-primary" />
             <div>
               <p className="text-xs text-muted-foreground">Previsão Próximas 6 Semanas</p>
-              <p className="text-xl font-bold">{demandForecast.filter(d => d.forecast).reduce((s, d) => s + (d.forecast || 0), 0).toLocaleString('pt-BR')} un</p>
+              <p className="text-xl font-bold">{demandForecast.filter(d => d.forecast).reduce((s, d) => s + (d.forecast || 0), formatNumber(0))} un</p>
             </div>
           </CardContent>
         </Card>

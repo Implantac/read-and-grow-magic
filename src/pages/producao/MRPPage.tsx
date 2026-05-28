@@ -373,7 +373,7 @@ export default function MRPPage() {
                       <span className="text-muted-foreground">Custo estimado total: <strong className="text-foreground">R$ {materialNeeds.filter(m => m.deficit > 0).reduce((s, m) => {
                         const supply = supplies.find(su => su.code === m.materialCode || su.name === m.materialName);
                         return s + m.deficit * (supply?.unit_cost || 0);
-                      }, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></span>
+                      }, formatNumber(0), 2)}</strong></span>
                     </div>
                   </div>
                   <Table>
@@ -397,7 +397,7 @@ export default function MRPPage() {
                             <TableCell className="text-right font-mono font-bold">{formatNumber(m.deficit)}</TableCell>
                             <TableCell>{m.unit}</TableCell>
                             <TableCell>{m.supplier || <span className="text-muted-foreground">—</span>}</TableCell>
-                            <TableCell className="text-right">R$ {estCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
+                            <TableCell className="text-right">R$ {formatNumber(estCost, 2)}</TableCell>
                             <TableCell>
                               <Badge variant={m.status === 'critical' ? 'destructive' : 'secondary'}>
                                 {m.status === 'critical' ? 'Urgente' : 'Normal'}

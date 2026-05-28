@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { DollarSign, TrendingUp, CheckCircle, Clock, Plus, Search, Filter } from 'lucide-react';
 import { format } from 'date-fns';
+import { formatBRL, formatNumber } from '@/lib/formatters';
 
 const currentPeriod = format(new Date(), 'yyyy-MM');
 
@@ -74,10 +75,10 @@ export default function CommissionsPage() {
       <PageHeader title="Comissões" description="Gestão de comissões, políticas e pagamentos" />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <KPICard title="Prevista" value={`R$ ${totalForecast.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={<Clock className="h-5 w-5" />} index={0} accentColor="info" />
-        <KPICard title="Liberada" value={`R$ ${totalReleased.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={<TrendingUp className="h-5 w-5" />} index={1} accentColor="warning" />
-        <KPICard title="Aprovada" value={`R$ ${totalApproved.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={<CheckCircle className="h-5 w-5" />} index={2} accentColor="success" />
-        <KPICard title="Paga" value={`R$ ${totalPaid.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={<DollarSign className="h-5 w-5" />} index={3} accentColor="primary" />
+        <KPICard title="Prevista" value={`${formatBRL(totalForecast)}`} icon={<Clock className="h-5 w-5" />} index={0} accentColor="info" />
+        <KPICard title="Liberada" value={`${formatBRL(totalReleased)}`} icon={<TrendingUp className="h-5 w-5" />} index={1} accentColor="warning" />
+        <KPICard title="Aprovada" value={`${formatBRL(totalApproved)}`} icon={<CheckCircle className="h-5 w-5" />} index={2} accentColor="success" />
+        <KPICard title="Paga" value={`${formatBRL(totalPaid)}`} icon={<DollarSign className="h-5 w-5" />} index={3} accentColor="primary" />
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
@@ -124,9 +125,9 @@ export default function CommissionsPage() {
                       <TableCell className="font-mono text-sm">{c.order_number || '-'}</TableCell>
                       <TableCell>{c.sales_rep_name || '-'}</TableCell>
                       <TableCell>{c.client_name || '-'}</TableCell>
-                      <TableCell>R$ {(c.base_value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
+                      <TableCell>R$ {(c.base_value || formatNumber(0), 2)}</TableCell>
                       <TableCell>{c.applied_percentage}%</TableCell>
-                      <TableCell className="font-semibold">R$ {(c.calculated_value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
+                      <TableCell className="font-semibold">R$ {(c.calculated_value || formatNumber(0), 2)}</TableCell>
                       <TableCell><Badge className={statusColors[c.status] || ''}>{statusLabels[c.status] || c.status}</Badge></TableCell>
                       <TableCell>
                         {c.status === 'forecast' && (

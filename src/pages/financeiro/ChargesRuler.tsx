@@ -9,6 +9,7 @@ import { useChargeRules, useChargesLog, useRunChargesRuler, useToggleChargeRule 
 import { Play, Bell, AlertTriangle, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { formatNumber } from '@/lib/formatters';
 
 const SEVERITY_BADGE: Record<string, { variant: any; icon: any; label: string }> = {
   info: { variant: 'secondary', icon: Bell, label: 'Aviso' },
@@ -152,7 +153,7 @@ export default function ChargesRulerPage() {
                       {format(new Date(log.created_at), 'dd/MM HH:mm', { locale: ptBR })}
                     </TableCell>
                     <TableCell className="font-medium">{log.client_name || '—'}</TableCell>
-                    <TableCell>R$ {log.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
+                    <TableCell>R$ {formatNumber(log.amount, 2)}</TableCell>
                     <TableCell>
                       {log.due_date ? format(new Date(log.due_date), 'dd/MM/yyyy') : '—'}
                     </TableCell>

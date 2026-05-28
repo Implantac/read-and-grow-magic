@@ -18,6 +18,7 @@ import { Plus, Package, Search, ArrowUpCircle, ArrowDownCircle, AlertTriangle, B
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { formatBRL } from '@/lib/formatters';
 
 export default function SupplyStockPage() {
   const { supplies, movements, loading, createSupply, registerMovement, lowStockItems } = useSupplyStock();
@@ -76,7 +77,7 @@ export default function SupplyStockPage() {
 
       <div className="grid gap-4 md:grid-cols-4">
         <KPICard title="Total de Insumos" value={supplies.length} icon={<Boxes className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="Valor em Estoque" value={`R$ ${totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={<Package className="h-5 w-5" />} accentColor="success" index={1} />
+        <KPICard title="Valor em Estoque" value={`${formatBRL(totalValue)}`} icon={<Package className="h-5 w-5" />} accentColor="success" index={1} />
         <KPICard title="Estoque Crítico" value={lowStockItems.length} subtitle="abaixo do mínimo" icon={<AlertTriangle className="h-5 w-5" />} accentColor="warning" index={2} />
         <KPICard title="Movimentações" value={movements.length} subtitle="registradas" icon={<ArrowDownCircle className="h-5 w-5" />} accentColor="info" index={3} />
       </div>

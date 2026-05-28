@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useDREDynamic } from '@/hooks/useDREDynamic';
+import { formatNumber } from '@/lib/formatters';
 
 const SECTION_LABELS: Record<string, string> = {
   revenue: '💰 Receita Bruta',
@@ -65,7 +66,7 @@ export default function DREDynamicPage() {
           <CardTitle className="flex items-center justify-between">
             <span>DRE no período</span>
             <span className={grandTotal >= 0 ? 'text-success' : 'text-destructive'}>
-              Resultado: R$ {grandTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              Resultado: R$ {formatNumber(grandTotal, 2)}
             </span>
           </CardTitle>
         </CardHeader>
@@ -88,14 +89,14 @@ export default function DREDynamicPage() {
                     <TableRow key={section} className="bg-muted/50 font-semibold">
                       <TableCell>{SECTION_LABELS[section] || section}</TableCell>
                       <TableCell className={`text-right ${info.total >= 0 ? 'text-success' : 'text-destructive'}`}>
-                        R$ {info.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                        R$ {formatNumber(info.total, 2)}
                       </TableCell>
                     </TableRow>
                     {info.rows.map((r, i) => (
                       <TableRow key={section + i}>
                         <TableCell className="pl-8 text-sm text-muted-foreground">{r.category_name}</TableCell>
                         <TableCell className="text-right text-sm">
-                          R$ {Number(r.total).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                          R$ {formatNumber(Number(r.total), 2)}
                         </TableCell>
                       </TableRow>
                     ))}

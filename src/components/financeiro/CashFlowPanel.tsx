@@ -12,8 +12,8 @@ import { format, addDays, eachDayOfInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ArrowDownCircle, ArrowUpCircle, Search } from 'lucide-react';
 
-import { formatBRL } from '@/lib/formatters';
-const fmtCompact = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(v);
+import { formatBRL, formatBRLCompact } from '@/lib/formatters';
+const fmtCompact = (v: number) => formatBRLCompact(v);
 
 interface Props {
   currentBalance: number;

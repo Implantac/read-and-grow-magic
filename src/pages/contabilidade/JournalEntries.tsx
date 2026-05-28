@@ -18,7 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import type { JournalEntry } from '@/types/accounting';
 import type { ExportColumn } from '@/lib/exportUtils';
 
-import { formatBRL, formatDate } from '@/lib/formatters';
+import { formatBRL, formatDate, formatNumber } from '@/lib/formatters';
 const statusColors: Record<string, string> = {
   draft: 'bg-warning/10 text-warning border-warning/30',
   posted: 'bg-success/10 text-success border-success/30',
@@ -164,7 +164,7 @@ export default function JournalEntriesPage() {
                   </TableRow>
                 </TableBody>
               </Table>
-              <div className="text-xs text-muted-foreground">Criado por {selectedEntry.createdBy} em {new Date(selectedEntry.createdAt).toLocaleString('pt-BR')}</div>
+              <div className="text-xs text-muted-foreground">Criado por {selectedEntry.createdBy} em {new formatNumber(Date(selectedEntry.createdAt))}</div>
             </div>
           )}
         </DialogContent>

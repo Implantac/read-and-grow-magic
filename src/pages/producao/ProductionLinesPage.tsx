@@ -15,6 +15,7 @@ import { Plus, Pencil, Trash2, Search, Layers, Gauge, Users, AlertTriangle, Acti
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { formatNumber } from '@/lib/formatters';
 
 const shiftLabels: Record<string, string> = { morning: 'Manhã', afternoon: 'Tarde', night: 'Noite', integral: 'Integral' };
 const shiftColors: Record<string, string> = {
@@ -52,7 +53,7 @@ export default function ProductionLinesPage() {
   const kpiValues = [
     lines.length,
     lines.filter(l => l.is_active).length,
-    lines.reduce((sum, l) => sum + l.capacity_per_hour, 0).toLocaleString('pt-BR'),
+    lines.reduce((sum, l) => sum + l.capacity_per_hour, formatNumber(0)),
     new Set(lines.map(l => l.sector_id).filter(Boolean)).size,
   ];
 

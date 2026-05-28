@@ -18,7 +18,7 @@ import { priorityConfig } from '@/config/production';
 import { Skeleton } from '@/components/ui/skeleton';
 import { KPICard } from '@/components/shared/KPICard';
 import { supabase } from '@/integrations/supabase/client';
-import { formatNumber } from '@/lib/formatters';
+import { formatBRL, formatNumber } from '@/lib/formatters';
 import {
   ArrowRight, Clock, Factory, CheckCircle, Pause, AlertTriangle,
   Search, Package, TrendingUp, GripVertical, User, Calendar,
@@ -296,7 +296,7 @@ export default function ProductionKanban() {
       Object.entries(wipMetrics.byColumn).forEach(([status, data]) => {
         if (data.count > 10) {
           const statusLabel = KANBAN_COLUMNS.find(c => c.key === status)?.label || status;
-          list.push({ icon: '🏭', text: `${statusLabel}: ${data.count} OPs com ${data.qty} un em WIP (R$ ${data.cost.toLocaleString('pt-BR', { minimumFractionDigits: 0 })})`, severity: 'warning' });
+          list.push({ icon: '🏭', text: `${statusLabel}: ${data.count} OPs com ${data.qty} un em WIP (${formatBRL(data.cost)})`, severity: 'warning' });
         }
       });
     }
@@ -475,7 +475,7 @@ export default function ProductionKanban() {
               <p className="text-[10px] text-muted-foreground uppercase">Unidades em Processo</p>
             </div>
             <div className="text-center">
-              <p className="text-lg font-bold text-emerald-400">R$ {wipMetrics.totalCost.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+              <p className="text-lg font-bold text-emerald-400">R$ {formatNumber(wipMetrics.totalCost, 0)}</p>
               <p className="text-[10px] text-muted-foreground uppercase">Custo Estimado WIP</p>
             </div>
             {Object.entries(wipMetrics.byColumn).slice(0, 2).map(([status, data]) => {

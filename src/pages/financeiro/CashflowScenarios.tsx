@@ -9,6 +9,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { TrendingDown, TrendingUp, AlertTriangle } from 'lucide-react';
+import { formatBRL, formatNumber } from '@/lib/formatters';
 
 export default function CashflowScenariosPage() {
   const [days, setDays] = useState(30);
@@ -50,7 +51,7 @@ export default function CashflowScenariosPage() {
               <TrendingUp className="h-4 w-4 text-primary" />
             </div>
             <p className="text-2xl font-bold">
-              R$ {(last?.balance_real ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              R$ {(last?.balance_real ?? formatNumber(0), 2)}
             </p>
           </CardContent>
         </Card>
@@ -61,7 +62,7 @@ export default function CashflowScenariosPage() {
               <TrendingUp className="h-4 w-4 text-success" />
             </div>
             <p className="text-2xl font-bold text-success">
-              R$ {(last?.balance_optimistic ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              R$ {(last?.balance_optimistic ?? formatNumber(0), 2)}
             </p>
           </CardContent>
         </Card>
@@ -72,7 +73,7 @@ export default function CashflowScenariosPage() {
               <TrendingDown className="h-4 w-4 text-destructive" />
             </div>
             <p className="text-2xl font-bold text-destructive">
-              R$ {(last?.balance_pessimistic ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              R$ {(last?.balance_pessimistic ?? formatNumber(0), 2)}
             </p>
           </CardContent>
         </Card>
@@ -104,7 +105,7 @@ export default function CashflowScenariosPage() {
                 <XAxis dataKey="day" />
                 <YAxis />
                 <Tooltip
-                  formatter={(v: number) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                  formatter={(v: number) => `${formatBRL(v)}`}
                 />
                 <Legend />
                 <ReferenceLine y={0} stroke="hsl(var(--destructive))" strokeDasharray="3 3" />
