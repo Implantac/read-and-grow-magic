@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { formatBRL } from '@/lib/formatters';
 import {
   Receipt,
   Plus,
@@ -173,7 +174,7 @@ export default function NFCePage() {
           columns={[
             { key: 'number', label: 'Número' },
             { key: 'customerName', label: 'Cliente' },
-            { key: 'totalValue', label: 'Valor', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+            { key: 'totalValue', label: 'Valor', format: (v) => formatBRL(Number(v)) },
             { key: 'paymentMethod', label: 'Pagamento' },
             { key: 'status', label: 'Status' },
             { key: 'issuedAt', label: 'Emissão', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },

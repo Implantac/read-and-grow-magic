@@ -5,8 +5,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useFinancialInsights } from '@/hooks/useFinancialInsights';
 import { Brain, AlertTriangle, TrendingUp, Lightbulb, ShieldCheck } from 'lucide-react';
 
+import { formatBRL } from '@/lib/formatters';
 const formatCurrency = (v: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  formatBRL(v);
 
 const severityColor: Record<string, string> = {
   critical: 'bg-destructive/10 text-destructive border-destructive/30',

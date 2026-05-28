@@ -11,6 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { ShieldAlert, Lock, AlertTriangle, TrendingDown, Users, DollarSign } from 'lucide-react';
 
+import { formatBRL } from '@/lib/formatters';
 const RISK_COLORS = ['#10b981', '#f59e0b', '#f97316', '#ef4444'];
 
 export default function RiskDashboard() {
@@ -21,7 +22,7 @@ export default function RiskDashboard() {
   const { data: receivables = [] } = useAccountsReceivable();
 
   const clientMap = Object.fromEntries(clients.map(c => [c.id, c]));
-  const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  const fmt = (v: number) => formatBRL(v);
 
   const activeBlocks = blocks.filter(b => b.status === 'active');
   const blockedClients = profiles.filter(p => p.credit_status === 'blocked');

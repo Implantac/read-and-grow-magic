@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { formatBRL } from '@/lib/formatters';
 import {
   Plus, Eye, MoreHorizontal, FileText, XCircle, CheckCircle, Loader2,
   Package, DollarSign, Clock, TruckIcon, ArrowRight, CalendarDays, User, CreditCard, Hash, MapPin, StickyNote,
@@ -34,7 +35,7 @@ import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
 import { validateOrder, type CommercialValidation } from '@/hooks/useCommercialRules';
 
-const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+const fmt = (v: number) => formatBRL(v);
 
 const filterFields: FilterField[] = [
   { key: 'status', label: 'Status', type: 'select', options: [

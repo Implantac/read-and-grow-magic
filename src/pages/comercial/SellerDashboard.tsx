@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { formatBRL } from '@/lib/formatters';
 import {
   Target, Phone, AlertTriangle, TrendingUp, Users, Clock, CheckCircle,
   DollarSign, Trophy, Zap, ArrowRight, PhoneCall, Mail, MessageSquare,
@@ -28,7 +29,7 @@ import { useAIDailyActions, useAIRecommendations, useCompleteAIAction, useActOnR
 import { differenceInDays, format, isToday, startOfMonth, endOfMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+const fmt = (v: number) => formatBRL(v);
 
 const RISK_CONFIG = {
   critical: { label: 'Crítico', color: 'bg-red-500', badge: 'destructive' as const, icon: ShieldAlert },

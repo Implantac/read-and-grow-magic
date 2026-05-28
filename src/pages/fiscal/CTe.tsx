@@ -23,6 +23,7 @@ import { HighlightText } from '@/components/shared/HighlightText';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
+import { formatBRL } from '@/lib/formatters';
 const STEPS = [
   { id: 'import', label: 'Importar NF-e', icon: FileText },
   { id: 'parts', label: 'Participantes', icon: Truck },
@@ -31,7 +32,7 @@ const STEPS = [
   { id: 'review', label: 'Revisão', icon: ClipboardCheck },
 ];
 
-const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+const fmt = (v: number) => formatBRL(v);
 
 export default function CTePage() {
   const { data: ctes = [], isLoading } = useCTes();

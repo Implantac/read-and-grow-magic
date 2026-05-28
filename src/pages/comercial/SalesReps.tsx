@@ -23,7 +23,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+import { formatBRL } from '@/lib/formatters';
+const fmt = (v: number) => formatBRL(v);
 
 export default function SalesRepsPage() {
   const { data: reps = [], isLoading } = useSalesReps();

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { formatBRL } from '@/lib/formatters';
 import {
   Download,
   FileText,
@@ -166,7 +167,7 @@ export default function NFePage() {
             { key: 'number', label: 'Número' },
             { key: 'series', label: 'Série' },
             { key: 'clientName', label: 'Destinatário' },
-            { key: 'totalValue', label: 'Valor', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+            { key: 'totalValue', label: 'Valor', format: (v) => formatBRL(Number(v)) },
             { key: 'status', label: 'Status' },
             { key: 'issuedAt', label: 'Emissão', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
           ]}

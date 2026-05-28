@@ -8,7 +8,8 @@ import { ArrowLeftRight } from 'lucide-react';
 import { useBankAccounts } from '@/hooks/useBankAccounts';
 import { useTransferBetweenAccounts } from '@/hooks/useFinancialSettlements';
 
-const fmtBRL = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v ?? 0);
+import { formatBRL } from '@/lib/formatters';
+const fmtBRL = (v: number) => formatBRL(v ?? 0);
 
 export function TransferDialog() {
   const { data: accounts = [] } = useBankAccounts();

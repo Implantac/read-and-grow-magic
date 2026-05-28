@@ -16,6 +16,7 @@ import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
 
+import { formatBRL } from '@/lib/formatters';
 const typeColorMap: Record<string, string> = {
   asset: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
   liability: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
@@ -30,7 +31,7 @@ const exportColumns: ExportColumn[] = [
   { key: 'type', label: 'Tipo', format: (v) => getAccountTypeLabel(String(v)) },
   { key: 'nature', label: 'Natureza', format: (v) => v === 'debit' ? 'Devedora' : 'Credora' },
   { key: 'isAnalytical', label: 'Nível', format: (v) => v ? 'Analítica' : 'Sintética' },
-  { key: 'balance', label: 'Saldo', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+  { key: 'balance', label: 'Saldo', format: (v) => formatBRL(Number(v)) },
 ];
 
 const accountFilterFields: FilterField[] = [
@@ -74,7 +75,7 @@ export default function ChartOfAccountsPage() {
   }, [accounts]);
 
   const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+    formatBRL(value);
 
   const toggleGroup = (id: string) => {
     setExpandedGroups((prev) => {

@@ -19,6 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 
+import { formatBRL } from '@/lib/formatters';
 const STEPS = [
   { id: 'docs', label: 'Documentos', icon: FileText },
   { id: 'route', label: 'Rota', icon: MapPin },
@@ -111,7 +112,7 @@ export default function MDFePage() {
                                     <Badge variant="secondary" className="text-[10px] h-4">{doc.type}</Badge>
                                   </TableCell>
                                   <TableCell className="text-sm">{doc.client}</TableCell>
-                                  <TableCell className="text-right font-mono text-sm">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(doc.value)}</TableCell>
+                                  <TableCell className="text-right font-mono text-sm">{formatBRL(doc.value)}</TableCell>
                                 </TableRow>
                               ))}
                               {availableDocs.length === 0 && (

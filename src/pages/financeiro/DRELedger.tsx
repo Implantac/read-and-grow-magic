@@ -11,8 +11,9 @@ import { ptBR } from 'date-fns/locale';
 import { useDRESummary, useDREDetailed, calculateDRE, type DRESection } from '@/hooks/useDRE';
 import { cn } from '@/lib/utils';
 
+import { formatBRL } from '@/lib/formatters';
 const fmt = (v: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  formatBRL(v);
 
 const SECTION_LABEL: Record<DRESection, string> = {
   revenue: 'Receita Operacional',

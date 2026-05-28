@@ -6,6 +6,7 @@ import { PageLoading } from '@/components/shared/PageLoading';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { formatBRL } from '@/lib/formatters';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -120,7 +121,7 @@ export default function ClientsPage() {
             { key: 'document', label: 'CPF/CNPJ' }, { key: 'email', label: 'E-mail' },
             { key: 'phone', label: 'Telefone' }, { key: 'address_city', label: 'Cidade' },
             { key: 'address_state', label: 'UF' },
-            { key: 'credit_limit', label: 'Limite de Crédito', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+            { key: 'credit_limit', label: 'Limite de Crédito', format: (v) => formatBRL(Number(v)) },
             { key: 'status', label: 'Status' },
           ]}
           filename="clientes"

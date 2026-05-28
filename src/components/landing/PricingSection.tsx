@@ -6,8 +6,9 @@ import { Check, X, Star } from 'lucide-react';
 import { usePlans } from '@/hooks/useSubscription';
 import { cn } from '@/lib/utils';
 
+import { formatBRL } from '@/lib/formatters';
 const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  formatBRL(value);
 
 const moduleLabels: Record<string, string> = {
   comercial: 'Comercial', estoque: 'Estoque', financeiro: 'Financeiro',

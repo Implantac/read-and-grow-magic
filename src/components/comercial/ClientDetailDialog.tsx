@@ -17,6 +17,7 @@ import { useOrders } from '@/hooks/useOrders';
 import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
 import { useSalesFunnel } from '@/hooks/useSalesFunnel';
 import { type DbClient } from '@/hooks/useClients';
+import { formatBRL } from '@/lib/formatters';
 import {
   Phone, MapPin, FileText, ShoppingCart, StickyNote, Clock, AlertTriangle,
   DollarSign, Plus, RotateCcw, Handshake, TrendingUp, Target, CreditCard,
@@ -26,7 +27,7 @@ import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { getOrderStatusLabel, getPaymentMethodLabel } from '@/config/commercial';
 
-const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+const fmt = (v: number) => formatBRL(v);
 
 const EVENT_ICONS: Record<string, React.ReactNode> = {
   contact: <Phone className="h-3.5 w-3.5" />,

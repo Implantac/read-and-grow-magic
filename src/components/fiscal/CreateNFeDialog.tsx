@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { formatBRL } from '@/lib/formatters';
 import {
   Plus, Trash2, FileText, Users, Package, Calculator,
   Truck, CreditCard, ClipboardCheck, ArrowLeft, ArrowRight, Send, Sparkles,
@@ -73,7 +74,7 @@ const STEPS = [
 ];
 
 const fmt = (v: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  formatBRL(v);
 
 export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialogProps) {
   const clientsQuery = useClients();

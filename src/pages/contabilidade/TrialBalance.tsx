@@ -12,8 +12,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import type { ExportColumn } from '@/lib/exportUtils';
 import type { TrialBalanceItem } from '@/types/accounting';
 
+import { formatBRL } from '@/lib/formatters';
 const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  formatBRL(value);
 
 const typeColors: Record<string, string> = {
   asset: 'text-blue-600',

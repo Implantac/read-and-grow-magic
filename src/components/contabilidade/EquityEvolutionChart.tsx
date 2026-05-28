@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatBRL } from '@/lib/formatters';
 import {
   LineChart,
   Line,
@@ -37,7 +38,7 @@ export function EquityEvolutionChart({ data = [] }: EquityEvolutionChartProps) {
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey="month" tick={{ fontSize: 11 }} />
               <YAxis tickFormatter={formatCurrency} tick={{ fontSize: 11 }} />
-              <Tooltip formatter={(v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)} />
+              <Tooltip formatter={(v: number) => formatBRL(v)} />
               <Legend />
               <Line type="monotone" dataKey="assets" name="Ativo" stroke="hsl(var(--chart-1))" strokeWidth={2} dot={{ r: 4 }} />
               <Line type="monotone" dataKey="liabilities" name="Passivo" stroke="hsl(var(--chart-3))" strokeWidth={2} dot={{ r: 4 }} />

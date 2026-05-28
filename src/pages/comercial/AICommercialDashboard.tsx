@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
+import { formatBRL } from '@/lib/formatters';
 import {
   Brain, Zap, Target, AlertTriangle, TrendingUp, Users, Phone, CheckCircle,
   DollarSign, ShieldAlert, Sparkles, RefreshCw, ArrowRight, Clock,
@@ -20,7 +21,7 @@ import {
   type AIScore, type AIRecommendation, type AIInsight, type AIDailyAction, type AIPrediction, type AIForecast,
 } from '@/hooks/useAICommercial';
 
-const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+const fmt = (v: number) => formatBRL(v);
 
 const SEVERITY_MAP: Record<string, { color: string; icon: typeof AlertTriangle }> = {
   critical: { color: 'text-red-500', icon: ShieldAlert },

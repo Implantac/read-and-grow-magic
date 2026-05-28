@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { formatBRL } from '@/lib/formatters';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog';
@@ -15,7 +16,7 @@ import { useUseAdvance } from '@/hooks/useFinancialSettlements';
 import { cn } from '@/lib/utils';
 
 const fmt = (v: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v) || 0);
+  formatBRL(Number(v) || 0);
 
 export type SettlementTarget = {
   source_type: 'receivable' | 'payable';

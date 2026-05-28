@@ -11,7 +11,8 @@ import { useRenegotiations } from '@/hooks/useRenegotiations';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-const formatCurrency = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+import { formatBRL } from '@/lib/formatters';
+const formatCurrency = (v: number) => formatBRL(v);
 
 const statusMap: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   pending: { label: 'Pendente', variant: 'secondary' },

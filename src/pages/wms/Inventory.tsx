@@ -14,6 +14,7 @@ import { Search, Package, AlertTriangle, ClipboardList, DollarSign } from 'lucid
 import { useWMSInventory } from '@/hooks/useWMSInventory';
 import type { InventoryStatus } from '@/types/wms';
 
+import { formatBRL } from '@/lib/formatters';
 const statusConfig: Record<InventoryStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   available: { label: 'Disponível', variant: 'default' },
   reserved: { label: 'Reservado', variant: 'secondary' },
@@ -59,7 +60,7 @@ export default function InventoryPage() {
               { key: 'location', label: 'Localização' },
               { key: 'quantity', label: 'Quantidade' },
               { key: 'availableQty', label: 'Disponível' },
-              { key: 'value', label: 'Valor', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+              { key: 'value', label: 'Valor', format: (v) => formatBRL(Number(v)) },
               { key: 'status', label: 'Status' },
             ]}
             filename="inventario_wms"
@@ -68,7 +69,7 @@ export default function InventoryPage() {
       />
 
       <div className="grid gap-4 md:grid-cols-4">
-        <KPICard title="Valor Total" value={new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalValue)} description={`${totalItems} itens em estoque`} icon={DollarSign} index={0} />
+        <KPICard title="Valor Total" value={formatBRL(totalValue)} description={`${totalItems} itens em estoque`} icon={DollarSign} index={0} />
         <KPICard title="Health Score" value={`${Math.round(100 - (lowStockItems / (items.length || 1) * 100))}%`} description="Disponibilidade Global" icon={Package} accentColor="success" index={1} />
         <KPICard title="Estoque Baixo" value={lowStockItems} description="Abaixo do mínimo" icon={AlertTriangle} index={2} accentColor={lowStockItems > 0 ? 'warning' : 'info'} />
         <KPICard title="Vencidos" value={expiredItems} description="Ação imediata" icon={AlertTriangle} index={3} accentColor={expiredItems > 0 ? 'danger' : 'info'} />

@@ -16,6 +16,7 @@ import { ptBR } from 'date-fns/locale';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, Legend, Tooltip, PieChart, Pie, Cell } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 
+import { formatBRL } from '@/lib/formatters';
 const chartConfig = {
   receitas: { label: 'Receitas', color: 'hsl(var(--success))' },
   despesas: { label: 'Despesas', color: 'hsl(var(--destructive))' },
@@ -23,7 +24,7 @@ const chartConfig = {
 };
 
 const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  formatBRL(value);
 
 const formatCompact = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(value);

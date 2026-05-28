@@ -15,7 +15,8 @@ import { useCampaigns, useCreateCampaign, useUpdateCampaign, type DbCampaign } f
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+import { formatBRL } from '@/lib/formatters';
+const fmt = (v: number) => formatBRL(v);
 
 const STATUS_MAP: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   draft: { label: 'Rascunho', variant: 'outline' },

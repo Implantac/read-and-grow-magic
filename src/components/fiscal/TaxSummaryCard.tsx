@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Calculator, Sparkles } from 'lucide-react';
 
+import { formatBRL } from '@/lib/formatters';
 interface TaxSummaryCardProps {
   icms: number;
   icmsST?: number;
@@ -13,7 +14,7 @@ interface TaxSummaryCardProps {
 }
 
 const fmt = (v: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  formatBRL(v);
 
 export function TaxSummaryCard({ icms, icmsST = 0, difal = 0, pis, cofins, ipi, total, totalTaxes }: TaxSummaryCardProps) {
   const taxBurden = total > 0 ? (totalTaxes / total) * 100 : 0;
