@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ShieldAlert, ShieldCheck, AlertTriangle, Activity, Check } from 'lucide-react';
-import { formatBRL, formatNumber } from '@/lib/formatters';
+import { formatBRL, formatDateTime, formatNumber } from '@/lib/formatters';
 import {
   useRiskProfiles, useSecurityLogs, useFraudRules, useUpdateFraudRule, useResolveSecurityLog,
 } from '@/hooks/useFinancialSecurity';

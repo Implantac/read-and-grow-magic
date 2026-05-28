@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { useGenerateCEOBrief, useExecuteDecisions, useAutoPilotRun, type CEOBriefResult } from '@/hooks/useCEOBrief';
-import { formatBRL, formatNumber } from '@/lib/formatters';
+import { formatBRL, formatDateTime, formatNumber } from '@/lib/formatters';
 
 const impactColor = (impacto: string) => {
   if (impacto === 'alto') return 'destructive';
