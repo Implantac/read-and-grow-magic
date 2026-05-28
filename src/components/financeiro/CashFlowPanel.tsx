@@ -13,7 +13,6 @@ import { ptBR } from 'date-fns/locale';
 import { ArrowDownCircle, ArrowUpCircle, Search } from 'lucide-react';
 
 import { formatBRL } from '@/lib/formatters';
-const fmtBRL = (v: number) => formatBRL(v);
 const fmtCompact = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(v);
 
 interface Props {
@@ -87,7 +86,7 @@ export function CashFlowPanel({ currentBalance }: Props) {
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} interval={Math.floor(projectedFlow.length / 10)} />
                 <YAxis tickFormatter={fmtCompact} tick={{ fontSize: 10 }} />
-                <Tooltip formatter={(v: number) => fmtBRL(v)} />
+                <Tooltip formatter={(v: number) => formatBRL(v)} />
                 <ReferenceLine y={0} stroke="hsl(var(--destructive))" strokeDasharray="3 3" />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Line type="monotone" dataKey="saldo" name="Saldo projetado" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
@@ -101,7 +100,7 @@ export function CashFlowPanel({ currentBalance }: Props) {
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                 <XAxis dataKey="date" tick={{ fontSize: 10 }} />
                 <YAxis tickFormatter={fmtCompact} tick={{ fontSize: 10 }} />
-                <Tooltip formatter={(v: number) => fmtBRL(v)} />
+                <Tooltip formatter={(v: number) => formatBRL(v)} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 <Line type="monotone" dataKey="entradas" name="Entradas" stroke="hsl(var(--success))" strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="saidas" name="Saídas" stroke="hsl(var(--destructive))" strokeWidth={2} dot={false} />
@@ -135,7 +134,7 @@ export function CashFlowPanel({ currentBalance }: Props) {
                       <TableCell className={`text-right font-medium ${l.type === 'inflow' ? 'text-success' : 'text-destructive'}`}>
                         <span className="flex items-center justify-end gap-1">
                           {l.type === 'inflow' ? <ArrowUpCircle className="h-3 w-3" /> : <ArrowDownCircle className="h-3 w-3" />}
-                          {fmtBRL(Number(l.amount))}
+                          {formatBRL(Number(l.amount))}
                         </span>
                       </TableCell>
                     </TableRow>

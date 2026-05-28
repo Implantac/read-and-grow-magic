@@ -15,8 +15,6 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
-const fmt = (v: number) => formatBRL(v || 0);
-
 type QuickAction = 'receive' | 'pay' | null;
 
 const PAYMENT_METHODS = [
@@ -114,13 +112,13 @@ export default function FinancialHub() {
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div>
               <p className="text-sm text-muted-foreground mb-1">Saldo total disponível</p>
-              <h2 className="text-4xl md:text-5xl font-bold tracking-tight">{fmt(totalBalance)}</h2>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tight">{formatBRL(totalBalance)}</h2>
               <div className="flex flex-wrap items-center gap-3 mt-3 text-sm">
                 <span className="flex items-center gap-1 text-emerald-500">
-                  <TrendingUp className="h-4 w-4" /> Hoje +{fmt(todayInflow)}
+                  <TrendingUp className="h-4 w-4" /> Hoje +{formatBRL(todayInflow)}
                 </span>
                 <span className="flex items-center gap-1 text-rose-500">
-                  <TrendingDown className="h-4 w-4" /> Hoje -{fmt(todayOutflow)}
+                  <TrendingDown className="h-4 w-4" /> Hoje -{formatBRL(todayOutflow)}
                 </span>
                 <Badge variant="outline">{accounts.filter(a => a.active).length} contas ativas</Badge>
               </div>
@@ -142,19 +140,19 @@ export default function FinancialHub() {
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Entradas no mês</p>
-            <p className="text-2xl font-bold text-emerald-500">{fmt(monthInflow)}</p>
+            <p className="text-2xl font-bold text-emerald-500">{formatBRL(monthInflow)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Saídas no mês</p>
-            <p className="text-2xl font-bold text-rose-500">{fmt(monthOutflow)}</p>
+            <p className="text-2xl font-bold text-rose-500">{formatBRL(monthOutflow)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Resultado do mês</p>
-            <p className={cn('text-2xl font-bold', monthNet >= 0 ? 'text-emerald-500' : 'text-rose-500')}>{fmt(monthNet)}</p>
+            <p className={cn('text-2xl font-bold', monthNet >= 0 ? 'text-emerald-500' : 'text-rose-500')}>{formatBRL(monthNet)}</p>
           </CardContent>
         </Card>
       </div>
@@ -169,7 +167,7 @@ export default function FinancialHub() {
               className={cn('w-full flex justify-between items-center p-3 rounded-lg border text-left hover:bg-accent/30 transition', selectedAccount === 'all' && 'border-primary bg-accent/20')}
             >
               <span className="font-medium">Todas as contas</span>
-              <span className="font-bold">{fmt(totalBalance)}</span>
+              <span className="font-bold">{formatBRL(totalBalance)}</span>
             </button>
             {accounts.map(a => (
               <button
@@ -181,7 +179,7 @@ export default function FinancialHub() {
                   <p className="font-medium text-sm">{a.name}</p>
                   <p className="text-xs text-muted-foreground">{a.bank_name}</p>
                 </div>
-                <span className={cn('font-bold text-sm', Number(a.balance) < 0 && 'text-destructive')}>{fmt(Number(a.balance))}</span>
+                <span className={cn('font-bold text-sm', Number(a.balance) < 0 && 'text-destructive')}>{formatBRL(Number(a.balance))}</span>
               </button>
             ))}
             {accounts.length === 0 && (
@@ -227,7 +225,7 @@ export default function FinancialHub() {
                     </div>
                     <div className="text-right shrink-0">
                       <p className={cn('font-bold', l.type === 'inflow' ? 'text-emerald-500' : 'text-rose-500')}>
-                        {l.type === 'inflow' ? '+' : '-'} {fmt(Number(l.amount))}
+                        {l.type === 'inflow' ? '+' : '-'} {formatBRL(Number(l.amount))}
                       </p>
                       {l.reconciled && <Badge variant="outline" className="text-[10px] mt-0.5">conciliado</Badge>}
                     </div>
@@ -288,7 +286,7 @@ export default function FinancialHub() {
                 <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
                 <SelectContent>
                   {accounts.filter(a => a.active).map(a => (
-                    <SelectItem key={a.id} value={a.id}>{a.name} — {fmt(Number(a.balance))}</SelectItem>
+                    <SelectItem key={a.id} value={a.id}>{a.name} — {formatBRL(Number(a.balance))}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

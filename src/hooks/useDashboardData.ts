@@ -3,13 +3,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
 
 import { formatBRL } from '@/lib/formatters';
-const fmt = (v: number) =>
-  formatBRL(v);
-
 const fmtShort = (v: number) => {
   if (v >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1)}M`;
   if (v >= 1_000) return `R$ ${(v / 1_000).toFixed(0)}k`;
-  return fmt(v);
+  return formatBRL(v);
 };
 
 export function useDashboardData() {
@@ -116,7 +113,7 @@ export function useDashboardData() {
       const alerts: Array<{ id: string; type: 'error' | 'warning' | 'info' | 'success'; module: string; message: string; timestamp: string }> = [];
 
       if (overduePayables.length > 0) {
-        alerts.push({ id: 'a1', type: 'error', module: 'Financeiro', message: `${overduePayables.length} conta(s) a pagar vencida(s) (${fmt(totalOverduePayable)})`, timestamp: 'Agora' });
+        alerts.push({ id: 'a1', type: 'error', module: 'Financeiro', message: `${overduePayables.length} conta(s) a pagar vencida(s) (${formatBRL(totalOverduePayable)})`, timestamp: 'Agora' });
       }
       if (overdueReceivables.length > 0) {
         alerts.push({ id: 'a2', type: 'warning', module: 'Financeiro', message: `${overdueReceivables.length} conta(s) a receber vencida(s)`, timestamp: 'Agora' });
@@ -138,10 +135,10 @@ export function useDashboardData() {
 
       // === MAIN KPIs ===
       const mainKPIs = [
-        { title: 'Faturamento Mensal', value: fmt(currentRevenue), change: Number(revenueTrend.toFixed(1)), color: 'primary' as const },
-        { title: 'Saldo Líquido', value: fmt(balance), change: balance >= 0 ? Math.abs(balance / (totalPayable || 1) * 100) : -(totalPayable / (totalReceivable || 1) * 100), color: 'success' as const },
-        { title: 'A Receber', value: fmt(totalReceivable), change: overdueReceivables.length > 0 ? -overdueReceivables.length : receivables.length, color: 'info' as const },
-        { title: 'A Pagar', value: fmt(totalPayable), change: overduePayables.length > 0 ? -overduePayables.length : 0, color: 'warning' as const },
+        { title: 'Faturamento Mensal', value: formatBRL(currentRevenue), change: Number(revenueTrend.toFixed(1)), color: 'primary' as const },
+        { title: 'Saldo Líquido', value: formatBRL(balance), change: balance >= 0 ? Math.abs(balance / (totalPayable || 1) * 100) : -(totalPayable / (totalReceivable || 1) * 100), color: 'success' as const },
+        { title: 'A Receber', value: formatBRL(totalReceivable), change: overdueReceivables.length > 0 ? -overdueReceivables.length : receivables.length, color: 'info' as const },
+        { title: 'A Pagar', value: formatBRL(totalPayable), change: overduePayables.length > 0 ? -overduePayables.length : 0, color: 'warning' as const },
       ];
 
       // === MODULE KPIs ===
@@ -156,7 +153,7 @@ export function useDashboardData() {
         { label: 'A Receber', value: fmtShort(totalReceivable), trend: 'neutral' as const },
         { label: 'A Pagar', value: fmtShort(totalPayable), trend: 'neutral' as const },
         { label: 'Saldo', value: fmtShort(balance), trend: balance >= 0 ? 'up' as const : 'down' as const },
-        { label: 'Vencidos', value: fmt(totalOverduePayable), trend: overduePayables.length > 0 ? 'down' as const : 'up' as const, trendValue: `${overduePayables.length} título(s)` },
+        { label: 'Vencidos', value: formatBRL(totalOverduePayable), trend: overduePayables.length > 0 ? 'down' as const : 'up' as const, trendValue: `${overduePayables.length} título(s)` },
       ];
 
       const inventoryKPIs = [
@@ -204,7 +201,7 @@ export function useDashboardData() {
       const recentActivities = (recentOrdersRes.data || []).map((o: any) => ({
         id: o.number,
         description: `Pedido ${o.number} - ${o.client_name}`,
-        value: fmt(Number(o.total)),
+        value: formatBRL(Number(o.total)),
         status: o.status,
         time: o.created_at,
       }));

@@ -53,9 +53,6 @@ const paymentMethods = [
   { value: 'pix', label: 'PIX (F4)', icon: QrCode, color: 'text-cyan-500 bg-cyan-500/10' },
 ];
 
-const fmt = (v: number) =>
-  formatBRL(v);
-
 export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
   const productsQuery = useProducts();
   const products = productsQuery.data || [];
@@ -161,7 +158,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase">Valor Total</p>
-                  <p className="text-2xl font-black text-primary tabular-nums">{fmt(total)}</p>
+                  <p className="text-2xl font-black text-primary tabular-nums">{formatBRL(total)}</p>
                 </div>
                 <DialogClose asChild>
                   <Button variant="ghost" size="icon" className="rounded-full">
@@ -194,7 +191,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                     <div className="font-bold text-sm line-clamp-1 mb-1">{p.name}</div>
                     <div className="text-[10px] text-muted-foreground mb-3">{p.code}</div>
                     <div className="mt-auto flex items-center justify-between">
-                      <div className="text-lg font-black text-primary">{fmt(p.sale_price)}</div>
+                      <div className="text-lg font-black text-primary">{formatBRL(p.sale_price)}</div>
                       <Plus className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                   </button>
@@ -219,7 +216,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                         </div>
                         <div className="flex-1">
                           <div className="font-bold">{item.productName}</div>
-                          <div className="text-[10px] font-bold text-muted-foreground uppercase">{item.productCode} • {fmt(item.unitPrice)}/{item.unit}</div>
+                          <div className="text-[10px] font-bold text-muted-foreground uppercase">{item.productCode} • {formatBRL(item.unitPrice)}/{item.unit}</div>
                         </div>
                         <div className="flex items-center gap-6">
                           <div className="flex items-center gap-3 bg-muted/50 p-1 rounded-xl border">
@@ -232,7 +229,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                             </Button>
                           </div>
                           <div className="w-32 text-right">
-                            <div className="text-lg font-black tabular-nums">{fmt(item.quantity * item.unitPrice)}</div>
+                            <div className="text-lg font-black tabular-nums">{formatBRL(item.quantity * item.unitPrice)}</div>
                           </div>
                           <Button variant="ghost" size="icon" className="h-10 w-10 text-destructive hover:bg-destructive/10 rounded-full" onClick={() => removeFromCart(item.productId)}>
                             <Trash2 className="h-5 w-5" />
@@ -259,7 +256,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                   <div className="space-y-4">
                     <div className="flex justify-between items-end">
                       <span className="text-muted-foreground font-bold text-xs uppercase">Subtotal</span>
-                      <span className="text-xl font-bold tabular-nums">{fmt(subtotal)}</span>
+                      <span className="text-xl font-bold tabular-nums">{formatBRL(subtotal)}</span>
                     </div>
                     <div className="flex justify-between items-end">
                       <span className="text-muted-foreground font-bold text-xs uppercase">Desconto</span>
@@ -280,7 +277,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                     <div className="space-y-1 pt-2">
                       <div className="text-muted-foreground font-black text-xs uppercase">Valor Total</div>
                       <div className="text-6xl font-black text-primary tracking-tighter tabular-nums leading-none">
-                        {fmt(total)}
+                        {formatBRL(total)}
                       </div>
                     </div>
                   </div>
@@ -348,7 +345,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                       {amountPaid >= total && (
                         <div className="pt-4 border-t border-success/20 flex items-center justify-between">
                           <span className="font-bold text-success text-sm uppercase">Troco:</span>
-                          <span className="text-2xl font-black text-success">{fmt(change)}</span>
+                          <span className="text-2xl font-black text-success">{formatBRL(change)}</span>
                         </div>
                       )}
                     </div>

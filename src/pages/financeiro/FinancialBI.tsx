@@ -21,7 +21,6 @@ import {
 } from 'recharts';
 import { useComputeIntelligence } from '@/hooks/useFinancialIntelligence';
 
-const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(v);
 const fmtFull = (v: number) => formatBRL(v);
 
 const PALETTE = ['hsl(var(--primary))', 'hsl(var(--accent))', '#22c55e', '#ef4444', '#3b82f6', '#a855f7', '#eab308', '#06b6d4'];
@@ -103,9 +102,9 @@ export default function FinancialBI() {
       </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <KPICard title="Saldo Total" value={fmt(totalBalance)} subtitle={`${banks.length} contas ativas`} icon={<Wallet className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="Entradas (30d)" value={fmt(inflow30)} subtitle="Ledger consolidado" icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={1} />
-        <KPICard title="Saídas (30d)" value={fmt(outflow30)} subtitle={`Líquido: ${fmt(inflow30 - outflow30)}`} icon={<TrendingDown className="h-5 w-5" />} accentColor="warning" index={2} />
+        <KPICard title="Saldo Total" value={formatBRL(totalBalance)} subtitle={`${banks.length} contas ativas`} icon={<Wallet className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Entradas (30d)" value={formatBRL(inflow30)} subtitle="Ledger consolidado" icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={1} />
+        <KPICard title="Saídas (30d)" value={formatBRL(outflow30)} subtitle={`Líquido: ${formatBRL(inflow30 - outflow30)}`} icon={<TrendingDown className="h-5 w-5" />} accentColor="warning" index={2} />
         <KPICard
           title="Score Financeiro"
           value={health?.score_total ? `${health.score_total} (${health.score_grade})` : (insights?.scoreGrade ?? '—')}
@@ -134,7 +133,7 @@ export default function FinancialBI() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={11} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickFormatter={(v) => fmt(v)} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickFormatter={(v) => formatBRL(v)} />
                 <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }} formatter={(v: number) => fmtFull(v)} />
                 <Area type="monotone" dataKey="in" name="Entradas" stroke="hsl(var(--primary))" fill="url(#gIn)" />
                 <Area type="monotone" dataKey="out" name="Saídas" stroke="hsl(var(--destructive))" fill="url(#gOut)" />
@@ -150,7 +149,7 @@ export default function FinancialBI() {
               <BarChart data={projection}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickFormatter={(v) => fmt(v)} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickFormatter={(v) => formatBRL(v)} />
                 <Tooltip contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))' }} formatter={(v: number) => fmtFull(v)} />
                 <Bar dataKey="balance" name="Saldo projetado" radius={[8, 8, 0, 0]}>
                   {projection.map((p, i) => (
