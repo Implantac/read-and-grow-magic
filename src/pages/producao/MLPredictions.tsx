@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 import { differenceInMinutes, format, subDays } from 'date-fns';
+import { formatBRL, formatNumber } from '@/lib/formatters';
 
 export default function MLPredictions() {
   const { orders } = useProductionOrders();
@@ -158,7 +159,7 @@ export default function MLPredictions() {
       suggestions.push({
         title: `${lowMargin.length} produtos com margem abaixo de 15%`,
         description: `Produtos: ${lowMargin.slice(0, 3).map(c => c.product_name).join(', ')}. Revisar custos ou reajustar preços.`,
-        impact: `Potencial: +${(lowMargin.reduce((s, c) => s + Math.abs(c.profit_value), 0)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`,
+        impact: `Potencial: +${(lowMargin.reduce((s, c) => s + Math.abs(c.profit_value),formatBRL(0))}`,
         type: 'warning', priority: 1, kpi: 'Margem',
       });
     }
@@ -247,7 +248,7 @@ export default function MLPredictions() {
             <TrendingUp className="h-8 w-8 text-primary" />
             <div>
               <p className="text-xs text-muted-foreground">Previsão Próximas 6 Semanas</p>
-              <p className="text-xl font-bold">{demandForecast.filter(d => d.forecast).reduce((s, d) => s + (d.forecast || 0), 0).toLocaleString('pt-BR')} un</p>
+              <p className="text-xl font-bold">{demandForecast.filter(d => d.forecast).reduce((s, d) => s + (d.forecast || 0), formatNumber(0))} un</p>
             </div>
           </CardContent>
         </Card>

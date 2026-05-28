@@ -11,7 +11,7 @@ import { ExpenseBreakdownChart } from '@/components/contabilidade/ExpenseBreakdo
 import { RevenueExpenseTrendChart } from '@/components/contabilidade/RevenueExpenseTrendChart';
 import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/useAccountsPayable';
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatBRLCompact } from '@/lib/formatters';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
@@ -23,7 +23,7 @@ import { ptBR } from 'date-fns/locale';
 import type { ExportColumn } from '@/lib/exportUtils';
 
 const formatCompact = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(value);
+  formatBRLCompact(value);
 
 export default function DREPage() {
   const { data: receivables = [], isLoading: loadingR } = useAccountsReceivable();

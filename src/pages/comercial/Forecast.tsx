@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { TrendingUp, Target, BarChart3, Zap } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { format } from 'date-fns';
+import { formatBRL } from '@/lib/formatters';
 
 const currentPeriod = format(new Date(), 'yyyy-MM');
 
@@ -24,7 +25,7 @@ export default function ForecastPage() {
   const [period, setPeriod] = useState(currentPeriod);
   const { data: forecast, isLoading } = useForecastCalculation(period);
 
-  const fmt = (v: number) => `R$ ${v.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`;
+  const fmt = (v: number) => `${formatBRL(v)}`;
 
   return (
     <PageContainer>

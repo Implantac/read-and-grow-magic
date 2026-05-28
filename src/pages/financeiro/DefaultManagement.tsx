@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useDefaultScores, useRecomputeDefaultScores, RISK_LABELS, RISK_COLORS } from '@/hooks/useDefaultScores';
 import { RefreshCw, AlertTriangle, TrendingDown, Users } from 'lucide-react';
+import { formatNumber } from '@/lib/formatters';
 
 const RISK_BADGE: Record<string, any> = {
   low: 'secondary',
@@ -61,7 +62,7 @@ export default function DefaultManagementPage() {
               <TrendingDown className="h-4 w-4 text-red-500" />
             </div>
             <p className="text-2xl font-bold text-red-600">
-              R$ {stats.totalOverdue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              R$ {formatNumber(stats.totalOverdue, 2)}
             </p>
           </CardContent>
         </Card>
@@ -118,7 +119,7 @@ export default function DefaultManagementPage() {
                   </TableCell>
                   <TableCell>{s.overdue_count}</TableCell>
                   <TableCell>
-                    R$ {Number(s.overdue_amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    R$ {formatNumber(Number(s.overdue_amount), 2)}
                   </TableCell>
                   <TableCell>{Number(s.avg_delay_days).toFixed(0)} dias</TableCell>
                   <TableCell>{s.max_delay_days} dias</TableCell>

@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { formatDate } from '@/lib/formatters';
+import { formatDate, formatNumber } from '@/lib/formatters';
 import {
   useLeaderboard, useBadges, useBadgeAwards, useMissions,
   useMissionProgress, useChallenges, useChallengeParticipants,
@@ -16,7 +16,7 @@ import {
 import { useSalesReps } from '@/hooks/useSalesReps';
 import { Trophy, Medal, Target, Flame, Star, Swords, Crown, Award, TrendingUp, Zap } from 'lucide-react';
 
-const fmt = (v: number) => new Intl.NumberFormat('pt-BR').format(v);
+const fmt = (v: number) => formatNumber(v);
 
 const rankIcons = ['🥇', '🥈', '🥉'];
 const rankColors = ['text-amber-500', 'text-slate-400', 'text-amber-700'];

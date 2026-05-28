@@ -21,6 +21,7 @@ import { KanbanService } from '@/lib/pcpServices';
 import { Truck, AlertTriangle, Plus, Calendar, DollarSign, Package, Clock, CheckCircle, Search, BarChart3, TrendingUp } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { formatBRL, formatNumber } from '@/lib/formatters';
 
 export default function OutsourcingPage() {
   const { orders: outsourcingOrders, loading, create, update, remove, lateOrders } = useOutsourcingOrders();
@@ -117,7 +118,7 @@ export default function OutsourcingPage() {
         <KPICard title="Em Andamento" value={pendingCount} icon={<Truck className="h-5 w-5" />} accentColor="primary" index={0} />
         <KPICard title="Atrasadas" value={lateOrders.length} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={1} />
         <KPICard title="Retornadas" value={returnedCount} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={2} />
-        <KPICard title="Custo Total" value={`R$ ${totalCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} icon={<DollarSign className="h-5 w-5" />} accentColor="warning" index={3} />
+        <KPICard title="Custo Total" value={`${formatBRL(totalCost)}`} icon={<DollarSign className="h-5 w-5" />} accentColor="warning" index={3} />
       </div>
 
       {/* Late alerts */}
@@ -208,7 +209,7 @@ export default function OutsourcingPage() {
                           </div>
                         </TableCell>
                         <TableCell><Badge className={cn('text-xs', sc.color)}>{sc.label}</Badge></TableCell>
-                        <TableCell>R$ {(o.total_cost || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
+                        <TableCell>R$ {(o.total_cost || formatNumber(0), 2)}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex gap-1 justify-end">
                             {o.status === 'sent' && (

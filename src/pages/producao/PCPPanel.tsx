@@ -29,6 +29,7 @@ import { format, differenceInDays, parseISO, differenceInMinutes, addDays, start
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
+import { formatNumber } from '@/lib/formatters';
 
 function GanttTimeline({ orders }: { orders: any[] }) {
   const activeOPs = useMemo(() => {
@@ -370,7 +371,7 @@ export default function PCPPanel() {
                       <TableCell className="font-mono">{o.number}</TableCell>
                       <TableCell>{o.client_name}</TableCell>
                       <TableCell>{o.items?.length || 0} itens</TableCell>
-                      <TableCell>R$ {o.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
+                      <TableCell>R$ {formatNumber(o.total, 2)}</TableCell>
                       <TableCell>{o.delivery_date ? format(new Date(o.delivery_date), 'dd/MM/yyyy') : '-'}</TableCell>
                       <TableCell><Badge className={cn('text-xs', priorityConfig[o.priority]?.color)}>{priorityConfig[o.priority]?.label || o.priority}</Badge></TableCell>
                       <TableCell className="text-right"><Button size="sm" onClick={() => setGeneratingFor(o)}><Plus className="h-3 w-3 mr-1" /> Gerar OP</Button></TableCell>

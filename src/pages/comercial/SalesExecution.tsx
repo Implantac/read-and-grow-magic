@@ -105,7 +105,7 @@ function SmartQueueTab() {
                   </Badge>
                 </div>
                 <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
-                  <span>R$ {(item.value || 0).toLocaleString('pt-BR')}</span>
+                  <span>R$ {(item.value || formatNumber(0))}</span>
                   <span>{item.probability || 0}% chance</span>
                   <span className="flex items-center gap-1">
                     <Clock className="h-3 w-3" />
@@ -273,8 +273,8 @@ function LostClientsTab() {
                     </Badge>
                   </div>
                   <div className="text-xs text-muted-foreground mt-1 flex gap-4 flex-wrap">
-                    <span>Total: R$ {(c.total_purchases || 0).toLocaleString('pt-BR')}</span>
-                    <span>Ticket: R$ {(c.avg_ticket || 0).toLocaleString('pt-BR')}</span>
+                    <span>Total: R$ {(c.total_purchases || formatNumber(0))}</span>
+                    <span>Ticket: R$ {(c.avg_ticket || formatNumber(0))}</span>
                     {c.segment && <span>• {c.segment}</span>}
                   </div>
                 </div>

@@ -7,9 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { useGenerateCEOBrief, useExecuteDecisions, useAutoPilotRun, type CEOBriefResult } from '@/hooks/useCEOBrief';
-
-const fmtBRL = (v: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(v || 0);
+import { formatBRL, formatNumber } from '@/lib/formatters';
 
 const impactColor = (impacto: string) => {
   if (impacto === 'alto') return 'destructive';
@@ -295,9 +293,9 @@ export function CEOBriefPanel() {
                 <div className="text-xs text-muted-foreground flex items-center gap-1">
                   Previsão próx. mês {trendIcon(forecast?.trend)}
                 </div>
-                <div className="text-xl font-bold mt-1">{fmtBRL(forecast?.previsao_proximo_mes ?? 0)}</div>
+                <div className="text-xl font-bold mt-1">{formatBRL(forecast?.previsao_proximo_mes ?? 0)}</div>
                 <div className="text-[10px] text-muted-foreground">
-                  Último: {fmtBRL(forecast?.ultimo_mes ?? 0)}
+                  Último: {formatBRL(forecast?.ultimo_mes ?? 0)}
                 </div>
               </div>
               {kpis.slice(0, 3).map((k) => (
@@ -308,7 +306,7 @@ export function CEOBriefPanel() {
                       ? `${Number(k.current_value).toFixed(1)}%`
                       : k.category === 'inventory'
                       ? Number(k.current_value).toFixed(0)
-                      : fmtBRL(Number(k.current_value))}
+                      : formatBRL(Number(k.current_value))}
                   </div>
                   <Badge variant={k.status === 'ok' ? 'outline' : k.status === 'alerta' ? 'secondary' : 'destructive'} className="mt-1 text-[10px]">
                     {k.status}
@@ -393,7 +391,7 @@ export function CEOBriefPanel() {
             )}
 
             <div className="text-[10px] text-muted-foreground text-right">
-              Gerado em {data.generated_at ? new Date(data.generated_at).toLocaleString('pt-BR') : '—'}
+              Gerado em {data.generated_at ? new formatNumber(Date(data.generated_at)) : '—'}
             </div>
           </>
           );

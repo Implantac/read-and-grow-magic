@@ -12,6 +12,7 @@ import { useSpedFiles } from '@/hooks/useSpedFiles';
 import { Download, Trash2, FileText, Loader2, Calendar, Sparkles, CheckCircle2, AlertCircle, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { formatBRL } from '@/lib/formatters';
 
 export default function SpedFiles() {
   const { files, loading, generating, generate, download, remove } = useSpedFiles();
@@ -142,7 +143,7 @@ export default function SpedFiles() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right font-mono font-bold">{f.totalRecords.toLocaleString()}</TableCell>
-                      <TableCell className="text-right font-black tabular-nums text-primary">{f.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</TableCell>
+                      <TableCell className="text-right font-black tabular-nums text-primary">{formatBRL(f.totalValue)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button variant="ghost" size="icon" onClick={() => download(f.id)} className="h-8 w-8 text-primary hover:bg-primary/10">

@@ -20,6 +20,7 @@ import {
 } from '@/hooks/useFinancialRecurring';
 import { Pause, Play, Plus, RefreshCw, X } from 'lucide-react';
 import { format } from 'date-fns';
+import { formatNumber } from '@/lib/formatters';
 
 const STATUS_VARIANT: Record<string, any> = {
   active: 'default',
@@ -188,7 +189,7 @@ export default function RecurringPage() {
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground">Compromisso mensal</p>
             <p className="text-2xl font-bold">
-              R$ {totals.monthlyValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              R$ {formatNumber(totals.monthlyValue, 2)}
             </p>
           </CardContent>
         </Card>
@@ -236,7 +237,7 @@ export default function RecurringPage() {
                   <TableCell className="font-medium">{r.description}</TableCell>
                   <TableCell>{r.party_name}</TableCell>
                   <TableCell>{FREQUENCY_LABELS[r.frequency]}</TableCell>
-                  <TableCell>R$ {Number(r.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
+                  <TableCell>R$ {formatNumber(Number(r.amount), 2)}</TableCell>
                   <TableCell>{format(new Date(r.next_run_date), 'dd/MM/yyyy')}</TableCell>
                   <TableCell>
                     <Badge variant={STATUS_VARIANT[r.status]}>{r.status}</Badge>

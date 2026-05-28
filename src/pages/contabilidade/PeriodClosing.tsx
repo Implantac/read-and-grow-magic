@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatNumber } from '@/lib/formatters';
 const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 
@@ -126,7 +126,7 @@ export default function PeriodClosing() {
                     {formatBRL(row.result)}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
-                    {row.closed_at ? new Date(row.closed_at).toLocaleString('pt-BR') : '—'}
+                    {row.closed_at ? new formatNumber(Date(row.closed_at)) : '—'}
                   </TableCell>
                   <TableCell className="text-right">
                     {row.status === 'open' ? (

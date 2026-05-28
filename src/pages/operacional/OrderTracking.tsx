@@ -18,6 +18,7 @@ import { Search, Eye, ArrowRight, Clock, CheckCircle, XCircle, AlertTriangle, Pa
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import { formatNumber } from '@/lib/formatters';
 
 function OrderFlowBadge({ status }: { status: string }) {
   const s = getOrderFlowStatus(status);
@@ -185,7 +186,7 @@ export default function OrderTracking() {
                     <TableCell className="font-mono font-medium">{o.number}</TableCell>
                     <TableCell>{o.client_name}</TableCell>
                     <TableCell>{format(new Date(o.date), 'dd/MM/yyyy')}</TableCell>
-                    <TableCell>R$ {o.total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
+                    <TableCell>R$ {formatNumber(o.total, 2)}</TableCell>
                     <TableCell><OrderFlowBadge status={o.status} /></TableCell>
                     <TableCell className="hidden lg:table-cell"><OrderProgressBar status={o.status} /></TableCell>
                     <TableCell className="text-right">
@@ -264,8 +265,8 @@ export default function OrderTracking() {
                     <div><span className="text-muted-foreground">Status:</span> <OrderFlowBadge status={selectedOrder.status} /></div>
                     <div><span className="text-muted-foreground">Data:</span> {format(new Date(selectedOrder.date), 'dd/MM/yyyy')}</div>
                     <div><span className="text-muted-foreground">Entrega:</span> {selectedOrder.delivery_date ? format(new Date(selectedOrder.delivery_date), 'dd/MM/yyyy') : '-'}</div>
-                    <div><span className="text-muted-foreground">Subtotal:</span> R$ {selectedOrder.subtotal?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                    <div><span className="text-muted-foreground">Total:</span> R$ {selectedOrder.total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                    <div><span className="text-muted-foreground">Subtotal:</span> R$ {formatNumber(selectedOrder.subtotal?, 2)}</div>
+                    <div><span className="text-muted-foreground">Total:</span> R$ {formatNumber(selectedOrder.total?, 2)}</div>
                     <div><span className="text-muted-foreground">Pgto:</span> {selectedOrder.payment_method}</div>
                     <div><span className="text-muted-foreground">Condição:</span> {selectedOrder.payment_condition}</div>
                     <div><span className="text-muted-foreground">Aprov. Comercial:</span> {selectedOrder.commercial_approval || 'Pendente'}</div>
@@ -287,7 +288,7 @@ export default function OrderTracking() {
                           <TableCell className="font-mono">{i.product_code}</TableCell>
                           <TableCell>{i.product_name}</TableCell>
                           <TableCell>{i.quantity}</TableCell>
-                          <TableCell>R$ {i.total?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
+                          <TableCell>R$ {formatNumber(i.total?, 2)}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>

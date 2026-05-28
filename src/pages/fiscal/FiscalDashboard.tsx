@@ -8,10 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { FileCheck, FileText, Receipt, Landmark, AlertCircle } from 'lucide-react';
 
-import { formatDate } from '@/lib/formatters';
-const fmt = (v: number) =>
-  v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
+import { formatBRL, formatDate } from '@/lib/formatters';
 function useFiscalSummary() {
   return useQuery({
     queryKey: ['fiscal_dashboard_summary'],

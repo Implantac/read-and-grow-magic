@@ -17,6 +17,7 @@ import { Plus, Pencil, Trash2, Search, Wrench, Cog, User, Monitor, AlertTriangle
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { formatNumber } from '@/lib/formatters';
 
 const typeLabels: Record<string, string> = { machine: 'Máquina', operator: 'Operador', workstation: 'Posto de Trabalho' };
 const typeIcons: Record<string, any> = { machine: Cog, operator: User, workstation: Monitor };
@@ -57,7 +58,7 @@ export default function ProductionResourcesPage() {
   const kpiValues = [
     resources.length,
     resources.filter(r => r.resource_type === 'machine').length,
-    resources.reduce((s, r) => s + r.capacity_per_hour, 0).toLocaleString('pt-BR'),
+    resources.reduce((s, r) => s + r.capacity_per_hour, formatNumber(0)),
     `R$ ${resources.reduce((s, r) => s + r.cost_per_hour, 0).toFixed(0)}`,
   ];
 

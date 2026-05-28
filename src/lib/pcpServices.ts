@@ -4,6 +4,7 @@
  */
 
 import { differenceInDays, parseISO, addDays, format } from 'date-fns';
+import { formatBRL } from '@/lib/formatters';
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -149,7 +150,7 @@ export class MRPService {
         severity: 'critical',
         title: `${criticals.length} material(is) em estado crítico`,
         description: `Materiais ${criticals.slice(0, 3).map(c => c.materialName).join(', ')} com cobertura abaixo de 50%. Gere pedido de compra urgente.`,
-        estimatedImpact: `R$ ${criticals.reduce((s, c) => s + c.deficit * c.unitCost, 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} em compras necessárias`,
+        estimatedImpact: `${formatBRL(criticals.reduce((s, c) => s + c.deficit * c.unitCost, 0))} em compras necessárias`,
       });
     }
 

@@ -1,6 +1,7 @@
 import { Users, UserCheck, UserX, TrendingUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import type { DbClient } from '@/hooks/useClients';
+import { formatBRLCompact } from '@/lib/formatters';
 
 interface Props {
   clients: DbClient[];
@@ -14,7 +15,7 @@ export function ClientStats({ clients }: Props) {
   const aClients = clients.filter(c => c.abc_classification === 'A').length;
 
   const fmt = (v: number) =>
-    new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(v);
+    formatBRLCompact(v);
 
   const cards = [
     { label: 'Total de Clientes', value: total, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },

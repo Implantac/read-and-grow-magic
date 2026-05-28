@@ -10,6 +10,7 @@ import { useOrderLifecycle } from '@/hooks/useOrderLifecycle';
 import { FileText, Clock, CheckCircle, DollarSign, Play, Ban } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { formatNumber } from '@/lib/formatters';
 
 const billingStatusConfig: Record<string, { label: string; color: string }> = {
   awaiting_billing: { label: 'Aguardando', color: 'bg-warning/10 text-warning' },
@@ -74,7 +75,7 @@ export default function BillingQueuePage() {
         </CardContent></Card>
         <Card><CardContent className="p-4 flex items-center gap-3">
           <DollarSign className="h-8 w-8 text-primary" />
-          <div><p className="text-2xl font-bold">R$ {totalPending.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}</p><p className="text-xs text-muted-foreground">Valor Pendente</p></div>
+          <div><p className="text-2xl font-bold">R$ {formatNumber(totalPending, 0)}</p><p className="text-xs text-muted-foreground">Valor Pendente</p></div>
         </CardContent></Card>
       </div>
 
@@ -103,9 +104,9 @@ export default function BillingQueuePage() {
                   <TableRow key={item.id}>
                     <TableCell><Badge variant="outline" className={cn('font-medium border', sc.color)}>{sc.label}</Badge></TableCell>
                     <TableCell>{item.billing_type === 'full' ? 'Total' : 'Parcial'}</TableCell>
-                    <TableCell>R$ {item.amount?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
-                    <TableCell>R$ {item.billed_amount?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
-                    <TableCell>R$ {item.pending_amount?.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>
+                    <TableCell>R$ {formatNumber(item.amount?, 2)}</TableCell>
+                    <TableCell>R$ {formatNumber(item.billed_amount?, 2)}</TableCell>
+                    <TableCell>R$ {formatNumber(item.pending_amount?, 2)}</TableCell>
                     <TableCell>{item.invoice_number || '-'}</TableCell>
                     <TableCell>{format(new Date(item.created_at), 'dd/MM/yyyy')}</TableCell>
                     <TableCell className="text-right">

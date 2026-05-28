@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useFinancialInsights } from '@/hooks/useFinancialInsights';
 import { Brain, AlertTriangle, TrendingUp, Lightbulb, ShieldCheck } from 'lucide-react';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatNumber } from '@/lib/formatters';
 const severityColor: Record<string, string> = {
   critical: 'bg-destructive/10 text-destructive border-destructive/30',
   high: 'bg-warning/10 text-warning border-warning/30',
@@ -97,7 +97,7 @@ export function FinancialAIPanel() {
         </div>
 
         <p className="text-[10px] text-muted-foreground text-right">
-          Análise gerada com base em dados reais do sistema · {new Date(data.computedAt).toLocaleString('pt-BR')}
+          Análise gerada com base em dados reais do sistema · {new formatNumber(Date(data.computedAt))}
         </p>
       </CardContent>
     </Card>
