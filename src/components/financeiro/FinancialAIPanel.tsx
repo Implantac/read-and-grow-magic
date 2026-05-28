@@ -6,9 +6,6 @@ import { useFinancialInsights } from '@/hooks/useFinancialInsights';
 import { Brain, AlertTriangle, TrendingUp, Lightbulb, ShieldCheck } from 'lucide-react';
 
 import { formatBRL } from '@/lib/formatters';
-const formatCurrency = (v: number) =>
-  formatBRL(v);
-
 const severityColor: Record<string, string> = {
   critical: 'bg-destructive/10 text-destructive border-destructive/30',
   high: 'bg-warning/10 text-warning border-warning/30',
@@ -62,19 +59,19 @@ export function FinancialAIPanel() {
           <div className="rounded-lg border p-3">
             <p className="text-xs text-muted-foreground">Projeção 30d</p>
             <p className={`text-lg font-bold ${data.metrics.projectedBalance30d >= 0 ? 'text-success' : 'text-destructive'}`}>
-              {formatCurrency(data.metrics.projectedBalance30d)}
+              {formatBRL(data.metrics.projectedBalance30d)}
             </p>
           </div>
           <div className="rounded-lg border p-3">
             <p className="text-xs text-muted-foreground">Projeção 60d</p>
             <p className={`text-lg font-bold ${data.metrics.projectedBalance60d >= 0 ? 'text-success' : 'text-destructive'}`}>
-              {formatCurrency(data.metrics.projectedBalance60d)}
+              {formatBRL(data.metrics.projectedBalance60d)}
             </p>
           </div>
           <div className="rounded-lg border p-3">
             <p className="text-xs text-muted-foreground">Projeção 90d</p>
             <p className={`text-lg font-bold ${data.metrics.projectedBalance90d >= 0 ? 'text-success' : 'text-destructive'}`}>
-              {formatCurrency(data.metrics.projectedBalance90d)}
+              {formatBRL(data.metrics.projectedBalance90d)}
             </p>
           </div>
         </div>

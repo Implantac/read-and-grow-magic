@@ -15,8 +15,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { formatBRL } from '@/lib/formatters';
 const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-const formatBRL = (n: number) =>
-  formatBRL(n || 0);
+
 
 export default function PeriodClosing() {
   const { toast } = useToast();

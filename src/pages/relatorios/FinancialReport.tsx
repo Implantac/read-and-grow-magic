@@ -8,9 +8,7 @@ import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
 
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(value);
-
+const formatCurrency = (value: number) => formatBRLCompact(value);
 export default function FinancialReport() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ revenue: 0, expenses: 0, profit: 0, overdue: 0, overdueCount: 0 });

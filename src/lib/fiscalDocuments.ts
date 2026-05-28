@@ -1,15 +1,7 @@
 import jsPDF from 'jspdf';
 import type { NFe, NFeItem } from '@/types/fiscal';
 
-import { formatDate, formatBRL } from '@/lib/formatters';
-const formatCurrency = (v: number) =>
-  formatBRL(v);
-
-const formatDate = (dateString: string) => {
-  if (!dateString) return '';
-  const d = new Date(dateString);
-  return formatDate(d) + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-};
+import { formatDateTime, formatBRL } from '@/lib/formatters';
 
 export function generateDANFE(nfe: NFe): void {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -52,7 +44,7 @@ export function generateDANFE(nfe: NFe): void {
   // Right: Type
   const typeLabel = nfe.operationType === 'saida' ? '1 - SAÍDA' : '0 - ENTRADA';
   addText(typeLabel, margin + contentWidth - 3, y + 8, { size: 9, bold: true, align: 'right' });
-  addText(`Emissão: ${formatDate(nfe.issueDate)}`, margin + contentWidth - 3, y + 14, { size: 7, align: 'right' });
+  addText(`Emissão: ${formatDateTime(nfe.issueDate)}`, margin + contentWidth - 3, y + 14, { size: 7, align: 'right' });
 
   // Status badge
   if (nfe.status === 'authorized') {
@@ -73,7 +65,7 @@ export function generateDANFE(nfe: NFe): void {
   if (nfe.protocol) {
     drawRect(margin, y, contentWidth, 8);
     addText('PROTOCOLO DE AUTORIZAÇÃO', margin + 3, y + 4, { size: 6 });
-    addText(`${nfe.protocol} - ${formatDate(nfe.authorizationDate || '')}`, margin + 3, y + 7.5, { size: 7, bold: true });
+    addText(`${nfe.protocol} - ${formatDateTime(nfe.authorizationDate || '')}`, margin + 3, y + 7.5, { size: 7, bold: true });
     y += 10;
   }
 
@@ -136,9 +128,9 @@ export function generateDANFE(nfe: NFe): void {
     addText(item.cfop || '', cols[3].x + 1, y + 4, { size: 5 });
     addText(item.unit || 'UN', cols[4].x + 1, y + 4, { size: 5 });
     addText(String(item.quantity), cols[5].x + 1, y + 4, { size: 5 });
-    addText(formatCurrency(item.unitPrice), cols[6].x + 1, y + 4, { size: 5 });
-    addText(formatCurrency(item.total), cols[7].x + 1, y + 4, { size: 5 });
-    addText(formatCurrency(item.icmsValue || 0), cols[8].x + 1, y + 4, { size: 5 });
+    addText(formatBRL(item.unitPrice), cols[6].x + 1, y + 4, { size: 5 });
+    addText(formatBRL(item.total), cols[7].x + 1, y + 4, { size: 5 });
+    addText(formatBRL(item.icmsValue || 0), cols[8].x + 1, y + 4, { size: 5 });
 
     y += rowHeight;
   });
@@ -159,30 +151,30 @@ export function generateDANFE(nfe: NFe): void {
 
   // Row 1
   addText('Base ICMS', margin + 3, taxY, { size: 5 });
-  addText(formatCurrency(nfe.icms), margin + 3, taxY + 3.5, { size: 7, bold: true });
+  addText(formatBRL(nfe.icms), margin + 3, taxY + 3.5, { size: 7, bold: true });
 
   addText('Valor ICMS', margin + taxCol + 3, taxY, { size: 5 });
-  addText(formatCurrency(nfe.icms), margin + taxCol + 3, taxY + 3.5, { size: 7, bold: true });
+  addText(formatBRL(nfe.icms), margin + taxCol + 3, taxY + 3.5, { size: 7, bold: true });
 
   addText('Valor IPI', margin + taxCol * 2 + 3, taxY, { size: 5 });
-  addText(formatCurrency(nfe.ipi), margin + taxCol * 2 + 3, taxY + 3.5, { size: 7, bold: true });
+  addText(formatBRL(nfe.ipi), margin + taxCol * 2 + 3, taxY + 3.5, { size: 7, bold: true });
 
   addText('Valor Total NF-e', margin + taxCol * 3 + 3, taxY, { size: 5 });
-  addText(formatCurrency(nfe.total), margin + taxCol * 3 + 3, taxY + 3.5, { size: 9, bold: true });
+  addText(formatBRL(nfe.total), margin + taxCol * 3 + 3, taxY + 3.5, { size: 9, bold: true });
 
   // Row 2
   const taxY2 = taxY + 9;
   addText('Valor PIS', margin + 3, taxY2, { size: 5 });
-  addText(formatCurrency(nfe.pis), margin + 3, taxY2 + 3.5, { size: 7, bold: true });
+  addText(formatBRL(nfe.pis), margin + 3, taxY2 + 3.5, { size: 7, bold: true });
 
   addText('Valor COFINS', margin + taxCol + 3, taxY2, { size: 5 });
-  addText(formatCurrency(nfe.cofins), margin + taxCol + 3, taxY2 + 3.5, { size: 7, bold: true });
+  addText(formatBRL(nfe.cofins), margin + taxCol + 3, taxY2 + 3.5, { size: 7, bold: true });
 
   addText('Desconto', margin + taxCol * 2 + 3, taxY2, { size: 5 });
-  addText(formatCurrency(nfe.discount), margin + taxCol * 2 + 3, taxY2 + 3.5, { size: 7, bold: true });
+  addText(formatBRL(nfe.discount), margin + taxCol * 2 + 3, taxY2 + 3.5, { size: 7, bold: true });
 
   addText('Frete', margin + taxCol * 3 + 3, taxY2, { size: 5 });
-  addText(formatCurrency(nfe.shipping), margin + taxCol * 3 + 3, taxY2 + 3.5, { size: 7, bold: true });
+  addText(formatBRL(nfe.shipping), margin + taxCol * 3 + 3, taxY2 + 3.5, { size: 7, bold: true });
 
   y += 26;
 
@@ -195,7 +187,7 @@ export function generateDANFE(nfe: NFe): void {
     addText('NOTA FISCAL CANCELADA', margin + 3, y + 5, { size: 9, bold: true });
     addText(`Motivo: ${nfe.cancellationReason}`, margin + 3, y + 10, { size: 7 });
     if (nfe.cancellationDate) {
-      addText(`Data: ${formatDate(nfe.cancellationDate)}`, margin + 3, y + 13, { size: 6 });
+      addText(`Data: ${formatDateTime(nfe.cancellationDate)}`, margin + 3, y + 13, { size: 6 });
     }
   }
 

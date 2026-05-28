@@ -8,9 +8,7 @@ import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
 
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(value);
-
+const formatCurrency = (value: number) => formatBRLCompact(value);
 export default function InventoryReport() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ skus: 0, totalValue: 0, totalQty: 0, criticalItems: 0 });

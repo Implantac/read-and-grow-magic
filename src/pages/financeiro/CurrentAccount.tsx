@@ -11,8 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
-const formatBRL = (n: number) =>
-  formatBRL(n || 0);
+
+
 
 interface Row {
   party: string;

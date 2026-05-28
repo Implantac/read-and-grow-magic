@@ -15,8 +15,6 @@ import { useBankAccounts, useCreateBankAccount } from '@/hooks/useBankAccounts';
 import { TransferDialog } from '@/components/financeiro/TransferDialog';
 
 import { formatBRL } from '@/lib/formatters';
-const formatCurrency = (v: number) => formatBRL(v);
-
 export default function BankAccounts() {
   const { data: accounts = [], isLoading } = useBankAccounts();
   const createMut = useCreateBankAccount();
@@ -72,9 +70,9 @@ export default function BankAccounts() {
       </PageHeader>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <KPICard index={0} title="Saldo Total" value={formatCurrency(totalBalance)} icon={<Wallet className="h-5 w-5" />} accentColor="primary" />
+        <KPICard index={0} title="Saldo Total" value={formatBRL(totalBalance)} icon={<Wallet className="h-5 w-5" />} accentColor="primary" />
         <KPICard index={1} title="Contas Ativas" value={accounts.filter(a => a.active).length.toString()} icon={<Building2 className="h-5 w-5" />} accentColor="success" />
-        <KPICard index={2} title="Maior Saldo" value={formatCurrency(accounts.length > 0 ? Math.max(...accounts.map(a => Number(a.balance))) : 0)} icon={<TrendingUp className="h-5 w-5" />} accentColor="info" />
+        <KPICard index={2} title="Maior Saldo" value={formatBRL(accounts.length > 0 ? Math.max(...accounts.map(a => Number(a.balance))) : 0)} icon={<TrendingUp className="h-5 w-5" />} accentColor="info" />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -91,7 +89,7 @@ export default function BankAccounts() {
               <Badge variant={acc.active ? 'default' : 'secondary'}>{acc.active ? 'Ativa' : 'Inativa'}</Badge>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{formatCurrency(Number(acc.balance))}</p>
+              <p className="text-2xl font-bold">{formatBRL(Number(acc.balance))}</p>
               <p className="text-xs text-muted-foreground mt-1">{acc.account_type === 'checking' ? 'Conta Corrente' : acc.account_type === 'savings' ? 'Poupança' : acc.account_type === 'investment' ? 'Investimento' : 'Caixa'}</p>
             </CardContent>
           </Card>

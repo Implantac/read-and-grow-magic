@@ -14,16 +14,13 @@ import type { ExportColumn } from '@/lib/exportUtils';
 import type { LedgerEntry } from '@/types/accounting';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
-const formatCurrency = (value: number) =>
-  formatBRL(value);
-
 const exportColumns: ExportColumn[] = [
   { key: 'date', label: 'Data' },
   { key: 'journalNumber', label: 'Lançamento' },
   { key: 'description', label: 'Descrição' },
-  { key: 'debit', label: 'Débito', format: (v) => formatCurrency(Number(v)) },
-  { key: 'credit', label: 'Crédito', format: (v) => formatCurrency(Number(v)) },
-  { key: 'balance', label: 'Saldo', format: (v) => formatCurrency(Number(v)) },
+  { key: 'debit', label: 'Débito', format: (v) => formatBRL(Number(v)) },
+  { key: 'credit', label: 'Crédito', format: (v) => formatBRL(Number(v)) },
+  { key: 'balance', label: 'Saldo', format: (v) => formatBRL(Number(v)) },
 ];
 
 const ledgerFilterFields: FilterField[] = [
@@ -143,7 +140,7 @@ export default function GeneralLedgerPage() {
             {account && (
               <div className="flex gap-4 text-sm">
                 <div><span className="text-muted-foreground">Natureza:</span> <Badge variant="outline">{account.nature === 'debit' ? 'Devedora' : 'Credora'}</Badge></div>
-                <div><span className="text-muted-foreground">Saldo Atual:</span> <span className="font-bold">{formatCurrency(finalBalance)}</span></div>
+                <div><span className="text-muted-foreground">Saldo Atual:</span> <span className="font-bold">{formatBRL(finalBalance)}</span></div>
               </div>
             )}
           </div>
@@ -151,9 +148,9 @@ export default function GeneralLedgerPage() {
       </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Total Débitos</p><p className="text-2xl font-bold text-blue-600">{formatCurrency(totalDebits)}</p></CardContent></Card>
-        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Total Créditos</p><p className="text-2xl font-bold text-red-600">{formatCurrency(totalCredits)}</p></CardContent></Card>
-        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Saldo Final</p><p className="text-2xl font-bold">{formatCurrency(finalBalance)}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Total Débitos</p><p className="text-2xl font-bold text-blue-600">{formatBRL(totalDebits)}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Total Créditos</p><p className="text-2xl font-bold text-red-600">{formatBRL(totalCredits)}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-sm text-muted-foreground">Saldo Final</p><p className="text-2xl font-bold">{formatBRL(finalBalance)}</p></CardContent></Card>
       </div>
 
       <Card>
@@ -182,18 +179,18 @@ export default function GeneralLedgerPage() {
                     <TableCell>{formatDate(entry.date)}</TableCell>
                     <TableCell className="font-mono text-xs">{entry.journalNumber}</TableCell>
                     <TableCell>{entry.description}</TableCell>
-                    <TableCell className="text-right">{entry.debit > 0 ? formatCurrency(entry.debit) : '-'}</TableCell>
-                    <TableCell className="text-right">{entry.credit > 0 ? formatCurrency(entry.credit) : '-'}</TableCell>
+                    <TableCell className="text-right">{entry.debit > 0 ? formatBRL(entry.debit) : '-'}</TableCell>
+                    <TableCell className="text-right">{entry.credit > 0 ? formatBRL(entry.credit) : '-'}</TableCell>
                     <TableCell className={cn('text-right font-medium', entry.balance < 0 && 'text-destructive')}>
-                      {formatCurrency(entry.balance)}
+                      {formatBRL(entry.balance)}
                     </TableCell>
                   </TableRow>
                 ))}
                 <TableRow className="font-bold bg-muted/50">
                   <TableCell colSpan={3}>TOTAIS</TableCell>
-                  <TableCell className="text-right">{formatCurrency(totalDebits)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(totalCredits)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(finalBalance)}</TableCell>
+                  <TableCell className="text-right">{formatBRL(totalDebits)}</TableCell>
+                  <TableCell className="text-right">{formatBRL(totalCredits)}</TableCell>
+                  <TableCell className="text-right">{formatBRL(finalBalance)}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>

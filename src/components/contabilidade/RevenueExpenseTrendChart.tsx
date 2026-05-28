@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatBRLCompact } from '@/lib/formatters';
 import {
   Line,
   XAxis,
@@ -12,9 +12,7 @@ import {
   Bar,
 } from 'recharts';
 
-const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(value);
-
+const formatCurrency = (value: number) => formatBRLCompact(value);
 const formatFull = (value: number) =>
   formatBRL(value);
 

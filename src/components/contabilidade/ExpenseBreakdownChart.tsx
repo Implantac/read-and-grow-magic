@@ -16,9 +16,6 @@ const COLORS = [
   'hsl(var(--chart-5))',
 ];
 
-const formatCurrency = (value: number) =>
-  formatBRL(value);
-
 // Empty data - will be populated from database
 const expenseBreakdown: { name: string; value: number; percentage: number }[] = [];
 
@@ -47,7 +44,7 @@ export function ExpenseBreakdownChart() {
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(v: number) => formatCurrency(v)} />
+              <Tooltip formatter={(v: number) => formatBRL(v)} />
             </PieChart>
           </ResponsiveContainer>
         ) : (
