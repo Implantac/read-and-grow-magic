@@ -16,7 +16,6 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 import { formatBRL } from '@/lib/formatters';
-const fmt = (v: number) => formatBRL(v);
 
 const STATUS_MAP: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   draft: { label: 'Rascunho', variant: 'outline' },
@@ -113,7 +112,7 @@ export default function Campaigns() {
                   </div>
                   <div>
                     <div className="flex justify-between text-xs mb-1">
-                      <span>Meta: {campaign.goal_type === 'revenue' ? fmt(campaign.goal_value) : campaign.goal_value}</span>
+                      <span>Meta: {campaign.goal_type === 'revenue' ? formatBRL(campaign.goal_value) : campaign.goal_value}</span>
                       <span className="font-medium">{pct.toFixed(0)}%</span>
                     </div>
                     <Progress value={Math.min(pct, 100)} className="h-2" />

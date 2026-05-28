@@ -70,8 +70,8 @@ export default function CreditAnalysis() {
       <PageHeader title="Análise de Crédito" description="Gestão de limites, scores e risco comercial" />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <KPICard title="Limite Total" value={fmt(totalLimit)} icon={<Shield className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="Limite Utilizado" value={fmt(totalUsed)} icon={<ShieldAlert className="h-5 w-5" />} accentColor="warning" index={1} />
+        <KPICard title="Limite Total" value={formatBRL(totalLimit)} icon={<Shield className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Limite Utilizado" value={formatBRL(totalUsed)} icon={<ShieldAlert className="h-5 w-5" />} accentColor="warning" index={1} />
         <KPICard title="Clientes Bloqueados" value={String(blockedCount)} icon={<ShieldX className="h-5 w-5" />} accentColor="danger" index={2} />
         <KPICard title="Alto Risco" value={String(highRiskCount)} icon={<ShieldCheck className="h-5 w-5" />} accentColor="warning" index={3} />
       </div>
@@ -114,9 +114,9 @@ export default function CreditAnalysis() {
                 return (
                   <TableRow key={p.id} className="cursor-pointer hover:bg-muted/50" onClick={() => openEdit(p)}>
                     <TableCell className="font-medium">{client?.name || '—'}</TableCell>
-                    <TableCell>{fmt(p.credit_limit)}</TableCell>
-                    <TableCell>{fmt(p.used_limit)}</TableCell>
-                    <TableCell className={p.available_limit < 0 ? 'text-destructive font-semibold' : ''}>{fmt(p.available_limit)}</TableCell>
+                    <TableCell>{formatBRL(p.credit_limit)}</TableCell>
+                    <TableCell>{formatBRL(p.used_limit)}</TableCell>
+                    <TableCell className={p.available_limit < 0 ? 'text-destructive font-semibold' : ''}>{formatBRL(p.available_limit)}</TableCell>
                     <TableCell>
                       <span className="font-mono font-bold">{p.score_grade}</span>
                       <span className="text-xs text-muted-foreground ml-1">({p.score_numeric})</span>

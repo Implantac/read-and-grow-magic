@@ -20,7 +20,6 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
 import { formatBRL } from '@/lib/formatters';
-const fmt = (v: number) => formatBRL(v);
 
 const statusVariant: Record<string, string> = {
   pending: 'bg-warning/10 text-warning border-warning/30',
@@ -85,7 +84,7 @@ export default function Boletos() {
                   <SelectTrigger><SelectValue placeholder="Selecione (ou gere avulso)" /></SelectTrigger>
                   <SelectContent>
                     {receivables.filter(r => r.status !== 'paid').slice(0, 100).map(r => (
-                      <SelectItem key={r.id} value={r.id}>{r.client_name} — {fmt(Number(r.open_amount ?? r.amount))}</SelectItem>
+                      <SelectItem key={r.id} value={r.id}>{r.client_name} — {formatBRL(Number(r.open_amount ?? r.amount))}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -108,8 +107,8 @@ export default function Boletos() {
       </PageHeader>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <KPICard title="Em Aberto" value={fmt(totals.open)} icon={<Receipt className="h-5 w-5" />} accentColor="warning" index={0} />
-        <KPICard title="Pagos" value={fmt(totals.paid)} icon={<CheckCircle2 className="h-5 w-5" />} accentColor="success" index={1} />
+        <KPICard title="Em Aberto" value={formatBRL(totals.open)} icon={<Receipt className="h-5 w-5" />} accentColor="warning" index={0} />
+        <KPICard title="Pagos" value={formatBRL(totals.paid)} icon={<CheckCircle2 className="h-5 w-5" />} accentColor="success" index={1} />
         <KPICard title="Total" value={String(totals.count)} icon={<Receipt className="h-5 w-5" />} accentColor="primary" index={2} />
       </div>
 
@@ -141,7 +140,7 @@ export default function Boletos() {
                   <TableCell className="font-mono text-xs">{b.our_number || '-'}</TableCell>
                   <TableCell className="text-sm">{b.client_name || '-'}</TableCell>
                   <TableCell className="text-sm">{format(new Date(b.due_date), 'dd/MM/yyyy')}</TableCell>
-                  <TableCell className="text-right font-medium">{fmt(Number(b.amount))}</TableCell>
+                  <TableCell className="text-right font-medium">{formatBRL(Number(b.amount))}</TableCell>
                   <TableCell className="font-mono text-xs max-w-[200px] truncate" title={b.digitable_line || ''}>{b.digitable_line || '-'}</TableCell>
                   <TableCell><Badge variant="outline" className={statusVariant[b.status]}>{BOLETO_STATUS_LABELS[b.status]}</Badge></TableCell>
                   <TableCell>

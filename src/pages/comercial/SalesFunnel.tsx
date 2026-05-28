@@ -24,7 +24,6 @@ import { differenceInDays } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
-const fmt = (v: number) => formatBRL(v);
 
 const KANBAN_STAGES = FUNNEL_STAGES.slice(0, 6);
 
@@ -218,9 +217,9 @@ export default function SalesFunnelPage() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 mb-6 mt-6">
         <KPICard index={0} title="Oportunidades Abertas" value={stats.openCount.toString()} icon={<Target className="h-5 w-5" />} accentColor="info" />
-        <KPICard index={1} title="Valor Pipeline" value={fmt(stats.totalValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" />
-        <KPICard index={2} title="Valor Ponderado" value={fmt(stats.weightedValue)} icon={<TrendingUp className="h-5 w-5" />} accentColor="accent" />
-        <KPICard index={3} title="Ganhos Totais" value={fmt(stats.wonValue)} subtitle={`${stats.wonCount} oportunidades`} icon={<Trophy className="h-5 w-5" />} accentColor="success" />
+        <KPICard index={1} title="Valor Pipeline" value={formatBRL(stats.totalValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" />
+        <KPICard index={2} title="Valor Ponderado" value={formatBRL(stats.weightedValue)} icon={<TrendingUp className="h-5 w-5" />} accentColor="accent" />
+        <KPICard index={3} title="Ganhos Totais" value={formatBRL(stats.wonValue)} subtitle={`${stats.wonCount} oportunidades`} icon={<Trophy className="h-5 w-5" />} accentColor="success" />
         <KPICard index={4} title="Taxa Conversão" value={`${stats.conversionRate.toFixed(1)}%`} subtitle={`${stats.lostCount} perdidas`} icon={<BarChart3 className="h-5 w-5" />} accentColor="warning" />
       </div>
 
@@ -259,7 +258,7 @@ export default function SalesFunnelPage() {
                     </Button>
                   </div>
                   <div className="flex items-center gap-2 mb-2 px-1">
-                    <span className="text-[10px] text-muted-foreground">{fmt(stageValue)}</span>
+                    <span className="text-[10px] text-muted-foreground">{formatBRL(stageValue)}</span>
                     {metric && metric.avgDays > 0 && (
                       <Badge variant="outline" className="text-[9px] px-1 py-0">
                         <Clock className="h-2.5 w-2.5 mr-0.5" />{metric.avgDays}d
@@ -293,7 +292,7 @@ export default function SalesFunnelPage() {
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </div>
-                            <p className="text-xs text-primary font-semibold">{fmt(item.value)}</p>
+                            <p className="text-xs text-primary font-semibold">{formatBRL(item.value)}</p>
                             {item.contact_name && <p className="text-[11px] text-muted-foreground">{item.contact_name}</p>}
                             <div className="flex items-center justify-between pt-1">
                               <div className="flex items-center gap-1">
@@ -354,7 +353,7 @@ export default function SalesFunnelPage() {
                         <td className="px-4 py-3 text-center">
                           <Badge variant="secondary" className="font-mono">{m.count}</Badge>
                         </td>
-                        <td className="px-4 py-3 text-right font-semibold text-primary">{fmt(m.totalValue)}</td>
+                        <td className="px-4 py-3 text-right font-semibold text-primary">{formatBRL(m.totalValue)}</td>
                         <td className="px-4 py-3 text-center">
                           <div className="flex items-center justify-center gap-1">
                             <Clock className="h-3 w-3 text-muted-foreground" />
@@ -385,7 +384,7 @@ export default function SalesFunnelPage() {
                     <XAxis dataKey="name" fontSize={11} angle={-20} textAnchor="end" height={60} />
                     <YAxis fontSize={11} />
                     <Tooltip
-                      formatter={(v: number, name: string) => [name === 'value' ? fmt(v) : v, name === 'value' ? 'Valor' : 'Quantidade']}
+                      formatter={(v: number, name: string) => [name === 'value' ? formatBRL(v) : v, name === 'value' ? 'Valor' : 'Quantidade']}
                     />
                     <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Quantidade" />
                   </BarChart>
@@ -418,7 +417,7 @@ export default function SalesFunnelPage() {
                           <div>
                             <p className="text-sm font-medium">{item.title}</p>
                             <p className="text-xs text-muted-foreground">
-                              {stage?.label} • {fmt(item.value)} • Parado há <span className="font-semibold text-warning">{days} dias</span>
+                              {stage?.label} • {formatBRL(item.value)} • Parado há <span className="font-semibold text-warning">{days} dias</span>
                             </p>
                           </div>
                         </div>

@@ -29,7 +29,6 @@ import { useAIDailyActions, useAIRecommendations, useCompleteAIAction, useActOnR
 import { differenceInDays, format, isToday, startOfMonth, endOfMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-const fmt = (v: number) => formatBRL(v);
 
 const RISK_CONFIG = {
   critical: { label: 'Crítico', color: 'bg-red-500', badge: 'destructive' as const, icon: ShieldAlert },
@@ -161,11 +160,11 @@ export default function SellerDashboard() {
 
       {/* Daily KPIs */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 mt-6">
-        <KPICard index={0} title="Meta Diária" value={fmt(stats.dailyTarget)}
-          subtitle={`Vendido hoje: ${fmt(stats.todayBilling)}`}
+        <KPICard index={0} title="Meta Diária" value={formatBRL(stats.dailyTarget)}
+          subtitle={`Vendido hoje: ${formatBRL(stats.todayBilling)}`}
           icon={<Target className="h-5 w-5" />} accentColor="primary" />
         <KPICard index={1} title="Meta Mensal" value={`${stats.targetPct.toFixed(0)}%`}
-          subtitle={`${fmt(stats.monthBilling)} de ${fmt(stats.totalTarget)}`}
+          subtitle={`${formatBRL(stats.monthBilling)} de ${formatBRL(stats.totalTarget)}`}
           icon={<Trophy className="h-5 w-5" />} accentColor="success" />
         <KPICard index={2} title="Follow-ups Hoje" value={stats.todayFollowUps.toString()}
           subtitle={`${stats.pendingFollowUps} atrasados`}
@@ -185,7 +184,7 @@ export default function SellerDashboard() {
           <Progress value={Math.min(stats.targetPct, 100)} className="h-3" />
           <div className="flex justify-between mt-1 text-[10px] text-muted-foreground">
             <span>R$ 0</span>
-            <span>{fmt(stats.totalTarget)}</span>
+            <span>{formatBRL(stats.totalTarget)}</span>
           </div>
         </CardContent>
       </Card>
@@ -248,7 +247,7 @@ export default function SellerDashboard() {
                           <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                             <Phone className="h-3 w-3" />
                             <span>{action.clients.cellphone || action.clients.phone}</span>
-                            {action.estimated_value > 0 && <span className="text-primary font-medium">{fmt(action.estimated_value)}</span>}
+                            {action.estimated_value > 0 && <span className="text-primary font-medium">{formatBRL(action.estimated_value)}</span>}
                           </div>
                         )}
                       </div>
@@ -280,7 +279,7 @@ export default function SellerDashboard() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-sm font-medium">{rec.title}</span>
-                          {rec.estimated_value > 0 && <Badge variant="secondary" className="text-[10px]">{fmt(rec.estimated_value)}</Badge>}
+                          {rec.estimated_value > 0 && <Badge variant="secondary" className="text-[10px]">{formatBRL(rec.estimated_value)}</Badge>}
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">{rec.description}</p>
                         {rec.explanation && <p className="text-[10px] text-muted-foreground/70 italic mt-1">💡 {rec.explanation}</p>}
@@ -328,8 +327,8 @@ export default function SellerDashboard() {
                           </div>
                           <p className="text-xs text-muted-foreground mt-0.5">{insight.suggestedAction}</p>
                           <div className="flex items-center gap-3 mt-1 text-[10px] text-muted-foreground">
-                            <span>Ticket médio: {fmt(insight.avgTicket)}</span>
-                            <span>Total: {fmt(insight.totalPurchases)}</span>
+                            <span>Ticket médio: {formatBRL(insight.avgTicket)}</span>
+                            <span>Total: {formatBRL(insight.totalPurchases)}</span>
                             {insight.segment && <span>• {insight.segment}</span>}
                           </div>
                         </div>
@@ -432,7 +431,7 @@ export default function SellerDashboard() {
                             <p className="text-sm text-muted-foreground mt-1">{insight.suggestedAction}</p>
                             <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
                               <span>Último pedido: {insight.daysSinceLastPurchase} dias atrás</span>
-                              <span>Total comprado: {fmt(insight.totalPurchases)}</span>
+                              <span>Total comprado: {formatBRL(insight.totalPurchases)}</span>
                             </div>
                           </div>
                           <Button size="sm" onClick={() => handleScheduleFollowUp(insight)}>
@@ -470,13 +469,13 @@ export default function SellerDashboard() {
                         <p className="text-xs text-muted-foreground">{alert.description}</p>
                       </div>
                       {alert.estimatedLoss > 0 && (
-                        <Badge variant="destructive">{fmt(alert.estimatedLoss)}</Badge>
+                        <Badge variant="destructive">{formatBRL(alert.estimatedLoss)}</Badge>
                       )}
                     </div>
                   ))}
                   <div className="p-3 rounded-lg bg-destructive/10 text-center">
                     <p className="text-sm font-medium text-destructive">
-                      Total em risco: {fmt(lostAlerts.reduce((s, a) => s + a.estimatedLoss, 0))}
+                      Total em risco: {formatBRL(lostAlerts.reduce((s, a) => s + a.estimatedLoss, 0))}
                     </p>
                   </div>
                 </div>
@@ -506,11 +505,11 @@ export default function SellerDashboard() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium truncate">{p.repName}</span>
-                          <span className="text-sm font-bold text-primary">{fmt(p.totalSales)}</span>
+                          <span className="text-sm font-bold text-primary">{formatBRL(p.totalSales)}</span>
                         </div>
                         <div className="flex items-center gap-3 mt-1 text-[10px] text-muted-foreground">
                           <span>{p.ordersCount} pedidos</span>
-                          <span>Ticket: {fmt(p.avgTicket)}</span>
+                          <span>Ticket: {formatBRL(p.avgTicket)}</span>
                           <span>Conv: {p.conversionRate.toFixed(0)}%</span>
                         </div>
                         {p.monthlyTarget > 0 && (
@@ -532,7 +531,7 @@ export default function SellerDashboard() {
         <TabsContent value="pipeline" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3 mb-4">
             <KPICard index={0} title="Oportunidades Abertas" value={stats.openFunnel.toString()} icon={<Target className="h-5 w-5" />} accentColor="info" />
-            <KPICard index={1} title="Valor do Pipeline" value={fmt(stats.funnelValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" />
+            <KPICard index={1} title="Valor do Pipeline" value={formatBRL(stats.funnelValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" />
             <KPICard index={2} title="Alertas Comerciais" value={stats.openAlerts.toString()} icon={<AlertTriangle className="h-5 w-5" />} accentColor="warning" />
           </div>
           <Card>
@@ -565,7 +564,7 @@ export default function SellerDashboard() {
                             <Badge variant="outline" className="text-[10px]">{stageLabel}</Badge>
                             {days > 14 && <Badge variant="destructive" className="text-[10px]">⏰ {days}d parado</Badge>}
                           </div>
-                          <p className="text-xs text-primary font-semibold mt-0.5">{fmt(item.value)}</p>
+                          <p className="text-xs text-primary font-semibold mt-0.5">{formatBRL(item.value)}</p>
                         </div>
                         <Badge variant="secondary" className="text-[10px]">{item.probability}%</Badge>
                       </div>

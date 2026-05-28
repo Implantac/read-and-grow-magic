@@ -32,7 +32,6 @@ const STEPS = [
   { id: 'review', label: 'Revisão', icon: ClipboardCheck },
 ];
 
-const fmt = (v: number) => formatBRL(v);
 
 export default function CTePage() {
   const { data: ctes = [], isLoading } = useCTes();
@@ -99,7 +98,7 @@ export default function CTePage() {
     nfes.filter(n => n.status === 'authorized').map(n => ({
       value: n.id,
       label: `NF-e ${n.number} - ${n.clientName}`,
-      description: `Valor: ${fmt(n.total)}`,
+      description: `Valor: ${formatBRL(n.total)}`,
       meta: n.issueDate
     })), [nfes]);
 
@@ -409,7 +408,7 @@ export default function CTePage() {
                                 <Separator />
                                 <div className="flex justify-between items-center">
                                   <span className="text-xs font-bold uppercase">VALOR DO ICMS</span>
-                                  <span className="text-2xl font-black text-primary tabular-nums">{fmt((form.freight_value * form.icms_rate) / 100)}</span>
+                                  <span className="text-2xl font-black text-primary tabular-nums">{formatBRL((form.freight_value * form.icms_rate) / 100)}</span>
                                 </div>
                               </CardContent>
                             </Card>
@@ -443,9 +442,9 @@ export default function CTePage() {
                             <CardContent className="p-5 space-y-4">
                               <h4 className="text-[10px] font-black uppercase text-primary tracking-widest border-b border-primary/20 pb-2">Resumo Financeiro</h4>
                               <div className="space-y-2 text-sm">
-                                <div className="flex justify-between"><span>Valor da Carga:</span><span className="font-black tabular-nums">{fmt(form.cargo_value)}</span></div>
-                                <div className="flex justify-between"><span>Valor do Frete:</span><span className="font-black tabular-nums">{fmt(form.freight_value)}</span></div>
-                                <div className="flex justify-between text-primary"><span>ICMS ({form.icms_rate}%):</span><span className="font-black tabular-nums">{fmt((form.freight_value * form.icms_rate) / 100)}</span></div>
+                                <div className="flex justify-between"><span>Valor da Carga:</span><span className="font-black tabular-nums">{formatBRL(form.cargo_value)}</span></div>
+                                <div className="flex justify-between"><span>Valor do Frete:</span><span className="font-black tabular-nums">{formatBRL(form.freight_value)}</span></div>
+                                <div className="flex justify-between text-primary"><span>ICMS ({form.icms_rate}%):</span><span className="font-black tabular-nums">{formatBRL((form.freight_value * form.icms_rate) / 100)}</span></div>
                               </div>
                             </CardContent>
                           </Card>
@@ -477,7 +476,7 @@ export default function CTePage() {
       <div className="grid gap-4 md:grid-cols-3 mb-4">
         <Card><CardHeader><CardTitle className="text-sm text-muted-foreground">Total CT-e</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{ctes.length}</CardContent></Card>
         <Card><CardHeader><CardTitle className="text-sm text-muted-foreground">Autorizados</CardTitle></CardHeader><CardContent className="text-2xl font-bold text-success">{totals.authorized}</CardContent></Card>
-        <Card><CardHeader><CardTitle className="text-sm text-muted-foreground">Valor Total Frete</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{fmt(totals.total)}</CardContent></Card>
+        <Card><CardHeader><CardTitle className="text-sm text-muted-foreground">Valor Total Frete</CardTitle></CardHeader><CardContent className="text-2xl font-bold">{formatBRL(totals.total)}</CardContent></Card>
       </div>
 
       <Card>
@@ -497,7 +496,7 @@ export default function CTePage() {
                     <TableCell>{format(new Date(c.issue_date), 'dd/MM/yyyy')}</TableCell>
                     <TableCell>{c.carrier_name}</TableCell>
                     <TableCell className="text-sm">{c.sender_uf} → {c.recipient_uf}</TableCell>
-                    <TableCell className="text-right tabular-nums">{fmt(Number(c.freight_value))}</TableCell>
+                    <TableCell className="text-right tabular-nums">{formatBRL(Number(c.freight_value))}</TableCell>
                     <TableCell><FiscalStatusBadge status={c.status} /></TableCell>
                     <TableCell className="text-right space-x-1">
                       {c.status === 'draft' && <Button size="sm" variant="outline" onClick={() => transmit.mutate(c.id)}><Send className="h-3 w-3" /></Button>}

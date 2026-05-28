@@ -21,7 +21,6 @@ import {
   type AIScore, type AIRecommendation, type AIInsight, type AIDailyAction, type AIPrediction, type AIForecast,
 } from '@/hooks/useAICommercial';
 
-const fmt = (v: number) => formatBRL(v);
 
 const SEVERITY_MAP: Record<string, { color: string; icon: typeof AlertTriangle }> = {
   critical: { color: 'text-red-500', icon: ShieldAlert },
@@ -91,7 +90,7 @@ export default function AICommercialDashboard() {
         <KPICard index={0} title="Clientes Scored" value={totalScored.toString()} subtitle={`${atRisk} em risco • ${declining} em queda`} icon={<Users className="h-5 w-5" />} accentColor="primary" />
         <KPICard index={1} title="Ações do Dia" value={pendingActions.toString()} subtitle={`${completedActions} concluídas`} icon={<Zap className="h-5 w-5" />} accentColor="info" />
         <KPICard index={2} title="Deals em Risco" value={highRiskDeals.toString()} subtitle={`${highPriority} alta prioridade`} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" />
-        <KPICard index={3} title="Potencial Recs" value={fmt(totalRecsValue)} subtitle={`${recommendations.length} recomendações`} icon={<DollarSign className="h-5 w-5" />} accentColor="success" />
+        <KPICard index={3} title="Potencial Recs" value={formatBRL(totalRecsValue)} subtitle={`${recommendations.length} recomendações`} icon={<DollarSign className="h-5 w-5" />} accentColor="success" />
       </div>
 
       {/* Forecast Summary */}
@@ -105,15 +104,15 @@ export default function AICommercialDashboard() {
               </div>
               <div className="text-center">
                 <div className="text-xs text-muted-foreground">Pessimista</div>
-                <div className="text-sm font-semibold">{fmt(latestForecast.worst_case || 0)}</div>
+                <div className="text-sm font-semibold">{formatBRL(latestForecast.worst_case || 0)}</div>
               </div>
               <div className="text-center">
                 <div className="text-xs text-muted-foreground">Realista</div>
-                <div className="text-lg font-bold text-primary">{fmt(latestForecast.predicted_revenue || 0)}</div>
+                <div className="text-lg font-bold text-primary">{formatBRL(latestForecast.predicted_revenue || 0)}</div>
               </div>
               <div className="text-center">
                 <div className="text-xs text-muted-foreground">Otimista</div>
-                <div className="text-sm font-semibold">{fmt(latestForecast.best_case || 0)}</div>
+                <div className="text-sm font-semibold">{formatBRL(latestForecast.best_case || 0)}</div>
               </div>
               <div className="text-center">
                 <div className="text-xs text-muted-foreground">Confiança</div>
@@ -130,7 +129,7 @@ export default function AICommercialDashboard() {
               {latestForecast.factors?.daily_needed > 0 && (
                 <div className="text-center">
                   <div className="text-xs text-muted-foreground">Precisa/dia</div>
-                  <div className="text-sm font-semibold">{fmt(latestForecast.factors.daily_needed)}</div>
+                  <div className="text-sm font-semibold">{formatBRL(latestForecast.factors.daily_needed)}</div>
                 </div>
               )}
             </div>
@@ -295,7 +294,7 @@ function DailyActionCard({ action, onComplete }: { action: AIDailyAction; onComp
             <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
               <Phone className="h-3 w-3" />
               <span>{action.clients.cellphone || action.clients.phone}</span>
-              {action.estimated_value > 0 && <span className="text-primary font-medium">{fmt(action.estimated_value)}</span>}
+              {action.estimated_value > 0 && <span className="text-primary font-medium">{formatBRL(action.estimated_value)}</span>}
             </div>
           )}
         </div>
@@ -359,7 +358,7 @@ function RecommendationCard({ rec, onAct }: { rec: AIRecommendation; onAct: (res
               <span className="font-medium text-sm">{rec.title}</span>
               <Badge variant="outline" className="text-xs">{typeLabels[rec.recommendation_type] || rec.recommendation_type}</Badge>
               <Badge className={`text-xs ${PRIORITY_MAP[rec.priority] || ''}`} variant="outline">{rec.priority}</Badge>
-              {rec.estimated_value > 0 && <Badge variant="secondary" className="text-xs">{fmt(rec.estimated_value)}</Badge>}
+              {rec.estimated_value > 0 && <Badge variant="secondary" className="text-xs">{formatBRL(rec.estimated_value)}</Badge>}
             </div>
             <p className="text-xs text-muted-foreground">{rec.description}</p>
             {rec.explanation && (
@@ -397,7 +396,7 @@ function PredictionCard({ prediction }: { prediction: AIPrediction }) {
                 <Badge variant="outline" className="text-xs">{prediction.sales_funnel.stage}</Badge>
               )}
               {prediction.predicted_value > 0 && (
-                <Badge variant="secondary" className="text-xs">{fmt(prediction.predicted_value)}</Badge>
+                <Badge variant="secondary" className="text-xs">{formatBRL(prediction.predicted_value)}</Badge>
               )}
             </div>
             <div className="flex items-center gap-4 text-xs mb-1">
@@ -477,15 +476,15 @@ function ForecastCard({ forecast }: { forecast: AIForecast }) {
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center p-3 rounded-lg bg-muted/50">
             <div className="text-xs text-muted-foreground">Pessimista</div>
-            <div className="text-sm font-bold">{fmt(forecast.worst_case || 0)}</div>
+            <div className="text-sm font-bold">{formatBRL(forecast.worst_case || 0)}</div>
           </div>
           <div className="text-center p-3 rounded-lg bg-primary/10 border border-primary/20">
             <div className="text-xs text-muted-foreground">Realista</div>
-            <div className="text-lg font-bold text-primary">{fmt(forecast.predicted_revenue || 0)}</div>
+            <div className="text-lg font-bold text-primary">{formatBRL(forecast.predicted_revenue || 0)}</div>
           </div>
           <div className="text-center p-3 rounded-lg bg-muted/50">
             <div className="text-xs text-muted-foreground">Otimista</div>
-            <div className="text-sm font-bold">{fmt(forecast.best_case || 0)}</div>
+            <div className="text-sm font-bold">{formatBRL(forecast.best_case || 0)}</div>
           </div>
         </div>
 
@@ -497,8 +496,8 @@ function ForecastCard({ forecast }: { forecast: AIForecast }) {
                 <div key={id} className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
                   <span>{data.name || id.slice(0, 8)}</span>
                   <div className="flex gap-3">
-                    <span>Conf: {fmt(data.confirmed || 0)}</span>
-                    <span className="text-muted-foreground">Pipeline: {fmt(data.pipeline || 0)}</span>
+                    <span>Conf: {formatBRL(data.confirmed || 0)}</span>
+                    <span className="text-muted-foreground">Pipeline: {formatBRL(data.pipeline || 0)}</span>
                   </div>
                 </div>
               ))}
@@ -511,7 +510,7 @@ function ForecastCard({ forecast }: { forecast: AIForecast }) {
             <h4 className="text-xs font-medium text-muted-foreground mb-2">Por Região</h4>
             <div className="flex flex-wrap gap-2">
               {byRegion.map(([region, value]) => (
-                <Badge key={region} variant="secondary" className="text-xs">{region}: {fmt(value as number)}</Badge>
+                <Badge key={region} variant="secondary" className="text-xs">{region}: {formatBRL(value as number)}</Badge>
               ))}
             </div>
           </div>
@@ -522,7 +521,7 @@ function ForecastCard({ forecast }: { forecast: AIForecast }) {
             <h4 className="text-xs font-medium text-muted-foreground mb-2">Por Segmento</h4>
             <div className="flex flex-wrap gap-2">
               {bySegment.map(([seg, value]) => (
-                <Badge key={seg} variant="outline" className="text-xs">{seg}: {fmt(value as number)}</Badge>
+                <Badge key={seg} variant="outline" className="text-xs">{seg}: {formatBRL(value as number)}</Badge>
               ))}
             </div>
           </div>
