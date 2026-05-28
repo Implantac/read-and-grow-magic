@@ -1,15 +1,9 @@
 import jsPDF from 'jspdf';
 import type { NFe, NFeItem } from '@/types/fiscal';
 
-import { formatDate, formatBRL } from '@/lib/formatters';
-const formatCurrency = (v: number) =>
-  formatBRL(v);
+import { formatDate, formatDateTime, formatBRL } from '@/lib/formatters';
+const formatCurrency = (v: number) => formatBRL(v);
 
-const formatDate = (dateString: string) => {
-  if (!dateString) return '';
-  const d = new Date(dateString);
-  return formatDate(d) + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-};
 
 export function generateDANFE(nfe: NFe): void {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
