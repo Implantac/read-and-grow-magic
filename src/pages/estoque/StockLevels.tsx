@@ -118,10 +118,7 @@ export default function StockLevelsPage() {
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
+    return formatBRL(value);
   };
 
   const formatNumber = (value: number) => {
