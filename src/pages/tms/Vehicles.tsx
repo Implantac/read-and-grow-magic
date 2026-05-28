@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, Search, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { formatNumber } from '@/lib/formatters';
 const statusColors: Record<string, string> = { available: 'default', in_transit: 'secondary', maintenance: 'destructive' };
 const statusLabels: Record<string, string> = { available: 'Disponível', in_transit: 'Em Trânsito', maintenance: 'Manutenção' };
 
@@ -82,7 +83,7 @@ const Vehicles = () => {
                 <TableCell>{v.model}</TableCell>
                 <TableCell className="capitalize">{v.vehicleType}</TableCell>
                 <TableCell>{v.driverName || '-'}</TableCell>
-                <TableCell>{v.maxWeight.toLocaleString('pt-BR')}</TableCell>
+                <TableCell>{formatNumber(v.maxWeight)}</TableCell>
                 <TableCell><Badge variant={statusColors[v.status] as any}>{statusLabels[v.status] || v.status}</Badge></TableCell>
                 <TableCell><Button variant="ghost" size="icon" onClick={() => openEdit(v)}><Pencil className="h-4 w-4" /></Button></TableCell>
               </TableRow>

@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import MRPSimulation from '@/components/producao/MRPSimulation';
 
+import { formatNumber } from '@/lib/formatters';
 interface MaterialNeed {
   materialCode: string;
   materialName: string;
@@ -252,10 +253,10 @@ export default function MRPPage() {
                             <span className="text-xs text-muted-foreground ml-2">{m.materialCode}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-right font-mono">{m.totalRequired.toLocaleString('pt-BR')} {m.unit}</TableCell>
-                        <TableCell className="text-right font-mono">{m.inStock.toLocaleString('pt-BR')} {m.unit}</TableCell>
+                        <TableCell className="text-right font-mono">{formatNumber(m.totalRequired)} {m.unit}</TableCell>
+                        <TableCell className="text-right font-mono">{formatNumber(m.inStock)} {m.unit}</TableCell>
                         <TableCell className={cn('text-right font-mono font-bold', m.deficit > 0 ? 'text-destructive' : 'text-green-600')}>
-                          {m.deficit > 0 ? `-${m.deficit.toLocaleString('pt-BR')}` : '0'} {m.unit}
+                          {m.deficit > 0 ? `-${formatNumber(m.deficit)}` : '0'} {m.unit}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
@@ -393,7 +394,7 @@ export default function MRPPage() {
                         return (
                           <TableRow key={m.materialCode}>
                             <TableCell className="font-medium">{m.materialName}</TableCell>
-                            <TableCell className="text-right font-mono font-bold">{m.deficit.toLocaleString('pt-BR')}</TableCell>
+                            <TableCell className="text-right font-mono font-bold">{formatNumber(m.deficit)}</TableCell>
                             <TableCell>{m.unit}</TableCell>
                             <TableCell>{m.supplier || <span className="text-muted-foreground">—</span>}</TableCell>
                             <TableCell className="text-right">R$ {estCost.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</TableCell>

@@ -16,6 +16,7 @@ import { useSalesReps } from '@/hooks/useSalesReps';
 import { Flame, Phone, Clock, AlertTriangle, Trophy, Target, UserX, Zap, ArrowRight, CheckCircle, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 
+import { formatNumber } from '@/lib/formatters';
 function TodayGoalCards() {
   const today = new Date().toISOString().split('T')[0];
   const { data: goals } = useDailyGoals(undefined, today);
@@ -51,8 +52,8 @@ function TodayGoalCards() {
                 <c.icon className={`h-4 w-4 ${c.color}`} />
               </div>
               <div className="text-2xl font-bold">
-                {c.isCurrency ? `R$ ${c.achieved.toLocaleString('pt-BR')}` : c.achieved}
-                <span className="text-sm font-normal text-muted-foreground"> / {c.isCurrency ? `R$ ${c.target.toLocaleString('pt-BR')}` : c.target}</span>
+                {c.isCurrency ? `R$ ${formatNumber(c.achieved)}` : c.achieved}
+                <span className="text-sm font-normal text-muted-foreground"> / {c.isCurrency ? `R$ ${formatNumber(c.target)}` : c.target}</span>
               </div>
               <Progress value={pct} className="mt-2 h-2" />
               <span className={`text-xs font-medium ${pct >= 100 ? 'text-emerald-500' : pct >= 60 ? 'text-amber-500' : 'text-destructive'}`}>
@@ -218,7 +219,7 @@ function RankingTab() {
                 {rep.noFollowUp > 0 && <Badge variant="destructive">{rep.noFollowUp}</Badge>}
                 {rep.noFollowUp === 0 && <CheckCircle className="h-4 w-4 text-emerald-500 inline" />}
               </TableCell>
-              <TableCell className="text-right">R$ {rep.pipelineValue.toLocaleString('pt-BR')}</TableCell>
+              <TableCell className="text-right">R$ {formatNumber(rep.pipelineValue)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -244,7 +245,7 @@ function LostClientsTab() {
           <div className="text-[10px] text-muted-foreground">Clientes Inativos</div>
         </CardContent></Card>
         <Card><CardContent className="p-3 text-center">
-          <div className="text-xl font-bold text-primary">R$ {total.toLocaleString('pt-BR')}</div>
+          <div className="text-xl font-bold text-primary">R$ {formatNumber(total)}</div>
           <div className="text-[10px] text-muted-foreground">Receita Histórica</div>
         </CardContent></Card>
         <Card><CardContent className="p-3 text-center">

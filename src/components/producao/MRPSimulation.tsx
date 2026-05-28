@@ -9,6 +9,7 @@ import { SimulationService, SimulationScenario, SimulationResult, MRPService, Ac
 import { FlaskConical, AlertTriangle, TrendingDown, TrendingUp, Lightbulb, Play, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+import { formatNumber } from '@/lib/formatters';
 interface MRPSimulationProps {
   orders: any[];
   sheets: any[];
@@ -213,10 +214,10 @@ export default function MRPSimulation({ orders, sheets, supplies, capacities }: 
                     {result.materialImpact.map(m => (
                       <TableRow key={m.materialName}>
                         <TableCell className="font-medium">{m.materialName}</TableCell>
-                        <TableCell className="text-right font-mono">{m.originalDeficit.toLocaleString('pt-BR')}</TableCell>
-                        <TableCell className="text-right font-mono">{m.newDeficit.toLocaleString('pt-BR')}</TableCell>
+                        <TableCell className="text-right font-mono">{formatNumber(m.originalDeficit)}</TableCell>
+                        <TableCell className="text-right font-mono">{formatNumber(m.newDeficit)}</TableCell>
                         <TableCell className={cn('text-right font-bold', m.change > 0 ? 'text-destructive' : 'text-success')}>
-                          {m.change > 0 ? '+' : ''}{m.change.toLocaleString('pt-BR')}
+                          {m.change > 0 ? '+' : ''}{formatNumber(m.change)}
                         </TableCell>
                       </TableRow>
                     ))}
