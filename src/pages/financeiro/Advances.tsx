@@ -21,8 +21,6 @@ import { NewAdvanceDialog } from '@/components/financeiro/NewAdvanceDialog';
 import { format } from 'date-fns';
 
 import { formatBRL } from '@/lib/formatters';
-const fmtBRL = (v: number) => formatBRL(v ?? 0);
-
 export default function Advances() {
   const { data: advances = [], isLoading } = useFinancialAdvances();
   const { data: receivables = [] } = useAccountsReceivable();
@@ -93,9 +91,9 @@ export default function Advances() {
               <TableRow key={a.id}>
                 <TableCell className="font-mono text-xs">{format(new Date(a.received_date), 'dd/MM/yyyy')}</TableCell>
                 <TableCell>{a.party_name}</TableCell>
-                <TableCell className="text-right">{fmtBRL(Number(a.amount))}</TableCell>
-                <TableCell className="text-right">{fmtBRL(Number(a.used_amount))}</TableCell>
-                <TableCell className="text-right font-medium">{fmtBRL(remaining)}</TableCell>
+                <TableCell className="text-right">{formatBRL(Number(a.amount))}</TableCell>
+                <TableCell className="text-right">{formatBRL(Number(a.used_amount))}</TableCell>
+                <TableCell className="text-right font-medium">{formatBRL(remaining)}</TableCell>
                 <TableCell>
                   <Badge variant={a.status === 'consumed' ? 'secondary' : a.status === 'partial' ? 'outline' : 'default'}>
                     {a.status === 'consumed' ? 'Consumido' : a.status === 'partial' ? 'Parcial' : 'Disponível'}
@@ -124,9 +122,9 @@ export default function Advances() {
       </PageHeader>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <KPICard index={0} title="Saldo a compensar (clientes)" value={fmtBRL(totals.clientRemaining)}
+        <KPICard index={0} title="Saldo a compensar (clientes)" value={formatBRL(totals.clientRemaining)}
           icon={<TrendingDown className="h-5 w-5" />} accentColor="warning" />
-        <KPICard index={1} title="Crédito com fornecedores" value={fmtBRL(totals.supplierRemaining)}
+        <KPICard index={1} title="Crédito com fornecedores" value={formatBRL(totals.supplierRemaining)}
           icon={<TrendingUp className="h-5 w-5" />} accentColor="success" />
         <KPICard index={2} title="Adiantamentos ativos" value={String(totals.activeCount)}
           icon={<Wallet className="h-5 w-5" />} accentColor="primary" />
@@ -159,7 +157,7 @@ export default function Advances() {
           <DialogHeader>
             <DialogTitle>Aplicar adiantamento</DialogTitle>
             <DialogDescription>
-              Compensa o saldo do adiantamento contra um título em aberto. Disponível: {applyAdvance && fmtBRL(Number(applyAdvance.remaining_amount))}.
+              Compensa o saldo do adiantamento contra um título em aberto. Disponível: {applyAdvance && formatBRL(Number(applyAdvance.remaining_amount))}.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-2">
@@ -170,7 +168,7 @@ export default function Advances() {
                 <SelectContent>
                   {targetList.map((t: any) => (
                     <SelectItem key={t.id} value={t.id}>
-                      {t.description} — {fmtBRL(Number(t.open_amount ?? t.amount))}
+                      {t.description} — {formatBRL(Number(t.open_amount ?? t.amount))}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -11,20 +11,17 @@ import { RefreshCw, FileText, AlertTriangle, DollarSign, TrendingUp, TrendingDow
 import { useDailyReports, useGenerateReport, DailyReport, DailyReportData } from '@/hooks/useDailyReport';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
-const fmt = (v: number) =>
-  formatBRL(v);
-
 function ReportDetail({ data }: { data: DailyReportData }) {
   return (
     <div className="space-y-6">
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        <KPICard title="A Receber Hoje" value={fmt(data.receivables_due_today.total)} subtitle={`${data.receivables_due_today.count} títulos`} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="A Receber Atrasados" value={fmt(data.receivables_overdue.total)} subtitle={`${data.receivables_overdue.count} títulos`} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={1} />
-        <KPICard title="A Pagar Hoje" value={fmt(data.payables_due_today.total)} subtitle={`${data.payables_due_today.count} títulos`} icon={<TrendingDown className="h-5 w-5" />} accentColor="warning" index={2} />
-        <KPICard title="A Pagar Atrasados" value={fmt(data.payables_overdue.total)} subtitle={`${data.payables_overdue.count} títulos`} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={3} />
-        <KPICard title="Vendas do Dia" value={fmt(data.sales_summary.total)} subtitle={`${data.sales_summary.count} vendas`} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={4} />
-        <KPICard title="Saldo Caixa" value={fmt(data.cash_flow.balance)} subtitle={`+${fmt(data.cash_flow.income)} / -${fmt(data.cash_flow.expense)}`} icon={<DollarSign className="h-5 w-5" />} accentColor="info" index={5} />
+        <KPICard title="A Receber Hoje" value={formatBRL(data.receivables_due_today.total)} subtitle={`${data.receivables_due_today.count} títulos`} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="A Receber Atrasados" value={formatBRL(data.receivables_overdue.total)} subtitle={`${data.receivables_overdue.count} títulos`} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={1} />
+        <KPICard title="A Pagar Hoje" value={formatBRL(data.payables_due_today.total)} subtitle={`${data.payables_due_today.count} títulos`} icon={<TrendingDown className="h-5 w-5" />} accentColor="warning" index={2} />
+        <KPICard title="A Pagar Atrasados" value={formatBRL(data.payables_overdue.total)} subtitle={`${data.payables_overdue.count} títulos`} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={3} />
+        <KPICard title="Vendas do Dia" value={formatBRL(data.sales_summary.total)} subtitle={`${data.sales_summary.count} vendas`} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={4} />
+        <KPICard title="Saldo Caixa" value={formatBRL(data.cash_flow.balance)} subtitle={`+${formatBRL(data.cash_flow.income)} / -${formatBRL(data.cash_flow.expense)}`} icon={<DollarSign className="h-5 w-5" />} accentColor="info" index={5} />
       </div>
 
       {/* Receivables Due Today */}
@@ -45,7 +42,7 @@ function ReportDetail({ data }: { data: DailyReportData }) {
                   <TableRow key={r.id}>
                     <TableCell>{r.description}</TableCell>
                     <TableCell>{r.client_name}</TableCell>
-                    <TableCell className="text-right font-medium">{fmt(r.amount)}</TableCell>
+                    <TableCell className="text-right font-medium">{formatBRL(r.amount)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -74,7 +71,7 @@ function ReportDetail({ data }: { data: DailyReportData }) {
                     <TableCell>{r.description}</TableCell>
                     <TableCell>{r.client_name}</TableCell>
                     <TableCell><Badge variant="destructive">{formatDate(r.due_date)}</Badge></TableCell>
-                    <TableCell className="text-right font-medium">{fmt(r.amount)}</TableCell>
+                    <TableCell className="text-right font-medium">{formatBRL(r.amount)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -101,7 +98,7 @@ function ReportDetail({ data }: { data: DailyReportData }) {
                   <TableRow key={r.id}>
                     <TableCell>{r.description}</TableCell>
                     <TableCell>{r.supplier}</TableCell>
-                    <TableCell className="text-right font-medium">{fmt(r.amount)}</TableCell>
+                    <TableCell className="text-right font-medium">{formatBRL(r.amount)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -130,7 +127,7 @@ function ReportDetail({ data }: { data: DailyReportData }) {
                     <TableCell className="font-mono">{s.number}</TableCell>
                     <TableCell>{s.client_name}</TableCell>
                     <TableCell><Badge variant="outline">{s.status}</Badge></TableCell>
-                    <TableCell className="text-right font-medium">{fmt(s.total)}</TableCell>
+                    <TableCell className="text-right font-medium">{formatBRL(s.total)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

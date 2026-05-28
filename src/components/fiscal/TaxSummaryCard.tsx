@@ -13,9 +13,6 @@ interface TaxSummaryCardProps {
   totalTaxes: number;
 }
 
-const fmt = (v: number) =>
-  formatBRL(v);
-
 export function TaxSummaryCard({ icms, icmsST = 0, difal = 0, pis, cofins, ipi, total, totalTaxes }: TaxSummaryCardProps) {
   const taxBurden = total > 0 ? (totalTaxes / total) * 100 : 0;
 
@@ -46,7 +43,7 @@ export function TaxSummaryCard({ icms, icmsST = 0, difal = 0, pis, cofins, ipi, 
             <Calculator className="h-3.5 w-3.5" />
             Total de impostos
           </span>
-          <span className="font-semibold">{fmt(totalTaxes)}</span>
+          <span className="font-semibold">{formatBRL(totalTaxes)}</span>
         </div>
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>Carga tributária</span>
@@ -61,7 +58,7 @@ function TaxItem({ label, value, highlight }: { label: string; value: number; hi
   return (
     <div className={`rounded-md border p-2 ${highlight ? 'border-warning/30 bg-warning/5' : 'bg-card'}`}>
       <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="text-sm font-semibold tabular-nums">{fmt(value)}</div>
+      <div className="text-sm font-semibold tabular-nums">{formatBRL(value)}</div>
     </div>
   );
 }

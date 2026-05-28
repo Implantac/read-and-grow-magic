@@ -73,9 +73,6 @@ const STEPS = [
   { id: 'review', label: 'Revisão', icon: ClipboardCheck },
 ];
 
-const fmt = (v: number) =>
-  formatBRL(v);
-
 export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialogProps) {
   const clientsQuery = useClients();
   const productsQuery = useProducts();
@@ -179,7 +176,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
       value: p.id,
       label: p.name,
       description: `Cód: ${p.code}`,
-      meta: fmt(p.sale_price),
+      meta: formatBRL(p.sale_price),
     })),
     [products]
   );
@@ -723,7 +720,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                                 </div>
                               </TableCell>
                               <TableCell className="text-right font-bold tabular-nums">
-                                {fmt(item.quantity * item.unitPrice)}
+                                {formatBRL(item.quantity * item.unitPrice)}
                               </TableCell>
                               <TableCell>
                                 <Button variant="ghost" size="icon" onClick={() => removeItem(idx)} className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -782,10 +779,10 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                           {items.map((item, i) => (
                             <TableRow key={i}>
                               <TableCell className="text-xs font-medium">{item.productName}</TableCell>
-                              <TableCell className="text-right tabular-nums text-xs">{fmt(item.icms || 0)}</TableCell>
-                              <TableCell className="text-right tabular-nums text-xs">{fmt(item.ipi || 0)}</TableCell>
-                              <TableCell className="text-right tabular-nums text-xs">{fmt(item.pis || 0)}</TableCell>
-                              <TableCell className="text-right tabular-nums text-xs">{fmt(item.cofins || 0)}</TableCell>
+                              <TableCell className="text-right tabular-nums text-xs">{formatBRL(item.icms || 0)}</TableCell>
+                              <TableCell className="text-right tabular-nums text-xs">{formatBRL(item.ipi || 0)}</TableCell>
+                              <TableCell className="text-right tabular-nums text-xs">{formatBRL(item.pis || 0)}</TableCell>
+                              <TableCell className="text-right tabular-nums text-xs">{formatBRL(item.cofins || 0)}</TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
@@ -916,7 +913,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                             {items.map((it, i) => (
                               <div key={i} className="flex justify-between text-sm">
                                 <span>{it.quantity}x {it.productName}</span>
-                                <span className="font-mono">{fmt(it.quantity * it.unitPrice)}</span>
+                                <span className="font-mono">{formatBRL(it.quantity * it.unitPrice)}</span>
                               </div>
                             ))}
                           </div>
@@ -928,7 +925,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                       <Card className="border-primary bg-primary/5 shadow-2xl overflow-hidden">
                         <div className="bg-primary px-4 py-2 text-primary-foreground text-[10px] font-bold uppercase text-center tracking-[0.2em]">Total do Documento</div>
                         <CardContent className="p-6 text-center">
-                          <div className="text-4xl font-black tabular-nums text-primary mb-1">{fmt(total)}</div>
+                          <div className="text-4xl font-black tabular-nums text-primary mb-1">{formatBRL(total)}</div>
                           <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Valor Líquido da Nota</p>
                         </CardContent>
                       </Card>
@@ -937,20 +934,20 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
                         <CardContent className="p-4 space-y-2 text-sm">
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Subtotal Itens</span>
-                            <span className="font-bold">{fmt(subtotal)}</span>
+                            <span className="font-bold">{formatBRL(subtotal)}</span>
                           </div>
                           <div className="flex justify-between text-destructive">
                             <span className="text-muted-foreground">Descontos</span>
-                            <span className="font-bold">-{fmt(discount)}</span>
+                            <span className="font-bold">-{formatBRL(discount)}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Frete</span>
-                            <span className="font-bold">+{fmt(shipping)}</span>
+                            <span className="font-bold">+{formatBRL(shipping)}</span>
                           </div>
                           <Separator className="my-2" />
                           <div className="flex justify-between text-success">
                             <span className="font-bold">Total de Tributos</span>
-                            <span className="font-bold">{fmt(totalIcms + totalIpi + totalPis + totalCofins)}</span>
+                            <span className="font-bold">{formatBRL(totalIcms + totalIpi + totalPis + totalCofins)}</span>
                           </div>
                         </CardContent>
                       </Card>

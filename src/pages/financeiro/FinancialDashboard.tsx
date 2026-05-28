@@ -25,8 +25,6 @@ import { useFinancialInsights } from '@/hooks/useFinancialInsights';
 import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/useAccountsPayable';
 
-const fmtBRL = (v: number) =>
-  formatBRL(v ?? 0);
 const fmtCompact = (v: number) =>
   new Intl.NumberFormat('pt-BR', { notation: 'compact', maximumFractionDigits: 1 }).format(v ?? 0);
 const fmtDate = (s: string) => formatDate(s);
@@ -187,15 +185,15 @@ export default function FinancialDashboard() {
       </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <KpiCard title="Saldo Atual" value={fmtBRL(currentBalance)}
+        <KpiCard title="Saldo Atual" value={formatBRL(currentBalance)}
           subtitle={`${banks.length} contas ativas`}
           icon={<Wallet className="h-5 w-5" />} tone={currentBalance < 0 ? 'danger' : 'primary'} />
-        <KpiCard title="Entradas" value={fmtBRL(inflow)} subtitle={range.label}
+        <KpiCard title="Entradas" value={formatBRL(inflow)} subtitle={range.label}
           icon={<ArrowDownCircle className="h-5 w-5" />} tone="success" />
-        <KpiCard title="Saídas" value={fmtBRL(outflow)} subtitle={range.label}
+        <KpiCard title="Saídas" value={formatBRL(outflow)} subtitle={range.label}
           icon={<ArrowUpCircle className="h-5 w-5" />} tone="warning" />
-        <KpiCard title="Saldo Projetado 30d" value={fmtBRL(projected30)}
-          subtitle={`Líquido período: ${fmtBRL(net)}`}
+        <KpiCard title="Saldo Projetado 30d" value={formatBRL(projected30)}
+          subtitle={`Líquido período: ${formatBRL(net)}`}
           icon={<TrendingUp className="h-5 w-5" />} tone={projected30 < 0 ? 'danger' : 'success'} />
       </div>
 
@@ -262,7 +260,7 @@ export default function FinancialDashboard() {
                 <YAxis tickFormatter={fmtCompact} tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
                 <Tooltip
                   contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8 }}
-                  formatter={(v: any) => fmtBRL(Number(v))}
+                  formatter={(v: any) => formatBRL(Number(v))}
                 />
                 <ReferenceLine y={0} stroke="hsl(var(--destructive))" strokeDasharray="3 3" />
                 <Area type="monotone" dataKey="saldo" stroke="hsl(var(--primary))" fill="url(#gradSaldo)" strokeWidth={2} />
@@ -289,7 +287,7 @@ export default function FinancialDashboard() {
                       <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(v: any) => fmtBRL(Number(v))}
+                  <Tooltip formatter={(v: any) => formatBRL(Number(v))}
                     contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8 }} />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                 </PieChart>
@@ -317,11 +315,11 @@ export default function FinancialDashboard() {
             <div key={p.label} className="rounded-lg border p-4">
               <div className="text-xs text-muted-foreground">Em {p.label}</div>
               <div className={`mt-1 text-2xl font-bold ${p.saldo < 0 ? 'text-destructive' : 'text-foreground'}`}>
-                {fmtBRL(p.saldo)}
+                {formatBRL(p.saldo)}
               </div>
               <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-                <div className="text-success">+ {fmtBRL(p.entradas)}</div>
-                <div className="text-destructive">− {fmtBRL(p.saidas)}</div>
+                <div className="text-success">+ {formatBRL(p.entradas)}</div>
+                <div className="text-destructive">− {formatBRL(p.saidas)}</div>
               </div>
             </div>
           ))}
@@ -409,7 +407,7 @@ function LedgerTable({ rows }: { rows: LedgerEntryRow[] }) {
               </TableCell>
               <TableCell className="text-xs text-muted-foreground">{r.payment_method ?? '—'}</TableCell>
               <TableCell className={`text-right font-semibold ${r.type === 'inflow' ? 'text-success' : 'text-destructive'}`}>
-                {r.type === 'inflow' ? '+' : '−'} {fmtBRL(Number(r.amount))}
+                {r.type === 'inflow' ? '+' : '−'} {formatBRL(Number(r.amount))}
               </TableCell>
             </TableRow>
           ))}

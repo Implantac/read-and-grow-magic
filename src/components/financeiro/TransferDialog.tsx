@@ -9,8 +9,6 @@ import { useBankAccounts } from '@/hooks/useBankAccounts';
 import { useTransferBetweenAccounts } from '@/hooks/useFinancialSettlements';
 
 import { formatBRL } from '@/lib/formatters';
-const fmtBRL = (v: number) => formatBRL(v ?? 0);
-
 export function TransferDialog() {
   const { data: accounts = [] } = useBankAccounts();
   const transfer = useTransferBetweenAccounts();
@@ -60,7 +58,7 @@ export function TransferDialog() {
               <SelectContent>
                 {accounts.filter(a => a.active).map(a => (
                   <SelectItem key={a.id} value={a.id}>
-                    {a.name} — {fmtBRL(Number(a.balance))}
+                    {a.name} — {formatBRL(Number(a.balance))}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -81,7 +79,7 @@ export function TransferDialog() {
             <Label>Valor</Label>
             <Input type="number" step="0.01" min="0" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0,00" />
             {insufficient && (
-              <p className="text-xs text-destructive">Saldo insuficiente. Disponível: {fmtBRL(Number(fromAcc!.balance))}</p>
+              <p className="text-xs text-destructive">Saldo insuficiente. Disponível: {formatBRL(Number(fromAcc!.balance))}</p>
             )}
           </div>
           <div className="grid gap-2">

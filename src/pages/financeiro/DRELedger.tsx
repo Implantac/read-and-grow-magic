@@ -12,9 +12,6 @@ import { useDRESummary, useDREDetailed, calculateDRE, type DRESection } from '@/
 import { cn } from '@/lib/utils';
 
 import { formatBRL } from '@/lib/formatters';
-const fmt = (v: number) =>
-  formatBRL(v);
-
 const SECTION_LABEL: Record<DRESection, string> = {
   revenue: 'Receita Operacional',
   other_revenue: 'Outras Receitas',
@@ -148,7 +145,7 @@ export default function DRELedgerPage() {
                       <TableCell className="text-muted-foreground text-sm">{SECTION_LABEL[section] ?? section}</TableCell>
                       <TableCell className="font-medium">{r.category_name}</TableCell>
                       <TableCell className={cn('text-right tabular-nums', Number(r.total) < 0 ? 'text-destructive' : 'text-foreground')}>
-                        {fmt(Number(r.total))}
+                        {formatBRL(Number(r.total))}
                       </TableCell>
                     </TableRow>
                   ))
@@ -175,7 +172,7 @@ function KPI({ title, value, subtitle, icon, tone }: { title: string; value: num
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
             <p className="text-xs uppercase tracking-wide text-muted-foreground">{title}</p>
-            <p className="text-2xl font-bold tabular-nums">{fmt(value)}</p>
+            <p className="text-2xl font-bold tabular-nums">{formatBRL(value)}</p>
             {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
           </div>
           <div className={cn('rounded-lg p-2', toneCls)}>{icon}</div>
@@ -195,7 +192,7 @@ function DRELine({ label, value, bold, highlight }: { label: string; value: numb
         value < 0 && 'text-destructive',
         value > 0 && highlight && 'text-success'
       )}>
-        {fmt(value)}
+        {formatBRL(value)}
       </TableCell>
     </TableRow>
   );
