@@ -163,7 +163,7 @@ export default function QuotationsPage() {
       </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <KPICard title="Valor Total" value={fmt(totalValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Valor Total" value={formatBRL(totalValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
         <KPICard title="Rascunhos" value={draftCount} icon={<FileEdit className="h-5 w-5" />} accentColor="warning" index={1} />
         <KPICard title="Enviados" value={sentCount} icon={<Mail className="h-5 w-5" />} accentColor="info" index={2} />
         <KPICard title="Aprovados" value={approvedCount} icon={<ThumbsUp className="h-5 w-5" />} accentColor="success" index={3} />

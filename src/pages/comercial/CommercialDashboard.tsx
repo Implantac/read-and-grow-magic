@@ -25,11 +25,10 @@ import { ptBR } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 
-const fmt = (v: number) => formatBRL(v);
 const fmtShort = (v: number) => {
   if (v >= 1000000) return `R$ ${(v / 1000000).toFixed(1)}M`;
   if (v >= 1000) return `R$ ${(v / 1000).toFixed(0)}K`;
-  return fmt(v);
+  return formatBRL(v);
 };
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))', '#64748b', '#0ea5e9', '#f59e0b'];
 
@@ -171,13 +170,13 @@ export default function CommercialDashboard() {
 
       {/* KPIs Row 1 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 mt-6">
-        <KPICard index={0} title="Faturamento Hoje" value={fmt(stats.billingToday)} subtitle={`${stats.ordersToday} pedidos`} icon={<ShoppingCart className="h-5 w-5" />} accentColor="primary" />
-        <KPICard index={1} title="Faturamento do Mês" value={fmt(stats.billingMonth)} subtitle={
+        <KPICard index={0} title="Faturamento Hoje" value={formatBRL(stats.billingToday)} subtitle={`${stats.ordersToday} pedidos`} icon={<ShoppingCart className="h-5 w-5" />} accentColor="primary" />
+        <KPICard index={1} title="Faturamento do Mês" value={formatBRL(stats.billingMonth)} subtitle={
           stats.billingGrowth !== 0
             ? `${stats.billingGrowth > 0 ? '↑' : '↓'} ${Math.abs(stats.billingGrowth).toFixed(1)}% vs mês anterior`
             : `${stats.ordersMonth} pedidos`
         } icon={<DollarSign className="h-5 w-5" />} accentColor="success" />
-        <KPICard index={2} title="Ticket Médio" value={fmt(stats.avgTicket)} subtitle={`${stats.ordersMonth} pedidos no mês`} icon={<TrendingUp className="h-5 w-5" />} accentColor="accent" />
+        <KPICard index={2} title="Ticket Médio" value={formatBRL(stats.avgTicket)} subtitle={`${stats.ordersMonth} pedidos no mês`} icon={<TrendingUp className="h-5 w-5" />} accentColor="accent" />
         <KPICard index={3} title="Taxa de Conversão" value={`${stats.conversionRate.toFixed(1)}%`} subtitle={`${stats.funnelOpen} oportunidades abertas`} icon={<CheckCircle className="h-5 w-5" />} accentColor="info" />
       </div>
 
@@ -197,8 +196,8 @@ export default function CommercialDashboard() {
           <CardContent className="space-y-3">
             <div className="flex items-end justify-between">
               <div>
-                <p className="text-2xl font-bold text-primary">{fmt(stats.billingMonth)}</p>
-                <p className="text-xs text-muted-foreground">de {fmt(stats.totalTarget)} meta mensal</p>
+                <p className="text-2xl font-bold text-primary">{formatBRL(stats.billingMonth)}</p>
+                <p className="text-xs text-muted-foreground">de {formatBRL(stats.totalTarget)} meta mensal</p>
               </div>
               <Badge variant={stats.targetPct >= 100 ? 'default' : stats.targetPct >= 70 ? 'secondary' : 'destructive'} className="text-sm">
                 {stats.targetPct.toFixed(0)}%
@@ -219,7 +218,7 @@ export default function CommercialDashboard() {
         <Card>
           <CardHeader><CardTitle className="text-sm font-medium flex items-center gap-2"><Zap className="h-4 w-4 text-primary" /> Previsão de Faturamento</CardTitle></CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-primary">{fmt(insights.revenueForecast)}</p>
+            <p className="text-2xl font-bold text-primary">{formatBRL(insights.revenueForecast)}</p>
             <p className="text-xs text-muted-foreground mt-1">Pedidos em andamento (pendentes → separados)</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Badge variant="outline" className="text-[10px]">{insights.stuckOrders.length} travados</Badge>
@@ -260,7 +259,7 @@ export default function CommercialDashboard() {
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey="day" fontSize={10} interval={4} />
               <YAxis tickFormatter={v => fmtShort(v)} fontSize={10} />
-              <Tooltip formatter={(v: number, name: string) => [name === 'valor' ? fmt(v) : v, name === 'valor' ? 'Faturamento' : 'Pedidos']} />
+              <Tooltip formatter={(v: number, name: string) => [name === 'valor' ? formatBRL(v) : v, name === 'valor' ? 'Faturamento' : 'Pedidos']} />
               <Line type="monotone" dataKey="valor" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} name="valor" />
             </LineChart>
           </ResponsiveContainer>
@@ -295,7 +294,7 @@ export default function CommercialDashboard() {
                 <BarChart data={stats.topClients} layout="vertical">
                   <XAxis type="number" tickFormatter={(v) => fmtShort(v)} fontSize={11} />
                   <YAxis type="category" dataKey="name" width={120} fontSize={11} />
-                  <Tooltip formatter={(v: number) => fmt(v)} />
+                  <Tooltip formatter={(v: number) => formatBRL(v)} />
                   <Bar dataKey="total" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -325,7 +324,7 @@ export default function CommercialDashboard() {
                             <p className="text-[10px] text-muted-foreground">{rep.orders} pedidos</p>
                           </div>
                         </div>
-                        <span className="text-sm font-semibold text-primary">{fmt(rep.total)}</span>
+                        <span className="text-sm font-semibold text-primary">{formatBRL(rep.total)}</span>
                       </div>
                       {rep.target > 0 && (
                         <div className="flex items-center gap-2 pl-8">
@@ -357,7 +356,7 @@ export default function CommercialDashboard() {
                         <p className="text-[10px] text-muted-foreground">{region.count} pedidos</p>
                       </div>
                     </div>
-                    <span className="text-sm font-semibold text-primary">{fmt(region.total)}</span>
+                    <span className="text-sm font-semibold text-primary">{formatBRL(region.total)}</span>
                   </div>
                 ))}
               </div>
@@ -427,7 +426,7 @@ export default function CommercialDashboard() {
                     <p className="text-sm font-medium">{action.title}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">{action.description}</p>
                     {action.estimated_value > 0 && (
-                      <Badge variant="secondary" className="mt-1 text-[10px]">{fmt(action.estimated_value)}</Badge>
+                      <Badge variant="secondary" className="mt-1 text-[10px]">{formatBRL(action.estimated_value)}</Badge>
                     )}
                   </div>
                 </div>
@@ -439,7 +438,7 @@ export default function CommercialDashboard() {
                     <p className="text-sm font-medium">{rec.title}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">{rec.description}</p>
                     {rec.estimated_value > 0 && (
-                      <Badge variant="secondary" className="mt-1 text-[10px]">{fmt(rec.estimated_value)}</Badge>
+                      <Badge variant="secondary" className="mt-1 text-[10px]">{formatBRL(rec.estimated_value)}</Badge>
                     )}
                   </div>
                 </div>

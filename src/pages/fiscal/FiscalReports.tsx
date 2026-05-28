@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { formatBRL } from '@/lib/formatters';
 import {
   BarChart3,
   Download,
@@ -75,10 +76,7 @@ export default function FiscalReportsPage() {
   });
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
+    return formatBRL(value);
   };
 
   const formatDate = (dateString: string) => {

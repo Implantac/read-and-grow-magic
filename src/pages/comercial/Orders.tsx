@@ -35,7 +35,6 @@ import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
 import { validateOrder, type CommercialValidation } from '@/hooks/useCommercialRules';
 
-const fmt = (v: number) => formatBRL(v);
 
 const filterFields: FilterField[] = [
   { key: 'status', label: 'Status', type: 'select', options: [
@@ -267,7 +266,7 @@ export default function OrdersPage() {
     },
     {
       key: 'total', label: 'Total', sortable: true,
-      render: (v) => <span className="font-semibold">{fmt(v as number)}</span>,
+      render: (v) => <span className="font-semibold">{formatBRL(v as number)}</span>,
     },
     { key: 'priority', label: 'Prioridade', render: (v) => <StatusBadge type="priority" status={v as string} /> },
     { key: 'status', label: 'Status', render: (v) => <StatusBadge type="order" status={v as string} /> },
@@ -381,7 +380,7 @@ export default function OrdersPage() {
             columns={[
               { key: 'number', label: 'Pedido' }, { key: 'client_name', label: 'Cliente' },
               { key: 'date', label: 'Data', format: (v) => formatDate(v as string) },
-              { key: 'total', label: 'Total', format: (v) => fmt(Number(v)) },
+              { key: 'total', label: 'Total', format: (v) => formatBRL(Number(v)) },
               { key: 'priority', label: 'Prioridade' }, { key: 'status', label: 'Status' },
             ]}
             filename="pedidos"
@@ -393,7 +392,7 @@ export default function OrdersPage() {
 
       {/* KPI Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <KPICard title="Valor Total" value={fmt(totalValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Valor Total" value={formatBRL(totalValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
         <KPICard title="Total Pedidos" value={filteredOrders.length} icon={<Package className="h-5 w-5" />} accentColor="accent" index={1} />
         <KPICard title="Pendentes" value={pendingCount} subtitle={`${processingCount} em processamento`} icon={<Clock className="h-5 w-5" />} accentColor="warning" index={2} />
         <KPICard title="Entregues" value={deliveredCount} subtitle={filteredOrders.length > 0 ? `${Math.round((deliveredCount / filteredOrders.length) * 100)}% concluídos` : '—'} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={3} />
@@ -517,19 +516,19 @@ export default function OrdersPage() {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Itens ({formItems.length})</span>
-                        <span>{fmt(formItems.reduce((s, i) => s + (i.quantity * i.unit_price - i.discount), 0))}</span>
+                        <span>{formatBRL(formItems.reduce((s, i) => s + (i.quantity * i.unit_price - i.discount), 0))}</span>
                       </div>
                       {Number(formShipping) > 0 && (
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Frete</span>
-                          <span>{fmt(Number(formShipping))}</span>
+                          <span>{formatBRL(Number(formShipping))}</span>
                         </div>
                       )}
                       <Separator />
                       <div className="flex justify-between text-base font-bold">
                         <span>Total</span>
                         <span className="text-primary">
-                          {fmt(formItems.reduce((s, i) => s + (i.quantity * i.unit_price - i.discount), 0) + (Number(formShipping) || 0))}
+                          {formatBRL(formItems.reduce((s, i) => s + (i.quantity * i.unit_price - i.discount), 0) + (Number(formShipping) || 0))}
                         </span>
                       </div>
                     </div>
@@ -688,13 +687,13 @@ export default function OrdersPage() {
                                 <p className="font-mono text-xs text-muted-foreground">{item.product_code}</p>
                               </td>
                               <td className="px-4 py-3 text-right font-mono">{item.quantity}</td>
-                              <td className="px-4 py-3 text-right">{fmt(item.unit_price)}</td>
+                              <td className="px-4 py-3 text-right">{formatBRL(item.unit_price)}</td>
                               <td className="px-4 py-3 text-right">
                                 {item.discount > 0 ? (
-                                  <span className="text-destructive">-{fmt(item.discount)}</span>
+                                  <span className="text-destructive">-{formatBRL(item.discount)}</span>
                                 ) : '—'}
                               </td>
-                              <td className="px-4 py-3 text-right font-semibold">{fmt(item.total)}</td>
+                              <td className="px-4 py-3 text-right font-semibold">{formatBRL(item.total)}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -709,24 +708,24 @@ export default function OrdersPage() {
                     <CardContent className="space-y-2 p-4 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Subtotal</span>
-                        <span>{fmt(selectedOrder.subtotal)}</span>
+                        <span>{formatBRL(selectedOrder.subtotal)}</span>
                       </div>
                       {selectedOrder.discount > 0 && (
                         <div className="flex justify-between text-destructive">
                           <span>Desconto</span>
-                          <span>-{fmt(selectedOrder.discount)}</span>
+                          <span>-{formatBRL(selectedOrder.discount)}</span>
                         </div>
                       )}
                       {selectedOrder.shipping > 0 && (
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Frete</span>
-                          <span>{fmt(selectedOrder.shipping)}</span>
+                          <span>{formatBRL(selectedOrder.shipping)}</span>
                         </div>
                       )}
                       <Separator />
                       <div className="flex justify-between text-base font-bold">
                         <span>Total</span>
-                        <span className="text-primary">{fmt(selectedOrder.total)}</span>
+                        <span className="text-primary">{formatBRL(selectedOrder.total)}</span>
                       </div>
                     </CardContent>
                   </Card>

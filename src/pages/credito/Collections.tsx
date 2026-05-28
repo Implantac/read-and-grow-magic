@@ -71,7 +71,7 @@ export default function Collections() {
       <PageHeader title="Cobrança" description="Acompanhamento de inadimplência e ações de cobrança" />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <KPICard title="Total Vencido" value={fmt(totalOverdue)} icon={<DollarSign className="h-5 w-5" />} accentColor="danger" index={0} />
+        <KPICard title="Total Vencido" value={formatBRL(totalOverdue)} icon={<DollarSign className="h-5 w-5" />} accentColor="danger" index={0} />
         <KPICard title="Títulos Vencidos" value={String(overdueReceivables.length)} icon={<AlertCircle className="h-5 w-5" />} accentColor="warning" index={1} />
         <KPICard title="Ações em Aberto" value={String(openActions.length)} icon={<Clock className="h-5 w-5" />} accentColor="info" index={2} />
         <KPICard title="Promessas Quebradas" value={String(brokenPromises.length)} icon={<Phone className="h-5 w-5" />} accentColor="danger" index={3} />
@@ -92,7 +92,7 @@ export default function Collections() {
             ].map(a => (
               <div key={a.label} className="text-center p-3 rounded-lg bg-muted/50">
                 <p className="text-xs text-muted-foreground">{a.label}</p>
-                <p className={`text-sm font-bold ${a.color}`}>{fmt(a.value)}</p>
+                <p className={`text-sm font-bold ${a.color}`}>{formatBRL(a.value)}</p>
               </div>
             ))}
           </div>

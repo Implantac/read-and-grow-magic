@@ -24,7 +24,6 @@ import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 import { formatBRL } from '@/lib/formatters';
-const fmt = (v: number) => formatBRL(v);
 
 export default function SalesRepsPage() {
   const { data: reps = [], isLoading } = useSalesReps();
@@ -129,12 +128,12 @@ export default function SalesRepsPage() {
       </div>
     )},
     { key: 'commission_rate', label: 'Comissão', render: (_v, r) => `${r.commission_rate}%` },
-    { key: 'monthly_target', label: 'Meta Mensal', render: (_v, r) => fmt(r.monthly_target) },
+    { key: 'monthly_target', label: 'Meta Mensal', render: (_v, r) => formatBRL(r.monthly_target) },
     { key: 'total_sales', label: 'Vendas Total', render: (_v, r) => {
       const portfolio = portfolioData.repPortfolios.find(p => p.id === r.id);
       return (
         <div>
-          <p className="font-semibold">{fmt(portfolio?.revenue || 0)}</p>
+          <p className="font-semibold">{formatBRL(portfolio?.revenue || 0)}</p>
           <p className="text-[10px] text-muted-foreground">{portfolio?.clientCount || 0} clientes</p>
         </div>
       );
@@ -171,8 +170,8 @@ export default function SalesRepsPage() {
 
       <div className="grid gap-4 md:grid-cols-5 mb-6 mt-6">
         <KPICard index={0} title="Representantes" value={reps.length.toString()} subtitle={`${activeReps} ativos`} icon={<Users className="h-5 w-5" />} accentColor="primary" />
-        <KPICard index={1} title="Meta Total Mês" value={fmt(totalTarget)} icon={<Target className="h-5 w-5" />} accentColor="info" />
-        <KPICard index={2} title="Faturamento Total" value={fmt(totalRevenue)} icon={<DollarSign className="h-5 w-5" />} accentColor="success" />
+        <KPICard index={1} title="Meta Total Mês" value={formatBRL(totalTarget)} icon={<Target className="h-5 w-5" />} accentColor="info" />
+        <KPICard index={2} title="Faturamento Total" value={formatBRL(totalRevenue)} icon={<DollarSign className="h-5 w-5" />} accentColor="success" />
         <KPICard index={3} title="Atingimento" value={`${totalTarget > 0 ? ((totalRevenue / totalTarget) * 100).toFixed(0) : 0}%`} icon={<TrendingUp className="h-5 w-5" />} accentColor="accent" />
         <KPICard index={4} title="Sem Representante" value={portfolioData.unassigned.length.toString()} icon={<Briefcase className="h-5 w-5" />} accentColor="warning" />
       </div>
@@ -195,9 +194,9 @@ export default function SalesRepsPage() {
               {portfolioData.rankingData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={Math.max(300, portfolioData.rankingData.length * 50)}>
                   <BarChart data={portfolioData.rankingData} layout="vertical">
-                    <XAxis type="number" tickFormatter={v => fmt(v)} fontSize={11} />
+                    <XAxis type="number" tickFormatter={v => formatBRL(v)} fontSize={11} />
                     <YAxis type="category" dataKey="name" width={140} fontSize={12} />
-                    <Tooltip formatter={(v: number) => fmt(v)} />
+                    <Tooltip formatter={(v: number) => formatBRL(v)} />
                     <Bar dataKey="revenue" name="Faturamento" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
                     <Bar dataKey="meta" name="Meta" fill="hsl(var(--muted-foreground))" radius={[0, 4, 4, 0]} opacity={0.3} />
                   </BarChart>
@@ -232,7 +231,7 @@ export default function SalesRepsPage() {
                     </div>
                     <div className="p-2 rounded bg-muted/50">
                       <p className="text-[10px] text-muted-foreground">Faturamento</p>
-                      <p className="font-semibold text-primary">{fmt(rep.revenue)}</p>
+                      <p className="font-semibold text-primary">{formatBRL(rep.revenue)}</p>
                     </div>
                     <div className="p-2 rounded bg-muted/50">
                       <p className="text-[10px] text-muted-foreground">Conversão</p>
@@ -242,7 +241,7 @@ export default function SalesRepsPage() {
                   {rep.monthly_target > 0 && (
                     <div className="space-y-1">
                       <div className="flex justify-between text-xs">
-                        <span className="text-muted-foreground">Meta: {fmt(rep.monthly_target)}</span>
+                        <span className="text-muted-foreground">Meta: {formatBRL(rep.monthly_target)}</span>
                         <span className="font-medium">{rep.targetPct.toFixed(0)}%</span>
                       </div>
                       <Progress value={Math.min(rep.targetPct, 100)} className="h-1.5" />

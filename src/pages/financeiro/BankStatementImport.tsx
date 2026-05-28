@@ -13,7 +13,6 @@ import { parseCSV, parseOFX, useImportBankStatement, useAutoMatch, type ParsedTx
 import { useBankAccounts } from '@/hooks/useBankAccounts';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
-const fmt = (v: number) => formatBRL(v);
 
 export default function BankStatementImport() {
   const [parsed, setParsed] = useState<ParsedTx[]>([]);
@@ -126,7 +125,7 @@ export default function BankStatementImport() {
                       <TableCell className="text-xs">{formatDate(t.date)}</TableCell>
                       <TableCell className="text-sm">{t.description}</TableCell>
                       <TableCell><Badge variant={t.type === 'credit' ? 'default' : 'destructive'}>{t.type}</Badge></TableCell>
-                      <TableCell className="text-right font-mono text-sm">{fmt(t.amount)}</TableCell>
+                      <TableCell className="text-right font-mono text-sm">{formatBRL(t.amount)}</TableCell>
                       <TableCell className="text-xs text-muted-foreground">{t.bank_reference ?? '—'}</TableCell>
                     </TableRow>
                   ))}

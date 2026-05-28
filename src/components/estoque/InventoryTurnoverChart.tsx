@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { formatBRL } from '@/lib/formatters';
 import {
   ChartContainer,
   ChartTooltip,
@@ -104,10 +105,7 @@ export function InventoryTurnoverChart({ stockLevels }: InventoryTurnoverChartPr
   }, [turnoverData]);
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
+    return formatBRL(value);
   };
 
   const getBarColor = (classification: string) => {

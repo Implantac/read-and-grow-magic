@@ -1,9 +1,9 @@
 import jsPDF from 'jspdf';
 import type { NFe, NFeItem } from '@/types/fiscal';
 
-import { formatDate } from '@/lib/formatters';
+import { formatDate, formatBRL } from '@/lib/formatters';
 const formatCurrency = (v: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  formatBRL(v);
 
 const formatDate = (dateString: string) => {
   if (!dateString) return '';

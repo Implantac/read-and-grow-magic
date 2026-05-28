@@ -27,7 +27,6 @@ import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { getOrderStatusLabel, getPaymentMethodLabel } from '@/config/commercial';
 
-const fmt = (v: number) => formatBRL(v);
 
 const EVENT_ICONS: Record<string, React.ReactNode> = {
   contact: <Phone className="h-3.5 w-3.5" />,
@@ -110,11 +109,11 @@ export function ClientDetailDialog({ client, open, onOpenChange }: Props) {
         <div className="grid grid-cols-4 gap-2">
           <div className="rounded-lg border p-2.5 text-center">
             <p className="text-[10px] text-muted-foreground uppercase">Total Compras</p>
-            <p className="text-sm font-bold text-primary">{fmt(client.total_purchases || 0)}</p>
+            <p className="text-sm font-bold text-primary">{formatBRL(client.total_purchases || 0)}</p>
           </div>
           <div className="rounded-lg border p-2.5 text-center">
             <p className="text-[10px] text-muted-foreground uppercase">Ticket Médio</p>
-            <p className="text-sm font-bold">{fmt(client.avg_ticket || 0)}</p>
+            <p className="text-sm font-bold">{formatBRL(client.avg_ticket || 0)}</p>
           </div>
           <div className="rounded-lg border p-2.5 text-center">
             <p className="text-[10px] text-muted-foreground uppercase">Pedidos</p>
@@ -132,7 +131,7 @@ export function ClientDetailDialog({ client, open, onOpenChange }: Props) {
         {client.credit_limit > 0 && (
           <div className="space-y-1">
             <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground">Crédito: {fmt(client.current_balance)} / {fmt(client.credit_limit)}</span>
+              <span className="text-muted-foreground">Crédito: {formatBRL(client.current_balance)} / {formatBRL(client.credit_limit)}</span>
               <span className={`font-medium ${creditUsage > 80 ? 'text-destructive' : ''}`}>{creditUsage.toFixed(0)}%</span>
             </div>
             <Progress value={Math.min(creditUsage, 100)} className="h-1.5" />
@@ -171,17 +170,17 @@ export function ClientDetailDialog({ client, open, onOpenChange }: Props) {
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="p-3 rounded-lg bg-muted/50">
                 <span className="text-muted-foreground block text-xs">Limite de Crédito</span>
-                <p className="text-lg font-semibold">{fmt(client.credit_limit)}</p>
+                <p className="text-lg font-semibold">{formatBRL(client.credit_limit)}</p>
               </div>
               <div className="p-3 rounded-lg bg-muted/50">
                 <span className="text-muted-foreground block text-xs">Saldo Atual</span>
-                <p className={`text-lg font-semibold ${creditUsage > 80 ? 'text-destructive' : ''}`}>{fmt(client.current_balance)}</p>
+                <p className={`text-lg font-semibold ${creditUsage > 80 ? 'text-destructive' : ''}`}>{formatBRL(client.current_balance)}</p>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3 text-sm">
               <div><span className="text-muted-foreground block text-xs">Condição de Pagamento</span><p>{client.default_payment_condition || 'À vista'}</p></div>
               <div><span className="text-muted-foreground block text-xs">Tabela de Preço</span><p>{client.price_table || 'Padrão'}</p></div>
-              <div><span className="text-muted-foreground block text-xs">Potencial Estimado</span><p>{fmt(client.estimated_potential || 0)}</p></div>
+              <div><span className="text-muted-foreground block text-xs">Potencial Estimado</span><p>{formatBRL(client.estimated_potential || 0)}</p></div>
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div><span className="text-muted-foreground block text-xs">Região</span><p>{client.region || '—'}</p></div>
@@ -205,7 +204,7 @@ export function ClientDetailDialog({ client, open, onOpenChange }: Props) {
                         <p className="font-medium">{f.title}</p>
                         <p className="text-xs text-muted-foreground">{f.stage} • {f.probability}%</p>
                       </div>
-                      <span className="font-semibold text-primary">{fmt(f.value)}</span>
+                      <span className="font-semibold text-primary">{formatBRL(f.value)}</span>
                     </div>
                   ))}
                 </div>
@@ -244,7 +243,7 @@ export function ClientDetailDialog({ client, open, onOpenChange }: Props) {
                         </p>
                       </div>
                     </div>
-                    <span className="text-sm font-bold">{fmt(order.total)}</span>
+                    <span className="text-sm font-bold">{formatBRL(order.total)}</span>
                   </div>
                 ))}
               </div>
@@ -256,11 +255,11 @@ export function ClientDetailDialog({ client, open, onOpenChange }: Props) {
             <div className="grid grid-cols-3 gap-3">
               <div className="rounded-lg border p-3 text-center">
                 <p className="text-[10px] text-muted-foreground uppercase">A Receber</p>
-                <p className="text-lg font-bold text-primary">{fmt(totalReceivable)}</p>
+                <p className="text-lg font-bold text-primary">{formatBRL(totalReceivable)}</p>
               </div>
               <div className="rounded-lg border p-3 text-center">
                 <p className="text-[10px] text-muted-foreground uppercase">Vencido</p>
-                <p className={`text-lg font-bold ${overdueReceivable > 0 ? 'text-destructive' : ''}`}>{fmt(overdueReceivable)}</p>
+                <p className={`text-lg font-bold ${overdueReceivable > 0 ? 'text-destructive' : ''}`}>{formatBRL(overdueReceivable)}</p>
               </div>
               <div className="rounded-lg border p-3 text-center">
                 <p className="text-[10px] text-muted-foreground uppercase">Total Títulos</p>
@@ -286,7 +285,7 @@ export function ClientDetailDialog({ client, open, onOpenChange }: Props) {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold">{fmt(r.amount)}</p>
+                        <p className="text-sm font-semibold">{formatBRL(r.amount)}</p>
                         <Badge variant={r.status === 'paid' ? 'default' : isOverdue ? 'destructive' : 'secondary'} className="text-[10px]">
                           {r.status === 'paid' ? 'Pago' : isOverdue ? 'Vencido' : 'Pendente'}
                         </Badge>

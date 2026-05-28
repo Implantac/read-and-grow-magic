@@ -19,7 +19,6 @@ import { CHECK_STATUS_LABELS } from '@/types/financial';
 import { format } from 'date-fns';
 
 import { formatBRL } from '@/lib/formatters';
-const fmt = (v: number) => formatBRL(v);
 
 const statusVariant: Record<string, string> = {
   received: 'bg-warning/10 text-warning border-warning/30',
@@ -126,9 +125,9 @@ export default function Checks() {
       </PageHeader>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KPICard title="Em Carteira" value={fmt(totals.pending)} icon={<FileCheck className="h-5 w-5" />} accentColor="warning" index={0} />
-        <KPICard title="Compensados" value={fmt(totals.cleared)} icon={<CheckCircle2 className="h-5 w-5" />} accentColor="success" index={1} />
-        <KPICard title="Devolvidos" value={fmt(totals.bounced)} icon={<XCircle className="h-5 w-5" />} accentColor="danger" index={2} />
+        <KPICard title="Em Carteira" value={formatBRL(totals.pending)} icon={<FileCheck className="h-5 w-5" />} accentColor="warning" index={0} />
+        <KPICard title="Compensados" value={formatBRL(totals.cleared)} icon={<CheckCircle2 className="h-5 w-5" />} accentColor="success" index={1} />
+        <KPICard title="Devolvidos" value={formatBRL(totals.bounced)} icon={<XCircle className="h-5 w-5" />} accentColor="danger" index={2} />
         <KPICard title="Total Cheques" value={String(totals.count)} icon={<FileCheck className="h-5 w-5" />} accentColor="primary" index={3} />
       </div>
 
@@ -172,7 +171,7 @@ export default function Checks() {
                   <TableCell className="text-sm">{c.issuer_name || '-'}</TableCell>
                   <TableCell className="text-sm">{c.bank_name || '-'}</TableCell>
                   <TableCell className="text-sm">{c.due_date ? format(new Date(c.due_date), 'dd/MM/yyyy') : '-'}</TableCell>
-                  <TableCell className="text-right font-medium">{fmt(Number(c.amount))}</TableCell>
+                  <TableCell className="text-right font-medium">{formatBRL(Number(c.amount))}</TableCell>
                   <TableCell><Badge variant="outline" className={statusVariant[c.status]}>{CHECK_STATUS_LABELS[c.status]}</Badge></TableCell>
                   <TableCell>
                     <div className="flex justify-end gap-1">
@@ -208,7 +207,7 @@ export default function Checks() {
             <div className="space-y-3 py-2">
               <div className="rounded-md bg-muted p-3">
                 <p className="text-sm">Cheque <strong>{selected.check_number}</strong></p>
-                <p className="text-2xl font-bold text-primary">{fmt(Number(selected.amount))}</p>
+                <p className="text-2xl font-bold text-primary">{formatBRL(Number(selected.amount))}</p>
               </div>
               <div className="grid gap-1.5">
                 <Label className="text-xs">Conta bancária de depósito *</Label>

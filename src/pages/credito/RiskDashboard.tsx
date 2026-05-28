@@ -75,8 +75,8 @@ export default function RiskDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <KPICard title="Clientes Bloqueados" value={String(blockedClients.length)} icon={<ShieldAlert className="h-5 w-5" />} accentColor="danger" index={0} />
         <KPICard title="Pedidos Bloqueados" value={String(activeBlocks.length)} icon={<Lock className="h-5 w-5" />} accentColor="warning" index={1} />
-        <KPICard title="Total em Aberto" value={fmt(totalOpen)} icon={<DollarSign className="h-5 w-5" />} accentColor="info" index={2} />
-        <KPICard title="Total Vencido" value={fmt(totalOverdue)} icon={<TrendingDown className="h-5 w-5" />} accentColor="danger" index={3} />
+        <KPICard title="Total em Aberto" value={formatBRL(totalOpen)} icon={<DollarSign className="h-5 w-5" />} accentColor="info" index={2} />
+        <KPICard title="Total Vencido" value={formatBRL(totalOverdue)} icon={<TrendingDown className="h-5 w-5" />} accentColor="danger" index={3} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
@@ -106,7 +106,7 @@ export default function RiskDashboard() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" fontSize={12} />
                 <YAxis fontSize={12} tickFormatter={v => `${(v / 1000).toFixed(0)}k`} />
-                <Tooltip formatter={(v: number) => fmt(v)} />
+                <Tooltip formatter={(v: number) => formatBRL(v)} />
                 <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -138,7 +138,7 @@ export default function RiskDashboard() {
                     <TableCell>
                       <div className="space-y-1">
                         <Progress value={p.credit_limit > 0 ? (p.used_limit / p.credit_limit) * 100 : 0} className="h-2" />
-                        <span className="text-xs text-muted-foreground">{fmt(p.used_limit)} / {fmt(p.credit_limit)}</span>
+                        <span className="text-xs text-muted-foreground">{formatBRL(p.used_limit)} / {formatBRL(p.credit_limit)}</span>
                       </div>
                     </TableCell>
                   </TableRow>

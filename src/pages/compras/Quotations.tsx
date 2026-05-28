@@ -6,7 +6,7 @@ import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatDate } from '@/lib/formatters';
+import { formatDate, formatBRL } from '@/lib/formatters';
 import {
   Table,
   TableBody,
@@ -84,10 +84,7 @@ export default function QuotationsPage() {
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(value);
+    return formatBRL(value);
   };
 
   const formatDate = (date: string) => {

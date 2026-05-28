@@ -22,11 +22,10 @@ import { useFollowUps } from '@/hooks/useSalesIntelligence';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from 'recharts';
 import { startOfMonth, endOfMonth } from 'date-fns';
 
-const fmt = (v: number) => formatBRL(v);
 const fmtShort = (v: number) => {
   if (v >= 1000000) return `R$ ${(v / 1000000).toFixed(1)}M`;
   if (v >= 1000) return `R$ ${(v / 1000).toFixed(0)}K`;
-  return fmt(v);
+  return formatBRL(v);
 };
 const MEDAL_COLORS = ['text-yellow-500', 'text-gray-400', 'text-amber-700'];
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
@@ -105,7 +104,7 @@ export default function PerformanceDashboard() {
         <KPICard index={0} title="Faturamento Mês" value={fmtShort(globalStats.monthBilling)}
           subtitle={`${globalStats.monthOrders} pedidos`}
           icon={<DollarSign className="h-5 w-5" />} accentColor="primary" />
-        <KPICard index={1} title="Ticket Médio" value={fmt(globalStats.avgTicket)}
+        <KPICard index={1} title="Ticket Médio" value={formatBRL(globalStats.avgTicket)}
           icon={<TrendingUp className="h-5 w-5" />} accentColor="accent" />
         <KPICard index={2} title="Taxa Conversão" value={`${globalStats.conversionRate.toFixed(1)}%`}
           subtitle={`${globalStats.wonDeals} ganhos / ${globalStats.lostDeals} perdidos`}
@@ -151,11 +150,11 @@ export default function PerformanceDashboard() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
                             <span className="text-sm font-medium truncate">{p.repName}</span>
-                            <span className="text-sm font-bold text-primary">{fmt(p.totalSales)}</span>
+                            <span className="text-sm font-bold text-primary">{formatBRL(p.totalSales)}</span>
                           </div>
                           <div className="flex items-center gap-3 mt-1 text-[10px] text-muted-foreground">
                             <span>{p.ordersCount} pedidos</span>
-                            <span>Ticket: {fmt(p.avgTicket)}</span>
+                            <span>Ticket: {formatBRL(p.avgTicket)}</span>
                             <span>Conv: {p.conversionRate.toFixed(0)}%</span>
                             <span>{p.clientsServed} clientes</span>
                           </div>
@@ -186,7 +185,7 @@ export default function PerformanceDashboard() {
                     <BarChart data={performances.slice(0, 8)} layout="vertical">
                       <XAxis type="number" tickFormatter={v => fmtShort(v)} fontSize={10} />
                       <YAxis type="category" dataKey="repName" width={100} fontSize={11} />
-                      <Tooltip formatter={(v: number) => fmt(v)} />
+                      <Tooltip formatter={(v: number) => formatBRL(v)} />
                       <Bar dataKey="totalSales" radius={[0, 4, 4, 0]}>
                         {performances.slice(0, 8).map((_, i) => (
                           <Cell key={i} fill={COLORS[i % COLORS.length]} />
@@ -228,9 +227,9 @@ export default function PerformanceDashboard() {
                       <tr key={p.repId} className="border-b hover:bg-muted/30">
                         <td className="px-3 py-2 font-bold">{p.ranking}</td>
                         <td className="px-3 py-2 font-medium">{p.repName}</td>
-                        <td className="px-3 py-2 text-right font-semibold text-primary">{fmt(p.totalSales)}</td>
+                        <td className="px-3 py-2 text-right font-semibold text-primary">{formatBRL(p.totalSales)}</td>
                         <td className="px-3 py-2 text-right">{p.ordersCount}</td>
-                        <td className="px-3 py-2 text-right">{fmt(p.avgTicket)}</td>
+                        <td className="px-3 py-2 text-right">{formatBRL(p.avgTicket)}</td>
                         <td className="px-3 py-2 text-right">
                           <Badge variant={p.conversionRate >= 50 ? 'default' : 'secondary'}>{p.conversionRate.toFixed(0)}%</Badge>
                         </td>
@@ -350,7 +349,7 @@ export default function PerformanceDashboard() {
                           </div>
                           {alert.estimatedLoss > 0 && (
                             <Badge variant="destructive" className="shrink-0">
-                              {fmt(alert.estimatedLoss)}
+                              {formatBRL(alert.estimatedLoss)}
                             </Badge>
                           )}
                         </div>
@@ -359,7 +358,7 @@ export default function PerformanceDashboard() {
                   })}
                   <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-center">
                     <p className="text-sm font-medium text-destructive">
-                      Total em risco: {fmt(lostAlerts.reduce((s, a) => s + a.estimatedLoss, 0))}
+                      Total em risco: {formatBRL(lostAlerts.reduce((s, a) => s + a.estimatedLoss, 0))}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       Agir agora pode recuperar parte significativa deste valor

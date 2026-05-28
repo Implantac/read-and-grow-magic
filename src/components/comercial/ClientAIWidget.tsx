@@ -7,7 +7,6 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 import { formatBRL } from '@/lib/formatters';
-const fmt = (v: number) => formatBRL(v);
 
 interface Props {
   clientId: string;
