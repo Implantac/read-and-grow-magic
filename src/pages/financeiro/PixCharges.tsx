@@ -14,8 +14,7 @@ import { usePixCharges, useCreatePixCharge, useSimulatePixPayment } from '@/hook
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-
-const fmtBRL = (v: number) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+import { formatBRL } from '@/lib/formatters';
 
 const statusMeta = {
   pending: { label: 'Pendente', variant: 'secondary' as const, icon: Clock },
@@ -71,8 +70,8 @@ export default function PixCharges() {
       </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <KPICard title="Pendentes" value={totals.pending} subtitle={fmtBRL(totals.pendingAmount)} icon={<Clock className="h-5 w-5" />} accentColor="warning" index={0} />
-        <KPICard title="Pagos" value={totals.paid} subtitle={fmtBRL(totals.paidAmount)} icon={<CheckCircle2 className="h-5 w-5" />} accentColor="success" index={1} />
+        <KPICard title="Pendentes" value={totals.pending} subtitle={formatBRL(totals.pendingAmount)} icon={<Clock className="h-5 w-5" />} accentColor="warning" index={0} />
+        <KPICard title="Pagos" value={totals.paid} subtitle={formatBRL(totals.paidAmount)} icon={<CheckCircle2 className="h-5 w-5" />} accentColor="success" index={1} />
         <KPICard title="Total cobranças" value={charges.length} subtitle="últimos 200 registros" icon={<QrCode className="h-5 w-5" />} accentColor="primary" index={2} />
         <KPICard title="Taxa conversão" value={`${charges.length ? Math.round((totals.paid / charges.length) * 100) : 0}%`} subtitle="pagas / geradas" icon={<Zap className="h-5 w-5" />} accentColor="primary" index={3} />
       </div>
@@ -106,7 +105,7 @@ export default function PixCharges() {
                       <TableCell className="text-xs whitespace-nowrap">{format(new Date(c.created_at), 'dd/MM HH:mm', { locale: ptBR })}</TableCell>
                       <TableCell className="font-mono text-xs">{c.txid?.slice(0, 12)}...</TableCell>
                       <TableCell className="text-sm">{c.client_name ?? '—'}</TableCell>
-                      <TableCell className="text-right font-medium">{fmtBRL(Number(c.amount))}</TableCell>
+                      <TableCell className="text-right font-medium">{formatBRL(Number(c.amount))}</TableCell>
                       <TableCell><Badge variant={m.variant} className="gap-1"><Icon className="h-3 w-3" />{m.label}</Badge></TableCell>
                       <TableCell className="text-xs">{c.paid_at ? format(new Date(c.paid_at), 'dd/MM HH:mm', { locale: ptBR }) : '—'}</TableCell>
                       <TableCell className="text-right">

@@ -9,9 +9,6 @@ import { toast } from 'sonner';
 import { useGenerateCEOBrief, useExecuteDecisions, useAutoPilotRun, type CEOBriefResult } from '@/hooks/useCEOBrief';
 import { formatBRL, formatNumber } from '@/lib/formatters';
 
-const fmtBRL = (v: number) =>
-  formatBRL(v || 0);
-
 const impactColor = (impacto: string) => {
   if (impacto === 'alto') return 'destructive';
   if (impacto === 'medio') return 'secondary';
@@ -296,9 +293,9 @@ export function CEOBriefPanel() {
                 <div className="text-xs text-muted-foreground flex items-center gap-1">
                   Previsão próx. mês {trendIcon(forecast?.trend)}
                 </div>
-                <div className="text-xl font-bold mt-1">{fmtBRL(forecast?.previsao_proximo_mes ?? 0)}</div>
+                <div className="text-xl font-bold mt-1">{formatBRL(forecast?.previsao_proximo_mes ?? 0)}</div>
                 <div className="text-[10px] text-muted-foreground">
-                  Último: {fmtBRL(forecast?.ultimo_mes ?? 0)}
+                  Último: {formatBRL(forecast?.ultimo_mes ?? 0)}
                 </div>
               </div>
               {kpis.slice(0, 3).map((k) => (
@@ -309,7 +306,7 @@ export function CEOBriefPanel() {
                       ? `${Number(k.current_value).toFixed(1)}%`
                       : k.category === 'inventory'
                       ? Number(k.current_value).toFixed(0)
-                      : fmtBRL(Number(k.current_value))}
+                      : formatBRL(Number(k.current_value))}
                   </div>
                   <Badge variant={k.status === 'ok' ? 'outline' : k.status === 'alerta' ? 'secondary' : 'destructive'} className="mt-1 text-[10px]">
                     {k.status}

@@ -16,6 +16,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { differenceInDays, differenceInMinutes, parseISO, subDays, format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
+import { formatBRL } from '@/lib/formatters';
 
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))', 'hsl(var(--muted-foreground))'];
@@ -169,7 +170,7 @@ export default function BIIndustrialPage() {
     };
   }, [totalRevenue, totalCostSum, totalProduced, totalRejected, totalRealized]);
 
-  const fmt = (n: number) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const fmt = (n: number) =>formatBRL(n);
 
   const exportData = costBySector.map(s => ({
     Setor: s.sector, OPs: s.orders, Horas: s.laborHours, Produzido: s.produced, Refugo: s.rejected, 'Refugo%': s.rejectRate, 'Min/Peça': s.costPerUnit, 'Eficiência%': s.efficiency,

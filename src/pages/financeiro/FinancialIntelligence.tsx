@@ -9,8 +9,7 @@ import { KPICard } from '@/components/shared/KPICard';
 import { useLatestHealthScore, usePredictiveAlerts, useComputeIntelligence, useAutoReconcile } from '@/hooks/useFinancialIntelligence';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-
-const fmtBRL = (v: number | null | undefined) => (v ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+import { formatBRL } from '@/lib/formatters';
 
 const gradeColor: Record<string, string> = {
   A: 'bg-success text-success-foreground',
@@ -91,7 +90,7 @@ export default function FinancialIntelligence() {
                     <div className="font-medium text-sm">{a.title}</div>
                     {a.description && <div className="text-xs text-muted-foreground mt-1">{a.description}</div>}
                     {a.predicted_amount != null && (
-                      <div className="text-xs mt-2"><span className="text-muted-foreground">Valor projetado: </span><span className="font-mono font-medium">{fmtBRL(Number(a.predicted_amount))}</span></div>
+                      <div className="text-xs mt-2"><span className="text-muted-foreground">Valor projetado: </span><span className="font-mono font-medium">{formatBRL(Number(a.predicted_amount))}</span></div>
                     )}
                     {a.recommended_action && <div className="text-xs text-primary mt-1">→ {a.recommended_action}</div>}
                   </div>
