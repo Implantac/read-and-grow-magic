@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { handleMutationError } from '@/lib/toastHelpers';
 export interface DbClient {
   id: string;
   code: string;
@@ -69,7 +70,7 @@ export function useCreateClient() {
       qc.invalidateQueries({ queryKey: ['clients'] });
       toast({ title: 'Cliente cadastrado com sucesso!' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -86,7 +87,7 @@ export function useUpdateClient() {
       qc.invalidateQueries({ queryKey: ['clients'] });
       toast({ title: 'Cliente atualizado com sucesso!' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -102,6 +103,6 @@ export function useDeleteClient() {
       qc.invalidateQueries({ queryKey: ['clients'] });
       toast({ title: 'Cliente excluído com sucesso!' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { handleMutationError } from '@/lib/toastHelpers';
 export interface DbQuotationItem {
   id: string;
   quotation_id: string;
@@ -125,7 +126,7 @@ export function useUpdateQuotationStatus() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['quotations'] });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { handleMutationError } from '@/lib/toastHelpers';
 export interface RiskProfile {
   id: string;
   entity_type: string;
@@ -100,7 +101,7 @@ export function useUpdateFraudRule() {
       qc.invalidateQueries({ queryKey: ['financial_fraud_rules'] });
       toast({ title: 'Regra atualizada' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -117,6 +118,6 @@ export function useResolveSecurityLog() {
       qc.invalidateQueries({ queryKey: ['financial_security_logs'] });
       toast({ title: 'Marcado como resolvido' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }

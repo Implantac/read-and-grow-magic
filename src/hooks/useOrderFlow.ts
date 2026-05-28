@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { handleMutationError } from '@/lib/toastHelpers';
 // Order Status History
 export function useOrderStatusHistory(orderId?: string) {
   return useQuery({
@@ -89,7 +90,7 @@ export function useCreateConference() {
       qc.invalidateQueries({ queryKey: ['conference-records'] });
       toast({ title: 'Conferência criada!' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -124,7 +125,7 @@ export function useCreateBillingEntry() {
       qc.invalidateQueries({ queryKey: ['billing-queue'] });
       toast({ title: 'Pedido adicionado à fila de faturamento!' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -140,7 +141,7 @@ export function useUpdateBillingStatus() {
       qc.invalidateQueries({ queryKey: ['billing-queue'] });
       toast({ title: 'Status de faturamento atualizado!' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -180,7 +181,7 @@ export function useCreateShipment() {
       qc.invalidateQueries({ queryKey: ['shipment-orders'] });
       toast({ title: 'Expedição criada!' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -196,7 +197,7 @@ export function useUpdateShipment() {
       qc.invalidateQueries({ queryKey: ['shipment-orders'] });
       toast({ title: 'Expedição atualizada!' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -233,7 +234,7 @@ export function useAdvancedOrderStatusUpdate() {
       qc.invalidateQueries({ queryKey: ['order-status-history'] });
       toast({ title: 'Status do pedido atualizado!' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 

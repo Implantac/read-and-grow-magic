@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { handleMutationError } from '@/lib/toastHelpers';
 export function useBatchPayPayables() {
   const qc = useQueryClient();
   const { toast } = useToast();
@@ -24,6 +25,6 @@ export function useBatchPayPayables() {
       qc.invalidateQueries({ queryKey: ['financial_settlements'] });
       toast({ title: 'Pagamento em lote concluído', description: `${data.paid_count} contas pagas` });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }

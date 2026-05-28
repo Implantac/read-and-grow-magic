@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { handleMutationError } from '@/lib/toastHelpers';
 export function useCreditProfiles() {
   return useQuery({
     queryKey: ['credit-profiles'],
@@ -50,7 +51,7 @@ export function useUpsertCreditProfile() {
       qc.invalidateQueries({ queryKey: ['credit-profile'] });
       toast({ title: 'Perfil de crédito atualizado!' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -80,7 +81,7 @@ export function useCreateOrderBlock() {
       qc.invalidateQueries({ queryKey: ['order-blocks'] });
       toast({ title: 'Bloqueio registrado!' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -102,7 +103,7 @@ export function useReleaseOrderBlock() {
       qc.invalidateQueries({ queryKey: ['order-blocks'] });
       toast({ title: 'Bloqueio liberado!' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -132,7 +133,7 @@ export function useCreateCollectionAction() {
       qc.invalidateQueries({ queryKey: ['collection-actions'] });
       toast({ title: 'Ação de cobrança registrada!' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -160,7 +161,7 @@ export function useCreateCreditPolicy() {
       qc.invalidateQueries({ queryKey: ['credit-policies'] });
       toast({ title: 'Política de crédito criada!' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { handleMutationError } from '@/lib/toastHelpers';
 export type RecurringFrequency = 'weekly' | 'biweekly' | 'monthly' | 'bimonthly' | 'quarterly' | 'semiannual' | 'annual';
 export type RecurringStatus = 'active' | 'paused' | 'cancelled' | 'finished';
 export type RecurringKind = 'receivable' | 'payable';
@@ -72,7 +73,7 @@ export function useCreateRecurring() {
       qc.invalidateQueries({ queryKey: ['financial_recurring'] });
       toast({ title: 'Recorrência criada' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -91,7 +92,7 @@ export function useUpdateRecurringStatus() {
       qc.invalidateQueries({ queryKey: ['financial_recurring'] });
       toast({ title: 'Status atualizado' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
 
@@ -110,6 +111,6 @@ export function useGenerateRecurringEntries() {
       qc.invalidateQueries({ queryKey: ['accounts_payable'] });
       toast({ title: 'Geração concluída', description: `${data.created} contas geradas` });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }

@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { handleMutationError } from '@/lib/toastHelpers';
 export interface FinancialCategoryRow {
   id: string;
   code: string;
@@ -41,6 +42,6 @@ export function useCreateFinancialCategory() {
       qc.invalidateQueries({ queryKey: ['financial_categories'] });
       toast({ title: 'Categoria criada' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 }
