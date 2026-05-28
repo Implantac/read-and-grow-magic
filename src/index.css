@@ -266,3 +266,8 @@
 .animate-marquee:hover {
   animation-play-state: paused;
 }
+
+#lovable-badge {
+  display: none !important;
+}
+
