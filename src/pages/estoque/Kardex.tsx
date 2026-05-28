@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 import {
   Table,
   TableBody,
@@ -86,7 +86,7 @@ export default function KardexPage() {
         <ExportButton
           data={(kardexData?.entries || []) as unknown as Record<string, unknown>[]}
           columns={[
-            { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+            { key: 'date', label: 'Data', format: (v) => formatDate(v as string) },
             { key: 'documentNumber', label: 'Documento' },
             { key: 'type', label: 'Tipo' },
             { key: 'description', label: 'Descrição' },

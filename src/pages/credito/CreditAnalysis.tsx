@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Shield, ShieldAlert, ShieldCheck, ShieldX, Search, Plus } from 'lucide-react';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 const riskColors: Record<string, string> = {
   low: 'bg-emerald-500/10 text-emerald-700 border-emerald-200',
   medium: 'bg-amber-500/10 text-amber-700 border-amber-200',
@@ -123,7 +123,7 @@ export default function CreditAnalysis() {
                     </TableCell>
                     <TableCell><Badge variant="outline" className={riskColors[p.risk_classification]}>{riskLabels[p.risk_classification]}</Badge></TableCell>
                     <TableCell><Badge variant="secondary">{statusLabels[p.credit_status]}</Badge></TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{p.last_analysis_date ? new Date(p.last_analysis_date).toLocaleDateString('pt-BR') : '—'}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{p.last_analysis_date ? formatDate(p.last_analysis_date) : '—'}</TableCell>
                     <TableCell><Button variant="ghost" size="sm">Editar</Button></TableCell>
                   </TableRow>
                 );

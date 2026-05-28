@@ -22,7 +22,7 @@ import { useQuotations, useCreateQuotation, useUpdateQuotationStatus, useConvert
 import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 const filterFields: FilterField[] = [
   { key: 'status', label: 'Status', type: 'select', options: [
     { value: 'draft', label: 'Rascunho' }, { value: 'sent', label: 'Enviado' },
@@ -150,8 +150,8 @@ export default function QuotationsPage() {
             data={filteredQuotations as unknown as Record<string, unknown>[]}
             columns={[
               { key: 'number', label: 'Número' }, { key: 'client_name', label: 'Cliente' },
-              { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
-              { key: 'valid_until', label: 'Validade', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+              { key: 'date', label: 'Data', format: (v) => formatDate(v as string) },
+              { key: 'valid_until', label: 'Validade', format: (v) => formatDate(v as string) },
               { key: 'total', label: 'Total', format: (v) => formatBRL(Number(v)) },
               { key: 'status', label: 'Status' },
             ]}

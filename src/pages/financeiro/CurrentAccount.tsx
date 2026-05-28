@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 const formatBRL = (n: number) =>
   formatBRL(n || 0);
 
@@ -84,7 +84,7 @@ function CurrentAccountTable({ rows, search }: { rows: Row[]; search: string }) 
                   .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
                   .map((r) => (
                     <TableRow key={r.document_id}>
-                      <TableCell className="text-sm">{new Date(r.date).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell className="text-sm">{formatDate(r.date)}</TableCell>
                       <TableCell className="text-sm font-mono">{r.invoice_number || '—'}</TableCell>
                       <TableCell className="text-sm">{r.description}</TableCell>
                       <TableCell className="text-right font-mono">{formatBRL(r.debit)}</TableCell>

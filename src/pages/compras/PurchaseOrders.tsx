@@ -6,7 +6,7 @@ import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 import {
   Table,
   TableBody,
@@ -137,7 +137,7 @@ export default function PurchaseOrdersPage() {
           columns={[
             { key: 'number', label: 'Número' },
             { key: 'supplierName', label: 'Fornecedor' },
-            { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+            { key: 'date', label: 'Data', format: (v) => formatDate(v as string) },
             { key: 'total', label: 'Total', format: (v) => formatBRL(Number(v)) },
             { key: 'status', label: 'Status' },
             { key: 'priority', label: 'Prioridade' },

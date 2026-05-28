@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Lock, Unlock, Search, AlertTriangle, CheckCircle } from 'lucide-react';
 
+import { formatDate } from '@/lib/formatters';
 const blockTypeLabels: Record<string, string> = {
   financial: 'Financeiro', commercial: 'Comercial', credit: 'Crédito', compliance: 'Compliance',
 };
@@ -87,7 +88,7 @@ export default function OrderBlocks() {
                   <TableCell><Badge variant="outline">{blockTypeLabels[b.block_type] || b.block_type}</Badge></TableCell>
                   <TableCell className="max-w-xs truncate">{b.block_reason}</TableCell>
                   <TableCell>{b.blocked_by || '—'}</TableCell>
-                  <TableCell className="text-xs">{new Date(b.blocked_at).toLocaleDateString('pt-BR')}</TableCell>
+                  <TableCell className="text-xs">{formatDate(b.blocked_at)}</TableCell>
                   <TableCell><Badge className={statusColors[b.status]}>{b.status === 'active' ? 'Ativo' : b.status === 'released' ? 'Liberado' : 'Expirado'}</Badge></TableCell>
                   <TableCell>{b.released_by || '—'}</TableCell>
                   <TableCell>

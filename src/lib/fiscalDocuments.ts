@@ -1,13 +1,14 @@
 import jsPDF from 'jspdf';
 import type { NFe, NFeItem } from '@/types/fiscal';
 
+import { formatDate } from '@/lib/formatters';
 const formatCurrency = (v: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
 
 const formatDate = (dateString: string) => {
   if (!dateString) return '';
   const d = new Date(dateString);
-  return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  return formatDate(d) + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 };
 
 export function generateDANFE(nfe: NFe): void {

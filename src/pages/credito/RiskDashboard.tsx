@@ -11,7 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { ShieldAlert, Lock, AlertTriangle, TrendingDown, Users, DollarSign } from 'lucide-react';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 const RISK_COLORS = ['#10b981', '#f59e0b', '#f97316', '#ef4444'];
 
 export default function RiskDashboard() {
@@ -166,7 +166,7 @@ export default function RiskDashboard() {
                   <TableRow key={p.id}>
                     <TableCell className="font-medium">{clientMap[p.client_id]?.name || '—'}</TableCell>
                     <TableCell><span className="font-mono">{p.score_grade} ({p.score_numeric})</span></TableCell>
-                    <TableCell className="text-xs">{p.last_analysis_date ? new Date(p.last_analysis_date).toLocaleDateString('pt-BR') : 'Nunca'}</TableCell>
+                    <TableCell className="text-xs">{p.last_analysis_date ? formatDate(p.last_analysis_date) : 'Nunca'}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

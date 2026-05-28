@@ -18,7 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import type { JournalEntry } from '@/types/accounting';
 import type { ExportColumn } from '@/lib/exportUtils';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 const statusColors: Record<string, string> = {
   draft: 'bg-warning/10 text-warning border-warning/30',
   posted: 'bg-success/10 text-success border-success/30',
@@ -138,7 +138,7 @@ export default function JournalEntriesPage() {
           {selectedEntry && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div><span className="text-muted-foreground">Data:</span> {new Date(selectedEntry.date).toLocaleDateString('pt-BR')}</div>
+                <div><span className="text-muted-foreground">Data:</span> {formatDate(selectedEntry.date)}</div>
                 <div><span className="text-muted-foreground">Status:</span> <Badge variant="outline" className={cn('ml-1', statusColors[selectedEntry.status])}>{getJournalStatusLabel(selectedEntry.status)}</Badge></div>
                 <div className="col-span-2"><span className="text-muted-foreground">Descrição:</span> {selectedEntry.description}</div>
               </div>

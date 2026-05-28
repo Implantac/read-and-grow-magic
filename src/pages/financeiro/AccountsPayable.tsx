@@ -28,7 +28,7 @@ import { SettlementDialog, type SettlementTarget } from '@/components/financeiro
 import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 const paymentMethods: Record<PaymentMethod, string> = {
   pix: 'PIX', boleto: 'Boleto', credit_card: 'Cartão de Crédito',
   debit_card: 'Cartão de Débito', transfer: 'Transferência', cash: 'Dinheiro', check: 'Cheque',
@@ -344,7 +344,7 @@ export default function AccountsPayable() {
                 { key: 'description', label: 'Descrição' },
                 { key: 'supplier', label: 'Fornecedor' },
                 { key: 'category', label: 'Categoria' },
-                { key: 'due_date', label: 'Vencimento', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+                { key: 'due_date', label: 'Vencimento', format: (v) => formatDate(v as string) },
                 { key: 'amount', label: 'Valor Original', format: (v) => formatCurrency(Number(v)) },
                 { key: 'open_amount', label: 'Em Aberto', format: (v) => formatCurrency(Number(v ?? 0)) },
                 { key: 'status', label: 'Status' },

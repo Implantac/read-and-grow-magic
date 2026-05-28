@@ -23,7 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { differenceInDays } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 const fmt = (v: number) => formatBRL(v);
 
 const KANBAN_STAGES = FUNNEL_STAGES.slice(0, 6);
@@ -306,7 +306,7 @@ export default function SalesFunnelPage() {
                               </div>
                               {item.expected_close_date && (
                                 <span className="text-[10px] text-muted-foreground">
-                                  {new Date(item.expected_close_date).toLocaleDateString('pt-BR')}
+                                  {formatDate(item.expected_close_date)}
                                 </span>
                               )}
                             </div>

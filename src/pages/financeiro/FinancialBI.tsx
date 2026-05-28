@@ -14,7 +14,7 @@ import { useLatestHealthScore } from '@/hooks/useFinancialIntelligence';
 import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/useAccountsPayable';
 import { Wallet, TrendingUp, TrendingDown, Activity, Brain, RefreshCw } from 'lucide-react';
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, BarChart, Bar
@@ -200,7 +200,7 @@ export default function FinancialBI() {
                 <TableBody>
                   {ledger.slice(0, 10).map(l => (
                     <TableRow key={l.id}>
-                      <TableCell className="text-xs">{new Date(l.entry_date).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell className="text-xs">{formatDate(l.entry_date)}</TableCell>
                       <TableCell className="text-sm">{l.description}</TableCell>
                       <TableCell><Badge variant="outline" className="text-xs">{l.source}</Badge></TableCell>
                       <TableCell className={`text-right font-mono text-sm ${l.type === 'inflow' ? 'text-green-500' : 'text-red-500'}`}>

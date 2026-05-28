@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { formatBRL } from '@/lib/formatters';
+import { formatBRL, formatDate } from '@/lib/formatters';
 import {
   Plus, Eye, MoreHorizontal, FileText, XCircle, CheckCircle, Loader2,
   Package, DollarSign, Clock, TruckIcon, ArrowRight, CalendarDays, User, CreditCard, Hash, MapPin, StickyNote,
@@ -380,7 +380,7 @@ export default function OrdersPage() {
             data={filteredOrders as unknown as Record<string, unknown>[]}
             columns={[
               { key: 'number', label: 'Pedido' }, { key: 'client_name', label: 'Cliente' },
-              { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+              { key: 'date', label: 'Data', format: (v) => formatDate(v as string) },
               { key: 'total', label: 'Total', format: (v) => fmt(Number(v)) },
               { key: 'priority', label: 'Prioridade' }, { key: 'status', label: 'Status' },
             ]}
@@ -659,7 +659,7 @@ export default function OrdersPage() {
                     </div>
                   )}
                   {selectedOrder.approved_by && (
-                    <p className="text-[11px] text-muted-foreground">Aprovado por: {selectedOrder.approved_by}{selectedOrder.approved_at ? ` em ${new Date(selectedOrder.approved_at).toLocaleDateString('pt-BR')}` : ''}</p>
+                    <p className="text-[11px] text-muted-foreground">Aprovado por: {selectedOrder.approved_by}{selectedOrder.approved_at ? ` em ${formatDate(selectedOrder.approved_at)}` : ''}</p>
                   )}
                 </div>
 

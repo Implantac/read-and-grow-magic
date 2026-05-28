@@ -17,6 +17,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { MovementType } from '@/types/wms';
 
+import { formatDate } from '@/lib/formatters';
 const movementTypeConfig: Record<MovementType, { label: string; icon: React.ReactNode; color: string }> = {
   inbound: { label: 'Entrada', icon: <TrendingUp className="h-4 w-4" />, color: 'text-green-600' },
   outbound: { label: 'Saída', icon: <TrendingDown className="h-4 w-4" />, color: 'text-red-600' },
@@ -68,7 +69,7 @@ export default function WMSMovementsPage() {
                 { key: 'quantity', label: 'Quantidade' },
                 { key: 'reason', label: 'Motivo' },
                 { key: 'operator', label: 'Operador' },
-                { key: 'createdAt', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
+                { key: 'createdAt', label: 'Data', format: (v) => formatDate(v as string) },
               ]}
               filename="movimentacoes_wms"
             />
