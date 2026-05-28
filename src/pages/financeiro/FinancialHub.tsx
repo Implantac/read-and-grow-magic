@@ -14,7 +14,8 @@ import { useFinancialLedger, useCreateManualLedger } from '@/hooks/useFinancialL
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
-const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
+import { formatBRL } from '@/lib/formatters';
+const fmt = (v: number) => formatBRL(v || 0);
 
 type QuickAction = 'receive' | 'pay' | null;
 

@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Shield, ShieldAlert, ShieldCheck, ShieldX, Search, Plus } from 'lucide-react';
 
+import { formatBRL } from '@/lib/formatters';
 const riskColors: Record<string, string> = {
   low: 'bg-emerald-500/10 text-emerald-700 border-emerald-200',
   medium: 'bg-amber-500/10 text-amber-700 border-amber-200',
@@ -62,7 +63,7 @@ export default function CreditAnalysis() {
     });
   };
 
-  const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  const fmt = (v: number) => formatBRL(v);
 
   return (
     <PageContainer>

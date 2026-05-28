@@ -14,6 +14,7 @@ import { useLatestHealthScore } from '@/hooks/useFinancialIntelligence';
 import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/useAccountsPayable';
 import { Wallet, TrendingUp, TrendingDown, Activity, Brain, RefreshCw } from 'lucide-react';
+import { formatBRL } from '@/lib/formatters';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, BarChart, Bar
@@ -21,7 +22,7 @@ import {
 import { useComputeIntelligence } from '@/hooks/useFinancialIntelligence';
 
 const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(v);
-const fmtFull = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+const fmtFull = (v: number) => formatBRL(v);
 
 const PALETTE = ['hsl(var(--primary))', 'hsl(var(--accent))', '#22c55e', '#ef4444', '#3b82f6', '#a855f7', '#eab308', '#06b6d4'];
 

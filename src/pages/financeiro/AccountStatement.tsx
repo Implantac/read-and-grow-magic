@@ -12,8 +12,9 @@ import { useSuppliers } from '@/hooks/useSuppliers';
 import { useAccountStatement } from '@/hooks/useSettlement';
 import { ArrowDownCircle, ArrowUpCircle, Wallet } from 'lucide-react';
 
+import { formatBRL } from '@/lib/formatters';
 const fmt = (v: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v) || 0);
+  formatBRL(Number(v) || 0);
 
 export default function AccountStatement() {
   const [entityType, setEntityType] = useState<'client' | 'supplier'>('client');

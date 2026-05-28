@@ -11,6 +11,7 @@ import { ExpenseBreakdownChart } from '@/components/contabilidade/ExpenseBreakdo
 import { RevenueExpenseTrendChart } from '@/components/contabilidade/RevenueExpenseTrendChart';
 import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/useAccountsPayable';
+import { formatBRL } from '@/lib/formatters';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
@@ -22,7 +23,7 @@ import { ptBR } from 'date-fns/locale';
 import type { ExportColumn } from '@/lib/exportUtils';
 
 const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  formatBRL(value);
 const formatCompact = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(value);
 

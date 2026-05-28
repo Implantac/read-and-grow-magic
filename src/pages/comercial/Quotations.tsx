@@ -22,6 +22,7 @@ import { useQuotations, useCreateQuotation, useUpdateQuotationStatus, useConvert
 import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
 
+import { formatBRL } from '@/lib/formatters';
 const filterFields: FilterField[] = [
   { key: 'status', label: 'Status', type: 'select', options: [
     { value: 'draft', label: 'Rascunho' }, { value: 'sent', label: 'Enviado' },
@@ -89,7 +90,7 @@ export default function QuotationsPage() {
       return <span className={isPast(date) ? 'text-destructive' : ''}>{format(date, 'dd/MM/yyyy', { locale: ptBR })}</span>;
     }},
     { key: 'items', label: 'Itens', render: (_, row) => row.items?.length || 0 },
-    { key: 'total', label: 'Total', sortable: true, render: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v as number) },
+    { key: 'total', label: 'Total', sortable: true, render: (v) => formatBRL(v as number) },
     { key: 'status', label: 'Status', render: (v) => <StatusBadge type="quotation" status={v as string} /> },
   ];
 
@@ -140,7 +141,7 @@ export default function QuotationsPage() {
     return <PageLoading message="Carregando orçamentos..." />;
   }
 
-  const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  const fmt = (v: number) => formatBRL(v);
 
   return (
     <PageContainer>
@@ -151,7 +152,7 @@ export default function QuotationsPage() {
               { key: 'number', label: 'Número' }, { key: 'client_name', label: 'Cliente' },
               { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
               { key: 'valid_until', label: 'Validade', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
-              { key: 'total', label: 'Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+              { key: 'total', label: 'Total', format: (v) => formatBRL(Number(v)) },
               { key: 'status', label: 'Status' },
             ]}
             filename="orcamentos"
@@ -236,8 +237,8 @@ export default function QuotationsPage() {
                           <tr key={item.id} className="border-b last:border-0">
                             <td className="p-2"><p className="font-medium">{item.product_name}</p><p className="text-xs text-muted-foreground">{item.product_code}</p></td>
                             <td className="p-2 text-right">{item.quantity}</td>
-                            <td className="p-2 text-right">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.unit_price)}</td>
-                            <td className="p-2 text-right">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.total)}</td>
+                            <td className="p-2 text-right">{formatBRL(item.unit_price)}</td>
+                            <td className="p-2 text-right">{formatBRL(item.total)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -247,9 +248,9 @@ export default function QuotationsPage() {
               )}
               <div className="flex justify-end border-t pt-4">
                 <div className="w-64 space-y-1 text-sm">
-                  <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedQuotation.subtotal)}</span></div>
-                  {selectedQuotation.discount > 0 && <div className="flex justify-between text-destructive"><span>Desconto</span><span>-{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedQuotation.discount)}</span></div>}
-                  <div className="flex justify-between border-t pt-1 text-base font-semibold"><span>Total</span><span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedQuotation.total)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{formatBRL(selectedQuotation.subtotal)}</span></div>
+                  {selectedQuotation.discount > 0 && <div className="flex justify-between text-destructive"><span>Desconto</span><span>-{formatBRL(selectedQuotation.discount)}</span></div>}
+                  <div className="flex justify-between border-t pt-1 text-base font-semibold"><span>Total</span><span>{formatBRL(selectedQuotation.total)}</span></div>
                 </div>
               </div>
               {selectedQuotation.notes && <div className="border-t pt-4"><span className="text-sm text-muted-foreground">Observações</span><p className="text-sm">{selectedQuotation.notes}</p></div>}

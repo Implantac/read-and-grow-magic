@@ -10,8 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { RefreshCw, FileText, AlertTriangle, DollarSign, TrendingUp, TrendingDown, CalendarDays, Loader2 } from 'lucide-react';
 import { useDailyReports, useGenerateReport, DailyReport, DailyReportData } from '@/hooks/useDailyReport';
 
+import { formatBRL } from '@/lib/formatters';
 const fmt = (v: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  formatBRL(v);
 
 function ReportDetail({ data }: { data: DailyReportData }) {
   return (

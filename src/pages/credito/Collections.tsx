@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Phone, Plus, Search, AlertCircle, Clock, DollarSign } from 'lucide-react';
 
+import { formatBRL } from '@/lib/formatters';
 const actionLabels: Record<string, string> = {
   contact: 'Contato', promise: 'Promessa', renegotiation: 'Renegociação', agreement: 'Acordo', note: 'Observação', follow_up: 'Follow-up',
 };
@@ -36,7 +37,7 @@ export default function Collections() {
   const openActions = actions.filter(a => a.status === 'open');
   const brokenPromises = actions.filter(a => a.action_type === 'promise' && a.promise_status === 'broken');
 
-  const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  const fmt = (v: number) => formatBRL(v);
 
   const filtered = actions.filter(a => {
     const client = clientMap[a.client_id];

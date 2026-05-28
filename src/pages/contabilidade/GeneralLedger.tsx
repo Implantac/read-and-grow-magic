@@ -13,8 +13,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import type { ExportColumn } from '@/lib/exportUtils';
 import type { LedgerEntry } from '@/types/accounting';
 
+import { formatBRL } from '@/lib/formatters';
 const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  formatBRL(value);
 
 const exportColumns: ExportColumn[] = [
   { key: 'date', label: 'Data' },

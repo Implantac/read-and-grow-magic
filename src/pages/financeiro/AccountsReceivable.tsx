@@ -26,13 +26,14 @@ import { SettlementDialog, type SettlementTarget } from '@/components/financeiro
 import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+import { formatBRL } from '@/lib/formatters';
 const paymentMethods: Record<PaymentMethod, string> = {
   pix: 'PIX', boleto: 'Boleto', credit_card: 'Cartão de Crédito',
   debit_card: 'Cartão de Débito', transfer: 'Transferência', cash: 'Dinheiro', check: 'Cheque',
 };
 
 const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  formatBRL(value);
 
 export default function AccountsReceivable() {
   const { toast } = useToast();

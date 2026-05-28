@@ -12,7 +12,8 @@ import { useToast } from '@/hooks/use-toast';
 import { parseCSV, parseOFX, useImportBankStatement, useAutoMatch, type ParsedTx } from '@/hooks/useBankStatementImport';
 import { useBankAccounts } from '@/hooks/useBankAccounts';
 
-const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+import { formatBRL } from '@/lib/formatters';
+const fmt = (v: number) => formatBRL(v);
 
 export default function BankStatementImport() {
   const [parsed, setParsed] = useState<ParsedTx[]>([]);

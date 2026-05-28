@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatBRL } from '@/lib/formatters';
 import {
   PieChart,
   Pie,
@@ -16,7 +17,7 @@ const COLORS = [
 ];
 
 const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  formatBRL(value);
 
 // Empty data - will be populated from database
 const expenseBreakdown: { name: string; value: number; percentage: number }[] = [];

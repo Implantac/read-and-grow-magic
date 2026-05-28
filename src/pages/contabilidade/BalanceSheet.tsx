@@ -10,6 +10,7 @@ import { PageLoading } from '@/components/shared/PageLoading';
 import { EquityEvolutionChart } from '@/components/contabilidade/EquityEvolutionChart';
 import { FinancialIndicatorsPanel } from '@/components/contabilidade/FinancialIndicatorsPanel';
 import { useBalanceSheet } from '@/hooks/useBalanceSheet';
+import { formatBRL } from '@/lib/formatters';
 import {
   Table,
   TableBody,
@@ -22,7 +23,7 @@ import type { ExportColumn } from '@/lib/exportUtils';
 import type { BalanceSheetItem } from '@/types/accounting';
 
 const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  formatBRL(value);
 
 const exportColumns: ExportColumn[] = [
   { key: 'code', label: 'Código' },

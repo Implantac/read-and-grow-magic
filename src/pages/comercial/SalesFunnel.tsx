@@ -23,7 +23,8 @@ import { useToast } from '@/hooks/use-toast';
 import { differenceInDays } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+import { formatBRL } from '@/lib/formatters';
+const fmt = (v: number) => formatBRL(v);
 
 const KANBAN_STAGES = FUNNEL_STAGES.slice(0, 6);
 

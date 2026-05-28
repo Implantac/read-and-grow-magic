@@ -9,11 +9,12 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ShieldAlert, ShieldCheck, AlertTriangle, Activity, Check } from 'lucide-react';
+import { formatBRL } from '@/lib/formatters';
 import {
   useRiskProfiles, useSecurityLogs, useFraudRules, useUpdateFraudRule, useResolveSecurityLog,
 } from '@/hooks/useFinancialSecurity';
 
-const fmtCur = (v: number | null) => v == null ? '—' : new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+const fmtCur = (v: number | null) => v == null ? '—' : formatBRL(v);
 const sevColor = (s: string) =>
   s === 'critical' ? 'bg-red-600 text-white' :
   s === 'high' ? 'bg-orange-500 text-white' :

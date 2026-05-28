@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { formatBRL } from '@/lib/formatters';
 import {
   Table,
   TableBody,
@@ -124,8 +125,8 @@ export default function MovementsPage() {
             { key: 'type', label: 'Tipo' },
             { key: 'direction', label: 'Direção' },
             { key: 'quantity', label: 'Quantidade' },
-            { key: 'unitCost', label: 'Custo Unit.', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
-            { key: 'totalCost', label: 'Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+            { key: 'unitCost', label: 'Custo Unit.', format: (v) => formatBRL(Number(v)) },
+            { key: 'totalCost', label: 'Total', format: (v) => formatBRL(Number(v)) },
             { key: 'operator', label: 'Operador' },
             { key: 'createdAt', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
           ]}

@@ -14,7 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { useBankAccounts, useCreateBankAccount } from '@/hooks/useBankAccounts';
 import { TransferDialog } from '@/components/financeiro/TransferDialog';
 
-const formatCurrency = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+import { formatBRL } from '@/lib/formatters';
+const formatCurrency = (v: number) => formatBRL(v);
 
 export default function BankAccounts() {
   const { data: accounts = [], isLoading } = useBankAccounts();

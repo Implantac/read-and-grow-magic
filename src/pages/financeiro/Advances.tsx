@@ -20,7 +20,8 @@ import { useAccountsPayable } from '@/hooks/useAccountsPayable';
 import { NewAdvanceDialog } from '@/components/financeiro/NewAdvanceDialog';
 import { format } from 'date-fns';
 
-const fmtBRL = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v ?? 0);
+import { formatBRL } from '@/lib/formatters';
+const fmtBRL = (v: number) => formatBRL(v ?? 0);
 
 export default function Advances() {
   const { data: advances = [], isLoading } = useFinancialAdvances();

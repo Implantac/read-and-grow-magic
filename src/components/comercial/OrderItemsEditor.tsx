@@ -3,6 +3,7 @@ import { Plus, Trash2, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { formatBRL } from '@/lib/formatters';
 import {
   Command,
   CommandEmpty,
@@ -117,7 +118,7 @@ export function OrderItemsEditor({ items, onChange }: OrderItemsEditorProps) {
                             <span className="ml-2 text-xs text-muted-foreground">{product.code}</span>
                           </div>
                           <span className="text-sm text-muted-foreground">
-                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(product.sale_price)}
+                            {formatBRL(product.sale_price)}
                           </span>
                         </CommandItem>
                       ))}
@@ -159,7 +160,7 @@ export function OrderItemsEditor({ items, onChange }: OrderItemsEditorProps) {
             <div className="space-y-1">
               <Label className="text-xs">Total</Label>
               <div className="flex h-9 items-center rounded-md border bg-muted px-3 text-sm font-medium">
-                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(getItemTotal(item))}
+                {formatBRL(getItemTotal(item))}
               </div>
             </div>
           </div>
@@ -172,7 +173,7 @@ export function OrderItemsEditor({ items, onChange }: OrderItemsEditorProps) {
             <div className="flex items-center gap-8 justify-between">
               <span className="text-muted-foreground">Subtotal ({items.length} {items.length === 1 ? 'item' : 'itens'})</span>
               <span className="font-semibold text-lg">
-                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(grandTotal)}
+                {formatBRL(grandTotal)}
               </span>
             </div>
           </div>

@@ -18,7 +18,8 @@ import { useBankAccounts } from '@/hooks/useBankAccounts';
 import { CHECK_STATUS_LABELS } from '@/types/financial';
 import { format } from 'date-fns';
 
-const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+import { formatBRL } from '@/lib/formatters';
+const fmt = (v: number) => formatBRL(v);
 
 const statusVariant: Record<string, string> = {
   received: 'bg-warning/10 text-warning border-warning/30',

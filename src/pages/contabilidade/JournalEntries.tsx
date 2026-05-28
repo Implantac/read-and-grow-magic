@@ -18,6 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import type { JournalEntry } from '@/types/accounting';
 import type { ExportColumn } from '@/lib/exportUtils';
 
+import { formatBRL } from '@/lib/formatters';
 const statusColors: Record<string, string> = {
   draft: 'bg-warning/10 text-warning border-warning/30',
   posted: 'bg-success/10 text-success border-success/30',
@@ -28,14 +29,14 @@ const exportColumns: ExportColumn[] = [
   { key: 'number', label: 'Número' },
   { key: 'date', label: 'Data' },
   { key: 'description', label: 'Descrição' },
-  { key: 'totalDebit', label: 'Débito', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
-  { key: 'totalCredit', label: 'Crédito', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+  { key: 'totalDebit', label: 'Débito', format: (v) => formatBRL(Number(v)) },
+  { key: 'totalCredit', label: 'Crédito', format: (v) => formatBRL(Number(v)) },
   { key: 'status', label: 'Status', format: (v) => getJournalStatusLabel(String(v)) },
   { key: 'createdBy', label: 'Criado por' },
 ];
 
 const formatCurrency = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  formatBRL(value);
 
 const filterFields: FilterField[] = [
   {

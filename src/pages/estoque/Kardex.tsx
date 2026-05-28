@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { formatBRL } from '@/lib/formatters';
 import {
   Table,
   TableBody,
@@ -92,8 +93,8 @@ export default function KardexPage() {
             { key: 'quantityIn', label: 'Entrada' },
             { key: 'quantityOut', label: 'Saída' },
             { key: 'balance', label: 'Saldo' },
-            { key: 'unitCost', label: 'Custo Unit.', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
-            { key: 'totalValue', label: 'Valor Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+            { key: 'unitCost', label: 'Custo Unit.', format: (v) => formatBRL(Number(v)) },
+            { key: 'totalValue', label: 'Valor Total', format: (v) => formatBRL(Number(v)) },
           ]}
           filename={`kardex_${kardexData?.productCode || 'produto'}`}
         />

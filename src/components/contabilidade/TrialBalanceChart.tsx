@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatBRL } from '@/lib/formatters';
 import {
   BarChart,
   Bar,
@@ -14,7 +15,7 @@ const formatCurrency = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(value);
 
 const formatFull = (value: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+  formatBRL(value);
 
 // Empty data - will be populated from database
 const trialBalanceByType: { type: string; debit: number; credit: number }[] = [];

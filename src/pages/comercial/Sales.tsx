@@ -22,6 +22,7 @@ import { useSales, useCreateSale, type DbSale } from '@/hooks/useSales';
 import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
 
+import { formatBRL } from '@/lib/formatters';
 const filterFields: FilterField[] = [
   { key: 'status', label: 'Status', type: 'select', options: [
     { value: 'completed', label: 'Concluída' }, { value: 'cancelled', label: 'Cancelada' }, { value: 'refunded', label: 'Devolvida' },
@@ -87,7 +88,7 @@ export default function SalesPage() {
     { key: 'date', label: 'Data', sortable: true, render: (v) => format(new Date(v as string), "dd/MM/yyyy HH:mm", { locale: ptBR }) },
     { key: 'items', label: 'Itens', render: (_, row) => row.items?.length || 0 },
     { key: 'payment_method', label: 'Pagamento', render: (v) => getPaymentMethodLabel(v as any) },
-    { key: 'total', label: 'Total', sortable: true, render: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v as number) },
+    { key: 'total', label: 'Total', sortable: true, render: (v) => formatBRL(v as number) },
     { key: 'status', label: 'Status', render: (v) => <StatusBadge type="sale" status={v as string} /> },
   ];
 
@@ -112,7 +113,7 @@ export default function SalesPage() {
     return <PageLoading message="Carregando vendas..." />;
   }
 
-  const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  const fmt = (v: number) => formatBRL(v);
 
   return (
     <PageContainer>
@@ -123,7 +124,7 @@ export default function SalesPage() {
               { key: 'number', label: 'Número' }, { key: 'client_name', label: 'Cliente' },
               { key: 'date', label: 'Data', format: (v) => new Date(v as string).toLocaleDateString('pt-BR') },
               { key: 'payment_method', label: 'Pagamento', format: (v) => getPaymentMethodLabel(v as any) },
-              { key: 'total', label: 'Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+              { key: 'total', label: 'Total', format: (v) => formatBRL(Number(v)) },
               { key: 'status', label: 'Status' },
             ]}
             filename="vendas"
@@ -213,8 +214,8 @@ export default function SalesPage() {
                           <tr key={item.id} className="border-b last:border-0">
                             <td className="p-2"><p className="font-medium">{item.product_name}</p><p className="text-xs text-muted-foreground">{item.product_code}</p></td>
                             <td className="p-2 text-right">{item.quantity}</td>
-                            <td className="p-2 text-right">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.unit_price)}</td>
-                            <td className="p-2 text-right">{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.total)}</td>
+                            <td className="p-2 text-right">{formatBRL(item.unit_price)}</td>
+                            <td className="p-2 text-right">{formatBRL(item.total)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -224,9 +225,9 @@ export default function SalesPage() {
               )}
               <div className="flex justify-end border-t pt-4">
                 <div className="w-64 space-y-1 text-sm">
-                  <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedSale.subtotal)}</span></div>
-                  {selectedSale.discount > 0 && <div className="flex justify-between text-destructive"><span>Desconto</span><span>-{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedSale.discount)}</span></div>}
-                  <div className="flex justify-between border-t pt-1 text-base font-semibold"><span>Total</span><span>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(selectedSale.total)}</span></div>
+                  <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{formatBRL(selectedSale.subtotal)}</span></div>
+                  {selectedSale.discount > 0 && <div className="flex justify-between text-destructive"><span>Desconto</span><span>-{formatBRL(selectedSale.discount)}</span></div>}
+                  <div className="flex justify-between border-t pt-1 text-base font-semibold"><span>Total</span><span>{formatBRL(selectedSale.total)}</span></div>
                 </div>
               </div>
               {selectedSale.notes && <div className="border-t pt-4"><span className="text-sm text-muted-foreground">Observações</span><p className="text-sm">{selectedSale.notes}</p></div>}

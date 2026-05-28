@@ -12,8 +12,9 @@ import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/useAccountsPayable';
 import { useCompensateAccounts } from '@/hooks/useSettlement';
 
+import { formatBRL } from '@/lib/formatters';
 const fmt = (v: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v) || 0);
+  formatBRL(Number(v) || 0);
 
 export default function FinancialOffset() {
   const { data: receivables = [] } = useAccountsReceivable();

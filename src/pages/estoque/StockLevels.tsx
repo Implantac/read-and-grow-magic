@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { formatBRL } from '@/lib/formatters';
 import {
   Table,
   TableBody,
@@ -147,7 +148,7 @@ export default function StockLevelsPage() {
             { key: 'currentStock', label: 'Estoque Atual' },
             { key: 'minStock', label: 'Mínimo' },
             { key: 'maxStock', label: 'Máximo' },
-            { key: 'totalValue', label: 'Valor Total', format: (v) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number(v)) },
+            { key: 'totalValue', label: 'Valor Total', format: (v) => formatBRL(Number(v)) },
             { key: 'status', label: 'Status' },
           ]}
           filename="niveis_estoque"

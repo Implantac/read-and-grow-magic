@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { formatBRL } from '@/lib/formatters';
 import { 
   Search, Plus, Minus, Trash2, ShoppingCart, CreditCard, 
   Banknote, QrCode, User, Package, X, CheckCircle2, 
@@ -53,7 +54,7 @@ const paymentMethods = [
 ];
 
 const fmt = (v: number) =>
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+  formatBRL(v);
 
 export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
   const productsQuery = useProducts();

@@ -6,7 +6,8 @@ import { Brain, TrendingUp, AlertTriangle, ShieldAlert, Sparkles, ArrowRight } f
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-const fmt = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+import { formatBRL } from '@/lib/formatters';
+const fmt = (v: number) => formatBRL(v);
 
 interface Props {
   clientId: string;
