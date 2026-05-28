@@ -10,6 +10,7 @@ import { Progress } from '@/components/ui/progress';
 import { Building2, Search, Plus, MapPin, CheckCircle, Warehouse } from 'lucide-react';
 import { useDistributionCenters } from '@/hooks/useDistributionCenters';
 
+import { formatNumber } from '@/lib/formatters';
 export default function DistributionCentersPage() {
   const { centers, loading } = useDistributionCenters();
   const [search, setSearch] = useState('');
@@ -34,7 +35,7 @@ export default function DistributionCentersPage() {
       <div className="grid gap-4 md:grid-cols-4">
         <KPICard title="Total de CDs" value={centers.length} icon={Building2} index={0} />
         <KPICard title="Ativos" value={centers.filter(c => c.status === 'active').length} icon={CheckCircle} index={1} color="success" />
-        <KPICard title="Capacidade Total" value={`${totalCapacity.toLocaleString('pt-BR')} m³`} icon={Warehouse} index={2} />
+        <KPICard title="Capacidade Total" value={`${formatNumber(totalCapacity)} m³`} icon={Warehouse} index={2} />
         <KPICard title="Ocupação Média" value={`${avgOccupancy}%`} icon={Building2} index={3} color={avgOccupancy > 85 ? 'danger' : avgOccupancy > 70 ? 'warning' : undefined} />
       </div>
 
@@ -74,7 +75,7 @@ export default function DistributionCentersPage() {
                   <div>
                     <div className="flex justify-between text-sm mb-1">
                       <span className="text-muted-foreground">Ocupação</span>
-                      <span className="font-medium">{dc.usedCapacity.toLocaleString('pt-BR')}/{dc.totalCapacity.toLocaleString('pt-BR')} m³ ({occupancy}%)</span>
+                      <span className="font-medium">{formatNumber(dc.usedCapacity)}/{formatNumber(dc.totalCapacity)} m³ ({occupancy}%)</span>
                     </div>
                     <Progress value={occupancy} className={`h-2 ${occupancy > 85 ? '[&>div]:bg-destructive' : occupancy > 70 ? '[&>div]:bg-amber-500' : ''}`} />
                   </div>

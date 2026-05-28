@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ComposedChart, Line, AreaChart, Area, ReferenceLine } from 'recharts';
 
+import { formatNumber } from '@/lib/formatters';
 export default function DigitalTwinPage() {
   const { orders } = useProductionOrders();
   const { capacities } = useProductionCapacity();
@@ -120,8 +121,8 @@ export default function DigitalTwinPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <KPICard title="OPs Ativas" value={activeOPs.length} icon={<Package className="h-4 w-4" />} accentColor="primary" index={0} />
-        <KPICard title="Peças Pendentes" value={totalPendingQty.toLocaleString('pt-BR')} icon={<Clock className="h-4 w-4" />} accentColor="warning" index={1} />
-        <KPICard title="Capacidade/Dia" value={totalCapacityPerDay.toLocaleString('pt-BR')} icon={<Zap className="h-4 w-4" />} accentColor="success" index={2} />
+        <KPICard title="Peças Pendentes" value={formatNumber(totalPendingQty)} icon={<Clock className="h-4 w-4" />} accentColor="warning" index={1} />
+        <KPICard title="Capacidade/Dia" value={formatNumber(totalCapacityPerDay)} icon={<Zap className="h-4 w-4" />} accentColor="success" index={2} />
         <KPICard title="Dias p/ Concluir" value={daysToComplete} icon={<TrendingUp className="h-4 w-4" />} accentColor={daysToComplete > 15 ? 'danger' : 'primary'} index={3} />
         <KPICard title="Gargalos" value={bottleneckData.filter(b => b.isBottleneck).length} icon={<AlertTriangle className="h-4 w-4" />} accentColor={bottleneckData.filter(b => b.isBottleneck).length > 0 ? 'danger' : 'success'} index={4} />
       </div>
@@ -170,7 +171,7 @@ export default function DigitalTwinPage() {
             <Card>
               <CardHeader className="pb-2"><CardTitle className="text-base">📊 Cenário Atual</CardTitle></CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex justify-between"><span className="text-muted-foreground">Peças pendentes</span><span className="font-bold">{totalPendingQty.toLocaleString('pt-BR')}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Peças pendentes</span><span className="font-bold">{formatNumber(totalPendingQty)}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Tempo estimado</span><span className="font-bold">{(totalPendingMinutes / 60).toFixed(0)}h</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Dias para concluir</span><span className="font-bold">{daysToComplete} dias</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Previsão</span><span className="font-bold">{format(addDays(new Date(), daysToComplete), 'dd/MM/yyyy')}</span></div>
@@ -180,7 +181,7 @@ export default function DigitalTwinPage() {
             <Card className={cn('border-2', simNewOrders > 0 ? 'border-primary' : 'border-border')}>
               <CardHeader className="pb-2"><CardTitle className="text-base">🔮 Cenário Simulado ({scenario === 'optimistic' ? 'Otimista' : scenario === 'pessimistic' ? 'Pessimista' : 'Normal'})</CardTitle></CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex justify-between"><span className="text-muted-foreground">Peças pendentes</span><span className="font-bold">{simTotalPendingQty.toLocaleString('pt-BR')}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Peças pendentes</span><span className="font-bold">{formatNumber(simTotalPendingQty)}</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Tempo estimado</span><span className="font-bold">{(simTotalPendingMinutes / 60).toFixed(0)}h</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Dias para concluir</span><span className={cn('font-bold', simDaysToComplete > daysToComplete + 5 ? 'text-destructive' : '')}>{simDaysToComplete} dias</span></div>
                 <div className="flex justify-between"><span className="text-muted-foreground">Previsão</span><span className="font-bold">{format(simCompletionDate, 'dd/MM/yyyy')}</span></div>
@@ -265,7 +266,7 @@ export default function DigitalTwinPage() {
                         <AlertTriangle className="h-5 w-5 text-destructive" />
                         <div>
                           <p className="font-medium text-sm">{b.sector}: Gargalo detectado</p>
-                          <p className="text-xs text-muted-foreground">Carga: {b.simLoad}% — Folga: {b.slack.toLocaleString('pt-BR')} un/mês</p>
+                          <p className="text-xs text-muted-foreground">Carga: {b.simLoad}% — Folga: {formatNumber(b.slack)} un/mês</p>
                         </div>
                       </div>
                     ))}

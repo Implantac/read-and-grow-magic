@@ -18,6 +18,7 @@ import { priorityConfig } from '@/config/production';
 import { Skeleton } from '@/components/ui/skeleton';
 import { KPICard } from '@/components/shared/KPICard';
 import { supabase } from '@/integrations/supabase/client';
+import { formatNumber } from '@/lib/formatters';
 import {
   ArrowRight, Clock, Factory, CheckCircle, Pause, AlertTriangle,
   Search, Package, TrendingUp, GripVertical, User, Calendar,
@@ -470,7 +471,7 @@ export default function ProductionKanban() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="text-center">
-              <p className="text-lg font-bold text-primary">{wipMetrics.totalQty.toLocaleString('pt-BR')}</p>
+              <p className="text-lg font-bold text-primary">{formatNumber(wipMetrics.totalQty)}</p>
               <p className="text-[10px] text-muted-foreground uppercase">Unidades em Processo</p>
             </div>
             <div className="text-center">

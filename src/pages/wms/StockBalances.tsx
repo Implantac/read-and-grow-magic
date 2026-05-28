@@ -11,6 +11,7 @@ import { Database, Search, Package, Lock, CheckCircle } from 'lucide-react';
 import { useStockBalances } from '@/hooks/useStockBalances';
 import { ExportButton } from '@/components/shared/ExportButton';
 
+import { formatNumber } from '@/lib/formatters';
 const statusLabels: Record<string, string> = {
   available: 'Disponível', reserved: 'Reservado', blocked: 'Bloqueado',
   quarantine: 'Quarentena', damaged: 'Avariado', in_conference: 'Em Conferência', in_transit: 'Em Trânsito',
@@ -61,9 +62,9 @@ export default function StockBalancesPage() {
 
       <div className="grid gap-4 md:grid-cols-4">
         <KPICard title="Registros" value={balances.length} icon={Database} index={0} />
-        <KPICard title="Qtd Total" value={totalQty.toLocaleString('pt-BR')} icon={Package} index={1} />
-        <KPICard title="Reservado" value={totalReserved.toLocaleString('pt-BR')} icon={Lock} index={2} color="warning" />
-        <KPICard title="Disponível" value={totalAvailable.toLocaleString('pt-BR')} icon={CheckCircle} index={3} color="success" />
+        <KPICard title="Qtd Total" value={formatNumber(totalQty)} icon={Package} index={1} />
+        <KPICard title="Reservado" value={formatNumber(totalReserved)} icon={Lock} index={2} color="warning" />
+        <KPICard title="Disponível" value={formatNumber(totalAvailable)} icon={CheckCircle} index={3} color="success" />
       </div>
 
       <Card>

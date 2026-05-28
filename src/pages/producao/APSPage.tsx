@@ -17,6 +17,7 @@ import { Progress } from '@/components/ui/progress';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell, ComposedChart, Line, ReferenceLine } from 'recharts';
 import { toast } from 'sonner';
 
+import { formatNumber } from '@/lib/formatters';
 type SortCriteria = 'priority_due' | 'due_date' | 'shortest_first' | 'longest_first' | 'critical_ratio';
 
 export default function APSPage() {
@@ -324,7 +325,7 @@ export default function APSPage() {
               <CardContent className="pt-6 text-center space-y-2">
                 <Zap className="h-8 w-8 mx-auto text-warning" />
                 <p className="text-sm text-muted-foreground">Capacidade Diária</p>
-                <p className="text-3xl font-extrabold">{totalCapPerDay.toLocaleString('pt-BR')}</p>
+                <p className="text-3xl font-extrabold">{formatNumber(totalCapPerDay)}</p>
                 <p className="text-xs text-muted-foreground">unidades/dia ({capacities.length} recursos)</p>
               </CardContent>
             </Card>

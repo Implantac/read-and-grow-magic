@@ -16,6 +16,7 @@ import { Target, TrendingUp, Award, AlertTriangle, Plus } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { format } from 'date-fns';
 
+import { formatNumber } from '@/lib/formatters';
 const currentPeriod = format(new Date(), 'yyyy-MM');
 
 const targetTypeLabels: Record<string, string> = {
@@ -113,7 +114,7 @@ export default function SalesTargetsPage() {
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                 <YAxis />
-                <Tooltip formatter={(v: number) => `R$ ${v.toLocaleString('pt-BR')}`} />
+                <Tooltip formatter={(v: number) => `R$ ${formatNumber(v)}`} />
                 <Bar dataKey="meta" fill="hsl(var(--muted-foreground))" opacity={0.3} name="Meta" />
                 <Bar dataKey="realizado" name="Realizado">
                   {chartData.map((entry, i) => (
