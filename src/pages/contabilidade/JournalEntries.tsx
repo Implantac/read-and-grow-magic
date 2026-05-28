@@ -70,7 +70,7 @@ export default function JournalEntriesPage() {
 
   const columns: Column<JournalEntry>[] = [
     { key: 'number', label: 'Número', sortable: true },
-    { key: 'date', label: 'Data', sortable: true, render: (v) => new Date(String(v)).toLocaleDateString('pt-BR') },
+    { key: 'date', label: 'Data', sortable: true, render: (v) => formatDate(String(v)) },
     { key: 'description', label: 'Descrição', sortable: true },
     { key: 'totalDebit', label: 'Débito', sortable: true, className: 'text-right', render: (v) => formatBRL(Number(v)) },
     { key: 'totalCredit', label: 'Crédito', sortable: true, className: 'text-right', render: (v) => formatBRL(Number(v)) },
