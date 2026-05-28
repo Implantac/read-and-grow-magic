@@ -19,7 +19,8 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import MRPSimulation from '@/components/producao/MRPSimulation';
 
-import { formatNumber } from '@/lib/formatters';
+import { formatBRL, formatNumber } from '@/lib/formatters';
+
 interface MaterialNeed {
   materialCode: string;
   materialName: string;
