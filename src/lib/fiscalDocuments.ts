@@ -1,7 +1,8 @@
 import jsPDF from 'jspdf';
 import type { NFe, NFeItem } from '@/types/fiscal';
 
-import { formatDate, formatDateTime, formatBRL } from '@/lib/formatters';
+import { formatDateTime, formatBRL } from '@/lib/formatters';
+
 const formatCurrency = (v: number) => formatBRL(v);
 
 
