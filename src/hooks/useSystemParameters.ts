@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { toastSuccess } from '@/lib/toastHelpers';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export function useSystemParameters() {
   const queryClient = useQueryClient();
@@ -34,11 +34,7 @@ export function useSystemParameters() {
       toastSuccess('Configuração atualizada com sucesso!');
     },
     onError: (error: any) => {
-      toast({ 
-        title: 'Erro ao atualizar configuração', 
-        description: error.message, 
-        variant: 'destructive' 
-      });
+      toastError(error.message, undefined, 'Erro ao atualizar configuração');
     },
   });
 

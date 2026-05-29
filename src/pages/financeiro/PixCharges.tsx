@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatBRL } from '@/lib/formatters';
-import { toastSuccess } from '@/lib/toastHelpers';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 const statusMeta = {
   pending: { label: 'Pendente', variant: 'secondary' as const, icon: Clock },
@@ -42,7 +42,7 @@ export default function PixCharges() {
 
   const submit = async () => {
     const amt = parseFloat(form.amount);
-    if (!amt || amt <= 0) return toast({ title: 'Valor inválido', variant: 'destructive' });
+    if (!amt || amt <= 0) return toastError('Valor inválido');
     await create.mutateAsync({ amount: amt, client_name: form.client_name || undefined, description: form.description || undefined });
     setOpen(false);
     setForm({ amount: '', client_name: '', description: '' });

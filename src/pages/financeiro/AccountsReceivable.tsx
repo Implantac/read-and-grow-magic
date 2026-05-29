@@ -27,7 +27,7 @@ import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
-import { toastSuccess } from '@/lib/toastHelpers';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
 const paymentMethods: Record<PaymentMethod, string> = {
   pix: 'PIX', boleto: 'Boleto', credit_card: 'Cartão de Crédito',
   debit_card: 'Cartão de Débito', transfer: 'Transferência', cash: 'Dinheiro', check: 'Cheque',
@@ -91,7 +91,7 @@ export default function AccountsReceivable() {
 
   const handleSubmit = () => {
     if (!formData.description || !formData.clientId || !formData.amount || !formData.dueDate) {
-      toast({ title: 'Erro', description: 'Preencha todos os campos obrigatórios', variant: 'destructive' });
+      toastError('Preencha todos os campos obrigatórios');
       return;
     }
     const client = clients.find(c => c.id === formData.clientId);
@@ -167,7 +167,7 @@ export default function AccountsReceivable() {
     const openAmount = Number(selectedAccount.open_amount ?? selectedAccount.amount);
 
     if (amount <= 0) {
-      toast({ title: 'Erro', description: 'Informe o valor do recebimento', variant: 'destructive' });
+      toastError('Informe o valor do recebimento');
       return;
     }
     if (amount > openAmount + 0.01) {
@@ -175,7 +175,7 @@ export default function AccountsReceivable() {
       return;
     }
     if (!payForm.bankAccountId) {
-      toast({ title: 'Erro', description: 'Selecione a conta bancária', variant: 'destructive' });
+      toastError('Selecione a conta bancária');
       return;
     }
 

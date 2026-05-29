@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toastError } from '@/lib/toastHelpers';
 import { Plus, Search, Eye, Trash2, DollarSign, AlertTriangle, Clock, CheckCircle, Zap } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useBatchPayPayables } from '@/hooks/useBatchPay';
@@ -91,7 +92,7 @@ export default function AccountsPayable() {
 
   const handleSubmit = () => {
     if (!formData.description || !formData.supplier || !formData.amount || !formData.dueDate) {
-      toast({ title: 'Erro', description: 'Preencha todos os campos obrigatórios', variant: 'destructive' });
+      toastError('Preencha todos os campos obrigatórios');
       return;
     }
     const totalAmount = parseFloat(formData.amount);
@@ -147,7 +148,7 @@ export default function AccountsPayable() {
     const openAmount = Number(selectedAccount.open_amount ?? selectedAccount.amount);
 
     if (amount <= 0) {
-      toast({ title: 'Erro', description: 'Informe o valor do pagamento', variant: 'destructive' });
+      toastError('Informe o valor do pagamento');
       return;
     }
     if (amount > openAmount + 0.01) {
@@ -155,7 +156,7 @@ export default function AccountsPayable() {
       return;
     }
     if (!payForm.bankAccountId) {
-      toast({ title: 'Erro', description: 'Selecione a conta bancária', variant: 'destructive' });
+      toastError('Selecione a conta bancária');
       return;
     }
 
@@ -212,7 +213,7 @@ export default function AccountsPayable() {
 
   const handleBatchPay = () => {
     if (!batchForm.bankAccountId) {
-      toast({ title: 'Erro', description: 'Selecione a conta bancária', variant: 'destructive' });
+      toastError('Selecione a conta bancária');
       return;
     }
     const ids = Array.from(selectedIds);

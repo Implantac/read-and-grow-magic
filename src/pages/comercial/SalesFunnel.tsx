@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
+import { toastError } from '@/lib/toastHelpers';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
@@ -138,7 +139,7 @@ export default function SalesFunnelPage() {
   };
 
   const handleSave = async () => {
-    if (!formData.title) return toast({ title: 'Título obrigatório', variant: 'destructive' });
+    if (!formData.title) return toastError('Título obrigatório');
     const payload: any = {
       title: formData.title, description: formData.description || null, stage: formData.stage,
       value: parseFloat(formData.value) || 0, probability: parseInt(formData.probability) || 10,

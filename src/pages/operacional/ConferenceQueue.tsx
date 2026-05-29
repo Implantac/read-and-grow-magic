@@ -1,4 +1,5 @@
 import { PageContainer } from '@/components/shared/PageContainer';
+import { toastError } from '@/lib/toastHelpers';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -38,7 +39,7 @@ export default function ConferenceQueue() {
       updates.approved_at = new Date().toISOString();
     }
     const { error } = await supabase.from('conference_records').update(updates).eq('id', id);
-    if (error) { toast({ title: 'Erro', description: error.message, variant: 'destructive' }); return; }
+    if (error) { toastError(error.message); return; }
     toast({ title: `Conferência ${conferenceStatusConfig[status]?.label || status}` });
     qc.invalidateQueries({ queryKey: ['conference-records'] });
 

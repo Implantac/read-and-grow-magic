@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { toastSuccess } from '@/lib/toastHelpers';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 type View = 'login' | 'signup' | 'forgot';
 
@@ -34,7 +34,7 @@ export default function Login() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast({ title: 'Erro', description: 'Preencha todos os campos', variant: 'destructive' });
+      toastError('Preencha todos os campos');
       return;
     }
     setIsLoading(true);
@@ -43,7 +43,7 @@ export default function Login() {
       toastSuccess('Bem-vindo!', 'Login realizado com sucesso');
       navigate('/dashboard');
     } catch (error: any) {
-      toast({ title: 'Erro de autenticação', description: error.message || 'Email ou senha inválidos', variant: 'destructive' });
+      toastError(error.message || 'Email ou senha inválidos', undefined, 'Erro de autenticação');
     }
     setIsLoading(false);
   };
@@ -51,11 +51,11 @@ export default function Login() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password || !name) {
-      toast({ title: 'Erro', description: 'Preencha todos os campos', variant: 'destructive' });
+      toastError('Preencha todos os campos');
       return;
     }
     if (password.length < 6) {
-      toast({ title: 'Erro', description: 'A senha deve ter no mínimo 6 caracteres', variant: 'destructive' });
+      toastError('A senha deve ter no mínimo 6 caracteres');
       return;
     }
     setIsLoading(true);
@@ -64,7 +64,7 @@ export default function Login() {
       toastSuccess('Conta criada!', 'Verifique seu email para confirmar o cadastro.');
       setView('login');
     } catch (error: any) {
-      toast({ title: 'Erro ao criar conta', description: error.message, variant: 'destructive' });
+      toastError(error.message, undefined, 'Erro ao criar conta');
     }
     setIsLoading(false);
   };
@@ -72,7 +72,7 @@ export default function Login() {
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      toast({ title: 'Erro', description: 'Informe seu email', variant: 'destructive' });
+      toastError('Informe seu email');
       return;
     }
     setIsLoading(true);
@@ -81,7 +81,7 @@ export default function Login() {
       toastSuccess('Email enviado', 'Se o email estiver cadastrado, você receberá instruções para redefinir sua senha.');
       setView('login');
     } catch (error: any) {
-      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+      toastError(error.message);
     }
     setIsLoading(false);
   };

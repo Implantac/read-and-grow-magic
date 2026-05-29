@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { toastError } from '@/lib/toastHelpers';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -65,15 +66,15 @@ export default function FinancialHub() {
   const submitQuickAction = async () => {
     const amount = parseFloat(form.amount.replace(',', '.'));
     if (!amount || amount <= 0) {
-      toast({ title: 'Valor inválido', variant: 'destructive' });
+      toastError('Valor inválido');
       return;
     }
     if (!form.account_id) {
-      toast({ title: 'Selecione uma conta bancária', variant: 'destructive' });
+      toastError('Selecione uma conta bancária');
       return;
     }
     if (!form.description.trim()) {
-      toast({ title: 'Informe uma descrição', variant: 'destructive' });
+      toastError('Informe uma descrição');
       return;
     }
     await createLedger.mutateAsync({

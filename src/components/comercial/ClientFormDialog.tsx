@@ -13,7 +13,7 @@ import { useSalesReps } from '@/hooks/useSalesReps';
 import { clientSegments, brazilianStates } from '@/config/commercial';
 import { maskCNPJ, maskCPF, maskPhone, maskCEP, validateCNPJ, validateCPF, validateEmail, lookupCEP } from '@/lib/maskUtils';
 import { useCreateClient, useUpdateClient, type DbClient } from '@/hooks/useClients';
-import { toastSuccess } from '@/lib/toastHelpers';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 interface Props {
   open: boolean;
@@ -108,7 +108,7 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
       });
       toastSuccess('Endereço encontrado', `${data.city}/${data.state}`);
     } else {
-      toast({ title: 'CEP não encontrado', variant: 'destructive' });
+      toastError('CEP não encontrado');
     }
   };
 
@@ -134,7 +134,7 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
       // Switch to first tab containing the error
       if (e.name || e.document || e.email || e.phone) setTab('identification');
       else if (e.address_zip_code || e.address_city || e.address_state) setTab('address');
-      toast({ title: 'Verifique os campos', description: 'Há campos obrigatórios pendentes.', variant: 'destructive' });
+      toastError('Há campos obrigatórios pendentes.', undefined, 'Verifique os campos');
       return;
     }
 
