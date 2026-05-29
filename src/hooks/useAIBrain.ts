@@ -39,6 +39,7 @@ export interface BrainRun {
   decisions_count: number;
   duration_ms: number | null;
   status: string;
+  created_at: string;
 }
 
 // ─── Decisions ─────────────────────────────
