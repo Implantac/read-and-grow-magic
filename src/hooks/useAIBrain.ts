@@ -168,7 +168,17 @@ export function useRunBrain() {
   });
 }
 
+export interface BrainChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  actions?: Array<{ tool: string; args: any; result: any }>;
+}
+
 export function useBrainChat() {
+  const [messages, setMessages] = useState<BrainChatMessage[]>([]);
+  const [loading, setLoading] = useState(false);
+
 
   const [messages, setMessages] = useState<BrainChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
