@@ -672,6 +672,56 @@ async function handleApprove(decisionId: string, approve: boolean, userId?: stri
   return data;
 }
 
+// ─────────────────────────────────────────────
+// WEEKLY LEARNING — analisa rejeitadas e salva lições
+// ─────────────────────────────────────────────
+async function handleWeeklyLearning() {
+  const since = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+  const { data: rejected } = await admin
+    .from("ai_brain_decisions")
+    .select("module,title,rationale,impact_level,risk_level,confidence,proposed_action,created_at")
+    .eq("status", "rejected")
+    .gte("created_at", since)
+    .limit(100);
+
+  if (!rejected?.length) {
+    await saveMemory({
+      category: "lesson_learned",
+      key: `weekly_${new Date().toISOString().slice(0, 10)}`,
+      value: "Nenhuma rejeição na semana — Cérebro bem calibrado.",
+      importance: 4,
+    });
+    return { ok: true, rejected: 0, lessons_saved: 0 };
+  }
+
+  const prompt = `Você é o CÉREBRO em modo auto-aprendizado. Abaixo estão decisões REJEITADAS por humanos na última semana.
+Identifique PADRÕES de erro e gere até 5 lições para evitar repetir esses erros.
+
+Decisões rejeitadas:
+${JSON.stringify(rejected, null, 2).slice(0, 8000)}
+
+Retorne JSON: {"lessons":[{"category":"lesson_learned","key":"evitar_X_quando_Y","value":"regra clara em 1 frase","importance":7}]}`;
+
+  const out = await callLLM(
+    "Você é um analista que extrai aprendizados de decisões rejeitadas. Retorne JSON válido.",
+    prompt,
+  );
+  const lessons = Array.isArray(out.lessons) ? out.lessons : [];
+  let saved = 0;
+  for (const l of lessons) {
+    try {
+      await saveMemory({
+        category: l.category || "lesson_learned",
+        key: String(l.key || `lesson_${Date.now()}_${saved}`).slice(0, 200),
+        value: l.value,
+        importance: Number(l.importance) || 7,
+        source: "weekly_learning",
+      });
+      saved++;
+    } catch { /* ignore */ }
+  }
+  return { ok: true, rejected: rejected.length, lessons_saved: saved };
+}
 
 // ─────────────────────────────────────────────
 // SERVER
