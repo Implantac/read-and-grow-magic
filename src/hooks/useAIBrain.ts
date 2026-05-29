@@ -166,7 +166,10 @@ export function useRunBrain() {
       qc.invalidateQueries({ queryKey: ['brain_memories'] });
     },
   });
+}
+
 export function useBrainChat() {
+
   const [messages, setMessages] = useState<BrainChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
 
