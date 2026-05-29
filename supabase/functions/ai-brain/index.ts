@@ -41,7 +41,14 @@ async function invokeAgent(name: string, body: any, authHeader?: string) {
   }
 }
 
-async function gatherSnapshot(authHeader?: string) {
+// Snapshot cache em memória (TTL 3 min) — reduz custo de chat e análises consecutivas
+const SNAPSHOT_TTL_MS = 3 * 60 * 1000;
+let snapshotCache: { at: number; data: any } | null = null;
+
+async function gatherSnapshot(authHeader?: string, force = false) {
+  if (!force && snapshotCache && Date.now() - snapshotCache.at < SNAPSHOT_TTL_MS) {
+    return snapshotCache.data;
+  }
   const [exec, fin, finIntel, com, prod] = await Promise.allSettled([
     invokeAgent("ai-executive", { action: "dashboard", months: 6 }, authHeader),
     invokeAgent("financial-insights", {}, authHeader),
@@ -51,14 +58,28 @@ async function gatherSnapshot(authHeader?: string) {
   ]);
   const pick = (r: PromiseSettledResult<any>) =>
     r.status === "fulfilled" ? r.value : { error: "failed" };
-  return {
+  const data = {
     executive: pick(exec),
     financial_insights: pick(fin),
     financial_intelligence: pick(finIntel),
     commercial: pick(com),
     production: pick(prod),
   };
+  snapshotCache = { at: Date.now(), data };
+  return data;
 }
+
+// Resumo das últimas decisões pendentes para incluir no contexto do chat
+async function loadPendingSummary(limit = 8) {
+  const { data } = await admin
+    .from("ai_brain_decisions")
+    .select("id,module,title,impact_level,risk_level,created_at")
+    .eq("status", "pending")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return data || [];
+}
+
 
 // ─────────────────────────────────────────────
 // MEMORY
