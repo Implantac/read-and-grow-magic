@@ -36,6 +36,7 @@ const GamificationPage = lazy(() => import("./pages/comercial/Gamification"));
 const SalesAutomationPage = lazy(() => import("./pages/comercial/SalesAutomation"));
 const ExecutiveDashboardPage = lazy(() => import("./pages/diretoria/ExecutiveDashboard"));
 const BrainPage = lazy(() => import("./pages/diretoria/Brain"));
+const BrainLearningPage = lazy(() => import("./pages/diretoria/BrainLearning"));
 
 // Credit & Risk
 const CreditAnalysisPage = lazy(() => import("./pages/credito/CreditAnalysis"));
