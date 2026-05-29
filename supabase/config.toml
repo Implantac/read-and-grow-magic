@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.daily-bank-reconciliation]
 verify_jwt = false
+
+[functions.ai-brain]
+verify_jwt = false
