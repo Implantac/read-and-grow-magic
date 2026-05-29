@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { mutationErrorHandler } from '@/lib/toastHelpers';
 
 export interface DbSaleItem {
   id: string;
@@ -111,6 +112,6 @@ export function useCreateSale() {
       qc.invalidateQueries({ queryKey: ['accounts-receivable'] });
       toast({ title: 'Venda registrada com sucesso!', description: 'Movimentação de estoque e conta a receber geradas automaticamente.' });
     },
-    onError: (e: any) => toast({ title: 'Erro ao registrar venda', description: e.message, variant: 'destructive' }),
+    onError: mutationErrorHandler('Erro ao registrar venda'),
   });
 }

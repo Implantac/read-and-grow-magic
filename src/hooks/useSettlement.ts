@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { mutationErrorHandler } from '@/lib/toastHelpers';
 
 export type PaymentSplit = {
   payment_method: 'pix' | 'boleto' | 'credit_card' | 'debit_card' | 'transfer' | 'cash' | 'check';
@@ -47,7 +48,7 @@ export function useSettleAccount() {
       qc.invalidateQueries({ queryKey: ['bank_accounts'] });
       toast({ title: 'Liquidação concluída', description: 'Baixa registrada com sucesso' });
     },
-    onError: (e: any) => toast({ title: 'Erro na liquidação', description: e.message, variant: 'destructive' }),
+    onError: mutationErrorHandler('Erro na liquidação'),
   });
 }
 
@@ -72,7 +73,7 @@ export function useCompensateAccounts() {
       qc.invalidateQueries({ queryKey: ['financial_offsets'] });
       toast({ title: 'Compensação efetivada' });
     },
-    onError: (e: any) => toast({ title: 'Erro na compensação', description: e.message, variant: 'destructive' }),
+    onError: mutationErrorHandler('Erro na compensação'),
   });
 }
 

@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError } from '@/lib/toastHelpers';
+import { handleMutationError, mutationErrorHandler } from '@/lib/toastHelpers';
 export interface AuditLog {
   id: string;
   audit_run_id: string;
@@ -55,7 +55,7 @@ export function useRunFinancialAudit() {
         description: `${r?.issues_open ?? 0} problemas abertos · ${r?.auto_fixed ?? 0} auto-corrigidos`,
       });
     },
-    onError: (e: any) => toast({ title: 'Erro na auditoria', description: e.message, variant: 'destructive' }),
+    onError: mutationErrorHandler('Erro na auditoria'),
   });
 }
 

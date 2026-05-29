@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError } from '@/lib/toastHelpers';
+import { handleMutationError, mutationErrorHandler } from '@/lib/toastHelpers';
 export interface DbCategory {
   id: string;
   name: string;
@@ -77,6 +77,6 @@ export function useDeleteCategory() {
       qc.invalidateQueries({ queryKey: ['categories'] });
       toast({ title: 'Categoria excluída com sucesso!' });
     },
-    onError: (e: any) => toast({ title: 'Erro ao excluir', description: e.message, variant: 'destructive' }),
+    onError: mutationErrorHandler('Erro ao excluir'),
   });
 }

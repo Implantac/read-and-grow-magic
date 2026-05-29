@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 import { formatBRL, formatDateTime, formatNumber } from '@/lib/formatters';
+import { handleMutationError } from '@/lib/toastHelpers';
 const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 
@@ -45,7 +46,7 @@ export default function PeriodClosing() {
       qc.invalidateQueries({ queryKey: ['accounting_periods'] });
       toast({ title: 'Período fechado', description: 'Resultado apurado com sucesso' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 
   const reopenMutation = useMutation({
@@ -58,7 +59,7 @@ export default function PeriodClosing() {
       qc.invalidateQueries({ queryKey: ['accounting_periods'] });
       toast({ title: 'Período reaberto' });
     },
-    onError: (e: any) => toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
+    onError: handleMutationError,
   });
 
   const monthsView = useMemo(() => {

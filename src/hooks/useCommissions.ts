@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { mutationErrorHandler } from '@/lib/toastHelpers';
 
 export function useCommissionPolicies() {
   return useQuery({
@@ -58,7 +59,7 @@ export function useCommissionMutations() {
       queryClient.invalidateQueries({ queryKey: ['commission-policies'] });
       toast({ title: 'Política criada com sucesso' });
     },
-    onError: () => toast({ title: 'Erro ao criar política', variant: 'destructive' }),
+    onError: mutationErrorHandler('Erro ao criar política'),
   });
 
   const updatePolicy = useMutation({

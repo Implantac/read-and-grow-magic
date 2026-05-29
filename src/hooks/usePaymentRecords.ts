@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { toastError } from '@/lib/toastHelpers';
 
 export interface PaymentRecordRow {
   id: string;
@@ -48,6 +49,6 @@ export function useCreatePaymentRecord() {
       qc.invalidateQueries({ queryKey: ['accounts_payable'] });
       toast({ title: 'Sucesso', description: 'Baixa registrada com sucesso' });
     },
-    onError: () => { toast({ title: 'Erro', description: 'Erro ao registrar baixa', variant: 'destructive' }); },
+    onError: () => toastError('Erro ao registrar baixa'),
   });
 }

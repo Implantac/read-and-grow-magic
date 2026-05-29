@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { mutationErrorHandler } from '@/lib/toastHelpers';
 
 export function useSalesTargets(filters?: { period?: string; entityType?: string }) {
   return useQuery({
@@ -30,7 +31,7 @@ export function useSalesTargetMutations() {
       queryClient.invalidateQueries({ queryKey: ['sales-targets'] });
       toast({ title: 'Meta criada com sucesso' });
     },
-    onError: () => toast({ title: 'Erro ao criar meta', variant: 'destructive' }),
+    onError: mutationErrorHandler('Erro ao criar meta'),
   });
 
   const updateTarget = useMutation({
