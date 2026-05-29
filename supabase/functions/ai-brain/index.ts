@@ -782,6 +782,9 @@ Deno.serve(async (req) => {
       case "cron_run":
         result = await handleAnalyze(undefined, undefined, "autopilot");
         break;
+      case "weekly_learning":
+        result = await handleWeeklyLearning();
+        break;
 
       default:
         return new Response(JSON.stringify({ error: `unknown action ${action}` }), {
