@@ -101,34 +101,40 @@ async function saveMemory(m: {
   scope?: string;
   category: string;
   key: string;
-  value: any;
-  importance?: number;
-  source?: string;
-}) {
-  await admin.from("ai_brain_memory").upsert(
-    {
-      user_id: m.user_id || null,
-      scope: m.scope || (m.user_id ? "user" : "global"),
-      category: m.category,
-      key: m.key,
-      value: m.value,
-      importance: m.importance ?? 5,
-      source: m.source || "agent:brain",
-    },
-    { onConflict: "scope,user_id,key" },
-  );
-}
-
-// ─────────────────────────────────────────────
-// LLM CALL — synthesis with structured JSON
-// ─────────────────────────────────────────────
 async function callLLM(systemPrompt: string, userPrompt: string) {
-  const res = await fetch(GATEWAY, {
+  const doFetch = () => fetch(GATEWAY, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${LOVABLE_API_KEY}`,
       "Content-Type": "application/json",
     },
+    body: JSON.stringify({
+      model: MODEL,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      response_format: { type: "json_object" },
+    }),
+  });
+  let res = await doFetch();
+  if (res.status === 429) {
+    await new Promise((r) => setTimeout(r, 1500));
+    res = await doFetch();
+  }
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`LLM ${res.status}: ${text}`);
+  }
+  const data = await res.json();
+  const content = data?.choices?.[0]?.message?.content || "{}";
+  try {
+    return JSON.parse(content);
+  } catch {
+    return { raw: content };
+  }
+}
+
     body: JSON.stringify({
       model: MODEL,
       messages: [
