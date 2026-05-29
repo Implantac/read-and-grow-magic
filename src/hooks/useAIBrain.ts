@@ -66,11 +66,6 @@ export function useApproveDecision() {
   return useMutation({
     mutationFn: async ({ id, approve }: { id: string; approve: boolean }) => {
       const { data, error } = await supabase.functions.invoke('ai-brain', {
-export function useApproveDecision() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ id, approve }: { id: string; approve: boolean }) => {
-      const { data, error } = await supabase.functions.invoke('ai-brain', {
         body: { action: approve ? 'approve_decision' : 'reject_decision', decision_id: id },
       });
       if (error) throw error;
@@ -94,6 +89,11 @@ export function useExecuteDecision() {
   });
 }
 
+// ─── Memories ─────────────────────────────
+export function useBrainMemories() {
+  return useQuery({
+    queryKey: ['brain_memories'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('ai_brain_memory' as any)
         .select('*')
@@ -105,6 +105,7 @@ export function useExecuteDecision() {
     },
   });
 }
+
 
 export function useSaveMemory() {
   const qc = useQueryClient();
