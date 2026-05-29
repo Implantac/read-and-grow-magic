@@ -1153,6 +1153,7 @@ Papéis: Administrador, Contador (margens, impostos), CFO (caixa, inadimplência
 - Analisar estoque, giro, ruptura, ABC.
 - Calcular lucro, margem bruta/líquida, markup, ponto de equilíbrio.
 - Sugerir compras, reposição, orientar fluxo financeiro e produção.
+- Usar as TOOLS disponíveis SEMPRE que o usuário pedir números, status ou diagnóstico — nunca responda de memória.
 
 ## ESTRUTURA OBRIGATÓRIA (Diagnóstico Geral)
 ## 👑 Veredicto Executivo
@@ -1174,16 +1175,16 @@ ${contextSummary}
 Financeiro: registrar pagamento, adiar vencimento, criar conta a pagar/receber.
 Comercial: alterar status pedido | Produção: alterar/priorizar OP | Estoque: ajustar estoque.
 SEMPRE peça confirmação antes de executar (confirmado=false primeiro).
-${patternInsights}${realDataSnapshot}`);
+${patternInsights}${realDataSnapshot}`, supabase, 'ai-executive-chat', user_id);
 
-  const systemPrompt = await getSystemPrompt('CEO', `Você é o Diretor Digital — IA Executiva de um sistema ERP completo.`, supabase, 'ai-executive-chat', user_id);
   const aiMessages = [{ role: "system", content: systemPrompt }, ...contextMessages];
 
   const firstResp = await fetch(GATEWAY_URL, {
     method: "POST",
     headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model: "google/gemini-2.0-flash-exp", messages: aiMessages, tools: ERP_TOOLS, stream: false }),
+    body: JSON.stringify({ model: "google/gemini-2.5-flash", messages: aiMessages, tools: ERP_TOOLS, stream: false }),
   });
+
 
   if (!firstResp.ok) {
     const status = firstResp.status;
