@@ -41,7 +41,14 @@ async function invokeAgent(name: string, body: any, authHeader?: string) {
   }
 }
 
-async function gatherSnapshot(authHeader?: string) {
+// Snapshot cache em memória (TTL 3 min) — reduz custo de chat e análises consecutivas
+const SNAPSHOT_TTL_MS = 3 * 60 * 1000;
+let snapshotCache: { at: number; data: any } | null = null;
+
+async function gatherSnapshot(authHeader?: string, force = false) {
+  if (!force && snapshotCache && Date.now() - snapshotCache.at < SNAPSHOT_TTL_MS) {
+    return snapshotCache.data;
+  }
   const [exec, fin, finIntel, com, prod] = await Promise.allSettled([
     invokeAgent("ai-executive", { action: "dashboard", months: 6 }, authHeader),
     invokeAgent("financial-insights", {}, authHeader),
@@ -51,14 +58,28 @@ async function gatherSnapshot(authHeader?: string) {
   ]);
   const pick = (r: PromiseSettledResult<any>) =>
     r.status === "fulfilled" ? r.value : { error: "failed" };
-  return {
+  const data = {
     executive: pick(exec),
     financial_insights: pick(fin),
     financial_intelligence: pick(finIntel),
     commercial: pick(com),
     production: pick(prod),
   };
+  snapshotCache = { at: Date.now(), data };
+  return data;
 }
+
+// Resumo das últimas decisões pendentes para incluir no contexto do chat
+async function loadPendingSummary(limit = 8) {
+  const { data } = await admin
+    .from("ai_brain_decisions")
+    .select("id,module,title,impact_level,risk_level,created_at")
+    .eq("status", "pending")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return data || [];
+}
+
 
 // ─────────────────────────────────────────────
 // MEMORY
@@ -99,10 +120,10 @@ async function saveMemory(m: {
 }
 
 // ─────────────────────────────────────────────
-// LLM CALL — synthesis with structured JSON
+// LLM CALL — synthesis with structured JSON + retry em 429
 // ─────────────────────────────────────────────
 async function callLLM(systemPrompt: string, userPrompt: string) {
-  const res = await fetch(GATEWAY, {
+  const doFetch = () => fetch(GATEWAY, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${LOVABLE_API_KEY}`,
@@ -117,6 +138,11 @@ async function callLLM(systemPrompt: string, userPrompt: string) {
       response_format: { type: "json_object" },
     }),
   });
+  let res = await doFetch();
+  if (res.status === 429) {
+    await new Promise((r) => setTimeout(r, 1500));
+    res = await doFetch();
+  }
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`LLM ${res.status}: ${text}`);
@@ -129,6 +155,7 @@ async function callLLM(systemPrompt: string, userPrompt: string) {
     return { raw: content };
   }
 }
+
 
 // ─────────────────────────────────────────────
 // GUARDRAILS — quais decisões podem auto-executar
@@ -273,8 +300,35 @@ async function executeAction(action: any, userId?: string) {
         return { ok: true, order_id: data.id, new_due_date: p.new_due_date };
       }
       case "request_quotation": {
-        return { ok: true, note: "Cotação registrada como sugestão — compras deve criar manualmente" };
+        // Cria cotação real em rascunho para o setor de compras
+        const number = `COT-AI-${Date.now().toString().slice(-8)}`;
+        const validUntil = p.valid_until || new Date(Date.now() + 15 * 86400000).toISOString();
+        const { data, error } = await admin.from("quotations").insert({
+          number,
+          client_id: p.client_id || null,
+          client_name: p.client_name || p.supplier_name || "Cotação Cérebro",
+          valid_until: validUntil,
+          subtotal: p.subtotal || p.total || 0,
+          discount: 0,
+          total: p.total || 0,
+          status: "draft",
+          notes: `[Cérebro] ${p.description || p.notes || "Cotação sugerida pelo Cérebro"}`,
+        }).select().single();
+        if (error) throw error;
+        // notifica compradores
+        const { data: buyers } = await admin.from("user_roles").select("user_id").in("role", ["admin", "manager"]);
+        for (const b of buyers || []) {
+          await admin.from("notifications").insert({
+            user_id: b.user_id,
+            type: "info",
+            title: `📋 Nova cotação sugerida: ${number}`,
+            description: p.description || "Cérebro recomenda nova cotação",
+            module: "Compras",
+          });
+        }
+        return { ok: true, quotation_id: data.id, number };
       }
+
       case "create_purchase_order": {
         if (!p.supplier_name) return { ok: false, error: "supplier_name obrigatório" };
         const number = `PO-AI-${Date.now().toString().slice(-8)}`;
@@ -563,9 +617,10 @@ const AGENT_PERSONAS: Record<string, { label: string; focus: string }> = {
 
 async function handleChat(userId: string | undefined, messages: any[], authHeader?: string, agent = "geral") {
   const persona = AGENT_PERSONAS[agent] || AGENT_PERSONAS.geral;
-  const [snapshot, memories] = await Promise.all([
+  const [snapshot, memories, pending] = await Promise.all([
     gatherSnapshot(authHeader),
     loadMemories(userId, 15),
+    loadPendingSummary(8),
   ]);
 
   const ctx = `# CONTEXTO ATUAL DO NEGÓCIO
@@ -574,11 +629,14 @@ ${JSON.stringify(memories.slice(0, 10), null, 2)}
 
 ## Snapshot resumido
 KPIs: ${JSON.stringify(snapshot.executive?.kpis || {}, null, 2).slice(0, 1500)}
-Score financeiro: ${JSON.stringify(snapshot.financial_intelligence?.score || {}, null, 2).slice(0, 500)}`;
+Score financeiro: ${JSON.stringify(snapshot.financial_intelligence?.score || {}, null, 2).slice(0, 500)}
+
+## Decisões pendentes (aguardando aprovação humana)
+${pending.length ? pending.map((d: any) => `- [${d.impact_level}] ${d.module} · ${d.title} (${d.id.slice(0, 8)})`).join("\n") : "Nenhuma pendência."}`;
 
   const sys = `Você é o ${persona.label} — agente especializado do Cérebro do ERP.
 FOCO: ${persona.focus}
-Use o contexto (dados REAIS) para responder com precisão. Cite números exatos. Seja direto e PROATIVO: quando o usuário pedir uma ação executável, use as TOOLS disponíveis. Ações destrutivas viram decisões pendentes para aprovação humana — execute mesmo assim, é só uma proposta.
+Use o contexto (dados REAIS) para responder com precisão. Cite números exatos. Seja direto e PROATIVO: quando o usuário pedir uma ação executável, use as TOOLS disponíveis. Ações destrutivas viram decisões pendentes para aprovação humana — execute mesmo assim, é só uma proposta. Se houver decisões pendentes relevantes, mencione-as.
 
 ${ctx}`;
 
@@ -780,7 +838,52 @@ Deno.serve(async (req) => {
         break;
       case "list_memories":
         result = { memories: await loadMemories(userId, 100) };
+
+      case "feedback_decision": {
+        // Usuário aprova ou critica uma decisão executada — vira aprendizado
+        const { decision_id, rating, comment } = body;
+        if (!decision_id || !["up", "down"].includes(rating)) {
+          result = { ok: false, error: "decision_id e rating ('up'|'down') obrigatórios" };
+          break;
+        }
+        const { data: dec } = await admin.from("ai_brain_decisions")
+          .select("title,module,rationale,proposed_action,impact_level").eq("id", decision_id).single();
+        if (!dec) { result = { ok: false, error: "decisão não encontrada" }; break; }
+        await saveMemory({
+          user_id: userId,
+          category: rating === "up" ? "positive_feedback" : "lesson_learned",
+          key: `feedback_${decision_id}`,
+          value: {
+            rating, comment: comment || null,
+            decision: { title: dec.title, module: dec.module, action: dec.proposed_action, impact: dec.impact_level },
+            note: rating === "up"
+              ? "Padrão aprovado pelo humano — repetir em contextos similares."
+              : "Padrão rejeitado pelo humano — evitar em contextos similares.",
+          },
+          importance: rating === "down" ? 8 : 6,
+          source: "user_feedback",
+        });
+        result = { ok: true, registered: true };
         break;
+      }
+      case "reinforce_memory": {
+        // Aumenta importância de uma memória citada/usada com sucesso
+        const { memory_key, delta } = body;
+        if (!memory_key) { result = { ok: false, error: "memory_key obrigatório" }; break; }
+        const { data: mem } = await admin.from("ai_brain_memory")
+          .select("id,importance").eq("key", memory_key).maybeSingle();
+        if (!mem) { result = { ok: false, error: "memória não encontrada" }; break; }
+        const next = Math.min(10, (mem.importance || 5) + (Number(delta) || 1));
+        await admin.from("ai_brain_memory").update({ importance: next }).eq("id", mem.id);
+        result = { ok: true, new_importance: next };
+        break;
+      }
+      case "invalidate_cache":
+        snapshotCache = null;
+        result = { ok: true, cleared: true };
+        break;
+
+
 
       case "notify_critical": {
         const webhook = Deno.env.get("BRAIN_WEBHOOK_URL");
