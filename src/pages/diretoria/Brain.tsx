@@ -58,6 +58,9 @@ export default function BrainPage() {
         title="🧠 Cérebro Nativo"
         description="Núcleo de IA do ERP — orquestra todos os módulos, memória de longo prazo, decisões com guardrails"
       >
+        <Button asChild variant="outline" size="sm" className="gap-2">
+          <Link to="/diretoria/brain/aprendizado"><GraduationCap className="h-4 w-4" /> Aprendizado</Link>
+        </Button>
         <Button variant="outline" size="sm" onClick={() => runBrain.mutate('analyze')} disabled={runBrain.isPending} className="gap-2">
           <RefreshCw className={`h-4 w-4 ${runBrain.isPending ? 'animate-spin' : ''}`} /> Analisar agora
         </Button>
