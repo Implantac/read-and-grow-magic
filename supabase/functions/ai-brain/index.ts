@@ -291,6 +291,7 @@ Modo: ${mode === "autopilot" ? "AUTOPILOT — sugira ações de baixo risco que 
 
     // Persiste decisões com guardrails
     const decisions = Array.isArray(structured.decisoes) ? structured.decisoes : [];
+    let createdCount = 0;
     for (const d of decisions) {
       const g = classifyDecision(d);
       let executionResult: any = null;
@@ -459,6 +460,7 @@ Deno.serve(async (req) => {
       case "save_memory":
         await saveMemory({ ...body.memory, user_id: userId });
         result = { ok: true };
+        break;
       case "list_memories":
         result = { memories: await loadMemories(userId, 100) };
         break;
