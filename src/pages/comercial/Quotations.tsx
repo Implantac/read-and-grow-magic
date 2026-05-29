@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { toastError } from '@/lib/toastHelpers';
+import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { Plus, Eye, MoreHorizontal, FileText, Send, CheckCircle, XCircle, ArrowRightCircle, Loader2, DollarSign, FileEdit, Mail, ThumbsUp } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -97,7 +97,7 @@ export default function QuotationsPage() {
 
   const handleStatusChange = (quotation: DbQuotation, newStatus: string, message: string) => {
     updateStatus.mutate({ id: quotation.id, status: newStatus }, {
-      onSuccess: () => toast({ title: message, description: `Orçamento ${quotation.number}` }),
+      onSuccess: () => toastSuccess(message, `Orçamento ${quotation.number}`),
     });
   };
 

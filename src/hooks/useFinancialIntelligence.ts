@@ -72,10 +72,7 @@ export function useComputeIntelligence() {
     onSuccess: (data: any) => {
       qc.invalidateQueries({ queryKey: ['financial_health_score'] });
       qc.invalidateQueries({ queryKey: ['financial_predictive_alerts'] });
-      toast({
-        title: 'Inteligência financeira atualizada',
-        description: `Score: ${data?.score?.score ?? '-'} (${data?.score?.grade ?? '-'}) · ${data?.risks?.alerts_created ?? 0} novos alertas`,
-      });
+      toastSuccess('Inteligência financeira atualizada', `Score: ${data?.score?.score ?? '-'} (${data?.score?.grade ?? '-'}) · ${data?.risks?.alerts_created ?? 0} novos alertas`);
     },
     onError: handleMutationError,
   });

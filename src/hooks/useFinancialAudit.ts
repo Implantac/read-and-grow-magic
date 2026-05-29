@@ -50,10 +50,7 @@ export function useRunFinancialAudit() {
     onSuccess: (data: any) => {
       qc.invalidateQueries({ queryKey: ['financial_audit_logs'] });
       const r = data?.result;
-      toast({
-        title: 'Auditoria executada',
-        description: `${r?.issues_open ?? 0} problemas abertos · ${r?.auto_fixed ?? 0} auto-corrigidos`,
-      });
+      toastSuccess('Auditoria executada', `${r?.issues_open ?? 0} problemas abertos · ${r?.auto_fixed ?? 0} auto-corrigidos`);
     },
     onError: mutationErrorHandler('Erro na auditoria'),
   });

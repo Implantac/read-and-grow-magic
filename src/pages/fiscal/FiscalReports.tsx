@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toastSuccess } from '@/lib/toastHelpers';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatBRL } from '@/lib/formatters';
@@ -91,10 +92,7 @@ export default function FiscalReportsPage() {
   };
 
   const handleDownload = (report: FiscalReport) => {
-    toast({
-      title: 'Download Iniciado',
-      description: `Baixando ${reportTypeLabels[report.type]}...`,
-    });
+    toastSuccess('Download Iniciado', `Baixando ${reportTypeLabels[report.type]}...`);
   };
 
   const renderStatusBadge = (status: string) => {
