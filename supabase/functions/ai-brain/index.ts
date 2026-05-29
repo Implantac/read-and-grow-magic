@@ -144,6 +144,16 @@ const SAFE_ACTIONS = new Set([
   "log_observation",
   "save_memory",
   "generate_report",
+  "create_follow_up_task",
+  "escalate_alert",
+  "send_pix_reminder",
+]);
+
+// Tools que NUNCA podem ser auto-executadas, mesmo low-risk
+const RISKY_ACTIONS = new Set([
+  "block_client",
+  "reschedule_production_order",
+  "request_quotation",
 ]);
 
 async function executeAction(action: any, userId?: string) {
@@ -163,9 +173,32 @@ async function executeAction(action: any, userId?: string) {
         if (error) throw error;
         return { ok: true, alert_id: data.id };
       }
+      case "escalate_alert": {
+        const { data, error } = await admin.from("financial_alerts").insert({
+          alert_type: p.alert_type || "brain_escalation",
+          severity: "critical",
+          title: p.title || "🔴 Escalação do Cérebro",
+          description: p.description || "",
+          entity_type: p.entity_type || null,
+          entity_id: p.entity_id || null,
+        }).select().single();
+        if (error) throw error;
+        // notifica admins
+        const { data: admins } = await admin.from("user_roles").select("user_id").eq("role", "admin");
+        for (const a of admins || []) {
+          await admin.from("notifications").insert({
+            user_id: a.user_id,
+            type: "critical",
+            title: `🔴 ${p.title || "Escalação crítica do Cérebro"}`,
+            description: p.description || "",
+            module: "Cérebro",
+          });
+        }
+        return { ok: true, alert_id: data.id, admins_notified: (admins || []).length };
+      }
       case "notify_user": {
         const { data, error } = await admin.from("notifications").insert({
-          user_id: userId || null,
+          user_id: p.user_id || userId || null,
           type: p.type || "info",
           title: p.title || "Cérebro do ERP",
           description: p.description || "",
@@ -173,6 +206,70 @@ async function executeAction(action: any, userId?: string) {
         }).select().single();
         if (error) throw error;
         return { ok: true, notification_id: data.id };
+      }
+      case "send_pix_reminder": {
+        // Cobrança suave: notifica + cria alerta financeiro
+        const desc = p.description || `Lembrete de PIX pendente${p.amount ? ` — R$ ${p.amount}` : ""}`;
+        const { data: admins } = await admin.from("user_roles").select("user_id").in("role", ["admin", "manager"]);
+        for (const a of admins || []) {
+          await admin.from("notifications").insert({
+            user_id: a.user_id,
+            type: "warning",
+            title: p.title || "💸 Lembrete de cobrança PIX",
+            description: desc,
+            module: "Financeiro",
+          });
+        }
+        return { ok: true, recipients: (admins || []).length };
+      }
+      case "create_follow_up_task": {
+        const { data, error } = await admin.from("follow_up_tasks").insert({
+          client_id: p.client_id || null,
+          client_name: p.client_name || null,
+          sales_rep_id: p.sales_rep_id || null,
+          action_type: p.action_type || "follow_up",
+          title: p.title || "Follow-up sugerido pelo Cérebro",
+          description: p.description || "",
+          scheduled_date: p.scheduled_date || new Date(Date.now() + 24 * 3600 * 1000).toISOString().slice(0, 10),
+          priority: p.priority || "medium",
+          channel: p.channel || "whatsapp",
+          suggested_message: p.suggested_message || null,
+          ai_generated: true,
+          status: "pending",
+        }).select().single();
+        if (error) throw error;
+        return { ok: true, task_id: data.id };
+      }
+      case "block_client": {
+        if (!p.client_id) return { ok: false, error: "client_id obrigatório" };
+        const { error: e1 } = await admin.from("clients")
+          .update({ status: "blocked" })
+          .eq("id", p.client_id);
+        if (e1) throw e1;
+        // registra histórico via order_blocks se houver order_id
+        if (p.order_id) {
+          await admin.from("order_blocks").insert({
+            order_id: p.order_id,
+            block_type: "credit",
+            block_reason: p.reason || "Bloqueio recomendado pelo Cérebro",
+            description: p.description || "",
+            blocked_by: "ai-brain",
+            status: "active",
+            approval_level: "manager",
+          });
+        }
+        return { ok: true, client_id: p.client_id };
+      }
+      case "reschedule_production_order": {
+        if (!p.order_id || !p.new_due_date) return { ok: false, error: "order_id e new_due_date obrigatórios" };
+        const { data, error } = await admin.from("production_orders")
+          .update({ due_date: p.new_due_date, notes: `[Cérebro] ${p.reason || "Replanejamento"}` })
+          .eq("id", p.order_id).select().single();
+        if (error) throw error;
+        return { ok: true, order_id: data.id, new_due_date: p.new_due_date };
+      }
+      case "request_quotation": {
+        return { ok: true, note: "Cotação registrada como sugestão — compras deve criar manualmente" };
       }
       case "save_memory": {
         await saveMemory({
