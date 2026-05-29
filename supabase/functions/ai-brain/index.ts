@@ -336,11 +336,36 @@ RETORNE SEMPRE JSON VÁLIDO no formato:
       "risk_level": "low|medium|high",
       "confidence": 0.85,
       "evidence": {"dados_usados":"..."},
-      "proposed_action": {"tool":"create_alert|notify_user|log_observation|save_memory|generate_report|<custom>","params":{}}
+      "proposed_action": {"tool":"<tool_name>","params":{...}}
     }
   ],
   "memorias_a_salvar": [{"category":"pattern|fact","key":"...","value":"...","importance":7}]
-}`;
+}
+
+CATÁLOGO DE TOOLS DISPONÍVEIS:
+- create_alert (params: alert_type, severity, title, description, entity_type?, entity_id?) — cria alerta financeiro [SAFE]
+- escalate_alert (title, description) — alerta crítico + notifica todos admins [SAFE]
+- notify_user (user_id?, title, description, type?, module?) — envia notificação [SAFE]
+- send_pix_reminder (title?, description, amount?) — alerta cobrança PIX para financeiro [SAFE]
+- create_follow_up_task (client_id, client_name, title, description, scheduled_date, priority?, channel?, suggested_message?) — cria tarefa de follow-up comercial [SAFE]
+- save_memory (category, key, value, importance) — salva conhecimento de longo prazo [SAFE]
+- log_observation (description) — registra observação [SAFE]
+- generate_report (description) — sinaliza geração de relatório [SAFE]
+- block_client (client_id, reason, order_id?, description?) — BLOQUEIA cliente por crédito [REQUER APROVAÇÃO]
+- reschedule_production_order (order_id, new_due_date, reason) — reagenda OP [REQUER APROVAÇÃO]
+- request_quotation (description) — sugere cotação ao setor de compras [REQUER APROVAÇÃO]`;
+
+// Schema das tools para o chat (OpenAI tool calling)
+const BRAIN_TOOLS = [
+  { type: "function", function: { name: "create_alert", description: "Cria alerta financeiro", parameters: { type: "object", properties: { title: { type: "string" }, description: { type: "string" }, severity: { type: "string", enum: ["low", "medium", "high", "critical"] }, alert_type: { type: "string" } }, required: ["title", "description"] } } },
+  { type: "function", function: { name: "escalate_alert", description: "Cria alerta crítico e notifica todos admins. Use só quando algo é realmente urgente", parameters: { type: "object", properties: { title: { type: "string" }, description: { type: "string" } }, required: ["title", "description"] } } },
+  { type: "function", function: { name: "notify_user", description: "Envia notificação ao usuário atual", parameters: { type: "object", properties: { title: { type: "string" }, description: { type: "string" }, module: { type: "string" } }, required: ["title", "description"] } } },
+  { type: "function", function: { name: "send_pix_reminder", description: "Cria lembrete de cobrança PIX para o time financeiro", parameters: { type: "object", properties: { description: { type: "string" }, amount: { type: "number" }, title: { type: "string" } }, required: ["description"] } } },
+  { type: "function", function: { name: "create_follow_up_task", description: "Cria tarefa de follow-up comercial para um cliente", parameters: { type: "object", properties: { client_id: { type: "string" }, client_name: { type: "string" }, title: { type: "string" }, description: { type: "string" }, scheduled_date: { type: "string", description: "YYYY-MM-DD" }, channel: { type: "string", enum: ["whatsapp", "email", "phone", "visit"] }, priority: { type: "string", enum: ["low", "medium", "high"] }, suggested_message: { type: "string" } }, required: ["title", "description"] } } },
+  { type: "function", function: { name: "save_memory", description: "Salva conhecimento de longo prazo", parameters: { type: "object", properties: { category: { type: "string" }, key: { type: "string" }, value: {}, importance: { type: "number" } }, required: ["category", "key", "value"] } } },
+  { type: "function", function: { name: "block_client", description: "BLOQUEIA cliente por crédito. Ação destrutiva — sempre vai para aprovação humana", parameters: { type: "object", properties: { client_id: { type: "string" }, reason: { type: "string" }, description: { type: "string" } }, required: ["client_id", "reason"] } } },
+  { type: "function", function: { name: "reschedule_production_order", description: "Reagenda OP. Vai para aprovação humana", parameters: { type: "object", properties: { order_id: { type: "string" }, new_due_date: { type: "string", description: "YYYY-MM-DD" }, reason: { type: "string" } }, required: ["order_id", "new_due_date", "reason"] } } },
+];
 
 // ─────────────────────────────────────────────
 // HANDLERS
