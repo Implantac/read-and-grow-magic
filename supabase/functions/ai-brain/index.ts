@@ -271,6 +271,59 @@ async function executeAction(action: any, userId?: string) {
       case "request_quotation": {
         return { ok: true, note: "Cotação registrada como sugestão — compras deve criar manualmente" };
       }
+      case "create_purchase_order": {
+        if (!p.supplier_name) return { ok: false, error: "supplier_name obrigatório" };
+        const number = `PO-AI-${Date.now().toString().slice(-8)}`;
+        const { data, error } = await admin.from("purchase_orders").insert({
+          number,
+          supplier_id: p.supplier_id || null,
+          supplier_name: p.supplier_name,
+          date: new Date().toISOString(),
+          expected_delivery: p.expected_delivery || null,
+          total: p.total || 0,
+          subtotal: p.subtotal || p.total || 0,
+          payment_terms: p.payment_terms || null,
+          status: "draft",
+          priority: p.priority || "medium",
+          buyer_name: "Cérebro IA",
+          notes: `[Cérebro] ${p.notes || "PO sugerida"}`,
+        }).select().single();
+        if (error) throw error;
+        return { ok: true, po_id: data.id, number };
+      }
+      case "release_order_block": {
+        if (!p.block_id) return { ok: false, error: "block_id obrigatório" };
+        const { data, error } = await admin.from("order_blocks").update({
+          status: "released",
+          released_by: "ai-brain",
+          released_at: new Date().toISOString(),
+          release_justification: p.justification || "Liberado pelo Cérebro",
+        }).eq("id", p.block_id).select().single();
+        if (error) throw error;
+        return { ok: true, block_id: data.id };
+      }
+      case "mark_invoice_paid": {
+        if (!p.receivable_id) return { ok: false, error: "receivable_id obrigatório" };
+        const now = new Date().toISOString();
+        const { data, error } = await admin.from("accounts_receivable").update({
+          status: "paid",
+          payment_date: p.payment_date || now,
+          paid_amount: p.paid_amount || p.amount || null,
+          open_amount: 0,
+          notes: `[Cérebro] ${p.notes || "Baixa manual sugerida"}`,
+        }).eq("id", p.receivable_id).select().single();
+        if (error) throw error;
+        return { ok: true, receivable_id: data.id };
+      }
+      case "assign_sales_rep": {
+        if (!p.client_id || !p.sales_rep_id) return { ok: false, error: "client_id e sales_rep_id obrigatórios" };
+        const { data, error } = await admin.from("clients").update({
+          sales_rep_id: p.sales_rep_id,
+          commercial_notes: p.notes ? `[Cérebro] ${p.notes}` : null,
+        }).eq("id", p.client_id).select().single();
+        if (error) throw error;
+        return { ok: true, client_id: data.id, sales_rep_id: p.sales_rep_id };
+      }
       case "save_memory": {
         await saveMemory({
           user_id: userId,
