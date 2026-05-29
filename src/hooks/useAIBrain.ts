@@ -47,7 +47,7 @@ export function useBrainDecisions(status?: string) {
   const qc = useQueryClient();
   useEffect(() => {
     const ch = supabase
-      .channel('brain-decisions-rt')
+      .channel(`brain-decisions-rt-${Math.random().toString(36).slice(2)}`)
       .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'ai_brain_decisions' }, () => {
         qc.invalidateQueries({ queryKey: ['brain_decisions'] });
       })
@@ -57,6 +57,7 @@ export function useBrainDecisions(status?: string) {
       .subscribe();
     return () => { supabase.removeChannel(ch); };
   }, [qc]);
+
   return useQuery({
     queryKey: ['brain_decisions', status],
     queryFn: async () => {
