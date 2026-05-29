@@ -180,8 +180,6 @@ export function useBrainChat() {
   const [loading, setLoading] = useState(false);
 
 
-  const [messages, setMessages] = useState<BrainChatMessage[]>([]);
-  const [loading, setLoading] = useState(false);
 
   const send = useCallback(async (text: string, agent: string = 'geral') => {
     const userMsg: BrainChatMessage = { id: crypto.randomUUID(), role: 'user', content: text };
