@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import { useSystemParameters } from './useSystemParameters';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 export interface DbOrderItem {
   id: string;
@@ -148,7 +149,7 @@ export function useCreateOrder() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['orders'] });
-      toast({ title: 'Pedido criado com sucesso!' });
+      toastSuccess('Pedido criado com sucesso!');
     },
     onError: (e: any) => {
       console.error('Error creating order:', e);
@@ -174,7 +175,7 @@ export function useUpdateOrderStatus() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['orders'] });
-      toast({ title: 'Status do pedido atualizado!' });
+      toastSuccess('Status do pedido atualizado!');
     },
     onError: (e: any) => {
       console.error('Error updating order status:', e);
@@ -200,7 +201,7 @@ export function useUpdateOrderFields() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['orders'] });
-      toast({ title: 'Pedido atualizado!' });
+      toastSuccess('Pedido atualizado!');
     },
     onError: (e: any) => {
       console.error('Error updating order fields:', e);
@@ -293,7 +294,7 @@ export function useDeleteOrder() {
               await supabase.from('deleted_orders_archive').delete().eq('id', archiveId);
 
               qc.invalidateQueries({ queryKey: ['orders'] });
-              toast({ title: 'Pedido restaurado com sucesso!' });
+              toastSuccess('Pedido restaurado com sucesso!');
             } catch (err: any) {
               toast({ title: 'Erro ao restaurar pedido', description: err.message, variant: 'destructive' });
             }

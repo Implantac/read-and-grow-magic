@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 export interface AccountPayableRow {
   id: string;
@@ -59,7 +60,7 @@ export function useCreateAccountPayable() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accounts_payable'] });
-      toast({ title: 'Sucesso', description: 'Conta a pagar cadastrada com sucesso' });
+      toastSuccess('Sucesso', 'Conta a pagar cadastrada com sucesso');
     },
     onError: () => {
       toast({ title: 'Erro', description: 'Erro ao cadastrar conta a pagar', variant: 'destructive' });
@@ -102,7 +103,7 @@ export function useDeleteAccountPayable() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accounts_payable'] });
-      toast({ title: 'Sucesso', description: 'Conta removida com sucesso' });
+      toastSuccess('Sucesso', 'Conta removida com sucesso');
     },
     onError: () => {
       toast({ title: 'Erro', description: 'Erro ao remover conta', variant: 'destructive' });

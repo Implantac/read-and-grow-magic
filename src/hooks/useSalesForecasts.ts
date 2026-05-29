@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 const STAGE_WEIGHTS: Record<string, number> = {
   lead: 0.10,
@@ -103,7 +104,7 @@ export function useForecastMutations() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sales-forecasts'] });
-      toast({ title: 'Forecast salvo' });
+      toastSuccess('Forecast salvo');
     },
   });
 

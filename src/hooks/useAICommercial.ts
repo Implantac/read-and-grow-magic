@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 // ─── Types ─────────────────────────────────────────────────────────────
 export interface AIScore {
@@ -229,7 +230,7 @@ export function useRunAIEngine() {
       qc.invalidateQueries({ queryKey: ['ai_daily_actions'] });
       qc.invalidateQueries({ queryKey: ['ai_opportunity_predictions'] });
       qc.invalidateQueries({ queryKey: ['ai_forecast_snapshots'] });
-      toast({ title: '✨ IA Comercial', description: 'Motor executado com sucesso!' });
+      toastSuccess('✨ IA Comercial', 'Motor executado com sucesso!');
     },
     onError: (e: Error) => {
       const msg = e.message.includes('429') ? 'Limite de requisições excedido. Tente novamente em alguns minutos.'

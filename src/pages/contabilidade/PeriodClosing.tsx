@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 import { formatBRL, formatDateTime, formatNumber } from '@/lib/formatters';
-import { handleMutationError } from '@/lib/toastHelpers';
+import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 
@@ -44,7 +44,7 @@ export default function PeriodClosing() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['accounting_periods'] });
-      toast({ title: 'Período fechado', description: 'Resultado apurado com sucesso' });
+      toastSuccess('Período fechado', 'Resultado apurado com sucesso');
     },
     onError: handleMutationError,
   });
@@ -57,7 +57,7 @@ export default function PeriodClosing() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['accounting_periods'] });
-      toast({ title: 'Período reaberto' });
+      toastSuccess('Período reaberto');
     },
     onError: handleMutationError,
   });

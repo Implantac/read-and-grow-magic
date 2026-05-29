@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 export interface DailyReportData {
   report_date: string;
@@ -49,7 +50,7 @@ export function useGenerateReport() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['daily_executive_reports'] });
-      toast({ title: 'Relatório gerado', description: 'O relatório executivo diário foi gerado com sucesso.' });
+      toastSuccess('Relatório gerado', 'O relatório executivo diário foi gerado com sucesso.');
     },
     onError: (err: any) => {
       toast({ title: 'Erro', description: 'Erro ao gerar relatório: ' + err.message, variant: 'destructive' });

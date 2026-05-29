@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 export interface TaxRule {
   id: string;
@@ -73,7 +74,7 @@ export function useUpsertTaxRule() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tax_rules'] });
-      toast({ title: 'Regra fiscal salva' });
+      toastSuccess('Regra fiscal salva');
     },
     onError: (e: any) =>
       toast({ title: 'Erro', description: e.message, variant: 'destructive' }),
@@ -90,7 +91,7 @@ export function useDeleteTaxRule() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tax_rules'] });
-      toast({ title: 'Regra removida' });
+      toastSuccess('Regra removida');
     },
     onError: (e: any) =>
       toast({ title: 'Erro', description: e.message, variant: 'destructive' }),

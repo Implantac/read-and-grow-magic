@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError } from '@/lib/toastHelpers';
+import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export function useDeliveryTracking(shipmentId?: string) {
   return useQuery({
     queryKey: ['delivery-tracking', shipmentId],
@@ -36,7 +36,7 @@ export function useCreateTrackingEvent() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['delivery-tracking'] });
-      toast({ title: 'Evento de rastreamento registrado!' });
+      toastSuccess('Evento de rastreamento registrado!');
     },
     onError: handleMutationError,
   });

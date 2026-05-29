@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError } from '@/lib/toastHelpers';
+import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface FinancialHealthScore {
   id: string;
   reference_date: string;
@@ -93,7 +93,7 @@ export function useAutoReconcile() {
     onSuccess: (data: any) => {
       qc.invalidateQueries({ queryKey: ['bank_transactions'] });
       qc.invalidateQueries({ queryKey: ['financial_ledger'] });
-      toast({ title: 'Conciliação automática', description: `${data?.matched ?? 0} de ${data?.processed ?? 0} transações conciliadas` });
+      toastSuccess('Conciliação automática', `${data?.matched ?? 0} de ${data?.processed ?? 0} transações conciliadas`);
     },
     onError: handleMutationError,
   });

@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
 import { formatBRL } from '@/lib/formatters';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 const statusVariant: Record<string, string> = {
   pending: 'bg-warning/10 text-warning border-warning/30',
@@ -62,7 +63,7 @@ export default function Boletos() {
   const copy = (text: string | null) => {
     if (!text) return;
     navigator.clipboard.writeText(text);
-    toast({ title: 'Linha digitável copiada' });
+    toastSuccess('Linha digitável copiada');
   };
 
   if (isLoading) return <PageLoading message="Carregando boletos..." />;

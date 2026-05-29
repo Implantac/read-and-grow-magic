@@ -16,6 +16,7 @@ import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { validateTransition } from '@/lib/orderFlowEngine';
 import { format } from 'date-fns';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 interface TransitionInput {
   orderId: string;
@@ -282,7 +283,7 @@ export function useOrderLifecycle() {
       qc.invalidateQueries({ queryKey: ['billing-queue'] });
       qc.invalidateQueries({ queryKey: ['shipment-orders'] });
       qc.invalidateQueries({ queryKey: ['accounts-receivable'] });
-      toast({ title: 'Status do pedido atualizado com sucesso!' });
+      toastSuccess('Status do pedido atualizado com sucesso!');
     },
     onError: (e: any) => {
       toast({ title: 'Erro na transição', description: e.message, variant: 'destructive' });

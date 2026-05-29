@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 export interface CnpjData {
   razao_social: string;
@@ -39,7 +40,7 @@ export function useCnpjLookup() {
         throw new Error(err.message || 'CNPJ não encontrado');
       }
       const data = await res.json();
-      toast({ title: 'Dados carregados!', description: `Empresa: ${data.razao_social}` });
+      toastSuccess('Dados carregados!', `Empresa: ${data.razao_social}`);
       return {
         razao_social: data.razao_social || '',
         nome_fantasia: data.nome_fantasia || '',

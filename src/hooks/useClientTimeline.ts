@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError } from '@/lib/toastHelpers';
+import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export const TIMELINE_EVENT_TYPES = [
   { value: 'contact', label: 'Contato', icon: 'Phone' },
   { value: 'visit', label: 'Visita', icon: 'MapPin' },
@@ -56,7 +56,7 @@ export function useCreateTimelineEvent() {
     },
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['client_timeline'] });
-      toast({ title: 'Evento registrado' });
+      toastSuccess('Evento registrado');
     },
     onError: handleMutationError,
   });

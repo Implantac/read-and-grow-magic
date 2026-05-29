@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError } from '@/lib/toastHelpers';
+import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export function useCreditProfiles() {
   return useQuery({
     queryKey: ['credit-profiles'],
@@ -49,7 +49,7 @@ export function useUpsertCreditProfile() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['credit-profiles'] });
       qc.invalidateQueries({ queryKey: ['credit-profile'] });
-      toast({ title: 'Perfil de crédito atualizado!' });
+      toastSuccess('Perfil de crédito atualizado!');
     },
     onError: handleMutationError,
   });
@@ -79,7 +79,7 @@ export function useCreateOrderBlock() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['order-blocks'] });
-      toast({ title: 'Bloqueio registrado!' });
+      toastSuccess('Bloqueio registrado!');
     },
     onError: handleMutationError,
   });
@@ -101,7 +101,7 @@ export function useReleaseOrderBlock() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['order-blocks'] });
-      toast({ title: 'Bloqueio liberado!' });
+      toastSuccess('Bloqueio liberado!');
     },
     onError: handleMutationError,
   });
@@ -131,7 +131,7 @@ export function useCreateCollectionAction() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['collection-actions'] });
-      toast({ title: 'Ação de cobrança registrada!' });
+      toastSuccess('Ação de cobrança registrada!');
     },
     onError: handleMutationError,
   });
@@ -159,7 +159,7 @@ export function useCreateCreditPolicy() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['credit-policies'] });
-      toast({ title: 'Política de crédito criada!' });
+      toastSuccess('Política de crédito criada!');
     },
     onError: handleMutationError,
   });

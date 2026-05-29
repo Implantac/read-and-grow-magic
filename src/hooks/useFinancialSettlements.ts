@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError, mutationErrorHandler } from '@/lib/toastHelpers';
+import { handleMutationError, mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 export interface SettlementRow {
   id: string;
   source_type: 'receivable' | 'payable' | 'advance';
@@ -55,7 +55,7 @@ export function useReverseSettlement() {
       qc.invalidateQueries({ queryKey: ['accounts_payable'] });
       qc.invalidateQueries({ queryKey: ['financial_ledger'] });
       qc.invalidateQueries({ queryKey: ['bank_accounts'] });
-      toast({ title: 'Baixa estornada com sucesso' });
+      toastSuccess('Baixa estornada com sucesso');
     },
     onError: mutationErrorHandler('Erro ao estornar'),
   });
@@ -81,7 +81,7 @@ export function useUseAdvance() {
       qc.invalidateQueries({ queryKey: ['financial_settlements'] });
       qc.invalidateQueries({ queryKey: ['accounts_receivable'] });
       qc.invalidateQueries({ queryKey: ['accounts_payable'] });
-      toast({ title: 'Adiantamento aplicado' });
+      toastSuccess('Adiantamento aplicado');
     },
     onError: handleMutationError,
   });
@@ -105,7 +105,7 @@ export function useTransferBetweenAccounts() {
       qc.invalidateQueries({ queryKey: ['bank_accounts'] });
       qc.invalidateQueries({ queryKey: ['financial_ledger'] });
       qc.invalidateQueries({ queryKey: ['bank_transfers'] });
-      toast({ title: 'Transferência realizada' });
+      toastSuccess('Transferência realizada');
     },
     onError: handleMutationError,
   });

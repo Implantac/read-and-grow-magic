@@ -53,6 +53,7 @@ interface SystemEntry {
 
 import { useBankTransactions } from '@/hooks/useBankReconciliation';
 import { useCashFlowEntries } from '@/hooks/useCashFlow';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 export default function BankReconciliation() {
   const { transactions: bankRaw, loading: bankLoading, update: updateBankTx } = useBankTransactions();
@@ -122,7 +123,7 @@ export default function BankReconciliation() {
   const { toast } = useToast();
 
   const handleAutoReconcile = () => {
-    toast({ title: 'Info', description: 'Conciliação automática executada' });
+    toastSuccess('Info', 'Conciliação automática executada');
   };
 
   return (

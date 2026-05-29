@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError } from '@/lib/toastHelpers';
+import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface CTe {
   id: string;
   number: string;
@@ -70,7 +70,7 @@ export function useCreateCTe() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['ctes'] });
-      toast({ title: 'CT-e criado', description: 'Rascunho registrado com sucesso.' });
+      toastSuccess('CT-e criado', 'Rascunho registrado com sucesso.');
     },
     onError: handleMutationError,
   });
@@ -90,7 +90,7 @@ export function useTransmitCTe() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['ctes'] });
-      toast({ title: 'CT-e autorizado na SEFAZ (simulação)' });
+      toastSuccess('CT-e autorizado na SEFAZ (simulação)');
     },
     onError: handleMutationError,
   });
@@ -108,7 +108,7 @@ export function useCancelCTe() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['ctes'] });
-      toast({ title: 'CT-e cancelado' });
+      toastSuccess('CT-e cancelado');
     },
     onError: handleMutationError,
   });

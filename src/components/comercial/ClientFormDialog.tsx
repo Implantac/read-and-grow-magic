@@ -13,6 +13,7 @@ import { useSalesReps } from '@/hooks/useSalesReps';
 import { clientSegments, brazilianStates } from '@/config/commercial';
 import { maskCNPJ, maskCPF, maskPhone, maskCEP, validateCNPJ, validateCPF, validateEmail, lookupCEP } from '@/lib/maskUtils';
 import { useCreateClient, useUpdateClient, type DbClient } from '@/hooks/useClients';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 interface Props {
   open: boolean;
@@ -105,7 +106,7 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
         address_city: data.city || formData.address_city,
         address_state: data.state || formData.address_state,
       });
-      toast({ title: 'Endereço encontrado', description: `${data.city}/${data.state}` });
+      toastSuccess('Endereço encontrado', `${data.city}/${data.state}`);
     } else {
       toast({ title: 'CEP não encontrado', variant: 'destructive' });
     }

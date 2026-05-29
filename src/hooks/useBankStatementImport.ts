@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError, mutationErrorHandler } from '@/lib/toastHelpers';
+import { handleMutationError, mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 export interface ParsedTx {
   date: string;
   amount: number;
@@ -107,7 +107,7 @@ export function useImportBankStatement() {
       qc.invalidateQueries({ queryKey: ['bank_transactions'] });
       qc.invalidateQueries({ queryKey: ['financial_ledger'] });
       qc.invalidateQueries({ queryKey: ['bank_accounts'] });
-      toast({ title: 'Extrato importado', description: `${r.inserted} novas · ${r.matched} conciliadas · ${r.skipped} duplicadas ignoradas` });
+      toastSuccess('Extrato importado', `${r.inserted} novas · ${r.matched} conciliadas · ${r.skipped} duplicadas ignoradas`);
     },
     onError: mutationErrorHandler('Erro na importação'),
   });
@@ -129,7 +129,7 @@ export function useAutoMatch() {
     onSuccess: (r) => {
       qc.invalidateQueries({ queryKey: ['bank_transactions'] });
       qc.invalidateQueries({ queryKey: ['financial_ledger'] });
-      toast({ title: 'Match automático', description: `${r.matched} de ${r.total} transações conciliadas` });
+      toastSuccess('Match automático', `${r.matched} de ${r.total} transações conciliadas`);
     },
     onError: handleMutationError,
   });
@@ -150,7 +150,7 @@ export function useManualReconcile() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['bank_transactions'] });
       qc.invalidateQueries({ queryKey: ['financial_ledger'] });
-      toast({ title: 'Conciliado manualmente' });
+      toastSuccess('Conciliado manualmente');
     },
     onError: handleMutationError,
   });

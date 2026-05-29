@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { BoletoStatus } from '@/types/financial';
 
-import { handleMutationError } from '@/lib/toastHelpers';
+import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface FinancialBoleto {
   id: string;
   receivable_id: string | null;
@@ -66,7 +66,7 @@ export function useCreateBoleto() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['financial_boletos'] });
-      toast({ title: 'Boleto gerado', description: 'Linha digitável disponível' });
+      toastSuccess('Boleto gerado', 'Linha digitável disponível');
     },
     onError: handleMutationError,
   });
@@ -82,7 +82,7 @@ export function useCancelBoleto() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['financial_boletos'] });
-      toast({ title: 'Boleto cancelado' });
+      toastSuccess('Boleto cancelado');
     },
     onError: handleMutationError,
   });
@@ -123,7 +123,7 @@ export function useMarkBoletoPaid() {
       qc.invalidateQueries({ queryKey: ['accounts_receivable'] });
       qc.invalidateQueries({ queryKey: ['financial_ledger'] });
       qc.invalidateQueries({ queryKey: ['bank_accounts'] });
-      toast({ title: 'Boleto baixado com sucesso' });
+      toastSuccess('Boleto baixado com sucesso');
     },
     onError: handleMutationError,
   });

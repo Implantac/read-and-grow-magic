@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 export function useSuppliers() {
   const queryClient = useQueryClient();
@@ -26,7 +27,7 @@ export function useSuppliers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
-      toast({ title: 'Fornecedor criado com sucesso!' });
+      toastSuccess('Fornecedor criado com sucesso!');
     },
     onError: (error: any) => {
       toast({ 
@@ -50,7 +51,7 @@ export function useSuppliers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
-      toast({ title: 'Fornecedor atualizado com sucesso!' });
+      toastSuccess('Fornecedor atualizado com sucesso!');
     },
     onError: (error: any) => {
       toast({ 
@@ -68,7 +69,7 @@ export function useSuppliers() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
-      toast({ title: 'Fornecedor excluído com sucesso!' });
+      toastSuccess('Fornecedor excluído com sucesso!');
     },
     onError: (error: any) => {
       toast({ 

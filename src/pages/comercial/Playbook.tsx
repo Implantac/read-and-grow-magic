@@ -13,6 +13,7 @@ import { BookOpen, MessageSquare, Target, CheckCircle2, Copy, ThumbsUp, Clock, S
 import { useToast } from '@/hooks/use-toast';
 
 import { formatDate } from '@/lib/formatters';
+import { toastSuccess } from '@/lib/toastHelpers';
 const objectionCategories = [
   { value: 'price', label: 'Preço', icon: '💰' },
   { value: 'stall', label: 'Enrolação', icon: '⏳' },
@@ -32,7 +33,7 @@ export default function PlaybookPage() {
 
   const copyToClipboard = (text: string, playbookId?: string) => {
     navigator.clipboard.writeText(text);
-    toast({ title: 'Copiado!', description: 'Script copiado para a área de transferência' });
+    toastSuccess('Copiado!', 'Script copiado para a área de transferência');
     if (playbookId) {
       logUsage.mutate({ playbook_id: playbookId, action_type: 'copy_script', context: text.slice(0, 50) });
     }
@@ -40,7 +41,7 @@ export default function PlaybookPage() {
 
   const markObjectionUsed = (objId: string) => {
     logUsage.mutate({ objection_id: objId, action_type: 'used_objection' });
-    toast({ title: '✅ Registrado', description: 'Uso da resposta registrado com sucesso' });
+    toastSuccess('✅ Registrado', 'Uso da resposta registrado com sucesso');
   };
 
   // Adherence stats

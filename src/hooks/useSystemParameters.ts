@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 export function useSystemParameters() {
   const queryClient = useQueryClient();
@@ -30,7 +31,7 @@ export function useSystemParameters() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['system_parameters'] });
-      toast({ title: 'Configuração atualizada com sucesso!' });
+      toastSuccess('Configuração atualizada com sucesso!');
     },
     onError: (error: any) => {
       toast({ 

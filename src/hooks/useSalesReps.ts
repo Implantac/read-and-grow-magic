@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { mutationErrorHandler } from '@/lib/toastHelpers';
+import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 
 export interface DbSalesRep {
   id: string;
@@ -45,7 +45,7 @@ export function useCreateSalesRep() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['sales_reps'] });
-      toast({ title: 'Representante criado com sucesso' });
+      toastSuccess('Representante criado com sucesso');
     },
     onError: mutationErrorHandler('Erro ao criar representante'),
   });
@@ -62,7 +62,7 @@ export function useUpdateSalesRep() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['sales_reps'] });
-      toast({ title: 'Representante atualizado' });
+      toastSuccess('Representante atualizado');
     },
     onError: mutationErrorHandler('Erro ao atualizar'),
   });
@@ -78,7 +78,7 @@ export function useDeleteSalesRep() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['sales_reps'] });
-      toast({ title: 'Representante removido' });
+      toastSuccess('Representante removido');
     },
     onError: mutationErrorHandler('Erro ao remover'),
   });

@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError } from '@/lib/toastHelpers';
+import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface ICMSSTRule {
   id: string;
   name: string;
@@ -64,7 +64,7 @@ export function useUpsertICMSST() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['icms_st_rules'] });
-      toast({ title: 'Regra ICMS ST salva' });
+      toastSuccess('Regra ICMS ST salva');
     },
     onError: handleMutationError,
   });
@@ -96,7 +96,7 @@ export function useUpsertDIFAL() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['difal_rules'] });
-      toast({ title: 'Regra DIFAL salva' });
+      toastSuccess('Regra DIFAL salva');
     },
     onError: handleMutationError,
   });

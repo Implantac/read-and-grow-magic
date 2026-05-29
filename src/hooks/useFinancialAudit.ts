@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError, mutationErrorHandler } from '@/lib/toastHelpers';
+import { handleMutationError, mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 export interface AuditLog {
   id: string;
   audit_run_id: string;
@@ -72,7 +72,7 @@ export function useResolveAuditLog() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['financial_audit_logs'] });
-      toast({ title: 'Marcado como resolvido' });
+      toastSuccess('Marcado como resolvido');
     },
     onError: handleMutationError,
   });
