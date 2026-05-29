@@ -7,6 +7,7 @@ import { useCompanies } from '@/hooks/useCompanies';
 import { useAppStore } from '@/stores/useAppStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useBrainDecisions } from '@/hooks/useAIBrain';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
