@@ -497,21 +497,86 @@ ${JSON.stringify(memories.slice(0, 10), null, 2)}
 KPIs: ${JSON.stringify(snapshot.executive?.kpis || {}, null, 2).slice(0, 1500)}
 Score financeiro: ${JSON.stringify(snapshot.financial_intelligence?.score || {}, null, 2).slice(0, 500)}`;
 
-  const sys = `Você é o CÉREBRO do ERP — consultor sênior do negócio. Use o contexto abaixo (dados REAIS) para responder com precisão. Cite números exatos quando relevante. Seja direto e proponha ações.
+  const sys = `Você é o CÉREBRO do ERP — consultor sênior do negócio. Use o contexto (dados REAIS) para responder com precisão. Cite números exatos. Seja direto e PROATIVO: quando o usuário pedir uma ação executável (criar alerta, agendar follow-up, cobrar PIX, bloquear cliente, reagendar OP), use as TOOLS disponíveis em vez de só descrever. Para ações destrutivas (block_client, reschedule_production_order), a tool registra como pendente para aprovação humana — execute mesmo assim, é só uma proposta.
 
 ${ctx}`;
 
-  const res = await fetch(GATEWAY, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [{ role: "system", content: sys }, ...messages],
-    }),
-  });
-  if (!res.ok) throw new Error(`LLM ${res.status}: ${await res.text()}`);
-  const data = await res.json();
-  return { content: data?.choices?.[0]?.message?.content || "" };
+  const convo: any[] = [{ role: "system", content: sys }, ...messages];
+  const executed: any[] = [];
+  let finalContent = "";
+
+  for (let step = 0; step < 5; step++) {
+    const res = await fetch(GATEWAY, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model: MODEL, messages: convo, tools: BRAIN_TOOLS, tool_choice: "auto" }),
+    });
+    if (!res.ok) throw new Error(`LLM ${res.status}: ${await res.text()}`);
+    const data = await res.json();
+    const msg = data?.choices?.[0]?.message;
+    if (!msg) break;
+    convo.push(msg);
+
+    const toolCalls = msg.tool_calls || [];
+    if (!toolCalls.length) {
+      finalContent = msg.content || "";
+      break;
+    }
+
+    for (const tc of toolCalls) {
+      const name = tc.function?.name;
+      let args: any = {};
+      try { args = JSON.parse(tc.function?.arguments || "{}"); } catch { /* */ }
+
+      const isRisky = RISKY_ACTIONS.has(name);
+      let result: any;
+
+      if (isRisky) {
+        // Cria decisão pendente em vez de executar
+        const { data: dec } = await admin.from("ai_brain_decisions").insert({
+          user_id: userId || null,
+          module: "chat",
+          decision_type: "action",
+          title: `[Chat] ${name}`,
+          rationale: `Solicitada via chat — requer aprovação humana`,
+          impact_level: "high",
+          risk_level: "high",
+          confidence: 0.8,
+          evidence: { source: "chat", args },
+          proposed_action: { tool: name, params: args },
+          auto_executable: false,
+          requires_approval: true,
+          status: "pending",
+        }).select().single();
+        result = { ok: false, pending_approval: true, decision_id: dec?.id, message: `Ação ${name} criada como decisão pendente — aprove no painel do Cérebro.` };
+      } else {
+        result = await executeAction({ tool: name, params: args }, userId);
+        // audita no histórico de decisões
+        await admin.from("ai_brain_decisions").insert({
+          user_id: userId || null,
+          module: "chat",
+          decision_type: "action",
+          title: `[Chat] ${name}`,
+          rationale: "Executada via chat",
+          impact_level: "medium",
+          risk_level: "low",
+          confidence: 0.9,
+          evidence: { source: "chat", args },
+          proposed_action: { tool: name, params: args },
+          auto_executable: true,
+          requires_approval: false,
+          status: result.ok ? "auto_executed" : "approved",
+          executed_at: result.ok ? new Date().toISOString() : null,
+          execution_result: result,
+        });
+      }
+
+      executed.push({ tool: name, args, result });
+      convo.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify(result) });
+    }
+  }
+
+  return { content: finalContent || "✅ Ações executadas.", actions: executed };
 }
 
 async function handleApprove(decisionId: string, approve: boolean, userId?: string) {
