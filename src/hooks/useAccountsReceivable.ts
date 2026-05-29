@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export interface AccountReceivableRow {
@@ -47,8 +46,6 @@ export function useAccountsReceivable() {
 
 export function useCreateAccountReceivable() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-
   return useMutation({
     mutationFn: async (account: Partial<AccountReceivableRow> & { description: string; client_name: string; due_date: string; amount: number }) => {
       const { data, error } = await supabase
@@ -71,8 +68,6 @@ export function useCreateAccountReceivable() {
 
 export function useUpdateAccountReceivable() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-
   return useMutation({
     mutationFn: async ({ id, ...updates }: { id: string } & Partial<AccountReceivableRow>) => {
       const { data, error } = await supabase
@@ -95,8 +90,6 @@ export function useUpdateAccountReceivable() {
 
 export function useDeleteAccountReceivable() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('accounts_receivable').delete().eq('id', id);

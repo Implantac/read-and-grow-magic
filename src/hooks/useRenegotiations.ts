@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 
 export interface RenegotiationRow {
@@ -32,7 +31,6 @@ export function useRenegotiations() {
 
 export function useCreateRenegotiation() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (neg: Omit<RenegotiationRow, 'id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase.from('renegotiations').insert(neg).select().single();

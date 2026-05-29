@@ -20,15 +20,12 @@ import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageLoading } from '@/components/shared/PageLoading';
 import { KPICard } from '@/components/shared/KPICard';
-import { useToast } from '@/hooks/use-toast';
 
 export default function CategoriesPage() {
   const { data: categories = [], isLoading } = useCategories();
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
   const deleteCategory = useDeleteCategory();
-  const { toast } = useToast();
-
   const [search, setSearch] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);

@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 import { formatBRL, formatDateTime, formatNumber } from '@/lib/formatters';
@@ -19,7 +18,6 @@ const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho
 
 
 export default function PeriodClosing() {
-  const { toast } = useToast();
   const qc = useQueryClient();
   const [year, setYear] = useState(new Date().getFullYear());
 

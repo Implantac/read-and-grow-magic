@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export function useCreditProfiles() {
@@ -35,7 +34,6 @@ export function useCreditProfileByClient(clientId: string | undefined) {
 
 export function useUpsertCreditProfile() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (profile: any) => {
       const { data, error } = await supabase
@@ -70,7 +68,6 @@ export function useOrderBlocks(orderId?: string) {
 
 export function useCreateOrderBlock() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (block: any) => {
       const { data, error } = await supabase.from('order_blocks').insert(block).select().single();
@@ -87,7 +84,6 @@ export function useCreateOrderBlock() {
 
 export function useReleaseOrderBlock() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, released_by, release_justification }: { id: string; released_by: string; release_justification: string }) => {
       const { data, error } = await supabase
@@ -122,7 +118,6 @@ export function useCollectionActions(clientId?: string) {
 
 export function useCreateCollectionAction() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (action: any) => {
       const { data, error } = await supabase.from('collection_actions').insert(action).select().single();
@@ -150,7 +145,6 @@ export function useCreditPolicies() {
 
 export function useCreateCreditPolicy() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (policy: any) => {
       const { data, error } = await supabase.from('credit_policies').insert(policy).select().single();

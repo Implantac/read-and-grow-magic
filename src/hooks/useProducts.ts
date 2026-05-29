@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 
 export interface DbProduct {
@@ -52,7 +51,6 @@ export function useProducts() {
 
 export function useCreateProduct() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (product: Omit<DbProduct, 'id' | 'created_at' | 'updated_at' | 'category_name'>) => {
       const { data, error } = await supabase.from('products').insert(product).select().single();
@@ -69,7 +67,6 @@ export function useCreateProduct() {
 
 export function useUpdateProduct() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, category_name, ...product }: Partial<DbProduct> & { id: string; category_name?: string }) => {
       const { data, error } = await supabase.from('products').update({ ...product, updated_at: new Date().toISOString() }).eq('id', id).select().single();
@@ -86,7 +83,6 @@ export function useUpdateProduct() {
 
 export function useDeleteProduct() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('products').delete().eq('id', id);

@@ -20,7 +20,6 @@ import { Plus, MoreHorizontal, Pencil, Trash2, Users, Target, DollarSign, Trendi
 import { useSalesReps, useCreateSalesRep, useUpdateSalesRep, useDeleteSalesRep, type DbSalesRep } from '@/hooks/useSalesReps';
 import { useClients } from '@/hooks/useClients';
 import { useOrders } from '@/hooks/useOrders';
-import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -33,8 +32,6 @@ export default function SalesRepsPage() {
   const createRep = useCreateSalesRep();
   const updateRep = useUpdateSalesRep();
   const deleteRep = useDeleteSalesRep();
-  const { toast } = useToast();
-
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selected, setSelected] = useState<DbSalesRep | null>(null);

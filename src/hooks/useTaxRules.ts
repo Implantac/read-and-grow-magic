@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export interface TaxRule {
@@ -50,7 +49,6 @@ export function useTaxRules() {
 
 export function useUpsertTaxRule() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (rule: Partial<TaxRule> & { name: string }) => {
       const { id, created_at, updated_at, ...payload } = rule as any;
@@ -83,7 +81,6 @@ export function useUpsertTaxRule() {
 
 export function useDeleteTaxRule() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('tax_rules' as any).delete().eq('id', id);

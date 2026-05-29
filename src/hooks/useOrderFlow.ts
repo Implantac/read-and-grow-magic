@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 // Order Status History
@@ -37,7 +36,6 @@ export function useStockReservations(orderId?: string) {
 
 export function useCreateStockReservation() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (input: {
       order_id: string;
@@ -80,7 +78,6 @@ export function useConferenceRecords(orderId?: string) {
 
 export function useCreateConference() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (input: { order_id: string; conference_number: string; total_items: number }) => {
       const { error } = await supabase.from('conference_records').insert(input as any);
@@ -111,7 +108,6 @@ export function useBillingQueue() {
 
 export function useCreateBillingEntry() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (input: { order_id: string; amount: number; billing_type?: string }) => {
       const { error } = await supabase.from('billing_queue').insert({
@@ -131,7 +127,6 @@ export function useCreateBillingEntry() {
 
 export function useUpdateBillingStatus() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, status, ...rest }: { id: string; status: string; [key: string]: any }) => {
       const { error } = await supabase.from('billing_queue').update({ status, ...rest, updated_at: new Date().toISOString() } as any).eq('id', id);
@@ -161,7 +156,6 @@ export function useShipmentOrders(orderId?: string) {
 
 export function useCreateShipment() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (input: {
       order_id: string;
@@ -187,7 +181,6 @@ export function useCreateShipment() {
 
 export function useUpdateShipment() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, ...fields }: { id: string; [key: string]: any }) => {
       const { error } = await supabase.from('shipment_orders').update({ ...fields, updated_at: new Date().toISOString() } as any).eq('id', id);
@@ -204,7 +197,6 @@ export function useUpdateShipment() {
 // Enhanced order status update with history
 export function useAdvancedOrderStatusUpdate() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({
       id, status, observation, block_reason, changed_by, fulfillment_fields

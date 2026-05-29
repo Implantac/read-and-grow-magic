@@ -1,12 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export function useSuppliers() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-
   const suppliersQuery = useQuery({
     queryKey: ['suppliers'],
     queryFn: async () => {

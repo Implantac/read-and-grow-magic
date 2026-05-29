@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
 import { useCnpjLookup } from '@/hooks/useCnpjLookup';
 import { useSalesReps } from '@/hooks/useSalesReps';
 import { clientSegments, brazilianStates } from '@/config/commercial';
@@ -35,7 +34,6 @@ const defaultForm = {
 };
 
 export function ClientFormDialog({ open, onOpenChange, client, totalClients }: Props) {
-  const { toast } = useToast();
   const { data: salesReps = [] } = useSalesReps();
   const cnpjLookup = useCnpjLookup();
   const createClient = useCreateClient();

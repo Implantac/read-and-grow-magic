@@ -16,7 +16,6 @@ import { useFinancialBoletos, useCreateBoleto, useCancelBoleto, useMarkBoletoPai
 import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
 import { useBankAccounts } from '@/hooks/useBankAccounts';
 import { BOLETO_STATUS_LABELS } from '@/types/financial';
-import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
 import { formatBRL } from '@/lib/formatters';
@@ -31,7 +30,6 @@ const statusVariant: Record<string, string> = {
 };
 
 export default function Boletos() {
-  const { toast } = useToast();
   const [statusFilter, setStatusFilter] = useState('all');
   const { data: boletos = [], isLoading } = useFinancialBoletos({ status: statusFilter });
   const { data: receivables = [] } = useAccountsReceivable();

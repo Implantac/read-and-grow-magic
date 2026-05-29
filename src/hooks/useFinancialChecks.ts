@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import type { CheckStatus } from '@/types/financial';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
@@ -46,7 +45,6 @@ export function useFinancialChecks(filters?: { status?: string; type?: string })
 
 export function useCreateCheck() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (input: Partial<FinancialCheck> & { check_type: 'received' | 'issued'; check_number: string; amount: number }) => {
       const { data, error } = await supabase.from('financial_checks' as any).insert(input as any).select().single();
@@ -63,7 +61,6 @@ export function useCreateCheck() {
 
 export function useUpdateCheckStatus() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, status, deposit_date }: { id: string; status: CheckStatus; deposit_date?: string }) => {
       const updates: any = { status };
@@ -82,7 +79,6 @@ export function useUpdateCheckStatus() {
 
 export function useCompensateCheck() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (params: { id: string; bank_account_id?: string; clear_date?: string }) => {
       const { data, error } = await supabase.rpc('compensate_check' as any, {
@@ -108,7 +104,6 @@ export function useCompensateCheck() {
 
 export function useDeleteCheck() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('financial_checks' as any).delete().eq('id', id);

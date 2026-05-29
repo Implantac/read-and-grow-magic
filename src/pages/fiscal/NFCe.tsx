@@ -53,7 +53,6 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
 import { useNFCe } from '@/hooks/useNFCe';
 import { PDVDialog } from '@/components/fiscal/PDVDialog';
 import type { NFCe } from '@/types/fiscal';
@@ -86,7 +85,6 @@ const paymentIcons: Record<string, React.ComponentType<{ className?: string }>> 
 };
 
 export default function NFCePage() {
-  const { toast } = useToast();
   const { nfces, loading, cancel: cancelNFCe, emit } = useNFCe();
   const [pdvOpen, setPdvOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');

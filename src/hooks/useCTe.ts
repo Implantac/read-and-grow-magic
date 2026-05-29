@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface CTe {
@@ -52,7 +51,6 @@ export function useCTes() {
 
 export function useCreateCTe() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (payload: Partial<CTe> & { carrier_name: string; sender_name: string; recipient_name: string }) => {
       const number = 'CTE-' + Date.now().toString().slice(-8);
@@ -78,7 +76,6 @@ export function useCreateCTe() {
 
 export function useTransmitCTe() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (id: string) => {
       const access_key = Array.from({ length: 44 }, () => Math.floor(Math.random() * 10)).join('');
@@ -98,7 +95,6 @@ export function useTransmitCTe() {
 
 export function useCancelCTe() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
       const { error } = await supabase.from('cte' as any).update({

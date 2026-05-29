@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 export interface AuditLog {
@@ -37,7 +36,6 @@ export function useFinancialAuditLogs() {
 
 export function useRunFinancialAudit() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (mode: 'light' | 'full' = 'light') => {
       const { data, error } = await supabase.functions.invoke('financial-audit', {
@@ -58,7 +56,6 @@ export function useRunFinancialAudit() {
 
 export function useResolveAuditLog() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase

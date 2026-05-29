@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Upload, FileText, CheckCircle2, Zap } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { parseCSV, parseOFX, useImportBankStatement, useAutoMatch, type ParsedTx } from '@/hooks/useBankStatementImport';
 import { useBankAccounts } from '@/hooks/useBankAccounts';
 
@@ -23,8 +22,6 @@ export default function BankStatementImport() {
   const importMut = useImportBankStatement();
   const autoMatch = useAutoMatch();
   const { data: bankAccounts = [] } = useBankAccounts();
-  const { toast } = useToast();
-
   async function handleFile(file: File) {
     setFilename(file.name);
     try {

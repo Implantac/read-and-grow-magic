@@ -36,7 +36,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
 import { reportTypeLabels } from '@/config/fiscal';
 import { useFiscalReports } from '@/hooks/useFiscalReports';
 import { CreateReportDialog } from '@/components/fiscal/CreateReportDialog';
@@ -66,7 +65,6 @@ const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ 
 // Chart data will be computed from reports
 
 export default function FiscalReportsPage() {
-  const { toast } = useToast();
   const { reports, loading, generate, create } = useFiscalReports();
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [generating, setGenerating] = useState<string | null>(null);

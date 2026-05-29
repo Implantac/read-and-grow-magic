@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export interface FollowUpTask {
@@ -41,7 +40,6 @@ export function useFollowUpTasks(date?: string, status?: string) {
 
 export function useCreateFollowUp() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (task: Partial<FollowUpTask>) => {
       const { error } = await supabase.from('follow_up_tasks').insert(task as any);
@@ -90,7 +88,6 @@ export function useNurturingSequences() {
 }
 
 export function useAISalesMessage() {
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ action, context }: { action: string; context: any }) => {
       const { data, error } = await supabase.functions.invoke('ai-sales-message', {

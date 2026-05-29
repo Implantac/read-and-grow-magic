@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { useMemo } from 'react';
 import { differenceInDays, subDays, format } from 'date-fns';
 
@@ -89,7 +88,6 @@ export function useOpportunities(status?: string) {
 
 export function useCreateOpportunity() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (item: Partial<DbOpportunity>) => {
       const { data, error } = await supabase.from('sales_opportunities').insert(item as any).select().single();
@@ -132,7 +130,6 @@ export function useFollowUps(status?: string) {
 
 export function useCreateFollowUp() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (item: Partial<DbFollowUp>) => {
       const { data, error } = await supabase.from('follow_ups').insert(item as any).select().single();
@@ -175,7 +172,6 @@ export function useCampaigns(status?: string) {
 
 export function useCreateCampaign() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (item: Partial<DbCampaign>) => {
       const { data, error } = await supabase.from('sales_campaigns').insert(item as any).select().single();

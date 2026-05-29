@@ -13,7 +13,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
 import { validateTransition } from '@/lib/orderFlowEngine';
 import { format } from 'date-fns';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
@@ -175,8 +174,6 @@ async function releaseStockReservations(orderId: string) {
 
 export function useOrderLifecycle() {
   const qc = useQueryClient();
-  const { toast } = useToast();
-
   return useMutation({
     mutationFn: async (input: TransitionInput) => {
       const { orderId, order, targetStatus, observation, blockReason, changedBy } = input;

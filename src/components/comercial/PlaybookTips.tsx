@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BookOpen, Copy, MessageSquare, Target, ChevronDown } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { toastSuccess } from '@/lib/toastHelpers';
 
 interface PlaybookTipsProps {
@@ -17,8 +16,6 @@ export function PlaybookTips({ stage, compact = false }: PlaybookTipsProps) {
   const { data: playbooks = [] } = usePlaybooks(stage);
   const { data: objections = [] } = useObjections(stage);
   const logUsage = useLogPlaybookUsage();
-  const { toast } = useToast();
-
   const pb = playbooks[0];
   if (!pb) return null;
 

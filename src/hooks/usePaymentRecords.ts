@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 
 export interface PaymentRecordRow {
@@ -36,7 +35,6 @@ export function usePaymentRecords(entityType?: 'receivable' | 'payable', entityI
 
 export function useCreatePaymentRecord() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (record: Omit<PaymentRecordRow, 'id' | 'created_at'>) => {
       const { data, error } = await supabase.from('payment_records').insert(record).select().single();

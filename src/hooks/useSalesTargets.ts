@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 
 export function useSalesTargets(filters?: { period?: string; entityType?: string }) {
@@ -19,8 +18,6 @@ export function useSalesTargets(filters?: { period?: string; entityType?: string
 
 export function useSalesTargetMutations() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-
   const createTarget = useMutation({
     mutationFn: async (target: any) => {
       const { data, error } = await supabase.from('sales_targets').insert(target).select().single();

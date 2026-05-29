@@ -10,7 +10,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { usePlaybooks, useObjections, useLogPlaybookUsage, usePlaybookAdherence } from '@/hooks/usePlaybook';
 import { FUNNEL_STAGES } from '@/hooks/useSalesFunnel';
 import { BookOpen, MessageSquare, Target, CheckCircle2, Copy, ThumbsUp, Clock, Shield, TrendingUp, Users, Zap } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 
 import { formatDate } from '@/lib/formatters';
 import { toastSuccess } from '@/lib/toastHelpers';
@@ -29,8 +28,6 @@ export default function PlaybookPage() {
   const { data: objections = [], isLoading: loadingObj } = useObjections();
   const { data: usageLogs = [] } = usePlaybookAdherence();
   const logUsage = useLogPlaybookUsage();
-  const { toast } = useToast();
-
   const copyToClipboard = (text: string, playbookId?: string) => {
     navigator.clipboard.writeText(text);
     toastSuccess('Copiado!', 'Script copiado para a área de transferência');

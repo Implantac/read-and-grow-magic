@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface FinancialAdvanceRow {
@@ -35,7 +34,6 @@ export function useFinancialAdvances(partyType?: 'client' | 'supplier') {
 
 export function useCreateAdvance() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (adv: Omit<FinancialAdvanceRow, 'id' | 'created_at' | 'used_amount' | 'remaining_amount' | 'status'>) => {
       const { data, error } = await supabase.from('financial_advances').insert(adv).select().single();

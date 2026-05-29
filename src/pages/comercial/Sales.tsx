@@ -14,7 +14,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
@@ -38,7 +37,6 @@ const filterFields: FilterField[] = [
 ];
 
 export default function SalesPage() {
-  const { toast } = useToast();
   const { data: sales = [], isLoading } = useSales();
   const createSale = useCreateSale();
   const [filters, setFilters] = useState<Record<string, string>>({});

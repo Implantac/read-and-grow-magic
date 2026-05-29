@@ -55,7 +55,6 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
 import { useNFe } from '@/hooks/useNFe';
 import { nfeStatusLabels } from '@/config/fiscal';
 import { CreateNFeDialog } from '@/components/fiscal/CreateNFeDialog';
@@ -75,7 +74,6 @@ const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ 
 };
 
 export default function NFePage() {
-  const { toast } = useToast();
   const { nfes, loading, transmit, cancel, sendToPending, create } = useNFe();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');

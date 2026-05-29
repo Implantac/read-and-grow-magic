@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface RiskProfile {
@@ -91,7 +90,6 @@ export function useFraudRules() {
 
 export function useUpdateFraudRule() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, ...patch }: Partial<FraudRule> & { id: string }) => {
       const { error } = await supabase.from('financial_fraud_rules' as any).update(patch).eq('id', id);
@@ -107,7 +105,6 @@ export function useUpdateFraudRule() {
 
 export function useResolveSecurityLog() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('financial_security_logs' as any)

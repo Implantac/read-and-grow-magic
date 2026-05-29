@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface FinancialAlertRow {
@@ -41,7 +40,6 @@ export function useFinancialAlerts(status: 'open' | 'all' = 'all') {
 
 export function useDetectFinancialAlerts() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.rpc('detect_financial_alerts');
@@ -58,7 +56,6 @@ export function useDetectFinancialAlerts() {
 
 export function useUpdateAlertStatus() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: 'acknowledged' | 'resolved' }) => {
       const patch: any = { status };
