@@ -838,6 +838,8 @@ Deno.serve(async (req) => {
         break;
       case "list_memories":
         result = { memories: await loadMemories(userId, 100) };
+        break;
+
 
       case "feedback_decision": {
         // Usuário aprova ou critica uma decisão executada — vira aprendizado
