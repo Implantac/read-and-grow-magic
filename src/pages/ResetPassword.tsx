@@ -24,7 +24,7 @@ export default function ResetPassword() {
       toastError('Este link de recuperação é inválido ou expirou.', undefined, 'Link inválido');
       navigate('/login');
     }
-  }, [navigate, toast]);
+  }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
