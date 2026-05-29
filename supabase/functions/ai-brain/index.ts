@@ -782,9 +782,39 @@ Deno.serve(async (req) => {
         break;
       case "list_memories":
         result = { memories: await loadMemories(userId, 100) };
+      case "weekly_learning":
+        result = await handleWeeklyLearning();
         break;
-      case "execute_decision": {
-        const { data: dec, error: e0 } = await admin
+      case "notify_critical": {
+        const webhook = Deno.env.get("BRAIN_WEBHOOK_URL");
+        const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+        const { data: crits } = await admin
+          .from("ai_brain_decisions")
+          .select("id,module,title,rationale,impact_level,confidence,created_at,proposed_action")
+          .eq("status", "pending")
+          .in("impact_level", ["critical", "high"])
+          .gte("created_at", since)
+          .order("created_at", { ascending: false })
+          .limit(20);
+        if (!webhook) { result = { ok: false, skipped: true, reason: "BRAIN_WEBHOOK_URL not configured", count: crits?.length || 0 }; break; }
+        if (!crits?.length) { result = { ok: true, sent: 0, message: "Nenhuma decisão crítica recente." }; break; }
+        const payload = {
+          source: "ai-brain",
+          generated_at: new Date().toISOString(),
+          critical_count: crits.filter((c: any) => c.impact_level === "critical").length,
+          high_count: crits.filter((c: any) => c.impact_level === "high").length,
+          summary: crits.map((c: any) => `[${c.impact_level.toUpperCase()}] ${c.module} · ${c.title}`).join("\n"),
+          decisions: crits,
+        };
+        const r = await fetch(webhook, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }).catch((e) => ({ ok: false, status: 0, statusText: String(e) } as any));
+        result = { ok: (r as any).ok, status: (r as any).status, sent: crits.length };
+        break;
+      }
+
           .from("ai_brain_decisions").select("*").eq("id", body.decision_id).single();
         if (e0) throw e0;
         const r = await executeAction(dec.proposed_action, userId);
