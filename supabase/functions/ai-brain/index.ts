@@ -385,20 +385,33 @@ ${ctx}`;
 }
 
 async function handleApprove(decisionId: string, approve: boolean, userId?: string) {
-  const status = approve ? "approved" : "rejected";
-  const { data, error } = await admin
-    .from("ai_brain_decisions")
+  const { data: dec, error: e0 } = await admin
+    .from("ai_brain_decisions").select("*").eq("id", decisionId).single();
+  if (e0) throw e0;
+
+  if (!approve) {
+    const { data, error } = await admin.from("ai_brain_decisions")
+      .update({ status: "rejected", approved_by: userId || null, approved_at: new Date().toISOString() })
+      .eq("id", decisionId).select().single();
+    if (error) throw error;
+    return data;
+  }
+
+  // Approved → executa ação real
+  const execResult = await executeAction(dec.proposed_action, userId);
+  const { data, error } = await admin.from("ai_brain_decisions")
     .update({
-      status,
+      status: execResult.ok ? "executed" : "approved",
       approved_by: userId || null,
       approved_at: new Date().toISOString(),
+      executed_at: execResult.ok ? new Date().toISOString() : null,
+      execution_result: execResult,
     })
-    .eq("id", decisionId)
-    .select()
-    .single();
+    .eq("id", decisionId).select().single();
   if (error) throw error;
   return data;
 }
+
 
 // ─────────────────────────────────────────────
 // SERVER
