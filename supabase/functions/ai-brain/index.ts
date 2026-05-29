@@ -452,10 +452,26 @@ Deno.serve(async (req) => {
       case "save_memory":
         await saveMemory({ ...body.memory, user_id: userId });
         result = { ok: true };
-        break;
       case "list_memories":
         result = { memories: await loadMemories(userId, 100) };
         break;
+      case "execute_decision": {
+        const { data: dec, error: e0 } = await admin
+          .from("ai_brain_decisions").select("*").eq("id", body.decision_id).single();
+        if (e0) throw e0;
+        const r = await executeAction(dec.proposed_action, userId);
+        await admin.from("ai_brain_decisions").update({
+          status: r.ok ? "executed" : "approved",
+          executed_at: r.ok ? new Date().toISOString() : null,
+          execution_result: r,
+        }).eq("id", body.decision_id);
+        result = r;
+        break;
+      }
+      case "cron_run":
+        result = await handleAnalyze(undefined, undefined, "autopilot");
+        break;
+
       default:
         return new Response(JSON.stringify({ error: `unknown action ${action}` }), {
           status: 400,
