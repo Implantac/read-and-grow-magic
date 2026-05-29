@@ -44,6 +44,19 @@ export interface BrainRun {
 
 // ─── Decisions ─────────────────────────────
 export function useBrainDecisions(status?: string) {
+  const qc = useQueryClient();
+  useEffect(() => {
+    const ch = supabase
+      .channel('brain-decisions-rt')
+      .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'ai_brain_decisions' }, () => {
+        qc.invalidateQueries({ queryKey: ['brain_decisions'] });
+      })
+      .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'ai_brain_runs' }, () => {
+        qc.invalidateQueries({ queryKey: ['brain_runs'] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [qc]);
   return useQuery({
     queryKey: ['brain_decisions', status],
     queryFn: async () => {
