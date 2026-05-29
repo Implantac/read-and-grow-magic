@@ -133,7 +133,65 @@ const SAFE_ACTIONS = new Set([
   "log_observation",
   "save_memory",
   "generate_report",
+// ─────────────────────────────────────────────
+// ACTION EXECUTOR — efeitos reais
+// ─────────────────────────────────────────────
+const SAFE_ACTIONS = new Set([
+  "create_alert",
+  "notify_user",
+  "log_observation",
+  "save_memory",
+  "generate_report",
 ]);
+
+async function executeAction(action: any, userId?: string) {
+  const tool = action?.tool;
+  const p = action?.params || {};
+  try {
+    switch (tool) {
+      case "create_alert": {
+        const { data, error } = await admin.from("financial_alerts").insert({
+          alert_type: p.alert_type || "brain_insight",
+          severity: p.severity || "medium",
+          title: p.title || "Alerta do Cérebro",
+          description: p.description || "",
+          entity_type: p.entity_type || null,
+          entity_id: p.entity_id || null,
+        }).select().single();
+        if (error) throw error;
+        return { ok: true, alert_id: data.id };
+      }
+      case "notify_user": {
+        const { data, error } = await admin.from("notifications").insert({
+          user_id: userId || null,
+          type: p.type || "info",
+          title: p.title || "Cérebro do ERP",
+          description: p.description || "",
+          module: p.module || "Cérebro",
+        }).select().single();
+        if (error) throw error;
+        return { ok: true, notification_id: data.id };
+      }
+      case "save_memory": {
+        await saveMemory({
+          user_id: userId,
+          category: p.category || "fact",
+          key: p.key || `auto_${Date.now()}`,
+          value: p.value,
+          importance: p.importance ?? 5,
+        });
+        return { ok: true };
+      }
+      case "log_observation":
+      case "generate_report":
+        return { ok: true, note: `${tool} registrado` };
+      default:
+        return { ok: false, note: `tool ${tool} requer execução manual` };
+    }
+  } catch (e: any) {
+    return { ok: false, error: e?.message || String(e) };
+  }
+}
 
 function classifyDecision(d: any) {
   const impact = (d.impact_level || "medium").toLowerCase();
@@ -148,13 +206,6 @@ function classifyDecision(d: any) {
   };
 }
 
-// ─────────────────────────────────────────────
-// SYSTEM PROMPT
-// ─────────────────────────────────────────────
-const BRAIN_SYSTEM = `Você é o CÉREBRO NATIVO do ERP — um núcleo de IA estratégico que orquestra TODOS os módulos (financeiro, comercial, produção, fiscal, estoque) e toma decisões para o dono do negócio.
-
-PERSONALIDADE:
-- Você é o consultor sênior + COO + CFO digital do negócio.
 - Direto, estratégico, focado em RESULTADO e DECISÃO.
 - Fala em português brasileiro, sem jargão técnico desnecessário.
 
