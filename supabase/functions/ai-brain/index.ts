@@ -291,6 +291,7 @@ Modo: ${mode === "autopilot" ? "AUTOPILOT — sugira ações de baixo risco que 
 
     // Persiste decisões com guardrails
     const decisions = Array.isArray(structured.decisoes) ? structured.decisoes : [];
+    let createdCount = 0;
     for (const d of decisions) {
       const g = classifyDecision(d);
       let executionResult: any = null;
