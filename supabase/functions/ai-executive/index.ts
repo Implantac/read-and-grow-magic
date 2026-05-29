@@ -360,7 +360,7 @@ Gere insights estratégicos: { "insights": [...] }`;
     method: "POST",
     headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-2.0-flash-exp",
+      model: "google/gemini-2.5-flash",
       messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
       response_format: { type: "json_object" },
     }),
@@ -431,7 +431,7 @@ RECEITA REGIÃO: ${JSON.stringify(computed.revenueByRegion)}`;
     method: "POST",
     headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-2.0-flash-exp",
+      model: "google/gemini-2.5-flash",
       messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
       response_format: { type: "json_object" },
     }),
@@ -1220,7 +1220,7 @@ ${patternInsights}${realDataSnapshot}`, supabase, 'ai-executive-chat', user_id);
     const nextResp = await fetch(GATEWAY_URL, {
       method: "POST",
       headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "google/gemini-2.0-flash-exp", messages: aiMessages, tools: ERP_TOOLS, stream: false }),
+      body: JSON.stringify({ model: "google/gemini-2.5-flash", messages: aiMessages, tools: ERP_TOOLS, stream: false }),
     });
     if (!nextResp.ok) break;
     result = await nextResp.json();
@@ -1295,7 +1295,7 @@ async function handleDailySummary(supabase: any, lovableKey: string, corsHeaders
     method: "POST",
     headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: "google/gemini-2.0-flash-exp",
+      model: "google/gemini-2.5-flash",
       messages: [
         { role: "system", content: await getSystemPrompt('CFO', `Gere um RESUMO EXECUTIVO DIÁRIO em markdown, direto e objetivo.
 Formato:
@@ -1617,7 +1617,7 @@ export async function handleCEOBrief(supabase: any, lovableKey: string, corsHead
       method: "POST",
       headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.0-flash-exp",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: ceoPrompt + "\n\nIMPORTANTE: Sempre chame a função ceo_response com o JSON estruturado para renderização visual em cards. Se faltarem dados, retorne arrays vazios e veredicto='Dados insuficientes para análise confiável.'" },
           { role: "user", content: `Dados executivos para análise:\n${JSON.stringify(userPayload, null, 2)}` },
