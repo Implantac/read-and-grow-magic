@@ -59,6 +59,9 @@ export default function BrainPage() {
         title="🧠 Cérebro Nativo"
         description="Núcleo de IA do ERP — orquestra todos os módulos, memória de longo prazo, decisões com guardrails"
       >
+        <Button asChild size="sm" className="gap-2">
+          <Link to="/diretoria/brain/comando">🎯 Comando</Link>
+        </Button>
         <Button asChild variant="outline" size="sm" className="gap-2">
           <Link to="/diretoria/brain/aprendizado"><GraduationCap className="h-4 w-4" /> Aprendizado</Link>
         </Button>
