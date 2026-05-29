@@ -300,8 +300,35 @@ async function executeAction(action: any, userId?: string) {
         return { ok: true, order_id: data.id, new_due_date: p.new_due_date };
       }
       case "request_quotation": {
-        return { ok: true, note: "Cotação registrada como sugestão — compras deve criar manualmente" };
+        // Cria cotação real em rascunho para o setor de compras
+        const number = `COT-AI-${Date.now().toString().slice(-8)}`;
+        const validUntil = p.valid_until || new Date(Date.now() + 15 * 86400000).toISOString();
+        const { data, error } = await admin.from("quotations").insert({
+          number,
+          client_id: p.client_id || null,
+          client_name: p.client_name || p.supplier_name || "Cotação Cérebro",
+          valid_until: validUntil,
+          subtotal: p.subtotal || p.total || 0,
+          discount: 0,
+          total: p.total || 0,
+          status: "draft",
+          notes: `[Cérebro] ${p.description || p.notes || "Cotação sugerida pelo Cérebro"}`,
+        }).select().single();
+        if (error) throw error;
+        // notifica compradores
+        const { data: buyers } = await admin.from("user_roles").select("user_id").in("role", ["admin", "manager"]);
+        for (const b of buyers || []) {
+          await admin.from("notifications").insert({
+            user_id: b.user_id,
+            type: "info",
+            title: `📋 Nova cotação sugerida: ${number}`,
+            description: p.description || "Cérebro recomenda nova cotação",
+            module: "Compras",
+          });
+        }
+        return { ok: true, quotation_id: data.id, number };
       }
+
       case "create_purchase_order": {
         if (!p.supplier_name) return { ok: false, error: "supplier_name obrigatório" };
         const number = `PO-AI-${Date.now().toString().slice(-8)}`;
