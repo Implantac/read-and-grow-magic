@@ -34,6 +34,8 @@ export function Topbar() {
   } = useAppStore();
 
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { data: brainPending = [] } = useBrainDecisions('pending');
+  const brainCritical = brainPending.filter((d) => d.impact_level === 'critical').length;
 
   const handleLogout = async () => {
     await signOut();
