@@ -154,6 +154,10 @@ const RISKY_ACTIONS = new Set([
   "block_client",
   "reschedule_production_order",
   "request_quotation",
+  "create_purchase_order",
+  "release_order_block",
+  "mark_invoice_paid",
+  "assign_sales_rep",
 ]);
 
 async function executeAction(action: any, userId?: string) {
