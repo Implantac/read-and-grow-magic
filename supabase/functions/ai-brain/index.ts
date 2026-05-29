@@ -750,9 +750,10 @@ Deno.serve(async (req) => {
     const action = body.action || "analyze";
     const authHeader = req.headers.get("Authorization") || undefined;
 
-    // Auth user (best effort)
-    let userId: string | undefined;
-    if (authHeader) {
+      case "chat":
+        result = await handleChat(userId, body.messages || [], authHeader, body.agent || "geral");
+        break;
+
       const token = authHeader.replace("Bearer ", "");
       const { data } = await admin.auth.getUser(token);
       userId = data.user?.id;
