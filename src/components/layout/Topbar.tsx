@@ -211,6 +211,8 @@ export function Topbar() {
               Ver todas as notificações
             </DropdownMenuItem>
           </DropdownMenuContent>
+        </DropdownMenu>
+
         {/* Brain shortcut */}
         <Button
           variant="ghost"
@@ -234,8 +236,6 @@ export function Topbar() {
           )}
         </Button>
 
-        {/* Divider */}
-        <div className="mx-1 h-6 w-px bg-sidebar-border/50" />
         {/* Divider */}
         <div className="mx-1 h-6 w-px bg-sidebar-border/50" />
 
