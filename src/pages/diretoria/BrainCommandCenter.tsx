@@ -4,15 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Brain, Zap, CheckCircle2, XCircle, Send, RefreshCw, Sparkles, AlertTriangle, GraduationCap, Bot } from 'lucide-react';
+import { Brain, Zap, CheckCircle2, XCircle, Send, RefreshCw, Sparkles, AlertTriangle, GraduationCap, Bot, Bell, Database, Target } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { useBrainDecisions, useApproveDecision, useBrainRuns, useRunBrain, useBrainChat, useBrainLearning } from '@/hooks/useAIBrain';
+import { useBrainDecisions, useApproveDecision, useBrainRuns, useRunBrain, useBrainChat, useBrainLearning, useNotifyCritical } from '@/hooks/useAIBrain';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const impactColor: Record<string, string> = {
   critical: 'bg-destructive text-destructive-foreground',
@@ -21,14 +22,26 @@ const impactColor: Record<string, string> = {
   low: 'bg-muted text-muted-foreground',
 };
 
+const AGENTS = [
+  { id: 'geral', label: '🧠 Geral' },
+  { id: 'financeiro', label: '💰 CFO' },
+  { id: 'comercial', label: '📈 Vendas' },
+  { id: 'fiscal', label: '🧾 Fiscal' },
+  { id: 'logistica', label: '🚚 Operações' },
+  { id: 'producao', label: '🏭 PCP' },
+  { id: 'qualidade', label: '🔬 Qualidade' },
+];
+
 export default function BrainCommandCenter() {
   const { data: pending = [] } = useBrainDecisions('pending');
   const { data: runs = [] } = useBrainRuns();
   const { data: learning } = useBrainLearning();
   const runBrain = useRunBrain();
   const approve = useApproveDecision();
+  const notify = useNotifyCritical();
   const { messages, loading, send, clear } = useBrainChat();
   const [input, setInput] = useState('');
+  const [agent, setAgent] = useState('geral');
 
   const lastRun = runs[0];
   const veredicto = lastRun?.structured?.veredicto;
@@ -42,20 +55,34 @@ export default function BrainCommandCenter() {
     const t = input.trim();
     if (!t || loading) return;
     setInput('');
-    send(t);
+    send(t, agent);
+  };
+
+  const handleNotify = async () => {
+    try {
+      const r: any = await notify.mutateAsync();
+      if (r?.skipped) toast.warning('Configure o secret BRAIN_WEBHOOK_URL para enviar alertas externos (Zapier/Make/n8n → WhatsApp/Email).');
+      else if (r?.ok) toast.success(`${r.sent} alerta(s) enviado(s) ao canal externo.`);
+      else toast.error('Falha ao enviar (' + (r?.status || '?') + ').');
+    } catch (e: any) {
+      toast.error(e?.message || 'Erro ao notificar');
+    }
   };
 
   return (
     <PageContainer>
       <PageHeader
         title="🎯 Comando do Cérebro"
-        description="Visão única — veredicto, decisões, chat e aprendizado em uma tela"
+        description="Visão única — veredicto, decisões, agentes especializados e alertas externos"
       >
         <Button asChild variant="outline" size="sm" className="gap-2">
           <Link to="/diretoria/brain/aprendizado"><GraduationCap className="h-4 w-4" /> Aprendizado</Link>
         </Button>
         <Button asChild variant="outline" size="sm" className="gap-2">
           <Link to="/diretoria/brain"><Brain className="h-4 w-4" /> Visão clássica</Link>
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleNotify} disabled={notify.isPending} className="gap-2">
+          <Bell className="h-4 w-4" /> Alertar externo
         </Button>
         <Button variant="outline" size="sm" onClick={() => runBrain.mutate('analyze')} disabled={runBrain.isPending} className="gap-2">
           <RefreshCw className={`h-4 w-4 ${runBrain.isPending ? 'animate-spin' : ''}`} /> Analisar
@@ -73,7 +100,7 @@ export default function BrainCommandCenter() {
         <KPICard title="Auto-exec" value={learning?.autoExecuted ?? 0} subtitle="ações seguras" icon={<Zap className="h-5 w-5" />} index={3} />
       </div>
 
-      {/* Veredicto + risks/opps */}
+      {/* Veredicto */}
       {veredicto && (
         <Card className="border-l-4 border-l-primary">
           <CardHeader className="pb-2">
@@ -97,7 +124,6 @@ export default function BrainCommandCenter() {
 
       {/* Grid principal: pending + chat */}
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* Decisões pendentes */}
         <Card className="flex flex-col">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
@@ -107,9 +133,7 @@ export default function BrainCommandCenter() {
           <CardContent className="flex-1">
             <ScrollArea className="h-[480px] pr-3">
               {pending.length === 0 && (
-                <div className="text-center py-12 text-muted-foreground text-sm">
-                  ✨ Tudo em ordem. Cérebro não tem nada pendente.
-                </div>
+                <div className="text-center py-12 text-muted-foreground text-sm">✨ Tudo em ordem.</div>
               )}
               <div className="space-y-3">
                 {pending.map((d) => (
@@ -139,17 +163,32 @@ export default function BrainCommandCenter() {
           </CardContent>
         </Card>
 
-        {/* Chat */}
+        {/* Chat com agente especializado */}
         <Card className="flex flex-col">
-          <CardHeader className="pb-3 flex flex-row items-center justify-between">
-            <CardTitle className="text-base flex items-center gap-2"><Bot className="h-4 w-4 text-primary" /> Pergunte ao Cérebro</CardTitle>
-            {messages.length > 0 && <Button variant="ghost" size="sm" onClick={clear} className="h-7 text-xs">Limpar</Button>}
+          <CardHeader className="pb-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base flex items-center gap-2"><Bot className="h-4 w-4 text-primary" /> Agentes especializados</CardTitle>
+              {messages.length > 0 && <Button variant="ghost" size="sm" onClick={clear} className="h-7 text-xs">Limpar</Button>}
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {AGENTS.map((a) => (
+                <Button
+                  key={a.id}
+                  size="sm"
+                  variant={agent === a.id ? 'default' : 'outline'}
+                  onClick={() => setAgent(a.id)}
+                  className="h-7 text-[11px] px-2"
+                >
+                  {a.label}
+                </Button>
+              ))}
+            </div>
           </CardHeader>
           <CardContent className="space-y-3 flex-1 flex flex-col">
-            <ScrollArea className="h-[420px] border rounded-lg p-3 flex-1">
+            <ScrollArea className="h-[380px] border rounded-lg p-3 flex-1">
               {messages.length === 0 && (
                 <p className="text-sm text-muted-foreground text-center py-12">
-                  💬 "Quem deve ser cobrado hoje?", "Cria follow-up pro cliente X", "Bloqueia o cliente Y por inadimplência"
+                  💬 Selecione um agente acima e pergunte. Cada persona tem foco e tom próprios.
                 </p>
               )}
               <div className="space-y-3">
@@ -180,7 +219,7 @@ export default function BrainCommandCenter() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                placeholder="Pergunte ou peça uma ação..."
+                placeholder={`Pergunte ao ${AGENTS.find((a) => a.id === agent)?.label || 'agente'}...`}
                 className="resize-none"
                 rows={2}
               />
@@ -189,6 +228,52 @@ export default function BrainCommandCenter() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Calibração + Top memórias */}
+      {learning && (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2"><Target className="h-4 w-4 text-primary" /> Calibração da IA</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {learning.calibration.map((c) => (
+                <div key={c.bucket} className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span className="font-mono">{c.bucket} <span className="text-muted-foreground">({c.n})</span></span>
+                    <span>declarada {c.declared}% · real {c.actual}%</span>
+                  </div>
+                  <div className="h-2 bg-muted rounded overflow-hidden flex">
+                    <div className="bg-primary/60" style={{ width: `${c.declared}%` }} />
+                    <div className="bg-green-500/70 -ml-px" style={{ width: `${Math.max(0, c.actual - c.declared)}%` }} />
+                  </div>
+                </div>
+              ))}
+              <p className="text-[10px] text-muted-foreground pt-1">Barra azul = confiança declarada. Verde = quanto acima do declarado o real ficou.</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2"><Database className="h-4 w-4 text-primary" /> Top memórias do Cérebro</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {learning.topMemories.length === 0 && <p className="text-sm text-muted-foreground">Sem memórias ainda.</p>}
+              {learning.topMemories.slice(0, 8).map((m) => (
+                <div key={m.id} className="border-l-2 border-primary/40 pl-3 py-1">
+                  <div className="flex items-center gap-2 text-xs">
+                    <Badge variant="outline" className="text-[10px] uppercase">{m.category}</Badge>
+                    <span className="font-mono font-semibold">{m.key}</span>
+                    <span className="text-[10px] text-muted-foreground">imp. {m.importance}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                    {typeof m.value === 'string' ? m.value : JSON.stringify(m.value).slice(0, 200)}
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* Riscos & oportunidades */}
       {(riscos.length > 0 || oportunidades.length > 0) && (
