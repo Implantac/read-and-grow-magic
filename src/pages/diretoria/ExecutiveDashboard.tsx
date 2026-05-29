@@ -154,6 +154,8 @@ export default function ExecutiveDashboard() {
             </div>
           </CardContent>
         </Card>
+      )}
+
       <BrainSummaryWidget />
 
 
