@@ -460,6 +460,7 @@ Deno.serve(async (req) => {
       case "save_memory":
         await saveMemory({ ...body.memory, user_id: userId });
         result = { ok: true };
+        break;
       case "list_memories":
         result = { memories: await loadMemories(userId, 100) };
         break;
