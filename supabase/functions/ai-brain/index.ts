@@ -284,9 +284,12 @@ Modo: ${mode === "autopilot" ? "AUTOPILOT — sugira ações de baixo risco que 
 
     // Persiste decisões com guardrails
     const decisions = Array.isArray(structured.decisoes) ? structured.decisoes : [];
-    let createdCount = 0;
     for (const d of decisions) {
       const g = classifyDecision(d);
+      let executionResult: any = null;
+      if (g.auto_executable) {
+        executionResult = await executeAction(d.proposed_action, userId);
+      }
       const { error } = await admin.from("ai_brain_decisions").insert({
         run_id: run?.id,
         user_id: userId || null,
@@ -303,10 +306,11 @@ Modo: ${mode === "autopilot" ? "AUTOPILOT — sugira ações de baixo risco que 
         requires_approval: g.requires_approval,
         status: g.status,
         executed_at: g.auto_executable ? new Date().toISOString() : null,
-        execution_result: g.auto_executable ? { auto: true, note: "Ação segura executada automaticamente" } : null,
+        execution_result: executionResult,
       });
       if (!error) createdCount++;
     }
+
 
     // Persiste memórias propostas
     const mems = Array.isArray(structured.memorias_a_salvar) ? structured.memorias_a_salvar : [];
