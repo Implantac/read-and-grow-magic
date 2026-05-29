@@ -750,10 +750,8 @@ Deno.serve(async (req) => {
     const action = body.action || "analyze";
     const authHeader = req.headers.get("Authorization") || undefined;
 
-      case "chat":
-        result = await handleChat(userId, body.messages || [], authHeader, body.agent || "geral");
-        break;
-
+    let userId: string | undefined;
+    if (authHeader) {
       const token = authHeader.replace("Bearer ", "");
       const { data } = await admin.auth.getUser(token);
       userId = data.user?.id;
@@ -768,7 +766,7 @@ Deno.serve(async (req) => {
         result = await handleAnalyze(userId, authHeader, "autopilot");
         break;
       case "chat":
-        result = await handleChat(userId, body.messages || [], authHeader);
+        result = await handleChat(userId, body.messages || [], authHeader, body.agent || "geral");
         break;
       case "approve_decision":
         result = await handleApprove(body.decision_id, true, userId);
@@ -782,9 +780,8 @@ Deno.serve(async (req) => {
         break;
       case "list_memories":
         result = { memories: await loadMemories(userId, 100) };
-      case "weekly_learning":
-        result = await handleWeeklyLearning();
         break;
+
       case "notify_critical": {
         const webhook = Deno.env.get("BRAIN_WEBHOOK_URL");
         const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
@@ -814,7 +811,8 @@ Deno.serve(async (req) => {
         result = { ok: (r as any).ok, status: (r as any).status, sent: crits.length };
         break;
       }
-
+      case "execute_decision": {
+        const { data: dec, error: e0 } = await admin
           .from("ai_brain_decisions").select("*").eq("id", body.decision_id).single();
         if (e0) throw e0;
         const r = await executeAction(dec.proposed_action, userId);
@@ -832,6 +830,7 @@ Deno.serve(async (req) => {
       case "weekly_learning":
         result = await handleWeeklyLearning();
         break;
+
 
       default:
         return new Response(JSON.stringify({ error: `unknown action ${action}` }), {
