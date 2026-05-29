@@ -101,6 +101,27 @@ async function saveMemory(m: {
   scope?: string;
   category: string;
   key: string;
+  value: any;
+  importance?: number;
+  source?: string;
+}) {
+  await admin.from("ai_brain_memory").upsert(
+    {
+      user_id: m.user_id || null,
+      scope: m.scope || (m.user_id ? "user" : "global"),
+      category: m.category,
+      key: m.key,
+      value: m.value,
+      importance: m.importance ?? 5,
+      source: m.source || "agent:brain",
+    },
+    { onConflict: "scope,user_id,key" },
+  );
+}
+
+// ─────────────────────────────────────────────
+// LLM CALL — synthesis with structured JSON + retry em 429
+// ─────────────────────────────────────────────
 async function callLLM(systemPrompt: string, userPrompt: string) {
   const doFetch = () => fetch(GATEWAY, {
     method: "POST",
@@ -135,27 +156,6 @@ async function callLLM(systemPrompt: string, userPrompt: string) {
   }
 }
 
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ],
-      response_format: { type: "json_object" },
-    }),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`LLM ${res.status}: ${text}`);
-  }
-  const data = await res.json();
-  const content = data?.choices?.[0]?.message?.content || "{}";
-  try {
-    return JSON.parse(content);
-  } catch {
-    return { raw: content };
-  }
-}
 
 // ─────────────────────────────────────────────
 // GUARDRAILS — quais decisões podem auto-executar
