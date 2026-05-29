@@ -36,6 +36,7 @@ const GamificationPage = lazy(() => import("./pages/comercial/Gamification"));
 const SalesAutomationPage = lazy(() => import("./pages/comercial/SalesAutomation"));
 const ExecutiveDashboardPage = lazy(() => import("./pages/diretoria/ExecutiveDashboard"));
 const BrainPage = lazy(() => import("./pages/diretoria/Brain"));
+const BrainLearningPage = lazy(() => import("./pages/diretoria/BrainLearning"));
 
 // Credit & Risk
 const CreditAnalysisPage = lazy(() => import("./pages/credito/CreditAnalysis"));
@@ -242,6 +243,9 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/diretoria/executive" element={<ExecutiveDashboardPage />} />
               <Route path="/diretoria/brain" element={<BrainPage />} />
+              <Route path="/diretoria/brain/aprendizado" element={<BrainLearningPage />} />
+              <Route path="/diretoria/cerebro" element={<BrainPage />} />
+              <Route path="/diretoria/cerebro/aprendizado" element={<BrainLearningPage />} />
               
               {/* Commercial Module */}
               <Route path="/comercial/dashboard" element={<CommercialDashboardPage />} />

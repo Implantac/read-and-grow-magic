@@ -144,6 +144,16 @@ const SAFE_ACTIONS = new Set([
   "log_observation",
   "save_memory",
   "generate_report",
+  "create_follow_up_task",
+  "escalate_alert",
+  "send_pix_reminder",
+]);
+
+// Tools que NUNCA podem ser auto-executadas, mesmo low-risk
+const RISKY_ACTIONS = new Set([
+  "block_client",
+  "reschedule_production_order",
+  "request_quotation",
 ]);
 
 async function executeAction(action: any, userId?: string) {
@@ -163,9 +173,32 @@ async function executeAction(action: any, userId?: string) {
         if (error) throw error;
         return { ok: true, alert_id: data.id };
       }
+      case "escalate_alert": {
+        const { data, error } = await admin.from("financial_alerts").insert({
+          alert_type: p.alert_type || "brain_escalation",
+          severity: "critical",
+          title: p.title || "🔴 Escalação do Cérebro",
+          description: p.description || "",
+          entity_type: p.entity_type || null,
+          entity_id: p.entity_id || null,
+        }).select().single();
+        if (error) throw error;
+        // notifica admins
+        const { data: admins } = await admin.from("user_roles").select("user_id").eq("role", "admin");
+        for (const a of admins || []) {
+          await admin.from("notifications").insert({
+            user_id: a.user_id,
+            type: "critical",
+            title: `🔴 ${p.title || "Escalação crítica do Cérebro"}`,
+            description: p.description || "",
+            module: "Cérebro",
+          });
+        }
+        return { ok: true, alert_id: data.id, admins_notified: (admins || []).length };
+      }
       case "notify_user": {
         const { data, error } = await admin.from("notifications").insert({
-          user_id: userId || null,
+          user_id: p.user_id || userId || null,
           type: p.type || "info",
           title: p.title || "Cérebro do ERP",
           description: p.description || "",
@@ -173,6 +206,70 @@ async function executeAction(action: any, userId?: string) {
         }).select().single();
         if (error) throw error;
         return { ok: true, notification_id: data.id };
+      }
+      case "send_pix_reminder": {
+        // Cobrança suave: notifica + cria alerta financeiro
+        const desc = p.description || `Lembrete de PIX pendente${p.amount ? ` — R$ ${p.amount}` : ""}`;
+        const { data: admins } = await admin.from("user_roles").select("user_id").in("role", ["admin", "manager"]);
+        for (const a of admins || []) {
+          await admin.from("notifications").insert({
+            user_id: a.user_id,
+            type: "warning",
+            title: p.title || "💸 Lembrete de cobrança PIX",
+            description: desc,
+            module: "Financeiro",
+          });
+        }
+        return { ok: true, recipients: (admins || []).length };
+      }
+      case "create_follow_up_task": {
+        const { data, error } = await admin.from("follow_up_tasks").insert({
+          client_id: p.client_id || null,
+          client_name: p.client_name || null,
+          sales_rep_id: p.sales_rep_id || null,
+          action_type: p.action_type || "follow_up",
+          title: p.title || "Follow-up sugerido pelo Cérebro",
+          description: p.description || "",
+          scheduled_date: p.scheduled_date || new Date(Date.now() + 24 * 3600 * 1000).toISOString().slice(0, 10),
+          priority: p.priority || "medium",
+          channel: p.channel || "whatsapp",
+          suggested_message: p.suggested_message || null,
+          ai_generated: true,
+          status: "pending",
+        }).select().single();
+        if (error) throw error;
+        return { ok: true, task_id: data.id };
+      }
+      case "block_client": {
+        if (!p.client_id) return { ok: false, error: "client_id obrigatório" };
+        const { error: e1 } = await admin.from("clients")
+          .update({ status: "blocked" })
+          .eq("id", p.client_id);
+        if (e1) throw e1;
+        // registra histórico via order_blocks se houver order_id
+        if (p.order_id) {
+          await admin.from("order_blocks").insert({
+            order_id: p.order_id,
+            block_type: "credit",
+            block_reason: p.reason || "Bloqueio recomendado pelo Cérebro",
+            description: p.description || "",
+            blocked_by: "ai-brain",
+            status: "active",
+            approval_level: "manager",
+          });
+        }
+        return { ok: true, client_id: p.client_id };
+      }
+      case "reschedule_production_order": {
+        if (!p.order_id || !p.new_due_date) return { ok: false, error: "order_id e new_due_date obrigatórios" };
+        const { data, error } = await admin.from("production_orders")
+          .update({ due_date: p.new_due_date, notes: `[Cérebro] ${p.reason || "Replanejamento"}` })
+          .eq("id", p.order_id).select().single();
+        if (error) throw error;
+        return { ok: true, order_id: data.id, new_due_date: p.new_due_date };
+      }
+      case "request_quotation": {
+        return { ok: true, note: "Cotação registrada como sugestão — compras deve criar manualmente" };
       }
       case "save_memory": {
         await saveMemory({
@@ -239,11 +336,36 @@ RETORNE SEMPRE JSON VÁLIDO no formato:
       "risk_level": "low|medium|high",
       "confidence": 0.85,
       "evidence": {"dados_usados":"..."},
-      "proposed_action": {"tool":"create_alert|notify_user|log_observation|save_memory|generate_report|<custom>","params":{}}
+      "proposed_action": {"tool":"<tool_name>","params":{...}}
     }
   ],
   "memorias_a_salvar": [{"category":"pattern|fact","key":"...","value":"...","importance":7}]
-}`;
+}
+
+CATÁLOGO DE TOOLS DISPONÍVEIS:
+- create_alert (params: alert_type, severity, title, description, entity_type?, entity_id?) — cria alerta financeiro [SAFE]
+- escalate_alert (title, description) — alerta crítico + notifica todos admins [SAFE]
+- notify_user (user_id?, title, description, type?, module?) — envia notificação [SAFE]
+- send_pix_reminder (title?, description, amount?) — alerta cobrança PIX para financeiro [SAFE]
+- create_follow_up_task (client_id, client_name, title, description, scheduled_date, priority?, channel?, suggested_message?) — cria tarefa de follow-up comercial [SAFE]
+- save_memory (category, key, value, importance) — salva conhecimento de longo prazo [SAFE]
+- log_observation (description) — registra observação [SAFE]
+- generate_report (description) — sinaliza geração de relatório [SAFE]
+- block_client (client_id, reason, order_id?, description?) — BLOQUEIA cliente por crédito [REQUER APROVAÇÃO]
+- reschedule_production_order (order_id, new_due_date, reason) — reagenda OP [REQUER APROVAÇÃO]
+- request_quotation (description) — sugere cotação ao setor de compras [REQUER APROVAÇÃO]`;
+
+// Schema das tools para o chat (OpenAI tool calling)
+const BRAIN_TOOLS = [
+  { type: "function", function: { name: "create_alert", description: "Cria alerta financeiro", parameters: { type: "object", properties: { title: { type: "string" }, description: { type: "string" }, severity: { type: "string", enum: ["low", "medium", "high", "critical"] }, alert_type: { type: "string" } }, required: ["title", "description"] } } },
+  { type: "function", function: { name: "escalate_alert", description: "Cria alerta crítico e notifica todos admins. Use só quando algo é realmente urgente", parameters: { type: "object", properties: { title: { type: "string" }, description: { type: "string" } }, required: ["title", "description"] } } },
+  { type: "function", function: { name: "notify_user", description: "Envia notificação ao usuário atual", parameters: { type: "object", properties: { title: { type: "string" }, description: { type: "string" }, module: { type: "string" } }, required: ["title", "description"] } } },
+  { type: "function", function: { name: "send_pix_reminder", description: "Cria lembrete de cobrança PIX para o time financeiro", parameters: { type: "object", properties: { description: { type: "string" }, amount: { type: "number" }, title: { type: "string" } }, required: ["description"] } } },
+  { type: "function", function: { name: "create_follow_up_task", description: "Cria tarefa de follow-up comercial para um cliente", parameters: { type: "object", properties: { client_id: { type: "string" }, client_name: { type: "string" }, title: { type: "string" }, description: { type: "string" }, scheduled_date: { type: "string", description: "YYYY-MM-DD" }, channel: { type: "string", enum: ["whatsapp", "email", "phone", "visit"] }, priority: { type: "string", enum: ["low", "medium", "high"] }, suggested_message: { type: "string" } }, required: ["title", "description"] } } },
+  { type: "function", function: { name: "save_memory", description: "Salva conhecimento de longo prazo", parameters: { type: "object", properties: { category: { type: "string" }, key: { type: "string" }, value: {}, importance: { type: "number" } }, required: ["category", "key", "value"] } } },
+  { type: "function", function: { name: "block_client", description: "BLOQUEIA cliente por crédito. Ação destrutiva — sempre vai para aprovação humana", parameters: { type: "object", properties: { client_id: { type: "string" }, reason: { type: "string" }, description: { type: "string" } }, required: ["client_id", "reason"] } } },
+  { type: "function", function: { name: "reschedule_production_order", description: "Reagenda OP. Vai para aprovação humana", parameters: { type: "object", properties: { order_id: { type: "string" }, new_due_date: { type: "string", description: "YYYY-MM-DD" }, reason: { type: "string" } }, required: ["order_id", "new_due_date", "reason"] } } },
+];
 
 // ─────────────────────────────────────────────
 // HANDLERS
@@ -375,21 +497,86 @@ ${JSON.stringify(memories.slice(0, 10), null, 2)}
 KPIs: ${JSON.stringify(snapshot.executive?.kpis || {}, null, 2).slice(0, 1500)}
 Score financeiro: ${JSON.stringify(snapshot.financial_intelligence?.score || {}, null, 2).slice(0, 500)}`;
 
-  const sys = `Você é o CÉREBRO do ERP — consultor sênior do negócio. Use o contexto abaixo (dados REAIS) para responder com precisão. Cite números exatos quando relevante. Seja direto e proponha ações.
+  const sys = `Você é o CÉREBRO do ERP — consultor sênior do negócio. Use o contexto (dados REAIS) para responder com precisão. Cite números exatos. Seja direto e PROATIVO: quando o usuário pedir uma ação executável (criar alerta, agendar follow-up, cobrar PIX, bloquear cliente, reagendar OP), use as TOOLS disponíveis em vez de só descrever. Para ações destrutivas (block_client, reschedule_production_order), a tool registra como pendente para aprovação humana — execute mesmo assim, é só uma proposta.
 
 ${ctx}`;
 
-  const res = await fetch(GATEWAY, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: MODEL,
-      messages: [{ role: "system", content: sys }, ...messages],
-    }),
-  });
-  if (!res.ok) throw new Error(`LLM ${res.status}: ${await res.text()}`);
-  const data = await res.json();
-  return { content: data?.choices?.[0]?.message?.content || "" };
+  const convo: any[] = [{ role: "system", content: sys }, ...messages];
+  const executed: any[] = [];
+  let finalContent = "";
+
+  for (let step = 0; step < 5; step++) {
+    const res = await fetch(GATEWAY, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model: MODEL, messages: convo, tools: BRAIN_TOOLS, tool_choice: "auto" }),
+    });
+    if (!res.ok) throw new Error(`LLM ${res.status}: ${await res.text()}`);
+    const data = await res.json();
+    const msg = data?.choices?.[0]?.message;
+    if (!msg) break;
+    convo.push(msg);
+
+    const toolCalls = msg.tool_calls || [];
+    if (!toolCalls.length) {
+      finalContent = msg.content || "";
+      break;
+    }
+
+    for (const tc of toolCalls) {
+      const name = tc.function?.name;
+      let args: any = {};
+      try { args = JSON.parse(tc.function?.arguments || "{}"); } catch { /* */ }
+
+      const isRisky = RISKY_ACTIONS.has(name);
+      let result: any;
+
+      if (isRisky) {
+        // Cria decisão pendente em vez de executar
+        const { data: dec } = await admin.from("ai_brain_decisions").insert({
+          user_id: userId || null,
+          module: "chat",
+          decision_type: "action",
+          title: `[Chat] ${name}`,
+          rationale: `Solicitada via chat — requer aprovação humana`,
+          impact_level: "high",
+          risk_level: "high",
+          confidence: 0.8,
+          evidence: { source: "chat", args },
+          proposed_action: { tool: name, params: args },
+          auto_executable: false,
+          requires_approval: true,
+          status: "pending",
+        }).select().single();
+        result = { ok: false, pending_approval: true, decision_id: dec?.id, message: `Ação ${name} criada como decisão pendente — aprove no painel do Cérebro.` };
+      } else {
+        result = await executeAction({ tool: name, params: args }, userId);
+        // audita no histórico de decisões
+        await admin.from("ai_brain_decisions").insert({
+          user_id: userId || null,
+          module: "chat",
+          decision_type: "action",
+          title: `[Chat] ${name}`,
+          rationale: "Executada via chat",
+          impact_level: "medium",
+          risk_level: "low",
+          confidence: 0.9,
+          evidence: { source: "chat", args },
+          proposed_action: { tool: name, params: args },
+          auto_executable: true,
+          requires_approval: false,
+          status: result.ok ? "auto_executed" : "approved",
+          executed_at: result.ok ? new Date().toISOString() : null,
+          execution_result: result,
+        });
+      }
+
+      executed.push({ tool: name, args, result });
+      convo.push({ role: "tool", tool_call_id: tc.id, content: JSON.stringify(result) });
+    }
+  }
+
+  return { content: finalContent || "✅ Ações executadas.", actions: executed };
 }
 
 async function handleApprove(decisionId: string, approve: boolean, userId?: string) {
