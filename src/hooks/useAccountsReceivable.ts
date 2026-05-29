@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { toastSuccess } from '@/lib/toastHelpers';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export interface AccountReceivableRow {
   id: string;
@@ -64,7 +64,7 @@ export function useCreateAccountReceivable() {
       toastSuccess('Sucesso', 'Conta a receber cadastrada com sucesso');
     },
     onError: () => {
-      toast({ title: 'Erro', description: 'Erro ao cadastrar conta a receber', variant: 'destructive' });
+      toastError('Erro ao cadastrar conta a receber');
     },
   });
 }
@@ -88,7 +88,7 @@ export function useUpdateAccountReceivable() {
       queryClient.invalidateQueries({ queryKey: ['accounts_receivable'] });
     },
     onError: () => {
-      toast({ title: 'Erro', description: 'Erro ao atualizar conta', variant: 'destructive' });
+      toastError('Erro ao atualizar conta');
     },
   });
 }
@@ -107,7 +107,7 @@ export function useDeleteAccountReceivable() {
       toastSuccess('Sucesso', 'Conta removida com sucesso');
     },
     onError: () => {
-      toast({ title: 'Erro', description: 'Erro ao remover conta', variant: 'destructive' });
+      toastError('Erro ao remover conta');
     },
   });
 }

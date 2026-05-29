@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { toastSuccess } from '@/lib/toastHelpers';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export interface FollowUpTask {
   id: string;
@@ -103,7 +103,7 @@ export function useAISalesMessage() {
       const msg = e.message.includes('429') ? 'Limite de requisições excedido. Tente novamente.'
         : e.message.includes('402') ? 'Créditos insuficientes.'
         : e.message;
-      toast({ title: 'Erro na IA', description: msg, variant: 'destructive' });
+      toastError(msg, undefined, 'Erro na IA');
     },
   });
 }

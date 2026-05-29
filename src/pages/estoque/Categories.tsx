@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toastError } from '@/lib/toastHelpers';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,7 +56,7 @@ export default function CategoriesPage() {
 
   const handleSave = () => {
     if (!formData.name.trim()) {
-      toast({ title: 'Erro', description: 'O nome da categoria é obrigatório', variant: 'destructive' });
+      toastError('O nome da categoria é obrigatório');
       return;
     }
     if (editingCategory) {
@@ -68,7 +69,7 @@ export default function CategoriesPage() {
   const handleDeleteConfirm = () => {
     if (editingCategory) {
       if ((editingCategory.products_count || 0) > 0) {
-        toast({ title: 'Não é possível excluir', description: 'A categoria possui produtos vinculados.', variant: 'destructive' });
+        toastError('A categoria possui produtos vinculados.', undefined, 'Não é possível excluir');
         setIsDeleteOpen(false);
         return;
       }

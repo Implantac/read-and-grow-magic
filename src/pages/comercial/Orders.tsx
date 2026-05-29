@@ -34,7 +34,7 @@ import { useClients } from '@/hooks/useClients';
 import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
 import { validateOrder, type CommercialValidation } from '@/hooks/useCommercialRules';
-import { toastSuccess } from '@/lib/toastHelpers';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 
 const filterFields: FilterField[] = [
@@ -184,11 +184,11 @@ export default function OrdersPage() {
 
   const handleCreate = () => {
     if (!formClient.name || formItems.length === 0) {
-      toast({ title: 'Preencha o cliente e adicione pelo menos um item', variant: 'destructive' });
+      toastError('Preencha o cliente e adicione pelo menos um item');
       return;
     }
     if (hasBlocks) {
-      toast({ title: 'Pedido bloqueado', description: 'Corrija as pendências antes de continuar.', variant: 'destructive' });
+      toastError('Corrija as pendências antes de continuar.', undefined, 'Pedido bloqueado');
       return;
     }
     const needsApproval = orderValidations.some(v => v.type === 'approval');

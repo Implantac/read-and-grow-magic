@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toastError } from '@/lib/toastHelpers';
 import { Plus, Eye, MoreHorizontal, FileText, Send, CheckCircle, XCircle, ArrowRightCircle, Loader2, DollarSign, FileEdit, Mail, ThumbsUp } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -60,7 +61,7 @@ export default function QuotationsPage() {
 
   const handleCreate = () => {
     if (!formClient.name || formItems.length === 0 || !formValidUntil) {
-      toast({ title: 'Preencha o cliente, validade e adicione pelo menos um item', variant: 'destructive' });
+      toastError('Preencha o cliente, validade e adicione pelo menos um item');
       return;
     }
     createQuotation.mutate({

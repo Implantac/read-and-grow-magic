@@ -16,7 +16,7 @@ import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
 import { validateTransition } from '@/lib/orderFlowEngine';
 import { format } from 'date-fns';
-import { toastSuccess } from '@/lib/toastHelpers';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 interface TransitionInput {
   orderId: string;
@@ -286,7 +286,7 @@ export function useOrderLifecycle() {
       toastSuccess('Status do pedido atualizado com sucesso!');
     },
     onError: (e: any) => {
-      toast({ title: 'Erro na transição', description: e.message, variant: 'destructive' });
+      toastError(e.message, undefined, 'Erro na transição');
     },
   });
 }

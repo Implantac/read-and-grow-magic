@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { toastSuccess } from '@/lib/toastHelpers';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -23,7 +23,7 @@ export default function ResetPassword() {
     if (hash.includes('type=recovery')) {
       setIsValid(true);
     } else {
-      toast({ title: 'Link inválido', description: 'Este link de recuperação é inválido ou expirou.', variant: 'destructive' });
+      toastError('Este link de recuperação é inválido ou expirou.', undefined, 'Link inválido');
       navigate('/login');
     }
   }, [navigate, toast]);
@@ -31,11 +31,11 @@ export default function ResetPassword() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      toast({ title: 'Erro', description: 'As senhas não coincidem', variant: 'destructive' });
+      toastError('As senhas não coincidem');
       return;
     }
     if (password.length < 6) {
-      toast({ title: 'Erro', description: 'A senha deve ter no mínimo 6 caracteres', variant: 'destructive' });
+      toastError('A senha deve ter no mínimo 6 caracteres');
       return;
     }
     setIsLoading(true);
@@ -45,7 +45,7 @@ export default function ResetPassword() {
       toastSuccess('Senha atualizada!', 'Sua senha foi redefinida com sucesso.');
       navigate('/login');
     } catch (error: any) {
-      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+      toastError(error.message);
     }
     setIsLoading(false);
   };

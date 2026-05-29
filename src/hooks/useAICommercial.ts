@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { toastSuccess } from '@/lib/toastHelpers';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 // ─── Types ─────────────────────────────────────────────────────────────
 export interface AIScore {
@@ -236,7 +236,7 @@ export function useRunAIEngine() {
       const msg = e.message.includes('429') ? 'Limite de requisições excedido. Tente novamente em alguns minutos.'
         : e.message.includes('402') ? 'Créditos insuficientes. Adicione créditos em Configurações > Workspace.'
         : e.message;
-      toast({ title: 'Erro na IA', description: msg, variant: 'destructive' });
+      toastError(msg, undefined, 'Erro na IA');
     },
   });
 }

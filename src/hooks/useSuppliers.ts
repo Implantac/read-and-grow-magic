@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { toastSuccess } from '@/lib/toastHelpers';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export function useSuppliers() {
   const queryClient = useQueryClient();
@@ -30,11 +30,7 @@ export function useSuppliers() {
       toastSuccess('Fornecedor criado com sucesso!');
     },
     onError: (error: any) => {
-      toast({ 
-        title: 'Erro ao criar fornecedor', 
-        description: error.message, 
-        variant: 'destructive' 
-      });
+      toastError(error.message, undefined, 'Erro ao criar fornecedor');
     },
   });
 
@@ -54,11 +50,7 @@ export function useSuppliers() {
       toastSuccess('Fornecedor atualizado com sucesso!');
     },
     onError: (error: any) => {
-      toast({ 
-        title: 'Erro ao atualizar fornecedor', 
-        description: error.message, 
-        variant: 'destructive' 
-      });
+      toastError(error.message, undefined, 'Erro ao atualizar fornecedor');
     },
   });
 
@@ -72,11 +64,7 @@ export function useSuppliers() {
       toastSuccess('Fornecedor excluído com sucesso!');
     },
     onError: (error: any) => {
-      toast({ 
-        title: 'Erro ao excluir fornecedor', 
-        description: error.message, 
-        variant: 'destructive' 
-      });
+      toastError(error.message, undefined, 'Erro ao excluir fornecedor');
     },
   });
 

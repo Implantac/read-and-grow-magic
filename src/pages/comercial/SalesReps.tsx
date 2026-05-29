@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { toastError } from '@/lib/toastHelpers';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageLoading } from '@/components/shared/PageLoading';
@@ -90,7 +91,7 @@ export default function SalesRepsPage() {
   };
 
   const handleSave = async () => {
-    if (!formData.name || !formData.code) return toast({ title: 'Nome e código obrigatórios', variant: 'destructive' });
+    if (!formData.name || !formData.code) return toastError('Nome e código obrigatórios');
     const payload: any = {
       name: formData.name, code: formData.code, email: formData.email || null,
       phone: formData.phone || null, region: formData.region || null,

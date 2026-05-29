@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
-import { toastSuccess } from '@/lib/toastHelpers';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
   User, Mail, Shield, Building2, MapPin, Phone, Save, Eye, EyeOff, Lock, Camera,
 } from 'lucide-react';
 
@@ -55,7 +55,7 @@ export default function ProfilePage() {
       setAvatarUrl(publicUrl);
       toastSuccess('Foto atualizada', 'Sua foto de perfil foi salva.');
     } catch (err: any) {
-      toast({ title: 'Erro no upload', description: err.message, variant: 'destructive' });
+      toastError(err.message, undefined, 'Erro no upload');
     } finally {
       setUploading(false);
     }
@@ -74,7 +74,7 @@ export default function ProfilePage() {
       setUser({ ...user, name, email });
       toastSuccess('Perfil atualizado', 'Suas informações foram salvas com sucesso.');
     } catch (err: any) {
-      toast({ title: 'Erro', description: err.message, variant: 'destructive' });
+      toastError(err.message);
     } finally {
       setSavingProfile(false);
     }
@@ -82,15 +82,15 @@ export default function ProfilePage() {
 
   const handleChangePassword = async () => {
     if (!currentPassword || !newPassword) {
-      toast({ title: 'Erro', description: 'Preencha todos os campos de senha.', variant: 'destructive' });
+      toastError('Preencha todos os campos de senha.');
       return;
     }
     if (newPassword !== confirmPassword) {
-      toast({ title: 'Erro', description: 'A nova senha e a confirmação não coincidem.', variant: 'destructive' });
+      toastError('A nova senha e a confirmação não coincidem.');
       return;
     }
     if (newPassword.length < 6) {
-      toast({ title: 'Erro', description: 'A nova senha deve ter pelo menos 6 caracteres.', variant: 'destructive' });
+      toastError('A nova senha deve ter pelo menos 6 caracteres.');
       return;
     }
 
@@ -111,7 +111,7 @@ export default function ProfilePage() {
       setConfirmPassword('');
       toastSuccess('Senha alterada', 'Sua senha foi atualizada com sucesso.');
     } catch (err: any) {
-      toast({ title: 'Erro', description: err.message, variant: 'destructive' });
+      toastError(err.message);
     } finally {
       setChangingPassword(false);
     }

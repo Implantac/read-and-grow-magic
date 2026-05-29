@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { toastSuccess } from '@/lib/toastHelpers';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export interface CnpjData {
   razao_social: string;
@@ -28,7 +28,7 @@ export function useCnpjLookup() {
   const lookup = async (cnpj: string): Promise<CnpjData | null> => {
     const clean = cleanCnpj(cnpj);
     if (clean.length !== 14) {
-      toast({ title: 'CNPJ inválido', description: 'O CNPJ deve conter 14 dígitos.', variant: 'destructive' });
+      toastError('O CNPJ deve conter 14 dígitos.', undefined, 'CNPJ inválido');
       return null;
     }
 
@@ -56,7 +56,7 @@ export function useCnpjLookup() {
         email: data.email || '',
       };
     } catch (e: any) {
-      toast({ title: 'Erro ao consultar CNPJ', description: e.message || 'Verifique o número e tente novamente.', variant: 'destructive' });
+      toastError(e.message || 'Verifique o número e tente novamente.', undefined, 'Erro ao consultar CNPJ');
       return null;
     } finally {
       setLoading(false);

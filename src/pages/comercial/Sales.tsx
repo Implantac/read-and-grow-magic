@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toastError } from '@/lib/toastHelpers';
 import { Plus, Eye, MoreHorizontal, FileText, Loader2, DollarSign, ShoppingBag, TrendingUp } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -60,7 +61,7 @@ export default function SalesPage() {
 
   const handleCreate = () => {
     if (!formClient.name || formItems.length === 0) {
-      toast({ title: 'Preencha o cliente e adicione pelo menos um item', variant: 'destructive' });
+      toastError('Preencha o cliente e adicione pelo menos um item');
       return;
     }
     createSale.mutate({

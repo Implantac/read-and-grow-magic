@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import { useSystemParameters } from './useSystemParameters';
-import { toastSuccess } from '@/lib/toastHelpers';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export interface DbOrderItem {
   id: string;
@@ -153,11 +153,7 @@ export function useCreateOrder() {
     },
     onError: (e: any) => {
       console.error('Error creating order:', e);
-      toast({ 
-        title: 'Erro ao criar pedido', 
-        description: e.message || 'Ocorreu um erro inesperado', 
-        variant: 'destructive' 
-      });
+      toastError(e.message || 'Ocorreu um erro inesperado', undefined, 'Erro ao criar pedido');
     },
   });
 }
@@ -179,11 +175,7 @@ export function useUpdateOrderStatus() {
     },
     onError: (e: any) => {
       console.error('Error updating order status:', e);
-      toast({ 
-        title: 'Erro ao atualizar status', 
-        description: e.message, 
-        variant: 'destructive' 
-      });
+      toastError(e.message, undefined, 'Erro ao atualizar status');
     },
   });
 }
@@ -205,11 +197,7 @@ export function useUpdateOrderFields() {
     },
     onError: (e: any) => {
       console.error('Error updating order fields:', e);
-      toast({ 
-        title: 'Erro ao atualizar pedido', 
-        description: e.message, 
-        variant: 'destructive' 
-      });
+      toastError(e.message, undefined, 'Erro ao atualizar pedido');
     },
   });
 }
@@ -296,7 +284,7 @@ export function useDeleteOrder() {
               qc.invalidateQueries({ queryKey: ['orders'] });
               toastSuccess('Pedido restaurado com sucesso!');
             } catch (err: any) {
-              toast({ title: 'Erro ao restaurar pedido', description: err.message, variant: 'destructive' });
+              toastError(err.message, undefined, 'Erro ao restaurar pedido');
             }
           }
         }, 'Desfazer');
@@ -327,11 +315,7 @@ export function useDeleteOrder() {
     },
     onError: (e: any) => {
       console.error('Error deleting order:', e);
-      toast({ 
-        title: 'Erro ao remover pedido', 
-        description: e.message || 'Não foi possível excluir o pedido no momento.', 
-        variant: 'destructive' 
-      });
+      toastError(e.message || 'Não foi possível excluir o pedido no momento.', undefined, 'Erro ao remover pedido');
     },
   });
 }

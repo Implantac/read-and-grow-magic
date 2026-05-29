@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { toastError } from '@/lib/toastHelpers';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
@@ -211,7 +212,7 @@ export default function PCPPanel() {
 
   const generateOPFromOrder = async (order: any) => {
     const items = order.items || [];
-    if (items.length === 0) { toast({ title: 'Pedido sem itens', variant: 'destructive' }); return; }
+    if (items.length === 0) { toastError('Pedido sem itens'); return; }
     try {
       for (const item of items) {
         const opNumber = `OP-${format(new Date(), 'yyyyMMdd')}-${order.number}-${item.product_code}`;
@@ -226,7 +227,7 @@ export default function PCPPanel() {
       toast({ title: `${items.length} OP(s) gerada(s) do pedido ${order.number}` });
       await refetch();
       setGeneratingFor(null);
-    } catch (e: any) { toast({ title: 'Erro ao gerar OP', description: e.message, variant: 'destructive' }); }
+    } catch (e: any) { toastError(e.message, undefined, 'Erro ao gerar OP'); }
   };
 
   const handleStatusChange = async (op: any, newStatus: string) => {

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { toastSuccess } from '@/lib/toastHelpers';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export interface AccountPayableRow {
   id: string;
@@ -63,7 +63,7 @@ export function useCreateAccountPayable() {
       toastSuccess('Sucesso', 'Conta a pagar cadastrada com sucesso');
     },
     onError: () => {
-      toast({ title: 'Erro', description: 'Erro ao cadastrar conta a pagar', variant: 'destructive' });
+      toastError('Erro ao cadastrar conta a pagar');
     },
   });
 }
@@ -87,7 +87,7 @@ export function useUpdateAccountPayable() {
       queryClient.invalidateQueries({ queryKey: ['accounts_payable'] });
     },
     onError: () => {
-      toast({ title: 'Erro', description: 'Erro ao atualizar conta', variant: 'destructive' });
+      toastError('Erro ao atualizar conta');
     },
   });
 }
@@ -106,7 +106,7 @@ export function useDeleteAccountPayable() {
       toastSuccess('Sucesso', 'Conta removida com sucesso');
     },
     onError: () => {
-      toast({ title: 'Erro', description: 'Erro ao remover conta', variant: 'destructive' });
+      toastError('Erro ao remover conta');
     },
   });
 }

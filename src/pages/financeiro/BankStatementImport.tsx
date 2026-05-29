@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { toastError } from '@/lib/toastHelpers';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,19 +32,19 @@ export default function BankStatementImport() {
       const isOFX = /<OFX|<STMTTRN/i.test(text);
       const txs = isOFX ? parseOFX(text) : parseCSV(text);
       if (txs.length === 0) {
-        toast({ title: 'Nenhuma transação encontrada', description: 'Verifique o formato do arquivo', variant: 'destructive' });
+        toastError('Verifique o formato do arquivo', undefined, 'Nenhuma transação encontrada');
         return;
       }
       setParsed(txs);
       toast({ title: `${txs.length} transações lidas`, description: 'Selecione a conta bancária e importe.' });
     } catch (e: any) {
-      toast({ title: 'Erro ao ler arquivo', description: e.message, variant: 'destructive' });
+      toastError(e.message, undefined, 'Erro ao ler arquivo');
     }
   }
 
   function handleImport() {
     if (!bankAccountId) {
-      toast({ title: 'Selecione uma conta bancária', variant: 'destructive' });
+      toastError('Selecione uma conta bancária');
       return;
     }
     importMut.mutate({ txs: parsed, bankAccountId }, {
