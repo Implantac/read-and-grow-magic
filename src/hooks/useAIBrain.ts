@@ -168,7 +168,6 @@ export function useRunBrain() {
   });
 }
 
-// ─── Chat ─────────────────────────────────
 export interface BrainChatMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -180,14 +179,16 @@ export function useBrainChat() {
   const [messages, setMessages] = useState<BrainChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const send = useCallback(async (text: string) => {
+
+
+  const send = useCallback(async (text: string, agent: string = 'geral') => {
     const userMsg: BrainChatMessage = { id: crypto.randomUUID(), role: 'user', content: text };
     setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
     try {
       const history = [...messages, userMsg].map((m) => ({ role: m.role, content: m.content }));
       const { data, error } = await supabase.functions.invoke('ai-brain', {
-        body: { action: 'chat', messages: history },
+        body: { action: 'chat', messages: history, agent },
       });
       if (error) throw error;
       setMessages((prev) => [
@@ -207,6 +208,18 @@ export function useBrainChat() {
   const clear = useCallback(() => setMessages([]), []);
   return { messages, loading, send, clear };
 }
+
+export function useNotifyCritical() {
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('ai-brain', { body: { action: 'notify_critical' } });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+
 
 // ─── Learning analytics ─────────────────────────────
 export interface LearningStats {
