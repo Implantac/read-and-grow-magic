@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { toastError } from '@/lib/toastHelpers';
 
 export interface CostCenterRow {
   id: string;
@@ -33,6 +34,6 @@ export function useCreateCostCenter() {
       return data;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['cost_centers'] }); toast({ title: 'Sucesso', description: 'Centro de custo criado' }); },
-    onError: () => { toast({ title: 'Erro', description: 'Erro ao criar centro de custo', variant: 'destructive' }); },
+    onError: () => toastError('Erro ao criar centro de custo'),
   });
 }

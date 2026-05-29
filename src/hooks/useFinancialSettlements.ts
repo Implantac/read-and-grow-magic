@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError } from '@/lib/toastHelpers';
+import { handleMutationError, mutationErrorHandler } from '@/lib/toastHelpers';
 export interface SettlementRow {
   id: string;
   source_type: 'receivable' | 'payable' | 'advance';
@@ -57,7 +57,7 @@ export function useReverseSettlement() {
       qc.invalidateQueries({ queryKey: ['bank_accounts'] });
       toast({ title: 'Baixa estornada com sucesso' });
     },
-    onError: (e: any) => toast({ title: 'Erro ao estornar', description: e.message, variant: 'destructive' }),
+    onError: mutationErrorHandler('Erro ao estornar'),
   });
 }
 

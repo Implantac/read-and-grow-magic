@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { toastError } from '@/lib/toastHelpers';
 
 export interface BankAccountRow {
   id: string;
@@ -40,7 +41,7 @@ export function useCreateBankAccount() {
       return data;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['bank_accounts'] }); toast({ title: 'Sucesso', description: 'Conta bancária cadastrada' }); },
-    onError: () => { toast({ title: 'Erro', description: 'Erro ao cadastrar conta', variant: 'destructive' }); },
+    onError: () => toastError('Erro ao cadastrar conta'),
   });
 }
 
@@ -54,6 +55,6 @@ export function useUpdateBankAccount() {
       return data;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['bank_accounts'] }); },
-    onError: () => { toast({ title: 'Erro', description: 'Erro ao atualizar conta', variant: 'destructive' }); },
+    onError: () => toastError('Erro ao atualizar conta'),
   });
 }

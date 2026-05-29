@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError } from '@/lib/toastHelpers';
+import { handleMutationError, mutationErrorHandler } from '@/lib/toastHelpers';
 // Order Status History
 export function useOrderStatusHistory(orderId?: string) {
   return useQuery({
@@ -60,7 +60,7 @@ export function useCreateStockReservation() {
       qc.invalidateQueries({ queryKey: ['stock-reservations'] });
       toast({ title: 'Reserva criada com sucesso!' });
     },
-    onError: (e: any) => toast({ title: 'Erro ao criar reserva', description: e.message, variant: 'destructive' }),
+    onError: mutationErrorHandler('Erro ao criar reserva'),
   });
 }
 
