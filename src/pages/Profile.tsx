@@ -10,9 +10,9 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
-import { toastSuccess, toastError } from '@/lib/toastHelpers';
   User, Mail, Shield, Building2, MapPin, Phone, Save, Eye, EyeOff, Lock, Camera,
 } from 'lucide-react';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export default function ProfilePage() {
   const { user, activeCompany, activeBranch, theme, toggleTheme, setUser } = useAppStore();
