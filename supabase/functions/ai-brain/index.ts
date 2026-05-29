@@ -250,7 +250,7 @@ RETORNE SEMPRE JSON VÁLIDO no formato:
 // ─────────────────────────────────────────────
 async function handleAnalyze(userId: string | undefined, authHeader?: string, mode = "analyze") {
   const t0 = Date.now();
-  const { data: run } = await admin
+      agents_used: ["ai-executive", "financial-insights", "financial-intelligence", "ai-commercial", "ai-production"],
     .from("ai_brain_runs")
     .insert({
       user_id: userId || null,
