@@ -20,7 +20,6 @@ import { StatusBadge } from '@/components/shared/StatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { financialCategories } from '@/config/financial';
 import { PaymentMethod } from '@/types/financial';
-import { useToast } from '@/hooks/use-toast';
 import { useAccountsPayable, useCreateAccountPayable, useUpdateAccountPayable, useDeleteAccountPayable } from '@/hooks/useAccountsPayable';
 import { useCreatePaymentRecord } from '@/hooks/usePaymentRecords';
 import { useBankAccounts } from '@/hooks/useBankAccounts';
@@ -36,7 +35,6 @@ const paymentMethods: Record<PaymentMethod, string> = {
 };
 
 export default function AccountsPayable() {
-  const { toast } = useToast();
   const { data: accounts = [], isLoading } = useAccountsPayable();
   const { data: bankAccounts = [] } = useBankAccounts();
   const { data: costCenters = [] } = useCostCenters();

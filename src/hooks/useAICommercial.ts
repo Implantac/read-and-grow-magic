@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 // ─── Types ─────────────────────────────────────────────────────────────
@@ -214,7 +213,6 @@ export function useAIForecasts() {
 
 export function useRunAIEngine() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (action: string) => {
       const { data, error } = await supabase.functions.invoke('ai-commercial', {

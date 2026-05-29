@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 
 export type PaymentSplit = {
@@ -24,7 +23,6 @@ export type SettleParams = {
 
 export function useSettleAccount() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (params: SettleParams) => {
       const { data, error } = await supabase.rpc('settle_account', {
@@ -54,7 +52,6 @@ export function useSettleAccount() {
 
 export function useCompensateAccounts() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (p: { receivable_id: string; payable_id: string; amount: number; notes?: string }) => {
       const { data, error } = await supabase.rpc('compensate_accounts', {

@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface ChargeRule {
@@ -69,7 +68,6 @@ export function useChargesLog(filters?: { clientId?: string; severity?: string; 
 
 export function useRunChargesRuler() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.rpc('process_charges_ruler');
@@ -86,7 +84,6 @@ export function useRunChargesRuler() {
 
 export function useToggleChargeRule() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, active }: { id: string; active: boolean }) => {
       const { error } = await supabase

@@ -10,7 +10,6 @@ import { useOrders } from '@/hooks/useOrders';
 import { useOrderLifecycle } from '@/hooks/useOrderLifecycle';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
-import { useToast } from '@/hooks/use-toast';
 import { Package, Lock, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -28,8 +27,6 @@ export default function SeparationQueue() {
   const { data: orders } = useOrders();
   const lifecycle = useOrderLifecycle();
   const qc = useQueryClient();
-  const { toast } = useToast();
-
   const updateReservationStatus = async (id: string, status: string, orderId?: string) => {
     const updates: any = { status, updated_at: new Date().toISOString() };
     if (status === 'picked') updates.picked_at = new Date().toISOString();

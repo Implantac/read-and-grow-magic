@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export interface DailyReportData {
@@ -40,8 +39,6 @@ export function useDailyReports() {
 
 export function useGenerateReport() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-
   return useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke('daily-executive-report');

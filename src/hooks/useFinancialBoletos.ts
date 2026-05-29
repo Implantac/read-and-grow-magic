@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import type { BoletoStatus } from '@/types/financial';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
@@ -51,7 +50,6 @@ export function useFinancialBoletos(filters?: { status?: string }) {
 
 export function useCreateBoleto() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (input: { receivable_id?: string; client_id?: string; client_name?: string; amount: number; due_date: string; bank_account_id?: string; notes?: string }) => {
       const fake = mockBoleto(input.amount);
@@ -74,7 +72,6 @@ export function useCreateBoleto() {
 
 export function useCancelBoleto() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('financial_boletos' as any).update({ status: 'cancelled' }).eq('id', id);
@@ -92,7 +89,6 @@ export function useCancelBoleto() {
 // (the existing payment_records trigger will update the receivable + ledger)
 export function useMarkBoletoPaid() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (params: { id: string; bank_account_id?: string }) => {
       const { data: bol, error: e1 } = await supabase.from('financial_boletos' as any).select('*').eq('id', params.id).single();

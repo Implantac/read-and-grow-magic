@@ -28,7 +28,6 @@ import { usePCPIntelligence } from '@/hooks/usePCPIntelligence';
 import { Factory, Clock, CheckCircle, AlertTriangle, Search, Plus, Play, Pause, BarChart3, Users, Gauge, Bell, ShieldCheck, GanttChart } from 'lucide-react';
 import { format, differenceInDays, parseISO, differenceInMinutes, addDays, startOfDay, endOfDay, max as dateMax, min as dateMin } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { formatNumber } from '@/lib/formatters';
 
@@ -174,8 +173,6 @@ export default function PCPPanel() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [generatingFor, setGeneratingFor] = useState<any>(null);
-  const { toast } = useToast();
-
   const filtered = productionOrders.filter(o => {
     const matchSearch = !search || o.order_number.toLowerCase().includes(search.toLowerCase()) || o.product_name.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === 'all' || o.status === statusFilter;

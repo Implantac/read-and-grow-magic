@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { useMemo } from 'react';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
@@ -36,7 +35,6 @@ export function useContactLogs(salesRepId?: string, dateFrom?: string) {
 
 export function useCreateContactLog() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (log: Partial<ContactLog>) => {
       const { data, error } = await supabase.from('sales_contact_logs').insert(log as any).select().single();

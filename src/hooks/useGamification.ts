@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 export interface GamificationBadge {
   id: string;
@@ -82,7 +81,6 @@ export function useGamificationPoints(salesRepId?: string) {
 
 export function useAddPoints() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (entry: { sales_rep_id: string; action_type: string; points: number; description?: string; reference_id?: string }) => {
       const { error } = await supabase.from('gamification_points').insert(entry as any);

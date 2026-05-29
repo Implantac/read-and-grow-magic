@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 export interface DbCategory {
@@ -33,7 +32,6 @@ export function useCategories() {
 
 export function useCreateCategory() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (cat: { name: string; description?: string; active?: boolean }) => {
       const { data, error } = await supabase.from('categories').insert(cat).select().single();
@@ -50,7 +48,6 @@ export function useCreateCategory() {
 
 export function useUpdateCategory() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, ...cat }: { id: string; name?: string; description?: string; active?: boolean }) => {
       const { data, error } = await supabase.from('categories').update({ ...cat, updated_at: new Date().toISOString() }).eq('id', id).select().single();
@@ -67,7 +64,6 @@ export function useUpdateCategory() {
 
 export function useDeleteCategory() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('categories').delete().eq('id', id);

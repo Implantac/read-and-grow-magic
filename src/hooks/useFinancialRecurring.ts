@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export type RecurringFrequency = 'weekly' | 'biweekly' | 'monthly' | 'bimonthly' | 'quarterly' | 'semiannual' | 'annual';
@@ -58,7 +57,6 @@ export function useRecurringList(filters?: { kind?: RecurringKind; status?: Recu
 
 export function useCreateRecurring() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (payload: Partial<RecurringRow>) => {
       const { data, error } = await supabase
@@ -79,7 +77,6 @@ export function useCreateRecurring() {
 
 export function useUpdateRecurringStatus() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: RecurringStatus }) => {
       const { error } = await supabase
@@ -98,7 +95,6 @@ export function useUpdateRecurringStatus() {
 
 export function useGenerateRecurringEntries() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.rpc('generate_recurring_entries');

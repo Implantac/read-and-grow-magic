@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface ICMSSTRule {
@@ -51,7 +50,6 @@ export function useICMSSTRules() {
 
 export function useUpsertICMSST() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (rule: Partial<ICMSSTRule> & { name: string }) => {
       const { id, ...payload } = rule as any;
@@ -83,7 +81,6 @@ export function useDIFALRules() {
 
 export function useUpsertDIFAL() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (rule: Partial<DIFALRule> & { name: string; uf_origin: string; uf_destination: string }) => {
       const { id, ...payload } = rule as any;

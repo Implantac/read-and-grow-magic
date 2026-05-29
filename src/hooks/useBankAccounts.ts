@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 
 export interface BankAccountRow {
@@ -33,7 +32,6 @@ export function useBankAccounts() {
 
 export function useCreateBankAccount() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (account: { name: string; bank_name: string; bank_code?: string; agency?: string; account_number?: string; account_type?: string }) => {
       const { data, error } = await supabase.from('bank_accounts').insert([account]).select().single();
@@ -47,7 +45,6 @@ export function useCreateBankAccount() {
 
 export function useUpdateBankAccount() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, ...updates }: { id: string } & Partial<BankAccountRow>) => {
       const { data, error } = await supabase.from('bank_accounts').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id).select().single();

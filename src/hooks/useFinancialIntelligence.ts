@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface FinancialHealthScore {
@@ -62,7 +61,6 @@ export function usePredictiveAlerts() {
 
 export function useComputeIntelligence() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke('financial-intelligence?action=compute', { body: {} });
@@ -80,7 +78,6 @@ export function useComputeIntelligence() {
 
 export function useAutoReconcile() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke('financial-intelligence?action=auto-reconcile', { body: {} });

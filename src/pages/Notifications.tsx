@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
 import { useNotifications } from '@/hooks/useNotifications';
 import {
   BellOff, Check, CheckCheck, Search, Trash2,
@@ -26,7 +25,6 @@ const typeConfig = {
 };
 
 export default function NotificationsPage() {
-  const { toast } = useToast();
   const { notifications, isLoading, unreadCount, markAsRead, markAllAsRead, deleteNotification, clearAll } = useNotifications();
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<string>('all');

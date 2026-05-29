@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { toastSuccess } from '@/lib/toastHelpers';
 
 const STAGE_WEIGHTS: Record<string, number> = {
@@ -94,8 +93,6 @@ export function useForecastCalculation(period: string) {
 
 export function useForecastMutations() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-
   const saveForecast = useMutation({
     mutationFn: async (forecast: any) => {
       const { data, error } = await supabase.from('sales_forecasts').insert(forecast).select().single();

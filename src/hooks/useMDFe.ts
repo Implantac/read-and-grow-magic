@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface MDFe {
@@ -46,7 +45,6 @@ export function useMDFes() {
 
 export function useCreateMDFe() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (payload: Partial<MDFe> & { uf_origin: string; uf_destination: string }) => {
       const number = 'MDFE-' + Date.now().toString().slice(-8);
@@ -64,7 +62,6 @@ export function useCreateMDFe() {
 
 export function useTransmitMDFe() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (id: string) => {
       const access_key = Array.from({ length: 44 }, () => Math.floor(Math.random() * 10)).join('');
@@ -84,7 +81,6 @@ export function useTransmitMDFe() {
 
 export function useCloseMDFe() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('mdfe' as any).update({
@@ -102,7 +98,6 @@ export function useCloseMDFe() {
 
 export function useAddMDFeDocument() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (payload: { mdfe_id: string; document_type: 'nfe' | 'cte'; document_number: string; access_key?: string; document_value?: number; document_weight?: number; unloading_city?: string }) => {
       const { error } = await supabase.from('mdfe_documents' as any).insert(payload);

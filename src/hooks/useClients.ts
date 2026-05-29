@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface DbClient {
@@ -59,7 +58,6 @@ export function useClients() {
 
 export function useCreateClient() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (client: Omit<DbClient, 'id' | 'created_at' | 'updated_at'>) => {
       const { data, error } = await supabase.from('clients').insert(client).select().single();
@@ -76,7 +74,6 @@ export function useCreateClient() {
 
 export function useUpdateClient() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, ...client }: Partial<DbClient> & { id: string }) => {
       const { data, error } = await supabase.from('clients').update({ ...client, updated_at: new Date().toISOString() }).eq('id', id).select().single();
@@ -93,7 +90,6 @@ export function useUpdateClient() {
 
 export function useDeleteClient() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('clients').delete().eq('id', id);

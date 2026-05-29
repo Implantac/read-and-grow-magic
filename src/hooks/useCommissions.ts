@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 
 export function useCommissionPolicies() {
@@ -47,8 +46,6 @@ export function useCommissionPayments(period?: string) {
 
 export function useCommissionMutations() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-
   const createPolicy = useMutation({
     mutationFn: async (policy: any) => {
       const { data, error } = await supabase.from('commission_policies').insert(policy).select().single();

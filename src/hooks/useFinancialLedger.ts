@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface LedgerEntryRow {
@@ -38,7 +37,6 @@ export function useFinancialLedger(filters?: { from?: string; to?: string; bankA
 
 export function useCreateManualLedger() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (entry: Omit<LedgerEntryRow, 'id' | 'created_at' | 'reconciled' | 'bank_transaction_id'> & { source?: string }) => {
       const { data, error } = await supabase

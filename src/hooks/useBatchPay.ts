@@ -1,11 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export function useBatchPayPayables() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (params: { ids: string[]; bank_account_id: string; payment_method: string; payment_date?: string; notes?: string }) => {
       const { data, error } = await supabase.rpc('batch_pay_payables' as any, {

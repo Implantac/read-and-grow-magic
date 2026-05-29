@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 export interface ParsedTx {
@@ -68,7 +67,6 @@ export function parseOFX(text: string): ParsedTx[] {
 
 export function useImportBankStatement() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ txs, bankAccountId }: { txs: ParsedTx[]; bankAccountId?: string }) => {
       if (!bankAccountId) throw new Error('Selecione uma conta bancária');
@@ -115,7 +113,6 @@ export function useImportBankStatement() {
 
 export function useAutoMatch() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (bankAccountId?: string) => {
       const { data, error } = await supabase.rpc(
@@ -137,7 +134,6 @@ export function useAutoMatch() {
 
 export function useManualReconcile() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ bankTxId, ledgerEntryId }: { bankTxId: string; ledgerEntryId: string }) => {
       const { error: e1 } = await supabase.from('bank_transactions')

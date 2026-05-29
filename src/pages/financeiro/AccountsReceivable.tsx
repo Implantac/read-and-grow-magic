@@ -17,7 +17,6 @@ import { StatusBadge } from '@/components/shared/StatusBadge';
 import { Badge } from '@/components/ui/badge';
 import { financialCategories } from '@/config/financial';
 import { PaymentMethod } from '@/types/financial';
-import { useToast } from '@/hooks/use-toast';
 import { useAccountsReceivable, useCreateAccountReceivable, useUpdateAccountReceivable, useDeleteAccountReceivable } from '@/hooks/useAccountsReceivable';
 import { useCreatePaymentRecord } from '@/hooks/usePaymentRecords';
 import { useBankAccounts } from '@/hooks/useBankAccounts';
@@ -34,7 +33,6 @@ const paymentMethods: Record<PaymentMethod, string> = {
 };
 
 export default function AccountsReceivable() {
-  const { toast } = useToast();
   const { data: accounts = [], isLoading } = useAccountsReceivable();
   const { data: clients = [] } = useClients();
   const { data: bankAccounts = [] } = useBankAccounts();

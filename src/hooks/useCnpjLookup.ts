@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export interface CnpjData {
@@ -23,8 +22,6 @@ function cleanCnpj(cnpj: string) {
 
 export function useCnpjLookup() {
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
-
   const lookup = async (cnpj: string): Promise<CnpjData | null> => {
     const clean = cleanCnpj(cnpj);
     if (clean.length !== 14) {

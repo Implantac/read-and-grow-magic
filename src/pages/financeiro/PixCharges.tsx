@@ -11,7 +11,6 @@ import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
 import { usePixCharges, useCreatePixCharge, useSimulatePixPayment } from '@/hooks/usePixCharges';
-import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatBRL } from '@/lib/formatters';
@@ -29,7 +28,6 @@ export default function PixCharges() {
   const { data: charges = [], isLoading } = usePixCharges();
   const create = useCreatePixCharge();
   const simulate = useSimulatePixPayment();
-  const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ amount: '', client_name: '', description: '' });
 

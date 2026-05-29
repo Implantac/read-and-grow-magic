@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 
 export interface DbSaleItem {
@@ -67,7 +66,6 @@ export function useSales() {
 
 export function useCreateSale() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (input: CreateSaleInput) => {
       const { count } = await supabase.from('sales').select('id', { count: 'exact', head: true });

@@ -12,7 +12,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowDownCircle, ArrowUpCircle, Wallet, Banknote, QrCode, CreditCard, Receipt, FileCheck, ArrowLeftRight, TrendingUp, TrendingDown, Search } from 'lucide-react';
 import { useBankAccounts } from '@/hooks/useBankAccounts';
 import { useFinancialLedger, useCreateManualLedger } from '@/hooks/useFinancialLedger';
-import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
@@ -29,7 +28,6 @@ const PAYMENT_METHODS = [
 ];
 
 export default function FinancialHub() {
-  const { toast } = useToast();
   const { data: accounts = [], isLoading: loadingAccounts } = useBankAccounts();
   const today = new Date().toISOString().split('T')[0];
   const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];

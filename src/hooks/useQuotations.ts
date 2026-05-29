@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 export interface DbQuotationItem {
@@ -68,7 +67,6 @@ export function useQuotations() {
 
 export function useCreateQuotation() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (input: CreateQuotationInput) => {
       const { count } = await supabase.from('quotations').select('id', { count: 'exact', head: true });
@@ -117,7 +115,6 @@ export function useCreateQuotation() {
 
 export function useUpdateQuotationStatus() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const { error } = await supabase.from('quotations').update({ status, updated_at: new Date().toISOString() }).eq('id', id);
@@ -132,7 +129,6 @@ export function useUpdateQuotationStatus() {
 
 export function useConvertQuotationToOrder() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (quotation: DbQuotation) => {
       // Generate order number

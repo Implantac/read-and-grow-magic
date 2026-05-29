@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 export interface SettlementRow {
@@ -39,7 +38,6 @@ export function useSettlements(filters?: { sourceType?: string; sourceId?: strin
 
 export function useReverseSettlement() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason?: string }) => {
       const { data, error } = await supabase.rpc('reverse_settlement', {
@@ -63,7 +61,6 @@ export function useReverseSettlement() {
 
 export function useUseAdvance() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (params: { advanceId: string; sourceType: 'receivable' | 'payable'; sourceId: string; amount: number; notes?: string }) => {
       const { data, error } = await supabase.rpc('use_advance', {
@@ -89,7 +86,6 @@ export function useUseAdvance() {
 
 export function useTransferBetweenAccounts() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (params: { fromAccount: string; toAccount: string; amount: number; description?: string }) => {
       const { data, error } = await supabase.rpc('transfer_between_accounts', {

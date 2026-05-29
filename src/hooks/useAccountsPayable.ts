@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export interface AccountPayableRow {
@@ -46,8 +45,6 @@ export function useAccountsPayable() {
 
 export function useCreateAccountPayable() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-
   return useMutation({
     mutationFn: async (account: Partial<AccountPayableRow> & { description: string; supplier: string; due_date: string; amount: number }) => {
       const { data, error } = await supabase
@@ -70,8 +67,6 @@ export function useCreateAccountPayable() {
 
 export function useUpdateAccountPayable() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-
   return useMutation({
     mutationFn: async ({ id, ...updates }: { id: string } & Partial<AccountPayableRow>) => {
       const { data, error } = await supabase
@@ -94,8 +89,6 @@ export function useUpdateAccountPayable() {
 
 export function useDeleteAccountPayable() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
-
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('accounts_payable').delete().eq('id', id);

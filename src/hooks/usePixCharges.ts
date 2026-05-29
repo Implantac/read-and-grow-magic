@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface PixCharge {
@@ -38,7 +37,6 @@ export function usePixCharges() {
 
 export function useCreatePixCharge() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (input: { amount: number; client_name?: string; client_id?: string; receivable_id?: string; description?: string; bank_account_id?: string; expires_minutes?: number }) => {
       const { data, error } = await supabase.functions.invoke('pix-webhook?action=create', { body: input });
@@ -55,7 +53,6 @@ export function useCreatePixCharge() {
 
 export function useSimulatePixPayment() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (charge_id: string) => {
       const { data, error } = await supabase.functions.invoke('pix-webhook?action=simulate-payment', { body: { charge_id } });

@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 
 export interface CostCenterRow {
@@ -26,7 +25,6 @@ export function useCostCenters() {
 
 export function useCreateCostCenter() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (cc: { code: string; name: string; parent_id?: string | null }) => {
       const { data, error } = await supabase.from('cost_centers').insert(cc).select().single();

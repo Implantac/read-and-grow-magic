@@ -20,7 +20,6 @@ import { PlaybookTips } from '@/components/comercial/PlaybookTips';
 import { useClients } from '@/hooks/useClients';
 import { useSalesReps } from '@/hooks/useSalesReps';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/hooks/use-toast';
 import { differenceInDays } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
@@ -34,8 +33,6 @@ export default function SalesFunnelPage() {
   const { data: reps = [] } = useSalesReps();
   const createItem = useCreateFunnelItem();
   const updateItem = useUpdateFunnelItem();
-  const { toast } = useToast();
-
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<DbFunnelItem | null>(null);
   const [draggedItem, setDraggedItem] = useState<DbFunnelItem | null>(null);

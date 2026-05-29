@@ -8,7 +8,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { exportToCSV, exportToExcel, type ExportColumn } from '@/lib/exportUtils';
-import { useToast } from '@/hooks/use-toast';
 
 interface ExportButtonProps<T extends Record<string, unknown>> {
   data: T[];
@@ -25,8 +24,6 @@ export function ExportButton<T extends Record<string, unknown>>({
   variant = 'outline',
   size = 'sm',
 }: ExportButtonProps<T>) {
-  const { toast } = useToast();
-
   const handleExport = (format: 'csv' | 'excel') => {
     if (data.length === 0) {
       toastError('Não há dados para exportar.', undefined, 'Sem dados');

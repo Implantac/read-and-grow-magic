@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 
 export interface DbSalesRep {
@@ -36,7 +35,6 @@ export function useSalesReps() {
 
 export function useCreateSalesRep() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (rep: Partial<DbSalesRep>) => {
       const { data, error } = await supabase.from('sales_reps').insert(rep as any).select().single();
@@ -53,7 +51,6 @@ export function useCreateSalesRep() {
 
 export function useUpdateSalesRep() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<DbSalesRep> & { id: string }) => {
       const { data, error } = await supabase.from('sales_reps').update(updates as any).eq('id', id).select().single();
@@ -70,7 +67,6 @@ export function useUpdateSalesRep() {
 
 export function useDeleteSalesRep() {
   const qc = useQueryClient();
-  const { toast } = useToast();
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('sales_reps').delete().eq('id', id);

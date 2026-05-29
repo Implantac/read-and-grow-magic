@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
@@ -17,8 +16,6 @@ import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export default function ProfilePage() {
   const { user, activeCompany, activeBranch, theme, toggleTheme, setUser } = useAppStore();
-  const { toast } = useToast();
-
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState('');
