@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toastSuccess } from '@/lib/toastHelpers';
 import { Textarea } from '@/components/ui/textarea';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -130,18 +131,12 @@ export default function NFePage() {
 
   const handlePrint = (nfe: NFe) => {
     generateDANFE(nfe);
-    toast({
-      title: 'DANFE Gerado',
-      description: `PDF da DANFE ${nfe.number} baixado com sucesso`,
-    });
+    toastSuccess('DANFE Gerado', `PDF da DANFE ${nfe.number} baixado com sucesso`);
   };
 
   const handleDownloadXML = (nfe: NFe) => {
     generateNFeXML(nfe);
-    toast({
-      title: 'XML Baixado',
-      description: `XML da NF-e ${nfe.number} baixado com sucesso`,
-    });
+    toastSuccess('XML Baixado', `XML da NF-e ${nfe.number} baixado com sucesso`);
   };
 
   const renderStatusBadge = (status: string) => {

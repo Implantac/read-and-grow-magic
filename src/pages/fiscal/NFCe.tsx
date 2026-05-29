@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toastSuccess } from '@/lib/toastHelpers';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatBRL, formatDate } from '@/lib/formatters';
@@ -120,10 +121,7 @@ export default function NFCePage() {
   };
 
   const handlePrint = (nfce: NFCe) => {
-    toast({
-      title: 'Imprimindo Cupom',
-      description: `Cupom fiscal ${nfce.number} enviado para impressão`,
-    });
+    toastSuccess('Imprimindo Cupom', `Cupom fiscal ${nfce.number} enviado para impressão`);
   };
 
   const handleCancel = async (nfce: NFCe) => {
@@ -131,10 +129,7 @@ export default function NFCePage() {
   };
 
   const handleReprint = (nfce: NFCe) => {
-    toast({
-      title: '2ª Via',
-      description: `Reimpressão do cupom ${nfce.number} enviada`,
-    });
+    toastSuccess('2ª Via', `Reimpressão do cupom ${nfce.number} enviada`);
   };
 
   const renderStatusBadge = (status: string) => {

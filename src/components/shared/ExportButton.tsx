@@ -1,4 +1,5 @@
 import { Download, FileSpreadsheet, FileText } from 'lucide-react';
+import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -28,11 +29,7 @@ export function ExportButton<T extends Record<string, unknown>>({
 
   const handleExport = (format: 'csv' | 'excel') => {
     if (data.length === 0) {
-      toast({
-        title: 'Sem dados',
-        description: 'Não há dados para exportar.',
-        variant: 'destructive',
-      });
+      toastError('Não há dados para exportar.', undefined, 'Sem dados');
       return;
     }
 
@@ -45,10 +42,7 @@ export function ExportButton<T extends Record<string, unknown>>({
       exportToExcel(data, columns, fullFilename);
     }
 
-    toast({
-      title: 'Exportação concluída',
-      description: `${data.length} registros exportados em formato ${format === 'csv' ? 'CSV' : 'Excel'}.`,
-    });
+    toastSuccess('Exportação concluída', `${data.length} registros exportados em formato ${format === 'csv' ? 'CSV' : 'Excel'}.`);
   };
 
   return (
