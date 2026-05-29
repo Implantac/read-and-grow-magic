@@ -208,22 +208,7 @@ export function useNotifyCritical() {
   });
 }
 
-        ...prev,
-        { id: crypto.randomUUID(), role: 'assistant', content: data?.content || '—', actions: data?.actions || [] },
-      ]);
-    } catch (e: any) {
-      setMessages((prev) => [
-        ...prev,
-        { id: crypto.randomUUID(), role: 'assistant', content: '❌ ' + (e?.message || 'Erro') },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  }, [messages]);
 
-  const clear = useCallback(() => setMessages([]), []);
-  return { messages, loading, send, clear };
-}
 
 // ─── Learning analytics ─────────────────────────────
 export interface LearningStats {
