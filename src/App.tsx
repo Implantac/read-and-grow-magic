@@ -37,6 +37,7 @@ const SalesAutomationPage = lazy(() => import("./pages/comercial/SalesAutomation
 const ExecutiveDashboardPage = lazy(() => import("./pages/diretoria/ExecutiveDashboard"));
 const BrainPage = lazy(() => import("./pages/diretoria/Brain"));
 const BrainLearningPage = lazy(() => import("./pages/diretoria/BrainLearning"));
+const BrainCommandCenterPage = lazy(() => import("./pages/diretoria/BrainCommandCenter"));
 
 // Credit & Risk
 const CreditAnalysisPage = lazy(() => import("./pages/credito/CreditAnalysis"));
@@ -244,8 +245,10 @@ const App = () => (
               <Route path="/diretoria/executive" element={<ExecutiveDashboardPage />} />
               <Route path="/diretoria/brain" element={<BrainPage />} />
               <Route path="/diretoria/brain/aprendizado" element={<BrainLearningPage />} />
+              <Route path="/diretoria/brain/comando" element={<BrainCommandCenterPage />} />
               <Route path="/diretoria/cerebro" element={<BrainPage />} />
               <Route path="/diretoria/cerebro/aprendizado" element={<BrainLearningPage />} />
+              <Route path="/diretoria/cerebro/comando" element={<BrainCommandCenterPage />} />
               
               {/* Commercial Module */}
               <Route path="/comercial/dashboard" element={<CommercialDashboardPage />} />

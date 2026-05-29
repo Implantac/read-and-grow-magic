@@ -154,6 +154,10 @@ const RISKY_ACTIONS = new Set([
   "block_client",
   "reschedule_production_order",
   "request_quotation",
+  "create_purchase_order",
+  "release_order_block",
+  "mark_invoice_paid",
+  "assign_sales_rep",
 ]);
 
 async function executeAction(action: any, userId?: string) {
@@ -271,6 +275,59 @@ async function executeAction(action: any, userId?: string) {
       case "request_quotation": {
         return { ok: true, note: "Cotação registrada como sugestão — compras deve criar manualmente" };
       }
+      case "create_purchase_order": {
+        if (!p.supplier_name) return { ok: false, error: "supplier_name obrigatório" };
+        const number = `PO-AI-${Date.now().toString().slice(-8)}`;
+        const { data, error } = await admin.from("purchase_orders").insert({
+          number,
+          supplier_id: p.supplier_id || null,
+          supplier_name: p.supplier_name,
+          date: new Date().toISOString(),
+          expected_delivery: p.expected_delivery || null,
+          total: p.total || 0,
+          subtotal: p.subtotal || p.total || 0,
+          payment_terms: p.payment_terms || null,
+          status: "draft",
+          priority: p.priority || "medium",
+          buyer_name: "Cérebro IA",
+          notes: `[Cérebro] ${p.notes || "PO sugerida"}`,
+        }).select().single();
+        if (error) throw error;
+        return { ok: true, po_id: data.id, number };
+      }
+      case "release_order_block": {
+        if (!p.block_id) return { ok: false, error: "block_id obrigatório" };
+        const { data, error } = await admin.from("order_blocks").update({
+          status: "released",
+          released_by: "ai-brain",
+          released_at: new Date().toISOString(),
+          release_justification: p.justification || "Liberado pelo Cérebro",
+        }).eq("id", p.block_id).select().single();
+        if (error) throw error;
+        return { ok: true, block_id: data.id };
+      }
+      case "mark_invoice_paid": {
+        if (!p.receivable_id) return { ok: false, error: "receivable_id obrigatório" };
+        const now = new Date().toISOString();
+        const { data, error } = await admin.from("accounts_receivable").update({
+          status: "paid",
+          payment_date: p.payment_date || now,
+          paid_amount: p.paid_amount || p.amount || null,
+          open_amount: 0,
+          notes: `[Cérebro] ${p.notes || "Baixa manual sugerida"}`,
+        }).eq("id", p.receivable_id).select().single();
+        if (error) throw error;
+        return { ok: true, receivable_id: data.id };
+      }
+      case "assign_sales_rep": {
+        if (!p.client_id || !p.sales_rep_id) return { ok: false, error: "client_id e sales_rep_id obrigatórios" };
+        const { data, error } = await admin.from("clients").update({
+          sales_rep_id: p.sales_rep_id,
+          commercial_notes: p.notes ? `[Cérebro] ${p.notes}` : null,
+        }).eq("id", p.client_id).select().single();
+        if (error) throw error;
+        return { ok: true, client_id: data.id, sales_rep_id: p.sales_rep_id };
+      }
       case "save_memory": {
         await saveMemory({
           user_id: userId,
@@ -353,7 +410,11 @@ CATÁLOGO DE TOOLS DISPONÍVEIS:
 - generate_report (description) — sinaliza geração de relatório [SAFE]
 - block_client (client_id, reason, order_id?, description?) — BLOQUEIA cliente por crédito [REQUER APROVAÇÃO]
 - reschedule_production_order (order_id, new_due_date, reason) — reagenda OP [REQUER APROVAÇÃO]
-- request_quotation (description) — sugere cotação ao setor de compras [REQUER APROVAÇÃO]`;
+- request_quotation (description) — sugere cotação ao setor de compras [REQUER APROVAÇÃO]
+- create_purchase_order (supplier_name, supplier_id?, total, expected_delivery?, notes?) — cria PO em rascunho [REQUER APROVAÇÃO]
+- release_order_block (block_id, justification) — libera bloqueio comercial [REQUER APROVAÇÃO]
+- mark_invoice_paid (receivable_id, paid_amount?, payment_date?, notes?) — dá baixa em título a receber [REQUER APROVAÇÃO]
+- assign_sales_rep (client_id, sales_rep_id, notes?) — atribui vendedor a cliente [REQUER APROVAÇÃO]`;
 
 // Schema das tools para o chat (OpenAI tool calling)
 const BRAIN_TOOLS = [
@@ -365,6 +426,10 @@ const BRAIN_TOOLS = [
   { type: "function", function: { name: "save_memory", description: "Salva conhecimento de longo prazo", parameters: { type: "object", properties: { category: { type: "string" }, key: { type: "string" }, value: {}, importance: { type: "number" } }, required: ["category", "key", "value"] } } },
   { type: "function", function: { name: "block_client", description: "BLOQUEIA cliente por crédito. Ação destrutiva — sempre vai para aprovação humana", parameters: { type: "object", properties: { client_id: { type: "string" }, reason: { type: "string" }, description: { type: "string" } }, required: ["client_id", "reason"] } } },
   { type: "function", function: { name: "reschedule_production_order", description: "Reagenda OP. Vai para aprovação humana", parameters: { type: "object", properties: { order_id: { type: "string" }, new_due_date: { type: "string", description: "YYYY-MM-DD" }, reason: { type: "string" } }, required: ["order_id", "new_due_date", "reason"] } } },
+  { type: "function", function: { name: "create_purchase_order", description: "Cria ordem de compra em rascunho. Vai para aprovação humana", parameters: { type: "object", properties: { supplier_name: { type: "string" }, supplier_id: { type: "string" }, total: { type: "number" }, expected_delivery: { type: "string" }, notes: { type: "string" } }, required: ["supplier_name"] } } },
+  { type: "function", function: { name: "release_order_block", description: "Libera bloqueio comercial de um pedido. Vai para aprovação humana", parameters: { type: "object", properties: { block_id: { type: "string" }, justification: { type: "string" } }, required: ["block_id", "justification"] } } },
+  { type: "function", function: { name: "mark_invoice_paid", description: "Dá baixa em título a receber. Vai para aprovação humana", parameters: { type: "object", properties: { receivable_id: { type: "string" }, paid_amount: { type: "number" }, payment_date: { type: "string" }, notes: { type: "string" } }, required: ["receivable_id"] } } },
+  { type: "function", function: { name: "assign_sales_rep", description: "Atribui vendedor a um cliente. Vai para aprovação humana", parameters: { type: "object", properties: { client_id: { type: "string" }, sales_rep_id: { type: "string" }, notes: { type: "string" } }, required: ["client_id", "sales_rep_id"] } } },
 ];
 
 // ─────────────────────────────────────────────
@@ -607,6 +672,56 @@ async function handleApprove(decisionId: string, approve: boolean, userId?: stri
   return data;
 }
 
+// ─────────────────────────────────────────────
+// WEEKLY LEARNING — analisa rejeitadas e salva lições
+// ─────────────────────────────────────────────
+async function handleWeeklyLearning() {
+  const since = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+  const { data: rejected } = await admin
+    .from("ai_brain_decisions")
+    .select("module,title,rationale,impact_level,risk_level,confidence,proposed_action,created_at")
+    .eq("status", "rejected")
+    .gte("created_at", since)
+    .limit(100);
+
+  if (!rejected?.length) {
+    await saveMemory({
+      category: "lesson_learned",
+      key: `weekly_${new Date().toISOString().slice(0, 10)}`,
+      value: "Nenhuma rejeição na semana — Cérebro bem calibrado.",
+      importance: 4,
+    });
+    return { ok: true, rejected: 0, lessons_saved: 0 };
+  }
+
+  const prompt = `Você é o CÉREBRO em modo auto-aprendizado. Abaixo estão decisões REJEITADAS por humanos na última semana.
+Identifique PADRÕES de erro e gere até 5 lições para evitar repetir esses erros.
+
+Decisões rejeitadas:
+${JSON.stringify(rejected, null, 2).slice(0, 8000)}
+
+Retorne JSON: {"lessons":[{"category":"lesson_learned","key":"evitar_X_quando_Y","value":"regra clara em 1 frase","importance":7}]}`;
+
+  const out = await callLLM(
+    "Você é um analista que extrai aprendizados de decisões rejeitadas. Retorne JSON válido.",
+    prompt,
+  );
+  const lessons = Array.isArray(out.lessons) ? out.lessons : [];
+  let saved = 0;
+  for (const l of lessons) {
+    try {
+      await saveMemory({
+        category: l.category || "lesson_learned",
+        key: String(l.key || `lesson_${Date.now()}_${saved}`).slice(0, 200),
+        value: l.value,
+        importance: Number(l.importance) || 7,
+        source: "weekly_learning",
+      });
+      saved++;
+    } catch { /* ignore */ }
+  }
+  return { ok: true, rejected: rejected.length, lessons_saved: saved };
+}
 
 // ─────────────────────────────────────────────
 // SERVER
@@ -666,6 +781,9 @@ Deno.serve(async (req) => {
       }
       case "cron_run":
         result = await handleAnalyze(undefined, undefined, "autopilot");
+        break;
+      case "weekly_learning":
+        result = await handleWeeklyLearning();
         break;
 
       default:
