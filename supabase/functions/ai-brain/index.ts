@@ -410,7 +410,11 @@ CATÁLOGO DE TOOLS DISPONÍVEIS:
 - generate_report (description) — sinaliza geração de relatório [SAFE]
 - block_client (client_id, reason, order_id?, description?) — BLOQUEIA cliente por crédito [REQUER APROVAÇÃO]
 - reschedule_production_order (order_id, new_due_date, reason) — reagenda OP [REQUER APROVAÇÃO]
-- request_quotation (description) — sugere cotação ao setor de compras [REQUER APROVAÇÃO]`;
+- request_quotation (description) — sugere cotação ao setor de compras [REQUER APROVAÇÃO]
+- create_purchase_order (supplier_name, supplier_id?, total, expected_delivery?, notes?) — cria PO em rascunho [REQUER APROVAÇÃO]
+- release_order_block (block_id, justification) — libera bloqueio comercial [REQUER APROVAÇÃO]
+- mark_invoice_paid (receivable_id, paid_amount?, payment_date?, notes?) — dá baixa em título a receber [REQUER APROVAÇÃO]
+- assign_sales_rep (client_id, sales_rep_id, notes?) — atribui vendedor a cliente [REQUER APROVAÇÃO]`;
 
 // Schema das tools para o chat (OpenAI tool calling)
 const BRAIN_TOOLS = [
