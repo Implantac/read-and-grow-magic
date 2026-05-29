@@ -811,7 +811,8 @@ Deno.serve(async (req) => {
         result = { ok: (r as any).ok, status: (r as any).status, sent: crits.length };
         break;
       }
-
+      case "execute_decision": {
+        const { data: dec, error: e0 } = await admin
           .from("ai_brain_decisions").select("*").eq("id", body.decision_id).single();
         if (e0) throw e0;
         const r = await executeAction(dec.proposed_action, userId);
@@ -829,6 +830,7 @@ Deno.serve(async (req) => {
       case "weekly_learning":
         result = await handleWeeklyLearning();
         break;
+
 
       default:
         return new Response(JSON.stringify({ error: `unknown action ${action}` }), {
