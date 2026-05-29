@@ -192,9 +192,7 @@ function computeKPIs(d: any, months: number = 12) {
   const currentRatio = futurePayablesTotal > 0 ? futureReceivablesTotal / futurePayablesTotal : 2; 
   const quickRatio = futurePayablesTotal > 0 ? (futureReceivablesTotal * 0.8) / futurePayablesTotal : 1.5;
 
-  // Financial Projections
-  const futureReceivablesTotal = d.receivables.filter((r: any) => r.status === 'pending' && new Date(r.due_date) > now).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
-  const futurePayablesTotal = d.payables.filter((p: any) => p.status === 'pending' && new Date(p.due_date) > now).reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0);
+
 
   // Sales Targets
   const targetsSummary = d.salesTargets.reduce((acc: any, t: any) => ({ target: acc.target + (t.target_value || 0), achieved: acc.achieved + (t.achieved_value || 0) }), { target: 0, achieved: 0 });
