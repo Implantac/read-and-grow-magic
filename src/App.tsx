@@ -243,6 +243,9 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/diretoria/executive" element={<ExecutiveDashboardPage />} />
               <Route path="/diretoria/brain" element={<BrainPage />} />
+              <Route path="/diretoria/brain/aprendizado" element={<BrainLearningPage />} />
+              <Route path="/diretoria/cerebro" element={<BrainPage />} />
+              <Route path="/diretoria/cerebro/aprendizado" element={<BrainLearningPage />} />
               
               {/* Commercial Module */}
               <Route path="/comercial/dashboard" element={<CommercialDashboardPage />} />
