@@ -617,9 +617,10 @@ const AGENT_PERSONAS: Record<string, { label: string; focus: string }> = {
 
 async function handleChat(userId: string | undefined, messages: any[], authHeader?: string, agent = "geral") {
   const persona = AGENT_PERSONAS[agent] || AGENT_PERSONAS.geral;
-  const [snapshot, memories] = await Promise.all([
+  const [snapshot, memories, pending] = await Promise.all([
     gatherSnapshot(authHeader),
     loadMemories(userId, 15),
+    loadPendingSummary(8),
   ]);
 
   const ctx = `# CONTEXTO ATUAL DO NEGÓCIO
@@ -628,11 +629,14 @@ ${JSON.stringify(memories.slice(0, 10), null, 2)}
 
 ## Snapshot resumido
 KPIs: ${JSON.stringify(snapshot.executive?.kpis || {}, null, 2).slice(0, 1500)}
-Score financeiro: ${JSON.stringify(snapshot.financial_intelligence?.score || {}, null, 2).slice(0, 500)}`;
+Score financeiro: ${JSON.stringify(snapshot.financial_intelligence?.score || {}, null, 2).slice(0, 500)}
+
+## Decisões pendentes (aguardando aprovação humana)
+${pending.length ? pending.map((d: any) => `- [${d.impact_level}] ${d.module} · ${d.title} (${d.id.slice(0, 8)})`).join("\n") : "Nenhuma pendência."}`;
 
   const sys = `Você é o ${persona.label} — agente especializado do Cérebro do ERP.
 FOCO: ${persona.focus}
-Use o contexto (dados REAIS) para responder com precisão. Cite números exatos. Seja direto e PROATIVO: quando o usuário pedir uma ação executável, use as TOOLS disponíveis. Ações destrutivas viram decisões pendentes para aprovação humana — execute mesmo assim, é só uma proposta.
+Use o contexto (dados REAIS) para responder com precisão. Cite números exatos. Seja direto e PROATIVO: quando o usuário pedir uma ação executável, use as TOOLS disponíveis. Ações destrutivas viram decisões pendentes para aprovação humana — execute mesmo assim, é só uma proposta. Se houver decisões pendentes relevantes, mencione-as.
 
 ${ctx}`;
 
