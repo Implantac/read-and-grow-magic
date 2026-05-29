@@ -42,15 +42,21 @@ async function invokeAgent(name: string, body: any, authHeader?: string) {
 }
 
 async function gatherSnapshot(authHeader?: string) {
-  const [exec, fin, finIntel] = await Promise.allSettled([
+  const [exec, fin, finIntel, com, prod] = await Promise.allSettled([
     invokeAgent("ai-executive", { action: "dashboard", months: 6 }, authHeader),
     invokeAgent("financial-insights", {}, authHeader),
     invokeAgent("financial-intelligence?action=compute", {}, authHeader),
+    invokeAgent("ai-commercial", { action: "overview" }, authHeader),
+    invokeAgent("ai-production", { action: "kpis" }, authHeader),
   ]);
+  const pick = (r: PromiseSettledResult<any>) =>
+    r.status === "fulfilled" ? r.value : { error: "failed" };
   return {
-    executive: exec.status === "fulfilled" ? exec.value : { error: "failed" },
-    financial_insights: fin.status === "fulfilled" ? fin.value : { error: "failed" },
-    financial_intelligence: finIntel.status === "fulfilled" ? finIntel.value : { error: "failed" },
+    executive: pick(exec),
+    financial_insights: pick(fin),
+    financial_intelligence: pick(finIntel),
+    commercial: pick(com),
+    production: pick(prod),
   };
 }
 
@@ -250,7 +256,7 @@ async function handleAnalyze(userId: string | undefined, authHeader?: string, mo
       user_id: userId || null,
       trigger: "manual",
       mode,
-      agents_used: ["ai-executive", "financial-insights", "financial-intelligence"],
+      agents_used: ["ai-executive", "financial-insights", "financial-intelligence", "ai-commercial", "ai-production"],
       status: "running",
     })
     .select()
