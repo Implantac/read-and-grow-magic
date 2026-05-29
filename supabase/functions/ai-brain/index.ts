@@ -548,7 +548,21 @@ Modo: ${mode === "autopilot" ? "AUTOPILOT — sugira ações de baixo risco que 
   }
 }
 
-async function handleChat(userId: string | undefined, messages: any[], authHeader?: string) {
+// ─────────────────────────────────────────────
+// AGENT PERSONAS — foco especializado por área
+// ─────────────────────────────────────────────
+const AGENT_PERSONAS: Record<string, { label: string; focus: string }> = {
+  geral: { label: "Cérebro Geral", focus: "Visão 360° do negócio. Equilibra todas as áreas." },
+  financeiro: { label: "CFO Digital", focus: "Foque em caixa, AP/AR, DRE, inadimplência, fluxo. Priorize liquidez e margem. Tom de CFO sênior." },
+  comercial: { label: "Diretor Comercial", focus: "Foque em pipeline, conversão, ticket médio, vendedores, clientes-chave. Tom de Head of Sales." },
+  fiscal: { label: "Auditor Fiscal", focus: "Foque em NF-e, impostos (ICMS/PIS/COFINS/IPI), SPED, divergências e compliance. Tom técnico-fiscal." },
+  logistica: { label: "Diretor de Operações", focus: "Foque em WMS, TMS, expedições, picking, lead-time, ocupação de CDs. Tom de COO." },
+  qualidade: { label: "Gestor de Qualidade", focus: "Foque em defeitos, devoluções, inspeções, quarentena, NCs. Tom técnico-industrial." },
+  producao: { label: "Gerente de PCP", focus: "Foque em OEE, MRP, gargalos, capacidade, ordens de produção. Tom de PCP/Indústria 4.0." },
+};
+
+async function handleChat(userId: string | undefined, messages: any[], authHeader?: string, agent = "geral") {
+  const persona = AGENT_PERSONAS[agent] || AGENT_PERSONAS.geral;
   const [snapshot, memories] = await Promise.all([
     gatherSnapshot(authHeader),
     loadMemories(userId, 15),
@@ -562,7 +576,9 @@ ${JSON.stringify(memories.slice(0, 10), null, 2)}
 KPIs: ${JSON.stringify(snapshot.executive?.kpis || {}, null, 2).slice(0, 1500)}
 Score financeiro: ${JSON.stringify(snapshot.financial_intelligence?.score || {}, null, 2).slice(0, 500)}`;
 
-  const sys = `Você é o CÉREBRO do ERP — consultor sênior do negócio. Use o contexto (dados REAIS) para responder com precisão. Cite números exatos. Seja direto e PROATIVO: quando o usuário pedir uma ação executável (criar alerta, agendar follow-up, cobrar PIX, bloquear cliente, reagendar OP), use as TOOLS disponíveis em vez de só descrever. Para ações destrutivas (block_client, reschedule_production_order), a tool registra como pendente para aprovação humana — execute mesmo assim, é só uma proposta.
+  const sys = `Você é o ${persona.label} — agente especializado do Cérebro do ERP.
+FOCO: ${persona.focus}
+Use o contexto (dados REAIS) para responder com precisão. Cite números exatos. Seja direto e PROATIVO: quando o usuário pedir uma ação executável, use as TOOLS disponíveis. Ações destrutivas viram decisões pendentes para aprovação humana — execute mesmo assim, é só uma proposta.
 
 ${ctx}`;
 
