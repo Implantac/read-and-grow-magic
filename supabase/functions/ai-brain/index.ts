@@ -838,7 +838,52 @@ Deno.serve(async (req) => {
         break;
       case "list_memories":
         result = { memories: await loadMemories(userId, 100) };
+
+      case "feedback_decision": {
+        // Usuário aprova ou critica uma decisão executada — vira aprendizado
+        const { decision_id, rating, comment } = body;
+        if (!decision_id || !["up", "down"].includes(rating)) {
+          result = { ok: false, error: "decision_id e rating ('up'|'down') obrigatórios" };
+          break;
+        }
+        const { data: dec } = await admin.from("ai_brain_decisions")
+          .select("title,module,rationale,proposed_action,impact_level").eq("id", decision_id).single();
+        if (!dec) { result = { ok: false, error: "decisão não encontrada" }; break; }
+        await saveMemory({
+          user_id: userId,
+          category: rating === "up" ? "positive_feedback" : "lesson_learned",
+          key: `feedback_${decision_id}`,
+          value: {
+            rating, comment: comment || null,
+            decision: { title: dec.title, module: dec.module, action: dec.proposed_action, impact: dec.impact_level },
+            note: rating === "up"
+              ? "Padrão aprovado pelo humano — repetir em contextos similares."
+              : "Padrão rejeitado pelo humano — evitar em contextos similares.",
+          },
+          importance: rating === "down" ? 8 : 6,
+          source: "user_feedback",
+        });
+        result = { ok: true, registered: true };
         break;
+      }
+      case "reinforce_memory": {
+        // Aumenta importância de uma memória citada/usada com sucesso
+        const { memory_key, delta } = body;
+        if (!memory_key) { result = { ok: false, error: "memory_key obrigatório" }; break; }
+        const { data: mem } = await admin.from("ai_brain_memory")
+          .select("id,importance").eq("key", memory_key).maybeSingle();
+        if (!mem) { result = { ok: false, error: "memória não encontrada" }; break; }
+        const next = Math.min(10, (mem.importance || 5) + (Number(delta) || 1));
+        await admin.from("ai_brain_memory").update({ importance: next }).eq("id", mem.id);
+        result = { ok: true, new_importance: next };
+        break;
+      }
+      case "invalidate_cache":
+        snapshotCache = null;
+        result = { ok: true, cleared: true };
+        break;
+
+
 
       case "notify_critical": {
         const webhook = Deno.env.get("BRAIN_WEBHOOK_URL");
