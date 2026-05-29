@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { toastError } from '@/lib/toastHelpers';
+import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
@@ -160,12 +160,12 @@ export default function SalesFunnelPage() {
 
   const markAsWon = async (item: DbFunnelItem) => {
     await updateItem.mutateAsync({ id: item.id, status: 'won', won_date: new Date().toISOString() } as any);
-    toast({ title: '🏆 Oportunidade ganha!', description: item.title });
+    toastSuccess('🏆 Oportunidade ganha!', item.title);
   };
 
   const markAsLost = async (item: DbFunnelItem) => {
     await updateItem.mutateAsync({ id: item.id, status: 'lost', lost_date: new Date().toISOString() } as any);
-    toast({ title: 'Oportunidade perdida', description: item.title });
+    toastSuccess('Oportunidade perdida', item.title);
   };
 
   const moveToNextStage = async (item: DbFunnelItem) => {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { toastError } from '@/lib/toastHelpers';
+import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { Plus, Search, Eye, Trash2, DollarSign, AlertTriangle, Clock, CheckCircle, Zap } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useBatchPayPayables } from '@/hooks/useBatchPay';
@@ -152,7 +152,7 @@ export default function AccountsPayable() {
       return;
     }
     if (amount > openAmount + 0.01) {
-      toast({ title: 'Atenção', description: `Valor maior que o saldo em aberto (${formatBRL(openAmount)})`, variant: 'destructive' });
+      toastError(`Valor maior que o saldo em aberto (${formatBRL(openAmount)})`, undefined, 'Atenção');
       return;
     }
     if (!payForm.bankAccountId) {
@@ -176,7 +176,7 @@ export default function AccountsPayable() {
         const isFull = openAmount - amount <= 0.01;
         setIsPayDialogOpen(false);
         setSelectedAccount(null);
-        toast({ title: 'Sucesso', description: isFull ? 'Título quitado' : 'Baixa parcial registrada' });
+        toastSuccess('Sucesso', isFull ? 'Título quitado' : 'Baixa parcial registrada');
       }
     });
   };

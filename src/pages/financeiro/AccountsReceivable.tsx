@@ -171,7 +171,7 @@ export default function AccountsReceivable() {
       return;
     }
     if (amount > openAmount + 0.01) {
-      toast({ title: 'Atenção', description: `Valor maior que o saldo em aberto (${formatBRL(openAmount)})`, variant: 'destructive' });
+      toastError(`Valor maior que o saldo em aberto (${formatBRL(openAmount)})`, undefined, 'Atenção');
       return;
     }
     if (!payForm.bankAccountId) {
@@ -195,7 +195,7 @@ export default function AccountsReceivable() {
         const isFull = openAmount - amount <= 0.01;
         setIsReceiveDialogOpen(false);
         setSelectedAccount(null);
-        toast({ title: 'Sucesso', description: isFull ? 'Título quitado com sucesso' : 'Baixa parcial registrada com sucesso' });
+        toastSuccess('Sucesso', isFull ? 'Título quitado com sucesso' : 'Baixa parcial registrada com sucesso');
       }
     });
   };

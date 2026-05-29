@@ -1,5 +1,5 @@
 import { PageContainer } from '@/components/shared/PageContainer';
-import { toastError } from '@/lib/toastHelpers';
+import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -35,7 +35,7 @@ export default function SeparationQueue() {
     if (status === 'picked') updates.picked_at = new Date().toISOString();
     const { error } = await supabase.from('stock_reservations').update(updates).eq('id', id);
     if (error) { toastError(error.message); return; }
-    toast({ title: `Status atualizado para ${reservationStatusConfig[status]?.label || status}` });
+    toastSuccess(`Status atualizado para ${reservationStatusConfig[status]?.label || status}`);
     qc.invalidateQueries({ queryKey: ['stock-reservations'] });
 
     // Check if all reservations for this order are picked → advance order to awaiting_conference

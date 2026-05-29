@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { toastError } from '@/lib/toastHelpers';
+import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,7 +36,7 @@ export default function BankStatementImport() {
         return;
       }
       setParsed(txs);
-      toast({ title: `${txs.length} transações lidas`, description: 'Selecione a conta bancária e importe.' });
+      toastSuccess(`${txs.length} transações lidas`, 'Selecione a conta bancária e importe.');
     } catch (e: any) {
       toastError(e.message, undefined, 'Erro ao ler arquivo');
     }

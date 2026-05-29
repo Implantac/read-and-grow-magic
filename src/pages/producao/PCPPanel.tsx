@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { toastError } from '@/lib/toastHelpers';
+import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
@@ -224,7 +224,7 @@ export default function PCPPanel() {
         } as any);
       }
       lifecycle.mutate({ orderId: order.id, order, targetStatus: 'in_production', observation: `${items.length} OP(s) gerada(s)` });
-      toast({ title: `${items.length} OP(s) gerada(s) do pedido ${order.number}` });
+      toastSuccess(`${items.length} OP(s) gerada(s) do pedido ${order.number}`);
       await refetch();
       setGeneratingFor(null);
     } catch (e: any) { toastError(e.message, undefined, 'Erro ao gerar OP'); }
