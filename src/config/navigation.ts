@@ -29,6 +29,11 @@ export const navigationSections: NavSection[] = [
         href: '/diretoria/executive',
         icon: 'Brain',
       },
+      {
+        title: '🧠 Cérebro Nativo',
+        href: '/diretoria/brain',
+        icon: 'Sparkles',
+      },
     ],
   },
   {
