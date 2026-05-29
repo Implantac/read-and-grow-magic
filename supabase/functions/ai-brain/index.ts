@@ -127,6 +127,11 @@ async function callLLM(systemPrompt: string, userPrompt: string) {
 // ─────────────────────────────────────────────
 // GUARDRAILS — quais decisões podem auto-executar
 // ─────────────────────────────────────────────
+// (SAFE_ACTIONS defined below)
+
+// ─────────────────────────────────────────────
+// ACTION EXECUTOR — efeitos reais
+// ─────────────────────────────────────────────
 const SAFE_ACTIONS = new Set([
   "create_alert",
   "notify_user",
@@ -134,6 +139,55 @@ const SAFE_ACTIONS = new Set([
   "save_memory",
   "generate_report",
 ]);
+
+async function executeAction(action: any, userId?: string) {
+  const tool = action?.tool;
+  const p = action?.params || {};
+  try {
+    switch (tool) {
+      case "create_alert": {
+        const { data, error } = await admin.from("financial_alerts").insert({
+          alert_type: p.alert_type || "brain_insight",
+          severity: p.severity || "medium",
+          title: p.title || "Alerta do Cérebro",
+          description: p.description || "",
+          entity_type: p.entity_type || null,
+          entity_id: p.entity_id || null,
+        }).select().single();
+        if (error) throw error;
+        return { ok: true, alert_id: data.id };
+      }
+      case "notify_user": {
+        const { data, error } = await admin.from("notifications").insert({
+          user_id: userId || null,
+          type: p.type || "info",
+          title: p.title || "Cérebro do ERP",
+          description: p.description || "",
+          module: p.module || "Cérebro",
+        }).select().single();
+        if (error) throw error;
+        return { ok: true, notification_id: data.id };
+      }
+      case "save_memory": {
+        await saveMemory({
+          user_id: userId,
+          category: p.category || "fact",
+          key: p.key || `auto_${Date.now()}`,
+          value: p.value,
+          importance: p.importance ?? 5,
+        });
+        return { ok: true };
+      }
+      case "log_observation":
+      case "generate_report":
+        return { ok: true, note: `${tool} registrado` };
+      default:
+        return { ok: false, note: `tool ${tool} requer execução manual` };
+    }
+  } catch (e: any) {
+    return { ok: false, error: e?.message || String(e) };
+  }
+}
 
 function classifyDecision(d: any) {
   const impact = (d.impact_level || "medium").toLowerCase();
@@ -148,15 +202,13 @@ function classifyDecision(d: any) {
   };
 }
 
-// ─────────────────────────────────────────────
-// SYSTEM PROMPT
-// ─────────────────────────────────────────────
-const BRAIN_SYSTEM = `Você é o CÉREBRO NATIVO do ERP — um núcleo de IA estratégico que orquestra TODOS os módulos (financeiro, comercial, produção, fiscal, estoque) e toma decisões para o dono do negócio.
+const BRAIN_SYSTEM = `Você é o CÉREBRO NATIVO do ERP — núcleo estratégico que orquestra TODOS os módulos.
 
 PERSONALIDADE:
-- Você é o consultor sênior + COO + CFO digital do negócio.
+- Consultor sênior + COO + CFO digital.
 - Direto, estratégico, focado em RESULTADO e DECISÃO.
 - Fala em português brasileiro, sem jargão técnico desnecessário.
+
 
 REGRAS CRÍTICAS:
 - DADOS REAIS APENAS. NUNCA invente números. Se faltar dado, diga "dados insuficientes".
@@ -233,9 +285,12 @@ Modo: ${mode === "autopilot" ? "AUTOPILOT — sugira ações de baixo risco que 
 
     // Persiste decisões com guardrails
     const decisions = Array.isArray(structured.decisoes) ? structured.decisoes : [];
-    let createdCount = 0;
     for (const d of decisions) {
       const g = classifyDecision(d);
+      let executionResult: any = null;
+      if (g.auto_executable) {
+        executionResult = await executeAction(d.proposed_action, userId);
+      }
       const { error } = await admin.from("ai_brain_decisions").insert({
         run_id: run?.id,
         user_id: userId || null,
@@ -252,10 +307,11 @@ Modo: ${mode === "autopilot" ? "AUTOPILOT — sugira ações de baixo risco que 
         requires_approval: g.requires_approval,
         status: g.status,
         executed_at: g.auto_executable ? new Date().toISOString() : null,
-        execution_result: g.auto_executable ? { auto: true, note: "Ação segura executada automaticamente" } : null,
+        execution_result: executionResult,
       });
       if (!error) createdCount++;
     }
+
 
     // Persiste memórias propostas
     const mems = Array.isArray(structured.memorias_a_salvar) ? structured.memorias_a_salvar : [];
@@ -330,20 +386,33 @@ ${ctx}`;
 }
 
 async function handleApprove(decisionId: string, approve: boolean, userId?: string) {
-  const status = approve ? "approved" : "rejected";
-  const { data, error } = await admin
-    .from("ai_brain_decisions")
+  const { data: dec, error: e0 } = await admin
+    .from("ai_brain_decisions").select("*").eq("id", decisionId).single();
+  if (e0) throw e0;
+
+  if (!approve) {
+    const { data, error } = await admin.from("ai_brain_decisions")
+      .update({ status: "rejected", approved_by: userId || null, approved_at: new Date().toISOString() })
+      .eq("id", decisionId).select().single();
+    if (error) throw error;
+    return data;
+  }
+
+  // Approved → executa ação real
+  const execResult = await executeAction(dec.proposed_action, userId);
+  const { data, error } = await admin.from("ai_brain_decisions")
     .update({
-      status,
+      status: execResult.ok ? "executed" : "approved",
       approved_by: userId || null,
       approved_at: new Date().toISOString(),
+      executed_at: execResult.ok ? new Date().toISOString() : null,
+      execution_result: execResult,
     })
-    .eq("id", decisionId)
-    .select()
-    .single();
+    .eq("id", decisionId).select().single();
   if (error) throw error;
   return data;
 }
+
 
 // ─────────────────────────────────────────────
 // SERVER
@@ -384,10 +453,26 @@ Deno.serve(async (req) => {
       case "save_memory":
         await saveMemory({ ...body.memory, user_id: userId });
         result = { ok: true };
-        break;
       case "list_memories":
         result = { memories: await loadMemories(userId, 100) };
         break;
+      case "execute_decision": {
+        const { data: dec, error: e0 } = await admin
+          .from("ai_brain_decisions").select("*").eq("id", body.decision_id).single();
+        if (e0) throw e0;
+        const r = await executeAction(dec.proposed_action, userId);
+        await admin.from("ai_brain_decisions").update({
+          status: r.ok ? "executed" : "approved",
+          executed_at: r.ok ? new Date().toISOString() : null,
+          execution_result: r,
+        }).eq("id", body.decision_id);
+        result = r;
+        break;
+      }
+      case "cron_run":
+        result = await handleAnalyze(undefined, undefined, "autopilot");
+        break;
+
       default:
         return new Response(JSON.stringify({ error: `unknown action ${action}` }), {
           status: 400,

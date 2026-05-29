@@ -75,6 +75,20 @@ export function useApproveDecision() {
   });
 }
 
+export function useExecuteDecision() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data, error } = await supabase.functions.invoke('ai-brain', {
+        body: { action: 'execute_decision', decision_id: id },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['brain_decisions'] }),
+  });
+}
+
 // ─── Memories ─────────────────────────────
 export function useBrainMemories() {
   return useQuery({
@@ -91,6 +105,7 @@ export function useBrainMemories() {
     },
   });
 }
+
 
 export function useSaveMemory() {
   const qc = useQueryClient();
