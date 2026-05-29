@@ -127,12 +127,8 @@ async function callLLM(systemPrompt: string, userPrompt: string) {
 // ─────────────────────────────────────────────
 // GUARDRAILS — quais decisões podem auto-executar
 // ─────────────────────────────────────────────
-const SAFE_ACTIONS = new Set([
-  "create_alert",
-  "notify_user",
-  "log_observation",
-  "save_memory",
-  "generate_report",
+// (SAFE_ACTIONS defined below)
+
 // ─────────────────────────────────────────────
 // ACTION EXECUTOR — efeitos reais
 // ─────────────────────────────────────────────
