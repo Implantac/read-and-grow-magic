@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 type View = 'login' | 'signup' | 'forgot';
 
@@ -39,7 +40,7 @@ export default function Login() {
     setIsLoading(true);
     try {
       await signIn(email, password);
-      toast({ title: 'Bem-vindo!', description: 'Login realizado com sucesso' });
+      toastSuccess('Bem-vindo!', 'Login realizado com sucesso');
       navigate('/dashboard');
     } catch (error: any) {
       toast({ title: 'Erro de autenticação', description: error.message || 'Email ou senha inválidos', variant: 'destructive' });
@@ -60,7 +61,7 @@ export default function Login() {
     setIsLoading(true);
     try {
       await signUp(email, password, name);
-      toast({ title: 'Conta criada!', description: 'Verifique seu email para confirmar o cadastro.' });
+      toastSuccess('Conta criada!', 'Verifique seu email para confirmar o cadastro.');
       setView('login');
     } catch (error: any) {
       toast({ title: 'Erro ao criar conta', description: error.message, variant: 'destructive' });
@@ -77,7 +78,7 @@ export default function Login() {
     setIsLoading(true);
     try {
       await resetPassword(email);
-      toast({ title: 'Email enviado', description: 'Se o email estiver cadastrado, você receberá instruções para redefinir sua senha.' });
+      toastSuccess('Email enviado', 'Se o email estiver cadastrado, você receberá instruções para redefinir sua senha.');
       setView('login');
     } catch (error: any) {
       toast({ title: 'Erro', description: error.message, variant: 'destructive' });

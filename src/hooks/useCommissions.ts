@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { mutationErrorHandler } from '@/lib/toastHelpers';
+import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 
 export function useCommissionPolicies() {
   return useQuery({
@@ -57,7 +57,7 @@ export function useCommissionMutations() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['commission-policies'] });
-      toast({ title: 'Política criada com sucesso' });
+      toastSuccess('Política criada com sucesso');
     },
     onError: mutationErrorHandler('Erro ao criar política'),
   });
@@ -70,7 +70,7 @@ export function useCommissionMutations() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['commission-policies'] });
-      toast({ title: 'Política atualizada' });
+      toastSuccess('Política atualizada');
     },
   });
 
@@ -81,7 +81,7 @@ export function useCommissionMutations() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['commissions'] });
-      toast({ title: 'Comissão atualizada' });
+      toastSuccess('Comissão atualizada');
     },
   });
 

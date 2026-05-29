@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useMemo } from 'react';
 
-import { handleMutationError } from '@/lib/toastHelpers';
+import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 // ── Contact Logs ──
 export interface ContactLog {
   id: string;
@@ -46,7 +46,7 @@ export function useCreateContactLog() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['sales_contact_logs'] });
       qc.invalidateQueries({ queryKey: ['sales_daily_goals'] });
-      toast({ title: 'Contato registrado' });
+      toastSuccess('Contato registrado');
     },
     onError: handleMutationError,
   });

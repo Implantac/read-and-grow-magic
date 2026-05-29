@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 export interface DbCommercialAlert {
   id: string;
@@ -44,7 +45,7 @@ export function useResolveAlert() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['commercial_alerts'] });
-      toast({ title: 'Alerta resolvido' });
+      toastSuccess('Alerta resolvido');
     },
   });
 }

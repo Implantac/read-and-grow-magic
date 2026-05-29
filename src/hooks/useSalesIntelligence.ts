@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useMemo } from 'react';
 import { differenceInDays, subDays, format } from 'date-fns';
 
-import { handleMutationError } from '@/lib/toastHelpers';
+import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 // ─── Types ───────────────────────────────────────────────────────────────
 export interface DbOpportunity {
   id: string;
@@ -98,7 +98,7 @@ export function useCreateOpportunity() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['sales_opportunities'] });
-      toast({ title: 'Oportunidade criada' });
+      toastSuccess('Oportunidade criada');
     },
     onError: handleMutationError,
   });
@@ -141,7 +141,7 @@ export function useCreateFollowUp() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['follow_ups'] });
-      toast({ title: 'Follow-up agendado' });
+      toastSuccess('Follow-up agendado');
     },
     onError: handleMutationError,
   });
@@ -184,7 +184,7 @@ export function useCreateCampaign() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['sales_campaigns'] });
-      toast({ title: 'Campanha criada' });
+      toastSuccess('Campanha criada');
     },
     onError: handleMutationError,
   });

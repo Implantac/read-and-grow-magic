@@ -27,6 +27,7 @@ import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
+import { toastSuccess } from '@/lib/toastHelpers';
 const paymentMethods: Record<PaymentMethod, string> = {
   pix: 'PIX', boleto: 'Boleto', credit_card: 'Cartão de Crédito',
   debit_card: 'Cartão de Débito', transfer: 'Transferência', cash: 'Dinheiro', check: 'Cheque',
@@ -426,7 +427,7 @@ export default function AccountsReceivable() {
                           </Button>
                           {(account.status === 'overdue' || (account.status === 'pending' && new Date(account.due_date) < now)) && (
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-warning hover:text-warning" title="Enviar cobrança"
-                              onClick={() => toast({ title: 'Lembrete enviado', description: `Cobrança enviada para ${account.client_name}` })}>
+                              onClick={() => toastSuccess('Lembrete enviado', `Cobrança enviada para ${account.client_name}`)}>
                               <Mail className="h-4 w-4" />
                             </Button>
                           )}

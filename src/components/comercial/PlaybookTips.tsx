@@ -6,6 +6,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BookOpen, Copy, MessageSquare, Target, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 interface PlaybookTipsProps {
   stage: string;
@@ -23,7 +24,7 @@ export function PlaybookTips({ stage, compact = false }: PlaybookTipsProps) {
 
   const copy = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast({ title: 'Copiado!' });
+    toastSuccess('Copiado!');
     logUsage.mutate({ playbook_id: pb.id, action_type: 'copy_script', context: text.slice(0, 50) });
   };
 

@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -41,7 +42,7 @@ export default function ResetPassword() {
     try {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
-      toast({ title: 'Senha atualizada!', description: 'Sua senha foi redefinida com sucesso.' });
+      toastSuccess('Senha atualizada!', 'Sua senha foi redefinida com sucesso.');
       navigate('/login');
     } catch (error: any) {
       toast({ title: 'Erro', description: error.message, variant: 'destructive' });

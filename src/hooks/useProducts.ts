@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { mutationErrorHandler } from '@/lib/toastHelpers';
+import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 
 export interface DbProduct {
   id: string;
@@ -61,7 +61,7 @@ export function useCreateProduct() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['products'] });
-      toast({ title: 'Produto criado com sucesso!' });
+      toastSuccess('Produto criado com sucesso!');
     },
     onError: mutationErrorHandler('Erro ao criar produto'),
   });
@@ -78,7 +78,7 @@ export function useUpdateProduct() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['products'] });
-      toast({ title: 'Produto atualizado com sucesso!' });
+      toastSuccess('Produto atualizado com sucesso!');
     },
     onError: mutationErrorHandler('Erro ao atualizar produto'),
   });
@@ -94,7 +94,7 @@ export function useDeleteProduct() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['products'] });
-      toast({ title: 'Produto excluído com sucesso!' });
+      toastSuccess('Produto excluído com sucesso!');
     },
     onError: mutationErrorHandler('Erro ao excluir produto'),
   });

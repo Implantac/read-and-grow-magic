@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
+import { toastSuccess } from '@/lib/toastHelpers';
   User, Mail, Shield, Building2, MapPin, Phone, Save, Eye, EyeOff, Lock, Camera,
 } from 'lucide-react';
 
@@ -52,7 +53,7 @@ export default function ProfilePage() {
 
       await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
       setAvatarUrl(publicUrl);
-      toast({ title: 'Foto atualizada', description: 'Sua foto de perfil foi salva.' });
+      toastSuccess('Foto atualizada', 'Sua foto de perfil foi salva.');
     } catch (err: any) {
       toast({ title: 'Erro no upload', description: err.message, variant: 'destructive' });
     } finally {
@@ -71,7 +72,7 @@ export default function ProfilePage() {
 
       if (error) throw error;
       setUser({ ...user, name, email });
-      toast({ title: 'Perfil atualizado', description: 'Suas informações foram salvas com sucesso.' });
+      toastSuccess('Perfil atualizado', 'Suas informações foram salvas com sucesso.');
     } catch (err: any) {
       toast({ title: 'Erro', description: err.message, variant: 'destructive' });
     } finally {
@@ -108,7 +109,7 @@ export default function ProfilePage() {
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
-      toast({ title: 'Senha alterada', description: 'Sua senha foi atualizada com sucesso.' });
+      toastSuccess('Senha alterada', 'Sua senha foi atualizada com sucesso.');
     } catch (err: any) {
       toast({ title: 'Erro', description: err.message, variant: 'destructive' });
     } finally {

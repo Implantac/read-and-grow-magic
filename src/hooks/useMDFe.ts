@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError } from '@/lib/toastHelpers';
+import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface MDFe {
   id: string;
   number: string;
@@ -56,7 +56,7 @@ export function useCreateMDFe() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['mdfes'] });
-      toast({ title: 'MDF-e criado' });
+      toastSuccess('MDF-e criado');
     },
     onError: handleMutationError,
   });
@@ -76,7 +76,7 @@ export function useTransmitMDFe() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['mdfes'] });
-      toast({ title: 'MDF-e autorizado (simulação)' });
+      toastSuccess('MDF-e autorizado (simulação)');
     },
     onError: handleMutationError,
   });
@@ -94,7 +94,7 @@ export function useCloseMDFe() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['mdfes'] });
-      toast({ title: 'Viagem encerrada' });
+      toastSuccess('Viagem encerrada');
     },
     onError: handleMutationError,
   });
@@ -119,7 +119,7 @@ export function useAddMDFeDocument() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['mdfes'] });
       qc.invalidateQueries({ queryKey: ['mdfe_documents'] });
-      toast({ title: 'Documento adicionado ao MDF-e' });
+      toastSuccess('Documento adicionado ao MDF-e');
     },
     onError: handleMutationError,
   });

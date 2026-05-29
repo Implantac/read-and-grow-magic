@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 export interface FollowUpTask {
   id: string;
@@ -48,7 +49,7 @@ export function useCreateFollowUp() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['follow_up_tasks'] });
-      toast({ title: 'Follow-up criado com sucesso' });
+      toastSuccess('Follow-up criado com sucesso');
     },
   });
 }

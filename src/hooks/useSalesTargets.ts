@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { mutationErrorHandler } from '@/lib/toastHelpers';
+import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 
 export function useSalesTargets(filters?: { period?: string; entityType?: string }) {
   return useQuery({
@@ -29,7 +29,7 @@ export function useSalesTargetMutations() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sales-targets'] });
-      toast({ title: 'Meta criada com sucesso' });
+      toastSuccess('Meta criada com sucesso');
     },
     onError: mutationErrorHandler('Erro ao criar meta'),
   });
@@ -42,7 +42,7 @@ export function useSalesTargetMutations() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sales-targets'] });
-      toast({ title: 'Meta atualizada' });
+      toastSuccess('Meta atualizada');
     },
   });
 
@@ -53,7 +53,7 @@ export function useSalesTargetMutations() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sales-targets'] });
-      toast({ title: 'Meta removida' });
+      toastSuccess('Meta removida');
     },
   });
 

@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError } from '@/lib/toastHelpers';
+import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface LedgerEntryRow {
   id: string;
   entry_date: string;
@@ -51,7 +51,7 @@ export function useCreateManualLedger() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['financial_ledger'] });
       qc.invalidateQueries({ queryKey: ['bank_accounts'] });
-      toast({ title: 'Lançamento registrado' });
+      toastSuccess('Lançamento registrado');
     },
     onError: handleMutationError,
   });

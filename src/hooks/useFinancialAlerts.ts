@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError } from '@/lib/toastHelpers';
+import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface FinancialAlertRow {
   id: string;
   alert_type: string;
@@ -50,7 +50,7 @@ export function useDetectFinancialAlerts() {
     },
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['financial_alerts'] });
-      toast({ title: 'Análise concluída', description: `${data.created} alertas avaliados` });
+      toastSuccess('Análise concluída', `${data.created} alertas avaliados`);
     },
     onError: handleMutationError,
   });
@@ -69,7 +69,7 @@ export function useUpdateAlertStatus() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['financial_alerts'] });
-      toast({ title: 'Alerta atualizado' });
+      toastSuccess('Alerta atualizado');
     },
     onError: handleMutationError,
   });

@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatBRL } from '@/lib/formatters';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 const statusMeta = {
   pending: { label: 'Pendente', variant: 'secondary' as const, icon: Clock },
@@ -111,7 +112,7 @@ export default function PixCharges() {
                       <TableCell className="text-right">
                         <div className="flex gap-1 justify-end">
                           {c.copy_paste && (
-                            <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText(c.copy_paste!); toast({ title: 'PIX copiado' }); }}>
+                            <Button size="sm" variant="ghost" onClick={() => { navigator.clipboard.writeText(c.copy_paste!); toastSuccess('PIX copiado'); }}>
                               <Copy className="h-3 w-3" />
                             </Button>
                           )}

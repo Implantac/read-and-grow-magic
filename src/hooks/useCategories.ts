@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError, mutationErrorHandler } from '@/lib/toastHelpers';
+import { handleMutationError, mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 export interface DbCategory {
   id: string;
   name: string;
@@ -42,7 +42,7 @@ export function useCreateCategory() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['categories'] });
-      toast({ title: 'Categoria criada com sucesso!' });
+      toastSuccess('Categoria criada com sucesso!');
     },
     onError: handleMutationError,
   });
@@ -59,7 +59,7 @@ export function useUpdateCategory() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['categories'] });
-      toast({ title: 'Categoria atualizada com sucesso!' });
+      toastSuccess('Categoria atualizada com sucesso!');
     },
     onError: handleMutationError,
   });
@@ -75,7 +75,7 @@ export function useDeleteCategory() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['categories'] });
-      toast({ title: 'Categoria excluída com sucesso!' });
+      toastSuccess('Categoria excluída com sucesso!');
     },
     onError: mutationErrorHandler('Erro ao excluir'),
   });

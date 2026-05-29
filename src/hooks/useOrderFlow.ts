@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-import { handleMutationError, mutationErrorHandler } from '@/lib/toastHelpers';
+import { handleMutationError, mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 // Order Status History
 export function useOrderStatusHistory(orderId?: string) {
   return useQuery({
@@ -58,7 +58,7 @@ export function useCreateStockReservation() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['stock-reservations'] });
-      toast({ title: 'Reserva criada com sucesso!' });
+      toastSuccess('Reserva criada com sucesso!');
     },
     onError: mutationErrorHandler('Erro ao criar reserva'),
   });
@@ -88,7 +88,7 @@ export function useCreateConference() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['conference-records'] });
-      toast({ title: 'Conferência criada!' });
+      toastSuccess('Conferência criada!');
     },
     onError: handleMutationError,
   });
@@ -123,7 +123,7 @@ export function useCreateBillingEntry() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['billing-queue'] });
-      toast({ title: 'Pedido adicionado à fila de faturamento!' });
+      toastSuccess('Pedido adicionado à fila de faturamento!');
     },
     onError: handleMutationError,
   });
@@ -139,7 +139,7 @@ export function useUpdateBillingStatus() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['billing-queue'] });
-      toast({ title: 'Status de faturamento atualizado!' });
+      toastSuccess('Status de faturamento atualizado!');
     },
     onError: handleMutationError,
   });
@@ -179,7 +179,7 @@ export function useCreateShipment() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['shipment-orders'] });
-      toast({ title: 'Expedição criada!' });
+      toastSuccess('Expedição criada!');
     },
     onError: handleMutationError,
   });
@@ -195,7 +195,7 @@ export function useUpdateShipment() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['shipment-orders'] });
-      toast({ title: 'Expedição atualizada!' });
+      toastSuccess('Expedição atualizada!');
     },
     onError: handleMutationError,
   });
@@ -232,7 +232,7 @@ export function useAdvancedOrderStatusUpdate() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['orders'] });
       qc.invalidateQueries({ queryKey: ['order-status-history'] });
-      toast({ title: 'Status do pedido atualizado!' });
+      toastSuccess('Status do pedido atualizado!');
     },
     onError: handleMutationError,
   });

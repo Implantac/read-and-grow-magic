@@ -34,6 +34,7 @@ import { useClients } from '@/hooks/useClients';
 import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
 import { validateOrder, type CommercialValidation } from '@/hooks/useCommercialRules';
+import { toastSuccess } from '@/lib/toastHelpers';
 
 
 const filterFields: FilterField[] = [
@@ -206,7 +207,7 @@ export default function OrdersPage() {
         setIsFormOpen(false);
         resetForm();
         if (needsApproval) {
-          toast({ title: '⚠️ Pedido criado com pendência de aprovação', description: 'Desconto ou condição especial requer aprovação.' });
+          toastSuccess('⚠️ Pedido criado com pendência de aprovação', 'Desconto ou condição especial requer aprovação.');
         }
       },
     });
@@ -278,10 +279,10 @@ export default function OrdersPage() {
     updateStatus.mutate({ id: order.id, status: nextStatus }, {
       onSuccess: () => {
         if (nextStatus === 'confirmed') {
-          toast({ title: '🏭 Picking WMS gerado', description: 'Uma ordem de separação foi criada automaticamente no WMS.' });
+          toastSuccess('🏭 Picking WMS gerado', 'Uma ordem de separação foi criada automaticamente no WMS.');
         }
         if (nextStatus === 'invoiced') {
-          toast({ title: '📄 NF-e gerada automaticamente', description: 'Uma NF-e de saída foi criada como rascunho no módulo Fiscal.' });
+          toastSuccess('📄 NF-e gerada automaticamente', 'Uma NF-e de saída foi criada como rascunho no módulo Fiscal.');
         }
       }
     });
