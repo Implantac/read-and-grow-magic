@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, ChevronDown, LogOut, Menu, Moon, Sun, User, Search, Command } from 'lucide-react';
+import { Bell, Brain, ChevronDown, LogOut, Menu, Moon, Sun, User, Search, Command } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Company } from '@/types';
 
@@ -7,6 +7,7 @@ import { useCompanies } from '@/hooks/useCompanies';
 import { useAppStore } from '@/stores/useAppStore';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useBrainDecisions } from '@/hooks/useAIBrain';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -33,6 +34,8 @@ export function Topbar() {
   } = useAppStore();
 
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { data: brainPending = [] } = useBrainDecisions('pending');
+  const brainCritical = brainPending.filter((d) => d.impact_level === 'critical').length;
 
   const handleLogout = async () => {
     await signOut();
@@ -209,6 +212,29 @@ export function Topbar() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Brain shortcut */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate('/diretoria/cerebro')}
+          title={brainPending.length > 0 ? `${brainPending.length} decisões do Cérebro pendentes` : 'Cérebro Nativo'}
+          className="relative h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
+        >
+          <Brain className="h-4 w-4" />
+          {brainPending.length > 0 && (
+            <span
+              className={cn(
+                'absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full text-[10px] font-bold px-1 animate-fade-in',
+                brainCritical > 0
+                  ? 'bg-destructive text-destructive-foreground animate-pulse'
+                  : 'bg-primary text-primary-foreground'
+              )}
+            >
+              {brainPending.length > 9 ? '9+' : brainPending.length}
+            </span>
+          )}
+        </Button>
 
         {/* Divider */}
         <div className="mx-1 h-6 w-px bg-sidebar-border/50" />
