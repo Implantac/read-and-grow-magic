@@ -361,6 +361,171 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_brain_decisions: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          auto_executable: boolean
+          confidence: number
+          created_at: string
+          decision_type: string
+          evidence: Json
+          executed_at: string | null
+          execution_result: Json | null
+          id: string
+          impact_level: string
+          module: string
+          proposed_action: Json
+          rationale: string
+          requires_approval: boolean
+          risk_level: string
+          run_id: string | null
+          status: string
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          auto_executable?: boolean
+          confidence?: number
+          created_at?: string
+          decision_type: string
+          evidence?: Json
+          executed_at?: string | null
+          execution_result?: Json | null
+          id?: string
+          impact_level?: string
+          module: string
+          proposed_action?: Json
+          rationale: string
+          requires_approval?: boolean
+          risk_level?: string
+          run_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          auto_executable?: boolean
+          confidence?: number
+          created_at?: string
+          decision_type?: string
+          evidence?: Json
+          executed_at?: string | null
+          execution_result?: Json | null
+          id?: string
+          impact_level?: string
+          module?: string
+          proposed_action?: Json
+          rationale?: string
+          requires_approval?: boolean
+          risk_level?: string
+          run_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      ai_brain_memory: {
+        Row: {
+          category: string
+          created_at: string
+          embedding_summary: string | null
+          expires_at: string | null
+          id: string
+          importance: number
+          key: string
+          scope: string
+          source: string | null
+          updated_at: string
+          user_id: string | null
+          value: Json
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          embedding_summary?: string | null
+          expires_at?: string | null
+          id?: string
+          importance?: number
+          key: string
+          scope?: string
+          source?: string | null
+          updated_at?: string
+          user_id?: string | null
+          value: Json
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          embedding_summary?: string | null
+          expires_at?: string | null
+          id?: string
+          importance?: number
+          key?: string
+          scope?: string
+          source?: string | null
+          updated_at?: string
+          user_id?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
+      ai_brain_runs: {
+        Row: {
+          agents_used: string[]
+          created_at: string
+          decisions_count: number
+          duration_ms: number | null
+          error: string | null
+          id: string
+          input: Json | null
+          mode: string
+          status: string
+          structured: Json | null
+          synthesis: string | null
+          trigger: string
+          user_id: string | null
+        }
+        Insert: {
+          agents_used?: string[]
+          created_at?: string
+          decisions_count?: number
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          input?: Json | null
+          mode?: string
+          status?: string
+          structured?: Json | null
+          synthesis?: string | null
+          trigger: string
+          user_id?: string | null
+        }
+        Update: {
+          agents_used?: string[]
+          created_at?: string
+          decisions_count?: number
+          duration_ms?: number | null
+          error?: string | null
+          id?: string
+          input?: Json | null
+          mode?: string
+          status?: string
+          structured?: Json | null
+          synthesis?: string | null
+          trigger?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       ai_daily_actions: {
         Row: {
           action_date: string
