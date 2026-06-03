@@ -15,9 +15,15 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Optional API key validation for RFID readers
+    // Require API key for RFID readers
     const apiKey = req.headers.get('x-api-key');
-    // In production, validate apiKey against stored keys
+    const expectedKey = Deno.env.get('RFID_WEBHOOK_API_KEY');
+    if (!expectedKey || !apiKey || apiKey !== expectedKey) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
 
     const body = await req.json();
 
