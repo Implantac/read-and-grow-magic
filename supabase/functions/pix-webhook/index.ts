@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { requireAuth } from '../_shared/require-auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,6 +17,23 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const action = url.searchParams.get('action') ?? 'webhook';
+
+    // User-initiated actions: require admin/manager JWT.
+    if (action === 'create' || action === 'simulate-payment') {
+      const auth = await requireAuth(req, { roles: ['admin', 'manager'] });
+      if (!auth.ok) {
+        return new Response(JSON.stringify({ error: auth.message }), {
+          status: auth.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      // simulate-payment is a test-only utility; disable in production unless explicitly enabled.
+      if (action === 'simulate-payment' && Deno.env.get('PIX_SIMULATION_ENABLED') !== 'true') {
+        return new Response(JSON.stringify({ error: 'Simulation disabled' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
 
     // Simulação: criar cobrança PIX
     if (action === 'create' && req.method === 'POST') {
