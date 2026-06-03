@@ -65,10 +65,14 @@ Deno.serve(async (req) => {
       return Response.json({ ok: true, result: data }, { headers: corsHeaders });
     }
 
-    // Webhook real — validar assinatura quando PIX_WEBHOOK_SECRET configurado
+    // Webhook real — assinatura HMAC obrigatória.
     const signature = req.headers.get('x-pix-signature') ?? '';
     const expectedSig = Deno.env.get('PIX_WEBHOOK_SECRET');
-    if (expectedSig && signature !== expectedSig) {
+    if (!expectedSig) {
+      console.error('PIX_WEBHOOK_SECRET not configured');
+      return Response.json({ error: 'misconfigured' }, { status: 500, headers: corsHeaders });
+    }
+    if (signature !== expectedSig) {
       return Response.json({ error: 'invalid signature' }, { status: 401, headers: corsHeaders });
     }
     const payload = await req.json();
