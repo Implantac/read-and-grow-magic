@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
       const origin = req.headers.get('origin') || Deno.env.get('SITE_URL') || '';
 
       const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-        data: { 
+        data: {
           name: name || '',
           phone: phone || '',
           department: department || '',
@@ -120,6 +120,14 @@ Deno.serve(async (req) => {
         redirectTo: `${origin}/login`,
       });
       if (error) throw error;
+
+      // Pin the new user to the inviting admin's company.
+      if (data.user && callerCompanyId) {
+        await supabaseAdmin
+          .from('profiles')
+          .update({ company_id: callerCompanyId })
+          .eq('id', data.user.id);
+      }
 
       // Update role if not viewer (trigger creates viewer by default for non-first users)
       if (role !== 'viewer' && data.user) {
@@ -137,6 +145,7 @@ Deno.serve(async (req) => {
     if (action === 'delete') {
       const { user_id } = params;
       if (user_id === user.id) throw new Error('Cannot delete your own account');
+      await assertSameCompany(user_id);
 
       const { error } = await supabaseAdmin.auth.admin.deleteUser(user_id);
       if (error) throw error;
@@ -149,6 +158,7 @@ Deno.serve(async (req) => {
     if (action === 'change_role') {
       const { user_id, role, phone, department, branch_id } = params;
       if (user_id === user.id && role) throw new Error('Cannot change your own role');
+      await assertSameCompany(user_id);
 
       if (role) {
         const { error: roleError } = await supabaseAdmin
@@ -179,6 +189,7 @@ Deno.serve(async (req) => {
     if (action === 'toggle_ban') {
       const { user_id, banned } = params;
       if (user_id === user.id) throw new Error('Cannot ban your own account');
+      await assertSameCompany(user_id);
 
       const { error } = await supabaseAdmin.auth.admin.updateUserById(user_id, {
         ban_duration: banned ? '87600h' : 'none',
@@ -189,6 +200,7 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
 
     if (action === 'reset_password') {
       const { email } = params;
