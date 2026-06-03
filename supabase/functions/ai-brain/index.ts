@@ -808,11 +808,47 @@ Deno.serve(async (req) => {
     const action = body.action || "analyze";
     const authHeader = req.headers.get("Authorization") || undefined;
 
+    // Cron-only actions: require CRON_SECRET header (Supabase scheduled functions).
+    const CRON_ACTIONS = new Set(["cron_run", "weekly_learning"]);
+    const CRON_SECRET = Deno.env.get("CRON_SECRET");
+    if (CRON_ACTIONS.has(action)) {
+      const provided = req.headers.get("x-cron-secret");
+      if (!CRON_SECRET || provided !== CRON_SECRET) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
+
     let userId: string | undefined;
-    if (authHeader) {
+    let userRole: string | null = null;
+    if (!CRON_ACTIONS.has(action)) {
+      if (!authHeader?.startsWith("Bearer ")) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
       const token = authHeader.replace("Bearer ", "");
-      const { data } = await admin.auth.getUser(token);
-      userId = data.user?.id;
+      const { data, error } = await admin.auth.getUser(token);
+      if (error || !data?.user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      userId = data.user.id;
+      const { data: roleRow } = await admin.from("user_roles").select("role").eq("user_id", userId).order("role").limit(1).maybeSingle();
+      userRole = (roleRow as any)?.role || null;
+
+      // Privileged actions require admin/manager
+      const PRIVILEGED = new Set([
+        "approve_decision", "reject_decision", "execute_decision",
+        "autopilot", "notify_critical", "invalidate_cache",
+      ]);
+      if (PRIVILEGED.has(action) && !["admin", "manager"].includes(userRole || "")) {
+        return new Response(JSON.stringify({ error: "Forbidden: admin/manager required" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
     let result: any;
@@ -842,6 +878,7 @@ Deno.serve(async (req) => {
 
 
       case "feedback_decision": {
+
         // Usuário aprova ou critica uma decisão executada — vira aprendizado
         const { decision_id, rating, comment } = body;
         if (!decision_id || !["up", "down"].includes(rating)) {
