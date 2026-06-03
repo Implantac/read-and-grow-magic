@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4"
+import { requireAuth } from "../_shared/require-auth.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,19 +13,36 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
+    const auth = await requireAuth(req, { roles: ['admin', 'manager', 'operator'] })
+    if (!auth.ok) {
+      return new Response(JSON.stringify({ error: auth.message }), {
+        status: auth.status,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Use service role to perform the state change, but enforce tenant scoping in code.
+    const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { nfeId, action } = await req.json()
+    const body = await req.json()
+    const { nfeId, action, reason } = body
 
     if (!nfeId) {
       throw new Error('ID da NF-e é obrigatório')
     }
 
-    // Fetch NFe data
-    const { data: nfe, error: nfeError } = await supabaseClient
+    // Resolve caller's company_id and ensure NF-e belongs to it
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('company_id')
+      .eq('id', auth.userId!)
+      .maybeSingle()
+    const callerCompany = profile?.company_id
+
+    const { data: nfe, error: nfeError } = await supabaseAdmin
       .from('nfe')
       .select('*')
       .eq('id', nfeId)
@@ -33,11 +51,14 @@ serve(async (req) => {
     if (nfeError || !nfe) {
       throw new Error('NF-e não encontrada')
     }
+    if (callerCompany && nfe.company_id && nfe.company_id !== callerCompany) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
 
     if (action === 'transmit') {
-      console.log(`Transmitindo NF-e ${nfe.number}...`)
-      
-      // Simulate validation (e.g. check if client has document)
       if (!nfe.client_document) {
         return new Response(
           JSON.stringify({ error: 'Erro SEFAZ: Destinatário sem CPF/CNPJ informado.' }),
@@ -45,7 +66,6 @@ serve(async (req) => {
         )
       }
 
-      // Simulate a random "SEFAZ Unavailable" or "Rejected" error (5% chance)
       if (Math.random() < 0.05) {
         return new Response(
           JSON.stringify({ error: 'Erro SEFAZ: Serviço Temporariamente Indisponível (Código 105).' }),
@@ -53,14 +73,13 @@ serve(async (req) => {
         )
       }
 
-      // Simulate delay
       await new Promise(resolve => setTimeout(resolve, 2000))
 
       const accessKey = Array.from({ length: 44 }, () => Math.floor(Math.random() * 10)).join('')
       const protocol = '1' + Date.now().toString().slice(-14)
       const authorizationDate = new Date().toISOString()
 
-      const { error: updateError } = await supabaseClient
+      const { error: updateError } = await supabaseAdmin
         .from('nfe')
         .update({
           status: 'authorized',
@@ -79,15 +98,20 @@ serve(async (req) => {
     }
 
     if (action === 'cancel') {
-      const { reason } = await req.json()
+      // Cancellation requires admin or manager
+      if (auth.role !== 'admin' && auth.role !== 'manager') {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
       if (!reason || reason.length < 15) {
         throw new Error('Justificativa de cancelamento deve ter pelo menos 15 caracteres.')
       }
 
-      // Simulate delay
       await new Promise(resolve => setTimeout(resolve, 1500))
 
-      const { error: cancelError } = await supabaseClient
+      const { error: cancelError } = await supabaseAdmin
         .from('nfe')
         .update({
           status: 'cancelled',
@@ -105,10 +129,9 @@ serve(async (req) => {
     }
 
     throw new Error('Ação inválida')
-
   } catch (error) {
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: (error as Error).message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
     )
   }

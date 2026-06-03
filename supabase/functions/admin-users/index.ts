@@ -38,18 +38,41 @@ Deno.serve(async (req) => {
 
     if (roleData?.role !== 'admin') throw new Error('Forbidden: Admin role required');
 
+    // Caller's tenant — used to scope every admin operation.
+    const { data: callerProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('company_id')
+      .eq('id', user.id)
+      .maybeSingle();
+    const callerCompanyId: string | null = callerProfile?.company_id ?? null;
+
+    const assertSameCompany = async (targetUserId: string) => {
+      if (!callerCompanyId) throw new Error('Forbidden');
+      const { data: targetProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('company_id')
+        .eq('id', targetUserId)
+        .maybeSingle();
+      if (!targetProfile || targetProfile.company_id !== callerCompanyId) {
+        throw new Error('Forbidden');
+      }
+    };
+
     const body = await req.json();
     const { action, ...params } = body;
 
     if (action === 'list') {
-      const { data: profiles } = await supabaseAdmin
+      let profilesQuery = supabaseAdmin
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
+      if (callerCompanyId) profilesQuery = profilesQuery.eq('company_id', callerCompanyId);
+      const { data: profiles } = await profilesQuery;
 
-      const { data: roles } = await supabaseAdmin
-        .from('user_roles')
-        .select('*');
+      const profileIds = (profiles || []).map((p: any) => p.id);
+      const { data: roles } = profileIds.length
+        ? await supabaseAdmin.from('user_roles').select('*').in('user_id', profileIds)
+        : { data: [] as any[] };
 
       const { data: { users: authUsers } } = await supabaseAdmin.auth.admin.listUsers({
         perPage: 1000,
@@ -88,7 +111,7 @@ Deno.serve(async (req) => {
       const origin = req.headers.get('origin') || Deno.env.get('SITE_URL') || '';
 
       const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-        data: { 
+        data: {
           name: name || '',
           phone: phone || '',
           department: department || '',
@@ -97,6 +120,14 @@ Deno.serve(async (req) => {
         redirectTo: `${origin}/login`,
       });
       if (error) throw error;
+
+      // Pin the new user to the inviting admin's company.
+      if (data.user && callerCompanyId) {
+        await supabaseAdmin
+          .from('profiles')
+          .update({ company_id: callerCompanyId })
+          .eq('id', data.user.id);
+      }
 
       // Update role if not viewer (trigger creates viewer by default for non-first users)
       if (role !== 'viewer' && data.user) {
@@ -114,6 +145,7 @@ Deno.serve(async (req) => {
     if (action === 'delete') {
       const { user_id } = params;
       if (user_id === user.id) throw new Error('Cannot delete your own account');
+      await assertSameCompany(user_id);
 
       const { error } = await supabaseAdmin.auth.admin.deleteUser(user_id);
       if (error) throw error;
@@ -126,6 +158,7 @@ Deno.serve(async (req) => {
     if (action === 'change_role') {
       const { user_id, role, phone, department, branch_id } = params;
       if (user_id === user.id && role) throw new Error('Cannot change your own role');
+      await assertSameCompany(user_id);
 
       if (role) {
         const { error: roleError } = await supabaseAdmin
@@ -156,6 +189,7 @@ Deno.serve(async (req) => {
     if (action === 'toggle_ban') {
       const { user_id, banned } = params;
       if (user_id === user.id) throw new Error('Cannot ban your own account');
+      await assertSameCompany(user_id);
 
       const { error } = await supabaseAdmin.auth.admin.updateUserById(user_id, {
         ban_duration: banned ? '87600h' : 'none',
@@ -166,6 +200,7 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
 
     if (action === 'reset_password') {
       const { email } = params;
