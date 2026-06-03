@@ -65,9 +65,14 @@ Deno.serve(async (req) => {
       return Response.json({ ok: true, result: data }, { headers: corsHeaders });
     }
 
-    // Webhook real
-    const payload = await req.json();
+    // Webhook real — validar assinatura quando PIX_WEBHOOK_SECRET configurado
     const signature = req.headers.get('x-pix-signature') ?? '';
+    const expectedSig = Deno.env.get('PIX_WEBHOOK_SECRET');
+    if (expectedSig && signature !== expectedSig) {
+      return Response.json({ error: 'invalid signature' }, { status: 401, headers: corsHeaders });
+    }
+    const payload = await req.json();
+
 
     // idempotência
     const eventId = payload.endToEndId ?? payload.txid ?? crypto.randomUUID();
