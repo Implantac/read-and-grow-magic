@@ -38,18 +38,41 @@ Deno.serve(async (req) => {
 
     if (roleData?.role !== 'admin') throw new Error('Forbidden: Admin role required');
 
+    // Caller's tenant — used to scope every admin operation.
+    const { data: callerProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('company_id')
+      .eq('id', user.id)
+      .maybeSingle();
+    const callerCompanyId: string | null = callerProfile?.company_id ?? null;
+
+    const assertSameCompany = async (targetUserId: string) => {
+      if (!callerCompanyId) throw new Error('Forbidden');
+      const { data: targetProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('company_id')
+        .eq('id', targetUserId)
+        .maybeSingle();
+      if (!targetProfile || targetProfile.company_id !== callerCompanyId) {
+        throw new Error('Forbidden');
+      }
+    };
+
     const body = await req.json();
     const { action, ...params } = body;
 
     if (action === 'list') {
-      const { data: profiles } = await supabaseAdmin
+      let profilesQuery = supabaseAdmin
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
+      if (callerCompanyId) profilesQuery = profilesQuery.eq('company_id', callerCompanyId);
+      const { data: profiles } = await profilesQuery;
 
-      const { data: roles } = await supabaseAdmin
-        .from('user_roles')
-        .select('*');
+      const profileIds = (profiles || []).map((p: any) => p.id);
+      const { data: roles } = profileIds.length
+        ? await supabaseAdmin.from('user_roles').select('*').in('user_id', profileIds)
+        : { data: [] as any[] };
 
       const { data: { users: authUsers } } = await supabaseAdmin.auth.admin.listUsers({
         perPage: 1000,
