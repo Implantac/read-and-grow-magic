@@ -2664,6 +2664,7 @@ export type Database = {
           is_headquarters: boolean
           municipal_registration: string | null
           name: string
+          operation_types: Json | null
           parent_company_id: string | null
           phone: string | null
           segment: string | null
@@ -2671,6 +2672,7 @@ export type Database = {
           settings: Json | null
           state_registration: string | null
           status: string
+          sub_segment: string | null
           tax_regime: Database["public"]["Enums"]["tax_regime"] | null
           tier: Database["public"]["Enums"]["enterprise_tier"] | null
           trade_name: string | null
@@ -2695,6 +2697,7 @@ export type Database = {
           is_headquarters?: boolean
           municipal_registration?: string | null
           name: string
+          operation_types?: Json | null
           parent_company_id?: string | null
           phone?: string | null
           segment?: string | null
@@ -2702,6 +2705,7 @@ export type Database = {
           settings?: Json | null
           state_registration?: string | null
           status?: string
+          sub_segment?: string | null
           tax_regime?: Database["public"]["Enums"]["tax_regime"] | null
           tier?: Database["public"]["Enums"]["enterprise_tier"] | null
           trade_name?: string | null
@@ -2726,6 +2730,7 @@ export type Database = {
           is_headquarters?: boolean
           municipal_registration?: string | null
           name?: string
+          operation_types?: Json | null
           parent_company_id?: string | null
           phone?: string | null
           segment?: string | null
@@ -2733,6 +2738,7 @@ export type Database = {
           settings?: Json | null
           state_registration?: string | null
           status?: string
+          sub_segment?: string | null
           tax_regime?: Database["public"]["Enums"]["tax_regime"] | null
           tier?: Database["public"]["Enums"]["enterprise_tier"] | null
           trade_name?: string | null
