@@ -1312,7 +1312,7 @@ export type Database = {
           balance: number
           bank_code: string | null
           bank_name: string
-          company_id: string | null
+          company_id: string
           created_at: string
           id: string
           name: string
@@ -1326,7 +1326,7 @@ export type Database = {
           balance?: number
           bank_code?: string | null
           bank_name?: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           name: string
@@ -1340,13 +1340,21 @@ export type Database = {
           balance?: number
           bank_code?: string | null
           bank_name?: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           name?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bank_accounts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       bank_transactions: {
         Row: {
@@ -1886,7 +1894,7 @@ export type Database = {
           client_score: string | null
           code: string
           commercial_notes: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           credit_limit: number
           current_balance: number
@@ -1926,7 +1934,7 @@ export type Database = {
           client_score?: string | null
           code: string
           commercial_notes?: string | null
-          company_id?: string | null
+          company_id: string
           created_at?: string
           credit_limit?: number
           current_balance?: number
@@ -1966,7 +1974,7 @@ export type Database = {
           client_score?: string | null
           code?: string
           commercial_notes?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           credit_limit?: number
           current_balance?: number
@@ -1992,7 +2000,15 @@ export type Database = {
           trade_name?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "clients_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       collection_actions: {
         Row: {
@@ -4011,7 +4027,7 @@ export type Database = {
           check_number: string
           check_type: string
           clear_date: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           deposit_date: string | null
@@ -4038,7 +4054,7 @@ export type Database = {
           check_number: string
           check_type: string
           clear_date?: string | null
-          company_id?: string | null
+          company_id: string
           created_at?: string
           created_by?: string | null
           deposit_date?: string | null
@@ -4065,7 +4081,7 @@ export type Database = {
           check_number?: string
           check_type?: string
           clear_date?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           deposit_date?: string | null
@@ -4088,6 +4104,13 @@ export type Database = {
             columns: ["bank_account_id"]
             isOneToOne: false
             referencedRelation: "bank_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_checks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
           {
