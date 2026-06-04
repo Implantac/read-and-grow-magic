@@ -33,8 +33,8 @@ const AGENTS = [
 ];
 
 export default function BrainCommandCenter() {
-  const { data: pending = [] } = useBrainDecisions('pending');
-  const { data: runs = [] } = useBrainRuns();
+  const { data: pending = [], isLoading: loadingPending } = useBrainDecisions('pending');
+  const { data: runs = [], isLoading: loadingRuns } = useBrainRuns();
   const { data: learning } = useBrainLearning();
   const runBrain = useRunBrain();
   const approve = useApproveDecision();
@@ -61,9 +61,9 @@ export default function BrainCommandCenter() {
   const handleNotify = async () => {
     try {
       const r: any = await notify.mutateAsync();
-      if (r?.skipped) toast.warning('Configure o secret BRAIN_WEBHOOK_URL para enviar alertas externos (Zapier/Make/n8n → WhatsApp/Email).');
+      if (r?.skipped) toast.warning('Configure o secret BRAIN_WEBHOOK_URL para enviar alertas externos.');
       else if (r?.ok) toast.success(`${r.sent} alerta(s) enviado(s) ao canal externo.`);
-      else toast.error('Falha ao enviar (' + (r?.status || '?') + ').');
+      else toast.error('Falha ao enviar.');
     } catch (e: any) {
       toast.error(e?.message || 'Erro ao notificar');
     }
@@ -72,24 +72,23 @@ export default function BrainCommandCenter() {
   return (
     <PageContainer>
       <PageHeader
-        title="🎯 Comando do Cérebro"
-        description="Visão única — veredicto, decisões, agentes especializados e alertas externos"
+        title="🎯 Centro de Comando IA"
+        description="Gestão de vereditos, decisões autônomas e agentes especializados do Cérebro ERP"
       >
-        <Button asChild variant="outline" size="sm" className="gap-2">
-          <Link to="/diretoria/brain/aprendizado"><GraduationCap className="h-4 w-4" /> Aprendizado</Link>
-        </Button>
-        <Button asChild variant="outline" size="sm" className="gap-2">
-          <Link to="/diretoria/brain"><Brain className="h-4 w-4" /> Visão clássica</Link>
-        </Button>
-        <Button variant="outline" size="sm" onClick={handleNotify} disabled={notify.isPending} className="gap-2">
-          <Bell className="h-4 w-4" /> Alertar externo
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => runBrain.mutate('analyze')} disabled={runBrain.isPending} className="gap-2">
-          <RefreshCw className={`h-4 w-4 ${runBrain.isPending ? 'animate-spin' : ''}`} /> Analisar
-        </Button>
-        <Button size="sm" onClick={() => runBrain.mutate('autopilot')} disabled={runBrain.isPending} className="gap-2">
-          <Zap className="h-4 w-4" /> Autopilot
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button asChild variant="outline" size="sm" className="h-8 gap-2">
+            <Link to="/diretoria/brain/aprendizado"><GraduationCap className="h-4 w-4" /> Aprendizado</Link>
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleNotify} disabled={notify.isPending} className="h-8 gap-2">
+            <Bell className="h-4 w-4" /> Alertar Externo
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => runBrain.mutate('analyze')} disabled={runBrain.isPending} className="h-8 gap-2">
+            <RefreshCw className={cn("h-4 w-4", runBrain.isPending && "animate-spin")} /> Analisar Agora
+          </Button>
+          <Button size="sm" onClick={() => runBrain.mutate('autopilot')} disabled={runBrain.isPending} className="h-8 gap-2 bg-primary shadow-lg shadow-primary/20">
+            <Zap className="h-4 w-4" /> Ativar Autopilot
+          </Button>
+        </div>
       </PageHeader>
 
       {/* KPIs */}
