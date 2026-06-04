@@ -14,6 +14,7 @@ import { ptBR } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 const impactColor: Record<string, string> = {
   critical: 'bg-destructive text-destructive-foreground',
