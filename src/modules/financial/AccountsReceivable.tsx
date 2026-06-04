@@ -3,7 +3,6 @@ import { Plus, Search, Eye, Edit, Trash2, DollarSign, AlertTriangle, Clock, Chec
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
-import { KPICard } from '@/shared/components/KPICard';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -16,14 +15,17 @@ import { Textarea } from '@/ui/base/textarea';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Badge } from '@/ui/base/badge';
 import { financialCategories } from '@/config/financial';
-import { PaymentMethod } from '@/types/financial';
+import { PaymentMethod, AccountReceivable } from '@/types/financial';
 import { useAccountsReceivable, useCreateAccountReceivable, useUpdateAccountReceivable, useDeleteAccountReceivable } from '@/hooks/financial/useAccountsReceivable';
 import { useCreatePaymentRecord } from '@/hooks/financial/usePaymentRecords';
 import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 import { useClients } from '@/hooks/commercial/useClients';
 import { SettlementDialog, type SettlementTarget } from '@/components/financeiro/SettlementDialog';
+import { AgingList } from '@/components/financeiro/AgingList';
+import { AccountsReceivableSummary } from '@/components/financeiro/AccountsReceivableSummary';
 import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+
 
 import { formatBRL, formatDate } from '@/lib/formatters';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
