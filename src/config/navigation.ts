@@ -26,14 +26,9 @@ export const navigationSections: NavSection[] = [
         icon: 'Factory',
       },
       {
-        title: 'Indústria Alimentos',
-        href: '/vertical/food',
+        title: 'Alimentos & Rações',
+        href: '/vertical/food-feed',
         icon: 'Database',
-      },
-      {
-        title: 'Frigoríficos',
-        href: '/vertical/meat',
-        icon: 'Building2',
       },
       {
         title: 'Farmacêutico',
@@ -41,17 +36,12 @@ export const navigationSections: NavSection[] = [
         icon: 'ShieldCheck',
       },
       {
-        title: 'Fiação & Tecelagem',
-        href: '/vertical/textile-complex',
-        icon: 'Layers',
+        title: 'Distribuição & Atacado',
+        href: '/vertical/distribution',
+        icon: 'Truck',
       },
       {
-        title: 'Ração Animal',
-        href: '/vertical/animal-feed',
-        icon: 'Database',
-      },
-      {
-        title: 'Varejo & PDV',
+        title: 'Varejo & Redes',
         href: '/vertical/retail',
         icon: 'ShoppingBag',
       },
