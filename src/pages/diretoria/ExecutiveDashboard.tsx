@@ -84,8 +84,8 @@ export default function ExecutiveDashboard() {
     <PageContainer>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
         <PageHeader 
-          title="🧠 Diretor Digital" 
-          description="Assistente executivo unificado — consulte dados, execute ações e tome decisões"
+          title="🧠 Conselho Executivo (IA)" 
+          description="Plataforma ERP Enterprise Evolution Engine (EEE) — Inteligência adaptativa sênior"
         />
         <ExecutiveIntelligenceStatus qualityScore={isInsufficient ? 15 : 94} />
       </div>
