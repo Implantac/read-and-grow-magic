@@ -13,7 +13,8 @@ import { useExecutiveDashboard, useUnifiedChat } from '@/hooks/ai/useExecutiveAI
 import {
   ShoppingCart, Wallet, Package, Factory, Truck, Warehouse,
   DollarSign, TrendingUp, ArrowDownCircle, ArrowUpCircle,
-  RefreshCw, ShieldCheck, Scissors, Building, Database
+  RefreshCw, ShieldCheck, Scissors, Building, Database,
+  Users, Target, Navigation
 } from 'lucide-react';
 import { Card, CardContent } from '@/ui/base/card';
 import { Skeleton } from '@/ui/base/skeleton';
@@ -81,6 +82,7 @@ export default function Dashboard() {
   const {
     mainKPIs = [], commercialKPIs = [], financialKPIs = [], inventoryKPIs = [],
     productionKPIs = [], purchasingKPIs = [], wmsKPIs = [],
+    hrKPIs = [], crmKPIs = [], logisticKPIs = [],
     statusDistribution = [], alerts = [],
   } = data || {};
 
@@ -258,6 +260,9 @@ export default function Dashboard() {
         )}
 
         <ModuleKPISection title="Compras" icon={Truck} kpis={purchasingKPIs} accentColor="bg-[hsl(262,83%,58%)]" />
+        <ModuleKPISection title="RH & Capital Humano" icon={Users} kpis={hrKPIs} accentColor="bg-pink-500" />
+        <ModuleKPISection title="CRM & Marketing" icon={Target} kpis={crmKPIs} accentColor="bg-indigo-500" />
+        <ModuleKPISection title="Logística & TMS" icon={Navigation} kpis={logisticKPIs} accentColor="bg-cyan-500" />
       </div>
 
       {/* Gráficos Consolidados */}
