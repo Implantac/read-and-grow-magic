@@ -7090,6 +7090,7 @@ export type Database = {
           order_id: string | null
           pis: number
           protocol: string | null
+          purchase_order_id: string | null
           series: string
           shipping: number
           status: string
@@ -7131,6 +7132,7 @@ export type Database = {
           order_id?: string | null
           pis?: number
           protocol?: string | null
+          purchase_order_id?: string | null
           series?: string
           shipping?: number
           status?: string
@@ -7172,6 +7174,7 @@ export type Database = {
           order_id?: string | null
           pis?: number
           protocol?: string | null
+          purchase_order_id?: string | null
           series?: string
           shipping?: number
           status?: string
@@ -8616,6 +8619,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      product_supplier_references: {
+        Row: {
+          created_at: string | null
+          id: string
+          product_id: string
+          supplier_id: string
+          supplier_ref_code: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          product_id: string
+          supplier_id: string
+          supplier_ref_code: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          product_id?: string
+          supplier_id?: string
+          supplier_ref_code?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       product_technical_sheets: {
         Row: {

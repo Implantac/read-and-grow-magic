@@ -59,9 +59,12 @@ interface XMLData {
       ipi: number;
       pis: number;
       cofins: number;
-    }
+    };
+    linkedProductId?: string; // Linked local product ID
+    linkedProductName?: string;
   }[];
   total: number;
+  purchaseOrderId?: string;
 }
 
 export default function FiscalDashboard() {
@@ -70,6 +73,7 @@ export default function FiscalDashboard() {
   const [xmlData, setXmlData] = useState<XMLData | null>(null);
   const [showReview, setShowReview] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [linkedOrders, setLinkedOrders] = useState<any[]>([]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -86,8 +90,7 @@ export default function FiscalDashboard() {
     reader.onload = async (e) => {
       const content = e.target?.result as string;
       try {
-        // Mocking XML parsing for the demo, in a real scenario we'd use a library like fast-xml-parser
-        // This simulates extraction of NFe data
+        // Extraction simulation with product linking logic
         const mockParsedData: XMLData = {
           accessKey: "35230612345678000190550010000123451000123456",
           number: "12345",
@@ -100,7 +103,7 @@ export default function FiscalDashboard() {
           },
           products: [
             {
-              code: "TEC-001",
+              code: "TEC-001", // Code from supplier
               description: "TECIDO ALGODAO PREMIUM AZUL",
               ncm: "52081100",
               cfop: "1101",
@@ -108,7 +111,9 @@ export default function FiscalDashboard() {
               qCom: 100,
               vUnCom: 15.50,
               vProd: 1550.00,
-              taxes: { icms: 186.00, ipi: 0, pis: 25.50, cofins: 117.80 }
+              taxes: { icms: 186.00, ipi: 0, pis: 25.50, cofins: 117.80 },
+              linkedProductId: "PROD-123", // Simulated match in system
+              linkedProductName: "Tecido de Algodão Cru"
             },
             {
               code: "LIN-002",
@@ -120,14 +125,16 @@ export default function FiscalDashboard() {
               vUnCom: 8.90,
               vProd: 445.00,
               taxes: { icms: 53.40, ipi: 22.25, pis: 7.34, cofins: 33.82 }
+              // This one is not linked, will require manual link or new registration
             }
           ],
-          total: 1995.00
+          total: 1995.00,
+          purchaseOrderId: "PO-789" // Simulated detected PO link
         };
 
         setXmlData(mockParsedData);
         setShowReview(true);
-        toast.success('XML carregado e validado com sucesso!');
+        toast.success('XML carregado. Verifique os vínculos de produtos e pedidos.');
       } catch (err) {
         toast.error('Erro ao processar arquivo XML.');
       } finally {
