@@ -122,6 +122,7 @@ export function useCreateOrder() {
           total,
           notes: input.notes || null,
           status: 'pending',
+          created_at: new Date().toISOString(), // Ensure timestamp for sorting
         })
         .select()
         .single();

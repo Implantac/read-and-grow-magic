@@ -87,7 +87,7 @@ export default function BrainPage() {
           </CardHeader>
           <CardContent>
             <p className="text-sm leading-relaxed">{veredicto}</p>
-            {lastRun && <p className="text-xs text-muted-foreground mt-2">Atualizado {format(new Date(lastRun.created_at), "dd/MM 'às' HH:mm", { locale: ptBR })} · {lastRun.decisions_count} decisões geradas</p>}
+            {lastRun && <p className="text-xs text-muted-foreground mt-2">Atualizado {lastRun.created_at ? format(new Date(lastRun.created_at), "dd/MM 'às' HH:mm", { locale: ptBR }) : '—'} · {lastRun.decisions_count} decisões geradas</p>}
           </CardContent>
         </Card>
       )}
@@ -213,7 +213,8 @@ export default function BrainPage() {
                 <Badge variant="outline" className="text-[10px]">{r.mode}</Badge>
                 <div className="flex-1 text-sm truncate">{r.synthesis || '—'}</div>
                 <span className="text-xs text-muted-foreground shrink-0">{r.decisions_count} dec. · {r.duration_ms ? `${(r.duration_ms / 1000).toFixed(1)}s` : '—'}</span>
-                <span className="text-xs text-muted-foreground shrink-0">{format(new Date(r.created_at), 'dd/MM HH:mm', { locale: ptBR })}</span>
+                <span className="text-xs text-muted-foreground shrink-0">{r.created_at ? format(new Date(r.created_at), 'dd/MM HH:mm', { locale: ptBR }) : '—'}</span>
+
               </CardContent>
             </Card>
           ))}

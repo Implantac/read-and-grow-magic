@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
-import { handleMutationError, mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
+import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface DbQuotationItem {
   id: string;
   quotation_id: string;
@@ -109,7 +109,10 @@ export function useCreateQuotation() {
       qc.invalidateQueries({ queryKey: ['quotations'] });
       toastSuccess('Orçamento criado com sucesso!');
     },
-    onError: mutationErrorHandler('Erro ao criar orçamento'),
+    onError: (e: any) => {
+      console.error('Error creating quotation:', e);
+      handleMutationError(e);
+    },
   });
 }
 
@@ -177,6 +180,9 @@ export function useConvertQuotationToOrder() {
       qc.invalidateQueries({ queryKey: ['orders'] });
       toastSuccess('Orçamento convertido em pedido com sucesso!');
     },
-    onError: mutationErrorHandler('Erro ao converter'),
+    onError: (e: any) => {
+      console.error('Error converting quotation:', e);
+      handleMutationError(e);
+    },
   });
 }

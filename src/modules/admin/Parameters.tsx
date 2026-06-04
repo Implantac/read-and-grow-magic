@@ -289,7 +289,7 @@ const Parameters = () => {
                       </TableCell>
                       <TableCell>
                         <div className="text-sm text-muted-foreground">
-                          <p>{format(new Date(param.updatedAt), "dd/MM/yyyy", { locale: ptBR })}</p>
+                          <p>{param.updatedAt ? format(new Date(param.updatedAt), "dd/MM/yyyy", { locale: ptBR }) : '—'}</p>
                           <p className="text-xs">por {param.updatedBy}</p>
                         </div>
                       </TableCell>

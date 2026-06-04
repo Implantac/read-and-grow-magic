@@ -66,8 +66,12 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
           setOperationTypes((company.operation_types as any[]) || []);
         }
       }
-    } catch (error) {
-      console.error('Error loading enterprise context:', error);
+    } catch (error: any) {
+      if (error?.message?.includes('JWT') || error?.status === 401) {
+        // Silently ignore auth errors during initialization as useAuth handles redirect
+      } else {
+        console.error('Error loading enterprise context:', error);
+      }
     } finally {
       setIsLoading(false);
     }

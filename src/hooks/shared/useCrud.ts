@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { toastSuccess, handleMutationError, mutationErrorHandler } from '@/lib/toastHelpers';
+import { toastSuccess, toastError, handleMutationError } from '@/lib/toastHelpers';
 import { BaseService } from '@/services/shared/baseService';
 
 export function useCrud<T extends { id: string }>(
@@ -31,7 +31,10 @@ export function useCrud<T extends { id: string }>(
         queryClient.invalidateQueries({ queryKey });
         toastSuccess(`${entityName} cadastrado com sucesso!`);
       },
-      onError: (error: any) => handleMutationError(error),
+      onError: (error: any) => {
+        console.error(`Error creating ${entityName}:`, error);
+        handleMutationError(error);
+      },
     });
   };
 
@@ -42,7 +45,10 @@ export function useCrud<T extends { id: string }>(
         queryClient.invalidateQueries({ queryKey });
         toastSuccess(`${entityName} atualizado com sucesso!`);
       },
-      onError: (error: any) => handleMutationError(error),
+      onError: (error: any) => {
+        console.error(`Error updating ${entityName}:`, error);
+        handleMutationError(error);
+      },
     });
   };
 
@@ -53,7 +59,10 @@ export function useCrud<T extends { id: string }>(
         queryClient.invalidateQueries({ queryKey });
         toastSuccess(`${entityName} excluído com sucesso!`);
       },
-      onError: (error: any) => handleMutationError(error),
+      onError: (error: any) => {
+        console.error(`Error deleting ${entityName}:`, error);
+        handleMutationError(error);
+      },
     });
   };
 

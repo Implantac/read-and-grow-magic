@@ -75,15 +75,25 @@ export default function QuotationsPage() {
 
   const filteredQuotations = quotations.filter((q) => {
     if (filters.status && q.status !== filters.status) return false;
-    if (filters.startDate && new Date(q.date) < new Date(filters.startDate)) return false;
-    if (filters.endDate && new Date(q.date) > new Date(filters.endDate)) return false;
+    if (filters.startDate) {
+      const qDate = new Date(q.date);
+      const startDate = new Date(filters.startDate);
+      startDate.setHours(0, 0, 0, 0);
+      if (qDate < startDate) return false;
+    }
+    if (filters.endDate) {
+      const qDate = new Date(q.date);
+      const endDate = new Date(filters.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      if (qDate > endDate) return false;
+    }
     return true;
   });
 
   const columns: Column<DbQuotation>[] = [
     { key: 'number', label: 'Número', sortable: true },
     { key: 'client_name', label: 'Cliente', sortable: true },
-    { key: 'date', label: 'Data', sortable: true, render: (v) => format(new Date(v as string), 'dd/MM/yyyy', { locale: ptBR }) },
+    { key: 'date', label: 'Data', sortable: true, render: (v) => v ? format(new Date(v as string), 'dd/MM/yyyy', { locale: ptBR }) : '—' },
     { key: 'valid_until', label: 'Validade', render: (v) => {
       const date = new Date(v as string);
       return <span className={isPast(date) ? 'text-destructive' : ''}>{format(date, 'dd/MM/yyyy', { locale: ptBR })}</span>;

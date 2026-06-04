@@ -49,9 +49,9 @@ export function useClients() {
       const { data, error } = await supabase
         .from('clients')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('name', { ascending: true }); // Better default order for list
       if (error) throw error;
-      return data as DbClient[];
+      return (data || []) as DbClient[];
     },
   });
 }

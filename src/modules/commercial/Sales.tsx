@@ -76,15 +76,28 @@ export default function SalesPage() {
   const filteredSales = sales.filter((sale) => {
     if (filters.status && sale.status !== filters.status) return false;
     if (filters.paymentMethod && sale.payment_method !== filters.paymentMethod) return false;
-    if (filters.startDate && new Date(sale.date) < new Date(filters.startDate)) return false;
-    if (filters.endDate && new Date(sale.date) > new Date(filters.endDate)) return false;
+    if (filters.startDate) {
+      const saleDate = new Date(sale.date);
+      const startDate = new Date(filters.startDate);
+      // Set time to beginning of day for comparison
+      startDate.setHours(0, 0, 0, 0);
+      if (saleDate < startDate) return false;
+    }
+    if (filters.endDate) {
+      const saleDate = new Date(sale.date);
+      const endDate = new Date(filters.endDate);
+      // Set time to end of day for comparison
+      endDate.setHours(23, 59, 59, 999);
+      if (saleDate > endDate) return false;
+    }
     return true;
   });
+
 
   const columns: Column<DbSale>[] = [
     { key: 'number', label: 'Número', sortable: true },
     { key: 'client_name', label: 'Cliente', sortable: true },
-    { key: 'date', label: 'Data', sortable: true, render: (v) => format(new Date(v as string), "dd/MM/yyyy HH:mm", { locale: ptBR }) },
+    { key: 'date', label: 'Data', sortable: true, render: (v) => v ? format(new Date(v as string), "dd/MM/yyyy HH:mm", { locale: ptBR }) : '—' },
     { key: 'items', label: 'Itens', render: (_, row) => row.items?.length || 0 },
     { key: 'payment_method', label: 'Pagamento', render: (v) => getPaymentMethodLabel(v as any) },
     { key: 'total', label: 'Total', sortable: true, render: (v) => formatBRL(v as number) },

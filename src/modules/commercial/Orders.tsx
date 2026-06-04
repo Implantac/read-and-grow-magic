@@ -226,8 +226,18 @@ export default function OrdersPage() {
     if (filters.status && order.status !== filters.status) return false;
     if (filters.priority && order.priority !== filters.priority) return false;
     if (filters.paymentMethod && order.payment_method !== filters.paymentMethod) return false;
-    if (filters.startDate && new Date(order.date) < new Date(filters.startDate)) return false;
-    if (filters.endDate && new Date(order.date) > new Date(filters.endDate)) return false;
+    if (filters.startDate) {
+      const orderDate = new Date(order.date);
+      const startDate = new Date(filters.startDate);
+      startDate.setHours(0, 0, 0, 0);
+      if (orderDate < startDate) return false;
+    }
+    if (filters.endDate) {
+      const orderDate = new Date(order.date);
+      const endDate = new Date(filters.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      if (orderDate > endDate) return false;
+    }
     return true;
   });
 
@@ -245,7 +255,7 @@ export default function OrdersPage() {
         </div>
       ),
     },
-    { key: 'date', label: 'Data', sortable: true, render: (v) => format(new Date(v as string), 'dd/MM/yyyy', { locale: ptBR }) },
+    { key: 'date', label: 'Data', sortable: true, render: (v) => v ? format(new Date(v as string), 'dd/MM/yyyy', { locale: ptBR }) : '—' },
     {
       key: 'delivery_date', label: 'Entrega',
       render: (v) => v ? (

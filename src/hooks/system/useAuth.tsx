@@ -1,8 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAppStore } from '@/stores/useAppStore';
-import type { Company } from '@/types';
-const mockCompanies: Company[] = [];
 import type { User as AppUser } from '@/types';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
@@ -12,9 +10,7 @@ interface UseAuthOptions {
 
 function isAuthSessionError(error?: { status?: number; message?: string } | null) {
   if (!error) return false;
-
   const message = error.message?.toLowerCase() || '';
-
   return (
     error.status === 401 ||
     error.status === 403 ||
@@ -37,7 +33,8 @@ function mapSupabaseUser(user: SupabaseUser, profileName?: string, role?: string
 
 export function useAuth(options: UseAuthOptions = {}) {
   const { initialize = true } = options;
-  const { setUser, setUserRole, setActiveCompany, logout: storeLogout } = useAppStore();
+  const { setUser, setUserRole, logout: storeLogout } = useAppStore();
+
   const [loading, setLoading] = useState(initialize);
 
   const clearInvalidSession = useCallback(async () => {
@@ -51,34 +48,37 @@ export function useAuth(options: UseAuthOptions = {}) {
       return;
     }
 
-    const { data: userResponse, error: userError } = await supabase.auth.getUser();
-    const verifiedUser = userResponse.user;
+    try {
+      const { data: userResponse, error: userError } = await supabase.auth.getUser();
+      const verifiedUser = userResponse.user;
 
-    if (userError || !verifiedUser || verifiedUser.id !== sessionUser.id) {
-      await clearInvalidSession();
-      return;
+      if (userError || !verifiedUser || verifiedUser.id !== sessionUser.id) {
+        await clearInvalidSession();
+        return;
+      }
+
+      const [profileResponse, roleResponse] = await Promise.all([
+        supabase
+          .from('profiles')
+          .select('name')
+          .eq('id', verifiedUser.id)
+          .maybeSingle(),
+        supabase.rpc('get_user_role', { _user_id: verifiedUser.id })
+      ]);
+
+      if (isAuthSessionError(profileResponse.error) || isAuthSessionError(roleResponse.error)) {
+        await clearInvalidSession();
+        return;
+      }
+
+      const role = roleResponse.data || 'viewer';
+      const appUser = mapSupabaseUser(verifiedUser, profileResponse.data?.name, role);
+      setUser(appUser);
+      setUserRole(role);
+    } catch (e) {
+      console.error('Auth sync error:', e);
     }
-
-    const [profileResponse, roleResponse] = await Promise.all([
-      supabase
-        .from('profiles')
-        .select('name')
-        .eq('id', verifiedUser.id)
-        .maybeSingle(),
-      supabase.rpc('get_user_role', { _user_id: verifiedUser.id })
-    ]);
-
-    if (isAuthSessionError(profileResponse.error) || isAuthSessionError(roleResponse.error)) {
-      await clearInvalidSession();
-      return;
-    }
-
-    const role = roleResponse.data || 'viewer';
-    const appUser = mapSupabaseUser(verifiedUser, profileResponse.data?.name, role);
-    setUser(appUser);
-    setUserRole(role);
-    setActiveCompany(mockCompanies[0] ?? null);
-  }, [clearInvalidSession, setUser, setUserRole, setActiveCompany, storeLogout]);
+  }, [clearInvalidSession, setUser, setUserRole, storeLogout]);
 
   useEffect(() => {
     if (!initialize) {
@@ -87,24 +87,31 @@ export function useAuth(options: UseAuthOptions = {}) {
     }
 
     let mounted = true;
+    const isSyncing = { current: false };
 
     const runSync = async (sessionUser: SupabaseUser | null) => {
+      if (!mounted || isSyncing.current) return;
+      isSyncing.current = true;
       try {
         await syncAuthState(sessionUser);
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+          isSyncing.current = false;
+        }
       }
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      // Avoid async Supabase calls directly inside this callback (deadlock workaround)
-      setTimeout(() => {
-        void runSync(session?.user ?? null);
-      }, 0);
+      if (mounted) {
+        setTimeout(() => {
+          if (mounted) void runSync(session?.user ?? null);
+        }, 0);
+      }
     });
 
     void supabase.auth.getSession().then(({ data: { session } }) => {
-      void runSync(session?.user ?? null);
+      if (mounted) void runSync(session?.user ?? null);
     });
 
     return () => {
