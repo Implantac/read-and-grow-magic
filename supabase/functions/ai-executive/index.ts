@@ -277,7 +277,7 @@ function computeKPIs(d: any, months: number = 12) {
         { title: "Custo Operacional", description: "Tendência de alta em custos logísticos MoM", impact: "medium" }
       ]
     },
-    consensus: generateConsensus(computed.kpis, d, segment),
+    consensus: generateConsensusItems(computed.kpis, d, segment),
     summary: {
       segment,
       totalOrders: d.orders.length,
