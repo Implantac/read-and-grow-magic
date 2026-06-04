@@ -18,7 +18,9 @@ import { DataTable, type Column } from '@/shared/components/DataTable';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/shared/components/AdvancedFilters';
 import { getPaymentMethodLabel } from '@/config/commercial';
-import { useSales, useCreateSale, type DbSale } from '@/hooks/commercial/useSales';
+import { useSales, useCreateSale } from '@/hooks/commercial/useSales';
+import type { DbSale } from '@/types/commercial';
+
 import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
 
@@ -37,7 +39,7 @@ const filterFields: FilterField[] = [
 ];
 
 export default function SalesPage() {
-  const { data: sales = [], isLoading } = useSales();
+  const { data: sales = [], isLoading } = useSales() as { data: DbSale[] | undefined, isLoading: boolean };
   const createSale = useCreateSale();
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [isViewOpen, setIsViewOpen] = useState(false);

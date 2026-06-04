@@ -35,7 +35,7 @@ export default function PerformanceDashboard() {
   const { data: clients = [] } = useClients();
   const { data: funnel = [], isLoading: lf } = useSalesFunnel();
   const { data: reps = [] } = useSalesReps();
-  const { data: sales = [] } = useSales();
+  const { data: sales = [] } = useSales() as { data: any[] | undefined };
   const { data: followUps = [] } = useFollowUps();
 
   const performances = useRepPerformance(reps, orders, funnel);

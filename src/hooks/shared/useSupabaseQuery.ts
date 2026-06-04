@@ -1,5 +1,4 @@
 import { useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { PostgrestError } from '@supabase/supabase-js';
 
 /**
@@ -7,15 +6,17 @@ import { PostgrestError } from '@supabase/supabase-js';
  */
 export function useSupabaseQuery<T>(
   queryKey: unknown[],
-  queryFn: () => Promise<{ data: T | null; error: PostgrestError | null }>,
-  options?: Omit<UseQueryOptions<T | null, PostgrestError>, 'queryKey' | 'queryFn'>
+  queryFn: () => Promise<T>,
+  options?: Omit<UseQueryOptions<T, PostgrestError>, 'queryKey' | 'queryFn'>
 ) {
   return useQuery({
     queryKey,
     queryFn: async () => {
-      const { data, error } = await queryFn();
-      if (error) throw error;
-      return data;
+      try {
+        return await queryFn();
+      } catch (error: any) {
+        throw error;
+      }
     },
     ...options,
   });
@@ -25,16 +26,16 @@ export function useSupabaseQuery<T>(
  * Hook genérico para mutações no Supabase.
  */
 export function useSupabaseMutation<TVariables, TData>(
-  mutationFn: (variables: TVariables) => Promise<{ data: TData | null; error: PostgrestError | null }>,
-  options?: Omit<UseMutationOptions<TData | null, PostgrestError, TVariables>, 'mutationFn'>
+  mutationFn: (variables: TVariables) => Promise<TData>,
+  options?: Omit<UseMutationOptions<TData, PostgrestError, TVariables>, 'mutationFn'>
 ) {
-  const queryClient = useQueryClient();
-  
   return useMutation({
     mutationFn: async (variables: TVariables) => {
-      const { data, error } = await mutationFn(variables);
-      if (error) throw error;
-      return data;
+      try {
+        return await mutationFn(variables);
+      } catch (error: any) {
+        throw error;
+      }
     },
     ...options,
   });

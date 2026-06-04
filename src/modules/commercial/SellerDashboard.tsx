@@ -49,7 +49,7 @@ const OPPORTUNITY_LABELS: Record<string, string> = {
 export default function SellerDashboard() {
   const { data: clients = [], isLoading: lc } = useClients();
   const { data: orders = [], isLoading: lo } = useOrders();
-  const { data: sales = [] } = useSales();
+  const { data: sales = [] } = useSales() as { data: any[] | undefined };
   const { data: funnel = [] } = useSalesFunnel();
   const { data: reps = [] } = useSalesReps();
   const { data: followUps = [] } = useFollowUps();

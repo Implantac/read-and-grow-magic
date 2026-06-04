@@ -1,3 +1,8 @@
+export type SaleStatus = 'completed' | 'cancelled' | 'refunded' | 'pending';
+export type OrderStatus = 'pending' | 'approved' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+export type QuotationStatus = 'draft' | 'sent' | 'approved' | 'rejected' | 'expired';
+export type PaymentMethod = 'cash' | 'credit_card' | 'debit_card' | 'pix' | 'boleto' | 'transfer';
+
 export interface DbSaleItem {
   id: string;
   sale_id: string;
@@ -20,7 +25,7 @@ export interface DbSale {
   discount: number;
   total: number;
   payment_method: string;
-  status: string;
+  status: SaleStatus;
   sales_rep_id: string | null;
   sales_rep_name: string | null;
   notes: string | null;
