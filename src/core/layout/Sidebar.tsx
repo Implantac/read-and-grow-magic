@@ -226,12 +226,18 @@ export function Sidebar() {
             // Adaptive logic based on business vertical (Pillar 3 — ERP ADAPTATIVO)
             const adaptiveRules: Record<Segment, string[]> = {
               textile: ['Produção', 'Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+              apparel: ['Produção', 'Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
               fio: ['Produção', 'Logística', 'Financeiro', 'Gestão'],
               tecelagem: ['Produção', 'Logística', 'Financeiro', 'Gestão'],
               animal_feed: ['Produção', 'Logística', 'Financeiro', 'Gestão'],
               pharma: ['Produção', 'Logística', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+              industry: ['Produção', 'Logística', 'Financeiro', 'Gestão', 'Operacional'],
               distribution: ['Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+              wholesaler: ['Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
               retail: ['Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+              retail_chain: ['Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+              franchise: ['Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+              holding: ['Gestão', 'Financeiro', 'Comercial'],
               services: ['Comercial', 'Financeiro', 'Gestão'],
               food_factory: ['Produção', 'Logística', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
               general: ['Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Logística', 'Produção']
