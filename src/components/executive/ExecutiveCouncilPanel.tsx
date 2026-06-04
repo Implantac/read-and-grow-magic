@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
-import { Brain, Cpu, ShieldCheck, Scale, BarChart3, Factory, Warehouse, Search, DollarSign, Briefcase, Truck, Users, Cog } from 'lucide-react';
+import { Brain, Cpu, ShieldCheck, Scale, BarChart3, Factory, Warehouse, Search, DollarSign, Briefcase, Truck, Users, Cog, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const specialists = [
