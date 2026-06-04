@@ -2,6 +2,7 @@ import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 /**
  * Centralized AI Prompts Template System
+ */
 export const PROMPT_VERSION = "1.1.0";
 
 export const SHARED_PROMPT_RULES = `
