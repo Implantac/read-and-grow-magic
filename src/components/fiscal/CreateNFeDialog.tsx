@@ -45,6 +45,8 @@ interface NFeItemForm {
   pis?: number;
   cofins?: number;
   ipi?: number;
+  ibs?: number;
+  cbs?: number;
 }
 
 const highlightText = (text: string, search: string) => <HighlightText text={text} search={search} />;
@@ -59,7 +61,7 @@ interface CreateNFeDialogProps {
     clientId?: string;
     clientDocument?: string;
     operationType: string;
-    items: { productCode: string; productName: string; productId?: string; quantity: number; unitPrice: number; unit?: string; ncm?: string; cfop?: string }[];
+    items: { productCode: string; productName: string; productId?: string; quantity: number; unitPrice: number; unit?: string; ncm?: string; cfop?: string; ibs?: number; cbs?: number; ipi?: number; pis?: number; cofins?: number }[];
     discount?: number;
     shipping?: number;
   }) => Promise<any>;
@@ -134,11 +136,12 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
         
         const calc = calculateTaxes(
           { price: it.unitPrice, quantity: it.quantity, ncm: it.ncm },
-          'SP', // Default origin state
+          'SP', 
           clientUF || 'SP',
           taxRulesQuery.data || [],
           // @ts-ignore
-          currentCompany?.tax_regime || 'simples_nacional'
+          currentCompany?.tax_regime || 'simples_nacional',
+          'hybrid' // Hardcoded hybrid for this phase
         );
 
         return {
@@ -147,10 +150,12 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
           pis: calc.pis_value,
           cofins: calc.cofins_value,
           ipi: calc.ipi_value,
+          ibs: calc.ibs_value,
+          cbs: calc.cbs_value,
         };
       });
 
-      const changed = updated.some((u, i) => u.icms !== items[i]?.icms);
+      const changed = updated.some((u, i) => u.icms !== items[i]?.icms || u.ibs !== items[i]?.ibs);
       if (changed) setItems(updated);
     };
     if (items.length > 0) calcAll();
@@ -212,6 +217,8 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
   const totalPis = items.reduce((s, i) => s + (i.pis || 0), 0);
   const totalCofins = items.reduce((s, i) => s + (i.cofins || 0), 0);
   const totalIpi = items.reduce((s, i) => s + (i.ipi || 0), 0);
+  const totalIbs = items.reduce((s, i) => s + (i.ibs || 0), 0);
+  const totalCbs = items.reduce((s, i) => s + (i.cbs || 0), 0);
   const total = subtotal - discount + shipping;
 
   const validationByStep = useMemo(() => {
@@ -344,6 +351,8 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
         ipi: i.ipi,
         pis: i.pis,
         cofins: i.cofins,
+        ibs: i.ibs,
+        cbs: i.cbs,
       })),
       discount,
       shipping,
