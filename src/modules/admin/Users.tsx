@@ -179,31 +179,27 @@ const UsersPage = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Gestão de Usuários</h1>
-          <p className="text-muted-foreground">Gerencie usuários e permissões do sistema</p>
-        </div>
-        <div className="flex gap-2">
-          <ExportButton
-            data={filteredUsers as unknown as Record<string, unknown>[]}
-            columns={[
-              { key: 'name', label: 'Nome' },
-              { key: 'email', label: 'E-mail' },
-              { key: 'role', label: 'Perfil' },
-              { key: 'department', label: 'Departamento' },
-              { key: 'status', label: 'Status' },
-            ]}
-            filename="usuarios"
-          />
-          <Button onClick={handleCreateUser}>
-            <UserPlus className="h-4 w-4 mr-2" />
-            Novo Usuário
-          </Button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader 
+        title="Gestão de Usuários" 
+        description="Gerencie usuários e permissões do sistema"
+      >
+        <ExportButton
+          data={filteredUsers as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'name', label: 'Nome' },
+            { key: 'email', label: 'E-mail' },
+            { key: 'role', label: 'Perfil' },
+            { key: 'department', label: 'Departamento' },
+            { key: 'status', label: 'Status' },
+          ]}
+          filename="usuarios"
+        />
+        <Button onClick={handleCreateUser}>
+          <UserPlus className="h-4 w-4 mr-2" />
+          Novo Usuário
+        </Button>
+      </PageHeader>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -599,7 +595,7 @@ const UsersPage = () => {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 };
 
