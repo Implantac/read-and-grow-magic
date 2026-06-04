@@ -35,7 +35,7 @@ serve(async (req) => {
     const authenticatedUserId = user.id;
     const supabase = createClient(supabaseUrl, supabaseKey);
     const body = await req.json();
-    const { action, messages, months = 12 } = body;
+    const { action, messages, months = 12, segment = 'general' } = body;
 
     if (action === "clear_history") {
       await supabase.from("ai_executive_chat").delete().eq("user_id", authenticatedUserId);
@@ -48,7 +48,7 @@ serve(async (req) => {
     if (action === "ceo_brief") return await handleCEOBrief(supabase, lovableKey, corsHeaders);
     if (action === "execute_decisions") return await handleExecuteDecisions(supabase, body, corsHeaders, authenticatedUserId);
     if (action === "autopilot_run") return await handleAutoPilotRun(supabase, lovableKey, corsHeaders);
-    return await handleDashboardData(supabase, corsHeaders, months);
+    return await handleDashboardData(supabase, corsHeaders, months, segment);
   } catch (e) {
     console.error("ai-executive error:", e);
     return new Response(JSON.stringify({ error: `Internal error: ${e.message}` }), {
@@ -300,6 +300,7 @@ function computeKPIs(d: any, months: number = 12) {
       }
     ],
     summary: {
+      segment,
       totalOrders: d.orders.length,
       totalProducts: d.products.length,
       totalClients: d.clients.length,
