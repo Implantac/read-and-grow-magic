@@ -212,7 +212,7 @@ export default function FiscalDashboard() {
           
           {xmlData && (
             <div className="space-y-6 py-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-xl border">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 bg-muted/30 rounded-xl border">
                 <div>
                   <Label className="text-[10px] uppercase text-muted-foreground font-bold">Número/Série</Label>
                   <p className="font-bold">{xmlData.number} / {xmlData.series}</p>
@@ -225,6 +225,13 @@ export default function FiscalDashboard() {
                   <Label className="text-[10px] uppercase text-muted-foreground font-bold">Fornecedor</Label>
                   <p className="font-bold truncate">{xmlData.supplier.name}</p>
                   <p className="text-xs text-muted-foreground font-mono">{xmlData.supplier.cnpj}</p>
+                </div>
+                <div className="bg-primary/10 p-2 rounded border border-primary/20">
+                  <Label className="text-[10px] uppercase text-primary font-black">Pedido Vinculado</Label>
+                  <p className="font-bold text-primary flex items-center gap-1">
+                    <CheckCircle className="h-3 w-3" />
+                    {xmlData.purchaseOrderId || 'Nenhum'}
+                  </p>
                 </div>
               </div>
 
