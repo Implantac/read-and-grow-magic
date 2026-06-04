@@ -16,6 +16,7 @@ import { WMSRoutes } from './routes/WMSRoutes';
 import { AdminRoutes } from './routes/AdminRoutes';
 import { OperationalRoutes } from './routes/OperationalRoutes';
 import { MiscellaneousRoutes } from './routes/MiscellaneousRoutes';
+import { VerticalPackRoutes } from './core/routes/VerticalPackRoutes';
 
 // Eager load critical pages
 import Login from "./pages/Login";
@@ -66,6 +67,7 @@ const App = () => (
               {AdminRoutes}
               {OperationalRoutes}
               {MiscellaneousRoutes}
+              {VerticalPackRoutes}
             </Route>
 
             <Route path="*" element={<NotFound />} />

@@ -3,6 +3,7 @@ import logoUseSistemas from '@/assets/logo.png';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
+import { useEnterpriseStore } from '../stores/useEnterpriseStore';
 import { navigationSections } from '@/config/navigation';
 import type { NavItem } from '@/config/navigation';
 import {
@@ -166,6 +167,7 @@ function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, ex
 export function Sidebar() {
   const location = useLocation();
   const { sidebarCollapsed, user } = useAppStore();
+  const { config } = useEnterpriseStore();
   const [expandedItems, setExpandedItems] = useState<string[]>(['Dashboard', 'Operacional', 'Financeiro']);
 
   const toggleExpanded = (title: string) => {
@@ -218,7 +220,12 @@ export function Sidebar() {
 
         {/* Navigation Content */}
         <nav className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin px-3 py-4 space-y-6">
-          {navigationSections.map((section, sectionIndex) => (
+          {navigationSections.filter(section => {
+            if (!config) return true;
+            // Lógica de filtragem adaptativa por segmento
+            if (config.segment !== 'textile' && section.label === 'Produção') return false;
+            return true;
+          }).map((section, sectionIndex) => (
             <div key={section.label || sectionIndex} className="space-y-2">
               {!sidebarCollapsed && section.label && (
                 <div className="flex items-center justify-between px-3 mb-1">
