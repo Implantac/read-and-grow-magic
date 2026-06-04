@@ -2,13 +2,12 @@ import { useMemo } from 'react';
 import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/financial/useAccountsPayable';
 import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
-import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import type { BalanceSheetItem } from '@/types/accounting';
 
 export function useBalanceSheet() {
-  const { data: receivablesData = [], isLoading: loadingR } = useAccountsReceivable();
-  const { data: payablesData = [], isLoading: loadingP } = useAccountsPayable();
-  const { data: bankAccountsData = [], isLoading: loadingB } = useBankAccounts();
+  const { data: receivablesData, isLoading: loadingR } = useAccountsReceivable();
+  const { data: payablesData, isLoading: loadingP } = useAccountsPayable();
+  const { data: bankAccountsData, isLoading: loadingB } = useBankAccounts();
 
   const receivables = (receivablesData || []) as any[];
   const payables = (payablesData || []) as any[];
