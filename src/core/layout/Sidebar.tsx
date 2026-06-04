@@ -3,7 +3,7 @@ import logoUseSistemas from '@/assets/logo.png';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
-import { useEnterprise } from '../auth/EnterpriseContext';
+import { useEnterprise, type Segment } from '../auth/EnterpriseContext';
 import { navigationSections } from '@/config/navigation';
 import type { NavItem } from '@/config/navigation';
 import {
