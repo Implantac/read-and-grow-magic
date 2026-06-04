@@ -77,20 +77,21 @@ export function ExecutiveCouncilPanel() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-11 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-11 gap-2">
           {specialists.map((specialist) => {
             const Icon = specialist.icon;
             return (
               <div 
                 key={specialist.role} 
-                className="flex flex-col items-center text-center p-1.5 rounded-lg bg-background/30 border border-border/30 hover:border-primary/30 transition-all cursor-default group"
+                className="flex flex-col items-center text-center p-2 rounded-lg bg-background/40 border border-primary/10 hover:border-primary/40 hover:bg-background/60 hover:shadow-lg transition-all cursor-pointer group"
               >
-                <div className={cn("mb-1 p-1 rounded-full bg-background ring-1 ring-border group-hover:ring-primary/30 transition-all", specialist.color)}>
-                  <Icon className="h-3.5 w-3.5" />
+                <div className={cn("mb-1.5 p-1.5 rounded-full bg-background ring-1 ring-primary/20 group-hover:ring-primary/40 group-hover:scale-110 transition-all shadow-sm", specialist.color)}>
+                  <Icon className="h-4 w-4" />
                 </div>
-                <span className="text-[8px] font-bold leading-tight uppercase opacity-60 group-hover:opacity-100 transition-opacity">
+                <span className="text-[9px] font-black leading-tight uppercase tracking-tight text-foreground/70 group-hover:text-primary transition-colors">
                   {specialist.role}
                 </span>
+                <div className="mt-1 h-1 w-0 bg-primary/40 rounded-full group-hover:w-full transition-all duration-300" />
               </div>
             );
           })}
