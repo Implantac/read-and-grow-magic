@@ -2,36 +2,69 @@ export type PaymentStatus = 'pending' | 'paid' | 'overdue' | 'cancelled' | 'part
 export type TransactionType = 'income' | 'expense';
 export type PaymentMethod = 'pix' | 'boleto' | 'credit_card' | 'debit_card' | 'transfer' | 'cash' | 'check';
 
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  pix: 'PIX',
+  boleto: 'Boleto',
+  credit_card: 'Cartão de Crédito',
+  debit_card: 'Cartão de Débito',
+  transfer: 'Transferência',
+  cash: 'Dinheiro',
+  check: 'Cheque',
+};
+
 export interface AccountPayable {
   id: string;
   description: string;
   supplier: string;
   category: string;
   amount: number;
-  dueDate: string;
-  paymentDate?: string;
-  status: PaymentStatus;
-  paymentMethod?: PaymentMethod;
-  notes?: string;
-  invoiceNumber?: string;
-  createdAt: string;
+  original_amount: number | null;
+  open_amount: number | null;
+  paid_amount: number | null;
+  interest: number | null;
+  penalty: number | null;
+  discount_amount: number | null;
+  due_date: string;
+  payment_date: string | null;
+  status: PaymentStatus | string;
+  payment_method: PaymentMethod | string | null;
+  notes: string | null;
+  invoice_number: string | null;
+  expense_type: string | null;
+  cost_center_id: string | null;
+  bank_account_id: string | null;
+  installment_number: number | null;
+  total_installments: number | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface AccountReceivable {
   id: string;
   description: string;
-  client: string;
-  clientId: string;
+  client_name: string;
+  client_id: string | null;
   category: string;
   amount: number;
-  dueDate: string;
-  paymentDate?: string;
-  status: PaymentStatus;
-  paymentMethod?: PaymentMethod;
-  notes?: string;
-  invoiceNumber?: string;
-  orderId?: string;
-  createdAt: string;
+  original_amount: number | null;
+  open_amount: number | null;
+  paid_amount: number | null;
+  interest: number | null;
+  penalty: number | null;
+  discount_amount: number | null;
+  due_date: string;
+  issue_date: string | null;
+  payment_date: string | null;
+  status: PaymentStatus | string;
+  payment_method: PaymentMethod | string | null;
+  notes: string | null;
+  invoice_number: string | null;
+  nfe_id: string | null;
+  order_id: string | null;
+  installment_number: number | null;
+  total_installments: number | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface CashFlowEntry {
@@ -63,16 +96,6 @@ export interface FinancialCategory {
   type: TransactionType;
   color: string;
 }
-
-export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
-  pix: 'PIX',
-  boleto: 'Boleto',
-  credit_card: 'Cartão de Crédito',
-  debit_card: 'Cartão de Débito',
-  transfer: 'Transferência',
-  cash: 'Dinheiro',
-  check: 'Cheque',
-};
 
 export type CheckStatus = 'received' | 'deposited' | 'cleared' | 'bounced' | 'cancelled' | 'issued';
 export type BoletoStatus = 'pending' | 'registered' | 'paid' | 'cancelled' | 'expired';

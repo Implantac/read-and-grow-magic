@@ -1,7 +1,10 @@
 import { supabase } from '@/integrations/supabase/client';
 import { DbSale, CreateSaleInput } from '@/types/commercial';
+import { BaseService } from '../shared/baseService';
 
-export const salesService = {
+class SalesService {
+  private base = new BaseService<DbSale>('sales');
+
   async getAll() {
     const { data, error } = await supabase
       .from('sales')
@@ -14,10 +17,13 @@ export const salesService = {
       ...s,
       items: s.sale_items || [],
     })) as DbSale[];
-  },
+  }
+
+  async getById(id: string) {
+    return this.base.getById(id);
+  }
 
   async create(input: CreateSaleInput) {
-    // Get next number
     const { count } = await supabase.from('sales').select('id', { count: 'exact', head: true });
     const nextNum = `VND${String((count || 0) + 1).padStart(4, '0')}`;
 
@@ -55,4 +61,10 @@ export const salesService = {
 
     return sale;
   }
-};
+
+  async delete(id: string) {
+    return this.base.delete(id);
+  }
+}
+
+export const salesService = new SalesService();

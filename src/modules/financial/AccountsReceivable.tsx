@@ -3,7 +3,6 @@ import { Plus, Search, Eye, Edit, Trash2, DollarSign, AlertTriangle, Clock, Chec
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
-import { KPICard } from '@/shared/components/KPICard';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -16,14 +15,17 @@ import { Textarea } from '@/ui/base/textarea';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Badge } from '@/ui/base/badge';
 import { financialCategories } from '@/config/financial';
-import { PaymentMethod } from '@/types/financial';
+import { PaymentMethod, AccountReceivable } from '@/types/financial';
 import { useAccountsReceivable, useCreateAccountReceivable, useUpdateAccountReceivable, useDeleteAccountReceivable } from '@/hooks/financial/useAccountsReceivable';
 import { useCreatePaymentRecord } from '@/hooks/financial/usePaymentRecords';
 import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 import { useClients } from '@/hooks/commercial/useClients';
 import { SettlementDialog, type SettlementTarget } from '@/components/financeiro/SettlementDialog';
+import { AgingList } from '@/components/financeiro/AgingList';
+import { AccountsReceivableSummary } from '@/components/financeiro/AccountsReceivableSummary';
 import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+
 
 import { formatBRL, formatDate } from '@/lib/formatters';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
@@ -284,52 +286,12 @@ export default function AccountsReceivable() {
         </Dialog>
       </PageHeader>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KPICard title="Total em Aberto" value={formatBRL(summaryData.total)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="A Vencer" value={formatBRL(summaryData.pending)} subtitle={`${accounts.filter(a => a.status === 'pending').length} títulos`} icon={<Clock className="h-5 w-5" />} accentColor="warning" index={1} />
-        <KPICard title="Vencido" value={formatBRL(summaryData.overdue)} subtitle={`${accounts.filter(a => a.status === 'overdue' || (a.status === 'pending' && new Date(a.due_date) < now)).length} títulos`} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={2} />
-        <KPICard title="Recebido" value={formatBRL(summaryData.received)} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={3} />
-      </div>
+      <AccountsReceivableSummary accounts={accounts} />
+
 
       {/* Aging Summary Bar */}
-      {(() => {
-        const overdueItems = accounts.filter(a => a.status !== 'paid' && a.status !== 'cancelled' && new Date(a.due_date) < now);
-        const buckets = [
-          { label: '1-7d', min: 1, max: 7, className: 'bg-warning/60' },
-          { label: '8-15d', min: 8, max: 15, className: 'bg-warning' },
-          { label: '16-30d', min: 16, max: 30, className: 'bg-orange-500' },
-          { label: '31-60d', min: 31, max: 60, className: 'bg-destructive/70' },
-          { label: '+60d', min: 61, max: 9999, className: 'bg-destructive' },
-        ];
-        const totalOverdue = overdueItems.reduce((s, a) => s + Number(a.open_amount ?? a.amount), 0);
-        if (totalOverdue <= 0) return null;
-        const bucketData = buckets.map(b => {
-          const items = overdueItems.filter(a => { const d = differenceInDays(now, new Date(a.due_date)); return d >= b.min && d <= b.max; });
-          return { ...b, value: items.reduce((s, a) => s + Number(a.open_amount ?? a.amount), 0), count: items.length };
-        }).filter(b => b.value > 0);
-        return (
-          <Card>
-            <CardContent className="py-3 px-4">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5"><FileText className="h-3.5 w-3.5" /> Aging List</p>
-                <p className="text-sm font-bold text-destructive">{formatBRL(totalOverdue)}</p>
-              </div>
-              <div className="flex h-5 w-full rounded-full overflow-hidden">
-                {bucketData.map((b, i) => (
-                  <div key={i} className={`${b.className} relative group`} style={{ width: `${(b.value / totalOverdue) * 100}%` }} title={`${b.label}: ${formatBRL(b.value)} (${b.count} títulos)`}>
-                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-medium text-white opacity-0 group-hover:opacity-100 transition-opacity">{b.label}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="flex gap-3 mt-1.5 flex-wrap">
-                {bucketData.map((b, i) => (
-                  <span key={i} className="text-[10px] text-muted-foreground">{b.label}: {formatBRL(b.value)} ({b.count})</span>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        );
-      })()}
+      <AgingList accounts={accounts} />
+
 
       <Card>
         <CardContent className="pt-6">
