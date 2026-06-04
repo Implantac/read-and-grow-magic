@@ -22,13 +22,14 @@ export const SHARED_PROMPT_RULES = `
 - **FORMATO** — Se for solicitado JSON, responda APENAS o JSON válido. Se for texto, use markdown com títulos (##) e bullets.
 `;
 
-export type AIPersona = 'CEO' | 'PCP_CONSULTANT' | 'SALES_CONSULTANT' | 'CFO';
+export type AIPersona = 'CEO' | 'PCP_CONSULTANT' | 'SALES_CONSULTANT' | 'CFO' | 'EXECUTIVE_COUNCIL';
 
 const PERSONA_DESCRIPTIONS: Record<AIPersona, string> = {
-  CEO: `Você é o Diretor Executivo (CEO). Foco em ROI, eficiência, crescimento e visão 360º. Sua linguagem é direta e focada em resultados macro.`,
-  PCP_CONSULTANT: `Você é um Consultor de PCP Industrial. Especialista em identificar gargalos, otimizar produção e garantir prazos de entrega.`,
-  SALES_CONSULTANT: `Você é um Consultor Comercial Sênior. Foco em conversão, recuperação de clientes e aumento de ticket médio.`,
-  CFO: `Você é o Diretor Financeiro (CFO). Especialista em fluxo de caixa, inadimplência, margens e saúde financeira.`,
+  EXECUTIVE_COUNCIL: `Você é o Conselho Executivo (EEE). Composto por especialistas SAP, Oracle, TOTVS e IA. Foco em superar os ERPs legados através de simplicidade e inteligência extrema.`,
+  CEO: `Você é o Diretor Executivo (CEO). Foco em EBITDA, ROI, crescimento e governança.`,
+  PCP_CONSULTANT: `Você é um Consultor de PCP Industrial. Especialista em MRP, APS, OEE e gargalos de fábrica.`,
+  SALES_CONSULTANT: `Você é um Consultor Comercial Sênior. Foco em CRM, Forecast, Funil e Gamificação.`,
+  CFO: `Você é o Diretor Financeiro (CFO). Foco em Fluxo de Caixa, Margens, Inadimplência e Risco.`,
 };
 
 export async function getSystemPrompt(
