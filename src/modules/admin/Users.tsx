@@ -57,15 +57,16 @@ const UsersPage = () => {
 
   // Stats
   const stats = {
-    total: users.length,
-    active: users.filter(u => u.status === 'active').length,
-    pending: users.filter(u => u.status === 'pending').length,
-    blocked: users.filter(u => u.status === 'blocked').length,
+    total: users?.length || 0,
+    active: (users as SystemUser[] || []).filter(u => u.status === 'active').length,
+    pending: (users as SystemUser[] || []).filter(u => u.status === 'pending').length,
+    blocked: (users as SystemUser[] || []).filter(u => u.status === 'blocked').length,
   };
+
 
   // Filter users
   const filteredUsers = useMemo(() => {
-    return users.filter(user => {
+    return (users as SystemUser[] || []).filter(user => {
       const matchesSearch = !filter.search || 
         user.name.toLowerCase().includes(filter.search.toLowerCase()) ||
         user.email.toLowerCase().includes(filter.search.toLowerCase()) ||

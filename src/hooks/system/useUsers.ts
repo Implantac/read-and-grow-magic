@@ -74,7 +74,8 @@ export function useUsers() {
   const queryClient = useQueryClient();
   const { userRole } = useAppStore();
 
-  const usersQuery = useQuery({
+  const usersQuery = useQuery<SystemUser[]>({
+    queryKey: ['admin-users'],
     queryFn: async () => {
       const response = await callAdminUsers('list');
       if (!response?.data) return [];
