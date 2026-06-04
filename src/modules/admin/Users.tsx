@@ -357,9 +357,10 @@ const UsersPage = () => {
                   <TableCell>
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
-                        <Badge className={`${userRoleConfig[user.role].bgColor} ${userRoleConfig[user.role].color} border-0`}>
-                          {userRoleConfig[user.role].label}
+                        <Badge className={`${userRoleConfig[user.role as UserRole]?.bgColor || 'bg-gray-100'} ${userRoleConfig[user.role as UserRole]?.color || 'text-gray-700'} border-0`}>
+                          {userRoleConfig[user.role as UserRole]?.label || user.role}
                         </Badge>
+
                       </div>
                       <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
                         {user.department && (
@@ -378,9 +379,10 @@ const UsersPage = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge className={`${userStatusConfig[user.status].bgColor} ${userStatusConfig[user.status].color} border-0`}>
-                      {userStatusConfig[user.status].label}
+                    <Badge className={`${userStatusConfig[user.status as UserStatus]?.bgColor || 'bg-gray-100'} ${userStatusConfig[user.status as UserStatus]?.color || 'text-gray-700'} border-0`}>
+                      {userStatusConfig[user.status as UserStatus]?.label || user.status}
                     </Badge>
+
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
