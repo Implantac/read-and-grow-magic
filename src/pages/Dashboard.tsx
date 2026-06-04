@@ -115,11 +115,11 @@ export default function Dashboard() {
       </div>
 
       {/* Centro de Comando e Orquestração IA - Cockpit Panorâmico */}
-      <div className="grid gap-6 lg:grid-cols-12">
-        <div className="lg:col-span-9 xl:col-span-10">
+      <div className="grid gap-6 lg:grid-cols-12 items-stretch">
+        <div className="lg:col-span-8 xl:col-span-9 h-full">
           <ExecutiveCouncilPanel />
         </div>
-        <div className="lg:col-span-3 xl:col-span-2">
+        <div className="lg:col-span-4 xl:col-span-3 h-full">
           <ExecutiveConsensus />
         </div>
       </div>
