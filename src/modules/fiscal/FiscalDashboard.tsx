@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { Button } from "@/ui/base/button";
 import { Badge } from "@/ui/base/badge";
 import { Progress } from "@/ui/base/progress";
+import { Label } from "@/ui/base/label";
 import {
   Dialog,
   DialogContent,
