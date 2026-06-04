@@ -40,6 +40,21 @@ export const navigationSections: NavSection[] = [
         href: '/vertical/pharma',
         icon: 'ShieldCheck',
       },
+      {
+        title: 'Fiação & Tecelagem',
+        href: '/vertical/textile-complex',
+        icon: 'Layers',
+      },
+      {
+        title: 'Ração Animal',
+        href: '/vertical/animal-feed',
+        icon: 'Database',
+      },
+      {
+        title: 'Varejo & PDV',
+        href: '/vertical/retail',
+        icon: 'ShoppingBag',
+      },
     ],
   },
   {
