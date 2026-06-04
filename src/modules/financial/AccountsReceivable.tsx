@@ -286,12 +286,8 @@ export default function AccountsReceivable() {
         </Dialog>
       </PageHeader>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KPICard title="Total em Aberto" value={formatBRL(summaryData.total)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="A Vencer" value={formatBRL(summaryData.pending)} subtitle={`${accounts.filter(a => a.status === 'pending').length} títulos`} icon={<Clock className="h-5 w-5" />} accentColor="warning" index={1} />
-        <KPICard title="Vencido" value={formatBRL(summaryData.overdue)} subtitle={`${accounts.filter(a => a.status === 'overdue' || (a.status === 'pending' && new Date(a.due_date) < now)).length} títulos`} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={2} />
-        <KPICard title="Recebido" value={formatBRL(summaryData.received)} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={3} />
-      </div>
+      <AccountsReceivableSummary accounts={accounts} />
+
 
       {/* Aging Summary Bar */}
       {(() => {
