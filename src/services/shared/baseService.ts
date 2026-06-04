@@ -14,7 +14,7 @@ export class BaseService<T extends { id: string }> {
       .order(orderBy, { ascending });
 
     if (error) throw error;
-    return data as T[];
+    return (data as unknown) as T[];
   }
 
   async getById(id: string) {
@@ -25,7 +25,7 @@ export class BaseService<T extends { id: string }> {
       .single();
 
     if (error) throw error;
-    return data as T;
+    return (data as unknown) as T;
   }
 
   async create(item: Omit<T, 'id' | 'created_at' | 'updated_at'>) {
@@ -36,7 +36,7 @@ export class BaseService<T extends { id: string }> {
       .single();
 
     if (error) throw error;
-    return data as T;
+    return (data as unknown) as T;
   }
 
   async update(id: string, updates: Partial<T>) {
@@ -48,7 +48,7 @@ export class BaseService<T extends { id: string }> {
       .single();
 
     if (error) throw error;
-    return data as T;
+    return (data as unknown) as T;
   }
 
   async delete(id: string) {

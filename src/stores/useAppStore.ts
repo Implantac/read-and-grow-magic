@@ -12,7 +12,6 @@ interface AppState {
   activeCompany: Company | null;
   activeBranch: Branch | null;
   companies: Company[];
-
   
   // UI State
   sidebarCollapsed: boolean;
@@ -30,7 +29,6 @@ interface AppState {
   setCompanies: (companies: Company[]) => void;
 }
 
-
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
@@ -42,7 +40,6 @@ export const useAppStore = create<AppState>()(
       activeBranch: null,
       companies: [],
       sidebarCollapsed: false,
-
       theme: 'light',
       
       // Actions
@@ -63,7 +60,7 @@ export const useAppStore = create<AppState>()(
       
       setActiveCompany: (company) => set({ 
         activeCompany: company,
-        activeBranch: company?.branches[0] || null,
+        activeBranch: company?.branches?.[0] || null,
       }),
       
       setActiveBranch: (branch) => set({ activeBranch: branch }),
@@ -81,7 +78,7 @@ export const useAppStore = create<AppState>()(
       setCompanies: (companies) => set({ companies }),
     }),
     {
-      name: 'erp-wms-storage',
+      name: 'erp-app-storage',
       partialize: (state) => ({
         theme: state.theme,
         sidebarCollapsed: state.sidebarCollapsed,
