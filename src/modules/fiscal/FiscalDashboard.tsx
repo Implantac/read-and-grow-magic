@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { Button } from "@/ui/base/button";
 import { Badge } from "@/ui/base/badge";
 import { Progress } from "@/ui/base/progress";
 import { Label } from "@/ui/base/label";
+import { Input } from "@/ui/base/input";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +12,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/ui/base/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/ui/base/select";
 import { 
   ShieldCheck, 
   FileText, 
@@ -29,7 +37,10 @@ import {
   Loader2,
   CheckCircle,
   AlertTriangle,
-  Info
+  Info,
+  Link as LinkIcon,
+  RefreshCw,
+  Plus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
