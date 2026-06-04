@@ -5548,6 +5548,65 @@ export type Database = {
         }
         Relationships: []
       }
+      fiscal_tax_rules: {
+        Row: {
+          cfop: string
+          cofins_rate: number | null
+          company_id: string
+          created_at: string | null
+          cst: string | null
+          destination_state: string
+          icms_rate: number | null
+          icms_st_rate: number | null
+          id: string
+          ipi_rate: number | null
+          name: string
+          origin_state: string
+          pis_rate: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          cfop: string
+          cofins_rate?: number | null
+          company_id: string
+          created_at?: string | null
+          cst?: string | null
+          destination_state: string
+          icms_rate?: number | null
+          icms_st_rate?: number | null
+          id?: string
+          ipi_rate?: number | null
+          name: string
+          origin_state: string
+          pis_rate?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          cfop?: string
+          cofins_rate?: number | null
+          company_id?: string
+          created_at?: string | null
+          cst?: string | null
+          destination_state?: string
+          icms_rate?: number | null
+          icms_st_rate?: number | null
+          id?: string
+          ipi_rate?: number | null
+          name?: string
+          origin_state?: string
+          pis_rate?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fiscal_tax_rules_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follow_up_tasks: {
         Row: {
           action_type: string
