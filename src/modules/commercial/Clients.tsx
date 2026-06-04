@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Plus, Pencil, Trash2, Eye, MoreHorizontal, Loader2 } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
@@ -11,14 +11,14 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/ui/base/alert-dialog';
-import { Badge } from '@/ui/base/badge';
-import { DataTable, type Column } from '@/shared/components/DataTable';
-import { StatusBadge } from '@/shared/components/StatusBadge';
+import { DataTable } from '@/shared/components/DataTable';
 import { useClients, useDeleteClient, type DbClient } from '@/hooks/commercial/useClients';
 import { ClientDetailDialog } from '@/components/comercial/ClientDetailDialog';
 import { ClientFormDialog } from '@/components/comercial/ClientFormDialog';
 import { ClientStats } from '@/components/comercial/ClientStats';
 import { ClientFilters } from '@/components/comercial/ClientFilters';
+import { clientTableColumns } from '@/components/comercial/clientTableColumns';
+
 
 
 export default function ClientsPage() {
@@ -31,40 +31,14 @@ export default function ClientsPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<DbClient | null>(null);
 
-  const filteredClients = clients.filter((client) => {
+  const filteredClients = useMemo(() => clients.filter((client) => {
     if (filters.status && client.status !== filters.status) return false;
     if (filters.segment && client.segment !== filters.segment) return false;
     if (filters.state && client.address_state !== filters.state) return false;
     if (filters.abc_classification && client.abc_classification !== filters.abc_classification) return false;
     return true;
-  });
+  }), [clients, filters]);
 
-  const columns: Column<DbClient>[] = [
-    { key: 'code', label: 'Código', sortable: true },
-    { key: 'name', label: 'Nome/Razão Social', sortable: true, render: (_, row) => (
-      <div>
-        <p className="font-medium">{row.name}</p>
-        {row.trade_name && <p className="text-[10px] text-muted-foreground">{row.trade_name}</p>}
-      </div>
-    )},
-    { key: 'document', label: 'CPF/CNPJ', sortable: true },
-    { key: 'address_city', label: 'Cidade/UF', render: (_, row) => `${row.address_city}/${row.address_state}` },
-    { key: 'abc_classification', label: 'ABC', sortable: true, render: (v) => (
-      <Badge variant={(v as string) === 'A' ? 'default' : 'secondary'} className="text-xs font-bold w-7 justify-center">{(v as string) || 'C'}</Badge>
-    )},
-    { key: 'client_score', label: 'Score', render: (v) => {
-      const score = (v as string) || 'medium';
-      const cfg: Record<string, { label: string; cls: string }> = {
-        high: { label: 'Alto', cls: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-        medium: { label: 'Médio', cls: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
-        low: { label: 'Baixo', cls: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400' },
-      };
-      return <Badge className={`text-[10px] ${cfg[score]?.cls}`}>{cfg[score]?.label || score}</Badge>;
-    }},
-    { key: 'credit_limit', label: 'Limite', sortable: true,
-      render: (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(value as number) },
-    { key: 'status', label: 'Status', render: (value) => <StatusBadge type="client" status={value as string} /> },
-  ];
 
   const handleOpenForm = (client?: DbClient) => {
     setSelectedClient(client || null);
@@ -124,7 +98,7 @@ export default function ClientsPage() {
 
       <ClientFilters values={filters} onChange={setFilters} onClear={() => setFilters({})} />
 
-      <DataTable columns={columns} data={filteredClients} searchPlaceholder="Buscar por nome, CPF/CNPJ, e-mail..." pageSize={10} actions={renderActions} />
+      <DataTable columns={clientTableColumns} data={filteredClients} searchPlaceholder="Buscar por nome, CPF/CNPJ, e-mail..." pageSize={10} actions={renderActions} />
 
       <ClientFormDialog
         open={isFormOpen}
