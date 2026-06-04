@@ -40,7 +40,7 @@ const filterFields: FilterField[] = [
 ];
 
 export default function SalesPage() {
-  const { data: sales = [], isLoading } = useSales() as { data: DbSale[] | undefined, isLoading: boolean };
+  const { data: sales = [], isLoading } = useSales();
   const createSale = useCreateSale();
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [isViewOpen, setIsViewOpen] = useState(false);

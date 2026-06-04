@@ -1,75 +1,42 @@
 import { supabase } from '@/integrations/supabase/client';
-import { AccountReceivableRow } from '@/hooks/financial/useAccountsReceivable';
-import { AccountPayableRow } from '@/hooks/financial/useAccountsPayable';
+import { AccountReceivable, AccountPayable } from '@/types/financial';
+import { BaseService } from '../shared/baseService';
 
-export const financialService = {
+class FinancialService {
+  private receivablesBase = new BaseService<AccountReceivable>('accounts_receivable');
+  private payablesBase = new BaseService<AccountPayable>('accounts_payable');
+
   async getReceivables() {
-    const { data, error } = await supabase
-      .from('accounts_receivable')
-      .select('*')
-      .order('due_date', { ascending: true });
-    if (error) throw error;
-    return data as AccountReceivableRow[];
-  },
+    return this.receivablesBase.getAll({ orderBy: 'due_date', ascending: true });
+  }
 
-  async createReceivable(account: Partial<AccountReceivableRow>) {
-    const { data, error } = await supabase
-      .from('accounts_receivable')
-      .insert(account as any)
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
-  },
+  async createReceivable(account: Partial<AccountReceivable>) {
+    return this.receivablesBase.create(account as any);
+  }
 
-  async updateReceivable(id: string, updates: Partial<AccountReceivableRow>) {
-    const { data, error } = await supabase
-      .from('accounts_receivable')
-      .update({ ...updates, updated_at: new Date().toISOString() } as any)
-      .eq('id', id)
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
-  },
+  async updateReceivable(id: string, updates: Partial<AccountReceivable>) {
+    return this.receivablesBase.update(id, updates);
+  }
 
   async deleteReceivable(id: string) {
-    const { error } = await supabase.from('accounts_receivable').delete().eq('id', id);
-    if (error) throw error;
-  },
+    return this.receivablesBase.delete(id);
+  }
 
   async getPayables() {
-    const { data, error } = await supabase
-      .from('accounts_payable')
-      .select('*')
-      .order('due_date', { ascending: true });
-    if (error) throw error;
-    return data as AccountPayableRow[];
-  },
+    return this.payablesBase.getAll({ orderBy: 'due_date', ascending: true });
+  }
 
-  async createPayable(account: Partial<AccountPayableRow>) {
-    const { data, error } = await supabase
-      .from('accounts_payable')
-      .insert(account as any)
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
-  },
+  async createPayable(account: Partial<AccountPayable>) {
+    return this.payablesBase.create(account as any);
+  }
 
-  async updatePayable(id: string, updates: Partial<AccountPayableRow>) {
-    const { data, error } = await supabase
-      .from('accounts_payable')
-      .update({ ...updates, updated_at: new Date().toISOString() } as any)
-      .eq('id', id)
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
-  },
+  async updatePayable(id: string, updates: Partial<AccountPayable>) {
+    return this.payablesBase.update(id, updates);
+  }
 
   async deletePayable(id: string) {
-    const { error } = await supabase.from('accounts_payable').delete().eq('id', id);
-    if (error) throw error;
+    return this.payablesBase.delete(id);
   }
-};
+}
+
+export const financialService = new FinancialService();

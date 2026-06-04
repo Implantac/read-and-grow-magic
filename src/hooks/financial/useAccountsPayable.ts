@@ -2,33 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { financialService } from '@/services/financial/financialService';
 import { useSupabaseQuery, useSupabaseMutation } from '@/hooks/shared/useSupabaseQuery';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
-
-export interface AccountPayableRow {
-  id: string;
-  description: string;
-  supplier: string;
-  category: string;
-  amount: number;
-  original_amount: number | null;
-  open_amount: number | null;
-  paid_amount: number | null;
-  interest: number | null;
-  penalty: number | null;
-  discount_amount: number | null;
-  due_date: string;
-  payment_date: string | null;
-  status: string;
-  payment_method: string | null;
-  notes: string | null;
-  invoice_number: string | null;
-  expense_type: string | null;
-  cost_center_id: string | null;
-  bank_account_id: string | null;
-  installment_number: number | null;
-  total_installments: number | null;
-  created_at: string;
-  updated_at: string;
-}
+import { AccountPayable } from '@/types/financial';
 
 export function useAccountsPayable() {
   return useSupabaseQuery(['accounts_payable'], () => financialService.getPayables());
@@ -37,7 +11,7 @@ export function useAccountsPayable() {
 export function useCreateAccountPayable() {
   const queryClient = useQueryClient();
   return useSupabaseMutation(
-    (account: Partial<AccountPayableRow> & { description: string; supplier: string; due_date: string; amount: number }) => 
+    (account: Partial<AccountPayable> & { description: string; supplier: string; due_date: string; amount: number }) => 
       financialService.createPayable(account),
     {
       onSuccess: () => {
@@ -52,7 +26,7 @@ export function useCreateAccountPayable() {
 export function useUpdateAccountPayable() {
   const queryClient = useQueryClient();
   return useSupabaseMutation(
-    ({ id, ...updates }: { id: string } & Partial<AccountPayableRow>) => 
+    ({ id, ...updates }: { id: string } & Partial<AccountPayable>) => 
       financialService.updatePayable(id, updates),
     {
       onSuccess: () => {
@@ -76,3 +50,4 @@ export function useDeleteAccountPayable() {
     }
   );
 }
+
