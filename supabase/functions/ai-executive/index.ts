@@ -24,16 +24,16 @@ serve(async (req) => {
     }
     const userClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: authHeader } } });
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    
+    // Using getUser instead of getClaims for more robust auth verification
+    const { data: { user }, error: authError } = await userClient.auth.getUser(token);
+    if (authError || !user) {
+      console.error("Auth error:", authError);
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
+    const authenticatedUserId = user.id;
     const supabase = createClient(supabaseUrl, supabaseKey);
-    // SECURITY: Always use the authenticated user's ID from the verified JWT claims.
-    // Never trust a user_id supplied in the request body — that would allow IDOR
-    // (reading/writing/deleting another user's chat history).
-    const authenticatedUserId = claimsData.claims.sub as string;
     const body = await req.json();
     const { action, messages, months = 12 } = body;
 
@@ -51,7 +51,7 @@ serve(async (req) => {
     return await handleDashboardData(supabase, corsHeaders, months);
   } catch (e) {
     console.error("ai-executive error:", e);
-    return new Response(JSON.stringify({ error: "An internal error occurred. Please try again." }), {
+    return new Response(JSON.stringify({ error: `Internal error: ${e.message}` }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
