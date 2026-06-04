@@ -719,6 +719,36 @@ export type Database = {
           },
         ]
       }
+      ai_enterprise_memory: {
+        Row: {
+          company_id: string
+          context_key: string
+          context_value: Json
+          created_at: string | null
+          id: string
+          importance_score: number | null
+          module: string
+        }
+        Insert: {
+          company_id: string
+          context_key: string
+          context_value: Json
+          created_at?: string | null
+          id?: string
+          importance_score?: number | null
+          module: string
+        }
+        Update: {
+          company_id?: string
+          context_key?: string
+          context_value?: Json
+          created_at?: string | null
+          id?: string
+          importance_score?: number | null
+          module?: string
+        }
+        Relationships: []
+      }
       ai_executive_alerts: {
         Row: {
           acknowledged_at: string | null
@@ -803,6 +833,39 @@ export type Database = {
           metadata?: Json | null
           role?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      ai_executive_decisions: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          impact_prediction: Json | null
+          problem_description: string
+          rationale: string | null
+          status: string | null
+          suggestion: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          impact_prediction?: Json | null
+          problem_description: string
+          rationale?: string | null
+          status?: string | null
+          suggestion: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          impact_prediction?: Json | null
+          problem_description?: string
+          rationale?: string | null
+          status?: string | null
+          suggestion?: string
         }
         Relationships: []
       }
@@ -5310,6 +5373,48 @@ export type Database = {
           },
         ]
       }
+      fiscal_documents: {
+        Row: {
+          access_key: string | null
+          company_id: string
+          created_at: string | null
+          id: string
+          number: number
+          series: number
+          status: string | null
+          tax_amount: number | null
+          total_amount: number | null
+          type: string
+          xml_content: string | null
+        }
+        Insert: {
+          access_key?: string | null
+          company_id: string
+          created_at?: string | null
+          id?: string
+          number: number
+          series: number
+          status?: string | null
+          tax_amount?: number | null
+          total_amount?: number | null
+          type: string
+          xml_content?: string | null
+        }
+        Update: {
+          access_key?: string | null
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          number?: number
+          series?: number
+          status?: string | null
+          tax_amount?: number | null
+          total_amount?: number | null
+          type?: string
+          xml_content?: string | null
+        }
+        Relationships: []
+      }
       fiscal_reports: {
         Row: {
           company_id: string | null
@@ -5370,6 +5475,60 @@ export type Database = {
           total_pis?: number
           total_value?: number
           type?: string
+        }
+        Relationships: []
+      }
+      fiscal_rules: {
+        Row: {
+          cfop: string | null
+          cofins_rate: number | null
+          company_id: string
+          created_at: string | null
+          destination_state: string | null
+          icms_rate: number | null
+          icms_st_rate: number | null
+          id: string
+          ipi_rate: number | null
+          metadata: Json | null
+          name: string
+          ncm: string | null
+          origin_state: string | null
+          pis_rate: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          cfop?: string | null
+          cofins_rate?: number | null
+          company_id: string
+          created_at?: string | null
+          destination_state?: string | null
+          icms_rate?: number | null
+          icms_st_rate?: number | null
+          id?: string
+          ipi_rate?: number | null
+          metadata?: Json | null
+          name: string
+          ncm?: string | null
+          origin_state?: string | null
+          pis_rate?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          cfop?: string | null
+          cofins_rate?: number | null
+          company_id?: string
+          created_at?: string | null
+          destination_state?: string | null
+          icms_rate?: number | null
+          icms_st_rate?: number | null
+          id?: string
+          ipi_rate?: number | null
+          metadata?: Json | null
+          name?: string
+          ncm?: string | null
+          origin_state?: string | null
+          pis_rate?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }

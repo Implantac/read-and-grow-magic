@@ -1,0 +1,26 @@
+import { lazy } from 'react';
+import { Route } from 'react-router-dom';
+
+const FiscalDashboardPage = lazy(() => import("../modules/fiscal/FiscalDashboard"));
+const NFePage = lazy(() => import("../modules/fiscal/NFe"));
+const NFCePage = lazy(() => import("../modules/fiscal/NFCe"));
+const CTePage = lazy(() => import("../modules/fiscal/CTe"));
+const MDFePage = lazy(() => import("../modules/fiscal/MDFe"));
+const TaxRulesPage = lazy(() => import("../modules/fiscal/TaxRules"));
+const ICMSSTPage = lazy(() => import("../modules/fiscal/ICMSST"));
+const DIFALPage = lazy(() => import("../modules/fiscal/DIFAL"));
+const SpedFilesPage = lazy(() => import("../modules/fiscal/SpedFiles"));
+const FiscalReportsPage = lazy(() => import("../modules/fiscal/FiscalReports"));
+
+export const FiscalRoutes = [
+  <Route key="fiscal-dash" path="/fiscal/dashboard" element={<FiscalDashboardPage />} />,
+  <Route key="fiscal-nfe" path="/fiscal/nfe" element={<NFePage />} />,
+  <Route key="fiscal-nfce" path="/fiscal/nfce" element={<NFCePage />} />,
+  <Route key="fiscal-cte" path="/fiscal/cte" element={<CTePage />} />,
+  <Route key="fiscal-mdfe" path="/fiscal/mdfe" element={<MDFePage />} />,
+  <Route key="fiscal-regras" path="/fiscal/regras-fiscais" element={<TaxRulesPage />} />,
+  <Route key="fiscal-icms" path="/fiscal/icms-st" element={<ICMSSTPage />} />,
+  <Route key="fiscal-difal" path="/fiscal/difal" element={<DIFALPage />} />,
+  <Route key="fiscal-sped" path="/fiscal/sped" element={<SpedFilesPage />} />,
+  <Route key="fiscal-relatorios" path="/fiscal/relatorios" element={<FiscalReportsPage />} />,
+];

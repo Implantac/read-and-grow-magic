@@ -16,6 +16,7 @@ import { WMSRoutes } from './routes/WMSRoutes';
 import { AdminRoutes } from './routes/AdminRoutes';
 import { OperationalRoutes } from './routes/OperationalRoutes';
 import { MiscellaneousRoutes } from './routes/MiscellaneousRoutes';
+import { FiscalRoutes } from './routes/FiscalRoutes';
 import { VerticalPackRoutes } from './core/routes/VerticalPackRoutes';
 
 // Eager load critical pages
@@ -67,6 +68,7 @@ const App = () => (
               {AdminRoutes}
               {OperationalRoutes}
               {MiscellaneousRoutes}
+              {FiscalRoutes}
               {VerticalPackRoutes}
             </Route>
 
