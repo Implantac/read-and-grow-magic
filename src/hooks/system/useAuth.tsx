@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAppStore } from '@/stores/useAppStore';
 import type { User as AppUser } from '@/types';
@@ -88,24 +88,31 @@ export function useAuth(options: UseAuthOptions = {}) {
     }
 
     let mounted = true;
+    const isSyncing = { current: false };
 
     const runSync = async (sessionUser: SupabaseUser | null) => {
+      if (isSyncing.current) return;
+      isSyncing.current = true;
       try {
         await syncAuthState(sessionUser);
       } finally {
         if (mounted) setLoading(false);
+        isSyncing.current = false;
       }
     };
 
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       // Avoid async Supabase calls directly inside this callback (deadlock workaround)
-      setTimeout(() => {
-        void runSync(session?.user ?? null);
-      }, 0);
+      if (mounted) {
+        setTimeout(() => {
+          if (mounted) void runSync(session?.user ?? null);
+        }, 0);
+      }
     });
 
     void supabase.auth.getSession().then(({ data: { session } }) => {
-      void runSync(session?.user ?? null);
+      if (mounted) void runSync(session?.user ?? null);
     });
 
     return () => {

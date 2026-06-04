@@ -331,12 +331,19 @@ export function Sidebar() {
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button className="p-2 text-destructive/60 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors">
+                    <button 
+                      onClick={() => {
+                        const { signOut } = useAuth({ initialize: false });
+                        signOut().then(() => window.location.href = '/login');
+                      }}
+                      className="p-2 text-destructive/60 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                    >
                       <LogOut className="h-4 w-4" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>Sair do Sistema</TooltipContent>
                 </Tooltip>
+
               </div>
             </div>
           ) : (
@@ -352,7 +359,13 @@ export function Sidebar() {
               
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button className="p-2 text-sidebar-foreground/40 hover:text-primary hover:bg-sidebar-accent/50 rounded-lg transition-colors">
+                  <button 
+                    onClick={() => {
+                      const { signOut } = useAuth({ initialize: false });
+                      signOut().then(() => window.location.href = '/login');
+                    }}
+                    className="p-2 text-sidebar-foreground/40 hover:text-primary hover:bg-sidebar-accent/50 rounded-lg transition-colors"
+                  >
                     <LogOut className="h-4 w-4" />
                   </button>
                 </TooltipTrigger>
