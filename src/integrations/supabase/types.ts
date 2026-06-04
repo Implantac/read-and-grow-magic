@@ -8373,6 +8373,51 @@ export type Database = {
           },
         ]
       }
+      production_bom: {
+        Row: {
+          company_id: string
+          component_id: string | null
+          created_at: string | null
+          id: string
+          product_id: string | null
+          quantity: number
+          waste_percentage: number | null
+        }
+        Insert: {
+          company_id: string
+          component_id?: string | null
+          created_at?: string | null
+          id?: string
+          product_id?: string | null
+          quantity: number
+          waste_percentage?: number | null
+        }
+        Update: {
+          company_id?: string
+          component_id?: string | null
+          created_at?: string | null
+          id?: string
+          product_id?: string | null
+          quantity?: number
+          waste_percentage?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_bom_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_bom_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       production_capacity: {
         Row: {
           capacity_per_hour: number
@@ -9042,6 +9087,97 @@ export type Database = {
             columns: ["work_center_id"]
             isOneToOne: false
             referencedRelation: "work_centers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_orders_enterprise: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          end_date: string | null
+          id: string
+          metadata: Json | null
+          priority: number | null
+          product_id: string | null
+          quantity_planned: number
+          quantity_produced: number | null
+          start_date: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: number | null
+          product_id?: string | null
+          quantity_planned: number
+          quantity_produced?: number | null
+          start_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: number | null
+          product_id?: string | null
+          quantity_planned?: number
+          quantity_produced?: number | null
+          start_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_orders_enterprise_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_quality_checks: {
+        Row: {
+          check_type: string
+          created_at: string | null
+          id: string
+          inspector_id: string | null
+          notes: string | null
+          production_order_id: string | null
+          result: string
+        }
+        Insert: {
+          check_type: string
+          created_at?: string | null
+          id?: string
+          inspector_id?: string | null
+          notes?: string | null
+          production_order_id?: string | null
+          result: string
+        }
+        Update: {
+          check_type?: string
+          created_at?: string | null
+          id?: string
+          inspector_id?: string | null
+          notes?: string | null
+          production_order_id?: string | null
+          result?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_quality_checks_production_order_id_fkey"
+            columns: ["production_order_id"]
+            isOneToOne: false
+            referencedRelation: "production_orders_enterprise"
             referencedColumns: ["id"]
           },
         ]
@@ -13210,6 +13346,41 @@ export type Database = {
         }
         Relationships: []
       }
+      wms_docks: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          status: string | null
+          type: string
+          warehouse_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          status?: string | null
+          type: string
+          warehouse_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          status?: string | null
+          type?: string
+          warehouse_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_docks_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wms_inventory_counts: {
         Row: {
           company_id: string | null
@@ -14210,6 +14381,30 @@ export type Database = {
           to_location_code?: string | null
           to_location_id?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      wms_waves: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          priority: number | null
+          status: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          priority?: number | null
+          status?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          priority?: number | null
+          status?: string | null
         }
         Relationships: []
       }
