@@ -146,7 +146,7 @@ const Companies = () => {
 
     const companyData = {
       name: formData.get('name') as string,
-      tradeName: formData.get('tradeName') as string,
+      trade_name: formData.get('tradeName') as string,
       cnpj: cnpjValue,
       email: formData.get('email') as string,
       phone: formData.get('phone') as string,
@@ -155,26 +155,28 @@ const Companies = () => {
       tax_regime: taxRegime,
       operation_types: operations,
       status: 'active' as CompanyStatus,
-      updatedAt: new Date().toISOString(),
     };
 
     try {
       if (editingCompany) {
-        setCompanies(prev => prev.map(c => c.id === editingCompany.id ? { ...c, ...companyData } as Company : c));
+        const { error } = await supabase
+          .from('companies')
+          .update(companyData as any)
+          .eq('id', editingCompany.id);
+        if (error) throw error;
         toast.success('Empresa atualizada!');
       } else {
-        const newCompany: Company = {
-          id: `EMP${Date.now()}`,
-          ...companyData as any,
-          isHeadquarters: false,
-          createdAt: new Date().toISOString(),
-        };
-        setCompanies(prev => [...prev, newCompany]);
-        toast.success(`Filial "${companyData.tradeName}" cadastrada com ${operations.length} operações automáticas!`);
+        const { error } = await supabase
+          .from('companies')
+          .insert([{ ...companyData, is_headquarters: false }] as any);
+        if (error) throw error;
+        toast.success(`Filial "${companyData.trade_name}" cadastrada com ${operations.length} operações automáticas!`);
       }
       setIsDialogOpen(false);
-    } catch (error) {
-      toast.error('Erro ao salvar empresa.');
+      // We should ideally have a refetch here or use a hook
+      window.location.reload(); 
+    } catch (error: any) {
+      toast.error(`Erro ao salvar: ${error.message}`);
     }
   };
 
