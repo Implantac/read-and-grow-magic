@@ -277,28 +277,7 @@ function computeKPIs(d: any, months: number = 12) {
         { title: "Custo Operacional", description: "Tendência de alta em custos logísticos MoM", impact: "medium" }
       ]
     },
-    consensus: [
-      {
-        specialist: 'CTO Global',
-        insight: d.orders.length > 100 ? 'Volume de transações elevado detectado. Escalabilidade horizontal automática acionada.' : 'Infraestrutura operando com latência otimizada (< 50ms).',
-        status: 'success',
-      },
-      {
-        specialist: 'Arquiteto SAP S/4HANA',
-        insight: 'Estrutura de dados para integração via iDoc validada para o novo armazém.',
-        status: 'success',
-      },
-      {
-        specialist: 'Especialista PCP/MRP/APS',
-        insight: computed.kpis.prodEfficiency < 80 ? `Eficiência de produção em ${computed.kpis.prodEfficiency}%. Sugestão: Re-alocação de ordens.` : 'Linhas de produção operando conforme cronograma planejado.',
-        status: computed.kpis.prodEfficiency < 80 ? 'alert' : 'success',
-      },
-      {
-        specialist: 'Especialista Fiscal BR',
-        insight: 'Nova normativa de ICMS-ST para o setor têxtil integrada com sucesso ao motor de regras.',
-        status: 'success',
-      }
-    ],
+    consensus: generateConsensus(computed.kpis, d, segment),
     summary: {
       segment,
       totalOrders: d.orders.length,
