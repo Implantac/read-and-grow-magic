@@ -132,17 +132,6 @@ export default function SalesPage() {
   return (
     <PageContainer>
       <PageHeader title="Vendas" description="Histórico de vendas realizadas">
-          <ExportButton
-            data={filteredSales as unknown as Record<string, unknown>[]}
-            columns={[
-              { key: 'number', label: 'Número' }, { key: 'client_name', label: 'Cliente' },
-              { key: 'date', label: 'Data', format: (v) => formatDate(v as string) },
-              { key: 'payment_method', label: 'Pagamento', format: (v) => getPaymentMethodLabel(v as any) },
-              { key: 'total', label: 'Total', format: (v) => formatBRL(Number(v)) },
-              { key: 'status', label: 'Status' },
-            ]}
-            filename="vendas"
-          />
           <Button className="gap-2" onClick={() => { resetForm(); setIsFormOpen(true); }}>
             <Plus className="h-4 w-4" />Nova Venda
           </Button>
@@ -154,7 +143,20 @@ export default function SalesPage() {
         <KPICard title="Ticket Médio" value={salesCount > 0 ? formatBRL(totalSales / salesCount) : 'R$ 0,00'} icon={<TrendingUp className="h-5 w-5" />} accentColor="info" index={2} />
       </div>
 
-      <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
+        <ExportButton
+          data={filteredSales as unknown as Record<string, unknown>[]}
+          columns={[
+            { key: 'number', label: 'Número' }, { key: 'client_name', label: 'Cliente' },
+            { key: 'date', label: 'Data', format: (v) => formatDate(v as string) },
+            { key: 'payment_method', label: 'Pagamento', format: (v) => getPaymentMethodLabel(v as any) },
+            { key: 'total', label: 'Total', format: (v) => formatBRL(Number(v)) },
+            { key: 'status', label: 'Status' },
+          ]}
+          filename="vendas"
+        />
+      </div>
       <DataTable columns={columns} data={filteredSales} searchPlaceholder="Buscar por número, cliente..." pageSize={10} actions={renderActions} />
 
       {/* Create Sale Dialog */}
