@@ -14,6 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounting_accounts: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string | null
+          id: string
+          level: number
+          name: string
+          parent_id: string | null
+          type: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string | null
+          id?: string
+          level: number
+          name: string
+          parent_id?: string | null
+          type: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          level?: number
+          name?: string
+          parent_id?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounting_accounts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accounting_entries: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          date: string
+          description: string | null
+          id: string
+          reference_id: string | null
+          reference_type: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          date: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          date?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+        }
+        Relationships: []
+      }
+      accounting_items: {
+        Row: {
+          account_id: string | null
+          amount: number
+          cost_center_id: string | null
+          created_at: string | null
+          entry_id: string | null
+          id: string
+          type: string
+        }
+        Insert: {
+          account_id?: string | null
+          amount: number
+          cost_center_id?: string | null
+          created_at?: string | null
+          entry_id?: string | null
+          id?: string
+          type: string
+        }
+        Update: {
+          account_id?: string | null
+          amount?: number
+          cost_center_id?: string | null
+          created_at?: string | null
+          entry_id?: string | null
+          id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounting_items_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_items_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accounting_periods: {
         Row: {
           closed_at: string | null
@@ -2478,6 +2594,7 @@ export type Database = {
           cnpj: string
           created_at: string
           email: string | null
+          group_id: string | null
           id: string
           is_headquarters: boolean
           municipal_registration: string | null
@@ -2505,6 +2622,7 @@ export type Database = {
           cnpj: string
           created_at?: string
           email?: string | null
+          group_id?: string | null
           id?: string
           is_headquarters?: boolean
           municipal_registration?: string | null
@@ -2532,6 +2650,7 @@ export type Database = {
           cnpj?: string
           created_at?: string
           email?: string | null
+          group_id?: string | null
           id?: string
           is_headquarters?: boolean
           municipal_registration?: string | null
@@ -2549,6 +2668,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "companies_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "enterprise_groups"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "companies_parent_company_id_fkey"
             columns: ["parent_company_id"]
@@ -2835,6 +2961,177 @@ export type Database = {
           name?: string
           requires_approval_above?: number | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      crm_leads: {
+        Row: {
+          assigned_to: string | null
+          company_id: string
+          created_at: string | null
+          email: string | null
+          id: string
+          metadata: Json | null
+          name: string
+          phone: string | null
+          source: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          company_id: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          metadata?: Json | null
+          name: string
+          phone?: string | null
+          source?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          company_id?: string
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string
+          phone?: string | null
+          source?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      crm_opportunities: {
+        Row: {
+          ai_score: number | null
+          company_id: string
+          created_at: string | null
+          expected_closing_date: string | null
+          id: string
+          lead_id: string | null
+          lost_reason: string | null
+          pipeline_id: string | null
+          stage_id: string | null
+          title: string
+          updated_at: string | null
+          value: number | null
+        }
+        Insert: {
+          ai_score?: number | null
+          company_id: string
+          created_at?: string | null
+          expected_closing_date?: string | null
+          id?: string
+          lead_id?: string | null
+          lost_reason?: string | null
+          pipeline_id?: string | null
+          stage_id?: string | null
+          title: string
+          updated_at?: string | null
+          value?: number | null
+        }
+        Update: {
+          ai_score?: number | null
+          company_id?: string
+          created_at?: string | null
+          expected_closing_date?: string | null
+          id?: string
+          lead_id?: string | null
+          lost_reason?: string | null
+          pipeline_id?: string | null
+          stage_id?: string | null
+          title?: string
+          updated_at?: string | null
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_opportunities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "crm_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_opportunities_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipelines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_opportunities_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipeline_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_pipeline_stages: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          order_index: number
+          pipeline_id: string | null
+          probability: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          order_index: number
+          pipeline_id?: string | null
+          probability?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          order_index?: number
+          pipeline_id?: string | null
+          probability?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_pipeline_stages_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipelines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_pipelines: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_default: boolean | null
+          name: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
         }
         Relationships: []
       }
@@ -3434,6 +3731,27 @@ export type Database = {
           updated_at?: string
           used_capacity_m3?: number | null
           zip_code?: string | null
+        }
+        Relationships: []
+      }
+      enterprise_groups: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
         }
         Relationships: []
       }

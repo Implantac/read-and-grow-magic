@@ -1,6 +1,7 @@
 import { lazy } from 'react';
 import { Route } from 'react-router-dom';
 
+const CRMDashboardPage = lazy(() => import("../modules/commercial/CRMDashboard"));
 const ClientsPage = lazy(() => import("../modules/commercial/Clients"));
 const SalesPage = lazy(() => import("../modules/commercial/Sales"));
 const OrdersPage = lazy(() => import("../modules/commercial/Orders"));
@@ -21,6 +22,7 @@ const GamificationPage = lazy(() => import("../modules/commercial/Gamification")
 const SalesAutomationPage = lazy(() => import("../modules/commercial/SalesAutomation"));
 
 export const CommercialRoutes = [
+  <Route key="comercial-crm" path="/comercial/crm" element={<CRMDashboardPage />} />,
   <Route key="comercial-dashboard" path="/comercial/dashboard" element={<CommercialDashboardPage />} />,
   <Route key="comercial-clientes" path="/comercial/clientes" element={<ClientsPage />} />,
   <Route key="comercial-vendas" path="/comercial/vendas" element={<SalesPage />} />,
