@@ -114,11 +114,11 @@ export default function Dashboard() {
       </div>
 
       {/* Centro de Comando e Orquestração IA */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      <div className="grid gap-6 lg:grid-cols-4">
+        <div className="lg:col-span-3">
           <ExecutiveCouncilPanel />
         </div>
-        <div>
+        <div className="lg:col-span-1">
           <ExecutiveConsensus />
         </div>
       </div>
@@ -280,15 +280,31 @@ export default function Dashboard() {
 
       {/* Alertas + Faturamento + Atividades */}
       <div className="grid gap-6 lg:grid-cols-4">
-        <div className="lg:col-span-1">
-          <ExecutiveConsensus />
+        <div className="lg:col-span-1 space-y-6">
+          <GlobalAlerts alerts={alerts} />
+          <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
+            <h4 className="text-[10px] font-bold uppercase tracking-wider text-primary mb-3 flex items-center gap-2">
+              <ShieldCheck className="h-3 w-3" /> Integridade do Core
+            </h4>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Sincronização</span>
+                <Badge variant="outline" className="text-[9px] bg-success/10 text-success border-success/20">Real-time</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Motor de Regras</span>
+                <span className="text-[10px] font-bold">L4 Enterprise</span>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="lg:col-span-3 space-y-6">
-          <div className="grid gap-6 md:grid-cols-2">
-            <GlobalAlerts alerts={alerts} />
-            <RevenueChart />
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="md:col-span-2">
+              <RevenueChart />
+            </div>
+            <RecentActivities />
           </div>
-          <RecentActivities />
         </div>
       </div>
     </div>
