@@ -1,5 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { bankAccountsService } from '@/services/financial/bankAccountsService';
+import { useSupabaseQuery, useSupabaseMutation } from '@/hooks/shared/useSupabaseQuery';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 
 export interface BankAccountRow {
@@ -17,41 +18,34 @@ export interface BankAccountRow {
 }
 
 export function useBankAccounts() {
-  return useQuery({
-    queryKey: ['bank_accounts'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('bank_accounts')
-        .select('*')
-        .order('name');
-      if (error) throw error;
-      return data as BankAccountRow[];
-    },
-  });
+  return useSupabaseQuery(['bank_accounts'], () => bankAccountsService.getAll());
 }
 
 export function useCreateBankAccount() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (account: { name: string; bank_name: string; bank_code?: string; agency?: string; account_number?: string; account_type?: string }) => {
-      const { data, error } = await supabase.from('bank_accounts').insert([account]).select().single();
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['bank_accounts'] }); toastSuccess('Sucesso', 'Conta bancária cadastrada'); },
-    onError: () => toastError('Erro ao cadastrar conta'),
-  });
+  const queryClient = useQueryClient();
+  return useSupabaseMutation(
+    (account: Omit<BankAccountRow, 'id' | 'created_at' | 'updated_at' | 'balance' | 'active'>) => 
+      bankAccountsService.create(account),
+    {
+      onSuccess: () => { 
+        queryClient.invalidateQueries({ queryKey: ['bank_accounts'] }); 
+        toastSuccess('Sucesso', 'Conta bancária cadastrada'); 
+      },
+      onError: () => toastError('Erro ao cadastrar conta'),
+    }
+  );
 }
 
 export function useUpdateBankAccount() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string } & Partial<BankAccountRow>) => {
-      const { data, error } = await supabase.from('bank_accounts').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id).select().single();
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['bank_accounts'] }); },
-    onError: () => toastError('Erro ao atualizar conta'),
-  });
+  const queryClient = useQueryClient();
+  return useSupabaseMutation(
+    ({ id, ...updates }: { id: string } & Partial<BankAccountRow>) => 
+      bankAccountsService.update(id, updates),
+    {
+      onSuccess: () => { 
+        queryClient.invalidateQueries({ queryKey: ['bank_accounts'] }); 
+      },
+      onError: () => toastError('Erro ao atualizar conta'),
+    }
+  );
 }

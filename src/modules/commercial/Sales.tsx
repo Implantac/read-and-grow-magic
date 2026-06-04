@@ -25,6 +25,7 @@ import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
+
 const filterFields: FilterField[] = [
   { key: 'status', label: 'Status', type: 'select', options: [
     { value: 'completed', label: 'Concluída' }, { value: 'cancelled', label: 'Cancelada' }, { value: 'refunded', label: 'Devolvida' },
@@ -81,20 +82,17 @@ export default function SalesPage() {
     if (filters.startDate) {
       const saleDate = new Date(sale.date);
       const startDate = new Date(filters.startDate);
-      // Set time to beginning of day for comparison
       startDate.setHours(0, 0, 0, 0);
       if (saleDate < startDate) return false;
     }
     if (filters.endDate) {
       const saleDate = new Date(sale.date);
       const endDate = new Date(filters.endDate);
-      // Set time to end of day for comparison
       endDate.setHours(23, 59, 59, 999);
       if (saleDate > endDate) return false;
     }
     return true;
   });
-
 
   const columns: Column<DbSale>[] = [
     { key: 'number', label: 'Número', sortable: true },
@@ -120,14 +118,12 @@ export default function SalesPage() {
     </DropdownMenu>
   );
 
-  const totalSales = filteredSales.filter(s => s.status === 'completed').reduce((acc, s) => acc + s.total, 0);
-  const salesCount = filteredSales.filter(s => s.status === 'completed').length;
+  const totalSalesValue = filteredSales.filter(s => s.status === 'completed').reduce((acc, s) => acc + s.total, 0);
+  const salesCountValue = filteredSales.filter(s => s.status === 'completed').length;
 
   if (isLoading) {
     return <PageLoading message="Carregando vendas..." />;
   }
-
-  const fmt = (v: number) => formatBRL(v);
 
   return (
     <PageContainer>
@@ -136,12 +132,11 @@ export default function SalesPage() {
           <Plus className="h-4 w-4" />Nova Venda
         </Button>
       </PageHeader>
-      </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-3">
-        <KPICard title="Total de Vendas" value={formatBRL(totalSales)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="Vendas Concluídas" value={salesCount} icon={<ShoppingBag className="h-5 w-5" />} accentColor="success" index={1} />
-        <KPICard title="Ticket Médio" value={salesCount > 0 ? formatBRL(totalSales / salesCount) : 'R$ 0,00'} icon={<TrendingUp className="h-5 w-5" />} accentColor="info" index={2} />
+        <KPICard title="Total de Vendas" value={formatBRL(totalSalesValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Vendas Concluídas" value={salesCountValue} icon={<ShoppingBag className="h-5 w-5" />} accentColor="success" index={1} />
+        <KPICard title="Ticket Médio" value={salesCountValue > 0 ? formatBRL(totalSalesValue / salesCountValue) : 'R$ 0,00'} icon={<TrendingUp className="h-5 w-5" />} accentColor="info" index={2} />
       </div>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -158,6 +153,7 @@ export default function SalesPage() {
           filename="vendas"
         />
       </div>
+      
       <DataTable columns={columns} data={filteredSales} searchPlaceholder="Buscar por número, cliente..." pageSize={10} actions={renderActions} />
 
       {/* Create Sale Dialog */}
