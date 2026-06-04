@@ -132,9 +132,10 @@ export default function SalesPage() {
   return (
     <PageContainer>
       <PageHeader title="Vendas" description="Histórico de vendas realizadas">
-          <Button className="gap-2" onClick={() => { resetForm(); setIsFormOpen(true); }}>
-            <Plus className="h-4 w-4" />Nova Venda
-          </Button>
+        <Button className="gap-2" onClick={() => { resetForm(); setIsFormOpen(true); }}>
+          <Plus className="h-4 w-4" />Nova Venda
+        </Button>
+      </PageHeader>
       </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-3">

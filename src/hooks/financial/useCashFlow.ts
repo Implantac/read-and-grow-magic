@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { cashFlowService } from '@/services/financial/cashFlowService';
+import { useSupabaseQuery } from '@/hooks/shared/useSupabaseQuery';
 
 export interface CashFlowRow {
   id: string;
@@ -15,15 +15,5 @@ export interface CashFlowRow {
 }
 
 export function useCashFlowEntries() {
-  return useQuery({
-    queryKey: ['cash_flow_entries'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('cash_flow_entries')
-        .select('*')
-        .order('date', { ascending: true });
-      if (error) throw error;
-      return data as CashFlowRow[];
-    },
-  });
+  return useSupabaseQuery(['cash_flow_entries'], () => cashFlowService.getAll());
 }
