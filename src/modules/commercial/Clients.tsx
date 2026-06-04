@@ -14,23 +14,12 @@ import {
 import { Badge } from '@/ui/base/badge';
 import { DataTable, type Column } from '@/shared/components/DataTable';
 import { StatusBadge } from '@/shared/components/StatusBadge';
-import { AdvancedFilters, type FilterField } from '@/shared/components/AdvancedFilters';
-import { clientSegments, brazilianStates } from '@/config/commercial';
 import { useClients, useDeleteClient, type DbClient } from '@/hooks/commercial/useClients';
 import { ClientDetailDialog } from '@/components/comercial/ClientDetailDialog';
 import { ClientFormDialog } from '@/components/comercial/ClientFormDialog';
 import { ClientStats } from '@/components/comercial/ClientStats';
+import { ClientFilters } from '@/components/comercial/ClientFilters';
 
-const filterFields: FilterField[] = [
-  { key: 'status', label: 'Status', type: 'select', options: [
-    { value: 'active', label: 'Ativo' }, { value: 'inactive', label: 'Inativo' }, { value: 'blocked', label: 'Bloqueado' },
-  ]},
-  { key: 'segment', label: 'Segmento', type: 'select', options: clientSegments },
-  { key: 'state', label: 'Estado', type: 'select', options: brazilianStates },
-  { key: 'abc_classification', label: 'Curva ABC', type: 'select', options: [
-    { value: 'A', label: 'A - Alta' }, { value: 'B', label: 'B - Média' }, { value: 'C', label: 'C - Baixa' },
-  ]},
-];
 
 export default function ClientsPage() {
   const { data: clients = [], isLoading } = useClients();
@@ -133,7 +122,7 @@ export default function ClientsPage() {
 
       <ClientStats clients={clients} />
 
-      <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
+      <ClientFilters values={filters} onChange={setFilters} onClear={() => setFilters({})} />
 
       <DataTable columns={columns} data={filteredClients} searchPlaceholder="Buscar por nome, CPF/CNPJ, e-mail..." pageSize={10} actions={renderActions} />
 
