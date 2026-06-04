@@ -44,7 +44,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Shield, Lock, Phone, ArrowDown, Database, ScanBarcode, DoorOpen, RotateCcw,
   Bell, Repeat, TrendingDown, LineChart, AlertTriangle, ShieldAlert, Upload, QrCode,
   FileCheck2, FileDown, Percent, Globe, ScrollText, ArrowRightLeft,
-  BellRing, RotateCw, AlertOctagon, GitBranch, Siren,
+  BellRing, RotateCw, AlertOctagon, GitBranch, Siren, Scissors,
 };
 
 function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, expandedItems, toggleExpanded }: {
