@@ -1,5 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { productsService } from '@/services/inventory/productsService';
+import { useSupabaseQuery, useSupabaseMutation } from '@/hooks/shared/useSupabaseQuery';
 import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 
 export interface DbProduct {
@@ -28,70 +29,53 @@ export interface DbProduct {
   image_url: string | null;
   created_at: string;
   updated_at: string;
-  // joined
   category_name?: string;
 }
 
 export function useProducts() {
-  return useQuery({
-    queryKey: ['products'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*, categories(name)')
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      return (data as any[]).map((p) => ({
-        ...p,
-        category_name: p.categories?.name || '',
-      })) as DbProduct[];
-    },
-  });
+  return useSupabaseQuery(['products'], () => productsService.getAll());
 }
 
 export function useCreateProduct() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (product: Omit<DbProduct, 'id' | 'created_at' | 'updated_at' | 'category_name'>) => {
-      const { data, error } = await supabase.from('products').insert(product).select().single();
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['products'] });
-      toastSuccess('Produto criado com sucesso!');
-    },
-    onError: mutationErrorHandler('Erro ao criar produto'),
-  });
+  const queryClient = useQueryClient();
+  return useSupabaseMutation(
+    (product: Omit<DbProduct, 'id' | 'created_at' | 'updated_at' | 'category_name'>) => 
+      productsService.create(product),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['products'] });
+        toastSuccess('Produto criado com sucesso!');
+      },
+      onError: mutationErrorHandler('Erro ao criar produto'),
+    }
+  );
 }
 
 export function useUpdateProduct() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ id, category_name, ...product }: Partial<DbProduct> & { id: string; category_name?: string }) => {
-      const { data, error } = await supabase.from('products').update({ ...product, updated_at: new Date().toISOString() }).eq('id', id).select().single();
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['products'] });
-      toastSuccess('Produto atualizado com sucesso!');
-    },
-    onError: mutationErrorHandler('Erro ao atualizar produto'),
-  });
+  const queryClient = useQueryClient();
+  return useSupabaseMutation(
+    ({ id, category_name, ...product }: Partial<DbProduct> & { id: string; category_name?: string }) => 
+      productsService.update(id, product),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['products'] });
+        toastSuccess('Produto atualizado com sucesso!');
+      },
+      onError: mutationErrorHandler('Erro ao atualizar produto'),
+    }
+  );
 }
 
 export function useDeleteProduct() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from('products').delete().eq('id', id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['products'] });
-      toastSuccess('Produto excluído com sucesso!');
-    },
-    onError: mutationErrorHandler('Erro ao excluir produto'),
-  });
+  const queryClient = useQueryClient();
+  return useSupabaseMutation(
+    (id: string) => productsService.delete(id),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['products'] });
+        toastSuccess('Produto excluído com sucesso!');
+      },
+      onError: mutationErrorHandler('Erro ao excluir produto'),
+    }
+  );
 }
