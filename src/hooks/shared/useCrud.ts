@@ -70,3 +70,4 @@ export function useCrud<T extends { id: string }>(
     useDelete,
   };
 }
+
