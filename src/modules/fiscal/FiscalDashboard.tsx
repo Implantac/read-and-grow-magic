@@ -191,6 +191,21 @@ export default function FiscalDashboard() {
 
   const processImport = async () => {
     if (!xmlData) return;
+
+    // Check for unlinked items
+    const unlinkedItems = xmlData.products.filter(p => !p.linkedProductId);
+    if (unlinkedItems.length > 0) {
+      toast.error(`Existem ${unlinkedItems.length} itens sem vínculo. Defina o vínculo antes de finalizar.`);
+      return;
+    }
+
+    // Check for duplicate supplier references
+    const supplierCodes = xmlData.products.map(p => p.code);
+    const hasDuplicates = supplierCodes.some((code, index) => supplierCodes.indexOf(code) !== index);
+    if (hasDuplicates) {
+      toast.error('Existem referências de fornecedor duplicadas no XML. Verifique os itens.');
+      return;
+    }
     
     setIsProcessing(true);
     setProgress(0);
