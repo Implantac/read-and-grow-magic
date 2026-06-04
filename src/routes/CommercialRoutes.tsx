@@ -1,24 +1,24 @@
 import { lazy } from 'react';
 import { Route } from 'react-router-dom';
 
-const ClientsPage = lazy(() => import("../pages/comercial/Clients"));
-const SalesPage = lazy(() => import("../pages/comercial/Sales"));
-const OrdersPage = lazy(() => import("../pages/comercial/Orders"));
-const CommercialQuotationsPage = lazy(() => import("../pages/comercial/Quotations"));
-const CommercialDashboardPage = lazy(() => import("../pages/comercial/CommercialDashboard"));
-const SalesFunnelPage = lazy(() => import("../pages/comercial/SalesFunnel"));
-const SalesRepsPage = lazy(() => import("../pages/comercial/SalesReps"));
-const CommissionsPage = lazy(() => import("../pages/comercial/Commissions"));
-const SalesTargetsPage = lazy(() => import("../pages/comercial/SalesTargets"));
-const ForecastPage = lazy(() => import("../pages/comercial/Forecast"));
-const SellerDashboardPage = lazy(() => import("../pages/comercial/SellerDashboard"));
-const CampaignsPage = lazy(() => import("../pages/comercial/Campaigns"));
-const PerformanceDashboardPage = lazy(() => import("../pages/comercial/PerformanceDashboard"));
-const AICommercialDashboardPage = lazy(() => import("../pages/comercial/AICommercialDashboard"));
-const SalesExecutionPage = lazy(() => import("../pages/comercial/SalesExecution"));
-const PlaybookPage = lazy(() => import("../pages/comercial/Playbook"));
-const GamificationPage = lazy(() => import("../pages/comercial/Gamification"));
-const SalesAutomationPage = lazy(() => import("../pages/comercial/SalesAutomation"));
+const ClientsPage = lazy(() => import("../modules/commercial/Clients"));
+const SalesPage = lazy(() => import("../modules/commercial/Sales"));
+const OrdersPage = lazy(() => import("../modules/commercial/Orders"));
+const CommercialQuotationsPage = lazy(() => import("../modules/commercial/Quotations"));
+const CommercialDashboardPage = lazy(() => import("../modules/commercial/CommercialDashboard"));
+const SalesFunnelPage = lazy(() => import("../modules/commercial/SalesFunnel"));
+const SalesRepsPage = lazy(() => import("../modules/commercial/SalesReps"));
+const CommissionsPage = lazy(() => import("../modules/commercial/Commissions"));
+const SalesTargetsPage = lazy(() => import("../modules/commercial/SalesTargets"));
+const ForecastPage = lazy(() => import("../modules/commercial/Forecast"));
+const SellerDashboardPage = lazy(() => import("../modules/commercial/SellerDashboard"));
+const CampaignsPage = lazy(() => import("../modules/commercial/Campaigns"));
+const PerformanceDashboardPage = lazy(() => import("../modules/commercial/PerformanceDashboard"));
+const AICommercialDashboardPage = lazy(() => import("../modules/commercial/AICommercialDashboard"));
+const SalesExecutionPage = lazy(() => import("../modules/commercial/SalesExecution"));
+const PlaybookPage = lazy(() => import("../modules/commercial/Playbook"));
+const GamificationPage = lazy(() => import("../modules/commercial/Gamification"));
+const SalesAutomationPage = lazy(() => import("../modules/commercial/SalesAutomation"));
 
 export const CommercialRoutes = [
   <Route key="comercial-dashboard" path="/comercial/dashboard" element={<CommercialDashboardPage />} />,

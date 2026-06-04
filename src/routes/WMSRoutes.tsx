@@ -1,24 +1,24 @@
 import { lazy } from 'react';
 import { Route } from 'react-router-dom';
 
-const WMSDashboardPage = lazy(() => import("../pages/wms/Dashboard"));
-const ReceivingPage = lazy(() => import("../pages/wms/Receiving"));
-const StoragePage = lazy(() => import("../pages/wms/Storage"));
-const PickingPage = lazy(() => import("../pages/wms/Picking"));
-const PackingPage = lazy(() => import("../pages/wms/Packing"));
-const InventoryPage = lazy(() => import("../pages/wms/Inventory"));
-const WMSMovementsPage = lazy(() => import("../pages/wms/Movements"));
-const ConferencePage = lazy(() => import("../pages/wms/Conference"));
-const ShipmentsPage = lazy(() => import("../pages/wms/Shipments"));
-const LotsPage = lazy(() => import("../pages/wms/Lots"));
-const WavesPage = lazy(() => import("../pages/wms/Waves"));
-const PutawayPage = lazy(() => import("../pages/wms/Putaway"));
-const ReplenishmentPage = lazy(() => import("../pages/wms/Replenishment"));
-const ReturnsPage = lazy(() => import("../pages/wms/Returns"));
-const DistributionCentersPage = lazy(() => import("../pages/wms/DistributionCenters"));
-const StockBalancesPage = lazy(() => import("../pages/wms/StockBalances"));
-const DocksPage = lazy(() => import("../pages/wms/Docks"));
-const WMSAIPage = lazy(() => import("../pages/wms/WMSAI"));
+const WMSDashboardPage = lazy(() => import("../modules/wms/Dashboard"));
+const ReceivingPage = lazy(() => import("../modules/wms/Receiving"));
+const StoragePage = lazy(() => import("../modules/wms/Storage"));
+const PickingPage = lazy(() => import("../modules/wms/Picking"));
+const PackingPage = lazy(() => import("../modules/wms/Packing"));
+const InventoryPage = lazy(() => import("../modules/wms/Inventory"));
+const WMSMovementsPage = lazy(() => import("../modules/wms/Movements"));
+const ConferencePage = lazy(() => import("../modules/wms/Conference"));
+const ShipmentsPage = lazy(() => import("../modules/wms/Shipments"));
+const LotsPage = lazy(() => import("../modules/wms/Lots"));
+const WavesPage = lazy(() => import("../modules/wms/Waves"));
+const PutawayPage = lazy(() => import("../modules/wms/Putaway"));
+const ReplenishmentPage = lazy(() => import("../modules/wms/Replenishment"));
+const ReturnsPage = lazy(() => import("../modules/wms/Returns"));
+const DistributionCentersPage = lazy(() => import("../modules/wms/DistributionCenters"));
+const StockBalancesPage = lazy(() => import("../modules/wms/StockBalances"));
+const DocksPage = lazy(() => import("../modules/wms/Docks"));
+const WMSAIPage = lazy(() => import("../modules/wms/WMSAI"));
 
 export const WMSRoutes = [
   <Route key="wms-dash" path="/wms/dashboard" element={<WMSDashboardPage />} />,
