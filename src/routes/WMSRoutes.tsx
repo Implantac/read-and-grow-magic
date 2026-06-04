@@ -1,7 +1,7 @@
 import { lazy } from 'react';
 import { Route } from 'react-router-dom';
 
-const WMSDashboardPage = lazy(() => import("../modules/wms/Dashboard"));
+const WMSDashboardPage = lazy(() => import("../modules/wms/WMSDashboard"));
 const ReceivingPage = lazy(() => import("../modules/wms/Receiving"));
 const StoragePage = lazy(() => import("../modules/wms/Storage"));
 const PickingPage = lazy(() => import("../modules/wms/Picking"));
