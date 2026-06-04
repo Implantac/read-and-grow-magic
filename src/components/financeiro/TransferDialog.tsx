@@ -5,8 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeftRight } from 'lucide-react';
-import { useBankAccounts } from '@/hooks/useBankAccounts';
-import { useTransferBetweenAccounts } from '@/hooks/useFinancialSettlements';
+import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
+import { useTransferBetweenAccounts } from '@/hooks/financial/useFinancialSettlements';
 
 import { formatBRL } from '@/lib/formatters';
 export function TransferDialog() {

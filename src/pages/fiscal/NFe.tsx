@@ -55,7 +55,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useNFe } from '@/hooks/useNFe';
+import { useNFe } from '@/hooks/fiscal/useNFe';
 import { nfeStatusLabels } from '@/config/fiscal';
 import { CreateNFeDialog } from '@/components/fiscal/CreateNFeDialog';
 import { generateDANFE, generateNFeXML } from '@/lib/fiscalDocuments';

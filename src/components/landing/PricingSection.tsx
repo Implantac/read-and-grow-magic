@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Check, X, Star } from 'lucide-react';
-import { usePlans } from '@/hooks/useSubscription';
+import { usePlans } from '@/hooks/system/useSubscription';
 import { cn } from '@/lib/utils';
 
 import { formatBRL } from '@/lib/formatters';

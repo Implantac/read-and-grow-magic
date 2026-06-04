@@ -28,11 +28,11 @@ import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { getPaymentMethodLabel, getOrderStatusLabel } from '@/config/commercial';
-import { useOrders, useCreateOrder, useUpdateOrderStatus, useUpdateOrderFields, useDeleteOrder, type DbOrder } from '@/hooks/useOrders';
-import { useClients } from '@/hooks/useClients';
+import { useOrders, useCreateOrder, useUpdateOrderStatus, useUpdateOrderFields, useDeleteOrder, type DbOrder } from '@/hooks/commercial/useOrders';
+import { useClients } from '@/hooks/commercial/useClients';
 import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
-import { validateOrder, type CommercialValidation } from '@/hooks/useCommercialRules';
+import { validateOrder, type CommercialValidation } from '@/hooks/commercial/useCommercialRules';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 

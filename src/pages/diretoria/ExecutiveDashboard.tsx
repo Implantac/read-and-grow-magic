@@ -12,7 +12,7 @@ import {
   Bot, Layers, Flame, AlertTriangle, Calendar, Activity,
 } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
-import { useExecutiveDashboard, useGenerateInsights, useGenerateScenarios, useUnifiedChat, useDailySummary } from '@/hooks/useExecutiveAI';
+import { useExecutiveDashboard, useGenerateInsights, useGenerateScenarios, useUnifiedChat, useDailySummary } from '@/hooks/ai/useExecutiveAI';
 import { ExecutiveSWOT } from '@/components/executive/ExecutiveSWOT';
 import { ExecutiveIntelligenceStatus } from '@/components/executive/ExecutiveIntelligenceStatus';
 import { PrimaryKPICards, SecondaryKPICards, TargetAttainmentBar } from '@/components/executive/ExecutiveKPICards';

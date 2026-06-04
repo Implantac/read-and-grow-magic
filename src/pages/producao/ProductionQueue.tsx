@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useProductionOrders } from '@/hooks/useProductionOrders';
+import { useProductionOrders } from '@/hooks/production/useProductionOrders';
 import { productionStatusConfig, priorityConfig } from '@/config/production';
 import { ListOrdered, AlertTriangle, Clock, Factory, Play, CheckCircle } from 'lucide-react';
 import { format, differenceInDays, parseISO } from 'date-fns';

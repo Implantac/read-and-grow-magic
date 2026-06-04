@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { useProductionLines, ProductionLine } from '@/hooks/useProductionLines';
-import { useProductionSectors } from '@/hooks/useProductionSectors';
+import { useProductionLines, ProductionLine } from '@/hooks/production/useProductionLines';
+import { useProductionSectors } from '@/hooks/production/useProductionSectors';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

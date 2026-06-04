@@ -1,0 +1,66 @@
+import { lazy } from 'react';
+import { Route } from 'react-router-dom';
+
+const ProductionOrdersPage = lazy(() => import("../pages/producao/ProductionOrders"));
+const MaterialConsumptionPage = lazy(() => import("../pages/producao/MaterialConsumption"));
+const TimeEntriesPage = lazy(() => import("../pages/producao/TimeEntries"));
+const PCPPanelPage = lazy(() => import("../pages/producao/PCPPanel"));
+const ProductionStepsPage = lazy(() => import("../pages/producao/ProductionSteps"));
+const ProductionQueuePage = lazy(() => import("../pages/producao/ProductionQueue"));
+const QualityControlPage = lazy(() => import("../pages/producao/QualityControl"));
+const SupplyStockPage = lazy(() => import("../pages/producao/SupplyStock"));
+const ProductCostsPage = lazy(() => import("../pages/producao/ProductCosts"));
+const IndustrialDashboardPage = lazy(() => import("../pages/producao/IndustrialDashboard"));
+const OperatorTerminalPage = lazy(() => import("../pages/producao/OperatorTerminal"));
+const ShopFloorDashboardPage = lazy(() => import("../pages/producao/ShopFloorDashboard"));
+const ProductionKanbanPage = lazy(() => import("../pages/producao/ProductionKanban"));
+const TechnicalSheetsPage = lazy(() => import("../pages/producao/TechnicalSheets"));
+const ProductionCapacityPage = lazy(() => import("../pages/producao/ProductionCapacity"));
+const ProductionTraceabilityPage = lazy(() => import("../pages/producao/ProductionTraceability"));
+const AIProductionPage = lazy(() => import("../pages/producao/AIProductionPage"));
+const ProductionSchedulePage = lazy(() => import("../pages/producao/ProductionSchedule"));
+const MRPPage = lazy(() => import("../pages/producao/MRPPage"));
+const BIIndustrialPage = lazy(() => import("../pages/producao/BIIndustrial"));
+const DigitalTwinPage = lazy(() => import("../pages/producao/DigitalTwin"));
+const APSPageComponent = lazy(() => import("../pages/producao/APSPage"));
+const IoTDashboardPage = lazy(() => import("../pages/producao/IoTDashboard"));
+const OEEDashboardPage = lazy(() => import("../pages/producao/OEEDashboard"));
+const MLPredictionsPage = lazy(() => import("../pages/producao/MLPredictions"));
+const ProductionSectorsPage = lazy(() => import("../pages/producao/ProductionSectors"));
+const ProductionLinesPage = lazy(() => import("../pages/producao/ProductionLinesPage"));
+const ProductionResourcesPage = lazy(() => import("../pages/producao/ProductionResourcesPage"));
+const ProductionRoutesPage = lazy(() => import("../pages/producao/ProductionRoutesPage"));
+const OutsourcingPage = lazy(() => import("../pages/producao/OutsourcingPage"));
+
+export const ProductionRoutes = [
+  <Route key="prod-orders" path="/producao/ordens" element={<ProductionOrdersPage />} />,
+  <Route key="prod-cons" path="/producao/consumo" element={<MaterialConsumptionPage />} />,
+  <Route key="prod-time" path="/producao/apontamento" element={<TimeEntriesPage />} />,
+  <Route key="prod-pcp" path="/producao/pcp" element={<PCPPanelPage />} />,
+  <Route key="prod-steps" path="/producao/etapas" element={<ProductionStepsPage />} />,
+  <Route key="prod-queue" path="/producao/fila" element={<ProductionQueuePage />} />,
+  <Route key="prod-quality" path="/producao/qualidade" element={<QualityControlPage />} />,
+  <Route key="prod-supply" path="/producao/insumos" element={<SupplyStockPage />} />,
+  <Route key="prod-costs" path="/producao/custos" element={<ProductCostsPage />} />,
+  <Route key="prod-dash" path="/producao/dashboard" element={<IndustrialDashboardPage />} />,
+  <Route key="prod-term" path="/producao/terminal" element={<OperatorTerminalPage />} />,
+  <Route key="prod-shop" path="/producao/chao-de-fabrica" element={<ShopFloorDashboardPage />} />,
+  <Route key="prod-kanban" path="/producao/kanban" element={<ProductionKanbanPage />} />,
+  <Route key="prod-tech" path="/producao/fichas" element={<TechnicalSheetsPage />} />,
+  <Route key="prod-cap" path="/producao/capacidade" element={<ProductionCapacityPage />} />,
+  <Route key="prod-trace" path="/producao/rastreabilidade" element={<ProductionTraceabilityPage />} />,
+  <Route key="prod-ia" path="/producao/ia" element={<AIProductionPage />} />,
+  <Route key="prod-sched" path="/producao/programacao" element={<ProductionSchedulePage />} />,
+  <Route key="prod-mrp" path="/producao/mrp" element={<MRPPage />} />,
+  <Route key="prod-bi" path="/producao/bi" element={<BIIndustrialPage />} />,
+  <Route key="prod-twin" path="/producao/twin" element={<DigitalTwinPage />} />,
+  <Route key="prod-aps" path="/producao/aps" element={<APSPageComponent />} />,
+  <Route key="prod-iot" path="/producao/iot" element={<IoTDashboardPage />} />,
+  <Route key="prod-oee" path="/producao/oee" element={<OEEDashboardPage />} />,
+  <Route key="prod-ml" path="/producao/previsoes" element={<MLPredictionsPage />} />,
+  <Route key="prod-sect" path="/producao/setores" element={<ProductionSectorsPage />} />,
+  <Route key="prod-lines" path="/producao/linhas" element={<ProductionLinesPage />} />,
+  <Route key="prod-res" path="/producao/recursos" element={<ProductionResourcesPage />} />,
+  <Route key="prod-routes" path="/producao/roteiros" element={<ProductionRoutesPage />} />,
+  <Route key="prod-out" path="/producao/terceirizacao" element={<OutsourcingPage />} />,
+];

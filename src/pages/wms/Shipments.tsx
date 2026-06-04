@@ -17,7 +17,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Truck, Search, MoreHorizontal, PackageCheck, MapPin, Clock, CheckCircle, FileText, Plus } from 'lucide-react';
-import { useWMSShipments } from '@/hooks/useWMSShipments';
+import { useWMSShipments } from '@/hooks/wms/useWMSShipments';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 

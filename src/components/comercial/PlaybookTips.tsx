@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { usePlaybooks, useObjections, useLogPlaybookUsage, type Playbook, type Objection } from '@/hooks/usePlaybook';
+import { usePlaybooks, useObjections, useLogPlaybookUsage, type Playbook, type Objection } from '@/hooks/commercial/usePlaybook';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';

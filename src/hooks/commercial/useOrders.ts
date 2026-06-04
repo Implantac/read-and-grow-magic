@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
-import { useSystemParameters } from './useSystemParameters';
+import { useSystemParameters } from '@/hooks/system/useSystemParameters';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export interface DbOrderItem {

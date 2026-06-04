@@ -7,8 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { usePlaybooks, useObjections, useLogPlaybookUsage, usePlaybookAdherence } from '@/hooks/usePlaybook';
-import { FUNNEL_STAGES } from '@/hooks/useSalesFunnel';
+import { usePlaybooks, useObjections, useLogPlaybookUsage, usePlaybookAdherence } from '@/hooks/commercial/usePlaybook';
+import { FUNNEL_STAGES } from '@/hooks/commercial/useSalesFunnel';
 import { BookOpen, MessageSquare, Target, CheckCircle2, Copy, ThumbsUp, Clock, Shield, TrendingUp, Users, Zap } from 'lucide-react';
 
 import { formatDate } from '@/lib/formatters';

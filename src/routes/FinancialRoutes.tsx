@@ -1,0 +1,60 @@
+import { lazy } from 'react';
+import { Route } from 'react-router-dom';
+
+const AccountsPayable = lazy(() => import("../pages/financeiro/AccountsPayable"));
+const AccountsReceivable = lazy(() => import("../pages/financeiro/AccountsReceivable"));
+const CashFlow = lazy(() => import("../pages/financeiro/CashFlow"));
+const BankReconciliation = lazy(() => import("../pages/financeiro/BankReconciliation"));
+const FinancialDashboardPage = lazy(() => import("../pages/financeiro/FinancialDashboard"));
+const BankAccountsPage = lazy(() => import("../pages/financeiro/BankAccounts"));
+const CostCentersPage = lazy(() => import("../pages/financeiro/CostCenters"));
+const RenegotiationsPage = lazy(() => import("../pages/financeiro/Renegotiations"));
+const DRELedgerPage = lazy(() => import("../pages/financeiro/DRELedger"));
+const FinancialAuditPage = lazy(() => import("../pages/financeiro/FinancialAudit"));
+const PixChargesPage = lazy(() => import("../pages/financeiro/PixCharges"));
+const ChecksPage = lazy(() => import("../pages/financeiro/Checks"));
+const BoletosPage = lazy(() => import("../pages/financeiro/Boletos"));
+const FinancialIntelligencePage = lazy(() => import("../pages/financeiro/FinancialIntelligence"));
+const FinancialBIPage = lazy(() => import("../pages/financeiro/FinancialBI"));
+const FinancialAntifraudPage = lazy(() => import("../pages/financeiro/FinancialAntifraud"));
+const BankStatementImportPage = lazy(() => import("../pages/financeiro/BankStatementImport"));
+const AdvancesPage = lazy(() => import("../pages/financeiro/Advances"));
+const FinancialHubPage = lazy(() => import("../pages/financeiro/FinancialHub"));
+const AccountStatementPage = lazy(() => import("../pages/financeiro/AccountStatement"));
+const FinancialOffsetPage = lazy(() => import("../pages/financeiro/FinancialOffset"));
+const ChargesRulerPage = lazy(() => import("../pages/financeiro/ChargesRuler"));
+const RecurringPage = lazy(() => import("../pages/financeiro/RecurringPage"));
+const DefaultManagementPage = lazy(() => import("../pages/financeiro/DefaultManagement"));
+const CashflowScenariosPage = lazy(() => import("../pages/financeiro/CashflowScenarios"));
+const FinancialAlertsPage = lazy(() => import("../pages/financeiro/FinancialAlerts"));
+const DREDynamicPage = lazy(() => import("../pages/financeiro/DREDynamicPage"));
+
+export const FinancialRoutes = [
+  <Route key="fin-hub" path="/financeiro/central" element={<FinancialHubPage />} />,
+  <Route key="fin-dash" path="/financeiro/dashboard" element={<FinancialDashboardPage />} />,
+  <Route key="fin-pay" path="/financeiro/pagar" element={<AccountsPayable />} />,
+  <Route key="fin-rec" path="/financeiro/receber" element={<AccountsReceivable />} />,
+  <Route key="fin-flow" path="/financeiro/fluxo" element={<CashFlow />} />,
+  <Route key="fin-bank" path="/financeiro/tesouraria" element={<BankAccountsPage />} />,
+  <Route key="fin-cc" path="/financeiro/centros-custo" element={<CostCentersPage />} />,
+  <Route key="fin-reneg" path="/financeiro/renegociacoes" element={<RenegotiationsPage />} />,
+  <Route key="fin-recon" path="/financeiro/conciliacao" element={<BankReconciliation />} />,
+  <Route key="fin-dre" path="/financeiro/dre" element={<DRELedgerPage />} />,
+  <Route key="fin-audit" path="/financeiro/auditoria" element={<FinancialAuditPage />} />,
+  <Route key="fin-pix" path="/financeiro/pix" element={<PixChargesPage />} />,
+  <Route key="fin-checks" path="/financeiro/cheques" element={<ChecksPage />} />,
+  <Route key="fin-boletos" path="/financeiro/boletos" element={<BoletosPage />} />,
+  <Route key="fin-intel" path="/financeiro/inteligencia" element={<FinancialIntelligencePage />} />,
+  <Route key="fin-bi" path="/financeiro/bi" element={<FinancialBIPage />} />,
+  <Route key="fin-fraud" path="/financeiro/antifraude" element={<FinancialAntifraudPage />} />,
+  <Route key="fin-import" path="/financeiro/importar-extrato" element={<BankStatementImportPage />} />,
+  <Route key="fin-adv" path="/financeiro/adiantamentos" element={<AdvancesPage />} />,
+  <Route key="fin-stmt" path="/financeiro/conta-corrente" element={<AccountStatementPage />} />,
+  <Route key="fin-offset" path="/financeiro/compensacao" element={<FinancialOffsetPage />} />,
+  <Route key="fin-ruler" path="/financeiro/cobranca-automatica" element={<ChargesRulerPage />} />,
+  <Route key="fin-recur" path="/financeiro/recorrencias" element={<RecurringPage />} />,
+  <Route key="fin-default" path="/financeiro/inadimplencia" element={<DefaultManagementPage />} />,
+  <Route key="fin-scen" path="/financeiro/cenarios" element={<CashflowScenariosPage />} />,
+  <Route key="fin-alerts" path="/financeiro/alertas" element={<FinancialAlertsPage />} />,
+  <Route key="fin-dre-dyn" path="/financeiro/dre-dinamico" element={<DREDynamicPage />} />,
+];

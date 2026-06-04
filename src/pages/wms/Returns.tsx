@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RotateCcw, Search, Package, Truck, Factory, AlertTriangle, CheckCircle, Eye } from 'lucide-react';
-import { useWMSReturns } from '@/hooks/useWMSReturns';
+import { useWMSReturns } from '@/hooks/wms/useWMSReturns';
 
 const typeConfig: Record<string, { label: string; icon: React.ReactNode }> = {
   customer: { label: 'Cliente', icon: <Package className="h-4 w-4" /> },

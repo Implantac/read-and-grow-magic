@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Search, TrendingUp, TrendingDown, ArrowRight, RotateCcw, Plus, ArrowUpDown, Calendar } from 'lucide-react';
-import { useWMSMovements } from '@/hooks/useWMSOperations';
+import { useWMSMovements } from '@/hooks/wms/useWMSOperations';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { MovementType } from '@/types/wms';

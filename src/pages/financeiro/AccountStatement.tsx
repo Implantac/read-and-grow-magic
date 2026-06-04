@@ -7,9 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useClients } from '@/hooks/useClients';
-import { useSuppliers } from '@/hooks/useSuppliers';
-import { useAccountStatement } from '@/hooks/useSettlement';
+import { useClients } from '@/hooks/commercial/useClients';
+import { useSuppliers } from '@/hooks/purchasing/useSuppliers';
+import { useAccountStatement } from '@/hooks/financial/useSettlement';
 import { ArrowDownCircle, ArrowUpCircle, Wallet } from 'lucide-react';
 
 import { formatBRL, formatDate } from '@/lib/formatters';

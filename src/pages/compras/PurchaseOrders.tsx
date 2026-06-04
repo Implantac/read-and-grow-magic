@@ -42,7 +42,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { purchaseOrderStatuses } from '@/config/purchasing';
 import { PurchaseOrder, PurchaseOrderStatus } from '@/types/purchasing';
-import { usePurchaseOrders } from '@/hooks/usePurchaseOrders';
+import { usePurchaseOrders } from '@/hooks/purchasing/usePurchaseOrders';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';

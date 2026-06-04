@@ -5,7 +5,7 @@ import {
   Factory, Activity, Package, Scale,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { ExecutiveKPIs } from '@/hooks/useExecutiveAI';
+import type { ExecutiveKPIs } from '@/hooks/ai/useExecutiveAI';
 
 const fmt = (v: number) => v >= 1000000
   ? `R$ ${(v / 1000000).toFixed(1)}M`

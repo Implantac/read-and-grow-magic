@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { Percent, Plus } from 'lucide-react';
-import { useICMSSTRules, useUpsertICMSST } from '@/hooks/useTaxAdvancedRules';
+import { useICMSSTRules, useUpsertICMSST } from '@/hooks/fiscal/useTaxAdvancedRules';
 
 export default function ICMSSTPage() {
   const { data: rules = [], isLoading } = useICMSSTRules();

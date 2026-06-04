@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Search, Package, AlertTriangle, ClipboardList, DollarSign } from 'lucide-react';
-import { useWMSInventory } from '@/hooks/useWMSInventory';
+import { useWMSInventory } from '@/hooks/wms/useWMSInventory';
 import type { InventoryStatus } from '@/types/wms';
 
 import { formatBRL, formatDate } from '@/lib/formatters';

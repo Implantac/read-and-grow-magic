@@ -1,9 +1,9 @@
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { useCreditProfiles, useOrderBlocks, useCollectionActions } from '@/hooks/useCreditAnalysis';
-import { useClients } from '@/hooks/useClients';
-import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
+import { useCreditProfiles, useOrderBlocks, useCollectionActions } from '@/hooks/financial/useCreditAnalysis';
+import { useClients } from '@/hooks/commercial/useClients';
+import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DoorOpen, Truck, CheckCircle, AlertTriangle } from 'lucide-react';
-import { useLoadingDocks } from '@/hooks/useLoadingDocks';
+import { useLoadingDocks } from '@/hooks/wms/useLoadingDocks';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; color: string }> = {
   free: { label: 'Livre', variant: 'outline', color: 'border-l-green-500' },

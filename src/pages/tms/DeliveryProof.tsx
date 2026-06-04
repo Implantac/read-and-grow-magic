@@ -1,7 +1,7 @@
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageLoading } from '@/components/shared/PageLoading';
-import { useDeliveryProof } from '@/hooks/useTMS';
+import { useDeliveryProof } from '@/hooks/wms/useTMS';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';

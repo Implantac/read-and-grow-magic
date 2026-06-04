@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useFinancialInsights } from '@/hooks/useFinancialInsights';
+import { useFinancialInsights } from '@/hooks/financial/useFinancialInsights';
 import { Brain, AlertTriangle, TrendingUp, Lightbulb, ShieldCheck } from 'lucide-react';
 
 import { formatBRL, formatDateTime, formatNumber } from '@/lib/formatters';

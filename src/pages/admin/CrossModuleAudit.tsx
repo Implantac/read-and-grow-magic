@@ -8,7 +8,7 @@ import { Activity, ArrowRight, CheckCircle2, AlertTriangle, XCircle, Search, Rad
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { useCrossModuleEvents } from '@/hooks/useCrossModuleEvents';
+import { useCrossModuleEvents } from '@/hooks/system/useCrossModuleEvents';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 

@@ -18,12 +18,12 @@ import {
   Wallet, ArrowDownCircle, ArrowUpCircle, TrendingUp, AlertTriangle,
   Sparkles, Target, RefreshCw, ArrowRight,
 } from 'lucide-react';
-import { useBankAccounts } from '@/hooks/useBankAccounts';
-import { useFinancialLedger, type LedgerEntryRow } from '@/hooks/useFinancialLedger';
-import { useFinancialCategories } from '@/hooks/useFinancialCategories';
-import { useFinancialInsights } from '@/hooks/useFinancialInsights';
-import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
-import { useAccountsPayable } from '@/hooks/useAccountsPayable';
+import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
+import { useFinancialLedger, type LedgerEntryRow } from '@/hooks/financial/useFinancialLedger';
+import { useFinancialCategories } from '@/hooks/financial/useFinancialCategories';
+import { useFinancialInsights } from '@/hooks/financial/useFinancialInsights';
+import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
+import { useAccountsPayable } from '@/hooks/financial/useAccountsPayable';
 
 const fmtCompact = (v: number) =>
   new Intl.NumberFormat('pt-BR', { notation: 'compact', maximumFractionDigits: 1 }).format(v ?? 0);

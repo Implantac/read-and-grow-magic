@@ -9,7 +9,7 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { PageLoading } from '@/components/shared/PageLoading';
 import { EquityEvolutionChart } from '@/components/contabilidade/EquityEvolutionChart';
 import { FinancialIndicatorsPanel } from '@/components/contabilidade/FinancialIndicatorsPanel';
-import { useBalanceSheet } from '@/hooks/useBalanceSheet';
+import { useBalanceSheet } from '@/hooks/accounting/useBalanceSheet';
 import { formatBRL } from '@/lib/formatters';
 import {
   Table,

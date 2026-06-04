@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   MapPin, Search, Package, Grid3X3, Warehouse, Thermometer, AlertTriangle, Plus, FilterX
 } from 'lucide-react';
-import { useWMSStorageLocations } from '@/hooks/useWMSOperations';
+import { useWMSStorageLocations } from '@/hooks/wms/useWMSOperations';
 import type { StorageType } from '@/types/wms';
 import { cn } from '@/lib/utils';
 import { WarehouseMap } from '@/components/wms/WarehouseMap';

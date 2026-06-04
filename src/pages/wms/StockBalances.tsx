@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Database, Search, Package, Lock, CheckCircle } from 'lucide-react';
-import { useStockBalances } from '@/hooks/useStockBalances';
+import { useStockBalances } from '@/hooks/inventory/useStockBalances';
 import { ExportButton } from '@/components/shared/ExportButton';
 
 import { formatNumber } from '@/lib/formatters';

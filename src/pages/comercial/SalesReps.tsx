@@ -17,9 +17,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Plus, MoreHorizontal, Pencil, Trash2, Users, Target, DollarSign, TrendingUp, Briefcase } from 'lucide-react';
-import { useSalesReps, useCreateSalesRep, useUpdateSalesRep, useDeleteSalesRep, type DbSalesRep } from '@/hooks/useSalesReps';
-import { useClients } from '@/hooks/useClients';
-import { useOrders } from '@/hooks/useOrders';
+import { useSalesReps, useCreateSalesRep, useUpdateSalesRep, useDeleteSalesRep, type DbSalesRep } from '@/hooks/commercial/useSalesReps';
+import { useClients } from '@/hooks/commercial/useClients';
+import { useOrders } from '@/hooks/commercial/useOrders';
 import { Badge } from '@/components/ui/badge';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 

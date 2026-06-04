@@ -17,7 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useProducts, type DbProduct } from '@/hooks/useProducts';
+import { useProducts, type DbProduct } from '@/hooks/inventory/useProducts';
 
 export interface LineItem {
   product_id?: string | null;

@@ -15,7 +15,7 @@ import {
 import {
   Search, Package, Truck, Clock, Box, PackageCheck, MoreHorizontal, FileText, PlayCircle, CheckCircle,
 } from 'lucide-react';
-import { useWMSPacking } from '@/hooks/useWMSOperations';
+import { useWMSPacking } from '@/hooks/wms/useWMSOperations';
 import { toast } from 'sonner';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {

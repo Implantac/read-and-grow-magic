@@ -50,8 +50,8 @@ interface SystemEntry {
   matchedBankId?: string;
 }
 
-import { useBankTransactions } from '@/hooks/useBankReconciliation';
-import { useCashFlowEntries } from '@/hooks/useCashFlow';
+import { useBankTransactions } from '@/hooks/financial/useBankReconciliation';
+import { useCashFlowEntries } from '@/hooks/financial/useCashFlow';
 import { toastSuccess } from '@/lib/toastHelpers';
 
 export default function BankReconciliation() {

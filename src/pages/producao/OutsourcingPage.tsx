@@ -13,9 +13,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useOutsourcingOrders, type OutsourcingOrderRow } from '@/hooks/useOutsourcingOrders';
-import { useProductionOrders } from '@/hooks/useProductionOrders';
-import { useSuppliers } from '@/hooks/useSuppliers';
+import { useOutsourcingOrders, type OutsourcingOrderRow } from '@/hooks/production/useOutsourcingOrders';
+import { useProductionOrders } from '@/hooks/production/useProductionOrders';
+import { useSuppliers } from '@/hooks/purchasing/useSuppliers';
 import { outsourcingStatusConfig } from '@/config/production';
 import { KanbanService } from '@/lib/pcpServices';
 import { Truck, AlertTriangle, Plus, Calendar, DollarSign, Package, Clock, CheckCircle, Search, BarChart3, TrendingUp } from 'lucide-react';

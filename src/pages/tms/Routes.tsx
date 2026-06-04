@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageLoading } from '@/components/shared/PageLoading';
-import { useDeliveryRoutes, useCarriers, useVehicles } from '@/hooks/useTMS';
+import { useDeliveryRoutes, useCarriers, useVehicles } from '@/hooks/wms/useTMS';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

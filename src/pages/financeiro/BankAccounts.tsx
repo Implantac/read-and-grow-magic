@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { useBankAccounts, useCreateBankAccount } from '@/hooks/useBankAccounts';
+import { useBankAccounts, useCreateBankAccount } from '@/hooks/financial/useBankAccounts';
 import { TransferDialog } from '@/components/financeiro/TransferDialog';
 
 import { formatBRL } from '@/lib/formatters';

@@ -2,7 +2,7 @@ import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageLoading } from '@/components/shared/PageLoading';
 import { KPICard } from '@/components/shared/KPICard';
-import { useTMSDashboardStats } from '@/hooks/useTMS';
+import { useTMSDashboardStats } from '@/hooks/wms/useTMS';
 import { Truck, Building2, MapPin, PackageCheck, Navigation, Clock } from 'lucide-react';
 
 const TMSDashboard = () => {

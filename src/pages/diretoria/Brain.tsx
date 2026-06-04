@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { useBrainDecisions, useApproveDecision, useBrainMemories, useBrainRuns, useRunBrain, useBrainChat } from '@/hooks/useAIBrain';
+import { useBrainDecisions, useApproveDecision, useBrainMemories, useBrainRuns, useRunBrain, useBrainChat } from '@/hooks/ai/useAIBrain';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';

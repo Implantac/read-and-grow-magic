@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useProductCosts } from '@/hooks/useProductCosts';
+import { useProductCosts } from '@/hooks/production/useProductCosts';
 import { KPICard } from '@/components/shared/KPICard';
 import { Plus, DollarSign, TrendingUp, AlertTriangle, Calculator, Search, Pencil, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';

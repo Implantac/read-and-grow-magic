@@ -1,4 +1,4 @@
-import { useProductionOrderSteps, ProductionOrderStep } from '@/hooks/useProductionSteps';
+import { useProductionOrderSteps, ProductionOrderStep } from '@/hooks/production/useProductionSteps';
 import { cn } from '@/lib/utils';
 import { CheckCircle, Circle, Loader2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';

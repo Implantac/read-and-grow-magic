@@ -7,11 +7,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useCnpjLookup } from '@/hooks/useCnpjLookup';
-import { useSalesReps } from '@/hooks/useSalesReps';
+import { useCnpjLookup } from '@/hooks/system/useCnpjLookup';
+import { useSalesReps } from '@/hooks/commercial/useSalesReps';
 import { clientSegments, brazilianStates } from '@/config/commercial';
 import { maskCNPJ, maskCPF, maskPhone, maskCEP, validateCNPJ, validateCPF, validateEmail, lookupCEP } from '@/lib/maskUtils';
-import { useCreateClient, useUpdateClient, type DbClient } from '@/hooks/useClients';
+import { useCreateClient, useUpdateClient, type DbClient } from '@/hooks/commercial/useClients';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 interface Props {

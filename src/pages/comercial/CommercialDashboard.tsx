@@ -11,14 +11,14 @@ import {
   UserX, TrendingDown, Brain, Sparkles, RefreshCw,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useOrders } from '@/hooks/useOrders';
-import { useClients } from '@/hooks/useClients';
-import { useSalesFunnel } from '@/hooks/useSalesFunnel';
-import { useSalesReps } from '@/hooks/useSalesReps';
-import { useCommercialAlerts } from '@/hooks/useCommercialAlerts';
-import { useSales } from '@/hooks/useSales';
-import { useCommercialInsights } from '@/hooks/useCommercialRules';
-import { useAIDailyActions, useAIRecommendations, useRunAIEngine } from '@/hooks/useAICommercial';
+import { useOrders } from '@/hooks/commercial/useOrders';
+import { useClients } from '@/hooks/commercial/useClients';
+import { useSalesFunnel } from '@/hooks/commercial/useSalesFunnel';
+import { useSalesReps } from '@/hooks/commercial/useSalesReps';
+import { useCommercialAlerts } from '@/hooks/commercial/useCommercialAlerts';
+import { useSales } from '@/hooks/commercial/useSales';
+import { useCommercialInsights } from '@/hooks/commercial/useCommercialRules';
+import { useAIDailyActions, useAIRecommendations, useRunAIEngine } from '@/hooks/commercial/useAICommercial';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts';
 import { startOfMonth, endOfMonth, isToday, differenceInDays, subMonths, format, startOfDay, eachDayOfInterval, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';

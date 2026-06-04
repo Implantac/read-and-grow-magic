@@ -3,11 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { useFollowUpTasks } from '@/hooks/useFollowUpTasks';
-import { useAIScores } from '@/hooks/useAICommercial';
-import { useCommercialAlerts } from '@/hooks/useCommercialAlerts';
-import { useSalesFunnel } from '@/hooks/useSalesFunnel';
-import { useAISalesMessage } from '@/hooks/useFollowUpTasks';
+import { useFollowUpTasks } from '@/hooks/commercial/useFollowUpTasks';
+import { useAIScores } from '@/hooks/commercial/useAICommercial';
+import { useCommercialAlerts } from '@/hooks/commercial/useCommercialAlerts';
+import { useSalesFunnel } from '@/hooks/commercial/useSalesFunnel';
+import { useAISalesMessage } from '@/hooks/commercial/useFollowUpTasks';
 import { Brain, Flame, Phone, MessageSquare, AlertTriangle, TrendingUp, UserX, Zap, Target, Loader2, Sparkles, Copy, Clock } from 'lucide-react';
 
 const today = new Date().toISOString().split('T')[0];

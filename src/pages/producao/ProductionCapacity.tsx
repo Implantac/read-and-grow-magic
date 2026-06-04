@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useProductionCapacity } from '@/hooks/useProductionCapacity';
+import { useProductionCapacity } from '@/hooks/production/useProductionCapacity';
 import { Plus, Pencil, Trash2, Gauge, Factory, Users, Clock } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 

@@ -9,10 +9,10 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Trash2, QrCode, Banknote, CreditCard, Receipt, ArrowLeftRight, FileCheck, Wallet, Loader2 } from 'lucide-react';
-import { useBankAccounts } from '@/hooks/useBankAccounts';
-import { useFinancialAdvances } from '@/hooks/useFinancialAdvances';
-import { useSettleAccount, type PaymentSplit } from '@/hooks/useSettlement';
-import { useUseAdvance } from '@/hooks/useFinancialSettlements';
+import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
+import { useFinancialAdvances } from '@/hooks/financial/useFinancialAdvances';
+import { useSettleAccount, type PaymentSplit } from '@/hooks/financial/useSettlement';
+import { useUseAdvance } from '@/hooks/financial/useFinancialSettlements';
 import { cn } from '@/lib/utils';
 
 const fmt = (v: number) =>

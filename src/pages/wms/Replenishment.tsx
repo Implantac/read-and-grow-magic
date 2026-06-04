@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { RefreshCw, Search, ArrowRight, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
-import { useReplenishmentTasks } from '@/hooks/useReplenishmentTasks';
+import { useReplenishmentTasks } from '@/hooks/wms/useReplenishmentTasks';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   pending: { label: 'Pendente', variant: 'outline' },

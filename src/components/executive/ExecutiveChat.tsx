@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { Brain, Send, Loader2, Trash2, Sparkles, FileText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import type { ChatMessage } from '@/hooks/useExecutiveAI';
+import type { ChatMessage } from '@/hooks/ai/useExecutiveAI';
 
 const quickActions = [
   { label: '💰 Resumo Financeiro', prompt: 'Qual o resumo financeiro de hoje? Saldos, vencimentos e inadimplência.' },

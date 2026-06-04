@@ -19,7 +19,7 @@ import {
   Search, Package, Clock, CheckCircle, PlayCircle, ClipboardList, AlertTriangle, Zap, PackageSearch,
   Route, MapPin, Box, ArrowRight, User, Info, Layers, ScanBarcode, ChevronRight, CheckCircle2
 } from 'lucide-react';
-import { useWMSPicking } from '@/hooks/useWMSOperations';
+import { useWMSPicking } from '@/hooks/wms/useWMSOperations';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { PickingStatus } from '@/types/wms';

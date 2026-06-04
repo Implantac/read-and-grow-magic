@@ -13,7 +13,7 @@ import { PeriodSelector } from '@/components/contabilidade/PeriodSelector';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 
-import { useAccountingDashboardData } from '@/hooks/useAccountingDashboard';
+import { useAccountingDashboardData } from '@/hooks/accounting/useAccountingDashboard';
 
 export default function AccountingDashboard() {
   const { data: dashboardData, isLoading } = useAccountingDashboardData();

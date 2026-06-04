@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { useProductionRoutes, useProductionRouteSteps, ProductionRouteRow, ProductionRouteStep } from '@/hooks/useProductionRoutes';
-import { useProductionSectors } from '@/hooks/useProductionSectors';
-import { useProductionResources } from '@/hooks/useProductionResources';
-import { useProducts } from '@/hooks/useProducts';
+import { useProductionRoutes, useProductionRouteSteps, ProductionRouteRow, ProductionRouteStep } from '@/hooks/production/useProductionRoutes';
+import { useProductionSectors } from '@/hooks/production/useProductionSectors';
+import { useProductionResources } from '@/hooks/production/useProductionResources';
+import { useProducts } from '@/hooks/inventory/useProducts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

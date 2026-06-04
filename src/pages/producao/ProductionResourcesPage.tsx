@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { useProductionResources, ProductionResource } from '@/hooks/useProductionResources';
-import { useProductionSectors } from '@/hooks/useProductionSectors';
-import { useProductionLines } from '@/hooks/useProductionLines';
+import { useProductionResources, ProductionResource } from '@/hooks/production/useProductionResources';
+import { useProductionSectors } from '@/hooks/production/useProductionSectors';
+import { useProductionLines } from '@/hooks/production/useProductionLines';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

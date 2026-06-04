@@ -18,14 +18,14 @@ import {
   DollarSign, Trophy, Zap, ArrowRight, PhoneCall, Mail, MessageSquare,
   Calendar, Star, ShieldAlert, Eye, Brain, Sparkles, RefreshCw,
 } from 'lucide-react';
-import { useClients } from '@/hooks/useClients';
-import { useOrders } from '@/hooks/useOrders';
-import { useSales } from '@/hooks/useSales';
-import { useSalesFunnel } from '@/hooks/useSalesFunnel';
-import { useSalesReps } from '@/hooks/useSalesReps';
-import { useFollowUps, useCreateFollowUp, useUpdateFollowUp, useClientInsights, useRepPerformance, useLostSalesAlerts, useSalesScript, type ClientInsight } from '@/hooks/useSalesIntelligence';
-import { useCommercialAlerts } from '@/hooks/useCommercialAlerts';
-import { useAIDailyActions, useAIRecommendations, useCompleteAIAction, useActOnRecommendation, useRunAIEngine } from '@/hooks/useAICommercial';
+import { useClients } from '@/hooks/commercial/useClients';
+import { useOrders } from '@/hooks/commercial/useOrders';
+import { useSales } from '@/hooks/commercial/useSales';
+import { useSalesFunnel } from '@/hooks/commercial/useSalesFunnel';
+import { useSalesReps } from '@/hooks/commercial/useSalesReps';
+import { useFollowUps, useCreateFollowUp, useUpdateFollowUp, useClientInsights, useRepPerformance, useLostSalesAlerts, useSalesScript, type ClientInsight } from '@/hooks/commercial/useSalesIntelligence';
+import { useCommercialAlerts } from '@/hooks/commercial/useCommercialAlerts';
+import { useAIDailyActions, useAIRecommendations, useCompleteAIAction, useActOnRecommendation, useRunAIEngine } from '@/hooks/commercial/useAICommercial';
 import { differenceInDays, format, isToday, startOfMonth, endOfMonth } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 

@@ -12,9 +12,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { useFinancialBoletos, useCreateBoleto, useCancelBoleto, useMarkBoletoPaid } from '@/hooks/useFinancialBoletos';
-import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
-import { useBankAccounts } from '@/hooks/useBankAccounts';
+import { useFinancialBoletos, useCreateBoleto, useCancelBoleto, useMarkBoletoPaid } from '@/hooks/financial/useFinancialBoletos';
+import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
+import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 import { BOLETO_STATUS_LABELS } from '@/types/financial';
 import { format } from 'date-fns';
 

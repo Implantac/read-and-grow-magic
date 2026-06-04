@@ -3,11 +3,11 @@
  * Aggregates MRP, Scheduling, and Simulation services into proactive alerts & metrics
  */
 import { useMemo } from 'react';
-import { useProductionOrders } from './useProductionOrders';
-import { useProductionCapacity } from './useProductionCapacity';
-import { useTechnicalSheets } from './useTechnicalSheets';
-import { useSupplyStock } from './useSupplyStock';
-import { useTimeEntries } from './useTimeEntries';
+import { useProductionOrders } from '@/hooks/production/useProductionOrders';
+import { useProductionCapacity } from '@/hooks/production/useProductionCapacity';
+import { useTechnicalSheets } from '@/hooks/production/useTechnicalSheets';
+import { useSupplyStock } from '@/hooks/inventory/useSupplyStock';
+import { useTimeEntries } from '@/hooks/system/useTimeEntries';
 import { MRPService, SchedulingService, PCPMetricsService, type ActionSuggestion, type PCPMetrics, type MaterialNeed, type ScheduleSlot } from '@/lib/pcpServices';
 import { differenceInDays, differenceInMinutes } from 'date-fns';
 

@@ -10,7 +10,7 @@ import { QrCode, Plus, Copy, CheckCircle2, Clock, Zap } from 'lucide-react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { usePixCharges, useCreatePixCharge, useSimulatePixPayment } from '@/hooks/usePixCharges';
+import { usePixCharges, useCreatePixCharge, useSimulatePixPayment } from '@/hooks/financial/usePixCharges';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatBRL } from '@/lib/formatters';

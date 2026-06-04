@@ -18,7 +18,7 @@ import {
 import {
   ClipboardCheck, Search, MoreHorizontal, PlayCircle, CheckCircle, AlertTriangle, Clock, Eye, ScanBarcode,
 } from 'lucide-react';
-import { useWMSConference, ConferenceItem } from '@/hooks/useWMSConference';
+import { useWMSConference, ConferenceItem } from '@/hooks/wms/useWMSConference';
 import { BarcodeScanner, ScanFeedback } from '@/components/wms/BarcodeScanner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';

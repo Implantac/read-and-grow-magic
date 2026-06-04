@@ -6,7 +6,7 @@ import { Brain, AlertTriangle, TrendingUp, RefreshCw, Activity, Wallet, AlertCir
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { useLatestHealthScore, usePredictiveAlerts, useComputeIntelligence, useAutoReconcile } from '@/hooks/useFinancialIntelligence';
+import { useLatestHealthScore, usePredictiveAlerts, useComputeIntelligence, useAutoReconcile } from '@/hooks/financial/useFinancialIntelligence';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatBRL } from '@/lib/formatters';

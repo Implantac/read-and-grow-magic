@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useChargeRules, useChargesLog, useRunChargesRuler, useToggleChargeRule } from '@/hooks/useFinancialCharges';
+import { useChargeRules, useChargesLog, useRunChargesRuler, useToggleChargeRule } from '@/hooks/financial/useFinancialCharges';
 import { Play, Bell, AlertTriangle, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';

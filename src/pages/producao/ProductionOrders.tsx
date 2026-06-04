@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useProductionOrders } from '@/hooks/useProductionOrders';
-import { useProductionOrderSteps } from '@/hooks/useProductionSteps';
-import { useProductionLogs } from '@/hooks/useProductionLogs';
+import { useProductionOrders } from '@/hooks/production/useProductionOrders';
+import { useProductionOrderSteps } from '@/hooks/production/useProductionSteps';
+import { useProductionLogs } from '@/hooks/production/useProductionLogs';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
 import { QRCodeOPButton } from '@/components/producao/QRCodeOP';
 import { cn } from '@/lib/utils';
-import { ProductionOrderRow } from '@/hooks/useProductionOrders';
+import { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
 import { StepProgressPipeline } from '@/components/producao/StepProgressPipeline';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {

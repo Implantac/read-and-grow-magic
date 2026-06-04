@@ -14,8 +14,8 @@ import { Timer, Search, Clock, Play, Pause, CheckCircle, Eye, PlayCircle, StopCi
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { useTimeEntries, TimeEntryRow } from '@/hooks/useTimeEntries';
-import { useProductionOrders } from '@/hooks/useProductionOrders';
+import { useTimeEntries, TimeEntryRow } from '@/hooks/system/useTimeEntries';
+import { useProductionOrders } from '@/hooks/production/useProductionOrders';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ReactNode }> = {

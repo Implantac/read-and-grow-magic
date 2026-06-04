@@ -11,8 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useSupplyStock } from '@/hooks/useSupplyStock';
-import { useProductionOrders } from '@/hooks/useProductionOrders';
+import { useSupplyStock } from '@/hooks/inventory/useSupplyStock';
+import { useProductionOrders } from '@/hooks/production/useProductionOrders';
 import { KPICard } from '@/components/shared/KPICard';
 import { Plus, Package, Search, ArrowUpCircle, ArrowDownCircle, AlertTriangle, Boxes } from 'lucide-react';
 import { format } from 'date-fns';
