@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { toastError } from '@/lib/toastHelpers';
-import { Plus, Eye, MoreHorizontal, FileText, Loader2, DollarSign, ShoppingBag, TrendingUp } from 'lucide-react';
+import { Plus, Eye, MoreHorizontal, FileText, Loader2 } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
-import { KPICard } from '@/shared/components/KPICard';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -20,11 +19,11 @@ import { AdvancedFilters, type FilterField } from '@/shared/components/AdvancedF
 import { getPaymentMethodLabel } from '@/config/commercial';
 import { useSales, useCreateSale } from '@/hooks/commercial/useSales';
 import type { DbSale } from '@/types/commercial';
-
 import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
-
 import { formatBRL, formatDate } from '@/lib/formatters';
+import { SalesSummary } from '@/components/comercial/SalesSummary';
+
 
 const filterFields: FilterField[] = [
   { key: 'status', label: 'Status', type: 'select', options: [
@@ -76,7 +75,7 @@ export default function SalesPage() {
     });
   };
 
-  const filteredSales = sales.filter((sale) => {
+  const filteredSales = useMemo(() => sales.filter((sale) => {
     if (filters.status && sale.status !== filters.status) return false;
     if (filters.paymentMethod && sale.payment_method !== filters.paymentMethod) return false;
     if (filters.startDate) {
@@ -92,7 +91,8 @@ export default function SalesPage() {
       if (saleDate > endDate) return false;
     }
     return true;
-  });
+  }), [sales, filters]);
+
 
   const columns: Column<DbSale>[] = [
     { key: 'number', label: 'Número', sortable: true },
@@ -118,8 +118,6 @@ export default function SalesPage() {
     </DropdownMenu>
   );
 
-  const totalSalesValue = filteredSales.filter(s => s.status === 'completed').reduce((acc, s) => acc + s.total, 0);
-  const salesCountValue = filteredSales.filter(s => s.status === 'completed').length;
 
   if (isLoading) {
     return <PageLoading message="Carregando vendas..." />;
@@ -133,11 +131,8 @@ export default function SalesPage() {
         </Button>
       </PageHeader>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <KPICard title="Total de Vendas" value={formatBRL(totalSalesValue)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="Vendas Concluídas" value={salesCountValue} icon={<ShoppingBag className="h-5 w-5" />} accentColor="success" index={1} />
-        <KPICard title="Ticket Médio" value={salesCountValue > 0 ? formatBRL(totalSalesValue / salesCountValue) : 'R$ 0,00'} icon={<TrendingUp className="h-5 w-5" />} accentColor="info" index={2} />
-      </div>
+      <SalesSummary sales={filteredSales} />
+
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
