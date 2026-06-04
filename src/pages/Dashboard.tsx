@@ -113,8 +113,15 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Conselho Executivo */}
-      <ExecutiveCouncilPanel />
+      {/* Centro de Comando e Orquestração IA */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <ExecutiveCouncilPanel />
+        </div>
+        <div>
+          <ExecutiveConsensus />
+        </div>
+      </div>
 
       {/* Ações Recomendadas */}
       {insights.length > 0 && (

@@ -56,11 +56,11 @@ export function useDashboardData() {
         supabase.from('products').select('id, name, min_stock, reorder_point').eq('status', 'active'),
         // Recent orders for activity feed
         supabase.from('orders').select('number, client_name, total, status, created_at').order('created_at', { ascending: false }).limit(5),
-        // HR mock (would be real tables)
+        // HR & People Strategy
         supabase.from('profiles').select('id', { count: 'exact', head: true }),
-        // CRM opportunities
+        // CRM & Growth Opportunities
         supabase.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
-        // Logistics carriers
+        // Logistics & Fleet Management
         supabase.from('carriers').select('id', { count: 'exact', head: true }),
       ]);
 
