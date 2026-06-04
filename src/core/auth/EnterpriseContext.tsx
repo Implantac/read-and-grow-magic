@@ -40,9 +40,9 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
         
         if (company) {
           setCurrentCompany(company);
-          setSegment((company.segment as Segment) || 'general');
-          setTaxRegime(company.tax_regime || 'Simples Nacional');
-          setOperationTypes(company.operation_types || []);
+          setSegment((company.segment as any) || 'general');
+          setTaxRegime((company.tax_regime as string) || 'Simples Nacional');
+          setOperationTypes((company.operation_types as any[]) || []);
         }
       }
     } catch (error) {
@@ -56,9 +56,9 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     const { data } = await supabase.from('companies').select('*').eq('id', id).single();
     if (data) {
       setCurrentCompany(data);
-      setSegment((data.segment as Segment) || 'general');
-      setTaxRegime(data.tax_regime || 'Simples Nacional');
-      setOperationTypes(data.operation_types || []);
+      setSegment((data.segment as any) || 'general');
+      setTaxRegime((data.tax_regime as string) || 'Simples Nacional');
+      setOperationTypes((data.operation_types as any[]) || []);
     }
   };
 
