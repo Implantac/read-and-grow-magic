@@ -1,17 +1,23 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
-import { Brain, Cpu, ShieldCheck, Scale, BarChart3, Factory, Warehouse, Search, DollarSign } from 'lucide-react';
+import { Brain, Cpu, ShieldCheck, Scale, BarChart3, Factory, Warehouse, Search, DollarSign, Briefcase, Truck, Users, Cog } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const specialists = [
   { role: 'CTO Global', icon: Cpu, color: 'text-blue-500' },
   { role: 'Arquiteto SAP S/4HANA', icon: BarChart3, color: 'text-orange-500' },
-  { role: 'Especialista PCP/MRP/APS', icon: Factory, color: 'text-purple-500' },
+  { role: 'Arquiteto SAP B1', icon: BarChart3, color: 'text-blue-600' },
+  { role: 'Arquiteto TOTVS', icon: Cog, color: 'text-red-600' },
+  { role: 'Arquiteto Sankhya', icon: Cog, color: 'text-green-600' },
+  { role: 'Arquiteto Netsuite', icon: Cog, color: 'text-blue-400' },
+  { role: 'Especialista PCP/MRP', icon: Factory, color: 'text-purple-500' },
   { role: 'Especialista WMS/TMS', icon: Warehouse, color: 'text-green-500' },
-  { role: 'Especialista Fiscal Brasileiro', icon: Scale, color: 'text-red-500' },
-  { role: 'Especialista IA Empresarial', icon: Brain, color: 'text-pink-500' },
-  { role: 'Especialista UX Enterprise', icon: Search, color: 'text-yellow-500' },
+  { role: 'Especialista Fiscal', icon: Scale, color: 'text-red-500' },
+  { role: 'Especialista Contábil', icon: Briefcase, color: 'text-amber-600' },
+  { role: 'Especialista Supply', icon: Truck, color: 'text-cyan-600' },
+  { role: 'Especialista IA', icon: Brain, color: 'text-pink-500' },
+  { role: 'Especialista UX', icon: Search, color: 'text-yellow-500' },
   { role: 'Especialista Financeiro', icon: DollarSign, color: 'text-emerald-500' },
 ];
 
@@ -32,7 +38,7 @@ export function ExecutiveCouncilPanel() {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
           {specialists.map((specialist) => {
             const Icon = specialist.icon;
             return (
