@@ -211,6 +211,27 @@ export function useDashboardData() {
         { label: 'Tempo Médio', value: '2.4 dias', trend: 'down' as const },
       ];
 
+      const hrKPIs = [
+        { label: 'Colaboradores', value: String(hrRes.count || 0), trend: 'up' as const },
+        { label: 'Vagas Abertas', value: '4', trend: 'neutral' as const },
+        { label: 'Treinamentos', value: '12', trend: 'up' as const },
+        { label: 'Turnover', value: '1.2%', trend: 'down' as const },
+      ];
+
+      const crmKPIs = [
+        { label: 'Oportunidades', value: String(crmRes.count || 0), trend: 'up' as const },
+        { label: 'Lead Score Avg', value: '82', trend: 'up' as const },
+        { label: 'Conversão', value: '18%', trend: 'up' as const },
+        { label: 'CAC', value: 'R$ 450', trend: 'down' as const },
+      ];
+
+      const logisticKPIs = [
+        { label: 'Transportadoras', value: String(carriersRes.count || 0), trend: 'neutral' as const },
+        { label: 'Entregas Pontuais', value: '96%', trend: 'up' as const },
+        { label: 'Frete Médio', value: 'R$ 42', trend: 'down' as const },
+        { label: 'Tempo Médio', value: '2.4 dias', trend: 'down' as const },
+      ];
+
       // === STATUS DISTRIBUTION ===
       const completedCount = orders.filter(o => o.status === 'delivered').length + completedSales.length + completedProdOrders.length;
       const processingCount = orders.filter(o => ['processing', 'separated', 'invoiced', 'shipped'].includes(o.status)).length + activeProdOrders.length;
