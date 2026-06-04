@@ -2,8 +2,11 @@ import { lazy } from 'react';
 import { Route } from 'react-router-dom';
 
 const TextileDashboard = lazy(() => import("@/modules/production/TextileDashboard"));
-// Placeholder para outros componentes de vertical packs
+const PharmaDashboard = lazy(() => import("@/modules/production/PharmaDashboard"));
+const RetailDashboard = lazy(() => import("@/modules/production/RetailDashboard"));
 
 export const VerticalPackRoutes = [
   <Route key="textile-dashboard" path="/vertical/textile" element={<TextileDashboard />} />,
+  <Route key="pharma-dashboard" path="/vertical/pharma" element={<PharmaDashboard />} />,
+  <Route key="retail-dashboard" path="/vertical/retail" element={<RetailDashboard />} />,
 ];
