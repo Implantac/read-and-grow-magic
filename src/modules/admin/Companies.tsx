@@ -40,6 +40,7 @@ const Companies = () => {
   const branches = companies.filter(c => !c.isHeadquarters);
   const activeBranches = branches.filter(c => c.status === 'active').length;
   const [isValidated, setIsValidated] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   // Filter companies
   const filteredCompanies = companies.filter(company => {
@@ -62,17 +63,23 @@ const Companies = () => {
 
     setIsFetchingCNPJ(true);
     setIsValidated(false);
+    setValidationError(null);
     try {
       const cleanCnpj = cnpjValue.replace(/\D/g, '');
+      if (cleanCnpj.length !== 14) {
+        setValidationError('O CNPJ deve conter exatamente 14 números.');
+        return;
+      }
+
       const response = await fetch(`https://publica.cnpj.ws/cnpj/${cleanCnpj}`);
       
       if (!response.ok) {
         if (response.status === 404) {
-          toast.error('CNPJ não encontrado na base da Receita Federal');
+          setValidationError('CNPJ não encontrado na base da Receita Federal. Verifique se os números digitados estão corretos.');
         } else if (response.status === 429) {
-          toast.error('Muitas consultas em pouco tempo. Tente novamente em instantes.');
+          setValidationError('Muitas consultas em pouco tempo. Aguarde 1 minuto e tente novamente.');
         } else {
-          throw new Error('Erro ao buscar dados do CNPJ');
+          setValidationError('O serviço de consulta está temporariamente indisponível. Tente novamente mais tarde.');
         }
         return;
       }
@@ -80,7 +87,8 @@ const Companies = () => {
       const data = await response.json();
       
       if (data.estabelecimento.situacao_cadastral !== 'Ativa') {
-        toast.error(`Atenção: Este CNPJ possui situação cadastral "${data.estabelecimento.situacao_cadastral}" e pode ser rejeitado em emissões fiscais.`);
+        setValidationError(`Este CNPJ está com situação "${data.estabelecimento.situacao_cadastral}". Apenas empresas com situação "Ativa" podem ser cadastradas para emissão fiscal.`);
+        return;
       }
 
       // Mapear dados para o formulário
@@ -99,10 +107,10 @@ const Companies = () => {
       }
       
       setIsValidated(true);
-      toast.success('CNPJ validado com sucesso!');
+      toast.success('CNPJ validado e dados carregados!');
     } catch (error) {
       console.error(error);
-      toast.error('Não foi possível validar o CNPJ. Verifique a conexão ou preencha manualmente após autorização administrativa.');
+      setValidationError('Ocorreu um erro inesperado ao validar o CNPJ. Tente novamente.');
     } finally {
       setIsFetchingCNPJ(false);
     }
@@ -112,6 +120,7 @@ const Companies = () => {
     setEditingCompany(null);
     setCnpjValue('');
     setIsValidated(false);
+    setValidationError(null);
     setIsDialogOpen(true);
   };
 
@@ -119,6 +128,7 @@ const Companies = () => {
     setEditingCompany(company);
     setCnpjValue(company.cnpj);
     setIsValidated(true);
+    setValidationError(null);
     setIsDialogOpen(true);
   };
 
@@ -466,8 +476,13 @@ const Companies = () => {
               )}
             </CardContent>
           </Card>
-        </div>
-      </div>
+                    </div>
+                    {validationError && (
+                      <p className="text-xs text-destructive font-medium mt-1">
+                        {validationError}
+                      </p>
+                    )}
+                  </div>
 
       {/* Create/Edit Company Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
