@@ -11,6 +11,8 @@ interface AppState {
   // Company/Branch
   activeCompany: Company | null;
   activeBranch: Branch | null;
+  companies: Company[];
+
   
   // UI State
   sidebarCollapsed: boolean;
@@ -25,7 +27,9 @@ interface AppState {
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
   toggleTheme: () => void;
+  setCompanies: (companies: Company[]) => void;
 }
+
 
 export const useAppStore = create<AppState>()(
   persist(
@@ -36,7 +40,9 @@ export const useAppStore = create<AppState>()(
       userRole: null,
       activeCompany: null,
       activeBranch: null,
+      companies: [],
       sidebarCollapsed: false,
+
       theme: 'light',
       
       // Actions
@@ -71,6 +77,8 @@ export const useAppStore = create<AppState>()(
       toggleTheme: () => set((state) => ({
         theme: state.theme === 'light' ? 'dark' : 'light'
       })),
+      
+      setCompanies: (companies) => set({ companies }),
     }),
     {
       name: 'erp-wms-storage',
