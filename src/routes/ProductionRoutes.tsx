@@ -42,6 +42,7 @@ export const ProductionRoutes = [
   <Route key="prod-quality" path="/producao/qualidade" element={<QualityControlPage />} />,
   <Route key="prod-supply" path="/producao/insumos" element={<SupplyStockPage />} />,
   <Route key="prod-costs" path="/producao/custos" element={<ProductCostsPage />} />,
+  <Route key="prod-industrial-dash" path="/producao/dashboard-industrial" element={<IndustrialDashboardPage />} />,
   <Route key="prod-dash" path="/producao/dashboard" element={<IndustrialDashboardPage />} />,
   <Route key="prod-term" path="/producao/terminal" element={<OperatorTerminalPage />} />,
   <Route key="prod-shop" path="/producao/chao-de-fabrica" element={<ShopFloorDashboardPage />} />,
