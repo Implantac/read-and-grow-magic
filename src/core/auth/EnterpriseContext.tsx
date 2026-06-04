@@ -34,10 +34,12 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   const executiveCouncil = {
     roles: [
       'CTO Global', 'Arquiteto SAP S/4HANA', 'Arquiteto SAP Business One', 
-      'Arquiteto TOTVS Protheus', 'Arquiteto Oracle Netsuite', 'Especialista PCP/MRP/APS',
-      'Especialista Fiscal Brasileiro', 'Especialista IA Empresarial', 'Especialista UX Enterprise'
+      'Arquiteto TOTVS Protheus', 'Arquiteto Sankhya', 'Arquiteto Oracle Netsuite', 
+      'Especialista Microsoft Dynamics', 'Especialista ERP Industrial', 'Especialista PCP/MRP/APS',
+      'Especialista WMS/TMS', 'Especialista Fiscal Brasileiro', 'Especialista Contábil',
+      'Especialista Supply', 'Especialista IA Empresarial', 'Especialista UX Enterprise'
     ],
-    mission: 'Transformar este projeto em uma plataforma ERP Enterprise de próxima geração.'
+    mission: 'Construir uma plataforma ERP Enterprise Multivertical, Multiempresa, Inteligente, Adaptativa, Escalável e Orientada a Dados.'
   };
 
   useEffect(() => {
