@@ -381,12 +381,14 @@ export default function FiscalDashboard() {
               <div className="flex justify-between items-center p-4 bg-primary/5 rounded-xl border border-primary/20">
                 <div className="flex gap-4">
                   <div className="flex flex-col">
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground">Itens Novos</span>
-                    <Badge className="bg-green-100 text-green-700 w-fit">2 Detectados</Badge>
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground">Itens com Pendência</span>
+                    <Badge variant="destructive" className="animate-bounce w-fit">
+                      {xmlData.products.filter(p => !p.linkedProductId || xmlData.products.filter(item => item.code === p.code).length > 1).length} Pendentes
+                    </Badge>
                   </div>
                   <div className="flex flex-col">
                     <span className="text-[10px] uppercase font-bold text-muted-foreground">Fornecedor</span>
-                    <Badge className="bg-blue-100 text-blue-700 w-fit">Novo Cadastro</Badge>
+                    <Badge className="bg-blue-100 text-blue-700 w-fit">Reconhecido</Badge>
                   </div>
                 </div>
                 <div className="text-right">
