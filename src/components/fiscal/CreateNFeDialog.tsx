@@ -16,7 +16,9 @@ import { Badge } from '@/ui/base/badge';
 import { cfopOptions } from '@/config/fiscal';
 import { useClients } from '@/hooks/commercial/useClients';
 import { useProducts } from '@/hooks/inventory/useProducts';
-import { calculateItemTaxes } from '@/hooks/fiscal/useTaxRules';
+import { calculateTaxes } from '@/shared/utils/fiscalMotor';
+import { useFiscalTaxRules } from '@/hooks/fiscal/useFiscalTaxRules';
+import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { FiscalStepper } from './FiscalStepper';
 import { SmartSelect, SmartSelectOption } from './SmartSelect';
 import { TaxSummaryCard } from './TaxSummaryCard';
@@ -74,7 +76,9 @@ const STEPS = [
 ];
 
 export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialogProps) {
+  const { currentCompany } = useEnterprise();
   const clientsQuery = useClients();
+  const taxRulesQuery = useFiscalTaxRules('SP', clientUF || 'SP'); // Origin fix as SP for now
   const productsQuery = useProducts();
   const clients = clientsQuery.data || [];
   const products = productsQuery.data || [];
@@ -126,40 +130,32 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
 
   useEffect(() => {
     const calcAll = async () => {
-      const updated = await Promise.all(
-        items.map(async (it) => {
-          if (!it.cfop) return it;
-          try {
-            const calc = await calculateItemTaxes({
-              ncm: it.ncm || null,
-              cfop: it.cfop,
-              quantity: it.quantity,
-              unit_price: it.unitPrice,
-            });
-            return {
-              ...it,
-              icms: calc.icms_value,
-              pis: calc.pis_value,
-              cofins: calc.cofins_value,
-              ipi: calc.ipi_value,
-            };
-          } catch {
-            const base = it.quantity * it.unitPrice;
-            return {
-              ...it,
-              icms: base * 0.18,
-              pis: base * 0.0165,
-              cofins: base * 0.076,
-              ipi: 0,
-            };
-          }
-        })
-      );
+      const updated = items.map((it) => {
+        if (!it.cfop) return it;
+        
+        const calc = calculateTaxes(
+          { price: it.unitPrice, quantity: it.quantity, ncm: it.ncm },
+          'SP', // Default origin state
+          clientUF || 'SP',
+          taxRulesQuery.data || [],
+          // @ts-ignore
+          currentCompany?.tax_regime || 'simples_nacional'
+        );
+
+        return {
+          ...it,
+          icms: calc.icms_value,
+          pis: calc.pis_value,
+          cofins: calc.cofins_value,
+          ipi: calc.ipi_value,
+        };
+      });
+
       const changed = updated.some((u, i) => u.icms !== items[i]?.icms);
       if (changed) setItems(updated);
     };
     if (items.length > 0) calcAll();
-  }, [items.length, items.map((i) => `${i.cfop}-${i.quantity}-${i.unitPrice}-${i.ncm}`).join('|')]);
+  }, [items.length, items.map((i) => `${i.cfop}-${i.quantity}-${i.unitPrice}-${i.ncm}`).join('|'), clientUF, taxRulesQuery.data, currentCompany]);
 
   const clientOptions: SmartSelectOption[] = useMemo(
     () => clients.map((c) => ({
