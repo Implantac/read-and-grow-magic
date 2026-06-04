@@ -81,6 +81,24 @@ const modules: AIConsensusModule[] = [
     explanation: 'Índice de turnover em queda. Clima organizacional e produtividade acima da meta setorial.',
     lastUpdate: '1h atrás',
     integrity: 96.7
+  },
+  {
+    id: 'log',
+    name: 'Logística & WMS',
+    icon: Package,
+    status: 'healthy',
+    explanation: 'Rotas otimizadas. Redução de 15% no custo de frete via consolidação de cargas por IA.',
+    lastUpdate: '30 min atrás',
+    integrity: 97.4
+  },
+  {
+    id: 'qualidade',
+    name: 'Qualidade & Compliance',
+    icon: CheckCircle,
+    status: 'healthy',
+    explanation: 'Padrões AQL em conformidade total. Rastreabilidade ponta-a-ponta validada.',
+    lastUpdate: '2h atrás',
+    integrity: 100
   }
 ];
 
