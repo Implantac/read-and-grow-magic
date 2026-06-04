@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { type DbClient } from './useClients';
-import { type DbOrder } from './useOrders';
+import { type DbClient } from '@/hooks/commercial/useClients';
+import { type DbOrder } from '@/hooks/commercial/useOrders';
 
 export interface CommercialValidation {
   type: 'block' | 'approval' | 'warning';

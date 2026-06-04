@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { useAccountsReceivable } from './useAccountsReceivable';
-import { useAccountsPayable } from './useAccountsPayable';
-import { useBankAccounts } from './useBankAccounts';
+import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
+import { useAccountsPayable } from '@/hooks/financial/useAccountsPayable';
+import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 import { startOfMonth, endOfMonth, subMonths, isWithinInterval } from 'date-fns';
 import type { BalanceSheetItem } from '@/types/accounting';
 
