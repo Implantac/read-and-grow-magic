@@ -73,6 +73,7 @@ export const navigationSections: NavSection[] = [
     ],
   },
   {
+    label: 'Dashboard',
     items: [
       {
         title: 'Dashboard',

@@ -26,7 +26,9 @@ const consensusItems = [
   }
 ];
 
-export function ExecutiveConsensus() {
+export function ExecutiveConsensus({ consensus = [] }: { consensus?: any[] }) {
+  const items = consensus.length > 0 ? consensus : consensusItems;
+
   return (
     <Card className="border-primary/20">
       <CardHeader className="pb-3 border-b border-border/50">
@@ -42,7 +44,7 @@ export function ExecutiveConsensus() {
       </CardHeader>
       <CardContent className="pt-4 px-0">
         <div className="space-y-1">
-          {consensusItems.map((item, idx) => (
+          {items.map((item, idx) => (
             <div 
               key={idx} 
               className="flex items-start gap-3 p-3 hover:bg-muted/50 transition-colors cursor-default border-b border-border/30 last:border-0"
@@ -70,7 +72,7 @@ export function ExecutiveConsensus() {
         </div>
         <div className="mt-4 px-4 pb-2">
           <p className="text-[9px] text-center text-muted-foreground italic">
-            Consenso gerado há 12 minutos baseado em KPIs consolidados.
+            Consenso gerado baseado em KPIs consolidados em tempo real.
           </p>
         </div>
       </CardContent>

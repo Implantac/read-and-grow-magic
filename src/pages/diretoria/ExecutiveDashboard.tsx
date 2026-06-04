@@ -163,7 +163,7 @@ export default function ExecutiveDashboard() {
           <ExecutiveCouncilPanel />
         </div>
         <div>
-          <ExecutiveConsensus />
+          <ExecutiveConsensus consensus={data?.consensus} />
         </div>
       </div>
       <div className="mt-4">
