@@ -9,15 +9,14 @@ import { Badge } from '@/ui/base/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/ui/base/dialog';
 import { Label } from '@/ui/base/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
-import { Checkbox } from '@/ui/base/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { 
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
 } from '@/ui/base/table';
 import { 
-  Search, Plus, Edit2, Trash2, UserCheck, UserX, Shield, 
+  Search, Edit2, Trash2, UserCheck, UserX, Shield, 
   Users as UsersIcon, UserPlus, Clock, MoreVertical, Key, Loader2,
-  Phone, Building2, Mail, User, Briefcase, Building
+  Mail, User
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -32,7 +31,6 @@ import { toast } from 'sonner';
 import { 
   userStatusConfig, 
   userRoleConfig,
-  defaultPermissions as mockPermissions
 } from '@/config/administration';
 import { SystemUser, UserRole, UserStatus, UserFilter } from '@/types/administration';
 import { useUsers } from '@/hooks/system/useUsers';
