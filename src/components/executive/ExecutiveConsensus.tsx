@@ -3,6 +3,7 @@ import { Badge } from '@/ui/base/badge';
 import { Brain, MessageSquare, CheckCircle2, AlertCircle, TrendingUp, Lightbulb } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBrainRuns } from '@/hooks/ai/useAIBrain';
+import { useExecutiveDashboard } from '@/hooks/ai/useExecutiveAI';
 
 const fallbackConsensus = [
   {
@@ -30,6 +31,8 @@ export function ExecutiveConsensus({ consensus = [] }: { consensus?: any[] }) {
   const brainRisks = lastRun?.structured?.riscos || [];
   const brainOpps = lastRun?.structured?.oportunidades || [];
   
+  const { data: dashboardData } = useExecutiveDashboard();
+  
   const brainConsensus = [
     ...brainRisks.map((r: any) => ({
       specialist: 'Risk Advisor',
@@ -41,9 +44,19 @@ export function ExecutiveConsensus({ consensus = [] }: { consensus?: any[] }) {
       insight: `${o.titulo}: ${o.acao}`,
       status: 'recommendation'
     }))
+  ];
+
+  // Integrar consenso do dashboard executivo
+  const dashboardConsensus = dashboardData?.consensus || [];
+
+  const items = [
+    ...brainConsensus,
+    ...dashboardConsensus
   ].slice(0, 6);
 
-  const items = brainConsensus.length > 0 ? brainConsensus : (consensus.length > 0 ? consensus : fallbackConsensus);
+  if (items.length === 0) {
+    items.push(...(consensus.length > 0 ? consensus : fallbackConsensus));
+  }
 
   return (
     <Card className="border-primary/20 bg-background/50 backdrop-blur-sm shadow-lg overflow-hidden">

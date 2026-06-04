@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { useBrainRuns, useBrainLearning } from '@/hooks/ai/useAIBrain';
 import { Link } from 'react-router-dom';
 import { Button } from '@/ui/base/button';
+import { ExecutiveIntelligenceStatus } from './ExecutiveIntelligenceStatus';
 
 const specialists = [
   { role: 'IA CEO', icon: Brain, color: 'text-primary' },
@@ -39,6 +40,7 @@ export function ExecutiveCouncilPanel() {
             <CardTitle className="text-sm font-bold uppercase tracking-wider">Cérebro ERP Enterprise</CardTitle>
           </div>
           <div className="flex items-center gap-2">
+            <ExecutiveIntelligenceStatus qualityScore={saude === 'critico' ? 15 : saude === 'alerta' ? 65 : 94} />
             <Badge variant="outline" className={cn(
               "text-[10px] border-primary/20",
               saude === 'critico' ? 'bg-destructive/10 text-destructive border-destructive/20' : 
