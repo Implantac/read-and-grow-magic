@@ -169,7 +169,7 @@ export function Topbar() {
               Notificações
               {unreadCount > 0 && (
                 <button
-                  onClick={(e) => { e.stopPropagation(); markAllAsRead(); }}
+                  onClick={(e) => { e.stopPropagation(); markAllAsRead(undefined); }}
                   className="text-xs text-primary hover:text-primary/80 font-normal transition-colors"
                 >
                   Marcar todas como lidas

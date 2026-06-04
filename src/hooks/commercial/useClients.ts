@@ -1,7 +1,8 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { clientsService } from '@/services/commercial/clientsService';
+import { useSupabaseQuery, useSupabaseMutation } from '@/hooks/shared/useSupabaseQuery';
+import { toastSuccess, handleMutationError } from '@/lib/toastHelpers';
 
-import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface DbClient {
   id: string;
   code: string;
@@ -43,63 +44,47 @@ export interface DbClient {
 }
 
 export function useClients() {
-  return useQuery({
-    queryKey: ['clients'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('*')
-        .order('name', { ascending: true }); // Better default order for list
-      if (error) throw error;
-      return (data || []) as DbClient[];
-    },
-  });
+  return useSupabaseQuery(['clients'], () => clientsService.getAll());
 }
 
 export function useCreateClient() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (client: Omit<DbClient, 'id' | 'created_at' | 'updated_at'>) => {
-      const { data, error } = await supabase.from('clients').insert(client as any).select().single();
-      if (error) throw error;
-      return data;
-    },
-
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['clients'] });
-      toastSuccess('Cliente cadastrado com sucesso!');
-    },
-    onError: handleMutationError,
-  });
+  const queryClient = useQueryClient();
+  return useSupabaseMutation(
+    (client: Omit<DbClient, 'id' | 'created_at' | 'updated_at'>) => clientsService.create(client),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['clients'] });
+        toastSuccess('Cliente cadastrado com sucesso!');
+      },
+      onError: handleMutationError,
+    }
+  );
 }
 
 export function useUpdateClient() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ id, ...client }: Partial<DbClient> & { id: string }) => {
-      const { data, error } = await supabase.from('clients').update({ ...client, updated_at: new Date().toISOString() }).eq('id', id).select().single();
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['clients'] });
-      toastSuccess('Cliente atualizado com sucesso!');
-    },
-    onError: handleMutationError,
-  });
+  const queryClient = useQueryClient();
+  return useSupabaseMutation(
+    ({ id, ...client }: Partial<DbClient> & { id: string }) => clientsService.update(id, client),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['clients'] });
+        toastSuccess('Cliente atualizado com sucesso!');
+      },
+      onError: handleMutationError,
+    }
+  );
 }
 
 export function useDeleteClient() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from('clients').delete().eq('id', id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['clients'] });
-      toastSuccess('Cliente excluído com sucesso!');
-    },
-    onError: handleMutationError,
-  });
+  const queryClient = useQueryClient();
+  return useSupabaseMutation(
+    (id: string) => clientsService.delete(id),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['clients'] });
+        toastSuccess('Cliente excluído com sucesso!');
+      },
+      onError: handleMutationError,
+    }
+  );
 }

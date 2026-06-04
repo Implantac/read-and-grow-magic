@@ -1,81 +1,50 @@
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import type { ChartOfAccount } from '@/types/accounting';
-import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
+import { chartOfAccountsService } from '@/services/accounting/chartOfAccountsService';
+import { useSupabaseQuery, useSupabaseMutation } from '@/hooks/shared/useSupabaseQuery';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
+import { ChartOfAccount } from '@/types/accounting';
 
 export function useChartOfAccounts() {
-  const [accounts, setAccounts] = useState<ChartOfAccount[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const fetchAccounts = useCallback(async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('chart_of_accounts')
-        .select('*')
-        .order('code');
+  const query = useSupabaseQuery(
+    ['chart_of_accounts'], 
+    () => chartOfAccountsService.getAll()
+  );
 
-      if (error) throw error;
-
-      const mapped: ChartOfAccount[] = (data || []).map((row) => ({
-        id: row.id,
-        code: row.code,
-        name: row.name,
-        type: row.type as ChartOfAccount['type'],
-        nature: row.nature as ChartOfAccount['nature'],
-        parentId: row.parent_id,
-        level: row.level,
-        isAnalytical: row.is_analytical,
-        balance: Number(row.balance),
-        active: row.active,
-      }));
-
-      setAccounts(mapped);
-    } catch (error) {
-      console.error('Error fetching chart of accounts:', error);
-      toast.error('Erro ao carregar plano de contas');
-    } finally {
-      setLoading(false);
+  const createAccountMutation = useSupabaseMutation(
+    (account: Omit<ChartOfAccount, 'id'>) => chartOfAccountsService.create(account),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['chart_of_accounts'] });
+        toastSuccess('Conta criada com sucesso');
+      },
+      onError: (error) => {
+        console.error('Error creating account:', error);
+        toastError('Erro ao criar conta');
+      }
     }
-  }, []);
+  );
 
-  useEffect(() => {
-    fetchAccounts();
-  }, [fetchAccounts]);
-
-  const createAccount = async (account: Omit<ChartOfAccount, 'id'>) => {
-    try {
-      const { error } = await supabase.from('chart_of_accounts').insert({
-        code: account.code,
-        name: account.name,
-        type: account.type,
-        nature: account.nature,
-        parent_id: account.parentId,
-        level: account.level,
-        is_analytical: account.isAnalytical,
-        balance: account.balance,
-        active: account.active,
-      });
-      if (error) throw error;
-      toast.success('Conta criada com sucesso');
-      await fetchAccounts();
-    } catch (error) {
-      console.error('Error creating account:', error);
-      toast.error('Erro ao criar conta');
+  const deleteAccountMutation = useSupabaseMutation(
+    (id: string) => chartOfAccountsService.delete(id),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['chart_of_accounts'] });
+        toastSuccess('Conta excluída com sucesso');
+      },
+      onError: (error) => {
+        console.error('Error deleting account:', error);
+        toastError('Erro ao excluir conta');
+      }
     }
+  );
+
+  return { 
+    accounts: query.data || [], 
+    loading: query.isLoading, 
+    refetch: query.refetch, 
+    createAccount: createAccountMutation.mutate, 
+    deleteAccount: deleteAccountMutation.mutate 
   };
-
-  const deleteAccount = async (id: string) => {
-    try {
-      const { error } = await supabase.from('chart_of_accounts').delete().eq('id', id);
-      if (error) throw error;
-      toast.success('Conta excluída com sucesso');
-      await fetchAccounts();
-    } catch (error) {
-      console.error('Error deleting account:', error);
-      toast.error('Erro ao excluir conta');
-    }
-  };
-
-  return { accounts, loading, refetch: fetchAccounts, createAccount, deleteAccount };
 }

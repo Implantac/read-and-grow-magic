@@ -37,6 +37,7 @@ const saleStatusConfig: Record<SaleStatus, StatusConfig> = {
   completed: { label: 'Concluída', variant: 'success' },
   cancelled: { label: 'Cancelada', variant: 'destructive' },
   refunded: { label: 'Devolvida', variant: 'warning' },
+  pending: { label: 'Pendente', variant: 'warning' },
 };
 
 const quotationStatusConfig: Record<QuotationStatus, StatusConfig> = {

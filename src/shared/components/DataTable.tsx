@@ -39,6 +39,7 @@ interface DataTableProps<T> {
   emptyMessage?: string;
   onRowClick?: (row: T) => void;
   actions?: (row: T) => React.ReactNode;
+  className?: string;
 }
 
 type SortDirection = 'asc' | 'desc' | null;
@@ -53,6 +54,7 @@ export function DataTable<T extends { id: string }>({
   emptyMessage = 'Nenhum registro encontrado',
   onRowClick,
   actions,
+  className,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -179,7 +181,7 @@ export function DataTable<T extends { id: string }>({
   }
 
   return (
-    <div className="space-y-4">
+    <div className={cn("space-y-4", className)}>
       {searchable && (
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

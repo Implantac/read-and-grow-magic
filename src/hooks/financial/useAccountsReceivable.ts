@@ -1,5 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { financialService } from '@/services/financial/financialService';
+import { useSupabaseQuery, useSupabaseMutation } from '@/hooks/shared/useSupabaseQuery';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export interface AccountReceivableRow {
@@ -31,76 +32,48 @@ export interface AccountReceivableRow {
 }
 
 export function useAccountsReceivable() {
-  return useQuery({
-    queryKey: ['accounts_receivable'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('accounts_receivable')
-        .select('*')
-        .order('due_date', { ascending: true });
-      if (error) throw error;
-      return data as AccountReceivableRow[];
-    },
-  });
+  return useSupabaseQuery(['accounts_receivable'], () => financialService.getReceivables());
 }
 
 export function useCreateAccountReceivable() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (account: Partial<AccountReceivableRow> & { description: string; client_name: string; due_date: string; amount: number }) => {
-      const { data, error } = await supabase
-        .from('accounts_receivable')
-        .insert(account)
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['accounts_receivable'] });
-      toastSuccess('Sucesso', 'Conta a receber cadastrada com sucesso');
-    },
-    onError: () => {
-      toastError('Erro ao cadastrar conta a receber');
-    },
-  });
+  return useSupabaseMutation(
+    (account: Partial<AccountReceivableRow> & { description: string; client_name: string; due_date: string; amount: number }) => 
+      financialService.createReceivable(account),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['accounts_receivable'] });
+        toastSuccess('Sucesso', 'Conta a receber cadastrada com sucesso');
+      },
+      onError: () => toastError('Erro ao cadastrar conta a receber'),
+    }
+  );
 }
 
 export function useUpdateAccountReceivable() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string } & Partial<AccountReceivableRow>) => {
-      const { data, error } = await supabase
-        .from('accounts_receivable')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', id)
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['accounts_receivable'] });
-    },
-    onError: () => {
-      toastError('Erro ao atualizar conta');
-    },
-  });
+  return useSupabaseMutation(
+    ({ id, ...updates }: { id: string } & Partial<AccountReceivableRow>) => 
+      financialService.updateReceivable(id, updates),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['accounts_receivable'] });
+      },
+      onError: () => toastError('Erro ao atualizar conta'),
+    }
+  );
 }
 
 export function useDeleteAccountReceivable() {
   const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from('accounts_receivable').delete().eq('id', id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['accounts_receivable'] });
-      toastSuccess('Sucesso', 'Conta removida com sucesso');
-    },
-    onError: () => {
-      toastError('Erro ao remover conta');
-    },
-  });
+  return useSupabaseMutation(
+    (id: string) => financialService.deleteReceivable(id),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['accounts_receivable'] });
+        toastSuccess('Sucesso', 'Conta removida com sucesso');
+      },
+      onError: () => toastError('Erro ao remover conta'),
+    }
+  );
 }

@@ -40,12 +40,12 @@ export default function NotificationsPage() {
   });
 
   const handleMarkAllRead = () => {
-    markAllAsRead();
+    markAllAsRead(undefined);
     toastSuccess('Notificações', 'Todas marcadas como lidas.');
   };
 
   const handleClearAll = () => {
-    clearAll();
+    clearAll(undefined);
     toastSuccess('Limpo', 'Todas as notificações foram removidas.');
   };
 

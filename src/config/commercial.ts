@@ -5,11 +5,23 @@ export const getOrderStatusLabel = (status: OrderStatus): string => {
     pending: 'Pendente',
     confirmed: 'Confirmado',
     processing: 'Em Processamento',
-    separated: 'Separado',
-    invoiced: 'Faturado',
     shipped: 'Enviado',
     delivered: 'Entregue',
     cancelled: 'Cancelado',
+    quote: 'Orçamento',
+    awaiting_commercial_approval: 'Aguard. Aprov. Comercial',
+    awaiting_financial_approval: 'Aguard. Aprov. Financeira',
+    blocked: 'Bloqueado',
+    awaiting_separation: 'Aguard. Separação',
+    in_separation: 'Em Separação',
+    awaiting_production: 'Aguard. Produção',
+    in_production: 'Em Produção',
+    partial_production: 'Produção Parcial',
+    awaiting_conference: 'Aguard. Conferência',
+    conferenced: 'Conferido',
+    awaiting_billing: 'Aguard. Faturamento',
+    separated: 'Separado',
+    invoiced: 'Faturado',
   };
   return labels[status];
 };
@@ -19,6 +31,7 @@ export const getSaleStatusLabel = (status: SaleStatus): string => {
     completed: 'Concluída',
     cancelled: 'Cancelada',
     refunded: 'Devolvida',
+    pending: 'Pendente',
   };
   return labels[status];
 };

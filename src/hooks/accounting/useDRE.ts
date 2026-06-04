@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { dreService } from '@/services/accounting/dreService';
+import { useSupabaseQuery } from '@/hooks/shared/useSupabaseQuery';
 
 export type DRESection =
   | 'revenue'
@@ -38,31 +38,11 @@ export interface DRECalculation {
 }
 
 export function useDRESummary(from: string, to: string) {
-  return useQuery({
-    queryKey: ['dre_summary', from, to],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_dre_summary' as any, {
-        _from: from,
-        _to: to,
-      });
-      if (error) throw error;
-      return (data || []) as DRESummaryRow[];
-    },
-  });
+  return useSupabaseQuery(['dre_summary', from, to], () => dreService.getSummary(from, to));
 }
 
 export function useDREDetailed(from: string, to: string) {
-  return useQuery({
-    queryKey: ['dre_detailed', from, to],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_dre' as any, {
-        _from: from,
-        _to: to,
-      });
-      if (error) throw error;
-      return (data || []) as DRECategoryRow[];
-    },
-  });
+  return useSupabaseQuery(['dre_detailed', from, to], () => dreService.getDetailed(from, to));
 }
 
 export function calculateDRE(rows: DRESummaryRow[]): DRECalculation {

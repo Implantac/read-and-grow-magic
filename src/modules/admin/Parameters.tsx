@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -180,14 +182,11 @@ const Parameters = () => {
   const categories = Object.keys(parameterCategoryConfig) as ParameterCategory[];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Parâmetros do Sistema</h1>
-          <p className="text-muted-foreground">Configure os parâmetros e comportamentos do sistema</p>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader 
+        title="Parâmetros do Sistema" 
+        description="Configure os parâmetros e comportamentos do sistema"
+      />
 
       {/* Search */}
       <Card>
@@ -413,7 +412,7 @@ const Parameters = () => {
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </PageContainer>
   );
 };
 
