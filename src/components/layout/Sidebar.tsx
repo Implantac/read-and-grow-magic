@@ -68,10 +68,11 @@ function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, ex
 
   const indicator = isItemActive && (
     <span
-      className="absolute left-[-8px] top-1/2 -translate-y-1/2 w-[4px] rounded-r-full bg-primary"
+      className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r-full bg-primary"
       style={{ height: '18px', animation: 'sidebar-indicator 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}
     />
   );
+
 
   const iconElement = Icon && (
     <Icon className={cn(
