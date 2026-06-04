@@ -14,6 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
+      accounting_accounts: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string | null
+          id: string
+          level: number
+          name: string
+          parent_id: string | null
+          type: string
+        }
+        Insert: {
+          code: string
+          company_id: string
+          created_at?: string | null
+          id?: string
+          level: number
+          name: string
+          parent_id?: string | null
+          type: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          level?: number
+          name?: string
+          parent_id?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounting_accounts_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accounting_entries: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          date: string
+          description: string | null
+          id: string
+          reference_id: string | null
+          reference_type: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          date: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          date?: string
+          description?: string | null
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+        }
+        Relationships: []
+      }
+      accounting_items: {
+        Row: {
+          account_id: string | null
+          amount: number
+          cost_center_id: string | null
+          created_at: string | null
+          entry_id: string | null
+          id: string
+          type: string
+        }
+        Insert: {
+          account_id?: string | null
+          amount: number
+          cost_center_id?: string | null
+          created_at?: string | null
+          entry_id?: string | null
+          id?: string
+          type: string
+        }
+        Update: {
+          account_id?: string | null
+          amount?: number
+          cost_center_id?: string | null
+          created_at?: string | null
+          entry_id?: string | null
+          id?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accounting_items_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_items_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "accounting_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       accounting_periods: {
         Row: {
           closed_at: string | null
