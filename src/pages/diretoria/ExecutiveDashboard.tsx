@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { Slider } from '@/ui/base/slider';
 import { useExecutiveDashboard, useGenerateInsights, useGenerateScenarios, useUnifiedChat, useDailySummary } from '@/hooks/ai/useExecutiveAI';
+import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { ExecutiveSWOT } from '@/components/executive/ExecutiveSWOT';
 import { ExecutiveIntelligenceStatus } from '@/components/executive/ExecutiveIntelligenceStatus';
 import { PrimaryKPICards, SecondaryKPICards, TargetAttainmentBar } from '@/components/executive/ExecutiveKPICards';
@@ -52,9 +53,10 @@ const insightIcon: Record<string, any> = {
 };
 
 export default function ExecutiveDashboard() {
+  const { segment } = useEnterprise();
   const [tempPeriod, setTempPeriod] = useState<number>(12);
   const [period, setPeriod] = useState<number>(12);
-  const { data, isLoading } = useExecutiveDashboard(period);
+  const { data, isLoading } = useExecutiveDashboard(period, segment);
   const generateInsights = useGenerateInsights();
   const generateScenarios = useGenerateScenarios();
   const { messages, isLoading: chatLoading, sendMessage, clearChat } = useUnifiedChat();
@@ -85,7 +87,7 @@ export default function ExecutiveDashboard() {
     <PageContainer>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
         <PageHeader 
-          title="🧠 Conselho Executivo (IA)" 
+          title={`🧠 Conselho Executivo (IA) - ${segment?.toUpperCase() || 'GERAL'}`} 
           description="Plataforma ERP Enterprise Evolution Engine (EEE) — Inteligência adaptativa sênior"
         />
         <ExecutiveIntelligenceStatus qualityScore={isInsufficient ? 15 : 94} />
