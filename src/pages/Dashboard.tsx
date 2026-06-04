@@ -114,12 +114,12 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Centro de Comando e Orquestração IA */}
-      <div className="grid gap-6 lg:grid-cols-4">
-        <div className="lg:col-span-3">
+      {/* Centro de Comando e Orquestração IA - Cockpit Panorâmico */}
+      <div className="grid gap-6 lg:grid-cols-12">
+        <div className="lg:col-span-9 xl:col-span-10">
           <ExecutiveCouncilPanel />
         </div>
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-3 xl:col-span-2">
           <ExecutiveConsensus />
         </div>
       </div>
