@@ -1,7 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAppStore } from '@/stores/useAppStore';
-import { authService } from '@/services/system/authService';
+import type { Company } from '@/types';
+const mockCompanies: Company[] = [];
+import type { User as AppUser } from '@/types';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface UseAuthOptions {
@@ -10,7 +12,9 @@ interface UseAuthOptions {
 
 function isAuthSessionError(error?: { status?: number; message?: string } | null) {
   if (!error) return false;
+
   const message = error.message?.toLowerCase() || '';
+
   return (
     error.status === 401 ||
     error.status === 403 ||
@@ -21,13 +25,23 @@ function isAuthSessionError(error?: { status?: number; message?: string } | null
   );
 }
 
+function mapSupabaseUser(user: SupabaseUser, profileName?: string, role?: string): AppUser {
+  return {
+    id: user.id,
+    name: profileName || user.user_metadata?.name || user.email?.split('@')[0] || 'Usuário',
+    email: user.email || '',
+    role: (role as AppUser['role']) || 'viewer',
+    permissions: ['all'],
+  };
+}
+
 export function useAuth(options: UseAuthOptions = {}) {
   const { initialize = true } = options;
   const { setUser, setUserRole, setActiveCompany, logout: storeLogout } = useAppStore();
   const [loading, setLoading] = useState(initialize);
 
   const clearInvalidSession = useCallback(async () => {
-    await authService.signOut();
+    await supabase.auth.signOut().catch(() => undefined);
     storeLogout();
   }, [storeLogout]);
 
@@ -37,30 +51,34 @@ export function useAuth(options: UseAuthOptions = {}) {
       return;
     }
 
-    try {
-      const { data: userResponse, error: userError } = await supabase.auth.getUser();
-      const verifiedUser = userResponse.user;
+    const { data: userResponse, error: userError } = await supabase.auth.getUser();
+    const verifiedUser = userResponse.user;
 
-      if (userError || !verifiedUser || verifiedUser.id !== sessionUser.id) {
-        await clearInvalidSession();
-        return;
-      }
-
-      const [profile, role] = await Promise.all([
-        authService.getProfile(verifiedUser.id),
-        authService.getUserRole(verifiedUser.id)
-      ]);
-
-      const appUser = authService.mapSupabaseUser(verifiedUser, profile?.name, role);
-      setUser(appUser);
-      setUserRole(role);
-      // setActiveCompany(mockCompanies[0] ?? null); // Note: active company logic might need better handling
-    } catch (error: any) {
-      if (isAuthSessionError(error)) {
-        await clearInvalidSession();
-      }
+    if (userError || !verifiedUser || verifiedUser.id !== sessionUser.id) {
+      await clearInvalidSession();
+      return;
     }
-  }, [clearInvalidSession, setUser, setUserRole, storeLogout]);
+
+    const [profileResponse, roleResponse] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('name')
+        .eq('id', verifiedUser.id)
+        .maybeSingle(),
+      supabase.rpc('get_user_role', { _user_id: verifiedUser.id })
+    ]);
+
+    if (isAuthSessionError(profileResponse.error) || isAuthSessionError(roleResponse.error)) {
+      await clearInvalidSession();
+      return;
+    }
+
+    const role = roleResponse.data || 'viewer';
+    const appUser = mapSupabaseUser(verifiedUser, profileResponse.data?.name, role);
+    setUser(appUser);
+    setUserRole(role);
+    setActiveCompany(mockCompanies[0] ?? null);
+  }, [clearInvalidSession, setUser, setUserRole, setActiveCompany, storeLogout]);
 
   useEffect(() => {
     if (!initialize) {
@@ -79,6 +97,7 @@ export function useAuth(options: UseAuthOptions = {}) {
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Avoid async Supabase calls directly inside this callback (deadlock workaround)
       setTimeout(() => {
         void runSync(session?.user ?? null);
       }, 0);
@@ -94,11 +113,31 @@ export function useAuth(options: UseAuthOptions = {}) {
     };
   }, [initialize, syncAuthState]);
 
-  return { 
-    loading, 
-    signIn: authService.signIn, 
-    signUp: authService.signUp, 
-    signOut: authService.signOut, 
-    resetPassword: authService.resetPassword 
-  };
+  const signIn = useCallback(async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  }, []);
+
+  const signUp = useCallback(async (email: string, password: string, name: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name } },
+    });
+    if (error) throw error;
+  }, []);
+
+  const signOut = useCallback(async () => {
+    await supabase.auth.signOut().catch(() => undefined);
+    storeLogout();
+  }, [storeLogout]);
+
+  const resetPassword = useCallback(async (email: string) => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw error;
+  }, []);
+
+  return { loading, signIn, signUp, signOut, resetPassword };
 }
