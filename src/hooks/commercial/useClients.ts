@@ -60,10 +60,11 @@ export function useCreateClient() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (client: Omit<DbClient, 'id' | 'created_at' | 'updated_at'>) => {
-      const { data, error } = await supabase.from('clients').insert(client).select().single();
+      const { data, error } = await supabase.from('clients').insert(client as any).select().single();
       if (error) throw error;
       return data;
     },
+
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['clients'] });
       toastSuccess('Cliente cadastrado com sucesso!');
