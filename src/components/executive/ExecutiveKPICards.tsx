@@ -1,5 +1,5 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent } from '@/ui/base/card';
+import { Progress } from '@/ui/base/progress';
 import {
   TrendingUp, DollarSign, AlertTriangle, Wallet, Users, Target,
   Factory, Activity, Package, Scale,

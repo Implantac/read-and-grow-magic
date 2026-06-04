@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Search, UserPlus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Label } from '@/ui/base/label';
 import {
   Command,
   CommandEmpty,
@@ -10,12 +10,12 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from '@/components/ui/command';
+} from '@/ui/base/command';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
+} from '@/ui/base/popover';
 import { useClients, type DbClient } from '@/hooks/commercial/useClients';
 
 interface ClientSelectorProps {

@@ -1,8 +1,8 @@
 import { useRFIDEvents, useRFIDSummary } from '@/hooks/system/useRFID';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Badge } from '@/ui/base/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { RefreshCw, Activity, Radio, CheckCircle, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';

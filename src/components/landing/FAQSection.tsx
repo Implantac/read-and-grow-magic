@@ -1,7 +1,7 @@
-import { Badge } from '@/components/ui/badge';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Badge } from '@/ui/base/badge';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/ui/base/accordion';
 import { MessageCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/ui/base/button';
 
 const faqs = [
   {

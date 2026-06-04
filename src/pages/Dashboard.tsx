@@ -10,9 +10,9 @@ import {
   DollarSign, TrendingUp, ArrowDownCircle, ArrowUpCircle,
   RefreshCw,
 } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/ui/base/card';
+import { Skeleton } from '@/ui/base/skeleton';
+import { Button } from '@/ui/base/button';
 import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';

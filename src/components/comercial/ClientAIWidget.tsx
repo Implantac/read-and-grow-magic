@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { Progress } from '@/ui/base/progress';
+import { Skeleton } from '@/ui/base/skeleton';
 import { Brain, TrendingUp, AlertTriangle, ShieldAlert, Sparkles, ArrowRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';

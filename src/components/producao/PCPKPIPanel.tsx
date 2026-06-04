@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { KPICard } from '@/components/shared/KPICard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { KPICard } from '@/shared/components/KPICard';
 import { PCPMetricsService, MRPService, ActionSuggestion } from '@/lib/pcpServices';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Clock, Target, TrendingUp, AlertTriangle, Lightbulb, Gauge, CheckCircle, Factory, Zap } from 'lucide-react';

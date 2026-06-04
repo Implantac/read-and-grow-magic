@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/ui/base/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/ui/base/dialog';
+import { Input } from '@/ui/base/input';
+import { Label } from '@/ui/base/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { ArrowLeftRight } from 'lucide-react';
 import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 import { useTransferBetweenAccounts } from '@/hooks/financial/useFinancialSettlements';

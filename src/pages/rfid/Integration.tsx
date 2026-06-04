@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Badge } from '@/ui/base/badge';
+import { Switch } from '@/ui/base/switch';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/ui/base/dialog';
+import { Input } from '@/ui/base/input';
+import { Label } from '@/ui/base/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import {
   ArrowRightLeft, Plus, RefreshCw, CheckCircle2, PackagePlus,
   PackageSearch, Zap, Settings2, Activity, Layers, Pencil, Trash2

@@ -1,14 +1,14 @@
 import { lazy } from 'react';
 import { Route } from 'react-router-dom';
 
-const ChartOfAccountsPage = lazy(() => import("../pages/contabilidade/ChartOfAccounts"));
-const JournalEntriesPage = lazy(() => import("../pages/contabilidade/JournalEntries"));
-const GeneralLedgerPage = lazy(() => import("../pages/contabilidade/GeneralLedger"));
-const TrialBalancePage = lazy(() => import("../pages/contabilidade/TrialBalance"));
-const DREPage = lazy(() => import("../pages/contabilidade/DRE"));
-const BalanceSheetPage = lazy(() => import("../pages/contabilidade/BalanceSheet"));
-const AccountingDashboardPage = lazy(() => import("../pages/contabilidade/AccountingDashboard"));
-const PeriodClosingPage = lazy(() => import("../pages/contabilidade/PeriodClosing"));
+const ChartOfAccountsPage = lazy(() => import("../modules/accounting/ChartOfAccounts"));
+const JournalEntriesPage = lazy(() => import("../modules/accounting/JournalEntries"));
+const GeneralLedgerPage = lazy(() => import("../modules/accounting/GeneralLedger"));
+const TrialBalancePage = lazy(() => import("../modules/accounting/TrialBalance"));
+const DREPage = lazy(() => import("../modules/accounting/DRE"));
+const BalanceSheetPage = lazy(() => import("../modules/accounting/BalanceSheet"));
+const AccountingDashboardPage = lazy(() => import("../modules/accounting/AccountingDashboard"));
+const PeriodClosingPage = lazy(() => import("../modules/accounting/PeriodClosing"));
 
 export const AccountingRoutes = [
   <Route key="acc-chart" path="/contabilidade/plano-contas" element={<ChartOfAccountsPage />} />,

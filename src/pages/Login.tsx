@@ -4,10 +4,10 @@ import { Eye, EyeOff, Loader2, Lock, Mail, ArrowLeft, UserPlus } from 'lucide-re
 import logoUseSistemas from '@/assets/logo.png';
 import { useAuth } from '@/hooks/system/useAuth';
 import { useAppStore } from '@/stores/useAppStore';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Label } from '@/ui/base/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
 import { cn } from '@/lib/utils';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 

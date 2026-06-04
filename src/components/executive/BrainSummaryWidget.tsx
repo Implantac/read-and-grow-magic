@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Badge } from '@/ui/base/badge';
 import { Brain, Sparkles, AlertTriangle, ArrowRight, RefreshCw, Zap } from 'lucide-react';
 import { useBrainDecisions, useBrainRuns, useRunBrain } from '@/hooks/ai/useAIBrain';
 import { format } from 'date-fns';

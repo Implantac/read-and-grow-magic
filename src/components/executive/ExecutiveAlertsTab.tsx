@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
 import { cn } from '@/lib/utils';
 import { ShieldAlert, Activity, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { fmt } from './ExecutiveKPICards';

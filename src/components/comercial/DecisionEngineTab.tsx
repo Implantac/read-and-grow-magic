@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Badge } from '@/ui/base/badge';
+import { Progress } from '@/ui/base/progress';
 import { useFollowUpTasks } from '@/hooks/commercial/useFollowUpTasks';
 import { useAIScores } from '@/hooks/commercial/useAICommercial';
 import { useCommercialAlerts } from '@/hooks/commercial/useCommercialAlerts';

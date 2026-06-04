@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { PageLoading } from '@/components/shared/PageLoading';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { PageLoading } from '@/shared/components/PageLoading';
 import { useVehicles, useCarriers } from '@/hooks/wms/useTMS';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { Badge } from '@/ui/base/badge';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/base/dialog';
+import { Label } from '@/ui/base/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Plus, Search, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 

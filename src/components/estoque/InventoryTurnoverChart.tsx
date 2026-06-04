@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
 import { formatBRL } from '@/lib/formatters';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from '@/components/ui/chart';
+} from '@/ui/base/chart';
 import {
   BarChart,
   Bar,

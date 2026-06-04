@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { Button } from '@/ui/base/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
+import { Slider } from '@/ui/base/slider';
 import { SimulationService, SimulationScenario, SimulationResult, MRPService, ActionSuggestion } from '@/lib/pcpServices';
 import { FlaskConical, AlertTriangle, TrendingDown, TrendingUp, Lightbulb, Play, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';

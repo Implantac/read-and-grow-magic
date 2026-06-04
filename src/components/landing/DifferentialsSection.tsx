@@ -1,5 +1,5 @@
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/ui/base/badge';
+import { Card, CardContent } from '@/ui/base/card';
 import { Brain, Rocket, Factory, ShieldCheck, Gauge, Target } from 'lucide-react';
 
 const diffs = [

@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@/ui/base/button';
 import { ArrowRight, MessageCircle, Zap, CheckCircle2 } from 'lucide-react';
 
 interface Props { onLogin: () => void; onWhatsApp: () => void }

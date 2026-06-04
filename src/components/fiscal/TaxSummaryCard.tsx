@@ -1,4 +1,4 @@
-import { Card } from '@/components/ui/card';
+import { Card } from '@/ui/base/card';
 import { Calculator, Sparkles } from 'lucide-react';
 
 import { formatBRL } from '@/lib/formatters';

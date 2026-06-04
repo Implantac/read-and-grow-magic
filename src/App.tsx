@@ -1,10 +1,10 @@
 import { lazy, Suspense } from 'react';
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/ui/base/toaster";
+import { Toaster as Sonner } from "@/ui/base/sonner";
+import { TooltipProvider } from "@/ui/base/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { MainLayout } from "@/components/layout/MainLayout";
+import { MainLayout } from "@/core/layout/MainLayout";
 import { Loader2 } from 'lucide-react';
 
 // Routes
@@ -16,6 +16,7 @@ import { WMSRoutes } from './routes/WMSRoutes';
 import { AdminRoutes } from './routes/AdminRoutes';
 import { OperationalRoutes } from './routes/OperationalRoutes';
 import { MiscellaneousRoutes } from './routes/MiscellaneousRoutes';
+import { VerticalPackRoutes } from './core/routes/VerticalPackRoutes';
 
 // Eager load critical pages
 import Login from "./pages/Login";
@@ -66,6 +67,7 @@ const App = () => (
               {AdminRoutes}
               {OperationalRoutes}
               {MiscellaneousRoutes}
+              {VerticalPackRoutes}
             </Route>
 
             <Route path="*" element={<NotFound />} />

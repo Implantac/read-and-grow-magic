@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Badge } from '@/ui/base/badge';
+import { Input } from '@/ui/base/input';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/components/ui/select';
+} from '@/ui/base/select';
 import { useNotifications } from '@/hooks/system/useNotifications';
 import {
   BellOff, Check, CheckCheck, Search, Trash2,
@@ -14,7 +14,7 @@ import {
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/ui/base/skeleton';
 import { toastSuccess } from '@/lib/toastHelpers';
 
 const typeConfig = {

@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/ui/base/badge';
 import { Users, Cog, AlertTriangle, Lightbulb } from 'lucide-react';
 
 const blocks = [

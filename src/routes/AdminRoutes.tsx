@@ -1,12 +1,12 @@
 import { lazy } from 'react';
 import { Route } from 'react-router-dom';
 
-const UsersPage = lazy(() => import("../pages/admin/Users"));
-const CompaniesPage = lazy(() => import("../pages/admin/Companies"));
-const ParametersPage = lazy(() => import("../pages/admin/Parameters"));
-const SuperAdminPage = lazy(() => import("../pages/admin/SuperAdmin"));
-const DailyReportsPage = lazy(() => import("../pages/admin/DailyReports"));
-const CrossModuleAuditPage = lazy(() => import("../pages/admin/CrossModuleAudit"));
+const UsersPage = lazy(() => import("../modules/admin/Users"));
+const CompaniesPage = lazy(() => import("../modules/admin/Companies"));
+const ParametersPage = lazy(() => import("../modules/admin/Parameters"));
+const SuperAdminPage = lazy(() => import("../modules/admin/SuperAdmin"));
+const DailyReportsPage = lazy(() => import("../modules/admin/DailyReports"));
+const CrossModuleAuditPage = lazy(() => import("../modules/admin/CrossModuleAudit"));
 
 export const AdminRoutes = [
   <Route key="adm-users" path="/admin/usuarios" element={<UsersPage />} />,

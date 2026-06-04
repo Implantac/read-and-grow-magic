@@ -1,7 +1,7 @@
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { PageLoading } from '@/components/shared/PageLoading';
-import { KPICard } from '@/components/shared/KPICard';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { PageLoading } from '@/shared/components/PageLoading';
+import { KPICard } from '@/shared/components/KPICard';
 import { useTMSDashboardStats } from '@/hooks/wms/useTMS';
 import { Truck, Building2, MapPin, PackageCheck, Navigation, Clock } from 'lucide-react';
 

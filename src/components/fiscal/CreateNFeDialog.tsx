@@ -5,14 +5,14 @@ import {
   Truck, CreditCard, ClipboardCheck, ArrowLeft, ArrowRight, Send, Sparkles,
   Info, AlertCircle, CheckCircle2, ChevronRight, Scale, Receipt, AlertTriangle, ListChecks, Filter, Search, X
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Label } from '@/ui/base/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/ui/base/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
 import { cfopOptions } from '@/config/fiscal';
 import { useClients } from '@/hooks/commercial/useClients';
 import { useProducts } from '@/hooks/inventory/useProducts';
@@ -20,14 +20,14 @@ import { calculateItemTaxes } from '@/hooks/fiscal/useTaxRules';
 import { FiscalStepper } from './FiscalStepper';
 import { SmartSelect, SmartSelectOption } from './SmartSelect';
 import { TaxSummaryCard } from './TaxSummaryCard';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/ui/base/separator';
+import { ScrollArea } from '@/ui/base/scroll-area';
 import { cn } from '@/lib/utils';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { SearchHint } from '@/components/shared/SearchHint';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { HighlightText } from '@/components/shared/HighlightText';
+import { Alert, AlertDescription, AlertTitle } from '@/ui/base/alert';
+import { SearchHint } from '@/shared/components/SearchHint';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/ui/base/sheet';
+import { Tabs, TabsList, TabsTrigger } from '@/ui/base/tabs';
+import { HighlightText } from '@/shared/components/HighlightText';
 
 
 interface NFeItemForm {

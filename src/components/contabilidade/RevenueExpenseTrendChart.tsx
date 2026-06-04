@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { formatBRL, formatBRLCompact } from '@/lib/formatters';
 import {
   Line,

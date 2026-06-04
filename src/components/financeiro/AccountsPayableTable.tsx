@@ -1,10 +1,10 @@
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { Checkbox } from '@/ui/base/checkbox';
+import { Button } from '@/ui/base/button';
 import { Eye, DollarSign, Trash2 } from 'lucide-react';
-import { StatusBadge } from '@/components/shared/StatusBadge';
+import { StatusBadge } from '@/shared/components/StatusBadge';
 import { formatBRL, formatDate } from '@/lib/formatters';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/ui/base/badge';
 import { differenceInDays } from 'date-fns';
 
 interface AccountsPayableTableProps {

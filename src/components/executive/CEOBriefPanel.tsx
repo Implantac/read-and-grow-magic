@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Brain, RefreshCw, TrendingUp, TrendingDown, Minus, AlertTriangle, Target, Lightbulb, CheckCircle2, Bot } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Badge } from '@/ui/base/badge';
+import { Skeleton } from '@/ui/base/skeleton';
 import { toast } from 'sonner';
 import { useGenerateCEOBrief, useExecuteDecisions, useAutoPilotRun, type CEOBriefResult } from '@/hooks/ai/useCEOBrief';
 import { formatBRL, formatDateTime, formatNumber } from '@/lib/formatters';

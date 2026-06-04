@@ -1,7 +1,7 @@
 import { AlertCircle, AlertTriangle, CheckCircle, Info } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { ScrollArea } from '@/ui/base/scroll-area';
 import type { Alert } from '@/types';
 const mockAlerts: Alert[] = [];
 import { cn } from '@/lib/utils';

@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { KPICard } from '@/components/shared/KPICard';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
 import { useOrderBlocks, useReleaseOrderBlock } from '@/hooks/financial/useCreditAnalysis';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { Badge } from '@/ui/base/badge';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/ui/base/dialog';
+import { Label } from '@/ui/base/label';
+import { Textarea } from '@/ui/base/textarea';
 import { Lock, Unlock, Search, AlertTriangle, CheckCircle } from 'lucide-react';
 
 import { formatDate } from '@/lib/formatters';

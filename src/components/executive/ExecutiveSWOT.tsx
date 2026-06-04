@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { Button } from '@/ui/base/button';
 import { TrendingUp, TrendingDown, ShieldAlert, Zap, Check, RotateCcw, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

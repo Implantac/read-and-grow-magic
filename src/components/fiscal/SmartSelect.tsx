@@ -1,8 +1,8 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { Check, ChevronsUpDown, Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Input } from '@/ui/base/input';
 import { cn } from '@/lib/utils';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/ui/base/popover';
 
 export interface SmartSelectOption {
   value: string;

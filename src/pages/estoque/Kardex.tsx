@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { ExportButton } from '@/components/shared/ExportButton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ExportButton } from '@/shared/components/ExportButton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Badge } from '@/ui/base/badge';
+import { Skeleton } from '@/ui/base/skeleton';
 import { formatBRL, formatDate } from '@/lib/formatters';
 import {
   Table,
@@ -12,15 +12,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '@/ui/base/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
+} from '@/ui/base/select';
+import { Label } from '@/ui/base/label';
 import {
   FileText,
   ArrowDownCircle,
@@ -36,8 +36,8 @@ import { ptBR } from 'date-fns/locale';
 import {
   movementTypeConfig,
 } from '@/config/inventory';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
 import { useKardex, useKardexProducts } from '@/hooks/inventory/useKardex';
 import type { MovementType } from '@/types/inventory';
 

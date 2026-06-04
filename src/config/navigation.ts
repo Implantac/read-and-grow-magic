@@ -18,6 +18,26 @@ export interface NavSection {
 
 export const navigationSections: NavSection[] = [
   {
+    label: 'Pacotes Verticais',
+    items: [
+      {
+        title: 'Indústria Têxtil',
+        href: '/vertical/textile',
+        icon: 'Factory',
+      },
+      {
+        title: 'Frigoríficos',
+        href: '/vertical/meat',
+        icon: 'Building2',
+      },
+      {
+        title: 'Farmacêutico',
+        href: '/vertical/pharma',
+        icon: 'ShieldCheck',
+      },
+    ],
+  },
+  {
     items: [
       {
         title: 'Dashboard',

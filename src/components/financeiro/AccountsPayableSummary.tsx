@@ -1,5 +1,5 @@
 import { DollarSign, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
-import { KPICard } from '@/components/shared/KPICard';
+import { KPICard } from '@/shared/components/KPICard';
 import { formatBRL } from '@/lib/formatters';
 
 interface SummaryData {
