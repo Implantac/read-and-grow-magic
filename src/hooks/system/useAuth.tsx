@@ -1,10 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAppStore } from '@/stores/useAppStore';
-import type { Company } from '@/types';
-const mockCompanies: Company[] = [];
 import type { User as AppUser } from '@/types';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+
 
 interface UseAuthOptions {
   initialize?: boolean;
@@ -77,7 +76,9 @@ export function useAuth(options: UseAuthOptions = {}) {
     const appUser = mapSupabaseUser(verifiedUser, profileResponse.data?.name, role);
     setUser(appUser);
     setUserRole(role);
-    setActiveCompany(mockCompanies[0] ?? null);
+    // Removed mockCompanies reference as it might cause stale data
+    // setActiveCompany will be handled by the component or logic that loads the actual companies
+
   }, [clearInvalidSession, setUser, setUserRole, setActiveCompany, storeLogout]);
 
   useEffect(() => {
