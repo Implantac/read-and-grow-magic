@@ -96,7 +96,19 @@ export function useNFe() {
     clientId?: string;
     clientDocument?: string;
     operationType: string;
-    items: { productCode: string; productName: string; productId?: string; quantity: number; unitPrice: number; unit?: string; ncm?: string; cfop?: string }[];
+    items: { 
+      productCode: string; 
+      productName: string; 
+      productId?: string; 
+      quantity: number; 
+      unitPrice: number; 
+      unit?: string; 
+      ncm?: string; 
+      cfop?: string;
+      ipi?: number;
+      pis?: number;
+      cofins?: number;
+    }[];
     discount?: number;
     shipping?: number;
   }) => {
@@ -117,6 +129,10 @@ export function useNFe() {
       shipping,
       total,
       status: 'draft',
+      // @ts-ignore - added via migration
+      total_ipi: nfeData.items.reduce((s, i) => s + (i.ipi || 0), 0),
+      total_pis: nfeData.items.reduce((s, i) => s + (i.pis || 0), 0),
+      total_cofins: nfeData.items.reduce((s, i) => s + (i.cofins || 0), 0),
     }).select().single();
 
     if (error) { toast.error('Erro ao criar NF-e'); return null; }

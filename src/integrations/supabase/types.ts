@@ -5561,8 +5561,10 @@ export type Database = {
           id: string
           ipi_rate: number | null
           name: string
+          ncm: string | null
           origin_state: string
           pis_rate: number | null
+          regime_tributario_destino: string | null
           updated_at: string | null
         }
         Insert: {
@@ -5577,8 +5579,10 @@ export type Database = {
           id?: string
           ipi_rate?: number | null
           name: string
+          ncm?: string | null
           origin_state: string
           pis_rate?: number | null
+          regime_tributario_destino?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -5593,8 +5597,10 @@ export type Database = {
           id?: string
           ipi_rate?: number | null
           name?: string
+          ncm?: string | null
           origin_state?: string
           pis_rate?: number | null
+          regime_tributario_destino?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -7053,6 +7059,10 @@ export type Database = {
           status: string
           subtotal: number
           total: number
+          total_cofins: number | null
+          total_icms_st: number | null
+          total_ipi: number | null
+          total_pis: number | null
           uf_destination: string | null
           uf_origin: string | null
           updated_at: string
@@ -7087,6 +7097,10 @@ export type Database = {
           status?: string
           subtotal?: number
           total?: number
+          total_cofins?: number | null
+          total_icms_st?: number | null
+          total_ipi?: number | null
+          total_pis?: number | null
           uf_destination?: string | null
           uf_origin?: string | null
           updated_at?: string
@@ -7121,6 +7135,10 @@ export type Database = {
           status?: string
           subtotal?: number
           total?: number
+          total_cofins?: number | null
+          total_icms_st?: number | null
+          total_ipi?: number | null
+          total_pis?: number | null
           uf_destination?: string | null
           uf_origin?: string | null
           updated_at?: string
