@@ -9,7 +9,13 @@ import {
   Download,
   Search,
   Zap,
-  CheckCircle2
+  CheckCircle2,
+  UploadCloud,
+  FileSearch,
+  Package,
+  Users as UsersIcon,
+  Calculator,
+  Loader2
 } from "lucide-react";
 
 export default function FiscalDashboard() {
