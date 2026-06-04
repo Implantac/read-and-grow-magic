@@ -231,15 +231,6 @@ export default function FiscalDashboard() {
     toast.success('Entrada concluída! Pedido de compra finalizado e estoque atualizado via referência cruzada.');
   };
 
-    setIsProcessing(false);
-    setShowReview(false);
-    setXmlData(null);
-    toast.success('Entrada concluída! Pedido de compra finalizado e estoque atualizado via referência cruzada.');
-  };
-    setXmlData(null);
-    toast.success('Entrada concluída! Pedido de compra finalizado e estoque atualizado via referência cruzada.');
-  };
-
   return (
     <div className="p-6 space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
