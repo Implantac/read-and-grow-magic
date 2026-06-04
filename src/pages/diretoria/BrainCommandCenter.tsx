@@ -9,6 +9,8 @@ import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { useBrainDecisions, useApproveDecision, useBrainRuns, useRunBrain, useBrainChat, useBrainLearning, useNotifyCritical } from '@/hooks/ai/useAIBrain';
+import { AIConsensusPanel } from '@/components/diretoria/AIConsensusPanel';
+import { ExecutiveConsensus } from '@/components/diretoria/ExecutiveConsensus';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
@@ -122,12 +124,23 @@ export default function BrainCommandCenter() {
         </Card>
       )}
 
-      {/* Grid principal: pending + chat */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="flex flex-col">
+      {/* Grid principal: Consenso IA + Executive + Chat */}
+      <div className="grid gap-4 xl:grid-cols-3">
+        {/* Painel do Consenso de IA (Novo) */}
+        <div className="xl:col-span-1">
+          <AIConsensusPanel />
+        </div>
+
+        {/* Conselho Executivo */}
+        <div className="xl:col-span-1">
+          <ExecutiveConsensus />
+        </div>
+
+        {/* Pendentes */}
+        <Card className="flex flex-col xl:col-span-1">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-primary" /> Decisões aguardando você ({pending.length})
+              <AlertTriangle className="h-4 w-4 text-primary" /> Decisões Pendentes ({pending.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="flex-1">
@@ -145,9 +158,6 @@ export default function BrainCommandCenter() {
                     </div>
                     <div className="text-sm font-semibold">{d.title}</div>
                     <div className="text-xs text-muted-foreground line-clamp-2">{d.rationale}</div>
-                    {d.proposed_action?.tool && (
-                      <div className="text-[10px] font-mono bg-muted/50 rounded px-2 py-1 inline-block">→ {d.proposed_action.tool}</div>
-                    )}
                     <div className="flex gap-2 pt-1">
                       <Button size="sm" variant="default" onClick={() => approve.mutate({ id: d.id, approve: true })} disabled={approve.isPending} className="h-7 gap-1 text-xs">
                         <CheckCircle2 className="h-3 w-3" /> Aprovar
@@ -162,6 +172,10 @@ export default function BrainCommandCenter() {
             </ScrollArea>
           </CardContent>
         </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-1 mt-4">
+        {/* Chat com agente especializado movido para baixo ou lateral para cockpit panorâmico */}
 
         {/* Chat com agente especializado */}
         <Card className="flex flex-col">
