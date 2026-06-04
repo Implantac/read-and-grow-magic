@@ -26,6 +26,7 @@ import { CEOBriefPanel } from '@/components/executive/CEOBriefPanel';
 import { ExecutiveActionsPanel } from '@/components/executive/ExecutiveActionsPanel';
 import { BrainSummaryWidget } from '@/components/executive/BrainSummaryWidget';
 import { ExecutiveCouncilPanel } from '@/components/executive/ExecutiveCouncilPanel';
+import { ExecutiveConsensus } from '@/components/executive/ExecutiveConsensus';
 
 const severityColor: Record<string, string> = {
   critical: 'bg-destructive text-destructive-foreground',
