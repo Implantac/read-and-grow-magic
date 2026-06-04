@@ -210,6 +210,42 @@ export default function FiscalDashboard() {
       toast.info(step.msg);
     }
 
+  const processImport = async () => {
+    if (!xmlData) return;
+
+    // Check for unlinked items
+    const unlinkedItems = xmlData.products.filter(p => !p.linkedProductId);
+    if (unlinkedItems.length > 0) {
+      toast.error(`Existem ${unlinkedItems.length} itens sem vínculo. Defina o vínculo antes de finalizar.`);
+      return;
+    }
+
+    // Check for duplicate supplier references
+    const supplierCodes = xmlData.products.map(p => p.code);
+    const hasDuplicates = supplierCodes.some((code, index) => supplierCodes.indexOf(code) !== index);
+    if (hasDuplicates) {
+      toast.error('Existem referências de fornecedor duplicadas no XML. Verifique os itens.');
+      return;
+    }
+    
+    setIsProcessing(true);
+    setProgress(0);
+
+    // Simulated multi-step import process
+    const steps = [
+      { msg: 'Vinculando Pedido de Compra...', weight: 15 },
+      { msg: 'Cadastrando Fornecedor e Referências...', weight: 30 },
+      { msg: 'Sincronizando Produtos e Vínculos...', weight: 50 },
+      { msg: 'Calculando Custos, Tributos e Margens...', weight: 75 },
+      { msg: 'Finalizando Pedido de Compra e Estoque...', weight: 100 }
+    ];
+
+    for (const step of steps) {
+      await new Promise(r => setTimeout(r, 800));
+      setProgress(step.weight);
+      toast.info(step.msg);
+    }
+
     setIsProcessing(false);
     setShowReview(false);
     setXmlData(null);
