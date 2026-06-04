@@ -1,10 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
 
-export class BaseRepository<T> {
-  constructor(protected tableName: string) {}
+export class BaseRepository<T extends keyof Database['public']['Tables']> {
+  constructor(protected tableName: T) {}
 
   async getAll(companyId?: string) {
-    let query = supabase.from(this.tableName).select('*');
+    let query = supabase.from(this.tableName).select('*') as any;
     if (companyId) {
       query = query.eq('company_id', companyId);
     }
@@ -12,18 +13,18 @@ export class BaseRepository<T> {
   }
 
   async getById(id: string) {
-    return await supabase.from(this.tableName).select('*').eq('id', id).single();
+    return await (supabase.from(this.tableName).select('*') as any).eq('id', id).single();
   }
 
-  async create(data: Partial<T>) {
-    return await supabase.from(this.tableName).insert(data).select().single();
+  async create(data: any) {
+    return await (supabase.from(this.tableName).insert(data) as any).select().single();
   }
 
-  async update(id: string, data: Partial<T>) {
-    return await supabase.from(this.tableName).update(data).eq('id', id).select().single();
+  async update(id: string, data: any) {
+    return await (supabase.from(this.tableName).update(data) as any).eq('id', id).select().single();
   }
 
   async delete(id: string) {
-    return await supabase.from(this.tableName).delete().eq('id', id);
+    return await (supabase.from(this.tableName).delete() as any).eq('id', id);
   }
 }
