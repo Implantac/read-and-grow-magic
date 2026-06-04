@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { KPICard } from '@/components/shared/KPICard';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { RefreshCw, FileText, AlertTriangle, DollarSign, TrendingUp, TrendingDown, CalendarDays, Loader2 } from 'lucide-react';
-import { useDailyReports, useGenerateReport, DailyReport, DailyReportData } from '@/hooks/useDailyReport';
+import { useDailyReports, useGenerateReport, DailyReport, DailyReportData } from '@/hooks/ai/useDailyReport';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
 function ReportDetail({ data }: { data: DailyReportData }) {

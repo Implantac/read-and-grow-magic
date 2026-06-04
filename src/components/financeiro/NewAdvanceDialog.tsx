@@ -7,8 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus } from 'lucide-react';
 import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 import { useClients } from '@/hooks/commercial/useClients';
-import { useSuppliers } from '@/hooks/useSuppliers';
-import { useCreateAdvance } from '@/hooks/useFinancialAdvances';
+import { useSuppliers } from '@/hooks/purchasing/useSuppliers';
+import { useCreateAdvance } from '@/hooks/financial/useFinancialAdvances';
 
 export function NewAdvanceDialog() {
   const { data: accounts = [] } = useBankAccounts();

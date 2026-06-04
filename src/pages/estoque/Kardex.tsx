@@ -38,7 +38,7 @@ import {
 } from '@/config/inventory';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { useKardex, useKardexProducts } from '@/hooks/useKardex';
+import { useKardex, useKardexProducts } from '@/hooks/inventory/useKardex';
 import type { MovementType } from '@/types/inventory';
 
 export default function KardexPage() {

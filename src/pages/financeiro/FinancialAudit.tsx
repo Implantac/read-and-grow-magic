@@ -7,7 +7,7 @@ import { ShieldCheck, AlertTriangle, AlertCircle, Info, Play, CheckCircle2, Wren
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { useFinancialAuditLogs, useRunFinancialAudit, useResolveAuditLog } from '@/hooks/useFinancialAudit';
+import { useFinancialAuditLogs, useRunFinancialAudit, useResolveAuditLog } from '@/hooks/financial/useFinancialAudit';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 

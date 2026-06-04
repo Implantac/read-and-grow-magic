@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { useCreditProfiles, useUpsertCreditProfile } from '@/hooks/useCreditAnalysis';
+import { useCreditProfiles, useUpsertCreditProfile } from '@/hooks/financial/useCreditAnalysis';
 import { useClients } from '@/hooks/commercial/useClients';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';

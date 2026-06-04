@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ArrowDownRight, ArrowUpRight, TrendingUp, Wallet, Receipt } from 'lucide-react';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useDRESummary, useDREDetailed, calculateDRE, type DRESection } from '@/hooks/useDRE';
+import { useDRESummary, useDREDetailed, calculateDRE, type DRESection } from '@/hooks/accounting/useDRE';
 import { cn } from '@/lib/utils';
 
 import { formatBRL } from '@/lib/formatters';

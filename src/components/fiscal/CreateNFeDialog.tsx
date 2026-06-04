@@ -16,7 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { cfopOptions } from '@/config/fiscal';
 import { useClients } from '@/hooks/commercial/useClients';
 import { useProducts } from '@/hooks/inventory/useProducts';
-import { calculateItemTaxes } from '@/hooks/useTaxRules';
+import { calculateItemTaxes } from '@/hooks/fiscal/useTaxRules';
 import { FiscalStepper } from './FiscalStepper';
 import { SmartSelect, SmartSelectOption } from './SmartSelect';
 import { TaxSummaryCard } from './TaxSummaryCard';

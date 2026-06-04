@@ -53,7 +53,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { useNFCe } from '@/hooks/useNFCe';
+import { useNFCe } from '@/hooks/fiscal/useNFCe';
 import { PDVDialog } from '@/components/fiscal/PDVDialog';
 import type { NFCe } from '@/types/fiscal';
 import { PageContainer } from '@/components/shared/PageContainer';

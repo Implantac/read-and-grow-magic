@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { ShieldAlert, Activity, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { fmt } from './ExecutiveKPICards';
-import type { ExecutiveKPIs, ExecutiveAlert } from '@/hooks/useExecutiveAI';
+import type { ExecutiveKPIs, ExecutiveAlert } from '@/hooks/ai/useExecutiveAI';
 
 const severityColor: Record<string, string> = {
   critical: 'bg-destructive text-destructive-foreground',

@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useFinancialLedger } from '@/hooks/useFinancialLedger';
+import { useFinancialLedger } from '@/hooks/financial/useFinancialLedger';
 import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
-import { useFinancialInsights } from '@/hooks/useFinancialInsights';
-import { useLatestHealthScore } from '@/hooks/useFinancialIntelligence';
+import { useFinancialInsights } from '@/hooks/financial/useFinancialInsights';
+import { useLatestHealthScore } from '@/hooks/financial/useFinancialIntelligence';
 import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/financial/useAccountsPayable';
 import { Wallet, TrendingUp, TrendingDown, Activity, Brain, RefreshCw } from 'lucide-react';
@@ -19,7 +19,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, BarChart, Bar
 } from 'recharts';
-import { useComputeIntelligence } from '@/hooks/useFinancialIntelligence';
+import { useComputeIntelligence } from '@/hooks/financial/useFinancialIntelligence';
 
 const fmtFull = (v: number) => formatBRL(v);
 

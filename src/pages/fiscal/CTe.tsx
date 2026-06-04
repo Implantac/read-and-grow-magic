@@ -10,8 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Send, Ban, Plus, Truck, MapPin, DollarSign, ClipboardCheck, ArrowLeft, ArrowRight, FileText, Search, Sparkles, Receipt, ChevronRight, Calculator, ListChecks, AlertCircle, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { useCTes, useCreateCTe, useTransmitCTe, useCancelCTe } from '@/hooks/useCTe';
-import { useNFe } from '@/hooks/useNFe';
+import { useCTes, useCreateCTe, useTransmitCTe, useCancelCTe } from '@/hooks/fiscal/useCTe';
+import { useNFe } from '@/hooks/fiscal/useNFe';
 import { format } from 'date-fns';
 import { FiscalStepper } from '@/components/fiscal/FiscalStepper';
 import { FiscalStatusBadge } from '@/components/fiscal/FiscalStatusBadge';

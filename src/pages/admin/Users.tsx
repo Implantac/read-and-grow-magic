@@ -33,7 +33,7 @@ import {
   defaultPermissions as mockPermissions
 } from '@/config/administration';
 import { SystemUser, UserRole, UserStatus, UserFilter } from '@/types/administration';
-import { useUsers } from '@/hooks/useUsers';
+import { useUsers } from '@/hooks/system/useUsers';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 

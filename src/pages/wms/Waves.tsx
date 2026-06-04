@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { Layers, Play, CheckCircle, Clock, Search, Plus, ShoppingCart } from 'lucide-react';
-import { usePickingWaves } from '@/hooks/usePickingWaves';
+import { usePickingWaves } from '@/hooks/wms/usePickingWaves';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   planned: { label: 'Planejada', variant: 'outline' },

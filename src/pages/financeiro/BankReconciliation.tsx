@@ -50,7 +50,7 @@ interface SystemEntry {
   matchedBankId?: string;
 }
 
-import { useBankTransactions } from '@/hooks/useBankReconciliation';
+import { useBankTransactions } from '@/hooks/financial/useBankReconciliation';
 import { useCashFlowEntries } from '@/hooks/financial/useCashFlow';
 import { toastSuccess } from '@/lib/toastHelpers';
 

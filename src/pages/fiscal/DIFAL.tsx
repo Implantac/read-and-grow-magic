@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { Globe, Plus } from 'lucide-react';
-import { useDIFALRules, useUpsertDIFAL } from '@/hooks/useTaxAdvancedRules';
+import { useDIFALRules, useUpsertDIFAL } from '@/hooks/fiscal/useTaxAdvancedRules';
 
 export default function DIFALPage() {
   const { data: rules = [], isLoading } = useDIFALRules();

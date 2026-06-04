@@ -11,9 +11,9 @@ import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useProductionOrders } from '@/hooks/useProductionOrders';
-import { useProductionTimeLogs, formatElapsed } from '@/hooks/useProductionTimeLogs';
-import { useOutsourcingOrders } from '@/hooks/useOutsourcingOrders';
+import { useProductionOrders } from '@/hooks/production/useProductionOrders';
+import { useProductionTimeLogs, formatElapsed } from '@/hooks/production/useProductionTimeLogs';
+import { useOutsourcingOrders } from '@/hooks/production/useOutsourcingOrders';
 import { priorityConfig } from '@/config/production';
 import { Skeleton } from '@/components/ui/skeleton';
 import { KPICard } from '@/components/shared/KPICard';
@@ -25,12 +25,12 @@ import {
   PackageX, Truck, Wrench, Star, Swords, RefreshCw, Zap, Shield, Lightbulb, ListOrdered,
   Play, Square, Timer, Activity, DollarSign, Layers
 } from 'lucide-react';
-import { usePCPIntelligence } from '@/hooks/usePCPIntelligence';
+import { usePCPIntelligence } from '@/hooks/production/usePCPIntelligence';
 import { WarModeService, type WarModeResult as LocalWarModeResult } from '@/lib/pcpServices';
-import { useTechnicalSheets } from '@/hooks/useTechnicalSheets';
-import { useSupplyStock } from '@/hooks/useSupplyStock';
-import { useProductionCapacity } from '@/hooks/useProductionCapacity';
-import { useWorkCenters } from '@/hooks/useWorkCenters';
+import { useTechnicalSheets } from '@/hooks/production/useTechnicalSheets';
+import { useSupplyStock } from '@/hooks/inventory/useSupplyStock';
+import { useProductionCapacity } from '@/hooks/production/useProductionCapacity';
+import { useWorkCenters } from '@/hooks/production/useWorkCenters';
 import { QRCodeOPButton } from '@/components/producao/QRCodeOP';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';

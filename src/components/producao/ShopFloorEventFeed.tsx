@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Radio } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
-import type { ProductionEvent } from '@/hooks/useProductionEvents';
+import type { ProductionEvent } from '@/hooks/production/useProductionEvents';
 
 const eventTypeLabels: Record<string, { label: string; color: string }> = {
   op_created: { label: 'OP Criada', color: 'bg-primary/15 text-primary' },

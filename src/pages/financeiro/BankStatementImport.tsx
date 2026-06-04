@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Upload, FileText, CheckCircle2, Zap } from 'lucide-react';
-import { parseCSV, parseOFX, useImportBankStatement, useAutoMatch, type ParsedTx } from '@/hooks/useBankStatementImport';
+import { parseCSV, parseOFX, useImportBankStatement, useAutoMatch, type ParsedTx } from '@/hooks/financial/useBankStatementImport';
 import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 
 import { formatBRL, formatDate } from '@/lib/formatters';

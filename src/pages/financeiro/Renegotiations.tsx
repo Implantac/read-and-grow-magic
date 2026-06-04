@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { useRenegotiations } from '@/hooks/useRenegotiations';
+import { useRenegotiations } from '@/hooks/financial/useRenegotiations';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 

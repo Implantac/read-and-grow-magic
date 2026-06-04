@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useFinancialChecks, useCreateCheck, useCompensateCheck, useUpdateCheckStatus, useDeleteCheck } from '@/hooks/useFinancialChecks';
+import { useFinancialChecks, useCreateCheck, useCompensateCheck, useUpdateCheckStatus, useDeleteCheck } from '@/hooks/financial/useFinancialChecks';
 import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 import { CHECK_STATUS_LABELS } from '@/types/financial';
 import { format } from 'date-fns';

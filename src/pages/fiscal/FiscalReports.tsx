@@ -37,7 +37,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { reportTypeLabels } from '@/config/fiscal';
-import { useFiscalReports } from '@/hooks/useFiscalReports';
+import { useFiscalReports } from '@/hooks/fiscal/useFiscalReports';
 import { CreateReportDialog } from '@/components/fiscal/CreateReportDialog';
 import type { FiscalReport } from '@/types/fiscal';
 import { PageContainer } from '@/components/shared/PageContainer';

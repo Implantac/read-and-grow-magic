@@ -1,4 +1,4 @@
-import { useWMSDashboardStats } from '@/hooks/useWMSOperations';
+import { useWMSDashboardStats } from '@/hooks/wms/useWMSOperations';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';

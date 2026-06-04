@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { useCostCenters, useCreateCostCenter } from '@/hooks/useCostCenters';
+import { useCostCenters, useCreateCostCenter } from '@/hooks/system/useCostCenters';
 
 export default function CostCenters() {
   const { data: centers = [], isLoading } = useCostCenters();

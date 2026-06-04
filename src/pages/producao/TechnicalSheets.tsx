@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { useTechnicalSheets } from '@/hooks/useTechnicalSheets';
+import { useTechnicalSheets } from '@/hooks/production/useTechnicalSheets';
 import { Plus, FileText, Pencil, Trash2, Clock, DollarSign, Layers } from 'lucide-react';
 
 interface StepEntry { name: string; time_minutes: number; sector: string; }

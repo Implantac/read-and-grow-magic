@@ -17,7 +17,7 @@ import {
   useGenerateRecurringEntries,
   useRecurringList,
   useUpdateRecurringStatus,
-} from '@/hooks/useFinancialRecurring';
+} from '@/hooks/financial/useFinancialRecurring';
 import { Pause, Play, Plus, RefreshCw, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { formatNumber } from '@/lib/formatters';

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useDefaultScores, useRecomputeDefaultScores, RISK_LABELS, RISK_COLORS } from '@/hooks/useDefaultScores';
+import { useDefaultScores, useRecomputeDefaultScores, RISK_LABELS, RISK_COLORS } from '@/hooks/system/useDefaultScores';
 import { RefreshCw, AlertTriangle, TrendingDown, Users } from 'lucide-react';
 import { formatNumber } from '@/lib/formatters';
 

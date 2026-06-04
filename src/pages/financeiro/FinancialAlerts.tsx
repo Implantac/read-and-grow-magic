@@ -3,7 +3,7 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useFinancialAlerts, useDetectFinancialAlerts, useUpdateAlertStatus } from '@/hooks/useFinancialAlerts';
+import { useFinancialAlerts, useDetectFinancialAlerts, useUpdateAlertStatus } from '@/hooks/financial/useFinancialAlerts';
 import { AlertTriangle, AlertCircle, Bell, Check, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { Building2, Search, Plus, MapPin, CheckCircle, Warehouse } from 'lucide-react';
-import { useDistributionCenters } from '@/hooks/useDistributionCenters';
+import { useDistributionCenters } from '@/hooks/wms/useDistributionCenters';
 
 import { formatNumber } from '@/lib/formatters';
 export default function DistributionCentersPage() {

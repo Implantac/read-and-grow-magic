@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Pencil, Trash2, Search, Calculator } from 'lucide-react';
-import { useTaxRules, useUpsertTaxRule, useDeleteTaxRule, type TaxRule } from '@/hooks/useTaxRules';
+import { useTaxRules, useUpsertTaxRule, useDeleteTaxRule, type TaxRule } from '@/hooks/fiscal/useTaxRules';
 
 const empty: Partial<TaxRule> = {
   name: '',

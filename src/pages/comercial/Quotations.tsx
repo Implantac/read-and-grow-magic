@@ -18,7 +18,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
-import { useQuotations, useCreateQuotation, useUpdateQuotationStatus, useConvertQuotationToOrder, type DbQuotation } from '@/hooks/useQuotations';
+import { useQuotations, useCreateQuotation, useUpdateQuotationStatus, useConvertQuotationToOrder, type DbQuotation } from '@/hooks/commercial/useQuotations';
 import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
 

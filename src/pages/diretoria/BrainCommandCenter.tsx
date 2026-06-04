@@ -8,7 +8,7 @@ import { Brain, Zap, CheckCircle2, XCircle, Send, RefreshCw, Sparkles, AlertTria
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { useBrainDecisions, useApproveDecision, useBrainRuns, useRunBrain, useBrainChat, useBrainLearning, useNotifyCritical } from '@/hooks/useAIBrain';
+import { useBrainDecisions, useApproveDecision, useBrainRuns, useRunBrain, useBrainChat, useBrainLearning, useNotifyCritical } from '@/hooks/ai/useAIBrain';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';

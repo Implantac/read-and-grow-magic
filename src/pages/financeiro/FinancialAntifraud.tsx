@@ -12,7 +12,7 @@ import { ShieldAlert, ShieldCheck, AlertTriangle, Activity, Check } from 'lucide
 import { formatBRL, formatDateTime, formatNumber } from '@/lib/formatters';
 import {
   useRiskProfiles, useSecurityLogs, useFraudRules, useUpdateFraudRule, useResolveSecurityLog,
-} from '@/hooks/useFinancialSecurity';
+} from '@/hooks/financial/useFinancialSecurity';
 
 const fmtCur = (v: number | null) => v == null ? '—' : formatBRL(v);
 const sevColor = (s: string) =>

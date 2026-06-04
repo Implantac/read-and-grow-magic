@@ -19,9 +19,9 @@ import {
   Sparkles, Target, RefreshCw, ArrowRight,
 } from 'lucide-react';
 import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
-import { useFinancialLedger, type LedgerEntryRow } from '@/hooks/useFinancialLedger';
-import { useFinancialCategories } from '@/hooks/useFinancialCategories';
-import { useFinancialInsights } from '@/hooks/useFinancialInsights';
+import { useFinancialLedger, type LedgerEntryRow } from '@/hooks/financial/useFinancialLedger';
+import { useFinancialCategories } from '@/hooks/financial/useFinancialCategories';
+import { useFinancialInsights } from '@/hooks/financial/useFinancialInsights';
 import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/financial/useAccountsPayable';
 

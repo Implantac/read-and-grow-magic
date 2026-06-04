@@ -5,7 +5,7 @@ import { TrendingUp, Users, PieChart, MapPin, Zap, Target, ArrowUpRight, ArrowDo
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell, PieChart as RPieChart, Pie, LineChart, Line, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { fmt } from './ExecutiveKPICards';
-import type { ExecutiveDashboardData } from '@/hooks/useExecutiveAI';
+import type { ExecutiveDashboardData } from '@/hooks/ai/useExecutiveAI';
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))', 'hsl(var(--muted-foreground))'];
 

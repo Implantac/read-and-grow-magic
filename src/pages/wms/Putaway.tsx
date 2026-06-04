@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowDown, Search, MapPin, Clock, CheckCircle } from 'lucide-react';
-import { usePutawayTasks } from '@/hooks/usePutawayTasks';
+import { usePutawayTasks } from '@/hooks/wms/usePutawayTasks';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   pending: { label: 'Pendente', variant: 'outline' },

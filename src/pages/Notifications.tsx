@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useNotifications } from '@/hooks/system/useNotifications';
 import {
   BellOff, Check, CheckCheck, Search, Trash2,
   AlertTriangle, AlertCircle, Info, CheckCircle, Filter,

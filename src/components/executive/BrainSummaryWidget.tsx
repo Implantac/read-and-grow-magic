@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Brain, Sparkles, AlertTriangle, ArrowRight, RefreshCw, Zap } from 'lucide-react';
-import { useBrainDecisions, useBrainRuns, useRunBrain } from '@/hooks/useAIBrain';
+import { useBrainDecisions, useBrainRuns, useRunBrain } from '@/hooks/ai/useAIBrain';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 

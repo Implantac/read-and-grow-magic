@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowLeftRight, Loader2 } from 'lucide-react';
 import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/financial/useAccountsPayable';
-import { useCompensateAccounts } from '@/hooks/useSettlement';
+import { useCompensateAccounts } from '@/hooks/financial/useSettlement';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
 const fmt = (v: number) =>

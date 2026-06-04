@@ -8,11 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { useTimeEntries } from '@/hooks/useTimeEntries';
-import { useProductionOrders } from '@/hooks/useProductionOrders';
-import { useProductionSteps } from '@/hooks/useProductionSteps';
+import { useTimeEntries } from '@/hooks/system/useTimeEntries';
+import { useProductionOrders } from '@/hooks/production/useProductionOrders';
+import { useProductionSteps } from '@/hooks/production/useProductionSteps';
 import { supabase } from '@/integrations/supabase/client';
-import { useProductionMachines } from '@/hooks/useProductionMachines';
+import { useProductionMachines } from '@/hooks/production/useProductionMachines';
 import { Play, Pause, CheckCircle, Timer, Package, AlertTriangle, User, Layers, Clock, Plus, Minus, AlertOctagon, Cpu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { differenceInMinutes, differenceInSeconds, format } from 'date-fns';

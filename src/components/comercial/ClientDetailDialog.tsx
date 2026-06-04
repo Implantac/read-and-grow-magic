@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
-import { useClientTimeline, useCreateTimelineEvent, TIMELINE_EVENT_TYPES } from '@/hooks/useClientTimeline';
+import { useClientTimeline, useCreateTimelineEvent, TIMELINE_EVENT_TYPES } from '@/hooks/commercial/useClientTimeline';
 import { useOrders } from '@/hooks/commercial/useOrders';
 import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
 import { useSalesFunnel } from '@/hooks/commercial/useSalesFunnel';

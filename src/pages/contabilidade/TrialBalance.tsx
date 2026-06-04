@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { getAccountTypeLabel } from '@/config/accounting';
-import { useChartOfAccounts } from '@/hooks/useChartOfAccounts';
+import { useChartOfAccounts } from '@/hooks/accounting/useChartOfAccounts';
 import { cn } from '@/lib/utils';
 import { Scale } from 'lucide-react';
 import { TrialBalanceChart } from '@/components/contabilidade/TrialBalanceChart';

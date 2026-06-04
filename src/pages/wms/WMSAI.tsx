@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Brain, AlertTriangle, TrendingUp, RefreshCw } from 'lucide-react';
-import { useWMSAIInsights } from '@/hooks/useWMSAIInsights';
+import { useWMSAIInsights } from '@/hooks/wms/useWMSAIInsights';
 
 const severityConfig: Record<string, { icon: React.ReactNode; variant: 'default' | 'secondary' | 'destructive' | 'outline'; border: string }> = {
   info: { icon: <TrendingUp className="h-4 w-4" />, variant: 'outline', border: '' },

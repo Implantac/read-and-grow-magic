@@ -4,7 +4,7 @@ import { Brain, TrendingUp, XCircle, CheckCircle2, Zap, Target, ArrowLeft } from
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { useBrainLearning } from '@/hooks/useAIBrain';
+import { useBrainLearning } from '@/hooks/ai/useAIBrain';
 import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';

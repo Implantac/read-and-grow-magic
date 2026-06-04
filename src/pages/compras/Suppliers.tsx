@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { Star, Plus, Search, Eye, Edit, Trash2, Mail, Phone, MapPin, MoreHorizontal, Loader2 } from 'lucide-react';
-import { useSuppliers } from '@/hooks/useSuppliers';
+import { useSuppliers } from '@/hooks/purchasing/useSuppliers';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,7 +40,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { supplierCategories } from '@/config/purchasing';
-import { useCnpjLookup } from '@/hooks/useCnpjLookup';
+import { useCnpjLookup } from '@/hooks/system/useCnpjLookup';
 import { Supplier } from '@/types/purchasing';
 
 const statusConfig = {

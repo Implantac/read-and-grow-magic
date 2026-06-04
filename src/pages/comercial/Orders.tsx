@@ -32,7 +32,7 @@ import { useOrders, useCreateOrder, useUpdateOrderStatus, useUpdateOrderFields, 
 import { useClients } from '@/hooks/commercial/useClients';
 import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
-import { validateOrder, type CommercialValidation } from '@/hooks/useCommercialRules';
+import { validateOrder, type CommercialValidation } from '@/hooks/commercial/useCommercialRules';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 

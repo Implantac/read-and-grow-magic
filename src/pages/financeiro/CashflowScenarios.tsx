@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useCashflowScenarios } from '@/hooks/useCashflowScenarios';
+import { useCashflowScenarios } from '@/hooks/financial/useCashflowScenarios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';

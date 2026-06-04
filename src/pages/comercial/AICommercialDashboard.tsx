@@ -19,7 +19,7 @@ import {
   useAIPredictions, useAIForecasts,
   useRunAIEngine, useCompleteAIAction, useActOnRecommendation, useDismissInsight,
   type AIScore, type AIRecommendation, type AIInsight, type AIDailyAction, type AIPrediction, type AIForecast,
-} from '@/hooks/useAICommercial';
+} from '@/hooks/commercial/useAICommercial';
 
 
 const SEVERITY_MAP: Record<string, { color: string; icon: typeof AlertTriangle }> = {

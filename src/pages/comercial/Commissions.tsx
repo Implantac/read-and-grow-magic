@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { useCommissionPolicies, useCommissions, useCommissionMutations } from '@/hooks/useCommissions';
+import { useCommissionPolicies, useCommissions, useCommissionMutations } from '@/hooks/financial/useCommissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';

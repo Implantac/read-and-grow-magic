@@ -12,7 +12,7 @@ import {
   useLeaderboard, useBadges, useBadgeAwards, useMissions,
   useMissionProgress, useChallenges, useChallengeParticipants,
   useGamificationPoints,
-} from '@/hooks/useGamification';
+} from '@/hooks/system/useGamification';
 import { useSalesReps } from '@/hooks/commercial/useSalesReps';
 import { Trophy, Medal, Target, Flame, Star, Swords, Crown, Award, TrendingUp, Zap } from 'lucide-react';
 

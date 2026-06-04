@@ -10,9 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useQualityInspections } from '@/hooks/useQualityInspections';
-import { useProductionOrders } from '@/hooks/useProductionOrders';
-import { useProductionSteps } from '@/hooks/useProductionSteps';
+import { useQualityInspections } from '@/hooks/production/useQualityInspections';
+import { useProductionOrders } from '@/hooks/production/useProductionOrders';
+import { useProductionSteps } from '@/hooks/production/useProductionSteps';
 import { KPICard } from '@/components/shared/KPICard';
 import { Plus, ShieldCheck, AlertTriangle, CheckCircle, XCircle, Search } from 'lucide-react';
 import { format } from 'date-fns';

@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ExportButton } from '@/components/shared/ExportButton';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { getAccountTypeLabel } from '@/config/accounting';
-import { useChartOfAccounts } from '@/hooks/useChartOfAccounts';
+import { useChartOfAccounts } from '@/hooks/accounting/useChartOfAccounts';
 import { cn } from '@/lib/utils';
 import { Search, ChevronRight, ChevronDown, BookOpen, Plus, FolderTree, DollarSign } from 'lucide-react';
 import type { ExportColumn } from '@/lib/exportUtils';

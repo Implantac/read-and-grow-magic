@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { useSpedFiles } from '@/hooks/useSpedFiles';
+import { useSpedFiles } from '@/hooks/fiscal/useSpedFiles';
 import { Download, Trash2, FileText, Loader2, Calendar, Sparkles, CheckCircle2, AlertCircle, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';

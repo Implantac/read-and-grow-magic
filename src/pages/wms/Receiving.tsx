@@ -24,7 +24,7 @@ import {
   Package, Search, Truck, CheckCircle, Clock, PlayCircle, MoreHorizontal, ShoppingCart, PackagePlus,
   FileText, ShieldCheck, AlertCircle, Info, Box, LayoutGrid, ScanBarcode, Zap, CheckCircle2
 } from 'lucide-react';
-import { useWMSReceiving } from '@/hooks/useWMSOperations';
+import { useWMSReceiving } from '@/hooks/wms/useWMSOperations';
 import { BarcodeScanner, ScanFeedback } from '@/components/wms/BarcodeScanner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';

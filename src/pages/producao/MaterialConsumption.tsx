@@ -12,8 +12,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { useMaterialConsumptions, MaterialConsumptionRow } from '@/hooks/useMaterialConsumptions';
-import { useProductionOrders } from '@/hooks/useProductionOrders';
+import { useMaterialConsumptions, MaterialConsumptionRow } from '@/hooks/production/useMaterialConsumptions';
+import { useProductionOrders } from '@/hooks/production/useProductionOrders';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';

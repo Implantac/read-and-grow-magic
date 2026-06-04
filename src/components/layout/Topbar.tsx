@@ -3,11 +3,11 @@ import { Bell, Brain, ChevronDown, LogOut, Menu, Moon, Sun, User, Search, Comman
 import { useNavigate } from 'react-router-dom';
 import type { Company } from '@/types';
 
-import { useCompanies } from '@/hooks/useCompanies';
+import { useCompanies } from '@/hooks/system/useCompanies';
 import { useAppStore } from '@/stores/useAppStore';
 import { useAuth } from '@/hooks/system/useAuth';
-import { useNotifications } from '@/hooks/useNotifications';
-import { useBrainDecisions } from '@/hooks/useAIBrain';
+import { useNotifications } from '@/hooks/system/useNotifications';
+import { useBrainDecisions } from '@/hooks/ai/useAIBrain';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,

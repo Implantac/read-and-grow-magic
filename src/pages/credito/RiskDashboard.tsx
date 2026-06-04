@@ -1,7 +1,7 @@
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { KPICard } from '@/components/shared/KPICard';
-import { useCreditProfiles, useOrderBlocks, useCollectionActions } from '@/hooks/useCreditAnalysis';
+import { useCreditProfiles, useOrderBlocks, useCollectionActions } from '@/hooks/financial/useCreditAnalysis';
 import { useClients } from '@/hooks/commercial/useClients';
 import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

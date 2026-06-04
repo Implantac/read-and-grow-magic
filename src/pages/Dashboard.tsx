@@ -4,7 +4,7 @@ import { ConsolidatedCharts } from '@/components/dashboard/ConsolidatedCharts';
 import { GlobalAlerts } from '@/components/dashboard/GlobalAlerts';
 import { RevenueChart } from '@/components/dashboard/RevenueChart';
 import { RecentActivities } from '@/components/dashboard/RecentActivities';
-import { useDashboardData } from '@/hooks/useDashboardData';
+import { useDashboardData } from '@/hooks/system/useDashboardData';
 import {
   ShoppingCart, Wallet, Package, Factory, Truck, Warehouse,
   DollarSign, TrendingUp, ArrowDownCircle, ArrowUpCircle,

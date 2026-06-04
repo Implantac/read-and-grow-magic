@@ -18,7 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { financialCategories } from '@/config/financial';
 import { PaymentMethod } from '@/types/financial';
 import { useAccountsReceivable, useCreateAccountReceivable, useUpdateAccountReceivable, useDeleteAccountReceivable } from '@/hooks/financial/useAccountsReceivable';
-import { useCreatePaymentRecord } from '@/hooks/usePaymentRecords';
+import { useCreatePaymentRecord } from '@/hooks/financial/usePaymentRecords';
 import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 import { useClients } from '@/hooks/commercial/useClients';
 import { SettlementDialog, type SettlementTarget } from '@/components/financeiro/SettlementDialog';
