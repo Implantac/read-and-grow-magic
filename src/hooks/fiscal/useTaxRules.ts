@@ -28,6 +28,10 @@ export interface TaxRule {
   valid_from: string | null;
   valid_until: string | null;
   notes: string | null;
+  tax_framework: 'current' | 'reform_ibs_cbs' | 'hybrid';
+  ibs_rate: number;
+  cbs_rate: number;
+  is_is_rate: number;
   created_at: string;
   updated_at: string;
 }

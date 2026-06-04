@@ -26,6 +26,11 @@ export const navigationSections: NavSection[] = [
         icon: 'Factory',
       },
       {
+        title: 'Indústria Alimentos',
+        href: '/vertical/food',
+        icon: 'Database',
+      },
+      {
         title: 'Frigoríficos',
         href: '/vertical/meat',
         icon: 'Building2',

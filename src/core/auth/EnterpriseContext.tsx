@@ -7,6 +7,8 @@ interface EnterpriseContextType {
   currentCompany: any;
   currentBranch: any;
   segment: Segment;
+  taxRegime: string;
+  operationTypes: any[];
   isLoading: boolean;
   setCompany: (id: string) => Promise<void>;
 }
@@ -17,6 +19,8 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   const [currentCompany, setCurrentCompany] = useState<any>(null);
   const [currentBranch, setCurrentBranch] = useState<any>(null);
   const [segment, setSegment] = useState<Segment>('general');
+  const [taxRegime, setTaxRegime] = useState<string>('Simples Nacional');
+  const [operationTypes, setOperationTypes] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -28,7 +32,6 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // @ts-ignore - 'segment' added via migration
         const { data: company } = await supabase
           .from('companies')
           .select('*')
@@ -37,8 +40,9 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
         
         if (company) {
           setCurrentCompany(company);
-          // @ts-ignore
-          setSegment((company.segment as Segment) || 'general');
+          setSegment((company.segment as any) || 'general');
+          setTaxRegime((company.tax_regime as string) || 'Simples Nacional');
+          setOperationTypes((company.operation_types as any[]) || []);
         }
       }
     } catch (error) {
@@ -52,13 +56,22 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     const { data } = await supabase.from('companies').select('*').eq('id', id).single();
     if (data) {
       setCurrentCompany(data);
-      // @ts-ignore
-      setSegment((data.segment as Segment) || 'general');
+      setSegment((data.segment as any) || 'general');
+      setTaxRegime((data.tax_regime as string) || 'Simples Nacional');
+      setOperationTypes((data.operation_types as any[]) || []);
     }
   };
 
   return (
-    <EnterpriseContext.Provider value={{ currentCompany, currentBranch, segment, isLoading, setCompany }}>
+    <EnterpriseContext.Provider value={{ 
+      currentCompany, 
+      currentBranch, 
+      segment, 
+      taxRegime,
+      operationTypes,
+      isLoading, 
+      setCompany 
+    }}>
       {children}
     </EnterpriseContext.Provider>
   );
