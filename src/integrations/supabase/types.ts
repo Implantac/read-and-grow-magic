@@ -5389,6 +5389,27 @@ export type Database = {
           },
         ]
       }
+      fiscal_cfop_reference: {
+        Row: {
+          code: string
+          description: string
+          is_interstate: boolean
+          operation_type: string
+        }
+        Insert: {
+          code: string
+          description: string
+          is_interstate?: boolean
+          operation_type: string
+        }
+        Update: {
+          code?: string
+          description?: string
+          is_interstate?: boolean
+          operation_type?: string
+        }
+        Relationships: []
+      }
       fiscal_documents: {
         Row: {
           access_key: string | null
