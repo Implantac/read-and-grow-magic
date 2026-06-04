@@ -311,38 +311,59 @@ export default function FiscalDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y">
-                      {xmlData.products.map((p, idx) => (
-                        <tr key={idx} className="hover:bg-muted/20">
-                          <td className="px-3 py-3">
-                            <div className="font-medium">{p.description}</div>
-                            <div className="text-[10px] text-muted-foreground font-mono">Ref Fornecedor: {p.code}</div>
-                          </td>
-                          <td className="px-3 py-3">
-                            {p.linkedProductId ? (
-                              <div className="flex flex-col">
-                                <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 w-fit gap-1 mb-1">
-                                  <CheckCircle className="h-2 w-2" /> Vínculo OK
-                                </Badge>
-                                <span className="text-xs font-bold text-primary">{p.linkedProductName}</span>
-                                <span className="text-[10px] text-muted-foreground">{p.linkedProductId}</span>
-                              </div>
-                            ) : (
+                      {xmlData.products.map((p, idx) => {
+                        const isDuplicate = xmlData.products.filter(item => item.code === p.code).length > 1;
+                        const hasIssue = !p.linkedProductId || isDuplicate;
+
+                        return (
+                          <tr key={idx} className={cn(
+                            "hover:bg-muted/20 transition-colors",
+                            hasIssue && "bg-destructive/5"
+                          )}>
+                            <td className="px-3 py-3">
                               <div className="flex flex-col gap-1">
-                                <Badge variant="outline" className="text-amber-600 border-amber-200 w-fit gap-1">
-                                  <AlertTriangle className="h-2 w-2" /> Produto Novo
-                                </Badge>
-                                <Button 
-                                  variant="link" 
-                                  size="sm" 
-                                  className="h-auto p-0 text-[10px] justify-start gap-1"
-                                  onClick={() => handleManualLink(idx)}
-                                >
-                                  <LinkIcon className="h-2 w-2" />
-                                  Vincular manualmente
-                                </Button>
+                                <span className="font-medium">{p.description}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className={cn(
+                                    "text-[10px] font-mono px-1.5 py-0.5 rounded",
+                                    isDuplicate ? "bg-destructive text-destructive-foreground font-bold" : "text-muted-foreground bg-muted"
+                                  )}>
+                                    Ref: {p.code}
+                                  </span>
+                                  {isDuplicate && (
+                                    <Badge variant="destructive" className="h-4 text-[9px] px-1 animate-pulse">
+                                      Duplicado
+                                    </Badge>
+                                  )}
+                                </div>
                               </div>
-                            )}
-                          </td>
+                            </td>
+                            <td className="px-3 py-3">
+                              {p.linkedProductId ? (
+                                <div className="flex flex-col">
+                                  <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 w-fit gap-1 mb-1">
+                                    <CheckCircle className="h-2 w-2" /> Vínculo OK
+                                  </Badge>
+                                  <span className="text-xs font-bold text-primary">{p.linkedProductName}</span>
+                                  <span className="text-[10px] text-muted-foreground">{p.linkedProductId}</span>
+                                </div>
+                              ) : (
+                                <div className="flex flex-col gap-1">
+                                  <Badge variant="outline" className="text-destructive border-destructive/30 bg-destructive/5 w-fit gap-1 font-bold">
+                                    <AlertTriangle className="h-2 w-2" /> Vínculo Obrigatório
+                                  </Badge>
+                                  <Button 
+                                    variant="link" 
+                                    size="sm" 
+                                    className="h-auto p-0 text-[10px] justify-start gap-1 font-bold text-primary underline decoration-primary/30"
+                                    onClick={() => handleManualLink(idx)}
+                                  >
+                                    <LinkIcon className="h-2 w-2" />
+                                    Vincular agora
+                                  </Button>
+                                </div>
+                              )}
+                            </td>
                           <td className="px-3 py-3 text-center">
                             <div className="text-[10px] font-mono">{p.ncm}</div>
                             <Badge variant="outline" className="text-[9px] h-4 px-1">{p.cfop}</Badge>
@@ -350,7 +371,8 @@ export default function FiscalDashboard() {
                           <td className="px-3 py-3 text-right">{p.qCom} {p.uCom}</td>
                           <td className="px-3 py-3 text-right font-bold">R$ {p.vProd.toFixed(2)}</td>
                         </tr>
-                      ))}
+                      );
+                    })}
                     </tbody>
                   </table>
                 </div>
@@ -359,12 +381,14 @@ export default function FiscalDashboard() {
               <div className="flex justify-between items-center p-4 bg-primary/5 rounded-xl border border-primary/20">
                 <div className="flex gap-4">
                   <div className="flex flex-col">
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground">Itens Novos</span>
-                    <Badge className="bg-green-100 text-green-700 w-fit">2 Detectados</Badge>
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground">Itens com Pendência</span>
+                    <Badge variant="destructive" className="animate-bounce w-fit">
+                      {xmlData.products.filter(p => !p.linkedProductId || xmlData.products.filter(item => item.code === p.code).length > 1).length} Pendentes
+                    </Badge>
                   </div>
                   <div className="flex flex-col">
                     <span className="text-[10px] uppercase font-bold text-muted-foreground">Fornecedor</span>
-                    <Badge className="bg-blue-100 text-blue-700 w-fit">Novo Cadastro</Badge>
+                    <Badge className="bg-blue-100 text-blue-700 w-fit">Reconhecido</Badge>
                   </div>
                 </div>
                 <div className="text-right">
