@@ -222,9 +222,13 @@ export function Sidebar() {
         <nav className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin px-3 py-4 space-y-6">
           {navigationSections.filter(section => {
             if (!segment) return true;
-            // Lógica de filtragem adaptativa por segmento
-            if (segment !== 'textile' && section.label === 'Produção') return false;
-            if (segment === 'services' && (section.label === 'Operacional' || section.label === 'Logística')) return false;
+            // Adaptive logic based on business vertical
+            if (segment === 'services') {
+              if (section.label === 'Logística' || section.label === 'Operacional') return false;
+            }
+            if (segment === 'distribution' || segment === 'general') {
+              if (section.label === 'Produção') return false;
+            }
             return true;
           }).map((section, sectionIndex) => (
             <div key={section.label || sectionIndex} className="space-y-2">
