@@ -6,6 +6,10 @@ const PharmaDashboard = lazy(() => import("@/modules/production/PharmaDashboard"
 const RetailDashboard = lazy(() => import("@/modules/production/RetailDashboard"));
 const DistributionDashboard = lazy(() => import("@/modules/production/DistributionDashboard"));
 const FoodFeedDashboard = lazy(() => import("@/modules/production/FoodFeedDashboard"));
+const ApparelDashboard = lazy(() => import("@/modules/production/ApparelDashboard"));
+const WholesalerDashboard = lazy(() => import("@/modules/production/WholesalerDashboard"));
+const FranchiseDashboard = lazy(() => import("@/modules/production/FranchiseDashboard"));
+const HoldingDashboard = lazy(() => import("@/modules/production/HoldingDashboard"));
 
 export const VerticalPackRoutes = [
   <Route key="textile-dashboard" path="/vertical/textile" element={<TextileDashboard />} />,
@@ -13,4 +17,8 @@ export const VerticalPackRoutes = [
   <Route key="retail-dashboard" path="/vertical/retail" element={<RetailDashboard />} />,
   <Route key="distribution-dashboard" path="/vertical/distribution" element={<DistributionDashboard />} />,
   <Route key="food-feed-dashboard" path="/vertical/food-feed" element={<FoodFeedDashboard />} />,
+  <Route key="apparel-dashboard" path="/vertical/apparel" element={<ApparelDashboard />} />,
+  <Route key="wholesaler-dashboard" path="/vertical/wholesaler" element={<WholesalerDashboard />} />,
+  <Route key="franchise-dashboard" path="/vertical/franchise" element={<FranchiseDashboard />} />,
+  <Route key="holding-dashboard" path="/vertical/holding" element={<HoldingDashboard />} />,
 ];

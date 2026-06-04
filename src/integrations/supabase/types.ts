@@ -3903,6 +3903,47 @@ export type Database = {
         }
         Relationships: []
       }
+      feed_formulas: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          ingredients: Json | null
+          is_active: boolean | null
+          name: string
+          nutritional_values: Json | null
+          target_species: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          ingredients?: Json | null
+          is_active?: boolean | null
+          name: string
+          nutritional_values?: Json | null
+          target_species?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          ingredients?: Json | null
+          is_active?: boolean | null
+          name?: string
+          nutritional_values?: Json | null
+          target_species?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_formulas_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       financial_advance_transactions: {
         Row: {
           advance_id: string
@@ -6102,6 +6143,48 @@ export type Database = {
         }
         Relationships: []
       }
+      holding_entities: {
+        Row: {
+          created_at: string | null
+          equity_percentage: number | null
+          holding_company_id: string
+          id: string
+          relation_type: string | null
+          subsidiary_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          equity_percentage?: number | null
+          holding_company_id: string
+          id?: string
+          relation_type?: string | null
+          subsidiary_id: string
+        }
+        Update: {
+          created_at?: string | null
+          equity_percentage?: number | null
+          holding_company_id?: string
+          id?: string
+          relation_type?: string | null
+          subsidiary_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "holding_entities_holding_company_id_fkey"
+            columns: ["holding_company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "holding_entities_subsidiary_id_fkey"
+            columns: ["subsidiary_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       industrial_alerts: {
         Row: {
           alert_type: string
@@ -7990,6 +8073,50 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "client_current_account"
             referencedColumns: ["document_id"]
+          },
+        ]
+      }
+      pharma_lab_tests: {
+        Row: {
+          analyst_name: string | null
+          batch_id: string
+          company_id: string
+          created_at: string | null
+          id: string
+          raw_data: Json | null
+          result_status: string | null
+          test_date: string | null
+          test_type: string
+        }
+        Insert: {
+          analyst_name?: string | null
+          batch_id: string
+          company_id: string
+          created_at?: string | null
+          id?: string
+          raw_data?: Json | null
+          result_status?: string | null
+          test_date?: string | null
+          test_type: string
+        }
+        Update: {
+          analyst_name?: string | null
+          batch_id?: string
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          raw_data?: Json | null
+          result_status?: string | null
+          test_date?: string | null
+          test_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pharma_lab_tests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -10642,6 +10769,53 @@ export type Database = {
           },
         ]
       }
+      retail_chain_stores: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          is_franchise: boolean | null
+          location_lat: number | null
+          location_lng: number | null
+          manager_name: string | null
+          status: string | null
+          store_code: string | null
+          store_name: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          is_franchise?: boolean | null
+          location_lat?: number | null
+          location_lng?: number | null
+          manager_name?: string | null
+          status?: string | null
+          store_code?: string | null
+          store_name: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          is_franchise?: boolean | null
+          location_lat?: number | null
+          location_lng?: number | null
+          manager_name?: string | null
+          status?: string | null
+          store_code?: string | null
+          store_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retail_chain_stores_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rfid_events: {
         Row: {
           action_taken: string | null
@@ -13006,6 +13180,103 @@ export type Database = {
         }
         Relationships: []
       }
+      textile_weaving_orders: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          end_date: string | null
+          fabric_type: string
+          id: string
+          loom_id: string
+          meters_planned: number
+          meters_produced: number | null
+          start_date: string | null
+          status: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          end_date?: string | null
+          fabric_type: string
+          id?: string
+          loom_id: string
+          meters_planned: number
+          meters_produced?: number | null
+          start_date?: string | null
+          status?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          end_date?: string | null
+          fabric_type?: string
+          id?: string
+          loom_id?: string
+          meters_planned?: number
+          meters_produced?: number | null
+          start_date?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "textile_weaving_orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      textile_yarn_inventory: {
+        Row: {
+          batch_number: string | null
+          color_code: string | null
+          company_id: string
+          composition: string | null
+          created_at: string | null
+          current_stock: number | null
+          id: string
+          name: string
+          unit: string | null
+          updated_at: string | null
+          yarn_count: string | null
+        }
+        Insert: {
+          batch_number?: string | null
+          color_code?: string | null
+          company_id: string
+          composition?: string | null
+          created_at?: string | null
+          current_stock?: number | null
+          id?: string
+          name: string
+          unit?: string | null
+          updated_at?: string | null
+          yarn_count?: string | null
+        }
+        Update: {
+          batch_number?: string | null
+          color_code?: string | null
+          company_id?: string
+          composition?: string | null
+          created_at?: string | null
+          current_stock?: number | null
+          id?: string
+          name?: string
+          unit?: string | null
+          updated_at?: string | null
+          yarn_count?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "textile_yarn_inventory_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       time_entries: {
         Row: {
           company_id: string | null
@@ -13448,6 +13719,47 @@ export type Database = {
           variables?: string[] | null
         }
         Relationships: []
+      }
+      wholesaler_routes: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          delivery_points: Json | null
+          driver_id: string | null
+          frequency: string | null
+          id: string
+          route_name: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          delivery_points?: Json | null
+          driver_id?: string | null
+          frequency?: string | null
+          id?: string
+          route_name: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          delivery_points?: Json | null
+          driver_id?: string | null
+          frequency?: string | null
+          id?: string
+          route_name?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wholesaler_routes_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wms_ai_insights: {
         Row: {

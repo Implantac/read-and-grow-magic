@@ -9,7 +9,7 @@ import { useDashboardData } from '@/hooks/system/useDashboardData';
 import {
   ShoppingCart, Wallet, Package, Factory, Truck, Warehouse,
   DollarSign, TrendingUp, ArrowDownCircle, ArrowUpCircle,
-  RefreshCw, ShieldCheck
+  RefreshCw, ShieldCheck, Scissors, Building, Database
 } from 'lucide-react';
 import { Card, CardContent } from '@/ui/base/card';
 import { Skeleton } from '@/ui/base/skeleton';
@@ -159,6 +159,18 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         )}
+        {segment === 'apparel' && (
+          <Card className="border-l-4 border-l-orange-500 bg-orange-500/5 hover:bg-orange-500/10 transition-all cursor-pointer" onClick={() => window.location.href='/vertical/apparel'}>
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="p-3 bg-orange-500/10 rounded-xl"><Scissors className="text-orange-600 h-6 w-6" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Vertical</p>
+                <p className="font-bold">Confecção & Moda</p>
+                <p className="text-[10px] text-orange-600 font-medium">Acessar Dashboard Especializado →</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         {segment === 'pharma' && (
           <Card className="border-l-4 border-l-blue-500 bg-blue-500/5 hover:bg-blue-500/10 transition-all cursor-pointer" onClick={() => window.location.href='/vertical/pharma'}>
             <CardContent className="p-4 flex items-center gap-4">
@@ -191,6 +203,30 @@ export default function Dashboard() {
                 <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Vertical</p>
                 <p className="font-bold">Distribuição & Atacado</p>
                 <p className="text-[10px] text-green-600 font-medium">Acessar Dashboard Especializado →</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        {segment === 'wholesaler' && (
+          <Card className="border-l-4 border-l-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all cursor-pointer" onClick={() => window.location.href='/vertical/wholesaler'}>
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="p-3 bg-emerald-500/10 rounded-xl"><Database className="text-emerald-600 h-6 w-6" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Vertical</p>
+                <p className="font-bold">Atacadista</p>
+                <p className="text-[10px] text-emerald-600 font-medium">Acessar Dashboard Especializado →</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        {segment === 'holding' && (
+          <Card className="border-l-4 border-l-slate-500 bg-slate-500/5 hover:bg-slate-500/10 transition-all cursor-pointer" onClick={() => window.location.href='/vertical/holding'}>
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="p-3 bg-slate-500/10 rounded-xl"><Building className="text-slate-600 h-6 w-6" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Vertical</p>
+                <p className="font-bold">Holding & Grupos</p>
+                <p className="text-[10px] text-slate-600 font-medium">Acessar Consolidação →</p>
               </div>
             </CardContent>
           </Card>

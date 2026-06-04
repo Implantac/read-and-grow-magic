@@ -26,6 +26,21 @@ export const navigationSections: NavSection[] = [
         icon: 'Factory',
       },
       {
+        title: 'Confecção & Moda',
+        href: '/vertical/apparel',
+        icon: 'Scissors',
+      },
+      {
+        title: 'Fiação & Fios',
+        href: '/vertical/spinning',
+        icon: 'Repeat',
+      },
+      {
+        title: 'Tecelagem',
+        href: '/vertical/weaving',
+        icon: 'Columns',
+      },
+      {
         title: 'Alimentos & Rações',
         href: '/vertical/food-feed',
         icon: 'Database',
@@ -44,6 +59,16 @@ export const navigationSections: NavSection[] = [
         title: 'Varejo & Redes',
         href: '/vertical/retail',
         icon: 'ShoppingBag',
+      },
+      {
+        title: 'Franquias',
+        href: '/vertical/franchise',
+        icon: 'Building2',
+      },
+      {
+        title: 'Holdings & Grupos',
+        href: '/vertical/holding',
+        icon: 'FolderTree',
       },
     ],
   },

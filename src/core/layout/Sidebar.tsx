@@ -23,7 +23,7 @@ import {
   Bell, Repeat, TrendingDown, LineChart, AlertTriangle,
   ShieldAlert, Upload, QrCode, FileCheck2, FileDown,
   Percent, Globe, ScrollText, ArrowRightLeft,
-  BellRing, RotateCw, AlertOctagon, GitBranch, Siren,
+  BellRing, RotateCw, AlertOctagon, GitBranch, Siren, Scissors,
   LogOut, User as UserIcon, HelpCircle, ChevronRight
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/base/tooltip';
@@ -44,7 +44,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Shield, Lock, Phone, ArrowDown, Database, ScanBarcode, DoorOpen, RotateCcw,
   Bell, Repeat, TrendingDown, LineChart, AlertTriangle, ShieldAlert, Upload, QrCode,
   FileCheck2, FileDown, Percent, Globe, ScrollText, ArrowRightLeft,
-  BellRing, RotateCw, AlertOctagon, GitBranch, Siren,
+  BellRing, RotateCw, AlertOctagon, GitBranch, Siren, Scissors,
 };
 
 function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, expandedItems, toggleExpanded }: {
@@ -226,12 +226,18 @@ export function Sidebar() {
             // Adaptive logic based on business vertical (Pillar 3 — ERP ADAPTATIVO)
             const adaptiveRules: Record<Segment, string[]> = {
               textile: ['Produção', 'Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+              apparel: ['Produção', 'Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
               fio: ['Produção', 'Logística', 'Financeiro', 'Gestão'],
               tecelagem: ['Produção', 'Logística', 'Financeiro', 'Gestão'],
               animal_feed: ['Produção', 'Logística', 'Financeiro', 'Gestão'],
               pharma: ['Produção', 'Logística', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+              industry: ['Produção', 'Logística', 'Financeiro', 'Gestão', 'Operacional'],
               distribution: ['Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+              wholesaler: ['Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
               retail: ['Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+              retail_chain: ['Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+              franchise: ['Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+              holding: ['Gestão', 'Financeiro', 'Comercial'],
               services: ['Comercial', 'Financeiro', 'Gestão'],
               food_factory: ['Produção', 'Logística', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
               general: ['Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Logística', 'Produção']
