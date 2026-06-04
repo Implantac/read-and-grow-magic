@@ -12,11 +12,7 @@ export function useSupabaseQuery<T>(
   return useQuery({
     queryKey,
     queryFn: async () => {
-      try {
-        return await queryFn();
-      } catch (error: any) {
-        throw error;
-      }
+      return await queryFn();
     },
     ...options,
   });
@@ -31,11 +27,7 @@ export function useSupabaseMutation<TVariables, TData>(
 ) {
   return useMutation({
     mutationFn: async (variables: TVariables) => {
-      try {
-        return await mutationFn(variables);
-      } catch (error: any) {
-        throw error;
-      }
+      return await mutationFn(variables);
     },
     ...options,
   });
