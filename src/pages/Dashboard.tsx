@@ -7,7 +7,9 @@ import { RevenueChart } from '@/components/dashboard/RevenueChart';
 import { RecentActivities } from '@/components/dashboard/RecentActivities';
 import { ExecutiveConsensus } from '@/components/executive/ExecutiveConsensus';
 import { ExecutiveCouncilPanel } from '@/components/executive/ExecutiveCouncilPanel';
+import { ExecutiveActionsPanel } from '@/components/executive/ExecutiveActionsPanel';
 import { useDashboardData } from '@/hooks/system/useDashboardData';
+import { useExecutiveDashboard, useUnifiedChat } from '@/hooks/ai/useExecutiveAI';
 import {
   ShoppingCart, Wallet, Package, Factory, Truck, Warehouse,
   DollarSign, TrendingUp, ArrowDownCircle, ArrowUpCircle,
@@ -44,6 +46,10 @@ export default function Dashboard() {
   const { data, isLoading } = useDashboardData();
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { data: executiveData } = useExecutiveDashboard(1, segment);
+  const { sendMessage } = useUnifiedChat();
+
+  const insights = executiveData?.insights || [];
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -107,6 +113,20 @@ export default function Dashboard() {
 
       {/* Conselho Executivo */}
       <ExecutiveCouncilPanel />
+
+      {/* Ações Recomendadas */}
+      {insights.length > 0 && (
+        <ExecutiveActionsPanel 
+          actions={insights.slice(0, 3).map((ins: any) => ({
+            title: ins.title,
+            description: ins.description,
+            impact: ins.impact_estimate,
+            priority: ins.severity,
+            module: ins.module
+          }))}
+          onExecute={sendMessage}
+        />
+      )}
 
       {/* KPIs Principais */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
