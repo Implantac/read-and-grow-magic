@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
 import { useCompanies } from '@/hooks/system/useCompanies';
 import { Card, CardContent } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
@@ -184,16 +186,15 @@ const Companies = () => {
   const { companies: dbCompanies, loading } = useCompanies();
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">Gestão de Empresas</h1>
-          <p className="text-muted-foreground">Configuração adaptativa e automação fiscal</p>
-        </div>
+    <PageContainer>
+      <PageHeader 
+        title="Gestão de Empresas" 
+        description="Configuração adaptativa e automação fiscal"
+      >
         <Button onClick={() => { setEditingCompany(null); setCnpjValue(''); setIsValidated(false); setIsDialogOpen(true); }}>
           <Plus className="h-4 w-4 mr-2" /> Nova Filial
         </Button>
-      </div>
+      </PageHeader>
 
       {loading ? (
         <div className="flex justify-center py-12"><Loader2 className="animate-spin" /></div>
@@ -275,6 +276,8 @@ const Companies = () => {
       </Card>
       </>
       )}
+
+    </PageContainer>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">

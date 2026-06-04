@@ -1,4 +1,6 @@
 import { useState, useMemo } from 'react';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { Card, CardContent } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
