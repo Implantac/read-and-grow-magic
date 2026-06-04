@@ -2484,9 +2484,14 @@ export type Database = {
           name: string
           parent_company_id: string | null
           phone: string | null
+          segment_id: string | null
+          settings: Json | null
           state_registration: string | null
           status: string
+          tax_regime: Database["public"]["Enums"]["tax_regime"] | null
+          tier: Database["public"]["Enums"]["enterprise_tier"] | null
           trade_name: string | null
+          type: Database["public"]["Enums"]["org_type"] | null
           updated_at: string
         }
         Insert: {
@@ -2506,9 +2511,14 @@ export type Database = {
           name: string
           parent_company_id?: string | null
           phone?: string | null
+          segment_id?: string | null
+          settings?: Json | null
           state_registration?: string | null
           status?: string
+          tax_regime?: Database["public"]["Enums"]["tax_regime"] | null
+          tier?: Database["public"]["Enums"]["enterprise_tier"] | null
           trade_name?: string | null
+          type?: Database["public"]["Enums"]["org_type"] | null
           updated_at?: string
         }
         Update: {
@@ -2528,9 +2538,14 @@ export type Database = {
           name?: string
           parent_company_id?: string | null
           phone?: string | null
+          segment_id?: string | null
+          settings?: Json | null
           state_registration?: string | null
           status?: string
+          tax_regime?: Database["public"]["Enums"]["tax_regime"] | null
+          tier?: Database["public"]["Enums"]["enterprise_tier"] | null
           trade_name?: string | null
+          type?: Database["public"]["Enums"]["org_type"] | null
           updated_at?: string
         }
         Relationships: [
@@ -2539,6 +2554,13 @@ export type Database = {
             columns: ["parent_company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "companies_segment_id_fkey"
+            columns: ["segment_id"]
+            isOneToOne: false
+            referencedRelation: "enterprise_segments"
             referencedColumns: ["id"]
           },
         ]
@@ -3412,6 +3434,36 @@ export type Database = {
           updated_at?: string
           used_capacity_m3?: number | null
           zip_code?: string | null
+        }
+        Relationships: []
+      }
+      enterprise_segments: {
+        Row: {
+          active_modules: string[] | null
+          created_at: string | null
+          description: string | null
+          id: string
+          kpi_templates: Json | null
+          name: string
+          ui_theme_overrides: Json | null
+        }
+        Insert: {
+          active_modules?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          kpi_templates?: Json | null
+          name: string
+          ui_theme_overrides?: Json | null
+        }
+        Update: {
+          active_modules?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          kpi_templates?: Json | null
+          name?: string
+          ui_theme_overrides?: Json | null
         }
         Relationships: []
       }
@@ -11840,6 +11892,51 @@ export type Database = {
         }
         Relationships: []
       }
+      system_audit_logs: {
+        Row: {
+          action: string
+          company_id: string | null
+          created_at: string | null
+          entity_id: string | null
+          entity_name: string | null
+          id: string
+          ip_address: string | null
+          module: string
+          new_data: Json | null
+          old_data: Json | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          company_id?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_name?: string | null
+          id?: string
+          ip_address?: string | null
+          module: string
+          new_data?: Json | null
+          old_data?: Json | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          company_id?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_name?: string | null
+          id?: string
+          ip_address?: string | null
+          module?: string
+          new_data?: Json | null
+          old_data?: Json | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       system_parameters: {
         Row: {
           category: string
@@ -14220,6 +14317,9 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "manager" | "operator" | "viewer"
+      enterprise_tier: "small" | "medium" | "enterprise"
+      org_type: "holding" | "company" | "branch" | "unit"
+      tax_regime: "simples" | "presumed" | "real"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -14348,6 +14448,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "manager", "operator", "viewer"],
+      enterprise_tier: ["small", "medium", "enterprise"],
+      org_type: ["holding", "company", "branch", "unit"],
+      tax_regime: ["simples", "presumed", "real"],
     },
   },
 } as const
