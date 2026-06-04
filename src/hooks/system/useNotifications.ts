@@ -78,7 +78,7 @@ export function useNotifications() {
   );
 
   const markAllAsRead = useSupabaseMutation(
-    () => notificationsService.markAllAsRead(),
+    (_variables?: void) => notificationsService.markAllAsRead(),
     { onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }) }
   );
 
@@ -88,7 +88,7 @@ export function useNotifications() {
   );
 
   const clearAll = useSupabaseMutation(
-    () => notificationsService.clearAll(),
+    (_variables?: void) => notificationsService.clearAll(),
     { onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }) }
   );
 
