@@ -52,6 +52,16 @@ const moduleStatusMap: Record<string, { label: string; color: string; explanatio
     label: 'Compliance',
     color: 'text-info',
     explanation: 'Nenhuma pendência detectada. SPED e obrigações acessórias geradas com 100% de precisão.'
+  },
+  logistica: {
+    label: 'Fluidez',
+    color: 'text-success',
+    explanation: 'Entregas 12% mais rápidas com roteirização dinâmica. Custo por km reduzido.'
+  },
+  qualidade: {
+    label: 'Certificado',
+    color: 'text-success',
+    explanation: 'Zero não-conformidades críticas nos últimos 30 dias. Auditoria contínua ativa.'
   }
 };
 
