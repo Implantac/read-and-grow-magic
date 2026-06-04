@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
 import { Badge } from '@/ui/base/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/ui/base/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/ui/base/dialog';
 import { Label } from '@/ui/base/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
@@ -16,7 +16,7 @@ import {
 import { 
   Search, Edit2, Trash2, UserCheck, UserX, Shield, 
   Users as UsersIcon, UserPlus, Clock, MoreVertical, Key, Loader2,
-  Mail, User
+  Mail
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -51,9 +51,7 @@ const UsersPage = () => {
   
   const [filter, setFilter] = useState<UserFilter>({ role: 'all', status: 'all' });
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isPermissionsDialogOpen, setIsPermissionsDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<SystemUser | null>(null);
-  const [selectedUser, setSelectedUser] = useState<SystemUser | null>(null);
 
   const stats = {
     total: users?.length || 0,
@@ -83,11 +81,6 @@ const UsersPage = () => {
   const handleEditUser = (user: SystemUser) => {
     setEditingUser(user);
     setIsDialogOpen(true);
-  };
-
-  const handleManagePermissions = (user: SystemUser) => {
-    setSelectedUser(user);
-    setIsPermissionsDialogOpen(true);
   };
 
   const handleToggleStatus = async (user: SystemUser) => {
@@ -157,12 +150,6 @@ const UsersPage = () => {
     } catch (error: any) {
       toast.error(error.message || 'Erro ao salvar usuário');
     }
-  };
-
-  const handleSavePermissions = (permissions: string[]) => {
-    if (!selectedUser) return;
-    toast.info('Gestão de permissões será implementada em breve');
-    setIsPermissionsDialogOpen(false);
   };
 
   if (isLoading) {
@@ -239,7 +226,7 @@ const UsersPage = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Usuário</TableHead>
-                <TableHead>Organização</TableHead>
+                <TableHead>Perfil</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Último Acesso</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
@@ -268,7 +255,6 @@ const UsersPage = () => {
                       <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button></DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => handleEditUser(user)}><Edit2 className="h-4 w-4 mr-2" />Editar</DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleManagePermissions(user)}><Shield className="h-4 w-4 mr-2" />Permissões</DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleResetPassword(user)}><Key className="h-4 w-4 mr-2" />Redefinir Senha</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => handleToggleStatus(user)}>{user.status === 'blocked' ? (<><UserCheck className="h-4 w-4 mr-2" />Desbloquear</>) : (<><UserX className="h-4 w-4 mr-2 text-red-600" /><span className="text-red-600">Bloquear</span></>)}</DropdownMenuItem>
