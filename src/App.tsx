@@ -5,8 +5,8 @@ import { TooltipProvider } from "@/ui/base/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MainLayout } from "@/core/layout/MainLayout";
-import { EnterpriseProvider } from "@/core/auth/EnterpriseContext";
 import { Loader2 } from 'lucide-react';
+import { EnterpriseProvider } from "@/core/auth/EnterpriseContext";
 
 // Routes
 import { CommercialRoutes } from './routes/CommercialRoutes';
@@ -52,34 +52,34 @@ const App = () => (
     <TooltipProvider>
       <EnterpriseProvider>
         <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            
-            <Route element={<MainLayout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              {CommercialRoutes}
-              {FinancialRoutes}
-              {AccountingRoutes}
-              {ProductionRoutes}
-              {WMSRoutes}
-              {AdminRoutes}
-              {OperationalRoutes}
-              {MiscellaneousRoutes}
-              {FiscalRoutes}
-              {VerticalPackRoutes}
-            </Route>
+        <Sonner />
+        <BrowserRouter>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              
+              <Route element={<MainLayout />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                {CommercialRoutes}
+                {FinancialRoutes}
+                {AccountingRoutes}
+                {ProductionRoutes}
+                {WMSRoutes}
+                {AdminRoutes}
+                {OperationalRoutes}
+                {MiscellaneousRoutes}
+                {FiscalRoutes}
+                {VerticalPackRoutes}
+              </Route>
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
       </EnterpriseProvider>
-    </BrowserRouter>
-  </TooltipProvider>
+    </TooltipProvider>
   </QueryClientProvider>
 );
 

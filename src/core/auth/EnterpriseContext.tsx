@@ -25,26 +25,34 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
 
   const loadActiveTenant = async () => {
     setIsLoading(true);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: company } = await supabase
-        .from('companies')
-        .select('*')
-        .limit(1)
-        .single();
-      
-      if (company) {
-        setCurrentCompany(company);
-        setSegment((company.segment as Segment) || 'general');
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // @ts-ignore - 'segment' added via migration
+        const { data: company } = await supabase
+          .from('companies')
+          .select('*')
+          .limit(1)
+          .single();
+        
+        if (company) {
+          setCurrentCompany(company);
+          // @ts-ignore
+          setSegment((company.segment as Segment) || 'general');
+        }
       }
+    } catch (error) {
+      console.error('Error loading enterprise context:', error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const setCompany = async (id: string) => {
     const { data } = await supabase.from('companies').select('*').eq('id', id).single();
     if (data) {
       setCurrentCompany(data);
+      // @ts-ignore
       setSegment((data.segment as Segment) || 'general');
     }
   };
