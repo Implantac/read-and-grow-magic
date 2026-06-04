@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, Brain, ChevronDown, LogOut, Menu, Moon, Sun, User, Search, Command } from 'lucide-react';
+import { Bell, Brain, ChevronDown, LogOut, Menu, Moon, Sun, User, Search, Command, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Company } from '@/types';
 
