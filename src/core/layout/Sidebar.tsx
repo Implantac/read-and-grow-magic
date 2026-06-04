@@ -3,7 +3,7 @@ import logoUseSistemas from '@/assets/logo.png';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
-import { useEnterpriseStore } from '../stores/useEnterpriseStore';
+import { useEnterprise } from '../auth/EnterpriseContext';
 import { navigationSections } from '@/config/navigation';
 import type { NavItem } from '@/config/navigation';
 import {
@@ -167,8 +167,8 @@ function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, ex
 export function Sidebar() {
   const location = useLocation();
   const { sidebarCollapsed, user } = useAppStore();
-  const { config } = useEnterpriseStore();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Dashboard', 'Operacional', 'Financeiro']);
+  const { segment } = useEnterprise();
+  const [expandedItems, setExpandedItems] = useState<string[]>(['Dashboard', 'Operacional', 'Financeiro', 'Gestão']);
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) =>
@@ -221,9 +221,10 @@ export function Sidebar() {
         {/* Navigation Content */}
         <nav className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin px-3 py-4 space-y-6">
           {navigationSections.filter(section => {
-            if (!config) return true;
+            if (!segment) return true;
             // Lógica de filtragem adaptativa por segmento
-            if (config.segment !== 'textile' && section.label === 'Produção') return false;
+            if (segment !== 'textile' && section.label === 'Produção') return false;
+            if (segment === 'services' && (section.label === 'Operacional' || section.label === 'Logística')) return false;
             return true;
           }).map((section, sectionIndex) => (
             <div key={section.label || sectionIndex} className="space-y-2">
@@ -242,7 +243,11 @@ export function Sidebar() {
               )}
 
               <ul className="space-y-1">
-                {section.items.map((item) => (
+                {section.items.filter(item => {
+                  if (segment === 'services' && item.title === 'Comercial') return true;
+                  if (segment === 'services' && (item.title === 'Estoque' || item.title === 'Produção')) return false;
+                  return true;
+                }).map((item) => (
                   <NavItemComponent
                     key={item.title}
                     item={item}
