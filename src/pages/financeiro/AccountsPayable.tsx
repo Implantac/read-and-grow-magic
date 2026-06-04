@@ -1,23 +1,17 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
-import { Plus, Search, Eye, Trash2, DollarSign, AlertTriangle, Clock, CheckCircle, Zap } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Plus, Zap } from 'lucide-react';
 import { useBatchPayPayables } from '@/hooks/financial/useBatchPay';
 import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageLoading } from '@/components/shared/PageLoading';
-import { KPICard } from '@/components/shared/KPICard';
-import { ExportButton } from '@/components/shared/ExportButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { StatusBadge } from '@/components/shared/StatusBadge';
-import { Badge } from '@/components/ui/badge';
 import { financialCategories } from '@/config/financial';
 import { PaymentMethod } from '@/types/financial';
 import { useAccountsPayable, useCreateAccountPayable, useUpdateAccountPayable, useDeleteAccountPayable } from '@/hooks/financial/useAccountsPayable';
@@ -25,14 +19,10 @@ import { useCreatePaymentRecord } from '@/hooks/financial/usePaymentRecords';
 import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 import { useCostCenters } from '@/hooks/system/useCostCenters';
 import { SettlementDialog, type SettlementTarget } from '@/components/financeiro/SettlementDialog';
-import { format, differenceInDays } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
-
-import { formatBRL, formatDate } from '@/lib/formatters';
-const paymentMethods: Record<PaymentMethod, string> = {
-  pix: 'PIX', boleto: 'Boleto', credit_card: 'Cartão de Crédito',
-  debit_card: 'Cartão de Débito', transfer: 'Transferência', cash: 'Dinheiro', check: 'Cheque',
-};
+import { formatBRL } from '@/lib/formatters';
+import { AccountsPayableSummary } from '@/components/financeiro/AccountsPayableSummary';
+import { AccountsPayableTable } from '@/components/financeiro/AccountsPayableTable';
+import { AccountsPayableFilters } from '@/components/financeiro/AccountsPayableFilters';
 
 export default function AccountsPayable() {
   const { data: accounts = [], isLoading } = useAccountsPayable();
@@ -48,9 +38,8 @@ export default function AccountsPayable() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isPayDialogOpen, setIsPayDialogOpen] = useState(false);
   const [isBatchPayOpen, setIsBatchPayOpen] = useState(false);
-  const [selectedAccount, setSelectedAccount] = useState<typeof accounts[0] | null>(null);
+  const [selectedAccount, setSelectedAccount] = useState<any | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [settlementTarget, setSettlementTarget] = useState<SettlementTarget | null>(null);
 
@@ -58,19 +47,14 @@ export default function AccountsPayable() {
     description: '', supplier: '', category: '', amount: '', dueDate: '',
     invoiceNumber: '', notes: '', installments: '1', costCenterId: '', expenseType: 'variable',
   });
-  const [payForm, setPayForm] = useState({
-    amount: '', interest: '0', penalty: '0', discount: '0',
-    paymentMethod: 'pix' as PaymentMethod, bankAccountId: '', notes: '',
-    paymentDate: new Date().toISOString().split('T')[0],
-  });
+  
   const [batchForm, setBatchForm] = useState({
     paymentMethod: 'pix' as PaymentMethod, bankAccountId: '', notes: '',
   });
 
-  const now = new Date();
-  const categories = [...new Set(accounts.map(a => a.category))];
+  const categories = useMemo(() => [...new Set(accounts.map(a => a.category))], [accounts]);
 
-  const filteredAccounts = accounts.filter(account => {
+  const filteredAccounts = useMemo(() => accounts.filter(account => {
     const matchesSearch =
       account.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       account.supplier.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -78,15 +62,19 @@ export default function AccountsPayable() {
     const matchesStatus = statusFilter === 'all' || account.status === statusFilter;
     const matchesCategory = categoryFilter === 'all' || account.category === categoryFilter;
     return matchesSearch && matchesStatus && matchesCategory;
-  });
+  }), [accounts, searchTerm, statusFilter, categoryFilter]);
 
-  const pendingAccounts = accounts.filter(a => a.status !== 'paid' && a.status !== 'cancelled');
-  const summaryData = {
-    total: pendingAccounts.reduce((s, a) => s + Number(a.open_amount ?? a.amount), 0),
-    pending: accounts.filter(a => a.status === 'pending').reduce((s, a) => s + Number(a.open_amount ?? a.amount), 0),
-    overdue: accounts.filter(a => a.status === 'overdue' || (a.status === 'pending' && new Date(a.due_date) < now)).reduce((s, a) => s + Number(a.open_amount ?? a.amount), 0),
-    paid: accounts.filter(a => a.status === 'paid').reduce((s, a) => s + Number(a.paid_amount ?? a.amount), 0),
-  };
+  const summaryData = useMemo(() => {
+    const now = new Date();
+    const pending = accounts.filter(a => a.status === 'pending');
+    return {
+      total: accounts.filter(a => a.status !== 'paid' && a.status !== 'cancelled').reduce((s, a) => s + Number(a.open_amount ?? a.amount), 0),
+      pending: pending.reduce((s, a) => s + Number(a.open_amount ?? a.amount), 0),
+      pendingCount: pending.length,
+      overdue: accounts.filter(a => a.status === 'overdue' || (a.status === 'pending' && new Date(a.due_date) < now)).reduce((s, a) => s + Number(a.open_amount ?? a.amount), 0),
+      paid: accounts.filter(a => a.status === 'paid').reduce((s, a) => s + Number(a.paid_amount ?? a.amount), 0),
+    };
+  }, [accounts]);
 
   const handleSubmit = () => {
     if (!formData.description || !formData.supplier || !formData.amount || !formData.dueDate) {
@@ -124,7 +112,7 @@ export default function AccountsPayable() {
     setFormData({ description: '', supplier: '', category: '', amount: '', dueDate: '', invoiceNumber: '', notes: '', installments: '1', costCenterId: '', expenseType: 'variable' });
   };
 
-  const openPayDialog = (account: typeof accounts[0]) => {
+  const openPayDialog = (account: any) => {
     setSettlementTarget({
       source_type: 'payable',
       source_id: account.id,
@@ -136,78 +124,20 @@ export default function AccountsPayable() {
     });
   };
 
-  const handlePay = () => {
-    if (!selectedAccount) return;
-    const amount = parseFloat(payForm.amount) || 0;
-    const interest = parseFloat(payForm.interest) || 0;
-    const penalty = parseFloat(payForm.penalty) || 0;
-    const discount = parseFloat(payForm.discount) || 0;
-    const totalPaid = amount + interest + penalty - discount;
-    const openAmount = Number(selectedAccount.open_amount ?? selectedAccount.amount);
-
-    if (amount <= 0) {
-      toastError('Informe o valor do pagamento');
-      return;
-    }
-    if (amount > openAmount + 0.01) {
-      toastError(`Valor maior que o saldo em aberto (${formatBRL(openAmount)})`, undefined, 'Atenção');
-      return;
-    }
-    if (!payForm.bankAccountId) {
-      toastError('Selecione a conta bancária');
-      return;
-    }
-
-    // O trigger process_payment_record já atualiza accounts_payable + financial_ledger automaticamente.
-    // Não duplicar UPDATE no cliente.
-    createPayment.mutate({
-      payable_id: selectedAccount.id,
-      receivable_id: null,
-      amount, interest, penalty, discount, total_paid: totalPaid,
-      payment_method: payForm.paymentMethod,
-      payment_date: payForm.paymentDate,
-      bank_account_id: payForm.bankAccountId,
-      notes: payForm.notes || null,
-      created_by: null,
-    }, {
-      onSuccess: () => {
-        const isFull = openAmount - amount <= 0.01;
-        setIsPayDialogOpen(false);
-        setSelectedAccount(null);
-        toastSuccess('Sucesso', isFull ? 'Título quitado' : 'Baixa parcial registrada');
-      }
-    });
-  };
-
-  const getDaysOverdue = (dueDate: string) => {
-    const days = differenceInDays(now, new Date(dueDate));
-    return days > 0 ? days : 0;
-  };
-
-  const getAgingBadge = (dueDate: string, status: string) => {
-    if (status === 'paid' || status === 'cancelled') return null;
-    const days = getDaysOverdue(dueDate);
-    if (days === 0) return null;
-    if (days <= 7) return <Badge variant="outline" className="text-warning border-warning/30 bg-warning/10 text-xs">{days}d</Badge>;
-    if (days <= 30) return <Badge variant="outline" className="text-warning border-warning/50 bg-warning/20 text-xs">{days}d</Badge>;
-    return <Badge variant="outline" className="text-destructive border-destructive/30 bg-destructive/5 text-xs">{days}d</Badge>;
-  };
-
   const selectableAccounts = filteredAccounts.filter(a => a.status !== 'paid' && a.status !== 'cancelled');
   const selectableIds = selectableAccounts.map(a => a.id);
   const allSelected = selectableIds.length > 0 && selectableIds.every(id => selectedIds.has(id));
+  
   const toggleAll = () => {
     if (allSelected) setSelectedIds(new Set());
     else setSelectedIds(new Set(selectableIds));
   };
+  
   const toggleOne = (id: string) => {
     const next = new Set(selectedIds);
     if (next.has(id)) next.delete(id); else next.add(id);
     setSelectedIds(next);
   };
-  const selectedTotal = selectableAccounts
-    .filter(a => selectedIds.has(a.id))
-    .reduce((s, a) => s + Number(a.open_amount ?? a.amount), 0);
 
   const handleBatchPay = () => {
     if (!batchForm.bankAccountId) {
@@ -302,260 +232,80 @@ export default function AccountsPayable() {
         </Dialog>
       </PageHeader>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <KPICard title="Total em Aberto" value={formatBRL(summaryData.total)} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="A Vencer" value={formatBRL(summaryData.pending)} subtitle={`${accounts.filter(a => a.status === 'pending').length} títulos`} icon={<Clock className="h-5 w-5" />} accentColor="warning" index={1} />
-        <KPICard title="Vencido" value={formatBRL(summaryData.overdue)} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={2} />
-        <KPICard title="Pago" value={formatBRL(summaryData.paid)} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={3} />
-      </div>
+      <AccountsPayableSummary summary={summaryData} />
 
       <Card>
         <CardContent className="pt-6">
-          <div className="flex flex-col gap-4 sm:flex-row">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Buscar por descrição, fornecedor ou documento..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-9" />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-40"><SelectValue placeholder="Status" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="pending">Pendente</SelectItem>
-                <SelectItem value="partial">Parcial</SelectItem>
-                <SelectItem value="overdue">Vencido</SelectItem>
-                <SelectItem value="paid">Pago</SelectItem>
-                <SelectItem value="cancelled">Cancelado</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-full sm:w-40"><SelectValue placeholder="Categoria" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                {categories.map(cat => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <ExportButton
-              data={filteredAccounts as unknown as Record<string, unknown>[]}
-              columns={[
-                { key: 'description', label: 'Descrição' },
-                { key: 'supplier', label: 'Fornecedor' },
-                { key: 'category', label: 'Categoria' },
-                { key: 'due_date', label: 'Vencimento', format: (v) => formatDate(v as string) },
-                { key: 'amount', label: 'Valor Original', format: (v) => formatBRL(Number(v)) },
-                { key: 'open_amount', label: 'Em Aberto', format: (v) => formatBRL(Number(v ?? 0)) },
-                { key: 'status', label: 'Status' },
-              ]}
-              filename="contas_pagar"
+          <AccountsPayableFilters 
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            categoryFilter={categoryFilter}
+            onCategoryChange={setCategoryFilter}
+            categories={categories}
+            filteredData={filteredAccounts}
+          />
+
+          <div className="mt-6">
+            <AccountsPayableTable 
+              accounts={filteredAccounts}
+              selectedIds={selectedIds}
+              onToggleOne={toggleOne}
+              onToggleAll={toggleAll}
+              allSelected={allSelected}
+              onPay={openPayDialog}
+              onDelete={(id) => deleteMutation.mutate(id)}
+              onView={(account) => setSelectedAccount(account)}
             />
           </div>
         </CardContent>
       </Card>
 
       {selectedIds.size > 0 && (
-        <Card className="border-primary/40 bg-primary/5">
-          <CardContent className="flex items-center justify-between gap-3 py-3">
-            <div className="text-sm">
-              <span className="font-semibold">{selectedIds.size}</span> selecionado(s) · Total{' '}
-              <span className="font-semibold text-primary">{formatBRL(selectedTotal)}</span>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>Limpar</Button>
-              <Button size="sm" className="gap-2" onClick={() => setIsBatchPayOpen(true)}>
-                <Zap className="h-4 w-4" />Pagar em Lote
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="fixed bottom-6 left-1/2 flex -translate-x-1/2 items-center gap-4 rounded-full border bg-background px-6 py-3 shadow-xl">
+          <span className="text-sm font-medium">{selectedIds.size} selecionados ({formatBRL(selectableAccounts.filter(a => selectedIds.has(a.id)).reduce((s, a) => s + Number(a.open_amount ?? a.amount), 0))})</span>
+          <Dialog open={isBatchPayOpen} onOpenChange={setIsBatchPayOpen}>
+            <DialogTrigger asChild><Button size="sm" className="gap-2"><Zap className="h-4 w-4" />Pagar Lote</Button></DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle>Pagamento em Lote ({selectedIds.size} títulos)</DialogTitle></DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label>Conta Bancária</Label>
+                  <Select value={batchForm.bankAccountId} onValueChange={(v) => setBatchForm({ ...batchForm, bankAccountId: v })}>
+                    <SelectTrigger><SelectValue placeholder="Selecione a conta" /></SelectTrigger>
+                    <SelectContent>{bankAccounts.map(ba => <SelectItem key={ba.id} value={ba.id}>{ba.name} ({formatBRL(ba.balance)})</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Forma de Pagamento</Label>
+                  <Select value={batchForm.paymentMethod} onValueChange={(v) => setBatchForm({ ...batchForm, paymentMethod: v as PaymentMethod })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pix">PIX</SelectItem>
+                      <SelectItem value="transfer">Transferência</SelectItem>
+                      <SelectItem value="boleto">Boleto</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsBatchPayOpen(false)}>Cancelar</Button>
+                <Button onClick={handleBatchPay} disabled={batchPay.isPending}>Confirmar Pagamento</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       )}
 
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-10">
-                  <Checkbox checked={allSelected} onCheckedChange={toggleAll} aria-label="Selecionar tudo" />
-                </TableHead>
-                <TableHead>Descrição</TableHead>
-                <TableHead>Fornecedor</TableHead>
-                <TableHead>Vencimento</TableHead>
-                <TableHead className="text-right">Original</TableHead>
-                <TableHead className="text-right">Em Aberto</TableHead>
-                <TableHead>Parcela</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredAccounts.map((account) => {
-                const selectable = account.status !== 'paid' && account.status !== 'cancelled';
-                return (
-                <TableRow key={account.id} data-state={selectedIds.has(account.id) ? 'selected' : undefined}>
-                  <TableCell>
-                    {selectable && (
-                      <Checkbox
-                        checked={selectedIds.has(account.id)}
-                        onCheckedChange={() => toggleOne(account.id)}
-                        aria-label="Selecionar conta"
-                      />
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{account.description}</div>
-                      {account.invoice_number && <div className="text-xs text-muted-foreground">{account.invoice_number}</div>}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm">{account.supplier}</TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm">{format(new Date(account.due_date), 'dd/MM/yyyy', { locale: ptBR })}</span>
-                      {getAgingBadge(account.due_date, account.status)}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right text-sm">{formatBRL(Number(account.original_amount ?? account.amount))}</TableCell>
-                  <TableCell className="text-right text-sm font-medium">{formatBRL(Number(account.open_amount ?? account.amount))}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {account.total_installments && account.total_installments > 1 ? `${account.installment_number}/${account.total_installments}` : '-'}
-                  </TableCell>
-                  <TableCell><StatusBadge type="payment" status={account.status} /></TableCell>
-                  <TableCell>
-                    <div className="flex justify-end gap-1">
-                      {selectable && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-success hover:text-success" onClick={() => openPayDialog(account)}>
-                          <DollarSign className="h-4 w-4" />
-                        </Button>
-                      )}
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => deleteMutation.mutate(account.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )})}
-              {filteredAccounts.length === 0 && (
-                <TableRow><TableCell colSpan={9} className="h-24 text-center text-muted-foreground">Nenhuma conta encontrada</TableCell></TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      {/* Pay Dialog */}
-      <Dialog open={isPayDialogOpen} onOpenChange={setIsPayDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Registrar Pagamento</DialogTitle></DialogHeader>
-          {selectedAccount && (
-            <div className="space-y-4 py-2">
-              <div className="rounded-lg bg-muted p-4">
-                <p className="font-medium">{selectedAccount.description}</p>
-                <p className="text-sm text-muted-foreground">{selectedAccount.supplier}</p>
-                <div className="mt-2 flex justify-between">
-                  <div><p className="text-xs text-muted-foreground">Original</p><p className="font-medium">{formatBRL(Number(selectedAccount.original_amount ?? selectedAccount.amount))}</p></div>
-                  <div className="text-right"><p className="text-xs text-muted-foreground">Em Aberto</p><p className="text-xl font-bold text-primary">{formatBRL(Number(selectedAccount.open_amount ?? selectedAccount.amount))}</p></div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="grid gap-1.5"><Label className="text-xs">Valor Pago *</Label><Input type="number" step="0.01" value={payForm.amount} onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })} /></div>
-                <div className="grid gap-1.5"><Label className="text-xs">Juros</Label><Input type="number" step="0.01" value={payForm.interest} onChange={(e) => setPayForm({ ...payForm, interest: e.target.value })} /></div>
-                <div className="grid gap-1.5"><Label className="text-xs">Multa</Label><Input type="number" step="0.01" value={payForm.penalty} onChange={(e) => setPayForm({ ...payForm, penalty: e.target.value })} /></div>
-                <div className="grid gap-1.5"><Label className="text-xs">Desconto</Label><Input type="number" step="0.01" value={payForm.discount} onChange={(e) => setPayForm({ ...payForm, discount: e.target.value })} /></div>
-              </div>
-
-              <div className="rounded-md border p-3 bg-accent/50">
-                <p className="text-xs text-muted-foreground">Total Líquido</p>
-                <p className="text-lg font-bold">{formatBRL((parseFloat(payForm.amount) || 0) + (parseFloat(payForm.interest) || 0) + (parseFloat(payForm.penalty) || 0) - (parseFloat(payForm.discount) || 0))}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="grid gap-1.5">
-                  <Label className="text-xs">Forma de Pagamento *</Label>
-                  <Select value={payForm.paymentMethod} onValueChange={(v) => setPayForm({ ...payForm, paymentMethod: v as PaymentMethod })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>{Object.entries(paymentMethods).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-1.5">
-                  <Label className="text-xs">Conta Bancária *</Label>
-                  <Select value={payForm.bankAccountId} onValueChange={(v) => setPayForm({ ...payForm, bankAccountId: v })}>
-                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                    <SelectContent>{bankAccounts.map(b => <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>)}</SelectContent>
-                  </Select>
-                </div>
-                <div className="grid gap-1.5">
-                  <Label className="text-xs">Data do Pagamento *</Label>
-                  <Input type="date" value={payForm.paymentDate} onChange={(e) => setPayForm({ ...payForm, paymentDate: e.target.value })} />
-                </div>
-              </div>
-
-              <div className="grid gap-1.5"><Label className="text-xs">Observações</Label><Textarea value={payForm.notes} onChange={(e) => setPayForm({ ...payForm, notes: e.target.value })} className="h-16" /></div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsPayDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handlePay} disabled={createPayment.isPending} className="gap-2"><CheckCircle className="h-4 w-4" />Confirmar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Batch Pay Dialog */}
-      <Dialog open={isBatchPayOpen} onOpenChange={setIsBatchPayOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Pagar em Lote</DialogTitle></DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="rounded-lg bg-muted p-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-xs text-muted-foreground">Títulos selecionados</p>
-                  <p className="text-2xl font-bold">{selectedIds.size}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-muted-foreground">Total a pagar</p>
-                  <p className="text-2xl font-bold text-primary">{formatBRL(selectedTotal)}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid gap-1.5">
-              <Label className="text-xs">Forma de Pagamento *</Label>
-              <Select value={batchForm.paymentMethod} onValueChange={(v) => setBatchForm({ ...batchForm, paymentMethod: v as PaymentMethod })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{Object.entries(paymentMethods).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid gap-1.5">
-              <Label className="text-xs">Conta Bancária *</Label>
-              <Select value={batchForm.bankAccountId} onValueChange={(v) => setBatchForm({ ...batchForm, bankAccountId: v })}>
-                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent>{bankAccounts.map(b => <SelectItem key={b.id} value={b.id}>{b.name} — {formatBRL(Number(b.balance))}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid gap-1.5">
-              <Label className="text-xs">Observações</Label>
-              <Textarea value={batchForm.notes} onChange={(e) => setBatchForm({ ...batchForm, notes: e.target.value })} className="h-16" placeholder="Opcional" />
-            </div>
-
-            <div className="rounded-md border border-warning/30 bg-warning/5 p-3 text-xs text-muted-foreground">
-              Ao confirmar, todos os títulos selecionados serão quitados pelo valor em aberto na conta escolhida.
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsBatchPayOpen(false)}>Cancelar</Button>
-            <Button onClick={handleBatchPay} disabled={batchPay.isPending} className="gap-2">
-              <Zap className="h-4 w-4" />Confirmar Pagamento
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <SettlementDialog
-        open={!!settlementTarget}
-        onOpenChange={(v) => !v && setSettlementTarget(null)}
-        target={settlementTarget}
-      />
+      {settlementTarget && (
+        <SettlementDialog 
+          isOpen={!!settlementTarget} 
+          onClose={() => setSettlementTarget(null)} 
+          target={settlementTarget} 
+        />
+      )}
     </PageContainer>
   );
 }
+
