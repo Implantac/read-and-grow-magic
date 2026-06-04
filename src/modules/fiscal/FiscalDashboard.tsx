@@ -316,7 +316,15 @@ export default function FiscalDashboard() {
                                 <Badge variant="outline" className="text-amber-600 border-amber-200 w-fit gap-1">
                                   <AlertTriangle className="h-2 w-2" /> Produto Novo
                                 </Badge>
-                                <Button variant="link" size="sm" className="h-auto p-0 text-[10px] justify-start">Associar manual</Button>
+                                <Button 
+                                  variant="link" 
+                                  size="sm" 
+                                  className="h-auto p-0 text-[10px] justify-start gap-1"
+                                  onClick={() => handleManualLink(idx)}
+                                >
+                                  <LinkIcon className="h-2 w-2" />
+                                  Vincular manualmente
+                                </Button>
                               </div>
                             )}
                           </td>
