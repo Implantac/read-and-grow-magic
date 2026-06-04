@@ -1,18 +1,17 @@
 import { supabase } from '@/integrations/supabase/client';
-import { PostgrestError } from '@supabase/supabase-js';
 
 export interface BaseServiceOptions {
   orderBy?: string;
   ascending?: boolean;
 }
 
-export class BaseService<T extends { id: string }> {
+export class BaseService<T> {
   constructor(protected tableName: string) {}
 
   async getAll(options: BaseServiceOptions = {}) {
     const { orderBy = 'created_at', ascending = false } = options;
     const { data, error } = await supabase
-      .from(this.tableName)
+      .from(this.tableName as any)
       .select('*')
       .order(orderBy, { ascending });
 
@@ -22,7 +21,7 @@ export class BaseService<T extends { id: string }> {
 
   async getById(id: string) {
     const { data, error } = await supabase
-      .from(this.tableName)
+      .from(this.tableName as any)
       .select('*')
       .eq('id', id)
       .single();
@@ -31,10 +30,10 @@ export class BaseService<T extends { id: string }> {
     return data as T;
   }
 
-  async create(item: Omit<T, 'id' | 'created_at' | 'updated_at'>) {
+  async create(item: any) {
     const { data, error } = await supabase
-      .from(this.tableName)
-      .insert(item as any)
+      .from(this.tableName as any)
+      .insert(item)
       .select()
       .single();
 
@@ -42,10 +41,10 @@ export class BaseService<T extends { id: string }> {
     return data as T;
   }
 
-  async update(id: string, updates: Partial<T>) {
+  async update(id: string, updates: any) {
     const { data, error } = await supabase
-      .from(this.tableName)
-      .update({ ...updates, updated_at: new Date().toISOString() } as any)
+      .from(this.tableName as any)
+      .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id)
       .select()
       .single();
@@ -56,7 +55,7 @@ export class BaseService<T extends { id: string }> {
 
   async delete(id: string) {
     const { error } = await supabase
-      .from(this.tableName)
+      .from(this.tableName as any)
       .delete()
       .eq('id', id);
 
