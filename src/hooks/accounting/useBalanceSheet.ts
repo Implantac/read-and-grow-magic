@@ -2,44 +2,36 @@ import { useMemo } from 'react';
 import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/financial/useAccountsPayable';
 import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
-import { startOfMonth, endOfMonth, subMonths, isWithinInterval } from 'date-fns';
+import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import type { BalanceSheetItem } from '@/types/accounting';
 
 export function useBalanceSheet() {
-  const { data: receivables = [], isLoading: loadingR } = useAccountsReceivable();
-  const { data: payables = [], isLoading: loadingP } = useAccountsPayable();
-  const { data: bankAccounts = [], isLoading: loadingB } = useBankAccounts();
+  const { data: receivablesData = [], isLoading: loadingR } = useAccountsReceivable();
+  const { data: payablesData = [], isLoading: loadingP } = useAccountsPayable();
+  const { data: bankAccountsData = [], isLoading: loadingB } = useBankAccounts();
+
+  const receivables = (receivablesData || []) as any[];
+  const payables = (payablesData || []) as any[];
+  const bankAccounts = (bankAccountsData || []) as any[];
 
   const balanceSheetData = useMemo(() => {
     if (loadingR || loadingP || loadingB) return [];
 
-    const now = new Date();
-    const period = { start: startOfMonth(now), end: endOfMonth(now) };
-    const prevPeriod = { start: startOfMonth(subMonths(now, 1)), end: endOfMonth(subMonths(now, 1)) };
-
     // Assets (Ativo)
-    // 1.1 Circulante
-    // 1.1.1 Disponibilidades (Bank accounts)
     const currentCash = bankAccounts.reduce((s, a) => s + Number(a.balance), 0);
-    const prevCash = bankAccounts.reduce((s, a) => s + Number(a.balance), 0) * 0.98; // Mocking prev balance for now
+    const prevCash = currentCash * 0.98; // Mocking prev balance
 
-    // 1.1.2 Contas a Receber
+    // Contas a Receber
     const currentRec = receivables
       .filter(r => r.status === 'pending' || r.status === 'partial')
       .reduce((s, r) => s + Number(r.amount), 0);
-    const prevRec = receivables
-      .filter(r => r.status === 'pending' || r.status === 'partial')
-      .reduce((s, r) => s + Number(r.amount), 0) * 0.95; // Mocking prev state
+    const prevRec = currentRec * 0.95; // Mocking prev state
 
     // Liabilities (Passivo)
-    // 2.1 Circulante
-    // 2.1.1 Contas a Pagar
     const currentPay = payables
       .filter(p => p.status === 'pending' || p.status === 'partial')
       .reduce((s, p) => s + Number(p.amount), 0);
-    const prevPay = payables
-      .filter(p => p.status === 'pending' || p.status === 'partial')
-      .reduce((s, p) => s + Number(p.amount), 0) * 1.05; // Mocking prev state
+    const prevPay = currentPay * 1.05; // Mocking prev state
 
     const totalAssets = currentCash + currentRec;
     const totalLiabilities = currentPay;
