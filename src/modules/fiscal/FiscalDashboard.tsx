@@ -59,9 +59,12 @@ interface XMLData {
       ipi: number;
       pis: number;
       cofins: number;
-    }
+    };
+    linkedProductId?: string; // Linked local product ID
+    linkedProductName?: string;
   }[];
   total: number;
+  purchaseOrderId?: string;
 }
 
 export default function FiscalDashboard() {
@@ -70,6 +73,7 @@ export default function FiscalDashboard() {
   const [xmlData, setXmlData] = useState<XMLData | null>(null);
   const [showReview, setShowReview] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [linkedOrders, setLinkedOrders] = useState<any[]>([]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -86,8 +90,7 @@ export default function FiscalDashboard() {
     reader.onload = async (e) => {
       const content = e.target?.result as string;
       try {
-        // Mocking XML parsing for the demo, in a real scenario we'd use a library like fast-xml-parser
-        // This simulates extraction of NFe data
+        // Extraction simulation with product linking logic
         const mockParsedData: XMLData = {
           accessKey: "35230612345678000190550010000123451000123456",
           number: "12345",
@@ -100,7 +103,7 @@ export default function FiscalDashboard() {
           },
           products: [
             {
-              code: "TEC-001",
+              code: "TEC-001", // Code from supplier
               description: "TECIDO ALGODAO PREMIUM AZUL",
               ncm: "52081100",
               cfop: "1101",
@@ -108,7 +111,9 @@ export default function FiscalDashboard() {
               qCom: 100,
               vUnCom: 15.50,
               vProd: 1550.00,
-              taxes: { icms: 186.00, ipi: 0, pis: 25.50, cofins: 117.80 }
+              taxes: { icms: 186.00, ipi: 0, pis: 25.50, cofins: 117.80 },
+              linkedProductId: "PROD-123", // Simulated match in system
+              linkedProductName: "Tecido de Algodão Cru"
             },
             {
               code: "LIN-002",
@@ -120,14 +125,16 @@ export default function FiscalDashboard() {
               vUnCom: 8.90,
               vProd: 445.00,
               taxes: { icms: 53.40, ipi: 22.25, pis: 7.34, cofins: 33.82 }
+              // This one is not linked, will require manual link or new registration
             }
           ],
-          total: 1995.00
+          total: 1995.00,
+          purchaseOrderId: "PO-789" // Simulated detected PO link
         };
 
         setXmlData(mockParsedData);
         setShowReview(true);
-        toast.success('XML carregado e validado com sucesso!');
+        toast.success('XML carregado. Verifique os vínculos de produtos e pedidos.');
       } catch (err) {
         toast.error('Erro ao processar arquivo XML.');
       } finally {
@@ -146,15 +153,15 @@ export default function FiscalDashboard() {
 
     // Simulated multi-step import process
     const steps = [
-      { msg: 'Cadastrando Fornecedor...', weight: 20 },
-      { msg: 'Sincronizando Produtos...', weight: 40 },
-      { msg: 'Calculando Custos e Tributos...', weight: 70 },
-      { msg: 'Gerando Movimentação de Estoque...', weight: 90 },
-      { msg: 'Finalizando...', weight: 100 }
+      { msg: 'Vinculando Pedido de Compra...', weight: 15 },
+      { msg: 'Cadastrando Fornecedor e Referências...', weight: 30 },
+      { msg: 'Sincronizando Produtos e Vínculos...', weight: 50 },
+      { msg: 'Calculando Custos, Tributos e Margens...', weight: 75 },
+      { msg: 'Finalizando Pedido de Compra e Estoque...', weight: 100 }
     ];
 
     for (const step of steps) {
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(r, 800));
       setProgress(step.weight);
       toast.info(step.msg);
     }
@@ -162,7 +169,7 @@ export default function FiscalDashboard() {
     setIsProcessing(false);
     setShowReview(false);
     setXmlData(null);
-    toast.success('Importação finalizada! Todos os registros foram criados no ERP.');
+    toast.success('Entrada concluída! Pedido de compra finalizado e estoque atualizado via referência cruzada.');
   };
 
   return (
@@ -205,7 +212,7 @@ export default function FiscalDashboard() {
           
           {xmlData && (
             <div className="space-y-6 py-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-xl border">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 bg-muted/30 rounded-xl border">
                 <div>
                   <Label className="text-[10px] uppercase text-muted-foreground font-bold">Número/Série</Label>
                   <p className="font-bold">{xmlData.number} / {xmlData.series}</p>
@@ -219,22 +226,28 @@ export default function FiscalDashboard() {
                   <p className="font-bold truncate">{xmlData.supplier.name}</p>
                   <p className="text-xs text-muted-foreground font-mono">{xmlData.supplier.cnpj}</p>
                 </div>
+                <div className="bg-primary/10 p-2 rounded border border-primary/20">
+                  <Label className="text-[10px] uppercase text-primary font-black">Pedido Vinculado</Label>
+                  <p className="font-bold text-primary flex items-center gap-1">
+                    <CheckCircle className="h-3 w-3" />
+                    {xmlData.purchaseOrderId || 'Nenhum'}
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-3">
                 <h3 className="font-bold flex items-center gap-2">
                   <Package className="h-4 w-4 text-primary" />
-                  Produtos e Tributos Detectados
+                  Produtos e Inteligência de Vínculos
                 </h3>
                 <div className="border rounded-lg overflow-hidden">
                   <table className="w-full text-sm">
                     <thead className="bg-muted/50 border-b">
                       <tr>
-                        <th className="px-3 py-2 text-left">Produto</th>
+                        <th className="px-3 py-2 text-left">Item (XML)</th>
+                        <th className="px-3 py-2 text-left">Vínculo Sistema</th>
                         <th className="px-3 py-2 text-center">NCM/CFOP</th>
                         <th className="px-3 py-2 text-right">Qtd</th>
-                        <th className="px-3 py-2 text-right">V. Unit</th>
-                        <th className="px-3 py-2 text-right">Impostos</th>
                         <th className="px-3 py-2 text-right">Total</th>
                       </tr>
                     </thead>
@@ -243,18 +256,31 @@ export default function FiscalDashboard() {
                         <tr key={idx} className="hover:bg-muted/20">
                           <td className="px-3 py-3">
                             <div className="font-medium">{p.description}</div>
-                            <div className="text-[10px] text-muted-foreground font-mono">Cód: {p.code}</div>
+                            <div className="text-[10px] text-muted-foreground font-mono">Ref Fornecedor: {p.code}</div>
+                          </td>
+                          <td className="px-3 py-3">
+                            {p.linkedProductId ? (
+                              <div className="flex flex-col">
+                                <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 w-fit gap-1 mb-1">
+                                  <CheckCircle className="h-2 w-2" /> Vínculo OK
+                                </Badge>
+                                <span className="text-xs font-bold text-primary">{p.linkedProductName}</span>
+                                <span className="text-[10px] text-muted-foreground">{p.linkedProductId}</span>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col gap-1">
+                                <Badge variant="outline" className="text-amber-600 border-amber-200 w-fit gap-1">
+                                  <AlertTriangle className="h-2 w-2" /> Produto Novo
+                                </Badge>
+                                <Button variant="link" size="sm" className="h-auto p-0 text-[10px] justify-start">Associar manual</Button>
+                              </div>
+                            )}
                           </td>
                           <td className="px-3 py-3 text-center">
                             <div className="text-[10px] font-mono">{p.ncm}</div>
                             <Badge variant="outline" className="text-[9px] h-4 px-1">{p.cfop}</Badge>
                           </td>
                           <td className="px-3 py-3 text-right">{p.qCom} {p.uCom}</td>
-                          <td className="px-3 py-3 text-right">R$ {p.vUnCom.toFixed(2)}</td>
-                          <td className="px-3 py-3 text-right">
-                            <div className="text-[10px] text-primary font-bold">ICMS: R$ {p.taxes.icms.toFixed(2)}</div>
-                            <div className="text-[10px] text-muted-foreground">PIS/COF: R$ {(p.taxes.pis + p.taxes.cofins).toFixed(2)}</div>
-                          </td>
                           <td className="px-3 py-3 text-right font-bold">R$ {p.vProd.toFixed(2)}</td>
                         </tr>
                       ))}
