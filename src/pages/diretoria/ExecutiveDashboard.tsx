@@ -25,6 +25,7 @@ import { ExecutiveScenariosTab } from '@/components/executive/ExecutiveScenarios
 import { CEOBriefPanel } from '@/components/executive/CEOBriefPanel';
 import { ExecutiveActionsPanel } from '@/components/executive/ExecutiveActionsPanel';
 import { BrainSummaryWidget } from '@/components/executive/BrainSummaryWidget';
+import { ExecutiveCouncilPanel } from '@/components/executive/ExecutiveCouncilPanel';
 
 const severityColor: Record<string, string> = {
   critical: 'bg-destructive text-destructive-foreground',
@@ -156,7 +157,10 @@ export default function ExecutiveDashboard() {
         </Card>
       )}
 
-      <BrainSummaryWidget />
+      <ExecutiveCouncilPanel />
+      <div className="mt-4">
+        <BrainSummaryWidget />
+      </div>
 
 
 

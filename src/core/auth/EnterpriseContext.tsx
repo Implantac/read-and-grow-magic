@@ -1,16 +1,22 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export type Segment = 'textile' | 'food_factory' | 'pharma' | 'distribution' | 'services' | 'general';
+export type Segment = 'textile' | 'food_factory' | 'pharma' | 'distribution' | 'services' | 'retail' | 'general' | 'fio' | 'tecelagem' | 'animal_feed';
 
 interface EnterpriseContextType {
   currentCompany: any;
   currentBranch: any;
   segment: Segment;
+  subSegment: string;
+  companySize: string;
   taxRegime: string;
   operationTypes: any[];
   isLoading: boolean;
   setCompany: (id: string) => Promise<void>;
+  executiveCouncil: {
+    roles: string[];
+    mission: string;
+  };
 }
 
 const EnterpriseContext = createContext<EnterpriseContextType | undefined>(undefined);
@@ -19,9 +25,20 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   const [currentCompany, setCurrentCompany] = useState<any>(null);
   const [currentBranch, setCurrentBranch] = useState<any>(null);
   const [segment, setSegment] = useState<Segment>('general');
+  const [subSegment, setSubSegment] = useState<string>('');
+  const [companySize, setCompanySize] = useState<string>('Pequeno');
   const [taxRegime, setTaxRegime] = useState<string>('Simples Nacional');
   const [operationTypes, setOperationTypes] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const executiveCouncil = {
+    roles: [
+      'CTO Global', 'Arquiteto SAP S/4HANA', 'Arquiteto SAP Business One', 
+      'Arquiteto TOTVS Protheus', 'Arquiteto Oracle Netsuite', 'Especialista PCP/MRP/APS',
+      'Especialista Fiscal Brasileiro', 'Especialista IA Empresarial', 'Especialista UX Enterprise'
+    ],
+    mission: 'Transformar este projeto em uma plataforma ERP Enterprise de próxima geração.'
+  };
 
   useEffect(() => {
     loadActiveTenant();
@@ -41,6 +58,8 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
         if (company) {
           setCurrentCompany(company);
           setSegment((company.segment as any) || 'general');
+          setSubSegment(company.sub_segment || '');
+          setCompanySize(company.company_size || 'Pequeno');
           setTaxRegime((company.tax_regime as string) || 'Simples Nacional');
           setOperationTypes((company.operation_types as any[]) || []);
         }
@@ -57,6 +76,8 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     if (data) {
       setCurrentCompany(data);
       setSegment((data.segment as any) || 'general');
+      setSubSegment(data.sub_segment || '');
+      setCompanySize(data.company_size || 'Pequeno');
       setTaxRegime((data.tax_regime as string) || 'Simples Nacional');
       setOperationTypes((data.operation_types as any[]) || []);
     }
@@ -67,10 +88,13 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       currentCompany, 
       currentBranch, 
       segment, 
+      subSegment,
+      companySize,
       taxRegime,
       operationTypes,
       isLoading, 
-      setCompany 
+      setCompany,
+      executiveCouncil
     }}>
       {children}
     </EnterpriseContext.Provider>

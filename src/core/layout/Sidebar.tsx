@@ -3,7 +3,7 @@ import logoUseSistemas from '@/assets/logo.png';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
-import { useEnterprise } from '../auth/EnterpriseContext';
+import { useEnterprise, type Segment } from '../auth/EnterpriseContext';
 import { navigationSections } from '@/config/navigation';
 import type { NavItem } from '@/config/navigation';
 import {
@@ -222,13 +222,27 @@ export function Sidebar() {
         <nav className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin px-3 py-4 space-y-6">
           {navigationSections.filter(section => {
             if (!segment) return true;
-            // Adaptive logic based on business vertical
-            if (segment === 'services') {
-              if (section.label === 'Logística' || section.label === 'Operacional') return false;
+            
+            // Adaptive logic based on business vertical (Pillar 3 — ERP ADAPTATIVO)
+            const adaptiveRules: Record<Segment, string[]> = {
+              textile: ['Produção', 'Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+              fio: ['Produção', 'Logística', 'Financeiro', 'Gestão'],
+              tecelagem: ['Produção', 'Logística', 'Financeiro', 'Gestão'],
+              animal_feed: ['Produção', 'Logística', 'Financeiro', 'Gestão'],
+              pharma: ['Produção', 'Logística', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+              distribution: ['Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+              retail: ['Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+              services: ['Comercial', 'Financeiro', 'Gestão'],
+              food_factory: ['Produção', 'Logística', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+              general: ['Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Logística', 'Produção']
+            };
+
+            const allowedSections = adaptiveRules[segment] || adaptiveRules.general;
+            
+            if (section.label && !allowedSections.includes(section.label)) {
+              return false;
             }
-            if (segment === 'distribution' || segment === 'general') {
-              if (section.label === 'Produção') return false;
-            }
+
             return true;
           }).map((section, sectionIndex) => (
             <div key={section.label || sectionIndex} className="space-y-2">
@@ -248,8 +262,17 @@ export function Sidebar() {
 
               <ul className="space-y-1">
                 {section.items.filter(item => {
-                  if (segment === 'services' && item.title === 'Comercial') return true;
-                  if (segment === 'services' && (item.title === 'Estoque' || item.title === 'Produção')) return false;
+                  // Segment-specific item filtering
+                  if (segment === 'services' && (item.title === 'Estoque' || item.title === 'Produção' || item.title === 'WMS')) return false;
+                  if (segment === 'retail' && item.title === 'WMS') return true; // Retail might need WMS if it has a warehouse
+                  
+                  // Hide Vertical Packs that don't match the segment (except for Admin)
+                  if (section.label === 'Pacotes Verticais') {
+                    if (segment === 'textile' && item.title !== 'Indústria Têxtil') return false;
+                    if (segment === 'pharma' && item.title !== 'Farmacêutico') return false;
+                    if (segment === 'food_factory' && !item.title.includes('Alimentos')) return false;
+                  }
+
                   return true;
                 }).map((item) => (
                   <NavItemComponent
