@@ -52,7 +52,6 @@ const moduleStatusMap: Record<string, { label: string; color: string; explanatio
     label: 'Compliance',
     color: 'text-info',
     explanation: 'Nenhuma pendência detectada. SPED e obrigações acessórias geradas com 100% de precisão.'
-  }
   },
   logistica: {
     label: 'Fluidez',
@@ -64,6 +63,7 @@ const moduleStatusMap: Record<string, { label: string; color: string; explanatio
     color: 'text-success',
     explanation: 'Zero não-conformidades críticas nos últimos 30 dias. Auditoria contínua ativa.'
   }
+};
 
 const fallbackConsensus = [
   {
