@@ -19,6 +19,7 @@ import { OperationalRoutes } from './routes/OperationalRoutes';
 import { MiscellaneousRoutes } from './routes/MiscellaneousRoutes';
 import { FiscalRoutes } from './routes/FiscalRoutes';
 import { VerticalPackRoutes } from './core/routes/VerticalPackRoutes';
+import { ExecutiveRoutes } from './routes/ExecutiveRoutes';
 
 // Eager load critical pages
 import Login from "./pages/Login";
