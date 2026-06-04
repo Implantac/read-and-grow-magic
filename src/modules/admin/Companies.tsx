@@ -181,6 +181,8 @@ const Companies = () => {
     }
   };
 
+  const { companies: dbCompanies, loading } = useCompanies();
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -193,13 +195,17 @@ const Companies = () => {
         </Button>
       </div>
 
+      {loading ? (
+        <div className="flex justify-center py-12"><Loader2 className="animate-spin" /></div>
+      ) : (
+        <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-primary/5 border-primary/20">
           <CardContent className="p-4 flex items-center gap-4">
             <div className="p-3 bg-primary/10 rounded-xl"><Building2 className="text-primary h-6 w-6" /></div>
             <div>
               <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Matriz</p>
-              <p className="font-bold">{headquarters?.tradeName || 'Configure a Matriz'}</p>
+              <p className="font-bold">{dbCompanies.find(c => c.is_headquarters)?.trade_name || 'Configure a Matriz'}</p>
             </div>
           </CardContent>
         </Card>
@@ -208,7 +214,7 @@ const Companies = () => {
             <div className="p-3 bg-green-50 rounded-xl"><CheckCircle className="text-green-600 h-6 w-6" /></div>
             <div>
               <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Filiais Ativas</p>
-              <p className="text-2xl font-black">{activeBranches}</p>
+              <p className="text-2xl font-black">{dbCompanies.filter(c => !c.is_headquarters && c.status === 'active').length}</p>
             </div>
           </CardContent>
         </Card>
@@ -236,11 +242,11 @@ const Companies = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {companies.map((company: any) => (
+              {dbCompanies.map((company: any) => (
                 <TableRow key={company.id}>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-bold">{company.tradeName}</span>
+                      <span className="font-bold">{company.trade_name}</span>
                       <span className="text-xs text-muted-foreground font-mono">{company.cnpj}</span>
                     </div>
                   </TableCell>
@@ -259,7 +265,7 @@ const Companies = () => {
                     </div>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon"><Edit2 className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => { setEditingCompany(company); setCnpjValue(company.cnpj); setIsValidated(true); setIsDialogOpen(true); }}><Edit2 className="h-4 w-4" /></Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -267,6 +273,8 @@ const Companies = () => {
           </Table>
         </CardContent>
       </Card>
+      </>
+      )}
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
