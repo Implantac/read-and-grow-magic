@@ -34,13 +34,22 @@ interface ChangeRoleData {
 }
 
 async function callAdminUsers(action: string, params?: any) {
-  const { data, error } = await supabase.functions.invoke('admin-users', {
-    body: { action, ...params },
-  });
-  
-  if (error) throw new Error(error.message);
-  return data;
+  try {
+    const { data, error } = await supabase.functions.invoke('admin-users', {
+      body: { action, ...params },
+    });
+    
+    if (error) {
+      console.error('Edge function error:', error);
+      throw new Error(error.message || 'Erro na comunicação com o servidor');
+    }
+    return data;
+  } catch (err: any) {
+    console.error('Admin users call failed:', err);
+    throw err;
+  }
 }
+
 
 function mapToSystemUser(user: any): SystemUser {
   return {
@@ -66,9 +75,9 @@ export function useUsers() {
   const { userRole } = useAppStore();
 
   const usersQuery = useQuery({
-    queryKey: ['admin-users'],
     queryFn: async () => {
       const response = await callAdminUsers('list');
+      if (!response?.data) return [];
       return response.data.map(mapToSystemUser);
     },
     enabled: userRole === 'admin',
