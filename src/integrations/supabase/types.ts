@@ -5550,16 +5550,19 @@ export type Database = {
       }
       fiscal_tax_rules: {
         Row: {
+          cbs_rate: number | null
           cfop: string
           cofins_rate: number | null
           company_id: string
           created_at: string | null
           cst: string | null
           destination_state: string
+          ibs_rate: number | null
           icms_rate: number | null
           icms_st_rate: number | null
           id: string
           ipi_rate: number | null
+          is_hybrid_regime: boolean | null
           name: string
           ncm: string | null
           origin_state: string
@@ -5568,16 +5571,19 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          cbs_rate?: number | null
           cfop: string
           cofins_rate?: number | null
           company_id: string
           created_at?: string | null
           cst?: string | null
           destination_state: string
+          ibs_rate?: number | null
           icms_rate?: number | null
           icms_st_rate?: number | null
           id?: string
           ipi_rate?: number | null
+          is_hybrid_regime?: boolean | null
           name: string
           ncm?: string | null
           origin_state: string
@@ -5586,16 +5592,19 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          cbs_rate?: number | null
           cfop?: string
           cofins_rate?: number | null
           company_id?: string
           created_at?: string | null
           cst?: string | null
           destination_state?: string
+          ibs_rate?: number | null
           icms_rate?: number | null
           icms_st_rate?: number | null
           id?: string
           ipi_rate?: number | null
+          is_hybrid_regime?: boolean | null
           name?: string
           ncm?: string | null
           origin_state?: string
@@ -7058,8 +7067,11 @@ export type Database = {
           shipping: number
           status: string
           subtotal: number
+          tax_regime_type: string | null
           total: number
+          total_cbs: number | null
           total_cofins: number | null
+          total_ibs: number | null
           total_icms_st: number | null
           total_ipi: number | null
           total_pis: number | null
@@ -7096,8 +7108,11 @@ export type Database = {
           shipping?: number
           status?: string
           subtotal?: number
+          tax_regime_type?: string | null
           total?: number
+          total_cbs?: number | null
           total_cofins?: number | null
+          total_ibs?: number | null
           total_icms_st?: number | null
           total_ipi?: number | null
           total_pis?: number | null
@@ -7134,8 +7149,11 @@ export type Database = {
           shipping?: number
           status?: string
           subtotal?: number
+          tax_regime_type?: string | null
           total?: number
+          total_cbs?: number | null
           total_cofins?: number | null
+          total_ibs?: number | null
           total_icms_st?: number | null
           total_ipi?: number | null
           total_pis?: number | null
@@ -7155,6 +7173,7 @@ export type Database = {
       }
       nfe_items: {
         Row: {
+          cbs_value: number | null
           cest: string | null
           cfop: string | null
           cofins_rate: number
@@ -7165,6 +7184,7 @@ export type Database = {
           difal_value: number
           discount: number
           fcp_value: number
+          ibs_value: number | null
           icms_base: number
           icms_rate: number
           icms_st_base: number
@@ -7187,6 +7207,7 @@ export type Database = {
           unit_price: number
         }
         Insert: {
+          cbs_value?: number | null
           cest?: string | null
           cfop?: string | null
           cofins_rate?: number
@@ -7197,6 +7218,7 @@ export type Database = {
           difal_value?: number
           discount?: number
           fcp_value?: number
+          ibs_value?: number | null
           icms_base?: number
           icms_rate?: number
           icms_st_base?: number
@@ -7219,6 +7241,7 @@ export type Database = {
           unit_price?: number
         }
         Update: {
+          cbs_value?: number | null
           cest?: string | null
           cfop?: string | null
           cofins_rate?: number
@@ -7229,6 +7252,7 @@ export type Database = {
           difal_value?: number
           discount?: number
           fcp_value?: number
+          ibs_value?: number | null
           icms_base?: number
           icms_rate?: number
           icms_st_base?: number
