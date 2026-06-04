@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, Brain, ChevronDown, LogOut, Menu, Moon, Sun, User, Search, Command } from 'lucide-react';
+import { Bell, Brain, ChevronDown, LogOut, Menu, Moon, Sun, User, Search, Command, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Company } from '@/types';
 
@@ -214,11 +214,22 @@ export function Topbar() {
           </DropdownMenuContent>
         </DropdownMenu>
 
+        {/* IA Executiva shortcut */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate('/diretoria/executive')}
+          title="IA Executiva"
+          className="h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
+        >
+          <Sparkles className="h-4 w-4" />
+        </Button>
+
         {/* Brain shortcut */}
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate('/diretoria/cerebro')}
+          onClick={() => navigate('/diretoria/brain')}
           title={brainPending.length > 0 ? `${brainPending.length} decisões do Cérebro pendentes` : 'Cérebro Nativo'}
           className="relative h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
         >
