@@ -12874,12 +12874,14 @@ export type Database = {
       tax_rules: {
         Row: {
           active: boolean
+          cbs_rate: number | null
           cfop: string | null
           cofins_cst: string | null
           cofins_rate: number | null
           company_id: string | null
           created_at: string
           description: string | null
+          ibs_rate: number | null
           icms_cst: string | null
           icms_rate: number | null
           icms_reduction_base: number | null
@@ -12888,6 +12890,7 @@ export type Database = {
           id: string
           ipi_cst: string | null
           ipi_rate: number | null
+          is_is_rate: number | null
           name: string
           ncm: string | null
           notes: string | null
@@ -12895,6 +12898,7 @@ export type Database = {
           pis_cst: string | null
           pis_rate: number | null
           priority: number
+          tax_framework: string | null
           tax_regime: string | null
           uf_destination: string | null
           uf_origin: string | null
@@ -12904,12 +12908,14 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          cbs_rate?: number | null
           cfop?: string | null
           cofins_cst?: string | null
           cofins_rate?: number | null
           company_id?: string | null
           created_at?: string
           description?: string | null
+          ibs_rate?: number | null
           icms_cst?: string | null
           icms_rate?: number | null
           icms_reduction_base?: number | null
@@ -12918,6 +12924,7 @@ export type Database = {
           id?: string
           ipi_cst?: string | null
           ipi_rate?: number | null
+          is_is_rate?: number | null
           name: string
           ncm?: string | null
           notes?: string | null
@@ -12925,6 +12932,7 @@ export type Database = {
           pis_cst?: string | null
           pis_rate?: number | null
           priority?: number
+          tax_framework?: string | null
           tax_regime?: string | null
           uf_destination?: string | null
           uf_origin?: string | null
@@ -12934,12 +12942,14 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          cbs_rate?: number | null
           cfop?: string | null
           cofins_cst?: string | null
           cofins_rate?: number | null
           company_id?: string | null
           created_at?: string
           description?: string | null
+          ibs_rate?: number | null
           icms_cst?: string | null
           icms_rate?: number | null
           icms_reduction_base?: number | null
@@ -12948,6 +12958,7 @@ export type Database = {
           id?: string
           ipi_cst?: string | null
           ipi_rate?: number | null
+          is_is_rate?: number | null
           name?: string
           ncm?: string | null
           notes?: string | null
@@ -12955,6 +12966,7 @@ export type Database = {
           pis_cst?: string | null
           pis_rate?: number | null
           priority?: number
+          tax_framework?: string | null
           tax_regime?: string | null
           uf_destination?: string | null
           uf_origin?: string | null
