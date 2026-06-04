@@ -129,7 +129,7 @@ function computeKPIs(d: any, months: number = 12) {
   const grossProfit = totalRevenue - totalCosts;
   const grossMargin = totalRevenue > 0 ? (grossProfit / totalRevenue * 100) : 0;
 
-  // Time-based aggregation for trends (13 months to have base for 12 MoM points)
+  // Time-based aggregation for trends
   const revenueByMonth = [];
   const growthTrends = [];
   
@@ -157,15 +157,11 @@ function computeKPIs(d: any, months: number = 12) {
     });
   }
 
-  // Calculate MoM and YoY trends from the aggregated data
   for (let i = 1; i < revenueByMonth.length; i++) {
     const current = revenueByMonth[i];
     const prev = revenueByMonth[i - 1];
-    
-    // MoM: (Current - Previous) / Previous
     const moM = prev.revenue > 0 ? ((current.revenue - prev.revenue) / prev.revenue * 100) : 0;
     
-    // YoY: Compare with 12 months ago if available
     let yoY = 0;
     if (i >= 12) {
       const sameMonthLastYear = revenueByMonth[i - 12];
@@ -180,26 +176,26 @@ function computeKPIs(d: any, months: number = 12) {
     });
   }
 
-  // Financial health
   const totalReceivable = d.receivables.filter((r: any) => r.status === 'pending').reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
   const overdueReceivable = d.receivables.filter((r: any) => r.status === 'overdue' || (r.status === 'pending' && new Date(r.due_date) < now)).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
   const defaultRate = (totalReceivable + overdueReceivable) > 0 ? (overdueReceivable / (totalReceivable + overdueReceivable) * 100) : 0;
 
-  // Financial Projections
   const futureReceivablesTotal = d.receivables.filter((r: any) => r.status === 'pending' && new Date(r.due_date) > now).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
   const futurePayablesTotal = d.payables.filter((p: any) => p.status === 'pending' && new Date(p.due_date) > now).reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0);
 
-  // Liquidity ratios
   const currentRatio = futurePayablesTotal > 0 ? futureReceivablesTotal / futurePayablesTotal : 2; 
   const quickRatio = futurePayablesTotal > 0 ? (futureReceivablesTotal * 0.8) / futurePayablesTotal : 1.5;
 
+  const activeClientsCount = d.clients.filter((c: any) => c.status === 'active').length;
+  const inactiveClientsCount = d.clients.filter((c: any) => c.status === 'inactive').length;
+  const churnRate = (activeClientsCount + inactiveClientsCount) > 0 ? (inactiveClientsCount / (activeClientsCount + inactiveClientsCount) * 100) : 0;
 
+  const prodCompleted = d.production.filter((p: any) => p.status === 'completed');
+  const prodEfficiency = d.production.length > 0 ? (prodCompleted.length / d.production.length * 100) : 0;
 
-  // Sales Targets
   const targetsSummary = d.salesTargets.reduce((acc: any, t: any) => ({ target: acc.target + (t.target_value || 0), achieved: acc.achieved + (t.achieved_value || 0) }), { target: 0, achieved: 0 });
   const targetAttainment = targetsSummary.target > 0 ? (targetsSummary.achieved / targetsSummary.target * 100) : 0;
 
-  // Product Margins
   const productMap: Record<string, any> = {};
   d.products.forEach((p: any) => { productMap[p.id] = { name: p.name, cost: p.cost || 0 }; });
   const productSales: Record<string, any> = {};
@@ -223,7 +219,7 @@ function computeKPIs(d: any, months: number = 12) {
       moMGrowth: growthTrends[growthTrends.length - 1]?.revenueMoM || 0,
       yoYGrowth: growthTrends[growthTrends.length - 1]?.revenueYoY || 0,
       defaultRate: +defaultRate.toFixed(1),
-      churnRate: +((activeClients + inactiveClients) > 0 ? (inactiveClients / (activeClients + inactiveClients) * 100) : 0).toFixed(1),
+      churnRate: +churnRate.toFixed(1),
       avgDailyRevenue: +(totalRevenue / 30).toFixed(0),
       cashFlowProjection30d: futureReceivablesTotal - futurePayablesTotal,
       futureReceivables: futureReceivablesTotal, 
@@ -237,7 +233,7 @@ function computeKPIs(d: any, months: number = 12) {
       targetAttainment,
       totalTarget: targetsSummary.target,
       totalAchieved: targetsSummary.achieved,
-      // Fiscal KPIs (MCP-fiscal)
+      // Fiscal KPIs
       nfeIssuedCount: d.nfe.length,
       nfeAuthorizedCount: d.nfe.filter((n: any) => n.status === 'authorized' || n.status === 'autorizada').length,
       nfeRejectedCount: d.nfe.filter((n: any) => n.status === 'rejected' || n.status === 'rejeitada').length,
@@ -323,7 +319,7 @@ async function handleDashboardData(supabase: any, corsHeaders: any, months: numb
 
 async function handleGenerateInsights(supabase: any, lovableKey: string, corsHeaders: any) {
   const d = await fetchAllData(supabase);
-  const computed = computeKPIs(d, months);
+  const computed = computeKPIs(d);
 
   // Guard: sem dados reais, não chama LLM (evita alucinação)
   if (!checkHasRealData(d)) {
