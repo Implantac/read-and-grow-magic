@@ -48,8 +48,9 @@ export function MainLayout() {
       <Topbar />
       <main
         className={cn(
-          'h-screen overflow-y-auto pt-14 transition-[padding-left] duration-300 ease-in-out',
-          sidebarCollapsed ? 'pl-14' : 'pl-56'
+          'h-screen overflow-y-auto pt-14 transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1)',
+          sidebarCollapsed ? 'pl-16' : 'pl-64'
+
         )}
       >
         <div className="p-6">
