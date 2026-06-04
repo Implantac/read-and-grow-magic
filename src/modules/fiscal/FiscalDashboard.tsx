@@ -230,6 +230,12 @@ export default function FiscalDashboard() {
     setXmlData(null);
     toast.success('Entrada concluída! Pedido de compra finalizado e estoque atualizado via referência cruzada.');
   };
+
+    setIsProcessing(false);
+    setShowReview(false);
+    setXmlData(null);
+    toast.success('Entrada concluída! Pedido de compra finalizado e estoque atualizado via referência cruzada.');
+  };
     setXmlData(null);
     toast.success('Entrada concluída! Pedido de compra finalizado e estoque atualizado via referência cruzada.');
   };
