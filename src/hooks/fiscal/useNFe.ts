@@ -52,6 +52,10 @@ export function useNFe() {
           pisValue: Number(item.pis_value),
           cofinsRate: Number(item.cofins_rate),
           cofinsValue: Number(item.cofins_value),
+          // @ts-ignore
+          cbsValue: Number(item.cbs_value || 0),
+          // @ts-ignore
+          ibsValue: Number(item.ibs_value || 0),
           total: Number(item.total),
         });
         itemsMap.set(item.nfe_id, arr);
@@ -77,6 +81,10 @@ export function useNFe() {
       ipi: Number(row.ipi),
       pis: Number(row.pis),
       cofins: Number(row.cofins),
+      // @ts-ignore
+      ibs: Number(row.total_ibs || 0),
+      // @ts-ignore
+      cbs: Number(row.total_cbs || 0),
       total: Number(row.total),
       authorizationDate: row.authorization_date,
       cancellationDate: row.cancellation_date,
@@ -96,6 +104,7 @@ export function useNFe() {
     clientId?: string;
     clientDocument?: string;
     operationType: string;
+    taxRegimeType?: 'current' | 'hybrid' | 'reformed';
     items: { 
       productCode: string; 
       productName: string; 
@@ -108,6 +117,8 @@ export function useNFe() {
       ipi?: number;
       pis?: number;
       cofins?: number;
+      ibs?: number;
+      cbs?: number;
     }[];
     discount?: number;
     shipping?: number;
@@ -130,9 +141,15 @@ export function useNFe() {
       total,
       status: 'draft',
       // @ts-ignore - added via migration
+      tax_regime_type: nfeData.taxRegimeType || 'hybrid',
+      // @ts-ignore - added via migration
       total_ipi: nfeData.items.reduce((s, i) => s + (i.ipi || 0), 0),
       total_pis: nfeData.items.reduce((s, i) => s + (i.pis || 0), 0),
       total_cofins: nfeData.items.reduce((s, i) => s + (i.cofins || 0), 0),
+      // @ts-ignore
+      total_ibs: nfeData.items.reduce((s, i) => s + (i.ibs || 0), 0),
+      // @ts-ignore
+      total_cbs: nfeData.items.reduce((s, i) => s + (i.cbs || 0), 0),
     }).select().single();
 
     if (error) { toast.error('Erro ao criar NF-e'); return null; }
@@ -150,6 +167,10 @@ export function useNFe() {
         unit: item.unit || 'UN',
         ncm: item.ncm || null,
         cfop: item.cfop || null,
+        // @ts-ignore
+        ibs_value: item.ibs || 0,
+        // @ts-ignore
+        cbs_value: item.cbs || 0,
       }));
       await supabase.from('nfe_items').insert(itemsToInsert);
     }
