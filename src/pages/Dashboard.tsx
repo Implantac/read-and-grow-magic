@@ -19,6 +19,7 @@ import {
 import { Card, CardContent } from '@/ui/base/card';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Button } from '@/ui/base/button';
+import { Badge } from '@/ui/base/badge';
 import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
