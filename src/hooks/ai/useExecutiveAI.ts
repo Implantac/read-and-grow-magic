@@ -84,6 +84,7 @@ export interface ExecutiveDashboardData {
   salesRepStats: SalesRepStat[];
   funnelByStage: Record<string, { count: number; value: number }>;
   insights: ExecutiveInsight[];
+  consensus: Array<{ specialist: string; insight: string; status: string }>;
   alerts: ExecutiveAlert[];
   scenarios: any[];
   summary: { totalOrders: number; totalProducts: number; totalClients: number; productionOrders: number; funnelOpportunities: number };
