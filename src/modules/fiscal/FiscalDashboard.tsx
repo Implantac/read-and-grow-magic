@@ -153,15 +153,15 @@ export default function FiscalDashboard() {
 
     // Simulated multi-step import process
     const steps = [
-      { msg: 'Cadastrando Fornecedor...', weight: 20 },
-      { msg: 'Sincronizando Produtos...', weight: 40 },
-      { msg: 'Calculando Custos e Tributos...', weight: 70 },
-      { msg: 'Gerando Movimentação de Estoque...', weight: 90 },
-      { msg: 'Finalizando...', weight: 100 }
+      { msg: 'Vinculando Pedido de Compra...', weight: 15 },
+      { msg: 'Cadastrando Fornecedor e Referências...', weight: 30 },
+      { msg: 'Sincronizando Produtos e Vínculos...', weight: 50 },
+      { msg: 'Calculando Custos, Tributos e Margens...', weight: 75 },
+      { msg: 'Finalizando Pedido de Compra e Estoque...', weight: 100 }
     ];
 
     for (const step of steps) {
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(r, 800));
       setProgress(step.weight);
       toast.info(step.msg);
     }
@@ -169,7 +169,7 @@ export default function FiscalDashboard() {
     setIsProcessing(false);
     setShowReview(false);
     setXmlData(null);
-    toast.success('Importação finalizada! Todos os registros foram criados no ERP.');
+    toast.success('Entrada concluída! Pedido de compra finalizado e estoque atualizado via referência cruzada.');
   };
 
   return (
