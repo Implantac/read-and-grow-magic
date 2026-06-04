@@ -15,7 +15,7 @@ export const financialService = {
   async createReceivable(account: Partial<AccountReceivableRow>) {
     const { data, error } = await supabase
       .from('accounts_receivable')
-      .insert(account)
+      .insert([account])
       .select()
       .single();
     if (error) throw error;
@@ -50,7 +50,7 @@ export const financialService = {
   async createPayable(account: Partial<AccountPayableRow>) {
     const { data, error } = await supabase
       .from('accounts_payable')
-      .insert(account)
+      .insert([account])
       .select()
       .single();
     if (error) throw error;
