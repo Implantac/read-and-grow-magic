@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/ui/base/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MainLayout } from "@/core/layout/MainLayout";
+import { EnterpriseProvider } from "@/core/auth/EnterpriseContext";
 import { Loader2 } from 'lucide-react';
 
 // Routes
@@ -49,7 +50,8 @@ const queryClient = new QueryClient({
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
+      <EnterpriseProvider>
+        <Toaster />
       <Sonner />
       <BrowserRouter>
         <Suspense fallback={<PageLoader />}>
@@ -75,8 +77,9 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
-      </BrowserRouter>
-    </TooltipProvider>
+      </EnterpriseProvider>
+    </BrowserRouter>
+  </TooltipProvider>
   </QueryClientProvider>
 );
 

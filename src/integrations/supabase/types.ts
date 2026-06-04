@@ -2655,8 +2655,10 @@ export type Database = {
           address_street: string
           address_zip_code: string
           cnpj: string
+          company_size: string | null
           created_at: string
           email: string | null
+          enterprise_group_id: string | null
           group_id: string | null
           id: string
           is_headquarters: boolean
@@ -2664,6 +2666,7 @@ export type Database = {
           name: string
           parent_company_id: string | null
           phone: string | null
+          segment: string | null
           segment_id: string | null
           settings: Json | null
           state_registration: string | null
@@ -2683,8 +2686,10 @@ export type Database = {
           address_street?: string
           address_zip_code?: string
           cnpj: string
+          company_size?: string | null
           created_at?: string
           email?: string | null
+          enterprise_group_id?: string | null
           group_id?: string | null
           id?: string
           is_headquarters?: boolean
@@ -2692,6 +2697,7 @@ export type Database = {
           name: string
           parent_company_id?: string | null
           phone?: string | null
+          segment?: string | null
           segment_id?: string | null
           settings?: Json | null
           state_registration?: string | null
@@ -2711,8 +2717,10 @@ export type Database = {
           address_street?: string
           address_zip_code?: string
           cnpj?: string
+          company_size?: string | null
           created_at?: string
           email?: string | null
+          enterprise_group_id?: string | null
           group_id?: string | null
           id?: string
           is_headquarters?: boolean
@@ -2720,6 +2728,7 @@ export type Database = {
           name?: string
           parent_company_id?: string | null
           phone?: string | null
+          segment?: string | null
           segment_id?: string | null
           settings?: Json | null
           state_registration?: string | null
@@ -2731,6 +2740,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "companies_enterprise_group_id_fkey"
+            columns: ["enterprise_group_id"]
+            isOneToOne: false
+            referencedRelation: "enterprise_groups"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "companies_group_id_fkey"
             columns: ["group_id"]
