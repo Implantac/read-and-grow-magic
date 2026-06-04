@@ -158,7 +158,14 @@ export default function ExecutiveDashboard() {
         </Card>
       )}
 
-      <ExecutiveCouncilPanel />
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <ExecutiveCouncilPanel />
+        </div>
+        <div>
+          <ExecutiveConsensus />
+        </div>
+      </div>
       <div className="mt-4">
         <BrainSummaryWidget />
       </div>
