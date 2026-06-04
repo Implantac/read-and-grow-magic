@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAppStore } from '@/stores/useAppStore';
-import type { SystemUser } from '@/types/administration';
+import type { SystemUser, UserRole } from '@/types/administration';
+
 
 interface AdminUserResponse {
   id: string;
@@ -54,21 +55,22 @@ async function callAdminUsers(action: string, params?: any) {
 function mapToSystemUser(user: any): SystemUser {
   return {
     id: user.id,
-    name: user.name,
-    email: user.email,
+    name: user.name || '',
+    email: user.email || '',
     avatar: user.avatar_url,
-    role: user.role,
-    status: user.status,
+    role: (user.role as UserRole) || 'viewer',
+    status: user.status || 'active',
     permissions: [],
     lastLogin: user.last_sign_in_at,
-    createdAt: user.created_at,
-    updatedAt: user.updated_at,
+    createdAt: user.created_at || new Date().toISOString(),
+    updatedAt: user.updated_at || new Date().toISOString(),
     phone: user.phone || '',
     department: user.department || '',
     branchId: user.branch_id || '',
     branchName: '', // This would need a join in the edge function or hydration here
   };
 }
+
 
 export function useUsers() {
   const queryClient = useQueryClient();
