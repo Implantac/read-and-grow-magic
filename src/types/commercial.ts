@@ -1,6 +1,6 @@
 export type SaleStatus = 'completed' | 'cancelled' | 'refunded' | 'pending';
-export type OrderStatus = 'pending' | 'approved' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-export type QuotationStatus = 'draft' | 'sent' | 'approved' | 'rejected' | 'expired';
+export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'quote' | 'awaiting_commercial_approval' | 'awaiting_financial_approval' | 'blocked' | 'awaiting_separation' | 'in_separation' | 'awaiting_production' | 'in_production' | 'partial_production' | 'awaiting_conference' | 'conferenced' | 'awaiting_billing' | 'separated' | 'invoiced';
+export type QuotationStatus = 'draft' | 'sent' | 'approved' | 'rejected' | 'expired' | 'converted';
 export type PaymentMethod = 'cash' | 'credit_card' | 'debit_card' | 'pix' | 'boleto' | 'transfer';
 
 export interface DbSaleItem {
