@@ -9,7 +9,7 @@ import { useDashboardData } from '@/hooks/system/useDashboardData';
 import {
   ShoppingCart, Wallet, Package, Factory, Truck, Warehouse,
   DollarSign, TrendingUp, ArrowDownCircle, ArrowUpCircle,
-  RefreshCw, ShieldCheck
+  RefreshCw, ShieldCheck, Scissors, Building, Database
 } from 'lucide-react';
 import { Card, CardContent } from '@/ui/base/card';
 import { Skeleton } from '@/ui/base/skeleton';
