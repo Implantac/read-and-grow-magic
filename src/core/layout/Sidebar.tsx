@@ -168,7 +168,7 @@ export function Sidebar() {
   const location = useLocation();
   const { sidebarCollapsed, user } = useAppStore();
   const { segment } = useEnterprise();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Dashboard', 'Operacional', 'Financeiro']);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['Dashboard', 'Operacional', 'Financeiro', 'Gestão']);
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) =>
@@ -224,6 +224,7 @@ export function Sidebar() {
             if (!segment) return true;
             // Lógica de filtragem adaptativa por segmento
             if (segment !== 'textile' && section.label === 'Produção') return false;
+            if (segment === 'services' && (section.label === 'Operacional' || section.label === 'Logística')) return false;
             return true;
           }).map((section, sectionIndex) => (
             <div key={section.label || sectionIndex} className="space-y-2">
@@ -242,7 +243,11 @@ export function Sidebar() {
               )}
 
               <ul className="space-y-1">
-                {section.items.map((item) => (
+                {section.items.filter(item => {
+                  if (segment === 'services' && item.title === 'Comercial') return true;
+                  if (segment === 'services' && (item.title === 'Estoque' || item.title === 'Produção')) return false;
+                  return true;
+                }).map((item) => (
                   <NavItemComponent
                     key={item.title}
                     item={item}
