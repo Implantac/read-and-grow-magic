@@ -10,12 +10,17 @@ export class BaseService<T> {
 
   async getAll(options: BaseServiceOptions = {}) {
     const { orderBy = 'created_at', ascending = false } = options;
+    
+    // Check if column exists or use created_at as fallback
     const { data, error } = await supabase
       .from(this.tableName as any)
       .select('*')
       .order(orderBy, { ascending });
 
-    if (error) throw error;
+    if (error) {
+      console.error(`Error fetching from ${this.tableName}:`, error);
+      throw error;
+    }
     return data as T[];
   }
 
@@ -26,7 +31,10 @@ export class BaseService<T> {
       .eq('id', id)
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error(`Error fetching record ${id} from ${this.tableName}:`, error);
+      throw error;
+    }
     return data as T;
   }
 
@@ -37,19 +45,28 @@ export class BaseService<T> {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error(`Error creating record in ${this.tableName}:`, error);
+      throw error;
+    }
     return data as T;
   }
 
   async update(id: string, updates: any) {
+    // Add updated_at if column might exist, otherwise it will just be ignored by Supabase if it doesn't
+    const payload = { ...updates, updated_at: new Date().toISOString() };
+    
     const { data, error } = await supabase
       .from(this.tableName as any)
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .update(payload)
       .eq('id', id)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error(`Error updating record ${id} in ${this.tableName}:`, error);
+      throw error;
+    }
     return data as T;
   }
 
@@ -59,6 +76,9 @@ export class BaseService<T> {
       .delete()
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) {
+      console.error(`Error deleting record ${id} from ${this.tableName}:`, error);
+      throw error;
+    }
   }
 }
