@@ -382,6 +382,58 @@ export default function FiscalDashboard() {
         </DialogContent>
       </Dialog>
 
+      {/* Manual Product Linking Dialog */}
+      <Dialog open={showManualLinking} onOpenChange={setShowManualLinking}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <LinkIcon className="h-5 w-5 text-primary" />
+              Vincular Produto do Sistema
+            </DialogTitle>
+          </DialogHeader>
+          
+          {activeItemIndex !== null && xmlData && (
+            <div className="space-y-4 py-4">
+              <div className="p-3 bg-muted rounded-lg border">
+                <p className="text-[10px] uppercase font-bold text-muted-foreground">Item no XML</p>
+                <p className="font-medium text-sm">{xmlData.products[activeItemIndex].description}</p>
+                <p className="text-[10px] text-muted-foreground">Ref Fornecedor: {xmlData.products[activeItemIndex].code}</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Pesquisar no Catálogo Local</Label>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="Nome ou código do produto..." className="pl-9" />
+                </div>
+              </div>
+
+              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                {systemProducts.map((p) => (
+                  <div 
+                    key={p.id} 
+                    className="flex items-center justify-between p-3 rounded-lg border hover:border-primary cursor-pointer transition-all hover:bg-primary/5 group"
+                    onClick={() => confirmManualLink(p.id)}
+                  >
+                    <div>
+                      <p className="text-sm font-bold group-hover:text-primary transition-colors">{p.name}</p>
+                      <p className="text-[10px] text-muted-foreground">Cód: {p.code}</p>
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowManualLinking(false)}>Cancelar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="border-l-4 border-l-blue-500">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
