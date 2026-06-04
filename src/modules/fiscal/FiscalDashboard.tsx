@@ -371,7 +371,8 @@ export default function FiscalDashboard() {
                           <td className="px-3 py-3 text-right">{p.qCom} {p.uCom}</td>
                           <td className="px-3 py-3 text-right font-bold">R$ {p.vProd.toFixed(2)}</td>
                         </tr>
-                      ))}
+                      );
+                    })}
                     </tbody>
                   </table>
                 </div>
