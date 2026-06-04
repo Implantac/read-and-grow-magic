@@ -28,16 +28,30 @@ function updateImports(dir) {
     } else if (file.endsWith('.ts') || file.endsWith('.tsx')) {
       let content = fs.readFileSync(filePath, 'utf8');
       let changed = false;
+
+      // Update absolute imports
       hookMapping.forEach((newPath, oldPath) => {
-        if (content.includes(oldPath)) {
-          // Use regex to ensure we match exactly the path and not a subpath
-          const regex = new RegExp(oldPath + "(['\"])", 'g');
-          if (regex.test(content)) {
-            content = content.replace(regex, newPath + '$1');
+        const regex = new RegExp(oldPath + "(['\"])", 'g');
+        if (regex.test(content)) {
+          content = content.replace(regex, newPath + '$1');
+          changed = true;
+        }
+      });
+
+      // Update relative imports inside hooks to use absolute paths
+      if (filePath.startsWith('src/hooks')) {
+        const relativeRegex = /from\s+['"](\.\/|\.\.\/)(use[A-Za-z]+)['"]/g;
+        let match;
+        while ((match = relativeRegex.exec(content)) !== null) {
+          const hookName = match[2];
+          const absolutePath = `@/hooks/${hookName}`;
+          if (hookMapping.has(absolutePath)) {
+            content = content.replace(match[0], `from '${hookMapping.get(absolutePath)}'`);
             changed = true;
           }
         }
-      });
+      }
+
       if (changed) {
         fs.writeFileSync(filePath, content);
         console.log(`Updated imports in ${filePath}`);
@@ -45,6 +59,7 @@ function updateImports(dir) {
     }
   });
 }
+
 
 updateImports('src');
 console.log('Finished updating imports.');
