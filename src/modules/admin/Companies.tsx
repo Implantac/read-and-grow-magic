@@ -12,7 +12,8 @@ import {
 } from '@/ui/base/table';
 import { 
   Search, Plus, Edit2, Trash2, Building2, MapPin, Phone, Mail,
-  MoreVertical, CheckCircle2, XCircle, Building, Loader2
+  MoreVertical, CheckCircle2, XCircle, Building, Loader2,
+  Settings2, FileText, CheckCircle
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { companyStatusConfig } from '@/config/administration';
 import { Company, CompanyStatus, CompanyFilter, Address } from '@/types/administration';
+import { supabase } from '@/integrations/supabase/client';
 
 const Companies = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -34,6 +36,10 @@ const Companies = () => {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [isFetchingCNPJ, setIsFetchingCNPJ] = useState(false);
   const [cnpjValue, setCnpjValue] = useState('');
+  
+  // New industry fields
+  const [segment, setSegment] = useState('general');
+  const [taxRegime, setTaxRegime] = useState('Simples Nacional');
 
   // Stats
   const headquarters = companies.find(c => c.isHeadquarters);
@@ -41,19 +47,6 @@ const Companies = () => {
   const activeBranches = branches.filter(c => c.status === 'active').length;
   const [isValidated, setIsValidated] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
-
-  // Filter companies
-  const filteredCompanies = companies.filter(company => {
-    const matchesSearch = !filter.search || 
-      company.name.toLowerCase().includes(filter.search.toLowerCase()) ||
-      company.tradeName.toLowerCase().includes(filter.search.toLowerCase()) ||
-      company.cnpj.includes(filter.search);
-    const matchesStatus = filter.status === 'all' || company.status === filter.status;
-    const matchesType = filter.isHeadquarters === 'all' || 
-      (filter.isHeadquarters === true && company.isHeadquarters) ||
-      (filter.isHeadquarters === false && !company.isHeadquarters);
-    return matchesSearch && matchesStatus && matchesType;
-  });
 
   const handleFetchCNPJ = async () => {
     if (!cnpjValue || cnpjValue.replace(/\D/g, '').length !== 14) {
@@ -66,20 +59,13 @@ const Companies = () => {
     setValidationError(null);
     try {
       const cleanCnpj = cnpjValue.replace(/\D/g, '');
-      if (cleanCnpj.length !== 14) {
-        setValidationError('O CNPJ deve conter exatamente 14 números.');
-        return;
-      }
-
       const response = await fetch(`https://publica.cnpj.ws/cnpj/${cleanCnpj}`);
       
       if (!response.ok) {
-        if (response.status === 404) {
-          setValidationError('CNPJ não encontrado na base da Receita Federal. Verifique se os números digitados estão corretos.');
-        } else if (response.status === 429) {
-          setValidationError('Muitas consultas em pouco tempo. Aguarde 1 minuto e tente novamente.');
+        if (response.status === 429) {
+          setValidationError('Muitas consultas em pouco tempo. Aguarde 1 minuto.');
         } else {
-          setValidationError('O serviço de consulta está temporariamente indisponível. Tente novamente mais tarde.');
+          setValidationError('CNPJ não encontrado ou serviço indisponível.');
         }
         return;
       }
@@ -87,11 +73,11 @@ const Companies = () => {
       const data = await response.json();
       
       if (data.estabelecimento.situacao_cadastral !== 'Ativa') {
-        setValidationError(`Este CNPJ está com situação "${data.estabelecimento.situacao_cadastral}". Apenas empresas com situação "Ativa" podem ser cadastradas para emissão fiscal.`);
+        setValidationError(`Situação "${data.estabelecimento.situacao_cadastral}". Apenas empresas "Ativas" podem ser cadastradas.`);
         return;
       }
 
-      // Mapear dados para o formulário
+      // Populate form
       const form = document.querySelector('form') as HTMLFormElement;
       if (form) {
         (form.elements.namedItem('name') as HTMLInputElement).value = data.razao_social || '';
@@ -107,62 +93,46 @@ const Companies = () => {
       }
       
       setIsValidated(true);
-      toast.success('CNPJ validado e dados carregados!');
+      toast.success('CNPJ validado! Regras de operação serão criadas automaticamente.');
     } catch (error) {
-      console.error(error);
-      setValidationError('Ocorreu um erro inesperado ao validar o CNPJ. Tente novamente.');
+      setValidationError('Erro ao validar CNPJ.');
     } finally {
       setIsFetchingCNPJ(false);
     }
   };
 
-  const handleCreateCompany = () => {
-    setEditingCompany(null);
-    setCnpjValue('');
-    setIsValidated(false);
-    setValidationError(null);
-    setIsDialogOpen(true);
-  };
+  const generateOperations = (segment: string) => {
+    const baseOperations = [
+      { cfop: '5102', description: 'Venda de mercadoria adquirida de terceiros', type: 'Saída' },
+      { cfop: '1102', description: 'Compra para comercialização', type: 'Entrada' },
+    ];
 
-  const handleEditCompany = (company: Company) => {
-    setEditingCompany(company);
-    setCnpjValue(company.cnpj);
-    setIsValidated(true);
-    setValidationError(null);
-    setIsDialogOpen(true);
-  };
-
-  const handleViewDetails = (company: Company) => {
-    setSelectedCompany(company);
-  };
-
-  const handleToggleStatus = (company: Company) => {
-    const newStatus: CompanyStatus = company.status === 'active' ? 'inactive' : 'active';
-    setCompanies(prev => prev.map(c => 
-      c.id === company.id ? { ...c, status: newStatus, updatedAt: new Date().toISOString() } : c
-    ));
-    toast.success(`Empresa ${newStatus === 'active' ? 'ativada' : 'desativada'} com sucesso!`);
-  };
-
-  const handleDeleteCompany = (company: Company) => {
-    if (company.isHeadquarters) {
-      toast.error('Não é possível excluir a matriz!');
-      return;
+    if (['textile', 'food_factory', 'pharma'].includes(segment)) {
+      baseOperations.push(
+        { cfop: '5101', description: 'Venda de produção do estabelecimento', type: 'Saída' },
+        { cfop: '1101', description: 'Compra de matéria-prima para industrialização', type: 'Entrada' }
+      );
     }
-    setCompanies(prev => prev.filter(c => c.id !== company.id));
-    toast.success('Filial excluída com sucesso!');
+
+    if (segment === 'distribution') {
+      baseOperations.push(
+        { cfop: '5405', description: 'Venda de mercadoria adquirida (ST)', type: 'Saída' }
+      );
+    }
+
+    return baseOperations;
   };
 
-  const handleSaveCompany = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSaveCompany = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
     if (!isValidated) {
-      toast.error('É necessário validar o CNPJ antes de cadastrar a empresa.');
+      toast.error('Valide o CNPJ primeiro.');
       return;
     }
 
     const formData = new FormData(e.currentTarget);
-    
+    const operations = generateOperations(segment);
+
     const address: Address = {
       street: formData.get('street') as string,
       number: formData.get('number') as string,
@@ -174,470 +144,229 @@ const Companies = () => {
       country: 'Brasil',
     };
 
-    const companyData: Partial<Company> = {
+    const companyData = {
       name: formData.get('name') as string,
       tradeName: formData.get('tradeName') as string,
-      cnpj: formData.get('cnpj') as string,
-      stateRegistration: formData.get('stateRegistration') as string,
-      municipalRegistration: formData.get('municipalRegistration') as string,
+      cnpj: cnpjValue,
       email: formData.get('email') as string,
       phone: formData.get('phone') as string,
       address,
+      segment,
+      tax_regime: taxRegime,
+      operation_types: operations,
+      status: 'active' as CompanyStatus,
+      updatedAt: new Date().toISOString(),
     };
 
-    if (editingCompany) {
-      setCompanies(prev => prev.map(c => 
-        c.id === editingCompany.id 
-          ? { ...c, ...companyData, updatedAt: new Date().toISOString() } 
-          : c
-      ));
-      toast.success('Empresa atualizada com sucesso!');
-    } else {
-      const newCompany: Company = {
-        id: `EMP${String(companies.length + 1).padStart(3, '0')}`,
-        ...companyData as Company,
-        status: 'active',
-        isHeadquarters: false,
-        parentCompanyId: headquarters?.id,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setCompanies(prev => [...prev, newCompany]);
-      toast.success('Filial criada com sucesso!');
+    try {
+      if (editingCompany) {
+        setCompanies(prev => prev.map(c => c.id === editingCompany.id ? { ...c, ...companyData } as Company : c));
+        toast.success('Empresa atualizada!');
+      } else {
+        const newCompany: Company = {
+          id: `EMP${Date.now()}`,
+          ...companyData as any,
+          isHeadquarters: false,
+          createdAt: new Date().toISOString(),
+        };
+        setCompanies(prev => [...prev, newCompany]);
+        toast.success(`Filial "${companyData.tradeName}" cadastrada com ${operations.length} operações automáticas!`);
+      }
+      setIsDialogOpen(false);
+    } catch (error) {
+      toast.error('Erro ao salvar empresa.');
     }
-    
-    setIsDialogOpen(false);
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Gestão de Empresas</h1>
-          <p className="text-muted-foreground">Gerencie a matriz e filiais da empresa</p>
+          <h1 className="text-2xl font-bold">Gestão de Empresas</h1>
+          <p className="text-muted-foreground">Configuração adaptativa e automação fiscal</p>
         </div>
-        <Button onClick={handleCreateCompany}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nova Filial
+        <Button onClick={() => { setEditingCompany(null); setCnpjValue(''); setIsValidated(false); setIsDialogOpen(true); }}>
+          <Plus className="h-4 w-4 mr-2" /> Nova Filial
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <Building2 className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Matriz</p>
-                <p className="font-semibold">{headquarters?.tradeName || '-'}</p>
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="bg-primary/5 border-primary/20">
+          <CardContent className="p-4 flex items-center gap-4">
+            <div className="p-3 bg-primary/10 rounded-xl"><Building2 className="text-primary h-6 w-6" /></div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Matriz</p>
+              <p className="font-bold">{headquarters?.tradeName || 'Configure a Matriz'}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-100">
-                <Building className="h-5 w-5 text-green-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Filiais Ativas</p>
-                <p className="text-2xl font-bold text-green-600">{activeBranches}</p>
-              </div>
+          <CardContent className="p-4 flex items-center gap-4">
+            <div className="p-3 bg-green-50 rounded-xl"><CheckCircle className="text-green-600 h-6 w-6" /></div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Filiais Ativas</p>
+              <p className="text-2xl font-black">{activeBranches}</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gray-100">
-                <Building className="h-5 w-5 text-gray-600" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total de Filiais</p>
-                <p className="text-2xl font-bold">{branches.length}</p>
-              </div>
+          <CardContent className="p-4 flex items-center gap-4">
+            <div className="p-3 bg-blue-50 rounded-xl"><Settings2 className="text-blue-600 h-6 w-6" /></div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Segmentação</p>
+              <p className="text-sm font-semibold">Adaptativa Híbrida</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filters */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nome, razão social ou CNPJ..."
-                className="pl-10"
-                value={filter.search || ''}
-                onChange={(e) => setFilter(prev => ({ ...prev, search: e.target.value }))}
-              />
-            </div>
-            <Select
-              value={filter.status || 'all'}
-              onValueChange={(value) => setFilter(prev => ({ ...prev, status: value as CompanyStatus | 'all' }))}
-            >
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                {Object.entries(companyStatusConfig).map(([key, config]) => (
-                  <SelectItem key={key} value={key}>{config.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Empresa</TableHead>
+                <TableHead>Segmento</TableHead>
+                <TableHead>Regime</TableHead>
+                <TableHead>Operações</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {companies.map((company: any) => (
+                <TableRow key={company.id}>
+                  <TableCell>
+                    <div className="flex flex-col">
+                      <span className="font-bold">{company.tradeName}</span>
+                      <span className="text-xs text-muted-foreground font-mono">{company.cnpj}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="capitalize">{company.segment || 'Geral'}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm">{company.tax_regime || 'Simples'}</span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      {company.operation_types?.slice(0, 3).map((op: any) => (
+                        <Badge key={op.cfop} variant="secondary" className="text-[10px]">{op.cfop}</Badge>
+                      ))}
+                      {company.operation_types?.length > 3 && <span className="text-[10px]">+ {company.operation_types.length - 3}</span>}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="icon"><Edit2 className="h-4 w-4" /></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Companies List */}
-        <div className="lg:col-span-2">
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Empresa</TableHead>
-                    <TableHead>CNPJ</TableHead>
-                    <TableHead>Cidade/UF</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredCompanies.map((company) => (
-                    <TableRow 
-                      key={company.id}
-                      className={`cursor-pointer ${selectedCompany?.id === company.id ? 'bg-muted/50' : ''}`}
-                      onClick={() => handleViewDetails(company)}
-                    >
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${company.isHeadquarters ? 'bg-primary/10' : 'bg-muted'}`}>
-                            {company.isHeadquarters ? (
-                              <Building2 className="h-4 w-4 text-primary" />
-                            ) : (
-                              <Building className="h-4 w-4 text-muted-foreground" />
-                            )}
-                          </div>
-                          <div>
-                            <p className="font-medium">{company.tradeName}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {company.isHeadquarters ? 'Matriz' : 'Filial'}
-                            </p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm font-mono">{company.cnpj}</span>
-                      </TableCell>
-                      <TableCell>
-                        <span className="text-sm">{company.address.city}/{company.address.state}</span>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={`${companyStatusConfig[company.status].bgColor} ${companyStatusConfig[company.status].color} border-0`}>
-                          {companyStatusConfig[company.status].label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleEditCompany(company); }}>
-                              <Edit2 className="h-4 w-4 mr-2" />
-                              Editar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleToggleStatus(company); }}>
-                              {company.status === 'active' ? (
-                                <>
-                                  <XCircle className="h-4 w-4 mr-2" />
-                                  Desativar
-                                </>
-                              ) : (
-                                <>
-                                  <CheckCircle2 className="h-4 w-4 mr-2" />
-                                  Ativar
-                                </>
-                              )}
-                            </DropdownMenuItem>
-                            {!company.isHeadquarters && (
-                              <DropdownMenuItem 
-                                onClick={(e) => { e.stopPropagation(); handleDeleteCompany(company); }}
-                                className="text-destructive"
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Excluir
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Company Details Panel */}
-        <div>
-          <Card>
-            <CardContent className="p-4">
-              {selectedCompany ? (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-3 rounded-lg ${selectedCompany.isHeadquarters ? 'bg-primary/10' : 'bg-muted'}`}>
-                      {selectedCompany.isHeadquarters ? (
-                        <Building2 className="h-6 w-6 text-primary" />
-                      ) : (
-                        <Building className="h-6 w-6 text-muted-foreground" />
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">{selectedCompany.tradeName}</h3>
-                      <Badge className={`${companyStatusConfig[selectedCompany.status].bgColor} ${companyStatusConfig[selectedCompany.status].color} border-0`}>
-                        {selectedCompany.isHeadquarters ? 'Matriz' : 'Filial'} - {companyStatusConfig[selectedCompany.status].label}
-                      </Badge>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 pt-4 border-t">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Razão Social</p>
-                      <p className="text-sm font-medium">{selectedCompany.name}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">CNPJ</p>
-                      <p className="text-sm font-mono">{selectedCompany.cnpj}</p>
-                    </div>
-                    {selectedCompany.stateRegistration && (
-                      <div>
-                        <p className="text-xs text-muted-foreground">Inscrição Estadual</p>
-                        <p className="text-sm">{selectedCompany.stateRegistration}</p>
-                      </div>
-                    )}
-                    {selectedCompany.municipalRegistration && (
-                      <div>
-                        <p className="text-xs text-muted-foreground">Inscrição Municipal</p>
-                        <p className="text-sm">{selectedCompany.municipalRegistration}</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-3 pt-4 border-t">
-                    <div className="flex items-start gap-2">
-                      <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                      <div>
-                        <p className="text-sm">
-                          {selectedCompany.address.street}, {selectedCompany.address.number}
-                          {selectedCompany.address.complement && ` - ${selectedCompany.address.complement}`}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {selectedCompany.address.neighborhood} - {selectedCompany.address.city}/{selectedCompany.address.state}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          CEP: {selectedCompany.address.zipCode}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-muted-foreground" />
-                      <p className="text-sm">{selectedCompany.phone}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <p className="text-sm">{selectedCompany.email}</p>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t text-xs text-muted-foreground">
-                    <p>Cadastrado em: {format(new Date(selectedCompany.createdAt), "dd/MM/yyyy", { locale: ptBR })}</p>
-                    <p>Atualizado em: {format(new Date(selectedCompany.updatedAt), "dd/MM/yyyy", { locale: ptBR })}</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>Selecione uma empresa para ver os detalhes</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-                    </div>
-                    {validationError && (
-                      <p className="text-xs text-destructive font-medium mt-1">
-                        {validationError}
-                      </p>
-                    )}
-                  </div>
-
-      {/* Create/Edit Company Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingCompany ? 'Editar Empresa' : 'Nova Filial'}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-primary" />
+              Configuração Adaptativa de Empresa
+            </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSaveCompany} className="space-y-4">
-            <Tabs defaultValue="general">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="general">Dados Gerais</TabsTrigger>
-                <TabsTrigger value="address">Endereço</TabsTrigger>
+          
+          <form onSubmit={handleSaveCompany} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/30 p-4 rounded-xl border">
+              <div className="space-y-2">
+                <Label className="text-primary font-bold">Segmento do Negócio</Label>
+                <Select value={segment} onValueChange={setSegment}>
+                  <SelectTrigger className="bg-background">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">Geral / Comércio</SelectItem>
+                    <SelectItem value="textile">Indústria Têxtil</SelectItem>
+                    <SelectItem value="food_factory">Indústria de Alimentos</SelectItem>
+                    <SelectItem value="pharma">Farmacêutico</SelectItem>
+                    <SelectItem value="distribution">Distribuidora / Atacadista</SelectItem>
+                    <SelectItem value="services">Prestação de Serviços</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-[10px] text-muted-foreground">Define menus, KPIs e fluxos automaticamente.</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-primary font-bold">Regime Tributário</Label>
+                <Select value={taxRegime} onValueChange={setTaxRegime}>
+                  <SelectTrigger className="bg-background">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Simples Nacional">Simples Nacional</SelectItem>
+                    <SelectItem value="Lucro Presumido">Lucro Presumido</SelectItem>
+                    <SelectItem value="Lucro Real">Lucro Real</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-[10px] text-muted-foreground">Configura as alíquotas base do motor fiscal.</p>
+              </div>
+            </div>
+
+            <Tabs defaultValue="general" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="general">Dados Fiscais</TabsTrigger>
+                <TabsTrigger value="address">Localização</TabsTrigger>
+                <TabsTrigger value="preview">Operações Sugeridas</TabsTrigger>
               </TabsList>
               
-              <TabsContent value="general" className="space-y-4 mt-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2 sm:col-span-2">
-                    <Label htmlFor="name">Razão Social *</Label>
-                    <Input 
-                      id="name" 
-                      name="name" 
-                      defaultValue={editingCompany?.name}
-                      required 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="tradeName">Nome Fantasia *</Label>
-                    <Input 
-                      id="tradeName" 
-                      name="tradeName" 
-                      defaultValue={editingCompany?.tradeName}
-                      required 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="cnpj">CNPJ *</Label>
+              <TabsContent value="general" className="space-y-4 pt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="cnpj">CNPJ para Validação e Cadastro Automático</Label>
                     <div className="flex gap-2">
                       <Input 
                         id="cnpj" 
-                        name="cnpj" 
                         placeholder="00.000.000/0000-00"
                         value={cnpjValue}
                         onChange={(e) => setCnpjValue(e.target.value)}
-                        required 
+                        className="font-mono text-lg"
                       />
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={handleFetchCNPJ}
-                        disabled={isFetchingCNPJ}
-                      >
+                      <Button type="button" onClick={handleFetchCNPJ} disabled={isFetchingCNPJ} className="gap-2">
                         {isFetchingCNPJ ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                        Validar
                       </Button>
                     </div>
+                    {validationError && <p className="text-xs text-destructive font-bold">{validationError}</p>}
+                    {isValidated && <p className="text-xs text-green-600 font-bold flex items-center gap-1"><CheckCircle className="h-3 w-3" /> CNPJ Validado na Receita Federal</p>}
+                  </div>
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="name">Razão Social</Label>
+                    <Input id="name" name="name" required readOnly={isValidated} />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="stateRegistration">Inscrição Estadual</Label>
-                    <Input 
-                      id="stateRegistration" 
-                      name="stateRegistration" 
-                      defaultValue={editingCompany?.stateRegistration}
-                    />
+                    <Label htmlFor="tradeName">Nome Fantasia</Label>
+                    <Input id="tradeName" name="tradeName" required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="municipalRegistration">Inscrição Municipal</Label>
-                    <Input 
-                      id="municipalRegistration" 
-                      name="municipalRegistration" 
-                      defaultValue={editingCompany?.municipalRegistration}
-                    />
+                    <Label htmlFor="email">Email Corporativo</Label>
+                    <Input id="email" name="email" type="email" required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email *</Label>
-                    <Input 
-                      id="email" 
-                      name="email" 
-                      type="email"
-                      defaultValue={editingCompany?.email}
-                      required 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Telefone *</Label>
-                    <Input 
-                      id="phone" 
-                      name="phone" 
-                      defaultValue={editingCompany?.phone}
-                      required 
-                    />
+                    <Label htmlFor="phone">Telefone</Label>
+                    <Input id="phone" name="phone" required />
                   </div>
                 </div>
               </TabsContent>
-              
-              <TabsContent value="address" className="space-y-4 mt-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+              <TabsContent value="address" className="space-y-4 pt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2"><Label>CEP</Label><Input name="zipCode" id="zipCode" required /></div>
+                  <div className="space-y-2 md:col-span-2"><Label>Logradouro</Label><Input name="street" id="street" required /></div>
+                  <div className="space-y-2"><Label>Número</Label><Input name="number" id="number" required /></div>
+                  <div className="space-y-2"><Label>Complemento</Label><Input name="complement" id="complement" /></div>
+                  <div className="space-y-2"><Label>Bairro</Label><Input name="neighborhood" id="neighborhood" required /></div>
+                  <div className="space-y-2"><Label>Cidade</Label><Input name="city" id="city" required /></div>
                   <div className="space-y-2">
-                    <Label htmlFor="zipCode">CEP *</Label>
-                    <Input 
-                      id="zipCode" 
-                      name="zipCode" 
-                      placeholder="00000-000"
-                      defaultValue={editingCompany?.address.zipCode}
-                      required 
-                    />
-                  </div>
-                  <div className="space-y-2 sm:col-span-2">
-                    <Label htmlFor="street">Logradouro *</Label>
-                    <Input 
-                      id="street" 
-                      name="street" 
-                      defaultValue={editingCompany?.address.street}
-                      required 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="number">Número *</Label>
-                    <Input 
-                      id="number" 
-                      name="number" 
-                      defaultValue={editingCompany?.address.number}
-                      required 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="complement">Complemento</Label>
-                    <Input 
-                      id="complement" 
-                      name="complement" 
-                      defaultValue={editingCompany?.address.complement}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="neighborhood">Bairro *</Label>
-                    <Input 
-                      id="neighborhood" 
-                      name="neighborhood" 
-                      defaultValue={editingCompany?.address.neighborhood}
-                      required 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="city">Cidade *</Label>
-                    <Input 
-                      id="city" 
-                      name="city" 
-                      defaultValue={editingCompany?.address.city}
-                      required 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="state">UF *</Label>
-                    <Select name="state" defaultValue={editingCompany?.address.state || 'SP'}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione" />
-                      </SelectTrigger>
+                    <Label>UF</Label>
+                    <Select name="state" defaultValue="SP">
+                      <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'].map(uf => (
                           <SelectItem key={uf} value={uf}>{uf}</SelectItem>
@@ -647,14 +376,40 @@ const Companies = () => {
                   </div>
                 </div>
               </TabsContent>
+
+              <TabsContent value="preview" className="pt-4">
+                <div className="space-y-4">
+                  <div className="p-4 bg-primary/5 rounded-xl border border-primary/20">
+                    <h4 className="font-bold text-primary flex items-center gap-2 mb-2">
+                      <FileText className="h-4 w-4" />
+                      Motor de Operações Automáticas
+                    </h4>
+                    <p className="text-xs text-muted-foreground mb-4">
+                      Com base no segmento <strong>{segment}</strong>, as seguintes regras fiscais (CFOPs) serão criadas:
+                    </p>
+                    <div className="space-y-2">
+                      {generateOperations(segment).map((op) => (
+                        <div key={op.cfop} className="flex items-center justify-between p-2 bg-background rounded border text-xs">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary" className="font-mono">{op.cfop}</Badge>
+                            <span>{op.description}</span>
+                          </div>
+                          <Badge className={op.type === 'Saída' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'}>
+                            {op.type}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
             </Tabs>
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                Cancelar
-              </Button>
-              <Button type="submit">
-                {editingCompany ? 'Salvar' : 'Criar Filial'}
+            <DialogFooter className="border-t pt-4">
+              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
+              <Button type="submit" className="gap-2" disabled={!isValidated}>
+                <CheckCircle className="h-4 w-4" />
+                Finalizar Cadastro Inteligente
               </Button>
             </DialogFooter>
           </form>
