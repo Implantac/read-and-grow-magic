@@ -1,26 +1,19 @@
 import { supabase } from '@/integrations/supabase/client';
 
-export interface BaseServiceOptions {
-  orderBy?: string;
-  ascending?: boolean;
-}
-
-export class BaseService<T> {
+/**
+ * Service base com operações CRUD genéricas.
+ */
+export class BaseService<T extends { id: string }> {
   constructor(protected tableName: string) {}
 
-  async getAll(options: BaseServiceOptions = {}) {
+  async getAll(options: { orderBy?: string; ascending?: boolean } = {}) {
     const { orderBy = 'created_at', ascending = false } = options;
-    
-    // Check if column exists or use created_at as fallback
     const { data, error } = await supabase
       .from(this.tableName as any)
       .select('*')
       .order(orderBy, { ascending });
 
-    if (error) {
-      console.error(`Error fetching from ${this.tableName}:`, error);
-      throw error;
-    }
+    if (error) throw error;
     return data as T[];
   }
 
@@ -31,42 +24,30 @@ export class BaseService<T> {
       .eq('id', id)
       .single();
 
-    if (error) {
-      console.error(`Error fetching record ${id} from ${this.tableName}:`, error);
-      throw error;
-    }
+    if (error) throw error;
     return data as T;
   }
 
-  async create(item: any) {
+  async create(item: Omit<T, 'id' | 'created_at' | 'updated_at'>) {
     const { data, error } = await supabase
       .from(this.tableName as any)
-      .insert(item)
+      .insert(item as any)
       .select()
       .single();
 
-    if (error) {
-      console.error(`Error creating record in ${this.tableName}:`, error);
-      throw error;
-    }
+    if (error) throw error;
     return data as T;
   }
 
-  async update(id: string, updates: any) {
-    // Add updated_at if column might exist, otherwise it will just be ignored by Supabase if it doesn't
-    const payload = { ...updates, updated_at: new Date().toISOString() };
-    
+  async update(id: string, updates: Partial<T>) {
     const { data, error } = await supabase
       .from(this.tableName as any)
-      .update(payload)
+      .update({ ...updates, updated_at: new Date().toISOString() } as any)
       .eq('id', id)
       .select()
       .single();
 
-    if (error) {
-      console.error(`Error updating record ${id} in ${this.tableName}:`, error);
-      throw error;
-    }
+    if (error) throw error;
     return data as T;
   }
 
@@ -76,9 +57,6 @@ export class BaseService<T> {
       .delete()
       .eq('id', id);
 
-    if (error) {
-      console.error(`Error deleting record ${id} from ${this.tableName}:`, error);
-      throw error;
-    }
+    if (error) throw error;
   }
 }

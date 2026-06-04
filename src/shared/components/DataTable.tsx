@@ -39,6 +39,7 @@ interface DataTableProps<T> {
   emptyMessage?: string;
   onRowClick?: (row: T) => void;
   actions?: (row: T) => React.ReactNode;
+  className?: string;
 }
 
 type SortDirection = 'asc' | 'desc' | null;
@@ -54,7 +55,7 @@ export function DataTable<T extends { id: string }>({
   onRowClick,
   actions,
   className,
-}: DataTableProps<T> & { className?: string }) {
+}: DataTableProps<T>) {
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [sortKey, setSortKey] = useState<string | null>(null);
