@@ -327,47 +327,60 @@ async function handleDashboardData(supabase: any, corsHeaders: any, months: numb
 }
 
 function generateConsensusItems(kpis: any, data: any, segment: string) {
-  const items = [
-    {
-      specialist: 'CTO Global',
-      insight: data.orders.length > 500 ? 'Tráfego intenso. Ativando CDN Edge para latência zero no checkout.' : 'Estabilidade total em toda a infraestrutura multicloud.',
-      status: 'success',
-    },
-    {
-      specialist: 'Arquiteto SAP S/4HANA',
-      insight: 'Buffer de sincronização SAP integrado. Dados de estoque real-time confirmados.',
-      status: 'success',
-    }
-  ];
+  const items = [];
+  
+  // IA CEO
+  items.push({
+    specialist: 'IA CEO',
+    insight: kpis.totalRevenue > 0 ? `Crescimento projetado de ${kpis.revenueGrowth || 0}%. Foco estratégico em expansão de margem.` : 'Aguardando massa crítica de dados para roadmap estratégico.',
+    status: 'success',
+  });
 
-  if (segment === 'fio' || segment === 'textile' || segment === 'tecelagem') {
+  // IA CFO
+  items.push({
+    specialist: 'IA CFO',
+    insight: kpis.defaultRate > 5 ? `Alerta: Inadimplência em ${kpis.defaultRate}%. Recomendo revisão de régua de cobrança.` : 'Saúde financeira e liquidez em níveis excelentes.',
+    status: kpis.defaultRate > 5 ? 'alert' : 'success',
+  });
+
+  // Industrial Vertical
+  if (['textile', 'fio', 'tecelagem', 'industry', 'pharma', 'food_factory'].includes(segment)) {
     items.push({
-      specialist: 'Especialista PCP/MRP/APS',
-      insight: kpis.prodEfficiency < 85 ? `Alerta: Eficiência em ${kpis.prodEfficiency}%. Ajustando cronograma de teares.` : 'Sincronismo industrial otimizado por IA.',
+      specialist: 'Especialista PCP',
+      insight: kpis.prodEfficiency < 85 ? `OEE abaixo da meta (${kpis.prodEfficiency}%). Analisando paradas.` : 'Eficiência produtiva acima da média setorial.',
       status: kpis.prodEfficiency < 85 ? 'alert' : 'success',
     });
-  } else if (segment === 'pharma') {
+    
+    if (segment === 'pharma') {
+      items.push({
+        specialist: 'Quality QA',
+        insight: 'Rastreabilidade total garantida. Lotes em conformidade com RDC 658.',
+        status: 'success',
+      });
+    } else {
+      items.push({
+        specialist: 'IA Supply Chain',
+        insight: data.products.some((p: any) => p.stock_current <= p.stock_min) ? 'Ruptura detectada em itens Curva A.' : 'Níveis de estoque otimizados via MRP dinâmico.',
+        status: data.products.some((p: any) => p.stock_current <= p.stock_min) ? 'alert' : 'success',
+      });
+    }
+  } else {
+    // Other verticals
     items.push({
-      specialist: 'Especialista ERP Industrial',
-      insight: 'Rastreabilidade de lotes completa. Validação RDC 658 aplicada em tempo real.',
+      specialist: 'Market Intelligence',
+      insight: 'Oportunidades de cross-sell detectadas em 15% da base de clientes ativa.',
       status: 'success',
     });
-  } else if (segment === 'animal_feed' || segment === 'food_factory') {
     items.push({
-      specialist: 'Especialista Supply Chain',
-      insight: 'Monitoramento de silos OK. Nível de umidade dentro do padrão de segurança.',
+      specialist: 'IA CTO',
+      insight: 'Infraestrutura Enterprise Evolution Engine (EEE) operando com latência < 30ms.',
       status: 'success',
     });
   }
 
-  items.push({
-    specialist: 'Especialista Fiscal BR',
-    insight: kpis.nfeRejectedCount > 0 ? `Atenção: ${kpis.nfeRejectedCount} notas rejeitadas. Verifique CFOP/NCM.` : 'Conformidade fiscal 100%. Malha fina preventiva negativa.',
-    status: kpis.nfeRejectedCount > 0 ? 'alert' : 'success',
-  });
-
   return items;
 }
+
 
 // ─── Generate Insights ──────────────────────────────────────────
 
