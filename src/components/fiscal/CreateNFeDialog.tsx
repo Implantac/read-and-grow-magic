@@ -77,6 +77,11 @@ const STEPS = [
 
 export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialogProps) {
   const { currentCompany } = useEnterprise();
+  const [clientId, setClientId] = useState('');
+  const [clientName, setClientName] = useState('');
+  const [clientDocument, setClientDocument] = useState('');
+  const [clientUF, setClientUF] = useState('');
+  
   const clientsQuery = useClients();
   const taxRulesQuery = useFiscalTaxRules('SP', clientUF || 'SP'); // Origin fix as SP for now
   const productsQuery = useProducts();
@@ -89,12 +94,6 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
   const [operationType, setOperationType] = useState('saida');
   const [naturezaOp, setNaturezaOp] = useState('Venda de mercadoria');
   const [defaultCfop, setDefaultCfop] = useState('5102');
-
-  // Etapa 2 — Cliente
-  const [clientId, setClientId] = useState('');
-  const [clientName, setClientName] = useState('');
-  const [clientDocument, setClientDocument] = useState('');
-  const [clientUF, setClientUF] = useState('');
 
   // Etapa 3 — Produtos
   const [items, setItems] = useState<NFeItemForm[]>([]);
