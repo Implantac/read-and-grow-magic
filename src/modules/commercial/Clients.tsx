@@ -1,20 +1,20 @@
 import { useState } from 'react';
 import { Plus, Pencil, Trash2, Eye, MoreHorizontal, Loader2 } from 'lucide-react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { PageLoading } from '@/components/shared/PageLoading';
-import { ExportButton } from '@/components/shared/ExportButton';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { PageLoading } from '@/shared/components/PageLoading';
+import { ExportButton } from '@/shared/components/ExportButton';
+import { Button } from '@/ui/base/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/ui/base/dropdown-menu';
 import { formatBRL } from '@/lib/formatters';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
-import { DataTable, type Column } from '@/components/shared/DataTable';
-import { StatusBadge } from '@/components/shared/StatusBadge';
-import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
+} from '@/ui/base/alert-dialog';
+import { Badge } from '@/ui/base/badge';
+import { DataTable, type Column } from '@/shared/components/DataTable';
+import { StatusBadge } from '@/shared/components/StatusBadge';
+import { AdvancedFilters, type FilterField } from '@/shared/components/AdvancedFilters';
 import { clientSegments, brazilianStates } from '@/config/commercial';
 import { useClients, useDeleteClient, type DbClient } from '@/hooks/commercial/useClients';
 import { ClientDetailDialog } from '@/components/comercial/ClientDetailDialog';

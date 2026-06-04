@@ -1,15 +1,15 @@
 import { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ExportButton } from '@/components/shared/ExportButton';
-import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { Skeleton } from '@/ui/base/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
+import { ExportButton } from '@/shared/components/ExportButton';
+import { AdvancedFilters, type FilterField } from '@/shared/components/AdvancedFilters';
 import { useChartOfAccounts } from '@/hooks/accounting/useChartOfAccounts';
 import { useJournalEntries } from '@/hooks/accounting/useJournalEntries';
 import { cn } from '@/lib/utils';
 import { BookOpen } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import type { ExportColumn } from '@/lib/exportUtils';
 import type { LedgerEntry } from '@/types/accounting';
 

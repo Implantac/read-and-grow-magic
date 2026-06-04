@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/ui/base/badge';
 import { XCircle, CheckCircle2, ArrowRight, Sparkles } from 'lucide-react';
 
 const beforeItems = [

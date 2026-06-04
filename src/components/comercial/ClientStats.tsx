@@ -1,5 +1,5 @@
 import { Users, UserCheck, UserX, TrendingUp } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/ui/base/card';
 import type { DbClient } from '@/hooks/commercial/useClients';
 import { formatBRLCompact } from '@/lib/formatters';
 

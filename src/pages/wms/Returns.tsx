@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { KPICard } from '@/components/shared/KPICard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { RotateCcw, Search, Package, Truck, Factory, AlertTriangle, CheckCircle, Eye } from 'lucide-react';
 import { useWMSReturns } from '@/hooks/wms/useWMSReturns';
 

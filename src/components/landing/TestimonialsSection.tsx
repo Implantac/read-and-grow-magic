@@ -1,5 +1,5 @@
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/ui/base/badge';
+import { Card, CardContent } from '@/ui/base/card';
 import { Star, Quote } from 'lucide-react';
 
 const testimonials = [

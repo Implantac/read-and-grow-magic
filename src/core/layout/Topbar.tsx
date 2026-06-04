@@ -8,12 +8,12 @@ import { useAppStore } from '@/stores/useAppStore';
 import { useAuth } from '@/hooks/system/useAuth';
 import { useNotifications } from '@/hooks/system/useNotifications';
 import { useBrainDecisions } from '@/hooks/ai/useAIBrain';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/ui/base/button';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
+} from '@/ui/base/dropdown-menu';
+import { Badge } from '@/ui/base/badge';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';

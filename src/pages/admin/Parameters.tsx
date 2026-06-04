@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Badge } from '@/ui/base/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/ui/base/dialog';
+import { Label } from '@/ui/base/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
+import { Switch } from '@/ui/base/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { 
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
-} from '@/components/ui/table';
+} from '@/ui/base/table';
 import { 
   Search, Settings2, Edit2, Eye, EyeOff, Save, RefreshCw, 
   AlertTriangle, CheckCircle2, Info
@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 import { parameterCategoryConfig } from '@/config/administration';
 import { SystemParameter, ParameterCategory, ParameterFilter } from '@/types/administration';
 import { useSystemParameters } from '@/hooks/system/useSystemParameters';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/ui/base/skeleton';
 
 const Parameters = () => {
   const { parameters: dbParameters, isLoading, updateParameter } = useSystemParameters();

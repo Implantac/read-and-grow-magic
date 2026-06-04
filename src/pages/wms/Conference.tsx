@@ -1,20 +1,20 @@
 import { useState } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { KPICard } from '@/components/shared/KPICard';
-import { ExportButton } from '@/components/shared/ExportButton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
+import { ExportButton } from '@/shared/components/ExportButton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Badge } from '@/ui/base/badge';
+import { Skeleton } from '@/ui/base/skeleton';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/ui/base/dialog';
+import { Label } from '@/ui/base/label';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/ui/base/dropdown-menu';
 import {
   ClipboardCheck, Search, MoreHorizontal, PlayCircle, CheckCircle, AlertTriangle, Clock, Eye, ScanBarcode,
 } from 'lucide-react';

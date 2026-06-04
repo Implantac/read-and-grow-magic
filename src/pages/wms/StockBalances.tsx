@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { KPICard } from '@/components/shared/KPICard';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
+import { Card, CardContent } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { Input } from '@/ui/base/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Database, Search, Package, Lock, CheckCircle } from 'lucide-react';
 import { useStockBalances } from '@/hooks/inventory/useStockBalances';
-import { ExportButton } from '@/components/shared/ExportButton';
+import { ExportButton } from '@/shared/components/ExportButton';
 
 import { formatNumber } from '@/lib/formatters';
 const statusLabels: Record<string, string> = {

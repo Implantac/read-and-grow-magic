@@ -1,5 +1,5 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
 const orderStatusData = [
   { name: 'Entregues', value: 0, color: 'hsl(var(--success))' },
   { name: 'Em Trânsito', value: 0, color: 'hsl(var(--info))' },

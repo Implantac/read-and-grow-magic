@@ -1,22 +1,22 @@
 import { useState } from 'react';
 import { FileSpreadsheet } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Label } from '@/ui/base/label';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from '@/ui/base/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/ui/base/select';
 import { reportTypeLabels } from '@/config/fiscal';
 
 interface CreateReportDialogProps {

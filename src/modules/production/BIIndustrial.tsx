@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { KPICard } from '@/components/shared/KPICard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { useProductCosts } from '@/hooks/production/useProductCosts';
 import { useProductionOrders } from '@/hooks/production/useProductionOrders';
 import { useTimeEntries } from '@/hooks/system/useTimeEntries';
@@ -15,7 +15,7 @@ import { DollarSign, TrendingUp, TrendingDown, BarChart3, Factory, Target, Gauge
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line, AreaChart, Area, ComposedChart, ReferenceLine } from 'recharts';
 import { differenceInDays, differenceInMinutes, parseISO, subDays, format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { Progress } from '@/components/ui/progress';
+import { Progress } from '@/ui/base/progress';
 import { formatBRL } from '@/lib/formatters';
 
 

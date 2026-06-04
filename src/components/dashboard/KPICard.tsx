@@ -1,6 +1,6 @@
 import { ArrowDownRight, ArrowUpRight, Minus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/ui/base/card';
 import type { KPICard as KPICardType } from '@/types';
 import {
   DollarSign,

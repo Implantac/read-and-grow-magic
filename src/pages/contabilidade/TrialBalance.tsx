@@ -1,14 +1,14 @@
 import { useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ExportButton } from '@/components/shared/ExportButton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { Skeleton } from '@/ui/base/skeleton';
+import { ExportButton } from '@/shared/components/ExportButton';
 import { getAccountTypeLabel } from '@/config/accounting';
 import { useChartOfAccounts } from '@/hooks/accounting/useChartOfAccounts';
 import { cn } from '@/lib/utils';
 import { Scale } from 'lucide-react';
 import { TrialBalanceChart } from '@/components/contabilidade/TrialBalanceChart';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import type { ExportColumn } from '@/lib/exportUtils';
 import type { TrialBalanceItem } from '@/types/accounting';
 

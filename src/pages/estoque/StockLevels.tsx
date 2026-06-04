@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { ExportButton } from '@/components/shared/ExportButton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { ExportButton } from '@/shared/components/ExportButton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Badge } from '@/ui/base/badge';
+import { Progress } from '@/ui/base/progress';
 import { formatBRL } from '@/lib/formatters';
 import {
   Table,
@@ -13,14 +13,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '@/ui/base/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/ui/base/select';
 import {
   Dialog,
   DialogContent,
@@ -28,9 +28,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+} from '@/ui/base/dialog';
+import { Label } from '@/ui/base/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import {
   AlertTriangle,
   Package,
@@ -50,9 +50,9 @@ import { ptBR } from 'date-fns/locale';
 import {
   stockLevelStatusConfig,
 } from '@/config/inventory';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { KPICard } from '@/components/shared/KPICard';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
 import { ABCCurveChart } from '@/components/estoque/ABCCurveChart';
 import { InventoryTurnoverChart } from '@/components/estoque/InventoryTurnoverChart';
 import type { StockLevel, StockLevelStatus, StockLevelFilters } from '@/types/inventory';

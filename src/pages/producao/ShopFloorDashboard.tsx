@@ -1,10 +1,10 @@
 import { useMemo, useEffect, useState } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { KPICard } from '@/components/shared/KPICard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { useTimeEntries } from '@/hooks/system/useTimeEntries';
 import { useProductionOrders } from '@/hooks/production/useProductionOrders';
 import { useProductionMachines } from '@/hooks/production/useProductionMachines';
@@ -14,7 +14,7 @@ import { Users, Factory, AlertTriangle, TrendingUp, Activity, Radio, Cpu, Zap } 
 import { differenceInMinutes } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Progress } from '@/components/ui/progress';
+import { Progress } from '@/ui/base/progress';
 import ShopFloorEventFeed from '@/components/producao/ShopFloorEventFeed';
 
 export default function ShopFloorDashboardPage() {

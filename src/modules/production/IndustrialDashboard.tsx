@@ -1,11 +1,11 @@
 import { useMemo, useEffect, useState } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Progress } from '@/components/ui/progress';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { Button } from '@/ui/base/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { Progress } from '@/ui/base/progress';
 import { useProductCosts } from '@/hooks/production/useProductCosts';
 import { useSupplyStock } from '@/hooks/inventory/useSupplyStock';
 import { useIndustrialAlerts } from '@/hooks/production/useIndustrialAlerts';
@@ -14,13 +14,13 @@ import { useTimeEntries } from '@/hooks/system/useTimeEntries';
 import { useProductionCapacity } from '@/hooks/production/useProductionCapacity';
 import { usePCPIntelligence } from '@/hooks/production/usePCPIntelligence';
 import PCPIntelligencePanel from '@/components/producao/PCPIntelligencePanel';
-import { KPICard } from '@/components/shared/KPICard';
+import { KPICard } from '@/shared/components/KPICard';
 import { DollarSign, TrendingUp, AlertTriangle, Factory, Package, Gauge, CheckCircle, XCircle, Clock, Users, Activity, Zap, Layers, Timer, Wrench, Radio, Brain, RefreshCw } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line, CartesianGrid, AreaChart, Area } from 'recharts';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/ui/base/skeleton';
 import { cn } from '@/lib/utils';
 import { differenceInDays, differenceInMinutes, format, parseISO, subDays } from 'date-fns';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function IndustrialDashboard() {

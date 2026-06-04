@@ -1,22 +1,22 @@
 import { useState } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Badge } from '@/ui/base/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/ui/base/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
+import { Label } from '@/ui/base/label';
+import { Textarea } from '@/ui/base/textarea';
 import { useQualityInspections } from '@/hooks/production/useQualityInspections';
 import { useProductionOrders } from '@/hooks/production/useProductionOrders';
 import { useProductionSteps } from '@/hooks/production/useProductionSteps';
-import { KPICard } from '@/components/shared/KPICard';
+import { KPICard } from '@/shared/components/KPICard';
 import { Plus, ShieldCheck, AlertTriangle, CheckCircle, XCircle, Search } from 'lucide-react';
 import { format } from 'date-fns';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/ui/base/skeleton';
 
 const defectCategories = ['Costura irregular', 'Mancha no tecido', 'Estampa desalinhada', 'Bordado com falha', 'Medida incorreta', 'Acabamento ruim', 'Furo no tecido', 'Cor diferente', 'Outro'];
 const severityConfig: Record<string, { label: string; color: string }> = {

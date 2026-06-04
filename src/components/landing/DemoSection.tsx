@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/ui/base/badge';
 import { Play, BarChart3, Factory, Package, Users, TrendingUp } from 'lucide-react';
 import dashboardMockup from '@/assets/dashboard-mockup.jpg';
 

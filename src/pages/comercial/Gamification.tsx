@@ -1,12 +1,12 @@
 import { useState, useMemo } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { KPICard } from '@/components/shared/KPICard';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
+import { Badge } from '@/ui/base/badge';
+import { Progress } from '@/ui/base/progress';
+import { ScrollArea } from '@/ui/base/scroll-area';
 import { formatDate, formatNumber } from '@/lib/formatters';
 import {
   useLeaderboard, useBadges, useBadgeAwards, useMissions,

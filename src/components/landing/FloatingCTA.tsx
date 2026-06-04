@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/ui/base/button';
 import { MessageCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

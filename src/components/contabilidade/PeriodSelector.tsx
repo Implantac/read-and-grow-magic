@@ -5,7 +5,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/ui/base/select';
 import { periodOptions } from '@/config/accounting';
 
 interface PeriodSelectorProps {

@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
 import { FileDown, Loader2, BarChart3 } from 'lucide-react';
 import { EquityEvolutionChart } from '@/components/contabilidade/EquityEvolutionChart';
 import { MarginTrendChart } from '@/components/contabilidade/MarginTrendChart';
@@ -10,8 +10,8 @@ import { ExpenseBreakdownChart } from '@/components/contabilidade/ExpenseBreakdo
 import { FinancialIndicatorsPanel } from '@/components/contabilidade/FinancialIndicatorsPanel';
 import { TrialBalanceChart } from '@/components/contabilidade/TrialBalanceChart';
 import { PeriodSelector } from '@/components/contabilidade/PeriodSelector';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
 
 import { useAccountingDashboardData } from '@/hooks/accounting/useAccountingDashboard';
 

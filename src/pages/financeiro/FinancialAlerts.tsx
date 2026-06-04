@@ -1,8 +1,8 @@
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { Button } from '@/ui/base/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
 import { useFinancialAlerts, useDetectFinancialAlerts, useUpdateAlertStatus } from '@/hooks/financial/useFinancialAlerts';
 import { AlertTriangle, AlertCircle, Bell, Check, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';

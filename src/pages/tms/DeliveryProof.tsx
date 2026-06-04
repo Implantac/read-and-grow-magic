@@ -1,9 +1,9 @@
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { PageLoading } from '@/components/shared/PageLoading';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { PageLoading } from '@/shared/components/PageLoading';
 import { useDeliveryProof } from '@/hooks/wms/useTMS';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { Badge } from '@/ui/base/badge';
 import { format } from 'date-fns';
 
 const statusLabels: Record<string, string> = { pending: 'Pendente', delivered: 'Entregue', refused: 'Recusada', partial: 'Parcial' };

@@ -1,13 +1,13 @@
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { KPICard } from '@/components/shared/KPICard';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
 import { useCreditProfiles, useOrderBlocks, useCollectionActions } from '@/hooks/financial/useCreditAnalysis';
 import { useClients } from '@/hooks/commercial/useClients';
 import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { Badge } from '@/ui/base/badge';
+import { Progress } from '@/ui/base/progress';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { ShieldAlert, Lock, AlertTriangle, TrendingDown, Users, DollarSign } from 'lucide-react';
 

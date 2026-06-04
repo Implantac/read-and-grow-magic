@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/ui/base/badge';
 import { Factory, Warehouse, ShoppingBag, Shirt, Package, ClipboardList, ArrowRight } from 'lucide-react';
 
 const segments = [

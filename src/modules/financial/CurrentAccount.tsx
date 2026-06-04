@@ -2,13 +2,13 @@ import { useState, useMemo } from 'react';
 import { Wallet, Search, Users, Building2, ArrowUpDown } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { Card, CardContent } from '@/ui/base/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
+import { Input } from '@/ui/base/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { Badge } from '@/ui/base/badge';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
 

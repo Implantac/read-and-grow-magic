@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/ui/base/button';
+import { Badge } from '@/ui/base/badge';
 import { MessageCircle, Play, CheckCircle2, Shield, Zap, BarChart3, ArrowRight } from 'lucide-react';
 import dashboardMockup from '@/assets/dashboard-mockup.jpg';
 

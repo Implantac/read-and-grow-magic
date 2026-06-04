@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/ui/base/badge';
 import { AlertCircle, Clock, Package, FileWarning, BarChart3, Users, Truck } from 'lucide-react';
 
 const painItems = [

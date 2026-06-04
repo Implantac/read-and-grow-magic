@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
 import { Plus, Search, MoreHorizontal, Eye, Edit, Trash2, Send, CheckCircle, Package, FileText } from 'lucide-react';
-import { ExportButton } from '@/components/shared/ExportButton';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ExportButton } from '@/shared/components/ExportButton';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { formatBRL, formatDate } from '@/lib/formatters';
 import {
   Table,
@@ -14,14 +14,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '@/ui/base/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/ui/base/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -29,17 +29,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
+} from '@/ui/base/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+} from '@/ui/base/select';
+import { Label } from '@/ui/base/label';
+import { Badge } from '@/ui/base/badge';
+import { Separator } from '@/ui/base/separator';
 import { purchaseOrderStatuses } from '@/config/purchasing';
 import { PurchaseOrder, PurchaseOrderStatus } from '@/types/purchasing';
 import { usePurchaseOrders } from '@/hooks/purchasing/usePurchaseOrders';

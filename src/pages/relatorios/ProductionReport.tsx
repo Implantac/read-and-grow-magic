@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Skeleton } from '@/ui/base/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { Download, Factory, Target, AlertTriangle, Gauge } from 'lucide-react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { KPICard } from '@/components/shared/KPICard';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
 
 export default function ProductionReport() {
   const [loading, setLoading] = useState(true);

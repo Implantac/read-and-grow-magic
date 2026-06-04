@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { KPICard } from '@/components/shared/KPICard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Progress } from '@/components/ui/progress';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Progress } from '@/ui/base/progress';
 import { RefreshCw, Search, ArrowRight, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { useReplenishmentTasks } from '@/hooks/wms/useReplenishmentTasks';
 

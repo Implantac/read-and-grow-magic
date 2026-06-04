@@ -1,12 +1,12 @@
 import { useWMSDashboardStats } from '@/hooks/wms/useWMSOperations';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { KPICard } from '@/components/shared/KPICard';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
+import { Progress } from '@/ui/base/progress';
+import { Button } from '@/ui/base/button';
+import { Badge } from '@/ui/base/badge';
+import { Skeleton } from '@/ui/base/skeleton';
 import { Link } from 'react-router-dom';
 import {
   Warehouse, PackagePlus, PackageSearch, PackageCheck, Truck,
@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { WarehouseMap } from '@/components/wms/WarehouseMap';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 
 const quickActions = [
   { to: '/wms/recebimento', icon: PackagePlus, label: 'Recebimento', color: 'text-blue-500', bg: 'bg-blue-500/10' },

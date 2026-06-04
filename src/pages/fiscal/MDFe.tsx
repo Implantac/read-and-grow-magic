@@ -1,12 +1,12 @@
 import { useState, useMemo } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Label } from '@/ui/base/label';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/ui/base/dialog';
 import { Send, CheckSquare, Plus, MapPin, Truck, ClipboardCheck, ArrowLeft, ArrowRight, ScrollText, FileText, User, Trash2, ChevronRight, Info } from 'lucide-react';
 import { useMDFes, useCreateMDFe, useTransmitMDFe, useCloseMDFe } from '@/hooks/fiscal/useMDFe';
 import { useNFe } from '@/hooks/fiscal/useNFe';
@@ -14,10 +14,10 @@ import { useCTes } from '@/hooks/fiscal/useCTe';
 import { format } from 'date-fns';
 import { FiscalStepper } from '@/components/fiscal/FiscalStepper';
 import { FiscalStatusBadge } from '@/components/fiscal/FiscalStatusBadge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/ui/base/scroll-area';
+import { Separator } from '@/ui/base/separator';
+import { Badge } from '@/ui/base/badge';
+import { Checkbox } from '@/ui/base/checkbox';
 
 import { formatBRL } from '@/lib/formatters';
 const STEPS = [

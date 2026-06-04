@@ -1,7 +1,7 @@
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
 import { useOrders } from '@/hooks/commercial/useOrders';
 import { useProductionOrders } from '@/hooks/production/useProductionOrders';
 import { useBillingQueue, useShipmentOrders, useConferenceRecords, getOrderFlowStatus } from '@/hooks/commercial/useOrderFlow';

@@ -25,8 +25,8 @@ import {
   BellRing, RotateCw, AlertOctagon, GitBranch, Siren,
   LogOut, User as UserIcon, HelpCircle, ChevronRight
 } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/base/tooltip';
+import { Separator } from '@/ui/base/separator';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutDashboard, Users, Wallet, FileCheck, Package, ShoppingCart,

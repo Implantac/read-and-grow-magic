@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ExportButton } from '@/components/shared/ExportButton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { ExportButton } from '@/shared/components/ExportButton';
 import { cn } from '@/lib/utils';
 import { Scale, Building2, Landmark, PiggyBank } from 'lucide-react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { PageLoading } from '@/components/shared/PageLoading';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { PageLoading } from '@/shared/components/PageLoading';
 import { EquityEvolutionChart } from '@/components/contabilidade/EquityEvolutionChart';
 import { FinancialIndicatorsPanel } from '@/components/contabilidade/FinancialIndicatorsPanel';
 import { useBalanceSheet } from '@/hooks/accounting/useBalanceSheet';
@@ -18,7 +18,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '@/ui/base/table';
 import type { ExportColumn } from '@/lib/exportUtils';
 import type { BalanceSheetItem } from '@/types/accounting';
 

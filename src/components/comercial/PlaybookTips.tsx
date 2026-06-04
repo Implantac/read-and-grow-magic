@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { usePlaybooks, useObjections, useLogPlaybookUsage, type Playbook, type Objection } from '@/hooks/commercial/usePlaybook';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/ui/base/badge';
+import { Button } from '@/ui/base/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/ui/base/popover';
+import { ScrollArea } from '@/ui/base/scroll-area';
 import { BookOpen, Copy, MessageSquare, Target, ChevronDown } from 'lucide-react';
 import { toastSuccess } from '@/lib/toastHelpers';
 

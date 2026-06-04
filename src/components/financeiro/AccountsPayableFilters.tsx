@@ -1,7 +1,7 @@
 import { Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ExportButton } from '@/components/shared/ExportButton';
+import { Input } from '@/ui/base/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
+import { ExportButton } from '@/shared/components/ExportButton';
 import { formatDate } from '@/lib/formatters';
 
 interface AccountsPayableFiltersProps {

@@ -1,14 +1,14 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Label } from '@/ui/base/label';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@/ui/base/select';
 import {
   Sheet,
   SheetContent,
@@ -17,9 +17,9 @@ import {
   SheetTitle,
   SheetTrigger,
   SheetFooter,
-} from '@/components/ui/sheet';
+} from '@/ui/base/sheet';
 import { Filter, X } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/ui/base/badge';
 
 export interface FilterOption {
   value: string;

@@ -1,10 +1,10 @@
-import { PageContainer } from '@/components/shared/PageContainer';
+import { PageContainer } from '@/shared/components/PageContainer';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { Button } from '@/ui/base/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { useStockReservations } from '@/hooks/commercial/useOrderFlow';
 import { useOrders } from '@/hooks/commercial/useOrders';
 import { useOrderLifecycle } from '@/hooks/commercial/useOrderLifecycle';

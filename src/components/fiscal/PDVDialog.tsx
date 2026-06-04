@@ -6,20 +6,20 @@ import {
   ChevronRight, Receipt, Printer, ArrowLeft, MoreHorizontal,
   Monitor, Calculator, Send
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Label } from '@/ui/base/label';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogClose
-} from '@/components/ui/dialog';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
+} from '@/ui/base/dialog';
+import { Separator } from '@/ui/base/separator';
+import { Badge } from '@/ui/base/badge';
 import { useProducts } from '@/hooks/inventory/useProducts';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea } from '@/ui/base/scroll-area';
 import { cn } from '@/lib/utils';
 
 interface CartItem {

@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/ui/base/badge';
 import { cn } from '@/lib/utils';
 import type { OrderStatus, SaleStatus, QuotationStatus } from '@/types/commercial';
 import type { PaymentStatus } from '@/types/financial';

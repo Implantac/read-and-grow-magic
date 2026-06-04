@@ -1,8 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
 import { cn } from '@/lib/utils';
 import { TrendingUp, Users, PieChart, MapPin, Zap, Target, ArrowUpRight, ArrowDownRight, Activity } from 'lucide-react';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/ui/base/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell, PieChart as RPieChart, Pie, LineChart, Line, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { fmt } from './ExecutiveKPICards';
 import type { ExecutiveDashboardData } from '@/hooks/ai/useExecutiveAI';

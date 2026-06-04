@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
 import { Star, Plus, Search, Eye, Edit, Trash2, Mail, Phone, MapPin, MoreHorizontal, Loader2 } from 'lucide-react';
 import { useSuppliers } from '@/hooks/purchasing/useSuppliers';
-import { ExportButton } from '@/components/shared/ExportButton';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ExportButton } from '@/shared/components/ExportButton';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import {
   Table,
   TableBody,
@@ -14,13 +14,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '@/ui/base/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/ui/base/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -28,17 +28,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
+} from '@/ui/base/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
+} from '@/ui/base/select';
+import { Label } from '@/ui/base/label';
+import { Badge } from '@/ui/base/badge';
+import { Textarea } from '@/ui/base/textarea';
 import { supplierCategories } from '@/config/purchasing';
 import { useCnpjLookup } from '@/hooks/system/useCnpjLookup';
 import { Supplier } from '@/types/purchasing';

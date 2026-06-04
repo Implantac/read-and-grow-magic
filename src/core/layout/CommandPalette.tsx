@@ -8,7 +8,7 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from '@/components/ui/command';
+} from '@/ui/base/command';
 import { navigationItems } from '@/config/navigation';
 import {
   LayoutDashboard, Users, Wallet, FileCheck, Package, ShoppingCart,

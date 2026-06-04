@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { useRFIDReaders, useRFIDTags, useRFIDEvents, useRFIDSummary } from '@/hooks/system/useRFID';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { Button } from '@/ui/base/button';
+import { Skeleton } from '@/ui/base/skeleton';
 import { RefreshCw, Radio, Tag, Activity, AlertTriangle, Wifi, WifiOff, MapPin, Zap } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { format, subHours, startOfHour } from 'date-fns';

@@ -1,16 +1,16 @@
 import { useMemo } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { KPICard } from '@/components/shared/KPICard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
 import { formatBRL } from '@/lib/formatters';
 import {
   DollarSign, ShoppingCart, Users, TrendingUp, AlertTriangle, Target,
   ArrowUpRight, Clock, CheckCircle, MapPin, Zap, BarChart3, ShieldAlert,
   UserX, TrendingDown, Brain, Sparkles, RefreshCw,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/ui/base/button';
 import { useOrders } from '@/hooks/commercial/useOrders';
 import { useClients } from '@/hooks/commercial/useClients';
 import { useSalesFunnel } from '@/hooks/commercial/useSalesFunnel';
@@ -22,8 +22,8 @@ import { useAIDailyActions, useAIRecommendations, useRunAIEngine } from '@/hooks
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, CartesianGrid, Legend } from 'recharts';
 import { startOfMonth, endOfMonth, isToday, differenceInDays, subMonths, format, startOfDay, eachDayOfInterval, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Progress } from '@/components/ui/progress';
+import { Skeleton } from '@/ui/base/skeleton';
+import { Progress } from '@/ui/base/progress';
 
 const fmtShort = (v: number) => {
   if (v >= 1000000) return `R$ ${(v / 1000000).toFixed(1)}M`;

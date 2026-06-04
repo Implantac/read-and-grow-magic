@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@/ui/base/badge';
 import { Brain, Database, ShieldCheck, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

@@ -16,8 +16,8 @@ import {
   FileSpreadsheet,
   Eye,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/ui/base/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
 import {
   Table,
   TableBody,
@@ -25,24 +25,24 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '@/ui/base/table';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
+} from '@/ui/base/select';
+import { Badge } from '@/ui/base/badge';
+import { Progress } from '@/ui/base/progress';
+import { Separator } from '@/ui/base/separator';
 import { reportTypeLabels } from '@/config/fiscal';
 import { useFiscalReports } from '@/hooks/fiscal/useFiscalReports';
 import { CreateReportDialog } from '@/components/fiscal/CreateReportDialog';
 import type { FiscalReport } from '@/types/fiscal';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { KPICard } from '@/components/shared/KPICard';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
 import {
   AreaChart,
   Area,

@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
 import { Plus, Search, MoreHorizontal, Eye, Edit, Trash2, Send, CheckCircle, Users, Clock, FileCheck } from 'lucide-react';
-import { ExportButton } from '@/components/shared/ExportButton';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ExportButton } from '@/shared/components/ExportButton';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { formatDate, formatBRL } from '@/lib/formatters';
 import {
   Table,
@@ -14,14 +14,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '@/ui/base/table';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/ui/base/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -29,17 +29,17 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
+} from '@/ui/base/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+} from '@/ui/base/select';
+import { Badge } from '@/ui/base/badge';
+import { Separator } from '@/ui/base/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { quotationStatuses } from '@/config/purchasing';
 import { Quotation, QuotationStatus, QuotationSupplier } from '@/types/purchasing';
 import { format } from 'date-fns';

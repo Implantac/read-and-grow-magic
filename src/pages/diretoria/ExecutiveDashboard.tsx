@@ -1,17 +1,17 @@
 import { useState } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
+import { Badge } from '@/ui/base/badge';
+import { Skeleton } from '@/ui/base/skeleton';
 import { cn } from '@/lib/utils';
 import {
   Brain, Lightbulb, ShieldAlert, BarChart3, DollarSign,
   Bot, Layers, Flame, AlertTriangle, Calendar, Activity,
 } from 'lucide-react';
-import { Slider } from '@/components/ui/slider';
+import { Slider } from '@/ui/base/slider';
 import { useExecutiveDashboard, useGenerateInsights, useGenerateScenarios, useUnifiedChat, useDailySummary } from '@/hooks/ai/useExecutiveAI';
 import { ExecutiveSWOT } from '@/components/executive/ExecutiveSWOT';
 import { ExecutiveIntelligenceStatus } from '@/components/executive/ExecutiveIntelligenceStatus';

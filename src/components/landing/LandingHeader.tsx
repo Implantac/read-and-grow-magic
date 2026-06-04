@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/ui/base/button';
 import { MessageCircle, Menu, X, ArrowRight, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import logoUseSistemas from '@/assets/logo.png';

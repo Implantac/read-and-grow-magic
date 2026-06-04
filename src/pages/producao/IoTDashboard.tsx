@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
+import { Progress } from '@/ui/base/progress';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { useProductionMachines } from '@/hooks/production/useProductionMachines';
 import { useProductionCapacity } from '@/hooks/production/useProductionCapacity';
 import { Activity, Cpu, Wifi, WifiOff, Thermometer, Gauge, Zap, AlertTriangle, CheckCircle, RefreshCw, ShieldAlert, Wrench, Clock, TrendingUp, Battery } from 'lucide-react';

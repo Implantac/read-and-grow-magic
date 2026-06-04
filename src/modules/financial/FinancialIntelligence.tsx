@@ -1,11 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Badge } from '@/ui/base/badge';
+import { Progress } from '@/ui/base/progress';
 import { Brain, AlertTriangle, TrendingUp, RefreshCw, Activity, Wallet, AlertCircle } from 'lucide-react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { KPICard } from '@/components/shared/KPICard';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
 import { useLatestHealthScore, usePredictiveAlerts, useComputeIntelligence, useAutoReconcile } from '@/hooks/financial/useFinancialIntelligence';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';

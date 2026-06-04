@@ -1,20 +1,20 @@
 import { useState } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
 import { useProductionRoutes, useProductionRouteSteps, ProductionRouteRow, ProductionRouteStep } from '@/hooks/production/useProductionRoutes';
 import { useProductionSectors } from '@/hooks/production/useProductionSectors';
 import { useProductionResources } from '@/hooks/production/useProductionResources';
 import { useProducts } from '@/hooks/inventory/useProducts';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Label } from '@/ui/base/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/ui/base/dialog';
+import { Badge } from '@/ui/base/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Plus, Pencil, Trash2, Search, Route, Clock, ChevronRight, X, AlertTriangle, GitBranch, Package, Timer, Zap } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/ui/base/skeleton';
+import { Textarea } from '@/ui/base/textarea';
 
 const emptyRoute: Partial<ProductionRouteRow> = { code: '', product_id: null, product_code: '', product_name: '', version: '1.0', description: '', is_active: true };
 

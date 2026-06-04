@@ -1,14 +1,14 @@
 import { useState, useRef } from 'react';
 import { useAppStore } from '@/stores/useAppStore';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Label } from '@/ui/base/label';
+import { Badge } from '@/ui/base/badge';
+import { Separator } from '@/ui/base/separator';
+import { Switch } from '@/ui/base/switch';
+import { Avatar, AvatarFallback, AvatarImage } from '@/ui/base/avatar';
 import {
   User, Mail, Shield, Building2, MapPin, Phone, Save, Eye, EyeOff, Lock, Camera,
 } from 'lucide-react';

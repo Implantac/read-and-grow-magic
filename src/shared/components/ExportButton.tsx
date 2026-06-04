@@ -1,12 +1,12 @@
 import { Download, FileSpreadsheet, FileText } from 'lucide-react';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/ui/base/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@/ui/base/dropdown-menu';
 import { exportToCSV, exportToExcel, type ExportColumn } from '@/lib/exportUtils';
 
 interface ExportButtonProps<T extends Record<string, unknown>> {

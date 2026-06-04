@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ExportButton } from '@/components/shared/ExportButton';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { PageLoading } from '@/components/shared/PageLoading';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { ExportButton } from '@/shared/components/ExportButton';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { PageLoading } from '@/shared/components/PageLoading';
 import { cn } from '@/lib/utils';
 import { ArrowUpRight, ArrowDownRight, TrendingUp } from 'lucide-react';
 import { MarginTrendChart } from '@/components/contabilidade/MarginTrendChart';
@@ -14,8 +14,8 @@ import { useAccountsPayable } from '@/hooks/financial/useAccountsPayable';
 import { formatBRL, formatBRLCompact } from '@/lib/formatters';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+} from '@/ui/base/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { useState } from 'react';
 import { startOfMonth, endOfMonth, subMonths, isWithinInterval, format, eachMonthOfInterval } from 'date-fns';

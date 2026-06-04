@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { formatBRLCompact } from '@/lib/formatters';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Skeleton } from '@/ui/base/skeleton';
 import { supabase } from '@/integrations/supabase/client';
 import { Download, Package, AlertTriangle, TrendingDown, Boxes } from 'lucide-react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { KPICard } from '@/components/shared/KPICard';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
 
 const formatCurrency = (value: number) => formatBRLCompact(value);
 export default function InventoryReport() {

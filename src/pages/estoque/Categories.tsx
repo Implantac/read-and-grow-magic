@@ -1,25 +1,25 @@
 import { useState } from 'react';
 import { toastError } from '@/lib/toastHelpers';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Badge } from '@/ui/base/badge';
+import { Label } from '@/ui/base/label';
+import { Switch } from '@/ui/base/switch';
+import { Textarea } from '@/ui/base/textarea';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from '@/components/ui/table';
+} from '@/ui/base/table';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
-} from '@/components/ui/dialog';
-import { ExportButton } from '@/components/shared/ExportButton';
+} from '@/ui/base/dialog';
+import { ExportButton } from '@/shared/components/ExportButton';
 import { Plus, Search, Edit, Trash2, FolderTree, Package, Filter, Loader2 } from 'lucide-react';
 import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory, type DbCategory } from '@/hooks/inventory/useCategories';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { PageLoading } from '@/components/shared/PageLoading';
-import { KPICard } from '@/components/shared/KPICard';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { PageLoading } from '@/shared/components/PageLoading';
+import { KPICard } from '@/shared/components/KPICard';
 
 export default function CategoriesPage() {
   const { data: categories = [], isLoading } = useCategories();

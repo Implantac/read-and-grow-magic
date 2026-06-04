@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/ui/base/button';
+import { Badge } from '@/ui/base/badge';
 import { MessageCircle, Play, CheckCircle2 } from 'lucide-react';
 
 interface Props {

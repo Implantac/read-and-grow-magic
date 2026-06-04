@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { Button } from '@/ui/base/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { useShipmentOrders, useUpdateShipment } from '@/hooks/commercial/useOrderFlow';
 import { useDeliveryTracking, useCreateTrackingEvent } from '@/hooks/system/useDeliveryTracking';
 import { Truck, Clock, CheckCircle, Package, MapPin, Play, Eye, ArrowRight } from 'lucide-react';

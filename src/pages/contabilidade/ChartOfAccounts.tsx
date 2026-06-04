@@ -1,20 +1,20 @@
 import { useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Skeleton } from '@/components/ui/skeleton';
-import { ExportButton } from '@/components/shared/ExportButton';
-import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
+import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
+import { Button } from '@/ui/base/button';
+import { Input } from '@/ui/base/input';
+import { Skeleton } from '@/ui/base/skeleton';
+import { ExportButton } from '@/shared/components/ExportButton';
+import { AdvancedFilters, type FilterField } from '@/shared/components/AdvancedFilters';
 import { getAccountTypeLabel } from '@/config/accounting';
 import { useChartOfAccounts } from '@/hooks/accounting/useChartOfAccounts';
 import { cn } from '@/lib/utils';
 import { Search, ChevronRight, ChevronDown, BookOpen, Plus, FolderTree, DollarSign } from 'lucide-react';
 import type { ExportColumn } from '@/lib/exportUtils';
 import type { ChartOfAccount } from '@/types/accounting';
-import { PageContainer } from '@/components/shared/PageContainer';
-import { PageHeader } from '@/components/shared/PageHeader';
-import { KPICard } from '@/components/shared/KPICard';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
 
 import { formatBRL } from '@/lib/formatters';
 const typeColorMap: Record<string, string> = {
