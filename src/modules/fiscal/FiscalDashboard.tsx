@@ -238,17 +238,16 @@ export default function FiscalDashboard() {
               <div className="space-y-3">
                 <h3 className="font-bold flex items-center gap-2">
                   <Package className="h-4 w-4 text-primary" />
-                  Produtos e Tributos Detectados
+                  Produtos e Inteligência de Vínculos
                 </h3>
                 <div className="border rounded-lg overflow-hidden">
                   <table className="w-full text-sm">
                     <thead className="bg-muted/50 border-b">
                       <tr>
-                        <th className="px-3 py-2 text-left">Produto</th>
+                        <th className="px-3 py-2 text-left">Item (XML)</th>
+                        <th className="px-3 py-2 text-left">Vínculo Sistema</th>
                         <th className="px-3 py-2 text-center">NCM/CFOP</th>
                         <th className="px-3 py-2 text-right">Qtd</th>
-                        <th className="px-3 py-2 text-right">V. Unit</th>
-                        <th className="px-3 py-2 text-right">Impostos</th>
                         <th className="px-3 py-2 text-right">Total</th>
                       </tr>
                     </thead>
@@ -257,18 +256,31 @@ export default function FiscalDashboard() {
                         <tr key={idx} className="hover:bg-muted/20">
                           <td className="px-3 py-3">
                             <div className="font-medium">{p.description}</div>
-                            <div className="text-[10px] text-muted-foreground font-mono">Cód: {p.code}</div>
+                            <div className="text-[10px] text-muted-foreground font-mono">Ref Fornecedor: {p.code}</div>
+                          </td>
+                          <td className="px-3 py-3">
+                            {p.linkedProductId ? (
+                              <div className="flex flex-col">
+                                <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 w-fit gap-1 mb-1">
+                                  <CheckCircle className="h-2 w-2" /> Vínculo OK
+                                </Badge>
+                                <span className="text-xs font-bold text-primary">{p.linkedProductName}</span>
+                                <span className="text-[10px] text-muted-foreground">{p.linkedProductId}</span>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col gap-1">
+                                <Badge variant="outline" className="text-amber-600 border-amber-200 w-fit gap-1">
+                                  <AlertTriangle className="h-2 w-2" /> Produto Novo
+                                </Badge>
+                                <Button variant="link" size="sm" className="h-auto p-0 text-[10px] justify-start">Associar manual</Button>
+                              </div>
+                            )}
                           </td>
                           <td className="px-3 py-3 text-center">
                             <div className="text-[10px] font-mono">{p.ncm}</div>
                             <Badge variant="outline" className="text-[9px] h-4 px-1">{p.cfop}</Badge>
                           </td>
                           <td className="px-3 py-3 text-right">{p.qCom} {p.uCom}</td>
-                          <td className="px-3 py-3 text-right">R$ {p.vUnCom.toFixed(2)}</td>
-                          <td className="px-3 py-3 text-right">
-                            <div className="text-[10px] text-primary font-bold">ICMS: R$ {p.taxes.icms.toFixed(2)}</div>
-                            <div className="text-[10px] text-muted-foreground">PIS/COF: R$ {(p.taxes.pis + p.taxes.cofins).toFixed(2)}</div>
-                          </td>
                           <td className="px-3 py-3 text-right font-bold">R$ {p.vProd.toFixed(2)}</td>
                         </tr>
                       ))}
