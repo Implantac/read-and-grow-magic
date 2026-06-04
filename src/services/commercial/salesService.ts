@@ -2,10 +2,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { DbSale, CreateSaleInput } from '@/types/commercial';
 import { BaseService } from '../shared/baseService';
 
-class SalesService extends BaseService<DbSale> {
-  constructor() {
-    super('sales');
-  }
+class SalesService {
+  private base = new BaseService<DbSale>('sales');
 
   async getAll() {
     const { data, error } = await supabase
@@ -19,6 +17,10 @@ class SalesService extends BaseService<DbSale> {
       ...s,
       items: s.sale_items || [],
     })) as DbSale[];
+  }
+
+  async getById(id: string) {
+    return this.base.getById(id);
   }
 
   async create(input: CreateSaleInput) {
@@ -58,6 +60,10 @@ class SalesService extends BaseService<DbSale> {
     if (itemsError) throw itemsError;
 
     return sale;
+  }
+
+  async delete(id: string) {
+    return this.base.delete(id);
   }
 }
 
