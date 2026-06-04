@@ -77,6 +77,7 @@ export const navigationSections: NavSection[] = [
         href: '/comercial',
         icon: 'Users',
         children: [
+          { title: 'CRM Enterprise', href: '/comercial/crm', icon: 'Target' },
           { title: 'Dashboard', href: '/comercial/dashboard', icon: 'BarChart3' },
           { title: '⚡ O Que Fazer Hoje', href: '/comercial/execucao', icon: 'Zap' },
           { title: 'Painel Vendedor', href: '/comercial/vendedor', icon: 'Zap' },
