@@ -93,7 +93,7 @@ export default function QuotationsPage() {
   const columns: Column<DbQuotation>[] = [
     { key: 'number', label: 'Número', sortable: true },
     { key: 'client_name', label: 'Cliente', sortable: true },
-    { key: 'date', label: 'Data', sortable: true, render: (v) => format(new Date(v as string), 'dd/MM/yyyy', { locale: ptBR }) },
+    { key: 'date', label: 'Data', sortable: true, render: (v) => v ? format(new Date(v as string), 'dd/MM/yyyy', { locale: ptBR }) : '—' },
     { key: 'valid_until', label: 'Validade', render: (v) => {
       const date = new Date(v as string);
       return <span className={isPast(date) ? 'text-destructive' : ''}>{format(date, 'dd/MM/yyyy', { locale: ptBR })}</span>;

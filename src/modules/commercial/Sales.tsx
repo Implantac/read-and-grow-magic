@@ -97,7 +97,7 @@ export default function SalesPage() {
   const columns: Column<DbSale>[] = [
     { key: 'number', label: 'Número', sortable: true },
     { key: 'client_name', label: 'Cliente', sortable: true },
-    { key: 'date', label: 'Data', sortable: true, render: (v) => format(new Date(v as string), "dd/MM/yyyy HH:mm", { locale: ptBR }) },
+    { key: 'date', label: 'Data', sortable: true, render: (v) => v ? format(new Date(v as string), "dd/MM/yyyy HH:mm", { locale: ptBR }) : '—' },
     { key: 'items', label: 'Itens', render: (_, row) => row.items?.length || 0 },
     { key: 'payment_method', label: 'Pagamento', render: (v) => getPaymentMethodLabel(v as any) },
     { key: 'total', label: 'Total', sortable: true, render: (v) => formatBRL(v as number) },

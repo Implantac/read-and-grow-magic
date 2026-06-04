@@ -255,7 +255,7 @@ export default function OrdersPage() {
         </div>
       ),
     },
-    { key: 'date', label: 'Data', sortable: true, render: (v) => format(new Date(v as string), 'dd/MM/yyyy', { locale: ptBR }) },
+    { key: 'date', label: 'Data', sortable: true, render: (v) => v ? format(new Date(v as string), 'dd/MM/yyyy', { locale: ptBR }) : '—' },
     {
       key: 'delivery_date', label: 'Entrega',
       render: (v) => v ? (

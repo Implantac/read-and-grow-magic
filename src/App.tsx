@@ -42,8 +42,11 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 60 * 1000,
       gcTime: 5 * 60 * 1000,
-      retry: 1,
-      refetchOnWindowFocus: false,
+      retry: (failureCount, error: any) => {
+        if (error?.status === 401) return false;
+        return failureCount < 1;
+      },
+      refetchOnWindowFocus: true,
     },
   },
 });
