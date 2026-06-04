@@ -1,5 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { dreService } from '@/services/accounting/dreService';
+import { useSupabaseQuery } from '@/hooks/shared/useSupabaseQuery';
 
 export interface DREDynamicRow {
   section: string;
@@ -9,17 +9,8 @@ export interface DREDynamicRow {
 }
 
 export function useDREDynamic(params: { from: string; to: string; costCenterId?: string | null; channel?: string | null }) {
-  return useQuery({
-    queryKey: ['dre_dynamic', params],
-    queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_dre_dynamic', {
-        _from: params.from,
-        _to: params.to,
-        _cost_center_id: params.costCenterId ?? null,
-        _channel: params.channel ?? null,
-      });
-      if (error) throw error;
-      return (data ?? []) as DREDynamicRow[];
-    },
-  });
+  return useSupabaseQuery(
+    ['dre_dynamic', params], 
+    () => dreService.getDynamic(params)
+  );
 }

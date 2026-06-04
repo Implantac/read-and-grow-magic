@@ -18,5 +18,16 @@ export const dreService = {
     });
     if (error) throw error;
     return (data || []) as DRECategoryRow[];
+  },
+
+  async getDynamic(params: { from: string; to: string; costCenterId?: string | null; channel?: string | null }) {
+    const { data, error } = await supabase.rpc('get_dre_dynamic' as any, {
+      _from: params.from,
+      _to: params.to,
+      _cost_center_id: params.costCenterId ?? null,
+      _channel: params.channel ?? null,
+    });
+    if (error) throw error;
+    return (data ?? []) as any[];
   }
 };
