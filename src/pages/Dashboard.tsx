@@ -5,6 +5,7 @@ import { ConsolidatedCharts } from '@/components/dashboard/ConsolidatedCharts';
 import { GlobalAlerts } from '@/components/dashboard/GlobalAlerts';
 import { RevenueChart } from '@/components/dashboard/RevenueChart';
 import { RecentActivities } from '@/components/dashboard/RecentActivities';
+import { ExecutiveConsensus } from '@/components/diretoria/ExecutiveConsensus';
 import { useDashboardData } from '@/hooks/system/useDashboardData';
 import {
   ShoppingCart, Wallet, Package, Factory, Truck, Warehouse,
@@ -242,10 +243,17 @@ export default function Dashboard() {
       />
 
       {/* Alertas + Faturamento + Atividades */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        <GlobalAlerts alerts={alerts} />
-        <RevenueChart />
-        <RecentActivities />
+      <div className="grid gap-6 lg:grid-cols-4">
+        <div className="lg:col-span-1">
+          <ExecutiveConsensus />
+        </div>
+        <div className="lg:col-span-3 space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            <GlobalAlerts alerts={alerts} />
+            <RevenueChart />
+          </div>
+          <RecentActivities />
+        </div>
       </div>
     </div>
   );
