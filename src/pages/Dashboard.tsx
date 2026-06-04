@@ -9,7 +9,7 @@ import { useDashboardData } from '@/hooks/system/useDashboardData';
 import {
   ShoppingCart, Wallet, Package, Factory, Truck, Warehouse,
   DollarSign, TrendingUp, ArrowDownCircle, ArrowUpCircle,
-  RefreshCw,
+  RefreshCw, ShieldCheck
 } from 'lucide-react';
 import { Card, CardContent } from '@/ui/base/card';
 import { Skeleton } from '@/ui/base/skeleton';
@@ -145,6 +145,57 @@ export default function Dashboard() {
         {segment !== 'services' && <ModuleKPISection title="Estoque" icon={Package} kpis={inventoryKPIs} accentColor="bg-info" />}
         {segment !== 'services' && <ModuleKPISection title="WMS" icon={Warehouse} kpis={wmsKPIs} accentColor="bg-warning" />}
         {segment === 'textile' && <ModuleKPISection title="Produção" icon={Factory} kpis={productionKPIs} accentColor="bg-[hsl(142,76%,36%)]" />}
+        
+        {/* Vertical Specific Shortcuts */}
+        {segment === 'textile' && (
+          <Card className="border-l-4 border-l-purple-500 bg-purple-500/5 hover:bg-purple-500/10 transition-all cursor-pointer" onClick={() => window.location.href='/vertical/textile'}>
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="p-3 bg-purple-500/10 rounded-xl"><Factory className="text-purple-600 h-6 w-6" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Vertical</p>
+                <p className="font-bold">Indústria Têxtil</p>
+                <p className="text-[10px] text-purple-600 font-medium">Acessar Dashboard Especializado →</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        {segment === 'pharma' && (
+          <Card className="border-l-4 border-l-blue-500 bg-blue-500/5 hover:bg-blue-500/10 transition-all cursor-pointer" onClick={() => window.location.href='/vertical/pharma'}>
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="p-3 bg-blue-500/10 rounded-xl"><ShieldCheck className="text-blue-600 h-6 w-6" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Vertical</p>
+                <p className="font-bold">Farmacêutico</p>
+                <p className="text-[10px] text-blue-600 font-medium">Acessar Dashboard Especializado →</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        {segment === 'retail' && (
+          <Card className="border-l-4 border-l-pink-500 bg-pink-500/5 hover:bg-pink-500/10 transition-all cursor-pointer" onClick={() => window.location.href='/vertical/retail'}>
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="p-3 bg-pink-500/10 rounded-xl"><ShoppingCart className="text-pink-600 h-6 w-6" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Vertical</p>
+                <p className="font-bold">Varejo & Redes</p>
+                <p className="text-[10px] text-pink-600 font-medium">Acessar Dashboard Especializado →</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        {segment === 'distribution' && (
+          <Card className="border-l-4 border-l-green-500 bg-green-500/5 hover:bg-green-500/10 transition-all cursor-pointer" onClick={() => window.location.href='/vertical/distribution'}>
+            <CardContent className="p-4 flex items-center gap-4">
+              <div className="p-3 bg-green-500/10 rounded-xl"><Truck className="text-green-600 h-6 w-6" /></div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Vertical</p>
+                <p className="font-bold">Distribuição & Atacado</p>
+                <p className="text-[10px] text-green-600 font-medium">Acessar Dashboard Especializado →</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <ModuleKPISection title="Compras" icon={Truck} kpis={purchasingKPIs} accentColor="bg-[hsl(262,83%,58%)]" />
       </div>
 
