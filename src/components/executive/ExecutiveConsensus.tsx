@@ -21,27 +21,37 @@ const moduleStatusMap: Record<string, { label: string; color: string; explanatio
   comercial: { 
     label: 'Otimizado', 
     color: 'text-success', 
-    explanation: 'Motor de conversão operando com 94% de eficiência preditiva.' 
+    explanation: 'Motor de conversão operando com 94% de eficiência preditiva. Lead score calibrado.' 
   },
   financeiro: { 
     label: 'Estável', 
     color: 'text-primary', 
-    explanation: 'Fluxo de caixa projetado sem rupturas nos próximos 30 dias.' 
+    explanation: 'Fluxo de caixa projetado sem rupturas nos próximos 45 dias. DRE em conformidade.' 
   },
   producao: { 
     label: 'Atenção', 
     color: 'text-warning', 
-    explanation: 'Gargalo identificado na linha 04. IA sugerindo re-balanceamento.' 
+    explanation: 'Gargalo identificado na linha de tecelagem 04. IA sugerindo re-balanceamento de turnos.' 
   },
   estoque: { 
     label: 'Crítico', 
     color: 'text-destructive', 
-    explanation: 'Ruptura de estoque iminente em 12 SKUs de alta rotatividade.' 
+    explanation: 'Ruptura de estoque iminente em 12 SKUs de alta rotatividade. Necessário ressuprimento urgente.' 
   },
   rh: { 
     label: 'Saudável', 
     color: 'text-success', 
-    explanation: 'Clima organizacional e produtividade acima da meta setorial.' 
+    explanation: 'Clima organizacional e produtividade acima da meta setorial. Turnover reduzido em 12%.' 
+  },
+  compras: {
+    label: 'Eficiente',
+    color: 'text-success',
+    explanation: 'SLA de fornecedores em 98%. IA negociando condições otimizadas automaticamente.'
+  },
+  fiscal: {
+    label: 'Compliance',
+    color: 'text-info',
+    explanation: 'Nenhuma pendência detectada. SPED e obrigações acessórias geradas com 100% de precisão.'
   }
 };
 
