@@ -88,7 +88,7 @@ export function AccountsPayableTable({
               <TableCell className="text-right font-medium text-destructive">
                 {formatBRL(account.open_amount ?? account.amount)}
               </TableCell>
-              <TableCell><StatusBadge status={account.status} /></TableCell>
+              <TableCell><StatusBadge type="payment" status={account.status} /></TableCell>
               <TableCell className="text-right">
                 <div className="flex justify-end gap-2">
                   <Button variant="ghost" size="icon" onClick={() => onView(account)}><Eye className="h-4 w-4" /></Button>
