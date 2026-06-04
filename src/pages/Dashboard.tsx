@@ -5,7 +5,8 @@ import { ConsolidatedCharts } from '@/components/dashboard/ConsolidatedCharts';
 import { GlobalAlerts } from '@/components/dashboard/GlobalAlerts';
 import { RevenueChart } from '@/components/dashboard/RevenueChart';
 import { RecentActivities } from '@/components/dashboard/RecentActivities';
-import { ExecutiveConsensus } from '@/components/diretoria/ExecutiveConsensus';
+import { ExecutiveConsensus } from '@/components/executive/ExecutiveConsensus';
+import { ExecutiveCouncilPanel } from '@/components/executive/ExecutiveCouncilPanel';
 import { useDashboardData } from '@/hooks/system/useDashboardData';
 import {
   ShoppingCart, Wallet, Package, Factory, Truck, Warehouse,
@@ -103,6 +104,9 @@ export default function Dashboard() {
           </p>
         </div>
       </div>
+
+      {/* Conselho Executivo */}
+      <ExecutiveCouncilPanel />
 
       {/* KPIs Principais */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
