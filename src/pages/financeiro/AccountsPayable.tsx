@@ -300,8 +300,8 @@ export default function AccountsPayable() {
 
       {settlementTarget && (
         <SettlementDialog 
-          isOpen={!!settlementTarget} 
-          onClose={() => setSettlementTarget(null)} 
+          open={!!settlementTarget} 
+          onOpenChange={(open) => !open && setSettlementTarget(null)} 
           target={settlementTarget} 
         />
       )}
