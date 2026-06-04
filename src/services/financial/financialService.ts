@@ -15,7 +15,7 @@ export const financialService = {
   async createReceivable(account: Partial<AccountReceivableRow>) {
     const { data, error } = await supabase
       .from('accounts_receivable')
-      .insert([account])
+      .insert(account as any)
       .select()
       .single();
     if (error) throw error;
@@ -25,7 +25,7 @@ export const financialService = {
   async updateReceivable(id: string, updates: Partial<AccountReceivableRow>) {
     const { data, error } = await supabase
       .from('accounts_receivable')
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .update({ ...updates, updated_at: new Date().toISOString() } as any)
       .eq('id', id)
       .select()
       .single();
@@ -50,7 +50,7 @@ export const financialService = {
   async createPayable(account: Partial<AccountPayableRow>) {
     const { data, error } = await supabase
       .from('accounts_payable')
-      .insert([account])
+      .insert(account as any)
       .select()
       .single();
     if (error) throw error;
@@ -60,7 +60,7 @@ export const financialService = {
   async updatePayable(id: string, updates: Partial<AccountPayableRow>) {
     const { data, error } = await supabase
       .from('accounts_payable')
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .update({ ...updates, updated_at: new Date().toISOString() } as any)
       .eq('id', id)
       .select()
       .single();
