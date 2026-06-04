@@ -110,7 +110,7 @@ export default function BrainCommandCenter() {
           </CardHeader>
           <CardContent className="space-y-3">
             <p className="text-sm leading-relaxed">{veredicto}</p>
-            {lastRun && <p className="text-xs text-muted-foreground">Atualizado {format(new Date(lastRun.created_at), "dd/MM 'às' HH:mm", { locale: ptBR })} · {lastRun.decisions_count} decisões</p>}
+            {lastRun && <p className="text-xs text-muted-foreground">Atualizado {lastRun.created_at ? format(new Date(lastRun.created_at), "dd/MM 'às' HH:mm", { locale: ptBR }) : '—'} · {lastRun.decisions_count} decisões</p>}
             {kpisChave.length > 0 && (
               <div className="flex flex-wrap gap-2 pt-2">
                 {kpisChave.slice(0, 6).map((k: any, i: number) => (
