@@ -12,7 +12,7 @@ import {
 } from '@/ui/base/table';
 import { 
   Search, Plus, Edit2, Trash2, Building2, MapPin, Phone, Mail,
-  MoreVertical, CheckCircle2, XCircle, Building
+  MoreVertical, CheckCircle2, XCircle, Building, Loader2
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -32,6 +32,8 @@ const Companies = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [isFetchingCNPJ, setIsFetchingCNPJ] = useState(false);
+  const [cnpjValue, setCnpjValue] = useState('');
 
   // Stats
   const headquarters = companies.find(c => c.isHeadquarters);
@@ -50,6 +52,46 @@ const Companies = () => {
       (filter.isHeadquarters === false && !company.isHeadquarters);
     return matchesSearch && matchesStatus && matchesType;
   });
+
+  const handleFetchCNPJ = async () => {
+    if (!cnpjValue || cnpjValue.replace(/\D/g, '').length !== 14) {
+      toast.error('Informe um CNPJ válido');
+      return;
+    }
+
+    setIsFetchingCNPJ(true);
+    try {
+      const cleanCnpj = cnpjValue.replace(/\D/g, '');
+      const response = await fetch(`https://publica.cnpj.ws/cnpj/${cleanCnpj}`);
+      
+      if (!response.ok) throw new Error('Erro ao buscar dados do CNPJ');
+      
+      const data = await response.json();
+      
+      // Mapear dados para o formulário
+      const form = document.querySelector('form') as HTMLFormElement;
+      if (form) {
+        (form.elements.namedItem('name') as HTMLInputElement).value = data.razao_social || '';
+        (form.elements.namedItem('tradeName') as HTMLInputElement).value = data.estabelecimento.nome_fantasia || data.razao_social || '';
+        (form.elements.namedItem('email') as HTMLInputElement).value = data.estabelecimento.email || '';
+        (form.elements.namedItem('phone') as HTMLInputElement).value = `${data.estabelecimento.ddd1}${data.estabelecimento.telefone1}` || '';
+        (form.elements.namedItem('zipCode') as HTMLInputElement).value = data.estabelecimento.cep || '';
+        (form.elements.namedItem('street') as HTMLInputElement).value = data.estabelecimento.logradouro || '';
+        (form.elements.namedItem('number') as HTMLInputElement).value = data.estabelecimento.numero || '';
+        (form.elements.namedItem('complement') as HTMLInputElement).value = data.estabelecimento.complemento || '';
+        (form.elements.namedItem('neighborhood') as HTMLInputElement).value = data.estabelecimento.bairro || '';
+        (form.elements.namedItem('city') as HTMLInputElement).value = data.estabelecimento.cidade.nome || '';
+      }
+      
+      toast.success('Dados da empresa carregados com sucesso!');
+      toast.info('Regras fiscais e CFOPs serão gerados automaticamente ao salvar.');
+    } catch (error) {
+      console.error(error);
+      toast.error('Não foi possível buscar os dados do CNPJ. Preencha manualmente.');
+    } finally {
+      setIsFetchingCNPJ(false);
+    }
+  };
 
   const handleCreateCompany = () => {
     setEditingCompany(null);
@@ -437,13 +479,24 @@ const Companies = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="cnpj">CNPJ *</Label>
-                    <Input 
-                      id="cnpj" 
-                      name="cnpj" 
-                      placeholder="00.000.000/0000-00"
-                      defaultValue={editingCompany?.cnpj}
-                      required 
-                    />
+                    <div className="flex gap-2">
+                      <Input 
+                        id="cnpj" 
+                        name="cnpj" 
+                        placeholder="00.000.000/0000-00"
+                        value={cnpjValue}
+                        onChange={(e) => setCnpjValue(e.target.value)}
+                        required 
+                      />
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={handleFetchCNPJ}
+                        disabled={isFetchingCNPJ}
+                      >
+                        {isFetchingCNPJ ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                      </Button>
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="stateRegistration">Inscrição Estadual</Label>
