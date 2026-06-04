@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { Button } from "@/ui/base/button";
 import { Badge } from "@/ui/base/badge";
 import { Progress } from "@/ui/base/progress";
 import { Label } from "@/ui/base/label";
+import { Input } from "@/ui/base/input";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +12,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/ui/base/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/ui/base/select";
 import { 
   ShieldCheck, 
   FileText, 
@@ -29,7 +37,10 @@ import {
   Loader2,
   CheckCircle,
   AlertTriangle,
-  Info
+  Info,
+  Link as LinkIcon,
+  RefreshCw,
+  Plus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -72,8 +83,41 @@ export default function FiscalDashboard() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [xmlData, setXmlData] = useState<XMLData | null>(null);
   const [showReview, setShowReview] = useState(false);
+  const [showManualLinking, setShowManualLinking] = useState(false);
+  const [activeItemIndex, setActiveItemIndex] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
   const [linkedOrders, setLinkedOrders] = useState<any[]>([]);
+  
+  // Simulated product database for linking
+  const [systemProducts] = useState([
+    { id: 'PROD-123', name: 'Tecido de Algodão Cru', code: 'ALG-001' },
+    { id: 'PROD-456', name: 'Linha Costura Reforçada 40/2', code: 'LIN-100' },
+    { id: 'PROD-789', name: 'Botão Poliéster Perolado', code: 'BOT-005' },
+  ]);
+
+  const handleManualLink = (index: number) => {
+    setActiveItemIndex(index);
+    setShowManualLinking(true);
+  };
+
+  const confirmManualLink = (productId: string) => {
+    if (activeItemIndex === null || !xmlData) return;
+    
+    const product = systemProducts.find(p => p.id === productId);
+    if (!product) return;
+
+    const newProducts = [...xmlData.products];
+    newProducts[activeItemIndex] = {
+      ...newProducts[activeItemIndex],
+      linkedProductId: product.id,
+      linkedProductName: product.name
+    };
+
+    setXmlData({ ...xmlData, products: newProducts });
+    setShowManualLinking(false);
+    setActiveItemIndex(null);
+    toast.success(`Item vinculado a ${product.name}`);
+  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -272,7 +316,15 @@ export default function FiscalDashboard() {
                                 <Badge variant="outline" className="text-amber-600 border-amber-200 w-fit gap-1">
                                   <AlertTriangle className="h-2 w-2" /> Produto Novo
                                 </Badge>
-                                <Button variant="link" size="sm" className="h-auto p-0 text-[10px] justify-start">Associar manual</Button>
+                                <Button 
+                                  variant="link" 
+                                  size="sm" 
+                                  className="h-auto p-0 text-[10px] justify-start gap-1"
+                                  onClick={() => handleManualLink(idx)}
+                                >
+                                  <LinkIcon className="h-2 w-2" />
+                                  Vincular manualmente
+                                </Button>
                               </div>
                             )}
                           </td>
@@ -326,6 +378,58 @@ export default function FiscalDashboard() {
                 </Button>
               </>
             )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manual Product Linking Dialog */}
+      <Dialog open={showManualLinking} onOpenChange={setShowManualLinking}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <LinkIcon className="h-5 w-5 text-primary" />
+              Vincular Produto do Sistema
+            </DialogTitle>
+          </DialogHeader>
+          
+          {activeItemIndex !== null && xmlData && (
+            <div className="space-y-4 py-4">
+              <div className="p-3 bg-muted rounded-lg border">
+                <p className="text-[10px] uppercase font-bold text-muted-foreground">Item no XML</p>
+                <p className="font-medium text-sm">{xmlData.products[activeItemIndex].description}</p>
+                <p className="text-[10px] text-muted-foreground">Ref Fornecedor: {xmlData.products[activeItemIndex].code}</p>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Pesquisar no Catálogo Local</Label>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="Nome ou código do produto..." className="pl-9" />
+                </div>
+              </div>
+
+              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                {systemProducts.map((p) => (
+                  <div 
+                    key={p.id} 
+                    className="flex items-center justify-between p-3 rounded-lg border hover:border-primary cursor-pointer transition-all hover:bg-primary/5 group"
+                    onClick={() => confirmManualLink(p.id)}
+                  >
+                    <div>
+                      <p className="text-sm font-bold group-hover:text-primary transition-colors">{p.name}</p>
+                      <p className="text-[10px] text-muted-foreground">Cód: {p.code}</p>
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowManualLinking(false)}>Cancelar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
