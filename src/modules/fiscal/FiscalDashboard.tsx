@@ -83,8 +83,41 @@ export default function FiscalDashboard() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [xmlData, setXmlData] = useState<XMLData | null>(null);
   const [showReview, setShowReview] = useState(false);
+  const [showManualLinking, setShowManualLinking] = useState(false);
+  const [activeItemIndex, setActiveItemIndex] = useState<number | null>(null);
   const [progress, setProgress] = useState(0);
   const [linkedOrders, setLinkedOrders] = useState<any[]>([]);
+  
+  // Simulated product database for linking
+  const [systemProducts] = useState([
+    { id: 'PROD-123', name: 'Tecido de Algodão Cru', code: 'ALG-001' },
+    { id: 'PROD-456', name: 'Linha Costura Reforçada 40/2', code: 'LIN-100' },
+    { id: 'PROD-789', name: 'Botão Poliéster Perolado', code: 'BOT-005' },
+  ]);
+
+  const handleManualLink = (index: number) => {
+    setActiveItemIndex(index);
+    setShowManualLinking(true);
+  };
+
+  const confirmManualLink = (productId: string) => {
+    if (activeItemIndex === null || !xmlData) return;
+    
+    const product = systemProducts.find(p => p.id === productId);
+    if (!product) return;
+
+    const newProducts = [...xmlData.products];
+    newProducts[activeItemIndex] = {
+      ...newProducts[activeItemIndex],
+      linkedProductId: product.id,
+      linkedProductName: product.name
+    };
+
+    setXmlData({ ...xmlData, products: newProducts });
+    setShowManualLinking(false);
+    setActiveItemIndex(null);
+    toast.success(`Item vinculado a ${product.name}`);
+  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
