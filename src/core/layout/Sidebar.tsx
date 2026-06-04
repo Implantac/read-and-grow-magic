@@ -167,6 +167,7 @@ function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, ex
 export function Sidebar() {
   const location = useLocation();
   const { sidebarCollapsed, user } = useAppStore();
+  const { signOut } = useAuth({ initialize: false });
   const { segment } = useEnterprise();
   const [expandedItems, setExpandedItems] = useState<string[]>(['Dashboard', 'Operacional', 'Financeiro', 'Gestão']);
 
@@ -333,8 +334,8 @@ export function Sidebar() {
                   <TooltipTrigger asChild>
                     <button 
                       onClick={() => {
-                        const { signOut } = useAuth({ initialize: false });
                         signOut().then(() => window.location.href = '/login');
+
                       }}
                       className="p-2 text-destructive/60 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
                     >
@@ -361,8 +362,8 @@ export function Sidebar() {
                 <TooltipTrigger asChild>
                   <button 
                     onClick={() => {
-                      const { signOut } = useAuth({ initialize: false });
                       signOut().then(() => window.location.href = '/login');
+
                     }}
                     className="p-2 text-sidebar-foreground/40 hover:text-primary hover:bg-sidebar-accent/50 rounded-lg transition-colors"
                   >
