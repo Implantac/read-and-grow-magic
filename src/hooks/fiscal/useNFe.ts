@@ -96,7 +96,19 @@ export function useNFe() {
     clientId?: string;
     clientDocument?: string;
     operationType: string;
-    items: { productCode: string; productName: string; productId?: string; quantity: number; unitPrice: number; unit?: string; ncm?: string; cfop?: string }[];
+    items: { 
+      productCode: string; 
+      productName: string; 
+      productId?: string; 
+      quantity: number; 
+      unitPrice: number; 
+      unit?: string; 
+      ncm?: string; 
+      cfop?: string;
+      ipi?: number;
+      pis?: number;
+      cofins?: number;
+    }[];
     discount?: number;
     shipping?: number;
   }) => {
