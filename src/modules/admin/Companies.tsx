@@ -95,11 +95,13 @@ const Companies = () => {
 
   const handleCreateCompany = () => {
     setEditingCompany(null);
+    setCnpjValue('');
     setIsDialogOpen(true);
   };
 
   const handleEditCompany = (company: Company) => {
     setEditingCompany(company);
+    setCnpjValue(company.cnpj);
     setIsDialogOpen(true);
   };
 
