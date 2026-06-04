@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
-import { useOrders } from '@/hooks/useOrders';
+import { useOrders } from '@/hooks/commercial/useOrders';
 import { useOrderStatusHistory, getOrderFlowStatus, orderFlowStatuses } from '@/hooks/useOrderFlow';
 import { useOrderLifecycle } from '@/hooks/useOrderLifecycle';
 import { getAllowedTransitions, ORDER_FLOW_STEPS, getFlowStepIndex } from '@/lib/orderFlowEngine';

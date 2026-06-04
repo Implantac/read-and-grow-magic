@@ -9,8 +9,8 @@ import { ArrowUpRight, ArrowDownRight, TrendingUp } from 'lucide-react';
 import { MarginTrendChart } from '@/components/contabilidade/MarginTrendChart';
 import { ExpenseBreakdownChart } from '@/components/contabilidade/ExpenseBreakdownChart';
 import { RevenueExpenseTrendChart } from '@/components/contabilidade/RevenueExpenseTrendChart';
-import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
-import { useAccountsPayable } from '@/hooks/useAccountsPayable';
+import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
+import { useAccountsPayable } from '@/hooks/financial/useAccountsPayable';
 import { formatBRL, formatBRLCompact } from '@/lib/formatters';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,

@@ -8,8 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeftRight, Loader2 } from 'lucide-react';
-import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
-import { useAccountsPayable } from '@/hooks/useAccountsPayable';
+import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
+import { useAccountsPayable } from '@/hooks/financial/useAccountsPayable';
 import { useCompensateAccounts } from '@/hooks/useSettlement';
 
 import { formatBRL, formatDate } from '@/lib/formatters';

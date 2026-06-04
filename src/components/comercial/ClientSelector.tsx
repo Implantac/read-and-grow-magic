@@ -16,7 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useClients, type DbClient } from '@/hooks/useClients';
+import { useClients, type DbClient } from '@/hooks/commercial/useClients';
 
 interface ClientSelectorProps {
   clientId: string | null;

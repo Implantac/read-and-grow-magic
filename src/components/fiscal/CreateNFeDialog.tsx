@@ -14,8 +14,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cfopOptions } from '@/config/fiscal';
-import { useClients } from '@/hooks/useClients';
-import { useProducts } from '@/hooks/useProducts';
+import { useClients } from '@/hooks/commercial/useClients';
+import { useProducts } from '@/hooks/inventory/useProducts';
 import { calculateItemTaxes } from '@/hooks/useTaxRules';
 import { FiscalStepper } from './FiscalStepper';
 import { SmartSelect, SmartSelectOption } from './SmartSelect';

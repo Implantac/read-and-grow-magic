@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useBillingQueue, useUpdateBillingStatus } from '@/hooks/useOrderFlow';
-import { useOrders } from '@/hooks/useOrders';
+import { useOrders } from '@/hooks/commercial/useOrders';
 import { useOrderLifecycle } from '@/hooks/useOrderLifecycle';
 import { FileText, Clock, CheckCircle, DollarSign, Play, Ban } from 'lucide-react';
 import { format } from 'date-fns';

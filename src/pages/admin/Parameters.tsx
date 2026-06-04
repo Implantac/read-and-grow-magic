@@ -20,7 +20,7 @@ import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { parameterCategoryConfig } from '@/config/administration';
 import { SystemParameter, ParameterCategory, ParameterFilter } from '@/types/administration';
-import { useSystemParameters } from '@/hooks/useSystemParameters';
+import { useSystemParameters } from '@/hooks/system/useSystemParameters';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const Parameters = () => {

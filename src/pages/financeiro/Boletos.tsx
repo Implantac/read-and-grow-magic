@@ -13,8 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogT
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useFinancialBoletos, useCreateBoleto, useCancelBoleto, useMarkBoletoPaid } from '@/hooks/useFinancialBoletos';
-import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
-import { useBankAccounts } from '@/hooks/useBankAccounts';
+import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
+import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 import { BOLETO_STATUS_LABELS } from '@/types/financial';
 import { format } from 'date-fns';
 

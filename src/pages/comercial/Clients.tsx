@@ -16,7 +16,7 @@ import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { clientSegments, brazilianStates } from '@/config/commercial';
-import { useClients, useDeleteClient, type DbClient } from '@/hooks/useClients';
+import { useClients, useDeleteClient, type DbClient } from '@/hooks/commercial/useClients';
 import { ClientDetailDialog } from '@/components/comercial/ClientDetailDialog';
 import { ClientFormDialog } from '@/components/comercial/ClientFormDialog';
 import { ClientStats } from '@/components/comercial/ClientStats';

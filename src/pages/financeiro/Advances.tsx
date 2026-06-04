@@ -15,8 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Wallet, TrendingDown, TrendingUp, Sparkles } from 'lucide-react';
 import { useFinancialAdvances, type FinancialAdvanceRow } from '@/hooks/useFinancialAdvances';
 import { useUseAdvance } from '@/hooks/useFinancialSettlements';
-import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
-import { useAccountsPayable } from '@/hooks/useAccountsPayable';
+import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
+import { useAccountsPayable } from '@/hooks/financial/useAccountsPayable';
 import { NewAdvanceDialog } from '@/components/financeiro/NewAdvanceDialog';
 import { format } from 'date-fns';
 

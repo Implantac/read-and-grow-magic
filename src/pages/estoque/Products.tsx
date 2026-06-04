@@ -23,8 +23,8 @@ import { PageContainer } from '@/components/shared/PageContainer';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PageLoading } from '@/components/shared/PageLoading';
 import { KPICard } from '@/components/shared/KPICard';
-import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, type DbProduct } from '@/hooks/useProducts';
-import { useCategories } from '@/hooks/useCategories';
+import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, type DbProduct } from '@/hooks/inventory/useProducts';
+import { useCategories } from '@/hooks/inventory/useCategories';
 import type { ProductType, ProductStatus, ProductFilters } from '@/types/inventory';
 
 export default function ProductsPage() {

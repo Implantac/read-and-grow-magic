@@ -12,13 +12,13 @@ import {
   Target, TrendingUp, Users, Trophy, DollarSign, BarChart3,
   AlertTriangle, XCircle, ArrowDownRight, ArrowUpRight, Medal,
 } from 'lucide-react';
-import { useOrders } from '@/hooks/useOrders';
-import { useClients } from '@/hooks/useClients';
-import { useSalesFunnel } from '@/hooks/useSalesFunnel';
-import { useSalesReps } from '@/hooks/useSalesReps';
-import { useSales } from '@/hooks/useSales';
-import { useRepPerformance, useLostSalesAlerts, useClientInsights } from '@/hooks/useSalesIntelligence';
-import { useFollowUps } from '@/hooks/useSalesIntelligence';
+import { useOrders } from '@/hooks/commercial/useOrders';
+import { useClients } from '@/hooks/commercial/useClients';
+import { useSalesFunnel } from '@/hooks/commercial/useSalesFunnel';
+import { useSalesReps } from '@/hooks/commercial/useSalesReps';
+import { useSales } from '@/hooks/commercial/useSales';
+import { useRepPerformance, useLostSalesAlerts, useClientInsights } from '@/hooks/commercial/useSalesIntelligence';
+import { useFollowUps } from '@/hooks/commercial/useSalesIntelligence';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Legend } from 'recharts';
 import { startOfMonth, endOfMonth } from 'date-fns';
 

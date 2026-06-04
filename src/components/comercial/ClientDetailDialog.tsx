@@ -13,10 +13,10 @@ import { StatusBadge } from '@/components/shared/StatusBadge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { useClientTimeline, useCreateTimelineEvent, TIMELINE_EVENT_TYPES } from '@/hooks/useClientTimeline';
-import { useOrders } from '@/hooks/useOrders';
-import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
-import { useSalesFunnel } from '@/hooks/useSalesFunnel';
-import { type DbClient } from '@/hooks/useClients';
+import { useOrders } from '@/hooks/commercial/useOrders';
+import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
+import { useSalesFunnel } from '@/hooks/commercial/useSalesFunnel';
+import { type DbClient } from '@/hooks/commercial/useClients';
 import { formatBRL } from '@/lib/formatters';
 import {
   Phone, MapPin, FileText, ShoppingCart, StickyNote, Clock, AlertTriangle,

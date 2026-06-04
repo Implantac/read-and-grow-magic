@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowDownCircle, ArrowUpCircle, Wallet, Banknote, QrCode, CreditCard, Receipt, FileCheck, ArrowLeftRight, TrendingUp, TrendingDown, Search } from 'lucide-react';
-import { useBankAccounts } from '@/hooks/useBankAccounts';
+import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 import { useFinancialLedger, useCreateManualLedger } from '@/hooks/useFinancialLedger';
 import { cn } from '@/lib/utils';
 

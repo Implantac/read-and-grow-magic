@@ -13,7 +13,7 @@ import {
   useMissionProgress, useChallenges, useChallengeParticipants,
   useGamificationPoints,
 } from '@/hooks/useGamification';
-import { useSalesReps } from '@/hooks/useSalesReps';
+import { useSalesReps } from '@/hooks/commercial/useSalesReps';
 import { Trophy, Medal, Target, Flame, Star, Swords, Crown, Award, TrendingUp, Zap } from 'lucide-react';
 
 const fmt = (v: number) => formatNumber(v);

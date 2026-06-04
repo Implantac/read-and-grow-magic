@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Megaphone, Target, Calendar, TrendingUp, CheckCircle } from 'lucide-react';
-import { useCampaigns, useCreateCampaign, useUpdateCampaign, type DbCampaign } from '@/hooks/useSalesIntelligence';
+import { useCampaigns, useCreateCampaign, useUpdateCampaign, type DbCampaign } from '@/hooks/commercial/useSalesIntelligence';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 

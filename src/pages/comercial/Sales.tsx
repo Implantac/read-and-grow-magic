@@ -18,7 +18,7 @@ import { DataTable, type Column } from '@/components/shared/DataTable';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/components/shared/AdvancedFilters';
 import { getPaymentMethodLabel } from '@/config/commercial';
-import { useSales, useCreateSale, type DbSale } from '@/hooks/useSales';
+import { useSales, useCreateSale, type DbSale } from '@/hooks/commercial/useSales';
 import { ClientSelector } from '@/components/comercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
 

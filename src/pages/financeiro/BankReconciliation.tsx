@@ -51,7 +51,7 @@ interface SystemEntry {
 }
 
 import { useBankTransactions } from '@/hooks/useBankReconciliation';
-import { useCashFlowEntries } from '@/hooks/useCashFlow';
+import { useCashFlowEntries } from '@/hooks/financial/useCashFlow';
 import { toastSuccess } from '@/lib/toastHelpers';
 
 export default function BankReconciliation() {

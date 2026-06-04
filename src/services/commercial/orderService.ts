@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { DbOrder, CreateOrderInput } from '@/hooks/useOrders';
+import { DbOrder, CreateOrderInput } from '@/hooks/commercial/useOrders';
 import { BaseService } from '../shared/baseService';
 
 export class OrderService extends BaseService<DbOrder> {

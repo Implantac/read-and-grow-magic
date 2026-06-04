@@ -5,8 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus } from 'lucide-react';
-import { useBankAccounts } from '@/hooks/useBankAccounts';
-import { useClients } from '@/hooks/useClients';
+import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
+import { useClients } from '@/hooks/commercial/useClients';
 import { useSuppliers } from '@/hooks/useSuppliers';
 import { useCreateAdvance } from '@/hooks/useFinancialAdvances';
 

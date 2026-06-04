@@ -5,7 +5,7 @@ import type { Company } from '@/types';
 
 import { useCompanies } from '@/hooks/useCompanies';
 import { useAppStore } from '@/stores/useAppStore';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/system/useAuth';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useBrainDecisions } from '@/hooks/useAIBrain';
 import { Button } from '@/components/ui/button';

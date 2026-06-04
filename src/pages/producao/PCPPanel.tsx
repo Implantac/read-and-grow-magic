@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { Tooltip as UITooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useProductionOrders } from '@/hooks/useProductionOrders';
-import { useOrders } from '@/hooks/useOrders';
+import { useOrders } from '@/hooks/commercial/useOrders';
 import { useOrderLifecycle, checkProductionCompletion } from '@/hooks/useOrderLifecycle';
 import { useTimeEntries } from '@/hooks/useTimeEntries';
 import { useProductionCapacity } from '@/hooks/useProductionCapacity';

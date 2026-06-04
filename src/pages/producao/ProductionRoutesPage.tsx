@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { useProductionRoutes, useProductionRouteSteps, ProductionRouteRow, ProductionRouteStep } from '@/hooks/useProductionRoutes';
 import { useProductionSectors } from '@/hooks/useProductionSectors';
 import { useProductionResources } from '@/hooks/useProductionResources';
-import { useProducts } from '@/hooks/useProducts';
+import { useProducts } from '@/hooks/inventory/useProducts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

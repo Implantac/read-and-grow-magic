@@ -11,8 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useSmartSalesQueue, useRepExecutionMetrics, useLostClients, useCreateContactLog, useDailyGoals } from '@/hooks/useSalesExecution';
-import { useSalesReps } from '@/hooks/useSalesReps';
+import { useSmartSalesQueue, useRepExecutionMetrics, useLostClients, useCreateContactLog, useDailyGoals } from '@/hooks/commercial/useSalesExecution';
+import { useSalesReps } from '@/hooks/commercial/useSalesReps';
 import { Flame, Phone, Clock, AlertTriangle, Trophy, Target, UserX, Zap, ArrowRight, CheckCircle, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 

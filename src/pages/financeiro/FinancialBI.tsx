@@ -8,11 +8,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useFinancialLedger } from '@/hooks/useFinancialLedger';
-import { useBankAccounts } from '@/hooks/useBankAccounts';
+import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 import { useFinancialInsights } from '@/hooks/useFinancialInsights';
 import { useLatestHealthScore } from '@/hooks/useFinancialIntelligence';
-import { useAccountsReceivable } from '@/hooks/useAccountsReceivable';
-import { useAccountsPayable } from '@/hooks/useAccountsPayable';
+import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
+import { useAccountsPayable } from '@/hooks/financial/useAccountsPayable';
 import { Wallet, TrendingUp, TrendingDown, Activity, Brain, RefreshCw } from 'lucide-react';
 import { formatBRL, formatDate } from '@/lib/formatters';
 import {
