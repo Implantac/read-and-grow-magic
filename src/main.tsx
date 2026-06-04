@@ -48,4 +48,16 @@ function installDomGuards() {
 
 installDomGuards();
 
+const hideBadge = () => {
+  const badge = document.getElementById('lovable-badge');
+  if (badge) {
+    badge.style.display = 'none';
+    badge.style.visibility = 'hidden';
+    badge.remove();
+  }
+};
+
+const observer = new MutationObserver(() => hideBadge());
+observer.observe(document.documentElement, { childList: true, subtree: true });
+
 createRoot(document.getElementById("root")!).render(<App />);
