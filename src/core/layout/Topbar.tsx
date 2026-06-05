@@ -236,7 +236,7 @@ export function Topbar() {
 
         >
           <Brain className="h-4 w-4" />
-          {brainPending.length > 0 && (
+          {Array.isArray(brainPending) && brainPending.length > 0 && (
             <span
               className={cn(
                 'absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full text-[10px] font-bold px-1 animate-fade-in',
