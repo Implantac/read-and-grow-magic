@@ -4186,7 +4186,7 @@ export type Database = {
           barcode: string | null
           client_id: string | null
           client_name: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           digitable_line: string | null
@@ -4210,7 +4210,7 @@ export type Database = {
           barcode?: string | null
           client_id?: string | null
           client_name?: string | null
-          company_id?: string | null
+          company_id: string
           created_at?: string
           created_by?: string | null
           digitable_line?: string | null
@@ -4234,7 +4234,7 @@ export type Database = {
           barcode?: string | null
           client_id?: string | null
           client_name?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           digitable_line?: string | null
