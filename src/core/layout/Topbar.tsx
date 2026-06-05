@@ -248,7 +248,7 @@ export function Topbar() {
                   : 'bg-primary text-primary-foreground'
               )}
             >
-              {Array.isArray(brainPending) && brainPending.length > 9 ? '9+' : brainPending.length}
+              {brainPending.length > 9 ? '9+' : brainPending.length}
             </span>
           )}
         </Button>
