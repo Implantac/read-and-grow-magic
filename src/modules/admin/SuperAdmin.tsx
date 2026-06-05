@@ -156,7 +156,7 @@ export default function SuperAdmin() {
                         {sub?.status || 'Inativo'}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm">{c.address_city}/{c.address_state}</TableCell>
+                    <TableCell className="text-sm">{c.address.city}/{c.address.state}</TableCell>
                   </TableRow>
                 );
               })}
