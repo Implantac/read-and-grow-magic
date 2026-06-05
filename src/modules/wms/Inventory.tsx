@@ -4,7 +4,7 @@ import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
-import { Badge } from '@/ui/base/badge';
+import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Input } from '@/ui/base/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
@@ -13,15 +13,9 @@ import { Progress } from '@/ui/base/progress';
 import { Search, Package, AlertTriangle, ClipboardList, DollarSign } from 'lucide-react';
 import { useWMSInventory } from '@/hooks/wms/useWMSInventory';
 import type { InventoryStatus } from '@/types/wms';
+import { getInventoryStatusLabel } from '@/config/wms';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
-const statusConfig: Record<InventoryStatus, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  available: { label: 'Disponível', variant: 'default' },
-  reserved: { label: 'Reservado', variant: 'secondary' },
-  damaged: { label: 'Danificado', variant: 'destructive' },
-  expired: { label: 'Vencido', variant: 'destructive' },
-  quarantine: { label: 'Quarentena', variant: 'outline' }
-};
 
 export default function InventoryPage() {
   const { items, counts, loading } = useWMSInventory();
@@ -100,7 +94,11 @@ export default function InventoryPage() {
                   <SelectTrigger className="w-full md:w-[150px]"><SelectValue placeholder="Status" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos</SelectItem>
-                    {Object.entries(statusConfig).map(([key, config]) => <SelectItem key={key} value={key}>{config.label}</SelectItem>)}
+                    <SelectItem value="available">Disponível</SelectItem>
+                    <SelectItem value="reserved">Reservado</SelectItem>
+                    <SelectItem value="damaged">Danificado</SelectItem>
+                    <SelectItem value="expired">Vencido</SelectItem>
+                    <SelectItem value="quarantine">Quarentena</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -148,9 +146,7 @@ export default function InventoryPage() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={statusConfig[item.status]?.variant || 'default'}>
-                              {statusConfig[item.status]?.label || item.status}
-                            </Badge>
+                            <StatusBadge status={item.status} type="inventory" />
                           </TableCell>
                         </TableRow>
                       );

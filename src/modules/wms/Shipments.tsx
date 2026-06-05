@@ -7,7 +7,7 @@ import { ExportButton } from '@/shared/components/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
-import { Badge } from '@/ui/base/badge';
+import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
@@ -20,14 +20,6 @@ import { Truck, Search, MoreHorizontal, PackageCheck, MapPin, Clock, CheckCircle
 import { useWMSShipments } from '@/hooks/wms/useWMSShipments';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-
-const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  pending: { label: 'Pendente', variant: 'secondary' },
-  ready: { label: 'Pronto', variant: 'default' },
-  shipped: { label: 'Enviado', variant: 'outline' },
-  delivered: { label: 'Entregue', variant: 'outline' },
-  cancelled: { label: 'Cancelado', variant: 'destructive' },
-};
 
 export default function ShipmentsPage() {
   const { shipments, loading, create, ship, deliver } = useWMSShipments();
@@ -138,7 +130,6 @@ export default function ShipmentsPage() {
               </TableHeader>
               <TableBody>
                 {filteredShipments.map(s => {
-                  const cfg = statusConfig[s.status] || statusConfig.pending;
                   const progressValue = s.status === 'delivered' ? 100 : s.status === 'shipped' ? 75 : s.status === 'ready' ? 50 : 25;
                   
                   return (
@@ -190,7 +181,7 @@ export default function ShipmentsPage() {
                           </div>
                         ) : '-'}
                       </TableCell>
-                      <TableCell><Badge variant={cfg.variant} className="text-[10px] uppercase font-bold tracking-tight">{cfg.label}</Badge></TableCell>
+                      <TableCell><StatusBadge status={s.status} type="shipment" /></TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>

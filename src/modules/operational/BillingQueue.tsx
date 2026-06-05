@@ -1,7 +1,7 @@
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
-import { Badge } from '@/ui/base/badge';
+import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Button } from '@/ui/base/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { useBillingQueue, useUpdateBillingStatus } from '@/hooks/commercial/useOrderFlow';
@@ -11,14 +11,6 @@ import { FileText, Clock, CheckCircle, DollarSign, Play, Ban } from 'lucide-reac
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { formatBRL, formatNumber } from '@/lib/formatters';
-
-const billingStatusConfig: Record<string, { label: string; color: string }> = {
-  awaiting_billing: { label: 'Aguardando', color: 'bg-warning/10 text-warning' },
-  in_billing: { label: 'Em Faturamento', color: 'bg-info/10 text-info' },
-  billed_partial: { label: 'Faturado Parcial', color: 'bg-accent text-accent-foreground' },
-  billed_full: { label: 'Faturado Total', color: 'bg-success/10 text-success' },
-  rejected: { label: 'Rejeitado', color: 'bg-destructive/10 text-destructive' },
-};
 
 export default function BillingQueuePage() {
   const { data: items, isLoading } = useBillingQueue();
@@ -99,10 +91,9 @@ export default function BillingQueuePage() {
               ) : !items?.length ? (
                 <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhum item na fila de faturamento</TableCell></TableRow>
               ) : items.map((item: any) => {
-                const sc = billingStatusConfig[item.status] || { label: item.status, color: '' };
                 return (
                   <TableRow key={item.id}>
-                    <TableCell><Badge variant="outline" className={cn('font-medium border', sc.color)}>{sc.label}</Badge></TableCell>
+                    <TableCell><StatusBadge status={item.status} type="order" /></TableCell>
                     <TableCell>{item.billing_type === 'full' ? 'Total' : 'Parcial'}</TableCell>
                     <TableCell>{formatBRL(item.amount)}</TableCell>
                     <TableCell>{formatBRL(item.billed_amount)}</TableCell>
