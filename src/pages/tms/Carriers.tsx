@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
-import { useCarriers } from '@/hooks/wms/useTMS';
+import { useTMS } from '@/hooks/operational/useTMSQuery';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
@@ -13,7 +13,7 @@ import { Plus, Search, Pencil, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Carriers = () => {
-  const { carriers, loading, create, update, remove } = useCarriers();
+  const { carriers, carriersLoading: loading, createCarrier: create, updateCarrier: update, deleteCarrier: remove } = useTMS();
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
