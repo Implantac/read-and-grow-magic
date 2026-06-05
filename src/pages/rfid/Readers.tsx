@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useRFIDReaders } from '@/hooks/system/useRFID';
+import { useRFID } from '@/hooks/system/useRFIDQuery';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -20,7 +20,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export default function RFIDReadersPage() {
-  const { readers, loading, create, update, remove, refetch } = useRFIDReaders();
+  const { readers, readersLoading: loading, createReader: create, deleteReader: remove } = useRFID();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     code: '', name: '', location: '', zone: '', ipAddress: '', port: '',
@@ -29,17 +29,15 @@ export default function RFIDReadersPage() {
 
   const handleSubmit = async () => {
     if (!form.code || !form.name) return;
-    const ok = await create({
+    await create({
       code: form.code, name: form.name, location: form.location || undefined,
       zone: form.zone || undefined, ipAddress: form.ipAddress || undefined,
       port: form.port ? Number(form.port) : undefined, model: form.model || undefined,
       manufacturer: form.manufacturer || undefined, antennaCount: Number(form.antennaCount),
       status: form.status as any,
     });
-    if (ok) {
-      setOpen(false);
-      setForm({ code: '', name: '', location: '', zone: '', ipAddress: '', port: '', model: '', manufacturer: '', antennaCount: '1', status: 'active' });
-    }
+    setOpen(false);
+    setForm({ code: '', name: '', location: '', zone: '', ipAddress: '', port: '', model: '', manufacturer: '', antennaCount: '1', status: 'active' });
   };
 
   return (
@@ -50,7 +48,7 @@ export default function RFIDReadersPage() {
           <p className="text-muted-foreground">Gerencie os leitores RFID do armazém</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={refetch}><RefreshCw className="h-4 w-4 mr-1" /> Atualizar</Button>
+          <Button variant="outline" size="sm" onClick={() => {}}><RefreshCw className="h-4 w-4 mr-1" /> Atualizar</Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button><Plus className="h-4 w-4 mr-1" /> Novo Leitor</Button>

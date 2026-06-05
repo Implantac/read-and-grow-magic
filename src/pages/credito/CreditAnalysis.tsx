@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
-import { useCreditProfiles, useUpsertCreditProfile } from '@/hooks/financial/useCreditAnalysis';
+import { useCredit } from '@/hooks/financial/useCreditQuery';
 import { useClients } from '@/hooks/commercial/useClients';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
@@ -14,8 +14,8 @@ import { Label } from '@/ui/base/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Textarea } from '@/ui/base/textarea';
 import { Shield, ShieldAlert, ShieldCheck, ShieldX, Search, Plus } from 'lucide-react';
-
 import { formatBRL, formatDate } from '@/lib/formatters';
+
 const riskColors: Record<string, string> = {
   low: 'bg-emerald-500/10 text-emerald-700 border-emerald-200',
   medium: 'bg-amber-500/10 text-amber-700 border-amber-200',
@@ -26,14 +26,13 @@ const riskLabels: Record<string, string> = { low: 'Baixo', medium: 'Médio', hig
 const statusLabels: Record<string, string> = { approved: 'Aprovado', analysis: 'Em Análise', restricted: 'Restrito', blocked: 'Bloqueado' };
 
 export default function CreditAnalysis() {
-  const { data: profiles = [], isLoading } = useCreditProfiles();
+  const { analyses: profiles = [], analysesLoading: isLoading, updateAnalysis } = useCredit();
   const { data: clients = [] } = useClients();
-  const upsert = useUpsertCreditProfile();
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState<any>({});
 
-  const clientMap = Object.fromEntries(clients.map(c => [c.id, c]));
+  const clientMap = useMemo(() => Object.fromEntries(clients.map(c => [c.id, c])), [clients]);
 
   const filtered = profiles.filter(p => {
     const client = clientMap[p.client_id];
@@ -41,39 +40,27 @@ export default function CreditAnalysis() {
     return client.name.toLowerCase().includes(search.toLowerCase()) || client.code.toLowerCase().includes(search.toLowerCase());
   });
 
-  const totalLimit = profiles.reduce((s, p) => s + Number(p.credit_limit), 0);
-  const totalUsed = profiles.reduce((s, p) => s + Number(p.used_limit), 0);
-  const blockedCount = profiles.filter(p => p.credit_status === 'blocked').length;
-  const highRiskCount = profiles.filter(p => p.risk_classification === 'high' || p.risk_classification === 'blocked').length;
-
-  const openNew = () => {
-    setForm({ client_id: '', credit_limit: 0, risk_classification: 'medium', credit_status: 'analysis', score_numeric: 50, analysis_notes: '' });
-    setDialogOpen(true);
-  };
-
-  const openEdit = (p: any) => {
-    setForm({ ...p });
-    setDialogOpen(true);
-  };
+  const stats = useMemo(() => ({
+    totalLimit: profiles.reduce((s, p) => s + Number(p.credit_limit), 0),
+    totalUsed: profiles.reduce((s, p) => s + Number(p.used_limit), 0),
+    blockedCount: profiles.filter(p => p.credit_status === 'blocked').length,
+    highRiskCount: profiles.filter(p => p.risk_classification === 'high' || p.risk_classification === 'blocked').length,
+  }), [profiles]);
 
   const handleSave = () => {
     const { id, available_limit, score_grade, created_at, ...rest } = form;
-    upsert.mutate({ ...rest, last_analysis_date: new Date().toISOString(), updated_at: new Date().toISOString() }, {
-      onSuccess: () => setDialogOpen(false),
-    });
+    updateAnalysis({ id, updates: { ...rest, last_analysis_date: new Date().toISOString(), updated_at: new Date().toISOString() } }).then(() => setDialogOpen(false));
   };
-
-  const fmt = (v: number) => formatBRL(v);
 
   return (
     <PageContainer>
       <PageHeader title="Análise de Crédito" description="Gestão de limites, scores e risco comercial" />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <KPICard title="Limite Total" value={formatBRL(totalLimit)} icon={<Shield className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="Limite Utilizado" value={formatBRL(totalUsed)} icon={<ShieldAlert className="h-5 w-5" />} accentColor="warning" index={1} />
-        <KPICard title="Clientes Bloqueados" value={String(blockedCount)} icon={<ShieldX className="h-5 w-5" />} accentColor="danger" index={2} />
-        <KPICard title="Alto Risco" value={String(highRiskCount)} icon={<ShieldCheck className="h-5 w-5" />} accentColor="warning" index={3} />
+        <KPICard title="Limite Total" value={formatBRL(stats.totalLimit)} icon={<Shield className="h-5 w-5" />} accentColor="primary" index={0} />
+        <KPICard title="Limite Utilizado" value={formatBRL(stats.totalUsed)} icon={<ShieldAlert className="h-5 w-5" />} accentColor="warning" index={1} />
+        <KPICard title="Clientes Bloqueados" value={String(stats.blockedCount)} icon={<ShieldX className="h-5 w-5" />} accentColor="danger" index={2} />
+        <KPICard title="Alto Risco" value={String(stats.highRiskCount)} icon={<ShieldCheck className="h-5 w-5" />} accentColor="warning" index={3} />
       </div>
 
       <Card>
@@ -85,7 +72,7 @@ export default function CreditAnalysis() {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Buscar cliente..." value={search} onChange={e => setSearch(e.target.value)} className="pl-8 w-64" />
               </div>
-              <Button onClick={openNew} size="sm"><Plus className="h-4 w-4 mr-1" />Nova Análise</Button>
+              <Button onClick={() => { setForm({ client_id: '', credit_limit: 0, risk_classification: 'medium', credit_status: 'analysis', score_numeric: 50, analysis_notes: '' }); setDialogOpen(true); }} size="sm"><Plus className="h-4 w-4 mr-1" />Nova Análise</Button>
             </div>
           </div>
         </CardHeader>
@@ -112,7 +99,7 @@ export default function CreditAnalysis() {
               ) : filtered.map(p => {
                 const client = clientMap[p.client_id];
                 return (
-                  <TableRow key={p.id} className="cursor-pointer hover:bg-muted/50" onClick={() => openEdit(p)}>
+                  <TableRow key={p.id} className="cursor-pointer hover:bg-muted/50" onClick={() => { setForm({ ...p }); setDialogOpen(true); }}>
                     <TableCell className="font-medium">{client?.name || '—'}</TableCell>
                     <TableCell>{formatBRL(p.credit_limit)}</TableCell>
                     <TableCell>{formatBRL(p.used_limit)}</TableCell>
@@ -193,7 +180,7 @@ export default function CreditAnalysis() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave} disabled={upsert.isPending}>Salvar</Button>
+            <Button onClick={handleSave}>Salvar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

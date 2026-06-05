@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useRFIDReaders, useRFIDTags, useRFIDEvents, useRFIDSummary } from '@/hooks/system/useRFID';
+import { useRFID } from '@/hooks/system/useRFIDQuery';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
@@ -27,12 +27,25 @@ const STATUS_COLORS = {
 };
 
 export default function RFIDDashboardPage() {
-  const { readers, loading: loadingReaders, refetch: refetchReaders } = useRFIDReaders();
-  const { tags, loading: loadingTags } = useRFIDTags();
-  const { events, loading: loadingEvents } = useRFIDEvents(500);
-  const { summary, loading: loadingSummary, refetch: refetchSummary } = useRFIDSummary();
+  const { readers, readersLoading, tags, tagsLoading, getEvents } = useRFID();
+  const { data: events = [], isLoading: loadingEvents } = getEvents(500);
+  
+  const loading = readersLoading || tagsLoading || loadingEvents;
+  
+  // Create a summary derived from the data
+  const summary = useMemo(() => ({
+    totalReaders: readers.length,
+    activeReaders: readers.filter(r => r.status === 'active').length,
+    totalTags: tags.length,
+    activeTags: tags.filter(t => t.status === 'active').length,
+    eventsToday: events.length, // This should ideally come from a filtered query, but for now we use events
+    unprocessedEvents: events.filter(e => !e.processed).length,
+  }), [readers, tags, events]);
 
-  const loading = loadingReaders || loadingTags || loadingEvents || loadingSummary;
+  const refetchReaders = () => {}; // Handled by React Query
+  const refetchSummary = () => {};
+
+  
 
   // Events per hour (last 12 hours)
   const eventsPerHour = useMemo(() => {

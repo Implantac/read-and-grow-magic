@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
-import { useDeliveryRoutes, useCarriers, useVehicles } from '@/hooks/wms/useTMS';
+import { useTMS } from '@/hooks/operational/useTMSQuery';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
@@ -18,9 +18,7 @@ const statusLabels: Record<string, string> = { planned: 'Planejada', in_transit:
 const statusColors: Record<string, string> = { planned: 'secondary', in_transit: 'default', completed: 'outline', cancelled: 'destructive' };
 
 const Routes = () => {
-  const { routes, loading, create, update } = useDeliveryRoutes();
-  const { carriers } = useCarriers();
-  const { vehicles } = useVehicles();
+  const { routes, routesLoading: loading, createRoute: create, updateRoute: update, carriers, vehicles } = useTMS();
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ route_number: '', carrier_id: '', vehicle_id: '', driver_name: '', planned_date: '', total_stops: '0', notes: '' });
@@ -43,11 +41,11 @@ const Routes = () => {
   };
 
   const startRoute = async (id: string) => {
-    await update(id, { status: 'in_transit', departure_time: new Date().toISOString() });
+    await update({ id, updates: { status: 'in_transit', departure_time: new Date().toISOString() } });
   };
 
   const completeRoute = async (id: string) => {
-    await update(id, { status: 'completed', arrival_time: new Date().toISOString() });
+    await update({ id, updates: { status: 'completed', arrival_time: new Date().toISOString() } });
   };
 
   if (loading) return <PageLoading />;
