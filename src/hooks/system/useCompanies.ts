@@ -15,9 +15,11 @@ export function useCompanies() {
     if (query.data && query.data.length > 0) {
       setCompanies(query.data as any);
       if (!activeCompany) {
-        setActiveCompany(query.data[0] as any);
+        const firstCompany = query.data[0] as any;
+        setActiveCompany(firstCompany);
       }
     }
+
   }, [query.data, setCompanies, activeCompany, setActiveCompany]);
 
   const createCompanyMutation = useMutation({
