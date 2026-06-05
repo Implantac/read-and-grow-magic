@@ -138,7 +138,9 @@ function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, ex
         >
           <div className="overflow-hidden">
             <ul className="ml-5 space-y-1 border-l border-sidebar-border/60 pl-3">
-              {item.children?.map((child) => {
+              {(item.children || []).map((child) => {
+                if (!child) return null;
+
                 const ChildIcon = iconMap[child.icon];
                 const isChildActive = isActive(child.href);
                 return (
