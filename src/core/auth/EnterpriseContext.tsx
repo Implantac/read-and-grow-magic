@@ -24,6 +24,8 @@ interface EnterpriseContextType {
 const EnterpriseContext = createContext<EnterpriseContextType | undefined>(undefined);
 
 export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) => {
+  const [currentTenant, setCurrentTenant] = useState<any>(null);
+  const [currentGroup, setCurrentGroup] = useState<any>(null);
   const [currentCompany, setCurrentCompany] = useState<any>(null);
   const [currentBranch, setCurrentBranch] = useState<any>(null);
   const [segment, setSegment] = useState<Segment>('general');
@@ -56,7 +58,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       if (user) {
         // Load hierarchy via the new view
         const { data: hierarchy, error: hError } = await supabase
-          .from('vw_organizational_hierarchy')
+          .from('vw_organizational_hierarchy' as any)
           .select('*')
           .limit(1)
           .single();
@@ -109,7 +111,6 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       currentGroup,
       currentCompany, 
       currentBranch, 
-
       segment, 
       subSegment,
       companySize,
