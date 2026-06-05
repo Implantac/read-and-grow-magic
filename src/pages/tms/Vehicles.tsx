@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
-import { useVehicles, useCarriers } from '@/hooks/wms/useTMS';
+import { useTMS } from '@/hooks/operational/useTMSQuery';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
@@ -18,8 +18,7 @@ const statusColors: Record<string, string> = { available: 'default', in_transit:
 const statusLabels: Record<string, string> = { available: 'Disponível', in_transit: 'Em Trânsito', maintenance: 'Manutenção' };
 
 const Vehicles = () => {
-  const { vehicles, loading, create, update } = useVehicles();
-  const { carriers } = useCarriers();
+  const { vehicles, vehiclesLoading: loading, createVehicle: create, updateVehicle: update, carriers } = useTMS();
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
@@ -44,7 +43,7 @@ const Vehicles = () => {
   const handleSave = async () => {
     if (!form.plate) { toast.error('Placa é obrigatória'); return; }
     const payload = { ...form, max_weight: Number(form.max_weight), max_volume: Number(form.max_volume), carrier_id: form.carrier_id || null };
-    const ok = editing ? await update(editing.id, payload) : await create(payload);
+    const ok = editing ? await update({ id: editing.id, updates: payload }) : await create(payload);
     if (ok) setDialogOpen(false);
   };
 

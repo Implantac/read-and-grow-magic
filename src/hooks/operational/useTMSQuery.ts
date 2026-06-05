@@ -25,6 +25,7 @@ export function useTMS() {
     queryFn: () => tmsService.getProofs(),
   });
 
+  // Carriers
   const createCarrierMutation = useMutation({
     mutationFn: (carrier: any) => tmsService.createCarrier(carrier),
     onSuccess: () => {
@@ -58,6 +59,52 @@ export function useTMS() {
     }
   });
 
+  // Vehicles
+  const createVehicleMutation = useMutation({
+    mutationFn: (vehicle: any) => tmsService.createVehicle(vehicle),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tms_vehicles'] });
+      toastSuccess('Veículo criado com sucesso');
+    },
+    onError: (error: any) => {
+      toastError(error.message || 'Erro ao criar veículo');
+    }
+  });
+
+  const updateVehicleMutation = useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: any }) => tmsService.updateVehicle(id, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tms_vehicles'] });
+      toastSuccess('Veículo atualizado');
+    },
+    onError: (error: any) => {
+      toastError(error.message || 'Erro ao atualizar veículo');
+    }
+  });
+
+  // Routes
+  const createRouteMutation = useMutation({
+    mutationFn: (route: any) => tmsService.createRoute(route),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tms_routes'] });
+      toastSuccess('Rota criada com sucesso');
+    },
+    onError: (error: any) => {
+      toastError(error.message || 'Erro ao criar rota');
+    }
+  });
+
+  const updateRouteMutation = useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: any }) => tmsService.updateRoute(id, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tms_routes'] });
+      toastSuccess('Rota atualizada');
+    },
+    onError: (error: any) => {
+      toastError(error.message || 'Erro ao atualizar rota');
+    }
+  });
+
   return {
     carriers: carriersQuery.data || [],
     carriersLoading: carriersQuery.isLoading,
@@ -68,9 +115,13 @@ export function useTMS() {
     proofs: proofsQuery.data || [],
     proofsLoading: proofsQuery.isLoading,
     
-    // Carriers Mutations
+    // Mutations
     createCarrier: createCarrierMutation.mutateAsync,
     updateCarrier: updateCarrierMutation.mutateAsync,
     deleteCarrier: deleteCarrierMutation.mutateAsync,
+    createVehicle: createVehicleMutation.mutateAsync,
+    updateVehicle: updateVehicleMutation.mutateAsync,
+    createRoute: createRouteMutation.mutateAsync,
+    updateRoute: updateRouteMutation.mutateAsync,
   };
 }
