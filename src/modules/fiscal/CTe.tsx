@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Send, Ban, Plus, Truck, MapPin, DollarSign, ClipboardCheck, ArrowLeft, ArrowRight, FileText, Search, Sparkles, Receipt, ChevronRight, Calculator, ListChecks, AlertCircle, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Separator } from '@/ui/base/separator';
 import { useCTes, useCreateCTe, useTransmitCTe, useCancelCTe } from '@/hooks/fiscal/useCTe';
-import { useNFe } from '@/hooks/fiscal/useNFe';
+import { useFiscal } from '@/hooks/fiscal/useFiscal';
 import { format } from 'date-fns';
 import { FiscalStepper } from '@/components/fiscal/FiscalStepper';
 import { FiscalStatusBadge } from '@/components/fiscal/FiscalStatusBadge';
@@ -35,7 +35,7 @@ const STEPS = [
 
 export default function CTePage() {
   const { data: ctes = [], isLoading } = useCTes();
-  const { nfes } = useNFe();
+  const { nfes } = useFiscal();
   const createCTe = useCreateCTe();
   const transmit = useTransmitCTe();
   const cancel = useCancelCTe();

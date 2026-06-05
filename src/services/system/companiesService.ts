@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import type { Company, CompanyStatus, Address } from '@/types/administration';
+import type { Company, CompanyStatus } from '@/types/administration';
 
 export const companiesService = {
   async getAll(): Promise<Company[]> {
@@ -29,7 +29,7 @@ export const companiesService = {
         zipCode: company.address_zip_code || '',
         country: 'Brasil'
       },
-      logo: company.settings?.logo_url,
+      logo: company.settings && typeof company.settings === 'object' && 'logo_url' in company.settings ? (company.settings as any).logo_url : undefined,
       status: company.status as CompanyStatus,
       isHeadquarters: company.is_headquarters,
       parentCompanyId: company.parent_company_id,

@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/ui/base/dialog';
 import { Send, CheckSquare, Plus, MapPin, Truck, ClipboardCheck, ArrowLeft, ArrowRight, ScrollText, FileText, User, Trash2, ChevronRight, Info } from 'lucide-react';
 import { useMDFes, useCreateMDFe, useTransmitMDFe, useCloseMDFe } from '@/hooks/fiscal/useMDFe';
-import { useNFe } from '@/hooks/fiscal/useNFe';
+import { useFiscal } from '@/hooks/fiscal/useFiscal';
 import { useCTes } from '@/hooks/fiscal/useCTe';
 import { format } from 'date-fns';
 import { FiscalStepper } from '@/components/fiscal/FiscalStepper';
@@ -29,7 +29,7 @@ const STEPS = [
 
 export default function MDFePage() {
   const { data: mdfes = [], isLoading } = useMDFes();
-  const { nfes } = useNFe();
+  const { nfes } = useFiscal();
   const { data: ctes = [] } = useCTes();
   const create = useCreateMDFe();
   const transmit = useTransmitMDFe();
