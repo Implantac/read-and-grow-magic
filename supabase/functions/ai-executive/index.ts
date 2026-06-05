@@ -244,7 +244,7 @@ function computeKPIs(d: any, months: number = 12) {
   })).sort((a, b) => b.revenue - a.revenue);
 
   const kpis = {
-      totalRevenue, grossProfit, 
+      totalRevenue, grossProfit, totalCosts,
       grossMargin: +grossMargin.toFixed(1),
       moMGrowth: growthTrends[growthTrends.length - 1]?.revenueMoM || 0,
       yoYGrowth: growthTrends[growthTrends.length - 1]?.revenueYoY || 0,
@@ -263,6 +263,16 @@ function computeKPIs(d: any, months: number = 12) {
       targetAttainment,
       totalTarget: targetsSummary.target,
       totalAchieved: targetsSummary.achieved,
+      activeClients: activeClientsCount,
+      clientsAtRisk: d.clients.filter((c: any) => c.abc_classification === 'C' && c.status === 'active').length,
+      concentrationPct: (() => {
+          const top3Revenue = d.clients.sort((a: any, b: any) => (b.total_purchases || 0) - (a.total_purchases || 0)).slice(0, 3).reduce((s: number, c: any) => s + (c.total_purchases || 0), 0);
+          return totalRevenue > 0 ? +((top3Revenue / totalRevenue) * 100).toFixed(1) : 0;
+      })(),
+      avgTicket: activeClientsCount > 0 ? +(totalRevenue / activeClientsCount).toFixed(2) : 0,
+      netPosition: totalReceivable - totalCosts,
+      lowStockProducts: d.products.filter((p: any) => p.stock_current <= p.stock_min).length,
+      revenueGrowth: growthTrends[growthTrends.length - 1]?.revenueMoM || 0,
       // Fiscal KPIs
       nfeIssuedCount: d.nfe.length,
       nfeAuthorizedCount: d.nfe.filter((n: any) => n.status === 'authorized' || n.status === 'autorizada').length,
