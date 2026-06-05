@@ -96,6 +96,15 @@ const productionStatusConfig: Record<string, StatusConfig> = {
   cancelled: { label: 'Cancelado', variant: 'destructive' },
 };
 
+const nfeStatusConfig: Record<string, StatusConfig> = {
+  draft: { label: 'Rascunho', variant: 'secondary' },
+  pending: { label: 'Pendente', variant: 'warning' },
+  authorized: { label: 'Autorizada', variant: 'success' },
+  rejected: { label: 'Rejeitada', variant: 'destructive' },
+  cancelled: { label: 'Cancelada', variant: 'secondary' },
+  denied: { label: 'Denegada', variant: 'destructive' },
+};
+
 const variantStyles: Record<StatusVariant, string> = {
   default: 'bg-primary/10 text-primary border-primary/20',
   success: 'bg-success/10 text-success border-success/20',
@@ -106,7 +115,7 @@ const variantStyles: Record<StatusVariant, string> = {
 };
 
 export interface StatusBadgeProps {
-  type: 'order' | 'sale' | 'client' | 'priority' | 'payment' | 'quotation' | 'inventory' | 'shipment' | 'production';
+  type: 'order' | 'sale' | 'client' | 'priority' | 'payment' | 'quotation' | 'inventory' | 'shipment' | 'production' | 'nfe';
   status: string;
   className?: string;
 }
@@ -141,6 +150,9 @@ export function StatusBadge({ type, status, className }: StatusBadgeProps) {
       break;
     case 'production':
       config = productionStatusConfig[status] || { label: status, variant: 'default' };
+      break;
+    case 'nfe':
+      config = nfeStatusConfig[status] || { label: status, variant: 'default' };
       break;
     default:
       config = { label: status, variant: 'default' };
