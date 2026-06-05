@@ -1358,16 +1358,22 @@ ${patternInsights}${realDataSnapshot}`, supabase, 'ai-executive-chat', user_id);
 
 // ─── Daily Summary ──────────────────────────────────────────────
 
-async function handleDailySummary(supabase: any, lovableKey: string, corsHeaders: any) {
+async function handleDailySummary(supabase: any, lovableKey: string, corsHeaders: any, authenticatedUserId?: string, companyId?: string) {
   const today = new Date().toISOString().split("T")[0];
 
+  const query = (table: string) => {
+    let q = supabase.from(table).select("*");
+    if (companyId) q = q.eq("company_id", companyId);
+    return q;
+  };
+
   const [recRes, pagRes, bankRes, recHoje, pagHoje, opsRes] = await Promise.all([
-    supabase.from("accounts_receivable").select("id, amount, open_amount, status, due_date, client_name").limit(500),
-    supabase.from("accounts_payable").select("id, amount, open_amount, status, due_date, supplier").limit(500),
-    supabase.from("bank_accounts").select("name, balance").eq("active", true),
-    supabase.from("accounts_receivable").select("id, client_name, amount, open_amount").eq("due_date", today).eq("status", "pending"),
-    supabase.from("accounts_payable").select("id, supplier, amount, open_amount, description").eq("due_date", today).eq("status", "pending"),
-    supabase.from("production_orders").select("id, order_number, product_name, due_date, status").in("status", ["in_progress", "planned", "pending"]).limit(100),
+    query("accounts_receivable").limit(500),
+    query("accounts_payable").limit(500),
+    query("bank_accounts").eq("active", true),
+    query("accounts_receivable").eq("due_date", today).eq("status", "pending"),
+    query("accounts_payable").eq("due_date", today).eq("status", "pending"),
+    query("production_orders").in("status", ["in_progress", "planned", "pending"]).limit(100),
   ]);
 
   const banks = bankRes.data || [];
