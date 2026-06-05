@@ -36,8 +36,13 @@ export function ExecutiveChat({ messages, isLoading, sendMessage, clearChat, onD
 
   // Auto-scroll on new messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isLoading]);
+    if (messages.length > 0 || isLoading) {
+      const timer = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [messages.length, isLoading]);
 
   const handleSend = () => {
     if (!chatInput.trim() || isLoading) return;

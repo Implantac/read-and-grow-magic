@@ -221,7 +221,9 @@ export function useUnifiedChat() {
 
   // Persist messages to sessionStorage on every change
   useEffect(() => {
-    saveSession(messages);
+    if (messages.length > 0) {
+      saveSession(messages);
+    }
   }, [messages]);
 
   // Load server-side history on mount if session is empty
