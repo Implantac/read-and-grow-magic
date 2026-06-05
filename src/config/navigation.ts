@@ -200,7 +200,7 @@ export const navigationSections: NavSection[] = [
     items: [
       {
         title: 'Financeiro',
-        href: '/financial',
+        href: '/financeiro',
 
         icon: 'Wallet',
         children: [

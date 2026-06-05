@@ -35,7 +35,7 @@ export default function FinancialHub() {
   const [selectedAccount, setSelectedAccount] = useState<string>('all');
   const [search, setSearch] = useState('');
   const filterAccount = selectedAccount === 'all' ? undefined : selectedAccount;
-  const { data: ledger = [], isLoading: loadingLedger } = useFinancialLedger({ from: monthStart, bankAccountId: filterAccount });
+  const { data: ledger = [], isLoading: loadingLedger } = useFinancialLedger({ from: monthStart, bank_account_id: filterAccount });
   const createLedger = useCreateManualLedger();
 
   const [action, setAction] = useState<QuickAction>(null);

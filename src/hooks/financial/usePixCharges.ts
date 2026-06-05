@@ -25,8 +25,7 @@ export function usePixCharges() {
   return useQuery({
     queryKey: ['pix_charges'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('pix_charges' as any).select('*')
+      const { data, error } = await (supabase.from as any)('pix_charges').select('*')
         .order('created_at', { ascending: false }).limit(200);
       if (error) throw error;
       return (data ?? []) as unknown as PixCharge[];
