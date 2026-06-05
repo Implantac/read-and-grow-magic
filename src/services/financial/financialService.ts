@@ -1,20 +1,19 @@
 import { supabase } from '@/integrations/supabase/client';
-import { AccountReceivable, AccountPayable } from '@/types/financial';
 import { BaseService } from '../shared/baseService';
 
 class FinancialService {
-  private receivablesBase = new BaseService<AccountReceivable>('accounts_receivable');
-  private payablesBase = new BaseService<AccountPayable>('accounts_payable');
+  private receivablesBase = new BaseService('accounts_receivable');
+  private payablesBase = new BaseService('accounts_payable');
 
   async getReceivables() {
     return this.receivablesBase.getAll({ orderBy: 'due_date', ascending: true });
   }
 
-  async createReceivable(account: Partial<AccountReceivable>) {
-    return this.receivablesBase.create(account as any);
+  async createReceivable(account: any) {
+    return this.receivablesBase.create(account);
   }
 
-  async updateReceivable(id: string, updates: Partial<AccountReceivable>) {
+  async updateReceivable(id: string, updates: any) {
     return this.receivablesBase.update(id, updates);
   }
 
@@ -26,11 +25,11 @@ class FinancialService {
     return this.payablesBase.getAll({ orderBy: 'due_date', ascending: true });
   }
 
-  async createPayable(account: Partial<AccountPayable>) {
-    return this.payablesBase.create(account as any);
+  async createPayable(account: any) {
+    return this.payablesBase.create(account);
   }
 
-  async updatePayable(id: string, updates: Partial<AccountPayable>) {
+  async updatePayable(id: string, updates: any) {
     return this.payablesBase.update(id, updates);
   }
 
