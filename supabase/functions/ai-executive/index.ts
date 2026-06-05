@@ -34,6 +34,16 @@ serve(async (req) => {
 
     const authenticatedUserId = user.id;
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Fetch user profile to get company_id (multi-tenant isolation)
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("company_id")
+      .eq("id", authenticatedUserId)
+      .single();
+    
+    const companyId = profile?.company_id;
+
     const body = await req.json();
     const { action, messages, months = 12, segment = 'general' } = body;
 
@@ -41,14 +51,29 @@ serve(async (req) => {
       await supabase.from("ai_executive_chat").delete().eq("user_id", authenticatedUserId);
       return new Response(JSON.stringify({ ok: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-    if (action === "chat" || action === "assistant_chat") return await handleUnifiedChat(messages, supabase, lovableKey, corsHeaders, authenticatedUserId);
-    if (action === "daily_summary") return await handleDailySummary(supabase, lovableKey, corsHeaders);
-    if (action === "generate_insights") return await handleGenerateInsights(supabase, lovableKey, corsHeaders);
-    if (action === "generate_scenarios") return await handleGenerateScenarios(supabase, lovableKey, corsHeaders);
-    if (action === "ceo_brief") return await handleCEOBrief(supabase, lovableKey, corsHeaders);
-    if (action === "execute_decisions") return await handleExecuteDecisions(supabase, body, corsHeaders, authenticatedUserId);
-    if (action === "autopilot_run") return await handleAutoPilotRun(supabase, lovableKey, corsHeaders);
-    return await handleDashboardData(supabase, corsHeaders, months, segment);
+    
+    if (action === "chat" || action === "assistant_chat") 
+      return await handleUnifiedChat(messages, supabase, lovableKey, corsHeaders, authenticatedUserId, companyId);
+    
+    if (action === "daily_summary") 
+      return await handleDailySummary(supabase, lovableKey, corsHeaders, authenticatedUserId, companyId);
+    
+    if (action === "generate_insights") 
+      return await handleGenerateInsights(supabase, lovableKey, corsHeaders, authenticatedUserId, companyId);
+    
+    if (action === "generate_scenarios") 
+      return await handleGenerateScenarios(supabase, lovableKey, corsHeaders, authenticatedUserId, companyId);
+    
+    if (action === "ceo_brief") 
+      return await handleCEOBrief(supabase, lovableKey, corsHeaders, authenticatedUserId, companyId);
+    
+    if (action === "execute_decisions") 
+      return await handleExecuteDecisions(supabase, body, corsHeaders, authenticatedUserId, companyId);
+    
+    if (action === "autopilot_run") 
+      return await handleAutoPilotRun(supabase, lovableKey, corsHeaders, companyId);
+
+    return await handleDashboardData(supabase, corsHeaders, months, segment, companyId);
   } catch (e) {
     console.error("ai-executive error:", e);
     return new Response(JSON.stringify({ error: `Internal error: ${e.message}` }), {
@@ -60,37 +85,43 @@ serve(async (req) => {
 
 // ─── Data Fetching ──────────────────────────────────────────────
 
-async function fetchAllData(supabase: any) {
+async function fetchAllData(supabase: any, companyId?: string) {
+  const query = (table: string) => {
+    let q = supabase.from(table).select("*");
+    if (companyId) q = q.eq("company_id", companyId);
+    return q;
+  };
+
   const [
     ordersRes, receivableRes, payableRes, productsRes,
     clientsRes, productionRes, insightsRes, alertsRes, scenariosRes,
     salesRes, cashFlowRes, salesRepsRes, funnelRes, salesTargetsRes,
     orderItemsRes, commissionRes,
   ] = await Promise.all([
-    supabase.from("orders").select("id, total, status, created_at, client_name, client_id, discount, subtotal, sales_rep_id, sales_rep_name, priority").order("created_at", { ascending: false }).limit(500),
-    supabase.from("accounts_receivable").select("id, amount, status, due_date, paid_amount, open_amount, client_name, client_id").limit(500),
-    supabase.from("accounts_payable").select("id, amount, status, due_date, paid_amount, open_amount, supplier, category").limit(500),
-    supabase.from("products").select("id, name, price, cost, stock_current, stock_min, status, category_id").limit(500),
-    supabase.from("clients").select("id, name, total_purchases, last_purchase_date, status, credit_limit, current_balance, segment, region, abc_classification, avg_ticket").limit(500),
-    supabase.from("production_orders").select("id, status, planned_quantity, produced_quantity, created_at, start_date, end_date").limit(200),
-    supabase.from("ai_executive_insights").select("*").eq("status", "active").order("created_at", { ascending: false }).limit(20),
-    supabase.from("ai_executive_alerts").select("*").eq("status", "active").order("created_at", { ascending: false }).limit(10),
-    supabase.from("ai_executive_scenarios").select("*").order("created_at", { ascending: false }).limit(3),
-    supabase.from("sales").select("id, total, status, created_at, client_name").limit(500),
-    supabase.from("cash_flow_entries").select("id, amount, type, date, category").order("date", { ascending: false }).limit(200),
-    supabase.from("sales_reps").select("id, name, email, region, status").limit(100),
-    supabase.from("sales_funnel").select("id, client_name, stage, value, probability, sales_rep_id, created_at, status").limit(300),
-    supabase.from("sales_targets").select("id, sales_rep_id, target_value, achieved_value, period, target_type").limit(100),
-    supabase.from("order_items").select("id, order_id, product_id, product_name, product_code, quantity, unit_price, total, discount").limit(1000),
-    supabase.from("commissions").select("id, sales_rep_id, sales_rep_name, calculated_value, status, period").limit(200),
+    query("orders").order("created_at", { ascending: false }).limit(500),
+    query("accounts_receivable").limit(500),
+    query("accounts_payable").limit(500),
+    query("products").limit(500),
+    query("clients").limit(500),
+    query("production_orders").limit(200),
+    query("ai_executive_insights").eq("status", "active").order("created_at", { ascending: false }).limit(20),
+    query("ai_executive_alerts").eq("status", "active").order("created_at", { ascending: false }).limit(10),
+    query("ai_executive_scenarios").order("created_at", { ascending: false }).limit(3),
+    query("sales").limit(500),
+    query("cash_flow_entries").order("date", { ascending: false }).limit(200),
+    query("sales_reps").limit(100),
+    query("sales_funnel").limit(300),
+    query("sales_targets").limit(100),
+    query("order_items").limit(1000),
+    query("commissions").limit(200),
   ]);
 
-  // Fiscal data (NF-e, taxes, SPED) — used by AI as MCP-fiscal context
+  // Fiscal data (NF-e, taxes, SPED)
   const [nfeRes, nfeItemsRes, taxRulesRes, spedRes] = await Promise.all([
-    supabase.from("nfe").select("id, number, series, status, total_amount, total_tax, issue_date, customer_name, authorization_protocol, access_key").order("issue_date", { ascending: false }).limit(300).then((r: any) => r).catch(() => ({ data: [] })),
-    supabase.from("nfe_items").select("id, nfe_id, product_name, quantity, unit_price, total, icms_value, ipi_value, pis_value, cofins_value").limit(1000).then((r: any) => r).catch(() => ({ data: [] })),
-    supabase.from("tax_rules").select("id, name, tax_type, rate, active, ncm, cfop").limit(200).then((r: any) => r).catch(() => ({ data: [] })),
-    supabase.from("sped_files").select("id, file_type, period, status, generated_at, total_records").order("generated_at", { ascending: false }).limit(50).then((r: any) => r).catch(() => ({ data: [] })),
+    query("nfe").order("issue_date", { ascending: false }).limit(300).then((r: any) => r).catch(() => ({ data: [] })),
+    query("nfe_items").limit(1000).then((r: any) => r).catch(() => ({ data: [] })),
+    query("tax_rules").limit(200).then((r: any) => r).catch(() => ({ data: [] })),
+    query("sped_files").order("generated_at", { ascending: false }).limit(50).then((r: any) => r).catch(() => ({ data: [] })),
   ]);
 
   return {
@@ -213,7 +244,7 @@ function computeKPIs(d: any, months: number = 12) {
   })).sort((a, b) => b.revenue - a.revenue);
 
   const kpis = {
-      totalRevenue, grossProfit, 
+      totalRevenue, grossProfit, totalCosts,
       grossMargin: +grossMargin.toFixed(1),
       moMGrowth: growthTrends[growthTrends.length - 1]?.revenueMoM || 0,
       yoYGrowth: growthTrends[growthTrends.length - 1]?.revenueYoY || 0,
@@ -232,6 +263,16 @@ function computeKPIs(d: any, months: number = 12) {
       targetAttainment,
       totalTarget: targetsSummary.target,
       totalAchieved: targetsSummary.achieved,
+      activeClients: activeClientsCount,
+      clientsAtRisk: d.clients.filter((c: any) => c.abc_classification === 'C' && c.status === 'active').length,
+      concentrationPct: (() => {
+          const top3Revenue = d.clients.sort((a: any, b: any) => (b.total_purchases || 0) - (a.total_purchases || 0)).slice(0, 3).reduce((s: number, c: any) => s + (c.total_purchases || 0), 0);
+          return totalRevenue > 0 ? +((top3Revenue / totalRevenue) * 100).toFixed(1) : 0;
+      })(),
+      avgTicket: activeClientsCount > 0 ? +(totalRevenue / activeClientsCount).toFixed(2) : 0,
+      netPosition: totalReceivable - totalCosts,
+      lowStockProducts: d.products.filter((p: any) => p.stock_current <= p.stock_min).length,
+      revenueGrowth: growthTrends[growthTrends.length - 1]?.revenueMoM || 0,
       // Fiscal KPIs
       nfeIssuedCount: d.nfe.length,
       nfeAuthorizedCount: d.nfe.filter((n: any) => n.status === 'authorized' || n.status === 'autorizada').length,
@@ -302,8 +343,8 @@ function checkHasRealData(d: any): boolean {
 
 const INSUFFICIENT_DATA_MSG = "Dados insuficientes para análise confiável. Cadastre vendas, pedidos, contas a pagar ou receber para que a IA possa gerar diagnóstico baseado em dados reais.";
 
-async function handleDashboardData(supabase: any, corsHeaders: any, months: number = 12, segment: string = 'general') {
-  const d = await fetchAllData(supabase);
+async function handleDashboardData(supabase: any, corsHeaders: any, months: number = 12, segment: string = 'general', companyId?: string) {
+  const d = await fetchAllData(supabase, companyId);
   const computed = computeKPIs(d, months);
   
   // Custom logic for consensus based on segment
@@ -385,8 +426,8 @@ function generateConsensusItems(kpis: any, data: any, segment: string) {
 
 // ─── Generate Insights ──────────────────────────────────────────
 
-async function handleGenerateInsights(supabase: any, lovableKey: string, corsHeaders: any) {
-  const d = await fetchAllData(supabase);
+async function handleGenerateInsights(supabase: any, lovableKey: string, corsHeaders: any, authenticatedUserId?: string, companyId?: string) {
+  const d = await fetchAllData(supabase, companyId);
   const computed = computeKPIs(d);
 
   // Guard: sem dados reais, não chama LLM (evita alucinação)
@@ -466,8 +507,8 @@ Gere insights estratégicos: { "insights": [...] }`;
 
 // ─── Generate Scenarios ──────────────────────────────────────────
 
-async function handleGenerateScenarios(supabase: any, lovableKey: string, corsHeaders: any) {
-  const d = await fetchAllData(supabase);
+async function handleGenerateScenarios(supabase: any, lovableKey: string, corsHeaders: any, authenticatedUserId?: string, companyId?: string) {
+  const d = await fetchAllData(supabase, companyId);
   const computed = computeKPIs(d);
 
   // Guard: sem dados reais, não simula cenários
@@ -658,15 +699,21 @@ const ERP_TOOLS = [
 
 // ─── Tool Executors ─────────────────────────────────────────────
 
-async function executeConsultaFinanceiro(supabase: any, args: any) {
+async function executeConsultaFinanceiro(supabase: any, args: any, user_id?: string, company_id?: string) {
   const now = new Date();
   const today = now.toISOString().split("T")[0];
+  const query = (table: string) => {
+    let q = supabase.from(table).select("*");
+    if (company_id) q = q.eq("company_id", company_id);
+    return q;
+  };
+
   switch (args.tipo) {
     case "resumo": {
       const [recRes, pagRes, bankRes] = await Promise.all([
-        supabase.from("accounts_receivable").select("id, amount, status, due_date, open_amount, client_name").limit(500),
-        supabase.from("accounts_payable").select("id, amount, status, due_date, open_amount, supplier").limit(500),
-        supabase.from("bank_accounts").select("id, name, balance, active").eq("active", true),
+        query("accounts_receivable").limit(500),
+        query("accounts_payable").limit(500),
+        query("bank_accounts").eq("active", true),
       ]);
       const rec = recRes.data || []; const pag = pagRes.data || []; const banks = bankRes.data || [];
       const saldoBancario = banks.reduce((s: number, b: any) => s + (b.balance || 0), 0);
@@ -678,33 +725,33 @@ async function executeConsultaFinanceiro(supabase: any, args: any) {
     }
     case "vencimentos_hoje": {
       const [recHoje, pagHoje] = await Promise.all([
-        supabase.from("accounts_receivable").select("id, client_name, amount, open_amount, status").eq("due_date", today).eq("status", "pending"),
-        supabase.from("accounts_payable").select("id, supplier, amount, open_amount, status, description").eq("due_date", today).eq("status", "pending"),
+        query("accounts_receivable").eq("due_date", today).eq("status", "pending"),
+        query("accounts_payable").eq("due_date", today).eq("status", "pending"),
       ]);
       return { data: today, receber_hoje: { total: (recHoje.data || []).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0), itens: recHoje.data || [] }, pagar_hoje: { total: (pagHoje.data || []).reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0), itens: pagHoje.data || [] } };
     }
     case "atrasados": {
       const [recAtr, pagAtr] = await Promise.all([
-        supabase.from("accounts_receivable").select("id, client_name, amount, open_amount, due_date").or(`status.eq.overdue,and(status.eq.pending,due_date.lt.${today})`).order("due_date").limit(20),
-        supabase.from("accounts_payable").select("id, supplier, amount, open_amount, due_date, description").or(`status.eq.overdue,and(status.eq.pending,due_date.lt.${today})`).order("due_date").limit(20),
+        query("accounts_receivable").or(`status.eq.overdue,and(status.eq.pending,due_date.lt.${today})`).order("due_date").limit(20),
+        query("accounts_payable").or(`status.eq.overdue,and(status.eq.pending,due_date.lt.${today})`).order("due_date").limit(20),
       ]);
       return { receber_atrasados: recAtr.data || [], pagar_atrasados: pagAtr.data || [] };
     }
     case "a_pagar": {
-      const { data } = await supabase.from("accounts_payable").select("id, supplier, amount, open_amount, due_date, status, description").eq("status", "pending").order("due_date").limit(20);
+      const { data } = await query("accounts_payable").eq("status", "pending").order("due_date").limit(20);
       return { contas_a_pagar: data || [] };
     }
     case "a_receber": {
-      const { data } = await supabase.from("accounts_receivable").select("id, client_name, amount, open_amount, due_date, status").eq("status", "pending").order("due_date").limit(20);
+      const { data } = await query("accounts_receivable").eq("status", "pending").order("due_date").limit(20);
       return { contas_a_receber: data || [] };
     }
     case "fluxo_caixa": {
       const dias = args.periodo_dias || 30;
       const futuro = new Date(now.getTime() + dias * 86400000).toISOString().split("T")[0];
       const [recFut, pagFut, bankRes] = await Promise.all([
-        supabase.from("accounts_receivable").select("amount, open_amount, due_date").eq("status", "pending").gte("due_date", today).lte("due_date", futuro),
-        supabase.from("accounts_payable").select("amount, open_amount, due_date").eq("status", "pending").gte("due_date", today).lte("due_date", futuro),
-        supabase.from("bank_accounts").select("balance").eq("active", true),
+        query("accounts_receivable").eq("status", "pending").gte("due_date", today).lte("due_date", futuro),
+        query("accounts_payable").eq("status", "pending").gte("due_date", today).lte("due_date", futuro),
+        query("bank_accounts").eq("active", true),
       ]);
       const entradas = (recFut.data || []).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
       const saidas = (pagFut.data || []).reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0);
@@ -715,46 +762,52 @@ async function executeConsultaFinanceiro(supabase: any, args: any) {
   }
 }
 
-async function executeConsultaComercial(supabase: any, args: any) {
+async function executeConsultaComercial(supabase: any, args: any, user_id?: string, company_id?: string) {
   const limite = args.limite || 10;
+  const query = (table: string) => {
+    let q = supabase.from(table).select("*");
+    if (company_id) q = q.eq("company_id", company_id);
+    return q;
+  };
+
   switch (args.tipo) {
     case "resumo": {
       const [clRes, ordRes, funRes] = await Promise.all([
-        supabase.from("clients").select("id, status").limit(1000),
-        supabase.from("orders").select("id, total, status, created_at").order("created_at", { ascending: false }).limit(100),
-        supabase.from("sales_funnel").select("id, value, stage, status").limit(300),
+        query("clients").limit(1000),
+        query("orders").order("created_at", { ascending: false }).limit(100),
+        query("sales_funnel").limit(300),
       ]);
       const clients = clRes.data || []; const orders = ordRes.data || []; const funnel = funRes.data || [];
       return { clientes_ativos: clients.filter((c: any) => c.status === "active").length, total_clientes: clients.length, pedidos_recentes_30d: orders.filter((o: any) => new Date(o.created_at) > new Date(Date.now() - 30 * 86400000)).length, valor_pipeline: funnel.filter((f: any) => f.status === "active" || !f.status).reduce((s: number, f: any) => s + (f.value || 0), 0), oportunidades_ativas: funnel.filter((f: any) => f.status === "active" || !f.status).length };
     }
     case "pedidos_recentes": {
-      const { data } = await supabase.from("orders").select("id, number, client_name, total, status, created_at, priority").order("created_at", { ascending: false }).limit(limite);
+      const { data } = await query("orders").order("created_at", { ascending: false }).limit(limite);
       return { pedidos: data || [] };
     }
     case "top_clientes": {
-      const { data } = await supabase.from("clients").select("id, name, total_purchases, avg_ticket, abc_classification, last_purchase_date").order("total_purchases", { ascending: false }).limit(limite);
+      const { data } = await query("clients").order("total_purchases", { ascending: false }).limit(limite);
       return { top_clientes: data || [] };
     }
     case "clientes_risco": {
       const cutoff = new Date(Date.now() - 60 * 86400000).toISOString();
-      const { data } = await supabase.from("clients").select("id, name, last_purchase_date, total_purchases, avg_ticket").eq("status", "active").or(`last_purchase_date.lt.${cutoff},last_purchase_date.is.null`).limit(limite);
+      const { data } = await query("clients").eq("status", "active").or(`last_purchase_date.lt.${cutoff},last_purchase_date.is.null`).limit(limite);
       return { clientes_em_risco: data || [] };
     }
     case "metas": {
-      const { data } = await supabase.from("sales_targets").select("id, sales_rep_id, target_value, achieved_value, period, target_type").limit(50);
+      const { data } = await query("sales_targets").limit(50);
       const targets = data || [];
       const totalMeta = targets.reduce((s: number, t: any) => s + (t.target_value || 0), 0);
       const totalAtingido = targets.reduce((s: number, t: any) => s + (t.achieved_value || 0), 0);
       return { total_meta: totalMeta, total_atingido: totalAtingido, percentual: totalMeta > 0 ? +((totalAtingido / totalMeta) * 100).toFixed(1) : 0 };
     }
     case "funil": {
-      const { data } = await supabase.from("sales_funnel").select("id, client_name, stage, value, probability, status").eq("status", "active").order("value", { ascending: false }).limit(limite);
+      const { data } = await query("sales_funnel").eq("status", "active").order("value", { ascending: false }).limit(limite);
       return { oportunidades: data || [] };
     }
     case "vendedores": {
       const [repsRes, ordersRes] = await Promise.all([
-        supabase.from("sales_reps").select("id, name, region, status").eq("status", "active").limit(50),
-        supabase.from("orders").select("sales_rep_id, sales_rep_name, total, status").in("status", ["completed", "invoiced", "shipped", "delivered"]).limit(500),
+        query("sales_reps").eq("status", "active").limit(50),
+        query("orders").in("status", ["completed", "invoiced", "shipped", "delivered"]).limit(500),
       ]);
       const reps = repsRes.data || [];
       const orders = ordersRes.data || [];
@@ -772,24 +825,30 @@ async function executeConsultaComercial(supabase: any, args: any) {
   }
 }
 
-async function executeConsultaProducao(supabase: any, args: any) {
+async function executeConsultaProducao(supabase: any, args: any, user_id?: string, company_id?: string) {
   const today = new Date().toISOString().split("T")[0];
+  const query = (table: string) => {
+    let q = supabase.from(table).select("*");
+    if (company_id) q = q.eq("company_id", company_id);
+    return q;
+  };
+
   switch (args.tipo) {
     case "resumo": {
-      const { data } = await supabase.from("production_orders").select("id, status, planned_quantity, produced_quantity, due_date").limit(500);
+      const { data } = await query("production_orders").limit(500);
       const ops = data || [];
       return { total_ordens: ops.length, em_producao: ops.filter((o: any) => o.status === "in_progress").length, planejadas: ops.filter((o: any) => o.status === "planned" || o.status === "pending").length, concluidas: ops.filter((o: any) => o.status === "completed").length, atrasadas: ops.filter((o: any) => o.due_date && o.due_date < today && !["completed", "cancelled"].includes(o.status)).length };
     }
     case "ordens_ativas": {
-      const { data } = await supabase.from("production_orders").select("id, order_number, product_name, status, quantity, produced_quantity, due_date, priority").in("status", ["in_progress", "planned", "pending"]).order("priority").limit(20);
+      const { data } = await query("production_orders").in("status", ["in_progress", "planned", "pending"]).order("priority").limit(20);
       return { ordens_ativas: data || [] };
     }
     case "atrasadas": {
-      const { data } = await supabase.from("production_orders").select("id, order_number, product_name, status, due_date, quantity, produced_quantity").lt("due_date", today).not("status", "in", '("completed","cancelled")').order("due_date").limit(20);
+      const { data } = await query("production_orders").lt("due_date", today).not("status", "in", '("completed","cancelled")').order("due_date").limit(20);
       return { ordens_atrasadas: data || [] };
     }
     case "eficiencia": {
-      const { data } = await supabase.from("production_orders").select("planned_quantity, produced_quantity").eq("status", "completed").limit(200);
+      const { data } = await query("production_orders").eq("status", "completed").limit(200);
       const ops = data || [];
       const planned = ops.reduce((s: number, o: any) => s + (o.planned_quantity || 0), 0);
       const produced = ops.reduce((s: number, o: any) => s + (o.produced_quantity || 0), 0);
@@ -799,32 +858,38 @@ async function executeConsultaProducao(supabase: any, args: any) {
   }
 }
 
-async function executeConsultaEstoque(supabase: any, args: any) {
+async function executeConsultaEstoque(supabase: any, args: any, user_id?: string, company_id?: string) {
+  const query = (table: string) => {
+    let q = supabase.from(table).select("*");
+    if (company_id) q = q.eq("company_id", company_id);
+    return q;
+  };
+
   switch (args.tipo) {
     case "resumo": {
-      const { data } = await supabase.from("products").select("id, stock_current, stock_min, price, cost, status").eq("status", "active").limit(500);
+      const { data } = await query("products").eq("status", "active").limit(500);
       const prods = data || [];
       return { total_produtos: prods.length, abaixo_minimo: prods.filter((p: any) => p.stock_current <= p.stock_min).length, valor_estoque_total: +prods.reduce((s: number, p: any) => s + ((p.stock_current || 0) * (p.cost || p.price || 0)), 0).toFixed(2) };
     }
     case "baixo_estoque": {
-      const { data } = await supabase.from("products").select("id, name, code, stock_current, stock_min, price").eq("status", "active").limit(500);
+      const { data } = await query("products").eq("status", "active").limit(500);
       const baixo = (data || []).filter((p: any) => p.stock_current <= p.stock_min).sort((a: any, b: any) => (a.stock_current - a.stock_min) - (b.stock_current - b.stock_min));
       return { produtos_baixo_estoque: baixo.slice(0, 20) };
     }
     case "movimentacoes_recentes": {
-      const { data } = await supabase.from("stock_movements").select("id, product_name, direction, quantity, type, created_at, document_number").order("created_at", { ascending: false }).limit(15);
+      const { data } = await query("stock_movements").order("created_at", { ascending: false }).limit(15);
       return { movimentacoes: data || [] };
     }
     case "produto_especifico": {
       if (!args.produto_nome) return { erro: "Nome do produto não informado" };
-      const { data } = await supabase.from("products").select("id, name, code, stock_current, stock_min, price, cost, status").ilike("name", `%${args.produto_nome}%`).limit(5);
+      const { data } = await query("products").ilike("name", `%${args.produto_nome}%`).limit(5);
       return { produtos_encontrados: data || [] };
     }
     default: return { resumo: "Dados não encontrados" };
   }
 }
 
-async function executeAcao(supabase: any, args: any, user_id?: string) {
+async function executeAcao(supabase: any, args: any, user_id?: string, company_id?: string) {
   if (!args.confirmado) {
     return {
       status: "aguardando_confirmacao",
@@ -841,6 +906,7 @@ async function executeAcao(supabase: any, args: any, user_id?: string) {
       try {
         await supabase.from("ai_action_logs").insert({
           user_id,
+          company_id,
           action_type: "execution",
           module: args.modulo,
           action_name: actionName,
@@ -856,7 +922,9 @@ async function executeAcao(supabase: any, args: any, user_id?: string) {
     case "registrar_pagamento": {
       if (!params.id) return { erro: "ID da conta não informado" };
       const table = params.tipo === "receber" ? "accounts_receivable" : "accounts_payable";
-      const { error } = await supabase.from(table).update({ status: "paid", payment_date: new Date().toISOString().split("T")[0], paid_amount: params.valor }).eq("id", params.id);
+      let q = supabase.from(table).update({ status: "paid", payment_date: new Date().toISOString().split("T")[0], paid_amount: params.valor }).eq("id", params.id);
+      if (company_id) q = q.eq("company_id", company_id);
+      const { error } = await q;
       if (error) return { erro: error.message };
       await logAction("registrar_pagamento", "sucesso");
       return { status: "sucesso", mensagem: "✅ Pagamento registrado com sucesso." };
@@ -864,13 +932,16 @@ async function executeAcao(supabase: any, args: any, user_id?: string) {
     case "adiar_vencimento": {
       if (!params.id || !params.nova_data) return { erro: "ID e nova data são obrigatórios" };
       const table = params.tipo === "receber" ? "accounts_receivable" : "accounts_payable";
-      const { error } = await supabase.from(table).update({ due_date: params.nova_data }).eq("id", params.id);
+      let q = supabase.from(table).update({ due_date: params.nova_data }).eq("id", params.id);
+      if (company_id) q = q.eq("company_id", company_id);
+      const { error } = await q;
       if (error) return { erro: error.message };
       await logAction("adiar_vencimento", "sucesso");
       return { status: "sucesso", mensagem: `✅ Vencimento adiado para ${params.nova_data}.` };
     }
     case "criar_conta_pagar": {
       const { error } = await supabase.from("accounts_payable").insert({
+        company_id,
         description: params.descricao || "Conta via IA",
         supplier: params.fornecedor || "N/A",
         amount: params.valor || 0,
@@ -884,6 +955,7 @@ async function executeAcao(supabase: any, args: any, user_id?: string) {
     }
     case "criar_conta_receber": {
       const { error } = await supabase.from("accounts_receivable").insert({
+        company_id,
         description: params.descricao || "Conta via IA",
         client_name: params.cliente || "N/A",
         amount: params.valor || 0,
@@ -897,33 +969,44 @@ async function executeAcao(supabase: any, args: any, user_id?: string) {
     }
     case "alterar_status_pedido": {
       if (!params.id || !params.novo_status) return { erro: "ID e novo status obrigatórios" };
-      const { error } = await supabase.from("orders").update({ status: params.novo_status }).eq("id", params.id);
+      let q = supabase.from("orders").update({ status: params.novo_status }).eq("id", params.id);
+      if (company_id) q = q.eq("company_id", company_id);
+      const { error } = await q;
       if (error) return { erro: error.message };
       await logAction("alterar_status_pedido", "sucesso");
       return { status: "sucesso", mensagem: `✅ Pedido atualizado para "${params.novo_status}".` };
     }
     case "alterar_status_op": {
       if (!params.id || !params.novo_status) return { erro: "ID e novo status obrigatórios" };
-      const { error } = await supabase.from("production_orders").update({ status: params.novo_status }).eq("id", params.id);
+      let q = supabase.from("production_orders").update({ status: params.novo_status }).eq("id", params.id);
+      if (company_id) q = q.eq("company_id", company_id);
+      const { error } = await q;
       if (error) return { erro: error.message };
       await logAction("alterar_status_op", "sucesso");
       return { status: "sucesso", mensagem: `✅ OP atualizada para "${params.novo_status}".` };
     }
     case "priorizar_op": {
       if (!params.id) return { erro: "ID da OP não informado" };
-      const { error } = await supabase.from("production_orders").update({ priority: params.prioridade || "urgent" }).eq("id", params.id);
+      let q = supabase.from("production_orders").update({ priority: params.prioridade || "urgent" }).eq("id", params.id);
+      if (company_id) q = q.eq("company_id", company_id);
+      const { error } = await q;
       if (error) return { erro: error.message };
       await logAction("priorizar_op", "sucesso");
       return { status: "sucesso", mensagem: `✅ OP priorizada como "${params.prioridade || "urgent"}".` };
     }
     case "ajustar_estoque": {
       if (!params.product_id || params.quantidade == null) return { erro: "ID do produto e quantidade obrigatórios" };
-      const { data: prod } = await supabase.from("products").select("id, name, code, stock_current").eq("id", params.product_id).single();
+      let q = supabase.from("products").select("id, name, code, stock_current").eq("id", params.product_id);
+      if (company_id) q = q.eq("company_id", company_id);
+      const { data: prod } = await q.single();
       if (!prod) return { erro: "Produto não encontrado" };
       const newStock = (prod.stock_current || 0) + (params.quantidade || 0);
-      const { error } = await supabase.from("products").update({ stock_current: newStock }).eq("id", params.product_id);
+      let qu = supabase.from("products").update({ stock_current: newStock }).eq("id", params.product_id);
+      if (company_id) qu = qu.eq("company_id", company_id);
+      const { error } = await qu;
       if (error) return { erro: error.message };
       await supabase.from("stock_movements").insert({
+        company_id,
         document_number: `IA-ADJ-${Date.now()}`,
         product_id: prod.id,
         product_code: prod.code,
@@ -942,8 +1025,8 @@ async function executeAcao(supabase: any, args: any, user_id?: string) {
   }
 }
 
-async function executeAnaliseEstrategica(supabase: any, args: any) {
-  const d = await fetchAllData(supabase);
+async function executeAnaliseEstrategica(supabase: any, args: any, user_id?: string, company_id?: string) {
+  const d = await fetchAllData(supabase, company_id);
   const computed = computeKPIs(d);
   const k = computed.kpis;
 
@@ -971,16 +1054,22 @@ async function executeAnaliseEstrategica(supabase: any, args: any) {
 }
 
 // MCP-Fiscal: tool executor
-async function executeConsultaFiscal(supabase: any, args: any) {
+async function executeConsultaFiscal(supabase: any, args: any, user_id?: string, company_id?: string) {
   const periodoDias = args.periodo_dias || 30;
   const since = new Date(Date.now() - periodoDias * 24 * 3600 * 1000).toISOString();
+
+  const query = (table: string) => {
+    let q = supabase.from(table).select("*");
+    if (company_id) q = q.eq("company_id", company_id);
+    return q;
+  };
 
   switch (args.tipo) {
     case "resumo": {
       const [nfeRes, taxRes, spedRes] = await Promise.all([
-        supabase.from("nfe").select("id, status, total_amount, total_tax, issue_date").gte("issue_date", since).limit(500),
-        supabase.from("tax_rules").select("id, active").limit(200),
-        supabase.from("sped_files").select("id, period, generated_at, status").order("generated_at", { ascending: false }).limit(10),
+        query("nfe").gte("issue_date", since).limit(500),
+        query("tax_rules").limit(200),
+        query("sped_files").order("generated_at", { ascending: false }).limit(10),
       ]);
       const nfes = nfeRes.data || [];
       const totalAmount = nfes.reduce((s: number, n: any) => s + (n.total_amount || 0), 0);
@@ -998,15 +1087,15 @@ async function executeConsultaFiscal(supabase: any, args: any) {
       };
     }
     case "nfe_recentes": {
-      const { data } = await supabase.from("nfe").select("id, number, series, status, total_amount, total_tax, issue_date, customer_name, access_key").order("issue_date", { ascending: false }).limit(20);
+      const { data } = await query("nfe").order("issue_date", { ascending: false }).limit(20);
       return { nfe_recentes: data || [] };
     }
     case "nfe_rejeitadas": {
-      const { data } = await supabase.from("nfe").select("id, number, series, status, customer_name, issue_date, rejection_reason").in("status", ["rejected", "rejeitada"]).order("issue_date", { ascending: false }).limit(20);
+      const { data } = await query("nfe").in("status", ["rejected", "rejeitada"]).order("issue_date", { ascending: false }).limit(20);
       return { nfe_rejeitadas: data || [] };
     }
     case "impostos_periodo": {
-      const { data } = await supabase.from("nfe").select("issue_date, total_tax, total_amount").gte("issue_date", since).limit(1000);
+      const { data } = await query("nfe").gte("issue_date", since).limit(1000);
       const items = data || [];
       const byMonth: Record<string, { tax: number; amount: number }> = {};
       items.forEach((n: any) => {
@@ -1018,11 +1107,11 @@ async function executeConsultaFiscal(supabase: any, args: any) {
       return { por_mes: byMonth, periodo_dias: periodoDias };
     }
     case "regras_ativas": {
-      const { data } = await supabase.from("tax_rules").select("*").eq("active", true).limit(100);
+      const { data } = await query("tax_rules").eq("active", true).limit(100);
       return { regras: data || [] };
     }
     case "sped": {
-      const { data } = await supabase.from("sped_files").select("*").order("generated_at", { ascending: false }).limit(20);
+      const { data } = await query("sped_files").order("generated_at", { ascending: false }).limit(20);
       return { sped_files: data || [] };
     }
     default:
@@ -1031,7 +1120,7 @@ async function executeConsultaFiscal(supabase: any, args: any) {
 }
 
 // TOOL_EXECUTORS are called with (supabase, args, user_id) — see tool call loop below
-const TOOL_EXECUTORS: Record<string, (supabase: any, args: any, user_id?: string) => Promise<any>> = {
+const TOOL_EXECUTORS: Record<string, (supabase: any, args: any, user_id?: string, company_id?: string) => Promise<any>> = {
   analise_historica: async (supabase, args) => {
     // Busca agregados históricos de dois períodos para comparação
     const { periodo_a, periodo_b } = args;
@@ -1114,7 +1203,7 @@ Com base nesses padrões:
 
 // ─── Unified Chat with Tool Calling ─────────────────────────────
 
-async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: string, corsHeaders: any, user_id?: string) {
+async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: string, corsHeaders: any, user_id?: string, company_id?: string) {
   // ─── Server-side Memory: Load recent history for context ───
   let serverHistory: any[] = [];
   if (user_id) {
@@ -1168,13 +1257,19 @@ async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: str
   // Garante que o modelo SAIBA quais módulos têm dados antes de responder.
   let realDataSnapshot = "";
   try {
+    const query = (table: string) => {
+      let q = supabase.from(table).select("id", { count: "exact", head: true });
+      if (company_id) q = q.eq("company_id", company_id);
+      return q;
+    };
+
     const [ordC, recC, payC, prodC, cliC, opC] = await Promise.all([
-      supabase.from("orders").select("id", { count: "exact", head: true }),
-      supabase.from("accounts_receivable").select("id", { count: "exact", head: true }),
-      supabase.from("accounts_payable").select("id", { count: "exact", head: true }),
-      supabase.from("products").select("id", { count: "exact", head: true }),
-      supabase.from("clients").select("id", { count: "exact", head: true }),
-      supabase.from("production_orders").select("id", { count: "exact", head: true }),
+      query("orders"),
+      query("accounts_receivable"),
+      query("accounts_payable"),
+      query("products"),
+      query("clients"),
+      query("production_orders"),
     ]);
     const counts = {
       pedidos: ordC.count ?? 0,
@@ -1273,7 +1368,7 @@ ${patternInsights}${realDataSnapshot}`, supabase, 'ai-executive-chat', user_id);
       let toolResult: any;
       try {
         const args = typeof fn.arguments === "string" ? JSON.parse(fn.arguments) : fn.arguments;
-        toolResult = executor ? await executor(supabase, args, user_id) : { erro: `Função ${fn.name} não encontrada` };
+        toolResult = executor ? await executor(supabase, args, user_id, company_id) : { erro: `Função ${fn.name} não encontrada` };
       } catch (e) {
         toolResult = { erro: `Erro: ${e.message}` };
       }
@@ -1317,16 +1412,22 @@ ${patternInsights}${realDataSnapshot}`, supabase, 'ai-executive-chat', user_id);
 
 // ─── Daily Summary ──────────────────────────────────────────────
 
-async function handleDailySummary(supabase: any, lovableKey: string, corsHeaders: any) {
+async function handleDailySummary(supabase: any, lovableKey: string, corsHeaders: any, authenticatedUserId?: string, companyId?: string) {
   const today = new Date().toISOString().split("T")[0];
 
+  const query = (table: string) => {
+    let q = supabase.from(table).select("*");
+    if (companyId) q = q.eq("company_id", companyId);
+    return q;
+  };
+
   const [recRes, pagRes, bankRes, recHoje, pagHoje, opsRes] = await Promise.all([
-    supabase.from("accounts_receivable").select("id, amount, open_amount, status, due_date, client_name").limit(500),
-    supabase.from("accounts_payable").select("id, amount, open_amount, status, due_date, supplier").limit(500),
-    supabase.from("bank_accounts").select("name, balance").eq("active", true),
-    supabase.from("accounts_receivable").select("id, client_name, amount, open_amount").eq("due_date", today).eq("status", "pending"),
-    supabase.from("accounts_payable").select("id, supplier, amount, open_amount, description").eq("due_date", today).eq("status", "pending"),
-    supabase.from("production_orders").select("id, order_number, product_name, due_date, status").in("status", ["in_progress", "planned", "pending"]).limit(100),
+    query("accounts_receivable").limit(500),
+    query("accounts_payable").limit(500),
+    query("bank_accounts").eq("active", true),
+    query("accounts_receivable").eq("due_date", today).eq("status", "pending"),
+    query("accounts_payable").eq("due_date", today).eq("status", "pending"),
+    query("production_orders").in("status", ["in_progress", "planned", "pending"]).limit(100),
   ]);
 
   const banks = bankRes.data || [];
@@ -1537,8 +1638,8 @@ function suggestDecisions(ctx: any, forecast: any, risks: any[]) {
   return decisions;
 }
 
-export async function handleCEOBrief(supabase: any, lovableKey: string, corsHeaders: any) {
-  const data = await fetchAllData(supabase);
+export async function handleCEOBrief(supabase: any, lovableKey: string, corsHeaders: any, authenticatedUserId?: string, companyId?: string) {
+  const data = await fetchAllData(supabase, companyId);
   const kpis = computeKPIs(data);
   const ctx = buildContext(data, kpis);
   const forecast = predictRevenue(kpis.revenueByMonth || []);
@@ -1782,9 +1883,9 @@ async function handleExecuteDecisions(supabase: any, body: any, corsHeaders: any
 
 // ─── AutoPilotService ───────────────────────────────────────────
 // Orquestração CRON: contexto → forecast → riscos → decisões → registro
-export async function handleAutoPilotRun(supabase: any, _lovableKey: string, corsHeaders: any) {
+export async function handleAutoPilotRun(supabase: any, lovableKey: string, corsHeaders: any, companyId?: string) {
   try {
-    const data = await fetchAllData(supabase);
+    const data = await fetchAllData(supabase, companyId);
 
     // Guard: AutoPilot só roda com dados reais — evita gerar alertas/ações fictícias
     if (!checkHasRealData(data)) {

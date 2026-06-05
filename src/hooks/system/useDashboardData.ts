@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
+import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { useAppStore } from '@/stores/useAppStore';
 
 import { formatBRL } from '@/lib/formatters';
 const fmtShort = (v: number) => {
@@ -10,8 +11,11 @@ const fmtShort = (v: number) => {
 };
 
 export function useDashboardData() {
+  const { activeCompany } = useAppStore();
+  const companyId = activeCompany?.id;
+
   return useQuery({
-    queryKey: ['dashboard-consolidated'],
+    queryKey: ['dashboard-consolidated', companyId],
     queryFn: async () => {
       const now = new Date();
       const monthStart = startOfMonth(now).toISOString();
@@ -19,7 +23,6 @@ export function useDashboardData() {
       const prevMonthStart = startOfMonth(subMonths(now, 1)).toISOString();
       const prevMonthEnd = endOfMonth(subMonths(now, 1)).toISOString();
 
-      // Parallel queries
       const [
         salesRes, prevSalesRes, ordersRes, clientsRes, productsRes,
         receivableRes, payableRes, nfeRes, productionRes, purchaseRes,
@@ -27,41 +30,41 @@ export function useDashboardData() {
         lowStockRes, recentOrdersRes, hrRes, crmRes, carriersRes,
       ] = await Promise.all([
         // Current month sales
-        supabase.from('sales').select('total, status').gte('date', monthStart).lte('date', monthEnd),
+        supabase.from('sales').select('total, status').gte('date', monthStart).lte('date', monthEnd).eq('company_id', companyId),
         // Previous month sales
-        supabase.from('sales').select('total, status').gte('date', prevMonthStart).lte('date', prevMonthEnd),
+        supabase.from('sales').select('total, status').gte('date', prevMonthStart).lte('date', prevMonthEnd).eq('company_id', companyId),
         // Current month orders
-        supabase.from('orders').select('id, status, total, priority, created_at').gte('date', monthStart).lte('date', monthEnd),
+        supabase.from('orders').select('id, status, total, priority, created_at').gte('date', monthStart).lte('date', monthEnd).eq('company_id', companyId),
         // Active clients
-        supabase.from('clients').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+        supabase.from('clients').select('id', { count: 'exact', head: true }).eq('status', 'active').eq('company_id', companyId),
         // Active products
-        supabase.from('products').select('id, cost_price, sale_price, min_stock, reorder_point, status', { count: 'exact' }).eq('status', 'active'),
+        supabase.from('products').select('id, cost_price, sale_price, min_stock, reorder_point, status', { count: 'exact' }).eq('status', 'active').eq('company_id', companyId),
         // Accounts receivable pending
-        supabase.from('accounts_receivable').select('amount, status, due_date').eq('status', 'pending'),
+        supabase.from('accounts_receivable').select('amount, status, due_date').eq('status', 'pending').eq('company_id', companyId),
         // Accounts payable pending
-        supabase.from('accounts_payable').select('amount, status, due_date').eq('status', 'pending'),
+        supabase.from('accounts_payable').select('amount, status, due_date').eq('status', 'pending').eq('company_id', companyId),
         // NF-e this month
-        supabase.from('nfe').select('id, status, total').gte('issue_date', monthStart),
+        supabase.from('nfe').select('id, status, total').gte('issue_date', monthStart).eq('company_id', companyId),
         // Production orders active
-        supabase.from('production_orders').select('id, status, quantity, produced_quantity'),
+        supabase.from('production_orders').select('id, status, quantity, produced_quantity').eq('company_id', companyId),
         // Purchase orders
-        supabase.from('purchase_orders').select('id, status, total'),
+        supabase.from('purchase_orders').select('id, status, total').eq('company_id', companyId),
         // Stock movements this month
-        supabase.from('stock_movements').select('id, direction, quantity').gte('created_at', monthStart),
+        supabase.from('stock_movements').select('id, direction, quantity').gte('created_at', monthStart).eq('company_id', companyId),
         // Overdue payables
-        supabase.from('accounts_payable').select('amount').eq('status', 'pending').lt('due_date', now.toISOString()),
+        supabase.from('accounts_payable').select('amount').eq('status', 'pending').lt('due_date', now.toISOString()).eq('company_id', companyId),
         // Overdue receivables
-        supabase.from('accounts_receivable').select('amount').eq('status', 'pending').lt('due_date', now.toISOString()),
+        supabase.from('accounts_receivable').select('amount').eq('status', 'pending').lt('due_date', now.toISOString()).eq('company_id', companyId),
         // Low stock products
-        supabase.from('products').select('id, name, min_stock, reorder_point').eq('status', 'active'),
+        supabase.from('products').select('id, name, min_stock, reorder_point').eq('status', 'active').eq('company_id', companyId),
         // Recent orders for activity feed
-        supabase.from('orders').select('number, client_name, total, status, created_at').order('created_at', { ascending: false }).limit(5),
+        supabase.from('orders').select('number, client_name, total, status, created_at').eq('company_id', companyId).order('created_at', { ascending: false }).limit(5),
         // HR & People Strategy
-        supabase.from('profiles').select('id', { count: 'exact', head: true }),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('company_id', companyId),
         // CRM & Growth Opportunities
-        supabase.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'draft'),
+        supabase.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'draft').eq('company_id', companyId),
         // Logistics & Fleet Management
-        supabase.from('carriers').select('id', { count: 'exact', head: true }),
+        supabase.from('carriers').select('id', { count: 'exact', head: true }).eq('company_id', companyId),
       ]);
 
       // === COMMERCIAL ===
