@@ -6,9 +6,9 @@ import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/base/dialog';
-import { useShipmentOrders, useUpdateShipment } from '@/hooks/commercial/useOrderFlow';
-import { useDeliveryTracking, useCreateTrackingEvent } from '@/hooks/system/useDeliveryTracking';
+import { useOperational } from '@/hooks/operational/useOperational';
 import { Truck, Clock, CheckCircle, Package, MapPin, Play, Eye, ArrowRight } from 'lucide-react';
+
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -30,20 +30,20 @@ const SHIPMENT_TRANSITIONS: Record<string, string[]> = {
 };
 
 export default function ShipmentPage() {
-  const { data: shipments, isLoading } = useShipmentOrders();
-  const updateShipment = useUpdateShipment();
+  const { shipments, shipmentsLoading: isLoading, updateShipmentStatus, getTracking, createTrackingEvent } = useOperational();
   const [selectedShipment, setSelectedShipment] = useState<any>(null);
-  const { data: tracking } = useDeliveryTracking(selectedShipment?.id);
-  const createTracking = useCreateTrackingEvent();
+  const { data: tracking } = getTracking(selectedShipment?.id);
+
 
   const handleAdvance = (shipment: any, nextStatus: string) => {
-    updateShipment.mutate({ id: shipment.id, status: nextStatus });
-    createTracking.mutate({
+    updateShipmentStatus({ id: shipment.id, status: nextStatus });
+    createTrackingEvent({
       shipment_id: shipment.id,
       event_type: nextStatus,
       description: `Status alterado para ${shipmentStatusConfig[nextStatus]?.label || nextStatus}`,
     });
   };
+
 
   const statusCounts = (shipments || []).reduce((acc: Record<string, number>, s: any) => {
     acc[s.status] = (acc[s.status] || 0) + 1;
