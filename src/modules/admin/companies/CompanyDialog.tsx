@@ -5,10 +5,11 @@ import { Input } from '@/ui/base/input';
 import { Label } from '@/ui/base/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
-import { Building2, Loader2, Search } from 'lucide-react';
+import { Building2, Loader2, Search, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { Company, CompanyStatus, Address } from '@/types/administration';
 import { useCompanies } from '@/hooks/system/useCompanies';
+import { SEGMENTS, COMPANY_SIZES, TAX_REGIMES, Segment } from '@/config/adaptive';
 
 interface CompanyDialogProps {
   open: boolean;
@@ -20,8 +21,10 @@ export const CompanyDialog = ({ open, onOpenChange, editingCompany }: CompanyDia
   const [cnpjValue, setCnpjValue] = useState('');
   const [isValidated, setIsValidated] = useState(false);
   const [isFetchingCNPJ, setIsFetchingCNPJ] = useState(false);
-  const [segment, setSegment] = useState('general');
-  const [taxRegime, setTaxRegime] = useState('Simples Nacional');
+  const [segment, setSegment] = useState<string>(editingCompany?.segment || 'general');
+  const [taxRegime, setTaxRegime] = useState(editingCompany?.taxRegime || 'Simples Nacional');
+  const [companySize, setCompanySize] = useState(editingCompany?.companySize || 'Microempresa (ME)');
+  const [subSegment, setSubSegment] = useState(editingCompany?.subSegment || '');
   
   const { createCompany, updateCompany, isCreating, isUpdating } = useCompanies();
 
@@ -111,6 +114,10 @@ export const CompanyDialog = ({ open, onOpenChange, editingCompany }: CompanyDia
       address,
       status: 'active' as CompanyStatus,
       isHeadquarters: editingCompany?.isHeadquarters || false,
+      segment,
+      subSegment,
+      companySize,
+      taxRegime
     };
 
     try {
@@ -137,9 +144,10 @@ export const CompanyDialog = ({ open, onOpenChange, editingCompany }: CompanyDia
         
         <form onSubmit={handleSave} className="space-y-6">
           <Tabs defaultValue="general" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="general">Dados Principais</TabsTrigger>
               <TabsTrigger value="address">Endereço</TabsTrigger>
+              <TabsTrigger value="config">Segmentação (Pilar 3)</TabsTrigger>
             </TabsList>
             
             <TabsContent value="general" className="space-y-4 pt-4">
@@ -189,6 +197,71 @@ export const CompanyDialog = ({ open, onOpenChange, editingCompany }: CompanyDia
                 <div className="space-y-2"><Label>Bairro</Label><Input name="neighborhood" id="neighborhood" defaultValue={editingCompany?.address.neighborhood} required /></div>
                 <div className="space-y-2"><Label>Cidade</Label><Input name="city" id="city" defaultValue={editingCompany?.address.city} required /></div>
                 <div className="space-y-2"><Label>UF</Label><Input name="state" id="state" defaultValue={editingCompany?.address.state} required /></div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="config" className="space-y-4 pt-4">
+              <div className="rounded-lg bg-primary/5 p-4 mb-4 border border-primary/10">
+                <p className="text-sm text-primary font-medium flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  Pilar 3 — ERP Adaptativo
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  O sistema configurará automaticamente menus, módulos e permissões baseados nestas definições.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Segmento (Vertical)</Label>
+                  <Select value={segment} onValueChange={setSegment}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o segmento" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(SEGMENTS).map(([key, config]) => (
+                        <SelectItem key={key} value={key}>{config.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Subsegmento / Nicho</Label>
+                  <Input 
+                    value={subSegment} 
+                    onChange={(e) => setSubSegment(e.target.value)}
+                    placeholder="Ex: Malharia, Autopeças..." 
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Porte da Empresa</Label>
+                  <Select value={companySize} onValueChange={setCompanySize}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o porte" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {COMPANY_SIZES.map((size) => (
+                        <SelectItem key={size} value={size}>{size}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Regime Tributário</Label>
+                  <Select value={taxRegime} onValueChange={setTaxRegime}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o regime" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TAX_REGIMES.map((regime) => (
+                        <SelectItem key={regime} value={regime}>{regime}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </TabsContent>
           </Tabs>
