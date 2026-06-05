@@ -173,7 +173,7 @@ export function Sidebar() {
   const { sidebarCollapsed, user } = useAppStore();
   const { signOut } = useAuth({ initialize: false });
   const { segment } = useEnterprise();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Dashboard', 'Operacional', 'Financial', 'Gestão']);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['Dashboard', 'Operacional', 'Financeiro', 'Gestão']);
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) =>
@@ -230,24 +230,24 @@ export function Sidebar() {
             
             // Adaptive logic based on business vertical (Pillar 3 — ERP ADAPTATIVO)
             const adaptiveRules: Record<Segment, string[]> = {
-              textile: ['Dashboard', 'Produção', 'Logística', 'Operacional', 'Comercial', 'Financial', 'Gestão', 'Pacotes Verticais'],
-              apparel: ['Dashboard', 'Produção', 'Logística', 'Operacional', 'Comercial', 'Financial', 'Gestão', 'Pacotes Verticais'],
-              fio: ['Dashboard', 'Produção', 'Logística', 'Financial', 'Gestão'],
-              tecelagem: ['Dashboard', 'Produção', 'Logística', 'Financial', 'Gestão'],
-              animal_feed: ['Dashboard', 'Produção', 'Logística', 'Financial', 'Gestão'],
+              textile: ['Dashboard', 'Produção', 'Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+              apparel: ['Dashboard', 'Produção', 'Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+              fio: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão'],
+              tecelagem: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão'],
+              animal_feed: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão'],
 
-              pharma: ['Dashboard', 'Produção', 'Logística', 'Financial', 'Gestão', 'Pacotes Verticais'],
-              industry: ['Dashboard', 'Produção', 'Logística', 'Financial', 'Gestão', 'Operacional'],
-              distribution: ['Dashboard', 'Logística', 'Operacional', 'Comercial', 'Financial', 'Gestão'],
-              wholesaler: ['Dashboard', 'Logística', 'Operacional', 'Comercial', 'Financial', 'Gestão'],
-              retail: ['Dashboard', 'Operacional', 'Comercial', 'Financial', 'Gestão'],
-              retail_chain: ['Dashboard', 'Operacional', 'Comercial', 'Financial', 'Gestão'],
-              franchise: ['Dashboard', 'Operacional', 'Comercial', 'Financial', 'Gestão'],
+              pharma: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+              industry: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão', 'Operacional'],
+              distribution: ['Dashboard', 'Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+              wholesaler: ['Dashboard', 'Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+              retail: ['Dashboard', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+              retail_chain: ['Dashboard', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+              franchise: ['Dashboard', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
 
-              holding: ['Dashboard', 'Gestão', 'Financial', 'Comercial'],
-              services: ['Dashboard', 'Comercial', 'Financial', 'Gestão'],
-              food_factory: ['Dashboard', 'Produção', 'Logística', 'Financial', 'Gestão', 'Pacotes Verticais'],
-              general: ['Dashboard', 'Operacional', 'Comercial', 'Financial', 'Gestão', 'Logística', 'Produção']
+              holding: ['Dashboard', 'Gestão', 'Financeiro', 'Comercial'],
+              services: ['Dashboard', 'Comercial', 'Financeiro', 'Gestão'],
+              food_factory: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+              general: ['Dashboard', 'Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Logística', 'Produção']
             };
 
             const allowedSections = adaptiveRules[segment] || adaptiveRules.general;
