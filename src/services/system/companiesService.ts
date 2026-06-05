@@ -1,14 +1,14 @@
 import { supabase } from '@/integrations/supabase/client';
+import { BaseService } from '../shared/baseService';
 import type { Company, CompanyStatus } from '@/types/administration';
 
-export const companiesService = {
-  async getAll(): Promise<Company[]> {
-    const { data, error } = await supabase
-      .from('companies')
-      .select('*')
-      .order('name');
-    
-    if (error) throw error;
+export class CompaniesService extends BaseService<'companies'> {
+  constructor() {
+    super('companies');
+  }
+
+  async getAllDetailed(): Promise<Company[]> {
+    const data = await this.getAll({ orderBy: 'name', ascending: true });
     
     const allCompanies = (data || []).map(company => ({
       id: company.id,
@@ -55,37 +55,29 @@ export const companiesService = {
     });
 
     return rootCompanies as any;
-  },
+  }
 
+  async createDetailed(company: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) {
+    return this.create({
+      name: company.name,
+      trade_name: company.tradeName,
+      cnpj: company.cnpj,
+      email: company.email,
+      phone: company.phone,
+      address_street: company.address.street,
+      address_number: company.address.number,
+      address_complement: company.address.complement,
+      address_neighborhood: company.address.neighborhood,
+      address_city: company.address.city,
+      address_state: company.address.state,
+      address_zip_code: company.address.zipCode,
+      status: company.status,
+      is_headquarters: company.isHeadquarters,
+      parent_company_id: company.parentCompanyId
+    });
+  }
 
-  async create(company: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) {
-    const { data, error } = await supabase
-      .from('companies')
-      .insert([{
-        name: company.name,
-        trade_name: company.tradeName,
-        cnpj: company.cnpj,
-        email: company.email,
-        phone: company.phone,
-        address_street: company.address.street,
-        address_number: company.address.number,
-        address_complement: company.address.complement,
-        address_neighborhood: company.address.neighborhood,
-        address_city: company.address.city,
-        address_state: company.address.state,
-        address_zip_code: company.address.zipCode,
-        status: company.status,
-        is_headquarters: company.isHeadquarters,
-        parent_company_id: company.parentCompanyId
-      }])
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  async update(id: string, company: Partial<Company>) {
+  async updateDetailed(id: string, company: Partial<Company>) {
     const updateData: any = {};
     if (company.name) updateData.name = company.name;
     if (company.tradeName) updateData.trade_name = company.tradeName;
@@ -103,23 +95,14 @@ export const companiesService = {
     }
     if (company.status) updateData.status = company.status;
     
-    const { data, error } = await supabase
-      .from('companies')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single();
-    
-    if (error) throw error;
-    return data;
-  },
-
-  async delete(id: string) {
-    const { error } = await supabase
-      .from('companies')
-      .delete()
-      .eq('id', id);
-    
-    if (error) throw error;
+    return this.update(id, updateData);
   }
+}
+
+// Backward compatibility object
+export const companiesService = {
+  getAll: () => new CompaniesService().getAllDetailed(),
+  create: (c: any) => new CompaniesService().createDetailed(c),
+  update: (id: string, c: any) => new CompaniesService().updateDetailed(id, c),
+  delete: (id: string) => new CompaniesService().delete(id),
 };
