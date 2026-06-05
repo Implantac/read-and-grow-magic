@@ -23,16 +23,12 @@ import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
 import { KPICard } from '@/shared/components/KPICard';
-import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, type DbProduct } from '@/hooks/inventory/useProducts';
-import { useCategories } from '@/hooks/inventory/useCategories';
+import { useInventory } from '@/hooks/inventory/useInventoryQuery';
+import type { DbProduct } from '@/hooks/inventory/useProducts';
 import type { ProductType, ProductStatus, ProductFilters } from '@/types/inventory';
 
 export default function ProductsPage() {
-  const { data: products = [], isLoading } = useProducts();
-  const { data: categories = [] } = useCategories();
-  const createProduct = useCreateProduct();
-  const updateProduct = useUpdateProduct();
-  const deleteProduct = useDeleteProduct();
+  const { products, productsLoading: isLoading, categories, createProduct, updateProduct, deleteProduct } = useInventory();
 
   const [filters, setFilters] = useState<ProductFilters>({
     search: '', type: 'all', category: 'all', status: 'all',
@@ -112,15 +108,13 @@ export default function ProductsPage() {
     };
 
     if (selectedProduct) {
-      updateProduct.mutate({ id: selectedProduct.id, ...payload }, { 
-        onSuccess: () => {
+      updateProduct({ id: selectedProduct.id, updates: payload }).then(() => {
           setIsFormOpen(false);
           setSelectedProduct(null);
         }
       });
     } else {
-      createProduct.mutate(payload, { 
-        onSuccess: () => {
+      createProduct(payload).then(() => {
           setIsFormOpen(false);
           setSelectedProduct(null);
         }
@@ -130,7 +124,7 @@ export default function ProductsPage() {
 
   const confirmDelete = () => {
     if (selectedProduct) {
-      deleteProduct.mutate(selectedProduct.id, { onSuccess: () => { setIsDeleteOpen(false); setSelectedProduct(null); } });
+      deleteProduct(selectedProduct.id).then(() => { setIsDeleteOpen(false); setSelectedProduct(null); });
     }
   };
 
