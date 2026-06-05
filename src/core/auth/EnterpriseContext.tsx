@@ -64,16 +64,17 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
           .single();
         
         if (hierarchy) {
+          const h = hierarchy as any;
           const { data: company } = await supabase
             .from('companies')
             .select('*')
-            .eq('id', hierarchy.unit_id)
+            .eq('id', h.unit_id)
             .single();
 
           if (company) {
             setCurrentCompany(company);
-            setCurrentTenant({ id: hierarchy.tenant_id, name: hierarchy.tenant_name });
-            setCurrentGroup({ id: hierarchy.enterprise_group_id, name: hierarchy.group_name });
+            setCurrentTenant({ id: h.tenant_id, name: h.tenant_name });
+            setCurrentGroup({ id: h.enterprise_group_id, name: h.group_name });
             setSegment((company.segment as any) || 'general');
             setSubSegment(company.sub_segment || '');
             setCompanySize(company.company_size || 'Pequeno');
