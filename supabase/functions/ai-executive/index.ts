@@ -858,10 +858,16 @@ async function executeConsultaProducao(supabase: any, args: any, user_id?: strin
   }
 }
 
-async function executeConsultaEstoque(supabase: any, args: any) {
+async function executeConsultaEstoque(supabase: any, args: any, user_id?: string, company_id?: string) {
+  const query = (table: string) => {
+    let q = supabase.from(table).select("*");
+    if (company_id) q = q.eq("company_id", company_id);
+    return q;
+  };
+
   switch (args.tipo) {
     case "resumo": {
-      const { data } = await supabase.from("products").select("id, stock_current, stock_min, price, cost, status").eq("status", "active").limit(500);
+      const { data } = await query("products").eq("status", "active").limit(500);
       const prods = data || [];
       return { total_produtos: prods.length, abaixo_minimo: prods.filter((p: any) => p.stock_current <= p.stock_min).length, valor_estoque_total: +prods.reduce((s: number, p: any) => s + ((p.stock_current || 0) * (p.cost || p.price || 0)), 0).toFixed(2) };
     }
