@@ -10,40 +10,53 @@ export const companiesService = {
     
     if (error) throw error;
     
-    return (data || []).map(company => {
-      // Logic for branches: if it has parent_company_id, it is a branch.
-      // However, the getAll in Topbar expectation is that companies have a .branches array.
-      // So we map the base fields.
-      return {
-        id: company.id,
-        name: company.name,
-        tradeName: company.trade_name,
-        cnpj: company.cnpj,
-        stateRegistration: company.state_registration,
-        municipalRegistration: company.municipal_registration,
-        email: company.email,
-        phone: company.phone,
-        address: {
-          street: company.address_street || '',
-          number: company.address_number || '',
-          complement: company.address_complement || '',
-          neighborhood: company.address_neighborhood || '',
-          city: company.address_city || '',
-          state: company.address_state || '',
-          zipCode: company.address_zip_code || '',
-          country: 'Brasil'
-        },
-        logo: company.settings && typeof company.settings === 'object' && 'logo_url' in company.settings ? (company.settings as any).logo_url : undefined,
-        status: company.status as CompanyStatus,
-        isHeadquarters: company.is_headquarters,
-        parentCompanyId: company.parent_company_id,
-        createdAt: company.created_at,
-        updatedAt: company.updated_at,
-        branches: [], // Placeholder to avoid undefined errors in UI
-      };
+    const allCompanies = (data || []).map(company => ({
+      id: company.id,
+      name: company.name,
+      tradeName: company.trade_name,
+      cnpj: company.cnpj,
+      stateRegistration: company.state_registration,
+      municipalRegistration: company.municipal_registration,
+      email: company.email,
+      phone: company.phone,
+      address: {
+        street: company.address_street || '',
+        number: company.address_number || '',
+        complement: company.address_complement || '',
+        neighborhood: company.address_neighborhood || '',
+        city: company.address_city || '',
+        state: company.address_state || '',
+        zipCode: company.address_zip_code || '',
+        country: 'Brasil'
+      },
+      logo: company.settings && typeof company.settings === 'object' && 'logo_url' in company.settings ? (company.settings as any).logo_url : undefined,
+      status: company.status as CompanyStatus,
+      isHeadquarters: company.is_headquarters,
+      parentCompanyId: company.parent_company_id,
+      createdAt: company.created_at,
+      updatedAt: company.updated_at,
+      branches: [] as any[],
+    }));
+
+    // Build hierarchy: root companies get their sub-companies as branches
+    const rootCompanies = allCompanies.filter(c => !c.parentCompanyId || c.isHeadquarters);
+    
+    rootCompanies.forEach(root => {
+      root.branches = allCompanies.filter(c => c.parentCompanyId === root.id);
+      // If no sub-companies, add itself as a "Matriz" branch to ensure dropdown works
+      if (root.branches.length === 0) {
+        root.branches = [{
+          id: root.id,
+          name: 'Matriz',
+          code: '001',
+          companyId: root.id
+        }];
+      }
     });
 
+    return rootCompanies as any;
   },
+
 
   async create(company: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) {
     const { data, error } = await supabase
