@@ -1,3 +1,7 @@
+/**
+ * Utilitários de feedback visual (Toasts).
+ * Centraliza a exibição de mensagens para manter consistência em toda a aplicação.
+ */
 import { toast } from '@/hooks/use-toast';
 
 /**

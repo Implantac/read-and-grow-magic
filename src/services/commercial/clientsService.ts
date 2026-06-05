@@ -2,6 +2,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { DbClient } from '@/hooks/commercial/useClients';
 import { BaseService } from '../shared/baseService';
 
+/**
+ * Service para gerenciamento de clientes.
+ * Herda operações base e implementa lógicas específicas.
+ */
+
 class ClientsService {
   private base = new BaseService<DbClient>('clients');
 

@@ -1,6 +1,9 @@
 import { supabase } from '@/integrations/supabase/client';
 import { DbProduct } from '@/hooks/inventory/useProducts';
 
+/**
+ * Service para produtos com suporte a categorias.
+ */
 export const productsService = {
   async getAll() {
     const { data, error } = await supabase
