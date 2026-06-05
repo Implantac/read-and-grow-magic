@@ -78,8 +78,8 @@ export default function LandingHeader({ onLogin, onWhatsApp }: Props) {
       </div>
 
       <div className={cn(
-        'lg:hidden overflow-hidden transition-all duration-300',
-        menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        'lg:hidden overflow-y-auto transition-all duration-300',
+        menuOpen ? 'max-h-[80vh] opacity-100' : 'max-h-0 opacity-0'
       )}>
         <div className="bg-background/95 backdrop-blur-xl border-b border-border/50 px-4 pb-5 pt-2">
           <nav className="flex flex-col gap-1 mb-4">

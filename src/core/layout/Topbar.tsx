@@ -149,7 +149,7 @@ export function Topbar() {
         </Button>
 
         {/* Notifications - Connected to real data */}
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
@@ -252,7 +252,7 @@ export function Topbar() {
         <div className="mx-1 h-6 w-px bg-sidebar-border/50" />
 
         {/* User Menu */}
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="flex items-center gap-2 h-8 px-2 hover:bg-sidebar-accent/50">
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 ring-1 ring-primary/30">
