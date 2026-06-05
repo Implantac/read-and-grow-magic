@@ -231,8 +231,9 @@ export function Topbar() {
           variant="ghost"
           size="icon"
           onClick={() => navigate('/executive/brain')}
-          title={brainPending.length > 0 ? `${brainPending.length} decisões do Cérebro pendentes` : 'Cérebro Nativo'}
+          title={Array.isArray(brainPending) && brainPending.length > 0 ? `${brainPending.length} decisões do Cérebro pendentes` : 'Cérebro Nativo'}
           className="relative h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
+
         >
           <Brain className="h-4 w-4" />
           {brainPending.length > 0 && (
