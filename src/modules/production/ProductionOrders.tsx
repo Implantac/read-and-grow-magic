@@ -7,7 +7,7 @@ import { ExportButton } from '@/shared/components/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
-import { Badge } from '@/ui/base/badge';
+import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/ui/base/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
@@ -27,15 +27,6 @@ import { QRCodeOPButton } from '@/components/producao/QRCodeOP';
 import { cn } from '@/lib/utils';
 import { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
 import { StepProgressPipeline } from '@/components/producao/StepProgressPipeline';
-
-const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  draft: { label: 'Rascunho', variant: 'secondary' },
-  planned: { label: 'Planejado', variant: 'outline' },
-  in_progress: { label: 'Em Produção', variant: 'default' },
-  paused: { label: 'Pausada', variant: 'secondary' },
-  completed: { label: 'Concluído', variant: 'outline' },
-  cancelled: { label: 'Cancelado', variant: 'destructive' }
-};
 
 const priorityConfig: Record<string, { label: string; color: string }> = {
   low: { label: 'Baixa', color: 'text-muted-foreground' },
@@ -119,7 +110,12 @@ export default function ProductionOrdersPage() {
               <SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Status" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos Status</SelectItem>
-                {Object.entries(statusConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
+                <SelectItem value="draft">Rascunho</SelectItem>
+                <SelectItem value="planned">Planejado</SelectItem>
+                <SelectItem value="in_progress">Em Produção</SelectItem>
+                <SelectItem value="paused">Pausada</SelectItem>
+                <SelectItem value="completed">Concluído</SelectItem>
+                <SelectItem value="cancelled">Cancelado</SelectItem>
               </SelectContent>
             </Select>
             <Select value={priorityFilter} onValueChange={setPriorityFilter}>
@@ -151,7 +147,6 @@ export default function ProductionOrdersPage() {
                 const late = isLate(order);
                 const daysLate = order.due_date ? differenceInDays(new Date(), parseISO(order.due_date)) : 0;
                 const pCfg = priorityConfig[order.priority] || { label: order.priority, color: '' };
-                const sCfg = statusConfig[order.status] || { label: order.status, variant: 'outline' as const };
                 return (
                   <TableRow key={order.id} className={cn(late && 'bg-destructive/5')}>
                     <TableCell className="font-mono text-sm">{order.order_number}</TableCell>
@@ -178,7 +173,7 @@ export default function ProductionOrdersPage() {
                       </div>
                     </TableCell>
                     <TableCell><span className={cn('font-medium text-sm', pCfg.color)}>{pCfg.label}</span></TableCell>
-                    <TableCell><Badge variant={sCfg.variant}>{sCfg.label}</Badge></TableCell>
+                    <TableCell><StatusBadge status={order.status} type="production" /></TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <QRCodeOPButton orderNumber={order.order_number} orderId={order.id} productName={order.product_name} batchCode={order.batch_code || undefined} />
@@ -229,7 +224,7 @@ function OrderDetailContent({ order }: { order: ProductionOrderRow }) {
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
           <Factory className="h-5 w-5" /> OP {order.order_number}
-          <Badge variant={statusConfig[order.status]?.variant || 'outline'}>{statusConfig[order.status]?.label || order.status}</Badge>
+          <StatusBadge status={order.status} type="production" />
         </DialogTitle>
       </DialogHeader>
 
