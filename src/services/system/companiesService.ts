@@ -33,6 +33,10 @@ export class CompaniesService extends BaseService<'companies'> {
       status: company.status as CompanyStatus,
       isHeadquarters: company.is_headquarters,
       parentCompanyId: company.parent_company_id,
+      segment: company.segment,
+      subSegment: company.sub_segment,
+      companySize: company.company_size,
+      taxRegime: company.tax_regime,
       createdAt: company.created_at,
       updatedAt: company.updated_at,
       branches: [] as any[],
@@ -73,7 +77,11 @@ export class CompaniesService extends BaseService<'companies'> {
       address_zip_code: company.address.zipCode,
       status: company.status,
       is_headquarters: company.isHeadquarters,
-      parent_company_id: company.parentCompanyId
+      parent_company_id: company.parentCompanyId,
+      segment: company.segment,
+      sub_segment: company.subSegment,
+      company_size: company.companySize,
+      tax_regime: company.taxRegime
     });
   }
 
@@ -94,6 +102,10 @@ export class CompaniesService extends BaseService<'companies'> {
       updateData.address_zip_code = company.address.zipCode;
     }
     if (company.status) updateData.status = company.status;
+    if (company.segment) updateData.segment = company.segment;
+    if (company.subSegment) updateData.sub_segment = company.subSegment;
+    if (company.companySize) updateData.company_size = company.companySize;
+    if (company.taxRegime) updateData.tax_regime = company.taxRegime;
     
     return this.update(id, updateData);
   }

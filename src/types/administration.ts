@@ -43,6 +43,10 @@ export interface Company {
   status: CompanyStatus;
   isHeadquarters: boolean;
   parentCompanyId?: string;
+  segment?: string;
+  subSegment?: string;
+  companySize?: string;
+  taxRegime?: string;
   createdAt: string;
   updatedAt: string;
 }
