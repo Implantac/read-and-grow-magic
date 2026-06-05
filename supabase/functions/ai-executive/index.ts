@@ -840,15 +840,15 @@ async function executeConsultaProducao(supabase: any, args: any, user_id?: strin
       return { total_ordens: ops.length, em_producao: ops.filter((o: any) => o.status === "in_progress").length, planejadas: ops.filter((o: any) => o.status === "planned" || o.status === "pending").length, concluidas: ops.filter((o: any) => o.status === "completed").length, atrasadas: ops.filter((o: any) => o.due_date && o.due_date < today && !["completed", "cancelled"].includes(o.status)).length };
     }
     case "ordens_ativas": {
-      const { data } = await supabase.from("production_orders").select("id, order_number, product_name, status, quantity, produced_quantity, due_date, priority").in("status", ["in_progress", "planned", "pending"]).order("priority").limit(20);
+      const { data } = await query("production_orders").in("status", ["in_progress", "planned", "pending"]).order("priority").limit(20);
       return { ordens_ativas: data || [] };
     }
     case "atrasadas": {
-      const { data } = await supabase.from("production_orders").select("id, order_number, product_name, status, due_date, quantity, produced_quantity").lt("due_date", today).not("status", "in", '("completed","cancelled")').order("due_date").limit(20);
+      const { data } = await query("production_orders").lt("due_date", today).not("status", "in", '("completed","cancelled")').order("due_date").limit(20);
       return { ordens_atrasadas: data || [] };
     }
     case "eficiencia": {
-      const { data } = await supabase.from("production_orders").select("planned_quantity, produced_quantity").eq("status", "completed").limit(200);
+      const { data } = await query("production_orders").eq("status", "completed").limit(200);
       const ops = data || [];
       const planned = ops.reduce((s: number, o: any) => s + (o.planned_quantity || 0), 0);
       const produced = ops.reduce((s: number, o: any) => s + (o.produced_quantity || 0), 0);
