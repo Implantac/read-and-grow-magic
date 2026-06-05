@@ -1,37 +1,24 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { parametersService } from '@/services/system/parametersService';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export function useSystemParameters() {
   const queryClient = useQueryClient();
+  
   const parametersQuery = useQuery({
     queryKey: ['system_parameters'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('system_parameters')
-        .select('*');
-      if (error) throw error;
-      return data;
-    },
+    queryFn: () => parametersService.getAll(),
   });
 
   const updateParameterMutation = useMutation({
-    mutationFn: async ({ code, value }: { code: string; value: string }) => {
-      const { data, error } = await supabase
-        .from('system_parameters')
-        .update({ value, updated_at: new Date().toISOString() })
-        .eq('code', code)
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
-    },
+    mutationFn: ({ code, value }: { code: string; value: string }) => 
+      parametersService.update(code, value),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['system_parameters'] });
-      toastSuccess('Configuração atualizada com sucesso!');
+      toastSuccess('Configuração atualizada com sucesso');
     },
     onError: (error: any) => {
-      toastError(error.message, undefined, 'Erro ao atualizar configuração');
+      toastError(error.message || 'Erro ao atualizar configuração');
     },
   });
 

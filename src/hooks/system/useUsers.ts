@@ -1,76 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { usersService, InviteUserData, ChangeRoleData } from '@/services/system/usersService';
+import { toastSuccess, toastError } from '@/lib/toastHelpers';
+import type { SystemUser } from '@/types/administration';
 import { useAppStore } from '@/stores/useAppStore';
-import type { SystemUser, UserRole } from '@/types/administration';
-
-
-interface AdminUserResponse {
-  id: string;
-  name: string;
-  email: string;
-  avatar_url?: string;
-  created_at: string;
-  updated_at: string;
-  role: 'admin' | 'manager' | 'operator' | 'viewer';
-  last_sign_in_at?: string;
-  email_confirmed_at?: string;
-  status: 'active' | 'pending' | 'blocked';
-}
-
-interface InviteUserData {
-  email: string;
-  name: string;
-  role: 'admin' | 'manager' | 'operator' | 'viewer';
-  phone?: string;
-  department?: string;
-  branch_id?: string | null;
-}
-
-interface ChangeRoleData {
-  user_id: string;
-  role?: 'admin' | 'manager' | 'operator' | 'viewer';
-  phone?: string;
-  department?: string;
-  branch_id?: string | null;
-}
-
-async function callAdminUsers(action: string, params?: any) {
-  try {
-    const { data, error } = await supabase.functions.invoke('admin-users', {
-      body: { action, ...params },
-    });
-    
-    if (error) {
-      console.error('Edge function error:', error);
-      throw new Error(error.message || 'Erro na comunicação com o servidor');
-    }
-    return data;
-  } catch (err: any) {
-    console.error('Admin users call failed:', err);
-    throw err;
-  }
-}
-
-
-function mapToSystemUser(user: any): SystemUser {
-  return {
-    id: user.id,
-    name: user.name || '',
-    email: user.email || '',
-    avatar: user.avatar_url,
-    role: (user.role as UserRole) || 'viewer',
-    status: user.status || 'active',
-    permissions: [],
-    lastLogin: user.last_sign_in_at,
-    createdAt: user.created_at || new Date().toISOString(),
-    updatedAt: user.updated_at || new Date().toISOString(),
-    phone: user.phone || '',
-    department: user.department || '',
-    branchId: user.branch_id || '',
-    branchName: '', // This would need a join in the edge function or hydration here
-  };
-}
-
 
 export function useUsers() {
   const queryClient = useQueryClient();
@@ -78,45 +10,63 @@ export function useUsers() {
 
   const usersQuery = useQuery<SystemUser[]>({
     queryKey: ['admin-users'],
-    queryFn: async () => {
-      const response = await callAdminUsers('list');
-      if (!response?.data) return [];
-      return response.data.map(mapToSystemUser);
-    },
+    queryFn: () => usersService.getAll(),
     enabled: userRole === 'admin',
   });
 
   const inviteUserMutation = useMutation({
-    mutationFn: (userData: InviteUserData) => callAdminUsers('invite', userData),
+    mutationFn: (userData: InviteUserData) => usersService.invite(userData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      toastSuccess('Usuário convidado com sucesso');
     },
+    onError: (error: any) => {
+      toastError(error.message || 'Erro ao convidar usuário');
+    }
   });
 
   const deleteUserMutation = useMutation({
-    mutationFn: (user_id: string) => callAdminUsers('delete', { user_id }),
+    mutationFn: (userId: string) => usersService.delete(userId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      toastSuccess('Usuário excluído com sucesso');
     },
+    onError: (error: any) => {
+      toastError(error.message || 'Erro ao excluir usuário');
+    }
   });
 
   const changeRoleMutation = useMutation({
-    mutationFn: (data: ChangeRoleData) => callAdminUsers('change_role', data),
+    mutationFn: (data: ChangeRoleData) => usersService.update(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      toastSuccess('Perfil atualizado com sucesso');
     },
+    onError: (error: any) => {
+      toastError(error.message || 'Erro ao atualizar perfil');
+    }
   });
 
   const toggleBanMutation = useMutation({
-    mutationFn: (data: { user_id: string; banned: boolean }) => 
-      callAdminUsers('toggle_ban', data),
-    onSuccess: () => {
+    mutationFn: ({ user_id, banned }: { user_id: string; banned: boolean }) => 
+      usersService.toggleBan(user_id, banned),
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      toastSuccess(`Usuário ${variables.banned ? 'bloqueado' : 'desbloqueado'} com sucesso`);
     },
+    onError: (error: any) => {
+      toastError(error.message || 'Erro ao alterar status do usuário');
+    }
   });
 
   const resetPasswordMutation = useMutation({
-    mutationFn: (email: string) => callAdminUsers('reset_password', { email }),
+    mutationFn: (email: string) => usersService.resetPassword(email),
+    onSuccess: () => {
+      toastSuccess('Email de redefinição enviado com sucesso');
+    },
+    onError: (error: any) => {
+      toastError(error.message || 'Erro ao enviar email de redefinição');
+    }
   });
 
   return {
