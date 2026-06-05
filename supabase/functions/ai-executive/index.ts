@@ -1155,7 +1155,7 @@ Com base nesses padrões:
 
 // ─── Unified Chat with Tool Calling ─────────────────────────────
 
-async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: string, corsHeaders: any, user_id?: string) {
+async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: string, corsHeaders: any, user_id?: string, company_id?: string) {
   // ─── Server-side Memory: Load recent history for context ───
   let serverHistory: any[] = [];
   if (user_id) {
