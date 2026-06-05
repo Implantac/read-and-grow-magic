@@ -85,37 +85,43 @@ serve(async (req) => {
 
 // ─── Data Fetching ──────────────────────────────────────────────
 
-async function fetchAllData(supabase: any) {
+async function fetchAllData(supabase: any, companyId?: string) {
+  const query = (table: string) => {
+    let q = supabase.from(table).select("*");
+    if (companyId) q = q.eq("company_id", companyId);
+    return q;
+  };
+
   const [
     ordersRes, receivableRes, payableRes, productsRes,
     clientsRes, productionRes, insightsRes, alertsRes, scenariosRes,
     salesRes, cashFlowRes, salesRepsRes, funnelRes, salesTargetsRes,
     orderItemsRes, commissionRes,
   ] = await Promise.all([
-    supabase.from("orders").select("id, total, status, created_at, client_name, client_id, discount, subtotal, sales_rep_id, sales_rep_name, priority").order("created_at", { ascending: false }).limit(500),
-    supabase.from("accounts_receivable").select("id, amount, status, due_date, paid_amount, open_amount, client_name, client_id").limit(500),
-    supabase.from("accounts_payable").select("id, amount, status, due_date, paid_amount, open_amount, supplier, category").limit(500),
-    supabase.from("products").select("id, name, price, cost, stock_current, stock_min, status, category_id").limit(500),
-    supabase.from("clients").select("id, name, total_purchases, last_purchase_date, status, credit_limit, current_balance, segment, region, abc_classification, avg_ticket").limit(500),
-    supabase.from("production_orders").select("id, status, planned_quantity, produced_quantity, created_at, start_date, end_date").limit(200),
-    supabase.from("ai_executive_insights").select("*").eq("status", "active").order("created_at", { ascending: false }).limit(20),
-    supabase.from("ai_executive_alerts").select("*").eq("status", "active").order("created_at", { ascending: false }).limit(10),
-    supabase.from("ai_executive_scenarios").select("*").order("created_at", { ascending: false }).limit(3),
-    supabase.from("sales").select("id, total, status, created_at, client_name").limit(500),
-    supabase.from("cash_flow_entries").select("id, amount, type, date, category").order("date", { ascending: false }).limit(200),
-    supabase.from("sales_reps").select("id, name, email, region, status").limit(100),
-    supabase.from("sales_funnel").select("id, client_name, stage, value, probability, sales_rep_id, created_at, status").limit(300),
-    supabase.from("sales_targets").select("id, sales_rep_id, target_value, achieved_value, period, target_type").limit(100),
-    supabase.from("order_items").select("id, order_id, product_id, product_name, product_code, quantity, unit_price, total, discount").limit(1000),
-    supabase.from("commissions").select("id, sales_rep_id, sales_rep_name, calculated_value, status, period").limit(200),
+    query("orders").order("created_at", { ascending: false }).limit(500),
+    query("accounts_receivable").limit(500),
+    query("accounts_payable").limit(500),
+    query("products").limit(500),
+    query("clients").limit(500),
+    query("production_orders").limit(200),
+    query("ai_executive_insights").eq("status", "active").order("created_at", { ascending: false }).limit(20),
+    query("ai_executive_alerts").eq("status", "active").order("created_at", { ascending: false }).limit(10),
+    query("ai_executive_scenarios").order("created_at", { ascending: false }).limit(3),
+    query("sales").limit(500),
+    query("cash_flow_entries").order("date", { ascending: false }).limit(200),
+    query("sales_reps").limit(100),
+    query("sales_funnel").limit(300),
+    query("sales_targets").limit(100),
+    query("order_items").limit(1000),
+    query("commissions").limit(200),
   ]);
 
-  // Fiscal data (NF-e, taxes, SPED) — used by AI as MCP-fiscal context
+  // Fiscal data (NF-e, taxes, SPED)
   const [nfeRes, nfeItemsRes, taxRulesRes, spedRes] = await Promise.all([
-    supabase.from("nfe").select("id, number, series, status, total_amount, total_tax, issue_date, customer_name, authorization_protocol, access_key").order("issue_date", { ascending: false }).limit(300).then((r: any) => r).catch(() => ({ data: [] })),
-    supabase.from("nfe_items").select("id, nfe_id, product_name, quantity, unit_price, total, icms_value, ipi_value, pis_value, cofins_value").limit(1000).then((r: any) => r).catch(() => ({ data: [] })),
-    supabase.from("tax_rules").select("id, name, tax_type, rate, active, ncm, cfop").limit(200).then((r: any) => r).catch(() => ({ data: [] })),
-    supabase.from("sped_files").select("id, file_type, period, status, generated_at, total_records").order("generated_at", { ascending: false }).limit(50).then((r: any) => r).catch(() => ({ data: [] })),
+    query("nfe").order("issue_date", { ascending: false }).limit(300).then((r: any) => r).catch(() => ({ data: [] })),
+    query("nfe_items").limit(1000).then((r: any) => r).catch(() => ({ data: [] })),
+    query("tax_rules").limit(200).then((r: any) => r).catch(() => ({ data: [] })),
+    query("sped_files").order("generated_at", { ascending: false }).limit(50).then((r: any) => r).catch(() => ({ data: [] })),
   ]);
 
   return {
