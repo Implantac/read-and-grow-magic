@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
-import { Brain, Cpu, Scale, BarChart3, Factory, Warehouse, Search, DollarSign, Cog, Truck, Users, Activity, Zap, ShieldAlert, Rocket } from 'lucide-react';
+import { Brain, Cpu, Scale, BarChart3, Factory, Warehouse, Search, DollarSign, Cog, Truck, Users, Activity, Zap, ShieldAlert, Rocket, Building, Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBrainRuns, useBrainLearning } from '@/hooks/ai/useAIBrain';
 import { Link } from 'react-router-dom';
