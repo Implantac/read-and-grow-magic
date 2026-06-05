@@ -872,17 +872,17 @@ async function executeConsultaEstoque(supabase: any, args: any, user_id?: string
       return { total_produtos: prods.length, abaixo_minimo: prods.filter((p: any) => p.stock_current <= p.stock_min).length, valor_estoque_total: +prods.reduce((s: number, p: any) => s + ((p.stock_current || 0) * (p.cost || p.price || 0)), 0).toFixed(2) };
     }
     case "baixo_estoque": {
-      const { data } = await supabase.from("products").select("id, name, code, stock_current, stock_min, price").eq("status", "active").limit(500);
+      const { data } = await query("products").eq("status", "active").limit(500);
       const baixo = (data || []).filter((p: any) => p.stock_current <= p.stock_min).sort((a: any, b: any) => (a.stock_current - a.stock_min) - (b.stock_current - b.stock_min));
       return { produtos_baixo_estoque: baixo.slice(0, 20) };
     }
     case "movimentacoes_recentes": {
-      const { data } = await supabase.from("stock_movements").select("id, product_name, direction, quantity, type, created_at, document_number").order("created_at", { ascending: false }).limit(15);
+      const { data } = await query("stock_movements").order("created_at", { ascending: false }).limit(15);
       return { movimentacoes: data || [] };
     }
     case "produto_especifico": {
       if (!args.produto_nome) return { erro: "Nome do produto não informado" };
-      const { data } = await supabase.from("products").select("id, name, code, stock_current, stock_min, price, cost, status").ilike("name", `%${args.produto_nome}%`).limit(5);
+      const { data } = await query("products").ilike("name", `%${args.produto_nome}%`).limit(5);
       return { produtos_encontrados: data || [] };
     }
     default: return { resumo: "Dados não encontrados" };
