@@ -108,7 +108,7 @@ export function Topbar() {
             <DropdownMenuContent align="start" className="w-56 bg-sidebar border-sidebar-border">
               <DropdownMenuLabel className="text-sidebar-foreground/60 text-xs uppercase tracking-wider">Filiais</DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-sidebar-border" />
-              {(activeCompany.branches ?? []).map((branch) => (
+              {(activeCompany.branches || []).map((branch) => (
                 <DropdownMenuItem
                   key={branch.id}
                   onClick={() => setActiveBranch(branch)}
