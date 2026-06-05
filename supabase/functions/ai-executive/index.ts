@@ -343,8 +343,8 @@ function checkHasRealData(d: any): boolean {
 
 const INSUFFICIENT_DATA_MSG = "Dados insuficientes para análise confiável. Cadastre vendas, pedidos, contas a pagar ou receber para que a IA possa gerar diagnóstico baseado em dados reais.";
 
-async function handleDashboardData(supabase: any, corsHeaders: any, months: number = 12, segment: string = 'general') {
-  const d = await fetchAllData(supabase);
+async function handleDashboardData(supabase: any, corsHeaders: any, months: number = 12, segment: string = 'general', companyId?: string) {
+  const d = await fetchAllData(supabase, companyId);
   const computed = computeKPIs(d, months);
   
   // Custom logic for consensus based on segment
