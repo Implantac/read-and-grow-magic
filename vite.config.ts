@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => ({
       output: {
         manualChunks: {
           'vendor-react': ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query'],
-          'vendor-ui': ['lucide-react', 'recharts', 'date-fns', 'framer-motion'],
+          'vendor-ui': ['lucide-react', 'recharts', 'date-fns'],
           'erp-core': ['./src/core/auth/EnterpriseContext.tsx', './src/core/layout/MainLayout.tsx'],
         }
       }
