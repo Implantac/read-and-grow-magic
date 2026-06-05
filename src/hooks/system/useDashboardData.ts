@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
+import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
+import { useAppStore } from '@/stores/useAppStore';
 
 import { formatBRL } from '@/lib/formatters';
 const fmtShort = (v: number) => {
@@ -10,8 +11,11 @@ const fmtShort = (v: number) => {
 };
 
 export function useDashboardData() {
+  const { activeCompany } = useAppStore();
+  const companyId = activeCompany?.id;
+
   return useQuery({
-    queryKey: ['dashboard-consolidated'],
+    queryKey: ['dashboard-consolidated', companyId],
     queryFn: async () => {
       const now = new Date();
       const monthStart = startOfMonth(now).toISOString();
