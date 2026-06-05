@@ -1,5 +1,5 @@
 // User Management Types
-export type UserRole = 'admin' | 'manager' | 'operator' | 'viewer';
+export type UserRole = 'admin' | 'manager' | 'operator' | 'viewer' | 'diretor' | 'financeiro' | 'fiscal' | 'contabil' | 'compras' | 'producao' | 'logistica' | 'comercial' | 'loja' | 'franquia';
 export type UserStatus = 'active' | 'inactive' | 'pending' | 'blocked';
 
 export interface SystemUser {
