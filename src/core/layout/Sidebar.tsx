@@ -189,7 +189,7 @@ export function Sidebar() {
     <TooltipProvider delayDuration={0}>
       <aside
         className={cn(
-          'fixed left-0 top-0 z-40 flex h-screen flex-col bg-sidebar transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1)',
+          'fixed left-0 top-0 z-40 flex h-screen flex-col bg-sidebar transition-all duration-300 ease-in-out',
           sidebarCollapsed ? 'w-16' : 'w-64'
         )}
         style={{ 

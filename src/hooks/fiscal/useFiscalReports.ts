@@ -78,7 +78,7 @@ export function useFiscalReports() {
       status: 'pending',
     });
 
-    if (error) { toast.error('Erro ao criar relatório'); return false; }
+    if (error) { console.error('Fiscal report creation error:', error); toast.error('Erro ao criar relatório: ' + (error.message || '')); return false; }
     toast.success('Relatório criado com sucesso');
     await fetchReports();
     return true;

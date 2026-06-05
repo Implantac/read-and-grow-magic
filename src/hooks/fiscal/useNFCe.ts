@@ -94,7 +94,7 @@ export function useNFCe() {
       authorization_date: new Date().toISOString(),
     }).select().single();
 
-    if (error) { toast.error('Erro ao emitir NFC-e'); return null; }
+    if (error) { console.error('NFC-e emission error:', error); toast.error('Erro ao emitir NFC-e: ' + (error.message || '')); return null; }
 
     if (data.items.length > 0 && nfce) {
       const itemsToInsert = data.items.map(item => ({

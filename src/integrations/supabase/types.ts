@@ -15386,6 +15386,11 @@ export type Database = {
             }
             Returns: boolean
           }
+        | { Args: { _role: string; _user_id: string }; Returns: boolean }
+        | {
+            Args: { _company_id: string; _role: string; _user_id: string }
+            Returns: boolean
+          }
       import_bank_statement_batch: {
         Args: { p_bank_account_id: string; p_transactions: Json }
         Returns: {

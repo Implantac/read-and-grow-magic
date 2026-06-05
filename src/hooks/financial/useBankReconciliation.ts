@@ -21,7 +21,7 @@ export function useBankTransactions() {
   const fetch = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase.from('bank_transactions' as any).select('*').order('date', { ascending: false });
-    if (error) { console.error(error); toast.error('Erro ao carregar transações bancárias'); }
+    if (error) { console.error('Fetch transactions error:', error); toast.error('Erro ao carregar transações bancárias'); }
     else setTransactions((data as any as BankTransactionRow[]) || []);
     setLoading(false);
   }, []);

@@ -1,3 +1,7 @@
+/**
+ * Abstração de integração Supabase + React Query.
+ * Padroniza o tratamento de erros e tipagem das requisições.
+ */
 import { useQuery, useMutation, useQueryClient, UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
 import { PostgrestError } from '@supabase/supabase-js';
 

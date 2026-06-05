@@ -35,7 +35,7 @@ export function useSettleAccount() {
         _discount: params.discount ?? 0,
         _notes: params.notes ?? null,
       });
-      if (error) throw error;
+      if (error) { console.error('Settlement RPC error:', error); throw error; }
       return data;
     },
     onSuccess: () => {
