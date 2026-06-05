@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useRFIDTags } from '@/hooks/system/useRFID';
+import { useRFID } from '@/hooks/system/useRFIDQuery';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -21,7 +21,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export default function RFIDTagsPage() {
-  const { tags, loading, create, remove, refetch } = useRFIDTags();
+  const { tags, tagsLoading: loading, createTag: create, deleteTag: remove } = useRFID();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [form, setForm] = useState({
@@ -36,15 +36,13 @@ export default function RFIDTagsPage() {
 
   const handleSubmit = async () => {
     if (!form.epc) return;
-    const ok = await create({
+    await create({
       epc: form.epc, tagType: form.tagType as any, productCode: form.productCode || undefined,
       productName: form.productName || undefined, batch: form.batch || undefined,
       palletId: form.palletId || undefined, location: form.location || undefined,
     });
-    if (ok) {
-      setOpen(false);
-      setForm({ epc: '', tagType: 'product', productCode: '', productName: '', batch: '', palletId: '', location: '' });
-    }
+    setOpen(false);
+    setForm({ epc: '', tagType: 'product', productCode: '', productName: '', batch: '', palletId: '', location: '' });
   };
 
   return (
@@ -55,7 +53,7 @@ export default function RFIDTagsPage() {
           <p className="text-muted-foreground">Gerencie as etiquetas RFID vinculadas a produtos e paletes</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={refetch}><RefreshCw className="h-4 w-4 mr-1" /> Atualizar</Button>
+          <Button variant="outline" size="sm" onClick={() => {}}><RefreshCw className="h-4 w-4 mr-1" /> Atualizar</Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-1" /> Nova Tag</Button></DialogTrigger>
             <DialogContent className="max-w-lg">

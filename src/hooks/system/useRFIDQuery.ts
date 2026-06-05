@@ -25,18 +25,22 @@ export function useRFID() {
 
   // Readers Mutations
   const createReaderMutation = useMutation({
-    mutationFn: (reader: Partial<RFIDReader>) => supabase.from('rfid_readers' as any).insert({
-      code: reader.code, 
-      name: reader.name, 
-      location: reader.location, 
-      zone: reader.zone,
-      ip_address: reader.ipAddress, 
-      port: reader.port, 
-      model: reader.model,
-      manufacturer: reader.manufacturer, 
-      antenna_count: reader.antennaCount || 1,
-      status: reader.status || 'active',
-    }),
+    mutationFn: async (reader: Partial<RFIDReader>) => {
+      const { data, error } = await supabase.from('rfid_readers' as any).insert({
+        code: reader.code, 
+        name: reader.name, 
+        location: reader.location, 
+        zone: reader.zone,
+        ip_address: reader.ipAddress, 
+        port: reader.port, 
+        model: reader.model,
+        manufacturer: reader.manufacturer, 
+        antenna_count: reader.antennaCount || 1,
+        status: reader.status || 'active',
+      }).select().single();
+      if (error) throw error;
+      return data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rfid_readers'] });
       toastSuccess('Leitor RFID cadastrado com sucesso');
@@ -47,7 +51,10 @@ export function useRFID() {
   });
 
   const deleteReaderMutation = useMutation({
-    mutationFn: (id: string) => supabase.from('rfid_readers' as any).delete().eq('id', id),
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('rfid_readers' as any).delete().eq('id', id);
+      if (error) throw error;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rfid_readers'] });
       toastSuccess('Leitor RFID excluído');
@@ -59,17 +66,21 @@ export function useRFID() {
 
   // Tags Mutations
   const createTagMutation = useMutation({
-    mutationFn: (tag: Partial<RFIDTag>) => supabase.from('rfid_tags' as any).insert({
-      epc: tag.epc, 
-      tag_type: tag.tagType || 'product', 
-      product_id: tag.productId,
-      product_code: tag.productCode, 
-      product_name: tag.productName,
-      batch: tag.batch, 
-      pallet_id: tag.palletId, 
-      location: tag.location,
-      status: tag.status || 'active',
-    }),
+    mutationFn: async (tag: Partial<RFIDTag>) => {
+      const { data, error } = await supabase.from('rfid_tags' as any).insert({
+        epc: tag.epc, 
+        tag_type: tag.tagType || 'product', 
+        product_id: tag.productId,
+        product_code: tag.productCode, 
+        product_name: tag.productName,
+        batch: tag.batch, 
+        pallet_id: tag.palletId, 
+        location: tag.location,
+        status: tag.status || 'active',
+      }).select().single();
+      if (error) throw error;
+      return data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rfid_tags'] });
       toastSuccess('Tag RFID registrada com sucesso');
@@ -80,7 +91,10 @@ export function useRFID() {
   });
 
   const deleteTagMutation = useMutation({
-    mutationFn: (id: string) => supabase.from('rfid_tags' as any).delete().eq('id', id),
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('rfid_tags' as any).delete().eq('id', id);
+      if (error) throw error;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rfid_tags'] });
       toastSuccess('Tag RFID excluída');

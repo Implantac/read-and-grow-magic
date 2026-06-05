@@ -1,4 +1,5 @@
-import { useRFIDEvents, useRFIDSummary } from '@/hooks/system/useRFID';
+import { useRFID } from '@/hooks/system/useRFIDQuery';
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Badge } from '@/ui/base/badge';
@@ -15,8 +16,19 @@ const eventTypeColors: Record<string, 'default' | 'secondary' | 'destructive' | 
 };
 
 export default function RFIDEventsPage() {
-  const { events, loading, refetch } = useRFIDEvents(200);
-  const { summary } = useRFIDSummary();
+  const { readers, tags, getEvents } = useRFID();
+  const { data: events = [], isLoading: loading } = getEvents(200);
+  
+  const summary = useMemo(() => ({
+    totalReaders: readers.length,
+    activeReaders: readers.filter(r => r.status === 'active').length,
+    totalTags: tags.length,
+    activeTags: tags.filter(t => t.status === 'active').length,
+    eventsToday: events.length, 
+    unprocessedEvents: events.filter(e => !e.processed).length,
+  }), [readers, tags, events]);
+
+  const refetch = () => {};
 
   return (
     <div className="space-y-6">
