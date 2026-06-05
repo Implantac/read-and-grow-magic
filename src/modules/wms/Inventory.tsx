@@ -13,7 +13,7 @@ import { Progress } from '@/ui/base/progress';
 import { Search, Package, AlertTriangle, ClipboardList, DollarSign } from 'lucide-react';
 import { useWMSInventory } from '@/hooks/wms/useWMSInventory';
 import type { InventoryStatus } from '@/types/wms';
-import { getInventoryStatusLabel } from '@/config/wms';
+import { Badge } from '@/ui/base/badge';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
 

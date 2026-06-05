@@ -7,6 +7,7 @@ import { ExportButton } from '@/shared/components/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
+import { Badge } from '@/ui/base/badge';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';

@@ -70,6 +70,32 @@ const paymentStatusConfig: Record<PaymentStatus, StatusConfig> = {
   cancelled: { label: 'Cancelado', variant: 'secondary' },
 };
 
+const inventoryStatusConfig: Record<string, StatusConfig> = {
+  available: { label: 'Disponível', variant: 'success' },
+  reserved: { label: 'Reservado', variant: 'warning' },
+  damaged: { label: 'Danificado', variant: 'destructive' },
+  expired: { label: 'Vencido', variant: 'destructive' },
+  quarantine: { label: 'Quarentena', variant: 'info' },
+  out_of_stock: { label: 'Indisponível', variant: 'destructive' },
+};
+
+const shipmentStatusConfig: Record<string, StatusConfig> = {
+  pending: { label: 'Pendente', variant: 'warning' },
+  ready: { label: 'Pronto', variant: 'info' },
+  shipped: { label: 'Enviado', variant: 'success' },
+  delivered: { label: 'Entregue', variant: 'success' },
+  cancelled: { label: 'Cancelado', variant: 'destructive' },
+};
+
+const productionStatusConfig: Record<string, StatusConfig> = {
+  draft: { label: 'Rascunho', variant: 'secondary' },
+  planned: { label: 'Planejado', variant: 'info' },
+  in_progress: { label: 'Em Produção', variant: 'warning' },
+  paused: { label: 'Pausada', variant: 'secondary' },
+  completed: { label: 'Concluído', variant: 'success' },
+  cancelled: { label: 'Cancelado', variant: 'destructive' },
+};
+
 const variantStyles: Record<StatusVariant, string> = {
   default: 'bg-primary/10 text-primary border-primary/20',
   success: 'bg-success/10 text-success border-success/20',
@@ -80,7 +106,7 @@ const variantStyles: Record<StatusVariant, string> = {
 };
 
 export interface StatusBadgeProps {
-  type: 'order' | 'sale' | 'client' | 'priority' | 'payment' | 'quotation';
+  type: 'order' | 'sale' | 'client' | 'priority' | 'payment' | 'quotation' | 'inventory' | 'shipment' | 'production';
   status: string;
   className?: string;
 }
@@ -106,6 +132,15 @@ export function StatusBadge({ type, status, className }: StatusBadgeProps) {
       break;
     case 'payment':
       config = paymentStatusConfig[status as PaymentStatus] || { label: status, variant: 'default' };
+      break;
+    case 'inventory':
+      config = inventoryStatusConfig[status] || { label: status, variant: 'default' };
+      break;
+    case 'shipment':
+      config = shipmentStatusConfig[status] || { label: status, variant: 'default' };
+      break;
+    case 'production':
+      config = productionStatusConfig[status] || { label: status, variant: 'default' };
       break;
     default:
       config = { label: status, variant: 'default' };
