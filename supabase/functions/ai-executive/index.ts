@@ -762,14 +762,20 @@ async function executeConsultaFinanceiro(supabase: any, args: any, user_id?: str
   }
 }
 
-async function executeConsultaComercial(supabase: any, args: any) {
+async function executeConsultaComercial(supabase: any, args: any, user_id?: string, company_id?: string) {
   const limite = args.limite || 10;
+  const query = (table: string) => {
+    let q = supabase.from(table).select("*");
+    if (company_id) q = q.eq("company_id", company_id);
+    return q;
+  };
+
   switch (args.tipo) {
     case "resumo": {
       const [clRes, ordRes, funRes] = await Promise.all([
-        supabase.from("clients").select("id, status").limit(1000),
-        supabase.from("orders").select("id, total, status, created_at").order("created_at", { ascending: false }).limit(100),
-        supabase.from("sales_funnel").select("id, value, stage, status").limit(300),
+        query("clients").limit(1000),
+        query("orders").order("created_at", { ascending: false }).limit(100),
+        query("sales_funnel").limit(300),
       ]);
       const clients = clRes.data || []; const orders = ordRes.data || []; const funnel = funRes.data || [];
       return { clientes_ativos: clients.filter((c: any) => c.status === "active").length, total_clientes: clients.length, pedidos_recentes_30d: orders.filter((o: any) => new Date(o.created_at) > new Date(Date.now() - 30 * 86400000)).length, valor_pipeline: funnel.filter((f: any) => f.status === "active" || !f.status).reduce((s: number, f: any) => s + (f.value || 0), 0), oportunidades_ativas: funnel.filter((f: any) => f.status === "active" || !f.status).length };
