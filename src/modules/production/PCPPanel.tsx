@@ -22,6 +22,7 @@ import { useTechnicalSheets } from '@/hooks/production/useTechnicalSheets';
 import { useSupplyStock } from '@/hooks/inventory/useSupplyStock';
 import { supabase } from '@/integrations/supabase/client';
 import { productionStatusConfig, priorityConfig } from '@/config/production';
+import { StatusBadge } from '@/shared/components/StatusBadge';
 import PCPKPIPanel from '@/components/producao/PCPKPIPanel';
 import PCPIntelligencePanel from '@/components/producao/PCPIntelligencePanel';
 import { usePCPIntelligence } from '@/hooks/production/usePCPIntelligence';

@@ -7,6 +7,7 @@ import { DataTable, type Column } from '@/shared/components/DataTable';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { AdvancedFilters, type FilterField } from '@/shared/components/AdvancedFilters';
 import { getJournalStatusLabel } from '@/config/accounting';
+import { StatusBadge } from '@/shared/components/StatusBadge';
 import { useAccounting } from '@/hooks/accounting/useAccounting';
 import { cn } from '@/lib/utils';
 import { Plus, CheckCircle, Eye, BookOpen, FileText, Clock } from 'lucide-react';
