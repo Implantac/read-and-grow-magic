@@ -806,8 +806,8 @@ async function executeConsultaComercial(supabase: any, args: any, user_id?: stri
     }
     case "vendedores": {
       const [repsRes, ordersRes] = await Promise.all([
-        supabase.from("sales_reps").select("id, name, region, status").eq("status", "active").limit(50),
-        supabase.from("orders").select("sales_rep_id, sales_rep_name, total, status").in("status", ["completed", "invoiced", "shipped", "delivered"]).limit(500),
+        query("sales_reps").eq("status", "active").limit(50),
+        query("orders").in("status", ["completed", "invoiced", "shipped", "delivered"]).limit(500),
       ]);
       const reps = repsRes.data || [];
       const orders = ordersRes.data || [];
