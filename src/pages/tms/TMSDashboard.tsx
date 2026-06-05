@@ -2,11 +2,24 @@ import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
 import { KPICard } from '@/shared/components/KPICard';
-import { useTMSDashboardStats } from '@/hooks/wms/useTMS';
+import { useTMS } from '@/hooks/operational/useTMSQuery';
+import { useMemo } from 'react';
 import { Truck, Building2, MapPin, PackageCheck, Navigation, Clock } from 'lucide-react';
 
 const TMSDashboard = () => {
-  const { stats, loading } = useTMSDashboardStats();
+  const { carriers, carriersLoading, vehicles, vehiclesLoading, routes, routesLoading, proofs, proofsLoading } = useTMS();
+  
+  const loading = carriersLoading || vehiclesLoading || routesLoading || proofsLoading;
+
+  const stats = useMemo(() => ({
+    activeCarriers: carriers.filter(c => c.active).length,
+    availableVehicles: vehicles.filter(v => v.status === 'available').length,
+    totalVehicles: vehicles.length,
+    plannedRoutes: routes.filter(r => r.status === 'planned').length,
+    inTransitRoutes: routes.filter(r => r.status === 'in_transit').length,
+    pendingDeliveries: proofs.filter(p => p.status === 'pending').length,
+    deliveredCount: proofs.filter(p => p.status === 'delivered').length,
+  }), [carriers, vehicles, routes, proofs]);
 
   if (loading) return <PageLoading />;
 
