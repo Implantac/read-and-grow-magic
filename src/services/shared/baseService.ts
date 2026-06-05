@@ -1,13 +1,9 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
-
-type PublicSchema = Database['public'];
-type TableName = keyof PublicSchema['Tables'];
 
 /**
  * Base Service with generic CRUD operations.
  */
-export class BaseService<T extends TableName> {
+export class BaseService<T extends string> {
   constructor(protected tableName: T) {}
 
   async getAll(options: { 
@@ -19,7 +15,7 @@ export class BaseService<T extends TableName> {
     const { orderBy = 'created_at', ascending = false, limit, filters } = options;
     
     let query = supabase
-      .from(this.tableName)
+      .from(this.tableName as any)
       .select('*');
 
     if (filters) {
@@ -43,7 +39,7 @@ export class BaseService<T extends TableName> {
 
   async getById(id: string) {
     const { data, error } = await supabase
-      .from(this.tableName)
+      .from(this.tableName as any)
       .select('*')
       .eq('id' as any, id)
       .maybeSingle();
@@ -54,7 +50,7 @@ export class BaseService<T extends TableName> {
 
   async create(item: any) {
     const { data, error } = await supabase
-      .from(this.tableName)
+      .from(this.tableName as any)
       .insert(item as any)
       .select()
       .single();
@@ -65,7 +61,7 @@ export class BaseService<T extends TableName> {
 
   async update(id: string, updates: any) {
     const { data, error } = await supabase
-      .from(this.tableName)
+      .from(this.tableName as any)
       .update({ ...updates, updated_at: new Date().toISOString() } as any)
       .eq('id' as any, id)
       .select()
@@ -77,11 +73,12 @@ export class BaseService<T extends TableName> {
 
   async delete(id: string) {
     const { error } = await supabase
-      .from(this.tableName)
+      .from(this.tableName as any)
       .delete()
       .eq('id' as any, id);
 
     if (error) throw error;
   }
 }
+
 
