@@ -1,7 +1,6 @@
 import { BaseService } from '../shared/baseService';
-import { DbClient } from '@/hooks/commercial/useClients';
 
-export class ClientService extends BaseService<DbClient> {
+export class ClientService extends BaseService<'clients'> {
   constructor() {
     super('clients');
   }

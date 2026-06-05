@@ -1,5 +1,4 @@
 import { supabase } from '@/integrations/supabase/client';
-import { DbClient } from '@/hooks/commercial/useClients';
 import { BaseService } from '../shared/baseService';
 
 /**
@@ -8,7 +7,7 @@ import { BaseService } from '../shared/baseService';
  */
 
 class ClientsService {
-  private base = new BaseService<DbClient>('clients');
+  private base = new BaseService('clients');
 
   async getAll() {
     const { data, error } = await supabase
@@ -16,14 +15,14 @@ class ClientsService {
       .select('*')
       .order('name', { ascending: true });
     if (error) throw error;
-    return (data || []) as DbClient[];
+    return (data || []) as any[];
   }
 
-  async create(client: Omit<DbClient, 'id' | 'created_at' | 'updated_at'>) {
+  async create(client: any) {
     return this.base.create(client);
   }
 
-  async update(id: string, client: Partial<DbClient>) {
+  async update(id: string, client: any) {
     return this.base.update(id, client);
   }
 

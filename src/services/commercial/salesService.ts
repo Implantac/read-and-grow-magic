@@ -1,9 +1,8 @@
 import { supabase } from '@/integrations/supabase/client';
-import { DbSale, CreateSaleInput } from '@/types/commercial';
 import { BaseService } from '../shared/baseService';
 
 class SalesService {
-  private base = new BaseService<DbSale>('sales');
+  private base = new BaseService('sales');
 
   async getAll() {
     const { data, error } = await supabase
@@ -16,19 +15,19 @@ class SalesService {
     return (data as any[]).map((s) => ({
       ...s,
       items: s.sale_items || [],
-    })) as DbSale[];
+    })) as any[];
   }
 
   async getById(id: string) {
     return this.base.getById(id);
   }
 
-  async create(input: CreateSaleInput) {
+  async create(input: any) {
     const { count } = await supabase.from('sales').select('id', { count: 'exact', head: true });
     const nextNum = `VND${String((count || 0) + 1).padStart(4, '0')}`;
 
-    const subtotal = input.items.reduce((s, i) => s + (i.quantity * i.unit_price), 0);
-    const discount = input.items.reduce((s, i) => s + (i.discount || 0), 0);
+    const subtotal = input.items.reduce((s: number, i: any) => s + (i.quantity * i.unit_price), 0);
+    const discount = input.items.reduce((s: number, i: any) => s + (i.discount || 0), 0);
     const total = subtotal - discount;
 
     const { data: sale, error: saleError } = await supabase.from('sales').insert({
@@ -41,11 +40,11 @@ class SalesService {
       total,
       notes: input.notes || null,
       status: 'completed',
-    }).select().single();
+    } as any).select().single();
     
     if (saleError) throw saleError;
 
-    const items = input.items.map((item) => ({
+    const items = input.items.map((item: any) => ({
       sale_id: sale.id,
       product_id: item.product_id || null,
       product_name: item.product_name,
