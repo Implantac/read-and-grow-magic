@@ -507,8 +507,8 @@ Gere insights estratégicos: { "insights": [...] }`;
 
 // ─── Generate Scenarios ──────────────────────────────────────────
 
-async function handleGenerateScenarios(supabase: any, lovableKey: string, corsHeaders: any) {
-  const d = await fetchAllData(supabase);
+async function handleGenerateScenarios(supabase: any, lovableKey: string, corsHeaders: any, authenticatedUserId?: string, companyId?: string) {
+  const d = await fetchAllData(supabase, companyId);
   const computed = computeKPIs(d);
 
   // Guard: sem dados reais, não simula cenários
