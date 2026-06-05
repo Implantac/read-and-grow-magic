@@ -5,20 +5,42 @@ type PublicSchema = Database['public'];
 type TableName = keyof PublicSchema['Tables'];
 
 /**
- * Base Service with generic CRUD operations and strict typing.
+ * Base Service with generic CRUD operations.
+ * Use 'any' casts internally to avoid TS excessive complexity with large Supabase schemas.
  */
 export class BaseService<T extends TableName> {
   constructor(protected tableName: T) {}
 
-  async getAll(options: { orderBy?: string; ascending?: boolean } = {}) {
-    const { orderBy = 'created_at', ascending = false } = options;
-    const { data, error } = await supabase
+  async getAll(options: { 
+    orderBy?: string; 
+    ascending?: boolean;
+    limit?: number;
+    filters?: Record<string, any>;
+  } = {}) {
+    const { orderBy = 'created_at', ascending = false, limit, filters } = options;
+    
+    let query = supabase
       .from(this.tableName)
-      .select('*')
-      .order(orderBy as any, { ascending });
+      .select('*');
+
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined) {
+          query = query.eq(key as any, value);
+        }
+      });
+    }
+
+    query = query.order(orderBy as any, { ascending });
+
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
-    return (data as any) as PublicSchema['Tables'][T]['Row'][];
+    return data as any[];
   }
 
   async getById(id: string) {
@@ -29,30 +51,30 @@ export class BaseService<T extends TableName> {
       .single();
 
     if (error) throw error;
-    return (data as any) as PublicSchema['Tables'][T]['Row'];
+    return data as any;
   }
 
-  async create(item: PublicSchema['Tables'][T]['Insert']) {
+  async create(item: any) {
     const { data, error } = await supabase
       .from(this.tableName)
-      .insert(item as any)
+      .insert(item)
       .select()
       .single();
 
     if (error) throw error;
-    return (data as any) as PublicSchema['Tables'][T]['Row'];
+    return data as any;
   }
 
-  async update(id: string, updates: PublicSchema['Tables'][T]['Update']) {
+  async update(id: string, updates: any) {
     const { data, error } = await supabase
       .from(this.tableName)
-      .update({ ...updates, updated_at: new Date().toISOString() } as any)
+      .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id' as any, id)
       .select()
       .single();
 
     if (error) throw error;
-    return (data as any) as PublicSchema['Tables'][T]['Row'];
+    return data as any;
   }
 
   async delete(id: string) {
@@ -63,5 +85,4 @@ export class BaseService<T extends TableName> {
 
     if (error) throw error;
   }
-
 }

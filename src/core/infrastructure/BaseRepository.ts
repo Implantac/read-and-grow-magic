@@ -1,30 +1,24 @@
-import { supabase } from "@/integrations/supabase/client";
-import { Database } from "@/integrations/supabase/types";
+import { BaseService } from '@/services/shared/baseService';
 
-export class BaseRepository<T extends keyof Database['public']['Tables']> {
-  constructor(protected tableName: T) {}
-
-  async getAll(companyId?: string) {
-    let query = supabase.from(this.tableName).select('*') as any;
-    if (companyId) {
-      query = query.eq('company_id', companyId);
-    }
-    return await query;
+/**
+ * Legacy wrapper for BaseService to maintain compatibility.
+ * @deprecated Use BaseService directly or domain services.
+ */
+export class BaseRepository<T extends any> extends BaseService<any> {
+  constructor(tableName: any) {
+    super(tableName);
   }
 
-  async getById(id: string) {
-    return await (supabase.from(this.tableName).select('*') as any).eq('id', id).single();
+  async getAllCompat(companyId?: string) {
+    return super.getAll({ filters: companyId ? { company_id: companyId } : undefined });
   }
 
-  async create(data: any) {
-    return await (supabase.from(this.tableName).insert(data) as any).select().single();
-  }
-
-  async update(id: string, data: any) {
-    return await (supabase.from(this.tableName).update(data) as any).eq('id', id).select().single();
-  }
-
-  async delete(id: string) {
-    return await (supabase.from(this.tableName).delete() as any).eq('id', id);
+  // Compatibility for older code expecting .then() on query directly
+  async getAllLegacy(companyId?: string) {
+    const data = await this.getAllCompat(companyId);
+    return { data, error: null };
   }
 }
+
+
+

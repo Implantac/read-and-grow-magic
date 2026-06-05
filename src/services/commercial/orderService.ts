@@ -16,7 +16,7 @@ export class OrderService extends BaseService<'orders'> {
     return (data as any[]).map((o) => ({
       ...o,
       items: o.order_items || [],
-    })) as any[];
+    }));
   }
 
   async createOrder(input: any) {
@@ -31,7 +31,7 @@ export class OrderService extends BaseService<'orders'> {
     const nextNum = `PED${String(parseInt(lastNum) + 1).padStart(4, '0')}`;
 
     const subtotal = input.items.reduce((s: number, i: any) => s + (i.quantity * i.unit_price), 0);
-    const discount = input.items.reduce((s: number, i: any) => s + i.discount, 0);
+    const discount = input.items.reduce((s: number, i: any) => s + (i.discount || 0), 0);
     const shipping = input.shipping || 0;
     const total = subtotal - discount + shipping;
 
@@ -64,8 +64,8 @@ export class OrderService extends BaseService<'orders'> {
       product_code: item.product_code,
       quantity: item.quantity,
       unit_price: item.unit_price,
-      discount: item.discount,
-      total: (item.quantity * item.unit_price) - item.discount,
+      discount: item.discount || 0,
+      total: (item.quantity * item.unit_price) - (item.discount || 0),
     }));
 
     const { error: itemsError } = await supabase.from('order_items').insert(items);
@@ -78,11 +78,7 @@ export class OrderService extends BaseService<'orders'> {
   }
 
   async updateStatus(id: string, status: string) {
-    const { error } = await supabase
-      .from('orders')
-      .update({ status, updated_at: new Date().toISOString() } as any)
-      .eq('id', id);
-    if (error) throw error;
+    return this.update(id, { status });
   }
 
   async archiveForDeletion(id: string, undoDurationSeconds: number) {
@@ -108,11 +104,7 @@ export class OrderService extends BaseService<'orders'> {
 
     if (archiveError) throw archiveError;
 
-    const { error: deleteError } = await supabase.from('orders').delete().eq('id', id);
-    if (deleteError) {
-      await supabase.from('deleted_orders_archive').delete().eq('id', archiveData.id);
-      throw deleteError;
-    }
+    await this.delete(id);
 
     return { order, archiveId: archiveData.id };
   }
@@ -144,6 +136,7 @@ export class OrderService extends BaseService<'orders'> {
     }
 
     await supabase.from('deleted_orders_archive').delete().eq('id', archiveId);
+    return restored;
   }
 }
 

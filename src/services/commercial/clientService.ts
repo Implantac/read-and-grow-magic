@@ -7,3 +7,4 @@ export class ClientService extends BaseService<'clients'> {
 }
 
 export const clientService = new ClientService();
+

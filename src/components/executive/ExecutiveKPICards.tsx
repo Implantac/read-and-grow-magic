@@ -7,13 +7,13 @@ import {
 import { cn } from '@/lib/utils';
 import type { ExecutiveKPIs } from '@/hooks/ai/useExecutiveAI';
 
-const fmt = (v: number) => v >= 1000000
-  ? `R$ ${(v / 1000000).toFixed(1)}M`
-  : v >= 1000
-    ? `R$ ${(v / 1000).toFixed(0)}k`
-    : `R$ ${v.toFixed(0)}`;
+import { formatters } from '@/shared/utils/formatters';
 
-export { fmt };
+const fmt = formatters.currency;
+const fmtCompact = formatters.currencyCompact;
+
+export { fmt, fmtCompact };
+
 
 interface Props {
   kpis: ExecutiveKPIs | undefined;
@@ -23,7 +23,7 @@ export function PrimaryKPICards({ kpis }: Props) {
   const kpiCards = [
     { 
       label: 'Receita Total', 
-      value: fmt(kpis?.totalRevenue || 0), 
+      value: fmtCompact(kpis?.totalRevenue || 0), 
       icon: TrendingUp, 
       color: 'text-emerald-600', 
       bg: 'bg-emerald-500/10', 
@@ -38,9 +38,9 @@ export function PrimaryKPICards({ kpis }: Props) {
         </div>
       )
     },
-    { label: 'Lucro Bruto', value: fmt(kpis?.grossProfit || 0), icon: DollarSign, color: 'text-primary', bg: 'bg-primary/10', sub: <span className="text-[10px] text-muted-foreground">Margem {kpis?.grossMargin || 0}%</span> },
+    { label: 'Lucro Bruto', value: fmtCompact(kpis?.grossProfit || 0), icon: DollarSign, color: 'text-primary', bg: 'bg-primary/10', sub: <span className="text-[10px] text-muted-foreground">Margem {kpis?.grossMargin || 0}%</span> },
     { label: 'Liquidez Corrente', value: (kpis?.currentRatio || 0).toFixed(2), icon: Scale, color: (kpis?.currentRatio || 0) >= 1 ? 'text-emerald-600' : 'text-destructive', bg: (kpis?.currentRatio || 0) >= 1 ? 'bg-emerald-500/10' : 'bg-destructive/10', sub: <span className="text-[10px] text-muted-foreground">Saúde de curto prazo</span> },
-    { label: 'Posição Líquida', value: fmt(kpis?.netPosition || 0), icon: Wallet, color: (kpis?.netPosition || 0) >= 0 ? 'text-emerald-600' : 'text-destructive', bg: (kpis?.netPosition || 0) >= 0 ? 'bg-emerald-500/10' : 'bg-destructive/10' },
+    { label: 'Posição Líquida', value: fmtCompact(kpis?.netPosition || 0), icon: Wallet, color: (kpis?.netPosition || 0) >= 0 ? 'text-emerald-600' : 'text-destructive', bg: (kpis?.netPosition || 0) >= 0 ? 'bg-emerald-500/10' : 'bg-destructive/10' },
   ];
 
   return (
