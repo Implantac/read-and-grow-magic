@@ -32,14 +32,19 @@ function installDomGuards() {
 
   Node.prototype.insertBefore = function <T extends Node>(newNode: T, referenceNode: Node | null): T {
     if (referenceNode && referenceNode.parentNode !== this) {
-      return this.appendChild(newNode) as T;
+      if (this && typeof this.appendChild === 'function') {
+        return this.appendChild(newNode) as T;
+      }
+      return newNode;
     }
 
     try {
       return originalInsertBefore.call(this, newNode, referenceNode) as T;
     } catch (error) {
       if (error instanceof DOMException && error.name === "NotFoundError") {
-        return this.appendChild(newNode) as T;
+        if (this && typeof this.appendChild === 'function') {
+          return this.appendChild(newNode) as T;
+        }
       }
       throw error;
     }
