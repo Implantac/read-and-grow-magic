@@ -38,7 +38,7 @@ const Carriers = () => {
   const handleSave = async () => {
     if (!form.code || !form.name) { toast.error('Código e nome são obrigatórios'); return; }
     const ok = editing
-      ? await update(editing.id, form)
+      ? await update({ id: editing.id, updates: form })
       : await create(form);
     if (ok) setDialogOpen(false);
   };

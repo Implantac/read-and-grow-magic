@@ -45,7 +45,7 @@ export default function RFIDDashboardPage() {
   const refetchReaders = () => {}; // Handled by React Query
   const refetchSummary = () => {};
 
-  const loading = loadingReaders || loadingTags || loadingEvents || loadingSummary;
+  
 
   // Events per hour (last 12 hours)
   const eventsPerHour = useMemo(() => {
