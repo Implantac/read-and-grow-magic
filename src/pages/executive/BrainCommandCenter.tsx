@@ -45,7 +45,7 @@ export default function BrainCommandCenter() {
   const notify = useNotifyCritical();
   const { messages, loading, send, clear } = useBrainChat();
   const [input, setInput] = useState('');
-  const [agent, setAgent] = useState('geral');
+  const [agent, setAgent] = useState('general');
 
   const lastRun = runs[0];
   const veredicto = lastRun?.structured?.veredicto;
