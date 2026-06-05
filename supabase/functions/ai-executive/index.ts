@@ -699,15 +699,21 @@ const ERP_TOOLS = [
 
 // ─── Tool Executors ─────────────────────────────────────────────
 
-async function executeConsultaFinanceiro(supabase: any, args: any) {
+async function executeConsultaFinanceiro(supabase: any, args: any, user_id?: string, company_id?: string) {
   const now = new Date();
   const today = now.toISOString().split("T")[0];
+  const query = (table: string) => {
+    let q = supabase.from(table).select("*");
+    if (company_id) q = q.eq("company_id", company_id);
+    return q;
+  };
+
   switch (args.tipo) {
     case "resumo": {
       const [recRes, pagRes, bankRes] = await Promise.all([
-        supabase.from("accounts_receivable").select("id, amount, status, due_date, open_amount, client_name").limit(500),
-        supabase.from("accounts_payable").select("id, amount, status, due_date, open_amount, supplier").limit(500),
-        supabase.from("bank_accounts").select("id, name, balance, active").eq("active", true),
+        query("accounts_receivable").limit(500),
+        query("accounts_payable").limit(500),
+        query("bank_accounts").eq("active", true),
       ]);
       const rec = recRes.data || []; const pag = pagRes.data || []; const banks = bankRes.data || [];
       const saldoBancario = banks.reduce((s: number, b: any) => s + (b.balance || 0), 0);
