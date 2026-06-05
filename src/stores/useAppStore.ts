@@ -6,7 +6,7 @@ interface AppState {
   // Auth
   user: User | null;
   isAuthenticated: boolean;
-  userRole: 'admin' | 'manager' | 'operator' | 'viewer' | null;
+  userRole: 'admin' | 'manager' | 'operator' | 'viewer' | 'diretor' | 'financeiro' | 'fiscal' | 'contabil' | 'compras' | 'producao' | 'logistica' | 'comercial' | 'loja' | 'franquia' | null;
   
   // Company/Branch
   activeCompany: Company | null;
@@ -20,7 +20,7 @@ interface AppState {
   // Actions
   setUser: (user: User | null) => void;
   logout: () => void;
-  setUserRole: (role: 'admin' | 'manager' | 'operator' | 'viewer' | null) => void;
+  setUserRole: (role: 'admin' | 'manager' | 'operator' | 'viewer' | 'diretor' | 'financeiro' | 'fiscal' | 'contabil' | 'compras' | 'producao' | 'logistica' | 'comercial' | 'loja' | 'franquia' | null) => void;
   setActiveCompany: (company: Company | null) => void;
   setActiveBranch: (branch: Branch | null) => void;
   toggleSidebar: () => void;

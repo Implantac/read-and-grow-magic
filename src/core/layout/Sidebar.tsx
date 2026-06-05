@@ -4,7 +4,8 @@ import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
 import { useAuth } from '@/hooks/system/useAuth';
-import { useEnterprise, type Segment } from '../auth/EnterpriseContext';
+import { useEnterprise } from '../auth/EnterpriseContext';
+import { SEGMENTS } from '@/config/adaptive';
 
 import { navigationSections } from '@/config/navigation';
 import type { NavItem } from '@/config/navigation';
@@ -229,28 +230,8 @@ export function Sidebar() {
             if (!segment) return true;
             
             // Adaptive logic based on business vertical (Pillar 3 — ERP ADAPTATIVO)
-            const adaptiveRules: Record<Segment, string[]> = {
-              textile: ['Dashboard', 'Produção', 'Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
-              apparel: ['Dashboard', 'Produção', 'Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
-              fio: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão'],
-              tecelagem: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão'],
-              animal_feed: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão'],
-
-              pharma: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
-              industry: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão', 'Operacional'],
-              distribution: ['Dashboard', 'Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
-              wholesaler: ['Dashboard', 'Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
-              retail: ['Dashboard', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
-              retail_chain: ['Dashboard', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
-              franchise: ['Dashboard', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
-
-              holding: ['Dashboard', 'Gestão', 'Financeiro', 'Comercial'],
-              services: ['Dashboard', 'Comercial', 'Financeiro', 'Gestão'],
-              food_factory: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
-              general: ['Dashboard', 'Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Logística', 'Produção']
-            };
-
-            const allowedSections = adaptiveRules[segment] || adaptiveRules.general;
+            const segmentConfig = SEGMENTS[segment] || SEGMENTS.general;
+            const allowedSections = segmentConfig.allowedSections;
             
             if (section.label && !allowedSections.includes(section.label)) {
               return false;

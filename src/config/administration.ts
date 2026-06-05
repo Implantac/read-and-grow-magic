@@ -12,6 +12,16 @@ export const userRoleConfig: Record<UserRole, StatusConfig> = {
   manager: { value: 'manager', label: 'Gerente', color: 'text-blue-700', bgColor: 'bg-blue-100' },
   operator: { value: 'operator', label: 'Operador', color: 'text-green-700', bgColor: 'bg-green-100' },
   viewer: { value: 'viewer', label: 'Visualizador', color: 'text-gray-700', bgColor: 'bg-gray-100' },
+  diretor: { value: 'diretor', label: 'Diretor', color: 'text-red-700', bgColor: 'bg-red-100' },
+  financeiro: { value: 'financeiro', label: 'Financeiro', color: 'text-blue-700', bgColor: 'bg-blue-100' },
+  fiscal: { value: 'fiscal', label: 'Fiscal', color: 'text-orange-700', bgColor: 'bg-orange-100' },
+  contabil: { value: 'contabil', label: 'Contábil', color: 'text-indigo-700', bgColor: 'bg-indigo-100' },
+  compras: { value: 'compras', label: 'Compras', color: 'text-cyan-700', bgColor: 'bg-cyan-100' },
+  producao: { value: 'producao', label: 'Produção', color: 'text-amber-700', bgColor: 'bg-amber-100' },
+  logistica: { value: 'logistica', label: 'Logística', color: 'text-emerald-700', bgColor: 'bg-emerald-100' },
+  comercial: { value: 'comercial', label: 'Comercial', color: 'text-rose-700', bgColor: 'bg-rose-100' },
+  loja: { value: 'loja', label: 'Loja', color: 'text-pink-700', bgColor: 'bg-pink-100' },
+  franquia: { value: 'franquia', label: 'Franquia', color: 'text-violet-700', bgColor: 'bg-violet-100' },
 };
 
 export const companyStatusConfig: Record<CompanyStatus, StatusConfig> = {
