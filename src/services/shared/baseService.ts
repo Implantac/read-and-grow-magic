@@ -10,15 +10,36 @@ type TableName = keyof PublicSchema['Tables'];
 export class BaseService<T extends TableName> {
   constructor(protected tableName: T) {}
 
-  async getAll(options: { orderBy?: string; ascending?: boolean } = {}) {
-    const { orderBy = 'created_at', ascending = false } = options;
-    const { data, error } = await supabase
+  async getAll(options: { 
+    orderBy?: keyof PublicSchema['Tables'][T]['Row']; 
+    ascending?: boolean;
+    limit?: number;
+    filters?: Partial<PublicSchema['Tables'][T]['Row']>;
+  } = {}) {
+    const { orderBy = 'created_at' as any, ascending = false, limit, filters } = options;
+    
+    let query = supabase
       .from(this.tableName)
-      .select('*')
-      .order(orderBy as any, { ascending });
+      .select('*');
+
+    if (filters) {
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== undefined) {
+          query = query.eq(key as any, value);
+        }
+      });
+    }
+
+    query = query.order(orderBy as any, { ascending });
+
+    if (limit) {
+      query = query.limit(limit);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
-    return (data as any) as PublicSchema['Tables'][T]['Row'][];
+    return data as PublicSchema['Tables'][T]['Row'][];
   }
 
   async getById(id: string) {
@@ -29,7 +50,7 @@ export class BaseService<T extends TableName> {
       .single();
 
     if (error) throw error;
-    return (data as any) as PublicSchema['Tables'][T]['Row'];
+    return data as PublicSchema['Tables'][T]['Row'];
   }
 
   async create(item: PublicSchema['Tables'][T]['Insert']) {
@@ -40,7 +61,7 @@ export class BaseService<T extends TableName> {
       .single();
 
     if (error) throw error;
-    return (data as any) as PublicSchema['Tables'][T]['Row'];
+    return data as PublicSchema['Tables'][T]['Row'];
   }
 
   async update(id: string, updates: PublicSchema['Tables'][T]['Update']) {
@@ -52,7 +73,7 @@ export class BaseService<T extends TableName> {
       .single();
 
     if (error) throw error;
-    return (data as any) as PublicSchema['Tables'][T]['Row'];
+    return data as PublicSchema['Tables'][T]['Row'];
   }
 
   async delete(id: string) {
@@ -63,5 +84,4 @@ export class BaseService<T extends TableName> {
 
     if (error) throw error;
   }
-
 }
