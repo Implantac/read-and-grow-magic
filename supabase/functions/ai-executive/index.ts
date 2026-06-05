@@ -1023,11 +1023,6 @@ async function executeAcao(supabase: any, args: any, user_id?: string, company_i
     }
     default: return { erro: "Ação não implementada" };
   }
-      await logAction("ajustar_estoque", "sucesso");
-      return { status: "sucesso", mensagem: `✅ Estoque de "${prod.name}" ajustado: ${prod.stock_current} → ${newStock} unidades.` };
-    }
-    default: return { erro: "Ação não implementada" };
-  }
 }
 
 async function executeAnaliseEstrategica(supabase: any, args: any, user_id?: string, company_id?: string) {
