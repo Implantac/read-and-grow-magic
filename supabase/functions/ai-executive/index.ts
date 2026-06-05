@@ -1091,11 +1091,11 @@ async function executeConsultaFiscal(supabase: any, args: any, user_id?: string,
       return { por_mes: byMonth, periodo_dias: periodoDias };
     }
     case "regras_ativas": {
-      const { data } = await supabase.from("tax_rules").select("*").eq("active", true).limit(100);
+      const { data } = await query("tax_rules").eq("active", true).limit(100);
       return { regras: data || [] };
     }
     case "sped": {
-      const { data } = await supabase.from("sped_files").select("*").order("generated_at", { ascending: false }).limit(20);
+      const { data } = await query("sped_files").order("generated_at", { ascending: false }).limit(20);
       return { sped_files: data || [] };
     }
     default:
