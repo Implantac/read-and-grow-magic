@@ -9,17 +9,17 @@ import { Button } from '@/ui/base/button';
 import { ExecutiveIntelligenceStatus } from './ExecutiveIntelligenceStatus';
 
 const specialists = [
-  { role: 'IA CEO', icon: Brain, color: 'text-primary' },
-  { role: 'IA CFO', icon: DollarSign, color: 'text-emerald-500' },
-  { role: 'IA COO', icon: Cog, color: 'text-blue-500' },
-  { role: 'IA CTO', icon: Cpu, color: 'text-orange-500' },
-  { role: 'Especialista PCP', icon: Factory, color: 'text-purple-600' },
-  { role: 'Especialista WMS', icon: Warehouse, color: 'text-green-500' },
-  { role: 'IA Supply Chain', icon: Truck, color: 'text-cyan-600' },
-  { role: 'Especialista Fiscal', icon: Scale, color: 'text-red-500' },
+  { role: 'Global CTO', icon: Cpu, color: 'text-primary' },
+  { role: 'SAP S/4HANA', icon: Building, color: 'text-blue-600' },
+  { role: 'Oracle NetSuite', icon: Database, color: 'text-orange-600' },
+  { role: 'TOTVS/Sankhya', icon: Cog, color: 'text-red-500' },
+  { role: 'Industrial/PCP', icon: Factory, color: 'text-purple-600' },
+  { role: 'WMS/TMS', icon: Warehouse, color: 'text-green-500' },
+  { role: 'Fiscal/Contábil', icon: Scale, color: 'text-red-600' },
+  { role: 'Supply Chain', icon: Truck, color: 'text-cyan-600' },
   { role: 'HR Strategy', icon: Users, color: 'text-pink-500' },
-  { role: 'Market Intelligence', icon: BarChart3, color: 'text-indigo-500' },
-  { role: 'UX Enterprise', icon: Search, color: 'text-yellow-500' },
+  { role: 'Market Intel', icon: BarChart3, color: 'text-indigo-500' },
+  { role: 'IA Specialist', icon: Brain, color: 'text-yellow-500' },
 ];
 
 export function ExecutiveCouncilPanel() {
