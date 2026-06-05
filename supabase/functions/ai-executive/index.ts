@@ -983,8 +983,8 @@ async function executeAcao(supabase: any, args: any, user_id?: string) {
   }
 }
 
-async function executeAnaliseEstrategica(supabase: any, args: any) {
-  const d = await fetchAllData(supabase);
+async function executeAnaliseEstrategica(supabase: any, args: any, user_id?: string, company_id?: string) {
+  const d = await fetchAllData(supabase, company_id);
   const computed = computeKPIs(d);
   const k = computed.kpis;
 
