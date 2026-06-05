@@ -258,6 +258,8 @@ export function Sidebar() {
 
             return true;
           }).map((section, sectionIndex) => (
+            section && (
+
             <div key={section.label || sectionIndex} className="space-y-2">
               {!sidebarCollapsed && section.label && (
                 <div className="flex items-center justify-between px-3 mb-1">
