@@ -28,8 +28,13 @@ export function CEOStrategicChat({ messages, isLoading, sendMessage, clearChat }
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isLoading]);
+    if (messages.length > 0 || isLoading) {
+      const timer = setTimeout(() => {
+        endRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [messages.length, isLoading]);
 
   const handleSend = () => {
     if (!input.trim() || isLoading) return;

@@ -41,13 +41,14 @@ export function useSpedFiles() {
   }, []);
 
   const generate = useCallback(async (type: 'sped_fiscal' | 'sped_contribuicoes', startDate: string, endDate: string) => {
+    if (generating) return false;
     setGenerating(true);
     try {
       const fnName = type === 'sped_fiscal' ? 'generate_sped_fiscal' : 'generate_sped_contribuicoes';
       const { data, error } = await supabase.rpc(fnName as any, { p_start: startDate, p_end: endDate });
       if (error) throw error;
       const row: any = Array.isArray(data) ? data[0] : data;
-      if (!row) throw new Error('Sem retorno');
+      if (!row || !row.content) throw new Error('Sem retorno de conteúdo do servidor');
 
       const period = startDate.slice(0, 7);
       const { error: insErr } = await supabase.from('sped_files' as any).insert({
@@ -56,7 +57,7 @@ export function useSpedFiles() {
         start_date: startDate,
         end_date: endDate,
         content: row.content,
-        total_records: row.total_records,
+        total_records: row.total_records || 0,
         total_value: row.total_value || 0,
       });
       if (insErr) throw insErr;
@@ -65,12 +66,13 @@ export function useSpedFiles() {
       await fetchFiles();
       return true;
     } catch (e: any) {
-      toast.error('Erro ao gerar SPED: ' + (e.message || ''));
+      console.error('SPED Generation error:', e);
+      toast.error('Erro ao gerar SPED: ' + (e.message || 'Erro desconhecido'));
       return false;
     } finally {
       setGenerating(false);
     }
-  }, [fetchFiles]);
+  }, [fetchFiles, generating]);
 
   const download = useCallback(async (id: string) => {
     const { data, error } = await supabase

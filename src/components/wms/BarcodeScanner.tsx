@@ -38,10 +38,13 @@ export function BarcodeScanner({ onScan, placeholder = 'Escaneie ou digite o có
   useEffect(() => {
     if (autoFocus && !disabled) {
       const i = setInterval(() => {
-        if (document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        // Only autofocus if the tab is visible and focus isn't in another input
+        if (document.visibilityState === 'visible' && 
+            document.activeElement?.tagName !== 'INPUT' && 
+            document.activeElement?.tagName !== 'TEXTAREA') {
           inputRef.current?.focus();
         }
-      }, 800);
+      }, 1000); // Relaxed to 1000ms
       return () => clearInterval(i);
     }
   }, [autoFocus, disabled]);
