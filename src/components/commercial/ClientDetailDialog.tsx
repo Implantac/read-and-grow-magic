@@ -75,16 +75,18 @@ export function ClientDetailDialog({ client, open, onOpenChange }: Props) {
 
   if (!client) return null;
 
-  const clientOrders = allOrders.filter(o => o.client_id === client.id).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  const clientReceivables = allReceivables.filter(r => r.client_id === client.id);
-  const clientFunnel = allFunnel.filter(f => f.client_id === client.id && f.status === 'open');
+  const clientOrders = allOrders.filter(o => (o as any).client_id === client.id).sort((a, b) => new Date((b as any).date).getTime() - new Date((a as any).date).getTime());
+  const clientReceivables = allReceivables.filter(r => (r as any).client_id === client.id);
+  const clientFunnel = allFunnel.filter(f => (f as any).client_id === client.id && (f as any).status === 'open');
+
 
   const creditUsage = client.credit_limit > 0 ? (client.current_balance / client.credit_limit) * 100 : 0;
   const daysSinceLastPurchase = client.last_purchase_date ? differenceInDays(new Date(), new Date(client.last_purchase_date)) : null;
   const scoreConfig = SCORE_CONFIG[client.client_score as string] || SCORE_CONFIG['medium'];
 
-  const totalReceivable = clientReceivables.filter(r => r.status === 'pending').reduce((s, r) => s + r.amount, 0);
-  const overdueReceivable = clientReceivables.filter(r => r.status === 'overdue' || (r.status === 'pending' && new Date(r.due_date) < new Date())).reduce((s, r) => s + r.amount, 0);
+  const totalReceivable = clientReceivables.filter(r => (r as any).status === 'pending').reduce((s, r) => s + (r as any).amount, 0);
+  const overdueReceivable = clientReceivables.filter(r => (r as any).status === 'overdue' || ((r as any).status === 'pending' && new Date((r as any).due_date) < new Date())).reduce((s, r) => s + (r as any).amount, 0);
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -255,11 +257,12 @@ export function ClientDetailDialog({ client, open, onOpenChange }: Props) {
             <div className="grid grid-cols-3 gap-3">
               <div className="rounded-lg border p-3 text-center">
                 <p className="text-[10px] text-muted-foreground uppercase">A Receber</p>
-                <p className="text-lg font-bold text-primary">{formatBRL(totalReceivable)}</p>
+                <p className="text-lg font-bold text-primary">{formatBRL(totalReceivable as any)}</p>
               </div>
               <div className="rounded-lg border p-3 text-center">
                 <p className="text-[10px] text-muted-foreground uppercase">Vencido</p>
-                <p className={`text-lg font-bold ${overdueReceivable > 0 ? 'text-destructive' : ''}`}>{formatBRL(overdueReceivable)}</p>
+                <p className={`text-lg font-bold ${overdueReceivable > 0 ? 'text-destructive' : ''}`}>{formatBRL(overdueReceivable as any)}</p>
+
               </div>
               <div className="rounded-lg border p-3 text-center">
                 <p className="text-[10px] text-muted-foreground uppercase">Total Títulos</p>
@@ -270,24 +273,27 @@ export function ClientDetailDialog({ client, open, onOpenChange }: Props) {
               <p className="text-center text-sm text-muted-foreground py-6">Nenhum título encontrado</p>
             ) : (
               <div className="space-y-2 max-h-[300px] overflow-y-auto">
-                {clientReceivables.sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()).map(r => {
+                {clientReceivables.sort((a, b) => new Date((a as any).due_date).getTime() - new Date((b as any).due_date).getTime()).map((r: any) => {
                   const isOverdue = r.status === 'pending' && new Date(r.due_date) < new Date();
                   return (
                     <div key={r.id} className={`flex items-center justify-between border rounded-lg px-4 py-2.5 ${isOverdue ? 'border-destructive/30 bg-destructive/5' : ''}`}>
+
                       <div className="flex items-center gap-3">
                         <DollarSign className={`h-4 w-4 ${isOverdue ? 'text-destructive' : 'text-muted-foreground'}`} />
                         <div>
-                          <p className="text-sm font-medium">{r.description}</p>
+                          <p className="text-sm font-medium">{(r as any).description}</p>
                           <p className="text-xs text-muted-foreground">
-                            Vence: {format(new Date(r.due_date), 'dd/MM/yyyy', { locale: ptBR })}
-                            {r.invoice_number && ` • NF ${r.invoice_number}`}
+                            Vence: {format(new Date((r as any).due_date), 'dd/MM/yyyy', { locale: ptBR })}
+                            {(r as any).invoice_number && ` • NF ${(r as any).invoice_number}`}
+
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-semibold">{formatBRL(r.amount)}</p>
-                        <Badge variant={r.status === 'paid' ? 'default' : isOverdue ? 'destructive' : 'secondary'} className="text-[10px]">
-                          {r.status === 'paid' ? 'Pago' : isOverdue ? 'Vencido' : 'Pendente'}
+                        <p className="text-sm font-semibold">{formatBRL((r as any).amount)}</p>
+                        <Badge variant={(r as any).status === 'paid' ? 'default' : isOverdue ? 'destructive' : 'secondary'} className="text-[10px]">
+                          {(r as any).status === 'paid' ? 'Pago' : isOverdue ? 'Vencido' : 'Pendente'}
+
                         </Badge>
                       </div>
                     </div>
