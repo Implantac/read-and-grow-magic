@@ -6331,7 +6331,7 @@ export type Database = {
       }
       iot_telemetry: {
         Row: {
-          company_id: string | null
+          company_id: string
           created_at: string
           device_id: string
           device_type: string
@@ -6343,7 +6343,7 @@ export type Database = {
           unit: string | null
         }
         Insert: {
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           device_id: string
           device_type?: string
@@ -6355,7 +6355,7 @@ export type Database = {
           unit?: string | null
         }
         Update: {
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           device_id?: string
           device_type?: string
@@ -7908,7 +7908,7 @@ export type Database = {
       outsourcing_orders: {
         Row: {
           actual_return_date: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           expected_return_date: string | null
           id: string
@@ -7929,7 +7929,7 @@ export type Database = {
         }
         Insert: {
           actual_return_date?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           expected_return_date?: string | null
           id?: string
@@ -7950,7 +7950,7 @@ export type Database = {
         }
         Update: {
           actual_return_date?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           expected_return_date?: string | null
           id?: string
@@ -8749,6 +8749,7 @@ export type Database = {
       }
       product_supplier_references: {
         Row: {
+          company_id: string | null
           created_at: string | null
           id: string
           product_id: string
@@ -8757,6 +8758,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          company_id?: string | null
           created_at?: string | null
           id?: string
           product_id: string
@@ -8765,6 +8767,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          company_id?: string | null
           created_at?: string | null
           id?: string
           product_id?: string
@@ -8990,7 +8993,7 @@ export type Database = {
       }
       production_events: {
         Row: {
-          company_id: string | null
+          company_id: string
           created_at: string
           entity_id: string | null
           entity_name: string | null
@@ -9008,7 +9011,7 @@ export type Database = {
           source: string
         }
         Insert: {
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           entity_id?: string | null
           entity_name?: string | null
@@ -9026,7 +9029,7 @@ export type Database = {
           source?: string
         }
         Update: {
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           entity_id?: string | null
           entity_name?: string | null
@@ -9218,7 +9221,7 @@ export type Database = {
       }
       production_logs: {
         Row: {
-          company_id: string | null
+          company_id: string
           created_at: string
           description: string | null
           event_type: string
@@ -9230,7 +9233,7 @@ export type Database = {
           step_id: string | null
         }
         Insert: {
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           description?: string | null
           event_type?: string
@@ -9242,7 +9245,7 @@ export type Database = {
           step_id?: string | null
         }
         Update: {
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           description?: string | null
           event_type?: string
@@ -9268,7 +9271,7 @@ export type Database = {
           active: boolean
           capacity_per_hour: number | null
           code: string
-          company_id: string | null
+          company_id: string
           created_at: string
           current_operator: string | null
           current_order_id: string | null
@@ -9284,7 +9287,7 @@ export type Database = {
           active?: boolean
           capacity_per_hour?: number | null
           code: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           current_operator?: string | null
           current_order_id?: string | null
@@ -9300,7 +9303,7 @@ export type Database = {
           active?: boolean
           capacity_per_hour?: number | null
           code?: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           current_operator?: string | null
           current_order_id?: string | null
@@ -15367,13 +15370,22 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
+      has_role:
+        | {
+            Args: {
+              _role: Database["public"]["Enums"]["app_role"]
+              _user_id: string
+            }
+            Returns: boolean
+          }
+        | {
+            Args: {
+              _company_id: string
+              _role: Database["public"]["Enums"]["app_role"]
+              _user_id: string
+            }
+            Returns: boolean
+          }
       import_bank_statement_batch: {
         Args: { p_bank_account_id: string; p_transactions: Json }
         Returns: {
