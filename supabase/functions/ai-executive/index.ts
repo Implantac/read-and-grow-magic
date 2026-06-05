@@ -732,26 +732,26 @@ async function executeConsultaFinanceiro(supabase: any, args: any, user_id?: str
     }
     case "atrasados": {
       const [recAtr, pagAtr] = await Promise.all([
-        supabase.from("accounts_receivable").select("id, client_name, amount, open_amount, due_date").or(`status.eq.overdue,and(status.eq.pending,due_date.lt.${today})`).order("due_date").limit(20),
-        supabase.from("accounts_payable").select("id, supplier, amount, open_amount, due_date, description").or(`status.eq.overdue,and(status.eq.pending,due_date.lt.${today})`).order("due_date").limit(20),
+        query("accounts_receivable").or(`status.eq.overdue,and(status.eq.pending,due_date.lt.${today})`).order("due_date").limit(20),
+        query("accounts_payable").or(`status.eq.overdue,and(status.eq.pending,due_date.lt.${today})`).order("due_date").limit(20),
       ]);
       return { receber_atrasados: recAtr.data || [], pagar_atrasados: pagAtr.data || [] };
     }
     case "a_pagar": {
-      const { data } = await supabase.from("accounts_payable").select("id, supplier, amount, open_amount, due_date, status, description").eq("status", "pending").order("due_date").limit(20);
+      const { data } = await query("accounts_payable").eq("status", "pending").order("due_date").limit(20);
       return { contas_a_pagar: data || [] };
     }
     case "a_receber": {
-      const { data } = await supabase.from("accounts_receivable").select("id, client_name, amount, open_amount, due_date, status").eq("status", "pending").order("due_date").limit(20);
+      const { data } = await query("accounts_receivable").eq("status", "pending").order("due_date").limit(20);
       return { contas_a_receber: data || [] };
     }
     case "fluxo_caixa": {
       const dias = args.periodo_dias || 30;
       const futuro = new Date(now.getTime() + dias * 86400000).toISOString().split("T")[0];
       const [recFut, pagFut, bankRes] = await Promise.all([
-        supabase.from("accounts_receivable").select("amount, open_amount, due_date").eq("status", "pending").gte("due_date", today).lte("due_date", futuro),
-        supabase.from("accounts_payable").select("amount, open_amount, due_date").eq("status", "pending").gte("due_date", today).lte("due_date", futuro),
-        supabase.from("bank_accounts").select("balance").eq("active", true),
+        query("accounts_receivable").eq("status", "pending").gte("due_date", today).lte("due_date", futuro),
+        query("accounts_payable").eq("status", "pending").gte("due_date", today).lte("due_date", futuro),
+        query("bank_accounts").eq("active", true),
       ]);
       const entradas = (recFut.data || []).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0);
       const saidas = (pagFut.data || []).reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0);
