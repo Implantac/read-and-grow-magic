@@ -4,7 +4,7 @@ export interface User {
   name: string;
   email: string;
   avatar?: string;
-  role: 'admin' | 'manager' | 'operator' | 'viewer';
+  role: 'admin' | 'manager' | 'operator' | 'viewer' | 'diretor' | 'financeiro' | 'fiscal' | 'contabil' | 'compras' | 'producao' | 'logistica' | 'comercial' | 'loja' | 'franquia';
   permissions: string[];
 }
 
