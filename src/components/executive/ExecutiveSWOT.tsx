@@ -27,8 +27,12 @@ const SWOT_FILTERS_KEY = 'executive-swot-filters';
 
 export function ExecutiveSWOT({ data, isLoading }: Props) {
   const [activeFilters, setActiveFilters] = useState<string[]>(() => {
-    const saved = localStorage.getItem(SWOT_FILTERS_KEY);
-    return saved ? JSON.parse(saved) : ['strengths', 'weaknesses', 'opportunities', 'threats'];
+    try {
+      const saved = localStorage.getItem(SWOT_FILTERS_KEY);
+      return saved ? JSON.parse(saved) : ['strengths', 'weaknesses', 'opportunities', 'threats'];
+    } catch {
+      return ['strengths', 'weaknesses', 'opportunities', 'threats'];
+    }
   });
   const [showSyncBadge, setShowSyncBadge] = useState(false);
 

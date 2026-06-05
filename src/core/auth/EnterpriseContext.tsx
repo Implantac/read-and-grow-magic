@@ -49,7 +49,8 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   const loadActiveTenant = async () => {
     setIsLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
       if (user) {
         const { data: company } = await supabase
           .from('companies')

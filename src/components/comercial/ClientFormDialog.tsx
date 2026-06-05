@@ -161,7 +161,7 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
     if (client) {
       updateClient.mutate({ id: client.id, ...payload }, { onSuccess: () => onOpenChange(false) });
     } else {
-      const code = `CLI${String(totalClients + 1).padStart(3, '0')}`;
+      const code = `CLI${String(totalClients + 1).padStart(3, '0')}-${Date.now().toString().slice(-4)}`;
       createClient.mutate({ ...payload, code }, { onSuccess: () => onOpenChange(false) });
     }
   };

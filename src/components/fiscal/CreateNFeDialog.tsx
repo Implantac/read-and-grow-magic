@@ -85,10 +85,13 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
   const [clientUF, setClientUF] = useState('');
   
   const clientsQuery = useClients();
-  const taxRulesQuery = useFiscalTaxRules('SP', clientUF || 'SP'); // Origin fix as SP for now
+  const taxRulesQuery = useFiscalTaxRules('SP', clientUF || 'SP'); // Origin fixed as SP for now
   const productsQuery = useProducts();
-  const clients = clientsQuery.data || [];
-  const products = productsQuery.data || [];
+  
+  // Memoize data to avoid unnecessary re-renders in effects
+  const clients = useMemo(() => clientsQuery.data || [], [clientsQuery.data]);
+  const products = useMemo(() => productsQuery.data || [], [productsQuery.data]);
+  const taxRules = useMemo(() => taxRulesQuery.data || [], [taxRulesQuery.data]);
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
 
