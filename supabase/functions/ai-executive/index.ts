@@ -781,27 +781,27 @@ async function executeConsultaComercial(supabase: any, args: any, user_id?: stri
       return { clientes_ativos: clients.filter((c: any) => c.status === "active").length, total_clientes: clients.length, pedidos_recentes_30d: orders.filter((o: any) => new Date(o.created_at) > new Date(Date.now() - 30 * 86400000)).length, valor_pipeline: funnel.filter((f: any) => f.status === "active" || !f.status).reduce((s: number, f: any) => s + (f.value || 0), 0), oportunidades_ativas: funnel.filter((f: any) => f.status === "active" || !f.status).length };
     }
     case "pedidos_recentes": {
-      const { data } = await supabase.from("orders").select("id, number, client_name, total, status, created_at, priority").order("created_at", { ascending: false }).limit(limite);
+      const { data } = await query("orders").order("created_at", { ascending: false }).limit(limite);
       return { pedidos: data || [] };
     }
     case "top_clientes": {
-      const { data } = await supabase.from("clients").select("id, name, total_purchases, avg_ticket, abc_classification, last_purchase_date").order("total_purchases", { ascending: false }).limit(limite);
+      const { data } = await query("clients").order("total_purchases", { ascending: false }).limit(limite);
       return { top_clientes: data || [] };
     }
     case "clientes_risco": {
       const cutoff = new Date(Date.now() - 60 * 86400000).toISOString();
-      const { data } = await supabase.from("clients").select("id, name, last_purchase_date, total_purchases, avg_ticket").eq("status", "active").or(`last_purchase_date.lt.${cutoff},last_purchase_date.is.null`).limit(limite);
+      const { data } = await query("clients").eq("status", "active").or(`last_purchase_date.lt.${cutoff},last_purchase_date.is.null`).limit(limite);
       return { clientes_em_risco: data || [] };
     }
     case "metas": {
-      const { data } = await supabase.from("sales_targets").select("id, sales_rep_id, target_value, achieved_value, period, target_type").limit(50);
+      const { data } = await query("sales_targets").limit(50);
       const targets = data || [];
       const totalMeta = targets.reduce((s: number, t: any) => s + (t.target_value || 0), 0);
       const totalAtingido = targets.reduce((s: number, t: any) => s + (t.achieved_value || 0), 0);
       return { total_meta: totalMeta, total_atingido: totalAtingido, percentual: totalMeta > 0 ? +((totalAtingido / totalMeta) * 100).toFixed(1) : 0 };
     }
     case "funil": {
-      const { data } = await supabase.from("sales_funnel").select("id, client_name, stage, value, probability, status").eq("status", "active").order("value", { ascending: false }).limit(limite);
+      const { data } = await query("sales_funnel").eq("status", "active").order("value", { ascending: false }).limit(limite);
       return { oportunidades: data || [] };
     }
     case "vendedores": {
