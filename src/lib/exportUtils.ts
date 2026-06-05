@@ -130,8 +130,11 @@ function triggerDownload(blob: Blob, filename: string): void {
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  const body = document.body || document.getElementsByTagName('body')[0];
+  if (body) {
+    body.appendChild(a);
+    a.click();
+    body.removeChild(a);
+  }
   URL.revokeObjectURL(url);
 }
