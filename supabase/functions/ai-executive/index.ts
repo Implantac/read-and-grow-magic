@@ -1072,7 +1072,7 @@ async function executeConsultaFiscal(supabase: any, args: any) {
 }
 
 // TOOL_EXECUTORS are called with (supabase, args, user_id) — see tool call loop below
-const TOOL_EXECUTORS: Record<string, (supabase: any, args: any, user_id?: string) => Promise<any>> = {
+const TOOL_EXECUTORS: Record<string, (supabase: any, args: any, user_id?: string, company_id?: string) => Promise<any>> = {
   analise_historica: async (supabase, args) => {
     // Busca agregados históricos de dois períodos para comparação
     const { periodo_a, periodo_b } = args;
