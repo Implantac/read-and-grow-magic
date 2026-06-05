@@ -28,7 +28,7 @@ export function useSettleAccount() {
       const { data, error } = await supabase.rpc('settle_account', {
         _source_type: params.source_type,
         _source_id: params.source_id,
-        _splits: params.splits as any,
+        _splits: params.splits,
         _settlement_date: params.settlement_date ?? new Date().toISOString().slice(0, 10),
         _interest: params.interest ?? 0,
         _penalty: params.penalty ?? 0,
@@ -106,8 +106,7 @@ export function usePaymentSplits(settlementId?: string) {
     queryKey: ['financial_payment_split', settlementId],
     enabled: !!settlementId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('financial_payment_split')
+      const { data, error } = await (supabase.from as any)('financial_payment_split')
         .select('*')
         .eq('settlement_id', settlementId!)
         .order('created_at');

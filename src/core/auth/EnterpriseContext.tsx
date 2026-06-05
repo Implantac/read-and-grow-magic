@@ -57,16 +57,14 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       if (userError) throw userError;
       if (user) {
         // Load hierarchy via the new view
-        const { data: hierarchy, error: hError } = await supabase
-          .from('vw_organizational_hierarchy' as any)
+        const { data: hierarchy, error: hError } = await (supabase.from as any)('vw_organizational_hierarchy')
           .select('*')
           .limit(1)
           .single();
         
         if (hierarchy) {
           const h = hierarchy as any;
-          const { data: company } = await supabase
-            .from('companies')
+          const { data: company } = await (supabase.from as any)('companies')
             .select('*')
             .eq('id', h.unit_id)
             .single();
@@ -95,7 +93,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   };
 
   const setCompany = async (id: string) => {
-    const { data } = await supabase.from('companies').select('*').eq('id', id).single();
+    const { data } = await (supabase.from as any)('companies').select('*').eq('id', id).single();
     if (data) {
       setCurrentCompany(data);
       setSegment((data.segment as any) || 'general');
@@ -108,8 +106,8 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
 
   return (
     <EnterpriseContext.Provider value={{ 
-      currentTenant,
-      currentGroup,
+      currentTenant: currentTenant || { id: '00000000-0000-0000-0000-000000000000', name: 'Tenant Padrão' },
+      currentGroup: currentGroup || { id: '00000000-0000-0000-0000-000000000000', name: 'Grupo Padrão' },
       currentCompany, 
       currentBranch, 
       segment, 

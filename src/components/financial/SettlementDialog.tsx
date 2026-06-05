@@ -213,13 +213,18 @@ export function SettlementDialog({ open, onOpenChange, target, onSettled }: Prop
                   );
                 })}
               </div>
-              <div className="grid gap-2 md:grid-cols-[1fr_1fr_auto_auto]">
+              <div className="grid gap-2 md:grid-cols-[1.5fr_1fr_auto_auto]">
                 <Input
                   inputMode="decimal"
                   placeholder="Valor"
-                  value={String(split.amount)}
-                  onChange={(e) => updateSplit(idx, { amount: parseFloat(e.target.value.replace(',', '.')) || 0 })}
+                  value={split.amount === 0 ? '' : split.amount}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(',', '.');
+                    const num = val === '' ? 0 : parseFloat(val);
+                    updateSplit(idx, { amount: isNaN(num) ? 0 : num });
+                  }}
                 />
+
                 <Select
                   value={split.bank_account_id ?? ''}
                   onValueChange={(v) => updateSplit(idx, { bank_account_id: v || null })}

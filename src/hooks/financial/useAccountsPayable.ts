@@ -11,7 +11,7 @@ export function useAccountsPayable() {
 export function useCreateAccountPayable() {
   const queryClient = useQueryClient();
   return useSupabaseMutation(
-    (account: Partial<AccountPayable> & { description: string; supplier: string; due_date: string; amount: number }) => 
+    (account: Partial<AccountPayable>) => 
       financialService.createPayable(account),
     {
       onSuccess: () => {

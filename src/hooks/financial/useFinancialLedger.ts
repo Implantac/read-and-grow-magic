@@ -20,14 +20,14 @@ export interface LedgerEntryRow {
   created_at: string;
 }
 
-export function useFinancialLedger(filters?: { from?: string; to?: string; bankAccountId?: string }) {
+export function useFinancialLedger(filters?: { from?: string; to?: string; bank_account_id?: string }) {
   return useQuery({
     queryKey: ['financial_ledger', filters],
     queryFn: async () => {
       let q = supabase.from('financial_ledger').select('*').order('entry_date', { ascending: false });
       if (filters?.from) q = q.gte('entry_date', filters.from);
       if (filters?.to) q = q.lte('entry_date', filters.to);
-      if (filters?.bankAccountId) q = q.eq('bank_account_id', filters.bankAccountId);
+      if (filters?.bank_account_id) q = q.eq('bank_account_id', filters.bank_account_id);
       const { data, error } = await q.limit(1000);
       if (error) throw error;
       return data as LedgerEntryRow[];

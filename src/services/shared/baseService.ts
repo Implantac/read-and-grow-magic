@@ -1,14 +1,9 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Database } from '@/integrations/supabase/types';
-
-type PublicSchema = Database['public'];
-type TableName = keyof PublicSchema['Tables'];
 
 /**
  * Base Service with generic CRUD operations.
- * Use 'any' casts internally to avoid TS excessive complexity with large Supabase schemas.
  */
-export class BaseService<T extends TableName> {
+export class BaseService<T extends string> {
   constructor(protected tableName: T) {}
 
   async getAll(options: { 
@@ -19,13 +14,11 @@ export class BaseService<T extends TableName> {
   } = {}) {
     const { orderBy = 'created_at', ascending = false, limit, filters } = options;
     
-    let query = supabase
-      .from(this.tableName)
-      .select('*');
+    let query = (supabase.from as any)(this.tableName).select('*');
 
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined) {
+        if (value !== undefined && value !== null) {
           query = query.eq(key as any, value);
         }
       });
@@ -38,26 +31,23 @@ export class BaseService<T extends TableName> {
     }
 
     const { data, error } = await query;
-
     if (error) throw error;
-    return data as any[];
+    return (data || []) as any[];
   }
 
   async getById(id: string) {
-    const { data, error } = await supabase
-      .from(this.tableName)
+    const { data, error } = await (supabase.from as any)(this.tableName)
       .select('*')
       .eq('id' as any, id)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     return data as any;
   }
 
   async create(item: any) {
-    const { data, error } = await supabase
-      .from(this.tableName)
-      .insert(item)
+    const { data, error } = await (supabase.from as any)(this.tableName)
+      .insert(item as any)
       .select()
       .single();
 
@@ -66,9 +56,8 @@ export class BaseService<T extends TableName> {
   }
 
   async update(id: string, updates: any) {
-    const { data, error } = await supabase
-      .from(this.tableName)
-      .update({ ...updates, updated_at: new Date().toISOString() })
+    const { data, error } = await (supabase.from as any)(this.tableName)
+      .update({ ...updates, updated_at: new Date().toISOString() } as any)
       .eq('id' as any, id)
       .select()
       .single();
@@ -78,11 +67,13 @@ export class BaseService<T extends TableName> {
   }
 
   async delete(id: string) {
-    const { error } = await supabase
-      .from(this.tableName)
+    const { error } = await (supabase.from as any)(this.tableName)
       .delete()
       .eq('id' as any, id);
 
     if (error) throw error;
   }
 }
+
+
+

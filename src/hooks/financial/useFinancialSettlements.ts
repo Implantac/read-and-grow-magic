@@ -26,7 +26,7 @@ export function useSettlements(filters?: { sourceType?: string; sourceId?: strin
   return useQuery({
     queryKey: ['financial_settlements', filters],
     queryFn: async () => {
-      let q = supabase.from('financial_settlements').select('*').order('settlement_date', { ascending: false });
+      let q = (supabase.from as any)('financial_settlements').select('*').order('settlement_date', { ascending: false });
       if (filters?.sourceType) q = q.eq('source_type', filters.sourceType);
       if (filters?.sourceId) q = q.eq('source_id', filters.sourceId);
       const { data, error } = await q.limit(500);
@@ -111,7 +111,7 @@ export function useBankTransfers() {
   return useQuery({
     queryKey: ['bank_transfers'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('bank_transfers').select('*').order('transfer_date', { ascending: false }).limit(100);
+      const { data, error } = await (supabase.from as any)('bank_transfers').select('*').order('transfer_date', { ascending: false }).limit(100);
       if (error) throw error;
       return data;
     },
@@ -123,8 +123,7 @@ export function useAdvanceTransactions(advanceId?: string) {
     queryKey: ['advance_transactions', advanceId],
     enabled: !!advanceId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('financial_advance_transactions')
+      const { data, error } = await (supabase.from as any)('financial_advance_transactions')
         .select('*')
         .eq('advance_id', advanceId!)
         .order('created_at', { ascending: false });
@@ -138,8 +137,7 @@ export function useFinancialOperationsLog(limit = 100) {
   return useQuery({
     queryKey: ['financial_operations_log', limit],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('financial_operations_log')
+      const { data, error } = await (supabase.from as any)('financial_operations_log')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(limit);
