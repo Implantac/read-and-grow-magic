@@ -922,7 +922,9 @@ async function executeAcao(supabase: any, args: any, user_id?: string, company_i
     case "registrar_pagamento": {
       if (!params.id) return { erro: "ID da conta não informado" };
       const table = params.tipo === "receber" ? "accounts_receivable" : "accounts_payable";
-      const { error } = await supabase.from(table).update({ status: "paid", payment_date: new Date().toISOString().split("T")[0], paid_amount: params.valor }).eq("id", params.id);
+      let q = supabase.from(table).update({ status: "paid", payment_date: new Date().toISOString().split("T")[0], paid_amount: params.valor }).eq("id", params.id);
+      if (company_id) q = q.eq("company_id", company_id);
+      const { error } = await q;
       if (error) return { erro: error.message };
       await logAction("registrar_pagamento", "sucesso");
       return { status: "sucesso", mensagem: "✅ Pagamento registrado com sucesso." };
@@ -930,13 +932,16 @@ async function executeAcao(supabase: any, args: any, user_id?: string, company_i
     case "adiar_vencimento": {
       if (!params.id || !params.nova_data) return { erro: "ID e nova data são obrigatórios" };
       const table = params.tipo === "receber" ? "accounts_receivable" : "accounts_payable";
-      const { error } = await supabase.from(table).update({ due_date: params.nova_data }).eq("id", params.id);
+      let q = supabase.from(table).update({ due_date: params.nova_data }).eq("id", params.id);
+      if (company_id) q = q.eq("company_id", company_id);
+      const { error } = await q;
       if (error) return { erro: error.message };
       await logAction("adiar_vencimento", "sucesso");
       return { status: "sucesso", mensagem: `✅ Vencimento adiado para ${params.nova_data}.` };
     }
     case "criar_conta_pagar": {
       const { error } = await supabase.from("accounts_payable").insert({
+        company_id,
         description: params.descricao || "Conta via IA",
         supplier: params.fornecedor || "N/A",
         amount: params.valor || 0,
@@ -950,6 +955,7 @@ async function executeAcao(supabase: any, args: any, user_id?: string, company_i
     }
     case "criar_conta_receber": {
       const { error } = await supabase.from("accounts_receivable").insert({
+        company_id,
         description: params.descricao || "Conta via IA",
         client_name: params.cliente || "N/A",
         amount: params.valor || 0,
@@ -963,33 +969,44 @@ async function executeAcao(supabase: any, args: any, user_id?: string, company_i
     }
     case "alterar_status_pedido": {
       if (!params.id || !params.novo_status) return { erro: "ID e novo status obrigatórios" };
-      const { error } = await supabase.from("orders").update({ status: params.novo_status }).eq("id", params.id);
+      let q = supabase.from("orders").update({ status: params.novo_status }).eq("id", params.id);
+      if (company_id) q = q.eq("company_id", company_id);
+      const { error } = await q;
       if (error) return { erro: error.message };
       await logAction("alterar_status_pedido", "sucesso");
       return { status: "sucesso", mensagem: `✅ Pedido atualizado para "${params.novo_status}".` };
     }
     case "alterar_status_op": {
       if (!params.id || !params.novo_status) return { erro: "ID e novo status obrigatórios" };
-      const { error } = await supabase.from("production_orders").update({ status: params.novo_status }).eq("id", params.id);
+      let q = supabase.from("production_orders").update({ status: params.novo_status }).eq("id", params.id);
+      if (company_id) q = q.eq("company_id", company_id);
+      const { error } = await q;
       if (error) return { erro: error.message };
       await logAction("alterar_status_op", "sucesso");
       return { status: "sucesso", mensagem: `✅ OP atualizada para "${params.novo_status}".` };
     }
     case "priorizar_op": {
       if (!params.id) return { erro: "ID da OP não informado" };
-      const { error } = await supabase.from("production_orders").update({ priority: params.prioridade || "urgent" }).eq("id", params.id);
+      let q = supabase.from("production_orders").update({ priority: params.prioridade || "urgent" }).eq("id", params.id);
+      if (company_id) q = q.eq("company_id", company_id);
+      const { error } = await q;
       if (error) return { erro: error.message };
       await logAction("priorizar_op", "sucesso");
       return { status: "sucesso", mensagem: `✅ OP priorizada como "${params.prioridade || "urgent"}".` };
     }
     case "ajustar_estoque": {
       if (!params.product_id || params.quantidade == null) return { erro: "ID do produto e quantidade obrigatórios" };
-      const { data: prod } = await supabase.from("products").select("id, name, code, stock_current").eq("id", params.product_id).single();
+      let q = supabase.from("products").select("id, name, code, stock_current").eq("id", params.product_id);
+      if (company_id) q = q.eq("company_id", company_id);
+      const { data: prod } = await q.single();
       if (!prod) return { erro: "Produto não encontrado" };
       const newStock = (prod.stock_current || 0) + (params.quantidade || 0);
-      const { error } = await supabase.from("products").update({ stock_current: newStock }).eq("id", params.product_id);
+      let qu = supabase.from("products").update({ stock_current: newStock }).eq("id", params.product_id);
+      if (company_id) qu = qu.eq("company_id", company_id);
+      const { error } = await qu;
       if (error) return { erro: error.message };
       await supabase.from("stock_movements").insert({
+        company_id,
         document_number: `IA-ADJ-${Date.now()}`,
         product_id: prod.id,
         product_code: prod.code,
@@ -1001,6 +1018,11 @@ async function executeAcao(supabase: any, args: any, user_id?: string, company_i
         source: "erp",
         notes: params.motivo || "Ajuste via IA Executiva",
       });
+      await logAction("ajustar_estoque", "sucesso");
+      return { status: "sucesso", mensagem: `✅ Estoque de "${prod.name}" ajustado: ${prod.stock_current} → ${newStock} unidades.` };
+    }
+    default: return { erro: "Ação não implementada" };
+  }
       await logAction("ajustar_estoque", "sucesso");
       return { status: "sucesso", mensagem: `✅ Estoque de "${prod.name}" ajustado: ${prod.stock_current} → ${newStock} unidades.` };
     }
