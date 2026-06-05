@@ -1,39 +1,110 @@
+import { supabase } from '@/integrations/supabase/client';
 import { BaseService } from '../shared/baseService';
+import type { FinancialLedgerEntry, AccountPayable, AccountReceivable, PaymentRecord } from '@/types/financial';
 
-class FinancialService {
-  private receivablesBase = new BaseService('accounts_receivable');
-  private payablesBase = new BaseService('accounts_payable');
-
-  async getReceivables() {
-    return this.receivablesBase.getAll({ orderBy: 'due_date', ascending: true });
+class FinancialService extends BaseService<'financial_ledger'> {
+  constructor() {
+    super('financial_ledger');
   }
 
-  async createReceivable(account: any) {
-    return this.receivablesBase.create(account);
+  // Receivables
+  async getReceivables(): Promise<AccountReceivable[]> {
+    const { data, error } = await supabase
+      .from('accounts_receivable')
+      .select('*')
+      .order('due_date', { ascending: true });
+    if (error) throw error;
+    return data as AccountReceivable[];
   }
 
-  async updateReceivable(id: string, updates: any) {
-    return this.receivablesBase.update(id, updates);
+  async createReceivable(account: Partial<AccountReceivable>): Promise<AccountReceivable> {
+    const { data, error } = await supabase
+      .from('accounts_receivable')
+      .insert(account)
+      .select()
+      .single();
+    if (error) throw error;
+    return data as AccountReceivable;
   }
 
-  async deleteReceivable(id: string) {
-    return this.receivablesBase.delete(id);
+  async updateReceivable(id: string, updates: Partial<AccountReceivable>): Promise<AccountReceivable> {
+    const { data, error } = await supabase
+      .from('accounts_receivable')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data as AccountReceivable;
   }
 
-  async getPayables() {
-    return this.payablesBase.getAll({ orderBy: 'due_date', ascending: true });
+  async deleteReceivable(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('accounts_receivable')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
   }
 
-  async createPayable(account: any) {
-    return this.payablesBase.create(account);
+  // Payables
+  async getPayables(): Promise<AccountPayable[]> {
+    const { data, error } = await supabase
+      .from('accounts_payable')
+      .select('*')
+      .order('due_date', { ascending: true });
+    if (error) throw error;
+    return data as AccountPayable[];
   }
 
-  async updatePayable(id: string, updates: any) {
-    return this.payablesBase.update(id, updates);
+  async createPayable(account: Partial<AccountPayable>): Promise<AccountPayable> {
+    const { data, error } = await supabase
+      .from('accounts_payable')
+      .insert(account)
+      .select()
+      .single();
+    if (error) throw error;
+    return data as AccountPayable;
   }
 
-  async deletePayable(id: string) {
-    return this.payablesBase.delete(id);
+  async updatePayable(id: string, updates: Partial<AccountPayable>): Promise<AccountPayable> {
+    const { data, error } = await supabase
+      .from('accounts_payable')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+    if (error) throw error;
+    return data as AccountPayable;
+  }
+
+  async deletePayable(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('accounts_payable')
+      .delete()
+      .eq('id', id);
+    if (error) throw error;
+  }
+
+  // Ledger
+  async getLedger(filters?: { from?: string; to?: string; bankAccountId?: string }): Promise<FinancialLedgerEntry[]> {
+    let q = supabase.from('financial_ledger').select('*').order('entry_date', { ascending: false });
+    if (filters?.from) q = q.gte('entry_date', filters.from);
+    if (filters?.to) q = q.lte('entry_date', filters.to);
+    if (filters?.bankAccountId) q = q.eq('bank_account_id', filters.bankAccountId);
+    const { data, error } = await q.limit(1000);
+    if (error) throw error;
+    return data as FinancialLedgerEntry[];
+  }
+
+  // Payments
+  async createPayment(payment: Partial<PaymentRecord>): Promise<PaymentRecord> {
+    const { data, error } = await supabase
+      .from('payment_records')
+      .insert(payment)
+      .select()
+      .single();
+    if (error) throw error;
+    return data as PaymentRecord;
   }
 }
 

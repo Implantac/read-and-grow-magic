@@ -108,8 +108,8 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
 
   return (
     <EnterpriseContext.Provider value={{ 
-      currentTenant,
-      currentGroup,
+      currentTenant: currentTenant || { id: '00000000-0000-0000-0000-000000000000', name: 'Tenant Padrão' },
+      currentGroup: currentGroup || { id: '00000000-0000-0000-0000-000000000000', name: 'Grupo Padrão' },
       currentCompany, 
       currentBranch, 
       segment, 

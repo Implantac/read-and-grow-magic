@@ -8,13 +8,17 @@ export const bankAccountsService = {
       .select('*')
       .order('name');
     if (error) throw error;
-    return data as BankAccountRow[];
+    return (data || []) as BankAccountRow[];
   },
 
   async create(account: Omit<BankAccountRow, 'id' | 'created_at' | 'updated_at' | 'balance' | 'active'>) {
-    const { data, error } = await supabase.from('bank_accounts').insert([account]).select().single();
+    const { data, error } = await supabase
+      .from('bank_accounts')
+      .insert([account])
+      .select()
+      .single();
     if (error) throw error;
-    return data;
+    return data as BankAccountRow;
   },
 
   async update(id: string, updates: Partial<BankAccountRow>) {
@@ -25,6 +29,6 @@ export const bankAccountsService = {
       .select()
       .single();
     if (error) throw error;
-    return data;
+    return data as BankAccountRow;
   }
 };

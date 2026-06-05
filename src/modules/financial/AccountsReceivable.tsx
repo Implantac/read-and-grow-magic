@@ -180,7 +180,7 @@ export default function AccountsReceivable() {
     }
 
     // O trigger process_payment_record já atualiza accounts_receivable + financial_ledger automaticamente.
-    // Não duplicar UPDATE no cliente — isso causava paid_amount em dobro.
+
     createPayment.mutate({
       receivable_id: selectedAccount.id,
       payable_id: null,
