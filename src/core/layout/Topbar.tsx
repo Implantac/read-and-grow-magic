@@ -34,8 +34,11 @@ export function Topbar() {
   } = useAppStore();
 
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
-  const { data: brainPending = [] } = useBrainDecisions('pending');
+  const { data: brainPendingData } = useBrainDecisions('pending');
+  const brainPending = Array.isArray(brainPendingData) ? brainPendingData : [];
   const brainCritical = brainPending.filter((d) => d.impact_level === 'critical').length;
+
+
 
   const handleLogout = async () => {
     await signOut();
@@ -77,7 +80,7 @@ export function Topbar() {
           <DropdownMenuContent align="start" className="w-64 bg-sidebar border-sidebar-border">
             <DropdownMenuLabel className="text-sidebar-foreground/60 text-xs uppercase tracking-wider">Empresas</DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-sidebar-border" />
-            {companies.map((company: any) => (
+            {(Array.isArray(companies) ? companies : []).map((company: any) => (
               <DropdownMenuItem
                 key={company.id}
                 onClick={() => setActiveCompany(company)}
@@ -232,6 +235,8 @@ export function Topbar() {
           onClick={() => navigate('/executive/brain')}
           title={brainPending.length > 0 ? `${brainPending.length} decisões do Cérebro pendentes` : 'Cérebro Nativo'}
           className="relative h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
+
+
         >
           <Brain className="h-4 w-4" />
           {brainPending.length > 0 && (
