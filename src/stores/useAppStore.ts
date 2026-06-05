@@ -60,8 +60,11 @@ export const useAppStore = create<AppState>()(
       
       setActiveCompany: (company) => set({ 
         activeCompany: company,
-        activeBranch: company?.branches?.[0] || null,
+        activeBranch: (company && Array.isArray(company.branches) && company.branches.length > 0) 
+          ? company.branches[0] 
+          : null,
       }),
+
       
       setActiveBranch: (branch) => set({ activeBranch: branch }),
       
