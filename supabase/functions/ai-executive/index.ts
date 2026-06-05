@@ -1314,7 +1314,7 @@ ${patternInsights}${realDataSnapshot}`, supabase, 'ai-executive-chat', user_id);
       let toolResult: any;
       try {
         const args = typeof fn.arguments === "string" ? JSON.parse(fn.arguments) : fn.arguments;
-        toolResult = executor ? await executor(supabase, args, user_id) : { erro: `Função ${fn.name} não encontrada` };
+        toolResult = executor ? await executor(supabase, args, user_id, company_id) : { erro: `Função ${fn.name} não encontrada` };
       } catch (e) {
         toolResult = { erro: `Erro: ${e.message}` };
       }
