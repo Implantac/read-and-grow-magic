@@ -1070,15 +1070,16 @@ async function executeConsultaFiscal(supabase: any, args: any, user_id?: string,
       };
     }
     case "nfe_recentes": {
-      const { data } = await supabase.from("nfe").select("id, number, series, status, total_amount, total_tax, issue_date, customer_name, access_key").order("issue_date", { ascending: false }).limit(20);
+    case "nfe_recentes": {
+      const { data } = await query("nfe").order("issue_date", { ascending: false }).limit(20);
       return { nfe_recentes: data || [] };
     }
     case "nfe_rejeitadas": {
-      const { data } = await supabase.from("nfe").select("id, number, series, status, customer_name, issue_date, rejection_reason").in("status", ["rejected", "rejeitada"]).order("issue_date", { ascending: false }).limit(20);
+      const { data } = await query("nfe").in("status", ["rejected", "rejeitada"]).order("issue_date", { ascending: false }).limit(20);
       return { nfe_rejeitadas: data || [] };
     }
     case "impostos_periodo": {
-      const { data } = await supabase.from("nfe").select("issue_date, total_tax, total_amount").gte("issue_date", since).limit(1000);
+      const { data } = await query("nfe").gte("issue_date", since).limit(1000);
       const items = data || [];
       const byMonth: Record<string, { tax: number; amount: number }> = {};
       items.forEach((n: any) => {
