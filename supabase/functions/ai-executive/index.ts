@@ -1263,13 +1263,19 @@ async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: str
   // Garante que o modelo SAIBA quais módulos têm dados antes de responder.
   let realDataSnapshot = "";
   try {
+    const query = (table: string) => {
+      let q = supabase.from(table).select("id", { count: "exact", head: true });
+      if (company_id) q = q.eq("company_id", company_id);
+      return q;
+    };
+
     const [ordC, recC, payC, prodC, cliC, opC] = await Promise.all([
-      supabase.from("orders").select("id", { count: "exact", head: true }),
-      supabase.from("accounts_receivable").select("id", { count: "exact", head: true }),
-      supabase.from("accounts_payable").select("id", { count: "exact", head: true }),
-      supabase.from("products").select("id", { count: "exact", head: true }),
-      supabase.from("clients").select("id", { count: "exact", head: true }),
-      supabase.from("production_orders").select("id", { count: "exact", head: true }),
+      query("orders"),
+      query("accounts_receivable"),
+      query("accounts_payable"),
+      query("products"),
+      query("clients"),
+      query("production_orders"),
     ]);
     const counts = {
       pedidos: ordC.count ?? 0,
