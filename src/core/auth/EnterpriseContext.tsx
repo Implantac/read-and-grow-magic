@@ -4,6 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 export type Segment = 'textile' | 'food_factory' | 'pharma' | 'distribution' | 'services' | 'retail' | 'general' | 'fio' | 'tecelagem' | 'animal_feed' | 'industry' | 'wholesaler' | 'retail_chain' | 'franchise' | 'holding' | 'apparel';
 
 interface EnterpriseContextType {
+  currentTenant: any;
+  currentGroup: any;
   currentCompany: any;
   currentBranch: any;
   segment: Segment;
@@ -22,6 +24,8 @@ interface EnterpriseContextType {
 const EnterpriseContext = createContext<EnterpriseContextType | undefined>(undefined);
 
 export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) => {
+  const [currentTenant, setCurrentTenant] = useState<any>(null);
+  const [currentGroup, setCurrentGroup] = useState<any>(null);
   const [currentCompany, setCurrentCompany] = useState<any>(null);
   const [currentBranch, setCurrentBranch] = useState<any>(null);
   const [segment, setSegment] = useState<Segment>('general');
@@ -52,19 +56,31 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
       if (user) {
-        const { data: company } = await supabase
-          .from('companies')
+        // Load hierarchy via the new view
+        const { data: hierarchy, error: hError } = await supabase
+          .from('vw_organizational_hierarchy' as any)
           .select('*')
           .limit(1)
           .single();
         
-        if (company) {
-          setCurrentCompany(company);
-          setSegment((company.segment as any) || 'general');
-          setSubSegment(company.sub_segment || '');
-          setCompanySize(company.company_size || 'Pequeno');
-          setTaxRegime((company.tax_regime as string) || 'Simples Nacional');
-          setOperationTypes((company.operation_types as any[]) || []);
+        if (hierarchy) {
+          const h = hierarchy as any;
+          const { data: company } = await supabase
+            .from('companies')
+            .select('*')
+            .eq('id', h.unit_id)
+            .single();
+
+          if (company) {
+            setCurrentCompany(company);
+            setCurrentTenant({ id: h.tenant_id, name: h.tenant_name });
+            setCurrentGroup({ id: h.enterprise_group_id, name: h.group_name });
+            setSegment((company.segment as any) || 'general');
+            setSubSegment(company.sub_segment || '');
+            setCompanySize(company.company_size || 'Pequeno');
+            setTaxRegime((company.tax_regime as string) || 'Simples Nacional');
+            setOperationTypes((company.operation_types as any[]) || []);
+          }
         }
       }
     } catch (error: any) {
@@ -92,6 +108,8 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
 
   return (
     <EnterpriseContext.Provider value={{ 
+      currentTenant,
+      currentGroup,
       currentCompany, 
       currentBranch, 
       segment, 

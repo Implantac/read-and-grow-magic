@@ -2674,6 +2674,7 @@ export type Database = {
           status: string
           sub_segment: string | null
           tax_regime: Database["public"]["Enums"]["tax_regime"] | null
+          tenant_id: string | null
           tier: Database["public"]["Enums"]["enterprise_tier"] | null
           trade_name: string | null
           type: Database["public"]["Enums"]["org_type"] | null
@@ -2707,6 +2708,7 @@ export type Database = {
           status?: string
           sub_segment?: string | null
           tax_regime?: Database["public"]["Enums"]["tax_regime"] | null
+          tenant_id?: string | null
           tier?: Database["public"]["Enums"]["enterprise_tier"] | null
           trade_name?: string | null
           type?: Database["public"]["Enums"]["org_type"] | null
@@ -2740,6 +2742,7 @@ export type Database = {
           status?: string
           sub_segment?: string | null
           tax_regime?: Database["public"]["Enums"]["tax_regime"] | null
+          tenant_id?: string | null
           tier?: Database["public"]["Enums"]["enterprise_tier"] | null
           trade_name?: string | null
           type?: Database["public"]["Enums"]["org_type"] | null
@@ -2772,6 +2775,13 @@ export type Database = {
             columns: ["segment_id"]
             isOneToOne: false
             referencedRelation: "enterprise_segments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "companies_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
             referencedColumns: ["id"]
           },
         ]
@@ -3825,20 +3835,31 @@ export type Database = {
           description: string | null
           id: string
           name: string
+          tenant_id: string | null
         }
         Insert: {
           created_at?: string | null
           description?: string | null
           id?: string
           name: string
+          tenant_id?: string | null
         }
         Update: {
           created_at?: string | null
           description?: string | null
           id?: string
           name?: string
+          tenant_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "enterprise_groups_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       enterprise_segments: {
         Row: {
@@ -13183,6 +13204,36 @@ export type Database = {
         }
         Relationships: []
       }
+      tenants: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          settings: Json | null
+          slug: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          settings?: Json | null
+          slug?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          settings?: Json | null
+          slug?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       textile_weaving_orders: {
         Row: {
           company_id: string
@@ -15207,6 +15258,22 @@ export type Database = {
         }
         Relationships: []
       }
+      vw_organizational_hierarchy: {
+        Row: {
+          company_id: string | null
+          depth: number | null
+          enterprise_group_id: string | null
+          group_id: string | null
+          group_name: string | null
+          level: string | null
+          parent_id: string | null
+          tenant_id: string | null
+          tenant_name: string | null
+          unit_id: string | null
+          unit_name: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       auto_match_bank_transactions: {
@@ -15333,6 +15400,12 @@ export type Database = {
           inflow_real: number
           outflow_pessimistic: number
           outflow_real: number
+        }[]
+      }
+      get_consolidated_company_ids: {
+        Args: { _company_id: string }
+        Returns: {
+          id: string
         }[]
       }
       get_dre: {
