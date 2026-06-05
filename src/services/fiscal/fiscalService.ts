@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
-import { NFe, CTe, MDFe, NFCe, TaxRule } from '@/types/fiscal';
+import { NFe, NFCe } from '@/types/fiscal';
+
 
 export class FiscalService {
   private readonly supabase = supabase;
