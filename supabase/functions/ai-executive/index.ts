@@ -1829,9 +1829,9 @@ async function handleExecuteDecisions(supabase: any, body: any, corsHeaders: any
 
 // ─── AutoPilotService ───────────────────────────────────────────
 // Orquestração CRON: contexto → forecast → riscos → decisões → registro
-export async function handleAutoPilotRun(supabase: any, _lovableKey: string, corsHeaders: any) {
+export async function handleAutoPilotRun(supabase: any, lovableKey: string, corsHeaders: any, companyId?: string) {
   try {
-    const data = await fetchAllData(supabase);
+    const data = await fetchAllData(supabase, companyId);
 
     // Guard: AutoPilot só roda com dados reais — evita gerar alertas/ações fictícias
     if (!checkHasRealData(data)) {
