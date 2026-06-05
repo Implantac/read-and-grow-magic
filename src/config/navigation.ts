@@ -82,12 +82,12 @@ export const navigationSections: NavSection[] = [
       },
       {
         title: '🧠 IA Executiva',
-        href: '/diretoria/executive',
+        href: '/executive/executive',
         icon: 'Brain',
       },
       {
         title: '🧠 Cérebro Nativo',
-        href: '/diretoria/brain',
+        href: '/executive/brain',
         icon: 'Sparkles',
       },
     ],
