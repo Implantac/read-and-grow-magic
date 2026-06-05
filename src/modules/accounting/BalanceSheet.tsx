@@ -9,7 +9,7 @@ import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
 import { EquityEvolutionChart } from '@/components/contabilidade/EquityEvolutionChart';
 import { FinancialIndicatorsPanel } from '@/components/contabilidade/FinancialIndicatorsPanel';
-import { useBalanceSheet } from '@/hooks/accounting/useBalanceSheet';
+import { useAccounting } from '@/hooks/accounting/useAccounting';
 import { formatBRL } from '@/lib/formatters';
 import {
   Table,
@@ -30,7 +30,7 @@ const exportColumns: ExportColumn[] = [
 ];
 
 export default function BalanceSheetPage() {
-  const { balanceSheet, loading } = useBalanceSheet();
+  const { balanceSheet, balanceSheetLoading: loading } = useAccounting();
   
   const assets = balanceSheet.filter((i) => i.section === 'asset');
   const liabilities = balanceSheet.filter((i) => i.section === 'liability');

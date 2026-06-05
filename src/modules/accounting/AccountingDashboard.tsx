@@ -74,7 +74,6 @@ export default function AccountingDashboard() {
           icon={<FileText className="h-5 w-5" />} 
           accentColor="primary" 
           index={0} 
-          loading={isLoading}
         />
         <KPICard 
           title="Lançamentos Postados" 
@@ -82,7 +81,6 @@ export default function AccountingDashboard() {
           icon={<CheckCircle className="h-5 w-5" />} 
           accentColor="success" 
           index={1} 
-          loading={isLoading}
         />
         <KPICard 
           title="Pendentes/Rascunho" 
@@ -90,7 +88,6 @@ export default function AccountingDashboard() {
           icon={<Clock className="h-5 w-5" />} 
           accentColor="warning" 
           index={2} 
-          loading={isLoading}
         />
         <KPICard 
           title="Valor Total Postado" 
@@ -98,8 +95,8 @@ export default function AccountingDashboard() {
           icon={<DollarSign className="h-5 w-5" />} 
           accentColor="info" 
           index={3} 
-          loading={isLoading}
         />
+
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 mt-6">
