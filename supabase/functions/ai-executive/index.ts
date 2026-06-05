@@ -1087,7 +1087,6 @@ async function executeConsultaFiscal(supabase: any, args: any, user_id?: string,
       };
     }
     case "nfe_recentes": {
-    case "nfe_recentes": {
       const { data } = await query("nfe").order("issue_date", { ascending: false }).limit(20);
       return { nfe_recentes: data || [] };
     }
