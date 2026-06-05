@@ -83,19 +83,21 @@ const fallbackConsensus = [
     specialist: 'IA CFO',
     insight: 'Recomendo antecipação de recebíveis para garantir liquidez diante do aumento sazonal de compras.',
     status: 'recommendation',
-    module: 'financeiro'
+    module: 'financial'
   },
   {
     specialist: 'Especialista PCP',
     insight: 'Gargalo detectado na linha de tecelagem 04. Sugestão: Re-alocação de ordens para teares tipo B.',
     status: 'alert',
-    module: 'producao'
+    module: 'production'
+
   },
   {
     specialist: 'Market Intelligence',
     insight: 'Nova normativa de ICMS-ST para o setor têxtil integrada com sucesso ao motor de regras.',
     status: 'success',
-    module: 'financeiro'
+    module: 'financial'
+
   }
 ];
 

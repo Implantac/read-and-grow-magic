@@ -26,14 +26,15 @@ const impactColor: Record<string, string> = {
 };
 
 const AGENTS = [
-  { id: 'geral', label: '🧠 Geral' },
-  { id: 'financeiro', label: '💰 CFO' },
-  { id: 'comercial', label: '📈 Vendas' },
+  { id: 'general', label: '🧠 Geral' },
+  { id: 'financial', label: '💰 CFO' },
+  { id: 'commercial', label: '📈 Vendas' },
   { id: 'fiscal', label: '🧾 Fiscal' },
-  { id: 'logistica', label: '🚚 Operações' },
-  { id: 'producao', label: '🏭 PCP' },
-  { id: 'qualidade', label: '🔬 Qualidade' },
+  { id: 'operational', label: '🚚 Operações' },
+  { id: 'production', label: '🏭 PCP' },
+  { id: 'quality', label: '🔬 Qualidade' },
 ];
+
 
 export default function BrainCommandCenter() {
   const { data: pending = [], isLoading: loadingPending } = useBrainDecisions('pending');
