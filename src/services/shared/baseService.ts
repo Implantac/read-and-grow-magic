@@ -14,9 +14,7 @@ export class BaseService<T extends string> {
   } = {}) {
     const { orderBy = 'created_at', ascending = false, limit, filters } = options;
     
-    let query = supabase
-      .from(this.tableName as any)
-      .select('*');
+    let query = (supabase.from as any)(this.tableName).select('*');
 
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
@@ -38,8 +36,7 @@ export class BaseService<T extends string> {
   }
 
   async getById(id: string) {
-    const { data, error } = await supabase
-      .from(this.tableName as any)
+    const { data, error } = await (supabase.from as any)(this.tableName)
       .select('*')
       .eq('id' as any, id)
       .maybeSingle();
@@ -49,8 +46,7 @@ export class BaseService<T extends string> {
   }
 
   async create(item: any) {
-    const { data, error } = await supabase
-      .from(this.tableName as any)
+    const { data, error } = await (supabase.from as any)(this.tableName)
       .insert(item as any)
       .select()
       .single();
@@ -60,8 +56,7 @@ export class BaseService<T extends string> {
   }
 
   async update(id: string, updates: any) {
-    const { data, error } = await supabase
-      .from(this.tableName as any)
+    const { data, error } = await (supabase.from as any)(this.tableName)
       .update({ ...updates, updated_at: new Date().toISOString() } as any)
       .eq('id' as any, id)
       .select()
@@ -72,13 +67,13 @@ export class BaseService<T extends string> {
   }
 
   async delete(id: string) {
-    const { error } = await supabase
-      .from(this.tableName as any)
+    const { error } = await (supabase.from as any)(this.tableName)
       .delete()
       .eq('id' as any, id);
 
     if (error) throw error;
   }
 }
+
 
 
