@@ -7,6 +7,7 @@ import { DataTable, type Column } from '@/shared/components/DataTable';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { AdvancedFilters, type FilterField } from '@/shared/components/AdvancedFilters';
 import { getJournalStatusLabel } from '@/config/accounting';
+import { StatusBadge } from '@/shared/components/StatusBadge';
 import { useAccounting } from '@/hooks/accounting/useAccounting';
 import { cn } from '@/lib/utils';
 import { Plus, CheckCircle, Eye, BookOpen, FileText, Clock } from 'lucide-react';
@@ -19,11 +20,7 @@ import type { JournalEntry } from '@/types/accounting';
 import type { ExportColumn } from '@/lib/exportUtils';
 
 import { formatBRL, formatDate, formatDateTime, formatNumber } from '@/lib/formatters';
-const statusColors: Record<string, string> = {
-  draft: 'bg-warning/10 text-warning border-warning/30',
-  posted: 'bg-success/10 text-success border-success/30',
-  reversed: 'bg-destructive/10 text-destructive border-destructive/30',
-};
+
 
 const exportColumns: ExportColumn[] = [
   { key: 'number', label: 'Número' },
@@ -77,9 +74,7 @@ export default function JournalEntriesPage() {
     {
       key: 'status', label: 'Status',
       render: (v) => (
-        <Badge variant="outline" className={cn('text-xs', statusColors[String(v)])}>
-          {getJournalStatusLabel(String(v))}
-        </Badge>
+        <StatusBadge status={String(v)} type="accounting" />
       ),
     },
     { key: 'createdBy', label: 'Criado por' },
@@ -136,7 +131,7 @@ export default function JournalEntriesPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div><span className="text-muted-foreground">Data:</span> {formatDate(selectedEntry.date)}</div>
-                <div><span className="text-muted-foreground">Status:</span> <Badge variant="outline" className={cn('ml-1', statusColors[selectedEntry.status])}>{getJournalStatusLabel(selectedEntry.status)}</Badge></div>
+                <div><span className="text-muted-foreground">Status:</span> <StatusBadge status={selectedEntry.status} type="accounting" className="ml-1" /></div>
                 <div className="col-span-2"><span className="text-muted-foreground">Descrição:</span> {selectedEntry.description}</div>
               </div>
               <Table>

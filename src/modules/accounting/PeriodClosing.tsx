@@ -6,7 +6,7 @@ import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
-import { Badge } from '@/ui/base/badge';
+import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/ui/base/alert-dialog';
@@ -117,9 +117,7 @@ export default function PeriodClosing() {
                 <TableRow key={row.month}>
                   <TableCell className="font-medium">{row.name}/{year}</TableCell>
                   <TableCell>
-                    {row.status === 'open' && <Badge variant="outline">Aberto</Badge>}
-                    {row.status === 'closed' && <Badge className="bg-warning/15 text-warning">Fechado</Badge>}
-                    {row.status === 'locked' && <Badge variant="destructive">Bloqueado</Badge>}
+                    <StatusBadge status={row.status} type="accounting" />
                   </TableCell>
                   <TableCell className={`text-right font-mono ${row.result >= 0 ? 'text-success' : 'text-destructive'}`}>
                     {formatBRL(row.result)}
@@ -172,7 +170,7 @@ export default function PeriodClosing() {
                         </AlertDialogContent>
                       </AlertDialog>
                     ) : (
-                      <Badge variant="secondary"><CheckCircle2 className="h-3 w-3 mr-1" /> Imutável</Badge>
+                      <StatusBadge status="locked" type="accounting" />
                     )}
                   </TableCell>
                 </TableRow>

@@ -22,6 +22,7 @@ import { useTechnicalSheets } from '@/hooks/production/useTechnicalSheets';
 import { useSupplyStock } from '@/hooks/inventory/useSupplyStock';
 import { supabase } from '@/integrations/supabase/client';
 import { productionStatusConfig, priorityConfig } from '@/config/production';
+import { StatusBadge } from '@/shared/components/StatusBadge';
 import PCPKPIPanel from '@/components/producao/PCPKPIPanel';
 import PCPIntelligencePanel from '@/components/producao/PCPIntelligencePanel';
 import { usePCPIntelligence } from '@/hooks/production/usePCPIntelligence';
@@ -323,8 +324,8 @@ export default function PCPPanel() {
                         <TableCell>{o.quantity} {o.unit}</TableCell>
                         <TableCell>{o.produced_quantity} {o.unit}</TableCell>
                         <TableCell><div className="flex items-center gap-2"><Progress value={pct} className="h-2 w-16" /><span className="text-xs">{pct.toFixed(0)}%</span></div></TableCell>
-                        <TableCell><Badge className={cn('text-xs', sc.color)}>{sc.label}</Badge></TableCell>
-                        <TableCell><Badge className={cn('text-xs', pc.color)}>{pc.label}</Badge></TableCell>
+                        <TableCell><StatusBadge status={o.status} type="production" /></TableCell>
+                        <TableCell><StatusBadge status={o.priority} type="priority" /></TableCell>
                         <TableCell><div className="flex items-center gap-1">{o.due_date ? format(new Date(o.due_date), 'dd/MM/yyyy') : '-'}{isDelayed && <AlertTriangle className="h-3 w-3 text-destructive" />}</div></TableCell>
                         <TableCell className="text-right">
                           <div className="flex gap-1 justify-end">

@@ -5,7 +5,7 @@ import { KPICard } from '@/shared/components/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
-import { Badge } from '@/ui/base/badge';
+import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/ui/base/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
@@ -142,7 +142,7 @@ export default function ProductionStepsPage() {
                       <TableCell className="font-mono text-xs">{s.code}</TableCell>
                       <TableCell>{s.sector || '-'}</TableCell>
                       <TableCell>{s.estimated_time_minutes} min</TableCell>
-                      <TableCell><Badge variant={s.is_active ? 'default' : 'secondary'}>{s.is_active ? 'Ativa' : 'Inativa'}</Badge></TableCell>
+                      <TableCell><StatusBadge status={s.is_active ? 'active' : 'inactive'} type="client" /></TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-1 justify-end">
                           <Button variant="ghost" size="sm" onClick={() => openEdit(s)}><Pencil className="h-4 w-4" /></Button>
@@ -238,14 +238,8 @@ export default function ProductionStepsPage() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
                               <p className="font-medium">{step.step_name || `Etapa ${step.sequence}`}</p>
-                              {step.step_sector && <Badge variant="outline" className="text-[10px]">📍 {step.step_sector}</Badge>}
-                              <Badge variant={
-                                step.status === 'completed' ? 'default' :
-                                step.status === 'in_progress' ? 'default' : 'secondary'
-                              } className="text-[10px]">
-                                {step.status === 'completed' ? '✅ Concluída' :
-                                 step.status === 'in_progress' ? '🔄 Em andamento' : '⏳ Pendente'}
-                              </Badge>
+                              {step.step_sector && <div className="text-[10px] border px-2 py-0.5 rounded">📍 {step.step_sector}</div>}
+                              <StatusBadge status={step.status} type="production" className="text-[10px]" />
                             </div>
                             <div className="flex items-center gap-4 mt-1.5 text-xs text-muted-foreground">
                               {step.responsible && <span className="flex items-center gap-1"><User className="h-3 w-3" /> {step.responsible}</span>}
