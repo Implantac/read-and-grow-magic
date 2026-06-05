@@ -81,7 +81,7 @@ export default function BrainCommandCenter() {
       >
         <div className="flex flex-wrap items-center gap-2">
           <Button asChild variant="outline" size="sm" className="h-8 gap-2">
-            <Link to="/diretoria/brain/aprendizado"><GraduationCap className="h-4 w-4" /> Aprendizado</Link>
+            <Link to="/executive/brain/aprendizado"><GraduationCap className="h-4 w-4" /> Aprendizado</Link>
           </Button>
           <Button variant="outline" size="sm" onClick={handleNotify} disabled={notify.isPending} className="h-8 gap-2">
             <Bell className="h-4 w-4" /> Alertar Externo
