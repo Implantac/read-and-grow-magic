@@ -9,8 +9,9 @@ export class BaseRepository<T extends any> extends BaseService<any> {
     super(tableName);
   }
 
-  async getAll(companyId?: string) {
+  async getAllCompat(companyId?: string) {
     return super.getAll({ filters: companyId ? { company_id: companyId } : undefined });
   }
 }
+
 
