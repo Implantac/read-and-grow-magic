@@ -725,8 +725,8 @@ async function executeConsultaFinanceiro(supabase: any, args: any, user_id?: str
     }
     case "vencimentos_hoje": {
       const [recHoje, pagHoje] = await Promise.all([
-        supabase.from("accounts_receivable").select("id, client_name, amount, open_amount, status").eq("due_date", today).eq("status", "pending"),
-        supabase.from("accounts_payable").select("id, supplier, amount, open_amount, status, description").eq("due_date", today).eq("status", "pending"),
+        query("accounts_receivable").eq("due_date", today).eq("status", "pending"),
+        query("accounts_payable").eq("due_date", today).eq("status", "pending"),
       ]);
       return { data: today, receber_hoje: { total: (recHoje.data || []).reduce((s: number, r: any) => s + (r.open_amount || r.amount || 0), 0), itens: recHoje.data || [] }, pagar_hoje: { total: (pagHoje.data || []).reduce((s: number, p: any) => s + (p.open_amount || p.amount || 0), 0), itens: pagHoje.data || [] } };
     }
