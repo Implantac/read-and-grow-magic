@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ExportButton } from '@/shared/components/ExportButton';
-import { useStockMovements } from '@/hooks/wms/useWMSOperations';
+import { useInventory } from '@/hooks/inventory/useInventoryQuery';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -52,14 +52,14 @@ import { KPICard } from '@/shared/components/KPICard';
 import type { StockMovement, MovementType, MovementDirection, MovementFilters } from '@/types/inventory';
 
 export default function MovementsPage() {
-  const { movements: dbMovements, loading } = useStockMovements();
-  const movements = useMemo<StockMovement[]>(() => dbMovements.map((m: any) => ({
-    id: m.id, documentNumber: m.documentNumber, productId: m.productId || '',
-    productCode: m.productCode, productName: m.productName,
+  const { movements: dbMovements, movementsLoading: loading } = useInventory();
+  const movements = useMemo<StockMovement[]>(() => (dbMovements || []).map((m: any) => ({
+    id: m.id, documentNumber: m.document_number, productId: m.product_id || '',
+    productCode: m.products?.code || '', productName: m.products?.name || '',
     type: m.type as MovementType, direction: m.direction as MovementDirection,
-    quantity: m.quantity, unitCost: m.unitCost, totalCost: m.totalCost,
-    batch: m.batch, fromWarehouse: m.fromWarehouse, toWarehouse: m.toWarehouse,
-    reference: m.reference, notes: m.notes, operator: m.operator, createdAt: m.createdAt,
+    quantity: m.quantity, unitCost: m.unit_cost, totalCost: m.total_cost,
+    batch: m.batch, fromWarehouse: m.from_warehouse, toWarehouse: m.to_warehouse,
+    reference: m.reference, notes: m.notes, operator: m.operator, createdAt: m.created_at,
   })), [dbMovements]);
   const [filters, setFilters] = useState<MovementFilters>({
     search: '',
