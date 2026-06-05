@@ -5,12 +5,12 @@ import { toastSuccess, toastError } from '@/lib/toastHelpers';
 export function useCredit() {
   const queryClient = useQueryClient();
 
-  const analysesQuery = useQuery({
+  const analysesQuery = useQuery<any[]>({
     queryKey: ['credit_analyses'],
     queryFn: () => creditService.getCreditAnalyses(),
   });
 
-  const blocksQuery = useQuery({
+  const blocksQuery = useQuery<any[]>({
     queryKey: ['order_blocks'],
     queryFn: () => creditService.getOrderBlocks(),
   });
@@ -27,9 +27,9 @@ export function useCredit() {
   });
 
   return {
-    analyses: analysesQuery.data || [],
+    analyses: (analysesQuery.data || []) as any[],
     analysesLoading: analysesQuery.isLoading,
-    blocks: blocksQuery.data || [],
+    blocks: (blocksQuery.data || []) as any[],
     blocksLoading: blocksQuery.isLoading,
     
     updateAnalysis: updateAnalysisMutation.mutateAsync,

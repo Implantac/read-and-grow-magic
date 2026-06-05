@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
-import { Plus, Search, MoreHorizontal, Eye, Edit, Trash2, Send, CheckCircle, Package, FileText, Loader2 } from 'lucide-react';
+import { Plus, Search, MoreHorizontal, Eye, Edit, Trash2, Send, CheckCircle, Package, FileText, Loader2, Clock } from 'lucide-react';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -20,11 +20,12 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/ui/base/select';
 import { Badge } from '@/ui/base/badge';
+import { Label } from '@/ui/base/label';
 import { Separator } from '@/ui/base/separator';
 import { purchaseOrderStatuses } from '@/config/purchasing';
 import { PurchaseOrder } from '@/types/purchasing';
 import { usePurchasing } from '@/hooks/purchasing/usePurchasingQuery';
-import { toast } from 'sonner';
+import { KPICard } from '@/shared/components/KPICard';
 
 const priorityConfig: any = {
   low: { label: 'Baixa', className: 'bg-muted text-muted-foreground' },
@@ -56,13 +57,6 @@ export default function PurchaseOrdersPage() {
     inTransit: orders.filter((o) => ['sent', 'confirmed'].includes(o.status)).length,
     received: orders.filter((o) => o.status === 'received').length,
   }), [orders]);
-
-  const getProgressPercentage = (order: PurchaseOrder) => {
-    if (!order.items || order.items.length === 0) return 0;
-    const totalQty = order.items.reduce((sum, item) => sum + item.quantity, 0);
-    const receivedQty = order.items.reduce((sum, item) => sum + (item.receivedQuantity || 0), 0);
-    return totalQty > 0 ? Math.round((receivedQty / totalQty) * 100) : 0;
-  };
 
   if (loading) return <div className="flex items-center justify-center min-h-[400px]"><Loader2 className="animate-spin" /></div>;
 
@@ -160,7 +154,6 @@ export default function PurchaseOrdersPage() {
         </CardContent>
       </Card>
 
-      {/* View Dialog simplified for refactoring */}
       <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
         <DialogContent className="max-w-3xl">
           <DialogHeader><DialogTitle>Detalhes do Pedido {selectedOrder?.number}</DialogTitle></DialogHeader>

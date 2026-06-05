@@ -5,17 +5,17 @@ import { toastSuccess, toastError } from '@/lib/toastHelpers';
 export function useInventory() {
   const queryClient = useQueryClient();
 
-  const productsQuery = useQuery({
+  const productsQuery = useQuery<any[]>({
     queryKey: ['inventory_products'],
     queryFn: () => inventoryService.getProducts(),
   });
 
-  const categoriesQuery = useQuery({
+  const categoriesQuery = useQuery<any[]>({
     queryKey: ['inventory_categories'],
     queryFn: () => inventoryService.getCategories(),
   });
 
-  const movementsQuery = useQuery({
+  const movementsQuery = useQuery<any[]>({
     queryKey: ['inventory_movements'],
     queryFn: () => inventoryService.getMovements(),
   });
@@ -54,11 +54,11 @@ export function useInventory() {
   });
 
   return {
-    products: productsQuery.data || [],
+    products: (productsQuery.data || []) as any[],
     productsLoading: productsQuery.isLoading,
-    categories: categoriesQuery.data || [],
+    categories: (categoriesQuery.data || []) as any[],
     categoriesLoading: categoriesQuery.isLoading,
-    movements: movementsQuery.data || [],
+    movements: (movementsQuery.data || []) as any[],
     movementsLoading: movementsQuery.isLoading,
     
     // Mutations
