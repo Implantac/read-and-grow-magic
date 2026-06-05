@@ -43,7 +43,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { quotationStatuses } from '@/config/purchasing';
 import { Quotation, QuotationStatus, QuotationSupplier } from '@/types/purchasing';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { usePurchasing } from '@/hooks/purchasing/usePurchasingQuery';
 
 const priorityConfig = {
   low: { label: 'Baixa', className: 'bg-gray-100 text-gray-800' },
@@ -59,7 +59,8 @@ const supplierStatusConfig = {
 };
 
 export default function QuotationsPage() {
-  const [quotations, setQuotations] = useState<Quotation[]>([]);
+  const { quotations: dbQuotations, quotationsLoading: loading } = usePurchasing();
+  const quotations = dbQuotations || [];
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');

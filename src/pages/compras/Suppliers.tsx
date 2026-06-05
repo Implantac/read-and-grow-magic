@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Star, Plus, Search, Eye, Edit, Trash2, Mail, Phone, MapPin, MoreHorizontal, Loader2 } from 'lucide-react';
-import { useSuppliers } from '@/hooks/purchasing/useSuppliers';
+import { usePurchasing } from '@/hooks/purchasing/usePurchasingQuery';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -50,8 +50,8 @@ const statusConfig = {
 };
 
 export default function SuppliersPage() {
-  const { suppliers: rawSuppliers, loading, create: createSupplier, update: updateSupplier, remove: removeSupplier } = useSuppliers();
-  const suppliers: Supplier[] = rawSuppliers.map((s: any) => ({
+  const { suppliers: rawSuppliers, suppliersLoading: loading, createSupplier } = usePurchasing();
+  const suppliers: Supplier[] = (rawSuppliers || []).map((s: any) => ({
     id: s.id, code: s.code, name: s.name, tradeName: s.trade_name,
     document: s.document, documentType: s.document_type, email: s.email || '',
     phone: s.phone || '', cellphone: s.cellphone, status: s.status,
@@ -133,12 +133,12 @@ export default function SuppliersPage() {
   };
 
   const handleDelete = async (id: string) => {
-    await removeSupplier(id);
+    // TODO: implement remove mutation
   };
 
   const handleSave = async () => {
     if (selectedSupplier) {
-      await updateSupplier(selectedSupplier.id, {
+      // TODO: implement update mutation
         name: formData.name, trade_name: formData.tradeName, document: formData.document,
         document_type: formData.documentType, email: formData.email, phone: formData.phone,
         cellphone: formData.cellphone, category: formData.category, status: formData.status,

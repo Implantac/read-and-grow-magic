@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
-import { useCreditProfiles, useUpsertCreditProfile } from '@/hooks/financial/useCreditAnalysis';
+import { useCredit } from '@/hooks/financial/useCreditQuery';
 import { useClients } from '@/hooks/commercial/useClients';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
@@ -26,9 +26,8 @@ const riskLabels: Record<string, string> = { low: 'Baixo', medium: 'Médio', hig
 const statusLabels: Record<string, string> = { approved: 'Aprovado', analysis: 'Em Análise', restricted: 'Restrito', blocked: 'Bloqueado' };
 
 export default function CreditAnalysis() {
-  const { data: profiles = [], isLoading } = useCreditProfiles();
+  const { analyses: profiles = [], analysesLoading: isLoading, updateAnalysis } = useCredit();
   const { data: clients = [] } = useClients();
-  const upsert = useUpsertCreditProfile();
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState<any>({});
@@ -58,9 +57,7 @@ export default function CreditAnalysis() {
 
   const handleSave = () => {
     const { id, available_limit, score_grade, created_at, ...rest } = form;
-    upsert.mutate({ ...rest, last_analysis_date: new Date().toISOString(), updated_at: new Date().toISOString() }, {
-      onSuccess: () => setDialogOpen(false),
-    });
+    updateAnalysis({ id, updates: { ...rest, last_analysis_date: new Date().toISOString(), updated_at: new Date().toISOString() } }).then(() => setDialogOpen(false));
   };
 
   const fmt = (v: number) => formatBRL(v);

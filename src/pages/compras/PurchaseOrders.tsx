@@ -42,7 +42,7 @@ import { Badge } from '@/ui/base/badge';
 import { Separator } from '@/ui/base/separator';
 import { purchaseOrderStatuses } from '@/config/purchasing';
 import { PurchaseOrder, PurchaseOrderStatus } from '@/types/purchasing';
-import { usePurchaseOrders } from '@/hooks/purchasing/usePurchaseOrders';
+import { usePurchasing } from '@/hooks/purchasing/usePurchasingQuery';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -55,7 +55,7 @@ const priorityConfig = {
 };
 
 export default function PurchaseOrdersPage() {
-  const { orders, loading, refetch, update: updateOrder, remove: removeOrder } = usePurchaseOrders();
+  const { orders, ordersLoading: loading } = usePurchasing();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
