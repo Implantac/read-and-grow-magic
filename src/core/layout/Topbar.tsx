@@ -47,7 +47,7 @@ export function Topbar() {
   return (
     <header
       className={cn(
-        'fixed right-0 top-0 z-30 flex h-14 items-center justify-between border-b border-sidebar-border/30 px-4 transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1) backdrop-blur-xl',
+        'fixed right-0 top-0 z-30 flex h-14 items-center justify-between border-b border-sidebar-border/30 px-4 transition-all duration-300 ease-in-out backdrop-blur-xl',
         sidebarCollapsed ? 'left-16' : 'left-64'
 
       )}

@@ -9,15 +9,20 @@ import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
 export function MainLayout() {
-  const { isAuthenticated, sidebarCollapsed, theme } = useAppStore();
+  const { isAuthenticated, sidebarCollapsed, theme, user } = useAppStore();
   const { loading } = useAuth();
   const navigate = useNavigate();
 
+  // Handle auto-login if session exists but store is empty
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      navigate('/login');
+    if (!loading && !isAuthenticated && !user) {
+      // Small delay to ensure hooks are settled
+      const timer = setTimeout(() => {
+        if (!isAuthenticated) navigate('/login');
+      }, 500);
+      return () => clearTimeout(timer);
     }
-  }, [isAuthenticated, loading, navigate]);
+  }, [isAuthenticated, loading, navigate, user]);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
@@ -48,9 +53,8 @@ export function MainLayout() {
       <Topbar />
       <main
         className={cn(
-          'h-screen overflow-y-auto pt-14 transition-all duration-300 cubic-bezier(0.4, 0, 0.2, 1)',
+          'h-screen overflow-y-auto pt-14 transition-all duration-300 ease-in-out',
           sidebarCollapsed ? 'pl-16' : 'pl-64'
-
         )}
       >
         <div className="p-6">
