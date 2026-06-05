@@ -18,11 +18,11 @@ import { useAccountsPayable, useCreateAccountPayable, useUpdateAccountPayable, u
 import { useCreatePaymentRecord } from '@/hooks/financial/usePaymentRecords';
 import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 import { useCostCenters } from '@/hooks/system/useCostCenters';
-import { SettlementDialog, type SettlementTarget } from '@/components/financeiro/SettlementDialog';
+import { SettlementDialog, type SettlementTarget } from '@/components/financial/SettlementDialog';
 import { formatBRL } from '@/lib/formatters';
-import { AccountsPayableSummary } from '@/components/financeiro/AccountsPayableSummary';
-import { AccountsPayableTable } from '@/components/financeiro/AccountsPayableTable';
-import { AccountsPayableFilters } from '@/components/financeiro/AccountsPayableFilters';
+import { AccountsPayableSummary } from '@/components/financial/AccountsPayableSummary';
+import { AccountsPayableTable } from '@/components/financial/AccountsPayableTable';
+import { AccountsPayableFilters } from '@/components/financial/AccountsPayableFilters';
 
 export default function AccountsPayable() {
   const { data: accounts = [], isLoading } = useAccountsPayable();

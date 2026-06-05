@@ -30,8 +30,8 @@ import { AdvancedFilters, type FilterField } from '@/shared/components/AdvancedF
 import { getPaymentMethodLabel, getOrderStatusLabel } from '@/config/commercial';
 import { useOrders, useCreateOrder, useUpdateOrderStatus, useUpdateOrderFields, useDeleteOrder, type DbOrder } from '@/hooks/commercial/useOrders';
 import { useClients } from '@/hooks/commercial/useClients';
-import { ClientSelector } from '@/components/comercial/ClientSelector';
-import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
+import { ClientSelector } from '@/components/commercial/ClientSelector';
+import { OrderItemsEditor, type LineItem } from '@/components/commercial/OrderItemsEditor';
 import { validateOrder, type CommercialValidation } from '@/hooks/commercial/useCommercialRules';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 

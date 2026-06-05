@@ -15,7 +15,7 @@ import { differenceInMinutes } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Progress } from '@/ui/base/progress';
-import ShopFloorEventFeed from '@/components/producao/ShopFloorEventFeed';
+import ShopFloorEventFeed from '@/components/production/ShopFloorEventFeed';
 
 export default function ShopFloorDashboardPage() {
   const { entries, loading, refetch } = useTimeEntries();

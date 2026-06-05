@@ -19,8 +19,8 @@ import { DataTable, type Column } from '@/shared/components/DataTable';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { AdvancedFilters, type FilterField } from '@/shared/components/AdvancedFilters';
 import { useQuotations, useCreateQuotation, useUpdateQuotationStatus, useConvertQuotationToOrder, type DbQuotation } from '@/hooks/commercial/useQuotations';
-import { ClientSelector } from '@/components/comercial/ClientSelector';
-import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
+import { ClientSelector } from '@/components/commercial/ClientSelector';
+import { OrderItemsEditor, type LineItem } from '@/components/commercial/OrderItemsEditor';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
 const filterFields: FilterField[] = [

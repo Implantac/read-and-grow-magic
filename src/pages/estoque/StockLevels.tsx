@@ -53,8 +53,8 @@ import {
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
-import { ABCCurveChart } from '@/components/estoque/ABCCurveChart';
-import { InventoryTurnoverChart } from '@/components/estoque/InventoryTurnoverChart';
+import { ABCCurveChart } from '@/components/inventory/ABCCurveChart';
+import { InventoryTurnoverChart } from '@/components/inventory/InventoryTurnoverChart';
 import type { StockLevel, StockLevelStatus, StockLevelFilters } from '@/types/inventory';
 
 export default function StockLevelsPage() {

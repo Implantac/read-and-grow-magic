@@ -19,10 +19,10 @@ import { AdvancedFilters, type FilterField } from '@/shared/components/AdvancedF
 import { getPaymentMethodLabel } from '@/config/commercial';
 import { useSales, useCreateSale } from '@/hooks/commercial/useSales';
 import type { DbSale } from '@/types/commercial';
-import { ClientSelector } from '@/components/comercial/ClientSelector';
-import { OrderItemsEditor, type LineItem } from '@/components/comercial/OrderItemsEditor';
+import { ClientSelector } from '@/components/commercial/ClientSelector';
+import { OrderItemsEditor, type LineItem } from '@/components/commercial/OrderItemsEditor';
 import { formatBRL, formatDate } from '@/lib/formatters';
-import { SalesSummary } from '@/components/comercial/SalesSummary';
+import { SalesSummary } from '@/components/commercial/SalesSummary';
 
 
 const filterFields: FilterField[] = [

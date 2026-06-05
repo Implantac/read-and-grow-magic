@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Badge } from '@/ui/base/badge';
 import { useBankAccounts, useCreateBankAccount } from '@/hooks/financial/useBankAccounts';
-import { TransferDialog } from '@/components/financeiro/TransferDialog';
+import { TransferDialog } from '@/components/financial/TransferDialog';
 
 import { formatBRL } from '@/lib/formatters';
 export default function BankAccounts() {

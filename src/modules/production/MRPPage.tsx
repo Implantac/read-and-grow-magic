@@ -17,7 +17,7 @@ import { AlertTriangle, Package, Calculator, ShoppingCart, CheckCircle, XCircle,
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import MRPSimulation from '@/components/producao/MRPSimulation';
+import MRPSimulation from '@/components/production/MRPSimulation';
 
 import { formatBRL, formatNumber } from '@/lib/formatters';
 

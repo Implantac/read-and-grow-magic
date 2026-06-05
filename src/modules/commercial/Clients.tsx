@@ -13,11 +13,11 @@ import {
 } from '@/ui/base/alert-dialog';
 import { DataTable } from '@/shared/components/DataTable';
 import { useClients, useDeleteClient, type DbClient } from '@/hooks/commercial/useClients';
-import { ClientDetailDialog } from '@/components/comercial/ClientDetailDialog';
-import { ClientFormDialog } from '@/components/comercial/ClientFormDialog';
-import { ClientStats } from '@/components/comercial/ClientStats';
-import { ClientFilters } from '@/components/comercial/ClientFilters';
-import { clientTableColumns } from '@/components/comercial/clientTableColumns';
+import { ClientDetailDialog } from '@/components/commercial/ClientDetailDialog';
+import { ClientFormDialog } from '@/components/commercial/ClientFormDialog';
+import { ClientStats } from '@/components/commercial/ClientStats';
+import { ClientFilters } from '@/components/commercial/ClientFilters';
+import { clientTableColumns } from '@/components/commercial/clientTableColumns';
 
 
 
