@@ -71,6 +71,7 @@ export class AccountingService {
       createdAt: row.created_at,
       lines: row.lines.map((l: any) => ({
         id: l.id,
+        accountId: l.account_id,
         accountCode: l.account_code,
         accountName: l.account_name,
         description: l.description,
@@ -91,26 +92,55 @@ export class AccountingService {
 
   // Reports
   async getBalanceSheet(): Promise<BalanceSheetItem[]> {
-    // In a real app, this would be a RPC call or a complex query
-    // For now, we mimic the existing logic if any, or provide a standardized structure
     const { data, error } = await this.supabase
-      .from('balance_sheet_report')
+      .from('accounting_reports')
       .select('*')
+      .eq('report_type', 'balance_sheet')
       .order('code');
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map(row => ({
+      id: row.id,
+      code: row.code,
+      description: row.description,
+      currentPeriod: Number(row.current_period),
+      previousPeriod: Number(row.previous_period),
+      level: row.level,
+      isTotal: row.is_total,
+      section: row.section as BalanceSheetItem['section']
+    }));
   }
 
   async getDRE(): Promise<DREItem[]> {
     const { data, error } = await this.supabase
-      .from('dre_report')
+      .from('accounting_reports')
       .select('*')
+      .eq('report_type', 'dre')
       .order('order_index');
 
     if (error) throw error;
-    return data || [];
+    return (data || []).map(row => ({
+      id: row.id,
+      code: row.code,
+      description: row.description,
+      currentPeriod: Number(row.current_period),
+      previousPeriod: Number(row.previous_period),
+      variation: Number(row.variation),
+      level: row.level,
+      isTotal: row.is_total
+    }));
+  }
+
+  async getDashboardData(): Promise<any> {
+    const { data, error } = await this.supabase
+      .from('accounting_dashboard_stats')
+      .select('*')
+      .single();
+
+    if (error) throw error;
+    return data;
   }
 }
 
 export const accountingService = new AccountingService();
+
