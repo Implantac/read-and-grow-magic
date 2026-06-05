@@ -17,51 +17,60 @@ import { useExecutiveDashboard } from '@/hooks/ai/useExecutiveAI';
 import { ScrollArea } from '@/ui/base/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/base/tooltip';
 
-const moduleStatusMap: Record<string, { label: string; color: string; explanation: string }> = {
+const moduleStatusMap: Record<string, { label: string; color: string; explanation: string; icon: any }> = {
   comercial: { 
     label: 'Otimizado', 
     color: 'text-success', 
-    explanation: 'Motor de conversão operando com 94% de eficiência preditiva. Lead score calibrado.' 
+    explanation: 'Motor de conversão operando com 94% de eficiência preditiva. Lead score calibrado.',
+    icon: TrendingUp
   },
   financeiro: { 
     label: 'Estável', 
     color: 'text-primary', 
-    explanation: 'Fluxo de caixa projetado sem rupturas nos próximos 45 dias. DRE em conformidade.' 
+    explanation: 'Fluxo de caixa projetado sem rupturas nos próximos 45 dias. DRE em conformidade.',
+    icon: CheckCircle2
   },
   producao: { 
     label: 'Atenção', 
     color: 'text-warning', 
-    explanation: 'Gargalo identificado na linha de tecelagem 04. IA sugerindo re-balanceamento de turnos.' 
+    explanation: 'Gargalo identificado na linha de tecelagem 04. IA sugerindo re-balanceamento de turnos.',
+    icon: AlertCircle
   },
   estoque: { 
     label: 'Crítico', 
     color: 'text-destructive', 
-    explanation: 'Ruptura de estoque iminente em 12 SKUs de alta rotatividade. Necessário ressuprimento urgente.' 
+    explanation: 'Ruptura de estoque iminente em 12 SKUs de alta rotatividade. Necessário ressuprimento urgente.',
+    icon: AlertCircle
   },
   rh: { 
     label: 'Saudável', 
     color: 'text-success', 
-    explanation: 'Clima organizacional e produtividade acima da meta setorial. Turnover reduzido em 12%.' 
+    explanation: 'Clima organizacional e produtividade acima da meta setorial. Turnover reduzido em 12%.',
+    icon: CheckCircle2
   },
   compras: {
     label: 'Eficiente',
     color: 'text-success',
-    explanation: 'SLA de fornecedores em 98%. IA negociando condições otimizadas automaticamente.'
+    explanation: 'SLA de fornecedores em 98%. IA negociando condições otimizadas automaticamente.',
+    icon: TrendingUp
   },
   fiscal: {
     label: 'Compliance',
     color: 'text-info',
-    explanation: 'Nenhuma pendência detectada. SPED e obrigações acessórias geradas com 100% de precisão.'
+    explanation: 'Nenhuma pendência detectada. SPED e obrigações acessórias geradas com 100% de precisão.',
+    icon: CheckCircle2
   },
   logistica: {
     label: 'Fluidez',
     color: 'text-success',
-    explanation: 'Entregas 12% mais rápidas com roteirização dinâmica. Custo por km reduzido.'
+    explanation: 'Entregas 12% mais rápidas com roteirização dinâmica. Custo por km reduzido.',
+    icon: TrendingUp
   },
   qualidade: {
     label: 'Certificado',
     color: 'text-success',
-    explanation: 'Zero não-conformidades críticas nos últimos 30 dias. Auditoria contínua ativa.'
+    explanation: 'Zero não-conformidades críticas nos últimos 30 dias. Auditoria contínua ativa.',
+    icon: CheckCircle2
   }
 };
 
@@ -143,31 +152,37 @@ export function ExecutiveConsensus({ consensus = [] }: { consensus?: any[] }) {
       <div className="flex flex-col h-[500px]">
         {/* Status por Módulo */}
         <div className="p-3 border-b border-border/30 bg-muted/20 space-y-2 shrink-0">
-          <p className="text-[9px] font-bold uppercase tracking-tighter text-muted-foreground mb-2">Monitoramento de Módulos</p>
+          <p className="text-[9px] font-bold uppercase tracking-tighter text-muted-foreground mb-2">Status por Módulo (Consenso IA)</p>
           <div className="grid grid-cols-2 gap-2">
-            {Object.entries(moduleStatusMap).map(([key, status]) => (
-              <TooltipProvider key={key}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div className="flex items-center justify-between p-1.5 rounded bg-background/40 border border-border/50 hover:border-primary/30 transition-colors cursor-help">
-                      <span className="text-[9px] font-bold uppercase truncate pr-1">{key}</span>
-                      <span className={cn("text-[9px] font-black", status.color)}>{status.label}</span>
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="bg-popover border-primary/20 shadow-2xl p-3 max-w-[200px]">
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <div className={cn("h-1.5 w-1.5 rounded-full", status.color.replace('text-', 'bg-'))} />
-                        <p className="text-[10px] font-bold uppercase">{key}</p>
+            {Object.entries(moduleStatusMap).map(([key, status]) => {
+              const Icon = status.icon;
+              return (
+                <TooltipProvider key={key}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center justify-between p-1.5 rounded bg-background/40 border border-border/50 hover:border-primary/30 transition-all cursor-help group">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <Icon className={cn("h-3 w-3 shrink-0", status.color)} />
+                          <span className="text-[9px] font-bold uppercase truncate">{key}</span>
+                        </div>
+                        <span className={cn("text-[9px] font-black shrink-0", status.color)}>{status.label}</span>
                       </div>
-                      <p className="text-[11px] leading-relaxed text-muted-foreground italic">
-                        "{status.explanation}"
-                      </p>
-                    </div>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            ))}
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="bg-popover border-primary/20 shadow-2xl p-3 max-w-[200px] z-50">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <div className={cn("h-1.5 w-1.5 rounded-full", status.color.replace('text-', 'bg-'))} />
+                          <p className="text-[10px] font-bold uppercase">{key}</p>
+                        </div>
+                        <p className="text-[11px] leading-relaxed text-muted-foreground italic">
+                          "{status.explanation}"
+                        </p>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              );
+            })}
           </div>
         </div>
 
