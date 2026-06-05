@@ -3,7 +3,7 @@ import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
-import { Badge } from '@/ui/base/badge';
+import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Button } from '@/ui/base/button';
 import { Progress } from '@/ui/base/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
@@ -84,10 +84,10 @@ export default function ProductionQueuePage() {
                     <TableCell>{(o as any).client_name || '-'}</TableCell>
                     <TableCell>{o.produced_quantity}/{o.quantity} {o.unit}</TableCell>
                     <TableCell><div className="flex items-center gap-2"><Progress value={pct} className="h-2 w-16" /><span className="text-xs">{pct.toFixed(0)}%</span></div></TableCell>
-                    <TableCell><Badge className={cn('text-xs', pc.color)}>{pc.label}</Badge></TableCell>
+                    <TableCell><StatusBadge status={o.priority} type="priority" /></TableCell>
                     <TableCell><div className="flex items-center gap-1">{o.due_date ? format(new Date(o.due_date), 'dd/MM/yyyy') : '-'}{isDelayed && <AlertTriangle className="h-3 w-3 text-destructive" />}</div></TableCell>
                     <TableCell>{o.work_center || (o as any).sector || '-'}</TableCell>
-                    <TableCell><Badge className={cn('text-xs', sc.color)}>{sc.label}</Badge></TableCell>
+                    <TableCell><StatusBadge status={o.status} type="production" /></TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-1 justify-end">
                         {o.status === 'planned' && <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStart(o)}><Play className="h-3 w-3 mr-1" /> Iniciar</Button>}

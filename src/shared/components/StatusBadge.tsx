@@ -105,6 +105,15 @@ const nfeStatusConfig: Record<string, StatusConfig> = {
   denied: { label: 'Denegada', variant: 'destructive' },
 };
 
+const accountingStatusConfig: Record<string, StatusConfig> = {
+  draft: { label: 'Rascunho', variant: 'secondary' },
+  posted: { label: 'Lançado', variant: 'success' },
+  reversed: { label: 'Estornado', variant: 'destructive' },
+  open: { label: 'Aberto', variant: 'info' },
+  closed: { label: 'Fechado', variant: 'warning' },
+  locked: { label: 'Bloqueado', variant: 'destructive' },
+};
+
 const variantStyles: Record<StatusVariant, string> = {
   default: 'bg-primary/10 text-primary border-primary/20',
   success: 'bg-success/10 text-success border-success/20',
@@ -115,7 +124,7 @@ const variantStyles: Record<StatusVariant, string> = {
 };
 
 export interface StatusBadgeProps {
-  type: 'order' | 'sale' | 'client' | 'priority' | 'payment' | 'quotation' | 'inventory' | 'shipment' | 'production' | 'nfe';
+  type: 'order' | 'sale' | 'client' | 'priority' | 'payment' | 'quotation' | 'inventory' | 'shipment' | 'production' | 'nfe' | 'accounting';
   status: string;
   className?: string;
 }
@@ -153,6 +162,9 @@ export function StatusBadge({ type, status, className }: StatusBadgeProps) {
       break;
     case 'nfe':
       config = nfeStatusConfig[status] || { label: status, variant: 'default' };
+      break;
+    case 'accounting':
+      config = accountingStatusConfig[status] || { label: status, variant: 'default' };
       break;
     default:
       config = { label: status, variant: 'default' };

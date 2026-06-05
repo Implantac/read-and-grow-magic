@@ -13,7 +13,7 @@ import { Progress } from '@/ui/base/progress';
 import { Search, Package, AlertTriangle, ClipboardList, DollarSign } from 'lucide-react';
 import { useWMSInventory } from '@/hooks/wms/useWMSInventory';
 import type { InventoryStatus } from '@/types/wms';
-import { Badge } from '@/ui/base/badge';
+
 
 import { formatBRL, formatDate } from '@/lib/formatters';
 
@@ -187,9 +187,7 @@ export default function InventoryPage() {
                         <TableCell className={count.discrepancies > 0 ? 'text-destructive font-medium' : ''}>{count.discrepancies}</TableCell>
                         <TableCell>{count.operator || '-'}</TableCell>
                         <TableCell>
-                          <Badge variant={count.status === 'completed' ? 'default' : count.status === 'in_progress' ? 'secondary' : 'outline'}>
-                            {count.status === 'completed' ? 'Concluída' : count.status === 'in_progress' ? 'Em Andamento' : count.status === 'scheduled' ? 'Agendada' : count.status}
-                          </Badge>
+                          <StatusBadge status={count.status} type="inventory" />
                         </TableCell>
                       </TableRow>
                     ))}

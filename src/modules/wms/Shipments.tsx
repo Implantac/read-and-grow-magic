@@ -7,7 +7,7 @@ import { ExportButton } from '@/shared/components/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
-import { Badge } from '@/ui/base/badge';
+
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
@@ -166,7 +166,7 @@ export default function ShipmentsPage() {
                         <div className="font-medium text-sm">{s.customerName}</div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary" className="font-normal">{s.carrier || 'FOB'}</Badge>
+                        <span className="text-sm font-medium">{s.carrier || 'FOB'}</span>
                       </TableCell>
                       <TableCell className="tabular-nums">
                         <div className="flex items-center gap-1">

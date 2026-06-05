@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
 import { StatusBadge } from '@/shared/components/StatusBadge';
-import { Badge } from '@/ui/base/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/ui/base/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
@@ -287,10 +286,10 @@ function OrderDetailContent({ order }: { order: ProductionOrderRow }) {
           {/* Extra info */}
           {(order.color || order.size_grid || order.model_variant || order.batch_code) && (
             <div className="flex gap-2 flex-wrap">
-              {order.color && <Badge variant="outline">🎨 {order.color}</Badge>}
-              {order.size_grid && <Badge variant="outline">📐 {order.size_grid}</Badge>}
-              {order.model_variant && <Badge variant="outline">📦 {order.model_variant}</Badge>}
-              {order.batch_code && <Badge variant="outline">🏷️ {order.batch_code}</Badge>}
+              {order.color && <div className="text-xs px-2 py-0.5 rounded border">🎨 {order.color}</div>}
+              {order.size_grid && <div className="text-xs px-2 py-0.5 rounded border">📐 {order.size_grid}</div>}
+              {order.model_variant && <div className="text-xs px-2 py-0.5 rounded border">📦 {order.model_variant}</div>}
+              {order.batch_code && <div className="text-xs px-2 py-0.5 rounded border">🏷️ {order.batch_code}</div>}
             </div>
           )}
 
