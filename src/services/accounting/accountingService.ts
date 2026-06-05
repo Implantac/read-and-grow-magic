@@ -7,13 +7,13 @@ export class AccountingService {
   // Chart of Accounts
   async getChartOfAccounts(): Promise<ChartOfAccount[]> {
     const { data, error } = await this.supabase
-      .from('chart_of_accounts')
+      .from('chart_of_accounts' as any)
       .select('*')
       .order('code');
 
     if (error) throw error;
 
-    return (data || []).map((row) => ({
+    return (data || []).map((row: any) => ({
       id: row.id,
       code: row.code,
       name: row.name,
@@ -28,7 +28,7 @@ export class AccountingService {
   }
 
   async createAccount(account: Omit<ChartOfAccount, 'id'>): Promise<void> {
-    const { error } = await this.supabase.from('chart_of_accounts').insert({
+    const { error } = await this.supabase.from('chart_of_accounts' as any).insert({
       code: account.code,
       name: account.name,
       type: account.type,
@@ -43,14 +43,14 @@ export class AccountingService {
   }
 
   async deleteAccount(id: string): Promise<void> {
-    const { error } = await this.supabase.from('chart_of_accounts').delete().eq('id', id);
+    const { error } = await this.supabase.from('chart_of_accounts' as any).delete().eq('id', id);
     if (error) throw error;
   }
 
   // Journal Entries
   async getJournalEntries(): Promise<JournalEntry[]> {
     const { data, error } = await this.supabase
-      .from('journal_entries')
+      .from('journal_entries' as any)
       .select(`
         *,
         lines:journal_entry_lines(*)
@@ -59,7 +59,7 @@ export class AccountingService {
 
     if (error) throw error;
 
-    return (data || []).map(row => ({
+    return (data || []).map((row: any) => ({
       id: row.id,
       number: row.number,
       date: row.date,
@@ -69,7 +69,7 @@ export class AccountingService {
       totalCredit: Number(row.total_credit),
       createdBy: row.created_by,
       createdAt: row.created_at,
-      lines: row.lines.map((l: any) => ({
+      lines: (row.lines || []).map((l: any) => ({
         id: l.id,
         accountId: l.account_id,
         accountCode: l.account_code,
@@ -83,7 +83,7 @@ export class AccountingService {
 
   async postJournalEntry(id: string): Promise<void> {
     const { error } = await this.supabase
-      .from('journal_entries')
+      .from('journal_entries' as any)
       .update({ status: 'posted' })
       .eq('id', id);
     
@@ -93,13 +93,13 @@ export class AccountingService {
   // Reports
   async getBalanceSheet(): Promise<BalanceSheetItem[]> {
     const { data, error } = await this.supabase
-      .from('accounting_reports')
+      .from('accounting_reports' as any)
       .select('*')
       .eq('report_type', 'balance_sheet')
       .order('code');
 
     if (error) throw error;
-    return (data || []).map(row => ({
+    return (data || []).map((row: any) => ({
       id: row.id,
       code: row.code,
       description: row.description,
@@ -113,13 +113,13 @@ export class AccountingService {
 
   async getDRE(): Promise<DREItem[]> {
     const { data, error } = await this.supabase
-      .from('accounting_reports')
+      .from('accounting_reports' as any)
       .select('*')
       .eq('report_type', 'dre')
       .order('order_index');
 
     if (error) throw error;
-    return (data || []).map(row => ({
+    return (data || []).map((row: any) => ({
       id: row.id,
       code: row.code,
       description: row.description,
@@ -133,9 +133,9 @@ export class AccountingService {
 
   async getDashboardData(): Promise<any> {
     const { data, error } = await this.supabase
-      .from('accounting_dashboard_stats')
+      .from('accounting_dashboard_stats' as any)
       .select('*')
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     return data;
@@ -143,4 +143,3 @@ export class AccountingService {
 }
 
 export const accountingService = new AccountingService();
-
