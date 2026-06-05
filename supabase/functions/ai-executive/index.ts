@@ -1037,16 +1037,22 @@ async function executeAnaliseEstrategica(supabase: any, args: any, user_id?: str
 }
 
 // MCP-Fiscal: tool executor
-async function executeConsultaFiscal(supabase: any, args: any) {
+async function executeConsultaFiscal(supabase: any, args: any, user_id?: string, company_id?: string) {
   const periodoDias = args.periodo_dias || 30;
   const since = new Date(Date.now() - periodoDias * 24 * 3600 * 1000).toISOString();
+
+  const query = (table: string) => {
+    let q = supabase.from(table).select("*");
+    if (company_id) q = q.eq("company_id", company_id);
+    return q;
+  };
 
   switch (args.tipo) {
     case "resumo": {
       const [nfeRes, taxRes, spedRes] = await Promise.all([
-        supabase.from("nfe").select("id, status, total_amount, total_tax, issue_date").gte("issue_date", since).limit(500),
-        supabase.from("tax_rules").select("id, active").limit(200),
-        supabase.from("sped_files").select("id, period, generated_at, status").order("generated_at", { ascending: false }).limit(10),
+        query("nfe").gte("issue_date", since).limit(500),
+        query("tax_rules").limit(200),
+        query("sped_files").order("generated_at", { ascending: false }).limit(10),
       ]);
       const nfes = nfeRes.data || [];
       const totalAmount = nfes.reduce((s: number, n: any) => s + (n.total_amount || 0), 0);
