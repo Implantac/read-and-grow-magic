@@ -78,7 +78,7 @@ export function Topbar() {
           <DropdownMenuContent align="start" className="w-64 bg-sidebar border-sidebar-border">
             <DropdownMenuLabel className="text-sidebar-foreground/60 text-xs uppercase tracking-wider">Empresas</DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-sidebar-border" />
-            {companies.map((company: any) => (
+            {(Array.isArray(companies) ? companies : []).map((company: any) => (
               <DropdownMenuItem
                 key={company.id}
                 onClick={() => setActiveCompany(company)}
