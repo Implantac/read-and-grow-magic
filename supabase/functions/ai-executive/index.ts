@@ -426,8 +426,8 @@ function generateConsensusItems(kpis: any, data: any, segment: string) {
 
 // ─── Generate Insights ──────────────────────────────────────────
 
-async function handleGenerateInsights(supabase: any, lovableKey: string, corsHeaders: any) {
-  const d = await fetchAllData(supabase);
+async function handleGenerateInsights(supabase: any, lovableKey: string, corsHeaders: any, authenticatedUserId?: string, companyId?: string) {
+  const d = await fetchAllData(supabase, companyId);
   const computed = computeKPIs(d);
 
   // Guard: sem dados reais, não chama LLM (evita alucinação)
