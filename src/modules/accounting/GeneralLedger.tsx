@@ -5,8 +5,7 @@ import { Skeleton } from '@/ui/base/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { AdvancedFilters, type FilterField } from '@/shared/components/AdvancedFilters';
-import { useChartOfAccounts } from '@/hooks/accounting/useChartOfAccounts';
-import { useJournalEntries } from '@/hooks/accounting/useJournalEntries';
+import { useAccounting } from '@/hooks/accounting/useAccounting';
 import { cn } from '@/lib/utils';
 import { BookOpen } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
@@ -29,8 +28,7 @@ const ledgerFilterFields: FilterField[] = [
 ];
 
 export default function GeneralLedgerPage() {
-  const { accounts, loading: loadingAccounts } = useChartOfAccounts();
-  const { entries: journalEntries, loading: loadingEntries } = useJournalEntries();
+  const { accounts, accountsLoading: loadingAccounts, journalEntries, journalEntriesLoading: loadingEntries } = useAccounting();
   const analyticalAccounts = accounts.filter((a) => a.isAnalytical);
   const [selectedAccount, setSelectedAccount] = useState('');
   const [filters, setFilters] = useState<Record<string, string>>({});

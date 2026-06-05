@@ -4,7 +4,7 @@ import { Badge } from '@/ui/base/badge';
 import { Skeleton } from '@/ui/base/skeleton';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { getAccountTypeLabel } from '@/config/accounting';
-import { useChartOfAccounts } from '@/hooks/accounting/useChartOfAccounts';
+import { useAccounting } from '@/hooks/accounting/useAccounting';
 import { cn } from '@/lib/utils';
 import { Scale } from 'lucide-react';
 import { TrialBalanceChart } from '@/components/contabilidade/TrialBalanceChart';
@@ -30,7 +30,7 @@ const exportColumns: ExportColumn[] = [
 ];
 
 export default function TrialBalancePage() {
-  const { accounts, loading } = useChartOfAccounts();
+  const { accounts, accountsLoading: loading } = useAccounting();
 
   // Build trial balance from analytical accounts with non-zero balances
   const trialBalance = useMemo<TrialBalanceItem[]>(() => {

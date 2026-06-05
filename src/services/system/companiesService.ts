@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import type { Company } from '@/types/administration';
+import type { Company, CompanyStatus, Address } from '@/types/administration';
 
 export const companiesService = {
   async getAll(): Promise<Company[]> {
@@ -19,9 +19,18 @@ export const companiesService = {
       municipalRegistration: company.municipal_registration,
       email: company.email,
       phone: company.phone,
-      address: company.address as any,
-      logo: company.logo,
-      status: company.status,
+      address: {
+        street: company.address_street || '',
+        number: company.address_number || '',
+        complement: company.address_complement || '',
+        neighborhood: company.address_neighborhood || '',
+        city: company.address_city || '',
+        state: company.address_state || '',
+        zipCode: company.address_zip_code || '',
+        country: 'Brasil'
+      },
+      logo: company.settings?.logo_url,
+      status: company.status as CompanyStatus,
       isHeadquarters: company.is_headquarters,
       parentCompanyId: company.parent_company_id,
       createdAt: company.created_at,
@@ -38,7 +47,13 @@ export const companiesService = {
         cnpj: company.cnpj,
         email: company.email,
         phone: company.phone,
-        address: company.address,
+        address_street: company.address.street,
+        address_number: company.address.number,
+        address_complement: company.address.complement,
+        address_neighborhood: company.address.neighborhood,
+        address_city: company.address.city,
+        address_state: company.address.state,
+        address_zip_code: company.address.zipCode,
         status: company.status,
         is_headquarters: company.isHeadquarters,
         parent_company_id: company.parentCompanyId
@@ -57,7 +72,15 @@ export const companiesService = {
     if (company.cnpj) updateData.cnpj = company.cnpj;
     if (company.email) updateData.email = company.email;
     if (company.phone) updateData.phone = company.phone;
-    if (company.address) updateData.address = company.address;
+    if (company.address) {
+      updateData.address_street = company.address.street;
+      updateData.address_number = company.address.number;
+      updateData.address_complement = company.address.complement;
+      updateData.address_neighborhood = company.address.neighborhood;
+      updateData.address_city = company.address.city;
+      updateData.address_state = company.address.state;
+      updateData.address_zip_code = company.address.zipCode;
+    }
     if (company.status) updateData.status = company.status;
     
     const { data, error } = await supabase
