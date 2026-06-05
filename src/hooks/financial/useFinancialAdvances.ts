@@ -23,7 +23,7 @@ export function useFinancialAdvances(partyType?: 'client' | 'supplier') {
   return useQuery({
     queryKey: ['financial_advances', partyType],
     queryFn: async () => {
-      let q = supabase.from('financial_advances').select('*').order('received_date', { ascending: false });
+      let q = (supabase.from as any)('financial_advances').select('*').order('received_date', { ascending: false });
       if (partyType) q = q.eq('party_type', partyType);
       const { data, error } = await q;
       if (error) throw error;
@@ -36,11 +36,11 @@ export function useCreateAdvance() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (adv: Omit<FinancialAdvanceRow, 'id' | 'created_at' | 'used_amount' | 'remaining_amount' | 'status'>) => {
-      const { data, error } = await supabase.from('financial_advances').insert(adv).select().single();
+      const { data, error } = await (supabase.from as any)('financial_advances').insert(adv).select().single();
       if (error) throw error;
       // Lança no ledger
       if (data && adv.bank_account_id) {
-        await supabase.from('financial_ledger').insert({
+        await (supabase.from as any)('financial_ledger').insert({
           entry_date: adv.received_date,
           type: adv.party_type === 'client' ? 'inflow' : 'outflow',
           amount: adv.amount,
