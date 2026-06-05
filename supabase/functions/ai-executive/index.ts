@@ -889,7 +889,7 @@ async function executeConsultaEstoque(supabase: any, args: any, user_id?: string
   }
 }
 
-async function executeAcao(supabase: any, args: any, user_id?: string) {
+async function executeAcao(supabase: any, args: any, user_id?: string, company_id?: string) {
   if (!args.confirmado) {
     return {
       status: "aguardando_confirmacao",
@@ -906,6 +906,7 @@ async function executeAcao(supabase: any, args: any, user_id?: string) {
       try {
         await supabase.from("ai_action_logs").insert({
           user_id,
+          company_id,
           action_type: "execution",
           module: args.modulo,
           action_name: actionName,
