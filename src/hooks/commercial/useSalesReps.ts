@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
+import { useEnterprise } from '@/core/auth/EnterpriseContext';
 
 export interface DbSalesRep {
   id: string;
@@ -35,9 +36,13 @@ export function useSalesReps() {
 
 export function useCreateSalesRep() {
   const qc = useQueryClient();
+  const { currentCompany } = useEnterprise();
   return useMutation({
     mutationFn: async (rep: Partial<DbSalesRep>) => {
-      const { data, error } = await supabase.from('sales_reps').insert(rep as any).select().single();
+      const { data, error } = await supabase.from('sales_reps').insert({
+        ...rep,
+        company_id: currentCompany?.id
+      } as any).select().single();
       if (error) throw error;
       return data;
     },

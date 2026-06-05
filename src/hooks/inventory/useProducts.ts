@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { productsService } from '@/services/inventory/productsService';
 import { useSupabaseQuery, useSupabaseMutation } from '@/hooks/shared/useSupabaseQuery';
 import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
+import { useEnterprise } from '@/core/auth/EnterpriseContext';
 
 export interface DbProduct {
   id: string;
@@ -38,9 +39,10 @@ export function useProducts() {
 
 export function useCreateProduct() {
   const queryClient = useQueryClient();
+  const { currentCompany } = useEnterprise();
   return useSupabaseMutation(
     (product: Omit<DbProduct, 'id' | 'created_at' | 'updated_at' | 'category_name'>) => 
-      productsService.create(product),
+      productsService.create({ ...product, company_id: currentCompany?.id } as any),
     {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['products'] });
