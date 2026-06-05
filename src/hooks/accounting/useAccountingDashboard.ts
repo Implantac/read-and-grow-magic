@@ -7,3 +7,6 @@ export function useAccountingDashboardData() {
     () => accountingService.getDashboardData()
   );
 }
+
+// Alias for consistency with naming across project
+export const useAccountingDashboard = useAccountingDashboardData;

@@ -7,7 +7,8 @@ import { Skeleton } from '@/ui/base/skeleton';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { AdvancedFilters, type FilterField } from '@/shared/components/AdvancedFilters';
 import { getAccountTypeLabel } from '@/config/accounting';
-import { useChartOfAccounts } from '@/hooks/accounting/useChartOfAccounts';
+import { useAccounting } from '@/hooks/accounting/useAccounting';
+
 import { cn } from '@/lib/utils';
 import { Search, ChevronRight, ChevronDown, BookOpen, Plus, FolderTree, DollarSign } from 'lucide-react';
 import type { ExportColumn } from '@/lib/exportUtils';
@@ -62,7 +63,8 @@ const accountFilterFields: FilterField[] = [
 ];
 
 export default function ChartOfAccountsPage() {
-  const { accounts, loading } = useChartOfAccounts();
+  const { accounts, accountsLoading: loading } = useAccounting();
+
   const [search, setSearch] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [filters, setFilters] = useState<Record<string, string>>({});

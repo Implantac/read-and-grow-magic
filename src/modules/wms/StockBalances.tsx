@@ -8,7 +8,7 @@ import { Input } from '@/ui/base/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Database, Search, Package, Lock, CheckCircle } from 'lucide-react';
-import { useStockBalances } from '@/hooks/inventory/useStockBalances';
+import { useWms } from '@/hooks/wms/useWms';
 import { ExportButton } from '@/shared/components/ExportButton';
 
 import { formatNumber } from '@/lib/formatters';
@@ -22,7 +22,7 @@ const statusColors: Record<string, 'default' | 'secondary' | 'destructive' | 'ou
 };
 
 export default function StockBalancesPage() {
-  const { balances, loading } = useStockBalances();
+  const { stockBalances: balances, stockLoading: loading } = useWms();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 

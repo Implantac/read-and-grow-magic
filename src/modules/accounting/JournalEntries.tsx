@@ -7,7 +7,7 @@ import { DataTable, type Column } from '@/shared/components/DataTable';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { AdvancedFilters, type FilterField } from '@/shared/components/AdvancedFilters';
 import { getJournalStatusLabel } from '@/config/accounting';
-import { useJournalEntries } from '@/hooks/accounting/useJournalEntries';
+import { useAccounting } from '@/hooks/accounting/useAccounting';
 import { cn } from '@/lib/utils';
 import { Plus, CheckCircle, Eye, BookOpen, FileText, Clock } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
@@ -50,7 +50,7 @@ const filterFields: FilterField[] = [
 ];
 
 export default function JournalEntriesPage() {
-  const { entries: journalEntries, loading, postEntry } = useJournalEntries();
+  const { journalEntries, journalEntriesLoading: loading, postEntry } = useAccounting();
   const [selectedEntry, setSelectedEntry] = useState<JournalEntry | null>(null);
   const [filters, setFilters] = useState<Record<string, string>>({});
 
