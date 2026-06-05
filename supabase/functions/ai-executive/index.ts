@@ -212,8 +212,7 @@ function computeKPIs(d: any, months: number = 12) {
     marginPct: v.revenue > 0 ? +((v.revenue - v.cost) / v.revenue * 100).toFixed(1) : 0
   })).sort((a, b) => b.revenue - a.revenue);
 
-  return {
-    kpis: {
+  const kpis = {
       totalRevenue, grossProfit, 
       grossMargin: +grossMargin.toFixed(1),
       moMGrowth: growthTrends[growthTrends.length - 1]?.revenueMoM || 0,
@@ -247,8 +246,11 @@ function computeKPIs(d: any, months: number = 12) {
       activeTaxRules: d.taxRules.filter((t: any) => t.active).length,
       spedFilesGenerated: d.spedFiles.length,
       lastSpedDate: d.spedFiles[0]?.generated_at || null,
-    },
-    revenueByMonth: revenueByMonth.slice(1), // Remove the extra month used for base calculation
+  };
+
+  return {
+    kpis,
+    revenueByMonth: revenueByMonth.slice(1),
     growthTrends,
     topClients: d.clients.sort((a: any, b: any) => (b.total_purchases || 0) - (a.total_purchases || 0)).slice(0, 5),
     expenseByCategory: d.payables.reduce((acc: any, p: any) => ({ ...acc, [p.category || 'Outros']: (acc[p.category || 'Outros'] || 0) + (p.amount || 0) }), {}),
@@ -261,11 +263,11 @@ function computeKPIs(d: any, months: number = 12) {
     autoAlerts: d.alerts,
     swot: {
       strengths: [
-        { title: "Margem Bruta", description: `Margem de ${computed.kpis.grossMargin}% acima da meta setorial`, impact: "high" },
+        { title: "Margem Bruta", description: `Margem de ${kpis.grossMargin}% acima da meta setorial`, impact: "high" },
         { title: "Fidelidade", description: "Top 5 clientes representam receita recorrente estável", impact: "medium" }
       ],
       weaknesses: [
-        { title: "Inadimplência", description: `Taxa de ${computed.kpis.defaultRate}% impactando fluxo de caixa`, impact: "high" },
+        { title: "Inadimplência", description: `Taxa de ${kpis.defaultRate}% impactando fluxo de caixa`, impact: "high" },
         { title: "Estoque Crítico", description: `${d.products.filter((p: any) => p.stock_current <= p.stock_min).length} itens abaixo do estoque mínimo`, impact: "medium" }
       ],
       opportunities: [
@@ -277,9 +279,7 @@ function computeKPIs(d: any, months: number = 12) {
         { title: "Custo Operacional", description: "Tendência de alta em custos logísticos MoM", impact: "medium" }
       ]
     },
-    consensus: generateConsensusItems(computed.kpis, d, segment),
     summary: {
-      segment,
       totalOrders: d.orders.length,
       totalProducts: d.products.length,
       totalClients: d.clients.length,
@@ -288,6 +288,7 @@ function computeKPIs(d: any, months: number = 12) {
     },
   };
 }
+
 
 // Helper: detecta se há dados reais suficientes para análise por IA
 function checkHasRealData(d: any): boolean {
