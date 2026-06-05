@@ -18,7 +18,7 @@ export class BaseService<T extends TableName> {
       .order(orderBy as any, { ascending });
 
     if (error) throw error;
-    return data as PublicSchema['Tables'][T]['Row'][];
+    return (data as any) as PublicSchema['Tables'][T]['Row'][];
   }
 
   async getById(id: string) {
@@ -29,7 +29,7 @@ export class BaseService<T extends TableName> {
       .single();
 
     if (error) throw error;
-    return data as PublicSchema['Tables'][T]['Row'];
+    return (data as any) as PublicSchema['Tables'][T]['Row'];
   }
 
   async create(item: PublicSchema['Tables'][T]['Insert']) {
@@ -40,7 +40,7 @@ export class BaseService<T extends TableName> {
       .single();
 
     if (error) throw error;
-    return data as PublicSchema['Tables'][T]['Row'];
+    return (data as any) as PublicSchema['Tables'][T]['Row'];
   }
 
   async update(id: string, updates: PublicSchema['Tables'][T]['Update']) {
@@ -52,7 +52,7 @@ export class BaseService<T extends TableName> {
       .single();
 
     if (error) throw error;
-    return data as PublicSchema['Tables'][T]['Row'];
+    return (data as any) as PublicSchema['Tables'][T]['Row'];
   }
 
   async delete(id: string) {
@@ -63,4 +63,5 @@ export class BaseService<T extends TableName> {
 
     if (error) throw error;
   }
+
 }
