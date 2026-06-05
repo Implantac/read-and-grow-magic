@@ -825,11 +825,17 @@ async function executeConsultaComercial(supabase: any, args: any, user_id?: stri
   }
 }
 
-async function executeConsultaProducao(supabase: any, args: any) {
+async function executeConsultaProducao(supabase: any, args: any, user_id?: string, company_id?: string) {
   const today = new Date().toISOString().split("T")[0];
+  const query = (table: string) => {
+    let q = supabase.from(table).select("*");
+    if (company_id) q = q.eq("company_id", company_id);
+    return q;
+  };
+
   switch (args.tipo) {
     case "resumo": {
-      const { data } = await supabase.from("production_orders").select("id, status, planned_quantity, produced_quantity, due_date").limit(500);
+      const { data } = await query("production_orders").limit(500);
       const ops = data || [];
       return { total_ordens: ops.length, em_producao: ops.filter((o: any) => o.status === "in_progress").length, planejadas: ops.filter((o: any) => o.status === "planned" || o.status === "pending").length, concluidas: ops.filter((o: any) => o.status === "completed").length, atrasadas: ops.filter((o: any) => o.due_date && o.due_date < today && !["completed", "cancelled"].includes(o.status)).length };
     }
