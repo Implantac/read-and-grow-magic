@@ -15321,6 +15321,10 @@ export type Database = {
         }
         Returns: Json
       }
+      check_hierarchy_access: {
+        Args: { _target_company_id: string; _user_id: string }
+        Returns: boolean
+      }
       cleanup_expired_deleted_orders: { Args: never; Returns: undefined }
       close_accounting_period: {
         Args: { _month: number; _year: number }
@@ -15406,6 +15410,21 @@ export type Database = {
         Args: { _company_id: string }
         Returns: {
           id: string
+        }[]
+      }
+      get_consolidated_revenue: {
+        Args: {
+          _company_id?: string
+          _end_date?: string
+          _group_id?: string
+          _start_date?: string
+          _tenant_id?: string
+        }
+        Returns: {
+          entity_id: string
+          entity_name: string
+          orders_count: number
+          total_revenue: number
         }[]
       }
       get_dre: {
@@ -15579,7 +15598,21 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "manager" | "operator" | "viewer"
+      app_role:
+        | "admin"
+        | "manager"
+        | "operator"
+        | "viewer"
+        | "diretor"
+        | "financeiro"
+        | "fiscal"
+        | "contabil"
+        | "compras"
+        | "producao"
+        | "logistica"
+        | "comercial"
+        | "loja"
+        | "franquia"
       enterprise_tier: "small" | "medium" | "enterprise"
       org_type: "holding" | "company" | "branch" | "unit"
       tax_regime: "simples" | "presumed" | "real"
@@ -15710,7 +15743,22 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "manager", "operator", "viewer"],
+      app_role: [
+        "admin",
+        "manager",
+        "operator",
+        "viewer",
+        "diretor",
+        "financeiro",
+        "fiscal",
+        "contabil",
+        "compras",
+        "producao",
+        "logistica",
+        "comercial",
+        "loja",
+        "franquia",
+      ],
       enterprise_tier: ["small", "medium", "enterprise"],
       org_type: ["holding", "company", "branch", "unit"],
       tax_regime: ["simples", "presumed", "real"],
