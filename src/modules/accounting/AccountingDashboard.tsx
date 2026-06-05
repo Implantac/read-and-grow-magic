@@ -1,122 +1,167 @@
-import { useState, useRef, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
-import { FileDown, Loader2, BarChart3 } from 'lucide-react';
-import { EquityEvolutionChart } from '@/components/contabilidade/EquityEvolutionChart';
-import { MarginTrendChart } from '@/components/contabilidade/MarginTrendChart';
-import { RevenueExpenseTrendChart } from '@/components/contabilidade/RevenueExpenseTrendChart';
-import { ExpenseBreakdownChart } from '@/components/contabilidade/ExpenseBreakdownChart';
-import { FinancialIndicatorsPanel } from '@/components/contabilidade/FinancialIndicatorsPanel';
-import { TrialBalanceChart } from '@/components/contabilidade/TrialBalanceChart';
-import { PeriodSelector } from '@/components/contabilidade/PeriodSelector';
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Legend,
+  Cell,
+  PieChart,
+  Pie,
+} from 'recharts';
+import {
+  TrendingUp,
+  TrendingDown,
+  DollarSign,
+  FileText,
+  CheckCircle,
+  Clock,
+  ArrowUpRight,
+  ArrowDownRight,
+  Calendar,
+  Filter,
+  RefreshCw,
+} from 'lucide-react';
+import { useAccountingDashboardData } from '@/hooks/accounting/useAccountingDashboard';
+import { formatBRL } from '@/lib/formatters';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
+import { Skeleton } from '@/ui/base/skeleton';
 
-import { useAccountingDashboardData } from '@/hooks/accounting/useAccountingDashboard';
+const COLORS = ['#10b981', '#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6'];
 
 export default function AccountingDashboard() {
-  const { data: dashboardData, isLoading } = useAccountingDashboardData();
-  const [selectedPeriod, setSelectedPeriod] = useState('jan-24');
-  const [comparePeriod, setComparePeriod] = useState('dez-23');
-  const [isExporting, setIsExporting] = useState(false);
-  const dashboardRef = useRef<HTMLDivElement>(null);
+  const { data: stats, isLoading, refetch } = useAccountingDashboardData();
 
+  const totalEntries = stats?.total_entries || 0;
+  const postedEntries = stats?.posted_entries || 0;
+  const pendingEntries = stats?.pending_entries || 0;
+  const postedValue = stats?.total_posted_value || 0;
 
-  const navigate = useNavigate();
-
-  const handleExportPDF = useCallback(async () => {
-    if (!dashboardRef.current) return;
-    setIsExporting(true);
-    try {
-      const html2canvas = (await import('html2canvas')).default;
-      const { jsPDF } = await import('jspdf');
-      
-      const canvas = await html2canvas(dashboardRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      let heightLeft = pdfHeight;
-      let position = 0;
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      
-      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-      heightLeft -= pageHeight;
-      
-      while (heightLeft > 0) {
-        position = heightLeft - pdfHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-        heightLeft -= pageHeight;
-      }
-      
-      pdf.save(`painel-executivo-contabil-${selectedPeriod}.pdf`);
-    } catch (error) {
-      console.error('Error exporting PDF:', error);
-    } finally {
-      setIsExporting(false);
-    }
-  }, [selectedPeriod]);
+  const revenueExpenseTrend = stats?.revenue_expense_trend || [];
+  const monthlyEquityEvolution = stats?.monthly_equity_evolution || [];
 
   return (
     <PageContainer>
-      <PageHeader title="Painel Executivo Contábil" description="Visão consolidada dos indicadores contábeis">
-        <Button variant="outline" onClick={handleExportPDF} disabled={isExporting} className="gap-2">
-          {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
-          Exportar PDF
-        </Button>
-        <PeriodSelector
-          value={selectedPeriod}
-          onValueChange={setSelectedPeriod}
-          compareValue={comparePeriod}
-          onCompareChange={setComparePeriod}
-        />
+      <PageHeader title="Dashboard Contábil" description="Visão geral da saúde financeira e lançamentos">
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isLoading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            Atualizar
+          </Button>
+          <Button variant="outline" size="sm">
+            <Filter className="h-4 w-4 mr-2" />
+            Filtros
+          </Button>
+        </div>
       </PageHeader>
 
-      <div ref={dashboardRef} className="space-y-6">
-        {(!dashboardData?.entries || dashboardData.entries.length === 0) && (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-semibold mb-2">Nenhum dado contábil disponível</h3>
-              <p className="text-muted-foreground mb-4">
-                Cadastre lançamentos contábeis para visualizar os indicadores do painel executivo.
-              </p>
-              <Button onClick={() => navigate('/contabilidade/lancamentos')}>
-                Ir para Lançamentos
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+      <div className="grid gap-4 md:grid-cols-4">
+        <KPICard 
+          title="Total de Lançamentos" 
+          value={String(totalEntries)} 
+          icon={<FileText className="h-5 w-5" />} 
+          accentColor="primary" 
+          index={0} 
+          loading={isLoading}
+        />
+        <KPICard 
+          title="Lançamentos Postados" 
+          value={String(postedEntries)} 
+          icon={<CheckCircle className="h-5 w-5" />} 
+          accentColor="success" 
+          index={1} 
+          loading={isLoading}
+        />
+        <KPICard 
+          title="Pendentes/Rascunho" 
+          value={String(pendingEntries)} 
+          icon={<Clock className="h-5 w-5" />} 
+          accentColor="warning" 
+          index={2} 
+          loading={isLoading}
+        />
+        <KPICard 
+          title="Valor Total Postado" 
+          value={formatBRL(postedValue)} 
+          icon={<DollarSign className="h-5 w-5" />} 
+          accentColor="info" 
+          index={3} 
+          loading={isLoading}
+        />
+      </div>
 
-        {/* Charts Row 1: Revenue & Equity */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <RevenueExpenseTrendChart 
-            data={dashboardData?.revenueExpenseTrend?.map(t => ({ ...t, profit: t.revenue - t.expenses }))} 
-          />
-          <EquityEvolutionChart data={dashboardData?.monthlyEquityEvolution} />
-        </div>
+      <div className="grid gap-6 md:grid-cols-2 mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base font-medium flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              Receita vs Despesa (6 meses)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            {isLoading ? (
+              <Skeleton className="w-full h-full" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={revenueExpenseTrend}>
+                  <defs>
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/>
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#ef4444" stopOpacity={0.1}/>
+                      <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} />
+                  <YAxis axisLine={false} tickLine={false} tickFormatter={(v) => `R$ ${v/1000}k`} />
+                  <Tooltip formatter={(v: number) => formatBRL(v)} />
+                  <Legend />
+                  <Area type="monotone" dataKey="revenue" name="Receita" stroke="#10b981" fillOpacity={1} fill="url(#colorRevenue)" />
+                  <Area type="monotone" dataKey="expense" name="Despesa" stroke="#ef4444" fillOpacity={1} fill="url(#colorExpense)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
 
-        {/* Charts Row 2: Margins & Expenses */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <MarginTrendChart />
-          <ExpenseBreakdownChart />
-        </div>
-
-
-        {/* Charts Row 3: Trial Balance */}
-        <TrialBalanceChart />
-
-        {/* Financial Indicators */}
-        <FinancialIndicatorsPanel />
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base font-medium flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              Evolução do Patrimônio Líquido
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            {isLoading ? (
+              <Skeleton className="w-full h-full" />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyEquityEvolution}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="month" axisLine={false} tickLine={false} />
+                  <YAxis axisLine={false} tickLine={false} tickFormatter={(v) => `R$ ${v/1000}k`} />
+                  <Tooltip formatter={(v: number) => formatBRL(v)} />
+                  <Bar dataKey="value" name="Patrimônio" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </PageContainer>
   );
