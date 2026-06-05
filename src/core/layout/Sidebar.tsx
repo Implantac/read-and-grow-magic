@@ -259,50 +259,52 @@ export function Sidebar() {
             return true;
           }).map((section, sectionIndex) => (
             section && (
+              <div key={section.label || sectionIndex} className="space-y-2">
+                {!sidebarCollapsed && section.label && (
+                  <div className="flex items-center justify-between px-3 mb-1">
+                    <h2 className="text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-foreground/30">
+                      {section.label}
+                    </h2>
+                  </div>
+                )}
+                
+                {sidebarCollapsed && section.label && (
+                  <div className="flex justify-center mb-1">
+                    <div className="h-px w-6 bg-sidebar-border/50" />
+                  </div>
+                )}
 
-            <div key={section.label || sectionIndex} className="space-y-2">
-              {!sidebarCollapsed && section.label && (
-                <div className="flex items-center justify-between px-3 mb-1">
-                  <h2 className="text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-foreground/30">
-                    {section.label}
-                  </h2>
-                </div>
-              )}
-              
-              {sidebarCollapsed && section.label && (
-                <div className="flex justify-center mb-1">
-                  <div className="h-px w-6 bg-sidebar-border/50" />
-                </div>
-              )}
+                <ul className="space-y-1">
+                  {(section.items || []).filter(item => {
+                    if (!item) return false;
+                    // Segment-specific item filtering
+                    if (segment === 'services' && (item.title === 'Estoque' || item.title === 'Produção' || item.title === 'WMS')) return false;
+                    if (segment === 'retail' && item.title === 'WMS') return true; // Retail might need WMS if it has a warehouse
+                    
+                    // Hide Vertical Packs that don't match the segment (except for Admin)
+                    if (section.label === 'Pacotes Verticais') {
+                      if (segment === 'textile' && item.title !== 'Indústria Têxtil') return false;
+                      if (segment === 'pharma' && item.title !== 'Farmacêutico') return false;
+                      if (segment === 'food_factory' && !item.title.includes('Alimentos')) return false;
+                    }
 
-              <ul className="space-y-1">
-                {section.items.filter(item => {
-                  // Segment-specific item filtering
-                  if (segment === 'services' && (item.title === 'Estoque' || item.title === 'Produção' || item.title === 'WMS')) return false;
-                  if (segment === 'retail' && item.title === 'WMS') return true; // Retail might need WMS if it has a warehouse
-                  
-                  // Hide Vertical Packs that don't match the segment (except for Admin)
-                  if (section.label === 'Pacotes Verticais') {
-                    if (segment === 'textile' && item.title !== 'Indústria Têxtil') return false;
-                    if (segment === 'pharma' && item.title !== 'Farmacêutico') return false;
-                    if (segment === 'food_factory' && !item.title.includes('Alimentos')) return false;
-                  }
-
-                  return true;
-                }).map((item) => (
-                  <NavItemComponent
-                    key={item.title}
-                    item={item}
-                    sidebarCollapsed={sidebarCollapsed}
-                    isActive={isActive}
-                    isParentActive={isParentActive}
-                    expandedItems={expandedItems}
-                    toggleExpanded={toggleExpanded}
-                  />
-                ))}
-              </ul>
-            </div>
+                    return true;
+                  }).map((item) => (
+                    <NavItemComponent
+                      key={item.title}
+                      item={item}
+                      sidebarCollapsed={sidebarCollapsed}
+                      isActive={isActive}
+                      isParentActive={isParentActive}
+                      expandedItems={expandedItems}
+                      toggleExpanded={toggleExpanded}
+                    />
+                  ))}
+                </ul>
+              </div>
+            )
           ))}
+
         </nav>
 
         {/* Footer / User Profile */}
