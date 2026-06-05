@@ -34,7 +34,7 @@ export function BrainSummaryWidget() {
             <RefreshCw className={`h-3 w-3 ${runBrain.isPending ? 'animate-spin' : ''}`} />
           </Button>
           <Button asChild size="sm" variant="ghost" className="h-7 px-2 gap-1">
-            <Link to="/diretoria/brain">Abrir <ArrowRight className="h-3 w-3" /></Link>
+            <Link to="/executive/brain">Abrir <ArrowRight className="h-3 w-3" /></Link>
           </Button>
         </div>
       </CardHeader>

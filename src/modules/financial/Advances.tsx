@@ -17,7 +17,7 @@ import { useFinancialAdvances, type FinancialAdvanceRow } from '@/hooks/financia
 import { useUseAdvance } from '@/hooks/financial/useFinancialSettlements';
 import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/financial/useAccountsPayable';
-import { NewAdvanceDialog } from '@/components/financeiro/NewAdvanceDialog';
+import { NewAdvanceDialog } from '@/components/financial/NewAdvanceDialog';
 import { format } from 'date-fns';
 
 import { formatBRL } from '@/lib/formatters';

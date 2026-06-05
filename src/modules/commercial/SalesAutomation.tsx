@@ -13,7 +13,7 @@ import { useFollowUpTasks, useCreateFollowUp, useCompleteFollowUp, useWhatsAppTe
 import { useAIScores } from '@/hooks/commercial/useAICommercial';
 import { useCommercialAlerts } from '@/hooks/commercial/useCommercialAlerts';
 import { Bot, Phone, MessageSquare, Send, Clock, AlertTriangle, Users, Zap, CheckCircle2, Loader2, Calendar, ChevronRight, Sparkles, RefreshCw, Brain } from 'lucide-react';
-import DecisionEngineTab from '@/components/comercial/DecisionEngineTab';
+import DecisionEngineTab from '@/components/commercial/DecisionEngineTab';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 

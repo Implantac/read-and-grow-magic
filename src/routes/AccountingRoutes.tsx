@@ -11,12 +11,12 @@ const AccountingDashboardPage = lazy(() => import("../modules/accounting/Account
 const PeriodClosingPage = lazy(() => import("../modules/accounting/PeriodClosing"));
 
 export const AccountingRoutes = [
-  <Route key="acc-chart" path="/contabilidade/plano-contas" element={<ChartOfAccountsPage />} />,
-  <Route key="acc-journal" path="/contabilidade/lancamentos" element={<JournalEntriesPage />} />,
-  <Route key="acc-ledger" path="/contabilidade/razao" element={<GeneralLedgerPage />} />,
-  <Route key="acc-trial" path="/contabilidade/balancete" element={<TrialBalancePage />} />,
-  <Route key="acc-dre" path="/contabilidade/dre" element={<DREPage />} />,
-  <Route key="acc-balance" path="/contabilidade/balanco" element={<BalanceSheetPage />} />,
-  <Route key="acc-dash" path="/contabilidade/dashboard" element={<AccountingDashboardPage />} />,
-  <Route key="acc-closing" path="/contabilidade/fechamento" element={<PeriodClosingPage />} />,
+  <Route key="acc-chart" path="/accounting/plano-contas" element={<ChartOfAccountsPage />} />,
+  <Route key="acc-journal" path="/accounting/lancamentos" element={<JournalEntriesPage />} />,
+  <Route key="acc-ledger" path="/accounting/razao" element={<GeneralLedgerPage />} />,
+  <Route key="acc-trial" path="/accounting/balancete" element={<TrialBalancePage />} />,
+  <Route key="acc-dre" path="/accounting/dre" element={<DREPage />} />,
+  <Route key="acc-balance" path="/accounting/balanco" element={<BalanceSheetPage />} />,
+  <Route key="acc-dash" path="/accounting/dashboard" element={<AccountingDashboardPage />} />,
+  <Route key="acc-closing" path="/accounting/fechamento" element={<PeriodClosingPage />} />,
 ];

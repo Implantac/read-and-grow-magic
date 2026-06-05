@@ -50,7 +50,7 @@ export function ExecutiveCouncilPanel() {
               {saude === 'critico' ? '🔴 Estado Crítico' : saude === 'alerta' ? '⚠️ Alerta Ativo' : '✅ Sistema Saudável'}
             </Badge>
             <Button asChild variant="ghost" size="sm" className="h-6 px-2 text-[10px] gap-1">
-              <Link to="/diretoria/brain/comando">
+              <Link to="/executive/brain/comando">
                 <Zap className="h-3 w-3" /> Dashboard IA
               </Link>
             </Button>

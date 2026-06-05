@@ -2,11 +2,15 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useSupabaseQuery, useSupabaseMutation } from '@/hooks/shared/useSupabaseQuery';
 import { toastSuccess, handleMutationError } from '@/lib/toastHelpers';
 import { BaseService } from '@/services/shared/baseService';
+import { Database } from '@/integrations/supabase/types';
+
+type PublicSchema = Database['public'];
+type TableName = keyof PublicSchema['Tables'];
 
 /**
- * Hook utilitário para operações CRUD comuns usando BaseService.
+ * Utility hook for common CRUD operations using BaseService.
  */
-export function useCrud<T extends { id: string }>(
+export function useCrud<T extends TableName>(
   service: BaseService<T>,
   queryKey: string[],
   entityName: string
@@ -25,7 +29,7 @@ export function useCrud<T extends { id: string }>(
 
   const useCreate = () => {
     return useSupabaseMutation(
-      (item: Omit<T, 'id' | 'created_at' | 'updated_at'>) => service.create(item),
+      (item: PublicSchema['Tables'][T]['Insert']) => service.create(item),
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey });
@@ -38,7 +42,8 @@ export function useCrud<T extends { id: string }>(
 
   const useUpdate = () => {
     return useSupabaseMutation(
-      ({ id, ...updates }: { id: string } & Partial<T>) => service.update(id, updates as Partial<T>),
+      ({ id, ...updates }: { id: string } & PublicSchema['Tables'][T]['Update']) => 
+        service.update(id, updates as PublicSchema['Tables'][T]['Update']),
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey });
@@ -70,4 +75,3 @@ export function useCrud<T extends { id: string }>(
     useDelete,
   };
 }
-

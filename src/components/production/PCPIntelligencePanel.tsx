@@ -14,11 +14,11 @@ const severityConfig = {
 };
 
 const typeConfig: Record<string, { icon: any; label: string; route: string }> = {
-  purchase: { icon: ShoppingCart, label: 'Compra', route: '/producao/mrp' },
-  anticipate: { icon: Zap, label: 'Antecipar', route: '/producao/aps' },
-  redistribute: { icon: ArrowRight, label: 'Redistribuir', route: '/producao/aps' },
-  alert: { icon: Shield, label: 'Alerta', route: '/producao/pcp' },
-  overtime: { icon: Clock, label: 'Hora Extra', route: '/producao/capacidade' },
+  purchase: { icon: ShoppingCart, label: 'Compra', route: '/production/mrp' },
+  anticipate: { icon: Zap, label: 'Antecipar', route: '/production/aps' },
+  redistribute: { icon: ArrowRight, label: 'Redistribuir', route: '/production/aps' },
+  alert: { icon: Shield, label: 'Alerta', route: '/production/pcp' },
+  overtime: { icon: Clock, label: 'Hora Extra', route: '/production/capacidade' },
 };
 
 interface Props {
@@ -122,7 +122,7 @@ export default function PCPIntelligencePanel({ suggestions, summary, compact = f
           </div>
         </ScrollArea>
         {compact && suggestions.length > 5 && (
-          <Button variant="link" size="sm" className="w-full mt-2 text-xs" onClick={() => navigate('/producao/pcp')}>
+          <Button variant="link" size="sm" className="w-full mt-2 text-xs" onClick={() => navigate('/production/pcp')}>
             Ver todos os {suggestions.length} alertas →
           </Button>
         )}

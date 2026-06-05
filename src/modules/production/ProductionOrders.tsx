@@ -24,10 +24,10 @@ import {
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
-import { QRCodeOPButton } from '@/components/producao/QRCodeOP';
+import { QRCodeOPButton } from '@/components/production/QRCodeOP';
 import { cn } from '@/lib/utils';
 import { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
-import { StepProgressPipeline } from '@/components/producao/StepProgressPipeline';
+import { StepProgressPipeline } from '@/components/production/StepProgressPipeline';
 
 const priorityConfig: Record<string, { label: string; color: string }> = {
   low: { label: 'Baixa', color: 'text-muted-foreground' },

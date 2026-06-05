@@ -20,9 +20,9 @@ import { useAccountsReceivable, useCreateAccountReceivable, useUpdateAccountRece
 import { useCreatePaymentRecord } from '@/hooks/financial/usePaymentRecords';
 import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 import { useClients } from '@/hooks/commercial/useClients';
-import { SettlementDialog, type SettlementTarget } from '@/components/financeiro/SettlementDialog';
-import { AgingList } from '@/components/financeiro/AgingList';
-import { AccountsReceivableSummary } from '@/components/financeiro/AccountsReceivableSummary';
+import { SettlementDialog, type SettlementTarget } from '@/components/financial/SettlementDialog';
+import { AgingList } from '@/components/financial/AgingList';
+import { AccountsReceivableSummary } from '@/components/financial/AccountsReceivableSummary';
 import { format, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 

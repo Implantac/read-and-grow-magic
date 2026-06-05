@@ -9,8 +9,8 @@ import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { useBrainDecisions, useApproveDecision, useBrainRuns, useRunBrain, useBrainChat, useBrainLearning, useNotifyCritical } from '@/hooks/ai/useAIBrain';
-import { AIConsensusPanel } from '@/components/diretoria/AIConsensusPanel';
-import { ExecutiveConsensus } from '@/components/diretoria/ExecutiveConsensus';
+import { AIConsensusPanel } from '@/components/executive/AIConsensusPanel';
+import { ExecutiveConsensus } from '@/components/executive/ExecutiveConsensus';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import ReactMarkdown from 'react-markdown';
@@ -26,14 +26,15 @@ const impactColor: Record<string, string> = {
 };
 
 const AGENTS = [
-  { id: 'geral', label: '🧠 Geral' },
-  { id: 'financeiro', label: '💰 CFO' },
-  { id: 'comercial', label: '📈 Vendas' },
+  { id: 'general', label: '🧠 Geral' },
+  { id: 'financial', label: '💰 CFO' },
+  { id: 'commercial', label: '📈 Vendas' },
   { id: 'fiscal', label: '🧾 Fiscal' },
-  { id: 'logistica', label: '🚚 Operações' },
-  { id: 'producao', label: '🏭 PCP' },
-  { id: 'qualidade', label: '🔬 Qualidade' },
+  { id: 'operational', label: '🚚 Operações' },
+  { id: 'production', label: '🏭 PCP' },
+  { id: 'quality', label: '🔬 Qualidade' },
 ];
+
 
 export default function BrainCommandCenter() {
   const { data: pending = [], isLoading: loadingPending } = useBrainDecisions('pending');
@@ -44,7 +45,7 @@ export default function BrainCommandCenter() {
   const notify = useNotifyCritical();
   const { messages, loading, send, clear } = useBrainChat();
   const [input, setInput] = useState('');
-  const [agent, setAgent] = useState('geral');
+  const [agent, setAgent] = useState('general');
 
   const lastRun = runs[0];
   const veredicto = lastRun?.structured?.veredicto;
@@ -80,7 +81,7 @@ export default function BrainCommandCenter() {
       >
         <div className="flex flex-wrap items-center gap-2">
           <Button asChild variant="outline" size="sm" className="h-8 gap-2">
-            <Link to="/diretoria/brain/aprendizado"><GraduationCap className="h-4 w-4" /> Aprendizado</Link>
+            <Link to="/executive/brain/aprendizado"><GraduationCap className="h-4 w-4" /> Aprendizado</Link>
           </Button>
           <Button variant="outline" size="sm" onClick={handleNotify} disabled={notify.isPending} className="h-8 gap-2">
             <Bell className="h-4 w-4" /> Alertar Externo

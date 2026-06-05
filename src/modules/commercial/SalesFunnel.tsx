@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Plus, DollarSign, Target, TrendingUp, Pencil, MoreHorizontal, Trophy, XCircle, ArrowRight, Clock, BarChart3, AlertTriangle } from 'lucide-react';
 import { useSalesFunnel, useCreateFunnelItem, useUpdateFunnelItem, FUNNEL_STAGES, type DbFunnelItem } from '@/hooks/commercial/useSalesFunnel';
-import { PlaybookTips } from '@/components/comercial/PlaybookTips';
+import { PlaybookTips } from '@/components/commercial/PlaybookTips';
 import { useClients } from '@/hooks/commercial/useClients';
 import { useSalesReps } from '@/hooks/commercial/useSalesReps';
 import { Skeleton } from '@/ui/base/skeleton';

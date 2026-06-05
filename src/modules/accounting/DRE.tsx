@@ -6,9 +6,9 @@ import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
 import { cn } from '@/lib/utils';
 import { ArrowUpRight, ArrowDownRight, TrendingUp } from 'lucide-react';
-import { MarginTrendChart } from '@/components/contabilidade/MarginTrendChart';
-import { ExpenseBreakdownChart } from '@/components/contabilidade/ExpenseBreakdownChart';
-import { RevenueExpenseTrendChart } from '@/components/contabilidade/RevenueExpenseTrendChart';
+import { MarginTrendChart } from '@/components/accounting/MarginTrendChart';
+import { ExpenseBreakdownChart } from '@/components/accounting/ExpenseBreakdownChart';
+import { RevenueExpenseTrendChart } from '@/components/accounting/RevenueExpenseTrendChart';
 import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/financial/useAccountsPayable';
 import { formatBRL, formatBRLCompact } from '@/lib/formatters';
@@ -50,19 +50,20 @@ export default function DREPage() {
   }, [periodRange]);
 
   const computeDRE = (range: { start: Date; end: Date }) => {
-    const paidRec = receivables.filter(r => r.status === 'paid' && r.payment_date && isWithinInterval(new Date(r.payment_date), range));
-    const paidPay = payables.filter(p => p.status === 'paid' && p.payment_date && isWithinInterval(new Date(p.payment_date), range));
+    const paidRec = receivables.filter(r => (r as any).status === 'paid' && (r as any).payment_date && isWithinInterval(new Date((r as any).payment_date), range));
+    const paidPay = payables.filter(p => (p as any).status === 'paid' && (p as any).payment_date && isWithinInterval(new Date((p as any).payment_date), range));
 
-    const revenue = paidRec.reduce((s, r) => s + Number(r.paid_amount ?? r.amount), 0);
+    const revenue = paidRec.reduce((s, r) => s + Number((r as any).paid_amount ?? (r as any).amount), 0);
     const costCategories = ['Fornecedores'];
-    const costs = paidPay.filter(p => costCategories.includes(p.category)).reduce((s, p) => s + Number(p.paid_amount ?? p.amount), 0);
+    const costs = paidPay.filter(p => costCategories.includes((p as any).category)).reduce((s, p) => s + Number((p as any).paid_amount ?? (p as any).amount), 0);
     const grossProfit = revenue - costs;
-    const opex = paidPay.filter(p => !costCategories.includes(p.category)).reduce((s, p) => s + Number(p.paid_amount ?? p.amount), 0);
+    const opex = paidPay.filter(p => !costCategories.includes((p as any).category)).reduce((s, p) => s + Number((p as any).paid_amount ?? (p as any).amount), 0);
+
     const netProfit = grossProfit - opex;
 
     // Breakdown by category
     const expenseBreakdown = new Map<string, number>();
-    paidPay.forEach(p => expenseBreakdown.set(p.category, (expenseBreakdown.get(p.category) || 0) + Number(p.paid_amount ?? p.amount)));
+    paidPay.forEach(p => expenseBreakdown.set((p as any).category, (expenseBreakdown.get((p as any).category) || 0) + Number((p as any).paid_amount ?? (p as any).amount)));
 
     return { revenue, costs, grossProfit, opex, netProfit, expenseBreakdown };
   };
@@ -101,8 +102,9 @@ export default function DREPage() {
     return months.map(m => {
       const ms = startOfMonth(m);
       const me = endOfMonth(m);
-      const rev = receivables.filter(r => r.status === 'paid' && r.payment_date && isWithinInterval(new Date(r.payment_date), { start: ms, end: me })).reduce((s, r) => s + Number(r.paid_amount ?? r.amount), 0);
-      const exp = payables.filter(p => p.status === 'paid' && p.payment_date && isWithinInterval(new Date(p.payment_date), { start: ms, end: me })).reduce((s, p) => s + Number(p.paid_amount ?? p.amount), 0);
+      const rev = receivables.filter(r => (r as any).status === 'paid' && (r as any).payment_date && isWithinInterval(new Date((r as any).payment_date), { start: ms, end: me })).reduce((s, r) => s + Number((r as any).paid_amount ?? (r as any).amount), 0);
+      const exp = payables.filter(p => (p as any).status === 'paid' && (p as any).payment_date && isWithinInterval(new Date((p as any).payment_date), { start: ms, end: me })).reduce((s, p) => s + Number((p as any).paid_amount ?? (p as any).amount), 0);
+
       return { month: format(m, 'MMM/yy', { locale: ptBR }), receitas: rev, despesas: exp, lucro: rev - exp };
     });
   }, [receivables, payables]);

@@ -48,11 +48,12 @@ export function CashFlowPanel({ currentBalance }: Props) {
     return days.map(d => {
       const dayKey = format(d, 'yyyy-MM-dd');
       const inflow = receivables
-        .filter(r => r.status !== 'paid' && r.status !== 'cancelled' && r.due_date === dayKey)
-        .reduce((s, r) => s + Number(r.open_amount ?? r.amount), 0);
+        .filter(r => (r as any).status !== 'paid' && (r as any).status !== 'cancelled' && (r as any).due_date === dayKey)
+        .reduce((s, r) => s + Number((r as any).open_amount ?? (r as any).amount), 0);
       const outflow = payables
-        .filter(p => p.status !== 'paid' && p.status !== 'cancelled' && p.due_date === dayKey)
-        .reduce((s, p) => s + Number(p.open_amount ?? p.amount), 0);
+        .filter(p => (p as any).status !== 'paid' && (p as any).status !== 'cancelled' && (p as any).due_date === dayKey)
+        .reduce((s, p) => s + Number((p as any).open_amount ?? (p as any).amount), 0);
+
       acc += inflow - outflow;
       return { date: format(d, 'dd/MM', { locale: ptBR }), entradas: inflow, saidas: outflow, saldo: acc };
     });

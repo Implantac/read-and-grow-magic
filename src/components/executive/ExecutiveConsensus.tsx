@@ -18,28 +18,32 @@ import { ScrollArea } from '@/ui/base/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/base/tooltip';
 
 const moduleStatusMap: Record<string, { label: string; color: string; explanation: string; icon: any }> = {
-  comercial: { 
+  commercial: { 
     label: 'Otimizado', 
     color: 'text-success', 
     explanation: 'Motor de conversão operando com 94% de eficiência preditiva. Lead score calibrado.',
+
     icon: TrendingUp
   },
-  financeiro: { 
+  financial: { 
     label: 'Estável', 
     color: 'text-primary', 
     explanation: 'Fluxo de caixa projetado sem rupturas nos próximos 45 dias. DRE em conformidade.',
+
     icon: CheckCircle2
   },
-  producao: { 
+  production: { 
     label: 'Atenção', 
     color: 'text-warning', 
     explanation: 'Gargalo identificado na linha de tecelagem 04. IA sugerindo re-balanceamento de turnos.',
+
     icon: AlertCircle
   },
-  estoque: { 
+  inventory: { 
     label: 'Crítico', 
     color: 'text-destructive', 
     explanation: 'Ruptura de estoque iminente em 12 SKUs de alta rotatividade. Necessário ressuprimento urgente.',
+
     icon: AlertCircle
   },
   rh: { 
@@ -48,7 +52,7 @@ const moduleStatusMap: Record<string, { label: string; color: string; explanatio
     explanation: 'Clima organizacional e produtividade acima da meta setorial. Turnover reduzido em 12%.',
     icon: CheckCircle2
   },
-  compras: {
+  purchasing: {
     label: 'Eficiente',
     color: 'text-success',
     explanation: 'SLA de fornecedores em 98%. IA negociando condições otimizadas automaticamente.',
@@ -60,7 +64,7 @@ const moduleStatusMap: Record<string, { label: string; color: string; explanatio
     explanation: 'Nenhuma pendência detectada. SPED e obrigações acessórias geradas com 100% de precisão.',
     icon: CheckCircle2
   },
-  logistica: {
+  operational: {
     label: 'Fluidez',
     color: 'text-success',
     explanation: 'Entregas 12% mais rápidas com roteirização dinâmica. Custo por km reduzido.',
@@ -79,19 +83,21 @@ const fallbackConsensus = [
     specialist: 'IA CFO',
     insight: 'Recomendo antecipação de recebíveis para garantir liquidez diante do aumento sazonal de compras.',
     status: 'recommendation',
-    module: 'financeiro'
+    module: 'financial'
   },
   {
     specialist: 'Especialista PCP',
     insight: 'Gargalo detectado na linha de tecelagem 04. Sugestão: Re-alocação de ordens para teares tipo B.',
     status: 'alert',
-    module: 'producao'
+    module: 'production'
+
   },
   {
     specialist: 'Market Intelligence',
     insight: 'Nova normativa de ICMS-ST para o setor têxtil integrada com sucesso ao motor de regras.',
     status: 'success',
-    module: 'financeiro'
+    module: 'financial'
+
   }
 ];
 

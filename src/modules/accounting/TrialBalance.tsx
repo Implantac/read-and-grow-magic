@@ -7,7 +7,7 @@ import { getAccountTypeLabel } from '@/config/accounting';
 import { useAccounting } from '@/hooks/accounting/useAccounting';
 import { cn } from '@/lib/utils';
 import { Scale } from 'lucide-react';
-import { TrialBalanceChart } from '@/components/contabilidade/TrialBalanceChart';
+import { TrialBalanceChart } from '@/components/accounting/TrialBalanceChart';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import type { ExportColumn } from '@/lib/exportUtils';
 import type { TrialBalanceItem } from '@/types/accounting';

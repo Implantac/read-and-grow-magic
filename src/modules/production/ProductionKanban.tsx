@@ -31,7 +31,7 @@ import { useTechnicalSheets } from '@/hooks/production/useTechnicalSheets';
 import { useSupplyStock } from '@/hooks/inventory/useSupplyStock';
 import { useProductionCapacity } from '@/hooks/production/useProductionCapacity';
 import { useWorkCenters } from '@/hooks/production/useWorkCenters';
-import { QRCodeOPButton } from '@/components/producao/QRCodeOP';
+import { QRCodeOPButton } from '@/components/production/QRCodeOP';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';

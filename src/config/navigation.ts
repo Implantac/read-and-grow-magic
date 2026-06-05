@@ -196,11 +196,12 @@ export const navigationSections: NavSection[] = [
     ],
   },
   {
-    label: 'Financeiro',
+    label: 'Financial',
     items: [
       {
-        title: 'Financeiro',
-        href: '/financeiro',
+        title: 'Financial',
+        href: '/financial',
+
         icon: 'Wallet',
         children: [
           { title: 'Central Financeira', href: '/financeiro/central', icon: 'Zap' },

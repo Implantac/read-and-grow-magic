@@ -218,7 +218,7 @@ export function Topbar() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate('/diretoria/executive')}
+          onClick={() => navigate('/executive/executive')}
           title="IA Executiva"
           className="h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
         >
@@ -229,7 +229,7 @@ export function Topbar() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate('/diretoria/brain')}
+          onClick={() => navigate('/executive/brain')}
           title={brainPending.length > 0 ? `${brainPending.length} decisões do Cérebro pendentes` : 'Cérebro Nativo'}
           className="relative h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
         >

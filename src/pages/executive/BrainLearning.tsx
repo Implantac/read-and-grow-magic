@@ -29,7 +29,7 @@ export default function BrainLearningPage() {
         description="Calibração de confiança, taxa de aprovação e onde a IA está acertando ou errando"
       >
         <Button asChild variant="outline" size="sm" className="gap-2">
-          <Link to="/diretoria/brain"><ArrowLeft className="h-4 w-4" /> Voltar ao Cérebro</Link>
+          <Link to="/executive/brain"><ArrowLeft className="h-4 w-4" /> Voltar ao Cérebro</Link>
         </Button>
       </PageHeader>
 
