@@ -34,6 +34,16 @@ serve(async (req) => {
 
     const authenticatedUserId = user.id;
     const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Fetch user profile to get company_id (multi-tenant isolation)
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("company_id")
+      .eq("id", authenticatedUserId)
+      .single();
+    
+    const companyId = profile?.company_id;
+
     const body = await req.json();
     const { action, messages, months = 12, segment = 'general' } = body;
 
@@ -41,14 +51,29 @@ serve(async (req) => {
       await supabase.from("ai_executive_chat").delete().eq("user_id", authenticatedUserId);
       return new Response(JSON.stringify({ ok: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-    if (action === "chat" || action === "assistant_chat") return await handleUnifiedChat(messages, supabase, lovableKey, corsHeaders, authenticatedUserId);
-    if (action === "daily_summary") return await handleDailySummary(supabase, lovableKey, corsHeaders);
-    if (action === "generate_insights") return await handleGenerateInsights(supabase, lovableKey, corsHeaders);
-    if (action === "generate_scenarios") return await handleGenerateScenarios(supabase, lovableKey, corsHeaders);
-    if (action === "ceo_brief") return await handleCEOBrief(supabase, lovableKey, corsHeaders);
-    if (action === "execute_decisions") return await handleExecuteDecisions(supabase, body, corsHeaders, authenticatedUserId);
-    if (action === "autopilot_run") return await handleAutoPilotRun(supabase, lovableKey, corsHeaders);
-    return await handleDashboardData(supabase, corsHeaders, months, segment);
+    
+    if (action === "chat" || action === "assistant_chat") 
+      return await handleUnifiedChat(messages, supabase, lovableKey, corsHeaders, authenticatedUserId, companyId);
+    
+    if (action === "daily_summary") 
+      return await handleDailySummary(supabase, lovableKey, corsHeaders, authenticatedUserId, companyId);
+    
+    if (action === "generate_insights") 
+      return await handleGenerateInsights(supabase, lovableKey, corsHeaders, authenticatedUserId, companyId);
+    
+    if (action === "generate_scenarios") 
+      return await handleGenerateScenarios(supabase, lovableKey, corsHeaders, authenticatedUserId, companyId);
+    
+    if (action === "ceo_brief") 
+      return await handleCEOBrief(supabase, lovableKey, corsHeaders, authenticatedUserId, companyId);
+    
+    if (action === "execute_decisions") 
+      return await handleExecuteDecisions(supabase, body, corsHeaders, authenticatedUserId, companyId);
+    
+    if (action === "autopilot_run") 
+      return await handleAutoPilotRun(supabase, lovableKey, corsHeaders, companyId);
+
+    return await handleDashboardData(supabase, corsHeaders, months, segment, companyId);
   } catch (e) {
     console.error("ai-executive error:", e);
     return new Response(JSON.stringify({ error: `Internal error: ${e.message}` }), {
