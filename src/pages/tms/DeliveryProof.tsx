@@ -1,7 +1,7 @@
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
-import { useDeliveryProof } from '@/hooks/wms/useTMS';
+import { useTMS } from '@/hooks/operational/useTMSQuery';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Badge } from '@/ui/base/badge';
 import { format } from 'date-fns';
@@ -10,7 +10,7 @@ const statusLabels: Record<string, string> = { pending: 'Pendente', delivered: '
 const statusColors: Record<string, string> = { pending: 'secondary', delivered: 'default', refused: 'destructive', partial: 'outline' };
 
 const DeliveryProofPage = () => {
-  const { proofs, loading } = useDeliveryProof();
+  const { proofs, proofsLoading: loading } = useTMS();
 
   if (loading) return <PageLoading />;
 
