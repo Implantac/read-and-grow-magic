@@ -2,7 +2,7 @@ import { PageContainer } from '@/shared/components/PageContainer';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
-import { Badge } from '@/ui/base/badge';
+import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Button } from '@/ui/base/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { useConferenceRecords } from '@/hooks/commercial/useOrderFlow';
@@ -13,14 +13,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { CheckCircle, Clock, AlertTriangle, ClipboardCheck, Play } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-
-const conferenceStatusConfig: Record<string, { label: string; color: string }> = {
-  pending: { label: 'Pendente', color: 'bg-warning/10 text-warning' },
-  in_progress: { label: 'Em Conferência', color: 'bg-info/10 text-info' },
-  completed: { label: 'Concluída', color: 'bg-success/10 text-success' },
-  divergent: { label: 'Divergente', color: 'bg-destructive/10 text-destructive' },
-  approved: { label: 'Aprovada', color: 'bg-success/10 text-success' },
-};
 
 export default function ConferenceQueue() {
   const { data: conferences, isLoading } = useConferenceRecords();
@@ -37,7 +29,7 @@ export default function ConferenceQueue() {
     }
     const { error } = await supabase.from('conference_records').update(updates).eq('id', id);
     if (error) { toastError(error.message); return; }
-    toastSuccess(`Conferência ${conferenceStatusConfig[status]?.label || status}`);
+    toastSuccess(`Conferência atualizada com sucesso`);
     qc.invalidateQueries({ queryKey: ['conference-records'] });
 
     // When conference is completed/approved, advance order to conferenced → awaiting_billing
@@ -102,11 +94,10 @@ export default function ConferenceQueue() {
               ) : !conferences?.length ? (
                 <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhuma conferência na fila</TableCell></TableRow>
               ) : conferences.map((c: any) => {
-                const sc = conferenceStatusConfig[c.status] || { label: c.status, color: '' };
                 return (
                   <TableRow key={c.id}>
                     <TableCell className="font-mono">{c.conference_number}</TableCell>
-                    <TableCell><Badge variant="outline" className={cn('font-medium border', sc.color)}>{sc.label}</Badge></TableCell>
+                    <TableCell><StatusBadge status={c.status} type="order" /></TableCell>
                     <TableCell>{c.total_items}</TableCell>
                     <TableCell>{c.checked_items}</TableCell>
                     <TableCell>{c.divergent_items > 0 ? <span className="text-destructive font-medium">{c.divergent_items}</span> : 0}</TableCell>

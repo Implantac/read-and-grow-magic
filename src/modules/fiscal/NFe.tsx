@@ -53,6 +53,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/ui/base/select';
+import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Badge } from '@/ui/base/badge';
 import { Separator } from '@/ui/base/separator';
 import { useFiscal } from '@/hooks/fiscal/useFiscal';
@@ -64,14 +65,6 @@ import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 
-const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ className?: string }> }> = {
-  draft: { color: 'bg-muted text-muted-foreground', icon: FileText },
-  pending: { color: 'bg-warning/10 text-warning', icon: Clock },
-  authorized: { color: 'bg-success/10 text-success', icon: CheckCircle },
-  rejected: { color: 'bg-destructive/10 text-destructive', icon: AlertTriangle },
-  cancelled: { color: 'bg-muted text-muted-foreground', icon: Ban },
-  denied: { color: 'bg-destructive/10 text-destructive', icon: XCircle },
-};
 
 export default function NFePage() {
   const { nfes, nfesLoading: loading, transmitNFe: transmit, cancelNFe: cancel } = useFiscal();
@@ -141,14 +134,7 @@ export default function NFePage() {
   };
 
   const renderStatusBadge = (status: string) => {
-    const config = statusConfig[status];
-    const Icon = config?.icon || FileText;
-    return (
-      <Badge className={`${config?.color} gap-1`}>
-        <Icon className="h-3 w-3" />
-        {nfeStatusLabels[status] || status}
-      </Badge>
-    );
+    return <StatusBadge status={status} type="nfe" />;
   };
 
   return (
