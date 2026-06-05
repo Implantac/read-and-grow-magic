@@ -147,7 +147,7 @@ export default function AccountsPayable() {
     const ids = Array.from(selectedIds);
     if (ids.length === 0) return;
     batchPay.mutate(
-      { ids, bank_account_id: batchForm.bankAccountId, payment_method: batchForm.paymentMethod, notes: batchForm.notes || undefined },
+      { ids: Array.from(selectedIds), bank_account_id: batchForm.bankAccountId, payment_method: batchForm.paymentMethod, notes: batchForm.notes || undefined },
       { onSuccess: () => { setIsBatchPayOpen(false); setSelectedIds(new Set()); setBatchForm({ paymentMethod: 'pix', bankAccountId: '', notes: '' }); } }
     );
   };
