@@ -1584,8 +1584,8 @@ function suggestDecisions(ctx: any, forecast: any, risks: any[]) {
   return decisions;
 }
 
-export async function handleCEOBrief(supabase: any, lovableKey: string, corsHeaders: any) {
-  const data = await fetchAllData(supabase);
+export async function handleCEOBrief(supabase: any, lovableKey: string, corsHeaders: any, authenticatedUserId?: string, companyId?: string) {
+  const data = await fetchAllData(supabase, companyId);
   const kpis = computeKPIs(data);
   const ctx = buildContext(data, kpis);
   const forecast = predictRevenue(kpis.revenueByMonth || []);
