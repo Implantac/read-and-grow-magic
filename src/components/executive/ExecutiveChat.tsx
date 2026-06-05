@@ -126,7 +126,7 @@ export function ExecutiveChat({ messages, isLoading, sendMessage, clearChat, onD
                 </p>
                 <div className="grid gap-2 grid-cols-2 max-w-lg">
                   {quickActions.slice(0, 6).map(a => (
-                    <Button key={a.label} variant="outline" size="sm" className="text-xs h-auto py-2" onClick={() => sendMessage(a.prompt)}>
+                    <Button key={a.label} variant="outline" size="sm" className="text-[10px] h-auto py-2 px-1 whitespace-normal break-words" onClick={() => sendMessage(a.prompt)}>
                       {a.label}
                     </Button>
                   ))}
@@ -181,7 +181,7 @@ export function ExecutiveChat({ messages, isLoading, sendMessage, clearChat, onD
           {/* Mobile quick actions */}
           <div className="lg:hidden border-t px-3 py-2 flex gap-1.5 overflow-x-auto">
             {quickActions.slice(0, 4).map((a, i) => (
-              <Button key={i} variant="outline" size="sm" className="text-[10px] shrink-0 h-7 px-2" onClick={() => !isLoading && sendMessage(a.prompt)} disabled={isLoading}>
+              <Button key={i} variant="outline" size="sm" className="text-[10px] shrink-0 h-7 px-2 max-w-[120px] truncate" onClick={() => !isLoading && sendMessage(a.prompt)} disabled={isLoading}>
                 {a.label}
               </Button>
             ))}

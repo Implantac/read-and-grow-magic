@@ -162,7 +162,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
       if (changed) setItems(updated);
     };
     if (items.length > 0) calcAll();
-  }, [items.length, items.map((i) => `${i.cfop}-${i.quantity}-${i.unitPrice}-${i.ncm}`).join('|'), clientUF, taxRulesQuery.data, currentCompany]);
+  }, [items.length, items.map((i) => `${i.cfop}-${i.quantity}-${i.unitPrice}-${i.ncm}`).join('|'), clientUF, taxRules, currentCompany?.tax_regime]);
 
   const clientOptions: SmartSelectOption[] = useMemo(
     () => clients.map((c) => ({
