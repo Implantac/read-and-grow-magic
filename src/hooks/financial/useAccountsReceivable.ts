@@ -11,7 +11,7 @@ export function useAccountsReceivable() {
 export function useCreateAccountReceivable() {
   const queryClient = useQueryClient();
   return useSupabaseMutation(
-    (account: Partial<AccountReceivable> & { description: string; client_name: string; due_date: string; amount: number }) => 
+    (account: Partial<AccountReceivable>) => 
       financialService.createReceivable(account),
     {
       onSuccess: () => {

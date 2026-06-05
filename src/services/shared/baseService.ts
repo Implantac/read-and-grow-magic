@@ -6,7 +6,6 @@ type TableName = keyof PublicSchema['Tables'];
 
 /**
  * Base Service with generic CRUD operations.
- * Use 'any' casts internally to avoid TS excessive complexity with large Supabase schemas.
  */
 export class BaseService<T extends TableName> {
   constructor(protected tableName: T) {}
@@ -25,7 +24,7 @@ export class BaseService<T extends TableName> {
 
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
-        if (value !== undefined) {
+        if (value !== undefined && value !== null) {
           query = query.eq(key as any, value);
         }
       });
@@ -38,9 +37,8 @@ export class BaseService<T extends TableName> {
     }
 
     const { data, error } = await query;
-
     if (error) throw error;
-    return data as any[];
+    return (data || []) as any[];
   }
 
   async getById(id: string) {
@@ -48,7 +46,7 @@ export class BaseService<T extends TableName> {
       .from(this.tableName)
       .select('*')
       .eq('id' as any, id)
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     return data as any;
@@ -57,7 +55,7 @@ export class BaseService<T extends TableName> {
   async create(item: any) {
     const { data, error } = await supabase
       .from(this.tableName)
-      .insert(item)
+      .insert(item as any)
       .select()
       .single();
 
@@ -68,7 +66,7 @@ export class BaseService<T extends TableName> {
   async update(id: string, updates: any) {
     const { data, error } = await supabase
       .from(this.tableName)
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .update({ ...updates, updated_at: new Date().toISOString() } as any)
       .eq('id' as any, id)
       .select()
       .single();
@@ -86,3 +84,4 @@ export class BaseService<T extends TableName> {
     if (error) throw error;
   }
 }
+
