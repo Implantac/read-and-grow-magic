@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { useProductionOrders } from '@/hooks/production/useProductionOrders';
+import { useProduction } from '@/hooks/production/useProduction';
 import { useProductionOrderSteps } from '@/hooks/production/useProductionSteps';
 import { useProductionLogs } from '@/hooks/production/useProductionLogs';
+
 import { ExportButton } from '@/shared/components/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
@@ -44,7 +45,7 @@ const priorityConfig: Record<string, { label: string; color: string }> = {
 };
 
 export default function ProductionOrdersPage() {
-  const { orders, loading, update: updateOrder } = useProductionOrders();
+  const { orders, ordersLoading: loading, updateOrderStatus: updateOrder } = useProduction();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
@@ -69,17 +70,18 @@ export default function ProductionOrdersPage() {
 
   const handleViewDetails = (order: ProductionOrderRow) => { setSelectedOrder(order); setDetailsOpen(true); };
   const handleStartProduction = async (order: ProductionOrderRow) => {
-    await updateOrder(order.id, { status: 'in_progress', operator: 'Usuário Atual', start_date: new Date().toISOString() });
+    await updateOrder({ id: order.id, status: 'in_progress' });
   };
   const handlePauseProduction = async (order: ProductionOrderRow) => {
-    await updateOrder(order.id, { status: 'paused' });
+    await updateOrder({ id: order.id, status: 'paused' });
   };
   const handleResumeProduction = async (order: ProductionOrderRow) => {
-    await updateOrder(order.id, { status: 'in_progress' });
+    await updateOrder({ id: order.id, status: 'in_progress' });
   };
   const handleCompleteProduction = async (order: ProductionOrderRow) => {
-    await updateOrder(order.id, { status: 'completed', completed_date: new Date().toISOString(), produced_quantity: order.quantity });
+    await updateOrder({ id: order.id, status: 'completed' });
   };
+
 
   const getProgress = (o: ProductionOrderRow) => o.quantity > 0 ? Math.round((o.produced_quantity / o.quantity) * 100) : 0;
   const isLate = (o: ProductionOrderRow) => o.due_date && differenceInDays(new Date(), parseISO(o.due_date)) > 0 && !['completed', 'cancelled'].includes(o.status);
