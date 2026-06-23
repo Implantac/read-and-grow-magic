@@ -2,58 +2,38 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Card, CardContent } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
-import { Progress } from '@/ui/base/progress';
 import { Button } from '@/ui/base/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Input } from '@/ui/base/input';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/base/tooltip';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/ui/base/dialog';
-import { ScrollArea } from '@/ui/base/scroll-area';
-import { useProductionOrders } from '@/hooks/production/useProductionOrders';
-import { useProductionTimeLogs, formatElapsed } from '@/hooks/production/useProductionTimeLogs';
-import { useOutsourcingOrders } from '@/hooks/production/useOutsourcingOrders';
-import { priorityConfig } from '@/config/production';
 import { Skeleton } from '@/ui/base/skeleton';
 import { KPICard } from '@/shared/components/KPICard';
-import { supabase } from '@/integrations/supabase/client';
-import { formatBRL, formatNumber } from '@/lib/formatters';
-import {
-  ArrowRight, Clock, Factory, CheckCircle, Pause, AlertTriangle,
-  Search, Package, TrendingUp, GripVertical, User, Calendar,
-  PackageX, Truck, Wrench, Star, Swords, RefreshCw, Zap, Shield, Lightbulb, ListOrdered,
-  Play, Square, Timer, Activity, DollarSign, Layers
-} from 'lucide-react';
+import { useProductionOrders } from '@/hooks/production/useProductionOrders';
+import { useProductionTimeLogs } from '@/hooks/production/useProductionTimeLogs';
+import { useOutsourcingOrders } from '@/hooks/production/useOutsourcingOrders';
 import { usePCPIntelligence } from '@/hooks/production/usePCPIntelligence';
-import { WarModeService, type WarModeResult as LocalWarModeResult } from '@/lib/pcpServices';
 import { useTechnicalSheets } from '@/hooks/production/useTechnicalSheets';
 import { useSupplyStock } from '@/hooks/inventory/useSupplyStock';
 import { useProductionCapacity } from '@/hooks/production/useProductionCapacity';
 import { useWorkCenters } from '@/hooks/production/useWorkCenters';
-import { QRCodeOPButton } from '@/components/production/QRCodeOP';
-import { format, parseISO, differenceInDays } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
+import { formatBRL, formatNumber } from '@/lib/formatters';
+import { WarModeService } from '@/lib/pcpServices';
 import { cn } from '@/lib/utils';
+import { parseISO, differenceInDays } from 'date-fns';
 import { toast } from 'sonner';
+import {
+  Activity, AlertTriangle, Factory, Layers, ListOrdered, PackageX, RefreshCw,
+  Search, Star, Swords, TrendingUp, Truck,
+} from 'lucide-react';
 
-const KANBAN_COLUMNS = [
-  { key: 'planned', label: 'Planejado', icon: Clock, gradient: 'from-blue-500/10 to-blue-600/5', border: 'border-blue-500/40', badge: 'bg-blue-500/20 text-blue-300' },
-  { key: 'waiting_material', label: 'Aguardando Material', icon: PackageX, gradient: 'from-purple-500/10 to-purple-600/5', border: 'border-purple-500/40', badge: 'bg-purple-500/20 text-purple-300' },
-  { key: 'in_progress', label: 'Em Produção', icon: Factory, gradient: 'from-amber-500/10 to-yellow-600/5', border: 'border-amber-500/40', badge: 'bg-amber-500/20 text-amber-300' },
-  { key: 'outsourced', label: 'Terceirizado', icon: Truck, gradient: 'from-indigo-500/10 to-indigo-600/5', border: 'border-indigo-500/40', badge: 'bg-indigo-500/20 text-indigo-300' },
-  { key: 'finishing', label: 'Finalização', icon: Wrench, gradient: 'from-teal-500/10 to-teal-600/5', border: 'border-teal-500/40', badge: 'bg-teal-500/20 text-teal-300' },
-  { key: 'completed', label: 'Concluído', icon: CheckCircle, gradient: 'from-emerald-500/10 to-green-600/5', border: 'border-emerald-500/40', badge: 'bg-emerald-500/20 text-emerald-300' },
-];
+import { KANBAN_COLUMNS, VALID_TRANSITIONS, STATUS_LABELS } from './kanban/constants';
+import { KanbanCard } from './kanban/KanbanCard';
+import { WarModeDialog } from './kanban/WarModeDialog';
+import { SequenceDialog } from './kanban/SequenceDialog';
+import { BottleneckDialog } from './kanban/BottleneckDialog';
 
-const VALID_TRANSITIONS: Record<string, string[]> = {
-  planned: ['waiting_material', 'in_progress', 'outsourced'],
-  waiting_material: ['planned', 'in_progress'],
-  in_progress: ['paused', 'outsourced', 'finishing', 'completed'],
-  outsourced: ['in_progress', 'finishing'],
-  paused: ['in_progress'],
-  finishing: ['completed', 'in_progress'],
-  completed: [],
-};
 
 export default function ProductionKanban() {
   const { orders, loading, update, refetch } = useProductionOrders();
@@ -63,6 +43,8 @@ export default function ProductionKanban() {
   const [sectorFilter, setSectorFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
   const [wipLimits, setWipLimits] = useState<Record<string, number>>({});
+
+  // Dialog state
   const [warModeOpen, setWarModeOpen] = useState(false);
   const [warModeResult, setWarModeResult] = useState<any>(null);
   const [warModeLoading, setWarModeLoading] = useState(false);
@@ -75,8 +57,9 @@ export default function ProductionKanban() {
   const [bottleneckLoading, setBottleneckLoading] = useState(false);
   const [bottleneckOpen, setBottleneckOpen] = useState(false);
 
-  const { sheets } = useTechnicalSheets();
-  const { supplies } = useSupplyStock();
+  // Preserve original hook calls to keep cache warmups identical.
+  useTechnicalSheets();
+  useSupplyStock();
   const { capacities } = useProductionCapacity();
   const { workCenters } = useWorkCenters();
   const intelligence = usePCPIntelligence();
@@ -118,22 +101,25 @@ export default function ProductionKanban() {
     })();
   }, []);
 
-  const sectors = useMemo(() => [...new Set(orders.map(o => o.sector || o.work_center).filter(Boolean))], [orders]);
+  const sectors = useMemo(
+    () => [...new Set(orders.map(o => o.sector || o.work_center).filter(Boolean))],
+    [orders],
+  );
 
   const filteredOrders = useMemo(() => {
     return orders.filter(o => {
       if (o.status === 'cancelled' || o.status === 'draft') return false;
-      const matchSearch = !searchTerm ||
-        o.order_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        o.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (o.client_name || '').toLowerCase().includes(searchTerm.toLowerCase());
+      const term = searchTerm.toLowerCase();
+      const matchSearch = !term ||
+        o.order_number.toLowerCase().includes(term) ||
+        o.product_name.toLowerCase().includes(term) ||
+        (o.client_name || '').toLowerCase().includes(term);
       const matchSector = sectorFilter === 'all' || o.sector === sectorFilter || o.work_center === sectorFilter;
       const matchPriority = priorityFilter === 'all' || o.priority === priorityFilter;
       return matchSearch && matchSector && matchPriority;
     });
   }, [orders, searchTerm, sectorFilter, priorityFilter]);
 
-  // Map outsourcing data to OPs
   const outsourcingByOP = useMemo(() => {
     const map: Record<string, typeof outsourcingOrders> = {};
     outsourcingOrders.forEach(oo => {
@@ -144,13 +130,12 @@ export default function ProductionKanban() {
   }, [outsourcingOrders]);
 
   const columns = useMemo(() => {
+    const pMap: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
     return KANBAN_COLUMNS.map(col => ({
       ...col,
       items: filteredOrders.filter(o => o.status === col.key)
         .sort((a, b) => {
-          // Sort by priority_score first (desc), then by priority enum, then by due_date
           if ((b.priority_score || 0) !== (a.priority_score || 0)) return (b.priority_score || 0) - (a.priority_score || 0);
-          const pMap: Record<string, number> = { urgent: 0, high: 1, medium: 2, low: 3 };
           const pDiff = (pMap[a.priority] ?? 9) - (pMap[b.priority] ?? 9);
           if (pDiff !== 0) return pDiff;
           if (a.due_date && b.due_date) return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
@@ -166,7 +151,6 @@ export default function ProductionKanban() {
   const completedToday = orders.filter(o => o.status === 'completed' && o.completed_date && new Date(o.completed_date).toDateString() === new Date().toDateString()).length;
   const waitingMaterialCount = orders.filter(o => o.status === 'waiting_material').length;
 
-  // Capacity load per work center
   const capacityLoad = useMemo(() => {
     const load: Record<string, { name: string; capacity: number; allocated: number }> = {};
     workCenters.filter(wc => wc.is_active).forEach(wc => {
@@ -174,14 +158,11 @@ export default function ProductionKanban() {
     });
     orders.filter(o => ['planned', 'in_progress', 'waiting_material'].includes(o.status)).forEach(o => {
       const wcId = (o as any).work_center_id;
-      if (wcId && load[wcId]) {
-        load[wcId].allocated += o.quantity;
-      }
+      if (wcId && load[wcId]) load[wcId].allocated += o.quantity;
     });
     return load;
   }, [workCenters, orders]);
 
-  // WIP (Work In Progress) metrics
   const wipMetrics = useMemo(() => {
     const wipStatuses = ['planned', 'waiting_material', 'in_progress', 'outsourced', 'finishing', 'paused'];
     const wipOrders = orders.filter(o => wipStatuses.includes(o.status));
@@ -205,7 +186,6 @@ export default function ProductionKanban() {
   }, [orders, productCosts]);
 
   const moveOrder = useCallback(async (orderId: string, newStatus: string) => {
-    // Capacity alert (non-blocking)
     const order = orders.find(o => o.id === orderId);
     const wcId = order && (order as any).work_center_id;
     if (wcId && capacityLoad[wcId]) {
@@ -230,23 +210,18 @@ export default function ProductionKanban() {
     const order = orders.find(o => o.id === draggableId);
     if (!order || order.status === newStatus) return;
 
-    const statusLabels: Record<string, string> = {};
-    KANBAN_COLUMNS.forEach(c => { statusLabels[c.key] = c.label; });
-    statusLabels['paused'] = 'Pausada';
-
     if (!VALID_TRANSITIONS[order.status]?.includes(newStatus)) {
-      toast.error(`Transição inválida: "${statusLabels[order.status] || order.status}" → "${statusLabels[newStatus] || newStatus}"`, {
-        description: `De "${statusLabels[order.status]}" você pode ir para: ${(VALID_TRANSITIONS[order.status] || []).map(s => statusLabels[s] || s).join(', ') || 'nenhum'}.`,
+      toast.error(`Transição inválida: "${STATUS_LABELS[order.status] || order.status}" → "${STATUS_LABELS[newStatus] || newStatus}"`, {
+        description: `De "${STATUS_LABELS[order.status]}" você pode ir para: ${(VALID_TRANSITIONS[order.status] || []).map(s => STATUS_LABELS[s] || s).join(', ') || 'nenhum'}.`,
       });
       return;
     }
 
-    // WIP limit check
     const wipLimit = wipLimits[newStatus];
     if (wipLimit && wipLimit > 0) {
       const currentCount = orders.filter(o => o.status === newStatus).length;
       if (currentCount >= wipLimit) {
-        toast.warning(`Limite WIP atingido para "${statusLabels[newStatus]}"`, {
+        toast.warning(`Limite WIP atingido para "${STATUS_LABELS[newStatus]}"`, {
           description: `Máximo de ${wipLimit} OPs. Remova uma antes de adicionar.`,
         });
         return;
@@ -254,13 +229,12 @@ export default function ProductionKanban() {
     }
 
     await moveOrder(draggableId, newStatus);
-    toast.success(`OP ${order.order_number} movida para ${statusLabels[newStatus]}`);
+    toast.success(`OP ${order.order_number} movida para ${STATUS_LABELS[newStatus]}`);
   }, [orders, moveOrder, wipLimits]);
 
-  // Suggestions
   const suggestions = useMemo(() => {
     const list: { icon: string; text: string; severity: 'critical' | 'warning' | 'info' }[] = [];
-    
+
     orders.filter(o => o.due_date && differenceInDays(new Date(), parseISO(o.due_date)) > 0 && !['completed', 'cancelled'].includes(o.status))
       .slice(0, 3).forEach(o => {
         list.push({ icon: '🔴', text: `OP ${o.order_number} atrasada ${differenceInDays(new Date(), parseISO(o.due_date))}d → priorizar`, severity: 'critical' });
@@ -274,7 +248,6 @@ export default function ProductionKanban() {
       list.push({ icon: '📦', text: `OP ${o.order_number} aguardando material → verificar estoque`, severity: 'info' });
     });
 
-    // Capacity alerts
     Object.values(capacityLoad).forEach(cl => {
       const pct = cl.capacity > 0 ? (cl.allocated / cl.capacity) * 100 : 0;
       if (pct > 100) {
@@ -284,14 +257,12 @@ export default function ProductionKanban() {
       }
     });
 
-    // WIP limit warnings
     columns.forEach(col => {
       if (col.wipLimit > 0 && col.items.length >= col.wipLimit * 0.9 && col.items.length < col.wipLimit) {
         list.push({ icon: '⚡', text: `"${col.label}" próximo do limite WIP (${col.items.length}/${col.wipLimit})`, severity: 'warning' });
       }
     });
 
-    // WIP excess alerts
     if (wipMetrics.totalCost > 0) {
       Object.entries(wipMetrics.byColumn).forEach(([status, data]) => {
         if (data.count > 10) {
@@ -304,13 +275,11 @@ export default function ProductionKanban() {
     return list;
   }, [orders, lateOutsourcing, columns, capacityLoad, wipMetrics]);
 
-  // Recalculate priorities
+  // ---- Actions ----
   const handleRecalculate = async () => {
     setRecalculating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('pcp-priority', {
-        body: { action: 'recalculate' },
-      });
+      const { data, error } = await supabase.functions.invoke('pcp-priority', { body: { action: 'recalculate' } });
       if (error) throw error;
       toast.success(`Prioridades recalculadas: ${data.ordersUpdated} OPs atualizadas`);
       await refetch();
@@ -322,20 +291,12 @@ export default function ProductionKanban() {
     }
   };
 
-  // War Mode
   const handleWarMode = async () => {
     setWarModeLoading(true);
     try {
-      // Use local WarModeService for rich analysis (kanbanReorg, criticalAlerts)
       const localResult = WarModeService.execute(orders, intelligence.materialNeeds, capacities);
-      
-      // Also call edge function for server-side score calculation
-      const { data, error } = await supabase.functions.invoke('pcp-priority', {
-        body: { action: 'war_mode', confirm: false },
-      });
+      const { data, error } = await supabase.functions.invoke('pcp-priority', { body: { action: 'war_mode', confirm: false } });
       if (error) throw error;
-      
-      // Merge: use edge function scores + local kanbanReorg and criticalAlerts
       setWarModeResult({
         ...data,
         kanbanReorg: localResult.kanbanReorg,
@@ -354,28 +315,23 @@ export default function ProductionKanban() {
   const handleConfirmWarMode = async () => {
     setWarModeLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('pcp-priority', {
-        body: { action: 'war_mode', confirm: true },
-      });
+      const { data, error } = await supabase.functions.invoke('pcp-priority', { body: { action: 'war_mode', confirm: true } });
       if (error) throw error;
       toast.success(`Modo Guerra aplicado: ${data.priorityChanges?.length || 0} OPs repriorizadas`);
       setWarModeOpen(false);
       setWarModeResult(null);
       await refetch();
-    } catch (e: any) {
+    } catch {
       toast.error('Erro ao aplicar Modo Guerra');
     } finally {
       setWarModeLoading(false);
     }
   };
 
-  // Optimize Sequence
   const handleOptimizeSequence = async () => {
     setSequenceLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('pcp-schedule', {
-        body: { action: 'suggest' },
-      });
+      const { data, error } = await supabase.functions.invoke('pcp-schedule', { body: { action: 'suggest' } });
       if (error) throw error;
       setSequenceResult(data);
       setSequenceOpen(true);
@@ -390,15 +346,13 @@ export default function ProductionKanban() {
   const handleApplySequence = async () => {
     setApplyingSequence(true);
     try {
-      const { data, error } = await supabase.functions.invoke('pcp-schedule', {
-        body: { action: 'apply' },
-      });
+      const { data, error } = await supabase.functions.invoke('pcp-schedule', { body: { action: 'apply' } });
       if (error) throw error;
       toast.success(`Sequência aplicada: ${data.ordersUpdated} OPs atualizadas`);
       setSequenceOpen(false);
       setSequenceResult(null);
       await refetch();
-    } catch (e: any) {
+    } catch {
       toast.error('Erro ao aplicar sequência');
     } finally {
       setApplyingSequence(false);
@@ -501,7 +455,11 @@ export default function ProductionKanban() {
             </div>
             <div className="space-y-1">
               {suggestions.map((s, i) => (
-                <p key={i} className={cn('text-xs', s.severity === 'critical' ? 'text-destructive font-medium' : s.severity === 'warning' ? 'text-warning' : 'text-muted-foreground')}>
+                <p key={i} className={cn(
+                  'text-xs',
+                  s.severity === 'critical' ? 'text-destructive font-medium'
+                    : s.severity === 'warning' ? 'text-warning' : 'text-muted-foreground'
+                )}>
                   {s.icon} {s.text}
                 </p>
               ))}
@@ -610,493 +568,27 @@ export default function ProductionKanban() {
         </div>
       </DragDropContext>
 
-      {/* War Mode Dialog */}
-      <Dialog open={warModeOpen} onOpenChange={setWarModeOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-destructive">
-              <Swords className="h-5 w-5" /> Modo Guerra — Resultado da Análise
-            </DialogTitle>
-            <DialogDescription>
-              Revisão completa de prioridades, movimentações sugeridas e alertas críticos.
-            </DialogDescription>
-          </DialogHeader>
-          {warModeResult && (
-            <ScrollArea className="max-h-[50vh] pr-4">
-              <div className="space-y-4">
-                <p className="text-sm font-medium">{warModeResult.summary}</p>
+      <WarModeDialog
+        open={warModeOpen}
+        onOpenChange={setWarModeOpen}
+        result={warModeResult}
+        loading={warModeLoading}
+        onConfirm={handleConfirmWarMode}
+      />
 
-                {/* Critical Alerts */}
-                {warModeResult.criticalAlerts?.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1 text-destructive">
-                      <AlertTriangle className="h-4 w-4" /> Alertas Críticos
-                    </h4>
-                    <div className="space-y-1">
-                      {warModeResult.criticalAlerts.map((alert: string, i: number) => (
-                        <p key={i} className="text-xs text-destructive bg-destructive/10 p-2 rounded">🔴 {alert}</p>
-                      ))}
-                    </div>
-                  </div>
-                )}
+      <SequenceDialog
+        open={sequenceOpen}
+        onOpenChange={setSequenceOpen}
+        result={sequenceResult}
+        applying={applyingSequence}
+        onApply={handleApplySequence}
+      />
 
-                {/* Priority changes */}
-                {warModeResult.priorityChanges?.length > 0 ? (
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
-                      <Zap className="h-4 w-4 text-warning" /> Repriorização ({warModeResult.priorityChanges.length})
-                    </h4>
-                    <div className="space-y-1.5">
-                      {warModeResult.priorityChanges.map((c: any, i: number) => (
-                        <div key={i} className="p-2 rounded-lg bg-muted text-xs flex items-center justify-between">
-                          <div>
-                            <span className="font-mono font-medium">{c.order_number}</span>
-                            <span className="text-muted-foreground ml-2">Score: {c.score}</span>
-                            {c.factors?.length > 0 && (
-                              <p className="text-[10px] text-muted-foreground mt-0.5">{c.factors.join(' · ')}</p>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Badge variant="outline" className="text-[10px]">{c.oldPriority}</Badge>
-                            <ArrowRight className="h-3 w-3" />
-                            <Badge variant={c.newPriority === 'urgent' ? 'destructive' : 'default'} className="text-[10px]">{c.newPriority}</Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">✅ Todas as prioridades já estão corretas.</p>
-                )}
-
-                {/* Kanban Reorganization Suggestions */}
-                {warModeResult.kanbanReorg?.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
-                      <ArrowRight className="h-4 w-4 text-primary" /> Movimentações Sugeridas ({warModeResult.kanbanReorg.length})
-                    </h4>
-                    <div className="space-y-1.5">
-                      {warModeResult.kanbanReorg.map((r: any, i: number) => (
-                        <div key={i} className="p-2 rounded-lg bg-primary/5 text-xs flex items-center justify-between">
-                          <div>
-                            <span className="font-mono font-medium">{r.opNumber}</span>
-                            <span className="text-muted-foreground ml-2">→ {r.suggestedStatus}</span>
-                          </div>
-                          <span className="text-[10px] text-muted-foreground">{r.reason}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setWarModeOpen(false)}>Cancelar</Button>
-            <Button variant="destructive" onClick={handleConfirmWarMode} disabled={warModeLoading || !warModeResult?.priorityChanges?.length}>
-              <Swords className="h-4 w-4 mr-1" />
-              {warModeLoading ? 'Aplicando...' : 'Confirmar e Aplicar'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Sequence Optimization Dialog */}
-      <Dialog open={sequenceOpen} onOpenChange={setSequenceOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ListOrdered className="h-5 w-5 text-primary" /> Sequência Otimizada — Sugestão
-            </DialogTitle>
-            <DialogDescription>
-              Agrupamento por similaridade de produto para reduzir trocas de setup.
-            </DialogDescription>
-          </DialogHeader>
-          {sequenceResult && (
-            <ScrollArea className="max-h-[50vh] pr-4">
-              <div className="space-y-4">
-                <div className="grid grid-cols-3 gap-3">
-                  <Card className="border-primary/30 bg-primary/5">
-                    <CardContent className="py-3 px-4 text-center">
-                      <p className="text-2xl font-bold text-primary">{sequenceResult.totalOrders}</p>
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">OPs Sequenciadas</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-emerald-500/30 bg-emerald-500/5">
-                    <CardContent className="py-3 px-4 text-center">
-                      <p className="text-2xl font-bold text-emerald-400">{sequenceResult.totalGroups}</p>
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Grupos Similares</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-warning/30 bg-warning/5">
-                    <CardContent className="py-3 px-4 text-center">
-                      <p className="text-2xl font-bold text-warning">{sequenceResult.setupReduction}</p>
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Redução Setup</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <p className="text-sm font-medium">{sequenceResult.summary}</p>
-
-                <div className="space-y-1.5">
-                  {sequenceResult.sequence?.map((s: any) => (
-                    <div key={s.id} className={cn(
-                      'p-2.5 rounded-lg text-xs flex items-center gap-3',
-                      s.setup_change ? 'bg-warning/10 border border-warning/20' : 'bg-muted/50'
-                    )}>
-                      <span className="font-mono font-bold text-primary w-8 text-center">{s.sequence}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono font-medium">{s.order_number}</span>
-                          <span className="text-muted-foreground truncate">{s.product_name}</span>
-                        </div>
-                        <div className="flex items-center gap-2 mt-0.5 text-[10px] text-muted-foreground">
-                          {s.color && <span>Cor: {s.color}</span>}
-                          {s.model_variant && <span>Modelo: {s.model_variant}</span>}
-                          {s.sector && <span>Setor: {s.sector}</span>}
-                          {s.due_date && <span>Prazo: {format(parseISO(s.due_date), 'dd/MM')}</span>}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <Badge variant="outline" className="text-[9px] font-mono">{s.priority}</Badge>
-                        <Badge variant="outline" className="text-[9px] font-mono">
-                          <Shield className="h-2.5 w-2.5 mr-0.5" />{s.sequence_score}
-                        </Badge>
-                      </div>
-                      {s.setup_change && (
-                        <Badge className="text-[9px] bg-warning/20 text-warning shrink-0">🔧 Setup</Badge>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </ScrollArea>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSequenceOpen(false)}>Fechar</Button>
-            <Button onClick={handleApplySequence} disabled={applyingSequence || !sequenceResult?.sequence?.length}>
-              <ListOrdered className="h-4 w-4 mr-1" />
-              {applyingSequence ? 'Aplicando...' : 'Aplicar Sequência'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Bottleneck Dialog */}
-      <Dialog open={bottleneckOpen} onOpenChange={setBottleneckOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-destructive" /> Gargalos da Produção
-            </DialogTitle>
-            <DialogDescription>
-              Análise automática baseada em tempo real, etapas e filas de produção.
-            </DialogDescription>
-          </DialogHeader>
-          {bottleneckData && (
-            <ScrollArea className="max-h-[55vh] pr-4">
-              <div className="space-y-4">
-                <p className="text-sm font-medium">{bottleneckData.summary}</p>
-
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <Card className="border-primary/30 bg-primary/5">
-                    <CardContent className="py-3 px-2">
-                      <p className="text-2xl font-bold text-primary">{bottleneckData.totalEntriesAnalyzed}</p>
-                      <p className="text-[10px] text-muted-foreground uppercase">Apontamentos</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-warning/30 bg-warning/5">
-                    <CardContent className="py-3 px-2">
-                      <p className="text-2xl font-bold text-warning">{bottleneckData.totalStepsAnalyzed}</p>
-                      <p className="text-[10px] text-muted-foreground uppercase">Etapas</p>
-                    </CardContent>
-                  </Card>
-                  <Card className="border-destructive/30 bg-destructive/5">
-                    <CardContent className="py-3 px-2">
-                      <p className="text-2xl font-bold text-destructive">{bottleneckData.totalOrdersActive}</p>
-                      <p className="text-[10px] text-muted-foreground uppercase">OPs Ativas</p>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                {/* Work Center Bottlenecks */}
-                {bottleneckData.workCenterBottlenecks?.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
-                      <Factory className="h-4 w-4 text-destructive" /> Centros com Maior Tempo Médio
-                    </h4>
-                    <div className="space-y-1.5">
-                      {bottleneckData.workCenterBottlenecks.map((b: any, i: number) => (
-                        <div key={i} className={cn(
-                          'p-2.5 rounded-lg text-xs flex items-center justify-between',
-                          i === 0 ? 'bg-destructive/10 border border-destructive/20' : 'bg-muted/50'
-                        )}>
-                          <div>
-                            <span className="font-medium">{b.name}</span>
-                            <span className="text-muted-foreground ml-2">({b.entries} registros)</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant={i === 0 ? 'destructive' : 'outline'} className="text-[10px]">
-                              <Clock className="h-2.5 w-2.5 mr-0.5" /> {b.avgMinutes}min
-                            </Badge>
-                            {b.rejectRate > 0 && (
-                              <Badge className="text-[10px] bg-warning/20 text-warning">
-                                {b.rejectRate}% refugo
-                              </Badge>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Step Bottlenecks */}
-                {bottleneckData.stepBottlenecks?.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
-                      <AlertTriangle className="h-4 w-4 text-warning" /> Etapas que Excedem Estimativa
-                    </h4>
-                    <div className="space-y-1.5">
-                      {bottleneckData.stepBottlenecks.map((s: any, i: number) => (
-                        <div key={i} className={cn(
-                          'p-2.5 rounded-lg text-xs flex items-center justify-between',
-                          i === 0 ? 'bg-warning/10 border border-warning/20' : 'bg-muted/50'
-                        )}>
-                          <div>
-                            <span className="font-medium">{s.name}</span>
-                            <span className="text-muted-foreground ml-2">({s.entries} vezes)</span>
-                          </div>
-                          <Badge variant="outline" className="text-[10px]">
-                            +{s.avgOverrunMin}min excedido
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Queue Bottlenecks */}
-                {bottleneckData.queueBottlenecks?.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
-                      <PackageX className="h-4 w-4 text-primary" /> Filas por Setor/Status
-                    </h4>
-                    <div className="space-y-1.5">
-                      {bottleneckData.queueBottlenecks.map((q: any, i: number) => (
-                        <div key={i} className="p-2.5 rounded-lg text-xs flex items-center justify-between bg-muted/50">
-                          <span className="font-medium">{q.name}</span>
-                          <Badge variant="outline" className="text-[10px]">{q.queueSize} OPs</Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </ScrollArea>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setBottleneckOpen(false)}>Fechar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <BottleneckDialog
+        open={bottleneckOpen}
+        onOpenChange={setBottleneckOpen}
+        data={bottleneckData}
+      />
     </PageContainer>
-  );
-}
-
-interface KanbanCardProps {
-  order: any;
-  dragHandleProps: any;
-  isDragging: boolean;
-  columnKey: string;
-  onMove: (id: string, status: string) => void;
-  outsourcingData?: any[];
-  timeLogs: ReturnType<typeof useProductionTimeLogs>;
-}
-
-function KanbanCard({ order, dragHandleProps, isDragging, columnKey, onMove, outsourcingData, timeLogs }: KanbanCardProps) {
-  const progress = order.quantity > 0 ? (order.produced_quantity / order.quantity) * 100 : 0;
-  const isLate = order.due_date && differenceInDays(new Date(), parseISO(order.due_date)) > 0 && order.status !== 'completed';
-  const daysLate = order.due_date ? differenceInDays(new Date(), parseISO(order.due_date)) : 0;
-  const pCfg = priorityConfig[order.priority] || { label: order.priority, color: 'bg-gray-100 text-gray-800' };
-  const hasOutsourcing = outsourcingData && outsourcingData.length > 0;
-  const outsourcingLate = outsourcingData?.some(o => o.expected_return_date && new Date(o.expected_return_date) < new Date() && o.status !== 'returned');
-  const hasScore = order.priority_score > 0;
-
-  const priorityIndicator: Record<string, string> = {
-    urgent: 'border-l-red-500',
-    high: 'border-l-orange-500',
-    medium: 'border-l-blue-500',
-    low: 'border-l-gray-400',
-  };
-
-  const nextActions: Record<string, { label: string; status: string; icon: any }[]> = {
-    planned: [
-      { label: 'Produzir', status: 'in_progress', icon: ArrowRight },
-      { label: 'Aguardar Mat.', status: 'waiting_material', icon: PackageX },
-    ],
-    waiting_material: [
-      { label: 'Produzir', status: 'in_progress', icon: ArrowRight },
-    ],
-    in_progress: [
-      { label: 'Pausar', status: 'paused', icon: Pause },
-      { label: 'Finalizar', status: 'finishing', icon: Wrench },
-    ],
-    outsourced: [
-      { label: 'Retornou', status: 'in_progress', icon: ArrowRight },
-      { label: 'Finalizar', status: 'finishing', icon: Wrench },
-    ],
-    paused: [
-      { label: 'Retomar', status: 'in_progress', icon: ArrowRight },
-    ],
-    finishing: [
-      { label: 'Concluir', status: 'completed', icon: CheckCircle },
-    ],
-    completed: [],
-  };
-
-  const actions = nextActions[columnKey] || [];
-
-  return (
-    <Card className={cn(
-      'shadow-sm hover:shadow-md transition-all duration-200 border-l-[3px] group',
-      priorityIndicator[order.priority] || 'border-l-gray-400',
-      isLate && 'ring-1 ring-destructive/30 bg-destructive/5',
-      outsourcingLate && 'ring-1 ring-warning/30',
-      isDragging && 'shadow-2xl ring-2 ring-primary/40 rotate-[1deg] scale-[1.02]'
-    )}>
-      <CardContent className="p-2.5 space-y-1.5">
-        {/* Header */}
-        <div className="flex items-center gap-1">
-          <div {...dragHandleProps} className="cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity -ml-0.5">
-            <GripVertical className="h-3.5 w-3.5 text-muted-foreground" />
-          </div>
-          <span className="font-mono text-[10px] text-muted-foreground flex-1">{order.order_number}</span>
-          {hasScore && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Badge variant="outline" className="text-[9px] h-4 px-1 font-mono">
-                    <Shield className="h-2.5 w-2.5 mr-0.5" />{order.priority_score}
-                  </Badge>
-                </TooltipTrigger>
-                <TooltipContent><p className="text-xs">Score de prioridade: {order.priority_score}</p></TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
-          {isLate && (
-            <Badge variant="destructive" className="text-[9px] gap-0.5 px-1 h-4">
-              <AlertTriangle className="h-2.5 w-2.5" /> {daysLate}d
-            </Badge>
-          )}
-          {outsourcingLate && !isLate && (
-            <Badge className="text-[9px] gap-0.5 px-1 h-4 bg-warning/20 text-warning">
-              <Truck className="h-2.5 w-2.5" /> Terc. atrasado
-            </Badge>
-          )}
-        </div>
-
-        {/* Product */}
-        <p className="font-medium text-xs leading-tight truncate">{order.product_name}</p>
-
-        {/* Meta */}
-        <div className="flex items-center gap-1 flex-wrap">
-          <Badge className={cn('text-[9px] h-4', pCfg.color)}>{pCfg.label}</Badge>
-          {order.client_name && (
-            <span className="text-[10px] text-muted-foreground truncate flex items-center gap-0.5">
-              <User className="h-2.5 w-2.5" /> {order.client_name.split(' ')[0]}
-            </span>
-          )}
-          {hasOutsourcing && (
-            <Badge variant="outline" className="text-[9px] h-4"><Truck className="h-2.5 w-2.5 mr-0.5" />Terc.</Badge>
-          )}
-        </div>
-
-        {/* Progress */}
-        <div className="space-y-0.5">
-          <div className="flex justify-between text-[10px] text-muted-foreground">
-            <span>{order.produced_quantity}/{order.quantity}</span>
-            <span className="font-semibold">{progress.toFixed(0)}%</span>
-          </div>
-          <Progress value={progress} className="h-1" />
-        </div>
-
-        {/* Due date */}
-        {order.due_date && (
-          <p className={cn('text-[10px] flex items-center gap-0.5', isLate ? 'text-destructive font-medium' : 'text-muted-foreground')}>
-            <Calendar className="h-2.5 w-2.5" />
-            {format(parseISO(order.due_date), 'dd/MM')}
-          </p>
-        )}
-
-        {/* Timer Controls */}
-        {!['completed', 'cancelled'].includes(columnKey) && (() => {
-          const activeLog = timeLogs.getActiveLog(order.id);
-          const pausedLog = timeLogs.getPausedLog(order.id);
-          const totalFinished = timeLogs.getTotalElapsed(order.id);
-          const isRunning = !!activeLog;
-          const isPaused = !!pausedLog;
-
-          return (
-            <div className="space-y-1 pt-0.5">
-              {(isRunning || isPaused || totalFinished > 0) && (
-                <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                  <Timer className="h-2.5 w-2.5" />
-                  {isRunning && <span className="text-emerald-400 font-medium animate-pulse">● Rodando</span>}
-                  {isPaused && <span className="text-warning font-medium">⏸ Pausado ({formatElapsed(pausedLog!.elapsed_seconds)})</span>}
-                  {totalFinished > 0 && <span className="ml-auto">Total: {formatElapsed(totalFinished)}</span>}
-                </div>
-              )}
-              <div className="flex gap-1">
-                {!isRunning && !isPaused && (
-                  <Button size="sm" variant="outline" className="text-[10px] h-6 flex-1 px-1 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
-                    onClick={() => timeLogs.startTimer(order.id)}>
-                    <Play className="h-2.5 w-2.5 mr-0.5" /> Iniciar
-                  </Button>
-                )}
-                {isRunning && (
-                  <>
-                    <Button size="sm" variant="outline" className="text-[10px] h-6 flex-1 px-1 text-warning border-warning/30 hover:bg-warning/10"
-                      onClick={() => timeLogs.pauseTimer(order.id)}>
-                      <Pause className="h-2.5 w-2.5 mr-0.5" /> Pausar
-                    </Button>
-                    <Button size="sm" variant="outline" className="text-[10px] h-6 flex-1 px-1 text-destructive border-destructive/30 hover:bg-destructive/10"
-                      onClick={() => timeLogs.finishTimer(order.id)}>
-                      <Square className="h-2.5 w-2.5 mr-0.5" /> Finalizar
-                    </Button>
-                  </>
-                )}
-                {isPaused && (
-                  <>
-                    <Button size="sm" variant="outline" className="text-[10px] h-6 flex-1 px-1 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
-                      onClick={() => timeLogs.resumeTimer(order.id)}>
-                      <Play className="h-2.5 w-2.5 mr-0.5" /> Retomar
-                    </Button>
-                    <Button size="sm" variant="outline" className="text-[10px] h-6 flex-1 px-1 text-destructive border-destructive/30 hover:bg-destructive/10"
-                      onClick={() => timeLogs.finishTimer(order.id)}>
-                      <Square className="h-2.5 w-2.5 mr-0.5" /> Finalizar
-                    </Button>
-                  </>
-                )}
-              </div>
-            </div>
-          );
-        })()}
-
-        {/* Actions */}
-        {actions.length > 0 && (
-          <div className="flex gap-1 pt-0.5">
-            {actions.map(a => {
-              const ActionIcon = a.icon;
-              return (
-                <Button key={a.status} size="sm" variant="outline" className="text-[10px] h-6 flex-1 px-1" onClick={() => onMove(order.id, a.status)}>
-                  <ActionIcon className="h-2.5 w-2.5 mr-0.5" /> {a.label}
-                </Button>
-              );
-            })}
-          </div>
-        )}
-      </CardContent>
-    </Card>
   );
 }
