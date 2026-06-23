@@ -1,21 +1,72 @@
-# Relatório de Auditoria Global - ERP Enterprise
+# Auditoria de Refatoração — Snapshot
 
-## 1. Código Morto e Redundâncias
-- **Componentes Duplicados:** `src/components/ui` vs `src/ui/base` (shadcn duplicado).
-- **Serviços Redundantes:** Hooks de busca de dados (`useProducts`, `useOrders`) possuem lógica de serviço misturada; devem ser movidos para `src/modules/<module>/services`.
-- **Dashboards:** `ExecutiveDashboard` e `Dashboard.tsx` compartilham muitos KPIs similares. Devem ser unificados sob um componente `KpiGrid` no `shared`.
+> Gerado automaticamente como parte do plano de refatoração em fases.
+> **Nenhuma mudança de comportamento.** Este documento apenas mapeia o terreno.
 
-## 2. Inconsistências de Fluxo
-- O fluxo de faturamento fiscal está separado da saída de estoque em alguns módulos.
-- O CRM não está totalmente integrado ao Financeiro (comissões).
+## Resumo executivo
 
-## 3. Gargalos de Performance
-- Ausência de virtualização em tabelas com >500 registros (ex: `StockMovements`).
-- Re-renders excessivos no `MainLayout` ao navegar entre módulos.
+A base está em **bom estado estrutural**. Boa parte das "duplicações suspeitas" já é apenas re-export para compatibilidade. Os ganhos reais agora estão em **quebrar componentes grandes (Fase 4)**, não em mover utilitários.
 
-## 4. Score Atual
-- Arquitetura: 6/10
-- Escalabilidade: 5/10
-- Fiscal: 7/10
-- IA: 8/10
-- UX: 6/10
+---
+
+## Fase 0 — Achados da auditoria
+
+### Duplicações reais → status
+| Suspeita | Realidade | Ação |
+|---|---|---|
+| `src/lib/formatters.ts` vs `src/shared/utils/formatters.ts` | Já consolidado: `shared/utils/formatters` é apenas re-export tipado de `lib/formatters` (15 linhas). | **Nenhuma** — manter como está. |
+| `src/hooks/use-toast.ts` vs `src/ui/base/use-toast.ts` | Já consolidado: `ui/base/use-toast` é 3 linhas re-exportando `@/hooks/use-toast`. | **Nenhuma** — manter como está. |
+| `src/lib/toastHelpers.ts` | Já é a única superfície (`toastError`, `toastSuccess`, `mutationErrorHandler`). | **Nenhuma**. |
+| `services/inventory/inventoryService.ts` vs `services/wms/inventoryService.ts` | **Não são duplicatas.** O primeiro opera em `products/categories/inventory_movements`; o segundo em `wms_inventory_*`. Domínios distintos. | **Nenhuma** — nomes diferenciados pelo prefixo de diretório bastam. |
+| `services/commercial/clientService.ts` (10 linhas, classe vazia herdando `BaseService<'clients'>`) vs `clientsService.ts` (34 linhas, wrapper com `getAll/create/update/delete`) | Cada um tem **um único consumidor**: `ServiceLocator` usa `clientService`; `hooks/commercial/useClients` usa `clientsService`. APIs incompatíveis (classe vs objeto). | **Adiar p/ Fase 2.** Unificar requer adaptar `ServiceLocator` ou `useClients`. Risco > benefício no momento. |
+
+### Arquivos grandes (> 400 linhas, excluindo auto-gerados)
+Candidatos prioritários a split na **Fase 4**:
+
+| Linhas | Arquivo |
+|---:|---|
+| 1102 | `src/modules/production/ProductionKanban.tsx` |
+| 1007 | `src/components/fiscal/CreateNFeDialog.tsx` |
+| 984  | `src/lib/pcpServices.ts` |
+| 844  | `src/modules/commercial/Orders.tsx` |
+| 671  | `src/modules/commercial/SellerDashboard.tsx` |
+| 637  | `src/ui/base/sidebar.tsx` *(shadcn — não tocar)* |
+| 606  | `src/hooks/commercial/useSalesIntelligence.ts` |
+| 589  | `src/modules/production/BIIndustrial.tsx` |
+| 585  | `src/modules/fiscal/FiscalDashboard.tsx` |
+| 553  | `src/modules/commercial/AICommercialDashboard.tsx` |
+| 546  | `src/modules/production/OperatorTerminal.tsx` |
+| 532  | `src/modules/financial/AccountsReceivable.tsx` |
+| 529  | `src/pages/rfid/Integration.tsx` |
+| 528  | `src/pages/inventory/StockLevels.tsx` |
+| 514  | `src/modules/fiscal/CTe.tsx` |
+| 500  | `src/modules/production/PCPPanel.tsx` |
+
+### Observações estruturais positivas
+- Camadas `services → hooks → modules/pages` bem demarcadas em quase todos os domínios.
+- React Query usado consistentemente com `staleTime` de 5 min.
+- Tipos por domínio em `src/types/<dominio>.ts` (sem grandes duplicações).
+- Toasts e formatadores já centralizados.
+- Memórias do projeto (PT-BR, dark mode tokens, RLS multi-tenant, no-mocks) respeitadas no código auditado.
+
+### Pontos a observar (sem ação agora)
+- `src/services/commercial/clientService.ts` e `clientsService.ts` convivem (ver tabela acima).
+- Vários módulos > 500 linhas misturam UI + data-fetching + sub-componentes inline.
+- `src/lib/pcpServices.ts` (984 linhas) seria melhor sob `src/services/production/` quebrado por subdomínio.
+
+---
+
+## Fase 1 — Consolidação de utilitários
+
+**Status: já realizada em refatorações anteriores.**
+Re-exports validados; nada a fazer nesta rodada sem introduzir churn desnecessário.
+
+---
+
+## Próximas fases sugeridas
+
+1. **Fase 4 (alto impacto)** — quebrar `ProductionKanban`, `CreateNFeDialog`, `Orders` em subcomponentes coesos, preservando props públicas.
+2. **Fase 2** — unificar `clientService`/`clientsService` adaptando `ServiceLocator` para usar `clientsService`, depois remover `clientService.ts`.
+3. **Fase 6** — passada de lint/ordenação de imports automatizada.
+
+Confirme qual fase atacar em seguida e eu prossigo.
