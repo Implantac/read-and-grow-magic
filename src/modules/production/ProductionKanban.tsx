@@ -34,9 +34,6 @@ import { WarModeDialog } from './kanban/WarModeDialog';
 import { SequenceDialog } from './kanban/SequenceDialog';
 import { BottleneckDialog } from './kanban/BottleneckDialog';
 
-// Reused for the (unused) sheets/supplies hook calls that hydrate caches — keep behavior identical.
-void useTechnicalSheets;
-void useSupplyStock;
 
 export default function ProductionKanban() {
   const { orders, loading, update, refetch } = useProductionOrders();
