@@ -1,57 +1,31 @@
 import { useState, useMemo, useEffect } from 'react';
-import { formatBRL } from '@/lib/formatters';
 import {
-  Plus, Trash2, FileText, Users, Package, Calculator,
-  Truck, CreditCard, ClipboardCheck, ArrowLeft, ArrowRight, Send, Sparkles,
-  Info, AlertCircle, CheckCircle2, ChevronRight, Scale, Receipt, AlertTriangle, ListChecks, Filter, Search, X
+  AlertCircle, AlertTriangle, ArrowLeft, ChevronRight, Receipt, Send,
 } from 'lucide-react';
 import { Button } from '@/ui/base/button';
-import { Input } from '@/ui/base/input';
-import { Label } from '@/ui/base/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/ui/base/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
-import { cfopOptions } from '@/config/fiscal';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
+import { ScrollArea } from '@/ui/base/scroll-area';
+import { Alert, AlertDescription, AlertTitle } from '@/ui/base/alert';
+import { formatBRL } from '@/lib/formatters';
+import { cn } from '@/lib/utils';
 import { useClients } from '@/hooks/commercial/useClients';
 import { useProducts } from '@/hooks/inventory/useProducts';
-import { calculateTaxes } from '@/shared/utils/fiscalMotor';
 import { useFiscalTaxRules } from '@/hooks/fiscal/useFiscalTaxRules';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
+import { calculateTaxes } from '@/shared/utils/fiscalMotor';
 import { FiscalStepper } from './FiscalStepper';
-import { SmartSelect, SmartSelectOption } from './SmartSelect';
-import { TaxSummaryCard } from './TaxSummaryCard';
-import { Separator } from '@/ui/base/separator';
-import { ScrollArea } from '@/ui/base/scroll-area';
-import { cn } from '@/lib/utils';
-import { Alert, AlertDescription, AlertTitle } from '@/ui/base/alert';
-import { SearchHint } from '@/shared/components/SearchHint';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/ui/base/sheet';
-import { Tabs, TabsList, TabsTrigger } from '@/ui/base/tabs';
-import { HighlightText } from '@/shared/components/HighlightText';
+import type { SmartSelectOption } from './SmartSelect';
 
-
-interface NFeItemForm {
-  productCode: string;
-  productName: string;
-  productId?: string;
-  ncm: string;
-  cfop: string;
-  unit: string;
-  quantity: number;
-  unitPrice: number;
-  icms?: number;
-  pis?: number;
-  cofins?: number;
-  ipi?: number;
-  ibs?: number;
-  cbs?: number;
-}
-
-const highlightText = (text: string, search: string) => <HighlightText text={text} search={search} />;
-
-
+import { STEPS, type NFeItemForm } from './createNFe/types';
+import { StepInfo } from './createNFe/StepInfo';
+import { StepClient } from './createNFe/StepClient';
+import { StepProducts } from './createNFe/StepProducts';
+import { StepTaxes } from './createNFe/StepTaxes';
+import { StepTransport } from './createNFe/StepTransport';
+import { StepFinance } from './createNFe/StepFinance';
+import { StepReview } from './createNFe/StepReview';
+import { DiagnosticSheet } from './createNFe/DiagnosticSheet';
 
 interface CreateNFeDialogProps {
   open: boolean;
@@ -67,60 +41,53 @@ interface CreateNFeDialogProps {
   }) => Promise<any>;
 }
 
-const STEPS = [
-  { id: 'info', label: 'Dados', icon: FileText },
-  { id: 'client', label: 'Cliente', icon: Users },
-  { id: 'products', label: 'Produtos', icon: Package },
-  { id: 'taxes', label: 'Tributos', icon: Calculator },
-  { id: 'transport', label: 'Logística', icon: Truck },
-  { id: 'finance', label: 'Pagamento', icon: CreditCard },
-  { id: 'review', label: 'Revisão', icon: ClipboardCheck },
-];
-
 export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialogProps) {
   const { currentCompany } = useEnterprise();
+
+  // Cliente
   const [clientId, setClientId] = useState('');
   const [clientName, setClientName] = useState('');
   const [clientDocument, setClientDocument] = useState('');
   const [clientUF, setClientUF] = useState('');
-  
+
+  // Data
   const clientsQuery = useClients();
-  const taxRulesQuery = useFiscalTaxRules('SP', clientUF || 'SP'); // Origin fixed as SP for now
+  const taxRulesQuery = useFiscalTaxRules('SP', clientUF || 'SP');
   const productsQuery = useProducts();
-  
-  // Memoize data to avoid unnecessary re-renders in effects
   const clients = useMemo(() => clientsQuery.data || [], [clientsQuery.data]);
   const products = useMemo(() => productsQuery.data || [], [productsQuery.data]);
   const taxRules = useMemo(() => taxRulesQuery.data || [], [taxRulesQuery.data]);
+
+  // Wizard state
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
 
-  // Etapa 1 — Dados
+  // Step 0 — Dados
   const [operationType, setOperationType] = useState('saida');
   const [naturezaOp, setNaturezaOp] = useState('Venda de mercadoria');
   const [defaultCfop, setDefaultCfop] = useState('5102');
 
-  // Etapa 3 — Produtos
+  // Step 2 — Itens
   const [items, setItems] = useState<NFeItemForm[]>([]);
 
-  // Etapa 5 — Transporte
+  // Step 4 — Transporte
   const [carrierName, setCarrierName] = useState('');
-  const [freightType, setFreightType] = useState('1'); 
+  const [freightType, setFreightType] = useState('1');
   const [shipping, setShipping] = useState(0);
   const [volumeQty, setVolumeQty] = useState(1);
 
-  // Etapa 6 — Financeiro
+  // Step 5 — Financeiro
   const [paymentMethod, setPaymentMethod] = useState('99');
   const [installments, setInstallments] = useState(1);
   const [discount, setDiscount] = useState(0);
+
+  // Diagnóstico
   const [diagnosisFilter, setDiagnosisFilter] = useState<'all' | 'errors' | 'warnings'>('all');
   const [diagnosisSearch, setDiagnosisSearch] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDiagnosisSearch(searchTerm);
-    }, 400);
+    const timer = setTimeout(() => setDiagnosisSearch(searchTerm), 400);
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
@@ -133,20 +100,18 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
   }, [clientUF, operationType]);
 
   useEffect(() => {
-    const calcAll = async () => {
+    const calcAll = () => {
       const updated = items.map((it) => {
         if (!it.cfop) return it;
-        
         const calc = calculateTaxes(
           { price: it.unitPrice, quantity: it.quantity, ncm: it.ncm },
-          'SP', 
+          'SP',
           clientUF || 'SP',
           taxRulesQuery.data || [],
           // @ts-ignore
           currentCompany?.tax_regime || 'simples_nacional',
-          'hybrid' // Hardcoded hybrid for this phase
+          'hybrid',
         );
-
         return {
           ...it,
           icms: calc.icms_value,
@@ -157,13 +122,14 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
           cbs: calc.cbs_value,
         };
       });
-
       const changed = updated.some((u, i) => u.icms !== items[i]?.icms || u.ibs !== items[i]?.ibs);
       if (changed) setItems(updated);
     };
     if (items.length > 0) calcAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items.length, items.map((i) => `${i.cfop}-${i.quantity}-${i.unitPrice}-${i.ncm}`).join('|'), clientUF, taxRules, currentCompany?.tax_regime]);
 
+  // Options
   const clientOptions: SmartSelectOption[] = useMemo(
     () => clients.map((c) => ({
       value: c.id,
@@ -171,7 +137,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
       description: c.document,
       meta: `${c.address_city || ''}/${c.address_state || ''}`,
     })),
-    [clients]
+    [clients],
   );
 
   const productOptions: SmartSelectOption[] = useMemo(
@@ -181,9 +147,10 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
       description: `Cód: ${p.code}`,
       meta: formatBRL(p.sale_price),
     })),
-    [products]
+    [products],
   );
 
+  // Handlers
   const handleSelectClient = (id: string) => {
     const c = clients.find((cl) => cl.id === id);
     if (!c) return;
@@ -215,83 +182,40 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
   const updateItem = (idx: number, field: keyof NFeItemForm, value: string | number) =>
     setItems((prev) => prev.map((it, i) => (i === idx ? { ...it, [field]: value } : it)));
 
+  // Totais
   const subtotal = items.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
   const totalIcms = items.reduce((s, i) => s + (i.icms || 0), 0);
   const totalPis = items.reduce((s, i) => s + (i.pis || 0), 0);
   const totalCofins = items.reduce((s, i) => s + (i.cofins || 0), 0);
   const totalIpi = items.reduce((s, i) => s + (i.ipi || 0), 0);
-  const totalIbs = items.reduce((s, i) => s + (i.ibs || 0), 0);
-  const totalCbs = items.reduce((s, i) => s + (i.cbs || 0), 0);
   const total = subtotal - discount + shipping;
 
+  // Validação
   const validationByStep = useMemo(() => {
     const steps: Record<number, { errors: string[]; warnings: string[] }> = {};
     STEPS.forEach((_, i) => (steps[i] = { errors: [], warnings: [] }));
 
-    // Etapa 0 — Dados
-    if (!naturezaOp.trim()) {
-      steps[0].errors.push("Natureza da operação é obrigatória para a validade jurídica da NF-e.");
-    }
+    if (!naturezaOp.trim()) steps[0].errors.push('Natureza da operação é obrigatória para a validade jurídica da NF-e.');
+    if (!clientId) steps[1].errors.push('O destinatário é obrigatório. Selecione um cliente da base.');
+    if (clientDocument && clientDocument.replace(/\D/g, '').length < 11) steps[1].errors.push('O documento do destinatário (CPF/CNPJ) parece estar incompleto.');
+    if (!clientUF) steps[1].errors.push('UF do destinatário não identificada. Verifique o cadastro.');
 
-    // Etapa 1 — Cliente
-    if (!clientId) {
-      steps[1].errors.push("O destinatário é obrigatório. Selecione um cliente da base.");
-    }
-    if (clientDocument && clientDocument.replace(/\D/g, "").length < 11) {
-      steps[1].errors.push("O documento do destinatário (CPF/CNPJ) parece estar incompleto.");
-    }
-    if (!clientUF) {
-      steps[1].errors.push("UF do destinatário não identificada. Verifique o cadastro.");
-    }
-
-    // Etapa 2 — Produtos
-    if (items.length === 0) {
-      steps[2].errors.push("A nota precisa conter pelo menos um item para ser emitida.");
-    }
+    if (items.length === 0) steps[2].errors.push('A nota precisa conter pelo menos um item para ser emitida.');
     items.forEach((item, idx) => {
-      if (!item.cfop) {
-        steps[2].errors.push(`Item ${idx + 1} (${item.productName}): O código CFOP é obrigatório.`);
-      }
-      if (!item.ncm) {
-        steps[2].warnings.push(`Item ${idx + 1}: NCM não informado. Isso pode causar rejeição pela SEFAZ.`);
-      }
-      if (item.quantity <= 0) {
-        steps[2].errors.push(`Item ${idx + 1}: A quantidade deve ser maior que zero.`);
-      }
-      if (item.unitPrice <= 0) {
-        steps[2].errors.push(`Item ${idx + 1}: O valor unitário não pode ser zero.`);
-      }
+      if (!item.cfop) steps[2].errors.push(`Item ${idx + 1} (${item.productName}): O código CFOP é obrigatório.`);
+      if (!item.ncm) steps[2].warnings.push(`Item ${idx + 1}: NCM não informado. Isso pode causar rejeição pela SEFAZ.`);
+      if (item.quantity <= 0) steps[2].errors.push(`Item ${idx + 1}: A quantidade deve ser maior que zero.`);
+      if (item.unitPrice <= 0) steps[2].errors.push(`Item ${idx + 1}: O valor unitário não pode ser zero.`);
     });
 
-    // Etapa 3 — Tributos
     const totalTax = totalIcms + totalIpi + totalPis + totalCofins;
-    if (totalTax === 0 && subtotal > 0) {
-      steps[3].warnings.push("Atenção: O valor total de impostos está zerado. Verifique as regras.");
-    }
+    if (totalTax === 0 && subtotal > 0) steps[3].warnings.push('Atenção: O valor total de impostos está zerado. Verifique as regras.');
 
-    // Etapa 5 — Pagamento
-    if (!paymentMethod) {
-      steps[5].errors.push("Informe o meio de pagamento utilizado.");
-    }
-    if (installments < 1) {
-      steps[5].errors.push("O número de parcelas deve ser pelo menos 1.");
-    }
+    if (!paymentMethod) steps[5].errors.push('Informe o meio de pagamento utilizado.');
+    if (installments < 1) steps[5].errors.push('O número de parcelas deve ser pelo menos 1.');
 
     return steps;
-  }, [
-    naturezaOp,
-    clientId,
-    clientDocument,
-    clientUF,
-    items,
-    paymentMethod,
-    totalIcms,
-    totalIpi,
-    totalPis,
-    totalCofins,
-    subtotal,
-    installments,
-  ]);
+  }, [naturezaOp, clientId, clientDocument, clientUF, items, paymentMethod, totalIcms, totalIpi, totalPis, totalCofins, subtotal, installments]);
 
   const allIssues = useMemo(() => {
     const errors: { step: number; message: string }[] = [];
@@ -304,21 +228,17 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
     return { errors, warnings, total: errors.length + warnings.length };
   }, [validationByStep]);
 
-  const hasFilteredErrors = useMemo(() => {
-    return Object.values(validationByStep).some(data => 
-      data.errors.some(err => err.toLowerCase().includes(diagnosisSearch.toLowerCase()))
-    );
-  }, [validationByStep, diagnosisSearch]);
-
-  const hasFilteredWarnings = useMemo(() => {
-    return Object.values(validationByStep).some(data => 
-      data.warnings.some(warn => warn.toLowerCase().includes(diagnosisSearch.toLowerCase()))
-    );
-  }, [validationByStep, diagnosisSearch]);
+  const hasFilteredErrors = useMemo(
+    () => Object.values(validationByStep).some((data) => data.errors.some((err) => err.toLowerCase().includes(diagnosisSearch.toLowerCase()))),
+    [validationByStep, diagnosisSearch],
+  );
+  const hasFilteredWarnings = useMemo(
+    () => Object.values(validationByStep).some((data) => data.warnings.some((warn) => warn.toLowerCase().includes(diagnosisSearch.toLowerCase()))),
+    [validationByStep, diagnosisSearch],
+  );
 
   const currentStepValidation = validationByStep[step] || { errors: [], warnings: [] };
   const hasBlockingErrors = currentStepValidation.errors.length > 0;
-  const hasAnyBlockingErrors = allIssues.errors.length > 0;
 
   const nothingFoundInView = useMemo(() => {
     if (diagnosisFilter === 'all') return !hasFilteredErrors && !hasFilteredWarnings;
@@ -331,7 +251,6 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
     if (hasBlockingErrors) return;
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
   };
-  
   const handlePrev = () => setStep((s) => Math.max(s - 1, 0));
 
   const handleSubmit = async () => {
@@ -380,164 +299,19 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
               <DialogDescription>Fluxo automatizado com cálculo de impostos em tempo real</DialogDescription>
             </div>
             <div className="flex items-center gap-3">
-              <Sheet onOpenChange={(open) => {
-                if (!open) {
-                  setSearchTerm('');
-                  setDiagnosisFilter('all');
-                }
-              }}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" size="sm" className={cn("gap-2", allIssues.total > 0 ? "border-warning text-warning hover:bg-warning/5" : "border-success text-success hover:bg-success/5")}>
-                    <ListChecks className="h-4 w-4" />
-                    Inconsistências ({allIssues.total})
-                  </Button>
-                </SheetTrigger>
-                <SheetContent 
-                  className="w-[400px] sm:w-[540px]"
-                  onKeyDown={(e) => {
-                    if (e.key === 'Escape' && (searchTerm || diagnosisFilter !== 'all')) {
-                      setSearchTerm('');
-                      setDiagnosisFilter('all');
-                      e.preventDefault();
-                    }
-                  }}
-                >
-                  <SheetHeader>
-                    <SheetTitle className="flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-warning" />
-                      Diagnóstico de Emissão
-                    </SheetTitle>
-                    <SheetDescription>
-                      Resumo de todas as validações pendentes para a autorização da nota.
-                    </SheetDescription>
-                  </SheetHeader>
-
-                  <div className="mt-6 space-y-4">
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex gap-2">
-                        <div className="relative flex-1">
-                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                          <Input 
-                            placeholder="Filtrar por texto das inconsistências..." 
-                            className="pl-9"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                          />
-                        </div>
-                        {(searchTerm || diagnosisFilter !== 'all') && (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="h-10 px-3 text-xs gap-1 border-dashed hover:border-solid transition-all"
-                            onClick={() => {
-                              setSearchTerm('');
-                              setDiagnosisFilter('all');
-                            }}
-                          >
-                            <X className="h-3 w-3" />
-                            Limpar
-                          </Button>
-                        )}
-                      </div>
-                      <SearchHint keys="Esc">
-                        para limpar a busca e voltar o filtro para Tudo
-                      </SearchHint>
-
-                    </div>
-
-                    <Tabs value={diagnosisFilter} onValueChange={(v: any) => setDiagnosisFilter(v)} className="w-full">
-                      <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="all" className="text-xs">Tudo ({allIssues.total})</TabsTrigger>
-                        <TabsTrigger value="errors" className="text-xs">Erros ({allIssues.errors.length})</TabsTrigger>
-                        <TabsTrigger value="warnings" className="text-xs">Sugestões ({allIssues.warnings.length})</TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                  </div>
-
-                  <ScrollArea className="h-[calc(100vh-210px)] pr-4">
-                    <div className="space-y-6">
-                      {(diagnosisFilter === 'all' || diagnosisFilter === 'errors') && hasFilteredErrors && (
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-2 text-destructive font-bold text-[10px] uppercase tracking-widest bg-destructive/5 p-2 rounded-t-lg border-b border-destructive/10">
-                            <AlertCircle className="h-3.5 w-3.5" />
-                            Erros Críticos (Bloqueantes)
-                          </div>
-                          <div className="space-y-5 px-1">
-                            {STEPS.map((s, idx) => {
-                              const stepIssues = validationByStep[idx];
-                              const filteredErrors = stepIssues.errors.filter(err => 
-                                err.toLowerCase().includes(diagnosisSearch.toLowerCase())
-                              );
-                              if (filteredErrors.length === 0) return null;
-                              return (
-                                <div key={`err-group-${idx}`} className="space-y-2">
-                                  <div className="flex items-center gap-2 border-b border-dashed pb-1">
-                                    <Badge variant="outline" className="h-5 text-[10px] px-1.5">{s.label}</Badge>
-                                    <Button variant="ghost" size="sm" onClick={() => { setStep(idx); }} className="ml-auto text-[10px] h-5">Corrigir</Button>
-                                  </div>
-                                  {filteredErrors.map((err, i) => (
-                                    <div key={`err-${idx}-${i}`} className="flex gap-2 text-xs text-destructive pl-1">
-                                      <div className="w-1 h-1 rounded-full bg-destructive mt-1.5 shrink-0" />
-                                      <span>{highlightText(err, diagnosisSearch)}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-
-                      {(diagnosisFilter === 'all' || diagnosisFilter === 'warnings') && hasFilteredWarnings && (
-                        <div className="space-y-4 pt-4">
-                          <div className="flex items-center gap-2 text-amber-700 font-bold text-[10px] uppercase tracking-widest bg-amber-50 p-2 rounded-t-lg border-b border-amber-200/50">
-                            <AlertTriangle className="h-3.5 w-3.5" />
-                            Sugestões de Melhoria
-                          </div>
-                          <div className="space-y-5 px-1">
-                            {STEPS.map((s, idx) => {
-                              const stepIssues = validationByStep[idx];
-                              const filteredWarnings = stepIssues.warnings.filter(warn => 
-                                warn.toLowerCase().includes(diagnosisSearch.toLowerCase())
-                              );
-                              if (filteredWarnings.length === 0) return null;
-                              return (
-                                <div key={`warn-group-${idx}`} className="space-y-2">
-                                  <div className="flex items-center gap-2 border-b border-dashed pb-1">
-                                    <Badge variant="outline" className="h-5 text-[10px] px-1.5">{s.label}</Badge>
-                                    <Button variant="ghost" size="sm" onClick={() => { setStep(idx); }} className="ml-auto text-[10px] h-5">Corrigir</Button>
-                                  </div>
-                                  {filteredWarnings.map((warn, i) => (
-                                    <div key={`warn-${idx}-${i}`} className="flex gap-2 text-xs text-amber-700 pl-1">
-                                      <div className="w-1 h-1 rounded-full bg-amber-500 mt-1.5 shrink-0" />
-                                      <span>{highlightText(warn, diagnosisSearch)}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
-                      {nothingFoundInView && (
-                        <div className="py-20 text-center space-y-3">
-                          {diagnosisSearch ? (
-                            <>
-                              <Search className="h-12 w-12 mx-auto text-muted-foreground opacity-20" />
-                              <p className="text-sm text-muted-foreground font-medium">Nenhum resultado para "{diagnosisSearch}"</p>
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle2 className="h-12 w-12 mx-auto text-success opacity-20" />
-                              <p className="text-sm text-muted-foreground font-medium">Nenhuma inconsistência detectada!</p>
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </ScrollArea>
-                </SheetContent>
-              </Sheet>
+              <DiagnosticSheet
+                allIssues={allIssues}
+                validationByStep={validationByStep}
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                diagnosisFilter={diagnosisFilter}
+                setDiagnosisFilter={setDiagnosisFilter}
+                diagnosisSearch={diagnosisSearch}
+                hasFilteredErrors={hasFilteredErrors}
+                hasFilteredWarnings={hasFilteredWarnings}
+                nothingFoundInView={nothingFoundInView}
+                onStepClick={setStep}
+              />
               <Badge variant="outline" className="bg-background">Série: 001</Badge>
               <Badge variant="outline" className="bg-background">Ambiente: Homologação</Badge>
             </div>
@@ -569,401 +343,71 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
               </div>
 
               {step === 0 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 text-primary">
-                        <Info className="h-5 w-5" />
-                        <h3 className="font-bold uppercase tracking-wider text-xs">Informações da Operação</h3>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Tipo de Movimentação</Label>
-                        <Select value={operationType} onValueChange={setOperationType}>
-                          <SelectTrigger className="h-12"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="saida">Saída (Venda/Remessa)</SelectItem>
-                            <SelectItem value="entrada">Entrada (Compra/Devolução)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Natureza da Operação</Label>
-                        <Input value={naturezaOp} onChange={(e) => setNaturezaOp(e.target.value)} className="h-12" placeholder="Ex: Venda de mercadoria" />
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 text-primary">
-                        <Sparkles className="h-5 w-5" />
-                        <h3 className="font-bold uppercase tracking-wider text-xs">Configuração Inteligente</h3>
-                      </div>
-                      <div className="bg-muted/50 p-5 rounded-xl border border-dashed border-primary/20 space-y-4">
-                        <div className="space-y-2">
-                          <Label className="text-xs">Sugestão de CFOP Padrão</Label>
-                          <Select value={defaultCfop} onValueChange={setDefaultCfop}>
-                            <SelectTrigger className="bg-background h-10"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              {cfopOptions.map((c) => (
-                                <SelectItem key={c.value} value={c.value}>{c.value} - {c.label}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <p className="text-[11px] text-muted-foreground italic">
-                          * O sistema ajustará o CFOP automaticamente conforme a UF do destinatário na próxima etapa.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <StepInfo
+                  operationType={operationType} setOperationType={setOperationType}
+                  naturezaOp={naturezaOp} setNaturezaOp={setNaturezaOp}
+                  defaultCfop={defaultCfop} setDefaultCfop={setDefaultCfop}
+                />
               )}
-
               {step === 1 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-                  <div className="flex flex-col items-center gap-6">
-                    <div className="w-full max-w-2xl space-y-4">
-                      <Label className="text-center block text-lg font-semibold">Quem é o destinatário desta nota?</Label>
-                      <SmartSelect
-                        options={clientOptions}
-                        value={clientId}
-                        onChange={(id) => handleSelectClient(id)}
-                        placeholder="Busque por Nome, CPF ou CNPJ..."
-                      />
-                    </div>
-
-                    {clientName && (
-                      <Card className="w-full max-w-3xl border-primary/20 bg-primary/5 shadow-lg overflow-hidden transition-all">
-                        <div className="bg-primary px-6 py-2 text-primary-foreground text-xs font-bold uppercase tracking-widest flex items-center justify-between">
-                          <span>Cliente Selecionado</span>
-                          <CheckCircle2 className="h-4 w-4" />
-                        </div>
-                        <CardContent className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-                          <div className="space-y-1">
-                            <Label className="text-[10px] uppercase text-muted-foreground">Razão Social / Nome</Label>
-                            <p className="font-bold text-lg">{clientName}</p>
-                          </div>
-                          <div className="space-y-1">
-                            <Label className="text-[10px] uppercase text-muted-foreground">Documento</Label>
-                            <p className="font-mono">{clientDocument}</p>
-                          </div>
-                          <div className="space-y-1">
-                            <Label className="text-[10px] uppercase text-muted-foreground">Estado (UF)</Label>
-                            <div className="flex items-center gap-2">
-                              <Badge className="font-bold">{clientUF}</Badge>
-                              {clientUF !== 'SP' && <Badge variant="secondary" className="text-[10px] bg-warning/20 text-warning border-warning">Interestadual</Badge>}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
-                  </div>
-                </div>
+                <StepClient
+                  clientOptions={clientOptions}
+                  clientId={clientId}
+                  clientName={clientName}
+                  clientDocument={clientDocument}
+                  clientUF={clientUF}
+                  onSelectClient={handleSelectClient}
+                />
               )}
-
               {step === 2 && (
-                <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500">
-                  <div className="flex items-center justify-between border-b pb-4">
-                    <div className="space-y-1">
-                      <h3 className="text-lg font-bold">Listagem de Itens</h3>
-                      <p className="text-sm text-muted-foreground">Adicione os produtos ou serviços que compõem esta nota</p>
-                    </div>
-                    <div className="w-96">
-                      <SmartSelect
-                        options={productOptions}
-                        value=""
-                        onChange={(id) => handleAddProduct(id)}
-                        placeholder="Adicionar produto..."
-                      />
-                    </div>
-                  </div>
-
-                  {items.length > 0 ? (
-                    <div className="rounded-2xl border shadow-xl overflow-hidden bg-background">
-                      <Table>
-                        <TableHeader className="bg-muted/50">
-                          <TableRow>
-                            <TableHead className="w-[350px]">Produto</TableHead>
-                            <TableHead className="w-[120px]">CFOP</TableHead>
-                            <TableHead className="w-[100px]">Qtd</TableHead>
-                            <TableHead className="w-[150px]">Preço Unit.</TableHead>
-                            <TableHead className="text-right">Total</TableHead>
-                            <TableHead className="w-[50px]"></TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {items.map((item, idx) => (
-                            <TableRow key={idx} className="hover:bg-muted/30 group">
-                              <TableCell className="py-4">
-                                <div className="font-bold">{item.productName}</div>
-                                <div className="text-[10px] text-muted-foreground flex gap-2 mt-1">
-                                  <span>CÓD: {item.productCode}</span>
-                                  <span>•</span>
-                                  <span>UN: {item.unit}</span>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <Select value={item.cfop} onValueChange={(v) => updateItem(idx, 'cfop', v)}>
-                                  <SelectTrigger className="h-9 font-mono text-xs"><SelectValue /></SelectTrigger>
-                                  <SelectContent>
-                                    {cfopOptions.map((o) => (
-                                      <SelectItem key={o.value} value={o.value}>{o.value}</SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              </TableCell>
-                              <TableCell>
-                                <Input
-                                  type="number"
-                                  value={item.quantity}
-                                  onChange={(e) => updateItem(idx, 'quantity', Number(e.target.value))}
-                                  className="h-9 font-bold text-center"
-                                />
-                              </TableCell>
-                              <TableCell>
-                                <div className="relative">
-                                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">R$</span>
-                                  <Input
-                                    type="number"
-                                    value={item.unitPrice}
-                                    onChange={(e) => updateItem(idx, 'unitPrice', Number(e.target.value))}
-                                    className="h-9 pl-6 font-bold"
-                                  />
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-right font-bold tabular-nums">
-                                {formatBRL(item.quantity * item.unitPrice)}
-                              </TableCell>
-                              <TableCell>
-                                <Button variant="ghost" size="icon" onClick={() => removeItem(idx)} className="opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <Trash2 className="h-4 w-4 text-destructive" />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  ) : (
-                    <div className="py-20 text-center border-2 border-dashed rounded-2xl bg-muted/20">
-                      <Package className="h-16 w-16 mx-auto opacity-10 mb-4" />
-                      <p className="text-muted-foreground">Nenhum item adicionado ainda.</p>
-                    </div>
-                  )}
-                </div>
+                <StepProducts
+                  items={items}
+                  productOptions={productOptions}
+                  onAddProduct={handleAddProduct}
+                  onUpdateItem={updateItem}
+                  onRemoveItem={removeItem}
+                />
               )}
-
               {step === 3 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-                  <div className="flex items-center gap-4 border-b pb-4">
-                    <Calculator className="h-6 w-6 text-primary" />
-                    <div>
-                      <h3 className="text-xl font-bold">Apuração de Tributos</h3>
-                      <p className="text-sm text-muted-foreground">Valores calculados automaticamente com base nas regras fiscais vigentes</p>
-                    </div>
-                  </div>
-
-                  <div className="w-full">
-                    <TaxSummaryCard 
-                      icms={totalIcms}
-                      pis={totalPis}
-                      cofins={totalCofins}
-                      ipi={totalIpi}
-                      total={total}
-                      totalTaxes={totalIcms + totalIpi + totalPis + totalCofins}
-                    />
-                  </div>
-
-                  <Card className="bg-muted/30">
-                    <CardHeader><CardTitle className="text-sm">Detalhamento por Item</CardTitle></CardHeader>
-                    <CardContent className="p-0">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Item</TableHead>
-                            <TableHead className="text-right">ICMS</TableHead>
-                            <TableHead className="text-right">IPI</TableHead>
-                            <TableHead className="text-right">PIS</TableHead>
-                            <TableHead className="text-right">COFINS</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {items.map((item, i) => (
-                            <TableRow key={i}>
-                              <TableCell className="text-xs font-medium">{item.productName}</TableCell>
-                              <TableCell className="text-right tabular-nums text-xs">{formatBRL(item.icms || 0)}</TableCell>
-                              <TableCell className="text-right tabular-nums text-xs">{formatBRL(item.ipi || 0)}</TableCell>
-                              <TableCell className="text-right tabular-nums text-xs">{formatBRL(item.pis || 0)}</TableCell>
-                              <TableCell className="text-right tabular-nums text-xs">{formatBRL(item.cofins || 0)}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </CardContent>
-                  </Card>
-                </div>
+                <StepTaxes
+                  items={items}
+                  totalIcms={totalIcms}
+                  totalIpi={totalIpi}
+                  totalPis={totalPis}
+                  totalCofins={totalCofins}
+                  total={total}
+                />
               )}
-
               {step === 4 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 text-primary">
-                        <Truck className="h-5 w-5" />
-                        <h3 className="font-bold uppercase tracking-wider text-xs">Dados do Transportador</h3>
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Transportadora</Label>
-                        <Input value={carrierName} onChange={(e) => setCarrierName(e.target.value)} placeholder="Busque ou digite o nome..." />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Modalidade do Frete</Label>
-                        <Select value={freightType} onValueChange={setFreightType}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="0">0 - Por conta do emitente</SelectItem>
-                            <SelectItem value="1">1 - Por conta do destinatário</SelectItem>
-                            <SelectItem value="2">2 - Por conta de terceiros</SelectItem>
-                            <SelectItem value="9">9 - Sem frete</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 text-primary">
-                        <Scale className="h-5 w-5" />
-                        <h3 className="font-bold uppercase tracking-wider text-xs">Volumes e Peso</h3>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Quantidade de Volumes</Label>
-                          <Input type="number" value={volumeQty} onChange={(e) => setVolumeQty(Number(e.target.value))} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Valor do Frete</Label>
-                          <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">R$</span>
-                            <Input type="number" value={shipping} onChange={(e) => setShipping(Number(e.target.value))} className="pl-8" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <StepTransport
+                  carrierName={carrierName} setCarrierName={setCarrierName}
+                  freightType={freightType} setFreightType={setFreightType}
+                  shipping={shipping} setShipping={setShipping}
+                  volumeQty={volumeQty} setVolumeQty={setVolumeQty}
+                />
               )}
-
               {step === 5 && (
-                <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-                  <div className="max-w-xl mx-auto space-y-6">
-                    <div className="text-center space-y-2">
-                      <CreditCard className="h-12 w-12 mx-auto text-primary opacity-50" />
-                      <h3 className="text-xl font-bold">Condições de Pagamento</h3>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 gap-6">
-                      <div className="space-y-2">
-                        <Label>Forma de Pagamento</Label>
-                        <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                          <SelectTrigger className="h-12"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="01">Dinheiro</SelectItem>
-                            <SelectItem value="03">Cartão de Crédito</SelectItem>
-                            <SelectItem value="04">Cartão de Débito</SelectItem>
-                            <SelectItem value="15">Boleto Bancário</SelectItem>
-                            <SelectItem value="17">PIX</SelectItem>
-                            <SelectItem value="99">Outros</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label>Parcelas</Label>
-                          <Input type="number" min={1} value={installments} onChange={(e) => setInstallments(Number(e.target.value))} className="h-12" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Desconto Total</Label>
-                          <div className="relative">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
-                            <Input type="number" value={discount} onChange={(e) => setDiscount(Number(e.target.value))} className="h-12 pl-8" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <StepFinance
+                  paymentMethod={paymentMethod} setPaymentMethod={setPaymentMethod}
+                  installments={installments} setInstallments={setInstallments}
+                  discount={discount} setDiscount={setDiscount}
+                />
               )}
-
               {step === 6 && (
-                <div className="space-y-8 animate-in zoom-in-95 duration-500">
-                  <div className="text-center mb-8">
-                    <CheckCircle2 className="h-16 w-16 mx-auto text-success mb-4 animate-bounce" />
-                    <h3 className="text-2xl font-bold">Tudo pronto!</h3>
-                    <p className="text-muted-foreground">Revise os valores finais antes de autorizar na SEFAZ</p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <Card className="md:col-span-2">
-                      <CardHeader className="bg-muted/50 border-b py-3 px-6">
-                        <CardTitle className="text-xs font-bold uppercase tracking-widest">Resumo da Nota</CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-6 space-y-6">
-                        <div className="grid grid-cols-2 gap-8">
-                          <div className="space-y-1">
-                            <Label className="text-[10px] text-muted-foreground uppercase">Natureza da Operação</Label>
-                            <p className="font-bold">{naturezaOp}</p>
-                          </div>
-                          <div className="space-y-1">
-                            <Label className="text-[10px] text-muted-foreground uppercase">Destinatário</Label>
-                            <p className="font-bold">{clientName}</p>
-                            <p className="text-xs opacity-70">{clientDocument}</p>
-                          </div>
-                        </div>
-                        <Separator />
-                        <div className="space-y-3">
-                          <Label className="text-[10px] text-muted-foreground uppercase">Itens da Nota ({items.length})</Label>
-                          <div className="space-y-2">
-                            {items.map((it, i) => (
-                              <div key={i} className="flex justify-between text-sm">
-                                <span>{it.quantity}x {it.productName}</span>
-                                <span className="font-mono">{formatBRL(it.quantity * it.unitPrice)}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <div className="space-y-4">
-                      <Card className="border-primary bg-primary/5 shadow-2xl overflow-hidden">
-                        <div className="bg-primary px-4 py-2 text-primary-foreground text-[10px] font-bold uppercase text-center tracking-[0.2em]">Total do Documento</div>
-                        <CardContent className="p-6 text-center">
-                          <div className="text-4xl font-black tabular-nums text-primary mb-1">{formatBRL(total)}</div>
-                          <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">Valor Líquido da Nota</p>
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardContent className="p-4 space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Subtotal Itens</span>
-                            <span className="font-bold">{formatBRL(subtotal)}</span>
-                          </div>
-                          <div className="flex justify-between text-destructive">
-                            <span className="text-muted-foreground">Descontos</span>
-                            <span className="font-bold">-{formatBRL(discount)}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Frete</span>
-                            <span className="font-bold">+{formatBRL(shipping)}</span>
-                          </div>
-                          <Separator className="my-2" />
-                          <div className="flex justify-between text-success">
-                            <span className="font-bold">Total de Tributos</span>
-                            <span className="font-bold">{formatBRL(totalIcms + totalIpi + totalPis + totalCofins)}</span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </div>
-                </div>
+                <StepReview
+                  naturezaOp={naturezaOp}
+                  clientName={clientName}
+                  clientDocument={clientDocument}
+                  items={items}
+                  subtotal={subtotal}
+                  discount={discount}
+                  shipping={shipping}
+                  total={total}
+                  totalIcms={totalIcms}
+                  totalIpi={totalIpi}
+                  totalPis={totalPis}
+                  totalCofins={totalCofins}
+                />
               )}
             </div>
           </ScrollArea>
@@ -978,23 +422,23 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
               </Button>
             )}
             {step < STEPS.length - 1 ? (
-              <Button 
-                onClick={handleNext} 
+              <Button
+                onClick={handleNext}
                 disabled={hasBlockingErrors}
                 className={cn(
-                  "px-8 h-11 gap-2 shadow-lg transition-all",
-                  hasBlockingErrors ? "opacity-50 grayscale cursor-not-allowed" : "shadow-primary/20"
+                  'px-8 h-11 gap-2 shadow-lg transition-all',
+                  hasBlockingErrors ? 'opacity-50 grayscale cursor-not-allowed' : 'shadow-primary/20',
                 )}
               >
                 Avançar <ChevronRight className="h-4 w-4" />
               </Button>
             ) : (
-              <Button 
-                onClick={handleSubmit} 
-                disabled={saving || hasBlockingErrors} 
+              <Button
+                onClick={handleSubmit}
+                disabled={saving || hasBlockingErrors}
                 className={cn(
-                  "px-10 h-11 gap-2 bg-success hover:bg-success/90 shadow-lg transition-all",
-                  hasBlockingErrors ? "opacity-50 grayscale cursor-not-allowed" : "shadow-success/20"
+                  'px-10 h-11 gap-2 bg-success hover:bg-success/90 shadow-lg transition-all',
+                  hasBlockingErrors ? 'opacity-50 grayscale cursor-not-allowed' : 'shadow-success/20',
                 )}
               >
                 {saving ? 'Processando...' : <><Send className="h-4 w-4" /> Gerar NF-e</>}
