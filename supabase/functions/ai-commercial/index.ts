@@ -583,7 +583,7 @@ async function generateDailyActions(companyId: string, _scope: string[] | null) 
 }
 
 // ─── Engine 5: Opportunity Predictions (Fase 3) ──────────────────────
-async function generatePredictions(companyId: string) {
+async function generatePredictions(companyId: string, scope: string[] | null) {
   const { data: funnelItems } = await supabase.from("sales_funnel")
     .select("*, clients:client_id(id, name, code)")
     .eq("company_id", companyId)
@@ -593,11 +593,11 @@ async function generatePredictions(companyId: string) {
 
   if (!funnelItems?.length) return { predictions: 0 };
 
-  const { data: orders } = await supabase.from("orders")
-    .select("id, client_id, total, status, date")
+  const { data: orders } = await inBranch(supabase.from("orders")
+    .select("id, client_id, total, status, date, branch_id")
     .eq("company_id", companyId)
     .order("date", { ascending: false })
-    .limit(500);
+    .limit(500), scope);
 
 
   const now = new Date();
