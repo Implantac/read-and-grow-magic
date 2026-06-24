@@ -293,31 +293,31 @@ export function useDeleteOrder() {
           }
         }, 'Desfazer');
 
-      const { id, update } = toast({ 
+      const { id, update } = toast({
         title: 'Pedido removido com sucesso!',
         description: `O pedido ${deletedOrder.number} foi excluído. Você tem ${timeLeft} segundos para desfazer.`,
         duration: durationMs,
-        action: createAction() as unknown as any
+        action: createAction(),
       });
 
       interval = setInterval(() => {
         timeLeft -= 1;
         if (timeLeft <= 0) {
-          clearInterval(interval);
+          if (interval) clearInterval(interval);
           update({
             id,
             description: `O pedido ${deletedOrder.number} foi excluído permanentemente.`,
-            action: createAction(true) as unknown as any,
-          } as any);
+            action: createAction(true),
+          });
         } else {
           update({
             id,
             description: `O pedido ${deletedOrder.number} foi excluído. Você tem ${timeLeft} segundos para desfazer.`,
-          } as any);
+          });
         }
       }, 1000);
     },
-    onError: (e: any) => {
+    onError: (e: Error) => {
       console.error('Error deleting order:', e);
       toastError(e.message || 'Não foi possível excluir o pedido no momento.', undefined, 'Erro ao remover pedido');
     },
