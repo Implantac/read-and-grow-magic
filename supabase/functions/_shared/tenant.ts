@@ -201,3 +201,89 @@ export function jsonError(message: string, status: number): Response {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 }
+
+/**
+ * Server-side module access guard. Returns null if allowed, otherwise a 403
+ * Response that the caller must return immediately. Cron callers are allowed.
+ *
+ * Usage:
+ *   const denied = await requireModule(ctx, 'producao');
+ *   if (denied) return denied;
+ */
+export async function requireModule(
+  ctx: TenantContext,
+  moduleKey: string,
+): Promise<Response | null> {
+  if (ctx.viaCron) return null;
+  if (!ctx.companyId) {
+    return jsonError('Forbidden', 403);
+  }
+
+  const admin = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+  );
+
+  const { data, error } = await admin
+    .from('subscriptions')
+    .select('status, plan_modules:plan_id(module_key, enabled)')
+    .eq('company_id', ctx.companyId)
+    .in('status', ['active', 'trialing', 'trial'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error('[requireModule] subscription lookup failed', error);
+    return jsonError('Erro ao validar plano.', 500);
+  }
+  if (!data) {
+    return jsonError(
+      JSON.stringify({ error: 'plan_required', module: moduleKey }),
+      402,
+    );
+  }
+
+  // Fallback explicit lookup (PostgREST nested filter is limited)
+  const { data: pm } = await admin
+    .from('plan_modules')
+    .select('enabled')
+    .eq('plan_id', (data as any).plan_id ?? null)
+    .eq('module_key', moduleKey)
+    .eq('enabled', true)
+    .maybeSingle();
+
+  // Simpler & reliable: query plan_modules via subscription
+  const { data: row } = await admin
+    .from('subscriptions')
+    .select('plan_id')
+    .eq('company_id', ctx.companyId)
+    .in('status', ['active', 'trialing', 'trial'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!row?.plan_id) {
+    return new Response(
+      JSON.stringify({ error: 'plan_required', module: moduleKey }),
+      { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    );
+  }
+
+  const { data: mod } = await admin
+    .from('plan_modules')
+    .select('enabled')
+    .eq('plan_id', row.plan_id)
+    .eq('module_key', moduleKey)
+    .eq('enabled', true)
+    .maybeSingle();
+
+  if (!mod) {
+    return new Response(
+      JSON.stringify({ error: 'module_locked', module: moduleKey }),
+      { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    );
+  }
+
+  return null;
+}
