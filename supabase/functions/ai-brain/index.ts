@@ -980,17 +980,23 @@ Deno.serve(async (req) => {
       }
       case "execute_decision": {
         const { data: dec, error: e0 } = await admin
-          .from("ai_brain_decisions").select("*").eq("id", body.decision_id).single();
+          .from("ai_brain_decisions").select("*").eq("id", body.decision_id).eq("company_id", callerCompany!).maybeSingle();
         if (e0) throw e0;
+        if (!dec) {
+          return new Response(JSON.stringify({ error: "Forbidden" }), {
+            status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
         const r = await executeAction(dec.proposed_action, userId);
         await admin.from("ai_brain_decisions").update({
           status: r.ok ? "executed" : "approved",
           executed_at: r.ok ? new Date().toISOString() : null,
           execution_result: r,
-        }).eq("id", body.decision_id);
+        }).eq("id", body.decision_id).eq("company_id", callerCompany!);
         result = r;
         break;
       }
+
       case "cron_run":
         result = await handleAnalyze(undefined, undefined, "autopilot");
         break;
