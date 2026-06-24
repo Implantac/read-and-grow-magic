@@ -111,9 +111,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Re-roda os testes dentro do job de lint como guard adicional
-      # (cobre o caso de alguém pular o job dedicado via re-run parcial).
-      - name: Test ESLint threshold validator
+      # Guard adicional: re-roda os testes apenas quando o job dedicado
+      # também rodou (mesmo critério paths-filter), evitando trabalho
+      # duplicado em PRs que não tocam thresholds.
+      - name: Test ESLint threshold validator (guard)
+        if: needs.eslint-thresholds-tests.outputs.ran == 'true'
         run: bash scripts/test-eslint-thresholds.sh
 
       # Valida faixas dos thresholds do ESLint cache (vars/inputs/env).
