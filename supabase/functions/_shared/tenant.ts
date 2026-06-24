@@ -224,9 +224,9 @@ export async function requireModule(
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   );
 
-  const { data, error } = await admin
+  const { data: sub, error } = await admin
     .from('subscriptions')
-    .select('status, plan_modules:plan_id(module_key, enabled)')
+    .select('plan_id')
     .eq('company_id', ctx.companyId)
     .in('status', ['active', 'trialing', 'trial'])
     .order('created_at', { ascending: false })
@@ -237,33 +237,7 @@ export async function requireModule(
     console.error('[requireModule] subscription lookup failed', error);
     return jsonError('Erro ao validar plano.', 500);
   }
-  if (!data) {
-    return jsonError(
-      JSON.stringify({ error: 'plan_required', module: moduleKey }),
-      402,
-    );
-  }
-
-  // Fallback explicit lookup (PostgREST nested filter is limited)
-  const { data: pm } = await admin
-    .from('plan_modules')
-    .select('enabled')
-    .eq('plan_id', (data as any).plan_id ?? null)
-    .eq('module_key', moduleKey)
-    .eq('enabled', true)
-    .maybeSingle();
-
-  // Simpler & reliable: query plan_modules via subscription
-  const { data: row } = await admin
-    .from('subscriptions')
-    .select('plan_id')
-    .eq('company_id', ctx.companyId)
-    .in('status', ['active', 'trialing', 'trial'])
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (!row?.plan_id) {
+  if (!sub?.plan_id) {
     return new Response(
       JSON.stringify({ error: 'plan_required', module: moduleKey }),
       { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
@@ -273,7 +247,7 @@ export async function requireModule(
   const { data: mod } = await admin
     .from('plan_modules')
     .select('enabled')
-    .eq('plan_id', row.plan_id)
+    .eq('plan_id', sub.plan_id)
     .eq('module_key', moduleKey)
     .eq('enabled', true)
     .maybeSingle();
