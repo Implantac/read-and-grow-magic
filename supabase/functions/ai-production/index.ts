@@ -165,12 +165,12 @@ Cada objeto deve conter: insight_type, severity, title, description, affected_se
 
     // === ACTION: decision_engine ===
     if (action === "decision_engine") {
-      const { data: orders } = await supabase
+      const { data: orders } = await scopeOrders(supabase
         .from("production_orders")
         .select("*")
         .eq("company_id", callerCompany)
         .in("status", ["planned", "in_progress", "paused"])
-        .order("due_date");
+        .order("due_date"));
 
       const { data: capacity } = await supabase
         .from("production_capacity")
