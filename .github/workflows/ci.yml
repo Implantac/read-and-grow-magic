@@ -265,6 +265,7 @@ jobs:
               fi
             else
               echo "_Nenhum arquivo monitorado foi alterado neste PR/push._"
+            fi
             echo ""
             if [ -s /tmp/eslint-thresholds-logs/failures.md ]; then
               echo "### ❌ Casos que falharam"
@@ -274,6 +275,7 @@ jobs:
               echo "_Cada caso acima também foi publicado como workflow annotation (\`::error::\`) e aparece na aba **Files changed** / **Checks** do PR._"
               echo ""
             fi
+
 
             echo "### 🔗 Logs e artefatos"
             echo ""
