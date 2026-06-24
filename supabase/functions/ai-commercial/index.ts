@@ -440,7 +440,7 @@ Gere de 5 a 12 insights comerciais acionáveis para vendedores, supervisores, ge
 }
 
 // ─── Engine 4: Daily Action Queue (Fase 1+4) ─────────────────────────
-async function generateDailyActions(companyId: string) {
+async function generateDailyActions(companyId: string, _scope: string[] | null) {
   const today = new Date().toISOString().split("T")[0];
 
   // Delete old actions (not today) to avoid clutter
