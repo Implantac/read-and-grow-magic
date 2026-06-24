@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
     // Apply overrides and delays
     const processedOPs = allOrders.map((o: any) => {
       const priority = body.priorityOverrides?.[o.id] || o.priority;
-      let dueDate = o.due_date ? new Date(o.due_date) : null;
+      const dueDate = o.due_date ? new Date(o.due_date) : null;
 
       // Apply delay simulation
       const delay = body.delayedOPs?.find((d) => d.opId === o.id);

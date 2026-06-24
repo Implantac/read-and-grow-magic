@@ -390,9 +390,9 @@ export class SimulationService {
     const today = new Date();
 
     // Clone data for simulation (no mutations to originals)
-    let simOrders = orders.map(o => ({ ...o }));
-    let simSupplies = supplies.map(s => ({ ...s }));
-    let simCapacities = capacities.map(c => ({ ...c }));
+    const simOrders = orders.map(o => ({ ...o }));
+    const simSupplies = supplies.map(s => ({ ...s }));
+    const simCapacities = capacities.map(c => ({ ...c }));
 
     // Apply delay scenario
     if (scenario.delayedOPs) {
