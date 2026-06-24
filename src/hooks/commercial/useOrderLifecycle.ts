@@ -215,7 +215,7 @@ export function useOrderLifecycle() {
       }
 
       // Build update payload
-      const updatePayload: Record<string, string> = { status: targetStatus, updated_at: new Date().toISOString() };
+      const updatePayload: Database['public']['Tables']['orders']['Update'] = { status: targetStatus, updated_at: new Date().toISOString() };
 
       // Set fulfillment sub-statuses
       if (targetStatus === 'awaiting_separation' || targetStatus === 'in_separation') {
