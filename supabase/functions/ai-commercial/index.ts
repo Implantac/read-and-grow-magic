@@ -638,6 +638,7 @@ async function generatePredictions(companyId: string) {
     predictions.push({
       funnel_id: item.id,
       client_id: item.client_id,
+      company_id: companyId,
       close_probability: closeProbability,
       loss_risk: Math.round(Math.min(1, lossRisk) * 100) / 100,
       predicted_close_date: predictedClose.toISOString().split("T")[0],
@@ -649,8 +650,8 @@ async function generatePredictions(companyId: string) {
     });
   }
 
-  // Clear old predictions and insert new ones
-  await supabase.from("ai_opportunity_predictions").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+  // Clear old predictions for this company and insert new ones
+  await supabase.from("ai_opportunity_predictions").delete().eq("company_id", companyId);
 
   if (predictions.length > 0) {
     for (const pred of predictions) {
@@ -662,21 +663,24 @@ async function generatePredictions(companyId: string) {
 }
 
 // ─── Engine 6: Forecast Snapshot (Fase 3) ─────────────────────────────
-async function generateForecast() {
+async function generateForecast(companyId: string) {
   const now = new Date();
   const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
   const { data: orders } = await supabase.from("orders")
     .select("id, total, status, sales_rep_id, sales_rep_name, client_id, date")
+    .eq("company_id", companyId)
     .gte("date", `${period}-01`)
     .order("date", { ascending: false });
 
   const { data: funnel } = await supabase.from("sales_funnel")
     .select("id, value, stage, status, sales_rep_id, client_id")
+    .eq("company_id", companyId)
     .in("status", ["open", "active"]);
 
-  const { data: reps } = await supabase.from("sales_reps").select("id, name, region, monthly_target").limit(50);
-  const { data: clients } = await supabase.from("clients").select("id, segment, region").limit(500);
+  const { data: reps } = await supabase.from("sales_reps").select("id, name, region, monthly_target").eq("company_id", companyId).limit(50);
+  const { data: clients } = await supabase.from("clients").select("id, segment, region").eq("company_id", companyId).limit(500);
+
 
   const stageWeights: Record<string, number> = {
     lead: 0.10, opportunity: 0.25, proposal_sent: 0.45,
