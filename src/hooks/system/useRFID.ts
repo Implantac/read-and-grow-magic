@@ -139,7 +139,10 @@ export function useRFIDEvents(limit = 100) {
       rssi: r.rssi ? Number(r.rssi) : undefined, antenna: r.antenna || 1,
       location: r.location, zone: r.zone, processed: r.processed,
       processedAt: r.processed_at, actionTaken: r.action_taken,
-      metadata: r.metadata, createdAt: r.created_at,
+      metadata: (r.metadata && typeof r.metadata === 'object' && !Array.isArray(r.metadata))
+        ? (r.metadata as Record<string, unknown>) as Record<string, any>
+        : undefined,
+      createdAt: r.created_at,
     })));
     setLoading(false);
   }, [limit]);

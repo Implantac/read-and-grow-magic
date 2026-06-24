@@ -81,7 +81,7 @@ export class CompaniesService extends BaseService<'companies'> {
       segment: company.segment,
       sub_segment: company.subSegment,
       company_size: company.companySize,
-      tax_regime: company.taxRegime
+      tax_regime: company.taxRegime as 'presumed' | 'real' | 'simples'
     });
   }
 
