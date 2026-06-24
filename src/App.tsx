@@ -77,6 +77,7 @@ const App = () => (
                 {FiscalRoutes}
                 {VerticalPackRoutes}
                 {ExecutiveRoutes}
+                <Route path="*" element={<NotFound />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />
