@@ -718,10 +718,16 @@ ${ctx}`;
   return { content: finalContent || "✅ Ações executadas.", actions: executed };
 }
 
-async function handleApprove(decisionId: string, approve: boolean, userId?: string) {
-  const { data: dec, error: e0 } = await admin
-    .from("ai_brain_decisions").select("*").eq("id", decisionId).single();
+async function handleApprove(decisionId: string, approve: boolean, userId: string | undefined, callerCompany: string | null) {
+  const q = admin.from("ai_brain_decisions").select("*").eq("id", decisionId);
+  if (callerCompany) q.eq("company_id", callerCompany);
+  const { data: dec, error: e0 } = await q.maybeSingle();
   if (e0) throw e0;
+  if (!dec) {
+    const err: any = new Error("Forbidden");
+    err.status = 403;
+    throw err;
+  }
 
   if (!approve) {
     const { data, error } = await admin.from("ai_brain_decisions")
@@ -745,6 +751,7 @@ async function handleApprove(decisionId: string, approve: boolean, userId?: stri
   if (error) throw error;
   return data;
 }
+
 
 // ─────────────────────────────────────────────
 // WEEKLY LEARNING — analisa rejeitadas e salva lições
@@ -822,6 +829,7 @@ Deno.serve(async (req) => {
 
     let userId: string | undefined;
     let userRole: string | null = null;
+    let callerCompany: string | null = null;
     if (!CRON_ACTIONS.has(action)) {
       if (!authHeader?.startsWith("Bearer ")) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -838,6 +846,8 @@ Deno.serve(async (req) => {
       userId = data.user.id;
       const { data: roleRow } = await admin.from("user_roles").select("role").eq("user_id", userId).order("role").limit(1).maybeSingle();
       userRole = (roleRow as any)?.role || null;
+      const { data: profileRow } = await admin.from("profiles").select("company_id").eq("id", userId).maybeSingle();
+      callerCompany = (profileRow as any)?.company_id || null;
 
       // Privileged actions require admin/manager
       const PRIVILEGED = new Set([
@@ -849,7 +859,19 @@ Deno.serve(async (req) => {
           status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+
+      // Tenant-scoped actions require a resolved company_id
+      const TENANT_SCOPED = new Set([
+        "approve_decision", "reject_decision", "execute_decision",
+        "feedback_decision", "reinforce_memory",
+      ]);
+      if (TENANT_SCOPED.has(action) && !callerCompany) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
+
 
     let result: any;
     switch (action) {
@@ -863,11 +885,12 @@ Deno.serve(async (req) => {
         result = await handleChat(userId, body.messages || [], authHeader, body.agent || "geral");
         break;
       case "approve_decision":
-        result = await handleApprove(body.decision_id, true, userId);
+        result = await handleApprove(body.decision_id, true, userId, callerCompany);
         break;
       case "reject_decision":
-        result = await handleApprove(body.decision_id, false, userId);
+        result = await handleApprove(body.decision_id, false, userId, callerCompany);
         break;
+
       case "save_memory":
         await saveMemory({ ...body.memory, user_id: userId });
         result = { ok: true };
@@ -886,8 +909,9 @@ Deno.serve(async (req) => {
           break;
         }
         const { data: dec } = await admin.from("ai_brain_decisions")
-          .select("title,module,rationale,proposed_action,impact_level").eq("id", decision_id).single();
+          .select("title,module,rationale,proposed_action,impact_level,company_id").eq("id", decision_id).eq("company_id", callerCompany!).maybeSingle();
         if (!dec) { result = { ok: false, error: "decisão não encontrada" }; break; }
+
         await saveMemory({
           user_id: userId,
           category: rating === "up" ? "positive_feedback" : "lesson_learned",
@@ -910,10 +934,11 @@ Deno.serve(async (req) => {
         const { memory_key, delta } = body;
         if (!memory_key) { result = { ok: false, error: "memory_key obrigatório" }; break; }
         const { data: mem } = await admin.from("ai_brain_memory")
-          .select("id,importance").eq("key", memory_key).maybeSingle();
+          .select("id,importance").eq("key", memory_key).eq("company_id", callerCompany!).maybeSingle();
         if (!mem) { result = { ok: false, error: "memória não encontrada" }; break; }
         const next = Math.min(10, (mem.importance || 5) + (Number(delta) || 1));
-        await admin.from("ai_brain_memory").update({ importance: next }).eq("id", mem.id);
+        await admin.from("ai_brain_memory").update({ importance: next }).eq("id", mem.id).eq("company_id", callerCompany!);
+
         result = { ok: true, new_importance: next };
         break;
       }
@@ -955,17 +980,23 @@ Deno.serve(async (req) => {
       }
       case "execute_decision": {
         const { data: dec, error: e0 } = await admin
-          .from("ai_brain_decisions").select("*").eq("id", body.decision_id).single();
+          .from("ai_brain_decisions").select("*").eq("id", body.decision_id).eq("company_id", callerCompany!).maybeSingle();
         if (e0) throw e0;
+        if (!dec) {
+          return new Response(JSON.stringify({ error: "Forbidden" }), {
+            status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
         const r = await executeAction(dec.proposed_action, userId);
         await admin.from("ai_brain_decisions").update({
           status: r.ok ? "executed" : "approved",
           executed_at: r.ok ? new Date().toISOString() : null,
           execution_result: r,
-        }).eq("id", body.decision_id);
+        }).eq("id", body.decision_id).eq("company_id", callerCompany!);
         result = r;
         break;
       }
+
       case "cron_run":
         result = await handleAnalyze(undefined, undefined, "autopilot");
         break;

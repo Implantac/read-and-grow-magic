@@ -15,7 +15,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 // --- Auth helper ---
-async function requireAuth(req: Request): Promise<Response | null> {
+async function requireAuth(req: Request): Promise<Response | { userId: string; companyId: string }> {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -32,8 +32,17 @@ async function requireAuth(req: Request): Promise<Response | null> {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-  return null; // authenticated
+  const userId = (data.claims as any).sub as string;
+  const { data: profile } = await supabase.from("profiles").select("company_id").eq("id", userId).maybeSingle();
+  const companyId = (profile as any)?.company_id as string | undefined;
+  if (!companyId) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  return { userId, companyId };
 }
+
 
 async function callAI(systemPrompt: string, userPrompt: string, tools?: any[]): Promise<any> {
   const body: any = {
@@ -71,13 +80,14 @@ async function callAI(systemPrompt: string, userPrompt: string, tools?: any[]): 
 }
 
 // ─── Engine 1: Score Clients (Fase 1) ──────────────────────────────────
-async function scoreClients() {
-  const { data: clients } = await supabase.from("clients").select("*").eq("status", "active").limit(200);
+async function scoreClients(companyId: string) {
+  const { data: clients } = await supabase.from("clients").select("*").eq("company_id", companyId).eq("status", "active").limit(200);
   if (!clients?.length) return { scored: 0 };
 
-  const { data: orders } = await supabase.from("orders").select("id, client_id, total, date, status, sales_rep_id").neq("status", "cancelled").order("date", { ascending: false }).limit(2000);
-  const { data: receivables } = await supabase.from("accounts_receivable").select("client_id, amount, status, due_date").limit(1000);
-  const { data: sales } = await supabase.from("sales").select("id, client_id, total, date, status").neq("status", "cancelled").order("date", { ascending: false }).limit(1000);
+  const { data: orders } = await supabase.from("orders").select("id, client_id, total, date, status, sales_rep_id").eq("company_id", companyId).neq("status", "cancelled").order("date", { ascending: false }).limit(2000);
+  const { data: receivables } = await supabase.from("accounts_receivable").select("client_id, amount, status, due_date").eq("company_id", companyId).limit(1000);
+  const { data: sales } = await supabase.from("sales").select("id, client_id, total, date, status").eq("company_id", companyId).neq("status", "cancelled").order("date", { ascending: false }).limit(1000);
+
 
   const now = new Date();
   const scores: any[] = [];
@@ -144,6 +154,7 @@ async function scoreClients() {
 
     scores.push({
       client_id: client.id,
+      company_id: companyId,
       score_numeric: Math.round(clampedScore),
       score_grade: grade,
       priority_level: priority,
@@ -172,32 +183,35 @@ async function scoreClients() {
     await supabase.from("clients").update({
       client_score: score.score_grade,
       abc_classification: score.score_grade,
-    }).eq("id", score.client_id);
+    }).eq("id", score.client_id).eq("company_id", companyId);
   }
 
   return { scored: scores.length };
 }
 
 // ─── Engine 2: AI Recommendations (Fase 2 - cross-sell, upsell, ticket) ──
-async function generateRecommendations() {
+async function generateRecommendations(companyId: string) {
   const { data: topClients } = await supabase
     .from("ai_sales_scores")
     .select("*, clients(id, name, code, segment, last_purchase_date, avg_ticket, total_purchases, default_payment_condition)")
+    .eq("company_id", companyId)
     .order("score_numeric", { ascending: false })
     .limit(30);
 
   if (!topClients?.length) return { recommendations: 0 };
 
-  const { data: products } = await supabase.from("products").select("id, name, code, sale_price, cost_price, category_id, status").eq("status", "active").limit(100);
-  
+  const { data: products } = await supabase.from("products").select("id, name, code, sale_price, cost_price, category_id, status").eq("company_id", companyId).eq("status", "active").limit(100);
+
   // Get recent order items for each client to know what they buy
   const clientIds = topClients.map((s: any) => s.client_id);
   const { data: recentOrders } = await supabase.from("orders")
     .select("client_id, total, date, order_items(product_name, product_code, quantity, unit_price, total)")
+    .eq("company_id", companyId)
     .in("client_id", clientIds)
     .neq("status", "cancelled")
     .order("date", { ascending: false })
     .limit(200);
+
 
   const clientProducts: Record<string, string[]> = {};
   (recentOrders || []).forEach((o: any) => {
@@ -267,6 +281,7 @@ Utilize a função 'generate_recommendations' com o JSON estruturado.`, supabase
 
     await supabase.from("ai_recommendations").insert({
       client_id: clientData.clients.id,
+      company_id: companyId,
       recommendation_type: rec.type,
       title: rec.title,
       description: rec.description,
@@ -284,12 +299,13 @@ Utilize a função 'generate_recommendations' com o JSON estruturado.`, supabase
 }
 
 // ─── Engine 3: Insights for Managers (Fase 3) ─────────────────────────
-async function generateInsights() {
-  const { data: scores } = await supabase.from("ai_sales_scores").select("*").limit(200);
-  const { data: orders } = await supabase.from("orders").select("id, total, status, sales_rep_id, sales_rep_name, client_name, client_id, date").order("date", { ascending: false }).limit(500);
-  const { data: reps } = await supabase.from("sales_reps").select("id, name, monthly_target, region").limit(50);
-  const { data: funnel } = await supabase.from("sales_funnel").select("id, value, status, stage, sales_rep_id, updated_at, title").limit(200);
-  const { data: targets } = await supabase.from("sales_targets").select("*").limit(50);
+async function generateInsights(companyId: string) {
+  const { data: scores } = await supabase.from("ai_sales_scores").select("*").eq("company_id", companyId).limit(200);
+  const { data: orders } = await supabase.from("orders").select("id, total, status, sales_rep_id, sales_rep_name, client_name, client_id, date").eq("company_id", companyId).order("date", { ascending: false }).limit(500);
+  const { data: reps } = await supabase.from("sales_reps").select("id, name, monthly_target, region").eq("company_id", companyId).limit(50);
+  const { data: funnel } = await supabase.from("sales_funnel").select("id, value, status, stage, sales_rep_id, updated_at, title").eq("company_id", companyId).limit(200);
+  const { data: targets } = await supabase.from("sales_targets").select("*").eq("company_id", companyId).limit(50);
+
 
   const now = new Date();
   const thisMonth = orders?.filter((o: any) => new Date(o.date).getMonth() === now.getMonth() && new Date(o.date).getFullYear() === now.getFullYear()) || [];
@@ -392,6 +408,7 @@ Gere de 5 a 12 insights comerciais acionáveis para vendedores, supervisores, ge
   let inserted = 0;
   for (const insight of result.insights || []) {
     await supabase.from("ai_sales_insights").insert({
+      company_id: companyId,
       insight_type: insight.type,
       target_role: insight.target_role,
       title: insight.title,
@@ -408,30 +425,34 @@ Gere de 5 a 12 insights comerciais acionáveis para vendedores, supervisores, ge
 }
 
 // ─── Engine 4: Daily Action Queue (Fase 1+4) ─────────────────────────
-async function generateDailyActions() {
+async function generateDailyActions(companyId: string) {
   const today = new Date().toISOString().split("T")[0];
 
   // Delete old actions (not today) to avoid clutter
-  await supabase.from("ai_daily_actions").delete().neq("action_date", today).eq("status", "pending");
+  await supabase.from("ai_daily_actions").delete().eq("company_id", companyId).neq("action_date", today).eq("status", "pending");
 
   // Check if already generated today
-  const { data: existing } = await supabase.from("ai_daily_actions").select("id").eq("action_date", today).limit(1);
+  const { data: existing } = await supabase.from("ai_daily_actions").select("id").eq("company_id", companyId).eq("action_date", today).limit(1);
   if (existing?.length) return { actions: 0, message: "Already generated today" };
 
   const { data: scores } = await supabase.from("ai_sales_scores")
     .select("*, clients(id, name, code, phone, cellphone, segment, sales_rep_id, avg_ticket, total_purchases, last_purchase_date)")
+    .eq("company_id", companyId)
     .order("score_numeric", { ascending: false })
     .limit(100);
 
   const { data: pendingFollowUps } = await supabase.from("follow_ups")
     .select("client_id, subject, scheduled_date")
+    .eq("company_id", companyId)
     .eq("status", "pending")
     .lte("scheduled_date", new Date().toISOString())
     .limit(50);
 
   const { data: stagnantFunnel } = await supabase.from("sales_funnel")
     .select("id, title, value, client_id, sales_rep_id, stage, updated_at")
+    .eq("company_id", companyId)
     .eq("status", "open")
+
     .limit(50);
 
   if (!scores?.length) return { actions: 0 };
@@ -540,16 +561,17 @@ async function generateDailyActions() {
   const topActions = actions.slice(0, 30);
 
   if (topActions.length > 0) {
-    await supabase.from("ai_daily_actions").insert(topActions);
+    await supabase.from("ai_daily_actions").insert(topActions.map((a) => ({ ...a, company_id: companyId })));
   }
 
   return { actions: topActions.length };
 }
 
 // ─── Engine 5: Opportunity Predictions (Fase 3) ──────────────────────
-async function generatePredictions() {
+async function generatePredictions(companyId: string) {
   const { data: funnelItems } = await supabase.from("sales_funnel")
     .select("*, clients:client_id(id, name, code)")
+    .eq("company_id", companyId)
     .eq("status", "open")
     .order("value", { ascending: false })
     .limit(50);
@@ -558,8 +580,10 @@ async function generatePredictions() {
 
   const { data: orders } = await supabase.from("orders")
     .select("id, client_id, total, status, date")
+    .eq("company_id", companyId)
     .order("date", { ascending: false })
     .limit(500);
+
 
   const now = new Date();
 
@@ -614,6 +638,7 @@ async function generatePredictions() {
     predictions.push({
       funnel_id: item.id,
       client_id: item.client_id,
+      company_id: companyId,
       close_probability: closeProbability,
       loss_risk: Math.round(Math.min(1, lossRisk) * 100) / 100,
       predicted_close_date: predictedClose.toISOString().split("T")[0],
@@ -625,8 +650,8 @@ async function generatePredictions() {
     });
   }
 
-  // Clear old predictions and insert new ones
-  await supabase.from("ai_opportunity_predictions").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+  // Clear old predictions for this company and insert new ones
+  await supabase.from("ai_opportunity_predictions").delete().eq("company_id", companyId);
 
   if (predictions.length > 0) {
     for (const pred of predictions) {
@@ -638,21 +663,24 @@ async function generatePredictions() {
 }
 
 // ─── Engine 6: Forecast Snapshot (Fase 3) ─────────────────────────────
-async function generateForecast() {
+async function generateForecast(companyId: string) {
   const now = new Date();
   const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
   const { data: orders } = await supabase.from("orders")
     .select("id, total, status, sales_rep_id, sales_rep_name, client_id, date")
+    .eq("company_id", companyId)
     .gte("date", `${period}-01`)
     .order("date", { ascending: false });
 
   const { data: funnel } = await supabase.from("sales_funnel")
     .select("id, value, stage, status, sales_rep_id, client_id")
+    .eq("company_id", companyId)
     .in("status", ["open", "active"]);
 
-  const { data: reps } = await supabase.from("sales_reps").select("id, name, region, monthly_target").limit(50);
-  const { data: clients } = await supabase.from("clients").select("id, segment, region").limit(500);
+  const { data: reps } = await supabase.from("sales_reps").select("id, name, region, monthly_target").eq("company_id", companyId).limit(50);
+  const { data: clients } = await supabase.from("clients").select("id, segment, region").eq("company_id", companyId).limit(500);
+
 
   const stageWeights: Record<string, number> = {
     lead: 0.10, opportunity: 0.25, proposal_sent: 0.45,
@@ -724,6 +752,7 @@ async function generateForecast() {
   };
 
   await supabase.from("ai_forecast_snapshots").insert({
+    company_id: companyId,
     period,
     forecast_date: now.toISOString().split("T")[0],
     predicted_revenue: Math.round(predictedRevenue),
@@ -735,6 +764,7 @@ async function generateForecast() {
     by_region: byRegion,
     factors,
   });
+
 
   return {
     period,
@@ -753,8 +783,9 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     // Auth check
-    const authErr = await requireAuth(req);
-    if (authErr) return authErr;
+    const authRes = await requireAuth(req);
+    if (authRes instanceof Response) return authRes;
+    const { companyId } = authRes;
 
     const { action } = await req.json();
 
@@ -762,36 +793,37 @@ serve(async (req) => {
 
     switch (action) {
       case "score_clients":
-        result = await scoreClients();
+        result = await scoreClients(companyId);
         break;
       case "generate_recommendations":
-        result = await generateRecommendations();
+        result = await generateRecommendations(companyId);
         break;
       case "generate_insights":
-        result = await generateInsights();
+        result = await generateInsights(companyId);
         break;
       case "generate_daily_actions":
-        result = await generateDailyActions();
+        result = await generateDailyActions(companyId);
         break;
       case "generate_predictions":
-        result = await generatePredictions();
+        result = await generatePredictions(companyId);
         break;
       case "generate_forecast":
-        result = await generateForecast();
+        result = await generateForecast(companyId);
         break;
       case "full_analysis": {
-        const r1 = await scoreClients();
-        const r2 = await generateDailyActions();
-        const r3 = await generatePredictions();
-        const r4 = await generateRecommendations();
-        const r5 = await generateInsights();
-        const r6 = await generateForecast();
+        const r1 = await scoreClients(companyId);
+        const r2 = await generateDailyActions(companyId);
+        const r3 = await generatePredictions(companyId);
+        const r4 = await generateRecommendations(companyId);
+        const r5 = await generateInsights(companyId);
+        const r6 = await generateForecast(companyId);
         result = { ...r1, ...r2, ...r3, ...r4, ...r5, ...r6 };
         break;
       }
       default:
         throw new Error(`Unknown action: ${action}`);
     }
+
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

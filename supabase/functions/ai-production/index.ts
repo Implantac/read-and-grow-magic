@@ -31,6 +31,14 @@ serve(async (req) => {
     const { action } = await req.json();
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    const userId = (claimsData.claims as any).sub;
+    const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', userId).maybeSingle();
+    const callerCompany = (profile as any)?.company_id;
+    if (!callerCompany) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+
     // Helper to call AI
     const callAI = async (systemPrompt: string, userPrompt: string) => {
       const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -66,19 +74,23 @@ serve(async (req) => {
       const { data: orders } = await supabase
         .from("production_orders")
         .select("*")
+        .eq("company_id", callerCompany)
         .in("status", ["planned", "in_progress", "paused"])
         .order("due_date");
 
       const { data: capacity } = await supabase
         .from("production_capacity")
         .select("*")
+        .eq("company_id", callerCompany)
         .eq("is_active", true);
 
       const { data: timeEntries } = await supabase
         .from("time_entries")
         .select("*")
+        .eq("company_id", callerCompany)
         .order("start_time", { ascending: false })
         .limit(50);
+
 
       const prompt = await getSystemPrompt('PCP_CONSULTANT', `Analise os dados de produção e gere insights acionáveis.
 ORDENS DE PRODUÇÃO ATIVAS:
@@ -122,6 +134,7 @@ Cada objeto deve conter: insight_type, severity, title, description, affected_se
 
       for (const insight of insights) {
         await supabase.from("ai_production_insights").insert({
+          company_id: callerCompany,
           insight_type: insight.insight_type || "bottleneck",
           severity: insight.severity || "medium",
           title: insight.title || "Insight",
@@ -143,18 +156,22 @@ Cada objeto deve conter: insight_type, severity, title, description, affected_se
       const { data: orders } = await supabase
         .from("production_orders")
         .select("*")
+        .eq("company_id", callerCompany)
         .in("status", ["planned", "in_progress", "paused"])
         .order("due_date");
 
       const { data: capacity } = await supabase
         .from("production_capacity")
         .select("*")
+        .eq("company_id", callerCompany)
         .eq("is_active", true);
 
       const { data: supplies } = await supabase
         .from("supply_stock")
         .select("*")
+        .eq("company_id", callerCompany)
         .order("current_quantity");
+
 
       const prompt = await getSystemPrompt('PCP_CONSULTANT', `Analise a situação atual e forneça DECISÕES ESTRATÉGICAS em JSON.
 ORDENS ATIVAS (${orders?.length || 0}):
@@ -203,6 +220,7 @@ Gere um objeto JSON com:
       const { data: activeOPs } = await supabase
         .from("production_orders")
         .select("*")
+        .eq("company_id", callerCompany)
         .in("status", ["in_progress", "planned"])
         .order("priority")
         .limit(10);
@@ -210,7 +228,9 @@ Gere um objeto JSON com:
       const { data: activeEntries } = await supabase
         .from("time_entries")
         .select("*")
+        .eq("company_id", callerCompany)
         .eq("status", "started");
+
 
       const prompt = await getSystemPrompt('PCP_CONSULTANT', `Analise as OPs ativas e sugira a melhor sequência de trabalho para os operadores.
 OPS ATIVAS:
