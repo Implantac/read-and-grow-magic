@@ -5,6 +5,37 @@ on:
     branches: [main]
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      eslint_min_overlap:
+        description: "Mínimo de entradas preservadas (pre∩post intra-run) para considerar REUSED."
+        required: false
+        default: "1"
+      eslint_min_cross_overlap:
+        description: "Mínimo de chaves compartilhadas (prev.post ∩ cur.pre) para confirmar reuse cross-run."
+        required: false
+        default: "1"
+      eslint_max_size_delta_pct:
+        description: "Variação máxima permitida (%) do tamanho do .eslintcache entre runs. 0 desabilita."
+        required: false
+        default: "50"
+      eslint_require_mtime_continuity:
+        description: "Exigir que cur.pre.mtime == prev.post.mtime (true/false)."
+        required: false
+        default: "false"
+      eslint_require_mtime_changed:
+        description: "Exigir que mtime mude durante o lint para considerar REUSED (true/false)."
+        required: false
+        default: "false"
+
+# Thresholds configuráveis do ESLint cache (workflow_dispatch sobrescreve via inputs).
+# Editar os valores aqui muda os defaults para pull_request/push.
+env:
+  ESLINT_MIN_OVERLAP: ${{ github.event.inputs.eslint_min_overlap || '1' }}
+  ESLINT_MIN_CROSS_OVERLAP: ${{ github.event.inputs.eslint_min_cross_overlap || '1' }}
+  ESLINT_MAX_SIZE_DELTA_PCT: ${{ github.event.inputs.eslint_max_size_delta_pct || '50' }}
+  ESLINT_REQUIRE_MTIME_CONTINUITY: ${{ github.event.inputs.eslint_require_mtime_continuity || 'false' }}
+  ESLINT_REQUIRE_MTIME_CHANGED: ${{ github.event.inputs.eslint_require_mtime_changed || 'false' }}
 
 jobs:
   quality:
