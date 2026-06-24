@@ -15,7 +15,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 // --- Auth helper ---
-async function requireAuth(req: Request): Promise<Response | null> {
+async function requireAuth(req: Request): Promise<Response | { userId: string; companyId: string }> {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -32,8 +32,17 @@ async function requireAuth(req: Request): Promise<Response | null> {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-  return null; // authenticated
+  const userId = (data.claims as any).sub as string;
+  const { data: profile } = await supabase.from("profiles").select("company_id").eq("id", userId).maybeSingle();
+  const companyId = (profile as any)?.company_id as string | undefined;
+  if (!companyId) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  return { userId, companyId };
 }
+
 
 async function callAI(systemPrompt: string, userPrompt: string, tools?: any[]): Promise<any> {
   const body: any = {
