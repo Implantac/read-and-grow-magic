@@ -37,7 +37,13 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const body = await req.json().catch(() => ({}));
+    const { v, parseJson } = await import("../_shared/validation.ts");
+    const parsed = await parseJson(req, v.object({
+      action: v.optional(v.string({ enum: ["recalculate", "war_mode"] as const })),
+      confirm: v.optional(v.boolean()),
+    }));
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data;
     const action = body.action || "recalculate";
 
     // Fetch active production orders for caller's company only
