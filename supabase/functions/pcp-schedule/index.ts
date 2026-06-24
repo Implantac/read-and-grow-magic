@@ -32,11 +32,21 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceKey);
 
     const userId = (claimsData.claims as any).sub;
-    const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', userId).maybeSingle();
+    const { data: profile } = await supabase.from('profiles').select('company_id, default_branch_id').eq('id', userId).maybeSingle();
     const callerCompany = (profile as any)?.company_id;
     if (!callerCompany) {
       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+
+    const ctx = await resolveContextByIds(req, {
+      userId,
+      companyId: callerCompany,
+      defaultBranchId: (profile as any)?.default_branch_id ?? null,
+    });
+    if (!ctx.ok) {
+      return new Response(JSON.stringify({ error: ctx.message }), { status: ctx.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const scope = branchScope(ctx);
 
     const body = await req.json().catch(() => ({}));
     const action = body.action || "suggest";
@@ -44,14 +54,16 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Ação inválida" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Fetch active production orders for caller's company
-    const { data: orders, error: ordErr } = await supabase
+    // Fetch active production orders for caller's company + branch scope
+    let ordersQ = supabase
       .from("production_orders")
       .select("*")
       .eq("company_id", callerCompany)
       .in("status", ["planned", "in_progress", "paused", "waiting_material", "outsourced"])
       .order("created_at", { ascending: false })
       .limit(500);
+    if (scope) ordersQ = ordersQ.in("branch_id", scope);
+    const { data: orders, error: ordErr } = await ordersQ;
 
 
     if (ordErr) throw ordErr;
