@@ -1,9 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getSystemPrompt } from '../_shared/ai-prompts.ts'
+import { resolveContextByIds, branchScope } from '../_shared/tenant.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-branch-id',
 }
 
 Deno.serve(async (req) => {
