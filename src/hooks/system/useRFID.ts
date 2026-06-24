@@ -18,10 +18,10 @@ export function useRFIDReaders() {
     setLoading(true);
     const { data, error } = await supabase.from('rfid_readers').select('*').order('code');
     if (error) { console.error(error); toast.error('Erro ao carregar leitores RFID'); }
-    else setReaders((data || []).map((r: ReaderRow) => ({
+    else setReaders((data || []).map((r: ReaderRow): RFIDReader => ({
       id: r.id, code: r.code, name: r.name, location: r.location, zone: r.zone,
       ipAddress: r.ip_address, port: r.port, model: r.model, manufacturer: r.manufacturer,
-      antennaCount: r.antenna_count || 1, status: r.status,
+      antennaCount: r.antenna_count || 1, status: r.status as RFIDReader['status'],
       lastHeartbeat: r.last_heartbeat, createdAt: r.created_at, updatedAt: r.updated_at,
     })));
     setLoading(false);
@@ -81,10 +81,10 @@ export function useRFIDTags() {
     setLoading(true);
     const { data, error } = await supabase.from('rfid_tags').select('*').order('created_at', { ascending: false });
     if (error) { console.error(error); toast.error('Erro ao carregar tags RFID'); }
-    else setTags((data || []).map((r: TagRow) => ({
-      id: r.id, epc: r.epc, tagType: r.tag_type, productId: r.product_id,
+    else setTags((data || []).map((r: TagRow): RFIDTag => ({
+      id: r.id, epc: r.epc, tagType: r.tag_type as RFIDTag['tagType'], productId: r.product_id,
       productCode: r.product_code, productName: r.product_name, batch: r.batch,
-      palletId: r.pallet_id, location: r.location, status: r.status,
+      palletId: r.pallet_id, location: r.location, status: r.status as RFIDTag['status'],
       registeredAt: r.registered_at, lastReadAt: r.last_read_at,
       createdAt: r.created_at, updatedAt: r.updated_at,
     })));
@@ -133,9 +133,9 @@ export function useRFIDEvents(limit = 100) {
     const { data, error } = await supabase.from('rfid_events')
       .select('*').order('created_at', { ascending: false }).limit(limit);
     if (error) { console.error(error); toast.error('Erro ao carregar eventos RFID'); }
-    else setEvents((data || []).map((r: EventRow) => ({
+    else setEvents((data || []).map((r: EventRow): RFIDEvent => ({
       id: r.id, readerId: r.reader_id, readerCode: r.reader_code,
-      tagEpc: r.tag_epc, tagId: r.tag_id, eventType: r.event_type,
+      tagEpc: r.tag_epc, tagId: r.tag_id, eventType: r.event_type as RFIDEvent['eventType'],
       rssi: r.rssi ? Number(r.rssi) : undefined, antenna: r.antenna || 1,
       location: r.location, zone: r.zone, processed: r.processed,
       processedAt: r.processed_at, actionTaken: r.action_taken,
