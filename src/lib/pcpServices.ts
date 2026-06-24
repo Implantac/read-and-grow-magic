@@ -579,7 +579,7 @@ export class PCPMetricsService {
     const throughput = last30.length;
 
     // Utilization
-    const totalCapHrs = capacities.reduce((s: number, c: any) => s + (c.capacity_per_hour || 0) * (c.max_hours_per_day || 8), 0) * 22;
+    const totalCapHrs = capacities.reduce((s: number, c: CapacityLike) => s + (c.capacity_per_hour || 0) * (c.max_hours_per_day || 8), 0) * 22;
     const totalUsedHrs = activeOPs.reduce((s, o) => s + (o.realized_time_minutes || 0) / 60, 0);
     const utilizationPct = totalCapHrs > 0 ? (totalUsedHrs / totalCapHrs) * 100 : 0;
 
@@ -776,7 +776,7 @@ export class BottleneckDetectionService {
 
     // Sector overload
     const sectorLoad: Record<string, { ops: number; hours: number; capacity: number }> = {};
-    capacities.forEach((c: any) => {
+    capacities.forEach((c: CapacityLike) => {
       const s = c.sector || 'Geral';
       if (!sectorLoad[s]) sectorLoad[s] = { ops: 0, hours: 0, capacity: 0 };
       sectorLoad[s].capacity += (c.capacity_per_hour || 0) * (c.max_hours_per_day || 8);
