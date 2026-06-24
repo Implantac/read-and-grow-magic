@@ -220,6 +220,7 @@ Gere um objeto JSON com:
       const { data: activeOPs } = await supabase
         .from("production_orders")
         .select("*")
+        .eq("company_id", callerCompany)
         .in("status", ["in_progress", "planned"])
         .order("priority")
         .limit(10);
@@ -227,7 +228,9 @@ Gere um objeto JSON com:
       const { data: activeEntries } = await supabase
         .from("time_entries")
         .select("*")
+        .eq("company_id", callerCompany)
         .eq("status", "started");
+
 
       const prompt = await getSystemPrompt('PCP_CONSULTANT', `Analise as OPs ativas e sugira a melhor sequência de trabalho para os operadores.
 OPS ATIVAS:
