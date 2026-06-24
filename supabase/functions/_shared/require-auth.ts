@@ -10,6 +10,7 @@ export interface AuthResult {
   role: Role | null;
   viaCron: boolean;
   companyId: string | null;       // resolved from profiles when user is authenticated
+  defaultBranchId: string | null; // user's default branch from profiles
 }
 
 
