@@ -19,12 +19,12 @@ export interface BrainDecision {
   impact_level: 'low' | 'medium' | 'high' | 'critical';
   risk_level: 'low' | 'medium' | 'high';
   confidence: number;
-  evidence: Json;
-  proposed_action: Json;
+  evidence: BrainJson;
+  proposed_action: BrainJson;
   status: string;
   auto_executable: boolean;
   requires_approval: boolean;
-  execution_result: Json;
+  execution_result: BrainJson;
   created_at: string;
 }
 
@@ -32,7 +32,7 @@ export interface BrainMemory {
   id: string;
   category: string;
   key: string;
-  value: Json;
+  value: BrainJson;
   importance: number;
   scope: string;
   updated_at: string;
@@ -43,7 +43,7 @@ export interface BrainRun {
   trigger: string;
   mode: string;
   synthesis: string | null;
-  structured: Json;
+  structured: BrainJson;
   decisions_count: number;
   duration_ms: number | null;
   status: string;
@@ -143,7 +143,7 @@ export function useBrainMemories() {
 export interface SaveMemoryInput {
   category: string;
   key: string;
-  value: Json;
+  value: BrainJson;
   importance?: number;
   scope?: string;
 }
@@ -198,8 +198,8 @@ export function useRunBrain() {
 
 export interface BrainChatAction {
   tool: string;
-  args: Json;
-  result: Json;
+  args: BrainJson;
+  result: BrainJson;
 }
 
 export interface BrainChatMessage {
