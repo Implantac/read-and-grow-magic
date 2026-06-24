@@ -1,9 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { requireAuth } from "../_shared/require-auth.ts";
+import { corsHeaders, jsonResponse, jsonError, safeError } from "../_shared/tenant.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -11,31 +8,29 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    // Auth check
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const auth = await requireAuth(req, { roles: ["admin", "manager", "operator"] });
+    if (!auth.ok) {
+      return new Response(JSON.stringify({ error: auth.message }), {
+        status: auth.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
-    const userClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, { global: { headers: { Authorization: authHeader } } });
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-    }
+    const companyId = auth.companyId;
+    if (!companyId) return jsonError("Forbidden", 403);
 
-    const supabase = createClient(supabaseUrl, serviceKey);
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
 
     const { action, ...params } = await req.json();
 
     switch (action) {
       case "process_queue": {
-        // Process unprocessed events
         const { data: events } = await supabase
           .from("production_events")
           .select("*")
+          .eq("company_id", companyId)
           .eq("processed", false)
           .order("created_at", { ascending: true })
           .limit(50);
@@ -45,17 +40,17 @@ Deno.serve(async (req) => {
         for (const event of events || []) {
           let result: any = { action: "none" };
 
-          // Decision logic based on event type
           if (event.event_type === "op_created") {
-            // Check capacity and suggest scheduling
             const { count } = await supabase
               .from("production_orders")
               .select("*", { count: "exact", head: true })
+              .eq("company_id", companyId)
               .in("status", ["in_progress", "released", "planned"]);
 
             if ((count || 0) > 20) {
               result = { action: "alert", message: "Alta carga de produção: " + count + " OPs ativas", severity: "warning" };
               await supabase.from("industrial_alerts").insert({
+                company_id: companyId,
                 alert_type: "capacity",
                 severity: "medium",
                 title: "Alta carga de produção",
@@ -69,18 +64,15 @@ Deno.serve(async (req) => {
           }
 
           if (event.event_type === "step_paused") {
-            // Track long pauses
             result = { action: "monitor", reason: "pause_tracking" };
           }
 
           if (event.event_type === "op_completed") {
-            // Calculate efficiency metrics
             const payload = event.payload || {};
             result = { action: "analytics", produced: payload.produced };
           }
 
           if (event.event_type === "step_completed") {
-            // Check for quality issues (high reject rate)
             const payload = event.payload || {};
             const produced = payload.produced || 0;
             const rejected = payload.rejected || 0;
@@ -89,6 +81,7 @@ Deno.serve(async (req) => {
               if (rejectRate > 10) {
                 result = { action: "quality_alert", reject_rate: rejectRate };
                 await supabase.from("industrial_alerts").insert({
+                  company_id: companyId,
                   alert_type: "quality",
                   severity: rejectRate > 20 ? "critical" : "high",
                   title: `Refugo alto: ${rejectRate.toFixed(1)}%`,
@@ -102,32 +95,27 @@ Deno.serve(async (req) => {
             }
           }
 
-          // Mark as processed
           await supabase
             .from("production_events")
             .update({ processed: true, processed_at: new Date().toISOString(), processing_result: result })
-            .eq("id", event.id);
+            .eq("id", event.id)
+            .eq("company_id", companyId);
 
           results.push({ event_id: event.id, event_type: event.event_type, result });
         }
 
-        return new Response(JSON.stringify({ processed: results.length, results }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return jsonResponse({ processed: results.length, results });
       }
 
       case "iot_ingest": {
-        // Receive IoT sensor data
         const { device_id, device_type, machine_id, readings } = params;
 
         if (!device_id || !readings || !Array.isArray(readings)) {
-          return new Response(JSON.stringify({ error: "device_id and readings[] required" }), {
-            status: 400,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
+          return jsonError("device_id and readings[] required", 400);
         }
 
         const telemetryRows = readings.map((r: any) => ({
+          company_id: companyId,
           device_id,
           device_type: device_type || "sensor",
           machine_id: machine_id || null,
@@ -140,10 +128,10 @@ Deno.serve(async (req) => {
         const { error } = await supabase.from("iot_telemetry").insert(telemetryRows);
         if (error) throw error;
 
-        // Check thresholds and generate events
         for (const r of readings) {
           if (r.metric === "temperature" && r.value > 80) {
             await supabase.from("production_events").insert({
+              company_id: companyId,
               event_type: "iot_threshold_exceeded",
               source: "iot",
               entity_type: "device",
@@ -155,6 +143,7 @@ Deno.serve(async (req) => {
           }
           if (r.metric === "vibration" && r.value > 50) {
             await supabase.from("production_events").insert({
+              company_id: companyId,
               event_type: "iot_anomaly",
               source: "iot",
               entity_type: "device",
@@ -166,20 +155,19 @@ Deno.serve(async (req) => {
           }
         }
 
-        return new Response(JSON.stringify({ ingested: telemetryRows.length }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return jsonResponse({ ingested: telemetryRows.length });
       }
 
       case "get_analytics": {
-        // Production analytics summary
         const { period } = params;
-        const since = period === "week" ? "7 days" : period === "month" ? "30 days" : "1 day";
-        const sinceDate = new Date(Date.now() - (period === "week" ? 7 : period === "month" ? 30 : 1) * 86400000).toISOString();
+        const sinceDate = new Date(
+          Date.now() - (period === "week" ? 7 : period === "month" ? 30 : 1) * 86400000,
+        ).toISOString();
 
         const { data: events } = await supabase
           .from("production_events")
           .select("event_type, severity, created_at")
+          .eq("company_id", companyId)
           .gte("created_at", sinceDate);
 
         const summary: Record<string, number> = {};
@@ -190,25 +178,17 @@ Deno.serve(async (req) => {
         const { count: completedOPs } = await supabase
           .from("production_orders")
           .select("*", { count: "exact", head: true })
+          .eq("company_id", companyId)
           .eq("status", "completed")
           .gte("completed_date", sinceDate);
 
-        return new Response(JSON.stringify({ period, event_summary: summary, completed_ops: completedOPs || 0 }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return jsonResponse({ period, event_summary: summary, completed_ops: completedOPs || 0 });
       }
 
       default:
-        return new Response(JSON.stringify({ error: "Unknown action" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        return jsonError("Unknown action", 400);
     }
-  } catch (err: any) {
-    console.error('production-events error:', err);
-    return new Response(JSON.stringify({ error: 'An internal error occurred. Please try again.' }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+  } catch (err) {
+    return safeError(err, "production-events");
   }
 });

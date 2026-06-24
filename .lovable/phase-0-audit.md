@@ -30,12 +30,12 @@ Criado `supabase/functions/_shared/tenant.ts` com:
 | `pcp-metrics` | `production_orders` sem scope | resolve `company_id` do profile + `.eq('company_id', …)` + 403 se ausente |
 | `pcp-schedule-simulate` | `production_orders` + `production_capacity` sem scope | mesma estratégia |
 
-### ⚠️ Pendentes — requerem refator (cron multi-tenant)
-| Função | Risco | Plano |
-|---|---|---|
-| `daily-bank-reconciliation` | Cron agrega `bank_transactions` global; insere alertas/logs sem `company_id` | Iterar `companies` e processar por tenant |
-| `daily-executive-report` | Mesma situação (AR/AP/sales/cash agregados globais) | Idem — loop por `companies.id` |
-| `production-events` | Webhook industrial sem scope explícito | Resolver `company_id` por `device_id`/`reader_id` |
+### ✅ Corrigidas nesta sessão (cron multi-tenant)
+| Função | Correção |
+|---|---|
+| `daily-bank-reconciliation` | Loop por `companies`; `auto_match` por `bank_account` da empresa; `bank_transactions` / alertas / logs com `company_id` |
+| `daily-executive-report` | Loop por `companies`; AR/AP/sales/cash escopados; `daily_executive_reports.company_id` preenchido |
+| `production-events` | Resolve `company_id` do caller; `production_events`, `production_orders`, `iot_telemetry`, `industrial_alerts` escopados |
 
 ### 🟢 Webhooks externos (escopo natural por chave)
 - `pix-webhook` — escopo via `txid` único
