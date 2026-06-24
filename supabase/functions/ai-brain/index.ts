@@ -909,6 +909,8 @@ Deno.serve(async (req) => {
             status: ctx.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
+        const moduleDenied = await requireModule(ctx as TenantContext, 'executivo');
+        if (moduleDenied) return moduleDenied;
         callerScope = branchScope(ctx as TenantContext);
       }
     }
