@@ -20,6 +20,8 @@ import { MiscellaneousRoutes } from './routes/MiscellaneousRoutes';
 import { FiscalRoutes } from './routes/FiscalRoutes';
 import { VerticalPackRoutes } from './core/routes/VerticalPackRoutes';
 import { ExecutiveRoutes } from './routes/ExecutiveRoutes';
+import { FeatureGate } from '@/components/plan/FeatureGate';
+import { GatedOutlet } from '@/components/plan/GatedOutlet';
 
 // Eager load critical pages
 import Login from "./pages/Login";
@@ -28,6 +30,7 @@ import Dashboard from "./pages/Dashboard";
 // Lazy load common pages
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Upgrade = lazy(() => import("./pages/Upgrade"));
 
 function PageLoader() {
   return (
@@ -66,15 +69,23 @@ const App = () => (
               
               <Route element={<MainLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/upgrade" element={<Upgrade />} />
                 {CommercialRoutes}
-                <Route path="/financeiro/*" element={<Routes>{FinancialRoutes}</Routes>} />
+                <Route
+                  path="/financeiro/*"
+                  element={
+                    <FeatureGate module="financeiro">
+                      <Routes>{FinancialRoutes}</Routes>
+                    </FeatureGate>
+                  }
+                />
                 {AccountingRoutes}
-                {ProductionRoutes}
-                {WMSRoutes}
+                <Route element={<GatedOutlet module="producao" />}>{ProductionRoutes}</Route>
+                <Route element={<GatedOutlet module="wms" />}>{WMSRoutes}</Route>
                 {AdminRoutes}
                 {OperationalRoutes}
                 {MiscellaneousRoutes}
-                {FiscalRoutes}
+                <Route element={<GatedOutlet module="fiscal" />}>{FiscalRoutes}</Route>
                 {VerticalPackRoutes}
                 {ExecutiveRoutes}
                 <Route path="*" element={<NotFound />} />
