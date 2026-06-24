@@ -66,10 +66,16 @@ Trigger `fn_audit_sensitive_mutation` + `trg_audit_<tabela>` ativos em:
 - ✅ `has_role()` SECURITY DEFINER em uso
 - ⚠️ Auditar uso de localStorage/sessionStorage em rotas administrativas
 
-## 7. Validação Zod-like nas Edge Functions (✅ infra pronta)
-- Criado `_shared/validation.ts` (sem dep externa, cold-start zero)
-- Aplicado em `pcp-priority` e `pcp-schedule-simulate`
-- 🟡 Falta aplicar em: `ai-brain`, `ai-executive`, `ai-commercial`, `pcp-schedule`, `production-events`, `fiscal-transmitter`
+## 7. Validação Zod-like nas Edge Functions (✅ 100%)
+- `_shared/validation.ts` (sem dep externa, cold-start zero)
+- Aplicado:
+  - `pcp-priority`, `pcp-schedule-simulate` (schemas completos)
+  - `pcp-schedule` — enum `action ∈ {suggest, apply}`
+  - `production-events` — enum `action ∈ {process_queue, iot_ingest, get_analytics}`
+  - `ai-commercial` — enum de 7 ações
+  - `ai-executive` — enum de 10 ações + `months` numérico 1–60
+  - `ai-brain` — enum de 14 ações + `decisionId` UUID nas ações de decisão
+  - `fiscal-transmitter` — `nfeId` UUID, `action ∈ {transmit, cancel}`, `reason` mínimo 15 chars em cancelamento
 
 ## 8. Defensive hardening
 - ✅ `pcp-priority` e `pcp-schedule` agora incluem `.eq('company_id', callerCompany)` em **todos** os `UPDATE`
@@ -80,6 +86,6 @@ Trigger `fn_audit_sensitive_mutation` + `trg_audit_<tabela>` ativos em:
 - [x] Helper de tenant + validação disponíveis
 - [x] 100% edge functions auditadas com `company_id` scope + erro genérico
 - [x] Trigger de auditoria ativo em tabelas sensíveis
-- [ ] Validação aplicada em 100% das funções com body (2/8 feitas)
+- [x] Validação aplicada em 100% das funções com body (8/8)
 
 
