@@ -885,11 +885,12 @@ Deno.serve(async (req) => {
         result = await handleChat(userId, body.messages || [], authHeader, body.agent || "geral");
         break;
       case "approve_decision":
-        result = await handleApprove(body.decision_id, true, userId);
+        result = await handleApprove(body.decision_id, true, userId, callerCompany);
         break;
       case "reject_decision":
-        result = await handleApprove(body.decision_id, false, userId);
+        result = await handleApprove(body.decision_id, false, userId, callerCompany);
         break;
+
       case "save_memory":
         await saveMemory({ ...body.memory, user_id: userId });
         result = { ok: true };
