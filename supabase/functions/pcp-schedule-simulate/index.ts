@@ -45,19 +45,32 @@ Deno.serve(async (req) => {
     const sortCriteria = body.sortCriteria || "priority_due";
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Fetch active orders
+    // Resolve caller's company_id for tenant scoping
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("company_id")
+      .eq("id", claimsData.claims.sub)
+      .maybeSingle();
+    const callerCompany = (profile as any)?.company_id as string | undefined;
+    if (!callerCompany) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // Fetch active orders (tenant-scoped)
     const { data: orders, error: ordErr } = await supabase
       .from("production_orders")
       .select("*")
+      .eq("company_id", callerCompany)
       .in("status", ["planned", "in_progress", "paused"])
       .order("created_at", { ascending: false });
 
     if (ordErr) throw ordErr;
 
-    // Fetch capacities
+    // Fetch capacities (tenant-scoped)
     const { data: capacities, error: capErr } = await supabase
       .from("production_capacity")
-      .select("*");
+      .select("*")
+      .eq("company_id", callerCompany);
 
     if (capErr) throw capErr;
 
