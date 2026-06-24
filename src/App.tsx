@@ -67,7 +67,7 @@ const App = () => (
               <Route element={<MainLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 {CommercialRoutes}
-                <Route path="/financeiro/*" element={<>{FinancialRoutes}</>} />
+                <Route path="/financeiro/*" element={<Routes>{FinancialRoutes}</Routes>} />
                 {AccountingRoutes}
                 {ProductionRoutes}
                 {WMSRoutes}
