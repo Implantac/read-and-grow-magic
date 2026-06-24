@@ -204,12 +204,21 @@ jobs:
           MTIME_CHANGED=false
           [ "$POST_MTIME" != "$PRE_MTIME" ] && MTIME_CHANGED=true
 
-          if [ "$PRE_EXISTS" = "true" ] && [ "$MTIME_CHANGED" = "true" ] && [ "$OVERLAP" -gt 0 ]; then
-            VERDICT="REUSED — ESLint reabriu (mtime mudou) e preservou $OVERLAP entradas do cache anterior"
+          # Thresholds configuráveis (env). Defaults: MIN_OVERLAP=1, REQUIRE_MTIME_CHANGED=false.
+          MIN_OVERLAP="${ESLINT_MIN_OVERLAP:-1}"
+          REQUIRE_MTIME_CHANGED="${ESLINT_REQUIRE_MTIME_CHANGED:-false}"
+          OVERLAP_OK=$( [ "$OVERLAP" -ge "$MIN_OVERLAP" ] && echo true || echo false )
+          MTIME_OK=$( { [ "$REQUIRE_MTIME_CHANGED" != "true" ] || [ "$MTIME_CHANGED" = "true" ]; } && echo true || echo false )
+
+          if [ "$PRE_EXISTS" = "true" ] && [ "$MTIME_CHANGED" = "true" ] && [ "$OVERLAP_OK" = "true" ]; then
+            VERDICT="REUSED — ESLint reabriu (mtime mudou) e preservou $OVERLAP entradas (>= $MIN_OVERLAP)"
             REUSED=true
-          elif [ "$PRE_EXISTS" = "true" ] && [ "$OVERLAP" -gt 0 ]; then
-            VERDICT="REUSED (parcial) — $OVERLAP entradas preservadas, mas mtime não mudou"
+          elif [ "$PRE_EXISTS" = "true" ] && [ "$OVERLAP_OK" = "true" ] && [ "$MTIME_OK" = "true" ]; then
+            VERDICT="REUSED (parcial) — $OVERLAP entradas preservadas (>= $MIN_OVERLAP), mtime inalterado"
             REUSED=true
+          elif [ "$PRE_EXISTS" = "true" ] && [ "$OVERLAP" -gt 0 ] && [ "$OVERLAP_OK" = "false" ]; then
+            VERDICT="NOT REUSED — overlap=$OVERLAP abaixo do threshold MIN_OVERLAP=$MIN_OVERLAP"
+            REUSED=false
           elif [ "$PRE_EXISTS" = "true" ]; then
             VERDICT="NOT REUSED — cache estava presente mas nenhuma entrada sobreviveu (cache invalidado por conteúdo)"
             REUSED=false
@@ -218,6 +227,8 @@ jobs:
             REUSED=false
           fi
           echo "reused=$REUSED" >> "$GITHUB_OUTPUT"
+          echo "overlap=$OVERLAP" >> "$GITHUB_OUTPUT"
+          echo "min_overlap=$MIN_OVERLAP" >> "$GITHUB_OUTPUT"
 
           echo "ESLint cache verdict: $VERDICT"
           echo "Pre : mtime=$PRE_MTIME_HUMAN size=${PRE_SIZE}B entries=$PRE_ENTRIES"
