@@ -96,17 +96,63 @@ jobs:
       - name: Typecheck
         run: bun run typecheck
 
+      # Captura estado do .eslintcache ANTES do lint para depois confirmar
+      # que o ESLint efetivamente carregou e reaproveitou o cache.
+      - name: Snapshot ESLint cache (pre-lint)
+        id: eslint-pre
+        run: |
+          CACHE=node_modules/.cache/eslint/.eslintcache
+          if [ -f "$CACHE" ]; then
+            ENTRIES=$(node -e "try{const a=JSON.parse(require('fs').readFileSync('$CACHE','utf8'));console.log(Array.isArray(a)?a.length:Object.keys(a).length)}catch(e){console.log(0)}")
+            SIZE=$(stat -c%s "$CACHE")
+            echo "exists=true"   >> "$GITHUB_OUTPUT"
+            echo "entries=$ENTRIES" >> "$GITHUB_OUTPUT"
+            echo "size=$SIZE"    >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "entries=0"    >> "$GITHUB_OUTPUT"
+            echo "size=0"       >> "$GITHUB_OUTPUT"
+          fi
+
       # Falha em qualquer erro/warning novo, EXCETO @typescript-eslint/no-explicit-any
       # (limpeza incremental ainda em andamento).
       - name: Lint (strict, ignora no-explicit-any)
         id: lint
         run: |
           set -o pipefail
+          START=$(date +%s)
           bun run lint:ci | tee /tmp/lint-ci.log
+          echo "duration_s=$(( $(date +%s) - START ))" >> "$GITHUB_OUTPUT"
 
-      - name: Lint summary
+      - name: Verify ESLint cache was used
         if: always()
+        id: eslint-verify
         run: |
+          CACHE=node_modules/.cache/eslint/.eslintcache
+          PRE_EXISTS='${{ steps.eslint-pre.outputs.exists }}'
+          PRE_ENTRIES='${{ steps.eslint-pre.outputs.entries }}'
+          PRE_SIZE='${{ steps.eslint-pre.outputs.size }}'
+
+          if [ -f "$CACHE" ]; then
+            POST_ENTRIES=$(node -e "try{const a=JSON.parse(require('fs').readFileSync('$CACHE','utf8'));console.log(Array.isArray(a)?a.length:Object.keys(a).length)}catch(e){console.log(0)}")
+            POST_SIZE=$(stat -c%s "$CACHE")
+          else
+            POST_ENTRIES=0
+            POST_SIZE=0
+          fi
+
+          if [ "$PRE_EXISTS" = "true" ] && [ "$PRE_ENTRIES" -gt 0 ]; then
+            USED="yes (cache present before lint, $PRE_ENTRIES entries loaded)"
+            echo "used=true" >> "$GITHUB_OUTPUT"
+          else
+            USED="no (cold cache — first run for this config hash)"
+            echo "used=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          echo "ESLint cache used: $USED"
+          echo "Pre: exists=$PRE_EXISTS entries=$PRE_ENTRIES size=${PRE_SIZE}B"
+          echo "Post: entries=$POST_ENTRIES size=${POST_SIZE}B"
+
           {
             echo "### Lint & Typecheck"
             echo ""
@@ -114,11 +160,16 @@ jobs:
               echo '```'
               grep -E '^\[lint:ci\]' /tmp/lint-ci.log || tail -n 20 /tmp/lint-ci.log
               echo '```'
-            else
-              echo "_lint:ci did not produce output_"
             fi
             echo ""
             echo "- Lint step outcome: \`${{ steps.lint.outcome }}\`"
+            echo "- Lint duration: \`${{ steps.lint.outputs.duration_s }}s\`"
+            echo ""
+            echo "#### ESLint cache verification"
+            echo ""
+            echo "- Cache effectively used: **$USED**"
+            echo "- Pre-lint:  exists=\`$PRE_EXISTS\` entries=\`$PRE_ENTRIES\` size=\`${PRE_SIZE}B\`"
+            echo "- Post-lint: entries=\`$POST_ENTRIES\` size=\`${POST_SIZE}B\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Save ESLint cache
