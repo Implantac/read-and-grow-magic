@@ -1,18 +1,35 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 
 export type Segment = 'textile' | 'food_factory' | 'pharma' | 'distribution' | 'services' | 'retail' | 'general' | 'fio' | 'tecelagem' | 'animal_feed' | 'industry' | 'wholesaler' | 'retail_chain' | 'franchise' | 'holding' | 'apparel';
 
+type CompanyRow = Database['public']['Tables']['companies']['Row'];
+
+export interface TenantRef { id: string; name: string }
+export interface GroupRef { id: string; name: string }
+export interface BranchRef { id: string; name: string }
+
+interface HierarchyRow {
+  tenant_id: string;
+  tenant_name: string;
+  enterprise_group_id: string;
+  group_name: string;
+  unit_id: string;
+}
+
+export type OperationType = string | { key: string; label?: string };
+
 interface EnterpriseContextType {
-  currentTenant: any;
-  currentGroup: any;
-  currentCompany: any;
-  currentBranch: any;
+  currentTenant: TenantRef | null;
+  currentGroup: GroupRef | null;
+  currentCompany: CompanyRow | null;
+  currentBranch: BranchRef | null;
   segment: Segment;
   subSegment: string;
   companySize: string;
   taxRegime: string;
-  operationTypes: any[];
+  operationTypes: OperationType[];
   isLoading: boolean;
   setCompany: (id: string) => Promise<void>;
   executiveCouncil: {
@@ -24,21 +41,21 @@ interface EnterpriseContextType {
 const EnterpriseContext = createContext<EnterpriseContextType | undefined>(undefined);
 
 export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) => {
-  const [currentTenant, setCurrentTenant] = useState<any>(null);
-  const [currentGroup, setCurrentGroup] = useState<any>(null);
-  const [currentCompany, setCurrentCompany] = useState<any>(null);
-  const [currentBranch, setCurrentBranch] = useState<any>(null);
+  const [currentTenant, setCurrentTenant] = useState<TenantRef | null>(null);
+  const [currentGroup, setCurrentGroup] = useState<GroupRef | null>(null);
+  const [currentCompany, setCurrentCompany] = useState<CompanyRow | null>(null);
+  const [currentBranch] = useState<BranchRef | null>(null);
   const [segment, setSegment] = useState<Segment>('general');
   const [subSegment, setSubSegment] = useState<string>('');
   const [companySize, setCompanySize] = useState<string>('Pequeno');
   const [taxRegime, setTaxRegime] = useState<string>('Simples Nacional');
-  const [operationTypes, setOperationTypes] = useState<any[]>([]);
+  const [operationTypes, setOperationTypes] = useState<OperationType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const executiveCouncil = {
     roles: [
-      'CTO Global', 'Arquiteto SAP S/4HANA', 'Arquiteto SAP Business One', 
-      'Arquiteto TOTVS Protheus', 'Arquiteto Sankhya', 'Arquiteto Oracle Netsuite', 
+      'CTO Global', 'Arquiteto SAP S/4HANA', 'Arquiteto SAP Business One',
+      'Arquiteto TOTVS Protheus', 'Arquiteto Sankhya', 'Arquiteto Oracle Netsuite',
       'Especialista Microsoft Dynamics', 'Especialista ERP Industrial', 'Especialista PCP/MRP/APS',
       'Especialista WMS/TMS', 'Especialista Fiscal Brasileiro', 'Especialista Contábil',
       'Especialista Supply', 'Especialista IA Empresarial', 'Especialista UX Enterprise'
@@ -50,39 +67,45 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
     loadActiveTenant();
   }, []);
 
+  const applyCompany = (company: CompanyRow) => {
+    setCurrentCompany(company);
+    setSegment((company.segment as Segment | null) ?? 'general');
+    setSubSegment(company.sub_segment ?? '');
+    setCompanySize(company.company_size ?? 'Pequeno');
+    setTaxRegime((company.tax_regime as string | null) ?? 'Simples Nacional');
+    setOperationTypes((company.operation_types as OperationType[] | null) ?? []);
+  };
+
   const loadActiveTenant = async () => {
     setIsLoading(true);
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       if (userError) throw userError;
       if (user) {
-        // Load hierarchy via the new view
-        const { data: hierarchy, error: hError } = await (supabase.from as any)('vw_organizational_hierarchy')
+        // Load hierarchy via the view (view types may not be in generated Database)
+        const fromAny = supabase.from as unknown as (rel: string) => ReturnType<typeof supabase.from>;
+        const { data: hierarchyData } = await fromAny('vw_organizational_hierarchy')
           .select('*')
           .limit(1)
           .single();
-        
+
+        const hierarchy = hierarchyData as HierarchyRow | null;
         if (hierarchy) {
-          const h = hierarchy as any;
-          const { data: company } = await (supabase.from as any)('companies')
+          const { data: company } = await supabase.from('companies')
             .select('*')
-            .eq('id', h.unit_id)
+            .eq('id', hierarchy.unit_id)
             .single();
 
           if (company) {
-            setCurrentCompany(company);
-            setCurrentTenant({ id: h.tenant_id, name: h.tenant_name });
-            setCurrentGroup({ id: h.enterprise_group_id, name: h.group_name });
-            setSegment((company.segment as any) || 'general');
-            setSubSegment(company.sub_segment || '');
-            setCompanySize(company.company_size || 'Pequeno');
-            setTaxRegime((company.tax_regime as string) || 'Simples Nacional');
-            setOperationTypes((company.operation_types as any[]) || []);
+            applyCompany(company as CompanyRow);
+            setCurrentTenant({ id: hierarchy.tenant_id, name: hierarchy.tenant_name });
+            setCurrentGroup({ id: hierarchy.enterprise_group_id, name: hierarchy.group_name });
           }
         }
       }
-    } catch (error: any) {
-      if (error?.message?.includes('JWT') || error?.status === 401) {
+    } catch (error: unknown) {
+      const err = error as { message?: string; status?: number };
+      if (err?.message?.includes('JWT') || err?.status === 401) {
         // Silently ignore auth errors during initialization as useAuth handles redirect
       } else {
         console.error('Error loading enterprise context:', error);
@@ -93,29 +116,22 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   };
 
   const setCompany = async (id: string) => {
-    const { data } = await (supabase.from as any)('companies').select('*').eq('id', id).single();
-    if (data) {
-      setCurrentCompany(data);
-      setSegment((data.segment as any) || 'general');
-      setSubSegment(data.sub_segment || '');
-      setCompanySize(data.company_size || 'Pequeno');
-      setTaxRegime((data.tax_regime as string) || 'Simples Nacional');
-      setOperationTypes((data.operation_types as any[]) || []);
-    }
+    const { data } = await supabase.from('companies').select('*').eq('id', id).single();
+    if (data) applyCompany(data as CompanyRow);
   };
 
   return (
-    <EnterpriseContext.Provider value={{ 
-      currentTenant: currentTenant || { id: '00000000-0000-0000-0000-000000000000', name: 'Tenant Padrão' },
-      currentGroup: currentGroup || { id: '00000000-0000-0000-0000-000000000000', name: 'Grupo Padrão' },
-      currentCompany, 
-      currentBranch, 
-      segment, 
+    <EnterpriseContext.Provider value={{
+      currentTenant: currentTenant ?? { id: '00000000-0000-0000-0000-000000000000', name: 'Tenant Padrão' },
+      currentGroup: currentGroup ?? { id: '00000000-0000-0000-0000-000000000000', name: 'Grupo Padrão' },
+      currentCompany,
+      currentBranch,
+      segment,
       subSegment,
       companySize,
       taxRegime,
       operationTypes,
-      isLoading, 
+      isLoading,
       setCompany,
       executiveCouncil
     }}>

@@ -78,7 +78,8 @@ export function useOrders() {
         .select('*, order_items(*)')
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data as any[]).map((o) => ({
+      type OrderWithItems = DbOrder & { order_items?: DbOrderItem[] };
+      return (data as OrderWithItems[]).map((o) => ({
         ...o,
         items: o.order_items || [],
       })) as DbOrder[];
