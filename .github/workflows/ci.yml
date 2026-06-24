@@ -96,22 +96,32 @@ jobs:
       - name: Typecheck
         run: bun run typecheck
 
-      # Captura estado do .eslintcache ANTES do lint para depois confirmar
-      # que o ESLint efetivamente carregou e reaproveitou o cache.
+      # Captura estado do .eslintcache ANTES do lint (mtime + cópia das chaves)
+      # para depois comparar com o pós-lint e provar reutilização.
       - name: Snapshot ESLint cache (pre-lint)
         id: eslint-pre
         run: |
           CACHE=node_modules/.cache/eslint/.eslintcache
+          mkdir -p /tmp/eslint-cache-snapshot
           if [ -f "$CACHE" ]; then
-            ENTRIES=$(node -e "try{const a=JSON.parse(require('fs').readFileSync('$CACHE','utf8'));console.log(Array.isArray(a)?a.length:Object.keys(a).length)}catch(e){console.log(0)}")
+            MTIME=$(stat -c%Y "$CACHE")
+            MTIME_HUMAN=$(date -u -d "@$MTIME" +"%Y-%m-%dT%H:%M:%SZ")
             SIZE=$(stat -c%s "$CACHE")
-            echo "exists=true"   >> "$GITHUB_OUTPUT"
-            echo "entries=$ENTRIES" >> "$GITHUB_OUTPUT"
-            echo "size=$SIZE"    >> "$GITHUB_OUTPUT"
+            ENTRIES=$(node -e "try{const a=JSON.parse(require('fs').readFileSync('$CACHE','utf8'));console.log(Array.isArray(a)?a.length:Object.keys(a).length)}catch(e){console.log(0)}")
+            # Dump das CHAVES (filePath) presentes no cache antes do lint.
+            node -e "try{const a=JSON.parse(require('fs').readFileSync('$CACHE','utf8'));const keys=Array.isArray(a)?a.map(e=>e.filePath||e[0]).filter(Boolean):Object.keys(a);require('fs').writeFileSync('/tmp/eslint-cache-snapshot/pre-keys.txt',keys.sort().join('\n'))}catch(e){require('fs').writeFileSync('/tmp/eslint-cache-snapshot/pre-keys.txt','')}"
+            echo "exists=true"           >> "$GITHUB_OUTPUT"
+            echo "entries=$ENTRIES"      >> "$GITHUB_OUTPUT"
+            echo "size=$SIZE"            >> "$GITHUB_OUTPUT"
+            echo "mtime=$MTIME"          >> "$GITHUB_OUTPUT"
+            echo "mtime_human=$MTIME_HUMAN" >> "$GITHUB_OUTPUT"
           else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "entries=0"    >> "$GITHUB_OUTPUT"
-            echo "size=0"       >> "$GITHUB_OUTPUT"
+            : > /tmp/eslint-cache-snapshot/pre-keys.txt
+            echo "exists=false"  >> "$GITHUB_OUTPUT"
+            echo "entries=0"     >> "$GITHUB_OUTPUT"
+            echo "size=0"        >> "$GITHUB_OUTPUT"
+            echo "mtime=0"       >> "$GITHUB_OUTPUT"
+            echo "mtime_human=n/a" >> "$GITHUB_OUTPUT"
           fi
 
       # Falha em qualquer erro/warning novo, EXCETO @typescript-eslint/no-explicit-any
@@ -124,7 +134,11 @@ jobs:
           bun run lint:ci | tee /tmp/lint-ci.log
           echo "duration_s=$(( $(date +%s) - START ))" >> "$GITHUB_OUTPUT"
 
-      - name: Verify ESLint cache was used
+      # Verifica reutilização real via metadata do .eslintcache:
+      #  1) mtime mudou  -> ESLint reescreveu o arquivo (i.e., abriu+salvou)
+      #  2) interseção de chaves pre∩post > 0 -> entradas antigas foram preservadas
+      # Ambos verdadeiros = cache foi efetivamente reutilizado, não apenas recriado.
+      - name: Verify ESLint cache reuse (via mtime + key overlap)
         if: always()
         id: eslint-verify
         run: |
@@ -132,26 +146,47 @@ jobs:
           PRE_EXISTS='${{ steps.eslint-pre.outputs.exists }}'
           PRE_ENTRIES='${{ steps.eslint-pre.outputs.entries }}'
           PRE_SIZE='${{ steps.eslint-pre.outputs.size }}'
+          PRE_MTIME='${{ steps.eslint-pre.outputs.mtime }}'
+          PRE_MTIME_HUMAN='${{ steps.eslint-pre.outputs.mtime_human }}'
 
           if [ -f "$CACHE" ]; then
-            POST_ENTRIES=$(node -e "try{const a=JSON.parse(require('fs').readFileSync('$CACHE','utf8'));console.log(Array.isArray(a)?a.length:Object.keys(a).length)}catch(e){console.log(0)}")
+            POST_MTIME=$(stat -c%Y "$CACHE")
+            POST_MTIME_HUMAN=$(date -u -d "@$POST_MTIME" +"%Y-%m-%dT%H:%M:%SZ")
             POST_SIZE=$(stat -c%s "$CACHE")
+            POST_ENTRIES=$(node -e "try{const a=JSON.parse(require('fs').readFileSync('$CACHE','utf8'));console.log(Array.isArray(a)?a.length:Object.keys(a).length)}catch(e){console.log(0)}")
+            node -e "try{const a=JSON.parse(require('fs').readFileSync('$CACHE','utf8'));const keys=Array.isArray(a)?a.map(e=>e.filePath||e[0]).filter(Boolean):Object.keys(a);require('fs').writeFileSync('/tmp/eslint-cache-snapshot/post-keys.txt',keys.sort().join('\n'))}catch(e){require('fs').writeFileSync('/tmp/eslint-cache-snapshot/post-keys.txt','')}"
           else
-            POST_ENTRIES=0
-            POST_SIZE=0
+            POST_MTIME=0; POST_MTIME_HUMAN="n/a"; POST_SIZE=0; POST_ENTRIES=0
+            : > /tmp/eslint-cache-snapshot/post-keys.txt
           fi
 
-          if [ "$PRE_EXISTS" = "true" ] && [ "$PRE_ENTRIES" -gt 0 ]; then
-            USED="yes (cache present before lint, $PRE_ENTRIES entries loaded)"
-            echo "used=true" >> "$GITHUB_OUTPUT"
-          else
-            USED="no (cold cache — first run for this config hash)"
-            echo "used=false" >> "$GITHUB_OUTPUT"
+          OVERLAP=0
+          if [ -s /tmp/eslint-cache-snapshot/pre-keys.txt ] && [ -s /tmp/eslint-cache-snapshot/post-keys.txt ]; then
+            OVERLAP=$(comm -12 /tmp/eslint-cache-snapshot/pre-keys.txt /tmp/eslint-cache-snapshot/post-keys.txt | wc -l)
           fi
 
-          echo "ESLint cache used: $USED"
-          echo "Pre: exists=$PRE_EXISTS entries=$PRE_ENTRIES size=${PRE_SIZE}B"
-          echo "Post: entries=$POST_ENTRIES size=${POST_SIZE}B"
+          MTIME_CHANGED=false
+          [ "$POST_MTIME" != "$PRE_MTIME" ] && MTIME_CHANGED=true
+
+          if [ "$PRE_EXISTS" = "true" ] && [ "$MTIME_CHANGED" = "true" ] && [ "$OVERLAP" -gt 0 ]; then
+            VERDICT="REUSED — ESLint reabriu (mtime mudou) e preservou $OVERLAP entradas do cache anterior"
+            REUSED=true
+          elif [ "$PRE_EXISTS" = "true" ] && [ "$OVERLAP" -gt 0 ]; then
+            VERDICT="REUSED (parcial) — $OVERLAP entradas preservadas, mas mtime não mudou"
+            REUSED=true
+          elif [ "$PRE_EXISTS" = "true" ]; then
+            VERDICT="NOT REUSED — cache estava presente mas nenhuma entrada sobreviveu (cache invalidado por conteúdo)"
+            REUSED=false
+          else
+            VERDICT="COLD — primeiro run para este hash de config"
+            REUSED=false
+          fi
+          echo "reused=$REUSED" >> "$GITHUB_OUTPUT"
+
+          echo "ESLint cache verdict: $VERDICT"
+          echo "Pre : mtime=$PRE_MTIME_HUMAN size=${PRE_SIZE}B entries=$PRE_ENTRIES"
+          echo "Post: mtime=$POST_MTIME_HUMAN size=${POST_SIZE}B entries=$POST_ENTRIES"
+          echo "Key overlap pre∩post: $OVERLAP"
 
           {
             echo "### Lint & Typecheck"
@@ -165,11 +200,19 @@ jobs:
             echo "- Lint step outcome: \`${{ steps.lint.outcome }}\`"
             echo "- Lint duration: \`${{ steps.lint.outputs.duration_s }}s\`"
             echo ""
-            echo "#### ESLint cache verification"
+            echo "#### ESLint cache reuse verification"
             echo ""
-            echo "- Cache effectively used: **$USED**"
-            echo "- Pre-lint:  exists=\`$PRE_EXISTS\` entries=\`$PRE_ENTRIES\` size=\`${PRE_SIZE}B\`"
-            echo "- Post-lint: entries=\`$POST_ENTRIES\` size=\`${POST_SIZE}B\`"
+            echo "**Verdict:** $VERDICT"
+            echo ""
+            echo "| Métrica | Pre-lint | Post-lint |"
+            echo "|---|---|---|"
+            echo "| Arquivo existe | \`$PRE_EXISTS\` | \`$( [ -f "$CACHE" ] && echo true || echo false )\` |"
+            echo "| mtime (UTC) | \`$PRE_MTIME_HUMAN\` | \`$POST_MTIME_HUMAN\` |"
+            echo "| Tamanho (bytes) | \`$PRE_SIZE\` | \`$POST_SIZE\` |"
+            echo "| Entradas | \`$PRE_ENTRIES\` | \`$POST_ENTRIES\` |"
+            echo ""
+            echo "- mtime alterado: \`$MTIME_CHANGED\` _(ESLint abriu e regravou o arquivo)_"
+            echo "- Entradas preservadas (interseção pre∩post): \`$OVERLAP\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Save ESLint cache
