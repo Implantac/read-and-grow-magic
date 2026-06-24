@@ -800,7 +800,7 @@ serve(async (req) => {
     // Auth check
     const authRes = await requireAuth(req);
     if (authRes instanceof Response) return authRes;
-    const { companyId } = authRes;
+    const { companyId, scope } = authRes;
 
     const body = await req.json().catch(() => ({}));
     const ALLOWED = new Set(["score_clients","generate_recommendations","generate_insights","generate_daily_actions","generate_predictions","generate_forecast","full_analysis"]);
@@ -813,30 +813,30 @@ serve(async (req) => {
 
     switch (action) {
       case "score_clients":
-        result = await scoreClients(companyId);
+        result = await scoreClients(companyId, scope);
         break;
       case "generate_recommendations":
-        result = await generateRecommendations(companyId);
+        result = await generateRecommendations(companyId, scope);
         break;
       case "generate_insights":
-        result = await generateInsights(companyId);
+        result = await generateInsights(companyId, scope);
         break;
       case "generate_daily_actions":
-        result = await generateDailyActions(companyId);
+        result = await generateDailyActions(companyId, scope);
         break;
       case "generate_predictions":
-        result = await generatePredictions(companyId);
+        result = await generatePredictions(companyId, scope);
         break;
       case "generate_forecast":
-        result = await generateForecast(companyId);
+        result = await generateForecast(companyId, scope);
         break;
       case "full_analysis": {
-        const r1 = await scoreClients(companyId);
-        const r2 = await generateDailyActions(companyId);
-        const r3 = await generatePredictions(companyId);
-        const r4 = await generateRecommendations(companyId);
-        const r5 = await generateInsights(companyId);
-        const r6 = await generateForecast(companyId);
+        const r1 = await scoreClients(companyId, scope);
+        const r2 = await generateDailyActions(companyId, scope);
+        const r3 = await generatePredictions(companyId, scope);
+        const r4 = await generateRecommendations(companyId, scope);
+        const r5 = await generateInsights(companyId, scope);
+        const r6 = await generateForecast(companyId, scope);
         result = { ...r1, ...r2, ...r3, ...r4, ...r5, ...r6 };
         break;
       }
