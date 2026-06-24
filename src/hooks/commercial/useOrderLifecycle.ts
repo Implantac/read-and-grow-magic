@@ -17,20 +17,42 @@ import { validateTransition } from '@/lib/orderFlowEngine';
 import { format } from 'date-fns';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
+export interface OrderItemLike {
+  id: string;
+  product_id?: string | null;
+  product_code?: string | null;
+  product_name?: string | null;
+  quantity: number;
+}
+
+export interface OrderLike {
+  id: string;
+  number: string | number;
+  status: string;
+  total: number;
+  client_id?: string | null;
+  client_name?: string | null;
+  payment_condition?: string | null;
+  delivery_date?: string | null;
+  financial_approval?: string | null;
+  commercial_approval?: string | null;
+  items?: OrderItemLike[];
+}
+
 interface TransitionInput {
   orderId: string;
-  order: any; // full order object with items
+  order: OrderLike;
   targetStatus: string;
   observation?: string;
   blockReason?: string;
   changedBy?: string;
 }
 
-async function createStockReservations(order: any) {
+async function createStockReservations(order: OrderLike) {
   const items = order.items || [];
   if (items.length === 0) return;
 
-  const reservations = items.map((item: any) => ({
+  const reservations = items.map((item: OrderItemLike) => ({
     order_id: order.id,
     order_item_id: item.id,
     product_id: item.product_id,
@@ -48,7 +70,7 @@ async function createStockReservations(order: any) {
   if (error) console.error('Error creating reservations:', error);
 }
 
-async function createConferenceRecord(order: any) {
+async function createConferenceRecord(order: OrderLike) {
   const items = order.items || [];
   const confNumber = `CONF-${format(new Date(), 'yyyyMMdd')}-${order.number}`;
 
@@ -72,7 +94,7 @@ async function createConferenceRecord(order: any) {
 
   // Create conference items
   if (conf && items.length > 0) {
-    const confItems = items.map((item: any) => ({
+    const confItems = items.map((item: OrderItemLike) => ({
       conference_id: conf.id,
       order_item_id: item.id,
       product_code: item.product_code,
@@ -86,7 +108,7 @@ async function createConferenceRecord(order: any) {
   }
 }
 
-async function createBillingEntry(order: any) {
+async function createBillingEntry(order: OrderLike) {
   // Check if billing entry already exists
   const { data: existing } = await supabase
     .from('billing_queue')
@@ -105,7 +127,7 @@ async function createBillingEntry(order: any) {
   } as any);
 }
 
-async function generateReceivablesFromBilling(order: any) {
+async function generateReceivablesFromBilling(order: OrderLike) {
   // Check if receivable already exists
   const { data: existing } = await supabase
     .from('accounts_receivable')
@@ -144,7 +166,7 @@ async function generateReceivablesFromBilling(order: any) {
   }
 }
 
-async function createShipmentOrder(order: any) {
+async function createShipmentOrder(order: OrderLike) {
   const { data: existing } = await supabase
     .from('shipment_orders')
     .select('id')
@@ -193,7 +215,7 @@ export function useOrderLifecycle() {
       }
 
       // Build update payload
-      const updatePayload: any = { status: targetStatus, updated_at: new Date().toISOString() };
+      const updatePayload: Record<string, string> = { status: targetStatus, updated_at: new Date().toISOString() };
 
       // Set fulfillment sub-statuses
       if (targetStatus === 'awaiting_separation' || targetStatus === 'in_separation') {
@@ -282,7 +304,7 @@ export function useOrderLifecycle() {
       qc.invalidateQueries({ queryKey: ['accounts-receivable'] });
       toastSuccess('Status do pedido atualizado com sucesso!');
     },
-    onError: (e: any) => {
+    onError: (e: Error) => {
       toastError(e.message, undefined, 'Erro na transição');
     },
   });
