@@ -72,14 +72,31 @@ jobs:
               - '.github/workflows/ci.yml'
 
       - name: Run threshold validator tests
+        id: run_tests
         if: steps.filter.outputs.thresholds == 'true'
-        run: bash scripts/test-eslint-thresholds.sh
+        run: |
+          mkdir -p /tmp/eslint-thresholds-logs
+          # Captura stdout+stderr no log completo (artefato), preservando exit code.
+          set -o pipefail
+          bash scripts/test-eslint-thresholds.sh 2>&1 \
+            | tee /tmp/eslint-thresholds-logs/test-output.log
+
+      - name: Upload threshold tests log
+        id: upload_log
+        if: steps.filter.outputs.thresholds == 'true' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-thresholds-tests-log
+          path: /tmp/eslint-thresholds-logs/
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Skip notice
         if: steps.filter.outputs.thresholds != 'true'
         run: |
           echo "ℹ️  Nenhuma alteração em validate-eslint-thresholds.sh / test-eslint-thresholds.sh / ci.yml."
           echo "    Pulando suite de testes (job marcado como sucesso)."
+
 
       - name: Summary
         if: always()
