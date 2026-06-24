@@ -16,7 +16,9 @@ export function useDashboardData() {
 
   return useQuery({
     queryKey: ['dashboard-consolidated', companyId],
+    enabled: !!companyId,
     queryFn: async () => {
+      if (!companyId) return null;
       const now = new Date();
       const monthStart = startOfMonth(now).toISOString();
       const monthEnd = endOfMonth(now).toISOString();
