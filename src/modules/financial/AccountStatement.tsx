@@ -54,10 +54,10 @@ export default function AccountStatement() {
               <SelectItem value="supplier">Fornecedor</SelectItem>
             </SelectContent>
           </Select>
-          <Select value={entityId} onValueChange={setEntityId}>
+          <Select value={entityId || undefined} onValueChange={setEntityId}>
             <SelectTrigger><SelectValue placeholder={`Selecione um ${entityType === 'client' ? 'cliente' : 'fornecedor'}`} /></SelectTrigger>
             <SelectContent>
-              {list.map((e: any) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}
+              {list.filter((e: any) => e && e.id).map((e: any) => <SelectItem key={e.id} value={String(e.id)}>{e.name}</SelectItem>)}
             </SelectContent>
           </Select>
           <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
