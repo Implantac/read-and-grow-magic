@@ -130,9 +130,19 @@ serve(async (req) => {
 
     throw new Error('Ação inválida')
   } catch (error) {
+    const msg = (error as Error).message
+    const safeMessages = new Set([
+      'ID da NF-e é obrigatório',
+      'NF-e não encontrada',
+      'Justificativa de cancelamento deve ter pelo menos 15 caracteres.',
+      'Ação inválida',
+    ])
+    const clientMessage = safeMessages.has(msg) ? msg : 'Ocorreu um erro interno. Tente novamente.'
+    console.error('fiscal-transmitter error:', error)
     return new Response(
-      JSON.stringify({ error: (error as Error).message }),
+      JSON.stringify({ error: clientMessage }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
     )
   }
 })
+
