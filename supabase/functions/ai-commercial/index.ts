@@ -1,12 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getSystemPrompt } from "../_shared/ai-prompts.ts";
+import { resolveContextByIds, branchScope } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-branch-id",
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
 };
+
+// Helper: append branch filter to a query if scope is set
+const inBranch = <T extends { in: any }>(q: T, scope: string[] | null) =>
+  scope ? (q as any).in("branch_id", scope) : q;
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
