@@ -6,6 +6,73 @@
 import { differenceInDays, parseISO, addDays, format } from 'date-fns';
 import { formatBRL } from '@/lib/formatters';
 
+// ─── Structural input types (duck-typed shapes from hooks/DB) ───
+// These describe the *fields the engine reads*, not full DB rows.
+export interface OrderLike {
+  id: string;
+  order_number: string;
+  product_name?: string;
+  product_code?: string;
+  product_id?: string;
+  quantity: number;
+  produced_quantity: number;
+  status: string;
+  priority?: string;
+  sector?: string;
+  work_center?: string;
+  due_date?: string | null;
+  start_date?: string | null;
+  completed_date?: string | null;
+  estimated_time_minutes?: number;
+  realized_time_minutes?: number;
+  sales_order_id?: string | null;
+}
+export interface CapacityLike {
+  sector?: string;
+  capacity_per_hour?: number;
+  max_hours_per_day?: number;
+}
+export interface SupplyLike {
+  code?: string;
+  name?: string;
+  current_quantity?: number;
+  unit_cost?: number;
+}
+export interface MaterialItemLike {
+  code?: string;
+  componentCode?: string;
+  material_code?: string;
+  name?: string;
+  componentName?: string;
+  material_name?: string;
+  quantity?: number;
+  qty?: number;
+  waste_pct?: number;
+  wastePercentage?: number;
+  unit?: string;
+}
+export interface SheetLike {
+  product_code?: string;
+  product_id?: string;
+  materials?: MaterialItemLike[];
+}
+export interface TimeEntryLike {
+  start_time: string;
+  work_center?: string;
+  produced_quantity?: number;
+  rejected_quantity?: number;
+}
+export interface OutsourcingOrderLike {
+  id: string;
+  order_number?: string;
+  supplier_name: string;
+  status: string;
+  expected_return_date?: string | null;
+  actual_return_date?: string | null;
+  quantity_returned?: number;
+  quantity_rejected?: number;
+}
+
 // ─── Types ───────────────────────────────────────────────────
 
 export interface MaterialNeed {
