@@ -783,8 +783,9 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
     // Auth check
-    const authErr = await requireAuth(req);
-    if (authErr) return authErr;
+    const authRes = await requireAuth(req);
+    if (authRes instanceof Response) return authRes;
+    const { companyId } = authRes;
 
     const { action } = await req.json();
 
@@ -792,36 +793,37 @@ serve(async (req) => {
 
     switch (action) {
       case "score_clients":
-        result = await scoreClients();
+        result = await scoreClients(companyId);
         break;
       case "generate_recommendations":
-        result = await generateRecommendations();
+        result = await generateRecommendations(companyId);
         break;
       case "generate_insights":
-        result = await generateInsights();
+        result = await generateInsights(companyId);
         break;
       case "generate_daily_actions":
-        result = await generateDailyActions();
+        result = await generateDailyActions(companyId);
         break;
       case "generate_predictions":
-        result = await generatePredictions();
+        result = await generatePredictions(companyId);
         break;
       case "generate_forecast":
-        result = await generateForecast();
+        result = await generateForecast(companyId);
         break;
       case "full_analysis": {
-        const r1 = await scoreClients();
-        const r2 = await generateDailyActions();
-        const r3 = await generatePredictions();
-        const r4 = await generateRecommendations();
-        const r5 = await generateInsights();
-        const r6 = await generateForecast();
+        const r1 = await scoreClients(companyId);
+        const r2 = await generateDailyActions(companyId);
+        const r3 = await generatePredictions(companyId);
+        const r4 = await generateRecommendations(companyId);
+        const r5 = await generateInsights(companyId);
+        const r6 = await generateForecast(companyId);
         result = { ...r1, ...r2, ...r3, ...r4, ...r5, ...r6 };
         break;
       }
       default:
         throw new Error(`Unknown action: ${action}`);
     }
+
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
