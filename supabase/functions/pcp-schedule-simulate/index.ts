@@ -41,7 +41,15 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const body: SimulateRequest = await req.json();
+    const { v, parseJson } = await import("../_shared/validation.ts");
+    const parsed = await parseJson(req, v.object({
+      sortCriteria: v.optional(v.string({ enum: ["priority_due","due_date","shortest_first","longest_first","critical_ratio"] as const })),
+      priorityOverrides: v.optional(((raw: unknown) => raw && typeof raw === "object" ? { ok: true as const, data: raw as Record<string,string> } : { ok: false as const, errors: ["must be object"] })),
+      delayedOPs: v.optional(((raw: unknown) => Array.isArray(raw) ? { ok: true as const, data: raw as { opId: string; delayDays: number }[] } : { ok: false as const, errors: ["must be array"] })),
+      capacityChangePct: v.optional(v.number({ min: -100, max: 1000 })),
+    }));
+    if (!parsed.ok) return parsed.response;
+    const body = parsed.data as SimulateRequest;
     const sortCriteria = body.sortCriteria || "priority_due";
     const supabase = createClient(supabaseUrl, serviceKey);
 
