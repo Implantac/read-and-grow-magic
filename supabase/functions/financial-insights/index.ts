@@ -33,7 +33,12 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
-
+    const callerCompany = auth.companyId;
+    if (!callerCompany) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     const today = new Date();
     const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -44,12 +49,13 @@ Deno.serve(async (req) => {
     const future90 = new Date(today); future90.setDate(future90.getDate() + 90);
 
     const [banksRes, ledger30Res, ledger60Res, recRes, payRes] = await Promise.all([
-      supabase.from('bank_accounts').select('balance').eq('active', true),
-      supabase.from('financial_ledger').select('type,amount,entry_date,category_id').gte('entry_date', iso(d30)),
-      supabase.from('financial_ledger').select('type,amount,entry_date').gte('entry_date', iso(d60)).lt('entry_date', iso(d30)),
-      supabase.from('accounts_receivable').select('amount,open_amount,due_date,status').neq('status', 'paid'),
-      supabase.from('accounts_payable').select('amount,open_amount,due_date,status').neq('status', 'paid'),
+      supabase.from('bank_accounts').select('balance').eq('active', true).eq('company_id', callerCompany),
+      supabase.from('financial_ledger').select('type,amount,entry_date,category_id').gte('entry_date', iso(d30)).eq('company_id', callerCompany),
+      supabase.from('financial_ledger').select('type,amount,entry_date').gte('entry_date', iso(d60)).lt('entry_date', iso(d30)).eq('company_id', callerCompany),
+      supabase.from('accounts_receivable').select('amount,open_amount,due_date,status').neq('status', 'paid').eq('company_id', callerCompany),
+      supabase.from('accounts_payable').select('amount,open_amount,due_date,status').neq('status', 'paid').eq('company_id', callerCompany),
     ]);
+
 
     const currentBalance = (banksRes.data ?? []).reduce((s: number, b: any) => s + Number(b.balance ?? 0), 0);
     const ledger30 = ledger30Res.data ?? [];
