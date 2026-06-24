@@ -215,6 +215,36 @@ jobs:
             echo "- Entradas preservadas (interseção pre∩post): \`$OVERLAP\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
+          # Gera arquivo de metadados consolidado para anexar como artefato.
+          mkdir -p /tmp/eslint-cache-snapshot
+          {
+            echo "verdict=$VERDICT"
+            echo "reused=$REUSED"
+            echo "mtime_changed=$MTIME_CHANGED"
+            echo "overlap=$OVERLAP"
+            echo "pre_exists=$PRE_EXISTS"
+            echo "pre_mtime=$PRE_MTIME"
+            echo "pre_mtime_human=$PRE_MTIME_HUMAN"
+            echo "pre_size=$PRE_SIZE"
+            echo "pre_entries=$PRE_ENTRIES"
+            echo "post_mtime=$POST_MTIME"
+            echo "post_mtime_human=$POST_MTIME_HUMAN"
+            echo "post_size=$POST_SIZE"
+            echo "post_entries=$POST_ENTRIES"
+            echo "lint_outcome=${{ steps.lint.outcome }}"
+            echo "lint_duration_s=${{ steps.lint.outputs.duration_s }}"
+            echo "run_id=${{ github.run_id }}"
+            echo "run_attempt=${{ github.run_attempt }}"
+            echo "sha=${{ github.sha }}"
+          } > /tmp/eslint-cache-snapshot/metadata.txt
+
+          # Computa diffs de chaves (added/removed) para inspeção offline.
+          if [ -s /tmp/eslint-cache-snapshot/pre-keys.txt ] || [ -s /tmp/eslint-cache-snapshot/post-keys.txt ]; then
+            comm -23 /tmp/eslint-cache-snapshot/pre-keys.txt /tmp/eslint-cache-snapshot/post-keys.txt > /tmp/eslint-cache-snapshot/removed-keys.txt || true
+            comm -13 /tmp/eslint-cache-snapshot/pre-keys.txt /tmp/eslint-cache-snapshot/post-keys.txt > /tmp/eslint-cache-snapshot/added-keys.txt   || true
+            comm -12 /tmp/eslint-cache-snapshot/pre-keys.txt /tmp/eslint-cache-snapshot/post-keys.txt > /tmp/eslint-cache-snapshot/overlap-keys.txt || true
+          fi
+
       # Verifica existência do .eslintcache para condicionar o upload do artefato.
       - name: Check .eslintcache presence
         if: always()
