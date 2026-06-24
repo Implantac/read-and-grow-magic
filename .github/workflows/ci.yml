@@ -84,13 +84,18 @@ jobs:
           else
             SIZE="n/a"
           fi
+          REQUESTED="${{ runner.os }}-eslint-v1-${{ hashFiles('eslint.config.*', 'bun.lockb', 'bun.lock') }}"
           {
-            echo "### ESLint cache"
+            echo "## 🧹 ESLint cache — Restore"
             echo ""
-            echo "- Status: \`$STATUS\`"
-            echo "- Matched key: \`${MATCHED:-<none>}\`"
-            echo "- Requested key: \`${{ runner.os }}-eslint-v1-${{ hashFiles('eslint.config.*', 'bun.lockb', 'bun.lock') }}\`"
-            echo "- Cache file size: \`$SIZE\`"
+            echo "| Campo | Valor |"
+            echo "|---|---|"
+            echo "| Status | \`$STATUS\` |"
+            echo "| Requested key | \`$REQUESTED\` |"
+            echo "| Matched key | \`${MATCHED:-<none>}\` |"
+            echo "| Arquivo restaurado | \`$( [ -f node_modules/.cache/eslint/.eslintcache ] && echo true || echo false )\` |"
+            echo "| Tamanho do arquivo | \`$SIZE\` |"
+            echo ""
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Typecheck
@@ -188,31 +193,53 @@ jobs:
           echo "Post: mtime=$POST_MTIME_HUMAN size=${POST_SIZE}B entries=$POST_ENTRIES"
           echo "Key overlap pre∩post: $OVERLAP"
 
+          # Calcula deltas para a coluna Δ (post - pre).
+          SIZE_DELTA=$(( POST_SIZE - PRE_SIZE ))
+          ENTRIES_DELTA=$(( POST_ENTRIES - PRE_ENTRIES ))
+          if [ "$PRE_MTIME" = "0" ] || [ "$POST_MTIME" = "0" ]; then
+            MTIME_DELTA="n/a"
+          else
+            MTIME_DELTA="$(( POST_MTIME - PRE_MTIME ))s"
+          fi
+          POST_EXISTS=$( [ -f "$CACHE" ] && echo true || echo false )
+          [ "$REUSED" = "true" ] && VERDICT_ICON="✅" || VERDICT_ICON="⚠️"
+          [ "$MTIME_CHANGED" = "true" ] && MTIME_ICON="🔄" || MTIME_ICON="⏸️"
+
           {
-            echo "### Lint & Typecheck"
+            echo "## 🧪 Lint & Typecheck"
+            echo ""
+            echo "| Campo | Valor |"
+            echo "|---|---|"
+            echo "| Lint outcome | \`${{ steps.lint.outcome }}\` |"
+            echo "| Lint duration | \`${{ steps.lint.outputs.duration_s }}s\` |"
             echo ""
             if [ -f /tmp/lint-ci.log ]; then
+              echo "<details><summary>Saída do lint:ci</summary>"
+              echo ""
               echo '```'
               grep -E '^\[lint:ci\]' /tmp/lint-ci.log || tail -n 20 /tmp/lint-ci.log
               echo '```'
+              echo ""
+              echo "</details>"
+              echo ""
             fi
-            echo ""
-            echo "- Lint step outcome: \`${{ steps.lint.outcome }}\`"
-            echo "- Lint duration: \`${{ steps.lint.outputs.duration_s }}s\`"
-            echo ""
-            echo "#### ESLint cache reuse verification"
+            echo "## $VERDICT_ICON ESLint cache — Reuse verification"
             echo ""
             echo "**Verdict:** $VERDICT"
             echo ""
-            echo "| Métrica | Pre-lint | Post-lint |"
-            echo "|---|---|---|"
-            echo "| Arquivo existe | \`$PRE_EXISTS\` | \`$( [ -f "$CACHE" ] && echo true || echo false )\` |"
-            echo "| mtime (UTC) | \`$PRE_MTIME_HUMAN\` | \`$POST_MTIME_HUMAN\` |"
-            echo "| Tamanho (bytes) | \`$PRE_SIZE\` | \`$POST_SIZE\` |"
-            echo "| Entradas | \`$PRE_ENTRIES\` | \`$POST_ENTRIES\` |"
+            echo "| Métrica | Pre-lint | Post-lint | Δ |"
+            echo "|---|---|---|---|"
+            echo "| Arquivo existe | \`$PRE_EXISTS\` | \`$POST_EXISTS\` | — |"
+            echo "| mtime (UTC) | \`$PRE_MTIME_HUMAN\` | \`$POST_MTIME_HUMAN\` | \`$MTIME_DELTA\` |"
+            echo "| Tamanho (bytes) | \`$PRE_SIZE\` | \`$POST_SIZE\` | \`$SIZE_DELTA\` |"
+            echo "| Entradas | \`$PRE_ENTRIES\` | \`$POST_ENTRIES\` | \`$ENTRIES_DELTA\` |"
             echo ""
-            echo "- mtime alterado: \`$MTIME_CHANGED\` _(ESLint abriu e regravou o arquivo)_"
-            echo "- Entradas preservadas (interseção pre∩post): \`$OVERLAP\`"
+            echo "| Sinal | Valor |"
+            echo "|---|---|"
+            echo "| $MTIME_ICON mtime alterado | \`$MTIME_CHANGED\` |"
+            echo "| 🔗 Overlap pre∩post (entradas preservadas) | \`$OVERLAP\` |"
+            echo "| ♻️ Reutilizado | \`$REUSED\` |"
+            echo ""
           } >> "$GITHUB_STEP_SUMMARY"
 
           # Gera arquivo de metadados consolidado para anexar como artefato.
