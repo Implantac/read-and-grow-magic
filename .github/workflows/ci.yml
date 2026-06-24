@@ -28,14 +28,17 @@ on:
         required: false
         default: "false"
 
-# Thresholds configuráveis do ESLint cache (workflow_dispatch sobrescreve via inputs).
-# Editar os valores aqui muda os defaults para pull_request/push.
+# Thresholds configuráveis do ESLint cache.
+# Precedência: vars.* (repo/org) > workflow_dispatch.inputs > default hardcoded.
+# Defina em Settings → Secrets and variables → Actions → Variables com os mesmos
+# nomes (ESLINT_MIN_OVERLAP, ESLINT_MIN_CROSS_OVERLAP, ESLINT_MAX_SIZE_DELTA_PCT,
+# ESLINT_REQUIRE_MTIME_CONTINUITY, ESLINT_REQUIRE_MTIME_CHANGED) para sobrescrever.
 env:
-  ESLINT_MIN_OVERLAP: ${{ github.event.inputs.eslint_min_overlap || '1' }}
-  ESLINT_MIN_CROSS_OVERLAP: ${{ github.event.inputs.eslint_min_cross_overlap || '1' }}
-  ESLINT_MAX_SIZE_DELTA_PCT: ${{ github.event.inputs.eslint_max_size_delta_pct || '50' }}
-  ESLINT_REQUIRE_MTIME_CONTINUITY: ${{ github.event.inputs.eslint_require_mtime_continuity || 'false' }}
-  ESLINT_REQUIRE_MTIME_CHANGED: ${{ github.event.inputs.eslint_require_mtime_changed || 'false' }}
+  ESLINT_MIN_OVERLAP: ${{ vars.ESLINT_MIN_OVERLAP || github.event.inputs.eslint_min_overlap || '1' }}
+  ESLINT_MIN_CROSS_OVERLAP: ${{ vars.ESLINT_MIN_CROSS_OVERLAP || github.event.inputs.eslint_min_cross_overlap || '1' }}
+  ESLINT_MAX_SIZE_DELTA_PCT: ${{ vars.ESLINT_MAX_SIZE_DELTA_PCT || github.event.inputs.eslint_max_size_delta_pct || '50' }}
+  ESLINT_REQUIRE_MTIME_CONTINUITY: ${{ vars.ESLINT_REQUIRE_MTIME_CONTINUITY || github.event.inputs.eslint_require_mtime_continuity || 'false' }}
+  ESLINT_REQUIRE_MTIME_CHANGED: ${{ vars.ESLINT_REQUIRE_MTIME_CHANGED || github.event.inputs.eslint_require_mtime_changed || 'false' }}
 
 jobs:
   quality:
