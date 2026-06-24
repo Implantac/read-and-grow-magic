@@ -1,10 +1,11 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { getSystemPrompt } from '../_shared/ai-prompts.ts';
 import { requireAuth } from '../_shared/require-auth.ts';
+import { resolveContext } from '../_shared/tenant.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret, x-branch-id',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
 };
 
@@ -27,18 +28,32 @@ Deno.serve(async (req) => {
     });
   }
 
+  const ctx = await resolveContext(req, auth);
+  if (!ctx.ok) {
+    return new Response(JSON.stringify({ error: ctx.message }), {
+      status: ctx.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
-    const callerCompany = auth.companyId;
+    const callerCompany = ctx.companyId;
     if (!callerCompany) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
         status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
+    // Branch scope: when caller sent x-branch-id, restrict to that branch;
+    // otherwise span all branches the user can access in the company.
+    const requestedBranch = req.headers.get('x-branch-id');
+    const branchScope = requestedBranch ? [ctx.branchId!] : ctx.branchIds;
+    const scopeBranch = <T extends { in: any }>(q: T) =>
+      branchScope.length > 0 ? (q as any).in('branch_id', branchScope) : q;
 
     const today = new Date();
     const iso = (d: Date) => d.toISOString().slice(0, 10);
@@ -50,10 +65,10 @@ Deno.serve(async (req) => {
 
     const [banksRes, ledger30Res, ledger60Res, recRes, payRes] = await Promise.all([
       supabase.from('bank_accounts').select('balance').eq('active', true).eq('company_id', callerCompany),
-      supabase.from('financial_ledger').select('type,amount,entry_date,category_id').gte('entry_date', iso(d30)).eq('company_id', callerCompany),
-      supabase.from('financial_ledger').select('type,amount,entry_date').gte('entry_date', iso(d60)).lt('entry_date', iso(d30)).eq('company_id', callerCompany),
-      supabase.from('accounts_receivable').select('amount,open_amount,due_date,status').neq('status', 'paid').eq('company_id', callerCompany),
-      supabase.from('accounts_payable').select('amount,open_amount,due_date,status').neq('status', 'paid').eq('company_id', callerCompany),
+      scopeBranch(supabase.from('financial_ledger').select('type,amount,entry_date,category_id').gte('entry_date', iso(d30)).eq('company_id', callerCompany)),
+      scopeBranch(supabase.from('financial_ledger').select('type,amount,entry_date').gte('entry_date', iso(d60)).lt('entry_date', iso(d30)).eq('company_id', callerCompany)),
+      scopeBranch(supabase.from('accounts_receivable').select('amount,open_amount,due_date,status').neq('status', 'paid').eq('company_id', callerCompany)),
+      scopeBranch(supabase.from('accounts_payable').select('amount,open_amount,due_date,status').neq('status', 'paid').eq('company_id', callerCompany)),
     ]);
 
 
