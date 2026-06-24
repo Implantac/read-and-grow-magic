@@ -219,13 +219,13 @@ async function generateRecommendations(companyId: string, scope: string[] | null
 
   // Get recent order items for each client to know what they buy
   const clientIds = topClients.map((s: any) => s.client_id);
-  const { data: recentOrders } = await supabase.from("orders")
-    .select("client_id, total, date, order_items(product_name, product_code, quantity, unit_price, total)")
+  const { data: recentOrders } = await inBranch(supabase.from("orders")
+    .select("client_id, total, date, branch_id, order_items(product_name, product_code, quantity, unit_price, total)")
     .eq("company_id", companyId)
     .in("client_id", clientIds)
     .neq("status", "cancelled")
     .order("date", { ascending: false })
-    .limit(200);
+    .limit(200), scope);
 
 
   const clientProducts: Record<string, string[]> = {};
