@@ -48,7 +48,7 @@ interface TransitionInput {
   changedBy?: string;
 }
 
-async function createStockReservations(order: any) {
+async function createStockReservations(order: OrderLike) {
   const items = order.items || [];
   if (items.length === 0) return;
 
@@ -70,7 +70,7 @@ async function createStockReservations(order: any) {
   if (error) console.error('Error creating reservations:', error);
 }
 
-async function createConferenceRecord(order: any) {
+async function createConferenceRecord(order: OrderLike) {
   const items = order.items || [];
   const confNumber = `CONF-${format(new Date(), 'yyyyMMdd')}-${order.number}`;
 
@@ -108,7 +108,7 @@ async function createConferenceRecord(order: any) {
   }
 }
 
-async function createBillingEntry(order: any) {
+async function createBillingEntry(order: OrderLike) {
   // Check if billing entry already exists
   const { data: existing } = await supabase
     .from('billing_queue')
@@ -127,7 +127,7 @@ async function createBillingEntry(order: any) {
   } as any);
 }
 
-async function generateReceivablesFromBilling(order: any) {
+async function generateReceivablesFromBilling(order: OrderLike) {
   // Check if receivable already exists
   const { data: existing } = await supabase
     .from('accounts_receivable')
@@ -166,7 +166,7 @@ async function generateReceivablesFromBilling(order: any) {
   }
 }
 
-async function createShipmentOrder(order: any) {
+async function createShipmentOrder(order: OrderLike) {
   const { data: existing } = await supabase
     .from('shipment_orders')
     .select('id')
@@ -215,7 +215,7 @@ export function useOrderLifecycle() {
       }
 
       // Build update payload
-      const updatePayload: any = { status: targetStatus, updated_at: new Date().toISOString() };
+      const updatePayload: Record<string, string> = { status: targetStatus, updated_at: new Date().toISOString() };
 
       // Set fulfillment sub-statuses
       if (targetStatus === 'awaiting_separation' || targetStatus === 'in_separation') {
@@ -304,7 +304,7 @@ export function useOrderLifecycle() {
       qc.invalidateQueries({ queryKey: ['accounts-receivable'] });
       toastSuccess('Status do pedido atualizado com sucesso!');
     },
-    onError: (e: any) => {
+    onError: (e: Error) => {
       toastError(e.message, undefined, 'Erro na transição');
     },
   });
