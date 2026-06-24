@@ -11,8 +11,96 @@
 export const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers':
-    'authorization, x-client-info, apikey, content-type, x-cron-secret',
+    'authorization, x-client-info, apikey, content-type, x-cron-secret, x-branch-id',
 };
+
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import type { AuthResult } from "./require-auth.ts";
+
+export interface TenantContext {
+  ok: true;
+  userId: string | null;
+  companyId: string | null;
+  branchId: string | null;        // selected branch (header x-branch-id or default)
+  branchIds: string[];            // all branches caller can access (for cross-branch reads)
+  viaCron: boolean;
+}
+
+export interface TenantError {
+  ok: false;
+  status: number;
+  message: string;
+}
+
+/**
+ * Resolves the full tenant context (company + branch) for the caller.
+ * - Picks branch from header `x-branch-id` if provided and authorized,
+ *   otherwise falls back to profile.default_branch_id.
+ * - Loads the full set of branches the user has access to in their company,
+ *   useful for cross-branch listings.
+ *
+ * Always call AFTER `requireAuth`. Returns 403 if a forced branch is
+ * unauthorized for the caller.
+ */
+export async function resolveContext(
+  req: Request,
+  auth: AuthResult,
+): Promise<TenantContext | TenantError> {
+  // Cron callers get unrestricted context (no branch scope)
+  if (auth.viaCron) {
+    return {
+      ok: true,
+      userId: null,
+      companyId: null,
+      branchId: null,
+      branchIds: [],
+      viaCron: true,
+    };
+  }
+
+  const companyId = auth.companyId;
+  if (!companyId) {
+    return { ok: false, status: 403, message: "Forbidden" };
+  }
+
+  const admin = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+  );
+
+  // All branches in the caller's company (RLS scoped via service role, but we filter explicitly)
+  const { data: branchRows } = await admin
+    .from("branches")
+    .select("id")
+    .eq("company_id", companyId)
+    .eq("is_active", true);
+  const branchIds = (branchRows ?? []).map((b: any) => b.id as string);
+
+  // Branch from header takes precedence, fallback to default
+  const requested = req.headers.get("x-branch-id");
+  let branchId: string | null = auth.defaultBranchId ?? null;
+
+  if (requested) {
+    if (!branchIds.includes(requested)) {
+      return { ok: false, status: 403, message: "Forbidden branch" };
+    }
+    branchId = requested;
+  }
+
+  // If still null but there are branches, pick the first (headquarters fallback)
+  if (!branchId && branchIds.length > 0) {
+    branchId = branchIds[0];
+  }
+
+  return {
+    ok: true,
+    userId: auth.userId,
+    companyId,
+    branchId,
+    branchIds,
+    viaCron: false,
+  };
+}
 
 export interface CallerWithCompany {
   ok: true;
@@ -34,6 +122,16 @@ export function assertSameCompany(
 ): boolean {
   if (!callerCompanyId) return false;
   return rowCompanyId === callerCompanyId;
+}
+
+/** 403 if row branch is outside caller's accessible branches */
+export function assertSameBranch(
+  rowBranchId: string | null | undefined,
+  ctx: TenantContext,
+): boolean {
+  if (ctx.viaCron) return true;
+  if (!rowBranchId) return true; // null branch = company-wide row
+  return ctx.branchIds.includes(rowBranchId);
 }
 
 /** Generic client-facing error; logs the original server-side. */
