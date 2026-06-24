@@ -752,6 +752,7 @@ async function generateForecast(companyId: string) {
   };
 
   await supabase.from("ai_forecast_snapshots").insert({
+    company_id: companyId,
     period,
     forecast_date: now.toISOString().split("T")[0],
     predicted_revenue: Math.round(predictedRevenue),
@@ -763,6 +764,7 @@ async function generateForecast(companyId: string) {
     by_region: byRegion,
     factors,
   });
+
 
   return {
     period,
