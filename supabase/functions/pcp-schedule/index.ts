@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { getSystemPrompt } from "../_shared/ai-prompts.ts";
-import { resolveContextByIds, branchScope } from "../_shared/tenant.ts";
+import { resolveContextByIds, branchScope, requireModule } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -46,6 +46,8 @@ Deno.serve(async (req) => {
     if (!ctx.ok) {
       return new Response(JSON.stringify({ error: ctx.message }), { status: ctx.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+    const moduleDenied = await requireModule(ctx, 'producao');
+    if (moduleDenied) return moduleDenied;
     const scope = branchScope(ctx);
 
     const body = await req.json().catch(() => ({}));

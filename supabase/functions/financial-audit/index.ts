@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { requireAuth } from '../_shared/require-auth.ts';
-import { resolveContext } from '../_shared/tenant.ts';
+import { resolveContext, requireModule } from '../_shared/tenant.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,6 +23,8 @@ Deno.serve(async (req) => {
       status: ctx.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
+  const moduleDenied = await requireModule(ctx, 'financeiro');
+  if (moduleDenied) return moduleDenied;
 
   try {
     const url = new URL(req.url);

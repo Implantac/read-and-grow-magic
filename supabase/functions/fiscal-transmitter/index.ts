@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4"
 import { requireAuth } from "../_shared/require-auth.ts"
+import { resolveContext, requireModule } from "../_shared/tenant.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -20,6 +21,16 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
+
+    const ctx = await resolveContext(req, auth)
+    if (!ctx.ok) {
+      return new Response(JSON.stringify({ error: ctx.message }), {
+        status: ctx.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    const moduleDenied = await requireModule(ctx, 'fiscal')
+    if (moduleDenied) return moduleDenied
+
 
     // Use service role to perform the state change, but enforce tenant scoping in code.
     const supabaseAdmin = createClient(
