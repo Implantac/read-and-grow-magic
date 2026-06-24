@@ -31,7 +31,7 @@ export async function requireAuth(
     const cronSecret = Deno.env.get("CRON_SECRET");
     const provided = req.headers.get("x-cron-secret");
     if (cronSecret && provided && provided === cronSecret) {
-      return { ok: true, userId: null, role: null, viaCron: true, companyId: null };
+      return { ok: true, userId: null, role: null, viaCron: true, companyId: null, defaultBranchId: null };
     }
   }
 
@@ -64,15 +64,17 @@ export async function requireAuth(
     role = matched;
   }
 
-  // Resolve caller's company_id from profiles for tenant scoping
+  // Resolve caller's company_id + default branch from profiles for tenant scoping
   let companyId: string | null = null;
+  let defaultBranchId: string | null = null;
   const { data: profile } = await supabase
     .from("profiles")
-    .select("company_id")
+    .select("company_id, default_branch_id")
     .eq("id", data.user.id)
     .maybeSingle();
   companyId = (profile as any)?.company_id ?? null;
+  defaultBranchId = (profile as any)?.default_branch_id ?? null;
 
-  return { ok: true, userId: data.user.id, role, viaCron: false, companyId };
+  return { ok: true, userId: data.user.id, role, viaCron: false, companyId, defaultBranchId };
 }
 
