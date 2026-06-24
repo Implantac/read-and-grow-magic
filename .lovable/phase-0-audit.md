@@ -55,24 +55,31 @@ Criado `supabase/functions/_shared/tenant.ts` com:
 - ⏸️ `react-router-dom@6.30.1` — fix está em v7 (major). Bump major requer regressão de rotas; agendar.
 - ⏸️ `recharts@2.15.4` — fix em v3 (major, breaking). Agendar.
 
-## 5. Auditoria `system_audit_logs` (next step)
-Trigger genérico para mutações em tabelas sensíveis + logging de 403 cross-tenant.
+## 5. Auditoria `system_audit_logs` (✅ esta sessão)
+Trigger `fn_audit_sensitive_mutation` + `trg_audit_<tabela>` ativos em:
+`user_roles`, `profiles`, `companies`, `ai_brain_decisions`, `accounts_payable`,
+`accounts_receivable`, `financial_ledger`, `bank_accounts`, `production_orders`,
+`fiscal_documents`, `tax_rules`. Captura `INSERT/UPDATE/DELETE`, `auth.uid()` e
+`company_id` (best-effort; falha silenciosa para não bloquear a mutação).
 
 ## 6. RBAC / Sessão
 - ✅ `has_role()` SECURITY DEFINER em uso
 - ⚠️ Auditar uso de localStorage/sessionStorage em rotas administrativas
 
-## 7. Validação Zod nas Edge Functions
-- Pendente — aplicar schema em todas as funções com body
+## 7. Validação Zod-like nas Edge Functions (✅ infra pronta)
+- Criado `_shared/validation.ts` (sem dep externa, cold-start zero)
+- Aplicado em `pcp-priority` e `pcp-schedule-simulate`
+- 🟡 Falta aplicar em: `ai-brain`, `ai-executive`, `ai-commercial`, `pcp-schedule`, `production-events`, `fiscal-transmitter`
 
-## 8. Defensive hardening (esta sessão)
-- ✅ `pcp-priority` e `pcp-schedule` agora incluem `.eq('company_id', callerCompany)` em **todos** os `UPDATE` (belt-and-suspenders, mesmo que os IDs já tenham sido pré-filtrados)
+## 8. Defensive hardening
+- ✅ `pcp-priority` e `pcp-schedule` agora incluem `.eq('company_id', callerCompany)` em **todos** os `UPDATE`
 
 ## Critério de saída da Fase 0
-- [x] 0 findings críticos no scanner (validado — todos marcados como resolvidos)
+- [x] 0 findings críticos no scanner
 - [ ] 0 deps críticas (jspdf agendado para refactor com pdf-lib)
-- [x] Helper de tenant disponível
+- [x] Helper de tenant + validação disponíveis
 - [x] 100% edge functions auditadas com `company_id` scope + erro genérico
-- [ ] Validação Zod em 100% das funções com body
-- [ ] Trigger de auditoria ativo em tabelas sensíveis
+- [x] Trigger de auditoria ativo em tabelas sensíveis
+- [ ] Validação aplicada em 100% das funções com body (2/8 feitas)
+
 
