@@ -74,19 +74,23 @@ serve(async (req) => {
       const { data: orders } = await supabase
         .from("production_orders")
         .select("*")
+        .eq("company_id", callerCompany)
         .in("status", ["planned", "in_progress", "paused"])
         .order("due_date");
 
       const { data: capacity } = await supabase
         .from("production_capacity")
         .select("*")
+        .eq("company_id", callerCompany)
         .eq("is_active", true);
 
       const { data: timeEntries } = await supabase
         .from("time_entries")
         .select("*")
+        .eq("company_id", callerCompany)
         .order("start_time", { ascending: false })
         .limit(50);
+
 
       const prompt = await getSystemPrompt('PCP_CONSULTANT', `Analise os dados de produção e gere insights acionáveis.
 ORDENS DE PRODUÇÃO ATIVAS:
