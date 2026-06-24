@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- shadcn pattern: variants/utilities co-localizados com o componente */
 import { useTheme } from "next-themes";
 import { Toaster as Sonner, toast } from "sonner";
 

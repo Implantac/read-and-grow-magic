@@ -43,6 +43,7 @@ export default function CashFlow() {
       case 'year': return { start: startOfYear(now), end: endOfYear(now) };
       default: return { start: startOfMonth(now), end: endOfMonth(now) };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `now` é estável dentro do render
   }, [periodFilter]);
 
   const filteredEntries = entries.filter(entry => {
@@ -83,6 +84,7 @@ export default function CashFlow() {
         despesas: monthEntries.filter(e => e.type === 'expense').reduce((s, e) => s + Number(e.amount), 0),
       };
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `now` é estável dentro do render
   }, [entries]);
 
   // Expense by category
@@ -114,6 +116,7 @@ export default function CashFlow() {
         saldo: runningBalance,
       };
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `now` é estável dentro do render
   }, [currentBalance, receivables, payables]);
 
   const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];

@@ -4,7 +4,9 @@ import { BaseService } from '@/services/shared/baseService';
  * Legacy wrapper for BaseService to maintain compatibility.
  * @deprecated Use BaseService directly or domain services.
  */
-export class BaseRepository<T extends any> extends BaseService<any> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class BaseRepository<_T = unknown> extends BaseService<any> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(tableName: any) {
     super(tableName);
   }

@@ -62,7 +62,9 @@ export function BarcodeScanner({ onScan, placeholder = 'Escaneie ou digite o có
       gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
       osc.start();
       osc.stop(ctx.currentTime + 0.15);
-    } catch {}
+    } catch {
+      // Audio feedback opcional — ignora falha (sem suporte AudioContext)
+    }
   };
 
   const submit = async (code: string) => {

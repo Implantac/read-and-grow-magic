@@ -327,11 +327,12 @@ export class SchedulingService {
         case 'spt': return a._estMinutes - b._estMinutes;
         case 'lpt': return b._estMinutes - a._estMinutes;
         case 'critical_ratio': return b.criticalRatio - a.criticalRatio;
-        default:
+        default: {
           if (a.isLate !== b.isLate) return a.isLate ? -1 : 1;
           if (a.willBeLate !== b.willBeLate) return a.willBeLate ? -1 : 1;
           const pDiff = a._priorityNum - b._priorityNum;
           return pDiff !== 0 ? pDiff : a._dueIn - b._dueIn;
+        }
       }
     });
 
@@ -390,9 +391,9 @@ export class SimulationService {
     const today = new Date();
 
     // Clone data for simulation (no mutations to originals)
-    let simOrders = orders.map(o => ({ ...o }));
-    let simSupplies = supplies.map(s => ({ ...s }));
-    let simCapacities = capacities.map(c => ({ ...c }));
+    const simOrders = orders.map(o => ({ ...o }));
+    const simSupplies = supplies.map(s => ({ ...s }));
+    const simCapacities = capacities.map(c => ({ ...c }));
 
     // Apply delay scenario
     if (scenario.delayedOPs) {

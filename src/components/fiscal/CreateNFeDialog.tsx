@@ -108,7 +108,6 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
           'SP',
           clientUF || 'SP',
           taxRulesQuery.data || [],
-          // @ts-ignore
           currentCompany?.tax_regime || 'simples_nacional',
           'hybrid',
         );

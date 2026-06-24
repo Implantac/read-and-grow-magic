@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
     // Apply overrides and delays
     const processedOPs = allOrders.map((o: any) => {
       const priority = body.priorityOverrides?.[o.id] || o.priority;
-      let dueDate = o.due_date ? new Date(o.due_date) : null;
+      const dueDate = o.due_date ? new Date(o.due_date) : null;
 
       // Apply delay simulation
       const delay = body.delayedOPs?.find((d) => d.opId === o.id);
@@ -146,12 +146,13 @@ Deno.serve(async (req) => {
         case "critical_ratio":
           return b.criticalRatio - a.criticalRatio;
         case "priority_due":
-        default:
+        default: {
           if (a.isLate !== b.isLate) return a.isLate ? -1 : 1;
           if (a.willBeLate !== b.willBeLate) return a.willBeLate ? -1 : 1;
           const pDiff = a.priorityNum - b.priorityNum;
           if (pDiff !== 0) return pDiff;
           return a.dueIn - b.dueIn;
+        }
       }
     });
 
