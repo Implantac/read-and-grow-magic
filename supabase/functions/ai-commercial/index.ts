@@ -678,15 +678,15 @@ async function generatePredictions(companyId: string, scope: string[] | null) {
 }
 
 // ─── Engine 6: Forecast Snapshot (Fase 3) ─────────────────────────────
-async function generateForecast(companyId: string) {
+async function generateForecast(companyId: string, scope: string[] | null) {
   const now = new Date();
   const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-  const { data: orders } = await supabase.from("orders")
-    .select("id, total, status, sales_rep_id, sales_rep_name, client_id, date")
+  const { data: orders } = await inBranch(supabase.from("orders")
+    .select("id, total, status, sales_rep_id, sales_rep_name, client_id, date, branch_id")
     .eq("company_id", companyId)
     .gte("date", `${period}-01`)
-    .order("date", { ascending: false });
+    .order("date", { ascending: false }), scope);
 
   const { data: funnel } = await supabase.from("sales_funnel")
     .select("id, value, stage, status, sales_rep_id, client_id")
