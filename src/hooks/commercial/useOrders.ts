@@ -286,8 +286,9 @@ export function useDeleteOrder() {
 
               qc.invalidateQueries({ queryKey: ['orders'] });
               toastSuccess('Pedido restaurado com sucesso!');
-            } catch (err: any) {
-              toastError(err.message, undefined, 'Erro ao restaurar pedido');
+            } catch (err) {
+              const message = err instanceof Error ? err.message : 'Erro inesperado';
+              toastError(message, undefined, 'Erro ao restaurar pedido');
             }
           }
         }, 'Desfazer');
