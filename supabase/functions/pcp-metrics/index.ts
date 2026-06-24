@@ -30,24 +30,36 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Resolve caller's company_id for tenant scoping
+    const userId = (claimsData.claims as any).sub;
     const { data: profile } = await supabase
       .from("profiles")
-      .select("company_id")
-      .eq("id", claimsData.claims.sub)
+      .select("company_id, default_branch_id")
+      .eq("id", userId)
       .maybeSingle();
     const callerCompany = (profile as any)?.company_id as string | undefined;
     if (!callerCompany) {
       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Fetch production orders (tenant-scoped)
-    const { data: orders, error: ordErr } = await supabase
+    const ctx = await resolveContextByIds(req, {
+      userId,
+      companyId: callerCompany,
+      defaultBranchId: (profile as any)?.default_branch_id ?? null,
+    });
+    if (!ctx.ok) {
+      return new Response(JSON.stringify({ error: ctx.message }), { status: ctx.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const scope = branchScope(ctx);
+
+    // Fetch production orders (tenant + branch scoped)
+    let ordersQ = supabase
       .from("production_orders")
       .select("*")
       .eq("company_id", callerCompany)
       .order("created_at", { ascending: false })
       .limit(500);
+    if (scope) ordersQ = ordersQ.in("branch_id", scope);
+    const { data: orders, error: ordErr } = await ordersQ;
 
     if (ordErr) throw ordErr;
 
