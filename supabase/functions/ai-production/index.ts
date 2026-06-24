@@ -229,13 +229,13 @@ Gere um objeto JSON com:
 
     // === ACTION: operator_suggestions ===
     if (action === "operator_suggestions") {
-      const { data: activeOPs } = await supabase
+      const { data: activeOPs } = await scopeOrders(supabase
         .from("production_orders")
         .select("*")
         .eq("company_id", callerCompany)
         .in("status", ["in_progress", "planned"])
         .order("priority")
-        .limit(10);
+        .limit(10));
 
       const { data: activeEntries } = await supabase
         .from("time_entries")
