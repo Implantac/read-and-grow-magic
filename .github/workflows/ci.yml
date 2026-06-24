@@ -272,6 +272,145 @@ jobs:
             comm -12 /tmp/eslint-cache-snapshot/pre-keys.txt /tmp/eslint-cache-snapshot/post-keys.txt > /tmp/eslint-cache-snapshot/overlap-keys.txt || true
           fi
 
+      # Baixa o artefato de snapshots do run anterior (mesma workflow) para
+      # permitir a comparação cross-run de mtime/tamanho/overlap antes da
+      # decisão final de reutilização.
+      - name: Download previous run ESLint snapshots
+        if: always()
+        id: download-prev-snapshots
+        continue-on-error: true
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          workflow: ci.yml
+          name: eslint-cache-snapshots-.*
+          name_is_regexp: true
+          branch: ${{ github.event.pull_request.base.ref || github.ref_name }}
+          workflow_conclusion: ""
+          search_artifacts: true
+          skip_unpack: false
+          path: /tmp/eslint-prev
+          if_no_artifact_found: warn
+
+      # Compara o snapshot atual com o do run anterior (mtime, tamanho,
+      # entradas e overlap das chaves) e consolida a decisão final de
+      # reutilização levando em conta ambos os sinais.
+      - name: Cross-run ESLint cache comparison & final reuse decision
+        if: always()
+        id: eslint-crossrun
+        run: |
+          CUR_DIR=/tmp/eslint-cache-snapshot
+          PREV_ROOT=/tmp/eslint-prev
+          # O dawidd6 cria um subdiretório por artefato quando name_is_regexp=true.
+          PREV_DIR=$(find "$PREV_ROOT" -mindepth 1 -maxdepth 2 -type d -name 'eslint-cache-snapshots-*' 2>/dev/null | sort | tail -n1)
+          [ -z "$PREV_DIR" ] && [ -d "$PREV_ROOT" ] && PREV_DIR="$PREV_ROOT"
+
+          CUR_META="$CUR_DIR/metadata.txt"
+          PREV_META="$PREV_DIR/metadata.txt"
+
+          get_meta() { grep -E "^$2=" "$1" 2>/dev/null | head -n1 | cut -d= -f2- ; }
+
+          if [ -f "$PREV_META" ]; then
+            PREV_FOUND=true
+            PREV_RUN_ID=$(get_meta "$PREV_META" run_id)
+            PREV_SHA=$(get_meta "$PREV_META" sha)
+            PREV_POST_MTIME=$(get_meta "$PREV_META" post_mtime)
+            PREV_POST_MTIME_HUMAN=$(get_meta "$PREV_META" post_mtime_human)
+            PREV_POST_SIZE=$(get_meta "$PREV_META" post_size)
+            PREV_POST_ENTRIES=$(get_meta "$PREV_META" post_entries)
+            PREV_REUSED=$(get_meta "$PREV_META" reused)
+          else
+            PREV_FOUND=false
+            PREV_RUN_ID="n/a"; PREV_SHA="n/a"
+            PREV_POST_MTIME=0; PREV_POST_MTIME_HUMAN="n/a"
+            PREV_POST_SIZE=0; PREV_POST_ENTRIES=0; PREV_REUSED="n/a"
+          fi
+
+          CUR_PRE_MTIME=$(get_meta "$CUR_META" pre_mtime)
+          CUR_PRE_MTIME_HUMAN=$(get_meta "$CUR_META" pre_mtime_human)
+          CUR_PRE_SIZE=$(get_meta "$CUR_META" pre_size)
+          CUR_PRE_ENTRIES=$(get_meta "$CUR_META" pre_entries)
+          CUR_POST_MTIME_HUMAN=$(get_meta "$CUR_META" post_mtime_human)
+          CUR_POST_SIZE=$(get_meta "$CUR_META" post_size)
+          CUR_POST_ENTRIES=$(get_meta "$CUR_META" post_entries)
+          CUR_OVERLAP=$(get_meta "$CUR_META" overlap)
+          CUR_MTIME_CHANGED=$(get_meta "$CUR_META" mtime_changed)
+          CUR_REUSED=$(get_meta "$CUR_META" reused)
+
+          # Cross-run overlap: chaves do post anterior vs chaves do pre atual.
+          CROSS_OVERLAP=0
+          if [ -f "$PREV_DIR/post-keys.txt" ] && [ -s "$CUR_DIR/pre-keys.txt" ]; then
+            sort -u "$PREV_DIR/post-keys.txt" > /tmp/eslint-prev-post-keys.sorted
+            sort -u "$CUR_DIR/pre-keys.txt"  > /tmp/eslint-cur-pre-keys.sorted
+            CROSS_OVERLAP=$(comm -12 /tmp/eslint-prev-post-keys.sorted /tmp/eslint-cur-pre-keys.sorted | wc -l)
+          fi
+
+          # Continuidade: o cache restaurado neste run deve "herdar" do post do run anterior.
+          if [ "$PREV_FOUND" = "true" ] && [ "$CUR_PRE_MTIME" = "$PREV_POST_MTIME" ] && [ "$CUR_PRE_MTIME" != "0" ]; then
+            MTIME_CONTINUITY=true
+          else
+            MTIME_CONTINUITY=false
+          fi
+
+          if [ "$PREV_FOUND" = "true" ] && [ "$CROSS_OVERLAP" -gt 0 ] && [ "$CUR_REUSED" = "true" ]; then
+            FINAL_VERDICT="✅ REUSED (cross-run confirmado: $CROSS_OVERLAP chaves herdadas do run #$PREV_RUN_ID)"
+            FINAL_REUSED=true
+          elif [ "$PREV_FOUND" = "false" ] && [ "$CUR_REUSED" = "true" ]; then
+            FINAL_VERDICT="✅ REUSED (sem baseline anterior; verdict local mantido)"
+            FINAL_REUSED=true
+          elif [ "$PREV_FOUND" = "true" ] && [ "$CROSS_OVERLAP" -eq 0 ]; then
+            FINAL_VERDICT="⚠️ NOT REUSED (cache atual não compartilha chaves com run #$PREV_RUN_ID)"
+            FINAL_REUSED=false
+          else
+            FINAL_VERDICT="⚠️ NOT REUSED (verdict local: $CUR_REUSED)"
+            FINAL_REUSED=false
+          fi
+
+          echo "final_reused=$FINAL_REUSED"   >> "$GITHUB_OUTPUT"
+          echo "cross_overlap=$CROSS_OVERLAP" >> "$GITHUB_OUTPUT"
+          echo "prev_found=$PREV_FOUND"       >> "$GITHUB_OUTPUT"
+          echo "prev_run_id=$PREV_RUN_ID"     >> "$GITHUB_OUTPUT"
+
+          echo "Cross-run verdict: $FINAL_VERDICT"
+          echo "Previous run: $PREV_RUN_ID (sha=$PREV_SHA) found=$PREV_FOUND"
+          echo "Cross-run key overlap (prev.post ∩ cur.pre): $CROSS_OVERLAP"
+          echo "Mtime continuity (cur.pre == prev.post): $MTIME_CONTINUITY"
+
+          # Persiste no metadata para o artefato deste run.
+          {
+            echo "prev_found=$PREV_FOUND"
+            echo "prev_run_id=$PREV_RUN_ID"
+            echo "prev_sha=$PREV_SHA"
+            echo "cross_overlap=$CROSS_OVERLAP"
+            echo "mtime_continuity=$MTIME_CONTINUITY"
+            echo "final_reused=$FINAL_REUSED"
+            echo "final_verdict=$FINAL_VERDICT"
+          } >> "$CUR_META"
+
+          {
+            echo "## 🔁 ESLint cache — Cross-run comparison"
+            echo ""
+            echo "**Final verdict:** $FINAL_VERDICT"
+            echo ""
+            echo "| Métrica | Previous run (post) | Current run (pre) | Current run (post) |"
+            echo "|---|---|---|---|"
+            echo "| Run ID | \`$PREV_RUN_ID\` | \`${{ github.run_id }}\` | \`${{ github.run_id }}\` |"
+            echo "| mtime (UTC) | \`$PREV_POST_MTIME_HUMAN\` | \`$CUR_PRE_MTIME_HUMAN\` | \`$CUR_POST_MTIME_HUMAN\` |"
+            echo "| Tamanho (bytes) | \`$PREV_POST_SIZE\` | \`$CUR_PRE_SIZE\` | \`$CUR_POST_SIZE\` |"
+            echo "| Entradas | \`$PREV_POST_ENTRIES\` | \`$CUR_PRE_ENTRIES\` | \`$CUR_POST_ENTRIES\` |"
+            echo ""
+            echo "| Sinal cross-run | Valor |"
+            echo "|---|---|"
+            echo "| 📥 Artefato anterior encontrado | \`$PREV_FOUND\` |"
+            echo "| ⏱️ mtime continuity (prev.post == cur.pre) | \`$MTIME_CONTINUITY\` |"
+            echo "| 🔗 Overlap cross-run (prev.post ∩ cur.pre) | \`$CROSS_OVERLAP\` |"
+            echo "| 🧪 Verdict local (intra-run) | \`$CUR_REUSED\` |"
+            echo "| ♻️ Verdict final | \`$FINAL_REUSED\` |"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+
+
       # Verifica existência do .eslintcache para condicionar o upload do artefato.
       - name: Check .eslintcache presence
         if: always()
