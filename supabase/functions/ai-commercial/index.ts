@@ -281,6 +281,7 @@ Utilize a função 'generate_recommendations' com o JSON estruturado.`, supabase
 
     await supabase.from("ai_recommendations").insert({
       client_id: clientData.clients.id,
+      company_id: companyId,
       recommendation_type: rec.type,
       title: rec.title,
       description: rec.description,
@@ -298,12 +299,13 @@ Utilize a função 'generate_recommendations' com o JSON estruturado.`, supabase
 }
 
 // ─── Engine 3: Insights for Managers (Fase 3) ─────────────────────────
-async function generateInsights() {
-  const { data: scores } = await supabase.from("ai_sales_scores").select("*").limit(200);
-  const { data: orders } = await supabase.from("orders").select("id, total, status, sales_rep_id, sales_rep_name, client_name, client_id, date").order("date", { ascending: false }).limit(500);
-  const { data: reps } = await supabase.from("sales_reps").select("id, name, monthly_target, region").limit(50);
-  const { data: funnel } = await supabase.from("sales_funnel").select("id, value, status, stage, sales_rep_id, updated_at, title").limit(200);
-  const { data: targets } = await supabase.from("sales_targets").select("*").limit(50);
+async function generateInsights(companyId: string) {
+  const { data: scores } = await supabase.from("ai_sales_scores").select("*").eq("company_id", companyId).limit(200);
+  const { data: orders } = await supabase.from("orders").select("id, total, status, sales_rep_id, sales_rep_name, client_name, client_id, date").eq("company_id", companyId).order("date", { ascending: false }).limit(500);
+  const { data: reps } = await supabase.from("sales_reps").select("id, name, monthly_target, region").eq("company_id", companyId).limit(50);
+  const { data: funnel } = await supabase.from("sales_funnel").select("id, value, status, stage, sales_rep_id, updated_at, title").eq("company_id", companyId).limit(200);
+  const { data: targets } = await supabase.from("sales_targets").select("*").eq("company_id", companyId).limit(50);
+
 
   const now = new Date();
   const thisMonth = orders?.filter((o: any) => new Date(o.date).getMonth() === now.getMonth() && new Date(o.date).getFullYear() === now.getFullYear()) || [];
