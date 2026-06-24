@@ -23,6 +23,13 @@ Deno.serve(async (req) => {
   );
 
 
+  const callerCompany = auth.companyId;
+  if (!auth.viaCron && !callerCompany) {
+    return new Response(JSON.stringify({ error: 'Forbidden' }), {
+      status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
     const url = new URL(req.url);
     const action = url.searchParams.get('action') ?? 'compute';
@@ -38,8 +45,10 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'auto-reconcile') {
-      const { data: pending } = await supabase
-        .from('bank_transactions').select('id').neq('status', 'matched').limit(200);
+      let pendingQ = supabase
+        .from('bank_transactions').select('id, company_id').neq('status', 'matched').limit(200);
+      if (callerCompany) pendingQ = pendingQ.eq('company_id', callerCompany);
+      const { data: pending } = await pendingQ;
       let matched = 0;
       for (const tx of pending ?? []) {
         const { data } = await supabase.rpc('match_bank_transaction', { _bank_tx_id: tx.id });
@@ -51,6 +60,6 @@ Deno.serve(async (req) => {
     return Response.json({ ok: false, error: 'unknown action' }, { status: 400, headers: corsHeaders });
   } catch (e) {
     console.error('[financial-intelligence]', e);
-    return Response.json({ ok: false, error: String((e as Error).message) }, { status: 500, headers: corsHeaders });
+    return Response.json({ ok: false, error: 'Erro interno. Tente novamente.' }, { status: 500, headers: corsHeaders });
   }
 });
