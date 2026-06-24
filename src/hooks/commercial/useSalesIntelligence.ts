@@ -4,6 +4,14 @@ import { useMemo } from 'react';
 import { differenceInDays, subDays, format } from 'date-fns';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
+import type { Database } from '@/integrations/supabase/types';
+type OpportunityInsert = Database['public']['Tables']['sales_opportunities']['Insert'];
+type OpportunityUpdate = Database['public']['Tables']['sales_opportunities']['Update'];
+type FollowUpInsert = Database['public']['Tables']['follow_ups']['Insert'];
+type FollowUpUpdate = Database['public']['Tables']['follow_ups']['Update'];
+type CampaignInsert = Database['public']['Tables']['sales_campaigns']['Insert'];
+type CampaignUpdate = Database['public']['Tables']['sales_campaigns']['Update'];
+
 // ─── Types ───────────────────────────────────────────────────────────────
 export interface DbOpportunity {
   id: string;
@@ -13,7 +21,7 @@ export interface DbOpportunity {
   title: string;
   description: string | null;
   priority: string;
-  suggested_products: any;
+  suggested_products: unknown;
   estimated_value: number;
   status: string;
   contacted_at: string | null;
@@ -46,8 +54,8 @@ export interface DbCampaign {
   name: string;
   description: string | null;
   campaign_type: string;
-  target_products: any;
-  target_segments: any;
+  target_products: unknown;
+  target_segments: unknown;
   goal_type: string;
   goal_value: number;
   current_value: number;
@@ -90,7 +98,7 @@ export function useCreateOpportunity() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (item: Partial<DbOpportunity>) => {
-      const { data, error } = await supabase.from('sales_opportunities').insert(item as any).select().single();
+      const { data, error } = await supabase.from('sales_opportunities').insert(item as OpportunityInsert).select().single();
       if (error) throw error;
       return data;
     },
@@ -106,7 +114,7 @@ export function useUpdateOpportunity() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<DbOpportunity> & { id: string }) => {
-      const { data, error } = await supabase.from('sales_opportunities').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id).select().single();
+      const { data, error } = await supabase.from('sales_opportunities').update({ ...updates, updated_at: new Date().toISOString() } as OpportunityUpdate).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },
@@ -132,7 +140,7 @@ export function useCreateFollowUp() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (item: Partial<DbFollowUp>) => {
-      const { data, error } = await supabase.from('follow_ups').insert(item as any).select().single();
+      const { data, error } = await supabase.from('follow_ups').insert(item as FollowUpInsert).select().single();
       if (error) throw error;
       return data;
     },
@@ -148,7 +156,7 @@ export function useUpdateFollowUp() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<DbFollowUp> & { id: string }) => {
-      const { data, error } = await supabase.from('follow_ups').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id).select().single();
+      const { data, error } = await supabase.from('follow_ups').update({ ...updates, updated_at: new Date().toISOString() } as FollowUpUpdate).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },
@@ -174,7 +182,7 @@ export function useCreateCampaign() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (item: Partial<DbCampaign>) => {
-      const { data, error } = await supabase.from('sales_campaigns').insert(item as any).select().single();
+      const { data, error } = await supabase.from('sales_campaigns').insert(item as CampaignInsert).select().single();
       if (error) throw error;
       return data;
     },
@@ -190,7 +198,7 @@ export function useUpdateCampaign() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<DbCampaign> & { id: string }) => {
-      const { data, error } = await supabase.from('sales_campaigns').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id).select().single();
+      const { data, error } = await supabase.from('sales_campaigns').update({ ...updates, updated_at: new Date().toISOString() } as CampaignUpdate).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },
@@ -212,6 +220,38 @@ export function useDailyTargets(repId?: string) {
   });
 }
 
+
+// Structural input shapes for consumer hooks (duck-typed across modules)
+interface ClientLike {
+  id: string; name: string; code: string; segment?: string | null;
+  status?: string; last_purchase_date?: string | null;
+  purchase_frequency?: number; estimated_potential?: number;
+  abc_classification?: string | null; client_score?: string | null;
+  sales_rep_id?: string | null; default_payment_condition?: string | null;
+}
+interface OrderLike {
+  id: string; number?: string; client_id?: string; client_name?: string;
+  sales_rep_id?: string | null; date: string; total: number; status: string;
+  items?: Array<{ product_id?: string }>;
+}
+interface SaleLike {
+  client_id?: string; date: string; total: number; status: string;
+  items?: Array<{ product_id?: string }>;
+}
+interface ProductLike {
+  id: string; name: string; code: string; status?: string;
+  category_id?: string | null; sale_price: number; cost_price: number;
+}
+interface FunnelLike {
+  id: string; title: string; value: number; status: string;
+  sales_rep_id?: string | null; contact_name?: string | null;
+  created_at: string; updated_at?: string | null;
+}
+interface FollowUpLike {
+  id: string; subject: string; status: string; scheduled_date: string;
+}
+interface RepLike { id: string; name: string; monthly_target?: number; }
+
 // ─── Client Intelligence (computed from existing data) ───────────────────
 export interface ClientInsight {
   clientId: string;
@@ -232,24 +272,24 @@ export interface ClientInsight {
   salesRepId: string | null;
 }
 
-export function useClientInsights(clients: any[], orders: any[], sales: any[]) {
+export function useClientInsights(clients: ClientLike[], orders: OrderLike[], sales: SaleLike[]) {
   return useMemo(() => {
     const now = new Date();
     const insights: ClientInsight[] = [];
 
     clients.forEach(client => {
       // Calculate metrics from orders
-      const clientOrders = orders.filter((o: any) => o.client_id === client.id && o.status !== 'cancelled');
-      const clientSales = sales.filter((s: any) => s.client_id === client.id && s.status !== 'cancelled');
+      const clientOrders = orders.filter((o) => o.client_id === client.id && o.status !== 'cancelled');
+      const clientSales = sales.filter((s) => s.client_id === client.id && s.status !== 'cancelled');
       
       const allTransactions = [
-        ...clientOrders.map((o: any) => ({ date: o.date, total: o.total })),
-        ...clientSales.map((s: any) => ({ date: s.date, total: s.total })),
+        ...clientOrders.map((o) => ({ date: o.date, total: o.total })),
+        ...clientSales.map((s) => ({ date: s.date, total: s.total })),
       ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
       const lastDate = client.last_purchase_date || (allTransactions[0]?.date ?? null);
       const daysSince = lastDate ? differenceInDays(now, new Date(lastDate)) : 999;
-      const totalValue = allTransactions.reduce((s: number, t: any) => s + t.total, 0);
+      const totalValue = allTransactions.reduce((acc: number, t) => acc + t.total, 0);
       const avgTicket = allTransactions.length > 0 ? totalValue / allTransactions.length : 0;
       const frequency = client.purchase_frequency || 0;
       const potential = client.estimated_potential || 0;
@@ -325,7 +365,7 @@ export interface ProductSuggestion {
   confidence: 'high' | 'medium' | 'low';
 }
 
-export function useProductSuggestions(clientId: string | null, orders: any[], sales: any[], products: any[]) {
+export function useProductSuggestions(clientId: string | null, orders: OrderLike[], sales: SaleLike[], products: ProductLike[]) {
   return useMemo(() => {
     if (!clientId || products.length === 0) return [];
 
@@ -334,11 +374,11 @@ export function useProductSuggestions(clientId: string | null, orders: any[], sa
     const purchasedCategories = new Set<string>();
     const itemFrequency: Record<string, number> = {};
 
-    const clientOrders = orders.filter((o: any) => o.client_id === clientId && o.status !== 'cancelled');
-    const clientSales = sales.filter((s: any) => s.client_id === clientId && s.status !== 'cancelled');
+    const clientOrders = orders.filter((o) => o.client_id === clientId && o.status !== 'cancelled');
+    const clientSales = sales.filter((s) => s.client_id === clientId && s.status !== 'cancelled');
 
-    [...clientOrders, ...clientSales].forEach((o: any) => {
-      (o.items || []).forEach((item: any) => {
+    [...clientOrders, ...clientSales].forEach((o) => {
+      (o.items || []).forEach((item) => {
         if (item.product_id) {
           purchasedProductIds.add(item.product_id);
           itemFrequency[item.product_id] = (itemFrequency[item.product_id] || 0) + 1;
@@ -405,7 +445,7 @@ export interface SalesScript {
   closingTechnique: string;
 }
 
-export function useSalesScript(client: any | null, insight: ClientInsight | null): SalesScript | null {
+export function useSalesScript(client: ClientLike | null, insight: ClientInsight | null): SalesScript | null {
   return useMemo(() => {
     if (!client || !insight) return null;
 
@@ -494,7 +534,7 @@ export interface LostSaleAlert {
   clientName: string;
 }
 
-export function useLostSalesAlerts(funnel: any[], orders: any[], followUps: any[]) {
+export function useLostSalesAlerts(funnel: FunnelLike[], orders: OrderLike[], followUps: FollowUpLike[]) {
   return useMemo(() => {
     const now = new Date();
     const alerts: LostSaleAlert[] = [];
@@ -569,16 +609,16 @@ export interface RepPerformance {
   targetPct: number;
 }
 
-export function useRepPerformance(reps: any[], orders: any[], funnel: any[]) {
+export function useRepPerformance(reps: RepLike[], orders: OrderLike[], funnel: FunnelLike[]) {
   return useMemo(() => {
     const performances: RepPerformance[] = reps.map(rep => {
-      const repOrders = orders.filter((o: any) => o.sales_rep_id === rep.id && o.status !== 'cancelled');
-      const total = repOrders.reduce((s: number, o: any) => s + o.total, 0);
-      const repFunnel = funnel.filter((f: any) => f.sales_rep_id === rep.id);
-      const won = repFunnel.filter((f: any) => f.status === 'won').length;
-      const lost = repFunnel.filter((f: any) => f.status === 'lost').length;
+      const repOrders = orders.filter((o) => o.sales_rep_id === rep.id && o.status !== 'cancelled');
+      const total = repOrders.reduce((acc: number, o) => acc + o.total, 0);
+      const repFunnel = funnel.filter((f) => f.sales_rep_id === rep.id);
+      const won = repFunnel.filter((f) => f.status === 'won').length;
+      const lost = repFunnel.filter((f) => f.status === 'lost').length;
       const conversion = (won + lost) > 0 ? (won / (won + lost)) * 100 : 0;
-      const uniqueClients = new Set(repOrders.map((o: any) => o.client_id)).size;
+      const uniqueClients = new Set(repOrders.map((o) => o.client_id)).size;
       const target = rep.monthly_target || 0;
 
       return {

@@ -1,7 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 import type { RFIDReader, RFIDTag, RFIDEvent, RFIDSummary } from '@/types/rfid';
+
+type ReaderRow = Database['public']['Tables']['rfid_readers']['Row'];
+type ReaderUpdate = Database['public']['Tables']['rfid_readers']['Update'];
+type TagRow = Database['public']['Tables']['rfid_tags']['Row'];
+type TagUpdate = Database['public']['Tables']['rfid_tags']['Update'];
+type EventRow = Database['public']['Tables']['rfid_events']['Row'];
 
 export function useRFIDReaders() {
   const [readers, setReaders] = useState<RFIDReader[]>([]);
@@ -9,9 +16,9 @@ export function useRFIDReaders() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('rfid_readers' as any).select('*').order('code');
+    const { data, error } = await supabase.from('rfid_readers').select('*').order('code');
     if (error) { console.error(error); toast.error('Erro ao carregar leitores RFID'); }
-    else setReaders((data || []).map((r: any) => ({
+    else setReaders((data || []).map((r: ReaderRow) => ({
       id: r.id, code: r.code, name: r.name, location: r.location, zone: r.zone,
       ipAddress: r.ip_address, port: r.port, model: r.model, manufacturer: r.manufacturer,
       antennaCount: r.antenna_count || 1, status: r.status,
@@ -21,7 +28,7 @@ export function useRFIDReaders() {
   }, []);
 
   const create = async (reader: Partial<RFIDReader>) => {
-    const { error } = await supabase.from('rfid_readers' as any).insert({
+    const { error } = await supabase.from('rfid_readers').insert({
       code: reader.code, name: reader.name, location: reader.location, zone: reader.zone,
       ip_address: reader.ipAddress, port: reader.port, model: reader.model,
       manufacturer: reader.manufacturer, antenna_count: reader.antennaCount || 1,
@@ -34,7 +41,7 @@ export function useRFIDReaders() {
   };
 
   const update = async (id: string, updates: Partial<RFIDReader>) => {
-    const mapped: any = {};
+    const mapped: ReaderUpdate = {};
     if (updates.code !== undefined) mapped.code = updates.code;
     if (updates.name !== undefined) mapped.name = updates.name;
     if (updates.location !== undefined) mapped.location = updates.location;
@@ -47,7 +54,7 @@ export function useRFIDReaders() {
     if (updates.status !== undefined) mapped.status = updates.status;
     mapped.updated_at = new Date().toISOString();
 
-    const { error } = await supabase.from('rfid_readers' as any).update(mapped).eq('id', id);
+    const { error } = await supabase.from('rfid_readers').update(mapped).eq('id', id);
     if (error) { toast.error('Erro ao atualizar leitor'); return false; }
     toast.success('Leitor atualizado!');
     await fetch();
@@ -55,7 +62,7 @@ export function useRFIDReaders() {
   };
 
   const remove = async (id: string) => {
-    const { error } = await supabase.from('rfid_readers' as any).delete().eq('id', id);
+    const { error } = await supabase.from('rfid_readers').delete().eq('id', id);
     if (error) { toast.error('Erro ao excluir leitor'); return false; }
     toast.success('Leitor excluído!');
     await fetch();
@@ -72,9 +79,9 @@ export function useRFIDTags() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('rfid_tags' as any).select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('rfid_tags').select('*').order('created_at', { ascending: false });
     if (error) { console.error(error); toast.error('Erro ao carregar tags RFID'); }
-    else setTags((data || []).map((r: any) => ({
+    else setTags((data || []).map((r: TagRow) => ({
       id: r.id, epc: r.epc, tagType: r.tag_type, productId: r.product_id,
       productCode: r.product_code, productName: r.product_name, batch: r.batch,
       palletId: r.pallet_id, location: r.location, status: r.status,
@@ -85,7 +92,7 @@ export function useRFIDTags() {
   }, []);
 
   const create = async (tag: Partial<RFIDTag>) => {
-    const { error } = await supabase.from('rfid_tags' as any).insert({
+    const { error } = await supabase.from('rfid_tags').insert({
       epc: tag.epc, tag_type: tag.tagType || 'product', product_id: tag.productId,
       product_code: tag.productCode, product_name: tag.productName,
       batch: tag.batch, pallet_id: tag.palletId, location: tag.location,
@@ -97,8 +104,8 @@ export function useRFIDTags() {
     return true;
   };
 
-  const update = async (id: string, updates: any) => {
-    const { error } = await supabase.from('rfid_tags' as any).update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+  const update = async (id: string, updates: TagUpdate) => {
+    const { error } = await supabase.from('rfid_tags').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
     if (error) { toast.error('Erro ao atualizar tag'); return false; }
     toast.success('Tag atualizada!');
     await fetch();
@@ -106,7 +113,7 @@ export function useRFIDTags() {
   };
 
   const remove = async (id: string) => {
-    const { error } = await supabase.from('rfid_tags' as any).delete().eq('id', id);
+    const { error } = await supabase.from('rfid_tags').delete().eq('id', id);
     if (error) { toast.error('Erro ao excluir tag'); return false; }
     toast.success('Tag excluída!');
     await fetch();
@@ -123,10 +130,10 @@ export function useRFIDEvents(limit = 100) {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('rfid_events' as any)
+    const { data, error } = await supabase.from('rfid_events')
       .select('*').order('created_at', { ascending: false }).limit(limit);
     if (error) { console.error(error); toast.error('Erro ao carregar eventos RFID'); }
-    else setEvents((data || []).map((r: any) => ({
+    else setEvents((data || []).map((r: EventRow) => ({
       id: r.id, readerId: r.reader_id, readerCode: r.reader_code,
       tagEpc: r.tag_epc, tagId: r.tag_id, eventType: r.event_type,
       rssi: r.rssi ? Number(r.rssi) : undefined, antenna: r.antenna || 1,
@@ -166,9 +173,9 @@ export function useRFIDSummary() {
     today.setHours(0, 0, 0, 0);
 
     const [readersRes, tagsRes, eventsRes] = await Promise.all([
-      supabase.from('rfid_readers' as any).select('status'),
-      supabase.from('rfid_tags' as any).select('status'),
-      supabase.from('rfid_events' as any).select('processed,created_at').gte('created_at', today.toISOString()),
+      supabase.from('rfid_readers').select('status'),
+      supabase.from('rfid_tags').select('status'),
+      supabase.from('rfid_events').select('processed,created_at').gte('created_at', today.toISOString()),
     ]);
 
     const readers = readersRes.data || [];
@@ -177,11 +184,11 @@ export function useRFIDSummary() {
 
     setSummary({
       totalReaders: readers.length,
-      activeReaders: readers.filter((r: any) => r.status === 'active').length,
+      activeReaders: readers.filter((r) => r.status === 'active').length,
       totalTags: tags.length,
-      activeTags: tags.filter((t: any) => t.status === 'active').length,
+      activeTags: tags.filter((t) => t.status === 'active').length,
       eventsToday: events.length,
-      unprocessedEvents: events.filter((e: any) => !e.processed).length,
+      unprocessedEvents: events.filter((e) => !e.processed).length,
     });
     setLoading(false);
   }, []);
