@@ -12,6 +12,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { validateTransition } from '@/lib/orderFlowEngine';
 import { format } from 'date-fns';
