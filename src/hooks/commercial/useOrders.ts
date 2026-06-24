@@ -248,7 +248,7 @@ export function useDeleteOrder() {
       const undoSeconds = Number(getParameter('undo_duration_seconds', '10'));
       const durationMs = undoSeconds * 1000;
       let timeLeft = undoSeconds;
-      let interval: any;
+      let interval: ReturnType<typeof setInterval> | undefined;
 
       const createAction = (disabled = false) => 
         React.createElement(ToastAction, {
