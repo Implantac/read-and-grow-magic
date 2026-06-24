@@ -829,6 +829,7 @@ Deno.serve(async (req) => {
 
     let userId: string | undefined;
     let userRole: string | null = null;
+    let callerCompany: string | null = null;
     if (!CRON_ACTIONS.has(action)) {
       if (!authHeader?.startsWith("Bearer ")) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -845,6 +846,8 @@ Deno.serve(async (req) => {
       userId = data.user.id;
       const { data: roleRow } = await admin.from("user_roles").select("role").eq("user_id", userId).order("role").limit(1).maybeSingle();
       userRole = (roleRow as any)?.role || null;
+      const { data: profileRow } = await admin.from("profiles").select("company_id").eq("id", userId).maybeSingle();
+      callerCompany = (profileRow as any)?.company_id || null;
 
       // Privileged actions require admin/manager
       const PRIVILEGED = new Set([
@@ -856,7 +859,19 @@ Deno.serve(async (req) => {
           status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+
+      // Tenant-scoped actions require a resolved company_id
+      const TENANT_SCOPED = new Set([
+        "approve_decision", "reject_decision", "execute_decision",
+        "feedback_decision", "reinforce_memory",
+      ]);
+      if (TENANT_SCOPED.has(action) && !callerCompany) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
+
 
     let result: any;
     switch (action) {
