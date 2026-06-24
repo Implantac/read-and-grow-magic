@@ -17,9 +17,31 @@ import { validateTransition } from '@/lib/orderFlowEngine';
 import { format } from 'date-fns';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
+export interface OrderItemLike {
+  id: string;
+  product_id?: string | null;
+  product_code?: string | null;
+  product_name?: string | null;
+  quantity: number;
+}
+
+export interface OrderLike {
+  id: string;
+  number: string | number;
+  status: string;
+  total: number;
+  client_id?: string | null;
+  client_name?: string | null;
+  payment_condition?: string | null;
+  delivery_date?: string | null;
+  financial_approval?: string | null;
+  commercial_approval?: string | null;
+  items?: OrderItemLike[];
+}
+
 interface TransitionInput {
   orderId: string;
-  order: any; // full order object with items
+  order: OrderLike;
   targetStatus: string;
   observation?: string;
   blockReason?: string;
