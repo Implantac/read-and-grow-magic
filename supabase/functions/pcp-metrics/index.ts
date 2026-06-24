@@ -29,10 +29,22 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // Fetch production orders
+    // Resolve caller's company_id for tenant scoping
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("company_id")
+      .eq("id", claimsData.claims.sub)
+      .maybeSingle();
+    const callerCompany = (profile as any)?.company_id as string | undefined;
+    if (!callerCompany) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+    // Fetch production orders (tenant-scoped)
     const { data: orders, error: ordErr } = await supabase
       .from("production_orders")
       .select("*")
+      .eq("company_id", callerCompany)
       .order("created_at", { ascending: false })
       .limit(500);
 
