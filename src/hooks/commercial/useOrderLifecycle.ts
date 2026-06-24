@@ -52,7 +52,7 @@ async function createStockReservations(order: OrderLike) {
   const items = order.items || [];
   if (items.length === 0) return;
 
-  const reservations = items.map((item: any) => ({
+  const reservations = items.map((item: OrderItemLike) => ({
     order_id: order.id,
     order_item_id: item.id,
     product_id: item.product_id,
@@ -94,7 +94,7 @@ async function createConferenceRecord(order: OrderLike) {
 
   // Create conference items
   if (conf && items.length > 0) {
-    const confItems = items.map((item: any) => ({
+    const confItems = items.map((item: OrderItemLike) => ({
       conference_id: conf.id,
       order_item_id: item.id,
       product_code: item.product_code,
