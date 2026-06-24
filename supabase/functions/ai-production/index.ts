@@ -47,6 +47,8 @@ serve(async (req) => {
     if (!ctx.ok) {
       return new Response(JSON.stringify({ error: ctx.message }), { status: ctx.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
+    const moduleDenied = await requireModule(ctx, 'producao');
+    if (moduleDenied) return moduleDenied;
     const scope = branchScope(ctx);
     const scopeOrders = <T extends { in: any }>(q: T) => (scope ? (q as any).in('branch_id', scope) : q);
 
