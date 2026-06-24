@@ -102,7 +102,8 @@ Deno.serve(async (req) => {
         const { error } = await supabase
           .from("production_orders")
           .update({ priority_score: s.score, updated_at: new Date().toISOString() })
-          .eq("id", s.id);
+          .eq("id", s.id)
+          .eq("company_id", callerCompany);
         if (!error) updated++;
       }
 
