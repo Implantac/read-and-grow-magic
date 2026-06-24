@@ -909,8 +909,9 @@ Deno.serve(async (req) => {
           break;
         }
         const { data: dec } = await admin.from("ai_brain_decisions")
-          .select("title,module,rationale,proposed_action,impact_level").eq("id", decision_id).single();
+          .select("title,module,rationale,proposed_action,impact_level,company_id").eq("id", decision_id).eq("company_id", callerCompany!).maybeSingle();
         if (!dec) { result = { ok: false, error: "decisão não encontrada" }; break; }
+
         await saveMemory({
           user_id: userId,
           category: rating === "up" ? "positive_feedback" : "lesson_learned",
