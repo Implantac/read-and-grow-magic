@@ -69,9 +69,7 @@ const App = () => (
               <Route element={<MainLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/upgrade" element={<Upgrade />} />
-                <Route element={<FeatureGate module="comercial"><></></FeatureGate>}>
-                  {CommercialRoutes}
-                </Route>
+                {CommercialRoutes}
                 <Route
                   path="/financeiro/*"
                   element={
