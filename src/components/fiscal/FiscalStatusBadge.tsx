@@ -1,15 +1,8 @@
 import { CheckCircle2, Clock, XCircle, AlertTriangle, FileText, Ban, Truck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type FiscalStatus =
-  | 'draft'
-  | 'pending'
-  | 'authorized'
-  | 'rejected'
-  | 'cancelled'
-  | 'denied'
-  | 'closed'
-  | 'contingency';
+import type { FiscalStatus } from '@/modules/fiscal/types';
+export type { FiscalStatus };
 
 const config: Record<FiscalStatus, { label: string; icon: React.ComponentType<{ className?: string }>; className: string }> = {
   draft: { label: 'Rascunho', icon: FileText, className: 'bg-muted text-muted-foreground border-border' },

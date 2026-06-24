@@ -4,12 +4,8 @@ import { Input } from '@/ui/base/input';
 import { cn } from '@/lib/utils';
 import { Popover, PopoverContent, PopoverTrigger } from '@/ui/base/popover';
 
-export interface SmartSelectOption {
-  value: string;
-  label: string;
-  description?: string;
-  meta?: string;
-}
+import type { SmartSelectOption } from '@/modules/fiscal/types';
+export type { SmartSelectOption };
 
 interface SmartSelectProps {
   options: SmartSelectOption[];
