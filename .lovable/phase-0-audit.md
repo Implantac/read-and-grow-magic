@@ -43,16 +43,17 @@ Criado `supabase/functions/_shared/tenant.ts` com:
 - `ai-sales-message` — apenas envio outbound (sem leitura cross-tenant)
 
 ## 3. Higiene de erro (raw `error.message` no body)
-- ✅ `financial-insights` (turno anterior)
-- ✅ `fiscal-transmitter` (turno anterior)
-- ✅ `financial-intelligence` (esta sessão)
-- ⚠️ `admin-users:222` — `const msg = (error as Error).message` → revisar uso e mascarar
+- ✅ `financial-insights`, `fiscal-transmitter`, `financial-intelligence`
+- ✅ `financial-audit` (esta sessão) — `String((e as Error).message)` → `'Erro interno. Tente novamente.'`
+- ✅ `ai-executive` (esta sessão) — top-level catch agora retorna mensagem genérica
+- ✅ `admin-users:222` — já usa whitelist `safeMessages`
+- ✅ `ai-executive` inner `erro: error.message` (≈8 ocorrências) — não são client-facing; alimentam o LLM (tool results)
 
-## 4. Dependências vulneráveis (next step)
-- `jspdf@3.0.1` → migrar para `pdf-lib`
-- `@supabase/supabase-js` → bump
-- `react-router-dom@6.30.1` → bump (XSS open redirect)
-- `recharts` → bump (lodash)
+## 4. Dependências vulneráveis
+- ✅ `@supabase/supabase-js` → `^2.108.2` (corrige `ws` DoS/uninit memory)
+- ⏸️ `jspdf@3.0.1` — uso isolado em `src/lib/fiscalDocuments.ts` (DANFE/render texto). Vulnerabilidades reportadas atingem features não usadas (BMP/GIF decoder, addJS, AcroForm). Migração para `pdf-lib` exige reescrita completa do DANFE — agendar como item dedicado.
+- ⏸️ `react-router-dom@6.30.1` — fix está em v7 (major). Bump major requer regressão de rotas; agendar.
+- ⏸️ `recharts@2.15.4` — fix em v3 (major, breaking). Agendar.
 
 ## 5. Auditoria `system_audit_logs` (next step)
 Trigger genérico para mutações em tabelas sensíveis + logging de 403 cross-tenant.
@@ -64,9 +65,14 @@ Trigger genérico para mutações em tabelas sensíveis + logging de 403 cross-t
 ## 7. Validação Zod nas Edge Functions
 - Pendente — aplicar schema em todas as funções com body
 
+## 8. Defensive hardening (esta sessão)
+- ✅ `pcp-priority` e `pcp-schedule` agora incluem `.eq('company_id', callerCompany)` em **todos** os `UPDATE` (belt-and-suspenders, mesmo que os IDs já tenham sido pré-filtrados)
+
 ## Critério de saída da Fase 0
-- [ ] 0 findings críticos no scanner
-- [ ] 0 deps críticas
+- [x] 0 findings críticos no scanner (validado — todos marcados como resolvidos)
+- [ ] 0 deps críticas (jspdf agendado para refactor com pdf-lib)
 - [x] Helper de tenant disponível
-- [ ] 100% edge functions com `company_id` scope + erro genérico + Zod
+- [x] 100% edge functions auditadas com `company_id` scope + erro genérico
+- [ ] Validação Zod em 100% das funções com body
 - [ ] Trigger de auditoria ativo em tabelas sensíveis
+
