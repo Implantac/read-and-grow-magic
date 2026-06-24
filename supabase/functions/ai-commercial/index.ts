@@ -408,6 +408,7 @@ Gere de 5 a 12 insights comerciais acionáveis para vendedores, supervisores, ge
   let inserted = 0;
   for (const insight of result.insights || []) {
     await supabase.from("ai_sales_insights").insert({
+      company_id: companyId,
       insight_type: insight.type,
       target_role: insight.target_role,
       title: insight.title,
@@ -424,30 +425,34 @@ Gere de 5 a 12 insights comerciais acionáveis para vendedores, supervisores, ge
 }
 
 // ─── Engine 4: Daily Action Queue (Fase 1+4) ─────────────────────────
-async function generateDailyActions() {
+async function generateDailyActions(companyId: string) {
   const today = new Date().toISOString().split("T")[0];
 
   // Delete old actions (not today) to avoid clutter
-  await supabase.from("ai_daily_actions").delete().neq("action_date", today).eq("status", "pending");
+  await supabase.from("ai_daily_actions").delete().eq("company_id", companyId).neq("action_date", today).eq("status", "pending");
 
   // Check if already generated today
-  const { data: existing } = await supabase.from("ai_daily_actions").select("id").eq("action_date", today).limit(1);
+  const { data: existing } = await supabase.from("ai_daily_actions").select("id").eq("company_id", companyId).eq("action_date", today).limit(1);
   if (existing?.length) return { actions: 0, message: "Already generated today" };
 
   const { data: scores } = await supabase.from("ai_sales_scores")
     .select("*, clients(id, name, code, phone, cellphone, segment, sales_rep_id, avg_ticket, total_purchases, last_purchase_date)")
+    .eq("company_id", companyId)
     .order("score_numeric", { ascending: false })
     .limit(100);
 
   const { data: pendingFollowUps } = await supabase.from("follow_ups")
     .select("client_id, subject, scheduled_date")
+    .eq("company_id", companyId)
     .eq("status", "pending")
     .lte("scheduled_date", new Date().toISOString())
     .limit(50);
 
   const { data: stagnantFunnel } = await supabase.from("sales_funnel")
     .select("id, title, value, client_id, sales_rep_id, stage, updated_at")
+    .eq("company_id", companyId)
     .eq("status", "open")
+
     .limit(50);
 
   if (!scores?.length) return { actions: 0 };
