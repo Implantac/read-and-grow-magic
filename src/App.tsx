@@ -21,6 +21,7 @@ import { FiscalRoutes } from './routes/FiscalRoutes';
 import { VerticalPackRoutes } from './core/routes/VerticalPackRoutes';
 import { ExecutiveRoutes } from './routes/ExecutiveRoutes';
 import { FeatureGate } from '@/components/plan/FeatureGate';
+import { GatedOutlet } from '@/components/plan/GatedOutlet';
 
 // Eager load critical pages
 import Login from "./pages/Login";
@@ -79,12 +80,12 @@ const App = () => (
                   }
                 />
                 {AccountingRoutes}
-                {ProductionRoutes}
-                {WMSRoutes}
+                <Route element={<GatedOutlet module="producao" />}>{ProductionRoutes}</Route>
+                <Route element={<GatedOutlet module="wms" />}>{WMSRoutes}</Route>
                 {AdminRoutes}
                 {OperationalRoutes}
                 {MiscellaneousRoutes}
-                {FiscalRoutes}
+                <Route element={<GatedOutlet module="fiscal" />}>{FiscalRoutes}</Route>
                 {VerticalPackRoutes}
                 {ExecutiveRoutes}
                 <Route path="*" element={<NotFound />} />
