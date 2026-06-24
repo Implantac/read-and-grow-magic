@@ -1,9 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getSystemPrompt } from '../_shared/ai-prompts.ts'
+import { resolveContextByIds, branchScope } from '../_shared/tenant.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-branch-id',
 }
 
 Deno.serve(async (req) => {
@@ -30,13 +31,23 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     const userId = (claimsData.claims as any).sub
-    const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', userId).maybeSingle()
+    const { data: profile } = await supabase.from('profiles').select('company_id, default_branch_id').eq('id', userId).maybeSingle()
     const callerCompany = (profile as any)?.company_id
     if (!callerCompany) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
-    // 1. Analyze time_entries: avg time per work_center/operation
+    const ctx = await resolveContextByIds(req, {
+      userId,
+      companyId: callerCompany,
+      defaultBranchId: (profile as any)?.default_branch_id ?? null,
+    })
+    if (!ctx.ok) {
+      return new Response(JSON.stringify({ error: ctx.message }), { status: ctx.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+    const scope = branchScope(ctx)
+
+    // 1. Analyze time_entries (company-scoped only — no branch_id column)
     const { data: entries } = await supabase
       .from('time_entries')
       .select('work_center, operation_name, start_time, end_time, produced_quantity, rejected_quantity, status')
@@ -46,7 +57,7 @@ Deno.serve(async (req) => {
       .order('start_time', { ascending: false })
       .limit(500)
 
-    // 2. Analyze production_order_steps: avg realized vs estimated
+    // 2. Analyze production_order_steps (company-scoped)
     const { data: steps } = await supabase
       .from('production_order_steps')
       .select('step_id, sequence, estimated_time_minutes, realized_time_minutes, status, quantity_pending, quantity_rejected')
@@ -54,13 +65,15 @@ Deno.serve(async (req) => {
       .not('realized_time_minutes', 'is', null)
       .limit(500)
 
-    // 3. Analyze production_orders queue per status
-    const { data: orders } = await supabase
+    // 3. Analyze production_orders queue (company + branch scope)
+    let ordersQ = supabase
       .from('production_orders')
       .select('id, status, work_center, sector, quantity, produced_quantity, due_date')
       .eq('company_id', callerCompany)
       .not('status', 'in', '("completed","cancelled")')
       .limit(1000)
+    if (scope) ordersQ = ordersQ.in('branch_id', scope)
+    const { data: orders } = await ordersQ
 
 
     // --- Bottleneck Analysis ---

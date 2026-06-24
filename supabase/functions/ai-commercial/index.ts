@@ -1,12 +1,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getSystemPrompt } from "../_shared/ai-prompts.ts";
+import { resolveContextByIds, branchScope } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-branch-id",
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
 };
+
+// Helper: append branch filter to a query if scope is set
+const inBranch = <T extends { in: any }>(q: T, scope: string[] | null) =>
+  scope ? (q as any).in("branch_id", scope) : q;
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -15,7 +20,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 // --- Auth helper ---
-async function requireAuth(req: Request): Promise<Response | { userId: string; companyId: string }> {
+async function requireAuth(req: Request): Promise<Response | { userId: string; companyId: string; scope: string[] | null }> {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -33,14 +38,24 @@ async function requireAuth(req: Request): Promise<Response | { userId: string; c
     });
   }
   const userId = (data.claims as any).sub as string;
-  const { data: profile } = await supabase.from("profiles").select("company_id").eq("id", userId).maybeSingle();
+  const { data: profile } = await supabase.from("profiles").select("company_id, default_branch_id").eq("id", userId).maybeSingle();
   const companyId = (profile as any)?.company_id as string | undefined;
   if (!companyId) {
     return new Response(JSON.stringify({ error: "Forbidden" }), {
       status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-  return { userId, companyId };
+  const ctx = await resolveContextByIds(req, {
+    userId,
+    companyId,
+    defaultBranchId: (profile as any)?.default_branch_id ?? null,
+  });
+  if (!ctx.ok) {
+    return new Response(JSON.stringify({ error: ctx.message }), {
+      status: ctx.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  return { userId, companyId, scope: branchScope(ctx) };
 }
 
 
@@ -80,12 +95,12 @@ async function callAI(systemPrompt: string, userPrompt: string, tools?: any[]): 
 }
 
 // ─── Engine 1: Score Clients (Fase 1) ──────────────────────────────────
-async function scoreClients(companyId: string) {
+async function scoreClients(companyId: string, scope: string[] | null) {
   const { data: clients } = await supabase.from("clients").select("*").eq("company_id", companyId).eq("status", "active").limit(200);
   if (!clients?.length) return { scored: 0 };
 
-  const { data: orders } = await supabase.from("orders").select("id, client_id, total, date, status, sales_rep_id").eq("company_id", companyId).neq("status", "cancelled").order("date", { ascending: false }).limit(2000);
-  const { data: receivables } = await supabase.from("accounts_receivable").select("client_id, amount, status, due_date").eq("company_id", companyId).limit(1000);
+  const { data: orders } = await inBranch(supabase.from("orders").select("id, client_id, total, date, status, sales_rep_id, branch_id").eq("company_id", companyId).neq("status", "cancelled").order("date", { ascending: false }).limit(2000), scope);
+  const { data: receivables } = await inBranch(supabase.from("accounts_receivable").select("client_id, amount, status, due_date, branch_id").eq("company_id", companyId).limit(1000), scope);
   const { data: sales } = await supabase.from("sales").select("id, client_id, total, date, status").eq("company_id", companyId).neq("status", "cancelled").order("date", { ascending: false }).limit(1000);
 
 
@@ -190,7 +205,7 @@ async function scoreClients(companyId: string) {
 }
 
 // ─── Engine 2: AI Recommendations (Fase 2 - cross-sell, upsell, ticket) ──
-async function generateRecommendations(companyId: string) {
+async function generateRecommendations(companyId: string, scope: string[] | null) {
   const { data: topClients } = await supabase
     .from("ai_sales_scores")
     .select("*, clients(id, name, code, segment, last_purchase_date, avg_ticket, total_purchases, default_payment_condition)")
@@ -204,13 +219,13 @@ async function generateRecommendations(companyId: string) {
 
   // Get recent order items for each client to know what they buy
   const clientIds = topClients.map((s: any) => s.client_id);
-  const { data: recentOrders } = await supabase.from("orders")
-    .select("client_id, total, date, order_items(product_name, product_code, quantity, unit_price, total)")
+  const { data: recentOrders } = await inBranch(supabase.from("orders")
+    .select("client_id, total, date, branch_id, order_items(product_name, product_code, quantity, unit_price, total)")
     .eq("company_id", companyId)
     .in("client_id", clientIds)
     .neq("status", "cancelled")
     .order("date", { ascending: false })
-    .limit(200);
+    .limit(200), scope);
 
 
   const clientProducts: Record<string, string[]> = {};
@@ -299,9 +314,9 @@ Utilize a função 'generate_recommendations' com o JSON estruturado.`, supabase
 }
 
 // ─── Engine 3: Insights for Managers (Fase 3) ─────────────────────────
-async function generateInsights(companyId: string) {
+async function generateInsights(companyId: string, scope: string[] | null) {
   const { data: scores } = await supabase.from("ai_sales_scores").select("*").eq("company_id", companyId).limit(200);
-  const { data: orders } = await supabase.from("orders").select("id, total, status, sales_rep_id, sales_rep_name, client_name, client_id, date").eq("company_id", companyId).order("date", { ascending: false }).limit(500);
+  const { data: orders } = await inBranch(supabase.from("orders").select("id, total, status, sales_rep_id, sales_rep_name, client_name, client_id, date, branch_id").eq("company_id", companyId).order("date", { ascending: false }).limit(500), scope);
   const { data: reps } = await supabase.from("sales_reps").select("id, name, monthly_target, region").eq("company_id", companyId).limit(50);
   const { data: funnel } = await supabase.from("sales_funnel").select("id, value, status, stage, sales_rep_id, updated_at, title").eq("company_id", companyId).limit(200);
   const { data: targets } = await supabase.from("sales_targets").select("*").eq("company_id", companyId).limit(50);
@@ -425,7 +440,7 @@ Gere de 5 a 12 insights comerciais acionáveis para vendedores, supervisores, ge
 }
 
 // ─── Engine 4: Daily Action Queue (Fase 1+4) ─────────────────────────
-async function generateDailyActions(companyId: string) {
+async function generateDailyActions(companyId: string, _scope: string[] | null) {
   const today = new Date().toISOString().split("T")[0];
 
   // Delete old actions (not today) to avoid clutter
@@ -568,7 +583,7 @@ async function generateDailyActions(companyId: string) {
 }
 
 // ─── Engine 5: Opportunity Predictions (Fase 3) ──────────────────────
-async function generatePredictions(companyId: string) {
+async function generatePredictions(companyId: string, scope: string[] | null) {
   const { data: funnelItems } = await supabase.from("sales_funnel")
     .select("*, clients:client_id(id, name, code)")
     .eq("company_id", companyId)
@@ -578,11 +593,11 @@ async function generatePredictions(companyId: string) {
 
   if (!funnelItems?.length) return { predictions: 0 };
 
-  const { data: orders } = await supabase.from("orders")
-    .select("id, client_id, total, status, date")
+  const { data: orders } = await inBranch(supabase.from("orders")
+    .select("id, client_id, total, status, date, branch_id")
     .eq("company_id", companyId)
     .order("date", { ascending: false })
-    .limit(500);
+    .limit(500), scope);
 
 
   const now = new Date();
@@ -663,15 +678,15 @@ async function generatePredictions(companyId: string) {
 }
 
 // ─── Engine 6: Forecast Snapshot (Fase 3) ─────────────────────────────
-async function generateForecast(companyId: string) {
+async function generateForecast(companyId: string, scope: string[] | null) {
   const now = new Date();
   const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
-  const { data: orders } = await supabase.from("orders")
-    .select("id, total, status, sales_rep_id, sales_rep_name, client_id, date")
+  const { data: orders } = await inBranch(supabase.from("orders")
+    .select("id, total, status, sales_rep_id, sales_rep_name, client_id, date, branch_id")
     .eq("company_id", companyId)
     .gte("date", `${period}-01`)
-    .order("date", { ascending: false });
+    .order("date", { ascending: false }), scope);
 
   const { data: funnel } = await supabase.from("sales_funnel")
     .select("id, value, stage, status, sales_rep_id, client_id")
@@ -785,7 +800,7 @@ serve(async (req) => {
     // Auth check
     const authRes = await requireAuth(req);
     if (authRes instanceof Response) return authRes;
-    const { companyId } = authRes;
+    const { companyId, scope } = authRes;
 
     const body = await req.json().catch(() => ({}));
     const ALLOWED = new Set(["score_clients","generate_recommendations","generate_insights","generate_daily_actions","generate_predictions","generate_forecast","full_analysis"]);
@@ -798,30 +813,30 @@ serve(async (req) => {
 
     switch (action) {
       case "score_clients":
-        result = await scoreClients(companyId);
+        result = await scoreClients(companyId, scope);
         break;
       case "generate_recommendations":
-        result = await generateRecommendations(companyId);
+        result = await generateRecommendations(companyId, scope);
         break;
       case "generate_insights":
-        result = await generateInsights(companyId);
+        result = await generateInsights(companyId, scope);
         break;
       case "generate_daily_actions":
-        result = await generateDailyActions(companyId);
+        result = await generateDailyActions(companyId, scope);
         break;
       case "generate_predictions":
-        result = await generatePredictions(companyId);
+        result = await generatePredictions(companyId, scope);
         break;
       case "generate_forecast":
-        result = await generateForecast(companyId);
+        result = await generateForecast(companyId, scope);
         break;
       case "full_analysis": {
-        const r1 = await scoreClients(companyId);
-        const r2 = await generateDailyActions(companyId);
-        const r3 = await generatePredictions(companyId);
-        const r4 = await generateRecommendations(companyId);
-        const r5 = await generateInsights(companyId);
-        const r6 = await generateForecast(companyId);
+        const r1 = await scoreClients(companyId, scope);
+        const r2 = await generateDailyActions(companyId, scope);
+        const r3 = await generatePredictions(companyId, scope);
+        const r4 = await generateRecommendations(companyId, scope);
+        const r5 = await generateInsights(companyId, scope);
+        const r6 = await generateForecast(companyId, scope);
         result = { ...r1, ...r2, ...r3, ...r4, ...r5, ...r6 };
         break;
       }

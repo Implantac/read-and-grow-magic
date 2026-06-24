@@ -1,10 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getSystemPrompt } from "../_shared/ai-prompts.ts";
+import { resolveContextByIds, branchScope } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-branch-id",
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
 };
 
@@ -32,11 +33,22 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const userId = (claimsData.claims as any).sub;
-    const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', userId).maybeSingle();
+    const { data: profile } = await supabase.from('profiles').select('company_id, default_branch_id').eq('id', userId).maybeSingle();
     const callerCompany = (profile as any)?.company_id;
     if (!callerCompany) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
+
+    const ctx = await resolveContextByIds(req, {
+      userId,
+      companyId: callerCompany,
+      defaultBranchId: (profile as any)?.default_branch_id ?? null,
+    });
+    if (!ctx.ok) {
+      return new Response(JSON.stringify({ error: ctx.message }), { status: ctx.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    const scope = branchScope(ctx);
+    const scopeOrders = <T extends { in: any }>(q: T) => (scope ? (q as any).in('branch_id', scope) : q);
 
 
     // Helper to call AI
@@ -71,12 +83,12 @@ serve(async (req) => {
 
     // === ACTION: generate_insights ===
     if (action === "generate_insights") {
-      const { data: orders } = await supabase
+      const { data: orders } = await scopeOrders(supabase
         .from("production_orders")
         .select("*")
         .eq("company_id", callerCompany)
         .in("status", ["planned", "in_progress", "paused"])
-        .order("due_date");
+        .order("due_date"));
 
       const { data: capacity } = await supabase
         .from("production_capacity")
@@ -153,12 +165,12 @@ Cada objeto deve conter: insight_type, severity, title, description, affected_se
 
     // === ACTION: decision_engine ===
     if (action === "decision_engine") {
-      const { data: orders } = await supabase
+      const { data: orders } = await scopeOrders(supabase
         .from("production_orders")
         .select("*")
         .eq("company_id", callerCompany)
         .in("status", ["planned", "in_progress", "paused"])
-        .order("due_date");
+        .order("due_date"));
 
       const { data: capacity } = await supabase
         .from("production_capacity")
@@ -217,13 +229,13 @@ Gere um objeto JSON com:
 
     // === ACTION: operator_suggestions ===
     if (action === "operator_suggestions") {
-      const { data: activeOPs } = await supabase
+      const { data: activeOPs } = await scopeOrders(supabase
         .from("production_orders")
         .select("*")
         .eq("company_id", callerCompany)
         .in("status", ["in_progress", "planned"])
         .order("priority")
-        .limit(10);
+        .limit(10));
 
       const { data: activeEntries } = await supabase
         .from("time_entries")

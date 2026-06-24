@@ -1,9 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { requireAuth } from '../_shared/require-auth.ts';
+import { resolveContext } from '../_shared/tenant.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret, x-branch-id',
 };
 
 Deno.serve(async (req) => {
@@ -13,6 +14,13 @@ Deno.serve(async (req) => {
   if (!auth.ok) {
     return new Response(JSON.stringify({ error: auth.message }), {
       status: auth.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+  const ctx = await resolveContext(req, auth);
+  if (!ctx.ok) {
+    return new Response(JSON.stringify({ error: ctx.message }), {
+      status: ctx.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 
@@ -26,8 +34,8 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
-    const callerCompany = auth.companyId;
-    if (!callerCompany && !auth.viaCron) {
+    const callerCompany = ctx.companyId;
+    if (!callerCompany && !ctx.viaCron) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
         status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
