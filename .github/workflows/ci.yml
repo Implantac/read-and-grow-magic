@@ -84,13 +84,18 @@ jobs:
           else
             SIZE="n/a"
           fi
+          REQUESTED="${{ runner.os }}-eslint-v1-${{ hashFiles('eslint.config.*', 'bun.lockb', 'bun.lock') }}"
           {
-            echo "### ESLint cache"
+            echo "## 🧹 ESLint cache — Restore"
             echo ""
-            echo "- Status: \`$STATUS\`"
-            echo "- Matched key: \`${MATCHED:-<none>}\`"
-            echo "- Requested key: \`${{ runner.os }}-eslint-v1-${{ hashFiles('eslint.config.*', 'bun.lockb', 'bun.lock') }}\`"
-            echo "- Cache file size: \`$SIZE\`"
+            echo "| Campo | Valor |"
+            echo "|---|---|"
+            echo "| Status | \`$STATUS\` |"
+            echo "| Requested key | \`$REQUESTED\` |"
+            echo "| Matched key | \`${MATCHED:-<none>}\` |"
+            echo "| Arquivo restaurado | \`$( [ -f node_modules/.cache/eslint/.eslintcache ] && echo true || echo false )\` |"
+            echo "| Tamanho do arquivo | \`$SIZE\` |"
+            echo ""
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Typecheck
