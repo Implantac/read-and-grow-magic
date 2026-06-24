@@ -31,6 +31,14 @@ serve(async (req) => {
     const { action } = await req.json();
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    const userId = (claimsData.claims as any).sub;
+    const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', userId).maybeSingle();
+    const callerCompany = (profile as any)?.company_id;
+    if (!callerCompany) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+
     // Helper to call AI
     const callAI = async (systemPrompt: string, userPrompt: string) => {
       const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
