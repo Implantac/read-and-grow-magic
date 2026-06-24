@@ -34,6 +34,8 @@ Deno.serve(async (req) => {
       status: ctx.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
+  const moduleDenied = await requireModule(ctx, 'financeiro');
+  if (moduleDenied) return moduleDenied;
 
   try {
     const supabase = createClient(
