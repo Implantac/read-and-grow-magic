@@ -22,6 +22,16 @@ serve(async (req) => {
       })
     }
 
+    const ctx = await resolveContext(req, auth)
+    if (!ctx.ok) {
+      return new Response(JSON.stringify({ error: ctx.message }), {
+        status: ctx.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    const moduleDenied = await requireModule(ctx, 'fiscal')
+    if (moduleDenied) return moduleDenied
+
+
     // Use service role to perform the state change, but enforce tenant scoping in code.
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
