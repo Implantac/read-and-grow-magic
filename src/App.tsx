@@ -20,6 +20,7 @@ import { MiscellaneousRoutes } from './routes/MiscellaneousRoutes';
 import { FiscalRoutes } from './routes/FiscalRoutes';
 import { VerticalPackRoutes } from './core/routes/VerticalPackRoutes';
 import { ExecutiveRoutes } from './routes/ExecutiveRoutes';
+import { FeatureGate } from '@/components/plan/FeatureGate';
 
 // Eager load critical pages
 import Login from "./pages/Login";
@@ -28,6 +29,7 @@ import Dashboard from "./pages/Dashboard";
 // Lazy load common pages
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Upgrade = lazy(() => import("./pages/Upgrade"));
 
 function PageLoader() {
   return (
@@ -66,8 +68,18 @@ const App = () => (
               
               <Route element={<MainLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
-                {CommercialRoutes}
-                <Route path="/financeiro/*" element={<Routes>{FinancialRoutes}</Routes>} />
+                <Route path="/upgrade" element={<Upgrade />} />
+                <Route element={<FeatureGate module="comercial"><></></FeatureGate>}>
+                  {CommercialRoutes}
+                </Route>
+                <Route
+                  path="/financeiro/*"
+                  element={
+                    <FeatureGate module="financeiro">
+                      <Routes>{FinancialRoutes}</Routes>
+                    </FeatureGate>
+                  }
+                />
                 {AccountingRoutes}
                 {ProductionRoutes}
                 {WMSRoutes}
