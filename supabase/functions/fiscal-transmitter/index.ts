@@ -27,11 +27,23 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const body = await req.json()
-    const { nfeId, action, reason } = body
-
-    if (!nfeId) {
-      throw new Error('ID da NF-e é obrigatório')
+    const body = await req.json().catch(() => ({}))
+    const { nfeId, action, reason } = body as any
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (typeof nfeId !== 'string' || !UUID_RE.test(nfeId)) {
+      return new Response(JSON.stringify({ error: 'ID da NF-e inválido' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    if (!['transmit','cancel'].includes(action)) {
+      return new Response(JSON.stringify({ error: 'Ação inválida' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    if (action === 'cancel' && (typeof reason !== 'string' || reason.trim().length < 15)) {
+      return new Response(JSON.stringify({ error: 'Justificativa de cancelamento deve ter ao menos 15 caracteres' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
     }
 
     // Resolve caller's company_id and ensure NF-e belongs to it

@@ -787,7 +787,12 @@ serve(async (req) => {
     if (authRes instanceof Response) return authRes;
     const { companyId } = authRes;
 
-    const { action } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const ALLOWED = new Set(["score_clients","generate_recommendations","generate_insights","generate_daily_actions","generate_predictions","generate_forecast","full_analysis"]);
+    const action = body?.action;
+    if (typeof action !== "string" || !ALLOWED.has(action)) {
+      return new Response(JSON.stringify({ error: "Ação inválida" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
     let result: any;
 

@@ -39,6 +39,9 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const action = body.action || "suggest";
+    if (!["suggest","apply"].includes(action)) {
+      return new Response(JSON.stringify({ error: "Ação inválida" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
     // Fetch active production orders for caller's company
     const { data: orders, error: ordErr } = await supabase

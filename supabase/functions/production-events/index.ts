@@ -23,7 +23,11 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
 
-    const { action, ...params } = await req.json();
+    const parsed = await req.json().catch(() => ({}));
+    const { action, ...params } = parsed as any;
+    if (!["process_queue","iot_ingest","get_analytics"].includes(action)) {
+      return jsonError("Ação inválida", 400);
+    }
 
     switch (action) {
       case "process_queue": {
