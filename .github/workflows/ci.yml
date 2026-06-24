@@ -86,30 +86,76 @@ jobs:
         env:
           THRESHOLDS_RAN: ${{ steps.filter.outputs.thresholds }}
           THRESHOLDS_FILES: ${{ steps.filter.outputs.thresholds_files }}
+          MATCHED_FILTERS: ${{ steps.filter.outputs.changes }}
           JOB_STATUS: ${{ job.status }}
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref || github.ref_name }}
         run: |
+          # Classifica execução vs. pulado e monta motivo detalhado.
           if [ "$THRESHOLDS_RAN" = "true" ]; then
+            EXECUTED="✅ Sim"
             STATUS="executada (\`$JOB_STATUS\`)"
-            REASON="arquivos relevantes alterados neste PR/push"
+            if [ -n "$THRESHOLDS_FILES" ]; then
+              REASON="filtro \`thresholds\` deu match em arquivos monitorados (ver lista abaixo)"
+            else
+              REASON="filtro \`thresholds\` retornou \`true\` sem base de comparação (evento \`$EVENT_NAME\` — ex.: push inicial da branch ou \`workflow_dispatch\`)"
+            fi
           else
+            EXECUTED="⏭️  Não (pulada)"
             STATUS="pulada"
-            REASON="nenhum arquivo relevante alterado"
+            REASON="nenhum filtro deu match — nenhum arquivo monitorado foi alterado em relação a \`$BASE_REF\`"
           fi
+
+          # Classifica cada path monitorado individualmente conforme os arquivos casados.
+          classify() {
+            local pattern="$1"
+            if [ "$THRESHOLDS_RAN" != "true" ]; then
+              echo "—"
+              return
+            fi
+            if [ -z "$THRESHOLDS_FILES" ]; then
+              echo "possivelmente (sem lista de arquivos)"
+              return
+            fi
+            # shellcheck disable=SC2086
+            set -- $THRESHOLDS_FILES
+            for f in "$@"; do
+              if [ "$f" = "$pattern" ]; then
+                echo "✅ match"
+                return
+              fi
+            done
+            echo "— (sem alterações)"
+          }
+          M1=$(classify "scripts/validate-eslint-thresholds.sh")
+          M2=$(classify "scripts/test-eslint-thresholds.sh")
+          M3=$(classify ".github/workflows/ci.yml")
+
           {
             echo "## 🧪 ESLint thresholds — tests"
             echo ""
             echo "| Campo | Valor |"
             echo "|---|---|"
+            echo "| Executada? | $EXECUTED |"
             echo "| Suite | $STATUS |"
             echo "| Motivo | $REASON |"
-            echo "| Arquivos monitorados | \`scripts/validate-eslint-thresholds.sh\`, \`scripts/test-eslint-thresholds.sh\`, \`.github/workflows/ci.yml\` |"
+            echo "| Evento | \`$EVENT_NAME\` |"
+            echo "| Ref base → head | \`${BASE_REF:-—}\` → \`${HEAD_REF:-—}\` |"
+            echo "| Filtros que deram match | \`${MATCHED_FILTERS:-[]}\` |"
+            echo ""
+            echo "### 🎯 Status por filtro / path monitorado"
+            echo ""
+            echo "| Path monitorado | Status |"
+            echo "|---|---|"
+            echo "| \`scripts/validate-eslint-thresholds.sh\` | $M1 |"
+            echo "| \`scripts/test-eslint-thresholds.sh\` | $M2 |"
+            echo "| \`.github/workflows/ci.yml\` | $M3 |"
             echo ""
             echo "### 📂 Arquivos que dispararam a execução"
             echo ""
             if [ "$THRESHOLDS_RAN" = "true" ]; then
               if [ -n "$THRESHOLDS_FILES" ]; then
-                # `list-files: shell` devolve os paths separados por espaço.
-                # Convertemos em uma lista markdown com um item por arquivo.
                 # shellcheck disable=SC2086
                 set -- $THRESHOLDS_FILES
                 echo "Total: **$#** arquivo(s)."
@@ -118,8 +164,6 @@ jobs:
                   echo "- \`$f\`"
                 done
               else
-                # Em pushes sem base de comparação o filter marca "true"
-                # sem listar arquivos — registramos isso explicitamente.
                 echo "_O filter retornou \`true\` sem lista de arquivos (provavelmente um push sem base de comparação — ex.: primeiro push da branch ou execução manual)._"
               fi
             else
@@ -128,6 +172,7 @@ jobs:
             echo ""
             echo "> Quando executada, uma falha aqui bloqueia o job \`quality\` via \`needs:\`."
           } >> "$GITHUB_STEP_SUMMARY"
+
 
 
 
