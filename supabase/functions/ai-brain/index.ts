@@ -812,7 +812,25 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json().catch(() => ({}));
+    const ALLOWED_BRAIN_ACTIONS = new Set([
+      "analyze","autopilot","chat","approve_decision","reject_decision","save_memory",
+      "list_memories","feedback_decision","reinforce_memory","invalidate_cache",
+      "notify_critical","execute_decision","cron_run","weekly_learning",
+    ]);
     const action = body.action || "analyze";
+    if (typeof action !== "string" || !ALLOWED_BRAIN_ACTIONS.has(action)) {
+      return new Response(JSON.stringify({ error: "Ação inválida" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    // Validate UUIDs for decision actions
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const DECISION_ACTIONS = new Set(["approve_decision","reject_decision","feedback_decision","execute_decision"]);
+    if (DECISION_ACTIONS.has(action) && (typeof body.decisionId !== "string" || !UUID_RE.test(body.decisionId))) {
+      return new Response(JSON.stringify({ error: "decisionId inválido" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const authHeader = req.headers.get("Authorization") || undefined;
 
     // Cron-only actions: require CRON_SECRET header (Supabase scheduled functions).

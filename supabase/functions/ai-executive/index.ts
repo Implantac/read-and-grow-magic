@@ -44,8 +44,15 @@ serve(async (req) => {
     
     const companyId = profile?.company_id;
 
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const ALLOWED_ACTIONS = new Set(["clear_history","chat","assistant_chat","daily_summary","generate_insights","generate_scenarios","ceo_brief","execute_decisions","autopilot_run","dashboard"]);
     const { action, messages, months = 12, segment = 'general' } = body;
+    if (action !== undefined && (typeof action !== "string" || !ALLOWED_ACTIONS.has(action))) {
+      return new Response(JSON.stringify({ error: "Ação inválida" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    if (typeof months !== "number" || months < 1 || months > 60) {
+      return new Response(JSON.stringify({ error: "Parâmetro months inválido" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
 
     if (action === "clear_history") {
       await supabase.from("ai_executive_chat").delete().eq("user_id", authenticatedUserId);
