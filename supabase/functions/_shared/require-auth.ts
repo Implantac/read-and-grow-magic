@@ -9,7 +9,9 @@ export interface AuthResult {
   userId: string | null;          // null when authorized via cron secret
   role: Role | null;
   viaCron: boolean;
+  companyId: string | null;       // resolved from profiles when user is authenticated
 }
+
 
 export interface AuthError {
   ok: false;
