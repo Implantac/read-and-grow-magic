@@ -297,7 +297,7 @@ export function useDeleteOrder() {
         title: 'Pedido removido com sucesso!',
         description: `O pedido ${deletedOrder.number} foi excluído. Você tem ${timeLeft} segundos para desfazer.`,
         duration: durationMs,
-        action: createAction(),
+        action: createAction() as unknown as React.ReactElement,
       });
 
       interval = setInterval(() => {
@@ -307,7 +307,7 @@ export function useDeleteOrder() {
           update({
             id,
             description: `O pedido ${deletedOrder.number} foi excluído permanentemente.`,
-            action: createAction(true),
+            action: createAction(true) as unknown as React.ReactElement,
           });
         } else {
           update({
