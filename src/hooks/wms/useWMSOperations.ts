@@ -176,9 +176,9 @@ export function useWMSPacking() {
 function mapPacking(r: PackingRow) {
   return {
     id: r.id, orderNumber: r.order_number, customerName: r.customer_name,
-    volumes: r.volumes, status: r.status, operator: r.operator || '',
+    volumes: 0, status: r.status, operator: r.operator || '',
     startedAt: r.started_at, completedAt: r.completed_at,
-    shippedAt: r.shipped_at, trackingCode: r.tracking_code, createdAt: r.created_at,
+    shippedAt: r.shipped_at, trackingCode: r.tracking_number, createdAt: r.created_at,
   };
 }
 
