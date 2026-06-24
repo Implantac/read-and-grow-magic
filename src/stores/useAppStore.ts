@@ -85,6 +85,8 @@ export const useAppStore = create<AppState>()(
       partialize: (state) => ({
         theme: state.theme,
         sidebarCollapsed: state.sidebarCollapsed,
+        activeCompany: state.activeCompany,
+        activeBranch: state.activeBranch,
       }),
     }
   )

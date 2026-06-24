@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { Bell, Brain, ChevronDown, LogOut, Menu, Moon, Sun, User, Search, Command, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import type { Company } from '@/types';
+import type { Company, Branch } from '@/types';
 
 import { useCompanies } from '@/hooks/system/useCompanies';
 import { useAppStore } from '@/stores/useAppStore';
+import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { useAuth } from '@/hooks/system/useAuth';
 import { useNotifications } from '@/hooks/system/useNotifications';
 import { useBrainDecisions } from '@/hooks/ai/useAIBrain';
@@ -28,10 +29,33 @@ const typeColors = {
 export function Topbar() {
   const navigate = useNavigate();
   const { signOut } = useAuth({ initialize: false });
-  const { 
+  const {
     user, activeCompany, activeBranch, sidebarCollapsed, theme,
     toggleSidebar, setActiveCompany, setActiveBranch, toggleTheme,
   } = useAppStore();
+  const setActiveCompanyId = useEnterpriseStore((s) => s.setActiveCompanyId);
+  const setActiveBranchId = useEnterpriseStore((s) => s.setActiveBranchId);
+
+  // Keep enterprise store in sync so the supabase invoke interceptor
+  // and edge functions always receive the correct tenant scope.
+  useEffect(() => {
+    setActiveCompanyId(activeCompany?.id ?? null);
+  }, [activeCompany?.id, setActiveCompanyId]);
+  useEffect(() => {
+    setActiveBranchId(activeBranch?.id ?? null);
+  }, [activeBranch?.id, setActiveBranchId]);
+
+  const handleSelectCompany = (company: Company) => {
+    setActiveCompany(company);
+    setActiveCompanyId(company?.id ?? null);
+    const firstBranch = Array.isArray(company?.branches) && company.branches.length > 0 ? company.branches[0] : null;
+    setActiveBranchId(firstBranch?.id ?? null);
+  };
+
+  const handleSelectBranch = (branch: Branch) => {
+    setActiveBranch(branch);
+    setActiveBranchId(branch?.id ?? null);
+  };
 
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { data: brainPendingData } = useBrainDecisions('pending');
@@ -83,7 +107,7 @@ export function Topbar() {
             {(Array.isArray(companies) ? companies : []).map((company: any) => (
               <DropdownMenuItem
                 key={company.id}
-                onClick={() => setActiveCompany(company)}
+                onClick={() => handleSelectCompany(company)}
                 className={cn(
                   'text-sidebar-foreground/80 hover:text-primary focus:text-primary',
                   activeCompany?.id === company.id && 'text-primary bg-sidebar-accent'
@@ -111,7 +135,7 @@ export function Topbar() {
               {(activeCompany.branches || []).map((branch) => (
                 <DropdownMenuItem
                   key={branch.id}
-                  onClick={() => setActiveBranch(branch)}
+                  onClick={() => handleSelectBranch(branch)}
                   className={cn(
                     'text-sidebar-foreground/80 hover:text-primary focus:text-primary',
                     activeBranch?.id === branch.id && 'text-primary bg-sidebar-accent'
