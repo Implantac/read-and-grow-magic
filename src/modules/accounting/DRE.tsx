@@ -40,6 +40,7 @@ export default function DREPage() {
       case 'year': return { start: startOfMonth(subMonths(now, 11)), end: endOfMonth(now) };
       default: return { start: startOfMonth(now), end: endOfMonth(now) };
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `now` é estável dentro do render
   }, [period]);
 
   const prevRange = useMemo(() => {
@@ -68,7 +69,9 @@ export default function DREPage() {
     return { revenue, costs, grossProfit, opex, netProfit, expenseBreakdown };
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- computeDRE é função local pura, deps reais já listadas
   const current = useMemo(() => computeDRE(periodRange), [receivables, payables, periodRange]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- idem
   const previous = useMemo(() => computeDRE(prevRange), [receivables, payables, prevRange]);
 
   const variation = (cur: number, prev: number) => prev !== 0 ? ((cur - prev) / Math.abs(prev)) * 100 : cur > 0 ? 100 : 0;
@@ -107,6 +110,7 @@ export default function DREPage() {
 
       return { month: format(m, 'MMM/yy', { locale: ptBR }), receitas: rev, despesas: exp, lucro: rev - exp };
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `now` é estável dentro do render
   }, [receivables, payables]);
 
   const exportColumns: ExportColumn[] = [

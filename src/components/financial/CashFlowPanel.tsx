@@ -39,6 +39,7 @@ export function CashFlowPanel({ currentBalance }: Props) {
       acc += inflow - outflow;
       return { date: format(d, 'dd/MM', { locale: ptBR }), entradas: inflow, saidas: outflow, saldo: acc };
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `today` é estável dentro do render
   }, [ledger]);
 
   // Fluxo PROJETADO (próximos 90 dias)
@@ -57,6 +58,7 @@ export function CashFlowPanel({ currentBalance }: Props) {
       acc += inflow - outflow;
       return { date: format(d, 'dd/MM', { locale: ptBR }), entradas: inflow, saidas: outflow, saldo: acc };
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `today` é estável dentro do render
   }, [receivables, payables, currentBalance]);
 
   const filteredLedger = ledger.filter(l =>

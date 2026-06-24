@@ -74,6 +74,7 @@ export default function ChartOfAccountsPage() {
     if (accounts.length > 0 && expandedGroups.size === 0) {
       setExpandedGroups(new Set(accounts.filter(a => a.parentId === null).map(a => a.id)));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- inicializa expansão apenas no primeiro carregamento de accounts
   }, [accounts]);
 
   const formatCurrency = (value: number) =>

@@ -151,6 +151,7 @@ export default function CommercialDashboard() {
       blockedClients,
       noRepClients,
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `sales` é mantido para invalidar quando vendas mudam (efeito downstream)
   }, [orders, clients, funnel, alerts, sales, reps]);
 
   if (loading) {

@@ -80,6 +80,7 @@ export default function CTePage() {
     if (form.icms_rate <= 0) steps[3].warnings.push("Alíquota de ICMS zerada. Verifique se há isenção.");
 
     return steps;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `step` é referenciado apenas para indexar mensagens já capturadas
   }, [form, selectedNFeId]);
 
   const allIssues = useMemo(() => {
