@@ -68,6 +68,6 @@ Deno.serve(async (req) => {
     return Response.json({ ok: true, result: data }, { headers: corsHeaders });
   } catch (e) {
     console.error('[financial-audit]', e);
-    return Response.json({ ok: false, error: String((e as Error).message) }, { status: 500, headers: corsHeaders });
+    return Response.json({ ok: false, error: 'Erro interno. Tente novamente.' }, { status: 500, headers: corsHeaders });
   }
 });
