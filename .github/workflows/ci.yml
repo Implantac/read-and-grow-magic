@@ -267,6 +267,19 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+      # Anexa snapshots pre/post (chaves, diffs e metadata) como artefato
+      # separado para comparação offline de mtime, tamanho e overlap.
+      - name: Upload ESLint cache snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-cache-snapshots-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/eslint-cache-snapshot/
+          if-no-files-found: ignore
+          retention-days: 7
+
+
+
       - name: Save ESLint cache
         if: always()
         uses: actions/cache/save@v4
