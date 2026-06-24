@@ -4,7 +4,7 @@
 // Orquestrador multi-agente + memória + decisões com guardrails
 // ============================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { resolveContextByIds, branchScope, type TenantContext } from "../_shared/tenant.ts";
+import { resolveContextByIds, branchScope, requireModule, type TenantContext } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
