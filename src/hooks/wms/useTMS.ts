@@ -1,6 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
+
+type CarrierRow = Database['public']['Tables']['carriers']['Row'];
+type CarrierInsert = Database['public']['Tables']['carriers']['Insert'];
+type CarrierUpdate = Database['public']['Tables']['carriers']['Update'];
+type VehicleRow = Database['public']['Tables']['vehicles']['Row'];
+type VehicleInsert = Database['public']['Tables']['vehicles']['Insert'];
+type VehicleUpdate = Database['public']['Tables']['vehicles']['Update'];
+type RouteRow = Database['public']['Tables']['delivery_routes']['Row'];
+type RouteInsert = Database['public']['Tables']['delivery_routes']['Insert'];
+type RouteUpdate = Database['public']['Tables']['delivery_routes']['Update'];
+type ProofRow = Database['public']['Tables']['delivery_proof']['Row'];
 
 export interface Carrier {
   id: string;
@@ -73,9 +85,9 @@ export function useCarriers() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('carriers' as any).select('*').order('name');
+    const { data, error } = await supabase.from('carriers').select('*').order('name');
     if (error) { toast.error('Erro ao carregar transportadoras'); console.error(error); }
-    else setCarriers((data || []).map((r: any) => ({
+    else setCarriers((data || []).map((r: CarrierRow) => ({
       id: r.id, code: r.code, name: r.name, document: r.document || '',
       contactName: r.contact_name || '', phone: r.phone || '', email: r.email || '',
       address: r.address || '', serviceTypes: r.service_types || [], active: r.active,
@@ -84,16 +96,16 @@ export function useCarriers() {
     setLoading(false);
   }, []);
 
-  const create = async (carrier: Partial<Record<string, any>>) => {
-    const { error } = await supabase.from('carriers' as any).insert(carrier);
+  const create = async (carrier: CarrierInsert) => {
+    const { error } = await supabase.from('carriers').insert(carrier);
     if (error) { toast.error('Erro ao criar transportadora'); return false; }
     toast.success('Transportadora criada!');
     await fetch();
     return true;
   };
 
-  const update = async (id: string, updates: Partial<Record<string, any>>) => {
-    const { error } = await supabase.from('carriers' as any).update(updates).eq('id', id);
+  const update = async (id: string, updates: CarrierUpdate) => {
+    const { error } = await supabase.from('carriers').update(updates).eq('id', id);
     if (error) { toast.error('Erro ao atualizar'); return false; }
     toast.success('Transportadora atualizada!');
     await fetch();
@@ -101,7 +113,7 @@ export function useCarriers() {
   };
 
   const remove = async (id: string) => {
-    const { error } = await supabase.from('carriers' as any).delete().eq('id', id);
+    const { error } = await supabase.from('carriers').delete().eq('id', id);
     if (error) { toast.error('Erro ao excluir'); return false; }
     toast.success('Transportadora excluída!');
     await fetch();
@@ -119,9 +131,9 @@ export function useVehicles() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('vehicles' as any).select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('vehicles').select('*').order('created_at', { ascending: false });
     if (error) { toast.error('Erro ao carregar veículos'); console.error(error); }
-    else setVehicles((data || []).map((r: any) => ({
+    else setVehicles((data || []).map((r: VehicleRow) => ({
       id: r.id, carrierId: r.carrier_id, plate: r.plate, model: r.model || '',
       vehicleType: r.vehicle_type || 'truck', maxWeight: Number(r.max_weight),
       maxVolume: Number(r.max_volume), driverName: r.driver_name || '',
@@ -130,16 +142,16 @@ export function useVehicles() {
     setLoading(false);
   }, []);
 
-  const create = async (vehicle: Partial<Record<string, any>>) => {
-    const { error } = await supabase.from('vehicles' as any).insert(vehicle);
+  const create = async (vehicle: VehicleInsert) => {
+    const { error } = await supabase.from('vehicles').insert(vehicle);
     if (error) { toast.error('Erro ao criar veículo'); return false; }
     toast.success('Veículo criado!');
     await fetch();
     return true;
   };
 
-  const update = async (id: string, updates: Partial<Record<string, any>>) => {
-    const { error } = await supabase.from('vehicles' as any).update(updates).eq('id', id);
+  const update = async (id: string, updates: VehicleUpdate) => {
+    const { error } = await supabase.from('vehicles').update(updates).eq('id', id);
     if (error) { toast.error('Erro ao atualizar'); return false; }
     toast.success('Veículo atualizado!');
     await fetch();
@@ -157,9 +169,9 @@ export function useDeliveryRoutes() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('delivery_routes' as any).select('*').order('planned_date', { ascending: false });
+    const { data, error } = await supabase.from('delivery_routes').select('*').order('planned_date', { ascending: false });
     if (error) { toast.error('Erro ao carregar rotas'); console.error(error); }
-    else setRoutes((data || []).map((r: any) => ({
+    else setRoutes((data || []).map((r: RouteRow) => ({
       id: r.id, routeNumber: r.route_number, carrierId: r.carrier_id || '',
       vehicleId: r.vehicle_id || '', driverName: r.driver_name || '',
       plannedDate: r.planned_date, departureTime: r.departure_time || '',
@@ -171,16 +183,16 @@ export function useDeliveryRoutes() {
     setLoading(false);
   }, []);
 
-  const create = async (route: Partial<Record<string, any>>) => {
-    const { error } = await supabase.from('delivery_routes' as any).insert(route);
+  const create = async (route: RouteInsert) => {
+    const { error } = await supabase.from('delivery_routes').insert(route);
     if (error) { toast.error('Erro ao criar rota'); return false; }
     toast.success('Rota criada!');
     await fetch();
     return true;
   };
 
-  const update = async (id: string, updates: Partial<Record<string, any>>) => {
-    const { error } = await supabase.from('delivery_routes' as any).update(updates).eq('id', id);
+  const update = async (id: string, updates: RouteUpdate) => {
+    const { error } = await supabase.from('delivery_routes').update(updates).eq('id', id);
     if (error) { toast.error('Erro ao atualizar rota'); return false; }
     toast.success('Rota atualizada!');
     await fetch();
@@ -198,9 +210,9 @@ export function useDeliveryProof() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('delivery_proof' as any).select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('delivery_proof').select('*').order('created_at', { ascending: false });
     if (error) { toast.error('Erro ao carregar provas de entrega'); console.error(error); }
-    else setProofs((data || []).map((r: any) => ({
+    else setProofs((data || []).map((r: ProofRow) => ({
       id: r.id, routeId: r.route_id || '', orderNumber: r.order_number || '',
       customerName: r.customer_name || '', deliveredAt: r.delivered_at || '',
       receivedBy: r.received_by || '', signatureUrl: r.signature_url || '',
@@ -228,10 +240,10 @@ export function useTMSDashboardStats() {
   const fetch = useCallback(async () => {
     setLoading(true);
     const [cRes, vRes, rRes, dRes] = await Promise.all([
-      supabase.from('carriers' as any).select('active'),
-      supabase.from('vehicles' as any).select('status'),
-      supabase.from('delivery_routes' as any).select('status'),
-      supabase.from('delivery_proof' as any).select('status'),
+      supabase.from('carriers').select('active'),
+      supabase.from('vehicles').select('status'),
+      supabase.from('delivery_routes').select('status'),
+      supabase.from('delivery_proof').select('status'),
     ]);
 
     const carriers = cRes.data || [];
@@ -241,14 +253,14 @@ export function useTMSDashboardStats() {
 
     setStats({
       totalCarriers: carriers.length,
-      activeCarriers: carriers.filter((c: any) => c.active).length,
+      activeCarriers: carriers.filter((c) => c.active).length,
       totalVehicles: vehicles.length,
-      availableVehicles: vehicles.filter((v: any) => v.status === 'available').length,
-      plannedRoutes: routes.filter((r: any) => r.status === 'planned').length,
-      inTransitRoutes: routes.filter((r: any) => r.status === 'in_transit').length,
-      completedRoutes: routes.filter((r: any) => r.status === 'completed').length,
-      pendingDeliveries: deliveries.filter((d: any) => d.status === 'pending').length,
-      deliveredCount: deliveries.filter((d: any) => d.status === 'delivered').length,
+      availableVehicles: vehicles.filter((v) => v.status === 'available').length,
+      plannedRoutes: routes.filter((r) => r.status === 'planned').length,
+      inTransitRoutes: routes.filter((r) => r.status === 'in_transit').length,
+      completedRoutes: routes.filter((r) => r.status === 'completed').length,
+      pendingDeliveries: deliveries.filter((d) => d.status === 'pending').length,
+      deliveredCount: deliveries.filter((d) => d.status === 'delivered').length,
     });
     setLoading(false);
   }, []);
