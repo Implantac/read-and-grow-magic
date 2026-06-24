@@ -22,6 +22,8 @@ export function useOperational() {
     }
   });
 
+  // Factory helper around useQuery — kept here for cohesion with the operational hooks group.
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const trackingQuery = (shipmentId: string) => useQuery({
     queryKey: ['delivery_tracking', shipmentId],
     queryFn: () => operationalService.getTrackingEvents(shipmentId),

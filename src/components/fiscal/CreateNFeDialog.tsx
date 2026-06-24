@@ -108,7 +108,7 @@ export function CreateNFeDialog({ open, onOpenChange, onCreate }: CreateNFeDialo
           'SP',
           clientUF || 'SP',
           taxRulesQuery.data || [],
-          // @ts-ignore
+          // @ts-expect-error tax_regime pode estar fora do enum em tenants legados
           currentCompany?.tax_regime || 'simples_nacional',
           'hybrid',
         );

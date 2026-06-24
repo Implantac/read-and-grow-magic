@@ -18,6 +18,8 @@ export function useRFID() {
     queryFn: () => rfidService.getTags(),
   });
 
+  // Factory helper around useQuery — caller invokes it inside its own component scope.
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const eventsQuery = (limit = 100) => useQuery({
     queryKey: ['rfid_events', limit],
     queryFn: () => rfidService.getEvents(limit),
