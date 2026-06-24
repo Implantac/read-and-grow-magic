@@ -286,6 +286,7 @@ jobs:
       # Disponibiliza o .eslintcache como artefato do job para inspeção manual
       # da evidência de reutilização entre execuções de CI.
       - name: Upload .eslintcache artifact
+        id: upload-eslintcache
         if: always() && steps.eslint-cache-file.outputs.exists == 'true'
         uses: actions/upload-artifact@v4
         with:
@@ -297,6 +298,7 @@ jobs:
       # Anexa snapshots pre/post (chaves, diffs e metadata) como artefato
       # separado para comparação offline de mtime, tamanho e overlap.
       - name: Upload ESLint cache snapshots
+        id: upload-eslint-snapshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -304,6 +306,45 @@ jobs:
           path: /tmp/eslint-cache-snapshot/
           if-no-files-found: ignore
           retention-days: 7
+
+      # Publica no $GITHUB_STEP_SUMMARY links diretos para os artefatos gerados,
+      # facilitando a inspeção da evidência de reutilização do cache.
+      - name: Summarize ESLint artifact links
+        if: always()
+        env:
+          CACHE_NAME: eslintcache-${{ github.run_id }}-${{ github.run_attempt }}
+          CACHE_URL: ${{ steps.upload-eslintcache.outputs.artifact-url }}
+          CACHE_ID: ${{ steps.upload-eslintcache.outputs.artifact-id }}
+          SNAP_NAME: eslint-cache-snapshots-${{ github.run_id }}-${{ github.run_attempt }}
+          SNAP_URL: ${{ steps.upload-eslint-snapshots.outputs.artifact-url }}
+          SNAP_ID: ${{ steps.upload-eslint-snapshots.outputs.artifact-id }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          fmt_link() {
+            local name="$1" url="$2" id="$3"
+            if [ -n "$url" ]; then
+              echo "[\`$name\`]($url)"
+            elif [ -n "$id" ]; then
+              echo "[\`$name\`](${RUN_URL}/artifacts/${id})"
+            else
+              echo "_não publicado_"
+            fi
+          }
+          CACHE_LINK=$(fmt_link "$CACHE_NAME" "$CACHE_URL" "$CACHE_ID")
+          SNAP_LINK=$(fmt_link "$SNAP_NAME" "$SNAP_URL" "$SNAP_ID")
+          {
+            echo "## 📦 ESLint cache — Artefatos"
+            echo ""
+            echo "| Artefato | Conteúdo | Link |"
+            echo "|---|---|---|"
+            echo "| .eslintcache | Arquivo binário do ESLint (evidência bruta de reutilização) | $CACHE_LINK |"
+            echo "| snapshots pre/post | \`metadata.txt\`, \`pre-keys.txt\`, \`post-keys.txt\`, \`added/removed/overlap-keys.txt\` | $SNAP_LINK |"
+            echo ""
+            echo "> Página do run: [$RUN_URL]($RUN_URL) (aba **Artifacts** no rodapé)"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+
 
 
 
