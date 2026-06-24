@@ -6,6 +6,73 @@
 import { differenceInDays, parseISO, addDays, format } from 'date-fns';
 import { formatBRL } from '@/lib/formatters';
 
+// ─── Structural input types (duck-typed shapes from hooks/DB) ───
+// These describe the *fields the engine reads*, not full DB rows.
+export interface OrderLike {
+  id: string;
+  order_number: string;
+  product_name?: string;
+  product_code?: string;
+  product_id?: string;
+  quantity: number;
+  produced_quantity: number;
+  status: string;
+  priority?: string;
+  sector?: string;
+  work_center?: string;
+  due_date?: string | null;
+  start_date?: string | null;
+  completed_date?: string | null;
+  estimated_time_minutes?: number;
+  realized_time_minutes?: number;
+  sales_order_id?: string | null;
+}
+export interface CapacityLike {
+  sector?: string;
+  capacity_per_hour?: number;
+  max_hours_per_day?: number;
+}
+export interface SupplyLike {
+  code?: string;
+  name?: string;
+  current_quantity?: number;
+  unit_cost?: number;
+}
+export interface MaterialItemLike {
+  code?: string;
+  componentCode?: string;
+  material_code?: string;
+  name?: string;
+  componentName?: string;
+  material_name?: string;
+  quantity?: number;
+  qty?: number;
+  waste_pct?: number;
+  wastePercentage?: number;
+  unit?: string;
+}
+export interface SheetLike {
+  product_code?: string;
+  product_id?: string;
+  materials?: MaterialItemLike[];
+}
+export interface TimeEntryLike {
+  start_time: string;
+  work_center?: string;
+  produced_quantity?: number;
+  rejected_quantity?: number;
+}
+export interface OutsourcingOrderLike {
+  id: string;
+  order_number?: string;
+  supplier_name: string;
+  status: string;
+  expected_return_date?: string | null;
+  actual_return_date?: string | null;
+  quantity_returned?: number;
+  quantity_rejected?: number;
+}
+
 // ─── Types ───────────────────────────────────────────────────
 
 export interface MaterialNeed {
@@ -83,19 +150,19 @@ export class MRPService {
    * Calculate material needs from production orders and technical sheets
    */
   static calculateNeeds(
-    activeOPs: any[],
-    sheets: any[],
-    supplies: any[]
+    activeOPs: OrderLike[],
+    sheets: SheetLike[],
+    supplies: SupplyLike[]
   ): MaterialNeed[] {
     const needsMap: Record<string, { totalRequired: number; relatedOPs: string[]; unit: string; name: string }> = {};
 
     activeOPs.forEach(op => {
-      const sheet = sheets.find((s: any) =>
+      const sheet = sheets.find((s) =>
         s.product_code === op.product_code || s.product_id === op.product_id
       );
       if (sheet && Array.isArray(sheet.materials)) {
         const remaining = Math.max(0, op.quantity - op.produced_quantity);
-        sheet.materials.forEach((mat: any) => {
+        sheet.materials.forEach((mat) => {
           const code = mat.code || mat.componentCode || mat.material_code || '';
           const name = mat.name || mat.componentName || mat.material_name || code;
           const qtyPerUnit = mat.quantity || mat.qty || 0;
@@ -109,7 +176,7 @@ export class MRPService {
     });
 
     return Object.entries(needsMap).map(([code, data]) => {
-      const supply = supplies.find((s: any) => s.code === code || s.name === data.name);
+      const supply = supplies.find((s) => s.code === code || s.name === data.name);
       const inStock = supply?.current_quantity || 0;
       const deficit = Math.max(0, data.totalRequired - inStock);
       const coveragePct = data.totalRequired > 0 ? Math.min(100, (inStock / data.totalRequired) * 100) : 100;
@@ -137,8 +204,8 @@ export class MRPService {
    */
   static generateSuggestions(
     needs: MaterialNeed[],
-    activeOPs: any[],
-    capacities: any[]
+    activeOPs: OrderLike[],
+    capacities: CapacityLike[]
   ): ActionSuggestion[] {
     const suggestions: ActionSuggestion[] = [];
 
@@ -215,11 +282,11 @@ export class SchedulingService {
    * Sequence OPs based on multiple criteria
    */
   static sequenceOPs(
-    activeOPs: any[],
-    capacities: any[],
+    activeOPs: OrderLike[],
+    capacities: CapacityLike[],
     algorithm: 'priority_due' | 'edd' | 'spt' | 'lpt' | 'critical_ratio' = 'priority_due'
   ): ScheduleSlot[] {
-    const totalCapPerDay = capacities.reduce((s: number, c: any) => s + (c.capacity_per_hour || 0) * (c.max_hours_per_day || 8), 0);
+    const totalCapPerDay = capacities.reduce((s: number, c) => s + (c.capacity_per_hour || 0) * (c.max_hours_per_day || 8), 0);
     const today = new Date();
 
     const slots = activeOPs.map(o => {
@@ -254,7 +321,7 @@ export class SchedulingService {
       };
     });
 
-    slots.sort((a: any, b: any) => {
+    slots.sort((a, b) => {
       switch (algorithm) {
         case 'edd': return a._dueIn - b._dueIn;
         case 'spt': return a._estMinutes - b._estMinutes;
@@ -270,7 +337,7 @@ export class SchedulingService {
 
     // Calculate start/end dates sequentially
     let cumHours = 0;
-    return slots.map((slot: any) => {
+    return slots.map((slot) => {
       const startDate = addDays(today, Math.ceil(cumHours / 8));
       cumHours += slot.estHours;
       const endDate = addDays(today, Math.ceil(cumHours / 8));
@@ -283,11 +350,11 @@ export class SchedulingService {
    */
   static calculateResourceLoad(
     slots: ScheduleSlot[],
-    capacities: any[]
+    capacities: CapacityLike[]
   ): { sector: string; ops: number; hours: number; capacity: number; loadPct: number; isOverloaded: boolean }[] {
     const sectorLoad: Record<string, { ops: number; hours: number; capacity: number }> = {};
 
-    capacities.forEach((c: any) => {
+    capacities.forEach((c) => {
       const s = c.sector || 'Geral';
       if (!sectorLoad[s]) sectorLoad[s] = { ops: 0, hours: 0, capacity: 0 };
       sectorLoad[s].capacity += (c.capacity_per_hour || 0) * (c.max_hours_per_day || 8) * 22;
@@ -315,10 +382,10 @@ export class SimulationService {
    */
   static simulate(
     scenario: SimulationScenario,
-    orders: any[],
-    sheets: any[],
-    supplies: any[],
-    capacities: any[]
+    orders: OrderLike[],
+    sheets: SheetLike[],
+    supplies: SupplyLike[],
+    capacities: CapacityLike[]
   ): SimulationResult {
     const today = new Date();
 
@@ -372,7 +439,7 @@ export class SimulationService {
         const origDue = origOrder?.due_date || o.due_date;
         const remaining = Math.max(0, o.quantity - o.produced_quantity);
         const avgTime = o.estimated_time_minutes / Math.max(o.quantity, 1);
-        const totalCap = simCapacities.reduce((s: number, c: any) => s + (c.capacity_per_hour || 0) * 8, 0);
+        const totalCap = simCapacities.reduce((s: number, c) => s + (c.capacity_per_hour || 0) * 8, 0);
         const estDays = totalCap > 0 ? remaining / totalCap : 999;
         const newEstimate = format(addDays(today, Math.ceil(estDays)), 'yyyy-MM-dd');
         const daysImpact = differenceInDays(parseISO(newEstimate), parseISO(origDue));
@@ -425,12 +492,12 @@ export class SimulationService {
   /**
    * Generate preset scenarios for quick simulation
    */
-  static presetScenarios(orders: any[], supplies: any[], capacities: any[]): SimulationScenario[] {
+  static presetScenarios(orders: OrderLike[], supplies: SupplyLike[], capacities: CapacityLike[]): SimulationScenario[] {
     const scenarios: SimulationScenario[] = [];
 
     // Scenario 1: Main material shortage
     if (supplies.length > 0) {
-      const topMaterial = supplies.sort((a: any, b: any) => (b.current_quantity || 0) - (a.current_quantity || 0))[0];
+      const topMaterial = supplies.sort((a, b) => (b.current_quantity || 0) - (a.current_quantity || 0))[0];
       scenarios.push({
         name: 'Falta de material principal',
         description: `Redução de 50% no estoque de ${topMaterial?.name || 'material'}`,
@@ -439,7 +506,7 @@ export class SimulationService {
     }
 
     // Scenario 2: Capacity reduction
-    const sectors = [...new Set(capacities.map((c: any) => c.sector))];
+    const sectors = [...new Set(capacities.map((c) => c.sector))];
     if (sectors.length > 0) {
       scenarios.push({
         name: 'Redução de capacidade (-30%)',
@@ -474,7 +541,7 @@ export class SimulationService {
 // ─── Metrics Service ─────────────────────────────────────────
 
 export class PCPMetricsService {
-  static calculate(orders: any[], timeEntries: any[], capacities: any[]): PCPMetrics {
+  static calculate(orders: OrderLike[], timeEntries: TimeEntryLike[], capacities: CapacityLike[]): PCPMetrics {
     const today = new Date();
     const todayStr = today.toDateString();
     const activeStatuses = ['planned', 'in_progress', 'paused'];
@@ -512,7 +579,7 @@ export class PCPMetricsService {
     const throughput = last30.length;
 
     // Utilization
-    const totalCapHrs = capacities.reduce((s: number, c: any) => s + (c.capacity_per_hour || 0) * (c.max_hours_per_day || 8), 0) * 22;
+    const totalCapHrs = capacities.reduce((s: number, c: CapacityLike) => s + (c.capacity_per_hour || 0) * (c.max_hours_per_day || 8), 0) * 22;
     const totalUsedHrs = activeOPs.reduce((s, o) => s + (o.realized_time_minutes || 0) / 60, 0);
     const utilizationPct = totalCapHrs > 0 ? (totalUsedHrs / totalCapHrs) * 100 : 0;
 
@@ -541,7 +608,7 @@ export class PriorityEngineService {
    * Higher score = higher priority.
    */
   static calculateScores(
-    orders: any[],
+    orders: OrderLike[],
     materialNeeds?: MaterialNeed[]
   ): { opId: string; opNumber: string; score: number; factors: string[] }[] {
     const now = new Date();
@@ -631,9 +698,9 @@ export class WarModeService {
    * Does NOT persist — returns a plan for user confirmation.
    */
   static execute(
-    orders: any[],
+    orders: OrderLike[],
     materialNeeds: MaterialNeed[],
-    capacities: any[]
+    capacities: CapacityLike[]
   ): WarModeResult {
     const scores = PriorityEngineService.calculateScores(orders, materialNeeds);
     const activeOPs = orders.filter(o => ['planned', 'in_progress', 'paused', 'waiting_material', 'outsourced'].includes(o.status));
@@ -700,16 +767,16 @@ export class WarModeService {
 
 export class BottleneckDetectionService {
   static detect(
-    orders: any[],
-    capacities: any[],
-    timeEntries: any[]
+    orders: OrderLike[],
+    capacities: CapacityLike[],
+    timeEntries: TimeEntryLike[]
   ): { sector: string; type: string; severity: 'warning' | 'critical'; message: string; suggestion: string }[] {
     const bottlenecks: { sector: string; type: string; severity: 'warning' | 'critical'; message: string; suggestion: string }[] = [];
     const activeOPs = orders.filter(o => ['planned', 'in_progress'].includes(o.status));
 
     // Sector overload
     const sectorLoad: Record<string, { ops: number; hours: number; capacity: number }> = {};
-    capacities.forEach((c: any) => {
+    capacities.forEach((c: CapacityLike) => {
       const s = c.sector || 'Geral';
       if (!sectorLoad[s]) sectorLoad[s] = { ops: 0, hours: 0, capacity: 0 };
       sectorLoad[s].capacity += (c.capacity_per_hour || 0) * (c.max_hours_per_day || 8);
@@ -743,9 +810,9 @@ export class BottleneckDetectionService {
 
     // Quality issues (high reject rate)
     const todayStr = new Date().toDateString();
-    const todayEntries = timeEntries.filter((e: any) => new Date(e.start_time).toDateString() === todayStr);
+    const todayEntries = timeEntries.filter((e) => new Date(e.start_time).toDateString() === todayStr);
     const sectorRejects: Record<string, { produced: number; rejected: number }> = {};
-    todayEntries.forEach((e: any) => {
+    todayEntries.forEach((e) => {
       const s = e.work_center || 'Geral';
       if (!sectorRejects[s]) sectorRejects[s] = { produced: 0, rejected: 0 };
       sectorRejects[s].produced += e.produced_quantity || 0;
@@ -786,11 +853,11 @@ export class SuggestionEngine {
    * Generate unified, actionable suggestions from all PCP data sources
    */
   static generate(
-    orders: any[],
+    orders: OrderLike[],
     materialNeeds: MaterialNeed[],
-    capacities: any[],
-    outsourcingOrders: any[],
-    timeEntries: any[]
+    capacities: CapacityLike[],
+    outsourcingOrders: OutsourcingOrderLike[],
+    timeEntries: TimeEntryLike[]
   ): SmartSuggestion[] {
     const suggestions: SmartSuggestion[] = [];
     const now = new Date();
@@ -847,7 +914,7 @@ export class SuggestionEngine {
     });
 
     // 4. Supplier late
-    outsourcingOrders.filter((oo: any) => oo.status !== 'returned' && oo.expected_return_date && new Date(oo.expected_return_date) < now).forEach((oo: any) => {
+    outsourcingOrders.filter((oo) => oo.status !== 'returned' && oo.expected_return_date && new Date(oo.expected_return_date) < now).forEach((oo) => {
       const days = differenceInDays(now, new Date(oo.expected_return_date));
       suggestions.push({
         id: `supplier-${oo.id}`,
@@ -938,7 +1005,7 @@ export class KanbanService {
   /**
    * Calculate supplier performance metrics from outsourcing orders
    */
-  static calculateSupplierMetrics(outsourcingOrders: any[]): {
+  static calculateSupplierMetrics(outsourcingOrders: OutsourcingOrderLike[]): {
     supplierName: string;
     totalOrders: number;
     returnedOnTime: number;
@@ -947,7 +1014,7 @@ export class KanbanService {
     onTimeRate: number;
     avgQualityRate: number;
   }[] {
-    const bySupplier: Record<string, any[]> = {};
+    const bySupplier: Record<string, OutsourcingOrderLike[]> = {};
     outsourcingOrders.forEach(o => {
       if (!bySupplier[o.supplier_name]) bySupplier[o.supplier_name] = [];
       bySupplier[o.supplier_name].push(o);
