@@ -55,6 +55,8 @@ async function requireAuth(req: Request): Promise<Response | { userId: string; c
       status: ctx.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+  const denied = await requireModule(ctx, "comercial");
+  if (denied) return denied;
   return { userId, companyId, scope: branchScope(ctx) };
 }
 
