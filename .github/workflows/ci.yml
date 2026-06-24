@@ -343,6 +343,18 @@ jobs:
       - name: Cross-run ESLint cache comparison & final reuse decision
         if: always()
         id: eslint-crossrun
+        env:
+          # Brutos para detectar a origem efetiva (vars > input > default).
+          VAR_MIN_OVERLAP: ${{ vars.ESLINT_MIN_OVERLAP }}
+          VAR_MIN_CROSS_OVERLAP: ${{ vars.ESLINT_MIN_CROSS_OVERLAP }}
+          VAR_MAX_SIZE_DELTA_PCT: ${{ vars.ESLINT_MAX_SIZE_DELTA_PCT }}
+          VAR_REQUIRE_MTIME_CONTINUITY: ${{ vars.ESLINT_REQUIRE_MTIME_CONTINUITY }}
+          VAR_REQUIRE_MTIME_CHANGED: ${{ vars.ESLINT_REQUIRE_MTIME_CHANGED }}
+          IN_MIN_OVERLAP: ${{ github.event.inputs.eslint_min_overlap }}
+          IN_MIN_CROSS_OVERLAP: ${{ github.event.inputs.eslint_min_cross_overlap }}
+          IN_MAX_SIZE_DELTA_PCT: ${{ github.event.inputs.eslint_max_size_delta_pct }}
+          IN_REQUIRE_MTIME_CONTINUITY: ${{ github.event.inputs.eslint_require_mtime_continuity }}
+          IN_REQUIRE_MTIME_CHANGED: ${{ github.event.inputs.eslint_require_mtime_changed }}
         run: |
           CUR_DIR=/tmp/eslint-cache-snapshot
           PREV_ROOT=/tmp/eslint-prev
