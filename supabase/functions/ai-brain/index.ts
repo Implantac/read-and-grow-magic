@@ -934,10 +934,11 @@ Deno.serve(async (req) => {
         const { memory_key, delta } = body;
         if (!memory_key) { result = { ok: false, error: "memory_key obrigatório" }; break; }
         const { data: mem } = await admin.from("ai_brain_memory")
-          .select("id,importance").eq("key", memory_key).maybeSingle();
+          .select("id,importance").eq("key", memory_key).eq("company_id", callerCompany!).maybeSingle();
         if (!mem) { result = { ok: false, error: "memória não encontrada" }; break; }
         const next = Math.min(10, (mem.importance || 5) + (Number(delta) || 1));
-        await admin.from("ai_brain_memory").update({ importance: next }).eq("id", mem.id);
+        await admin.from("ai_brain_memory").update({ importance: next }).eq("id", mem.id).eq("company_id", callerCompany!);
+
         result = { ok: true, new_importance: next };
         break;
       }
