@@ -108,7 +108,15 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           BASE_REF: ${{ github.base_ref }}
           HEAD_REF: ${{ github.head_ref || github.ref_name }}
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          JOB_ID_REF: ${{ github.job }}
+          ARTIFACT_ID: ${{ steps.upload_log.outputs.artifact-id }}
+          ARTIFACT_URL: ${{ steps.upload_log.outputs.artifact-url }}
         run: |
+
           # Classifica execução vs. pulado e monta motivo detalhado.
           if [ "$THRESHOLDS_RAN" = "true" ]; then
             EXECUTED="✅ Sim"
