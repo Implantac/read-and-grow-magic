@@ -17,7 +17,17 @@ const IGNORED_RULES = new Set(["@typescript-eslint/no-explicit-any"]);
 
 const result = spawnSync(
   "npx",
-  ["eslint", ".", "-f", "json"],
+  [
+    "eslint",
+    ".",
+    "-f",
+    "json",
+    "--cache",
+    "--cache-location",
+    "node_modules/.cache/eslint/.eslintcache",
+    "--cache-strategy",
+    "content",
+  ],
   { encoding: "utf8", maxBuffer: 256 * 1024 * 1024 },
 );
 
