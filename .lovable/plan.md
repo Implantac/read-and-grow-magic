@@ -1,207 +1,139 @@
 
-# Plano de Evolução — ERP Enterprise SaaS (Confecção, Moda, Distribuição e Manufatura)
+# Fase 1 — Núcleo SaaS Multiempresa
 
-Plano dividido em **6 fases sequenciais**. Cada fase entrega valor operacional ponta a ponta (DB + serviço + UI + permissões + auditoria), sem reescrever o que já existe.
+Objetivo: transformar o ERP num produto SaaS comercializável, com hierarquia tenant→empresa→filial, billing por plano com limites, onboarding self-service e RBAC granular. Cada módulo entrega ponta a ponta (DB + edge function + UI + RLS + auditoria) e deve estar **gated por plano** desde o dia 1.
 
----
-
-## FASE 0 — Estabilização e Segurança (1–2 semanas)
-
-Pré-requisito de tudo. O scanner apontou riscos críticos que precisam ser resolvidos antes de comercializar.
-
-### 0.1 Isolamento multi-tenant (crítico)
-- Auditar **todas** as edge functions que usam service-role e adicionar `.eq('company_id', callerCompanyId)`.
-- Criar helper `resolveCompany(req)` único em `_shared/require-auth.ts` (já parcialmente feito).
-- Adicionar testes automatizados de cross-tenant (chamar com UUID de outra company → 403).
-
-### 0.2 Higiene de erros
-- Padronizar respostas: mensagem genérica ao cliente + `console.error` server-side.
-- Criar wrapper `safeHandler()` reutilizável.
-
-### 0.3 Dependências vulneráveis
-- Substituir `jspdf` por `pdf-lib` ou `@react-pdf/renderer` (jsPDF tem 10+ CVEs críticas/altas).
-- Atualizar `react-router-dom`, `@supabase/supabase-js`, `recharts`.
-
-### 0.4 Observabilidade base
-- Tabela `system_audit_logs` já existe → garantir uso em **toda** mutação crítica via trigger.
-- Edge function `log-ingest` para erros de UI.
+Duração estimada: 2–3 semanas. Ordem é sequencial — cada módulo depende do anterior.
 
 ---
 
-## FASE 1 — Núcleo SaaS Multiempresa (2–3 semanas)
+## Módulo 1.1 — Hierarquia de Tenants (fundação)
 
-Hoje o projeto tem `company_id` espalhado, mas falta a camada de SaaS comercial.
+**Escopo**
+- Consolidar hierarquia: `tenant → enterprise_group → company → branch → warehouse`.
+- Criar tabela `branches` (filiais por CNPJ/CNPJ-base) com `company_id`, código, endereço, IE, regime fiscal.
+- Adicionar `branch_id` (nullable, default = filial matriz) em: `orders`, `accounts_payable`, `accounts_receivable`, `financial_ledger`, `fiscal_documents`, `stock_movements`, `production_orders`.
+- Migrar dados existentes: criar 1 filial "Matriz" por company; backfill `branch_id`.
+- Helper `resolveContext(req)` em `_shared/tenant.ts` retornando `{ userId, tenantId, companyId, branchId }`.
+- Seletor de filial no `Topbar` (persistido em `useEnterpriseStore`).
 
-### 1.1 Modelo de tenants
-- Consolidar `companies` + `tenants` + `enterprise_groups` + `holding_entities` em hierarquia clara:
-  ```
-  tenant (assinante SaaS)
-    └─ enterprise_group (holding)
-         └─ company (empresa/CNPJ)
-              └─ branch (filial)  ← NOVA
-                   └─ warehouse (depósito)
-  ```
-- Adicionar `branch_id` (filial) onde fizer sentido: estoque, pedidos, NF-e, financeiro.
-
-### 1.2 Billing SaaS
-- `plans`, `plan_features`, `subscriptions`, `saas_invoices` já existem → ativar:
-  - Limites por plano (usuários, NF-e/mês, GB storage, chamadas IA).
-  - Medidor de uso em `usage_tracking` com cron diário.
-  - Bloqueio gracioso ao exceder limite.
-- Integração Stripe (assinatura) — usar `payments--enable_stripe_payments`.
-
-### 1.3 Onboarding self-service
-- Wizard: criar tenant → empresa → CNPJ (autopreenche via BrasilAPI) → plano → primeiro admin.
-- Seed automático: plano de contas padrão, CFOPs, NCMs comuns, perfis RBAC.
-
-### 1.4 RBAC granular
-- `user_roles` já existe → expandir para **permissions matrix** (módulo × ação).
-- UI de gestão de perfis no `PermissionsEditor`.
+**Critérios de aceite**
+- [ ] Toda tabela operacional tem `branch_id` indexado.
+- [ ] RLS atualizada: `has_company_access(company_id)` + opcional `has_branch_access(branch_id)`.
+- [ ] Trocar filial no Topbar filtra listagens de pedidos, financeiro, estoque e NF-e.
+- [ ] Backfill 100% sem nulos em `branch_id` para registros existentes.
+- [ ] Teste cross-tenant: usuário da Company A com UUID de branch da Company B → 403.
 
 ---
 
-## FASE 2 — PLM para Confecção (3–4 semanas) — DIFERENCIAL
+## Módulo 1.2 — Catálogo de Planos e Features
 
-Maior gap competitivo. Hoje há `products`, falta engenharia de produto têxtil.
+**Escopo**
+- Revisar `plans` e `plan_features`; seed dos planos comerciais: **Starter, Professional, Business, Enterprise**.
+- Cada plano define limites: `max_users`, `max_companies`, `max_branches`, `nfe_per_month`, `storage_gb`, `ai_calls_per_month`, módulos habilitados (PCP, WMS, PLM, IA Executiva).
+- Tabela `plan_modules` (plan_id × module_key, boolean).
+- Hook `usePlanFeatures()` e componente `<FeatureGate module="wms">…</FeatureGate>`.
+- Sidebar oculta itens não inclusos no plano; rotas protegidas redirecionam para `/upgrade`.
 
-### 2.1 Estrutura do produto têxtil
-Novas tabelas:
-- `plm_collections` (coleção / linha / estação)
-- `plm_references` (referência-pai: ex. "Camisa 1234")
-- `plm_variants` (grade: cor × tamanho) — gera SKU filho
-- `plm_color_chart` (cartela de cores)
-- `plm_size_grid` (grade padrão: PP, P, M, G, GG / 36-44)
-
-### 2.2 Ficha técnica
-- `plm_tech_sheets` (já existe `product_technical_sheets` → expandir)
-- `plm_bom_textile`: tecido principal, forro, aviamentos (botão, zíper, etiqueta) com consumo por tamanho.
-- `plm_operations`: corte, costura, acabamento, lavanderia, bordado — com tempo padrão.
-- Versionamento V1/V2/V3 com aprovação.
-
-### 2.3 Custo do produto
-- `plm_cost_simulation`: MP + MOD + CIF + impostos + margem → preço sugerido.
-- Comparativo entre versões.
-
-### 2.4 UI
-- Tela tipo "fichário" com abas: Identificação, Cores, Grade, Ficha Técnica, BOM, Operações, Custo, Versões.
-- Upload de croqui/imagem por variante.
+**Critérios de aceite**
+- [ ] 4 planos seedados em produção com limites diferenciados.
+- [ ] Tentar acessar `/wms` no plano Starter → tela de upgrade.
+- [ ] `useUserPlan()` cacheado (React Query, 10 min staleTime).
+- [ ] PT-BR em todas mensagens de bloqueio.
 
 ---
 
-## FASE 3 — PCP Industrial + APS (3–4 semanas)
+## Módulo 1.3 — Medidor de Uso e Bloqueio Gracioso
 
-`production_orders` existe → falta planejamento real.
+**Escopo**
+- Tabela `usage_tracking(tenant_id, metric, period_start, period_end, value)`.
+- Edge function `usage-aggregator` (cron 02:00 UTC) que apura por tenant: usuários ativos, NF-e emitidas no mês, storage usado, chamadas IA (lendo `ai_brain_decisions`, `fiscal_documents`, etc).
+- Função `check_quota(tenant_id, metric)` chamada antes de operações sensíveis (emitir NF-e, criar usuário, chamar IA).
+- Política: 80% → aviso no Topbar; 100% → bloqueia operação, libera leitura.
+- UI: card "Uso do plano" no Dashboard com barras de progresso por métrica.
 
-### 3.1 Capacidade
-- `production_resources`, `production_lines`, `production_machines` já existem → completar com calendário (turnos, paradas).
-- `production_capacity` por recurso/dia.
-
-### 3.2 MRP
-- Cron `mrp-engine`: explode BOM dos pedidos de venda → gera necessidades de compra e ordens de produção.
-- Considera estoque, em-pedido, lead time.
-
-### 3.3 APS (Sequenciamento)
-- Edge function `aps-scheduler`: heurística (EDD + setup time + gargalo) para sequenciar OPs nos recursos.
-- Visualização Gantt (drag-and-drop manual).
-
-### 3.4 Apontamento de chão de fábrica
-- Terminal mobile (já há diretiva mobile-first): operador escaneia QR da OP, inicia/pausa operação.
-- `production_time_logs` + cálculo automático de OEE.
-
-### 3.5 Análise de gargalos
-- `pcp-bottlenecks` já existe → expor dashboard com utilização vs. capacidade por recurso.
+**Critérios de aceite**
+- [ ] Cron roda diariamente e popula `usage_tracking`.
+- [ ] Emitir NF-e além do limite retorna 402 com mensagem PT-BR e CTA "Fazer upgrade".
+- [ ] Card de uso reflete em tempo real (revalida ao mudar de página).
+- [ ] Auditoria registra todo bloqueio em `system_audit_logs`.
 
 ---
 
-## FASE 4 — WMS Avançado + Logística (2–3 semanas)
+## Módulo 1.4 — Onboarding Self-Service
 
-Base WMS existe; faltam fluxos enterprise.
+**Escopo**
+- Rota pública `/signup` (4 passos): conta admin → dados da empresa (CNPJ autopreenche via BrasilAPI) → escolha de plano → confirmação.
+- Edge function `tenant-provisioning` (service-role) executa em transação:
+  1. Cria `tenant`, `company` (matriz), `branch` (matriz), `subscription` (trial 14 dias).
+  2. Seeda plano de contas contábeis, CFOPs comuns, NCMs frequentes, perfis RBAC padrão (admin/manager/operator/viewer), centro de custo padrão.
+  3. Atribui role `admin` ao usuário criador.
+- Tela de boas-vindas com checklist: cadastrar 1º produto, 1º cliente, configurar certificado A1, convidar equipe.
 
-### 4.1 Endereçamento inteligente
-- `wms_storage_locations` com regras (curva ABC, peso, validade FEFO).
-- Putaway sugerido automaticamente.
-
-### 4.2 Picking por ondas
-- `picking_waves` já existe → algoritmo de agrupamento (por rota, transportadora, cliente).
-- Picking por voz/RF (terminal mobile).
-
-### 4.3 Inventário rotativo
-- Geração automática de tarefas por curva ABC.
-- Conciliação com ajustes contábeis.
-
-### 4.4 TMS básico
-- Romaneio de carga, integração Correios/Jadlog/Braspress (cotação + etiqueta).
-- Tracking de entrega (`delivery_tracking`).
+**Critérios de aceite**
+- [ ] Signup completo cria tenant 100% funcional em < 5s.
+- [ ] CNPJ inválido → erro antes de submeter.
+- [ ] Trial de 14 dias expira corretamente e bloqueia escrita (libera leitura/export).
+- [ ] Email de boas-vindas enviado via edge function de email.
 
 ---
 
-## FASE 5 — Fiscal Completo + Contabilidade (2–3 semanas)
+## Módulo 1.5 — Billing Stripe
 
-NF-e/NFC-e já existem; faltam CT-e, MDF-e e SPEDs.
+**Escopo**
+- Ativar `payments--enable_stripe_payments`.
+- Tabelas `stripe_customers`, `stripe_subscriptions` (já existem `saas_invoices` — reaproveitar).
+- Edge functions: `create-checkout-session`, `customer-portal`, `stripe-webhook` (handle `customer.subscription.updated/deleted`, `invoice.paid/failed`).
+- UI: página `/billing` com plano atual, próxima cobrança, link para portal Stripe, histórico de faturas.
+- Sincronização: webhook atualiza `subscriptions.status` (active/past_due/canceled) e libera/bloqueia features.
 
-### 5.1 Documentos fiscais
-- `cte`, `mdfe` já existem → completar emissão + transmissão SEFAZ.
-- Inutilização, carta de correção, cancelamento.
-
-### 5.2 SPED
-- Geração ECD, ECF, Fiscal, Contribuições, EFD-Reinf.
-- Validador integrado.
-
-### 5.3 Apuração de impostos
-- `tax_rules`, `tax_difal_rules`, `tax_icms_st_rules` já existem → motor de cálculo unificado.
-- Apuração mensal: ICMS, IPI, PIS, COFINS, ISS, DIFAL.
-
-### 5.4 Contabilidade automatizada
-- Triggers: NF-e autorizada → lançamento contábil + financeiro (já existe parcialmente).
-- DRE, Balanço, Balancete em tempo real.
-- Fechamento de período com bloqueio.
+**Critérios de aceite**
+- [ ] Upgrade Starter → Pro reflete em < 30s após pagamento.
+- [ ] `past_due` por 7 dias → tenant cai para modo somente-leitura.
+- [ ] Webhook idempotente (event_id deduplicado).
+- [ ] Faturas PDF baixáveis do portal Stripe.
 
 ---
 
-## FASE 6 — Integrações e IA Aplicada (contínuo)
+## Módulo 1.6 — RBAC Granular (Permissions Matrix)
 
-### 6.1 Conectores
-- Bancos: PIX (já existe webhook), CNAB 240/400, Open Finance.
-- Marketplaces: ML, Shopee, Amazon (sync produto, pedido, estoque).
-- E-commerce: Shopify, WooCommerce, Nuvemshop.
-- WhatsApp Business (já há templates).
+**Escopo**
+- Tabela `permissions(role app_role, module text, action text)` — ex: (`manager`, `financial`, `approve_payment`).
+- Função `has_permission(user_id, module, action)` SECURITY DEFINER.
+- Refatorar checagens espalhadas (`hasRole('admin')`) para `hasPermission('financial.approve_payment')`.
+- UI `PermissionsEditor` redesenhada como matriz módulo × ação por perfil, com toggle por permissão.
+- Auditoria: toda mudança de permissão gera linha em `system_audit_logs`.
 
-### 6.2 IA aplicada (não genérica)
-- **Previsão de demanda**: por SKU/coleção usando histórico + sazonalidade.
-- **Compras inteligentes**: sugere PO baseado em MRP + lead time + sazonalidade.
-- **Precificação dinâmica**: por margem-alvo, elasticidade, estoque parado.
-- **Detecção de fraude financeira**: `financial_fraud_rules` já existe → completar.
-- **Análise de crédito**: score de cliente (`customer_credit_profiles` existe).
-
----
-
-## Detalhes técnicos
-
-### Padrões obrigatórios em toda nova feature
-1. Migração com: CREATE TABLE → GRANT → RLS → POLICY (scoped por `company_id`).
-2. Hook React Query com `staleTime: 5min`, paginação server-side.
-3. Service em `src/services/<modulo>/` (camada única de acesso).
-4. Componente usa `PageContainer`, `PageHeader`, `KPICard`, `DataTable`, `AdvancedFilters`, `ExportButton`.
-5. Edge function: `requireAuth` → `companyId` scoping → erro genérico → log estruturado.
-6. Auditoria via trigger `system_audit_logs`.
-
-### Métricas de aceitação
-- p95 de listagens < 300ms com 100k linhas.
-- Bundle inicial < 500KB gzip (já há code splitting).
-- 0 findings críticos no scanner de segurança.
-- Cobertura mínima de testes em edge functions: 70%.
+**Critérios de aceite**
+- [ ] Matriz cobre ≥ 8 módulos × ≥ 6 ações cada.
+- [ ] Trocar permissão reflete em < 1s (invalidação de cache).
+- [ ] Operator sem `production.create_order` não vê botão "Nova OP".
+- [ ] Diff visual da mudança de permissão registrado na auditoria.
 
 ---
 
-## Sequenciamento sugerido (próximos passos imediatos)
+## Ordem de execução e dependências
 
-1. **Esta semana**: Fase 0 completa (segurança + deps).
-2. **Próximas 2 semanas**: Fase 1.1 + 1.2 (tenants + billing) — destrava SaaS.
-3. **Mês 2**: Fase 2 (PLM Confecção) — diferencial de mercado.
-4. **Mês 3**: Fase 3 (PCP/APS).
-5. **Mês 4**: Fases 4–5 em paralelo.
-6. **Contínuo**: Fase 6.
+```text
+1.1 Hierarquia ──┬──> 1.2 Planos ──> 1.3 Uso ──> 1.5 Billing
+                 │
+                 └──> 1.4 Onboarding ──> 1.5 Billing
+                                              │
+                                              └──> 1.6 RBAC
+```
 
----
+1.1 é bloqueante para tudo. 1.2 e 1.4 podem rodar em paralelo após 1.1. 1.5 depende de 1.2+1.3+1.4. 1.6 é independente mas mais útil após 1.5 (cobra por perfis adicionais em planos altos).
 
-**Pergunta antes de aprovar:** quer que eu comece pela **Fase 0** (estabilização/segurança) ou prefere priorizar a **Fase 2 (PLM Confecção)** por ser o maior diferencial competitivo?
+## Definition of Done da Fase 1
+
+- [ ] Todos 6 módulos com critérios de aceite verdes.
+- [ ] Cobertura de testes cross-tenant em todos endpoints novos.
+- [ ] Documentação `/docs/saas-architecture.md` atualizada.
+- [ ] `.lovable/phase-1-audit.md` criado com checklist final.
+- [ ] Tenant demo (`demo@empresa.com`) provisionado para QA.
+
+## Fora de escopo (vai para Fase 2)
+
+- PLM têxtil (coleções, grade cor×tamanho, ficha técnica).
+- White-label por tenant (domínio custom, logo, tema).
+- Marketplace de integrações.
