@@ -72,14 +72,31 @@ jobs:
               - '.github/workflows/ci.yml'
 
       - name: Run threshold validator tests
+        id: run_tests
         if: steps.filter.outputs.thresholds == 'true'
-        run: bash scripts/test-eslint-thresholds.sh
+        run: |
+          mkdir -p /tmp/eslint-thresholds-logs
+          # Captura stdout+stderr no log completo (artefato), preservando exit code.
+          set -o pipefail
+          bash scripts/test-eslint-thresholds.sh 2>&1 \
+            | tee /tmp/eslint-thresholds-logs/test-output.log
+
+      - name: Upload threshold tests log
+        id: upload_log
+        if: steps.filter.outputs.thresholds == 'true' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-thresholds-tests-log
+          path: /tmp/eslint-thresholds-logs/
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Skip notice
         if: steps.filter.outputs.thresholds != 'true'
         run: |
           echo "ℹ️  Nenhuma alteração em validate-eslint-thresholds.sh / test-eslint-thresholds.sh / ci.yml."
           echo "    Pulando suite de testes (job marcado como sucesso)."
+
 
       - name: Summary
         if: always()
@@ -91,7 +108,15 @@ jobs:
           EVENT_NAME: ${{ github.event_name }}
           BASE_REF: ${{ github.base_ref }}
           HEAD_REF: ${{ github.head_ref || github.ref_name }}
+          SERVER_URL: ${{ github.server_url }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          JOB_ID_REF: ${{ github.job }}
+          ARTIFACT_ID: ${{ steps.upload_log.outputs.artifact-id }}
+          ARTIFACT_URL: ${{ steps.upload_log.outputs.artifact-url }}
         run: |
+
           # Classifica execução vs. pulado e monta motivo detalhado.
           if [ "$THRESHOLDS_RAN" = "true" ]; then
             EXECUTED="✅ Sim"
@@ -170,8 +195,27 @@ jobs:
               echo "_Nenhum arquivo monitorado foi alterado neste PR/push._"
             fi
             echo ""
+            echo "### 🔗 Logs e artefatos"
+            echo ""
+            RUN_URL="$SERVER_URL/$REPOSITORY/actions/runs/$RUN_ID"
+            JOB_LOGS_URL="$RUN_URL/attempts/${RUN_ATTEMPT:-1}#summary-$JOB_ID_REF"
+            echo "- 📜 [Log completo do run]($RUN_URL) (tentativa #${RUN_ATTEMPT:-1})"
+            echo "- 🧾 [Logs deste job]($JOB_LOGS_URL)"
+            if [ "$THRESHOLDS_RAN" = "true" ]; then
+              if [ -n "$ARTIFACT_URL" ]; then
+                echo "- 📦 [Artefato \`eslint-thresholds-tests-log\` (download direto)]($ARTIFACT_URL)"
+              elif [ -n "$ARTIFACT_ID" ]; then
+                echo "- 📦 [Artefato \`eslint-thresholds-tests-log\`]($SERVER_URL/$REPOSITORY/actions/runs/$RUN_ID/artifacts/$ARTIFACT_ID) — retenção: 14 dias"
+              else
+                echo "- 📦 Artefato \`eslint-thresholds-tests-log\` disponível na [aba Artifacts do run]($RUN_URL#artifacts) — retenção: 14 dias"
+              fi
+            else
+              echo "- 📦 _Sem artefato: a suite foi pulada neste run._"
+            fi
+            echo ""
             echo "> Quando executada, uma falha aqui bloqueia o job \`quality\` via \`needs:\`."
           } >> "$GITHUB_STEP_SUMMARY"
+
 
 
 
