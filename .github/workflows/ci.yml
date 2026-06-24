@@ -41,55 +41,65 @@ env:
   ESLINT_REQUIRE_MTIME_CHANGED: ${{ vars.ESLINT_REQUIRE_MTIME_CHANGED || github.event.inputs.eslint_require_mtime_changed || 'false' }}
 
 jobs:
-  # Job dedicado e rápido para os testes do validador de thresholds.
-  # Roda em paralelo com `quality` e é dependência obrigatória dele —
-  # qualquer regressão nas validações falha o pipeline inteiro antes do
-  # lint/typecheck, mesmo em PRs que não tocam o workflow.
+  # Job dedicado para testes do validador de thresholds.
+  # Usa dorny/paths-filter para rodar a suite apenas quando arquivos
+  # relevantes mudam (validator, testes ou o próprio workflow). Quando
+  # nada relevante muda, o job termina em sucesso como no-op — assim o
+  # `needs:` do job `quality` continua satisfeito sem custo extra.
   eslint-thresholds-tests:
     name: ESLint thresholds — tests
     runs-on: ubuntu-latest
     timeout-minutes: 3
+    outputs:
+      ran: ${{ steps.filter.outputs.thresholds }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Detect changes to threshold scripts
-        id: changed
-        run: |
-          if git rev-parse HEAD~1 >/dev/null 2>&1; then
-            CHANGED=$(git diff --name-only HEAD~1 HEAD -- \
-              scripts/validate-eslint-thresholds.sh \
-              scripts/test-eslint-thresholds.sh \
-              .github/workflows/ci.yml || true)
-          else
-            CHANGED="(shallow clone — assuming changed)"
-          fi
-          if [ -n "$CHANGED" ]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            echo "Arquivos relacionados a thresholds alterados neste push:"
-            echo "$CHANGED"
-          else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-            echo "Nenhuma mudança nos scripts de threshold — executando suite mesmo assim."
-          fi
+      - name: Detect changes to threshold files
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          # Em pushes (sem base), o filter retorna "true" para todos os filtros,
+          # garantindo que pelo menos um push na branch padrão valide a suite.
+          filters: |
+            thresholds:
+              - 'scripts/validate-eslint-thresholds.sh'
+              - 'scripts/test-eslint-thresholds.sh'
+              - '.github/workflows/ci.yml'
 
-      # Executa SEMPRE (não apenas quando os scripts mudam) para travar
-      # qualquer regressão indireta — ex.: mudança no bash do runner,
-      # alteração em variáveis de ambiente herdadas, etc.
       - name: Run threshold validator tests
+        if: steps.filter.outputs.thresholds == 'true'
         run: bash scripts/test-eslint-thresholds.sh
+
+      - name: Skip notice
+        if: steps.filter.outputs.thresholds != 'true'
+        run: |
+          echo "ℹ️  Nenhuma alteração em validate-eslint-thresholds.sh / test-eslint-thresholds.sh / ci.yml."
+          echo "    Pulando suite de testes (job marcado como sucesso)."
 
       - name: Summary
         if: always()
         run: |
+          if [ "${{ steps.filter.outputs.thresholds }}" = "true" ]; then
+            STATUS="executada (\`${{ job.status }}\`)"
+            REASON="arquivos relevantes alterados neste PR/push"
+          else
+            STATUS="pulada"
+            REASON="nenhum arquivo relevante alterado"
+          fi
           {
             echo "## 🧪 ESLint thresholds — tests"
             echo ""
-            echo "- Scripts alterados neste push: \`${{ steps.changed.outputs.changed }}\`"
-            echo "- Status: \`${{ job.status }}\`"
+            echo "| Campo | Valor |"
+            echo "|---|---|"
+            echo "| Suite | $STATUS |"
+            echo "| Motivo | $REASON |"
+            echo "| Arquivos monitorados | \`scripts/validate-eslint-thresholds.sh\`, \`scripts/test-eslint-thresholds.sh\`, \`.github/workflows/ci.yml\` |"
             echo ""
-            echo "> Suite roda em **todos** os pushes/PRs; falha aqui bloqueia o job \`quality\`."
+            echo "> Quando executada, uma falha aqui bloqueia o job \`quality\` via \`needs:\`."
           } >> "$GITHUB_STEP_SUMMARY"
+
 
   quality:
     name: Lint & Typecheck
