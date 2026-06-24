@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Build caches
+node_modules/.vite
+node_modules/.cache
+dist/.vite
+*.tsbuildinfo

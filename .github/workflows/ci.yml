@@ -40,6 +40,18 @@ jobs:
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
+      - name: Cache build artifacts (vite + tsbuildinfo)
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules/.vite
+            node_modules/.cache/tsbuildinfo
+            dist/.vite
+          key: ${{ runner.os }}-build-${{ hashFiles('bun.lockb', 'bun.lock', 'tsconfig*.json', 'vite.config.ts') }}-${{ hashFiles('src/**/*.ts', 'src/**/*.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ hashFiles('bun.lockb', 'bun.lock', 'tsconfig*.json', 'vite.config.ts') }}-
+            ${{ runner.os }}-build-
+
       - name: Typecheck
         run: bun run typecheck
 
