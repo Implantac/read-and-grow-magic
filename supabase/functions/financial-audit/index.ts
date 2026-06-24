@@ -17,6 +17,13 @@ Deno.serve(async (req) => {
     });
   }
 
+  const ctx = await resolveContext(req, auth);
+  if (!ctx.ok) {
+    return new Response(JSON.stringify({ error: ctx.message }), {
+      status: ctx.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
     const url = new URL(req.url);
     const action = url.searchParams.get('action') ?? 'run';
@@ -27,8 +34,8 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
-    const callerCompany = auth.companyId;
-    if (!callerCompany && !auth.viaCron) {
+    const callerCompany = ctx.companyId;
+    if (!callerCompany && !ctx.viaCron) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
         status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
