@@ -107,7 +107,7 @@ export function Topbar() {
             {(Array.isArray(companies) ? companies : []).map((company: any) => (
               <DropdownMenuItem
                 key={company.id}
-                onClick={() => setActiveCompany(company)}
+                onClick={() => handleSelectCompany(company)}
                 className={cn(
                   'text-sidebar-foreground/80 hover:text-primary focus:text-primary',
                   activeCompany?.id === company.id && 'text-primary bg-sidebar-accent'
@@ -135,7 +135,7 @@ export function Topbar() {
               {(activeCompany.branches || []).map((branch) => (
                 <DropdownMenuItem
                   key={branch.id}
-                  onClick={() => setActiveBranch(branch)}
+                  onClick={() => handleSelectBranch(branch)}
                   className={cn(
                     'text-sidebar-foreground/80 hover:text-primary focus:text-primary',
                     activeBranch?.id === branch.id && 'text-primary bg-sidebar-accent'
