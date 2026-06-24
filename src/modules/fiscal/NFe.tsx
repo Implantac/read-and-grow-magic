@@ -123,8 +123,8 @@ export default function NFePage() {
     setNfeToCancel(null);
   };
 
-  const handlePrint = (nfe: NFe) => {
-    generateDANFE(nfe);
+  const handlePrint = async (nfe: NFe) => {
+    await generateDANFE(nfe);
     toastSuccess('DANFE Gerado', `PDF da DANFE ${nfe.number} baixado com sucesso`);
   };
 
