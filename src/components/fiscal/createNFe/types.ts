@@ -1,21 +1,6 @@
 import { FileText, Users, Package, Calculator, Truck, CreditCard, ClipboardCheck } from 'lucide-react';
 
-export interface NFeItemForm {
-  productCode: string;
-  productName: string;
-  productId?: string;
-  ncm: string;
-  cfop: string;
-  unit: string;
-  quantity: number;
-  unitPrice: number;
-  icms?: number;
-  pis?: number;
-  cofins?: number;
-  ipi?: number;
-  ibs?: number;
-  cbs?: number;
-}
+export type { NFeItemForm } from '@/modules/fiscal/types';
 
 export const STEPS = [
   { id: 'info', label: 'Dados', icon: FileText },

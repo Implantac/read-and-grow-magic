@@ -1,12 +1,8 @@
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export interface FiscalStep {
-  id: string;
-  label: string;
-  description?: string;
-  icon?: React.ComponentType<{ className?: string }>;
-}
+import type { FiscalStep } from '@/modules/fiscal/types';
+export type { FiscalStep };
 
 interface FiscalStepperProps {
   steps: FiscalStep[];
