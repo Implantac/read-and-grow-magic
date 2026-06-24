@@ -20,7 +20,7 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 // --- Auth helper ---
-async function requireAuth(req: Request): Promise<Response | { userId: string; companyId: string }> {
+async function requireAuth(req: Request): Promise<Response | { userId: string; companyId: string; scope: string[] | null }> {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader?.startsWith("Bearer ")) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -38,14 +38,24 @@ async function requireAuth(req: Request): Promise<Response | { userId: string; c
     });
   }
   const userId = (data.claims as any).sub as string;
-  const { data: profile } = await supabase.from("profiles").select("company_id").eq("id", userId).maybeSingle();
+  const { data: profile } = await supabase.from("profiles").select("company_id, default_branch_id").eq("id", userId).maybeSingle();
   const companyId = (profile as any)?.company_id as string | undefined;
   if (!companyId) {
     return new Response(JSON.stringify({ error: "Forbidden" }), {
       status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-  return { userId, companyId };
+  const ctx = await resolveContextByIds(req, {
+    userId,
+    companyId,
+    defaultBranchId: (profile as any)?.default_branch_id ?? null,
+  });
+  if (!ctx.ok) {
+    return new Response(JSON.stringify({ error: ctx.message }), {
+      status: ctx.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  return { userId, companyId, scope: branchScope(ctx) };
 }
 
 
