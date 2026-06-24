@@ -154,6 +154,7 @@ async function scoreClients(companyId: string) {
 
     scores.push({
       client_id: client.id,
+      company_id: companyId,
       score_numeric: Math.round(clampedScore),
       score_grade: grade,
       priority_level: priority,
@@ -182,32 +183,35 @@ async function scoreClients(companyId: string) {
     await supabase.from("clients").update({
       client_score: score.score_grade,
       abc_classification: score.score_grade,
-    }).eq("id", score.client_id);
+    }).eq("id", score.client_id).eq("company_id", companyId);
   }
 
   return { scored: scores.length };
 }
 
 // ─── Engine 2: AI Recommendations (Fase 2 - cross-sell, upsell, ticket) ──
-async function generateRecommendations() {
+async function generateRecommendations(companyId: string) {
   const { data: topClients } = await supabase
     .from("ai_sales_scores")
     .select("*, clients(id, name, code, segment, last_purchase_date, avg_ticket, total_purchases, default_payment_condition)")
+    .eq("company_id", companyId)
     .order("score_numeric", { ascending: false })
     .limit(30);
 
   if (!topClients?.length) return { recommendations: 0 };
 
-  const { data: products } = await supabase.from("products").select("id, name, code, sale_price, cost_price, category_id, status").eq("status", "active").limit(100);
-  
+  const { data: products } = await supabase.from("products").select("id, name, code, sale_price, cost_price, category_id, status").eq("company_id", companyId).eq("status", "active").limit(100);
+
   // Get recent order items for each client to know what they buy
   const clientIds = topClients.map((s: any) => s.client_id);
   const { data: recentOrders } = await supabase.from("orders")
     .select("client_id, total, date, order_items(product_name, product_code, quantity, unit_price, total)")
+    .eq("company_id", companyId)
     .in("client_id", clientIds)
     .neq("status", "cancelled")
     .order("date", { ascending: false })
     .limit(200);
+
 
   const clientProducts: Record<string, string[]> = {};
   (recentOrders || []).forEach((o: any) => {
