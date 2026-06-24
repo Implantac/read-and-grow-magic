@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { Bell, Brain, ChevronDown, LogOut, Menu, Moon, Sun, User, Search, Command, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import type { Company } from '@/types';
+import type { Company, Branch } from '@/types';
 
 import { useCompanies } from '@/hooks/system/useCompanies';
 import { useAppStore } from '@/stores/useAppStore';
+import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { useAuth } from '@/hooks/system/useAuth';
 import { useNotifications } from '@/hooks/system/useNotifications';
 import { useBrainDecisions } from '@/hooks/ai/useAIBrain';
