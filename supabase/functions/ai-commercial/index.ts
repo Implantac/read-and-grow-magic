@@ -80,13 +80,14 @@ async function callAI(systemPrompt: string, userPrompt: string, tools?: any[]): 
 }
 
 // ─── Engine 1: Score Clients (Fase 1) ──────────────────────────────────
-async function scoreClients() {
-  const { data: clients } = await supabase.from("clients").select("*").eq("status", "active").limit(200);
+async function scoreClients(companyId: string) {
+  const { data: clients } = await supabase.from("clients").select("*").eq("company_id", companyId).eq("status", "active").limit(200);
   if (!clients?.length) return { scored: 0 };
 
-  const { data: orders } = await supabase.from("orders").select("id, client_id, total, date, status, sales_rep_id").neq("status", "cancelled").order("date", { ascending: false }).limit(2000);
-  const { data: receivables } = await supabase.from("accounts_receivable").select("client_id, amount, status, due_date").limit(1000);
-  const { data: sales } = await supabase.from("sales").select("id, client_id, total, date, status").neq("status", "cancelled").order("date", { ascending: false }).limit(1000);
+  const { data: orders } = await supabase.from("orders").select("id, client_id, total, date, status, sales_rep_id").eq("company_id", companyId).neq("status", "cancelled").order("date", { ascending: false }).limit(2000);
+  const { data: receivables } = await supabase.from("accounts_receivable").select("client_id, amount, status, due_date").eq("company_id", companyId).limit(1000);
+  const { data: sales } = await supabase.from("sales").select("id, client_id, total, date, status").eq("company_id", companyId).neq("status", "cancelled").order("date", { ascending: false }).limit(1000);
+
 
   const now = new Date();
   const scores: any[] = [];
