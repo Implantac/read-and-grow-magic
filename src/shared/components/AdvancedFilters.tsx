@@ -104,15 +104,15 @@ export function AdvancedFilters({
                 <Label htmlFor={field.key}>{field.label}</Label>
                 {field.type === 'select' && field.options ? (
                   <Select
-                    value={localValues[field.key] || ''}
-                    onValueChange={(value) => handleChange(field.key, value)}
+                    value={localValues[field.key] || undefined}
+                    onValueChange={(value) => handleChange(field.key, value === '__all__' ? '' : value)}
                   >
                     <SelectTrigger id={field.key}>
                       <SelectValue placeholder={field.placeholder || 'Selecione...'} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todos</SelectItem>
-                      {field.options.map((option) => (
+                      <SelectItem value="__all__">Todos</SelectItem>
+                      {field.options.filter((o) => o && o.value !== '').map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           {option.label}
                         </SelectItem>
