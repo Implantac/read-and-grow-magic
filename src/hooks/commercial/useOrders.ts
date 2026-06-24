@@ -153,7 +153,7 @@ export function useCreateOrder() {
       qc.invalidateQueries({ queryKey: ['orders'] });
       toastSuccess('Pedido criado com sucesso!');
     },
-    onError: (e: any) => {
+    onError: (e: Error) => {
       console.error('Error creating order:', e);
       toastError(e.message || 'Ocorreu um erro inesperado', undefined, 'Erro ao criar pedido');
     },
@@ -175,7 +175,7 @@ export function useUpdateOrderStatus() {
       qc.invalidateQueries({ queryKey: ['orders'] });
       toastSuccess('Status do pedido atualizado!');
     },
-    onError: (e: any) => {
+    onError: (e: Error) => {
       console.error('Error updating order status:', e);
       toastError(e.message, undefined, 'Erro ao atualizar status');
     },
@@ -186,10 +186,11 @@ export function useUpdateOrderFields() {
   const qc = useQueryClient();
   const { toast } = useToast();
   return useMutation({
-    mutationFn: async ({ id, ...fields }: { id: string; [key: string]: any }) => {
+    mutationFn: async ({ id, ...fields }: { id: string } & Partial<DbOrder>) => {
+      const payload = { ...fields, updated_at: new Date().toISOString() };
       const { error } = await supabase
         .from('orders')
-        .update({ ...fields, updated_at: new Date().toISOString() } as any)
+        .update(payload)
         .eq('id', id);
       if (error) throw error;
     },
@@ -197,7 +198,7 @@ export function useUpdateOrderFields() {
       qc.invalidateQueries({ queryKey: ['orders'] });
       toastSuccess('Pedido atualizado!');
     },
-    onError: (e: any) => {
+    onError: (e: Error) => {
       console.error('Error updating order fields:', e);
       toastError(e.message, undefined, 'Erro ao atualizar pedido');
     },
