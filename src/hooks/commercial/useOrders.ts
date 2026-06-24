@@ -78,7 +78,8 @@ export function useOrders() {
         .select('*, order_items(*)')
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data as any[]).map((o) => ({
+      type OrderWithItems = DbOrder & { order_items?: DbOrderItem[] };
+      return (data as OrderWithItems[]).map((o) => ({
         ...o,
         items: o.order_items || [],
       })) as DbOrder[];
@@ -152,7 +153,7 @@ export function useCreateOrder() {
       qc.invalidateQueries({ queryKey: ['orders'] });
       toastSuccess('Pedido criado com sucesso!');
     },
-    onError: (e: any) => {
+    onError: (e: Error) => {
       console.error('Error creating order:', e);
       toastError(e.message || 'Ocorreu um erro inesperado', undefined, 'Erro ao criar pedido');
     },
@@ -174,7 +175,7 @@ export function useUpdateOrderStatus() {
       qc.invalidateQueries({ queryKey: ['orders'] });
       toastSuccess('Status do pedido atualizado!');
     },
-    onError: (e: any) => {
+    onError: (e: Error) => {
       console.error('Error updating order status:', e);
       toastError(e.message, undefined, 'Erro ao atualizar status');
     },
@@ -185,10 +186,11 @@ export function useUpdateOrderFields() {
   const qc = useQueryClient();
   const { toast } = useToast();
   return useMutation({
-    mutationFn: async ({ id, ...fields }: { id: string; [key: string]: any }) => {
+    mutationFn: async ({ id, ...fields }: { id: string } & Partial<Omit<DbOrder, 'items' | 'id'>>) => {
+      const payload = { ...fields, updated_at: new Date().toISOString() };
       const { error } = await supabase
         .from('orders')
-        .update({ ...fields, updated_at: new Date().toISOString() } as any)
+        .update(payload)
         .eq('id', id);
       if (error) throw error;
     },
@@ -196,7 +198,7 @@ export function useUpdateOrderFields() {
       qc.invalidateQueries({ queryKey: ['orders'] });
       toastSuccess('Pedido atualizado!');
     },
-    onError: (e: any) => {
+    onError: (e: Error) => {
       console.error('Error updating order fields:', e);
       toastError(e.message, undefined, 'Erro ao atualizar pedido');
     },
@@ -246,7 +248,8 @@ export function useDeleteOrder() {
       const undoSeconds = Number(getParameter('undo_duration_seconds', '10'));
       const durationMs = undoSeconds * 1000;
       let timeLeft = undoSeconds;
-      let interval: any;
+      // eslint-disable-next-line prefer-const
+      let interval: ReturnType<typeof setInterval> | undefined;
 
       const createAction = (disabled = false) => 
         React.createElement(ToastAction, {
@@ -272,7 +275,7 @@ export function useDeleteOrder() {
               if (restError) throw restError;
 
               if (order_items && order_items.length > 0) {
-                const restoredItems = order_items.map((item: any) => ({
+                const restoredItems = order_items.map((item: DbOrderItem) => ({
                   ...item,
                   order_id: restored.id
                 }));
@@ -284,37 +287,38 @@ export function useDeleteOrder() {
 
               qc.invalidateQueries({ queryKey: ['orders'] });
               toastSuccess('Pedido restaurado com sucesso!');
-            } catch (err: any) {
-              toastError(err.message, undefined, 'Erro ao restaurar pedido');
+            } catch (err) {
+              const message = err instanceof Error ? err.message : 'Erro inesperado';
+              toastError(message, undefined, 'Erro ao restaurar pedido');
             }
           }
         }, 'Desfazer');
 
-      const { id, update } = toast({ 
+      const { id, update } = toast({
         title: 'Pedido removido com sucesso!',
         description: `O pedido ${deletedOrder.number} foi excluído. Você tem ${timeLeft} segundos para desfazer.`,
         duration: durationMs,
-        action: createAction() as unknown as any
+        action: createAction() as unknown as React.ReactElement,
       });
 
       interval = setInterval(() => {
         timeLeft -= 1;
         if (timeLeft <= 0) {
-          clearInterval(interval);
+          if (interval) clearInterval(interval);
           update({
             id,
             description: `O pedido ${deletedOrder.number} foi excluído permanentemente.`,
-            action: createAction(true) as unknown as any,
-          } as any);
+            action: createAction(true) as unknown as React.ReactElement,
+          });
         } else {
           update({
             id,
             description: `O pedido ${deletedOrder.number} foi excluído. Você tem ${timeLeft} segundos para desfazer.`,
-          } as any);
+          });
         }
       }, 1000);
     },
-    onError: (e: any) => {
+    onError: (e: Error) => {
       console.error('Error deleting order:', e);
       toastError(e.message || 'Não foi possível excluir o pedido no momento.', undefined, 'Erro ao remover pedido');
     },
