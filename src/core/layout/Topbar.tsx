@@ -29,10 +29,33 @@ const typeColors = {
 export function Topbar() {
   const navigate = useNavigate();
   const { signOut } = useAuth({ initialize: false });
-  const { 
+  const {
     user, activeCompany, activeBranch, sidebarCollapsed, theme,
     toggleSidebar, setActiveCompany, setActiveBranch, toggleTheme,
   } = useAppStore();
+  const setActiveCompanyId = useEnterpriseStore((s) => s.setActiveCompanyId);
+  const setActiveBranchId = useEnterpriseStore((s) => s.setActiveBranchId);
+
+  // Keep enterprise store in sync so the supabase invoke interceptor
+  // and edge functions always receive the correct tenant scope.
+  useEffect(() => {
+    setActiveCompanyId(activeCompany?.id ?? null);
+  }, [activeCompany?.id, setActiveCompanyId]);
+  useEffect(() => {
+    setActiveBranchId(activeBranch?.id ?? null);
+  }, [activeBranch?.id, setActiveBranchId]);
+
+  const handleSelectCompany = (company: Company) => {
+    setActiveCompany(company);
+    setActiveCompanyId(company?.id ?? null);
+    const firstBranch = Array.isArray(company?.branches) && company.branches.length > 0 ? company.branches[0] : null;
+    setActiveBranchId(firstBranch?.id ?? null);
+  };
+
+  const handleSelectBranch = (branch: Branch) => {
+    setActiveBranch(branch);
+    setActiveBranchId(branch?.id ?? null);
+  };
 
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const { data: brainPendingData } = useBrainDecisions('pending');
