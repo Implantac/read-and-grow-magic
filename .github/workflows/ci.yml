@@ -195,8 +195,27 @@ jobs:
               echo "_Nenhum arquivo monitorado foi alterado neste PR/push._"
             fi
             echo ""
+            echo "### 🔗 Logs e artefatos"
+            echo ""
+            RUN_URL="$SERVER_URL/$REPOSITORY/actions/runs/$RUN_ID"
+            JOB_LOGS_URL="$RUN_URL/attempts/${RUN_ATTEMPT:-1}#summary-$JOB_ID_REF"
+            echo "- 📜 [Log completo do run]($RUN_URL) (tentativa #${RUN_ATTEMPT:-1})"
+            echo "- 🧾 [Logs deste job]($JOB_LOGS_URL)"
+            if [ "$THRESHOLDS_RAN" = "true" ]; then
+              if [ -n "$ARTIFACT_URL" ]; then
+                echo "- 📦 [Artefato \`eslint-thresholds-tests-log\` (download direto)]($ARTIFACT_URL)"
+              elif [ -n "$ARTIFACT_ID" ]; then
+                echo "- 📦 [Artefato \`eslint-thresholds-tests-log\`]($SERVER_URL/$REPOSITORY/actions/runs/$RUN_ID/artifacts/$ARTIFACT_ID) — retenção: 14 dias"
+              else
+                echo "- 📦 Artefato \`eslint-thresholds-tests-log\` disponível na [aba Artifacts do run]($RUN_URL#artifacts) — retenção: 14 dias"
+              fi
+            else
+              echo "- 📦 _Sem artefato: a suite foi pulada neste run._"
+            fi
+            echo ""
             echo "> Quando executada, uma falha aqui bloqueia o job \`quality\` via \`needs:\`."
           } >> "$GITHUB_STEP_SUMMARY"
+
 
 
 
