@@ -8663,16 +8663,52 @@ export type Database = {
           },
         ]
       }
+      plan_modules: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          module_key: string
+          plan_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          module_key: string
+          plan_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          module_key?: string
+          plan_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_modules_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plans: {
         Row: {
+          ai_calls_per_month: number
           allowed_modules: string[]
           created_at: string
           description: string | null
           id: string
           is_active: boolean
+          max_branches: number
+          max_companies: number
           max_orders_month: number
           max_users: number
           name: string
+          nfe_per_month: number
           price_annual: number
           price_monthly: number
           slug: string
@@ -8682,14 +8718,18 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ai_calls_per_month?: number
           allowed_modules?: string[]
           created_at?: string
           description?: string | null
           id?: string
           is_active?: boolean
+          max_branches?: number
+          max_companies?: number
           max_orders_month?: number
           max_users?: number
           name: string
+          nfe_per_month?: number
           price_annual?: number
           price_monthly?: number
           slug: string
@@ -8699,14 +8739,18 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ai_calls_per_month?: number
           allowed_modules?: string[]
           created_at?: string
           description?: string | null
           id?: string
           is_active?: boolean
+          max_branches?: number
+          max_companies?: number
           max_orders_month?: number
           max_users?: number
           name?: string
+          nfe_per_month?: number
           price_annual?: number
           price_monthly?: number
           slug?: string
@@ -15609,6 +15653,24 @@ export type Database = {
           total_revenue: number
         }[]
       }
+      get_current_plan: {
+        Args: never
+        Returns: {
+          ai_calls_per_month: number
+          allowed_modules: string[]
+          max_branches: number
+          max_companies: number
+          max_orders_month: number
+          max_users: number
+          nfe_per_month: number
+          plan_id: string
+          plan_name: string
+          plan_slug: string
+          storage_mb: number
+          subscription_status: string
+          trial_end: string
+        }[]
+      }
       get_dre: {
         Args: { _from: string; _to: string }
         Returns: {
@@ -15649,6 +15711,7 @@ export type Database = {
         Returns: Database["public"]["Enums"]["app_role"]
       }
       has_branch_access: { Args: { _branch_id: string }; Returns: boolean }
+      has_module_access: { Args: { _module_key: string }; Returns: boolean }
       has_role:
         | {
             Args: {
