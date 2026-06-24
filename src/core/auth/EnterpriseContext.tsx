@@ -65,6 +65,8 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     loadActiveTenant();
+    // loadActiveTenant captures only stable setters; running once on mount is intentional.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const applyCompany = (company: CompanyRow) => {
@@ -140,6 +142,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   );
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useEnterprise = () => {
   const context = useContext(EnterpriseContext);
   if (!context) throw new Error('useEnterprise must be used within EnterpriseProvider');
