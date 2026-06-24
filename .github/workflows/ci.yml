@@ -52,16 +52,17 @@ jobs:
             ${{ runner.os }}-build-${{ hashFiles('bun.lockb', 'bun.lock', 'tsconfig*.json', 'vite.config.ts') }}-
             ${{ runner.os }}-build-
 
-      # Chave só invalida quando a config do ESLint ou as deps mudam.
-      # O sufixo com github.sha garante salvar uma versão fresca a cada run,
-      # enquanto restore-keys reaproveita o cache do run anterior com a mesma config.
-      - name: Cache ESLint
-        uses: actions/cache@v4
+      # Cache do ESLint dividido em restore/save para que a chave dependa
+      # APENAS do que afeta regras (config + plugins resolvidos via lockfile).
+      # O save usa um sufixo único (run_id) só para permitir gravar uma nova
+      # versão; o restore casa pela chave estável via restore-keys.
+      - name: Restore ESLint cache
+        id: eslint-cache-restore
+        uses: actions/cache/restore@v4
         with:
           path: node_modules/.cache/eslint
-          key: ${{ runner.os }}-eslint-v1-${{ hashFiles('eslint.config.*', 'bun.lockb', 'bun.lock') }}-${{ github.sha }}
+          key: ${{ runner.os }}-eslint-v1-${{ hashFiles('eslint.config.*', 'bun.lockb', 'bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-eslint-v1-${{ hashFiles('eslint.config.*', 'bun.lockb', 'bun.lock') }}-
             ${{ runner.os }}-eslint-v1-
 
       - name: Typecheck
@@ -71,3 +72,10 @@ jobs:
       # (limpeza incremental ainda em andamento).
       - name: Lint (strict, ignora no-explicit-any)
         run: bun run lint:ci
+
+      - name: Save ESLint cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: node_modules/.cache/eslint
+          key: ${{ runner.os }}-eslint-v1-${{ hashFiles('eslint.config.*', 'bun.lockb', 'bun.lock') }}-${{ github.run_id }}
