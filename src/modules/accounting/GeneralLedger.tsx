@@ -129,7 +129,7 @@ export default function GeneralLedgerPage() {
                       <SelectItem key={a.code} value={a.code}>{a.code} - {a.name}</SelectItem>
                     ))
                   ) : (
-                    <SelectItem value="" disabled>Nenhuma conta disponível</SelectItem>
+                    <SelectItem value="__none__" disabled>Nenhuma conta disponível</SelectItem>
                   )}
                 </SelectContent>
               </Select>
