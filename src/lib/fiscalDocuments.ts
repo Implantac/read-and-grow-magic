@@ -1,94 +1,152 @@
-import jsPDF from 'jspdf';
+import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
 import type { NFe, NFeItem } from '@/types/fiscal';
 
 import { formatDateTime, formatBRL } from '@/lib/formatters';
 
-export function generateDANFE(nfe: NFe): void {
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  const pageWidth = 210;
+// Convert mm → PDF points (1 mm = 2.83465 pt)
+const MM = 2.83465;
+
+interface DrawCtx {
+  page: PDFPage;
+  helv: PDFFont;
+  helvBold: PDFFont;
+  pageHeightMm: number;
+}
+
+function drawText(
+  ctx: DrawCtx,
+  text: string,
+  xMm: number,
+  yMm: number,
+  options?: { size?: number; bold?: boolean; align?: 'left' | 'center' | 'right'; maxWidth?: number }
+) {
+  const size = options?.size ?? 8;
+  const font = options?.bold ? ctx.helvBold : ctx.helv;
+  const align = options?.align ?? 'left';
+  let str = text ?? '';
+
+  if (options?.maxWidth) {
+    const maxW = options.maxWidth * MM;
+    while (str.length > 0 && font.widthOfTextAtSize(str, size) > maxW) {
+      str = str.slice(0, -1);
+    }
+  }
+
+  let x = xMm * MM;
+  const width = font.widthOfTextAtSize(str, size);
+  if (align === 'center') x -= width / 2;
+  else if (align === 'right') x -= width;
+
+  const y = (ctx.pageHeightMm - yMm) * MM - size; // baseline adjust
+  ctx.page.drawText(str, { x, y, size, font, color: rgb(0, 0, 0) });
+}
+
+function drawRect(ctx: DrawCtx, xMm: number, yMm: number, wMm: number, hMm: number, fill?: [number, number, number]) {
+  const x = xMm * MM;
+  const y = (ctx.pageHeightMm - yMm - hMm) * MM;
+  const w = wMm * MM;
+  const h = hMm * MM;
+  ctx.page.drawRectangle({
+    x,
+    y,
+    width: w,
+    height: h,
+    borderColor: rgb(0, 0, 0),
+    borderWidth: 0.3,
+    color: fill ? rgb(fill[0], fill[1], fill[2]) : undefined,
+  });
+}
+
+function triggerDownload(bytes: Uint8Array, filename: string, mime: string) {
+  // copy into a fresh ArrayBuffer (avoid SharedArrayBuffer typing issues)
+  const ab = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(ab).set(bytes);
+  const blob = new Blob([ab], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  const body = document.body || document.getElementsByTagName('body')[0];
+  if (body) {
+    body.appendChild(a);
+    a.click();
+    body.removeChild(a);
+  }
+  URL.revokeObjectURL(url);
+}
+
+export async function generateDANFE(nfe: NFe): Promise<void> {
+  const pdfDoc = await PDFDocument.create();
+  const helv = await pdfDoc.embedFont(StandardFonts.Helvetica);
+  const helvBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+  const pageWidthMm = 210;
+  const pageHeightMm = 297;
   const margin = 10;
-  const contentWidth = pageWidth - margin * 2;
+  const contentWidth = pageWidthMm - margin * 2;
+
+  let page = pdfDoc.addPage([pageWidthMm * MM, pageHeightMm * MM]);
+  let ctx: DrawCtx = { page, helv, helvBold, pageHeightMm };
   let y = margin;
 
-  const drawRect = (x: number, yPos: number, w: number, h: number) => {
-    doc.setDrawColor(0);
-    doc.setLineWidth(0.3);
-    doc.rect(x, yPos, w, h);
-  };
-
-  const addText = (text: string, x: number, yPos: number, options?: { size?: number; bold?: boolean; align?: 'left' | 'center' | 'right'; maxWidth?: number }) => {
-    doc.setFontSize(options?.size || 8);
-    doc.setFont('helvetica', options?.bold ? 'bold' : 'normal');
-    const align = options?.align || 'left';
-    if (options?.maxWidth) {
-      doc.text(text, x, yPos, { maxWidth: options.maxWidth, align });
-    } else {
-      doc.text(text, x, yPos, { align });
-    }
+  const newPage = () => {
+    page = pdfDoc.addPage([pageWidthMm * MM, pageHeightMm * MM]);
+    ctx = { page, helv, helvBold, pageHeightMm };
+    y = margin;
   };
 
   // ===== HEADER =====
-  drawRect(margin, y, contentWidth, 30);
+  drawRect(ctx, margin, y, contentWidth, 30);
+  drawText(ctx, 'DANFE', margin + 3, y + 6, { size: 14, bold: true });
+  drawText(ctx, 'Documento Auxiliar da', margin + 3, y + 11, { size: 6 });
+  drawText(ctx, 'Nota Fiscal Eletrônica', margin + 3, y + 14, { size: 6 });
 
-  // Left: Emitter info
-  addText('DANFE', margin + 3, y + 6, { size: 14, bold: true });
-  addText('Documento Auxiliar da', margin + 3, y + 11, { size: 6 });
-  addText('Nota Fiscal Eletrônica', margin + 3, y + 14, { size: 6 });
-
-  // Center: NF-e number
   const centerX = margin + contentWidth / 2;
-  addText('NF-e', centerX, y + 6, { size: 12, bold: true, align: 'center' });
-  addText(`Nº ${nfe.number}`, centerX, y + 12, { size: 10, bold: true, align: 'center' });
-  addText(`Série: ${nfe.series}`, centerX, y + 17, { size: 8, align: 'center' });
+  drawText(ctx, 'NF-e', centerX, y + 6, { size: 12, bold: true, align: 'center' });
+  drawText(ctx, `Nº ${nfe.number}`, centerX, y + 12, { size: 10, bold: true, align: 'center' });
+  drawText(ctx, `Série: ${nfe.series}`, centerX, y + 17, { size: 8, align: 'center' });
 
-  // Right: Type
   const typeLabel = nfe.operationType === 'saida' ? '1 - SAÍDA' : '0 - ENTRADA';
-  addText(typeLabel, margin + contentWidth - 3, y + 8, { size: 9, bold: true, align: 'right' });
-  addText(`Emissão: ${formatDateTime(nfe.issueDate)}`, margin + contentWidth - 3, y + 14, { size: 7, align: 'right' });
+  drawText(ctx, typeLabel, margin + contentWidth - 3, y + 8, { size: 9, bold: true, align: 'right' });
+  drawText(ctx, `Emissão: ${formatDateTime(nfe.issueDate)}`, margin + contentWidth - 3, y + 14, { size: 7, align: 'right' });
 
-  // Status badge
   if (nfe.status === 'authorized') {
-    addText('AUTORIZADA', margin + contentWidth - 3, y + 20, { size: 8, bold: true, align: 'right' });
+    drawText(ctx, 'AUTORIZADA', margin + contentWidth - 3, y + 20, { size: 8, bold: true, align: 'right' });
   } else if (nfe.status === 'cancelled') {
-    addText('CANCELADA', margin + contentWidth - 3, y + 20, { size: 8, bold: true, align: 'right' });
+    drawText(ctx, 'CANCELADA', margin + contentWidth - 3, y + 20, { size: 8, bold: true, align: 'right' });
   }
-
   y += 32;
 
   // ===== ACCESS KEY =====
-  drawRect(margin, y, contentWidth, 10);
-  addText('CHAVE DE ACESSO', margin + 3, y + 4, { size: 6 });
-  addText(nfe.accessKey || 'Chave não disponível', margin + 3, y + 8, { size: 8, bold: true });
+  drawRect(ctx, margin, y, contentWidth, 10);
+  drawText(ctx, 'CHAVE DE ACESSO', margin + 3, y + 4, { size: 6 });
+  drawText(ctx, nfe.accessKey || 'Chave não disponível', margin + 3, y + 8, { size: 8, bold: true });
   y += 12;
 
   // ===== PROTOCOL =====
   if (nfe.protocol) {
-    drawRect(margin, y, contentWidth, 8);
-    addText('PROTOCOLO DE AUTORIZAÇÃO', margin + 3, y + 4, { size: 6 });
-    addText(`${nfe.protocol} - ${formatDateTime(nfe.authorizationDate || '')}`, margin + 3, y + 7.5, { size: 7, bold: true });
+    drawRect(ctx, margin, y, contentWidth, 8);
+    drawText(ctx, 'PROTOCOLO DE AUTORIZAÇÃO', margin + 3, y + 4, { size: 6 });
+    drawText(ctx, `${nfe.protocol} - ${formatDateTime(nfe.authorizationDate || '')}`, margin + 3, y + 7.5, { size: 7, bold: true });
     y += 10;
   }
 
   // ===== DESTINATÁRIO =====
-  drawRect(margin, y, contentWidth, 18);
-  addText('DESTINATÁRIO/REMETENTE', margin + 3, y + 4, { size: 6, bold: true });
-
-  addText('Nome/Razão Social', margin + 3, y + 8, { size: 5 });
-  addText(nfe.clientName, margin + 3, y + 12, { size: 8, bold: true });
-
+  drawRect(ctx, margin, y, contentWidth, 18);
+  drawText(ctx, 'DESTINATÁRIO/REMETENTE', margin + 3, y + 4, { size: 6, bold: true });
+  drawText(ctx, 'Nome/Razão Social', margin + 3, y + 8, { size: 5 });
+  drawText(ctx, nfe.clientName, margin + 3, y + 12, { size: 8, bold: true, maxWidth: contentWidth - 60 });
   if (nfe.clientDocument) {
-    addText('CNPJ/CPF', margin + contentWidth - 50, y + 8, { size: 5 });
-    addText(nfe.clientDocument, margin + contentWidth - 50, y + 12, { size: 8 });
+    drawText(ctx, 'CNPJ/CPF', margin + contentWidth - 50, y + 8, { size: 5 });
+    drawText(ctx, nfe.clientDocument, margin + contentWidth - 50, y + 12, { size: 8 });
   }
-
   y += 20;
 
   // ===== ITEMS TABLE =====
-  drawRect(margin, y, contentWidth, 8);
-  addText('DADOS DOS PRODUTOS/SERVIÇOS', margin + 3, y + 5, { size: 7, bold: true });
+  drawRect(ctx, margin, y, contentWidth, 8);
+  drawText(ctx, 'DADOS DOS PRODUTOS/SERVIÇOS', margin + 3, y + 5, { size: 7, bold: true });
   y += 8;
 
-  // Table Header
   const cols = [
     { label: 'Código', width: 18, x: margin },
     { label: 'Descrição', width: 55, x: margin + 18 },
@@ -101,102 +159,78 @@ export function generateDANFE(nfe: NFe): void {
     { label: 'ICMS', width: 22, x: margin + 166 },
   ];
 
-  drawRect(margin, y, contentWidth, 6);
-  doc.setFillColor(240, 240, 240);
-  doc.rect(margin, y, contentWidth, 6, 'F');
-  drawRect(margin, y, contentWidth, 6);
-
+  drawRect(ctx, margin, y, contentWidth, 6, [0.94, 0.94, 0.94]);
   cols.forEach((col) => {
-    addText(col.label, col.x + 1, y + 4, { size: 5, bold: true });
+    drawText(ctx, col.label, col.x + 1, y + 4, { size: 5, bold: true });
   });
   y += 6;
 
-  // Table Rows
   const items = nfe.items || [];
   items.forEach((item: NFeItem) => {
     if (y > 260) {
-      doc.addPage();
-      y = margin;
+      newPage();
     }
-
     const rowHeight = 6;
-    drawRect(margin, y, contentWidth, rowHeight);
+    drawRect(ctx, margin, y, contentWidth, rowHeight);
 
-    addText(item.productCode, cols[0].x + 1, y + 4, { size: 5 });
-    addText(item.productName.substring(0, 30), cols[1].x + 1, y + 4, { size: 5 });
-    addText(item.ncm || '', cols[2].x + 1, y + 4, { size: 5 });
-    addText(item.cfop || '', cols[3].x + 1, y + 4, { size: 5 });
-    addText(item.unit || 'UN', cols[4].x + 1, y + 4, { size: 5 });
-    addText(String(item.quantity), cols[5].x + 1, y + 4, { size: 5 });
-    addText(formatBRL(item.unitPrice), cols[6].x + 1, y + 4, { size: 5 });
-    addText(formatBRL(item.total), cols[7].x + 1, y + 4, { size: 5 });
-    addText(formatBRL(item.icmsValue || 0), cols[8].x + 1, y + 4, { size: 5 });
-
+    drawText(ctx, item.productCode, cols[0].x + 1, y + 4, { size: 5, maxWidth: cols[0].width - 1 });
+    drawText(ctx, item.productName.substring(0, 30), cols[1].x + 1, y + 4, { size: 5, maxWidth: cols[1].width - 1 });
+    drawText(ctx, item.ncm || '', cols[2].x + 1, y + 4, { size: 5 });
+    drawText(ctx, item.cfop || '', cols[3].x + 1, y + 4, { size: 5 });
+    drawText(ctx, item.unit || 'UN', cols[4].x + 1, y + 4, { size: 5 });
+    drawText(ctx, String(item.quantity), cols[5].x + 1, y + 4, { size: 5 });
+    drawText(ctx, formatBRL(item.unitPrice), cols[6].x + 1, y + 4, { size: 5 });
+    drawText(ctx, formatBRL(item.total), cols[7].x + 1, y + 4, { size: 5 });
+    drawText(ctx, formatBRL(item.icmsValue || 0), cols[8].x + 1, y + 4, { size: 5 });
     y += rowHeight;
   });
-
   y += 4;
 
   // ===== TOTALS =====
-  if (y > 250) {
-    doc.addPage();
-    y = margin;
-  }
+  if (y > 250) newPage();
 
-  drawRect(margin, y, contentWidth, 24);
-  addText('CÁLCULO DO IMPOSTO', margin + 3, y + 4, { size: 6, bold: true });
+  drawRect(ctx, margin, y, contentWidth, 24);
+  drawText(ctx, 'CÁLCULO DO IMPOSTO', margin + 3, y + 4, { size: 6, bold: true });
 
   const taxY = y + 8;
   const taxCol = contentWidth / 4;
 
-  // Row 1
-  addText('Base ICMS', margin + 3, taxY, { size: 5 });
-  addText(formatBRL(nfe.icms), margin + 3, taxY + 3.5, { size: 7, bold: true });
+  drawText(ctx, 'Base ICMS', margin + 3, taxY, { size: 5 });
+  drawText(ctx, formatBRL(nfe.icms), margin + 3, taxY + 3.5, { size: 7, bold: true });
+  drawText(ctx, 'Valor ICMS', margin + taxCol + 3, taxY, { size: 5 });
+  drawText(ctx, formatBRL(nfe.icms), margin + taxCol + 3, taxY + 3.5, { size: 7, bold: true });
+  drawText(ctx, 'Valor IPI', margin + taxCol * 2 + 3, taxY, { size: 5 });
+  drawText(ctx, formatBRL(nfe.ipi), margin + taxCol * 2 + 3, taxY + 3.5, { size: 7, bold: true });
+  drawText(ctx, 'Valor Total NF-e', margin + taxCol * 3 + 3, taxY, { size: 5 });
+  drawText(ctx, formatBRL(nfe.total), margin + taxCol * 3 + 3, taxY + 3.5, { size: 9, bold: true });
 
-  addText('Valor ICMS', margin + taxCol + 3, taxY, { size: 5 });
-  addText(formatBRL(nfe.icms), margin + taxCol + 3, taxY + 3.5, { size: 7, bold: true });
-
-  addText('Valor IPI', margin + taxCol * 2 + 3, taxY, { size: 5 });
-  addText(formatBRL(nfe.ipi), margin + taxCol * 2 + 3, taxY + 3.5, { size: 7, bold: true });
-
-  addText('Valor Total NF-e', margin + taxCol * 3 + 3, taxY, { size: 5 });
-  addText(formatBRL(nfe.total), margin + taxCol * 3 + 3, taxY + 3.5, { size: 9, bold: true });
-
-  // Row 2
   const taxY2 = taxY + 9;
-  addText('Valor PIS', margin + 3, taxY2, { size: 5 });
-  addText(formatBRL(nfe.pis), margin + 3, taxY2 + 3.5, { size: 7, bold: true });
-
-  addText('Valor COFINS', margin + taxCol + 3, taxY2, { size: 5 });
-  addText(formatBRL(nfe.cofins), margin + taxCol + 3, taxY2 + 3.5, { size: 7, bold: true });
-
-  addText('Desconto', margin + taxCol * 2 + 3, taxY2, { size: 5 });
-  addText(formatBRL(nfe.discount), margin + taxCol * 2 + 3, taxY2 + 3.5, { size: 7, bold: true });
-
-  addText('Frete', margin + taxCol * 3 + 3, taxY2, { size: 5 });
-  addText(formatBRL(nfe.shipping), margin + taxCol * 3 + 3, taxY2 + 3.5, { size: 7, bold: true });
+  drawText(ctx, 'Valor PIS', margin + 3, taxY2, { size: 5 });
+  drawText(ctx, formatBRL(nfe.pis), margin + 3, taxY2 + 3.5, { size: 7, bold: true });
+  drawText(ctx, 'Valor COFINS', margin + taxCol + 3, taxY2, { size: 5 });
+  drawText(ctx, formatBRL(nfe.cofins), margin + taxCol + 3, taxY2 + 3.5, { size: 7, bold: true });
+  drawText(ctx, 'Desconto', margin + taxCol * 2 + 3, taxY2, { size: 5 });
+  drawText(ctx, formatBRL(nfe.discount), margin + taxCol * 2 + 3, taxY2 + 3.5, { size: 7, bold: true });
+  drawText(ctx, 'Frete', margin + taxCol * 3 + 3, taxY2, { size: 5 });
+  drawText(ctx, formatBRL(nfe.shipping), margin + taxCol * 3 + 3, taxY2 + 3.5, { size: 7, bold: true });
 
   y += 26;
 
   // ===== CANCELLATION =====
   if (nfe.status === 'cancelled' && nfe.cancellationReason) {
-    drawRect(margin, y, contentWidth, 14);
-    doc.setFillColor(255, 230, 230);
-    doc.rect(margin, y, contentWidth, 14, 'F');
-    drawRect(margin, y, contentWidth, 14);
-    addText('NOTA FISCAL CANCELADA', margin + 3, y + 5, { size: 9, bold: true });
-    addText(`Motivo: ${nfe.cancellationReason}`, margin + 3, y + 10, { size: 7 });
+    drawRect(ctx, margin, y, contentWidth, 14, [1, 0.9, 0.9]);
+    drawText(ctx, 'NOTA FISCAL CANCELADA', margin + 3, y + 5, { size: 9, bold: true });
+    drawText(ctx, `Motivo: ${nfe.cancellationReason}`, margin + 3, y + 10, { size: 7, maxWidth: contentWidth - 6 });
     if (nfe.cancellationDate) {
-      addText(`Data: ${formatDateTime(nfe.cancellationDate)}`, margin + 3, y + 13, { size: 6 });
+      drawText(ctx, `Data: ${formatDateTime(nfe.cancellationDate)}`, margin + 3, y + 13, { size: 6 });
     }
   }
 
   // ===== FOOTER =====
-  doc.setFontSize(6);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Documento gerado pelo sistema ERP - Use Sistemas', pageWidth / 2, 290, { align: 'center' });
+  drawText(ctx, 'Documento gerado pelo sistema ERP - Use Sistemas', pageWidthMm / 2, 290, { size: 6, align: 'center' });
 
-  doc.save(`DANFE_${nfe.number}.pdf`);
+  const bytes = await pdfDoc.save();
+  triggerDownload(bytes, `DANFE_${nfe.number}.pdf`, 'application/pdf');
 }
 
 export function generateNFeXML(nfe: NFe): void {
