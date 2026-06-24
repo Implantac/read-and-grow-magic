@@ -561,16 +561,17 @@ async function generateDailyActions(companyId: string) {
   const topActions = actions.slice(0, 30);
 
   if (topActions.length > 0) {
-    await supabase.from("ai_daily_actions").insert(topActions);
+    await supabase.from("ai_daily_actions").insert(topActions.map((a) => ({ ...a, company_id: companyId })));
   }
 
   return { actions: topActions.length };
 }
 
 // ─── Engine 5: Opportunity Predictions (Fase 3) ──────────────────────
-async function generatePredictions() {
+async function generatePredictions(companyId: string) {
   const { data: funnelItems } = await supabase.from("sales_funnel")
     .select("*, clients:client_id(id, name, code)")
+    .eq("company_id", companyId)
     .eq("status", "open")
     .order("value", { ascending: false })
     .limit(50);
@@ -579,8 +580,10 @@ async function generatePredictions() {
 
   const { data: orders } = await supabase.from("orders")
     .select("id, client_id, total, status, date")
+    .eq("company_id", companyId)
     .order("date", { ascending: false })
     .limit(500);
+
 
   const now = new Date();
 
