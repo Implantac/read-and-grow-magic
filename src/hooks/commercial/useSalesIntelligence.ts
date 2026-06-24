@@ -4,6 +4,14 @@ import { useMemo } from 'react';
 import { differenceInDays, subDays, format } from 'date-fns';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
+import type { Database } from '@/integrations/supabase/types';
+type OpportunityInsert = Database['public']['Tables']['sales_opportunities']['Insert'];
+type OpportunityUpdate = Database['public']['Tables']['sales_opportunities']['Update'];
+type FollowUpInsert = Database['public']['Tables']['follow_ups']['Insert'];
+type FollowUpUpdate = Database['public']['Tables']['follow_ups']['Update'];
+type CampaignInsert = Database['public']['Tables']['sales_campaigns']['Insert'];
+type CampaignUpdate = Database['public']['Tables']['sales_campaigns']['Update'];
+
 // ─── Types ───────────────────────────────────────────────────────────────
 export interface DbOpportunity {
   id: string;
@@ -90,7 +98,7 @@ export function useCreateOpportunity() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (item: Partial<DbOpportunity>) => {
-      const { data, error } = await supabase.from('sales_opportunities').insert(item as any).select().single();
+      const { data, error } = await supabase.from('sales_opportunities').insert(item as OpportunityInsert).select().single();
       if (error) throw error;
       return data;
     },
@@ -106,7 +114,7 @@ export function useUpdateOpportunity() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<DbOpportunity> & { id: string }) => {
-      const { data, error } = await supabase.from('sales_opportunities').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id).select().single();
+      const { data, error } = await supabase.from('sales_opportunities').update({ ...updates, updated_at: new Date().toISOString() } as OpportunityUpdate).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },
@@ -132,7 +140,7 @@ export function useCreateFollowUp() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (item: Partial<DbFollowUp>) => {
-      const { data, error } = await supabase.from('follow_ups').insert(item as any).select().single();
+      const { data, error } = await supabase.from('follow_ups').insert(item as FollowUpInsert).select().single();
       if (error) throw error;
       return data;
     },
@@ -148,7 +156,7 @@ export function useUpdateFollowUp() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<DbFollowUp> & { id: string }) => {
-      const { data, error } = await supabase.from('follow_ups').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id).select().single();
+      const { data, error } = await supabase.from('follow_ups').update({ ...updates, updated_at: new Date().toISOString() } as FollowUpUpdate).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },
@@ -174,7 +182,7 @@ export function useCreateCampaign() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (item: Partial<DbCampaign>) => {
-      const { data, error } = await supabase.from('sales_campaigns').insert(item as any).select().single();
+      const { data, error } = await supabase.from('sales_campaigns').insert(item as CampaignInsert).select().single();
       if (error) throw error;
       return data;
     },
@@ -190,7 +198,7 @@ export function useUpdateCampaign() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<DbCampaign> & { id: string }) => {
-      const { data, error } = await supabase.from('sales_campaigns').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id).select().single();
+      const { data, error } = await supabase.from('sales_campaigns').update({ ...updates, updated_at: new Date().toISOString() } as CampaignUpdate).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },
