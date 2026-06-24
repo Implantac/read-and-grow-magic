@@ -102,6 +102,26 @@ export async function resolveContext(
   };
 }
 
+/**
+ * Same as resolveContext but accepts raw {userId, companyId, defaultBranchId}
+ * for code paths that don't use requireAuth (e.g. functions that do their
+ * own auth via getClaims).
+ */
+export async function resolveContextByIds(
+  req: Request,
+  ids: { userId: string | null; companyId: string | null; defaultBranchId?: string | null },
+): Promise<TenantContext | TenantError> {
+  const fakeAuth: AuthResult = {
+    ok: true,
+    userId: ids.userId,
+    role: null,
+    viaCron: false,
+    companyId: ids.companyId,
+    defaultBranchId: ids.defaultBranchId ?? null,
+  };
+  return resolveContext(req, fakeAuth);
+}
+
 export interface CallerWithCompany {
   ok: true;
   companyId: string | null;
