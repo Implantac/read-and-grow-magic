@@ -30,16 +30,25 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, serviceKey);
 
+    const userId = (claimsData.claims as any).sub;
+    const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', userId).maybeSingle();
+    const callerCompany = (profile as any)?.company_id;
+    if (!callerCompany) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const body = await req.json().catch(() => ({}));
     const action = body.action || "suggest";
 
-    // Fetch active production orders
+    // Fetch active production orders for caller's company
     const { data: orders, error: ordErr } = await supabase
       .from("production_orders")
       .select("*")
+      .eq("company_id", callerCompany)
       .in("status", ["planned", "in_progress", "paused", "waiting_material", "outsourced"])
       .order("created_at", { ascending: false })
       .limit(500);
+
 
     if (ordErr) throw ordErr;
     const allOrders = orders || [];
