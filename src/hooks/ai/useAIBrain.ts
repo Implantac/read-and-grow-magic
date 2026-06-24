@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { Database, Json } from '@/integrations/supabase/types';
+import type { Database } from '@/integrations/supabase/types';
 import { useCallback, useEffect, useState } from 'react';
+
+// Loose JSON object shape — brain payloads are heterogeneous and consumed by many
+// widgets that read arbitrary keys. Keeping it permissive avoids forcing casts in callers.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type BrainJson = Record<string, any> | any[] | string | number | boolean | null;
 
 type RealtimeFilter = Parameters<ReturnType<typeof supabase.channel>['on']>[1];
 
