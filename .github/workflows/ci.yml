@@ -215,6 +215,28 @@ jobs:
             echo "- Entradas preservadas (interseção pre∩post): \`$OVERLAP\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # Verifica existência do .eslintcache para condicionar o upload do artefato.
+      - name: Check .eslintcache presence
+        if: always()
+        id: eslint-cache-file
+        run: |
+          if [ -f node_modules/.cache/eslint/.eslintcache ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Disponibiliza o .eslintcache como artefato do job para inspeção manual
+      # da evidência de reutilização entre execuções de CI.
+      - name: Upload .eslintcache artifact
+        if: always() && steps.eslint-cache-file.outputs.exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslintcache-${{ github.run_id }}-${{ github.run_attempt }}
+          path: node_modules/.cache/eslint/.eslintcache
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Save ESLint cache
         if: always()
         uses: actions/cache/save@v4
