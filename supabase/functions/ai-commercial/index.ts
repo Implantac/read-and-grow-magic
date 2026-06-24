@@ -205,7 +205,7 @@ async function scoreClients(companyId: string, scope: string[] | null) {
 }
 
 // ─── Engine 2: AI Recommendations (Fase 2 - cross-sell, upsell, ticket) ──
-async function generateRecommendations(companyId: string) {
+async function generateRecommendations(companyId: string, scope: string[] | null) {
   const { data: topClients } = await supabase
     .from("ai_sales_scores")
     .select("*, clients(id, name, code, segment, last_purchase_date, avg_ticket, total_purchases, default_payment_condition)")
