@@ -51,7 +51,7 @@ Criado `supabase/functions/_shared/tenant.ts` com:
 
 ## 4. Dependências vulneráveis
 - ✅ `@supabase/supabase-js` → `^2.108.2` (corrige `ws` DoS/uninit memory)
-- ⏸️ `jspdf@3.0.1` — uso isolado em `src/lib/fiscalDocuments.ts` (DANFE/render texto). Vulnerabilidades reportadas atingem features não usadas (BMP/GIF decoder, addJS, AcroForm). Migração para `pdf-lib` exige reescrita completa do DANFE — agendar como item dedicado.
+- ✅ `jspdf` **removido** — `src/lib/fiscalDocuments.ts` reescrito com `pdf-lib@1.17.1` (sem CVEs conhecidos). Todas as advisories de jsPDF (path traversal, HTML/AcroForm injection, BMP/GIF DoS, addJS, XMP) deixam de aplicar.
 - ⏸️ `react-router-dom@6.30.1` — fix está em v7 (major). Bump major requer regressão de rotas; agendar.
 - ⏸️ `recharts@2.15.4` — fix em v3 (major, breaking). Agendar.
 
@@ -82,10 +82,12 @@ Trigger `fn_audit_sensitive_mutation` + `trg_audit_<tabela>` ativos em:
 
 ## Critério de saída da Fase 0
 - [x] 0 findings críticos no scanner
-- [ ] 0 deps críticas (jspdf agendado para refactor com pdf-lib)
+- [x] 0 deps críticas (jspdf removido, migrado para pdf-lib)
 - [x] Helper de tenant + validação disponíveis
 - [x] 100% edge functions auditadas com `company_id` scope + erro genérico
 - [x] Trigger de auditoria ativo em tabelas sensíveis
 - [x] Validação aplicada em 100% das funções com body (8/8)
+
+**Status: ✅ FASE 0 CONCLUÍDA** — pendente apenas bumps majors opcionais (react-router v7, recharts v3).
 
 
