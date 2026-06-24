@@ -1,6 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { Database } from '@/integrations/supabase/types';
 import { useCallback, useEffect, useState } from 'react';
+
+// Loose JSON object shape — brain payloads are heterogeneous and consumed by many
+// widgets that read arbitrary keys. Keeping it permissive avoids forcing casts in callers.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type BrainJson = Record<string, any> | any[] | string | number | boolean | null;
+
+type RealtimeFilter = Parameters<ReturnType<typeof supabase.channel>['on']>[1];
 
 export interface BrainDecision {
   id: string;
@@ -11,12 +19,12 @@ export interface BrainDecision {
   impact_level: 'low' | 'medium' | 'high' | 'critical';
   risk_level: 'low' | 'medium' | 'high';
   confidence: number;
-  evidence: any;
-  proposed_action: any;
+  evidence: BrainJson;
+  proposed_action: BrainJson;
   status: string;
   auto_executable: boolean;
   requires_approval: boolean;
-  execution_result: any;
+  execution_result: BrainJson;
   created_at: string;
 }
 
@@ -24,7 +32,7 @@ export interface BrainMemory {
   id: string;
   category: string;
   key: string;
-  value: any;
+  value: BrainJson;
   importance: number;
   scope: string;
   updated_at: string;
@@ -35,12 +43,16 @@ export interface BrainRun {
   trigger: string;
   mode: string;
   synthesis: string | null;
-  structured: any;
+  structured: BrainJson;
   decisions_count: number;
   duration_ms: number | null;
   status: string;
   created_at: string;
 }
+
+type DecisionRow = Database['public']['Tables']['ai_brain_decisions']['Row'];
+type MemoryRow = Database['public']['Tables']['ai_brain_memory']['Row'];
+type RunRow = Database['public']['Tables']['ai_brain_runs']['Row'];
 
 // ─── Decisions ─────────────────────────────
 export function useBrainDecisions(status?: string) {
@@ -49,16 +61,20 @@ export function useBrainDecisions(status?: string) {
     let mounted = true;
     const ch = supabase
       .channel(`brain-decisions-rt-${Math.random().toString(36).slice(2)}`)
-      .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'ai_brain_decisions' }, () => {
-        if (mounted) qc.invalidateQueries({ queryKey: ['brain_decisions'] });
-      })
-      .on('postgres_changes' as any, { event: '*', schema: 'public', table: 'ai_brain_runs' }, () => {
-        if (mounted) qc.invalidateQueries({ queryKey: ['brain_runs'] });
-      })
+      .on(
+        'postgres_changes' as unknown as 'system',
+        { event: '*', schema: 'public', table: 'ai_brain_decisions' } as unknown as RealtimeFilter,
+        () => { if (mounted) qc.invalidateQueries({ queryKey: ['brain_decisions'] }); },
+      )
+      .on(
+        'postgres_changes' as unknown as 'system',
+        { event: '*', schema: 'public', table: 'ai_brain_runs' } as unknown as RealtimeFilter,
+        () => { if (mounted) qc.invalidateQueries({ queryKey: ['brain_runs'] }); },
+      )
       .subscribe();
-    return () => { 
+    return () => {
       mounted = false;
-      supabase.removeChannel(ch); 
+      supabase.removeChannel(ch);
     };
   }, [qc]);
 
@@ -66,14 +82,14 @@ export function useBrainDecisions(status?: string) {
     queryKey: ['brain_decisions', status],
     queryFn: async () => {
       let q = supabase
-        .from('ai_brain_decisions' as any)
+        .from('ai_brain_decisions')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(100);
       if (status) q = q.eq('status', status);
       const { data, error } = await q;
       if (error) throw error;
-      return (data || []) as unknown as BrainDecision[];
+      return ((data ?? []) as DecisionRow[]) as unknown as BrainDecision[];
     },
     refetchInterval: 60_000,
   });
@@ -113,22 +129,29 @@ export function useBrainMemories() {
     queryKey: ['brain_memories'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('ai_brain_memory' as any)
+        .from('ai_brain_memory')
         .select('*')
         .order('importance', { ascending: false })
         .order('updated_at', { ascending: false })
         .limit(200);
       if (error) throw error;
-      return (data || []) as unknown as BrainMemory[];
+      return ((data ?? []) as MemoryRow[]) as unknown as BrainMemory[];
     },
   });
 }
 
+export interface SaveMemoryInput {
+  category: string;
+  key: string;
+  value: BrainJson;
+  importance?: number;
+  scope?: string;
+}
 
 export function useSaveMemory() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (memory: { category: string; key: string; value: any; importance?: number; scope?: string }) => {
+    mutationFn: async (memory: SaveMemoryInput) => {
       const { data, error } = await supabase.functions.invoke('ai-brain', {
         body: { action: 'save_memory', memory },
       });
@@ -145,12 +168,12 @@ export function useBrainRuns() {
     queryKey: ['brain_runs'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('ai_brain_runs' as any)
+        .from('ai_brain_runs')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(20);
       if (error) throw error;
-      return (data || []) as unknown as BrainRun[];
+      return ((data ?? []) as RunRow[]) as unknown as BrainRun[];
     },
   });
 }
@@ -173,18 +196,22 @@ export function useRunBrain() {
   });
 }
 
+export interface BrainChatAction {
+  tool: string;
+  args: BrainJson;
+  result: BrainJson;
+}
+
 export interface BrainChatMessage {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  actions?: Array<{ tool: string; args: any; result: any }>;
+  actions?: BrainChatAction[];
 }
 
 export function useBrainChat() {
   const [messages, setMessages] = useState<BrainChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
-
-
 
   const send = useCallback(async (text: string, agent: string = 'geral') => {
     const userMsg: BrainChatMessage = { id: crypto.randomUUID(), role: 'user', content: text };
@@ -196,14 +223,16 @@ export function useBrainChat() {
         body: { action: 'chat', messages: history, agent },
       });
       if (error) throw error;
+      const payload = (data ?? {}) as { content?: string; actions?: BrainChatAction[] };
       setMessages((prev) => [
         ...prev,
-        { id: crypto.randomUUID(), role: 'assistant', content: data?.content || '—', actions: data?.actions || [] },
+        { id: crypto.randomUUID(), role: 'assistant', content: payload.content || '—', actions: payload.actions || [] },
       ]);
-    } catch (e: any) {
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Erro';
       setMessages((prev) => [
         ...prev,
-        { id: crypto.randomUUID(), role: 'assistant', content: '❌ ' + (e?.message || 'Erro') },
+        { id: crypto.randomUUID(), role: 'assistant', content: '❌ ' + message },
       ]);
     } finally {
       setLoading(false);
@@ -223,8 +252,6 @@ export function useNotifyCritical() {
     },
   });
 }
-
-
 
 // ─── Learning analytics ─────────────────────────────
 export interface LearningStats {
@@ -249,10 +276,10 @@ export function useBrainLearning() {
     refetchInterval: 60_000,
     queryFn: async (): Promise<LearningStats> => {
       const [{ data: decs }, { data: mems }] = await Promise.all([
-        supabase.from('ai_brain_decisions' as any).select('*').order('created_at', { ascending: false }).limit(500),
-        supabase.from('ai_brain_memory' as any).select('*').order('importance', { ascending: false }).limit(10),
+        supabase.from('ai_brain_decisions').select('*').order('created_at', { ascending: false }).limit(500),
+        supabase.from('ai_brain_memory').select('*').order('importance', { ascending: false }).limit(10),
       ]);
-      const list = ((decs || []) as unknown as BrainDecision[]);
+      const list = ((decs ?? []) as DecisionRow[]) as unknown as BrainDecision[];
       const total = list.length;
       const approved = list.filter((d) => d.status === 'approved' || d.status === 'executed').length;
       const rejected = list.filter((d) => d.status === 'rejected').length;
@@ -299,7 +326,7 @@ export function useBrainLearning() {
         total, approved, rejected, pending, autoExecuted, executed,
         approvalRate, rejectionRate, avgConfidence,
         byModule, calibration, recentRejected,
-        topMemories: ((mems || []) as unknown as BrainMemory[]),
+        topMemories: ((mems ?? []) as MemoryRow[]) as unknown as BrainMemory[],
       };
     },
   });
