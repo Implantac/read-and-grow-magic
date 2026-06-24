@@ -8,6 +8,8 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
+    "lint:ci": "node scripts/lint-ci.mjs",
+    "typecheck": "tsgo --noEmit",
     "preview": "vite preview"
   },
   "dependencies": {
