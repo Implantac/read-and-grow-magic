@@ -89,7 +89,79 @@ jobs:
           name: eslint-thresholds-tests-log
           path: /tmp/eslint-thresholds-logs/
           if-no-files-found: ignore
-          retention-days: 14
+
+      # Quando a suite falha, emite workflow annotations (::error::) com path/linha,
+      # de modo que apareçam diretamente na aba "Files changed" e no checks summary
+      # do PR. Lê o log capturado em test-output.log para reconstruir os casos ❌.
+      - name: Annotate test failures
+        if: steps.run_tests.outcome == 'failure'
+        env:
+          LOG_FILE: /tmp/eslint-thresholds-logs/test-output.log
+          TEST_FILE: scripts/test-eslint-thresholds.sh
+          VALIDATOR_FILE: scripts/validate-eslint-thresholds.sh
+        run: |
+          if [ ! -f "$LOG_FILE" ]; then
+            echo "::error file=$TEST_FILE::Suite eslint-thresholds-tests falhou, mas log não foi capturado ($LOG_FILE ausente)."
+            exit 0
+          fi
+
+          # Linhas indicando casos que falharam: "  ❌ <name> — <reasons>"
+          mapfile -t FAIL_LINES < <(grep -nE '^\s*❌ ' "$LOG_FILE" || true)
+
+          # Limpa arquivo de resumo para o próximo step ler.
+          : > /tmp/eslint-thresholds-logs/failures.md
+
+          if [ "${#FAIL_LINES[@]}" -eq 0 ]; then
+            echo "::error file=$TEST_FILE::Suite falhou (exit != 0) mas nenhum caso ❌ foi detectado no log. Verifique o artefato eslint-thresholds-tests-log."
+            echo "- Suite falhou sem casos ❌ detectados (ver artefato)." >> /tmp/eslint-thresholds-logs/failures.md
+            exit 0
+          fi
+
+          for entry in "${FAIL_LINES[@]}"; do
+            # entry = "<lineno>:  ❌ <name> —<reasons>"
+            lineno="${entry%%:*}"
+            rest="${entry#*:}"
+            # Remove o prefixo "  ❌ "
+            desc="$(printf '%s' "$rest" | sed -E 's/^[[:space:]]*❌[[:space:]]+//')"
+            name="${desc%% —*}"
+            reasons="${desc#*—}"
+            [ "$reasons" = "$desc" ] && reasons=""
+
+            # Tenta achar a env var de threshold citada no stderr do validador
+            # (linhas após "stderr:" indentadas com 7 espaços), tipicamente
+            # contendo "ESLINT_*".
+            threshold="$(awk -v start="$lineno" '
+              NR<=start{next}
+              /^\s*❌ /{exit}
+              /ESLINT_[A-Z_]+/ {
+                match($0,/ESLINT_[A-Z_]+/);
+                print substr($0,RSTART,RLENGTH); exit
+              }
+            ' "$LOG_FILE")"
+
+            msg="Caso \"$name\" falhou."
+            [ -n "$reasons" ] && msg="$msg Motivo:$reasons"
+            [ -n "$threshold" ] && msg="$msg Threshold envolvido: $threshold."
+
+            # Annotation no arquivo dos testes (linha aproximada do caso é
+            # desconhecida — usamos o arquivo inteiro para que apareça no PR).
+            echo "::error file=$TEST_FILE,title=ESLint thresholds — caso falhou::$msg"
+
+            # Se conseguimos identificar a env var, também anota o validador
+            # (que é onde a regra de faixa vive).
+            if [ -n "$threshold" ]; then
+              echo "::error file=$VALIDATOR_FILE,title=Threshold inválido ($threshold)::Validação de $threshold falhou no caso \"$name\". Ajuste a faixa permitida no validador ou corrija o valor em vars/inputs/env."
+            fi
+
+            # Guarda para o Summary
+            printf -- '- **%s** — %s%s\n' \
+              "$name" \
+              "${reasons:-sem detalhes}" \
+              "${threshold:+ _(threshold: \`$threshold\`)_}" \
+              >> /tmp/eslint-thresholds-logs/failures.md
+          done
+
+
 
       - name: Skip notice
         if: steps.filter.outputs.thresholds != 'true'
