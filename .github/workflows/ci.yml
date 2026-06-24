@@ -72,3 +72,10 @@ jobs:
       # (limpeza incremental ainda em andamento).
       - name: Lint (strict, ignora no-explicit-any)
         run: bun run lint:ci
+
+      - name: Save ESLint cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: node_modules/.cache/eslint
+          key: ${{ runner.os }}-eslint-v1-${{ hashFiles('eslint.config.*', 'bun.lockb', 'bun.lock') }}-${{ github.run_id }}
