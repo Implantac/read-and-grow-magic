@@ -134,6 +134,26 @@ export function assertSameBranch(
   return ctx.branchIds.includes(rowBranchId);
 }
 
+/**
+ * Returns the branch_id list to use as filter, or null when no scoping
+ * should be applied (cron / no branches). When the caller explicitly sent
+ * x-branch-id, only that branch is returned; otherwise spans every branch
+ * the user has access to in the company.
+ *
+ * Usage:
+ *   const scope = branchScope(ctx);
+ *   let q = supabase.from('production_orders').select('*').eq('company_id', companyId);
+ *   if (scope) q = q.in('branch_id', scope);
+ */
+export function branchScope(ctx: TenantContext): string[] | null {
+  if (ctx.viaCron) return null;
+  if (!ctx.branchId && ctx.branchIds.length === 0) return null;
+  // If caller has only one branch OR forced a specific branch via header,
+  // narrow to a single id; otherwise span all accessible branches.
+  if (ctx.branchIds.length <= 1) return ctx.branchId ? [ctx.branchId] : null;
+  return ctx.branchIds;
+}
+
 /** Generic client-facing error; logs the original server-side. */
 export function safeError(
   err: unknown,
