@@ -26,28 +26,41 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
+    const callerCompany = auth.companyId;
+    if (!callerCompany && !auth.viaCron) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     if (action === 'status') {
-      const { data: openIssues } = await supabase
+      let q = supabase
         .from('financial_audit_logs')
         .select('level', { count: 'exact' })
         .eq('status', 'open');
+      if (callerCompany) q = q.eq('company_id', callerCompany);
+      const { data: openIssues } = await q;
       const counts = { high: 0, medium: 0, low: 0 };
       (openIssues ?? []).forEach((r: any) => { counts[r.level as keyof typeof counts]++; });
-      const { data: lastRun } = await supabase
+      let qLast = supabase
         .from('financial_audit_logs')
         .select('created_at, audit_run_id')
-        .order('created_at', { ascending: false }).limit(1).maybeSingle();
+        .order('created_at', { ascending: false }).limit(1);
+      if (callerCompany) qLast = qLast.eq('company_id', callerCompany);
+      const { data: lastRun } = await qLast.maybeSingle();
       return Response.json({ ok: true, open_by_level: counts, last_run_at: lastRun?.created_at ?? null }, { headers: corsHeaders });
     }
 
     if (action === 'logs') {
-      const { data, error } = await supabase
+      let q = supabase
         .from('financial_audit_logs').select('*')
         .order('created_at', { ascending: false }).limit(100);
+      if (callerCompany) q = q.eq('company_id', callerCompany);
+      const { data, error } = await q;
       if (error) throw error;
       return Response.json({ ok: true, logs: data }, { headers: corsHeaders });
     }
+
 
     // Default: run audit
     const { data, error } = await supabase.rpc('run_financial_audit', { _mode: mode });
