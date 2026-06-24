@@ -718,10 +718,16 @@ ${ctx}`;
   return { content: finalContent || "✅ Ações executadas.", actions: executed };
 }
 
-async function handleApprove(decisionId: string, approve: boolean, userId?: string) {
-  const { data: dec, error: e0 } = await admin
-    .from("ai_brain_decisions").select("*").eq("id", decisionId).single();
+async function handleApprove(decisionId: string, approve: boolean, userId: string | undefined, callerCompany: string | null) {
+  const q = admin.from("ai_brain_decisions").select("*").eq("id", decisionId);
+  if (callerCompany) q.eq("company_id", callerCompany);
+  const { data: dec, error: e0 } = await q.maybeSingle();
   if (e0) throw e0;
+  if (!dec) {
+    const err: any = new Error("Forbidden");
+    err.status = 403;
+    throw err;
+  }
 
   if (!approve) {
     const { data, error } = await admin.from("ai_brain_decisions")
@@ -745,6 +751,7 @@ async function handleApprove(decisionId: string, approve: boolean, userId?: stri
   if (error) throw error;
   return data;
 }
+
 
 // ─────────────────────────────────────────────
 // WEEKLY LEARNING — analisa rejeitadas e salva lições
