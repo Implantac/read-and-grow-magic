@@ -62,6 +62,9 @@ jobs:
         with:
           # Em pushes (sem base), o filter retorna "true" para todos os filtros,
           # garantindo que pelo menos um push na branch padrão valide a suite.
+          # `list-files: shell` expõe a lista de arquivos casados em
+          # `steps.filter.outputs.<name>_files` (separados por espaço, com escaping shell-safe).
+          list-files: shell
           filters: |
             thresholds:
               - 'scripts/validate-eslint-thresholds.sh'
@@ -80,9 +83,13 @@ jobs:
 
       - name: Summary
         if: always()
+        env:
+          THRESHOLDS_RAN: ${{ steps.filter.outputs.thresholds }}
+          THRESHOLDS_FILES: ${{ steps.filter.outputs.thresholds_files }}
+          JOB_STATUS: ${{ job.status }}
         run: |
-          if [ "${{ steps.filter.outputs.thresholds }}" = "true" ]; then
-            STATUS="executada (\`${{ job.status }}\`)"
+          if [ "$THRESHOLDS_RAN" = "true" ]; then
+            STATUS="executada (\`$JOB_STATUS\`)"
             REASON="arquivos relevantes alterados neste PR/push"
           else
             STATUS="pulada"
@@ -97,8 +104,31 @@ jobs:
             echo "| Motivo | $REASON |"
             echo "| Arquivos monitorados | \`scripts/validate-eslint-thresholds.sh\`, \`scripts/test-eslint-thresholds.sh\`, \`.github/workflows/ci.yml\` |"
             echo ""
+            echo "### 📂 Arquivos que dispararam a execução"
+            echo ""
+            if [ "$THRESHOLDS_RAN" = "true" ]; then
+              if [ -n "$THRESHOLDS_FILES" ]; then
+                # `list-files: shell` devolve os paths separados por espaço.
+                # Convertemos em uma lista markdown com um item por arquivo.
+                # shellcheck disable=SC2086
+                set -- $THRESHOLDS_FILES
+                echo "Total: **$#** arquivo(s)."
+                echo ""
+                for f in "$@"; do
+                  echo "- \`$f\`"
+                done
+              else
+                # Em pushes sem base de comparação o filter marca "true"
+                # sem listar arquivos — registramos isso explicitamente.
+                echo "_O filter retornou \`true\` sem lista de arquivos (provavelmente um push sem base de comparação — ex.: primeiro push da branch ou execução manual)._"
+              fi
+            else
+              echo "_Nenhum arquivo monitorado foi alterado neste PR/push._"
+            fi
+            echo ""
             echo "> Quando executada, uma falha aqui bloqueia o job \`quality\` via \`needs:\`."
           } >> "$GITHUB_STEP_SUMMARY"
+
 
 
   quality:
