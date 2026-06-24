@@ -274,7 +274,7 @@ export function useDeleteOrder() {
               if (restError) throw restError;
 
               if (order_items && order_items.length > 0) {
-                const restoredItems = order_items.map((item: any) => ({
+                const restoredItems = order_items.map((item: DbOrderItem) => ({
                   ...item,
                   order_id: restored.id
                 }));
