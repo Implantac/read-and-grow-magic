@@ -49,6 +49,8 @@ Deno.serve(async (req) => {
     if (!ctx.ok) {
       return new Response(JSON.stringify({ error: ctx.message }), { status: ctx.status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+    const moduleDenied = await requireModule(ctx, 'producao');
+    if (moduleDenied) return moduleDenied;
     const scope = branchScope(ctx);
 
     // Fetch production orders (tenant + branch scoped)
