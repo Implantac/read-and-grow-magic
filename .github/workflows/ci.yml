@@ -41,17 +41,68 @@ env:
   ESLINT_REQUIRE_MTIME_CHANGED: ${{ vars.ESLINT_REQUIRE_MTIME_CHANGED || github.event.inputs.eslint_require_mtime_changed || 'false' }}
 
 jobs:
+  # Job dedicado e rápido para os testes do validador de thresholds.
+  # Roda em paralelo com `quality` e é dependência obrigatória dele —
+  # qualquer regressão nas validações falha o pipeline inteiro antes do
+  # lint/typecheck, mesmo em PRs que não tocam o workflow.
+  eslint-thresholds-tests:
+    name: ESLint thresholds — tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect changes to threshold scripts
+        id: changed
+        run: |
+          if git rev-parse HEAD~1 >/dev/null 2>&1; then
+            CHANGED=$(git diff --name-only HEAD~1 HEAD -- \
+              scripts/validate-eslint-thresholds.sh \
+              scripts/test-eslint-thresholds.sh \
+              .github/workflows/ci.yml || true)
+          else
+            CHANGED="(shallow clone — assuming changed)"
+          fi
+          if [ -n "$CHANGED" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Arquivos relacionados a thresholds alterados neste push:"
+            echo "$CHANGED"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Nenhuma mudança nos scripts de threshold — executando suite mesmo assim."
+          fi
+
+      # Executa SEMPRE (não apenas quando os scripts mudam) para travar
+      # qualquer regressão indireta — ex.: mudança no bash do runner,
+      # alteração em variáveis de ambiente herdadas, etc.
+      - name: Run threshold validator tests
+        run: bash scripts/test-eslint-thresholds.sh
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "## 🧪 ESLint thresholds — tests"
+            echo ""
+            echo "- Scripts alterados neste push: \`${{ steps.changed.outputs.changed }}\`"
+            echo "- Status: \`${{ job.status }}\`"
+            echo ""
+            echo "> Suite roda em **todos** os pushes/PRs; falha aqui bloqueia o job \`quality\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
   quality:
     name: Lint & Typecheck
     runs-on: ubuntu-latest
+    needs: eslint-thresholds-tests
     timeout-minutes: 15
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Garante que a lógica de validação dos thresholds está correta
-      # (executa scripts/test-eslint-thresholds.sh com 14 casos pass/fail).
+      # Re-roda os testes dentro do job de lint como guard adicional
+      # (cobre o caso de alguém pular o job dedicado via re-run parcial).
       - name: Test ESLint threshold validator
         run: bash scripts/test-eslint-thresholds.sh
 
