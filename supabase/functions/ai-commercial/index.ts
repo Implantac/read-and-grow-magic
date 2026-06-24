@@ -314,9 +314,9 @@ Utilize a função 'generate_recommendations' com o JSON estruturado.`, supabase
 }
 
 // ─── Engine 3: Insights for Managers (Fase 3) ─────────────────────────
-async function generateInsights(companyId: string) {
+async function generateInsights(companyId: string, scope: string[] | null) {
   const { data: scores } = await supabase.from("ai_sales_scores").select("*").eq("company_id", companyId).limit(200);
-  const { data: orders } = await supabase.from("orders").select("id, total, status, sales_rep_id, sales_rep_name, client_name, client_id, date").eq("company_id", companyId).order("date", { ascending: false }).limit(500);
+  const { data: orders } = await inBranch(supabase.from("orders").select("id, total, status, sales_rep_id, sales_rep_name, client_name, client_id, date, branch_id").eq("company_id", companyId).order("date", { ascending: false }).limit(500), scope);
   const { data: reps } = await supabase.from("sales_reps").select("id, name, monthly_target, region").eq("company_id", companyId).limit(50);
   const { data: funnel } = await supabase.from("sales_funnel").select("id, value, status, stage, sales_rep_id, updated_at, title").eq("company_id", companyId).limit(200);
   const { data: targets } = await supabase.from("sales_targets").select("*").eq("company_id", companyId).limit(50);
