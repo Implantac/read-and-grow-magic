@@ -145,7 +145,8 @@ Deno.serve(async (req) => {
             priority_score: s.score,
             updated_at: new Date().toISOString(),
           })
-          .eq("id", s.id);
+          .eq("id", s.id)
+          .eq("company_id", callerCompany);
       }
 
       // Apply priority changes if confirm flag
@@ -154,7 +155,8 @@ Deno.serve(async (req) => {
           await supabase
             .from("production_orders")
             .update({ priority: c.newPriority, updated_at: new Date().toISOString() })
-            .eq("id", c.id);
+            .eq("id", c.id)
+            .eq("company_id", callerCompany);
         }
       }
 
