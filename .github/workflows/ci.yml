@@ -65,13 +65,61 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-eslint-v1-
 
+      - name: Report ESLint cache restore status
+        run: |
+          MATCHED='${{ steps.eslint-cache-restore.outputs.cache-matched-key }}'
+          HIT='${{ steps.eslint-cache-restore.outputs.cache-hit }}'
+          if [ "$HIT" = "true" ]; then
+            STATUS="exact hit"
+          elif [ -n "$MATCHED" ]; then
+            STATUS="partial hit (restore-keys)"
+          else
+            STATUS="miss"
+          fi
+          echo "ESLint cache: $STATUS"
+          echo "Matched key: ${MATCHED:-<none>}"
+          if [ -f node_modules/.cache/eslint/.eslintcache ]; then
+            SIZE=$(du -h node_modules/.cache/eslint/.eslintcache | cut -f1)
+            echo "Cache file size: $SIZE"
+          else
+            SIZE="n/a"
+          fi
+          {
+            echo "### ESLint cache"
+            echo ""
+            echo "- Status: \`$STATUS\`"
+            echo "- Matched key: \`${MATCHED:-<none>}\`"
+            echo "- Requested key: \`${{ runner.os }}-eslint-v1-${{ hashFiles('eslint.config.*', 'bun.lockb', 'bun.lock') }}\`"
+            echo "- Cache file size: \`$SIZE\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Typecheck
         run: bun run typecheck
 
       # Falha em qualquer erro/warning novo, EXCETO @typescript-eslint/no-explicit-any
       # (limpeza incremental ainda em andamento).
       - name: Lint (strict, ignora no-explicit-any)
-        run: bun run lint:ci
+        id: lint
+        run: |
+          set -o pipefail
+          bun run lint:ci | tee /tmp/lint-ci.log
+
+      - name: Lint summary
+        if: always()
+        run: |
+          {
+            echo "### Lint & Typecheck"
+            echo ""
+            if [ -f /tmp/lint-ci.log ]; then
+              echo '```'
+              grep -E '^\[lint:ci\]' /tmp/lint-ci.log || tail -n 20 /tmp/lint-ci.log
+              echo '```'
+            else
+              echo "_lint:ci did not produce output_"
+            fi
+            echo ""
+            echo "- Lint step outcome: \`${{ steps.lint.outcome }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Save ESLint cache
         if: always()
