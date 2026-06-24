@@ -33,11 +33,22 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const userId = (claimsData.claims as any).sub;
-    const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', userId).maybeSingle();
+    const { data: profile } = await supabase.from('profiles').select('company_id, default_branch_id').eq('id', userId).maybeSingle();
     const callerCompany = (profile as any)?.company_id;
     if (!callerCompany) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
+
+    const ctx = await resolveContextByIds(req, {
+      userId,
+      companyId: callerCompany,
+      defaultBranchId: (profile as any)?.default_branch_id ?? null,
+    });
+    if (!ctx.ok) {
+      return new Response(JSON.stringify({ error: ctx.message }), { status: ctx.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    const scope = branchScope(ctx);
+    const scopeOrders = <T extends { in: any }>(q: T) => (scope ? (q as any).in('branch_id', scope) : q);
 
 
     // Helper to call AI
