@@ -849,6 +849,7 @@ Deno.serve(async (req) => {
     let userId: string | undefined;
     let userRole: string | null = null;
     let callerCompany: string | null = null;
+    let callerScope: string[] | null = null;
     if (!CRON_ACTIONS.has(action)) {
       if (!authHeader?.startsWith("Bearer ")) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -865,7 +866,7 @@ Deno.serve(async (req) => {
       userId = data.user.id;
       const { data: roleRow } = await admin.from("user_roles").select("role").eq("user_id", userId).order("role").limit(1).maybeSingle();
       userRole = (roleRow as any)?.role || null;
-      const { data: profileRow } = await admin.from("profiles").select("company_id").eq("id", userId).maybeSingle();
+      const { data: profileRow } = await admin.from("profiles").select("company_id, default_branch_id").eq("id", userId).maybeSingle();
       callerCompany = (profileRow as any)?.company_id || null;
 
       // Privileged actions require admin/manager
@@ -889,7 +890,24 @@ Deno.serve(async (req) => {
           status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
+
+      // Resolve branch context (optional — branch filtering applies only to
+      // tables with branch_id; ai_brain_* tables are company-scoped).
+      if (callerCompany) {
+        const ctx = await resolveContextByIds(req, {
+          userId,
+          companyId: callerCompany,
+          defaultBranchId: (profileRow as any)?.default_branch_id ?? null,
+        });
+        if (!ctx.ok) {
+          return new Response(JSON.stringify({ error: ctx.message }), {
+            status: ctx.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        callerScope = branchScope(ctx as TenantContext);
+      }
     }
+    void callerScope; // reserved for downstream branch-aware reads
 
 
     let result: any;
