@@ -720,8 +720,13 @@ ${ctx}`;
 }
 
 async function handleApprove(decisionId: string, approve: boolean, userId: string | undefined, callerCompany: string | null) {
-  const q = admin.from("ai_brain_decisions").select("*").eq("id", decisionId);
-  if (callerCompany) q.eq("company_id", callerCompany);
+  if (!callerCompany) {
+    const err: any = new Error("Forbidden");
+    err.status = 403;
+    throw err;
+  }
+  let q = admin.from("ai_brain_decisions").select("*").eq("id", decisionId);
+  q = q.eq("company_id", callerCompany);
   const { data: dec, error: e0 } = await q.maybeSingle();
   if (e0) throw e0;
   if (!dec) {
@@ -733,7 +738,7 @@ async function handleApprove(decisionId: string, approve: boolean, userId: strin
   if (!approve) {
     const { data, error } = await admin.from("ai_brain_decisions")
       .update({ status: "rejected", approved_by: userId || null, approved_at: new Date().toISOString() })
-      .eq("id", decisionId).select().single();
+      .eq("id", decisionId).eq("company_id", callerCompany).select().single();
     if (error) throw error;
     return data;
   }
@@ -748,7 +753,7 @@ async function handleApprove(decisionId: string, approve: boolean, userId: strin
       executed_at: execResult.ok ? new Date().toISOString() : null,
       execution_result: execResult,
     })
-    .eq("id", decisionId).select().single();
+    .eq("id", decisionId).eq("company_id", callerCompany).select().single();
   if (error) throw error;
   return data;
 }
