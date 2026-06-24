@@ -50,74 +50,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Garante que a lógica de validação dos thresholds está correta
+      # (executa scripts/test-eslint-thresholds.sh com 14 casos pass/fail).
+      - name: Test ESLint threshold validator
+        run: bash scripts/test-eslint-thresholds.sh
+
       # Valida faixas dos thresholds do ESLint cache (vars/inputs/env).
       # Falha cedo com mensagem clara para evitar verdicts silenciosamente errados.
       - name: Validate ESLint cache thresholds
-        run: |
-          ERRORS=()
+        run: bash scripts/validate-eslint-thresholds.sh
 
-          is_int() { [[ "$1" =~ ^-?[0-9]+$ ]]; }
-          is_bool() { [[ "$1" == "true" || "$1" == "false" ]]; }
 
-          check_int_range() {
-            local name="$1" value="$2" min="$3" max="$4"
-            if ! is_int "$value"; then
-              ERRORS+=("$name='$value' não é inteiro válido (esperado: int em [$min, $max])")
-              return
-            fi
-            if [ "$value" -lt "$min" ] || [ "$value" -gt "$max" ]; then
-              ERRORS+=("$name=$value fora da faixa permitida [$min, $max]")
-            fi
-          }
-          check_bool() {
-            local name="$1" value="$2"
-            if ! is_bool "$value"; then
-              ERRORS+=("$name='$value' não é booleano válido (esperado: 'true' ou 'false')")
-            fi
-          }
-
-          # Faixas:
-          #  MIN_OVERLAP / MIN_CROSS_OVERLAP : 0..100000 (nº de arquivos no cache)
-          #  MAX_SIZE_DELTA_PCT              : 0..1000  (0 = desabilita o check)
-          #  REQUIRE_MTIME_*                 : true|false
-          check_int_range  "ESLINT_MIN_OVERLAP"              "$ESLINT_MIN_OVERLAP"              0 100000
-          check_int_range  "ESLINT_MIN_CROSS_OVERLAP"        "$ESLINT_MIN_CROSS_OVERLAP"        0 100000
-          check_int_range  "ESLINT_MAX_SIZE_DELTA_PCT"       "$ESLINT_MAX_SIZE_DELTA_PCT"       0 1000
-          check_bool       "ESLINT_REQUIRE_MTIME_CONTINUITY" "$ESLINT_REQUIRE_MTIME_CONTINUITY"
-          check_bool       "ESLINT_REQUIRE_MTIME_CHANGED"    "$ESLINT_REQUIRE_MTIME_CHANGED"
-
-          {
-            echo "## 🎛️ ESLint cache — Threshold validation"
-            echo ""
-            echo "| Parâmetro | Valor | Faixa esperada |"
-            echo "|---|---|---|"
-            echo "| \`ESLINT_MIN_OVERLAP\` | \`$ESLINT_MIN_OVERLAP\` | int [0, 100000] |"
-            echo "| \`ESLINT_MIN_CROSS_OVERLAP\` | \`$ESLINT_MIN_CROSS_OVERLAP\` | int [0, 100000] |"
-            echo "| \`ESLINT_MAX_SIZE_DELTA_PCT\` | \`$ESLINT_MAX_SIZE_DELTA_PCT\` | int [0, 1000] (0 desabilita) |"
-            echo "| \`ESLINT_REQUIRE_MTIME_CONTINUITY\` | \`$ESLINT_REQUIRE_MTIME_CONTINUITY\` | true \\| false |"
-            echo "| \`ESLINT_REQUIRE_MTIME_CHANGED\` | \`$ESLINT_REQUIRE_MTIME_CHANGED\` | true \\| false |"
-            echo ""
-          } >> "$GITHUB_STEP_SUMMARY"
-
-          if [ "${#ERRORS[@]}" -gt 0 ]; then
-            echo "::group::❌ Threshold validation failed"
-            {
-              echo "**Erros de validação dos thresholds do ESLint cache:**"
-              echo ""
-            } >> "$GITHUB_STEP_SUMMARY"
-            for e in "${ERRORS[@]}"; do
-              echo "::error title=Invalid ESLint cache threshold::$e"
-              echo "- ❌ $e" >> "$GITHUB_STEP_SUMMARY"
-            done
-            {
-              echo ""
-              echo "Defina valores válidos em **Settings → Secrets and variables → Actions → Variables**"
-              echo "ou via \`workflow_dispatch\` inputs. Precedência: \`vars\` > \`input\` > default."
-            } >> "$GITHUB_STEP_SUMMARY"
-            echo "::endgroup::"
-            exit 1
-          fi
-          echo "✅ Thresholds válidos."
 
 
 
