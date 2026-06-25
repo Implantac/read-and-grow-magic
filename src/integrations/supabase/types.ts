@@ -1502,6 +1502,89 @@ export type Database = {
           },
         ]
       }
+      automation_rules: {
+        Row: {
+          actions: Json
+          company_id: string
+          conditions: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          trigger_event: string
+          updated_at: string
+        }
+        Insert: {
+          actions?: Json
+          company_id: string
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          trigger_event: string
+          updated_at?: string
+        }
+        Update: {
+          actions?: Json
+          company_id?: string
+          conditions?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          trigger_event?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      automation_runs: {
+        Row: {
+          company_id: string
+          created_at: string
+          error: string | null
+          id: string
+          input: Json
+          output: Json
+          rule_id: string
+          status: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          input?: Json
+          output?: Json
+          rule_id: string
+          status?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          error?: string | null
+          id?: string
+          input?: Json
+          output?: Json
+          rule_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_runs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "automation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bank_accounts: {
         Row: {
           account_number: string | null
@@ -3726,6 +3809,60 @@ export type Database = {
           },
         ]
       }
+      custom_relationships: {
+        Row: {
+          cascade_delete: boolean
+          company_id: string
+          created_at: string
+          from_entity_id: string
+          from_field: string
+          id: string
+          relationship_type: string
+          to_entity_id: string
+          to_field: string
+          updated_at: string
+        }
+        Insert: {
+          cascade_delete?: boolean
+          company_id: string
+          created_at?: string
+          from_entity_id: string
+          from_field: string
+          id?: string
+          relationship_type?: string
+          to_entity_id: string
+          to_field: string
+          updated_at?: string
+        }
+        Update: {
+          cascade_delete?: boolean
+          company_id?: string
+          created_at?: string
+          from_entity_id?: string
+          from_field?: string
+          id?: string
+          relationship_type?: string
+          to_entity_id?: string
+          to_field?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_relationships_from_entity_id_fkey"
+            columns: ["from_entity_id"]
+            isOneToOne: false
+            referencedRelation: "custom_entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_relationships_to_entity_id_fkey"
+            columns: ["to_entity_id"]
+            isOneToOne: false
+            referencedRelation: "custom_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_credit_profiles: {
         Row: {
           analysis_notes: string | null
@@ -3835,6 +3972,92 @@ export type Database = {
           report_date?: string
         }
         Relationships: []
+      }
+      dashboard_definitions: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_default: boolean
+          layout: Json
+          name: string
+          role_scope: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          layout?: Json
+          name: string
+          role_scope?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_default?: boolean
+          layout?: Json
+          name?: string
+          role_scope?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      dashboard_widgets: {
+        Row: {
+          company_id: string
+          config: Json
+          created_at: string
+          dashboard_id: string
+          data_source: string
+          id: string
+          position: Json
+          title: string
+          updated_at: string
+          widget_type: string
+        }
+        Insert: {
+          company_id: string
+          config?: Json
+          created_at?: string
+          dashboard_id: string
+          data_source: string
+          id?: string
+          position?: Json
+          title: string
+          updated_at?: string
+          widget_type: string
+        }
+        Update: {
+          company_id?: string
+          config?: Json
+          created_at?: string
+          dashboard_id?: string
+          data_source?: string
+          id?: string
+          position?: Json
+          title?: string
+          updated_at?: string
+          widget_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dashboard_widgets_dashboard_id_fkey"
+            columns: ["dashboard_id"]
+            isOneToOne: false
+            referencedRelation: "dashboard_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       deleted_orders_archive: {
         Row: {
@@ -15662,6 +15885,148 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      workflow_definitions: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          initial_step: string | null
+          is_active: boolean
+          name: string
+          steps: Json
+          target_entity: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          initial_step?: string | null
+          is_active?: boolean
+          name: string
+          steps?: Json
+          target_entity: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          initial_step?: string | null
+          is_active?: boolean
+          name?: string
+          steps?: Json
+          target_entity?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      workflow_instances: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          context: Json
+          created_at: string
+          current_step: string | null
+          definition_id: string
+          id: string
+          started_by: string | null
+          status: string
+          target_entity: string
+          target_record_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          context?: Json
+          created_at?: string
+          current_step?: string | null
+          definition_id: string
+          id?: string
+          started_by?: string | null
+          status?: string
+          target_entity: string
+          target_record_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          context?: Json
+          created_at?: string
+          current_step?: string | null
+          definition_id?: string
+          id?: string
+          started_by?: string | null
+          status?: string
+          target_entity?: string
+          target_record_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_instances_definition_id_fkey"
+            columns: ["definition_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_transitions: {
+        Row: {
+          actor_id: string | null
+          comment: string | null
+          company_id: string
+          created_at: string
+          from_step: string | null
+          id: string
+          instance_id: string
+          payload: Json
+          to_step: string
+        }
+        Insert: {
+          actor_id?: string | null
+          comment?: string | null
+          company_id: string
+          created_at?: string
+          from_step?: string | null
+          id?: string
+          instance_id: string
+          payload?: Json
+          to_step: string
+        }
+        Update: {
+          actor_id?: string | null
+          comment?: string | null
+          company_id?: string
+          created_at?: string
+          from_step?: string | null
+          id?: string
+          instance_id?: string
+          payload?: Json
+          to_step?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_transitions_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
