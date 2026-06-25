@@ -9,6 +9,8 @@ import { SEGMENTS } from '@/config/adaptive';
 
 import { navigationSections } from '@/config/navigation';
 import type { NavItem } from '@/config/navigation';
+import { useCustomEntities } from '@/hooks/useCustomEntities';
+
 import {
   LayoutDashboard, Users, Wallet, FileCheck, Package, ShoppingCart,
   Factory, Warehouse, Settings, ChevronDown, UserCircle,
