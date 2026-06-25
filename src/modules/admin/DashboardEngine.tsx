@@ -1,0 +1,117 @@
+import { useState } from "react";
+import { PageContainer } from "@/shared/components/PageContainer";
+import { PageHeader } from "@/shared/components/PageHeader";
+import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
+import { Button } from "@/ui/base/button";
+import { Input } from "@/ui/base/input";
+import { Label } from "@/ui/base/label";
+import { Badge } from "@/ui/base/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/ui/base/dialog";
+import { Plus, Trash2, LayoutDashboard } from "lucide-react";
+import { useDashboards, useDashboardWidgets, useDashboardMutations } from "@/hooks/useDashboardEngine";
+
+export default function DashboardEngine() {
+  const { data: dashboards = [] } = useDashboards();
+  const [activeId, setActiveId] = useState<string | undefined>();
+  const { data: widgets = [] } = useDashboardWidgets(activeId);
+  const { saveDashboard, removeDashboard, saveWidget, removeWidget } = useDashboardMutations();
+
+  const [dashOpen, setDashOpen] = useState(false);
+  const [widgetOpen, setWidgetOpen] = useState(false);
+  const [dashName, setDashName] = useState("");
+  const [widgetForm, setWidgetForm] = useState({ title: "", widget_type: "kpi", data_source: "" });
+
+  return (
+    <PageContainer>
+      <PageHeader title="Dashboard Engine" description="Construa dashboards e widgets personalizados por tenant" icon={LayoutDashboard} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <Card className="lg:col-span-1">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Dashboards</CardTitle>
+            <Dialog open={dashOpen} onOpenChange={setDashOpen}>
+              <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4" /></Button></DialogTrigger>
+              <DialogContent>
+                <DialogHeader><DialogTitle>Novo Dashboard</DialogTitle></DialogHeader>
+                <Label>Nome</Label>
+                <Input value={dashName} onChange={(e) => setDashName(e.target.value)} />
+                <DialogFooter>
+                  <Button onClick={async () => { await saveDashboard.mutateAsync({ name: dashName }); setDashName(""); setDashOpen(false); }} disabled={!dashName}>Salvar</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </CardHeader>
+          <CardContent>
+            {dashboards.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum dashboard.</p>
+            ) : (
+              <div className="space-y-1">
+                {dashboards.map((d) => (
+                  <button
+                    key={d.id}
+                    onClick={() => setActiveId(d.id)}
+                    className={`w-full text-left p-2 rounded border ${activeId === d.id ? "bg-accent" : ""}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-sm">{d.name}</span>
+                      <Trash2 className="h-3 w-3 text-muted-foreground" onClick={(e) => { e.stopPropagation(); removeDashboard.mutate(d.id); }} />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Widgets {activeId ? `(${widgets.length})` : ""}</CardTitle>
+            <Dialog open={widgetOpen} onOpenChange={setWidgetOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm" disabled={!activeId}><Plus className="h-4 w-4 mr-1" /> Widget</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader><DialogTitle>Novo Widget</DialogTitle></DialogHeader>
+                <div className="space-y-2">
+                  <div><Label>Título</Label><Input value={widgetForm.title} onChange={(e) => setWidgetForm({ ...widgetForm, title: e.target.value })} /></div>
+                  <div><Label>Tipo</Label><Input value={widgetForm.widget_type} onChange={(e) => setWidgetForm({ ...widgetForm, widget_type: e.target.value })} placeholder="kpi | line | bar | pie | table" /></div>
+                  <div><Label>Fonte de dados</Label><Input value={widgetForm.data_source} onChange={(e) => setWidgetForm({ ...widgetForm, data_source: e.target.value })} placeholder="ex: sales.total, orders.count" /></div>
+                </div>
+                <DialogFooter>
+                  <Button onClick={async () => {
+                    if (!activeId) return;
+                    await saveWidget.mutateAsync({ dashboard_id: activeId, ...widgetForm });
+                    setWidgetForm({ title: "", widget_type: "kpi", data_source: "" });
+                    setWidgetOpen(false);
+                  }} disabled={!widgetForm.title || !widgetForm.data_source}>Salvar</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </CardHeader>
+          <CardContent>
+            {!activeId ? (
+              <p className="text-sm text-muted-foreground">Selecione um dashboard.</p>
+            ) : widgets.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum widget. Adicione o primeiro.</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {widgets.map((w) => (
+                  <div key={w.id} className="p-3 border rounded">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-medium text-sm">{w.title}</div>
+                        <Badge variant="outline" className="mt-1 text-xs">{w.widget_type}</Badge>
+                      </div>
+                      <Trash2 className="h-4 w-4 cursor-pointer text-muted-foreground" onClick={() => removeWidget.mutate({ id: w.id, dashboard_id: activeId })} />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">{w.data_source}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </PageContainer>
+  );
+}
