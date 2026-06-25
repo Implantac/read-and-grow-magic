@@ -3682,6 +3682,50 @@ export type Database = {
           },
         ]
       }
+      custom_records: {
+        Row: {
+          branch_id: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          data: Json
+          entity_id: string
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          branch_id?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          data?: Json
+          entity_id: string
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          branch_id?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          data?: Json
+          entity_id?: string
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_records_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "custom_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_credit_profiles: {
         Row: {
           analysis_notes: string | null
