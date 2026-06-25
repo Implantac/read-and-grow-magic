@@ -347,3 +347,44 @@ export async function enforceQuota(
 
   return null;
 }
+
+/**
+ * Granular permission guard (RBAC 1.6). Returns null if allowed,
+ * otherwise a 403 Response. Cron callers bypass.
+ *
+ * Usage:
+ *   const denied = await requirePermission(ctx, 'commercial.orders', 'approve');
+ *   if (denied) return denied;
+ */
+export async function requirePermission(
+  ctx: TenantContext,
+  resource: string,
+  action: string,
+): Promise<Response | null> {
+  if (ctx.viaCron) return null;
+  if (!ctx.userId || !ctx.companyId) return jsonError('Forbidden', 403);
+
+  const admin = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+  );
+
+  const { data, error } = await admin.rpc('has_permission', {
+    _user_id: ctx.userId,
+    _company_id: ctx.companyId,
+    _resource: resource,
+    _action: action,
+  });
+
+  if (error) {
+    console.error('[requirePermission]', error);
+    return jsonError('Erro ao validar permissão.', 500);
+  }
+  if (!data) {
+    return new Response(
+      JSON.stringify({ error: 'permission_denied', resource, action }),
+      { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    );
+  }
+  return null;
+}
