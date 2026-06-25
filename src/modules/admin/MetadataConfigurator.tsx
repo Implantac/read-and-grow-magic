@@ -36,9 +36,11 @@ import {
   useCustomEntities,
   useCustomFields,
   useCustomRecords,
+  useCustomRelationships,
   useEntityMutations,
   useFieldMutations,
   useRecordMutations,
+  useRelationshipMutations,
   type CustomField,
 } from "@/hooks/useCustomEntities";
 
