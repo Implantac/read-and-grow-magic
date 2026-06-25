@@ -7,8 +7,10 @@ import { Input } from "@/ui/base/input";
 import { Label } from "@/ui/base/label";
 import { Badge } from "@/ui/base/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/ui/base/dialog";
-import { Plus, Trash2, LayoutDashboard } from "lucide-react";
+import { Plus, Trash2, LayoutDashboard, ExternalLink } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useDashboards, useDashboardWidgets, useDashboardMutations } from "@/hooks/useDashboardEngine";
+import { WidgetRenderer } from "@/components/dashboard/WidgetRenderer";
 
 export default function DashboardEngine() {
   const { data: dashboards = [] } = useDashboards();
@@ -54,7 +56,12 @@ export default function DashboardEngine() {
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-sm">{d.name}</span>
-                      <Trash2 className="h-3 w-3 text-muted-foreground" onClick={(e) => { e.stopPropagation(); removeDashboard.mutate(d.id); }} />
+                      <div className="flex items-center gap-2">
+                        <Link to={`/dashboards/${d.id}`} onClick={(e) => e.stopPropagation()}>
+                          <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                        </Link>
+                        <Trash2 className="h-3 w-3 text-muted-foreground" onClick={(e) => { e.stopPropagation(); removeDashboard.mutate(d.id); }} />
+                      </div>
                     </div>
                   </button>
                 ))}
@@ -94,19 +101,22 @@ export default function DashboardEngine() {
             ) : widgets.length === 0 ? (
               <p className="text-sm text-muted-foreground">Nenhum widget. Adicione o primeiro.</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {widgets.map((w) => (
-                  <div key={w.id} className="p-3 border rounded">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium text-sm">{w.title}</div>
-                        <Badge variant="outline" className="mt-1 text-xs">{w.widget_type}</Badge>
-                      </div>
-                      <Trash2 className="h-4 w-4 cursor-pointer text-muted-foreground" onClick={() => removeWidget.mutate({ id: w.id, dashboard_id: activeId })} />
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {widgets.map((w) => (
+                    <div key={w.id} className="relative">
+                      <Trash2
+                        className="h-4 w-4 cursor-pointer text-muted-foreground absolute top-2 right-2 z-10"
+                        onClick={() => removeWidget.mutate({ id: w.id, dashboard_id: activeId })}
+                      />
+                      <WidgetRenderer widget={w as any} />
+                      <p className="text-[10px] text-muted-foreground mt-1 px-1">
+                        <Badge variant="outline" className="text-[10px] mr-1">{w.widget_type}</Badge>
+                        {w.data_source}
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">{w.data_source}</p>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
           </CardContent>

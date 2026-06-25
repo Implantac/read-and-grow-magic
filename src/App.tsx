@@ -34,6 +34,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Upgrade = lazy(() => import("./pages/Upgrade"));
 const Subscribe = lazy(() => import("./pages/Subscribe"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
+const DashboardView = lazy(() => import("./pages/DashboardView"));
 
 
 function PageLoader() {
@@ -75,6 +76,7 @@ const App = () => (
               <Route element={<MainLayout />}>
                 <Route element={<OnboardingGuard />}>
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/dashboards/:id" element={<DashboardView />} />
                 <Route path="/upgrade" element={<Upgrade />} />
                 <Route path="/subscribe" element={<Subscribe />} />
 
