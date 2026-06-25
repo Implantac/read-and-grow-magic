@@ -29,8 +29,9 @@ import {
   ShieldAlert, Upload, QrCode, FileCheck2, FileDown,
   Percent, Globe, ScrollText, ArrowRightLeft,
   BellRing, RotateCw, AlertOctagon, GitBranch, Siren, Scissors,
-  LogOut, User as UserIcon, HelpCircle, ChevronRight
+  LogOut, User as UserIcon, HelpCircle, ChevronRight, Inbox
 } from 'lucide-react';
+
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/base/tooltip';
 import { Separator } from '@/ui/base/separator';
 
@@ -49,8 +50,9 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Shield, Lock, Phone, ArrowDown, Database, ScanBarcode, DoorOpen, RotateCcw,
   Bell, Repeat, TrendingDown, LineChart, AlertTriangle, ShieldAlert, Upload, QrCode,
   FileCheck2, FileDown, Percent, Globe, ScrollText, ArrowRightLeft,
-  BellRing, RotateCw, AlertOctagon, GitBranch, Siren, Scissors,
+  BellRing, RotateCw, AlertOctagon, GitBranch, Siren, Scissors, Inbox,
 };
+
 
 function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, expandedItems, toggleExpanded }: {
   item: NavItem;
