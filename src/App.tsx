@@ -71,6 +71,7 @@ const App = () => (
               <Route element={<MainLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/upgrade" element={<Upgrade />} />
+                <Route path="/subscribe" element={<Subscribe />} />
                 {CommercialRoutes}
                 <Route
                   path="/financeiro/*"
