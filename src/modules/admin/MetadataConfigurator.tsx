@@ -723,6 +723,11 @@ function RelationshipsPanel({ entityId }: { entityId: string }) {
                 <input type="checkbox" checked={cascade} onChange={(e) => setCascade(e.target.checked)} />
                 Excluir em cascata
               </label>
+              {error && (
+                <p className="text-sm text-destructive" role="alert">
+                  {error}
+                </p>
+              )}
             </div>
             <DialogFooter>
               <Button onClick={submit} disabled={create.isPending || update.isPending}>
