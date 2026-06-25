@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface FinancialCategoryRow {
