@@ -62,17 +62,26 @@ function RenderByType({ type, payload, widget }: { type: string; payload: any; w
     );
   }
   if (type === "series") {
-    const Chart = widget.widget_type === "bar" ? BarChart : LineChart;
-    const Bars = widget.widget_type === "bar" ? Bar : Line;
+    const isBar = widget.widget_type === "bar";
     return (
       <ResponsiveContainer width="100%" height={220}>
-        <Chart data={payload}>
-          <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-          <XAxis dataKey="date" fontSize={11} />
-          <YAxis fontSize={11} />
-          <Tooltip />
-          <Bars type="monotone" dataKey="value" stroke="#FF9800" fill="#FF9800" />
-        </Chart>
+        {isBar ? (
+          <BarChart data={payload}>
+            <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+            <XAxis dataKey="date" fontSize={11} />
+            <YAxis fontSize={11} />
+            <Tooltip />
+            <Bar dataKey="value" fill="#FF9800" />
+          </BarChart>
+        ) : (
+          <LineChart data={payload}>
+            <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+            <XAxis dataKey="date" fontSize={11} />
+            <YAxis fontSize={11} />
+            <Tooltip />
+            <Line type="monotone" dataKey="value" stroke="#FF9800" />
+          </LineChart>
+        )}
       </ResponsiveContainer>
     );
   }
