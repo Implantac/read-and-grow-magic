@@ -120,12 +120,18 @@ export default function MetadataConfigurator() {
                 <TabsTrigger value="fields">
                   <Settings2 className="mr-2 h-4 w-4" /> Campos
                 </TabsTrigger>
+                <TabsTrigger value="relationships">
+                  <GitBranch className="mr-2 h-4 w-4" /> Relacionamentos
+                </TabsTrigger>
                 <TabsTrigger value="records">
                   <FileText className="mr-2 h-4 w-4" /> Registros
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="fields">
                 <FieldsPanel entityId={selectedEntity.id} />
+              </TabsContent>
+              <TabsContent value="relationships">
+                <RelationshipsPanel entityId={selectedEntity.id} />
               </TabsContent>
               <TabsContent value="records">
                 <RecordsPanel entityId={selectedEntity.id} />
