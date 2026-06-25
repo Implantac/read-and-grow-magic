@@ -3551,6 +3551,137 @@ export type Database = {
           },
         ]
       }
+      custom_entities: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          entity_key: string
+          icon: string | null
+          id: string
+          is_active: boolean
+          label: string
+          label_plural: string | null
+          module_key: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entity_key: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          label: string
+          label_plural?: string | null
+          module_key?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          entity_key?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          label_plural?: string | null
+          module_key?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_entities_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custom_fields: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          default_value: Json | null
+          display_order: number
+          entity_id: string
+          field_key: string
+          field_type: string
+          help_text: string | null
+          id: string
+          is_active: boolean
+          is_required: boolean
+          is_unique: boolean
+          label: string
+          options: Json | null
+          reference_entity: string | null
+          updated_at: string
+          validation: Json | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          default_value?: Json | null
+          display_order?: number
+          entity_id: string
+          field_key: string
+          field_type: string
+          help_text?: string | null
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          is_unique?: boolean
+          label: string
+          options?: Json | null
+          reference_entity?: string | null
+          updated_at?: string
+          validation?: Json | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          default_value?: Json | null
+          display_order?: number
+          entity_id?: string
+          field_key?: string
+          field_type?: string
+          help_text?: string | null
+          id?: string
+          is_active?: boolean
+          is_required?: boolean
+          is_unique?: boolean
+          label?: string
+          options?: Json | null
+          reference_entity?: string | null
+          updated_at?: string
+          validation?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_fields_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "custom_fields_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "custom_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_credit_profiles: {
         Row: {
           analysis_notes: string | null
