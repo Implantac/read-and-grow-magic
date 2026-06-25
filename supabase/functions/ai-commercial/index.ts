@@ -57,6 +57,8 @@ async function requireAuth(req: Request): Promise<Response | { userId: string; c
   }
   const denied = await requireModule(ctx, "comercial");
   if (denied) return denied;
+  const quotaDenied = await enforceQuota(ctx, "ai_calls", 1);
+  if (quotaDenied) return quotaDenied;
   return { userId, companyId, scope: branchScope(ctx) };
 }
 
