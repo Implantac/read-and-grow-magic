@@ -4578,7 +4578,7 @@ export type Database = {
           chart_account_id: string | null
           code: string
           color: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           dre_section: string | null
           id: string
@@ -4593,7 +4593,7 @@ export type Database = {
           chart_account_id?: string | null
           code: string
           color?: string | null
-          company_id?: string | null
+          company_id: string
           created_at?: string
           dre_section?: string | null
           id?: string
@@ -4608,7 +4608,7 @@ export type Database = {
           chart_account_id?: string | null
           code?: string
           color?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           dre_section?: string | null
           id?: string
@@ -5099,7 +5099,7 @@ export type Database = {
           branch_id: string | null
           category_id: string | null
           chart_account_id: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           description: string
@@ -5120,7 +5120,7 @@ export type Database = {
           branch_id?: string | null
           category_id?: string | null
           chart_account_id?: string | null
-          company_id?: string | null
+          company_id: string
           created_at?: string
           created_by?: string | null
           description: string
@@ -5141,7 +5141,7 @@ export type Database = {
           branch_id?: string | null
           category_id?: string | null
           chart_account_id?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           description?: string
