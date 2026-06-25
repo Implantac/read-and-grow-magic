@@ -15558,6 +15558,22 @@ export type Database = {
         }
         Returns: Json
       }
+      bootstrap_tenant: {
+        Args: {
+          _address_city: string
+          _address_neighborhood: string
+          _address_number: string
+          _address_state: string
+          _address_street: string
+          _address_zip: string
+          _cnpj: string
+          _company_name: string
+          _email?: string
+          _phone?: string
+          _segment: string
+        }
+        Returns: Json
+      }
       calculate_difal: {
         Args: { _base: number; _uf_destination: string; _uf_origin: string }
         Returns: Json
