@@ -42,6 +42,7 @@ const ACTION_TYPES = [
   { value: "notification", label: "Notificação interna" },
   { value: "webhook", label: "Webhook HTTP" },
   { value: "log", label: "Registrar em log" },
+  { value: "start_workflow", label: "Iniciar workflow" },
 ];
 
 const OPERATORS = [
