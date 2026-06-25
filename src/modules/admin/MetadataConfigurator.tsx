@@ -542,3 +542,147 @@ function formatValue(v: any, type: string): string {
   if (type === "json") return JSON.stringify(v);
   return String(v);
 }
+
+const RELATIONSHIP_TYPES = [
+  { value: "one_to_many", label: "1:N (Um para Muitos)" },
+  { value: "many_to_one", label: "N:1 (Muitos para Um)" },
+  { value: "many_to_many", label: "N:N (Muitos para Muitos)" },
+];
+
+function RelationshipsPanel({ entityId }: { entityId: string }) {
+  const { data: entities = [] } = useCustomEntities();
+  const { data: rels = [] } = useCustomRelationships(entityId);
+  const { create, remove } = useRelationshipMutations(entityId);
+  const [open, setOpen] = useState(false);
+  const [toEntityId, setToEntityId] = useState<string>("");
+  const [relType, setRelType] = useState<string>("one_to_many");
+  const [fromField, setFromField] = useState("");
+  const [toField, setToField] = useState("");
+  const [cascade, setCascade] = useState(false);
+
+  const otherEntities = entities.filter((e) => e.id !== entityId);
+  const entityMap = new Map(entities.map((e) => [e.id, e]));
+
+  const submit = async () => {
+    if (!toEntityId || !fromField.trim() || !toField.trim()) return;
+    await create.mutateAsync({
+      to_entity_id: toEntityId,
+      relationship_type: relType,
+      from_field: fromField.trim(),
+      to_field: toField.trim(),
+      cascade_delete: cascade,
+    });
+    setToEntityId("");
+    setFromField("");
+    setToField("");
+    setCascade(false);
+    setOpen(false);
+  };
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="text-base">Relacionamentos</CardTitle>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm">
+              <Plus className="mr-2 h-4 w-4" /> Novo
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Novo Relacionamento</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div>
+                <Label>Entidade Destino</Label>
+                <Select value={toEntityId} onValueChange={setToEntityId}>
+                  <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                  <SelectContent>
+                    {otherEntities.map((e) => (
+                      <SelectItem key={e.id} value={e.id}>{e.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Tipo</Label>
+                <Select value={relType} onValueChange={setRelType}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {RELATIONSHIP_TYPES.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Campo origem</Label>
+                  <Input value={fromField} onChange={(e) => setFromField(e.target.value)} placeholder="ex.: cliente_id" />
+                </div>
+                <div>
+                  <Label>Campo destino</Label>
+                  <Input value={toField} onChange={(e) => setToField(e.target.value)} placeholder="ex.: id" />
+                </div>
+              </div>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={cascade} onChange={(e) => setCascade(e.target.checked)} />
+                Excluir em cascata
+              </label>
+            </div>
+            <DialogFooter>
+              <Button onClick={submit} disabled={create.isPending}>Criar</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </CardHeader>
+      <CardContent>
+        {rels.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Nenhum relacionamento definido.</p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Direção</TableHead>
+                <TableHead>Entidade</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead>Campos</TableHead>
+                <TableHead>Cascata</TableHead>
+                <TableHead className="w-12"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rels.map((r) => {
+                const isOutgoing = r.from_entity_id === entityId;
+                const other = entityMap.get(isOutgoing ? r.to_entity_id : r.from_entity_id);
+                return (
+                  <TableRow key={r.id}>
+                    <TableCell>
+                      <Badge variant={isOutgoing ? "default" : "outline"}>
+                        {isOutgoing ? "→ saída" : "← entrada"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-medium">{other?.label ?? "—"}</TableCell>
+                    <TableCell><Badge variant="outline">{r.relationship_type}</Badge></TableCell>
+                    <TableCell className="text-xs">
+                      <code>{r.from_field}</code> → <code>{r.to_field}</code>
+                    </TableCell>
+                    <TableCell>{r.cascade_delete ? "Sim" : "Não"}</TableCell>
+                    <TableCell>
+                      {isOutgoing && (
+                        <Button variant="ghost" size="icon" onClick={() => remove.mutate(r.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
