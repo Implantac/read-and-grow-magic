@@ -20,6 +20,7 @@ import {
   type AutomationCondition,
   type AutomationRule,
 } from "@/hooks/useAutomationEngine";
+import { useWorkflowDefinitions } from "@/hooks/useWorkflowEngine";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -41,6 +42,7 @@ const ACTION_TYPES = [
   { value: "notification", label: "Notificação interna" },
   { value: "webhook", label: "Webhook HTTP" },
   { value: "log", label: "Registrar em log" },
+  { value: "start_workflow", label: "Iniciar workflow" },
 ];
 
 const OPERATORS = [
@@ -72,6 +74,7 @@ const EMPTY_FORM: FormState = {
 
 export default function AutomationEngine() {
   const { data: rules = [], isLoading } = useAutomationRules();
+  const { data: workflowDefs = [] } = useWorkflowDefinitions();
   const { save, remove, toggle } = useAutomationMutations();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
@@ -377,6 +380,34 @@ export default function AutomationEngine() {
                         value={a.config.message ?? ""}
                         onChange={(e) => updateActionConfig(i, "message", e.target.value)}
                       />
+                    </div>
+                  )}
+
+                  {a.type === "start_workflow" && (
+                    <div>
+                      <Label className="text-xs">Workflow</Label>
+                      <Select
+                        value={a.config.definition_id ?? ""}
+                        onValueChange={(v) => updateActionConfig(i, "definition_id", v)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um workflow" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {workflowDefs.length === 0 ? (
+                            <SelectItem value="__none" disabled>Nenhum workflow disponível</SelectItem>
+                          ) : (
+                            workflowDefs.map((d: any) => (
+                              <SelectItem key={d.id} value={d.id}>
+                                {d.name} <span className="text-muted-foreground ml-2">({d.target_entity})</span>
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Uma instância será iniciada usando o contexto do evento como dados de entrada.
+                      </p>
                     </div>
                   )}
                 </div>

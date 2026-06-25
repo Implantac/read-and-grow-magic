@@ -74,25 +74,35 @@ Deno.serve(async (req) => {
       let status: "success" | "error" | "partial" = "success";
 
       for (const action of actions as any[]) {
+        const cfg = (action?.config ?? {}) as Record<string, any>;
         try {
           switch (action?.type) {
             case "notification": {
               const { error } = await admin.from("notifications").insert({
                 company_id: profile.company_id,
-                user_id: action.user_id ?? userData.user.id,
-                title: String(action.title ?? rule.name ?? "Automação"),
-                message: String(action.message ?? `Evento ${body.event}`),
-                type: action.level ?? "info",
+                user_id: cfg.user_id ?? userData.user.id,
+                title: String(cfg.title ?? rule.name ?? "Automação"),
+                message: String(cfg.message ?? `Evento ${body.event}`),
+                type: cfg.level ?? "info",
               });
               if (error) throw error;
               results.push({ type: "notification", ok: true });
               break;
             }
             case "webhook": {
-              if (!action.url || typeof action.url !== "string") throw new Error("missing_url");
-              const resp = await fetch(action.url, {
-                method: action.method ?? "POST",
-                headers: { "Content-Type": "application/json", ...(action.headers ?? {}) },
+              if (!cfg.url || typeof cfg.url !== "string") throw new Error("missing_url");
+              let headers: Record<string, string> = { "Content-Type": "application/json" };
+              if (cfg.headers) {
+                try {
+                  const parsed = typeof cfg.headers === "string" ? JSON.parse(cfg.headers) : cfg.headers;
+                  headers = { ...headers, ...parsed };
+                } catch {
+                  /* ignore invalid header JSON */
+                }
+              }
+              const resp = await fetch(cfg.url, {
+                method: cfg.method ?? "POST",
+                headers,
                 body: JSON.stringify({ event: body.event, context: ctx, rule: { id: rule.id, name: rule.name } }),
               });
               results.push({ type: "webhook", ok: resp.ok, status: resp.status });
@@ -100,7 +110,29 @@ Deno.serve(async (req) => {
               break;
             }
             case "log": {
-              results.push({ type: "log", ok: true, message: action.message ?? null });
+              results.push({ type: "log", ok: true, message: cfg.message ?? null });
+              break;
+            }
+            case "start_workflow": {
+              if (!cfg.definition_id) throw new Error("missing_workflow");
+              const { data: defRow, error: defErr } = await admin
+                .from("workflow_definitions")
+                .select("id, steps, company_id")
+                .eq("id", cfg.definition_id)
+                .maybeSingle();
+              if (defErr || !defRow || defRow.company_id !== profile.company_id) throw new Error("workflow_not_found");
+              const firstStep = Array.isArray(defRow.steps) && defRow.steps[0] ? (defRow.steps[0] as any).key : null;
+              const { data: inst, error: instErr } = await admin.from("workflow_instances").insert({
+                company_id: profile.company_id,
+                definition_id: defRow.id,
+                entity_id: (ctx as any).id ?? null,
+                current_step: firstStep,
+                status: "running",
+                context: ctx,
+                started_by: userData.user.id,
+              }).select("id").single();
+              if (instErr) throw instErr;
+              results.push({ type: "start_workflow", ok: true, instance_id: inst.id });
               break;
             }
             default:
