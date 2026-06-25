@@ -1,33 +1,47 @@
 import { useSearchParams, Link } from 'react-router-dom';
-import { Sparkles, Check, ArrowLeft } from 'lucide-react';
+import { Sparkles, Check, ArrowLeft, Lock } from 'lucide-react';
 import { Button } from '@/ui/base/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/ui/base/alert';
 import { usePlans } from '@/hooks/system/useSubscription';
 import { useCurrentPlan } from '@/hooks/system/useCurrentPlan';
-
-const MODULE_LABELS: Record<string, string> = {
-  comercial: 'Comercial',
-  estoque: 'Estoque',
-  financeiro: 'Financeiro',
-  producao: 'Produção (PCP)',
-  fiscal: 'Fiscal (NF-e/SPED)',
-  compras: 'Compras',
-  wms: 'WMS',
-  contabilidade: 'Contabilidade',
-  rfid: 'RFID',
-  credito: 'Crédito & Cobrança',
-  relatorios: 'Relatórios Avançados',
-  admin: 'Administração',
-};
+import { moduleLabel } from '@/lib/moduleLabels';
 
 export default function Upgrade() {
   const [params] = useSearchParams();
   const requested = params.get('module') ?? '';
+  const requiredPlanName = params.get('plan') ?? '';
+  const reason = params.get('reason') ?? '';
   const { data: plans = [], isLoading } = usePlans();
   const { data: current } = useCurrentPlan();
 
-  const moduleLabel = MODULE_LABELS[requested] ?? requested;
+  const label = requested ? moduleLabel(requested) : '';
+  const headline =
+    reason === 'plan_required'
+      ? 'Assinatura necessária'
+      : reason === 'module_locked'
+        ? `${label || 'Este módulo'} indisponível no seu plano`
+        : 'Faça upgrade do seu plano';
+
+  const subtext =
+    reason === 'plan_required'
+      ? requiredPlanName
+        ? `Para liberar ${label || 'este recurso'}, ative o plano ${requiredPlanName}.`
+        : `Você precisa de uma assinatura ativa para usar ${label || 'este recurso'}.`
+      : reason === 'module_locked'
+        ? requiredPlanName
+          ? `O módulo ${label} requer o plano ${requiredPlanName}${
+              current ? ` (seu plano atual: ${current.plan_name})` : ''
+            }.`
+          : `O módulo ${label} não está incluído no seu plano${
+              current ? ` ${current.plan_name}` : ''
+            }.`
+        : requested
+          ? `O módulo ${label} não está incluído no seu plano atual${
+              current ? ` (${current.plan_name})` : ''
+            }.`
+          : '';
 
   return (
     <div className="container mx-auto max-w-6xl space-y-6 py-8">
@@ -41,16 +55,28 @@ export default function Upgrade() {
           </Link>
           <h1 className="flex items-center gap-2 text-3xl font-bold">
             <Sparkles className="h-7 w-7 text-primary" />
-            Faça upgrade do seu plano
+            {headline}
           </h1>
-          {requested && (
-            <p className="mt-1 text-muted-foreground">
-              O módulo <strong className="text-foreground">{moduleLabel}</strong> não está incluído
-              no seu plano atual{current ? ` (${current.plan_name})` : ''}.
-            </p>
-          )}
+          {subtext && <p className="mt-1 text-muted-foreground">{subtext}</p>}
         </div>
       </div>
+
+      {reason && requested && (
+        <Alert>
+          <Lock className="h-4 w-4" />
+          <AlertTitle>
+            {label}
+            {requiredPlanName ? ` • requer ${requiredPlanName}` : ''}
+          </AlertTitle>
+          <AlertDescription>
+            {reason === 'plan_required'
+              ? 'Sua empresa ainda não possui uma assinatura ativa.'
+              : `O recurso solicitado faz parte de um plano superior${
+                  current ? ` ao seu (${current.plan_name})` : ''
+                }.`}
+          </AlertDescription>
+        </Alert>
+      )}
 
       {isLoading ? (
         <div className="text-center text-muted-foreground">Carregando planos…</div>
@@ -59,19 +85,22 @@ export default function Upgrade() {
           {plans.map((p) => {
             const isCurrent = current?.plan_id === p.id;
             const includes = p.allowed_modules?.includes(requested);
+            const isRequired =
+              !!requiredPlanName &&
+              p.name?.toLowerCase() === requiredPlanName.toLowerCase();
+            const highlight = isRequired || (!requiredPlanName && includes);
             return (
               <Card
                 key={p.id}
-                className={
-                  includes
-                    ? 'border-primary/50 ring-1 ring-primary/30'
-                    : ''
-                }
+                className={highlight ? 'border-primary/60 ring-2 ring-primary/40' : ''}
               >
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>{p.name}</CardTitle>
-                    {isCurrent && <Badge variant="secondary">Atual</Badge>}
+                    <div className="flex gap-1">
+                      {isRequired && <Badge>Recomendado</Badge>}
+                      {isCurrent && <Badge variant="secondary">Atual</Badge>}
+                    </div>
                   </div>
                   <CardDescription>{p.description}</CardDescription>
                   <div className="mt-2 text-3xl font-bold">
@@ -92,13 +121,27 @@ export default function Upgrade() {
                       <Check className="h-4 w-4 text-primary" />{' '}
                       {(p.allowed_modules?.length ?? 0)} módulos inclusos
                     </li>
+                    {requested && (
+                      <li className="flex items-center gap-2">
+                        {includes ? (
+                          <>
+                            <Check className="h-4 w-4 text-primary" /> Inclui {label}
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="h-4 w-4 text-muted-foreground" />{' '}
+                            <span className="text-muted-foreground">Não inclui {label}</span>
+                          </>
+                        )}
+                      </li>
+                    )}
                   </ul>
                   <Button
                     className="w-full"
                     disabled={isCurrent}
-                    variant={includes ? 'default' : 'outline'}
+                    variant={highlight ? 'default' : 'outline'}
                   >
-                    {isCurrent ? 'Plano atual' : includes ? 'Fazer upgrade' : 'Selecionar'}
+                    {isCurrent ? 'Plano atual' : highlight ? 'Fazer upgrade' : 'Selecionar'}
                   </Button>
                 </CardContent>
               </Card>
@@ -109,3 +152,4 @@ export default function Upgrade() {
     </div>
   );
 }
+
