@@ -29,7 +29,7 @@ export default function WorkflowInbox() {
 
   return (
     <PageContainer>
-      <PageHeader title="Caixa de Workflows" subtitle="Instâncias pendentes aguardando ação" icon={Inbox} />
+      <PageHeader title="Caixa de Workflows" description="Instâncias pendentes aguardando ação" icon={Inbox} />
 
       {loading ? (
         <div className="flex justify-center py-12">
