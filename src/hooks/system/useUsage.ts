@@ -29,8 +29,8 @@ export function useCurrentUsage() {
     enabled: !!companyId,
     staleTime: 60_000,
     queryFn: async (): Promise<UsageRow[]> => {
-      const { data, error } = await supabase
-        .from('v_current_usage' as any)
+      const { data, error } = await (supabase as any)
+        .from('v_current_usage')
         .select('*')
         .eq('company_id', companyId);
       if (error) throw error;
