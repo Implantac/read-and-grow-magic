@@ -1,4 +1,4 @@
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { Sparkles, Check, ArrowLeft, Lock } from 'lucide-react';
 import { Button } from '@/ui/base/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
