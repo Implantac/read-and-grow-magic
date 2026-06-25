@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Database, Plus, Trash2, Settings2, FileText, GitBranch } from "lucide-react";
+import { Database, Plus, Trash2, Settings2, FileText, GitBranch, Pencil } from "lucide-react";
 import { PageContainer } from "@/shared/components/PageContainer";
 import { PageHeader } from "@/shared/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
