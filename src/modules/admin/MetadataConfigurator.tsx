@@ -549,10 +549,17 @@ const RELATIONSHIP_TYPES = [
   { value: "many_to_many", label: "N:N (Muitos para Muitos)" },
 ];
 
+const INVERSE_TYPE: Record<string, string> = {
+  one_to_many: "many_to_one",
+  many_to_one: "one_to_many",
+  many_to_many: "many_to_many",
+};
+
 function RelationshipsPanel({ entityId }: { entityId: string }) {
   const { data: entities = [] } = useCustomEntities();
   const { data: rels = [], isLoading } = useCustomRelationships(entityId);
   const { create, update, remove } = useRelationshipMutations(entityId);
+  const { data: fromFields = [] } = useCustomFields(entityId);
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [toEntityId, setToEntityId] = useState<string>("");
@@ -560,6 +567,8 @@ function RelationshipsPanel({ entityId }: { entityId: string }) {
   const [fromField, setFromField] = useState("");
   const [toField, setToField] = useState("");
   const [cascade, setCascade] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { data: toFields = [] } = useCustomFields(toEntityId || "");
 
   const otherEntities = entities.filter((e) => e.id !== entityId);
   const entityMap = new Map(entities.map((e) => [e.id, e]));
@@ -571,6 +580,7 @@ function RelationshipsPanel({ entityId }: { entityId: string }) {
     setFromField("");
     setToField("");
     setCascade(false);
+    setError(null);
   };
 
   const openCreate = () => {
@@ -585,28 +595,72 @@ function RelationshipsPanel({ entityId }: { entityId: string }) {
     setFromField(r.from_field);
     setToField(r.to_field);
     setCascade(!!r.cascade_delete);
+    setError(null);
     setOpen(true);
   };
 
+  const validate = (): string | null => {
+    const from = fromField.trim();
+    const to = toField.trim();
+    if (!toEntityId) return "Selecione a entidade destino.";
+    if (!from || !to) return "Os campos origem e destino são obrigatórios.";
+    if (toEntityId === entityId) return "A entidade destino deve ser diferente da entidade atual.";
+    if (!RELATIONSHIP_TYPES.some((t) => t.value === relType))
+      return "Tipo de relacionamento inválido.";
+
+    const fromKeys = new Set<string>(["id", ...fromFields.map((f: any) => f.field_key)]);
+    const toKeys = new Set<string>(["id", ...toFields.map((f: any) => f.field_key)]);
+    if (!fromKeys.has(from))
+      return `Campo origem "${from}" não existe na entidade atual.`;
+    if (toEntityId && toFields.length >= 0 && !toKeys.has(to))
+      return `Campo destino "${to}" não existe na entidade destino.`;
+
+    // Cardinality compatibility: the "one" side must reference a unique key (we require "id").
+    if (relType === "many_to_one" && to !== "id")
+      return "Para N:1, o campo destino deve ser a chave única (id) da entidade destino.";
+    if (relType === "one_to_many" && from !== "id")
+      return "Para 1:N, o campo origem deve ser a chave única (id) da entidade atual.";
+
+    // Duplicate / inverse-duplicate detection.
+    const duplicate = rels.find((r: any) => {
+      if (editingId && r.id === editingId) return false;
+      const sameOutgoing =
+        r.from_entity_id === entityId &&
+        r.to_entity_id === toEntityId &&
+        r.relationship_type === relType &&
+        r.from_field === from &&
+        r.to_field === to;
+      const sameInverse =
+        r.to_entity_id === entityId &&
+        r.from_entity_id === toEntityId &&
+        r.relationship_type === INVERSE_TYPE[relType] &&
+        r.to_field === from &&
+        r.from_field === to;
+      return sameOutgoing || sameInverse;
+    });
+    if (duplicate) return "Já existe um relacionamento equivalente entre estas entidades.";
+
+    return null;
+  };
+
   const submit = async () => {
-    if (!toEntityId || !fromField.trim() || !toField.trim()) return;
+    const err = validate();
+    if (err) {
+      setError(err);
+      return;
+    }
+    setError(null);
+    const payload = {
+      to_entity_id: toEntityId,
+      relationship_type: relType,
+      from_field: fromField.trim(),
+      to_field: toField.trim(),
+      cascade_delete: cascade,
+    };
     if (editingId) {
-      await update.mutateAsync({
-        id: editingId,
-        to_entity_id: toEntityId,
-        relationship_type: relType,
-        from_field: fromField.trim(),
-        to_field: toField.trim(),
-        cascade_delete: cascade,
-      });
+      await update.mutateAsync({ id: editingId, ...payload });
     } else {
-      await create.mutateAsync({
-        to_entity_id: toEntityId,
-        relationship_type: relType,
-        from_field: fromField.trim(),
-        to_field: toField.trim(),
-        cascade_delete: cascade,
-      });
+      await create.mutateAsync(payload);
     }
     resetForm();
     setOpen(false);
@@ -669,6 +723,11 @@ function RelationshipsPanel({ entityId }: { entityId: string }) {
                 <input type="checkbox" checked={cascade} onChange={(e) => setCascade(e.target.checked)} />
                 Excluir em cascata
               </label>
+              {error && (
+                <p className="text-sm text-destructive" role="alert">
+                  {error}
+                </p>
+              )}
             </div>
             <DialogFooter>
               <Button onClick={submit} disabled={create.isPending || update.isPending}>
