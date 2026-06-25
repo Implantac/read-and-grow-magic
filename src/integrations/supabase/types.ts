@@ -15484,6 +15484,44 @@ export type Database = {
         }
         Relationships: []
       }
+      v_current_usage: {
+        Row: {
+          company_id: string | null
+          current_value: number | null
+          limit_value: number | null
+          metric: string | null
+          period: string | null
+          updated_at: string | null
+          usage_percent: number | null
+        }
+        Insert: {
+          company_id?: string | null
+          current_value?: number | null
+          limit_value?: number | null
+          metric?: string | null
+          period?: string | null
+          updated_at?: string | null
+          usage_percent?: never
+        }
+        Update: {
+          company_id?: string | null
+          current_value?: number | null
+          limit_value?: number | null
+          metric?: string | null
+          period?: string | null
+          updated_at?: string | null
+          usage_percent?: never
+        }
+        Relationships: [
+          {
+            foreignKeyName: "usage_tracking_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vw_organizational_hierarchy: {
         Row: {
           company_id: string | null
@@ -15551,6 +15589,10 @@ export type Database = {
         Args: { _target_company_id: string; _user_id: string }
         Returns: boolean
       }
+      check_quota: {
+        Args: { _company_id: string; _metric: string }
+        Returns: Json
+      }
       cleanup_expired_deleted_orders: { Args: never; Returns: undefined }
       close_accounting_period: {
         Args: { _month: number; _year: number }
@@ -15573,6 +15615,7 @@ export type Database = {
         }
         Returns: Json
       }
+      current_billing_period: { Args: never; Returns: string }
       detect_cashflow_risks: { Args: never; Returns: Json }
       detect_financial_alerts: { Args: never; Returns: Json }
       evaluate_transaction_risk: {
@@ -15739,6 +15782,10 @@ export type Database = {
           inserted: number
           skipped: number
         }[]
+      }
+      increment_usage: {
+        Args: { _company_id: string; _delta?: number; _metric: string }
+        Returns: number
       }
       manual_match_transaction: {
         Args: { p_bank_transaction_id: string; p_ledger_entry_id: string }
