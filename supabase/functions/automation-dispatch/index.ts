@@ -103,6 +103,34 @@ Deno.serve(async (req) => {
               results.push({ type: "log", ok: true, message: action.message ?? null });
               break;
             }
+            case "start_workflow": {
+              const key = action.workflow_key ?? action.definition_key;
+              const defQuery = admin
+                .from("workflow_definitions")
+                .select("id, steps")
+                .eq("company_id", profile.company_id)
+                .eq("is_active", true)
+                .limit(1);
+              const { data: defRow, error: defErr } = action.definition_id
+                ? await admin.from("workflow_definitions").select("id, steps").eq("id", action.definition_id).maybeSingle()
+                : key
+                  ? await defQuery.eq("key", key).maybeSingle()
+                  : { data: null, error: new Error("missing_workflow") } as any;
+              if (defErr || !defRow) throw new Error("workflow_not_found");
+              const firstStep = Array.isArray(defRow.steps) && defRow.steps[0] ? (defRow.steps[0] as any).key : null;
+              const { data: inst, error: instErr } = await admin.from("workflow_instances").insert({
+                company_id: profile.company_id,
+                definition_id: defRow.id,
+                entity_id: (ctx as any).id ?? null,
+                current_step: firstStep,
+                status: "running",
+                context: ctx,
+                started_by: userData.user.id,
+              }).select("id").single();
+              if (instErr) throw instErr;
+              results.push({ type: "start_workflow", ok: true, instance_id: inst.id });
+              break;
+            }
             default:
               results.push({ type: action?.type ?? "unknown", ok: false, error: "unsupported_action" });
               status = "partial";
