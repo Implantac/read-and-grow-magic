@@ -1,4 +1,4 @@
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { Sparkles, Check, ArrowLeft, Lock } from 'lucide-react';
 import { Button } from '@/ui/base/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
@@ -10,11 +10,19 @@ import { moduleLabel } from '@/lib/moduleLabels';
 
 export default function Upgrade() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const requested = params.get('module') ?? '';
   const requiredPlanName = params.get('plan') ?? '';
   const reason = params.get('reason') ?? '';
   const { data: plans = [], isLoading } = usePlans();
   const { data: current } = useCurrentPlan();
+
+  const goToSubscribe = (planId: string) => {
+    const qs = new URLSearchParams();
+    qs.set('plan', planId);
+    if (requested) qs.set('module', requested);
+    navigate(`/subscribe?${qs.toString()}`);
+  };
 
   const label = requested ? moduleLabel(requested) : '';
   const headline =
@@ -140,6 +148,7 @@ export default function Upgrade() {
                     className="w-full"
                     disabled={isCurrent}
                     variant={highlight ? 'default' : 'outline'}
+                    onClick={() => goToSubscribe(p.id)}
                   >
                     {isCurrent ? 'Plano atual' : highlight ? 'Fazer upgrade' : 'Selecionar'}
                   </Button>
