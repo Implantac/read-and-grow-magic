@@ -74,6 +74,7 @@ const EMPTY_FORM: FormState = {
 
 export default function AutomationEngine() {
   const { data: rules = [], isLoading } = useAutomationRules();
+  const { data: workflowDefs = [] } = useWorkflowDefinitions();
   const { save, remove, toggle } = useAutomationMutations();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
