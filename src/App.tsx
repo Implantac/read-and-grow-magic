@@ -22,6 +22,7 @@ import { VerticalPackRoutes } from './core/routes/VerticalPackRoutes';
 import { ExecutiveRoutes } from './routes/ExecutiveRoutes';
 import { FeatureGate } from '@/components/plan/FeatureGate';
 import { GatedOutlet } from '@/components/plan/GatedOutlet';
+import { OnboardingGuard } from '@/components/OnboardingGuard';
 
 // Eager load critical pages
 import Login from "./pages/Login";
@@ -32,6 +33,8 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Upgrade = lazy(() => import("./pages/Upgrade"));
 const Subscribe = lazy(() => import("./pages/Subscribe"));
+const Onboarding = lazy(() => import("./pages/Onboarding"));
+
 
 function PageLoader() {
   return (
@@ -67,11 +70,14 @@ const App = () => (
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/login" element={<Login />} />
               <Route path="/reset-password" element={<ResetPassword />} />
-              
+              <Route path="/onboarding" element={<Onboarding />} />
+
               <Route element={<MainLayout />}>
+                <Route element={<OnboardingGuard />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/upgrade" element={<Upgrade />} />
                 <Route path="/subscribe" element={<Subscribe />} />
+
                 {CommercialRoutes}
                 <Route
                   path="/financeiro/*"
