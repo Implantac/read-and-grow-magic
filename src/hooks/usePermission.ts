@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useEnterpriseStore } from "@/store/useEnterpriseStore";
+import { useEnterpriseStore } from "@/core/stores/useEnterpriseStore";
 
 /**
  * Granular permission check (RBAC 1.6).
