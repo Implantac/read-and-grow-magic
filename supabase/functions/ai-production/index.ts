@@ -49,6 +49,8 @@ serve(async (req) => {
     }
     const moduleDenied = await requireModule(ctx, 'producao');
     if (moduleDenied) return moduleDenied;
+    const quotaDenied = await enforceQuota(ctx, 'ai_calls', 1);
+    if (quotaDenied) return quotaDenied;
     const scope = branchScope(ctx);
     const scopeOrders = <T extends { in: any }>(q: T) => (scope ? (q as any).in('branch_id', scope) : q);
 
