@@ -35,7 +35,7 @@ export function RoleGuard({ roles, children, redirectTo = "/dashboard" }: RoleGu
         .select("role")
         .eq("user_id", user.id)
         .eq("company_id", companyId)
-        .in("role", roles as string[])
+        .in("role", roles as any)
         .limit(1);
 
       if (cancelled) return;
