@@ -35,6 +35,7 @@ const Upgrade = lazy(() => import("./pages/Upgrade"));
 const Subscribe = lazy(() => import("./pages/Subscribe"));
 const Onboarding = lazy(() => import("./pages/Onboarding"));
 const DashboardView = lazy(() => import("./pages/DashboardView"));
+const CustomEntityRecords = lazy(() => import("./pages/CustomEntityRecords"));
 
 
 function PageLoader() {
@@ -77,6 +78,7 @@ const App = () => (
                 <Route element={<OnboardingGuard />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/dashboards/:id" element={<DashboardView />} />
+                <Route path="/custom/:entityKey" element={<CustomEntityRecords />} />
                 <Route path="/upgrade" element={<Upgrade />} />
                 <Route path="/subscribe" element={<Subscribe />} />
 
