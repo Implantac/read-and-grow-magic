@@ -382,6 +382,34 @@ export default function AutomationEngine() {
                       />
                     </div>
                   )}
+
+                  {a.type === "start_workflow" && (
+                    <div>
+                      <Label className="text-xs">Workflow</Label>
+                      <Select
+                        value={a.config.definition_id ?? ""}
+                        onValueChange={(v) => updateActionConfig(i, "definition_id", v)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione um workflow" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {workflowDefs.length === 0 ? (
+                            <SelectItem value="__none" disabled>Nenhum workflow disponível</SelectItem>
+                          ) : (
+                            workflowDefs.map((d: any) => (
+                              <SelectItem key={d.id} value={d.id}>
+                                {d.name} <span className="text-muted-foreground ml-2">({d.target_entity})</span>
+                              </SelectItem>
+                            ))
+                          )}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Uma instância será iniciada usando o contexto do evento como dados de entrada.
+                      </p>
+                    </div>
+                  )}
                 </div>
               ))}
               <Button variant="outline" size="sm" onClick={addAction}>
