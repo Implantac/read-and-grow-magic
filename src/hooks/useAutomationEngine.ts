@@ -2,8 +2,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+export type AutomationActionType =
+  | "notification"
+  | "webhook"
+  | "log"
+  | "create_record"
+  | "update_record"
+  | "start_workflow";
+
 export interface AutomationAction {
-  type: "notify" | "create_record" | "update_record" | "webhook" | "start_workflow";
+  type: AutomationActionType;
   config: Record<string, any>;
 }
 
