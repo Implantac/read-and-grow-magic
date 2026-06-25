@@ -911,6 +911,8 @@ Deno.serve(async (req) => {
         }
         const moduleDenied = await requireModule(ctx as TenantContext, 'executivo');
         if (moduleDenied) return moduleDenied;
+        const quotaDenied = await enforceQuota(ctx as TenantContext, 'ai_calls', 1);
+        if (quotaDenied) return quotaDenied;
         callerScope = branchScope(ctx as TenantContext);
       }
     }
