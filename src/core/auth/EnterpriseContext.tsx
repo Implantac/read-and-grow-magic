@@ -85,8 +85,11 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       if (userError) throw userError;
       if (user) {
         // Load hierarchy via the view (view types may not be in generated Database)
-        const fromAny = supabase.from as unknown as (rel: string) => ReturnType<typeof supabase.from>;
-        const { data: hierarchyData } = await fromAny('vw_organizational_hierarchy')
+        const supabaseAny = supabase as unknown as {
+          from: (rel: string) => ReturnType<typeof supabase.from>;
+        };
+        const { data: hierarchyData } = await supabaseAny
+          .from('vw_organizational_hierarchy')
           .select('*')
           .limit(1)
           .single();

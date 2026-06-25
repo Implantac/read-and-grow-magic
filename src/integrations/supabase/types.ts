@@ -12434,7 +12434,7 @@ export type Database = {
         Row: {
           code: string
           commission_rate: number | null
-          company_id: string | null
+          company_id: string
           created_at: string | null
           email: string | null
           id: string
@@ -12451,7 +12451,7 @@ export type Database = {
         Insert: {
           code: string
           commission_rate?: number | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string | null
           email?: string | null
           id?: string
@@ -12468,7 +12468,7 @@ export type Database = {
         Update: {
           code?: string
           commission_rate?: number | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string | null
           email?: string | null
           id?: string
@@ -13354,7 +13354,7 @@ export type Database = {
           category: string | null
           cellphone: string | null
           code: string
-          company_id: string | null
+          company_id: string
           created_at: string
           delivery_time: number
           document: string
@@ -13380,7 +13380,7 @@ export type Database = {
           category?: string | null
           cellphone?: string | null
           code: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           delivery_time?: number
           document: string
@@ -13406,7 +13406,7 @@ export type Database = {
           category?: string | null
           cellphone?: string | null
           code?: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           delivery_time?: number
           document?: string
