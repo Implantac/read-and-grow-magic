@@ -10,11 +10,19 @@ import { moduleLabel } from '@/lib/moduleLabels';
 
 export default function Upgrade() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
   const requested = params.get('module') ?? '';
   const requiredPlanName = params.get('plan') ?? '';
   const reason = params.get('reason') ?? '';
   const { data: plans = [], isLoading } = usePlans();
   const { data: current } = useCurrentPlan();
+
+  const goToSubscribe = (planId: string) => {
+    const qs = new URLSearchParams();
+    qs.set('plan', planId);
+    if (requested) qs.set('module', requested);
+    navigate(`/subscribe?${qs.toString()}`);
+  };
 
   const label = requested ? moduleLabel(requested) : '';
   const headline =
