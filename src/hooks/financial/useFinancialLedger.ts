@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface LedgerEntryRow {
@@ -39,9 +40,11 @@ export function useCreateManualLedger() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (entry: Omit<LedgerEntryRow, 'id' | 'created_at' | 'reconciled' | 'bank_transaction_id'> & { source?: string }) => {
+      const company_id = useEnterpriseStore.getState().activeCompanyId;
+      if (!company_id) throw new Error('Empresa não selecionada');
       const { data, error } = await supabase
         .from('financial_ledger')
-        .insert({ ...entry, source: entry.source ?? 'manual' })
+        .insert({ ...entry, company_id, source: entry.source ?? 'manual' })
         .select().single();
       if (error) throw error;
       return data;

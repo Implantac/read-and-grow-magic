@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface FinancialCategoryRow {
@@ -32,7 +33,13 @@ export function useCreateFinancialCategory() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (cat: Omit<FinancialCategoryRow, 'id' | 'created_at' | 'active'>) => {
-      const { data, error } = await supabase.from('financial_categories').insert(cat).select().single();
+      const company_id = useEnterpriseStore.getState().activeCompanyId;
+      if (!company_id) throw new Error('Empresa não selecionada');
+      const { data, error } = await supabase
+        .from('financial_categories')
+        .insert({ ...cat, company_id })
+        .select()
+        .single();
       if (error) throw error;
       return data;
     },
