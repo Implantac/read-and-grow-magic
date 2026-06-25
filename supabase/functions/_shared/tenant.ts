@@ -210,6 +210,22 @@ export function jsonError(message: string, status: number): Response {
  *   const denied = await requireModule(ctx, 'producao');
  *   if (denied) return denied;
  */
+async function findCheapestPlanWithModule(
+  admin: ReturnType<typeof createClient>,
+  moduleKey: string,
+): Promise<{ id: string; name: string; price_monthly: number } | null> {
+  const { data } = await admin
+    .from('plan_modules')
+    .select('plan_id, plans:plan_id(id,name,price_monthly)')
+    .eq('module_key', moduleKey)
+    .eq('enabled', true);
+  const plans = (data ?? [])
+    .map((r: any) => r.plans)
+    .filter(Boolean) as Array<{ id: string; name: string; price_monthly: number }>;
+  plans.sort((a, b) => Number(a.price_monthly) - Number(b.price_monthly));
+  return plans[0] ?? null;
+}
+
 export async function requireModule(
   ctx: TenantContext,
   moduleKey: string,
@@ -226,7 +242,7 @@ export async function requireModule(
 
   const { data: sub, error } = await admin
     .from('subscriptions')
-    .select('plan_id')
+    .select('plan_id, plans:plan_id(name)')
     .eq('company_id', ctx.companyId)
     .in('status', ['active', 'trialing', 'trial'])
     .order('created_at', { ascending: false })
@@ -237,9 +253,17 @@ export async function requireModule(
     console.error('[requireModule] subscription lookup failed', error);
     return jsonError('Erro ao validar plano.', 500);
   }
+
+  const required = await findCheapestPlanWithModule(admin, moduleKey);
+
   if (!sub?.plan_id) {
     return new Response(
-      JSON.stringify({ error: 'plan_required', module: moduleKey }),
+      JSON.stringify({
+        error: 'plan_required',
+        module: moduleKey,
+        required_plan: required?.name ?? null,
+        required_plan_id: required?.id ?? null,
+      }),
       { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
   }
@@ -253,8 +277,15 @@ export async function requireModule(
     .maybeSingle();
 
   if (!mod) {
+    const currentPlanName = (sub as any)?.plans?.name ?? null;
     return new Response(
-      JSON.stringify({ error: 'module_locked', module: moduleKey }),
+      JSON.stringify({
+        error: 'module_locked',
+        module: moduleKey,
+        current_plan: currentPlanName,
+        required_plan: required?.name ?? null,
+        required_plan_id: required?.id ?? null,
+      }),
       { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
     );
   }
