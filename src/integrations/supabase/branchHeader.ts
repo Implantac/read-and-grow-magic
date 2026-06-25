@@ -101,6 +101,15 @@ export async function handlePlanErrorResponse(err: any): Promise<boolean> {
     return true;
   }
 
+  if (status === 403 && body?.error === 'permission_denied') {
+    const resource = body?.resource ?? '';
+    const action = body?.action ?? '';
+    toast.error('Permissão negada', {
+      description: `Você não tem permissão para ${action} em ${resource}. Solicite acesso ao administrador.`,
+    });
+    return true;
+  }
+
   return false;
 }
 

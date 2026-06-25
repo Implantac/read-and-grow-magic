@@ -8249,6 +8249,33 @@ export type Database = {
           },
         ]
       }
+      permissions: {
+        Row: {
+          action: string
+          created_at: string
+          description: string | null
+          id: string
+          module_key: string | null
+          resource: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          module_key?: string | null
+          resource: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          module_key?: string | null
+          resource?: string
+        }
+        Relationships: []
+      }
       pharma_lab_tests: {
         Row: {
           analyst_name: string | null
@@ -11295,6 +11322,35 @@ export type Database = {
         }
         Relationships: []
       }
+      role_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permission_id: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission_id: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission_id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saas_invoices: {
         Row: {
           amount: number
@@ -13673,6 +13729,51 @@ export type Database = {
           },
         ]
       }
+      user_permission_overrides: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          granted: boolean
+          id: string
+          permission_id: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          granted?: boolean
+          id?: string
+          permission_id: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          granted?: boolean
+          id?: string
+          permission_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_permission_overrides_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_permission_overrides_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "permissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           company_id: string
@@ -15771,6 +15872,15 @@ export type Database = {
       }
       has_branch_access: { Args: { _branch_id: string }; Returns: boolean }
       has_module_access: { Args: { _module_key: string }; Returns: boolean }
+      has_permission: {
+        Args: {
+          _action: string
+          _company_id: string
+          _resource: string
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role:
         | {
             Args: {
