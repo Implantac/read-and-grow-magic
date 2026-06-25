@@ -3,6 +3,7 @@ import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { ModuleKPISection } from '@/components/dashboard/ModuleKPISection';
 import { ConsolidatedCharts } from '@/components/dashboard/ConsolidatedCharts';
 import { GlobalAlerts } from '@/components/dashboard/GlobalAlerts';
+import { UsagePanel } from '@/components/plan/UsagePanel';
 import { RevenueChart } from '@/components/dashboard/RevenueChart';
 import { RecentActivities } from '@/components/dashboard/RecentActivities';
 import { ExecutiveConsensus } from '@/components/executive/ExecutiveConsensus';
@@ -300,6 +301,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="lg:col-span-3 space-y-6">
+          <UsagePanel />
           <div className="grid gap-6 md:grid-cols-3">
             <div className="md:col-span-2">
               <RevenueChart />

@@ -30,7 +30,9 @@ export default function Upgrade() {
       ? 'Assinatura necessária'
       : reason === 'module_locked'
         ? `${label || 'Este módulo'} indisponível no seu plano`
-        : 'Faça upgrade do seu plano';
+        : reason === 'quota_exceeded'
+          ? 'Limite do plano atingido'
+          : 'Faça upgrade do seu plano';
 
   const subtext =
     reason === 'plan_required'

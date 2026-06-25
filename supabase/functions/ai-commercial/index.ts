@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { getSystemPrompt } from "../_shared/ai-prompts.ts";
-import { resolveContextByIds, branchScope, requireModule } from "../_shared/tenant.ts";
+import { resolveContextByIds, branchScope, requireModule, enforceQuota } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -57,6 +57,8 @@ async function requireAuth(req: Request): Promise<Response | { userId: string; c
   }
   const denied = await requireModule(ctx, "comercial");
   if (denied) return denied;
+  const quotaDenied = await enforceQuota(ctx, "ai_calls", 1);
+  if (quotaDenied) return quotaDenied;
   return { userId, companyId, scope: branchScope(ctx) };
 }
 

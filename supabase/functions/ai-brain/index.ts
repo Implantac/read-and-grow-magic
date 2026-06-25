@@ -4,7 +4,7 @@
 // Orquestrador multi-agente + memória + decisões com guardrails
 // ============================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { resolveContextByIds, branchScope, requireModule, type TenantContext } from "../_shared/tenant.ts";
+import { resolveContextByIds, branchScope, requireModule, enforceQuota, type TenantContext } from "../_shared/tenant.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -911,6 +911,8 @@ Deno.serve(async (req) => {
         }
         const moduleDenied = await requireModule(ctx as TenantContext, 'executivo');
         if (moduleDenied) return moduleDenied;
+        const quotaDenied = await enforceQuota(ctx as TenantContext, 'ai_calls', 1);
+        if (quotaDenied) return quotaDenied;
         callerScope = branchScope(ctx as TenantContext);
       }
     }

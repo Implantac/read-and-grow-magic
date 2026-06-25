@@ -292,3 +292,58 @@ export async function requireModule(
 
   return null;
 }
+
+/**
+ * Quota enforcement. Checks `check_quota` RPC against the caller's plan
+ * and returns 402 if the limit was reached. Otherwise increments the
+ * counter atomically. Pass increment=0 to perform a check-only call.
+ *
+ * Metrics: 'orders' | 'nfe' | 'ai_calls' | 'users' | 'branches'
+ */
+export async function enforceQuota(
+  ctx: TenantContext,
+  metric: 'orders' | 'nfe' | 'ai_calls' | 'users' | 'branches',
+  increment = 1,
+): Promise<Response | null> {
+  if (ctx.viaCron || !ctx.companyId) return null;
+
+  const admin = createClient(
+    Deno.env.get('SUPABASE_URL')!,
+    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+  );
+
+  const { data: quota, error } = await admin.rpc('check_quota', {
+    _company_id: ctx.companyId,
+    _metric: metric,
+  });
+
+  if (error) {
+    console.error('[enforceQuota] check_quota failed', error);
+    return jsonError('Erro ao validar quota.', 500);
+  }
+
+  const allowed = (quota as any)?.allowed ?? true;
+  if (!allowed) {
+    return new Response(
+      JSON.stringify({
+        error: 'quota_exceeded',
+        metric,
+        current: (quota as any)?.current ?? 0,
+        limit: (quota as any)?.limit ?? null,
+        period: (quota as any)?.period ?? null,
+      }),
+      { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    );
+  }
+
+  if (increment > 0) {
+    const { error: incErr } = await admin.rpc('increment_usage', {
+      _company_id: ctx.companyId,
+      _metric: metric,
+      _delta: increment,
+    });
+    if (incErr) console.error('[enforceQuota] increment_usage failed', incErr);
+  }
+
+  return null;
+}

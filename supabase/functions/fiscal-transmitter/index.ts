@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4"
 import { requireAuth } from "../_shared/require-auth.ts"
-import { resolveContext, requireModule } from "../_shared/tenant.ts"
+import { resolveContext, requireModule, enforceQuota } from "../_shared/tenant.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -30,6 +30,8 @@ serve(async (req) => {
     }
     const moduleDenied = await requireModule(ctx, 'fiscal')
     if (moduleDenied) return moduleDenied
+    const quotaDenied = await enforceQuota(ctx, 'nfe', 1)
+    if (quotaDenied) return quotaDenied
 
 
     // Use service role to perform the state change, but enforce tenant scoping in code.
