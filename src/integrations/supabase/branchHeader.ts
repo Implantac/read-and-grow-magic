@@ -81,6 +81,26 @@ export async function handlePlanErrorResponse(err: any): Promise<boolean> {
     return true;
   }
 
+  if (status === 402 && body?.error === 'quota_exceeded') {
+    const metric: string = body?.metric ?? '';
+    const limit = body?.limit;
+    const metricLabels: Record<string, string> = {
+      orders: 'pedidos',
+      nfe: 'NF-e',
+      ai_calls: 'chamadas de IA',
+      users: 'usuários',
+      branches: 'filiais',
+    };
+    const ml = metricLabels[metric] ?? metric;
+    toast.error('Limite do plano atingido', {
+      description: limit
+        ? `Você atingiu o limite de ${limit.toLocaleString('pt-BR')} ${ml} no mês. Faça upgrade para continuar.`
+        : `Você atingiu o limite de ${ml} no mês. Faça upgrade para continuar.`,
+    });
+    redirectToUpgrade({ reason: 'quota_exceeded' });
+    return true;
+  }
+
   return false;
 }
 
