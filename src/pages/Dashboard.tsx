@@ -301,6 +301,7 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="lg:col-span-3 space-y-6">
+          <UsagePanel />
           <div className="grid gap-6 md:grid-cols-3">
             <div className="md:col-span-2">
               <RevenueChart />
