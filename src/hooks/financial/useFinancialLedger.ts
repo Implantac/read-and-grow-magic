@@ -40,9 +40,11 @@ export function useCreateManualLedger() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (entry: Omit<LedgerEntryRow, 'id' | 'created_at' | 'reconciled' | 'bank_transaction_id'> & { source?: string }) => {
+      const company_id = useEnterpriseStore.getState().activeCompanyId;
+      if (!company_id) throw new Error('Empresa não selecionada');
       const { data, error } = await supabase
         .from('financial_ledger')
-        .insert({ ...entry, source: entry.source ?? 'manual' })
+        .insert({ ...entry, company_id, source: entry.source ?? 'manual' })
         .select().single();
       if (error) throw error;
       return data;
