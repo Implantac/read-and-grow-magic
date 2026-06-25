@@ -20,6 +20,7 @@ import {
   type AutomationCondition,
   type AutomationRule,
 } from "@/hooks/useAutomationEngine";
+import { useWorkflowDefinitions } from "@/hooks/useWorkflowEngine";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
