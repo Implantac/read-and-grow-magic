@@ -358,6 +358,8 @@ export const navigationSections: NavSection[] = [
           { title: 'Auditoria Cross-Módulos', href: '/admin/auditoria-cross', icon: 'Activity' },
           { title: 'Metadata Engine', href: '/admin/metadata', icon: 'Database' },
           { title: 'Workflow Engine', href: '/admin/workflows', icon: 'GitBranch' },
+          { title: 'Caixa de Workflows', href: '/workflows/inbox', icon: 'Inbox' },
+
           { title: 'Automation Engine', href: '/admin/automacoes', icon: 'Zap' },
           { title: 'Dashboard Engine', href: '/admin/dashboards', icon: 'LayoutDashboard' },
         ],
