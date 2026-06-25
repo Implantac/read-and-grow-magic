@@ -12,6 +12,7 @@
 import { toast } from 'sonner';
 import { supabase } from './client';
 import { getActiveBranchId } from '@/core/stores/useEnterpriseStore';
+import { moduleLabel } from '@/lib/moduleLabels';
 
 let installed = false;
 let lastRedirectAt = 0;
@@ -21,7 +22,6 @@ async function extractErrorBody(err: any): Promise<{ status?: number; body?: any
     const resp: Response | undefined = err?.context?.response ?? err?.response;
     if (!resp) return { status: err?.context?.status ?? err?.status };
     const status = resp.status;
-    // Response may have been consumed; try clone first
     try {
       const cloned = resp.clone();
       const text = await cloned.text();
@@ -38,13 +38,15 @@ async function extractErrorBody(err: any): Promise<{ status?: number; body?: any
   }
 }
 
-function redirectToUpgrade(moduleKey?: string) {
+function redirectToUpgrade(params: { module?: string; requiredPlan?: string; reason?: string }) {
   const now = Date.now();
   if (now - lastRedirectAt < 1500) return;
   lastRedirectAt = now;
-  const target = moduleKey
-    ? `/upgrade?module=${encodeURIComponent(moduleKey)}`
-    : '/upgrade';
+  const qs = new URLSearchParams();
+  if (params.module) qs.set('module', params.module);
+  if (params.requiredPlan) qs.set('plan', params.requiredPlan);
+  if (params.reason) qs.set('reason', params.reason);
+  const target = qs.toString() ? `/upgrade?${qs.toString()}` : '/upgrade';
   if (typeof window !== 'undefined' && window.location.pathname !== '/upgrade') {
     window.location.assign(target);
   }
@@ -52,29 +54,33 @@ function redirectToUpgrade(moduleKey?: string) {
 
 export async function handlePlanErrorResponse(err: any): Promise<boolean> {
   const { status, body } = await extractErrorBody(err);
-  if (status === 402) {
-    const code = body?.error ?? 'plan_required';
-    if (code === 'plan_required') {
-      toast.error('Plano necessário', {
-        description: 'Você precisa de uma assinatura ativa para usar este recurso.',
-      });
-      redirectToUpgrade(body?.module);
-      return true;
-    }
+  const moduleKey: string | undefined = body?.module;
+  const requiredPlan: string | undefined = body?.required_plan ?? undefined;
+  const currentPlan: string | undefined = body?.current_plan ?? undefined;
+  const label = moduleLabel(moduleKey);
+
+  if (status === 402 && (body?.error ?? 'plan_required') === 'plan_required') {
+    toast.error('Assinatura necessária', {
+      description: requiredPlan
+        ? `Para usar ${label} ative o plano ${requiredPlan}.`
+        : `Você precisa de uma assinatura ativa para usar ${label}.`,
+    });
+    redirectToUpgrade({ module: moduleKey, requiredPlan, reason: 'plan_required' });
+    return true;
   }
-  if (status === 403) {
-    const code = body?.error ?? '';
-    if (code === 'module_locked') {
-      const moduleKey: string | undefined = body?.module;
-      toast.error('Módulo bloqueado no seu plano', {
-        description: moduleKey
-          ? `O módulo "${moduleKey}" não está incluso no seu plano atual.`
-          : 'Este módulo não está incluso no seu plano atual.',
-      });
-      redirectToUpgrade(moduleKey);
-      return true;
-    }
+
+  if (status === 403 && body?.error === 'module_locked') {
+    toast.error(`${label} indisponível no seu plano`, {
+      description: requiredPlan
+        ? `Faça upgrade para o plano ${requiredPlan} para liberar este módulo${
+            currentPlan ? ` (atual: ${currentPlan})` : ''
+          }.`
+        : `Este módulo não está incluso no seu plano${currentPlan ? ` ${currentPlan}` : ''}.`,
+    });
+    redirectToUpgrade({ module: moduleKey, requiredPlan, reason: 'module_locked' });
+    return true;
   }
+
   return false;
 }
 
