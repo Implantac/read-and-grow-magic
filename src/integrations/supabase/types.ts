@@ -16285,6 +16285,10 @@ export type Database = {
         }
         Returns: Json
       }
+      fn_emit_automation_event: {
+        Args: { _company_id: string; _context: Json; _event: string }
+        Returns: undefined
+      }
       generate_recurring_entries: { Args: never; Returns: Json }
       generate_sped_contribuicoes: {
         Args: { p_end: string; p_start: string }
