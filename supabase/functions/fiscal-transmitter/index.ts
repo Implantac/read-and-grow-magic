@@ -30,6 +30,8 @@ serve(async (req) => {
     }
     const moduleDenied = await requireModule(ctx, 'fiscal')
     if (moduleDenied) return moduleDenied
+    const quotaDenied = await enforceQuota(ctx, 'nfe', 1)
+    if (quotaDenied) return quotaDenied
 
 
     // Use service role to perform the state change, but enforce tenant scoping in code.
