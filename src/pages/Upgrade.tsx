@@ -148,6 +148,7 @@ export default function Upgrade() {
                     className="w-full"
                     disabled={isCurrent}
                     variant={highlight ? 'default' : 'outline'}
+                    onClick={() => goToSubscribe(p.id)}
                   >
                     {isCurrent ? 'Plano atual' : highlight ? 'Fazer upgrade' : 'Selecionar'}
                   </Button>
