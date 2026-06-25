@@ -68,15 +68,59 @@ Deno.serve(async (req) => {
     for (const rule of rules ?? []) {
       const ctx = body.context ?? {};
       if (!matchConditions((rule.conditions as any) ?? [], ctx)) continue;
-      // record run
+
+      const actions = Array.isArray(rule.actions) ? rule.actions : [];
+      const results: any[] = [];
+      let status: "success" | "error" | "partial" = "success";
+
+      for (const action of actions as any[]) {
+        try {
+          switch (action?.type) {
+            case "notification": {
+              const { error } = await admin.from("notifications").insert({
+                company_id: profile.company_id,
+                user_id: action.user_id ?? userData.user.id,
+                title: String(action.title ?? rule.name ?? "Automação"),
+                message: String(action.message ?? `Evento ${body.event}`),
+                type: action.level ?? "info",
+              });
+              if (error) throw error;
+              results.push({ type: "notification", ok: true });
+              break;
+            }
+            case "webhook": {
+              if (!action.url || typeof action.url !== "string") throw new Error("missing_url");
+              const resp = await fetch(action.url, {
+                method: action.method ?? "POST",
+                headers: { "Content-Type": "application/json", ...(action.headers ?? {}) },
+                body: JSON.stringify({ event: body.event, context: ctx, rule: { id: rule.id, name: rule.name } }),
+              });
+              results.push({ type: "webhook", ok: resp.ok, status: resp.status });
+              if (!resp.ok) status = "partial";
+              break;
+            }
+            case "log": {
+              results.push({ type: "log", ok: true, message: action.message ?? null });
+              break;
+            }
+            default:
+              results.push({ type: action?.type ?? "unknown", ok: false, error: "unsupported_action" });
+              status = "partial";
+          }
+        } catch (e: any) {
+          results.push({ type: action?.type, ok: false, error: e?.message ?? "action_error" });
+          status = "partial";
+        }
+      }
+
       await admin.from("automation_runs").insert({
         company_id: profile.company_id,
         rule_id: rule.id,
-        status: "success",
+        status,
         input: ctx,
-        output: { actions: rule.actions },
+        output: { actions: rule.actions, results },
       });
-      executed.push({ rule_id: rule.id, name: rule.name });
+      executed.push({ rule_id: rule.id, name: rule.name, status, results });
     }
 
     return new Response(JSON.stringify({ event: body.event, executed }), {
