@@ -253,6 +253,28 @@ export function useRelationshipMutations(entityId: string | undefined) {
       },
       onError: (e: any) => toast.error(e.message),
     }),
+    update: useMutation({
+      mutationFn: async (payload: {
+        id: string;
+        to_entity_id?: string;
+        relationship_type?: string;
+        from_field?: string;
+        to_field?: string;
+        cascade_delete?: boolean;
+      }) => {
+        const { id, ...rest } = payload;
+        const { error } = await supabase
+          .from("custom_relationships")
+          .update(rest)
+          .eq("id", id);
+        if (error) throw error;
+      },
+      onSuccess: () => {
+        toast.success("Relacionamento atualizado");
+        qc.invalidateQueries({ queryKey: ["custom_relationships", entityId] });
+      },
+      onError: (e: any) => toast.error(e.message),
+    }),
     remove: useMutation({
       mutationFn: async (id: string) => {
         const { error } = await supabase.from("custom_relationships").delete().eq("id", id);
@@ -265,6 +287,7 @@ export function useRelationshipMutations(entityId: string | undefined) {
       onError: (e: any) => toast.error(e.message),
     }),
   };
+
 }
 
 export function useRecordMutations(entityId: string | undefined) {

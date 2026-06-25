@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Database, Plus, Trash2, Settings2, FileText, GitBranch } from "lucide-react";
+import { Database, Plus, Trash2, Settings2, FileText, GitBranch, Pencil } from "lucide-react";
 import { PageContainer } from "@/shared/components/PageContainer";
 import { PageHeader } from "@/shared/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
@@ -551,9 +551,10 @@ const RELATIONSHIP_TYPES = [
 
 function RelationshipsPanel({ entityId }: { entityId: string }) {
   const { data: entities = [] } = useCustomEntities();
-  const { data: rels = [] } = useCustomRelationships(entityId);
-  const { create, remove } = useRelationshipMutations(entityId);
+  const { data: rels = [], isLoading } = useCustomRelationships(entityId);
+  const { create, update, remove } = useRelationshipMutations(entityId);
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [toEntityId, setToEntityId] = useState<string>("");
   const [relType, setRelType] = useState<string>("one_to_many");
   const [fromField, setFromField] = useState("");
@@ -563,19 +564,51 @@ function RelationshipsPanel({ entityId }: { entityId: string }) {
   const otherEntities = entities.filter((e) => e.id !== entityId);
   const entityMap = new Map(entities.map((e) => [e.id, e]));
 
-  const submit = async () => {
-    if (!toEntityId || !fromField.trim() || !toField.trim()) return;
-    await create.mutateAsync({
-      to_entity_id: toEntityId,
-      relationship_type: relType,
-      from_field: fromField.trim(),
-      to_field: toField.trim(),
-      cascade_delete: cascade,
-    });
+  const resetForm = () => {
+    setEditingId(null);
     setToEntityId("");
+    setRelType("one_to_many");
     setFromField("");
     setToField("");
     setCascade(false);
+  };
+
+  const openCreate = () => {
+    resetForm();
+    setOpen(true);
+  };
+
+  const openEdit = (r: any) => {
+    setEditingId(r.id);
+    setToEntityId(r.to_entity_id);
+    setRelType(r.relationship_type);
+    setFromField(r.from_field);
+    setToField(r.to_field);
+    setCascade(!!r.cascade_delete);
+    setOpen(true);
+  };
+
+  const submit = async () => {
+    if (!toEntityId || !fromField.trim() || !toField.trim()) return;
+    if (editingId) {
+      await update.mutateAsync({
+        id: editingId,
+        to_entity_id: toEntityId,
+        relationship_type: relType,
+        from_field: fromField.trim(),
+        to_field: toField.trim(),
+        cascade_delete: cascade,
+      });
+    } else {
+      await create.mutateAsync({
+        to_entity_id: toEntityId,
+        relationship_type: relType,
+        from_field: fromField.trim(),
+        to_field: toField.trim(),
+        cascade_delete: cascade,
+      });
+    }
+    resetForm();
     setOpen(false);
   };
 
@@ -583,15 +616,21 @@ function RelationshipsPanel({ entityId }: { entityId: string }) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-base">Relacionamentos</CardTitle>
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog
+          open={open}
+          onOpenChange={(o) => {
+            setOpen(o);
+            if (!o) resetForm();
+          }}
+        >
           <DialogTrigger asChild>
-            <Button size="sm">
+            <Button size="sm" onClick={openCreate}>
               <Plus className="mr-2 h-4 w-4" /> Novo
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Novo Relacionamento</DialogTitle>
+              <DialogTitle>{editingId ? "Editar" : "Novo"} Relacionamento</DialogTitle>
             </DialogHeader>
             <div className="space-y-3">
               <div>
@@ -632,13 +671,17 @@ function RelationshipsPanel({ entityId }: { entityId: string }) {
               </label>
             </div>
             <DialogFooter>
-              <Button onClick={submit} disabled={create.isPending}>Criar</Button>
+              <Button onClick={submit} disabled={create.isPending || update.isPending}>
+                {editingId ? "Salvar" : "Criar"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
       </CardHeader>
       <CardContent>
-        {rels.length === 0 ? (
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        ) : rels.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhum relacionamento definido.</p>
         ) : (
           <Table>
@@ -649,7 +692,7 @@ function RelationshipsPanel({ entityId }: { entityId: string }) {
                 <TableHead>Tipo</TableHead>
                 <TableHead>Campos</TableHead>
                 <TableHead>Cascata</TableHead>
-                <TableHead className="w-12"></TableHead>
+                <TableHead className="w-24"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -671,9 +714,14 @@ function RelationshipsPanel({ entityId }: { entityId: string }) {
                     <TableCell>{r.cascade_delete ? "Sim" : "Não"}</TableCell>
                     <TableCell>
                       {isOutgoing && (
-                        <Button variant="ghost" size="icon" onClick={() => remove.mutate(r.id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => openEdit(r)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => remove.mutate(r.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       )}
                     </TableCell>
                   </TableRow>
@@ -686,3 +734,4 @@ function RelationshipsPanel({ entityId }: { entityId: string }) {
     </Card>
   );
 }
+
