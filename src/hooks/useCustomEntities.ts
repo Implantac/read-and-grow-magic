@@ -14,8 +14,10 @@ export type CustomFieldType =
 
 export interface CustomEntity {
   id: string;
-  name: string;
+  entity_key: string;
   label: string;
+  label_plural: string | null;
+  module_key: string | null;
   description: string | null;
   icon: string | null;
   is_active: boolean;
@@ -27,9 +29,9 @@ export interface CustomEntity {
 export interface CustomField {
   id: string;
   entity_id: string;
-  name: string;
+  field_key: string;
   label: string;
-  field_type: CustomFieldType;
+  field_type: string;
   is_required: boolean;
   is_unique: boolean;
   default_value: any;
@@ -61,7 +63,7 @@ export function useCustomEntities() {
         .select("*")
         .order("label", { ascending: true });
       if (error) throw error;
-      return data as CustomEntity[];
+      return (data ?? []) as unknown as CustomEntity[];
     },
   });
 }
@@ -77,7 +79,7 @@ export function useCustomFields(entityId: string | undefined) {
         .eq("entity_id", entityId)
         .order("display_order", { ascending: true });
       if (error) throw error;
-      return data as CustomField[];
+      return (data ?? []) as unknown as CustomField[];
     },
     enabled: !!entityId,
   });
@@ -94,32 +96,39 @@ export function useCustomRecords(entityId: string | undefined) {
         .eq("entity_id", entityId)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as CustomRecord[];
+      return (data ?? []) as unknown as CustomRecord[];
     },
     enabled: !!entityId,
   });
+}
+
+async function currentCompanyId(): Promise<{ userId: string; companyId: string }> {
+  const { data: userRes } = await supabase.auth.getUser();
+  const userId = userRes.user?.id;
+  if (!userId) throw new Error("Não autenticado");
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("company_id")
+    .eq("id", userId)
+    .maybeSingle();
+  if (!profile?.company_id) throw new Error("Empresa não encontrada");
+  return { userId, companyId: profile.company_id };
 }
 
 export function useEntityMutations() {
   const qc = useQueryClient();
   return {
     create: useMutation({
-      mutationFn: async (payload: Partial<CustomEntity>) => {
-        const { data: userRes } = await supabase.auth.getUser();
-        const userId = userRes.user?.id;
-        if (!userId) throw new Error("Não autenticado");
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("company_id")
-          .eq("id", userId)
-          .maybeSingle();
-        if (!profile?.company_id) throw new Error("Empresa não encontrada");
+      mutationFn: async (payload: { entity_key: string; label: string; label_plural?: string; description?: string; icon?: string; module_key?: string }) => {
+        const { companyId } = await currentCompanyId();
         const { error } = await supabase.from("custom_entities").insert({
-          name: payload.name!,
-          label: payload.label!,
+          entity_key: payload.entity_key,
+          label: payload.label,
+          label_plural: payload.label_plural ?? payload.label,
           description: payload.description ?? null,
           icon: payload.icon ?? null,
-          company_id: profile.company_id,
+          module_key: payload.module_key ?? "custom",
+          company_id: companyId,
         });
         if (error) throw error;
       },
@@ -147,13 +156,15 @@ export function useFieldMutations(entityId: string | undefined) {
   const qc = useQueryClient();
   return {
     create: useMutation({
-      mutationFn: async (payload: Partial<CustomField>) => {
+      mutationFn: async (payload: { field_key: string; label: string; field_type: string; is_required?: boolean; is_unique?: boolean; help_text?: string; options?: any; display_order?: number }) => {
         if (!entityId) throw new Error("Entidade obrigatória");
+        const { companyId } = await currentCompanyId();
         const { error } = await supabase.from("custom_fields").insert({
           entity_id: entityId,
-          name: payload.name!,
-          label: payload.label!,
-          field_type: payload.field_type ?? "text",
+          company_id: companyId,
+          field_key: payload.field_key,
+          label: payload.label,
+          field_type: payload.field_type,
           is_required: payload.is_required ?? false,
           is_unique: payload.is_unique ?? false,
           help_text: payload.help_text ?? null,
@@ -188,18 +199,10 @@ export function useRecordMutations(entityId: string | undefined) {
     create: useMutation({
       mutationFn: async (data: Record<string, any>) => {
         if (!entityId) throw new Error("Entidade obrigatória");
-        const { data: userRes } = await supabase.auth.getUser();
-        const userId = userRes.user?.id;
-        if (!userId) throw new Error("Não autenticado");
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("company_id")
-          .eq("id", userId)
-          .maybeSingle();
-        if (!profile?.company_id) throw new Error("Empresa não encontrada");
+        const { userId, companyId } = await currentCompanyId();
         const { error } = await supabase.from("custom_records").insert({
           entity_id: entityId,
-          company_id: profile.company_id,
+          company_id: companyId,
           data,
           created_by: userId,
           updated_by: userId,
@@ -214,10 +217,10 @@ export function useRecordMutations(entityId: string | undefined) {
     }),
     update: useMutation({
       mutationFn: async ({ id, data }: { id: string; data: Record<string, any> }) => {
-        const { data: userRes } = await supabase.auth.getUser();
+        const { userId } = await currentCompanyId();
         const { error } = await supabase
           .from("custom_records")
-          .update({ data, updated_by: userRes.user?.id })
+          .update({ data, updated_by: userId })
           .eq("id", id);
         if (error) throw error;
       },
