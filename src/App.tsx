@@ -31,6 +31,7 @@ import Dashboard from "./pages/Dashboard";
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Upgrade = lazy(() => import("./pages/Upgrade"));
+const Subscribe = lazy(() => import("./pages/Subscribe"));
 
 function PageLoader() {
   return (
