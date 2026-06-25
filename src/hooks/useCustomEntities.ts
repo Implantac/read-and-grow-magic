@@ -193,6 +193,80 @@ export function useFieldMutations(entityId: string | undefined) {
   };
 }
 
+export interface CustomRelationship {
+  id: string;
+  company_id: string;
+  from_entity_id: string;
+  to_entity_id: string;
+  relationship_type: "one_to_many" | "many_to_many" | "many_to_one" | string;
+  from_field: string;
+  to_field: string;
+  cascade_delete: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export function useCustomRelationships(entityId: string | undefined) {
+  return useQuery({
+    queryKey: ["custom_relationships", entityId],
+    queryFn: async () => {
+      if (!entityId) return [];
+      const { data, error } = await supabase
+        .from("custom_relationships")
+        .select("*")
+        .or(`from_entity_id.eq.${entityId},to_entity_id.eq.${entityId}`)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as unknown as CustomRelationship[];
+    },
+    enabled: !!entityId,
+  });
+}
+
+export function useRelationshipMutations(entityId: string | undefined) {
+  const qc = useQueryClient();
+  return {
+    create: useMutation({
+      mutationFn: async (payload: {
+        to_entity_id: string;
+        relationship_type: string;
+        from_field: string;
+        to_field: string;
+        cascade_delete?: boolean;
+      }) => {
+        if (!entityId) throw new Error("Entidade obrigatória");
+        const { companyId } = await currentCompanyId();
+        const { error } = await supabase.from("custom_relationships").insert({
+          company_id: companyId,
+          from_entity_id: entityId,
+          to_entity_id: payload.to_entity_id,
+          relationship_type: payload.relationship_type,
+          from_field: payload.from_field,
+          to_field: payload.to_field,
+          cascade_delete: payload.cascade_delete ?? false,
+        });
+        if (error) throw error;
+      },
+      onSuccess: () => {
+        toast.success("Relacionamento criado");
+        qc.invalidateQueries({ queryKey: ["custom_relationships", entityId] });
+      },
+      onError: (e: any) => toast.error(e.message),
+    }),
+    remove: useMutation({
+      mutationFn: async (id: string) => {
+        const { error } = await supabase.from("custom_relationships").delete().eq("id", id);
+        if (error) throw error;
+      },
+      onSuccess: () => {
+        toast.success("Relacionamento removido");
+        qc.invalidateQueries({ queryKey: ["custom_relationships", entityId] });
+      },
+      onError: (e: any) => toast.error(e.message),
+    }),
+  };
+}
+
 export function useRecordMutations(entityId: string | undefined) {
   const qc = useQueryClient();
   return {
