@@ -288,7 +288,9 @@ export function Sidebar() {
             )
           ))}
 
+          <CustomEntitiesNav sidebarCollapsed={sidebarCollapsed} isActive={isActive} />
         </nav>
+
 
         {/* Footer / User Profile */}
         <div className="shrink-0 border-t border-sidebar-border/40 p-3 bg-sidebar-accent/10">
