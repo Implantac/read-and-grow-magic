@@ -31,6 +31,7 @@ export interface OrderLike {
   number: string | number;
   status: string;
   total: number;
+  company_id?: string | null;
   client_id?: string | null;
   client_name?: string | null;
   payment_condition?: string | null;
@@ -39,6 +40,7 @@ export interface OrderLike {
   commercial_approval?: string | null;
   items?: OrderItemLike[];
 }
+
 
 interface TransitionInput {
   orderId: string;
