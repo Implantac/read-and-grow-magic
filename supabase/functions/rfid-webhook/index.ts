@@ -1,8 +1,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { verifyHmacSignature } from '../_shared/hmac.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-api-key',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-api-key, x-rfid-signature',
 };
 
 Deno.serve(async (req) => {
@@ -24,8 +25,29 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Read raw body once so we can verify HMAC + parse JSON.
+    const rawBody = await req.text();
 
-    const body = await req.json();
+    // Optional HMAC signature (when RFID_WEBHOOK_SECRET is set, signature becomes mandatory).
+    const hmacSecret = Deno.env.get('RFID_WEBHOOK_SECRET');
+    if (hmacSecret) {
+      const sig = req.headers.get('x-rfid-signature');
+      const ok = await verifyHmacSignature(hmacSecret, rawBody, sig);
+      if (!ok) {
+        console.warn('[rfid-webhook] invalid HMAC signature');
+        return new Response(JSON.stringify({ error: 'invalid signature' }), {
+          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    let body: any;
+    try { body = JSON.parse(rawBody); }
+    catch {
+      return new Response(JSON.stringify({ error: 'invalid json' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     // Support single event or batch
     const events = Array.isArray(body) ? body : [body];
