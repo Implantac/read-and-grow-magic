@@ -165,6 +165,12 @@ export default function WorkflowEngine() {
               <div><Label>Entidade alvo</Label><Input value={form.target_entity} onChange={(e) => setForm({ ...form, target_entity: e.target.value })} placeholder="ex: orders, purchase_orders" /></div>
               <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
               <div><Label>Etapas</Label><StepEditor steps={form.steps} setSteps={(s) => setForm({ ...form, steps: s })} /></div>
+              {form.steps.length > 0 && (
+                <div>
+                  <Label className="flex items-center gap-1"><Eye className="h-3 w-3" /> Pré-visualização do fluxo</Label>
+                  <WorkflowGraph steps={form.steps} />
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button onClick={submit} disabled={!form.name || !form.target_entity}>Salvar</Button>
