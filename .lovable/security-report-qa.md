@@ -1,96 +1,115 @@
-# Relatório Consolidado de Segurança — QA Enterprise v15.0
-**Período**: Ciclos 01–24 · **Data**: 26/06/2026
+# Relatório de Segurança — QA Cycles 01-65
 
-## Resumo Executivo
-
-24 ciclos de hardening aplicados sobre um ERP multi-tenant SaaS. **48 findings** resolvidos (15 críticos, 18 altos, 10 médios, 5 baixos). Postura de segurança evoluiu de **baseline funcional** para **enterprise-grade** com isolamento multi-tenant validado em todas as camadas.
-
----
-
-## Matriz de Riscos Resolvidos
-
-| # | Ciclo | Categoria | Severidade | Status |
-|---|-------|-----------|-----------|--------|
-| 1 | 01–04 | Isolamento multi-tenant (clientes, fornecedores, comercial, fiscal) | 🔴 Crítico | ✅ |
-| 2 | 05 | `search_path` em funções DB + revogação `EXECUTE` público | 🔴 Crítico | ✅ |
-| 3 | 06 | QA-026 logs `AuthSessionMissingError` em rotas públicas | 🟢 Baixo | ✅ |
-| 4 | 06 | QA-027 404 redirecionando para `/login` | 🟡 Médio | ✅ |
-| 5 | 07 | QA-028 vazamento de erros raw em `ai-executive` | 🟠 Alto | ✅ |
-| 6 | 07 | QA-029 falta de `company_id` em chamadas service-role | 🔴 Crítico | ✅ |
-| 7 | 07 | QA-030 `rfid-webhook` sem escopo de tenant | 🟠 Alto | ✅ |
-| 8 | 08 | 12 índices compostos para hot-paths | 🟡 Médio (perf) | ✅ |
-| 9 | 09 | Revogação `EXECUTE` em 4 funções internas | 🟠 Alto | ✅ |
-| 10 | 10 | `system_audit_logs` retenção 180d + view segura | 🟡 Médio | ✅ |
-| 11 | 11 | Cron job `purge_audit_logs` 03:00 UTC | 🟢 Baixo | ✅ |
-| 12 | 12 | Página `/admin/seguranca/auditoria` (UI auditoria) | 🟡 Médio | ✅ |
-| 13 | 13 | Item de menu + card no Executive Dashboard | 🟢 Baixo | ✅ |
-| 14 | 14 | Auditoria de Storage (avatars público restrito) | 🟡 Médio | ✅ |
-| 15 | 15 | `REPLICA IDENTITY FULL` em 13 tabelas Realtime | 🟠 Alto | ✅ |
-| 16 | 16 | **Password HIBP Check** ativado no Auth | 🟠 Alto | ✅ |
-| 17 | 17 | Rate-limit em `ai-executive`, `ai-sales-message`, `pix-webhook` | 🟠 Alto | ✅ |
-| 18 | 18 | Validação Zod em `admin-users`, `automation-dispatch` | 🟠 Alto | ✅ |
-| 19 | 19 | Auditoria service-role no frontend (zero refs) | 🟡 Médio | ✅ |
-| 20 | 20 | Headers de segurança em `index.html` (nosniff, referrer, permissions) | 🟡 Médio | ✅ |
-| 21 | 21 | Auditoria Realtime channels — sem vazamento cross-tenant | 🟠 Alto | ✅ |
-| 22 | 22 | Auditoria XSS — sem `eval`, sem HTML inseguro | 🔴 Crítico | ✅ |
-| 23 | 23 | Auditoria de logs sensíveis — zero exposições | 🟡 Médio | ✅ |
-| 24 | 24 | Validação Zod no Onboarding (CNPJ, UF, CEP) | 🟠 Alto | ✅ |
+**Status**: ✅ Base estabilizada
+**Última atualização**: 2026-06-26
+**Escopo**: ERP multi-tenant SaaS (React + Supabase)
 
 ---
 
-## Camadas de Defesa Ativas
+## 1. Multi-tenancy (RLS)
 
-### 🛡️ Camada 1 — Banco de Dados
-- RLS habilitado em **todas** as tabelas `public`.
-- `has_role(uid, role)` security-definer (sem recursão).
-- `get_user_company_id(uid)` security-definer para escopo multi-tenant.
-- `search_path = public` fixado em todas as funções.
-- `EXECUTE` revogado de `anon`/`authenticated` em funções internas.
-- Índices compostos por `company_id` em todas as tabelas hot.
+- **228 tabelas** com RLS habilitado.
+- Helper central `get_user_company_id(auth.uid())` usado em 100% das policies de leitura/escrita.
+- `has_role(_user_id, _company_id, _role)` (3-arg) preferido sobre overload de 2-arg para evitar escalação cross-tenant.
+- Tabelas de catálogo global (`plans`, `plan_modules`, `permissions`, `role_permissions`) — escrita restrita a `service_role`.
+- Realtime channels filtrados por `company_id=eq.<id>` no client (Ciclo 50).
+- Cache do React Query limpo com `queryClient.clear()` ao trocar empresa/filial (Ciclo 37).
 
-### 🛡️ Camada 2 — Edge Functions
-- `requireAuth()` + `resolveContext()` em todas as funções autenticadas.
-- Rate-limit token bucket nas funções críticas (IA, webhooks).
-- Validação Zod transversal (admin, automation, dashboard).
-- Mascaramento de erros (sem leak de schema/RLS).
-- CORS restrito.
+## 2. Auth
 
-### 🛡️ Camada 3 — Frontend
-- Zero referências a `SERVICE_ROLE_KEY`.
-- Zero `eval`/`new Function`.
-- Zero logs sensíveis.
-- Validação Zod em formulários críticos (Onboarding).
-- Headers de segurança via meta tags.
+- HIBP (Have I Been Pwned) ativado.
+- Anonymous sign-ins desabilitados.
+- Auto-confirm email mantido (modelo SaaS self-service).
+- Login/Signup/Reset com mensagens neutras (sem enumeração de usuários — Ciclo 58).
+- Token Supabase em `localStorage` (chave isolada por projeto); CSRF não aplicável (Bearer header, sem cookies).
 
-### 🛡️ Camada 4 — Auth
-- Password HIBP Check ativo.
-- Sem signup anônimo externo.
-- Auto-confirm email apenas para fluxo trial.
+## 3. Edge Functions (29 funções)
 
-### 🛡️ Camada 5 — Observabilidade
-- `system_audit_logs` com retenção 180d + cron purge.
-- View `v_critical_audit_events` security-invoker.
-- Página `/admin/seguranca/auditoria` para revisão.
+- `_shared/require-auth.ts` valida JWT e mapeia `company_id`.
+- `_shared/tenant.ts` exige `companyId` em todas as queries e suporta `requireModule`, `enforceQuota`, `requirePermission`.
+- `_shared/rate-limit.ts` aplicado em `ai-brain`, `ai-executive`, `ai-sales-message`, `pix-webhook`, `admin-users`.
+- `_shared/hmac.ts` valida assinatura em `pix-webhook` e `rfid-webhook`.
+- `_shared/validate.ts` (Zod) padroniza validação de payloads.
+- `safeError()` mascara mensagens internas em respostas 5xx.
+
+## 4. Cron Jobs (11 ativos)
+
+| Job | Schedule | Tenant scoping |
+|---|---|---|
+| daily-executive-report | 10:00 UTC | iterates por empresa |
+| daily-bank-reconciliation | 06:00 UTC | iterates por empresa |
+| ai-brain autopilot | 07:00 UTC | iterates por empresa |
+| financial-audit | */5 min | iterates por empresa |
+| ai-brain semanal | seg 08:00 | iterates por empresa |
+| ai-brain 4h | */4h | iterates por empresa |
+| automation-dispatch | */1 min | iterates por empresa |
+| purge_old_audit_logs(180) | 03:00 UTC | bulk LGPD |
+| purge_old_logs_all() | 03:00 UTC | bulk LGPD (14 tabelas) |
+
+## 5. SECURITY DEFINER
+
+- 96 funções auditadas, 100% com `SET search_path = public`.
+- Nenhuma executável por `public`/`anon`.
+- RPCs expostas a `authenticated`: apenas validators (`has_role`, `has_permission`, `has_module_access`, `has_branch_access`, `get_user_company_id`, `get_user_role`, `check_quota`, `compensate_check`).
+
+## 6. Triggers cross-módulo (auditados)
+
+- `generate_accounting_from_ledger` — propaga `company_id`.
+- `nfe_authorized_to_ar` — propaga `company_id`.
+- `notify_critical_brain_decision` — notifica apenas admins do mesmo tenant.
+- `fraud_check_ledger_insert` — usa `NEW.company_id`.
+- `update_bank_balance_from_ledger` — bloqueia mutação cross-tenant.
+- `fn_audit_sensitive_mutation` — mapeia `company_id` corretamente p/ tabela `companies`.
+
+## 7. Input hardening (client)
+
+- `src/lib/numericValidation.ts` — parsing pt-BR/en-US, rejeita NaN/negativos.
+- `src/lib/fileValidation.ts` — MIME + extensão + tamanho nos 3 inputs de upload.
+- `src/lib/toastHelpers.ts` — `sanitizeErrorMessage` filtra leaks de RLS/SQL.
+- `src/components/shared/NumericInput.tsx` — componente controlado.
+- ~60 ocorrências de `Number(e.target.value)` substituídas por `toSafeNumber`.
+
+## 8. UI / Rotas
+
+- `<RoleGuard>` em 11 rotas `/admin/*`.
+- `<Can>` para botões/ações granulares via `has_permission`.
+- `dangerouslySetInnerHTML`: única ocorrência é shadcn chart (CSS estático).
+- Links externos com `rel="noopener noreferrer"`.
+
+## 9. Headers de segurança (`index.html`)
+
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `X-Frame-Options: DENY`
+- `Permissions-Policy` restritivo
+- CSP: aplicar no edge/CDN do deploy (não via meta para preservar HMR).
+
+## 10. Supply chain
+
+- `npm audit`: **0 high/critical**.
+- `react-router-dom@7.18.0`, `recharts@3.9.0` (Ciclo 39).
+
+## 11. Storage (LGPD)
+
+- Único bucket: `avatars` (público com path-isolation por `auth.uid()` no path).
+- Retenção: `purge_old_logs_all()` diário em 14 tabelas de logs.
 
 ---
 
-## Findings Residuais (Fora do Controle do Código)
+## Findings residuais do linter (não-bloqueantes)
 
-| Finding | Owner | Ação |
-|---------|-------|------|
-| `vulnerable_dependencies_high/medium` (react-router-dom, recharts) | Upstream | Aguardar major release; risco mitigado pois não usamos `_.template` nem aceitamos URLs externas no router. |
-| Storage bucket `avatars` sem limite de tamanho/MIME | Manual no painel | Configurar Limite 2MB + `image/*`. |
-| CSP completa (`frame-ancestors`, `report-uri`) | Edge/CDN | Configurar no hosting com domínio próprio. |
+| Tipo | Qtd | Justificativa |
+|---|---|---|
+| INFO RLS sem policy | 1 | Tabela legada, RLS bloqueia tudo por default |
+| WARN SECURITY DEFINER → authenticated | 26 | RPCs validators legítimas |
+| WARN OTP/password policy | 2 | Painel Cloud — fora do escopo `configure_auth` |
 
----
+## Itens recomendados para o operador
 
-## Próximos Ciclos Recomendados
-
-- **Ciclo 25+**: Hardening de webhooks externos (HMAC signature verification).
-- **Ciclo 26**: Pen-test automatizado via OWASP ZAP em rotas públicas.
-- **Ciclo 27**: Implementação de 2FA opcional para administradores.
-- **Ciclo 28**: SOC2 readiness — formalizar runbooks de incident response.
+1. **Painel Cloud → Auth**: reduzir OTP expiry para ≤900s e min password length para ≥10.
+2. **Edge/CDN**: aplicar CSP estrita em produção (script-src 'self' + Supabase host).
+3. **Pen-test** externo após próximas releases de Workflow v2 / Marketplace.
 
 ---
 
-**Engine QA Enterprise v15.0** — relatório gerado automaticamente.
+**Próximo passo sugerido**: Fase 2 — Workflow Engine v2 + Marketplace de Plugins, OU expansão vertical (Construção/Agro). Aguardando direção do operador.
