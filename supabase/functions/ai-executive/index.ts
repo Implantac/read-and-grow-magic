@@ -1696,8 +1696,8 @@ export async function handleCEOBrief(supabase: any, lovableKey: string, corsHead
   const risks = analyzeRisks(ctx, kpis);
   const plan = generateGrowthPlan(ctx, forecast, kpis);
   const decisions = suggestDecisions(ctx, forecast, risks);
-  const kpiRows = await persistKPIs(supabase, kpis, forecast);
-  await recordLearning(supabase, data);
+  const kpiRows = await persistKPIs(supabase, kpis, forecast, companyId);
+  await recordLearning(supabase, data, companyId);
 
   // Detecta se há dados reais suficientes para análise confiável
   // Usa o helper compartilhado (campos plurais conforme fetchAllData)
@@ -1940,6 +1940,11 @@ async function handleExecuteDecisions(supabase: any, body: any, corsHeaders: any
 // ─── AutoPilotService ───────────────────────────────────────────
 // Orquestração CRON: contexto → forecast → riscos → decisões → registro
 export async function handleAutoPilotRun(supabase: any, lovableKey: string, corsHeaders: any, companyId?: string) {
+  if (!companyId) {
+    return new Response(JSON.stringify({ error: "Empresa não identificada" }), {
+      status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
   try {
     const data = await fetchAllData(supabase, companyId);
 
