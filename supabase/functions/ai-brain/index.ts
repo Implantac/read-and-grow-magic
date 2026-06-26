@@ -651,7 +651,7 @@ const AGENT_PERSONAS: Record<string, { label: string; focus: string }> = {
   producao: { label: "Gerente de PCP", focus: "Foque em OEE, MRP, gargalos, capacidade, ordens de produção. Tom de PCP/Indústria 4.0." },
 };
 
-async function handleChat(userId: string | undefined, messages: any[], authHeader?: string, agent = "geral") {
+async function handleChat(userId: string | undefined, messages: any[], authHeader?: string, agent = "geral", companyId?: string | null) {
   const persona = AGENT_PERSONAS[agent] || AGENT_PERSONAS.geral;
   const [snapshot, memories, pending] = await Promise.all([
     gatherSnapshot(authHeader),
