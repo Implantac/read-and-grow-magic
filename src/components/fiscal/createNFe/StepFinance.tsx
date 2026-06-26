@@ -2,6 +2,7 @@ import { CreditCard } from 'lucide-react';
 import { Input } from '@/ui/base/input';
 import { Label } from '@/ui/base/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 interface Props {
   paymentMethod: string;
