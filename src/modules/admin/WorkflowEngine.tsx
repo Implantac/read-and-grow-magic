@@ -254,6 +254,13 @@ export default function WorkflowEngine() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={!!graphDef} onOpenChange={(o) => !o && setGraphDef(null)}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Fluxo: {graphDef?.name}</DialogTitle></DialogHeader>
+          {graphDef && <WorkflowGraph steps={graphDef.steps} />}
+        </DialogContent>
+      </Dialog>
+
     </PageContainer>
   );
 }
