@@ -32,9 +32,11 @@ export function DynamicForm({ fields, initial, submitting, onSubmit, onCancel }:
       const v = values[f.field_key];
       if (f.is_required && (v === undefined || v === null || v === "")) {
         next[f.field_key] = "Campo obrigatório";
+        continue;
       }
-      if (f.field_type === "number" && v !== "" && v !== undefined && v !== null && isNaN(Number(v))) {
-        next[f.field_key] = "Número inválido";
+      if (f.field_type === "number" && v !== "" && v !== undefined && v !== null) {
+        const r = parseNumericInput(v, { allowNegative: true });
+        if (!r.ok) next[f.field_key] = r.error;
       }
     }
     setErrors(next);
