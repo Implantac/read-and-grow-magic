@@ -109,10 +109,13 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
         }
       }
     } catch (error: unknown) {
-      const err = error as { message?: string; status?: number };
-      if (err?.message?.includes('JWT') || err?.status === 401) {
-        // Silently ignore auth errors during initialization as useAuth handles redirect
-      } else {
+      const err = error as { message?: string; status?: number; name?: string };
+      const isAuthMissing =
+        err?.name === 'AuthSessionMissingError' ||
+        err?.message?.includes('Auth session missing') ||
+        err?.message?.includes('JWT') ||
+        err?.status === 401;
+      if (!isAuthMissing) {
         console.error('Error loading enterprise context:', error);
       }
     } finally {
