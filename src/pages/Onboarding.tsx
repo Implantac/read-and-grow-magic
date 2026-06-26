@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, Building2, Rocket, CheckCircle2 } from 'lucide-react';
+import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import { useAppStore } from '@/stores/useAppStore';
 import { Button } from '@/ui/base/button';
@@ -9,6 +10,25 @@ import { Label } from '@/ui/base/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
+
+// CNPJ: 14 dígitos numéricos (com ou sem máscara)
+const cnpjRegex = /^\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}$/;
+const ufRegex = /^[A-Z]{2}$/;
+const cepRegex = /^\d{5}-?\d{3}$/;
+const phoneRegex = /^[\d\s()+\-]{8,20}$/;
+
+const onboardingSchema = z.object({
+  company_name: z.string().trim().min(2, 'Razão social muito curta').max(150, 'Razão social muito longa'),
+  cnpj: z.string().trim().regex(cnpjRegex, 'CNPJ inválido (use formato 00.000.000/0000-00)'),
+  segment: z.enum(['confeccao', 'industria', 'distribuicao', 'varejo', 'servicos', 'outro']),
+  phone: z.string().trim().regex(phoneRegex, 'Telefone inválido').max(20).optional().or(z.literal('')),
+  address_street: z.string().trim().max(150).optional().or(z.literal('')),
+  address_number: z.string().trim().max(20).optional().or(z.literal('')),
+  address_neighborhood: z.string().trim().max(80).optional().or(z.literal('')),
+  address_city: z.string().trim().max(80).optional().or(z.literal('')),
+  address_state: z.string().trim().regex(ufRegex, 'UF deve ter 2 letras maiúsculas').default('SP'),
+  address_zip: z.string().trim().regex(cepRegex, 'CEP inválido').optional().or(z.literal('')),
+});
 
 const SEGMENTS = [
   { value: 'confeccao', label: 'Confecção / Moda' },
@@ -63,8 +83,10 @@ export default function Onboarding() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.company_name.trim() || !form.cnpj.trim()) {
-      toastError('Informe nome e CNPJ da empresa');
+    const parsed = onboardingSchema.safeParse(form);
+    if (!parsed.success) {
+      const first = parsed.error.issues[0];
+      toastError(first?.message || 'Dados inválidos');
       return;
     }
     setLoading(true);
