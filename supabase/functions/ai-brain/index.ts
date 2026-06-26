@@ -781,7 +781,7 @@ async function handleApprove(decisionId: string, approve: boolean, userId: strin
   }
 
   // Approved → executa ação real
-  const execResult = await executeAction(dec.proposed_action, userId);
+  const execResult = await executeAction(dec.proposed_action, userId, callerCompany);
   const { data, error } = await admin.from("ai_brain_decisions")
     .update({
       status: execResult.ok ? "executed" : "approved",
