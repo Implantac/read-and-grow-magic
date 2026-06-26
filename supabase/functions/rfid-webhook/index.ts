@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
     // Support single event or batch
     const events = Array.isArray(body) ? body : [body];
 
-    const rows = events.map((e: any) => ({
+    const normalized = events.map((e: any) => ({
       reader_code: e.reader_code || e.readerCode || 'UNKNOWN',
       tag_epc: e.tag_epc || e.tagEpc || e.epc,
       event_type: e.event_type || e.eventType || 'read',
@@ -42,33 +42,56 @@ Deno.serve(async (req) => {
     }));
 
     // Validate required fields
-    const valid = rows.filter((r: any) => r.tag_epc);
+    const valid = normalized.filter((r: any) => r.tag_epc);
     if (valid.length === 0) {
       return new Response(JSON.stringify({ error: 'No valid events (tag_epc required)' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const { data, error } = await supabase.from('rfid_events').insert(valid);
+    // Resolve tenant (company_id) from reader_code — eventos sem leitor mapeado são rejeitados
+    const uniqueReaders = [...new Set(valid.map((r: any) => r.reader_code))];
+    const { data: readers } = await supabase
+      .from('rfid_readers')
+      .select('code, company_id')
+      .in('code', uniqueReaders);
+    const readerTenant = new Map<string, string>();
+    (readers || []).forEach((r: any) => { if (r.company_id) readerTenant.set(r.code, r.company_id); });
+
+    const rows = valid
+      .map((r: any) => {
+        const company_id = readerTenant.get(r.reader_code);
+        return company_id ? { ...r, company_id } : null;
+      })
+      .filter(Boolean);
+
+    if (rows.length === 0) {
+      return new Response(JSON.stringify({ error: 'No events with a registered reader/tenant' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { error } = await supabase.from('rfid_events').insert(rows);
     if (error) throw error;
 
-    // Update last_read_at on tags and last_heartbeat on readers
-    const uniqueEpcs = [...new Set(valid.map((r: any) => r.tag_epc))];
-    const uniqueReaders = [...new Set(valid.map((r: any) => r.reader_code))];
+    // Update last_read_at on tags and last_heartbeat on readers — escopados por tenant
     const now = new Date().toISOString();
+    const tagPairs = [...new Set(rows.map((r: any) => `${r.company_id}::${r.tag_epc}`))]
+      .map(k => { const [company_id, epc] = k.split('::'); return { company_id, epc }; });
 
     await Promise.all([
-      ...uniqueEpcs.map(epc =>
-        supabase.from('rfid_tags').update({ last_read_at: now }).eq('epc', epc)
+      ...tagPairs.map(({ company_id, epc }) =>
+        supabase.from('rfid_tags').update({ last_read_at: now }).eq('company_id', company_id).eq('epc', epc)
       ),
-      ...uniqueReaders.map(code =>
-        supabase.from('rfid_readers').update({ last_heartbeat: now }).eq('code', code)
+      ...[...readerTenant.entries()].map(([code, company_id]) =>
+        supabase.from('rfid_readers').update({ last_heartbeat: now }).eq('company_id', company_id).eq('code', code)
       ),
     ]);
 
-    return new Response(JSON.stringify({ success: true, inserted: valid.length }), {
+    return new Response(JSON.stringify({ success: true, inserted: rows.length, rejected: valid.length - rows.length }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
+
   } catch (error) {
     console.error('RFID webhook error:', error);
     return new Response(JSON.stringify({ error: 'An internal error occurred. Please try again.' }), {
