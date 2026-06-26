@@ -290,7 +290,7 @@ export default function DecisionEngineTab() {
                 <div className="flex gap-1">
                   <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => {
                     const phone = s.clients?.cellphone || s.clients?.phone || '';
-                    if (phone) window.open(`https://wa.me/55${phone.replace(/\D/g, '')}`, '_blank');
+                    if (phone) window.open(`https://wa.me/55${phone.replace(/\D/g, '')}`, '_blank', 'noopener,noreferrer');
                   }}>
                     <MessageSquare className="h-3 w-3" />
                   </Button>

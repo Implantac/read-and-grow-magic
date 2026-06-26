@@ -206,7 +206,7 @@ function WhatsAppTab() {
     const msg = encodeURIComponent(buildMessage());
     const cleanPhone = phone.replace(/\D/g, '');
     const fullPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
-    window.open(`https://wa.me/${fullPhone}?text=${msg}`, '_blank');
+    window.open(`https://wa.me/${fullPhone}?text=${msg}`, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -470,7 +470,7 @@ function AlertsTab() {
                   <Button size="sm" variant="outline" onClick={() => {
                     const phone = c.clients?.cellphone || c.clients?.phone || '';
                     const cleanPhone = phone.replace(/\D/g, '');
-                    if (cleanPhone) window.open(`https://wa.me/55${cleanPhone}`, '_blank');
+                    if (cleanPhone) window.open(`https://wa.me/55${cleanPhone}`, '_blank', 'noopener,noreferrer');
                   }}>
                     <MessageSquare className="h-3 w-3 mr-1" />WhatsApp
                   </Button>
