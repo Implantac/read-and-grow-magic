@@ -193,7 +193,7 @@ Gere:
         });
       }
       const t = await response.text();
-      console.error('AI gateway error:', status, t);
+      console.error('AI gateway error:', status, t.slice(0, 200));
       throw new Error(`AI gateway error: ${status}`);
     }
 
