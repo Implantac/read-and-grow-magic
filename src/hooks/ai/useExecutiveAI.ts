@@ -162,21 +162,34 @@ export function useDailySummary() {
 // ─── Session Persistence Helpers ────────────────────────────────
 
 const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes inactivity timeout
-const SESSION_KEY = 'executive_chat_session';
+const SESSION_KEY_PREFIX = 'executive_chat_session:';
+const sessionKeyFor = (uid: string | null) => `${SESSION_KEY_PREFIX}${uid ?? 'anon'}`;
 
 interface SessionData {
   messages: { role: 'user' | 'assistant'; content: string; timestamp: string }[];
   lastActivity: string;
 }
 
-function loadSession(): ChatMessage[] {
+function purgeOtherSessionKeys(currentUid: string | null) {
   try {
-    const raw = sessionStorage.getItem(SESSION_KEY);
+    const keep = sessionKeyFor(currentUid);
+    for (let i = sessionStorage.length - 1; i >= 0; i--) {
+      const k = sessionStorage.key(i);
+      if (k && k.startsWith(SESSION_KEY_PREFIX) && k !== keep) {
+        sessionStorage.removeItem(k);
+      }
+    }
+  } catch { /* ignore */ }
+}
+
+function loadSession(uid: string | null): ChatMessage[] {
+  try {
+    const raw = sessionStorage.getItem(sessionKeyFor(uid));
     if (!raw) return [];
     const session: SessionData = JSON.parse(raw);
     const lastActivity = new Date(session.lastActivity).getTime();
     if (Date.now() - lastActivity > SESSION_TIMEOUT_MS) {
-      sessionStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem(sessionKeyFor(uid));
       return [];
     }
     return session.messages.map(m => ({
@@ -190,7 +203,7 @@ function loadSession(): ChatMessage[] {
   }
 }
 
-function saveSession(messages: ChatMessage[]) {
+function saveSession(uid: string | null, messages: ChatMessage[]) {
   try {
     const session: SessionData = {
       messages: messages.map(m => ({
@@ -200,9 +213,10 @@ function saveSession(messages: ChatMessage[]) {
       })),
       lastActivity: new Date().toISOString(),
     };
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    sessionStorage.setItem(sessionKeyFor(uid), JSON.stringify(session));
   } catch { /* ignore storage errors */ }
 }
+
 
 // ─── Unified Chat (Tool-Calling + Memory) ───────────────────────
 
