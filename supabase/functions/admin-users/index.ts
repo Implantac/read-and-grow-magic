@@ -58,8 +58,22 @@ Deno.serve(async (req) => {
       }
     };
 
-    const body = await req.json();
-    const { action, ...params } = body;
+    const body = await req.json().catch(() => ({}));
+    const { action, ...params } = (body ?? {}) as Record<string, unknown>;
+
+    const ALLOWED_ACTIONS = new Set(['list', 'invite', 'delete', 'change_role', 'toggle_ban', 'reset_password']);
+    if (typeof action !== 'string' || !ALLOWED_ACTIONS.has(action)) {
+      return new Response(JSON.stringify({ error: 'Invalid action' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const isUuid = (v: unknown): v is string => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+    const isEmail = (v: unknown): v is string => typeof v === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.length <= 254;
+    const ALLOWED_ROLES = new Set(['admin', 'manager', 'operator', 'viewer']);
+    const validationError = (msg: string) => new Response(JSON.stringify({ error: msg }), {
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
 
     if (action === 'list') {
       let profilesQuery = supabaseAdmin
