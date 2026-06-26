@@ -20,6 +20,23 @@ export default function WorkflowInbox() {
   const { advance } = useWorkflowMutations();
   const [target, setTarget] = useState<{ instanceId: string; toStep: string; complete: boolean } | null>(null);
   const [comment, setComment] = useState("");
+  const [graphFor, setGraphFor] = useState<string | null>(null);
+  const qc = useQueryClient();
+  const companyId = useEnterpriseStore((s) => s.activeCompanyId);
+
+  // Realtime: refresh instances on any update in this tenant
+  useEffect(() => {
+    if (!companyId) return;
+    const ch = supabase
+      .channel(`wf-inbox-${companyId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "workflow_instances", filter: `company_id=eq.${companyId}` },
+        () => qc.invalidateQueries({ queryKey: ["workflow_instances"] }),
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [companyId, qc]);
 
   const defMap = useMemo(() => {
     const m = new Map<string, { name: string; steps: WorkflowStep[] }>();
