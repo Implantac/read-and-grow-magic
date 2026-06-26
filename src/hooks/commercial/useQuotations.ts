@@ -1,7 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useEnterprise } from '@/core/auth/EnterpriseContext';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
+
 export interface DbQuotationItem {
   id: string;
   quotation_id: string;
