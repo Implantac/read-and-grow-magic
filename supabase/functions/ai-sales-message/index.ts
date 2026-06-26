@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { getSystemPrompt } from "../_shared/ai-prompts.ts";
+import { checkRateLimit, rateLimitResponse } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -26,6 +27,15 @@ serve(async (req) => {
     if (claimsError || !claimsData?.claims) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
+
+    // Rate limit: 20 msg/min per user
+    const userId = (claimsData.claims as any).sub as string;
+    const rl = checkRateLimit({ key: `ai-sales-message:${userId}`, limit: 20, windowMs: 60_000 });
+    if (!rl.allowed) {
+      console.warn(`[ai-sales-message] rate limit hit for user ${userId}`);
+      return rateLimitResponse(rl, corsHeaders);
+    }
+
 
     const { action, context } = await req.json();
 
