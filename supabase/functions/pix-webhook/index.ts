@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
 
     const { data: ev } = await supabase.from('pix_webhook_events').insert({
       event_id: eventId, txid: payload.txid, end_to_end_id: payload.endToEndId,
-      payload, signature,
+      payload, signature: signature ?? '',
     }).select().single();
 
     // localizar cobrança
