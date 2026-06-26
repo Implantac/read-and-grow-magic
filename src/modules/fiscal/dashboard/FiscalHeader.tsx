@@ -1,5 +1,7 @@
 import { Button } from "@/ui/base/button";
 import { Download, Loader2, UploadCloud } from "lucide-react";
+import { validateFile, MB } from "@/lib/fileValidation";
+import { toastError } from "@/lib/toastHelpers";
 
 interface FiscalHeaderProps {
   isUploading: boolean;
@@ -7,6 +9,22 @@ interface FiscalHeaderProps {
 }
 
 export function FiscalHeader({ isUploading, onFileUpload }: FiscalHeaderProps) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const v = validateFile(file, {
+        mime: ['application/xml', 'text/xml'],
+        extensions: ['xml'],
+        maxBytes: 5 * MB,
+      });
+      if (!v.ok) {
+        toastError(v.error!, undefined, 'Arquivo rejeitado');
+        e.target.value = '';
+        return;
+      }
+    }
+    onFileUpload(e);
+  };
   return (
     <div className="flex items-center justify-between">
       <div>
@@ -18,8 +36,8 @@ export function FiscalHeader({ isUploading, onFileUpload }: FiscalHeaderProps) {
           <input
             type="file"
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            accept=".xml"
-            onChange={onFileUpload}
+            accept=".xml,application/xml,text/xml"
+            onChange={handleChange}
             disabled={isUploading}
           />
           <Button className="gap-2 bg-primary hover:bg-primary/90">
