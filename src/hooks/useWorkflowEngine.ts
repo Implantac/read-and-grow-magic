@@ -218,7 +218,7 @@ export function useWorkflowMutations() {
             current_step: nextStep,
             status: payload.complete ? "completed" : "running",
             completed_at: payload.complete ? new Date().toISOString() : null,
-            context: mergedContext,
+            context: mergedContext as any,
           })
           .eq("id", payload.instance_id);
         if (uErr) throw uErr;
