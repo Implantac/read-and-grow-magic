@@ -52,10 +52,15 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "no_company" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const body = (await req.json()) as DispatchPayload;
-    if (!body?.event) {
+    const raw = await req.json().catch(() => ({})) as Partial<DispatchPayload>;
+    const event = typeof raw?.event === 'string' ? raw.event.trim() : '';
+    if (!event || event.length > 120 || !/^[a-zA-Z0-9._-]+$/.test(event)) {
       return new Response(JSON.stringify({ error: "invalid_event" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+    const context = (raw?.context && typeof raw.context === 'object' && !Array.isArray(raw.context))
+      ? raw.context as Record<string, unknown>
+      : {};
+    const body: DispatchPayload = { event, context };
 
     const { data: rules } = await admin
       .from("automation_rules")
