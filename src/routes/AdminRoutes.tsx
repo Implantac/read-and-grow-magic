@@ -18,17 +18,21 @@ const adminOnly = (el: JSX.Element) => (
   <RoleGuard roles={["admin", "manager"]}>{el}</RoleGuard>
 );
 
+const superOnly = (el: JSX.Element) => (
+  <RoleGuard roles={["admin", "system_admin"]}>{el}</RoleGuard>
+);
+
 export const AdminRoutes = [
-  <Route key="adm-users" path="/admin/usuarios" element={<UsersPage />} />,
-  <Route key="adm-comp" path="/admin/empresas" element={<CompaniesPage />} />,
-  <Route key="adm-param" path="/admin/parametros" element={<ParametersPage />} />,
-  <Route key="adm-super" path="/admin/super" element={<SuperAdminPage />} />,
-  <Route key="adm-rep" path="/admin/relatorios" element={<DailyReportsPage />} />,
-  <Route key="adm-audit" path="/admin/auditoria" element={<CrossModuleAuditPage />} />,
+  <Route key="adm-users" path="/admin/usuarios" element={adminOnly(<UsersPage />)} />,
+  <Route key="adm-comp" path="/admin/empresas" element={adminOnly(<CompaniesPage />)} />,
+  <Route key="adm-param" path="/admin/parametros" element={adminOnly(<ParametersPage />)} />,
+  <Route key="adm-super" path="/admin/super" element={superOnly(<SuperAdminPage />)} />,
+  <Route key="adm-rep" path="/admin/relatorios" element={adminOnly(<DailyReportsPage />)} />,
+  <Route key="adm-audit" path="/admin/auditoria" element={adminOnly(<CrossModuleAuditPage />)} />,
   <Route key="adm-metadata" path="/admin/metadata" element={adminOnly(<MetadataConfiguratorPage />)} />,
   <Route key="adm-workflow" path="/admin/workflows" element={adminOnly(<WorkflowEnginePage />)} />,
   <Route key="adm-automation" path="/admin/automacoes" element={adminOnly(<AutomationEnginePage />)} />,
   <Route key="adm-dashboards" path="/admin/dashboards" element={adminOnly(<DashboardEnginePage />)} />,
-  <Route key="adm-security-audit" path="/admin/seguranca/auditoria" element={<SecurityAuditPage />} />,
+  <Route key="adm-security-audit" path="/admin/seguranca/auditoria" element={adminOnly(<SecurityAuditPage />)} />,
 ];
 
