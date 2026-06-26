@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/ui/base/textarea';
 import { Shield, ShieldAlert, ShieldCheck, ShieldX, Search, Plus } from 'lucide-react';
 import { formatBRL, formatDate } from '@/lib/formatters';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 const riskColors: Record<string, string> = {
   low: 'bg-emerald-500/10 text-emerald-700 border-emerald-200',
@@ -140,11 +141,11 @@ export default function CreditAnalysis() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Limite de Crédito</Label>
-                <Input type="number" value={form.credit_limit || 0} onChange={e => setForm({ ...form, credit_limit: Number(e.target.value) })} />
+                <Input type="number" value={form.credit_limit || 0} onChange={e => setForm({ ...form, credit_limit: toSafeNumber(e.target.value) })} />
               </div>
               <div>
                 <Label>Score (0-100)</Label>
-                <Input type="number" min={0} max={100} value={form.score_numeric || 50} onChange={e => setForm({ ...form, score_numeric: Number(e.target.value) })} />
+                <Input type="number" min={0} max={100} value={form.score_numeric || 50} onChange={e => setForm({ ...form, score_numeric: toSafeNumber(e.target.value) })} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">

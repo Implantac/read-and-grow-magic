@@ -21,6 +21,7 @@ import { Badge } from '@/ui/base/badge';
 import { useProducts } from '@/hooks/inventory/useProducts';
 import { ScrollArea } from '@/ui/base/scroll-area';
 import { cn } from '@/lib/utils';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 interface CartItem {
   productCode: string;
@@ -266,7 +267,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                           <Input 
                             type="number" 
                             value={discount || ''} 
-                            onChange={(e) => setDiscount(Number(e.target.value))}
+                            onChange={(e) => setDiscount(toSafeNumber(e.target.value))}
                             className="text-right font-bold h-10 pl-8 bg-background border-2"
                             placeholder="0,00"
                           />
@@ -337,7 +338,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                         <Input
                           type="number"
                           value={amountPaid || ''}
-                          onChange={(e) => setAmountPaid(Number(e.target.value))}
+                          onChange={(e) => setAmountPaid(toSafeNumber(e.target.value))}
                           className="h-16 pl-14 text-3xl font-black tabular-nums border-none shadow-none focus-visible:ring-0"
                           autoFocus
                         />

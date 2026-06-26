@@ -15,6 +15,7 @@ import { useWMSLots } from '@/hooks/wms/useWMSLots';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 const statusColors: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   available: 'default',
@@ -172,7 +173,7 @@ export default function LotsPage() {
               <div><Label>Código Produto *</Label><Input value={newLot.product_code} onChange={e => setNewLot(p => ({ ...p, product_code: e.target.value }))} /></div>
               <div className="col-span-2"><Label>Nome Produto</Label><Input value={newLot.product_name} onChange={e => setNewLot(p => ({ ...p, product_name: e.target.value }))} /></div>
               <div><Label>Fornecedor</Label><Input value={newLot.supplier} onChange={e => setNewLot(p => ({ ...p, supplier: e.target.value }))} /></div>
-              <div><Label>Quantidade</Label><Input type="number" value={newLot.quantity || ''} onChange={e => setNewLot(p => ({ ...p, quantity: Number(e.target.value) }))} /></div>
+              <div><Label>Quantidade</Label><Input type="number" value={newLot.quantity || ''} onChange={e => setNewLot(p => ({ ...p, quantity: toSafeNumber(e.target.value) }))} /></div>
               <div><Label>Data Fabricação</Label><Input type="date" value={newLot.manufacture_date} onChange={e => setNewLot(p => ({ ...p, manufacture_date: e.target.value }))} /></div>
               <div><Label>Validade</Label><Input type="date" value={newLot.expiration_date} onChange={e => setNewLot(p => ({ ...p, expiration_date: e.target.value }))} /></div>
               <div><Label>Localização</Label><Input value={newLot.location} onChange={e => setNewLot(p => ({ ...p, location: e.target.value }))} /></div>

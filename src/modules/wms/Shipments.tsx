@@ -21,6 +21,7 @@ import { Truck, Search, MoreHorizontal, PackageCheck, MapPin, Clock, CheckCircle
 import { useWMSShipments } from '@/hooks/wms/useWMSShipments';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 export default function ShipmentsPage() {
   const { shipments, loading, create, ship, deliver } = useWMSShipments();
@@ -223,7 +224,7 @@ export default function ShipmentsPage() {
           <DialogHeader><DialogTitle>Registrar Envio</DialogTitle></DialogHeader>
           <div>
             <Label>Código de Rastreio</Label>
-            <Input value={trackingNumber} onChange={e => setTrackingNumber(e.target.value)} placeholder="Ex: BR123456789XX" />
+            <Input value={trackingNumber} onChange={e => setTrackingtoSafeNumber(e.target.value)} placeholder="Ex: BR123456789XX" />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setTrackingOpen(false)}>Cancelar</Button>
@@ -241,9 +242,9 @@ export default function ShipmentsPage() {
               <div><Label>Cliente *</Label><Input value={newShipment.customer_name} onChange={e => setNewShipment(p => ({ ...p, customer_name: e.target.value }))} /></div>
               <div><Label>Nº Pedido</Label><Input value={newShipment.order_number} onChange={e => setNewShipment(p => ({ ...p, order_number: e.target.value }))} /></div>
               <div><Label>Transportadora</Label><Input value={newShipment.carrier} onChange={e => setNewShipment(p => ({ ...p, carrier: e.target.value }))} /></div>
-              <div><Label>Volumes</Label><Input type="number" value={newShipment.volumes} onChange={e => setNewShipment(p => ({ ...p, volumes: Number(e.target.value) }))} /></div>
-              <div><Label>Peso Total (kg)</Label><Input type="number" value={newShipment.total_weight || ''} onChange={e => setNewShipment(p => ({ ...p, total_weight: Number(e.target.value) }))} /></div>
-              <div><Label>Valor Total (R$)</Label><Input type="number" value={newShipment.total_value || ''} onChange={e => setNewShipment(p => ({ ...p, total_value: Number(e.target.value) }))} /></div>
+              <div><Label>Volumes</Label><Input type="number" value={newShipment.volumes} onChange={e => setNewShipment(p => ({ ...p, volumes: toSafeNumber(e.target.value) }))} /></div>
+              <div><Label>Peso Total (kg)</Label><Input type="number" value={newShipment.total_weight || ''} onChange={e => setNewShipment(p => ({ ...p, total_weight: toSafeNumber(e.target.value) }))} /></div>
+              <div><Label>Valor Total (R$)</Label><Input type="number" value={newShipment.total_value || ''} onChange={e => setNewShipment(p => ({ ...p, total_value: toSafeNumber(e.target.value) }))} /></div>
             </div>
             <div><Label>Endereço de Entrega</Label><Input value={newShipment.shipping_address} onChange={e => setNewShipment(p => ({ ...p, shipping_address: e.target.value }))} /></div>
             <div><Label>Operador</Label><Input value={newShipment.operator} onChange={e => setNewShipment(p => ({ ...p, operator: e.target.value }))} /></div>

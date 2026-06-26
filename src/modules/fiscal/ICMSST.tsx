@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Switch } from '@/ui/base/switch';
 import { Percent, Plus } from 'lucide-react';
 import { useICMSSTRules, useUpsertICMSST } from '@/hooks/fiscal/useTaxAdvancedRules';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 export default function ICMSSTPage() {
   const { data: rules = [], isLoading } = useICMSSTRules();
@@ -40,12 +41,12 @@ export default function ICMSSTPage() {
                 <div><Label>CEST</Label><Input value={editing.cest || ''} onChange={(e) => setEditing({ ...editing, cest: e.target.value })} /></div>
                 <div><Label>UF Origem</Label><Input value={editing.uf_origin || ''} onChange={(e) => setEditing({ ...editing, uf_origin: e.target.value.toUpperCase() })} maxLength={2} /></div>
                 <div><Label>UF Destino</Label><Input value={editing.uf_destination || ''} onChange={(e) => setEditing({ ...editing, uf_destination: e.target.value.toUpperCase() })} maxLength={2} /></div>
-                <div><Label>MVA Original (%)</Label><Input type="number" step="0.01" value={editing.mva_original} onChange={(e) => setEditing({ ...editing, mva_original: Number(e.target.value) })} /></div>
-                <div><Label>MVA Ajustada (%)</Label><Input type="number" step="0.01" value={editing.mva_adjusted || 0} onChange={(e) => setEditing({ ...editing, mva_adjusted: Number(e.target.value) })} /></div>
-                <div><Label>Alíq. Interna (%)</Label><Input type="number" step="0.01" value={editing.internal_rate} onChange={(e) => setEditing({ ...editing, internal_rate: Number(e.target.value) })} /></div>
-                <div><Label>Alíq. Interestadual (%)</Label><Input type="number" step="0.01" value={editing.interstate_rate} onChange={(e) => setEditing({ ...editing, interstate_rate: Number(e.target.value) })} /></div>
-                <div><Label>Redução de Base (%)</Label><Input type="number" step="0.01" value={editing.reduction_base || 0} onChange={(e) => setEditing({ ...editing, reduction_base: Number(e.target.value) })} /></div>
-                <div><Label>Prioridade</Label><Input type="number" value={editing.priority} onChange={(e) => setEditing({ ...editing, priority: Number(e.target.value) })} /></div>
+                <div><Label>MVA Original (%)</Label><Input type="number" step="0.01" value={editing.mva_original} onChange={(e) => setEditing({ ...editing, mva_original: toSafeNumber(e.target.value) })} /></div>
+                <div><Label>MVA Ajustada (%)</Label><Input type="number" step="0.01" value={editing.mva_adjusted || 0} onChange={(e) => setEditing({ ...editing, mva_adjusted: toSafeNumber(e.target.value) })} /></div>
+                <div><Label>Alíq. Interna (%)</Label><Input type="number" step="0.01" value={editing.internal_rate} onChange={(e) => setEditing({ ...editing, internal_rate: toSafeNumber(e.target.value) })} /></div>
+                <div><Label>Alíq. Interestadual (%)</Label><Input type="number" step="0.01" value={editing.interstate_rate} onChange={(e) => setEditing({ ...editing, interstate_rate: toSafeNumber(e.target.value) })} /></div>
+                <div><Label>Redução de Base (%)</Label><Input type="number" step="0.01" value={editing.reduction_base || 0} onChange={(e) => setEditing({ ...editing, reduction_base: toSafeNumber(e.target.value) })} /></div>
+                <div><Label>Prioridade</Label><Input type="number" value={editing.priority} onChange={(e) => setEditing({ ...editing, priority: toSafeNumber(e.target.value) })} /></div>
                 <div className="flex items-center gap-2 col-span-2"><Switch checked={editing.active} onCheckedChange={(v) => setEditing({ ...editing, active: v })} /><Label>Ativa</Label></div>
               </div>
               <Button onClick={onSave} disabled={upsert.isPending} className="w-full">Salvar</Button>

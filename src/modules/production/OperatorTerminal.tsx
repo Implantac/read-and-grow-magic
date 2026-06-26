@@ -17,6 +17,7 @@ import { Play, Pause, CheckCircle, Timer, Package, AlertTriangle, User, Layers, 
 import { cn } from '@/lib/utils';
 import { differenceInMinutes, differenceInSeconds, format } from 'date-fns';
 import { toast } from 'sonner';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 export default function OperatorTerminalPage() {
   const { entries, loading, create, update } = useTimeEntries();
@@ -392,7 +393,7 @@ export default function OperatorTerminalPage() {
                     </Button>
                     <Input
                       type="number" min={0} value={producedQty}
-                      onChange={e => setProducedQty(Number(e.target.value))}
+                      onChange={e => setProducedQty(toSafeNumber(e.target.value))}
                       className="h-14 text-2xl text-center font-bold"
                     />
                     <Button
@@ -416,7 +417,7 @@ export default function OperatorTerminalPage() {
                     </Button>
                     <Input
                       type="number" min={0} value={rejectedQty}
-                      onChange={e => setRejectedQty(Number(e.target.value))}
+                      onChange={e => setRejectedQty(toSafeNumber(e.target.value))}
                       className="h-14 text-2xl text-center font-bold"
                     />
                     <Button

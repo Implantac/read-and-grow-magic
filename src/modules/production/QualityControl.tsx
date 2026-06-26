@@ -17,6 +17,7 @@ import { KPICard } from '@/shared/components/KPICard';
 import { Plus, ShieldCheck, AlertTriangle, CheckCircle, XCircle, Search } from 'lucide-react';
 import { format } from 'date-fns';
 import { Skeleton } from '@/ui/base/skeleton';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 const defectCategories = ['Costura irregular', 'Mancha no tecido', 'Estampa desalinhada', 'Bordado com falha', 'Medida incorreta', 'Acabamento ruim', 'Furo no tecido', 'Cor diferente', 'Outro'];
 const severityConfig: Record<string, { label: string; color: string }> = {
@@ -164,8 +165,8 @@ export default function QualityControlPage() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div><Label>Peças Aprovadas</Label><Input type="number" value={form.approved_quantity} onChange={e => setForm({ ...form, approved_quantity: Number(e.target.value) })} /></div>
-              <div><Label>Peças Rejeitadas</Label><Input type="number" value={form.rejected_quantity} onChange={e => setForm({ ...form, rejected_quantity: Number(e.target.value) })} /></div>
+              <div><Label>Peças Aprovadas</Label><Input type="number" value={form.approved_quantity} onChange={e => setForm({ ...form, approved_quantity: toSafeNumber(e.target.value) })} /></div>
+              <div><Label>Peças Rejeitadas</Label><Input type="number" value={form.rejected_quantity} onChange={e => setForm({ ...form, rejected_quantity: toSafeNumber(e.target.value) })} /></div>
             </div>
             <div><Label>Categoria do Defeito</Label>
               <Select value={form.defect_category} onValueChange={v => setForm({ ...form, defect_category: v })}>

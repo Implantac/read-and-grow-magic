@@ -18,6 +18,7 @@ import {
   PopoverTrigger,
 } from '@/ui/base/popover';
 import { useProducts, type DbProduct } from '@/hooks/inventory/useProducts';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 export interface LineItem {
   product_id?: string | null;
@@ -136,7 +137,7 @@ export function OrderItemsEditor({ items, onChange }: OrderItemsEditorProps) {
                 type="number"
                 min={1}
                 value={item.quantity}
-                onChange={(e) => updateItem(index, 'quantity', Number(e.target.value) || 1)}
+                onChange={(e) => updateItem(index, 'quantity', toSafeNumber(e.target.value) || 1)}
               />
             </div>
             <div className="space-y-1">
@@ -145,7 +146,7 @@ export function OrderItemsEditor({ items, onChange }: OrderItemsEditorProps) {
                 type="number"
                 step="0.01"
                 value={item.unit_price}
-                onChange={(e) => updateItem(index, 'unit_price', Number(e.target.value) || 0)}
+                onChange={(e) => updateItem(index, 'unit_price', toSafeNumber(e.target.value) || 0)}
               />
             </div>
             <div className="space-y-1">
@@ -154,7 +155,7 @@ export function OrderItemsEditor({ items, onChange }: OrderItemsEditorProps) {
                 type="number"
                 step="0.01"
                 value={item.discount}
-                onChange={(e) => updateItem(index, 'discount', Number(e.target.value) || 0)}
+                onChange={(e) => updateItem(index, 'discount', toSafeNumber(e.target.value) || 0)}
               />
             </div>
             <div className="space-y-1">

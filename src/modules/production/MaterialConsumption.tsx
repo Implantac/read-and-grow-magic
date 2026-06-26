@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { PackageMinus, Search, Package, Eye, Plus, CheckCircle, AlertTriangle, MapPin, Box } from 'lucide-react';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 export default function MaterialConsumptionPage() {
   const { consumptions, loading, refetch, update } = useMaterialConsumptions();
@@ -235,7 +236,7 @@ export default function MaterialConsumptionPage() {
               </div>
               <div>
                 <Label>Quantidade a Consumir</Label>
-                <Input type="number" min={0} max={selected.expected_quantity - selected.consumed_quantity} value={consumeQty} onChange={e => setConsumeQty(Number(e.target.value))} className="mt-1" />
+                <Input type="number" min={0} max={selected.expected_quantity - selected.consumed_quantity} value={consumeQty} onChange={e => setConsumeQty(toSafeNumber(e.target.value))} className="mt-1" />
                 <p className="text-xs text-muted-foreground mt-1">Máximo: {selected.expected_quantity - selected.consumed_quantity} {selected.unit}</p>
               </div>
             </div>
@@ -268,7 +269,7 @@ export default function MaterialConsumptionPage() {
               <div><Label>Nome do Componente *</Label><Input value={form.component_name} onChange={e => setForm(f => ({ ...f, component_name: e.target.value }))} placeholder="Tecido algodão" /></div>
             </div>
             <div className="grid grid-cols-3 gap-4">
-              <div><Label>Quantidade Esperada</Label><Input type="number" value={form.expected_quantity} onChange={e => setForm(f => ({ ...f, expected_quantity: Number(e.target.value) }))} /></div>
+              <div><Label>Quantidade Esperada</Label><Input type="number" value={form.expected_quantity} onChange={e => setForm(f => ({ ...f, expected_quantity: toSafeNumber(e.target.value) }))} /></div>
               <div><Label>Unidade</Label>
                 <Select value={form.unit} onValueChange={v => setForm(f => ({ ...f, unit: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>

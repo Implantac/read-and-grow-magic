@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import { Skeleton } from '@/ui/base/skeleton';
 import { cn } from '@/lib/utils';
 import { formatBRL } from '@/lib/formatters';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 export default function SupplyStockPage() {
   const { supplies, movements, loading, createSupply, registerMovement, lowStockItems } = useSupplyStock();
@@ -197,12 +198,12 @@ export default function SupplyStockPage() {
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div><Label>Unidade</Label><Input value={supplyForm.unit} onChange={e => setSupplyForm({ ...supplyForm, unit: e.target.value })} /></div>
-              <div><Label>Qtde Inicial</Label><Input type="number" value={supplyForm.current_quantity} onChange={e => setSupplyForm({ ...supplyForm, current_quantity: Number(e.target.value) })} /></div>
-              <div><Label>Custo Unit. (R$)</Label><Input type="number" step="0.01" value={supplyForm.unit_cost} onChange={e => setSupplyForm({ ...supplyForm, unit_cost: Number(e.target.value) })} /></div>
+              <div><Label>Qtde Inicial</Label><Input type="number" value={supplyForm.current_quantity} onChange={e => setSupplyForm({ ...supplyForm, current_quantity: toSafeNumber(e.target.value) })} /></div>
+              <div><Label>Custo Unit. (R$)</Label><Input type="number" step="0.01" value={supplyForm.unit_cost} onChange={e => setSupplyForm({ ...supplyForm, unit_cost: toSafeNumber(e.target.value) })} /></div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div><Label>Qtde Mínima</Label><Input type="number" value={supplyForm.min_quantity} onChange={e => setSupplyForm({ ...supplyForm, min_quantity: Number(e.target.value) })} /></div>
-              <div><Label>Qtde Máxima</Label><Input type="number" value={supplyForm.max_quantity} onChange={e => setSupplyForm({ ...supplyForm, max_quantity: Number(e.target.value) })} /></div>
+              <div><Label>Qtde Mínima</Label><Input type="number" value={supplyForm.min_quantity} onChange={e => setSupplyForm({ ...supplyForm, min_quantity: toSafeNumber(e.target.value) })} /></div>
+              <div><Label>Qtde Máxima</Label><Input type="number" value={supplyForm.max_quantity} onChange={e => setSupplyForm({ ...supplyForm, max_quantity: toSafeNumber(e.target.value) })} /></div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div><Label>Fornecedor</Label><Input value={supplyForm.supplier} onChange={e => setSupplyForm({ ...supplyForm, supplier: e.target.value })} /></div>
@@ -237,7 +238,7 @@ export default function SupplyStockPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div><Label>Quantidade</Label><Input type="number" value={movForm.quantity} onChange={e => setMovForm({ ...movForm, quantity: Number(e.target.value) })} /></div>
+              <div><Label>Quantidade</Label><Input type="number" value={movForm.quantity} onChange={e => setMovForm({ ...movForm, quantity: toSafeNumber(e.target.value) })} /></div>
             </div>
             {movForm.direction === 'out' && (
               <div><Label>Ordem de Produção (opcional)</Label>

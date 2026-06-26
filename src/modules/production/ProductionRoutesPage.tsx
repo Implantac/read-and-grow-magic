@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Plus, Pencil, Trash2, Search, Route, Clock, ChevronRight, X, AlertTriangle, GitBranch, Package, Timer, Zap } from 'lucide-react';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Textarea } from '@/ui/base/textarea';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 const emptyRoute: Partial<ProductionRouteRow> = { code: '', product_id: null, product_code: '', product_name: '', version: '1.0', description: '', is_active: true };
 
@@ -260,8 +261,8 @@ function RouteStepsPanel({ routeId, onClose }: { routeId: string; onClose: () =>
                   <SelectContent>{resources.map(r => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div className="space-y-1"><Label className="text-xs">Setup (min)</Label><Input type="number" value={newStep.setup_time_minutes || 0} onChange={e => setNewStep({ ...newStep, setup_time_minutes: Number(e.target.value) })} /></div>
-              <div className="space-y-1"><Label className="text-xs">Operação (min)</Label><Input type="number" value={newStep.operation_time_minutes || 0} onChange={e => setNewStep({ ...newStep, operation_time_minutes: Number(e.target.value) })} /></div>
+              <div className="space-y-1"><Label className="text-xs">Setup (min)</Label><Input type="number" value={newStep.setup_time_minutes || 0} onChange={e => setNewStep({ ...newStep, setup_time_minutes: toSafeNumber(e.target.value) })} /></div>
+              <div className="space-y-1"><Label className="text-xs">Operação (min)</Label><Input type="number" value={newStep.operation_time_minutes || 0} onChange={e => setNewStep({ ...newStep, operation_time_minutes: toSafeNumber(e.target.value) })} /></div>
             </div>
             <div className="flex gap-2">
               <Button size="sm" onClick={handleAdd} disabled={!newStep.step_name}>Adicionar</Button>

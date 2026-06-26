@@ -18,6 +18,7 @@ import { ptBR } from 'date-fns/locale';
 import type { MovementType } from '@/types/wms';
 
 import { formatDate } from '@/lib/formatters';
+import { toSafeNumber } from '@/lib/numericValidation';
 const movementTypeConfig: Record<MovementType, { label: string; icon: React.ReactNode; color: string }> = {
   inbound: { label: 'Entrada', icon: <TrendingUp className="h-4 w-4" />, color: 'text-green-600' },
   outbound: { label: 'Saída', icon: <TrendingDown className="h-4 w-4" />, color: 'text-red-600' },
@@ -190,7 +191,7 @@ export default function WMSMovementsPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <div><Label>Quantidade</Label><Input type="number" value={formData.quantity} onChange={(e) => setFormData(p => ({ ...p, quantity: Number(e.target.value) }))} /></div>
+              <div><Label>Quantidade</Label><Input type="number" value={formData.quantity} onChange={(e) => setFormData(p => ({ ...p, quantity: toSafeNumber(e.target.value) }))} /></div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div><Label>Origem</Label><Input value={formData.from_location} onChange={(e) => setFormData(p => ({ ...p, from_location: e.target.value }))} /></div>

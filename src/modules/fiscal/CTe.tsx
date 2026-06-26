@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/ui/base/alert';
 
 import { formatBRL } from '@/lib/formatters';
+import { toSafeNumber } from '@/lib/numericValidation';
 const STEPS = [
   { id: 'import', label: 'Importar NF-e', icon: FileText },
   { id: 'parts', label: 'Participantes', icon: Truck },
@@ -380,14 +381,14 @@ export default function CTePage() {
                               <Label className="text-primary font-bold">Valor da Carga Total</Label>
                               <div className="relative">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">R$</span>
-                                <Input type="number" value={form.cargo_value} onChange={(e) => setForm({ ...form, cargo_value: Number(e.target.value) })} className="pl-10 h-12 text-lg font-black" />
+                                <Input type="number" value={form.cargo_value} onChange={(e) => setForm({ ...form, cargo_value: toSafeNumber(e.target.value) })} className="pl-10 h-12 text-lg font-black" />
                               </div>
                             </div>
                             <div className="space-y-2">
                               <Label className="text-primary font-bold">Valor do Serviço (Frete)</Label>
                               <div className="relative">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">R$</span>
-                                <Input type="number" value={form.freight_value} onChange={(e) => setForm({ ...form, freight_value: Number(e.target.value) })} className="pl-10 h-12 text-lg font-black" />
+                                <Input type="number" value={form.freight_value} onChange={(e) => setForm({ ...form, freight_value: toSafeNumber(e.target.value) })} className="pl-10 h-12 text-lg font-black" />
                               </div>
                             </div>
                           </div>
@@ -402,7 +403,7 @@ export default function CTePage() {
                                 <div className="flex justify-between items-end">
                                   <span className="text-xs text-muted-foreground font-bold">ALÍQUOTA ICMS</span>
                                   <div className="flex items-center gap-2">
-                                    <Input type="number" value={form.icms_rate} onChange={(e) => setForm({ ...form, icms_rate: Number(e.target.value) })} className="w-16 h-8 p-1 text-center font-bold" />
+                                    <Input type="number" value={form.icms_rate} onChange={(e) => setForm({ ...form, icms_rate: toSafeNumber(e.target.value) })} className="w-16 h-8 p-1 text-center font-bold" />
                                     <span className="text-xs font-bold">%</span>
                                   </div>
                                 </div>

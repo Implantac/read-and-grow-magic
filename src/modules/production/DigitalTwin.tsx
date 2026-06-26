@@ -17,6 +17,7 @@ import { Progress } from '@/ui/base/progress';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ComposedChart, Line, AreaChart, Area, ReferenceLine } from 'recharts';
 
 import { formatNumber } from '@/lib/formatters';
+import { toSafeNumber } from '@/lib/numericValidation';
 export default function DigitalTwinPage() {
   const { orders } = useProductionOrders();
   const { capacities } = useProductionCapacity();
@@ -142,15 +143,15 @@ export default function DigitalTwinPage() {
               <div className="grid md:grid-cols-4 gap-4">
                 <div>
                   <label className="text-sm font-medium">Novos Pedidos</label>
-                  <Input type="number" min={0} value={simNewOrders} onChange={e => setSimNewOrders(Number(e.target.value))} className="mt-1" />
+                  <Input type="number" min={0} value={simNewOrders} onChange={e => setSimNewOrders(toSafeNumber(e.target.value))} className="mt-1" />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Qtd por Pedido</label>
-                  <Input type="number" min={1} value={simQtyPerOrder} onChange={e => setSimQtyPerOrder(Number(e.target.value))} className="mt-1" />
+                  <Input type="number" min={1} value={simQtyPerOrder} onChange={e => setSimQtyPerOrder(toSafeNumber(e.target.value))} className="mt-1" />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Tempo/Unidade (min)</label>
-                  <Input type="number" min={0.1} step={0.1} value={simTimePerUnit} onChange={e => setSimTimePerUnit(Number(e.target.value))} className="mt-1" />
+                  <Input type="number" min={0.1} step={0.1} value={simTimePerUnit} onChange={e => setSimTimePerUnit(toSafeNumber(e.target.value))} className="mt-1" />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Cenário</label>
