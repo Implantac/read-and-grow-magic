@@ -19,7 +19,9 @@ import {
 } from "@/hooks/useWorkflowEngine";
 import { safeParseJson, type Branch } from "@/lib/workflowConditions";
 import { WorkflowHistory } from "@/components/workflow/WorkflowHistory";
+import { TriggersCard } from "@/components/workflow/TriggersCard";
 import { toSafeNumber } from "@/lib/numericValidation";
+
 
 function BranchEditor({
   branches,
