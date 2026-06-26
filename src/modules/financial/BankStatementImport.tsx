@@ -13,6 +13,7 @@ import { parseCSV, parseOFX, useImportBankStatement, useAutoMatch, type ParsedTx
 import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
+import { validateFile, MB } from '@/lib/fileValidation';
 
 export default function BankStatementImport() {
   const [parsed, setParsed] = useState<ParsedTx[]>([]);
@@ -23,6 +24,14 @@ export default function BankStatementImport() {
   const autoMatch = useAutoMatch();
   const { data: bankAccounts = [] } = useBankAccounts();
   async function handleFile(file: File) {
+    const v = validateFile(file, {
+      extensions: ['csv', 'ofx', 'txt'],
+      maxBytes: 10 * MB,
+    });
+    if (!v.ok) {
+      toastError(v.error!, undefined, 'Arquivo rejeitado');
+      return;
+    }
     setFilename(file.name);
     try {
       const text = await file.text();

@@ -13,6 +13,7 @@ import {
   User, Mail, Shield, Building2, MapPin, Phone, Save, Eye, EyeOff, Lock, Camera,
 } from 'lucide-react';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
+import { validateFile, MB } from '@/lib/fileValidation';
 
 export default function ProfilePage() {
   const { user, activeCompany, activeBranch, theme, toggleTheme, setUser } = useAppStore();
@@ -33,6 +34,17 @@ export default function ProfilePage() {
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user?.id) return;
+
+    const v = validateFile(file, {
+      mime: ['image/png', 'image/jpeg', 'image/webp', 'image/gif'],
+      extensions: ['png', 'jpg', 'jpeg', 'webp', 'gif'],
+      maxBytes: 2 * MB,
+    });
+    if (!v.ok) {
+      toastError(v.error!, undefined, 'Arquivo rejeitado');
+      e.target.value = '';
+      return;
+    }
 
     setUploading(true);
     try {
