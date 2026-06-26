@@ -12,6 +12,7 @@ const MetadataConfiguratorPage = lazy(() => import("../modules/admin/MetadataCon
 const WorkflowEnginePage = lazy(() => import("../modules/admin/WorkflowEngine"));
 const AutomationEnginePage = lazy(() => import("../modules/admin/AutomationEngine"));
 const DashboardEnginePage = lazy(() => import("../modules/admin/DashboardEngine"));
+const SecurityAuditPage = lazy(() => import("../modules/admin/SecurityAudit"));
 
 const adminOnly = (el: JSX.Element) => (
   <RoleGuard roles={["admin", "manager"]}>{el}</RoleGuard>
@@ -28,5 +29,6 @@ export const AdminRoutes = [
   <Route key="adm-workflow" path="/admin/workflows" element={adminOnly(<WorkflowEnginePage />)} />,
   <Route key="adm-automation" path="/admin/automacoes" element={adminOnly(<AutomationEnginePage />)} />,
   <Route key="adm-dashboards" path="/admin/dashboards" element={adminOnly(<DashboardEnginePage />)} />,
+  <Route key="adm-security-audit" path="/admin/seguranca/auditoria" element={<SecurityAuditPage />} />,
 ];
 
