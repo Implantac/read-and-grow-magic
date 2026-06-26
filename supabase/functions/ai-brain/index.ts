@@ -5,6 +5,7 @@
 // ============================================================
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { resolveContextByIds, branchScope, requireModule, enforceQuota, type TenantContext } from "../_shared/tenant.ts";
+import { checkRateLimit, rateLimitResponse } from "../_shared/rate-limit.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -906,6 +907,11 @@ Deno.serve(async (req) => {
         });
       }
       userId = data.user.id;
+
+      // Rate limit per user: 60 req/min — protege contra loops/abuso de IA
+      const rl = checkRateLimit({ key: `ai-brain:${userId}`, limit: 60, windowMs: 60_000 });
+      if (!rl.allowed) return rateLimitResponse(rl, corsHeaders);
+
       const { data: roleRow } = await admin.from("user_roles").select("role").eq("user_id", userId).order("role").limit(1).maybeSingle();
       userRole = (roleRow as any)?.role || null;
       const { data: profileRow } = await admin.from("profiles").select("company_id, default_branch_id").eq("id", userId).maybeSingle();
