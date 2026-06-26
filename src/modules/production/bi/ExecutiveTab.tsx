@@ -62,7 +62,7 @@ export function ExecutiveTab({ metrics, period, periodDays }: ExecutiveTabProps)
           <CardContent>
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
-                <Pie data={marginDist} dataKey="count" nameKey="label" cx="50%" cy="50%" outerRadius={100} label={({ label, count }) => count > 0 ? `${label}: ${count}` : ''}>
+                <Pie data={marginDist} dataKey="count" nameKey="label" cx="50%" cy="50%" outerRadius={100} label={(p: any) => p.count > 0 ? `${p.label}: ${p.count}` : ''}>
                   {marginDist.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
                 </Pie>
                 <Legend />

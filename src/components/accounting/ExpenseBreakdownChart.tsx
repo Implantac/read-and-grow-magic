@@ -37,7 +37,7 @@ export function ExpenseBreakdownChart() {
                 outerRadius={100}
                 paddingAngle={3}
                 dataKey="value"
-                label={({ name, percentage }) => `${name} (${percentage}%)`}
+                label={(props: any) => `${props.name} (${props.percentage}%)`}
                 labelLine={false}
               >
                 {expenseBreakdown.map((_, i) => (
