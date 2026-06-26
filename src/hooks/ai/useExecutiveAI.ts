@@ -340,7 +340,7 @@ export function useUnifiedChat() {
 
   const clearChat = useCallback(() => {
     setMessages([]);
-    sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(sessionKeyFor(userId));
     if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
     // Clear server-side history
     if (userId) {
