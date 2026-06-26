@@ -63,7 +63,9 @@ serve(async (req) => {
     }
 
     if (action === "clear_history") {
-      await supabase.from("ai_executive_chat").delete().eq("user_id", authenticatedUserId);
+      let delQ = supabase.from("ai_executive_chat").delete().eq("user_id", authenticatedUserId);
+      if (companyId) delQ = delQ.eq("company_id", companyId);
+      await delQ;
       return new Response(JSON.stringify({ ok: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     
@@ -527,6 +529,9 @@ Gere insights estratégicos: { "insights": [...] }`;
 // ─── Generate Scenarios ──────────────────────────────────────────
 
 async function handleGenerateScenarios(supabase: any, lovableKey: string, corsHeaders: any, authenticatedUserId?: string, companyId?: string) {
+  if (!companyId) {
+    return new Response(JSON.stringify({ error: "Empresa não identificada" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
   const d = await fetchAllData(supabase, companyId);
   const computed = computeKPIs(d);
 
@@ -575,6 +580,7 @@ RECEITA REGIÃO: ${JSON.stringify(computed.revenueByRegion)}`;
 
   const scenarios = parsed.scenarios || {};
   await supabase.from("ai_executive_scenarios").insert({
+    company_id: companyId,
     scenario_type: "quarterly",
     period: "next_3_months",
     optimistic: scenarios.optimistic || null,
@@ -1241,10 +1247,12 @@ async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: str
   // ─── Server-side Memory: Load recent history for context ───
   let serverHistory: any[] = [];
   if (user_id) {
-    const { data: recentMsgs } = await supabase
+    let histQ = supabase
       .from("ai_executive_chat")
       .select("role, content, created_at")
-      .eq("user_id", user_id)
+      .eq("user_id", user_id);
+    if (company_id) histQ = histQ.eq("company_id", company_id);
+    const { data: recentMsgs } = await histQ
       .order("created_at", { ascending: true })
       .limit(40);
     if (recentMsgs && recentMsgs.length > 0) {
