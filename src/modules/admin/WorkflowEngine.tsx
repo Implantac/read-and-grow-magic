@@ -232,12 +232,15 @@ export default function WorkflowEngine() {
         </CardContent>
       </Card>
 
+      <TriggersCard definitions={defs.map((d) => ({ id: d.id, name: d.name }))} />
+
       <Dialog open={!!historyInstanceId} onOpenChange={(o) => !o && setHistoryInstanceId(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader><DialogTitle>Histórico da execução</DialogTitle></DialogHeader>
           {historyInstanceId && <WorkflowHistory instanceId={historyInstanceId} />}
         </DialogContent>
       </Dialog>
+
     </PageContainer>
   );
 }
