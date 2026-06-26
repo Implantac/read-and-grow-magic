@@ -1,3 +1,4 @@
+import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import { PageContainer } from '@/shared/components/PageContainer';
