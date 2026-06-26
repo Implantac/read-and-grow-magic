@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { requireAuth } from '../_shared/require-auth.ts';
+import { checkRateLimit, rateLimitResponse } from '../_shared/rate-limit.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,6 +18,15 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url);
     const action = url.searchParams.get('action') ?? 'webhook';
+
+    // Rate limit by client IP (60 req/min) — public webhook surface
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
+    const rl = checkRateLimit({ key: `pix-webhook:${ip}:${action}`, limit: 60, windowMs: 60_000 });
+    if (!rl.allowed) {
+      console.warn(`[pix-webhook] rate limit hit for ip=${ip} action=${action}`);
+      return rateLimitResponse(rl, corsHeaders);
+    }
+
 
     // User-initiated actions: require admin/manager JWT.
     if (action === 'create' || action === 'simulate-payment') {
