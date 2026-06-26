@@ -138,6 +138,7 @@ export default function WorkflowEngine() {
     steps: [] as WorkflowStep[],
   });
   const [historyInstanceId, setHistoryInstanceId] = useState<string | null>(null);
+  const [graphDef, setGraphDef] = useState<{ name: string; steps: WorkflowStep[] } | null>(null);
 
   const submit = async () => {
     await saveDefinition.mutateAsync(form);
