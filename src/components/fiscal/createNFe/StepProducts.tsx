@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { cfopOptions } from '@/config/fiscal';
 import { formatBRL } from '@/lib/formatters';
+import { toSafeNumber } from '@/lib/numericValidation';
 import { SmartSelect, SmartSelectOption } from '../SmartSelect';
 import type { NFeItemForm } from './types';
 
