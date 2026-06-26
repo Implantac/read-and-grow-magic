@@ -709,6 +709,7 @@ ${ctx}`;
       if (isRisky) {
         // Cria decisão pendente em vez de executar
         const { data: dec } = await admin.from("ai_brain_decisions").insert({
+          company_id: companyId || null,
           user_id: userId || null,
           module: "chat",
           decision_type: "action",
@@ -725,9 +726,10 @@ ${ctx}`;
         }).select().single();
         result = { ok: false, pending_approval: true, decision_id: dec?.id, message: `Ação ${name} criada como decisão pendente — aprove no painel do Cérebro.` };
       } else {
-        result = await executeAction({ tool: name, params: args }, userId);
+        result = await executeAction({ tool: name, params: args }, userId, companyId);
         // audita no histórico de decisões
         await admin.from("ai_brain_decisions").insert({
+          company_id: companyId || null,
           user_id: userId || null,
           module: "chat",
           decision_type: "action",
