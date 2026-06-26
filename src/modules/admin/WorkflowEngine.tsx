@@ -10,7 +10,8 @@ import { Badge } from "@/ui/base/badge";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/ui/base/dialog";
-import { Plus, Trash2, Play, GitBranch, History, GitFork } from "lucide-react";
+import { Plus, Trash2, Play, GitBranch, History, GitFork, Eye } from "lucide-react";
+import { WorkflowGraph } from "@/components/workflow/WorkflowGraph";
 import {
   useWorkflowDefinitions,
   useWorkflowInstances,
