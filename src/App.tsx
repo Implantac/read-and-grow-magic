@@ -104,9 +104,9 @@ const App = () => (
                 <Route element={<GatedOutlet module="fiscal" />}>{FiscalRoutes}</Route>
                 {VerticalPackRoutes}
                 {ExecutiveRoutes}
-                <Route path="*" element={<NotFound />} />
                 </Route>
               </Route>
+
 
 
               <Route path="*" element={<NotFound />} />
