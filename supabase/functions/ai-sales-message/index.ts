@@ -28,6 +28,15 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
+    // Rate limit: 20 msg/min per user
+    const userId = (claimsData.claims as any).sub as string;
+    const rl = checkRateLimit({ key: `ai-sales-message:${userId}`, limit: 20, windowMs: 60_000 });
+    if (!rl.allowed) {
+      console.warn(`[ai-sales-message] rate limit hit for user ${userId}`);
+      return rateLimitResponse(rl, corsHeaders);
+    }
+
+
     const { action, context } = await req.json();
 
     let systemPrompt = '';
