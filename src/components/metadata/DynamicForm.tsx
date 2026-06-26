@@ -5,6 +5,7 @@ import { Textarea } from "@/ui/base/textarea";
 import { Switch } from "@/ui/base/switch";
 import { Button } from "@/ui/base/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/base/select";
+import { parseNumericInput } from "@/lib/numericValidation";
 import type { CustomField } from "@/hooks/useCustomEntities";
 
 interface Props {
