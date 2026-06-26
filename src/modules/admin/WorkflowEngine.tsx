@@ -19,7 +19,9 @@ import {
 } from "@/hooks/useWorkflowEngine";
 import { safeParseJson, type Branch } from "@/lib/workflowConditions";
 import { WorkflowHistory } from "@/components/workflow/WorkflowHistory";
+import { TriggersCard } from "@/components/workflow/TriggersCard";
 import { toSafeNumber } from "@/lib/numericValidation";
+
 
 function BranchEditor({
   branches,
@@ -232,12 +234,15 @@ export default function WorkflowEngine() {
         </CardContent>
       </Card>
 
+      <TriggersCard definitions={defs.map((d) => ({ id: d.id, name: d.name }))} />
+
       <Dialog open={!!historyInstanceId} onOpenChange={(o) => !o && setHistoryInstanceId(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader><DialogTitle>Histórico da execução</DialogTitle></DialogHeader>
           {historyInstanceId && <WorkflowHistory instanceId={historyInstanceId} />}
         </DialogContent>
       </Dialog>
+
     </PageContainer>
   );
 }
