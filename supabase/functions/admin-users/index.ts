@@ -30,6 +30,10 @@ Deno.serve(async (req) => {
     const { data: { user } } = await supabaseClient.auth.getUser();
     if (!user) throw new Error('Unauthorized');
 
+    // Rate limit por admin: 30 ops/min — admin-users é endpoint privilegiado
+    const rl = checkRateLimit({ key: `admin-users:${user.id}`, limit: 30, windowMs: 60_000 });
+    if (!rl.allowed) return rateLimitResponse(rl, corsHeaders);
+
     // Check admin role
     const { data: roleData } = await supabaseAdmin
       .from('user_roles')
