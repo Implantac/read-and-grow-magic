@@ -30,7 +30,7 @@ serve(async (req) => {
     }
 
     const rawBody = await req.json().catch(() => null);
-    const ALLOWED_ACTIONS = new Set(['analyze','suggest','forecast','insights']);
+    const ALLOWED_ACTIONS = new Set(['generate_insights','decision_engine','operator_suggestions']);
     const action = (rawBody && typeof rawBody === 'object' && typeof (rawBody as any).action === 'string')
       ? (rawBody as any).action : '';
     if (!ALLOWED_ACTIONS.has(action)) {
