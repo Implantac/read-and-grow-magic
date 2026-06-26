@@ -193,6 +193,9 @@ export default function WorkflowEngine() {
                     <p className="text-xs text-muted-foreground">{(d.steps as unknown as WorkflowStep[]).length} etapas · v{d.version}</p>
                   </div>
                   <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => setGraphDef({ name: d.name, steps: d.steps as unknown as WorkflowStep[] })}>
+                      <Eye className="h-4 w-4 mr-1" /> Visualizar
+                    </Button>
                     <Button size="sm" variant="outline" onClick={() => startInstance.mutate({ definition_id: d.id })}>
                       <Play className="h-4 w-4 mr-1" /> Iniciar
                     </Button>
