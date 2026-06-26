@@ -1,7 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useEnterprise } from '@/core/auth/EnterpriseContext';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
+
 export interface DbQuotationItem {
   id: string;
   quotation_id: string;
@@ -67,9 +69,11 @@ export function useQuotations() {
 
 export function useCreateQuotation() {
   const qc = useQueryClient();
+  const { currentCompany } = useEnterprise();
   return useMutation({
     mutationFn: async (input: CreateQuotationInput) => {
-      const { count } = await supabase.from('quotations').select('id', { count: 'exact', head: true });
+      if (!currentCompany?.id) throw new Error('Empresa não selecionada');
+      const { count } = await supabase.from('quotations').select('id', { count: 'exact', head: true }).eq('company_id', currentCompany.id);
       const nextNum = `ORC${String((count || 0) + 1).padStart(4, '0')}`;
 
       const subtotal = input.items.reduce((s, i) => s + (i.quantity * i.unit_price), 0);
@@ -77,6 +81,7 @@ export function useCreateQuotation() {
       const total = subtotal - discount;
 
       const { data: quotation, error: qError } = await supabase.from('quotations').insert({
+        company_id: currentCompany.id,
         number: nextNum,
         client_id: input.client_id || null,
         client_name: input.client_name,
@@ -90,6 +95,7 @@ export function useCreateQuotation() {
       if (qError) throw qError;
 
       const items = input.items.map((item) => ({
+        company_id: currentCompany.id,
         quotation_id: quotation.id,
         product_id: item.product_id || null,
         product_name: item.product_name,
@@ -102,6 +108,7 @@ export function useCreateQuotation() {
 
       const { error: itemsError } = await supabase.from('quotation_items').insert(items);
       if (itemsError) throw itemsError;
+
 
       return quotation;
     },
@@ -132,14 +139,17 @@ export function useUpdateQuotationStatus() {
 
 export function useConvertQuotationToOrder() {
   const qc = useQueryClient();
+  const { currentCompany } = useEnterprise();
   return useMutation({
     mutationFn: async (quotation: DbQuotation) => {
+      if (!currentCompany?.id) throw new Error('Empresa não selecionada');
       // Generate order number
-      const { count } = await supabase.from('orders').select('id', { count: 'exact', head: true });
+      const { count } = await supabase.from('orders').select('id', { count: 'exact', head: true }).eq('company_id', currentCompany.id);
       const nextNum = `PED${String((count || 0) + 1).padStart(4, '0')}`;
 
       // Create order from quotation
       const { data: order, error: orderError } = await supabase.from('orders').insert({
+        company_id: currentCompany.id,
         number: nextNum,
         client_id: quotation.client_id,
         client_name: quotation.client_name,
@@ -157,6 +167,7 @@ export function useConvertQuotationToOrder() {
       // Copy items
       if (quotation.items && quotation.items.length > 0) {
         const orderItems = quotation.items.map((item) => ({
+          company_id: currentCompany.id,
           order_id: order.id,
           product_id: item.product_id,
           product_name: item.product_name,
@@ -169,6 +180,7 @@ export function useConvertQuotationToOrder() {
         const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
         if (itemsError) throw itemsError;
       }
+
 
       // Update quotation status
       await supabase.from('quotations').update({ status: 'converted', updated_at: new Date().toISOString() }).eq('id', quotation.id);

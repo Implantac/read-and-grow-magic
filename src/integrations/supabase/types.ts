@@ -8193,7 +8193,7 @@ export type Database = {
       }
       order_items: {
         Row: {
-          company_id: string | null
+          company_id: string
           discount: number
           id: string
           order_id: string
@@ -8205,7 +8205,7 @@ export type Database = {
           unit_price: number
         }
         Insert: {
-          company_id?: string | null
+          company_id?: string
           discount?: number
           id?: string
           order_id: string
@@ -8217,7 +8217,7 @@ export type Database = {
           unit_price?: number
         }
         Update: {
-          company_id?: string | null
+          company_id?: string
           discount?: number
           id?: string
           order_id?: string
@@ -8348,7 +8348,7 @@ export type Database = {
           commercial_approval: string | null
           commission_rate: number | null
           commission_value: number | null
-          company_id: string | null
+          company_id: string
           conference_status: string | null
           created_at: string
           date: string
@@ -8386,7 +8386,7 @@ export type Database = {
           commercial_approval?: string | null
           commission_rate?: number | null
           commission_value?: number | null
-          company_id?: string | null
+          company_id: string
           conference_status?: string | null
           created_at?: string
           date?: string
@@ -8424,7 +8424,7 @@ export type Database = {
           commercial_approval?: string | null
           commission_rate?: number | null
           commission_value?: number | null
-          company_id?: string | null
+          company_id?: string
           conference_status?: string | null
           created_at?: string
           date?: string
@@ -10679,7 +10679,7 @@ export type Database = {
           barcode: string | null
           category_id: string | null
           code: string
-          company_id: string | null
+          company_id: string
           cost_price: number
           created_at: string
           depth: number | null
@@ -10713,7 +10713,7 @@ export type Database = {
           barcode?: string | null
           category_id?: string | null
           code: string
-          company_id?: string | null
+          company_id?: string
           cost_price?: number
           created_at?: string
           depth?: number | null
@@ -10747,7 +10747,7 @@ export type Database = {
           barcode?: string | null
           category_id?: string | null
           code?: string
-          company_id?: string | null
+          company_id?: string
           cost_price?: number
           created_at?: string
           depth?: number | null
@@ -10852,7 +10852,7 @@ export type Database = {
       }
       purchase_order_items: {
         Row: {
-          company_id: string | null
+          company_id: string
           discount: number
           id: string
           product_code: string
@@ -10866,7 +10866,7 @@ export type Database = {
           unit_price: number
         }
         Insert: {
-          company_id?: string | null
+          company_id?: string
           discount?: number
           id?: string
           product_code: string
@@ -10880,7 +10880,7 @@ export type Database = {
           unit_price?: number
         }
         Update: {
-          company_id?: string | null
+          company_id?: string
           discount?: number
           id?: string
           product_code?: string
@@ -10914,7 +10914,7 @@ export type Database = {
         Row: {
           buyer_id: string | null
           buyer_name: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           date: string
           discount: number
@@ -10937,7 +10937,7 @@ export type Database = {
         Insert: {
           buyer_id?: string | null
           buyer_name?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           date?: string
           discount?: number
@@ -10960,7 +10960,7 @@ export type Database = {
         Update: {
           buyer_id?: string | null
           buyer_name?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           date?: string
           discount?: number
@@ -11115,7 +11115,7 @@ export type Database = {
       }
       quotation_items: {
         Row: {
-          company_id: string | null
+          company_id: string
           discount: number
           id: string
           product_code: string
@@ -11127,7 +11127,7 @@ export type Database = {
           unit_price: number
         }
         Insert: {
-          company_id?: string | null
+          company_id?: string
           discount?: number
           id?: string
           product_code: string
@@ -11139,7 +11139,7 @@ export type Database = {
           unit_price?: number
         }
         Update: {
-          company_id?: string | null
+          company_id?: string
           discount?: number
           id?: string
           product_code?: string
@@ -11171,7 +11171,7 @@ export type Database = {
         Row: {
           client_id: string | null
           client_name: string
-          company_id: string | null
+          company_id: string
           created_at: string
           date: string
           discount: number
@@ -11189,7 +11189,7 @@ export type Database = {
         Insert: {
           client_id?: string | null
           client_name: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           date?: string
           discount?: number
@@ -11207,7 +11207,7 @@ export type Database = {
         Update: {
           client_id?: string | null
           client_name?: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           date?: string
           discount?: number
@@ -11808,7 +11808,7 @@ export type Database = {
       }
       sale_items: {
         Row: {
-          company_id: string | null
+          company_id: string
           discount: number
           id: string
           product_code: string
@@ -11820,7 +11820,7 @@ export type Database = {
           unit_price: number
         }
         Insert: {
-          company_id?: string | null
+          company_id?: string
           discount?: number
           id?: string
           product_code: string
@@ -11832,7 +11832,7 @@ export type Database = {
           unit_price?: number
         }
         Update: {
-          company_id?: string | null
+          company_id?: string
           discount?: number
           id?: string
           product_code?: string
@@ -11864,7 +11864,7 @@ export type Database = {
         Row: {
           client_id: string | null
           client_name: string
-          company_id: string | null
+          company_id: string
           created_at: string
           date: string
           discount: number
@@ -11881,7 +11881,7 @@ export type Database = {
         Insert: {
           client_id?: string | null
           client_name: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           date?: string
           discount?: number
@@ -11898,7 +11898,7 @@ export type Database = {
         Update: {
           client_id?: string | null
           client_name?: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           date?: string
           discount?: number
