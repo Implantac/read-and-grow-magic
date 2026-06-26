@@ -29,7 +29,13 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const { action } = await req.json();
+    const rawBody = await req.json().catch(() => null);
+    const ALLOWED_ACTIONS = new Set(['generate_insights','decision_engine','operator_suggestions']);
+    const action = (rawBody && typeof rawBody === 'object' && typeof (rawBody as any).action === 'string')
+      ? (rawBody as any).action : '';
+    if (!ALLOWED_ACTIONS.has(action)) {
+      return new Response(JSON.stringify({ error: 'Ação inválida' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const userId = (claimsData.claims as any).sub;
