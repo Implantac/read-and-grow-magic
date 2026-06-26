@@ -1080,9 +1080,21 @@ Deno.serve(async (req) => {
         break;
       }
 
-      case "cron_run":
-        result = await handleAnalyze(undefined, undefined, "autopilot");
+      case "cron_run": {
+        // Cron iterates per tenant — never auto-execute actions with NULL company_id
+        const { data: companies } = await admin.from("companies").select("id");
+        const runs: any[] = [];
+        for (const c of (companies ?? [])) {
+          try {
+            const r = await handleAnalyze(undefined, undefined, "autopilot", (c as any).id);
+            runs.push({ company_id: (c as any).id, ok: true, run_id: r?.run_id });
+          } catch (e: any) {
+            runs.push({ company_id: (c as any).id, ok: false, error: e?.message ?? String(e) });
+          }
+        }
+        result = { ok: true, companies: runs.length, runs };
         break;
+      }
       case "weekly_learning":
         result = await handleWeeklyLearning();
         break;
