@@ -523,11 +523,12 @@ const BRAIN_TOOLS = [
 // ─────────────────────────────────────────────
 // HANDLERS
 // ─────────────────────────────────────────────
-async function handleAnalyze(userId: string | undefined, authHeader?: string, mode = "analyze") {
+async function handleAnalyze(userId: string | undefined, authHeader?: string, mode = "analyze", companyId?: string | null) {
   const t0 = Date.now();
   const { data: run } = await admin
     .from("ai_brain_runs")
     .insert({
+      company_id: companyId || null,
       user_id: userId || null,
       trigger: "manual",
       mode,
