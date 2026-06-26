@@ -959,13 +959,13 @@ Deno.serve(async (req) => {
     let result: any;
     switch (action) {
       case "analyze":
-        result = await handleAnalyze(userId, authHeader, "analyze");
+        result = await handleAnalyze(userId, authHeader, "analyze", callerCompany);
         break;
       case "autopilot":
-        result = await handleAnalyze(userId, authHeader, "autopilot");
+        result = await handleAnalyze(userId, authHeader, "autopilot", callerCompany);
         break;
       case "chat":
-        result = await handleChat(userId, body.messages || [], authHeader, body.agent || "geral");
+        result = await handleChat(userId, body.messages || [], authHeader, body.agent || "geral", callerCompany);
         break;
       case "approve_decision":
         result = await handleApprove(body.decision_id, true, userId, callerCompany);
