@@ -76,17 +76,22 @@ Deno.serve(async (req) => {
       return Response.json({ ok: true, result: data }, { headers: corsHeaders });
     }
 
-    // Webhook real — assinatura HMAC obrigatória.
-    const signature = req.headers.get('x-pix-signature') ?? '';
-    const expectedSig = Deno.env.get('PIX_WEBHOOK_SECRET');
-    if (!expectedSig) {
+    // Webhook real — assinatura HMAC-SHA256 sobre o corpo bruto.
+    const signature = req.headers.get('x-pix-signature');
+    const secret = Deno.env.get('PIX_WEBHOOK_SECRET');
+    if (!secret) {
       console.error('PIX_WEBHOOK_SECRET not configured');
       return Response.json({ error: 'misconfigured' }, { status: 500, headers: corsHeaders });
     }
-    if (signature !== expectedSig) {
+    const rawBody = await req.text();
+    const valid = await verifyHmacSignature(secret, rawBody, signature);
+    if (!valid) {
+      console.warn('[pix-webhook] invalid HMAC signature');
       return Response.json({ error: 'invalid signature' }, { status: 401, headers: corsHeaders });
     }
-    const payload = await req.json();
+    let payload: any;
+    try { payload = JSON.parse(rawBody); }
+    catch { return Response.json({ error: 'invalid json' }, { status: 400, headers: corsHeaders }); }
 
 
     // idempotência
