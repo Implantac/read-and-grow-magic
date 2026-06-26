@@ -36,6 +36,13 @@ serve(async (req) => {
     const authenticatedUserId = user.id;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Rate limit: 30 requests / minute per user (AI calls are expensive)
+    const rl = checkRateLimit({ key: `ai-executive:${authenticatedUserId}`, limit: 30, windowMs: 60_000 });
+    if (!rl.allowed) {
+      console.warn(`[ai-executive] rate limit hit for user ${authenticatedUserId}`);
+      return rateLimitResponse(rl, corsHeaders);
+    }
+
     // Fetch user profile to get company_id (multi-tenant isolation)
     const { data: profile } = await supabase
       .from("profiles")
