@@ -37,7 +37,20 @@ serve(async (req) => {
     }
 
 
-    const { action, context } = await req.json();
+    const { z } = await import('../_shared/validate.ts');
+    const Schema = z.object({
+      action: z.enum(['suggest_message', 'suggest_objection_response', 'suggest_follow_up_plan']),
+      context: z.record(z.unknown()).default({}),
+    });
+    const rawBody = await req.json().catch(() => null);
+    const parsedBody = Schema.safeParse(rawBody);
+    if (!parsedBody.success) {
+      return new Response(
+        JSON.stringify({ error: 'validation_error', fields: parsedBody.error.flatten().fieldErrors }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      );
+    }
+    const { action, context } = parsedBody.data as { action: string; context: Record<string, any> };
 
     let systemPrompt = '';
     let userPrompt = '';
