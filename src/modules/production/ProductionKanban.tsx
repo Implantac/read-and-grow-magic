@@ -81,13 +81,15 @@ export default function ProductionKanban() {
   }, [orders]);
 
   // Realtime
+  const kanbanCompanyId = useEnterpriseStore((s) => s.activeCompanyId);
   useEffect(() => {
+    if (!kanbanCompanyId) return;
     const channel = supabase
-      .channel('kanban-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'production_orders' }, () => { refetch(); })
+      .channel(`kanban-realtime:${kanbanCompanyId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'production_orders', filter: `company_id=eq.${kanbanCompanyId}` }, () => { refetch(); })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [refetch]);
+  }, [refetch, kanbanCompanyId]);
 
   // Load WIP limits
   useEffect(() => {
