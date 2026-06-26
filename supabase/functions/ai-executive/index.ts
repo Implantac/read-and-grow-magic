@@ -707,6 +707,7 @@ const ERP_TOOLS = [
 // ─── Tool Executors ─────────────────────────────────────────────
 
 async function executeConsultaFinanceiro(supabase: any, args: any, user_id?: string, company_id?: string) {
+  if (!company_id) return { erro: "Empresa não identificada para a sessão." };
   const now = new Date();
   const today = now.toISOString().split("T")[0];
   const query = (table: string) => {
@@ -770,6 +771,7 @@ async function executeConsultaFinanceiro(supabase: any, args: any, user_id?: str
 }
 
 async function executeConsultaComercial(supabase: any, args: any, user_id?: string, company_id?: string) {
+  if (!company_id) return { erro: "Empresa não identificada para a sessão." };
   const limite = args.limite || 10;
   const query = (table: string) => {
     let q = supabase.from(table).select("*");
@@ -833,6 +835,7 @@ async function executeConsultaComercial(supabase: any, args: any, user_id?: stri
 }
 
 async function executeConsultaProducao(supabase: any, args: any, user_id?: string, company_id?: string) {
+  if (!company_id) return { erro: "Empresa não identificada para a sessão." };
   const today = new Date().toISOString().split("T")[0];
   const query = (table: string) => {
     let q = supabase.from(table).select("*");
@@ -866,6 +869,7 @@ async function executeConsultaProducao(supabase: any, args: any, user_id?: strin
 }
 
 async function executeConsultaEstoque(supabase: any, args: any, user_id?: string, company_id?: string) {
+  if (!company_id) return { erro: "Empresa não identificada para a sessão." };
   const query = (table: string) => {
     let q = supabase.from(table).select("*");
     if (company_id) q = q.eq("company_id", company_id);
@@ -1042,6 +1046,7 @@ async function executeAcao(supabase: any, args: any, user_id?: string, company_i
 }
 
 async function executeAnaliseEstrategica(supabase: any, args: any, user_id?: string, company_id?: string) {
+  if (!company_id) return { erro: "Empresa não identificada para a sessão." };
   const d = await fetchAllData(supabase, company_id);
   const computed = computeKPIs(d);
   const k = computed.kpis;
@@ -1071,6 +1076,7 @@ async function executeAnaliseEstrategica(supabase: any, args: any, user_id?: str
 
 // MCP-Fiscal: tool executor
 async function executeConsultaFiscal(supabase: any, args: any, user_id?: string, company_id?: string) {
+  if (!company_id) return { erro: "Empresa não identificada para a sessão." };
   const periodoDias = args.periodo_dias || 30;
   const since = new Date(Date.now() - periodoDias * 24 * 3600 * 1000).toISOString();
 
