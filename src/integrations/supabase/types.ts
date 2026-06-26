@@ -16125,6 +16125,48 @@ export type Database = {
         }
         Relationships: []
       }
+      v_critical_audit_events: {
+        Row: {
+          action: string | null
+          company_id: string | null
+          created_at: string | null
+          entity_id: string | null
+          entity_name: string | null
+          id: string | null
+          ip_address: string | null
+          module: string | null
+          new_data: Json | null
+          old_data: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          action?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_name?: string | null
+          id?: string | null
+          ip_address?: string | null
+          module?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string | null
+          company_id?: string | null
+          created_at?: string | null
+          entity_id?: string | null
+          entity_name?: string | null
+          id?: string | null
+          ip_address?: string | null
+          module?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       v_current_usage: {
         Row: {
           company_id: string | null
@@ -16472,6 +16514,7 @@ export type Database = {
         }
         Returns: Json
       }
+      purge_old_audit_logs: { Args: { _days?: number }; Returns: number }
       recalc_bank_balance: {
         Args: { _bank_account_id: string }
         Returns: number
