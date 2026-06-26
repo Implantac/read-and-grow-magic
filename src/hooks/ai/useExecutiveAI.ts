@@ -221,24 +221,27 @@ function saveSession(uid: string | null, messages: ChatMessage[]) {
 // ─── Unified Chat (Tool-Calling + Memory) ───────────────────────
 
 export function useUnifiedChat() {
-  const [messages, setMessages] = useState<ChatMessage[]>(() => loadSession());
+  const [userId, setUserId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const inactivityTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
 
-  // Get current user ID
+  // Get current user ID, then load tenant-scoped session
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      setUserId(data.user?.id || null);
+      const uid = data.user?.id || null;
+      setUserId(uid);
+      purgeOtherSessionKeys(uid);
+      setMessages(loadSession(uid));
     });
   }, []);
 
   // Persist messages to sessionStorage on every change
   useEffect(() => {
     if (messages.length > 0) {
-      saveSession(messages);
+      saveSession(userId, messages);
     }
-  }, [messages]);
+  }, [messages, userId]);
 
   // Load server-side history on mount if session is empty
   useEffect(() => {
@@ -268,9 +271,10 @@ export function useUnifiedChat() {
     if (inactivityTimer.current) clearTimeout(inactivityTimer.current);
     inactivityTimer.current = setTimeout(() => {
       setMessages([]);
-      sessionStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem(sessionKeyFor(userId));
     }, SESSION_TIMEOUT_MS);
-  }, []);
+  }, [userId]);
+
 
   // Clear timer on unmount
   useEffect(() => {
