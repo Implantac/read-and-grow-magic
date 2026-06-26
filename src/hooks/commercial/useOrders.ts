@@ -149,16 +149,6 @@ export function useCreateOrder() {
       }));
 
 
-      const items = input.items.map((item) => ({
-        order_id: order.id,
-        product_id: item.product_id || null,
-        product_name: item.product_name,
-        product_code: item.product_code,
-        quantity: item.quantity,
-        unit_price: item.unit_price,
-        discount: item.discount,
-        total: (item.quantity * item.unit_price) - item.discount,
-      }));
 
       const { error: itemsError } = await supabase.from('order_items').insert(items);
       if (itemsError) {
