@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useRFIDEvents } from '@/hooks/system/useRFID';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 interface WMSRule {
@@ -219,7 +220,7 @@ function RuleDialog({
             <div className="grid gap-2">
               <Label>Prioridade</Label>
               <Input type="number" min={1} max={100} value={form.priority}
-                onChange={e => set('priority', parseInt(e.target.value) || 1)} />
+                onChange={e => set('priority', toSafeNumber(e.target.value, 0, { integer: true }) || 1)} />
             </div>
             <div className="flex flex-col gap-2 pt-1">
               <Label>Auto-concluir operação WMS</Label>

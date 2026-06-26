@@ -20,6 +20,7 @@ import { Plus, Pencil, Trash2, GripVertical, Layers, Factory, Search, Play, Chec
 import { Skeleton } from '@/ui/base/skeleton';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 export default function ProductionStepsPage() {
   const { steps, loading, createStep, updateStep, deleteStep } = useProductionSteps();
@@ -287,7 +288,7 @@ export default function ProductionStepsPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div><Label>Setor</Label><Input value={form.sector} onChange={e => setForm({ ...form, sector: e.target.value })} placeholder="Ex: Corte" /></div>
-              <div><Label>Tempo Estimado (min)</Label><Input type="number" value={form.estimated_time_minutes} onChange={e => setForm({ ...form, estimated_time_minutes: Number(e.target.value) })} /></div>
+              <div><Label>Tempo Estimado (min)</Label><Input type="number" value={form.estimated_time_minutes} onChange={e => setForm({ ...form, estimated_time_minutes: toSafeNumber(e.target.value) })} /></div>
             </div>
             <div><Label>Descrição</Label><Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} /></div>
             <div className="flex items-center gap-2"><Switch checked={form.is_active} onCheckedChange={v => setForm({ ...form, is_active: v })} /><Label>Etapa ativa</Label></div>

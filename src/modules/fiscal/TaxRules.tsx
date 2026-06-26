@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Plus, Pencil, Trash2, Search, Calculator, Sparkles } from 'lucide-react';
 import { useTaxRules, useUpsertTaxRule, useDeleteTaxRule, type TaxRule } from '@/hooks/fiscal/useTaxRules';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 const empty: Partial<TaxRule> = {
   name: '',
@@ -211,19 +212,19 @@ export default function TaxRulesPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>ICMS %</Label>
-                  <Input type="number" step="0.01" value={editing.icms_rate ?? 0} onChange={(e) => setEditing({ ...editing, icms_rate: Number(e.target.value) })} />
+                  <Input type="number" step="0.01" value={editing.icms_rate ?? 0} onChange={(e) => setEditing({ ...editing, icms_rate: toSafeNumber(e.target.value) })} />
                 </div>
                 <div className="space-y-2">
                   <Label>PIS %</Label>
-                  <Input type="number" step="0.01" value={editing.pis_rate ?? 0} onChange={(e) => setEditing({ ...editing, pis_rate: Number(e.target.value) })} />
+                  <Input type="number" step="0.01" value={editing.pis_rate ?? 0} onChange={(e) => setEditing({ ...editing, pis_rate: toSafeNumber(e.target.value) })} />
                 </div>
                 <div className="space-y-2">
                   <Label>COFINS %</Label>
-                  <Input type="number" step="0.01" value={editing.cofins_rate ?? 0} onChange={(e) => setEditing({ ...editing, cofins_rate: Number(e.target.value) })} />
+                  <Input type="number" step="0.01" value={editing.cofins_rate ?? 0} onChange={(e) => setEditing({ ...editing, cofins_rate: toSafeNumber(e.target.value) })} />
                 </div>
                 <div className="space-y-2">
                   <Label>IPI %</Label>
-                  <Input type="number" step="0.01" value={editing.ipi_rate ?? 0} onChange={(e) => setEditing({ ...editing, ipi_rate: Number(e.target.value) })} />
+                  <Input type="number" step="0.01" value={editing.ipi_rate ?? 0} onChange={(e) => setEditing({ ...editing, ipi_rate: toSafeNumber(e.target.value) })} />
                 </div>
               </div>
             </TabsContent>
@@ -232,15 +233,15 @@ export default function TaxRulesPage() {
               <div className="grid grid-cols-3 gap-4 p-4 bg-purple-50/30 rounded-xl border border-purple-100">
                 <div className="space-y-2">
                   <Label className="text-purple-700">IBS % (Estadual/Mun.)</Label>
-                  <Input type="number" step="0.01" value={editing.ibs_rate ?? 0} onChange={(e) => setEditing({ ...editing, ibs_rate: Number(e.target.value) })} className="border-purple-200 focus-visible:ring-purple-500" />
+                  <Input type="number" step="0.01" value={editing.ibs_rate ?? 0} onChange={(e) => setEditing({ ...editing, ibs_rate: toSafeNumber(e.target.value) })} className="border-purple-200 focus-visible:ring-purple-500" />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-purple-700">CBS % (Federal)</Label>
-                  <Input type="number" step="0.01" value={editing.cbs_rate ?? 0} onChange={(e) => setEditing({ ...editing, cbs_rate: Number(e.target.value) })} className="border-purple-200 focus-visible:ring-purple-500" />
+                  <Input type="number" step="0.01" value={editing.cbs_rate ?? 0} onChange={(e) => setEditing({ ...editing, cbs_rate: toSafeNumber(e.target.value) })} className="border-purple-200 focus-visible:ring-purple-500" />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-purple-700">IS % (Seletivo)</Label>
-                  <Input type="number" step="0.01" value={editing.is_is_rate ?? 0} onChange={(e) => setEditing({ ...editing, is_is_rate: Number(e.target.value) })} className="border-purple-200 focus-visible:ring-purple-500" />
+                  <Input type="number" step="0.01" value={editing.is_is_rate ?? 0} onChange={(e) => setEditing({ ...editing, is_is_rate: toSafeNumber(e.target.value) })} className="border-purple-200 focus-visible:ring-purple-500" />
                 </div>
               </div>
               <div className="p-3 bg-amber-50 rounded-lg border border-amber-200 flex items-start gap-2">

@@ -15,6 +15,7 @@ import { Plus, DollarSign, TrendingUp, AlertTriangle, Calculator, Search, Pencil
 import { Skeleton } from '@/ui/base/skeleton';
 import { cn } from '@/lib/utils';
 import { formatBRL } from '@/lib/formatters';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 export default function ProductCostsPage() {
   const { costs, loading, createCost, updateCost, deleteCost, calculateCost, avgMargin, totalRevenue, totalCostSum, lowMarginProducts } = useProductCosts();
@@ -154,14 +155,14 @@ export default function ProductCostsPage() {
               <div><Label>Produto</Label><Input value={form.product_name} onChange={e => setForm({ ...form, product_name: e.target.value })} /></div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div><Label>Custo Mat. Prima (R$)</Label><Input type="number" step="0.01" value={form.raw_material_cost} onChange={e => setForm({ ...form, raw_material_cost: Number(e.target.value) })} /></div>
-              <div><Label>Custo Operacional (R$)</Label><Input type="number" step="0.01" value={form.operational_cost} onChange={e => setForm({ ...form, operational_cost: Number(e.target.value) })} /></div>
+              <div><Label>Custo Mat. Prima (R$)</Label><Input type="number" step="0.01" value={form.raw_material_cost} onChange={e => setForm({ ...form, raw_material_cost: toSafeNumber(e.target.value) })} /></div>
+              <div><Label>Custo Operacional (R$)</Label><Input type="number" step="0.01" value={form.operational_cost} onChange={e => setForm({ ...form, operational_cost: toSafeNumber(e.target.value) })} /></div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div><Label>Valor/Hora Mão de Obra (R$)</Label><Input type="number" step="0.01" value={form.labor_rate_per_hour} onChange={e => setForm({ ...form, labor_rate_per_hour: Number(e.target.value) })} /></div>
-              <div><Label>Tempo Produção (min)</Label><Input type="number" value={form.production_time_minutes} onChange={e => setForm({ ...form, production_time_minutes: Number(e.target.value) })} /></div>
+              <div><Label>Valor/Hora Mão de Obra (R$)</Label><Input type="number" step="0.01" value={form.labor_rate_per_hour} onChange={e => setForm({ ...form, labor_rate_per_hour: toSafeNumber(e.target.value) })} /></div>
+              <div><Label>Tempo Produção (min)</Label><Input type="number" value={form.production_time_minutes} onChange={e => setForm({ ...form, production_time_minutes: toSafeNumber(e.target.value) })} /></div>
             </div>
-            <div><Label>Preço de Venda (R$)</Label><Input type="number" step="0.01" value={form.sale_price} onChange={e => setForm({ ...form, sale_price: Number(e.target.value) })} /></div>
+            <div><Label>Preço de Venda (R$)</Label><Input type="number" step="0.01" value={form.sale_price} onChange={e => setForm({ ...form, sale_price: toSafeNumber(e.target.value) })} /></div>
 
             {/* Live Preview */}
             <Card className="bg-muted/50">

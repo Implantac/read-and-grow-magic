@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Switch } from '@/ui/base/switch';
 import { Globe, Plus } from 'lucide-react';
 import { useDIFALRules, useUpsertDIFAL } from '@/hooks/fiscal/useTaxAdvancedRules';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 export default function DIFALPage() {
   const { data: rules = [], isLoading } = useDIFALRules();
@@ -38,9 +39,9 @@ export default function DIFALPage() {
                 <div className="col-span-2"><Label>Nome</Label><Input value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} /></div>
                 <div><Label>UF Origem</Label><Input value={editing.uf_origin} onChange={(e) => setEditing({ ...editing, uf_origin: e.target.value.toUpperCase() })} maxLength={2} /></div>
                 <div><Label>UF Destino</Label><Input value={editing.uf_destination} onChange={(e) => setEditing({ ...editing, uf_destination: e.target.value.toUpperCase() })} maxLength={2} /></div>
-                <div><Label>Alíq. Interna Destino (%)</Label><Input type="number" step="0.01" value={editing.internal_rate_destination} onChange={(e) => setEditing({ ...editing, internal_rate_destination: Number(e.target.value) })} /></div>
-                <div><Label>Alíq. Interestadual (%)</Label><Input type="number" step="0.01" value={editing.interstate_rate} onChange={(e) => setEditing({ ...editing, interstate_rate: Number(e.target.value) })} /></div>
-                <div><Label>FCP (%)</Label><Input type="number" step="0.01" value={editing.fcp_rate || 0} onChange={(e) => setEditing({ ...editing, fcp_rate: Number(e.target.value) })} /></div>
+                <div><Label>Alíq. Interna Destino (%)</Label><Input type="number" step="0.01" value={editing.internal_rate_destination} onChange={(e) => setEditing({ ...editing, internal_rate_destination: toSafeNumber(e.target.value) })} /></div>
+                <div><Label>Alíq. Interestadual (%)</Label><Input type="number" step="0.01" value={editing.interstate_rate} onChange={(e) => setEditing({ ...editing, interstate_rate: toSafeNumber(e.target.value) })} /></div>
+                <div><Label>FCP (%)</Label><Input type="number" step="0.01" value={editing.fcp_rate || 0} onChange={(e) => setEditing({ ...editing, fcp_rate: toSafeNumber(e.target.value) })} /></div>
                 <div className="flex items-center gap-2"><Switch checked={editing.active} onCheckedChange={(v) => setEditing({ ...editing, active: v })} /><Label>Ativa</Label></div>
               </div>
               <Button onClick={onSave} disabled={upsert.isPending} className="w-full">Salvar</Button>

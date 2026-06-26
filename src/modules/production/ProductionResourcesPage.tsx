@@ -18,6 +18,7 @@ import { Skeleton } from '@/ui/base/skeleton';
 import { Textarea } from '@/ui/base/textarea';
 import { Switch } from '@/ui/base/switch';
 import { formatNumber } from '@/lib/formatters';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 const typeLabels: Record<string, string> = { machine: 'Máquina', operator: 'Operador', workstation: 'Posto de Trabalho' };
 const typeIcons: Record<string, any> = { machine: Cog, operator: User, workstation: Monitor };
@@ -208,8 +209,8 @@ export default function ProductionResourcesPage() {
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <div className="space-y-1.5"><Label>Capacidade/h</Label><Input type="number" value={form.capacity_per_hour || 0} onChange={e => setForm({ ...form, capacity_per_hour: Number(e.target.value) })} /></div>
-              <div className="space-y-1.5"><Label>Custo/Hora (R$)</Label><Input type="number" step="0.01" value={form.cost_per_hour || 0} onChange={e => setForm({ ...form, cost_per_hour: Number(e.target.value) })} /></div>
+              <div className="space-y-1.5"><Label>Capacidade/h</Label><Input type="number" value={form.capacity_per_hour || 0} onChange={e => setForm({ ...form, capacity_per_hour: toSafeNumber(e.target.value) })} /></div>
+              <div className="space-y-1.5"><Label>Custo/Hora (R$)</Label><Input type="number" step="0.01" value={form.cost_per_hour || 0} onChange={e => setForm({ ...form, cost_per_hour: toSafeNumber(e.target.value) })} /></div>
               <div className="space-y-1.5">
                 <Label>Status</Label>
                 <Select value={form.status || 'available'} onValueChange={v => setForm({ ...form, status: v })}>

@@ -22,6 +22,7 @@ import { useWMSConference, ConferenceItem } from '@/hooks/wms/useWMSConference';
 import { BarcodeScanner, ScanFeedback } from '@/components/wms/BarcodeScanner';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   pending: { label: 'Pendente', variant: 'secondary' },
@@ -343,7 +344,7 @@ export default function ConferencePage() {
                 <div key={i} className="grid grid-cols-3 gap-2 mt-2">
                   <Input placeholder="Código" value={item.product_code} onChange={e => { const arr = [...newItems]; arr[i].product_code = e.target.value; setNewItems(arr); }} />
                   <Input placeholder="Nome" value={item.product_name} onChange={e => { const arr = [...newItems]; arr[i].product_name = e.target.value; setNewItems(arr); }} />
-                  <Input type="number" placeholder="Qtd esperada" value={item.expected_qty || ''} onChange={e => { const arr = [...newItems]; arr[i].expected_qty = Number(e.target.value); setNewItems(arr); }} />
+                  <Input type="number" placeholder="Qtd esperada" value={item.expected_qty || ''} onChange={e => { const arr = [...newItems]; arr[i].expected_qty = toSafeNumber(e.target.value); setNewItems(arr); }} />
                 </div>
               ))}
               <Button variant="outline" size="sm" className="mt-2" onClick={() => setNewItems([...newItems, { product_code: '', product_name: '', expected_qty: 0 }])}>

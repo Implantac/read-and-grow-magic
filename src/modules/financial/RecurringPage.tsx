@@ -21,6 +21,7 @@ import {
 import { Pause, Play, Plus, RefreshCw, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { formatNumber } from '@/lib/formatters';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 const STATUS_VARIANT: Record<string, any> = {
   active: 'default',
@@ -131,7 +132,7 @@ export default function RecurringPage() {
                         type="number"
                         step="0.01"
                         value={form.amount}
-                        onChange={(e) => setForm({ ...form, amount: Number(e.target.value) })}
+                        onChange={(e) => setForm({ ...form, amount: toSafeNumber(e.target.value) })}
                       />
                     </div>
                     <div>
@@ -140,7 +141,7 @@ export default function RecurringPage() {
                         type="number"
                         step="0.01"
                         value={form.adjustment_percent}
-                        onChange={(e) => setForm({ ...form, adjustment_percent: Number(e.target.value) })}
+                        onChange={(e) => setForm({ ...form, adjustment_percent: toSafeNumber(e.target.value) })}
                       />
                     </div>
                   </div>
