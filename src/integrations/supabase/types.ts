@@ -16037,6 +16037,56 @@ export type Database = {
           },
         ]
       }
+      workflow_triggers: {
+        Row: {
+          company_id: string
+          condition: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          event_type: string
+          id: string
+          is_active: boolean
+          source_module: string | null
+          updated_at: string
+          workflow_definition_id: string
+        }
+        Insert: {
+          company_id: string
+          condition?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          event_type: string
+          id?: string
+          is_active?: boolean
+          source_module?: string | null
+          updated_at?: string
+          workflow_definition_id: string
+        }
+        Update: {
+          company_id?: string
+          condition?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          event_type?: string
+          id?: string
+          is_active?: boolean
+          source_module?: string | null
+          updated_at?: string
+          workflow_definition_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_triggers_workflow_definition_id_fkey"
+            columns: ["workflow_definition_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       client_current_account: {
@@ -16326,6 +16376,7 @@ export type Database = {
       current_billing_period: { Args: never; Returns: string }
       detect_cashflow_risks: { Args: never; Returns: Json }
       detect_financial_alerts: { Args: never; Returns: Json }
+      eval_wf_condition: { Args: { cond: Json; ctx: Json }; Returns: boolean }
       evaluate_transaction_risk: {
         Args: {
           _amount: number
