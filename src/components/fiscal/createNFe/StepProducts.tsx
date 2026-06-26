@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { cfopOptions } from '@/config/fiscal';
 import { formatBRL } from '@/lib/formatters';
+import { toSafeNumber } from '@/lib/numericValidation';
 import { SmartSelect, SmartSelectOption } from '../SmartSelect';
 import type { NFeItemForm } from './types';
 
@@ -71,8 +72,10 @@ export function StepProducts({ items, productOptions, onAddProduct, onUpdateItem
                   <TableCell>
                     <Input
                       type="number"
+                      min={0}
+                      step="0.001"
                       value={item.quantity}
-                      onChange={(e) => onUpdateItem(idx, 'quantity', Number(e.target.value))}
+                      onChange={(e) => onUpdateItem(idx, 'quantity', toSafeNumber(e.target.value, 0, { maxDecimals: 3, min: 0 }))}
                       className="h-9 font-bold text-center"
                     />
                   </TableCell>
@@ -81,8 +84,10 @@ export function StepProducts({ items, productOptions, onAddProduct, onUpdateItem
                       <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">R$</span>
                       <Input
                         type="number"
+                        min={0}
+                        step="0.01"
                         value={item.unitPrice}
-                        onChange={(e) => onUpdateItem(idx, 'unitPrice', Number(e.target.value))}
+                        onChange={(e) => onUpdateItem(idx, 'unitPrice', toSafeNumber(e.target.value, 0, { maxDecimals: 2, min: 0 }))}
                         className="h-9 pl-6 font-bold"
                       />
                     </div>

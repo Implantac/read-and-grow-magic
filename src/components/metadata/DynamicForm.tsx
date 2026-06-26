@@ -5,6 +5,7 @@ import { Textarea } from "@/ui/base/textarea";
 import { Switch } from "@/ui/base/switch";
 import { Button } from "@/ui/base/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/base/select";
+import { parseNumericInput } from "@/lib/numericValidation";
 import type { CustomField } from "@/hooks/useCustomEntities";
 
 interface Props {
@@ -31,9 +32,11 @@ export function DynamicForm({ fields, initial, submitting, onSubmit, onCancel }:
       const v = values[f.field_key];
       if (f.is_required && (v === undefined || v === null || v === "")) {
         next[f.field_key] = "Campo obrigatório";
+        continue;
       }
-      if (f.field_type === "number" && v !== "" && v !== undefined && v !== null && isNaN(Number(v))) {
-        next[f.field_key] = "Número inválido";
+      if (f.field_type === "number" && v !== "" && v !== undefined && v !== null) {
+        const r = parseNumericInput(v, { allowNegative: true });
+        if (r.ok === false) next[f.field_key] = r.error;
       }
     }
     setErrors(next);

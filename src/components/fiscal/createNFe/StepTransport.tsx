@@ -2,6 +2,7 @@ import { Scale, Truck } from 'lucide-react';
 import { Input } from '@/ui/base/input';
 import { Label } from '@/ui/base/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 interface Props {
   carrierName: string;
@@ -48,13 +49,13 @@ export function StepTransport({ carrierName, setCarrierName, freightType, setFre
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Quantidade de Volumes</Label>
-              <Input type="number" value={volumeQty} onChange={(e) => setVolumeQty(Number(e.target.value))} />
+              <Input type="number" min={0} step={1} value={volumeQty} onChange={(e) => setVolumeQty(toSafeNumber(e.target.value, 0, { integer: true, min: 0 }))} />
             </div>
             <div className="space-y-2">
               <Label>Valor do Frete</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">R$</span>
-                <Input type="number" value={shipping} onChange={(e) => setShipping(Number(e.target.value))} className="pl-8" />
+                <Input type="number" min={0} step="0.01" value={shipping} onChange={(e) => setShipping(toSafeNumber(e.target.value, 0, { maxDecimals: 2, min: 0 }))} className="pl-8" />
               </div>
             </div>
           </div>

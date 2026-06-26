@@ -2,6 +2,7 @@ import { CreditCard } from 'lucide-react';
 import { Input } from '@/ui/base/input';
 import { Label } from '@/ui/base/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
+import { toSafeNumber } from '@/lib/numericValidation';
 
 interface Props {
   paymentMethod: string;
@@ -39,13 +40,13 @@ export function StepFinance({ paymentMethod, setPaymentMethod, installments, set
           <div className="grid grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label>Parcelas</Label>
-              <Input type="number" min={1} value={installments} onChange={(e) => setInstallments(Number(e.target.value))} className="h-12" />
+              <Input type="number" min={1} step={1} value={installments} onChange={(e) => setInstallments(toSafeNumber(e.target.value, 1, { integer: true, min: 1, max: 36 }))} className="h-12" />
             </div>
             <div className="space-y-2">
               <Label>Desconto Total</Label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R$</span>
-                <Input type="number" value={discount} onChange={(e) => setDiscount(Number(e.target.value))} className="h-12 pl-8" />
+                <Input type="number" min={0} step="0.01" value={discount} onChange={(e) => setDiscount(toSafeNumber(e.target.value, 0, { maxDecimals: 2, min: 0 }))} className="h-12 pl-8" />
               </div>
             </div>
           </div>
