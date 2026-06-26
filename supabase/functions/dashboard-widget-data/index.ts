@@ -144,8 +144,11 @@ Deno.serve(async (req) => {
     if (!ctx.companyId) return jsonError("Forbidden", 403);
 
     const body = await req.json().catch(() => ({}));
-    const dataSource: string = body?.data_source ?? "";
-    const cfg = body?.config ?? {};
+    const dataSource: string = typeof body?.data_source === 'string' ? body.data_source : '';
+    if (!dataSource || dataSource.length > 120 || !/^[a-zA-Z0-9._-]+$/.test(dataSource)) {
+      return jsonError('data_source inválido', 400);
+    }
+    const cfg = (body?.config && typeof body.config === 'object' && !Array.isArray(body.config)) ? body.config : {};
 
     if (dataSource === "__catalog__") {
       return jsonResponse({
