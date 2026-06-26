@@ -212,6 +212,24 @@ export default function ExecutiveDashboard() {
         </div>
       )}
 
+      {/* Atalho rápido — Auditoria de Segurança */}
+      <Card className="border-l-4 border-l-primary hover-lift">
+        <CardContent className="p-4 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <ShieldAlert className="h-5 w-5 text-primary" />
+            <div>
+              <p className="text-sm font-semibold">Auditoria de Segurança</p>
+              <p className="text-xs text-muted-foreground">
+                Eventos críticos: exclusões, mudanças de permissão, falhas de login e operações financeiras
+              </p>
+            </div>
+          </div>
+          <Button asChild size="sm" variant="outline">
+            <Link to="/admin/seguranca/auditoria">Abrir</Link>
+          </Button>
+        </CardContent>
+      </Card>
+
       <Tabs defaultValue="assistant" className="space-y-4">
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="assistant" className="gap-1.5"><Bot className="h-3.5 w-3.5" />Diretor Digital</TabsTrigger>
