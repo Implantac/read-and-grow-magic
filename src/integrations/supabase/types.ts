@@ -15933,13 +15933,16 @@ export type Database = {
       }
       workflow_instances: {
         Row: {
+          assigned_to: string | null
           company_id: string
           completed_at: string | null
           context: Json
           created_at: string
           current_step: string | null
           definition_id: string
+          due_at: string | null
           id: string
+          priority: string
           started_by: string | null
           status: string
           target_entity: string
@@ -15947,13 +15950,16 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assigned_to?: string | null
           company_id: string
           completed_at?: string | null
           context?: Json
           created_at?: string
           current_step?: string | null
           definition_id: string
+          due_at?: string | null
           id?: string
+          priority?: string
           started_by?: string | null
           status?: string
           target_entity: string
@@ -15961,13 +15967,16 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assigned_to?: string | null
           company_id?: string
           completed_at?: string | null
           context?: Json
           created_at?: string
           current_step?: string | null
           definition_id?: string
+          due_at?: string | null
           id?: string
+          priority?: string
           started_by?: string | null
           status?: string
           target_entity?: string

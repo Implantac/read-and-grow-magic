@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { resolveNextStep, type Branch } from "@/lib/workflowConditions";
 
 export interface WorkflowStep {
   key: string;
@@ -8,7 +9,21 @@ export interface WorkflowStep {
   type?: "approval" | "task" | "automatic" | "notification";
   assignee_role?: string;
   next?: string;
-  conditions?: any;
+  branches?: Branch[];
+  sla_hours?: number;
+  conditions?: unknown;
+}
+
+export interface WorkflowTransition {
+  id: string;
+  company_id: string;
+  instance_id: string;
+  from_step: string | null;
+  to_step: string;
+  actor_id: string | null;
+  comment: string | null;
+  payload: Record<string, unknown>;
+  created_at: string;
 }
 
 export interface WorkflowDefinition {
@@ -172,20 +187,38 @@ export function useWorkflowMutations() {
       onError: (e: any) => toast.error(e.message),
     }),
     advance: useMutation({
-      mutationFn: async (payload: { instance_id: string; to_step: string; comment?: string; complete?: boolean }) => {
+      mutationFn: async (payload: { instance_id: string; to_step?: string; comment?: string; complete?: boolean; contextPatch?: Record<string, unknown> }) => {
         const { companyId, userId } = await currentCompanyId();
         const { data: inst, error: iErr } = await supabase
           .from("workflow_instances")
-          .select("current_step")
+          .select("current_step, context, definition_id")
           .eq("id", payload.instance_id)
           .maybeSingle();
         if (iErr || !inst) throw iErr ?? new Error("Instância não encontrada");
+
+        const mergedContext = { ...(inst.context as Record<string, unknown> ?? {}), ...(payload.contextPatch ?? {}) };
+
+        // Auto-resolve next step via branches when not provided
+        let nextStep = payload.to_step ?? null;
+        if (!nextStep) {
+          const { data: def } = await supabase
+            .from("workflow_definitions")
+            .select("steps")
+            .eq("id", inst.definition_id)
+            .maybeSingle();
+          const steps = ((def?.steps as unknown) as WorkflowStep[]) ?? [];
+          const current = steps.find((s) => s.key === inst.current_step);
+          nextStep = resolveNextStep(current?.branches, current?.next ?? null, mergedContext);
+          if (!nextStep) throw new Error("Não foi possível determinar a próxima etapa (sem next/branches).");
+        }
+
         const { error: uErr } = await supabase
           .from("workflow_instances")
           .update({
-            current_step: payload.to_step,
+            current_step: nextStep,
             status: payload.complete ? "completed" : "running",
             completed_at: payload.complete ? new Date().toISOString() : null,
+            context: mergedContext as any,
           })
           .eq("id", payload.instance_id);
         if (uErr) throw uErr;
@@ -193,16 +226,35 @@ export function useWorkflowMutations() {
           company_id: companyId,
           instance_id: payload.instance_id,
           from_step: inst.current_step,
-          to_step: payload.to_step,
+          to_step: nextStep,
           actor_id: userId,
           comment: payload.comment ?? null,
+          payload: (payload.contextPatch ?? {}) as any,
         });
       },
       onSuccess: () => {
         toast.success("Etapa avançada");
         qc.invalidateQueries({ queryKey: ["workflow_instances"] });
+        qc.invalidateQueries({ queryKey: ["workflow_transitions"] });
       },
       onError: (e: any) => toast.error(e.message),
     }),
   };
 }
+
+export function useWorkflowHistory(instanceId?: string) {
+  return useQuery({
+    queryKey: ["workflow_transitions", instanceId ?? "none"],
+    enabled: !!instanceId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("workflow_transitions")
+        .select("*")
+        .eq("instance_id", instanceId!)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as unknown as WorkflowTransition[];
+    },
+  });
+}
+
