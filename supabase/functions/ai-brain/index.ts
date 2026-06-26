@@ -188,13 +188,17 @@ const RISKY_ACTIONS = new Set([
   "assign_sales_rep",
 ]);
 
-async function executeAction(action: any, userId?: string) {
+async function executeAction(action: any, userId?: string, companyId?: string | null) {
   const tool = action?.tool;
   const p = action?.params || {};
+  if (!companyId) {
+    return { ok: false, error: "company_id ausente — ação ignorada para preservar isolamento multi-tenant" };
+  }
   try {
     switch (tool) {
       case "create_alert": {
         const { data, error } = await admin.from("financial_alerts").insert({
+          company_id: companyId,
           alert_type: p.alert_type || "brain_insight",
           severity: p.severity || "medium",
           title: p.title || "Alerta do Cérebro",
@@ -207,6 +211,7 @@ async function executeAction(action: any, userId?: string) {
       }
       case "escalate_alert": {
         const { data, error } = await admin.from("financial_alerts").insert({
+          company_id: companyId,
           alert_type: p.alert_type || "brain_escalation",
           severity: "critical",
           title: p.title || "🔴 Escalação do Cérebro",
@@ -215,10 +220,14 @@ async function executeAction(action: any, userId?: string) {
           entity_id: p.entity_id || null,
         }).select().single();
         if (error) throw error;
-        // notifica admins
-        const { data: admins } = await admin.from("user_roles").select("user_id").eq("role", "admin");
+        // notifica admins DA MESMA EMPRESA apenas
+        const { data: admins } = await admin.from("user_roles")
+          .select("user_id")
+          .eq("role", "admin")
+          .eq("company_id", companyId);
         for (const a of admins || []) {
           await admin.from("notifications").insert({
+            company_id: companyId,
             user_id: a.user_id,
             type: "critical",
             title: `🔴 ${p.title || "Escalação crítica do Cérebro"}`,
@@ -229,7 +238,14 @@ async function executeAction(action: any, userId?: string) {
         return { ok: true, alert_id: data.id, admins_notified: (admins || []).length };
       }
       case "notify_user": {
+        if (p.user_id && p.user_id !== userId) {
+          const { data: prof } = await admin.from("profiles").select("company_id").eq("id", p.user_id).maybeSingle();
+          if ((prof as any)?.company_id !== companyId) {
+            return { ok: false, error: "user_id pertence a outra empresa" };
+          }
+        }
         const { data, error } = await admin.from("notifications").insert({
+          company_id: companyId,
           user_id: p.user_id || userId || null,
           type: p.type || "info",
           title: p.title || "Cérebro do ERP",
@@ -240,11 +256,14 @@ async function executeAction(action: any, userId?: string) {
         return { ok: true, notification_id: data.id };
       }
       case "send_pix_reminder": {
-        // Cobrança suave: notifica + cria alerta financeiro
         const desc = p.description || `Lembrete de PIX pendente${p.amount ? ` — R$ ${p.amount}` : ""}`;
-        const { data: admins } = await admin.from("user_roles").select("user_id").in("role", ["admin", "manager"]);
+        const { data: admins } = await admin.from("user_roles")
+          .select("user_id")
+          .in("role", ["admin", "manager"])
+          .eq("company_id", companyId);
         for (const a of admins || []) {
           await admin.from("notifications").insert({
+            company_id: companyId,
             user_id: a.user_id,
             type: "warning",
             title: p.title || "💸 Lembrete de cobrança PIX",
@@ -256,6 +275,7 @@ async function executeAction(action: any, userId?: string) {
       }
       case "create_follow_up_task": {
         const { data, error } = await admin.from("follow_up_tasks").insert({
+          company_id: companyId,
           client_id: p.client_id || null,
           client_name: p.client_name || null,
           sales_rep_id: p.sales_rep_id || null,
@@ -274,13 +294,16 @@ async function executeAction(action: any, userId?: string) {
       }
       case "block_client": {
         if (!p.client_id) return { ok: false, error: "client_id obrigatório" };
-        const { error: e1 } = await admin.from("clients")
+        const { error: e1, data: updated } = await admin.from("clients")
           .update({ status: "blocked" })
-          .eq("id", p.client_id);
+          .eq("id", p.client_id)
+          .eq("company_id", companyId)
+          .select("id").maybeSingle();
         if (e1) throw e1;
-        // registra histórico via order_blocks se houver order_id
+        if (!updated) return { ok: false, error: "cliente não encontrado neste tenant" };
         if (p.order_id) {
           await admin.from("order_blocks").insert({
+            company_id: companyId,
             order_id: p.order_id,
             block_type: "credit",
             block_reason: p.reason || "Bloqueio recomendado pelo Cérebro",
@@ -296,15 +319,18 @@ async function executeAction(action: any, userId?: string) {
         if (!p.order_id || !p.new_due_date) return { ok: false, error: "order_id e new_due_date obrigatórios" };
         const { data, error } = await admin.from("production_orders")
           .update({ due_date: p.new_due_date, notes: `[Cérebro] ${p.reason || "Replanejamento"}` })
-          .eq("id", p.order_id).select().single();
+          .eq("id", p.order_id)
+          .eq("company_id", companyId)
+          .select().maybeSingle();
         if (error) throw error;
+        if (!data) return { ok: false, error: "OP não encontrada neste tenant" };
         return { ok: true, order_id: data.id, new_due_date: p.new_due_date };
       }
       case "request_quotation": {
-        // Cria cotação real em rascunho para o setor de compras
         const number = `COT-AI-${Date.now().toString().slice(-8)}`;
         const validUntil = p.valid_until || new Date(Date.now() + 15 * 86400000).toISOString();
         const { data, error } = await admin.from("quotations").insert({
+          company_id: companyId,
           number,
           client_id: p.client_id || null,
           client_name: p.client_name || p.supplier_name || "Cotação Cérebro",
@@ -316,10 +342,13 @@ async function executeAction(action: any, userId?: string) {
           notes: `[Cérebro] ${p.description || p.notes || "Cotação sugerida pelo Cérebro"}`,
         }).select().single();
         if (error) throw error;
-        // notifica compradores
-        const { data: buyers } = await admin.from("user_roles").select("user_id").in("role", ["admin", "manager"]);
+        const { data: buyers } = await admin.from("user_roles")
+          .select("user_id")
+          .in("role", ["admin", "manager"])
+          .eq("company_id", companyId);
         for (const b of buyers || []) {
           await admin.from("notifications").insert({
+            company_id: companyId,
             user_id: b.user_id,
             type: "info",
             title: `📋 Nova cotação sugerida: ${number}`,
@@ -334,6 +363,7 @@ async function executeAction(action: any, userId?: string) {
         if (!p.supplier_name) return { ok: false, error: "supplier_name obrigatório" };
         const number = `PO-AI-${Date.now().toString().slice(-8)}`;
         const { data, error } = await admin.from("purchase_orders").insert({
+          company_id: companyId,
           number,
           supplier_id: p.supplier_id || null,
           supplier_name: p.supplier_name,
@@ -357,8 +387,9 @@ async function executeAction(action: any, userId?: string) {
           released_by: "ai-brain",
           released_at: new Date().toISOString(),
           release_justification: p.justification || "Liberado pelo Cérebro",
-        }).eq("id", p.block_id).select().single();
+        }).eq("id", p.block_id).eq("company_id", companyId).select().maybeSingle();
         if (error) throw error;
+        if (!data) return { ok: false, error: "bloqueio não encontrado neste tenant" };
         return { ok: true, block_id: data.id };
       }
       case "mark_invoice_paid": {
@@ -370,8 +401,9 @@ async function executeAction(action: any, userId?: string) {
           paid_amount: p.paid_amount || p.amount || null,
           open_amount: 0,
           notes: `[Cérebro] ${p.notes || "Baixa manual sugerida"}`,
-        }).eq("id", p.receivable_id).select().single();
+        }).eq("id", p.receivable_id).eq("company_id", companyId).select().maybeSingle();
         if (error) throw error;
+        if (!data) return { ok: false, error: "título não encontrado neste tenant" };
         return { ok: true, receivable_id: data.id };
       }
       case "assign_sales_rep": {
@@ -379,8 +411,9 @@ async function executeAction(action: any, userId?: string) {
         const { data, error } = await admin.from("clients").update({
           sales_rep_id: p.sales_rep_id,
           commercial_notes: p.notes ? `[Cérebro] ${p.notes}` : null,
-        }).eq("id", p.client_id).select().single();
+        }).eq("id", p.client_id).eq("company_id", companyId).select().maybeSingle();
         if (error) throw error;
+        if (!data) return { ok: false, error: "cliente não encontrado neste tenant" };
         return { ok: true, client_id: data.id, sales_rep_id: p.sales_rep_id };
       }
       case "save_memory": {
