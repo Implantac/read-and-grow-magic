@@ -83,8 +83,10 @@ export default function Onboarding() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.company_name.trim() || !form.cnpj.trim()) {
-      toastError('Informe nome e CNPJ da empresa');
+    const parsed = onboardingSchema.safeParse(form);
+    if (!parsed.success) {
+      const first = parsed.error.issues[0];
+      toastError(first?.message || 'Dados inválidos');
       return;
     }
     setLoading(true);
