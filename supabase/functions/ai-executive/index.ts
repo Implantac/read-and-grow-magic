@@ -907,7 +907,15 @@ async function executeAcao(supabase: any, args: any, user_id?: string, company_i
       instrucao: "Responda **'sim, confirmo'** para executar ou **'cancelar'** para desistir.",
     };
   }
+  // Tenant guard — qualquer mutação exige escopo de empresa resolvido
+  if (!company_id) {
+    return { erro: "Empresa não identificada para a sessão. Faça login novamente." };
+  }
   const params = args.parametros || {};
+  const failSafe = (op: string, err: unknown) => {
+    console.error(`[ai-executive] ${op} failed:`, err);
+    return { erro: "Operação não pôde ser concluída. Verifique os dados e tente novamente." };
+  };
   const logAction = async (actionName: string, result: string) => {
     if (user_id) {
       try {
@@ -924,6 +932,7 @@ async function executeAcao(supabase: any, args: any, user_id?: string, company_i
       } catch { /* ignore */ }
     }
   };
+
 
   switch (args.acao) {
     case "registrar_pagamento": {
