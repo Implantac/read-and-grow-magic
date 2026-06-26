@@ -63,7 +63,9 @@ serve(async (req) => {
     }
 
     if (action === "clear_history") {
-      await supabase.from("ai_executive_chat").delete().eq("user_id", authenticatedUserId);
+      let delQ = supabase.from("ai_executive_chat").delete().eq("user_id", authenticatedUserId);
+      if (companyId) delQ = delQ.eq("company_id", companyId);
+      await delQ;
       return new Response(JSON.stringify({ ok: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     
@@ -442,6 +444,9 @@ function generateConsensusItems(kpis: any, data: any, segment: string) {
 // ─── Generate Insights ──────────────────────────────────────────
 
 async function handleGenerateInsights(supabase: any, lovableKey: string, corsHeaders: any, authenticatedUserId?: string, companyId?: string) {
+  if (!companyId) {
+    return new Response(JSON.stringify({ error: "Empresa não identificada" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
   const d = await fetchAllData(supabase, companyId);
   const computed = computeKPIs(d);
 
@@ -499,10 +504,14 @@ Gere insights estratégicos: { "insights": [...] }`;
   try { parsed = JSON.parse(content); } catch { parsed = { insights: [] }; }
   const insights = parsed.insights || [];
 
-  await supabase.from("ai_executive_insights").update({ status: "expired" }).eq("status", "active");
+  await supabase.from("ai_executive_insights")
+    .update({ status: "expired" })
+    .eq("status", "active")
+    .eq("company_id", companyId);
 
   for (const ins of insights) {
     await supabase.from("ai_executive_insights").insert({
+      company_id: companyId,
       insight_type: ins.type || "general",
       category: "strategic",
       severity: ins.severity || "medium",
@@ -515,14 +524,14 @@ Gere insights estratégicos: { "insights": [...] }`;
     });
   }
 
-  return new Response(JSON.stringify({ insights, generated: insights.length }), {
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}
+
 
 // ─── Generate Scenarios ──────────────────────────────────────────
 
 async function handleGenerateScenarios(supabase: any, lovableKey: string, corsHeaders: any, authenticatedUserId?: string, companyId?: string) {
+  if (!companyId) {
+    return new Response(JSON.stringify({ error: "Empresa não identificada" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
   const d = await fetchAllData(supabase, companyId);
   const computed = computeKPIs(d);
 
@@ -571,6 +580,7 @@ RECEITA REGIÃO: ${JSON.stringify(computed.revenueByRegion)}`;
 
   const scenarios = parsed.scenarios || {};
   await supabase.from("ai_executive_scenarios").insert({
+    company_id: companyId,
     scenario_type: "quarterly",
     period: "next_3_months",
     optimistic: scenarios.optimistic || null,
@@ -1237,10 +1247,12 @@ async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: str
   // ─── Server-side Memory: Load recent history for context ───
   let serverHistory: any[] = [];
   if (user_id) {
-    const { data: recentMsgs } = await supabase
+    let histQ = supabase
       .from("ai_executive_chat")
       .select("role, content, created_at")
-      .eq("user_id", user_id)
+      .eq("user_id", user_id);
+    if (company_id) histQ = histQ.eq("company_id", company_id);
+    const { data: recentMsgs } = await histQ
       .order("created_at", { ascending: true })
       .limit(40);
     if (recentMsgs && recentMsgs.length > 0) {
@@ -1253,6 +1265,7 @@ async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: str
   if (user_id && lastUserMsg) {
     await supabase.from("ai_executive_chat").insert({
       user_id,
+      company_id: company_id ?? null,
       role: "user",
       content: lastUserMsg.content,
     });
@@ -1325,6 +1338,7 @@ async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: str
     try {
       await supabase.from("ai_action_logs").insert({
         user_id,
+        company_id: company_id ?? null,
         action_type: "query",
         module: detectedModule,
         action_name: "consulta_chat",
@@ -1421,16 +1435,18 @@ ${patternInsights}${realDataSnapshot}`, supabase, 'ai-executive-chat', user_id);
   if (user_id) {
     await supabase.from("ai_executive_chat").insert({
       user_id,
+      company_id: company_id ?? null,
       role: "assistant",
       content,
     });
 
-    // ─── Trim old messages (keep last 60 per user) ───
-    const { data: allMsgs } = await supabase
+    // ─── Trim old messages (keep last 60 per user no tenant ativo) ───
+    let trimQ = supabase
       .from("ai_executive_chat")
       .select("id")
-      .eq("user_id", user_id)
-      .order("created_at", { ascending: true });
+      .eq("user_id", user_id);
+    if (company_id) trimQ = trimQ.eq("company_id", company_id);
+    const { data: allMsgs } = await trimQ.order("created_at", { ascending: true });
     if (allMsgs && allMsgs.length > 60) {
       const toDelete = allMsgs.slice(0, allMsgs.length - 60).map((m: any) => m.id);
       await supabase.from("ai_executive_chat").delete().in("id", toDelete);
@@ -1600,7 +1616,8 @@ function generateGrowthPlan(ctx: any, forecast: any, kpis: any) {
   return plan;
 }
 
-async function recordLearning(supabase: any, d: any) {
+async function recordLearning(supabase: any, d: any, companyId?: string | null) {
+  if (!companyId) return;
   try {
     const productSales: Record<string, number> = {};
     (d.orderItems || []).forEach((it: any) => {
@@ -1610,40 +1627,43 @@ async function recordLearning(supabase: any, d: any) {
     const top = Object.entries(productSales).sort((a, b) => b[1] - a[1]).slice(0, 30);
     for (const [productId, qty] of top) {
       await supabase.from("ai_learning").upsert({
+        company_id: companyId,
         pattern_type: "product_sales",
         pattern_key: `produto_${productId}`,
         value: qty,
         frequency: 1,
         metadata: { observed_at: new Date().toISOString() },
         last_updated: new Date().toISOString(),
-      }, { onConflict: "pattern_type,pattern_key" });
+      }, { onConflict: "company_id,pattern_type,pattern_key" });
     }
   } catch (e) { console.error("recordLearning warn:", e); }
 }
 
-async function persistKPIs(supabase: any, kpis: any, forecast: any) {
+async function persistKPIs(supabase: any, kpis: any, forecast: any, companyId?: string | null) {
   const today = new Date().toISOString().slice(0, 10);
   const rows = [
-    { snapshot_date: today, kpi_name: "receita_mes", category: "financial",
+    { company_id: companyId ?? null, snapshot_date: today, kpi_name: "receita_mes", category: "financial",
       current_value: kpis.totalRevenue, target_value: forecast.previsao_proximo_mes * 1.2,
       status: kpis.totalRevenue >= forecast.previsao_proximo_mes ? "ok" : "alerta",
       trend: forecast.trend, explanation: "Receita acumulada vs meta (+20% sobre média 6m)" },
-    { snapshot_date: today, kpi_name: "margem_bruta", category: "financial",
+    { company_id: companyId ?? null, snapshot_date: today, kpi_name: "margem_bruta", category: "financial",
       current_value: kpis.grossMargin, target_value: 25,
       status: kpis.grossMargin >= 25 ? "ok" : kpis.grossMargin >= 15 ? "alerta" : "critico",
       trend: null, explanation: "Margem bruta % — meta mínima 25%" },
-    { snapshot_date: today, kpi_name: "inadimplencia", category: "financial",
+    { company_id: companyId ?? null, snapshot_date: today, kpi_name: "inadimplencia", category: "financial",
       current_value: kpis.defaultRate, target_value: 5,
       status: kpis.defaultRate <= 5 ? "ok" : kpis.defaultRate <= 10 ? "alerta" : "critico",
       trend: null, explanation: "% da carteira em atraso — meta máx 5%" },
-    { snapshot_date: today, kpi_name: "ruptura_estoque", category: "inventory",
+    { company_id: companyId ?? null, snapshot_date: today, kpi_name: "ruptura_estoque", category: "inventory",
       current_value: kpis.lowStockProducts, target_value: 0,
       status: kpis.lowStockProducts === 0 ? "ok" : kpis.lowStockProducts < 5 ? "alerta" : "critico",
       trend: null, explanation: "Nº de SKUs abaixo do mínimo" },
   ];
   try {
-    await supabase.from("ai_kpis").delete()
+    let delQ = supabase.from("ai_kpis").delete()
       .eq("snapshot_date", today).in("kpi_name", rows.map((r) => r.kpi_name));
+    if (companyId) delQ = delQ.eq("company_id", companyId);
+    await delQ;
     await supabase.from("ai_kpis").insert(rows);
   } catch (e) { console.error("persistKPIs warn:", e); }
   return rows;
@@ -1676,8 +1696,8 @@ export async function handleCEOBrief(supabase: any, lovableKey: string, corsHead
   const risks = analyzeRisks(ctx, kpis);
   const plan = generateGrowthPlan(ctx, forecast, kpis);
   const decisions = suggestDecisions(ctx, forecast, risks);
-  const kpiRows = await persistKPIs(supabase, kpis, forecast);
-  await recordLearning(supabase, data);
+  const kpiRows = await persistKPIs(supabase, kpis, forecast, companyId);
+  await recordLearning(supabase, data, companyId);
 
   // Detecta se há dados reais suficientes para análise confiável
   // Usa o helper compartilhado (campos plurais conforme fetchAllData)
@@ -1852,7 +1872,7 @@ export async function handleCEOBrief(supabase: any, lovableKey: string, corsHead
 
 // ─── AdvancedActionEngine ───────────────────────────────────────
 // Executa decisões aprovadas — registra em ai_action_logs (suggestion-first, não muta dados de negócio sem flag)
-async function executeAdvancedActions(supabase: any, decisions: any[], userId?: string, autoExecute = false) {
+async function executeAdvancedActions(supabase: any, decisions: any[], userId?: string, autoExecute = false, companyId?: string | null) {
   const results: any[] = [];
   for (const d of decisions || []) {
     let result = "";
@@ -1882,6 +1902,7 @@ async function executeAdvancedActions(supabase: any, decisions: any[], userId?: 
           result = `Decisão registrada: ${d.action || d.type}`;
       }
       await supabase.from("ai_action_logs").insert({
+        company_id: companyId ?? null,
         action_type: "decision_execution",
         action_name: d.type,
         module: "executive_ai",
@@ -1899,21 +1920,31 @@ async function executeAdvancedActions(supabase: any, decisions: any[], userId?: 
   return results;
 }
 
-async function handleExecuteDecisions(supabase: any, body: any, corsHeaders: any, userId?: string) {
+async function handleExecuteDecisions(supabase: any, body: any, corsHeaders: any, userId?: string, companyId?: string) {
   const decisions = body?.decisions || [];
   const autoExecute = !!body?.auto_execute;
   if (!Array.isArray(decisions) || decisions.length === 0) {
     return new Response(JSON.stringify({ error: "Nenhuma decisão fornecida" }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
-  const results = await executeAdvancedActions(supabase, decisions, userId, autoExecute);
+  if (!companyId) {
+    return new Response(JSON.stringify({ error: "Empresa não identificada" }),
+      { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
+  const results = await executeAdvancedActions(supabase, decisions, userId, autoExecute, companyId);
   return new Response(JSON.stringify({ executed: results.length, results }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } });
 }
 
+
 // ─── AutoPilotService ───────────────────────────────────────────
 // Orquestração CRON: contexto → forecast → riscos → decisões → registro
 export async function handleAutoPilotRun(supabase: any, lovableKey: string, corsHeaders: any, companyId?: string) {
+  if (!companyId) {
+    return new Response(JSON.stringify({ error: "Empresa não identificada" }), {
+      status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
   try {
     const data = await fetchAllData(supabase, companyId);
 
@@ -1933,16 +1964,17 @@ export async function handleAutoPilotRun(supabase: any, lovableKey: string, cors
     const forecast = predictRevenue(kpis.revenueByMonth || []);
     const risks = analyzeRisks(ctx, kpis);
     const decisions = suggestDecisions(ctx, forecast, risks);
-    await persistKPIs(supabase, kpis, forecast);
-    await recordLearning(supabase, data);
+    await persistKPIs(supabase, kpis, forecast, companyId);
+    await recordLearning(supabase, data, companyId);
 
     // Auto-registra apenas decisões de prioridade média (não muta dados críticos sozinha)
     const safeDecisions = decisions.filter((d: any) => d.priority !== "alta");
-    const executed = await executeAdvancedActions(supabase, safeDecisions, undefined, true);
+    const executed = await executeAdvancedActions(supabase, safeDecisions, undefined, true, companyId);
 
     // Riscos críticos viram alertas executivos
     for (const r of risks.filter((x: any) => x.impacto === "alto")) {
       await supabase.from("ai_executive_alerts").insert({
+        company_id: companyId ?? null,
         alert_type: "autopilot_risk",
         severity: "critical",
         title: r.titulo,
@@ -1953,6 +1985,7 @@ export async function handleAutoPilotRun(supabase: any, lovableKey: string, cors
     }
 
     await supabase.from("ai_action_logs").insert({
+      company_id: companyId ?? null,
       action_type: "autopilot_cycle",
       action_name: "autopilot_run",
       module: "executive_ai",
@@ -1960,6 +1993,7 @@ export async function handleAutoPilotRun(supabase: any, lovableKey: string, cors
       parameters: { risks_count: risks.length, decisions_count: decisions.length },
       result: `Ciclo completo: ${executed.length} ações registradas, ${risks.filter((r:any)=>r.impacto==="alto").length} alertas críticos`,
     });
+
 
     return new Response(JSON.stringify({
       ran_at: new Date().toISOString(),

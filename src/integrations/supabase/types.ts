@@ -1089,7 +1089,7 @@ export type Database = {
       }
       ai_learning: {
         Row: {
-          company_id: string | null
+          company_id: string
           created_at: string
           frequency: number
           id: string
@@ -1100,7 +1100,7 @@ export type Database = {
           value: number | null
         }
         Insert: {
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           frequency?: number
           id?: string
@@ -1111,7 +1111,7 @@ export type Database = {
           value?: number | null
         }
         Update: {
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           frequency?: number
           id?: string
