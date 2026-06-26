@@ -442,78 +442,11 @@ function generateConsensusItems(kpis: any, data: any, segment: string) {
 // ─── Generate Insights ──────────────────────────────────────────
 
 async function handleGenerateInsights(supabase: any, lovableKey: string, corsHeaders: any, authenticatedUserId?: string, companyId?: string) {
+  if (!companyId) {
+    return new Response(JSON.stringify({ error: "Empresa não identificada" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
   const d = await fetchAllData(supabase, companyId);
-  const computed = computeKPIs(d);
 
-  // Guard: sem dados reais, não chama LLM (evita alucinação)
-  if (!checkHasRealData(d)) {
-    return new Response(JSON.stringify({
-      insights: [],
-      generated: 0,
-      data_status: "insufficient",
-      message: INSUFFICIENT_DATA_MSG,
-    }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
-  }
-
-  const systemPrompt = await getSystemPrompt('CEO', `Analise APENAS os dados reais fornecidos e gere insights estratégicos acionáveis.
-- Gere entre 4-10 insights cobrindo: receita, lucro, custos, risco financeiro, eficiência operacional e comercial.
-- Cada insight deve seguir o esquema JSON: { type, severity, title, description, explanation, impact_estimate, recommended_actions, module }.
-- Toda recomendação deve ser concreta e mensurável.`, supabase, 'ai-executive-insights', authenticatedUserId);
-
-  const userPrompt = `DADOS DA EMPRESA:
-KPIs: ${JSON.stringify(computed.kpis)}
-RECEITA MENSAL: ${JSON.stringify(computed.revenueByMonth)}
-TOP CLIENTES: ${JSON.stringify(computed.topClients)}
-DESPESAS: ${JSON.stringify(computed.expenseByCategory)}
-VENDEDORES: ${JSON.stringify(computed.salesRepStats)}
-FUNIL: ${JSON.stringify(computed.funnelByStage)}
-MARGEM POR PRODUTO (top 10): ${JSON.stringify(computed.productMargins)}
-PRODUTOS BAIXA MARGEM: ${JSON.stringify(computed.lowMarginProducts)}
-RECEITA POR REGIÃO: ${JSON.stringify(computed.revenueByRegion)}
-ALERTAS AUTO: ${JSON.stringify(computed.autoAlerts)}
-RESUMO: ${JSON.stringify(computed.summary)}
-
-Gere insights estratégicos: { "insights": [...] }`;
-
-  const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "google/gemini-2.5-flash",
-      messages: [{ role: "system", content: systemPrompt }, { role: "user", content: userPrompt }],
-      response_format: { type: "json_object" },
-    }),
-  });
-
-  if (!aiResp.ok) {
-    const status = aiResp.status;
-    return new Response(JSON.stringify({ error: "AI analysis failed" }), {
-      status: status === 429 ? 429 : status === 402 ? 402 : 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  const aiData = await aiResp.json();
-  const content = aiData.choices?.[0]?.message?.content || "{}";
-  let parsed: any;
-  try { parsed = JSON.parse(content); } catch { parsed = { insights: [] }; }
-  const insights = parsed.insights || [];
-
-  await supabase.from("ai_executive_insights").update({ status: "expired" }).eq("status", "active");
-
-  for (const ins of insights) {
-    await supabase.from("ai_executive_insights").insert({
-      insight_type: ins.type || "general",
-      category: "strategic",
-      severity: ins.severity || "medium",
-      title: ins.title,
-      description: ins.description,
-      explanation: ins.explanation,
-      impact_estimate: ins.impact_estimate,
-      recommended_actions: ins.recommended_actions,
-      module: ins.module || ins.type,
-    });
-  }
 
   return new Response(JSON.stringify({ insights, generated: insights.length }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
