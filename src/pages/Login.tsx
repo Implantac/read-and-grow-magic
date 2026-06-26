@@ -80,9 +80,12 @@ export default function Login() {
       await resetPassword(email);
       toastSuccess('Email enviado', 'Se o email estiver cadastrado, você receberá instruções para redefinir sua senha.');
       setView('login');
-    } catch (error: any) {
-      toastError(error.message);
+    } catch {
+      // Sempre sucesso aparente para não revelar se o email existe
+      toastSuccess('Email enviado', 'Se o email estiver cadastrado, você receberá instruções para redefinir sua senha.');
+      setView('login');
     }
+
     setIsLoading(false);
   };
 
