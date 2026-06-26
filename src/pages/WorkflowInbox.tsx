@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useWorkflowDefinitions, useWorkflowInstances, useWorkflowMutations, type WorkflowStep } from "@/hooks/useWorkflowEngine";
 import { PageContainer } from "@/shared/components/PageContainer";
 import { PageHeader } from "@/shared/components/PageHeader";
@@ -7,8 +7,12 @@ import { Button } from "@/ui/base/button";
 import { Badge } from "@/ui/base/badge";
 import { Textarea } from "@/ui/base/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/ui/base/dialog";
-import { Loader2, Inbox, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Loader2, Inbox, ArrowRight, CheckCircle2, Network } from "lucide-react";
 import { format } from "date-fns";
+import { WorkflowGraph } from "@/components/workflow/WorkflowGraph";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useEnterpriseStore } from "@/core/stores/useEnterpriseStore";
 
 export default function WorkflowInbox() {
   const { data: defs = [], isLoading: loadingDefs } = useWorkflowDefinitions();
