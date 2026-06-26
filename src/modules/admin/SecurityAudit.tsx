@@ -2,12 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageContainer } from "@/shared/components/PageContainer";
 import { PageHeader } from "@/shared/components/PageHeader";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card } from "@/ui/base/card";
+import { Input } from "@/ui/base/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/base/select";
+import { Badge } from "@/ui/base/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/base/table";
+import { Skeleton } from "@/ui/base/skeleton";
 import { RoleGuard } from "@/components/auth/RoleGuard";
 import { ShieldAlert } from "lucide-react";
 
@@ -82,7 +82,7 @@ function SecurityAuditInner() {
     <PageContainer>
       <PageHeader
         title="Auditoria de Segurança"
-        subtitle="Eventos sensíveis: exclusões, alterações de permissões/papéis, tentativas de login e exportações."
+        description="Eventos sensíveis: exclusões, alterações de permissões/papéis, tentativas de login e exportações."
         icon={ShieldAlert}
       />
 
