@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Bell, Brain, ChevronDown, LogOut, Menu, Moon, Sun, User, Search, Command, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import type { Company, Branch } from '@/types';
 
 import { useCompanies } from '@/hooks/system/useCompanies';
