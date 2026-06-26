@@ -87,7 +87,7 @@ export const NumericInput = forwardRef<HTMLInputElement, NumericInputProps>(
         return;
       }
       const r = parseNumericInput(text, opts);
-      if (!r.ok) {
+      if (r.ok === false) {
         setError(r.error);
         onValidationError?.(r.error);
         onValueChange(null);
