@@ -29,5 +29,6 @@ export const AdminRoutes = [
   <Route key="adm-workflow" path="/admin/workflows" element={adminOnly(<WorkflowEnginePage />)} />,
   <Route key="adm-automation" path="/admin/automacoes" element={adminOnly(<AutomationEnginePage />)} />,
   <Route key="adm-dashboards" path="/admin/dashboards" element={adminOnly(<DashboardEnginePage />)} />,
+  <Route key="adm-security-audit" path="/admin/seguranca/auditoria" element={<SecurityAuditPage />} />,
 ];
 
