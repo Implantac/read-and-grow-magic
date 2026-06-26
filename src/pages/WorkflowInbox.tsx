@@ -165,6 +165,30 @@ export default function WorkflowInbox() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <Dialog open={!!graphFor} onOpenChange={(o) => !o && setGraphFor(null)}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Visualização do fluxo (tempo real)</DialogTitle>
+          </DialogHeader>
+          {(() => {
+            const inst = instances.find((i) => i.id === graphFor);
+            const def = inst ? defMap.get(inst.definition_id) : null;
+            if (!inst || !def) return <p className="text-sm text-muted-foreground">Fluxo não encontrado.</p>;
+            return (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Badge variant="secondary">{def.name}</Badge>
+                  <span>•</span>
+                  <span>Etapa atual: <strong className="text-foreground">{inst.current_step ?? "—"}</strong></span>
+                  <span>•</span>
+                  <span>Status: {inst.status}</span>
+                </div>
+                <WorkflowGraph steps={def.steps} currentStepKey={inst.current_step} />
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
