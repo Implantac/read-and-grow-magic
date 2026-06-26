@@ -36,7 +36,7 @@ export function DynamicForm({ fields, initial, submitting, onSubmit, onCancel }:
       }
       if (f.field_type === "number" && v !== "" && v !== undefined && v !== null) {
         const r = parseNumericInput(v, { allowNegative: true });
-        if (!r.ok) next[f.field_key] = r.error;
+        if (r.ok === false) next[f.field_key] = r.error;
       }
     }
     setErrors(next);
