@@ -59,11 +59,13 @@ export default function Login() {
     setIsLoading(true);
     try {
       await signUp(email, password, name);
-      toastSuccess('Conta criada!', 'Verifique seu email para confirmar o cadastro.');
+      toastSuccess('Solicitação recebida', 'Se o email for válido e ainda não estiver cadastrado, você receberá um link de confirmação.');
       setView('login');
     } catch (error: any) {
-      toastError(error.message, undefined, 'Erro ao criar conta');
+      // Mensagem genérica para evitar enumeração de usuários
+      toastError('Não foi possível concluir o cadastro. Verifique os dados e tente novamente.', undefined, 'Erro ao criar conta');
     }
+
     setIsLoading(false);
   };
 
