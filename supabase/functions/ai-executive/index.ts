@@ -1377,7 +1377,7 @@ ${patternInsights}${realDataSnapshot}`, supabase, 'ai-executive-chat', user_id);
   if (!firstResp.ok) {
     const status = firstResp.status;
     const body = await firstResp.text();
-    console.error("AI gateway error:", status, body);
+    console.error("AI gateway error:", status, body.slice(0, 200));
     if (status === 429) return new Response(JSON.stringify({ error: "Rate limit excedido. Tente novamente em alguns minutos." }), { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     if (status === 402) return new Response(JSON.stringify({ error: "Créditos insuficientes. Adicione créditos em Configurações > Workspace." }), { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     return new Response(JSON.stringify({ error: "Erro no processamento de IA" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
