@@ -939,9 +939,9 @@ async function executeAcao(supabase: any, args: any, user_id?: string, company_i
       if (!params.id) return { erro: "ID da conta não informado" };
       const table = params.tipo === "receber" ? "accounts_receivable" : "accounts_payable";
       let q = supabase.from(table).update({ status: "paid", payment_date: new Date().toISOString().split("T")[0], paid_amount: params.valor }).eq("id", params.id);
-      if (company_id) q = q.eq("company_id", company_id);
+      q = q.eq("company_id", company_id);
       const { error } = await q;
-      if (error) return { erro: error.message };
+      if (error) return failSafe(args.acao, error);
       await logAction("registrar_pagamento", "sucesso");
       return { status: "sucesso", mensagem: "✅ Pagamento registrado com sucesso." };
     }
@@ -949,9 +949,9 @@ async function executeAcao(supabase: any, args: any, user_id?: string, company_i
       if (!params.id || !params.nova_data) return { erro: "ID e nova data são obrigatórios" };
       const table = params.tipo === "receber" ? "accounts_receivable" : "accounts_payable";
       let q = supabase.from(table).update({ due_date: params.nova_data }).eq("id", params.id);
-      if (company_id) q = q.eq("company_id", company_id);
+      q = q.eq("company_id", company_id);
       const { error } = await q;
-      if (error) return { erro: error.message };
+      if (error) return failSafe(args.acao, error);
       await logAction("adiar_vencimento", "sucesso");
       return { status: "sucesso", mensagem: `✅ Vencimento adiado para ${params.nova_data}.` };
     }
@@ -965,7 +965,7 @@ async function executeAcao(supabase: any, args: any, user_id?: string, company_i
         category: params.categoria || "Geral",
         status: "pending",
       });
-      if (error) return { erro: error.message };
+      if (error) return failSafe(args.acao, error);
       await logAction("criar_conta_pagar", "sucesso");
       return { status: "sucesso", mensagem: `✅ Conta a pagar criada: R$ ${(params.valor || 0).toLocaleString("pt-BR")} para ${params.fornecedor || "N/A"}.` };
     }
@@ -979,48 +979,48 @@ async function executeAcao(supabase: any, args: any, user_id?: string, company_i
         category: params.categoria || "Vendas",
         status: "pending",
       });
-      if (error) return { erro: error.message };
+      if (error) return failSafe(args.acao, error);
       await logAction("criar_conta_receber", "sucesso");
       return { status: "sucesso", mensagem: `✅ Conta a receber criada: R$ ${(params.valor || 0).toLocaleString("pt-BR")} de ${params.cliente || "N/A"}.` };
     }
     case "alterar_status_pedido": {
       if (!params.id || !params.novo_status) return { erro: "ID e novo status obrigatórios" };
       let q = supabase.from("orders").update({ status: params.novo_status }).eq("id", params.id);
-      if (company_id) q = q.eq("company_id", company_id);
+      q = q.eq("company_id", company_id);
       const { error } = await q;
-      if (error) return { erro: error.message };
+      if (error) return failSafe(args.acao, error);
       await logAction("alterar_status_pedido", "sucesso");
       return { status: "sucesso", mensagem: `✅ Pedido atualizado para "${params.novo_status}".` };
     }
     case "alterar_status_op": {
       if (!params.id || !params.novo_status) return { erro: "ID e novo status obrigatórios" };
       let q = supabase.from("production_orders").update({ status: params.novo_status }).eq("id", params.id);
-      if (company_id) q = q.eq("company_id", company_id);
+      q = q.eq("company_id", company_id);
       const { error } = await q;
-      if (error) return { erro: error.message };
+      if (error) return failSafe(args.acao, error);
       await logAction("alterar_status_op", "sucesso");
       return { status: "sucesso", mensagem: `✅ OP atualizada para "${params.novo_status}".` };
     }
     case "priorizar_op": {
       if (!params.id) return { erro: "ID da OP não informado" };
       let q = supabase.from("production_orders").update({ priority: params.prioridade || "urgent" }).eq("id", params.id);
-      if (company_id) q = q.eq("company_id", company_id);
+      q = q.eq("company_id", company_id);
       const { error } = await q;
-      if (error) return { erro: error.message };
+      if (error) return failSafe(args.acao, error);
       await logAction("priorizar_op", "sucesso");
       return { status: "sucesso", mensagem: `✅ OP priorizada como "${params.prioridade || "urgent"}".` };
     }
     case "ajustar_estoque": {
       if (!params.product_id || params.quantidade == null) return { erro: "ID do produto e quantidade obrigatórios" };
       let q = supabase.from("products").select("id, name, code, stock_current").eq("id", params.product_id);
-      if (company_id) q = q.eq("company_id", company_id);
+      q = q.eq("company_id", company_id);
       const { data: prod } = await q.single();
       if (!prod) return { erro: "Produto não encontrado" };
       const newStock = (prod.stock_current || 0) + (params.quantidade || 0);
       let qu = supabase.from("products").update({ stock_current: newStock }).eq("id", params.product_id);
-      if (company_id) qu = qu.eq("company_id", company_id);
+      qu = qu.eq("company_id", company_id);
       const { error } = await qu;
-      if (error) return { erro: error.message };
+      if (error) return failSafe(args.acao, error);
       await supabase.from("stock_movements").insert({
         company_id,
         document_number: `IA-ADJ-${Date.now()}`,
@@ -1076,7 +1076,7 @@ async function executeConsultaFiscal(supabase: any, args: any, user_id?: string,
 
   const query = (table: string) => {
     let q = supabase.from(table).select("*");
-    if (company_id) q = q.eq("company_id", company_id);
+    q = q.eq("company_id", company_id);
     return q;
   };
 
@@ -1275,7 +1275,7 @@ async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: str
   try {
     const query = (table: string) => {
       let q = supabase.from(table).select("id", { count: "exact", head: true });
-      if (company_id) q = q.eq("company_id", company_id);
+      q = q.eq("company_id", company_id);
       return q;
     };
 
