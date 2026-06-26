@@ -92,11 +92,14 @@ export function useOrders() {
 export function useCreateOrder() {
   const qc = useQueryClient();
   const { toast } = useToast();
+  const { currentCompany } = useEnterprise();
   return useMutation({
     mutationFn: async (input: CreateOrderInput) => {
+      if (!currentCompany?.id) throw new Error('Empresa não selecionada');
       const { data: lastOrder } = await supabase
         .from('orders')
         .select('number')
+        .eq('company_id', currentCompany.id)
         .order('number', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -112,6 +115,7 @@ export function useCreateOrder() {
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
+          company_id: currentCompany.id,
           number: nextNum,
           client_id: input.client_id || null,
           client_name: input.client_name,
@@ -125,12 +129,25 @@ export function useCreateOrder() {
           total,
           notes: input.notes || null,
           status: 'pending',
-          created_at: new Date().toISOString(), // Ensure timestamp for sorting
+          created_at: new Date().toISOString(),
         })
         .select()
         .single();
 
       if (orderError) throw orderError;
+
+      const items = input.items.map((item) => ({
+        company_id: currentCompany.id,
+        order_id: order.id,
+        product_id: item.product_id || null,
+        product_name: item.product_name,
+        product_code: item.product_code,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        discount: item.discount,
+        total: (item.quantity * item.unit_price) - item.discount,
+      }));
+
 
       const items = input.items.map((item) => ({
         order_id: order.id,
