@@ -122,6 +122,9 @@ export default function WorkflowInbox() {
                         Concluir workflow
                       </Button>
                     )}
+                    <Button size="sm" variant="outline" onClick={() => setGraphFor(inst.id)}>
+                      <Network className="h-3.5 w-3.5 mr-1" /> Ver fluxo
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
