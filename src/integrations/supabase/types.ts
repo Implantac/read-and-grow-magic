@@ -16515,6 +16515,7 @@ export type Database = {
         Returns: Json
       }
       purge_old_audit_logs: { Args: { _days?: number }; Returns: number }
+      purge_old_logs_all: { Args: never; Returns: Json }
       recalc_bank_balance: {
         Args: { _bank_account_id: string }
         Returns: number
