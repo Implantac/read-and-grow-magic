@@ -23,7 +23,7 @@ import LandingFooter from '@/components/landing/LandingFooter';
 export default function LandingPage() {
   const navigate = useNavigate();
   const handleLogin = () => navigate('/login');
-  const handleWhatsApp = () => window.open('https://wa.me/5500000000000?text=Quero%20ver%20o%20sistema%20funcionando', '_blank');
+  const handleWhatsApp = () => window.open('https://wa.me/5500000000000?text=Quero%20ver%20o%20sistema%20funcionando', '_blank', 'noopener,noreferrer');
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden dark scroll-smooth">

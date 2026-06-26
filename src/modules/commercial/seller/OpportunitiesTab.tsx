@@ -59,7 +59,7 @@ export function OpportunitiesTab({ insights, clients, onOpenScript, onScheduleFo
                       const phone = client?.cellphone || client?.phone || '';
                       const cleanPhone = phone.replace(/\D/g, '');
                       const msg = encodeURIComponent(`Olá${client?.trade_name ? ' ' + client.trade_name : ''}, tudo bem? Gostaria de conversar sobre uma oportunidade.`);
-                      window.open(`https://wa.me/55${cleanPhone}?text=${msg}`, '_blank');
+                      window.open(`https://wa.me/55${cleanPhone}?text=${msg}`, '_blank', 'noopener,noreferrer');
                     }}>
                       💬 WhatsApp
                     </Button>
