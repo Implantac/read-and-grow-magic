@@ -101,7 +101,7 @@ function StepEditor({
             <Input className="col-span-3" placeholder="Rótulo" value={s.label} onChange={(e) => update(i, { label: e.target.value })} />
             <Input className="col-span-2" placeholder="Tipo" value={s.type ?? "task"} onChange={(e) => update(i, { type: e.target.value as WorkflowStep["type"] })} />
             <Input className="col-span-2" placeholder="Papel" value={s.assignee_role ?? ""} onChange={(e) => update(i, { assignee_role: e.target.value })} />
-            <Input className="col-span-1" placeholder="SLA h" type="number" value={s.sla_hours ?? ""} onChange={(e) => update(i, { sla_hours: toSafeNumber(e.target.value, { integer: true, min: 0 }) ?? undefined })} />
+            <Input className="col-span-1" placeholder="SLA h" type="number" value={s.sla_hours ?? ""} onChange={(e) => update(i, { sla_hours: toSafeNumber(e.target.value, 0, { integer: true, min: 0 }) || undefined })} />
             <Button variant="ghost" size="icon" className="col-span-1" onClick={() => setSteps(steps.filter((_, idx) => idx !== i))}>
               <Trash2 className="h-4 w-4" />
             </Button>
