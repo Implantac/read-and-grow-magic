@@ -572,9 +572,10 @@ Modo: ${mode === "autopilot" ? "AUTOPILOT — sugira ações de baixo risco que 
       const g = classifyDecision(d);
       let executionResult: any = null;
       if (g.auto_executable) {
-        executionResult = await executeAction(d.proposed_action, userId);
+        executionResult = await executeAction(d.proposed_action, userId, companyId);
       }
       const { error } = await admin.from("ai_brain_decisions").insert({
+        company_id: companyId || null,
         run_id: run?.id,
         user_id: userId || null,
         module: d.module || "global",
