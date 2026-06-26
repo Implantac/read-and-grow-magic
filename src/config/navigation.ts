@@ -362,6 +362,7 @@ export const navigationSections: NavSection[] = [
 
           { title: 'Automation Engine', href: '/admin/automacoes', icon: 'Zap' },
           { title: 'Dashboard Engine', href: '/admin/dashboards', icon: 'LayoutDashboard' },
+          { title: 'Auditoria de Segurança', href: '/admin/seguranca/auditoria', icon: 'ShieldAlert' },
         ],
       },
     ],
