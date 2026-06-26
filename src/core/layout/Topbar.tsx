@@ -29,6 +29,7 @@ const typeColors = {
 
 export function Topbar() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { signOut } = useAuth({ initialize: false });
   const {
     user, activeCompany, activeBranch, sidebarCollapsed, theme,
@@ -47,15 +48,25 @@ export function Topbar() {
   }, [activeBranch?.id, setActiveBranchId]);
 
   const handleSelectCompany = (company: Company) => {
+    const previousId = activeCompany?.id ?? null;
     setActiveCompany(company);
     setActiveCompanyId(company?.id ?? null);
     const firstBranch = Array.isArray(company?.branches) && company.branches.length > 0 ? company.branches[0] : null;
     setActiveBranchId(firstBranch?.id ?? null);
+    // Tenant boundary changed — drop ALL cached queries to prevent cross-tenant
+    // data leakage from React Query keys that don't include company_id.
+    if (previousId !== (company?.id ?? null)) {
+      queryClient.clear();
+    }
   };
 
   const handleSelectBranch = (branch: Branch) => {
+    const previousId = activeBranch?.id ?? null;
     setActiveBranch(branch);
     setActiveBranchId(branch?.id ?? null);
+    if (previousId !== (branch?.id ?? null)) {
+      queryClient.clear();
+    }
   };
 
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
