@@ -58,8 +58,22 @@ Deno.serve(async (req) => {
       }
     };
 
-    const body = await req.json();
-    const { action, ...params } = body;
+    const body = await req.json().catch(() => ({}));
+    const { action, ...params } = (body ?? {}) as Record<string, unknown>;
+
+    const ALLOWED_ACTIONS = new Set(['list', 'invite', 'delete', 'change_role', 'toggle_ban', 'reset_password']);
+    if (typeof action !== 'string' || !ALLOWED_ACTIONS.has(action)) {
+      return new Response(JSON.stringify({ error: 'Invalid action' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const isUuid = (v: unknown): v is string => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+    const isEmail = (v: unknown): v is string => typeof v === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.length <= 254;
+    const ALLOWED_ROLES = new Set(['admin', 'manager', 'operator', 'viewer']);
+    const validationError = (msg: string) => new Response(JSON.stringify({ error: msg }), {
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
 
     if (action === 'list') {
       let profilesQuery = supabaseAdmin
@@ -105,8 +119,13 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'invite') {
-      const { email, name, role = 'viewer', phone, department, branch_id } = params;
-      if (!email) throw new Error('Email is required');
+      const { email, name, role = 'viewer', phone, department, branch_id } = params as any;
+      if (!isEmail(email)) return validationError('Valid email is required');
+      if (typeof role !== 'string' || !ALLOWED_ROLES.has(role)) return validationError('Invalid role');
+      if (name !== undefined && (typeof name !== 'string' || name.length > 120)) return validationError('Invalid name');
+      if (phone !== undefined && phone !== null && (typeof phone !== 'string' || phone.length > 32)) return validationError('Invalid phone');
+      if (department !== undefined && department !== null && (typeof department !== 'string' || department.length > 120)) return validationError('Invalid department');
+      if (branch_id !== undefined && branch_id !== null && !isUuid(branch_id)) return validationError('Invalid branch_id');
 
       const origin = req.headers.get('origin') || Deno.env.get('SITE_URL') || '';
 
@@ -121,7 +140,6 @@ Deno.serve(async (req) => {
       });
       if (error) throw error;
 
-      // Pin the new user to the inviting admin's company.
       if (data.user && callerCompanyId) {
         await supabaseAdmin
           .from('profiles')
@@ -129,7 +147,6 @@ Deno.serve(async (req) => {
           .eq('id', data.user.id);
       }
 
-      // Update role if not viewer (trigger creates viewer by default for non-first users)
       if (role !== 'viewer' && data.user) {
         await supabaseAdmin
           .from('user_roles')
@@ -143,7 +160,8 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'delete') {
-      const { user_id } = params;
+      const { user_id } = params as any;
+      if (!isUuid(user_id)) return validationError('Invalid user_id');
       if (user_id === user.id) throw new Error('Cannot delete your own account');
       await assertSameCompany(user_id);
 
@@ -156,7 +174,12 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'change_role') {
-      const { user_id, role, phone, department, branch_id } = params;
+      const { user_id, role, phone, department, branch_id } = params as any;
+      if (!isUuid(user_id)) return validationError('Invalid user_id');
+      if (role !== undefined && (typeof role !== 'string' || !ALLOWED_ROLES.has(role))) return validationError('Invalid role');
+      if (phone !== undefined && phone !== null && (typeof phone !== 'string' || phone.length > 32)) return validationError('Invalid phone');
+      if (department !== undefined && department !== null && (typeof department !== 'string' || department.length > 120)) return validationError('Invalid department');
+      if (branch_id !== undefined && branch_id !== null && !isUuid(branch_id)) return validationError('Invalid branch_id');
       if (user_id === user.id && role) throw new Error('Cannot change your own role');
       await assertSameCompany(user_id);
 
@@ -187,7 +210,9 @@ Deno.serve(async (req) => {
     }
 
     if (action === 'toggle_ban') {
-      const { user_id, banned } = params;
+      const { user_id, banned } = params as any;
+      if (!isUuid(user_id)) return validationError('Invalid user_id');
+      if (typeof banned !== 'boolean') return validationError('banned must be boolean');
       if (user_id === user.id) throw new Error('Cannot ban your own account');
       await assertSameCompany(user_id);
 
@@ -203,7 +228,8 @@ Deno.serve(async (req) => {
 
 
     if (action === 'reset_password') {
-      const { email } = params;
+      const { email } = params as any;
+      if (!isEmail(email)) return validationError('Valid email is required');
       const origin = req.headers.get('origin') || Deno.env.get('SITE_URL') || '';
 
       const { error } = await supabaseAdmin.auth.resetPasswordForEmail(email, {
@@ -215,6 +241,7 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+
 
     throw new Error('Invalid action');
   } catch (error) {
