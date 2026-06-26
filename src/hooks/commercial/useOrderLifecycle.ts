@@ -139,6 +139,21 @@ async function generateReceivablesFromBilling(order: OrderLike) {
     .limit(1);
   if (existing && existing.length > 0) return;
 
+  // Resolve company_id (required by RLS / NOT NULL)
+  let companyId = order.company_id ?? null;
+  if (!companyId && order.client_id) {
+    const { data: c } = await supabase
+      .from('clients')
+      .select('company_id')
+      .eq('id', order.client_id)
+      .maybeSingle();
+    companyId = (c as any)?.company_id ?? null;
+  }
+  if (!companyId) {
+    console.warn('[generateReceivablesFromBilling] company_id ausente; pulando geração', { orderId: order.id });
+    return;
+  }
+
   // Parse payment condition to determine installments
   const condition = order.payment_condition || '30';
   const daysMatch = condition.match(/(\d+)/g);
@@ -151,9 +166,10 @@ async function generateReceivablesFromBilling(order: OrderLike) {
     dueDate.setDate(dueDate.getDate() + (installmentDays[i] || 30));
 
     await supabase.from('accounts_receivable').insert({
+      company_id: companyId,
       description: `Pedido ${order.number} - Parcela ${i + 1}/${installmentCount}`,
-      client_name: order.client_name,
-      client_id: order.client_id,
+      client_name: order.client_name ?? '',
+      client_id: order.client_id ?? null,
       order_id: order.id,
       amount: installmentAmount,
       original_amount: installmentAmount,
@@ -165,9 +181,10 @@ async function generateReceivablesFromBilling(order: OrderLike) {
       installment_number: i + 1,
       total_installments: installmentCount,
       notes: `Gerado automaticamente do pedido ${order.number}`,
-    });
+    } as any);
   }
 }
+
 
 async function createShipmentOrder(order: OrderLike) {
   const { data: existing } = await supabase
