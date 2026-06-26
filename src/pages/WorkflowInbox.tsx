@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useWorkflowDefinitions, useWorkflowInstances, useWorkflowMutations, type WorkflowStep } from "@/hooks/useWorkflowEngine";
 import { PageContainer } from "@/shared/components/PageContainer";
 import { PageHeader } from "@/shared/components/PageHeader";
@@ -7,8 +7,12 @@ import { Button } from "@/ui/base/button";
 import { Badge } from "@/ui/base/badge";
 import { Textarea } from "@/ui/base/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/ui/base/dialog";
-import { Loader2, Inbox, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Loader2, Inbox, ArrowRight, CheckCircle2, Network } from "lucide-react";
 import { format } from "date-fns";
+import { WorkflowGraph } from "@/components/workflow/WorkflowGraph";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useEnterpriseStore } from "@/core/stores/useEnterpriseStore";
 
 export default function WorkflowInbox() {
   const { data: defs = [], isLoading: loadingDefs } = useWorkflowDefinitions();
@@ -16,6 +20,23 @@ export default function WorkflowInbox() {
   const { advance } = useWorkflowMutations();
   const [target, setTarget] = useState<{ instanceId: string; toStep: string; complete: boolean } | null>(null);
   const [comment, setComment] = useState("");
+  const [graphFor, setGraphFor] = useState<string | null>(null);
+  const qc = useQueryClient();
+  const companyId = useEnterpriseStore((s) => s.activeCompanyId);
+
+  // Realtime: refresh instances on any update in this tenant
+  useEffect(() => {
+    if (!companyId) return;
+    const ch = supabase
+      .channel(`wf-inbox-${companyId}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "workflow_instances", filter: `company_id=eq.${companyId}` },
+        () => qc.invalidateQueries({ queryKey: ["workflow_instances"] }),
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [companyId, qc]);
 
   const defMap = useMemo(() => {
     const m = new Map<string, { name: string; steps: WorkflowStep[] }>();
@@ -101,6 +122,9 @@ export default function WorkflowInbox() {
                         Concluir workflow
                       </Button>
                     )}
+                    <Button size="sm" variant="outline" onClick={() => setGraphFor(inst.id)}>
+                      <Network className="h-3.5 w-3.5 mr-1" /> Ver fluxo
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -139,6 +163,30 @@ export default function WorkflowInbox() {
               {advance.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirmar"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={!!graphFor} onOpenChange={(o) => !o && setGraphFor(null)}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Visualização do fluxo (tempo real)</DialogTitle>
+          </DialogHeader>
+          {(() => {
+            const inst = instances.find((i) => i.id === graphFor);
+            const def = inst ? defMap.get(inst.definition_id) : null;
+            if (!inst || !def) return <p className="text-sm text-muted-foreground">Fluxo não encontrado.</p>;
+            return (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Badge variant="secondary">{def.name}</Badge>
+                  <span>•</span>
+                  <span>Etapa atual: <strong className="text-foreground">{inst.current_step ?? "—"}</strong></span>
+                  <span>•</span>
+                  <span>Status: {inst.status}</span>
+                </div>
+                <WorkflowGraph steps={def.steps} currentStepKey={inst.current_step} />
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </PageContainer>
