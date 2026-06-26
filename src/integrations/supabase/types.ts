@@ -134,7 +134,7 @@ export type Database = {
         Row: {
           closed_at: string | null
           closed_by: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           id: string
           month: number
@@ -147,7 +147,7 @@ export type Database = {
         Insert: {
           closed_at?: string | null
           closed_by?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           month: number
@@ -160,7 +160,7 @@ export type Database = {
         Update: {
           closed_at?: string | null
           closed_by?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           month?: number
@@ -179,7 +179,7 @@ export type Database = {
           branch_id: string | null
           category: string
           category_id: string | null
-          company_id: string | null
+          company_id: string
           cost_center_id: string | null
           created_at: string
           description: string
@@ -213,7 +213,7 @@ export type Database = {
           branch_id?: string | null
           category?: string
           category_id?: string | null
-          company_id?: string | null
+          company_id: string
           cost_center_id?: string | null
           created_at?: string
           description: string
@@ -247,7 +247,7 @@ export type Database = {
           branch_id?: string | null
           category?: string
           category_id?: string | null
-          company_id?: string | null
+          company_id?: string
           cost_center_id?: string | null
           created_at?: string
           description?: string
@@ -322,7 +322,7 @@ export type Database = {
           category_id: string | null
           client_id: string | null
           client_name: string
-          company_id: string | null
+          company_id: string
           created_at: string
           description: string
           discount_amount: number | null
@@ -357,7 +357,7 @@ export type Database = {
           category_id?: string | null
           client_id?: string | null
           client_name: string
-          company_id?: string | null
+          company_id: string
           created_at?: string
           description: string
           discount_amount?: number | null
@@ -392,7 +392,7 @@ export type Database = {
           category_id?: string | null
           client_id?: string | null
           client_name?: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           description?: string
           discount_amount?: number | null
@@ -1643,7 +1643,7 @@ export type Database = {
           amount: number
           bank_account_id: string | null
           bank_reference: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           date: string
           description: string
@@ -1658,7 +1658,7 @@ export type Database = {
           amount?: number
           bank_account_id?: string | null
           bank_reference?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           date?: string
           description: string
@@ -1673,7 +1673,7 @@ export type Database = {
           amount?: number
           bank_account_id?: string | null
           bank_reference?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           date?: string
           description?: string
@@ -1697,7 +1697,7 @@ export type Database = {
       bank_transfers: {
         Row: {
           amount: number
-          company_id: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           description: string | null
@@ -1712,7 +1712,7 @@ export type Database = {
         }
         Insert: {
           amount: number
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -1727,7 +1727,7 @@ export type Database = {
         }
         Update: {
           amount?: number
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -1983,7 +1983,7 @@ export type Database = {
           amount: number
           balance: number
           category: string
-          company_id: string | null
+          company_id: string
           created_at: string
           date: string
           description: string
@@ -1996,7 +1996,7 @@ export type Database = {
           amount?: number
           balance?: number
           category: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           date?: string
           description: string
@@ -2009,7 +2009,7 @@ export type Database = {
           amount?: number
           balance?: number
           category?: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           date?: string
           description?: string
@@ -2065,7 +2065,7 @@ export type Database = {
           active: boolean
           balance: number
           code: string
-          company_id: string | null
+          company_id: string
           created_at: string
           id: string
           is_analytical: boolean
@@ -2080,7 +2080,7 @@ export type Database = {
           active?: boolean
           balance?: number
           code: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           is_analytical?: boolean
@@ -2095,7 +2095,7 @@ export type Database = {
           active?: boolean
           balance?: number
           code?: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           is_analytical?: boolean
@@ -3101,7 +3101,7 @@ export type Database = {
         Row: {
           active: boolean
           code: string
-          company_id: string | null
+          company_id: string
           created_at: string
           id: string
           name: string
@@ -3111,7 +3111,7 @@ export type Database = {
         Insert: {
           active?: boolean
           code: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           name: string
@@ -3121,7 +3121,7 @@ export type Database = {
         Update: {
           active?: boolean
           code?: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           name?: string
@@ -3474,7 +3474,7 @@ export type Database = {
           carrier_document: string | null
           carrier_id: string | null
           carrier_name: string
-          company_id: string | null
+          company_id: string
           created_at: string
           cte_type: string
           destination_city: string | null
@@ -3511,7 +3511,7 @@ export type Database = {
           carrier_document?: string | null
           carrier_id?: string | null
           carrier_name: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           cte_type?: string
           destination_city?: string | null
@@ -3548,7 +3548,7 @@ export type Database = {
           carrier_document?: string | null
           carrier_id?: string | null
           carrier_name?: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           cte_type?: string
           destination_city?: string | null
@@ -3588,7 +3588,7 @@ export type Database = {
       }
       cte_nfe_links: {
         Row: {
-          company_id: string | null
+          company_id: string
           created_at: string
           cte_id: string
           id: string
@@ -3598,7 +3598,7 @@ export type Database = {
           nfe_value: number
         }
         Insert: {
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           cte_id: string
           id?: string
@@ -3608,7 +3608,7 @@ export type Database = {
           nfe_value?: number
         }
         Update: {
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           cte_id?: string
           id?: string
@@ -4467,7 +4467,7 @@ export type Database = {
         Row: {
           advance_id: string
           amount: number
-          company_id: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           id: string
@@ -4481,7 +4481,7 @@ export type Database = {
         Insert: {
           advance_id: string
           amount: number
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           id?: string
@@ -4495,7 +4495,7 @@ export type Database = {
         Update: {
           advance_id?: string
           amount?: number
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           id?: string
@@ -4528,7 +4528,7 @@ export type Database = {
           amount: number
           bank_account_id: string | null
           client_id: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           id: string
           notes: string | null
@@ -4546,7 +4546,7 @@ export type Database = {
           amount: number
           bank_account_id?: string | null
           client_id?: string | null
-          company_id?: string | null
+          company_id: string
           created_at?: string
           id?: string
           notes?: string | null
@@ -4564,7 +4564,7 @@ export type Database = {
           amount?: number
           bank_account_id?: string | null
           client_id?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           notes?: string | null
@@ -4605,7 +4605,7 @@ export type Database = {
       financial_alerts: {
         Row: {
           alert_type: string
-          company_id: string | null
+          company_id: string
           created_at: string
           description: string | null
           entity_id: string | null
@@ -4619,7 +4619,7 @@ export type Database = {
         }
         Insert: {
           alert_type: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           description?: string | null
           entity_id?: string | null
@@ -4633,7 +4633,7 @@ export type Database = {
         }
         Update: {
           alert_type?: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           description?: string | null
           entity_id?: string | null
@@ -4655,7 +4655,7 @@ export type Database = {
           auto_fixed: boolean | null
           category: string
           check_name: string
-          company_id: string | null
+          company_id: string
           created_at: string
           description: string
           details: Json | null
@@ -4671,7 +4671,7 @@ export type Database = {
           auto_fixed?: boolean | null
           category: string
           check_name: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           description: string
           details?: Json | null
@@ -4687,7 +4687,7 @@ export type Database = {
           auto_fixed?: boolean | null
           category?: string
           check_name?: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           description?: string
           details?: Json | null
@@ -5264,7 +5264,7 @@ export type Database = {
         Row: {
           cash_runway_days: number | null
           cashflow_score: number | null
-          company_id: string | null
+          company_id: string
           created_at: string
           current_ratio: number | null
           delinquency_rate: number | null
@@ -5281,7 +5281,7 @@ export type Database = {
         Insert: {
           cash_runway_days?: number | null
           cashflow_score?: number | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           current_ratio?: number | null
           delinquency_rate?: number | null
@@ -5298,7 +5298,7 @@ export type Database = {
         Update: {
           cash_runway_days?: number | null
           cashflow_score?: number | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           current_ratio?: number | null
           delinquency_rate?: number | null
@@ -5426,7 +5426,7 @@ export type Database = {
       financial_offsets: {
         Row: {
           amount: number
-          company_id: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           id: string
@@ -5439,7 +5439,7 @@ export type Database = {
         }
         Insert: {
           amount: number
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           id?: string
@@ -5452,7 +5452,7 @@ export type Database = {
         }
         Update: {
           amount?: number
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           id?: string
@@ -5548,7 +5548,7 @@ export type Database = {
         Row: {
           amount: number
           bank_account_id: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           id: string
           notes: string | null
@@ -5559,7 +5559,7 @@ export type Database = {
         Insert: {
           amount: number
           bank_account_id?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           notes?: string | null
@@ -5570,7 +5570,7 @@ export type Database = {
         Update: {
           amount?: number
           bank_account_id?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           notes?: string | null
@@ -5657,7 +5657,7 @@ export type Database = {
           bank_account_id: string | null
           category_id: string | null
           client_id: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           day_of_month: number | null
@@ -5684,7 +5684,7 @@ export type Database = {
           bank_account_id?: string | null
           category_id?: string | null
           client_id?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           day_of_month?: number | null
@@ -5711,7 +5711,7 @@ export type Database = {
           bank_account_id?: string | null
           category_id?: string | null
           client_id?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           day_of_month?: number | null
@@ -5878,7 +5878,7 @@ export type Database = {
         Row: {
           amount: number
           bank_account_id: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           discount: number | null
@@ -5900,7 +5900,7 @@ export type Database = {
         Insert: {
           amount: number
           bank_account_id?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           discount?: number | null
@@ -5922,7 +5922,7 @@ export type Database = {
         Update: {
           amount?: number
           bank_account_id?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           discount?: number | null
@@ -6041,7 +6041,7 @@ export type Database = {
       }
       fiscal_reports: {
         Row: {
-          company_id: string | null
+          company_id: string
           created_at: string
           end_date: string
           file_url: string | null
@@ -6061,7 +6061,7 @@ export type Database = {
           type: string
         }
         Insert: {
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           end_date: string
           file_url?: string | null
@@ -6081,7 +6081,7 @@ export type Database = {
           type: string
         }
         Update: {
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           end_date?: string
           file_url?: string | null
@@ -6918,7 +6918,7 @@ export type Database = {
       }
       journal_entries: {
         Row: {
-          company_id: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           date: string
@@ -6931,7 +6931,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           date?: string
@@ -6944,7 +6944,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           date?: string
@@ -6963,7 +6963,7 @@ export type Database = {
           account_code: string
           account_id: string | null
           account_name: string
-          company_id: string | null
+          company_id: string
           credit: number
           debit: number
           description: string | null
@@ -6974,7 +6974,7 @@ export type Database = {
           account_code: string
           account_id?: string | null
           account_name: string
-          company_id?: string | null
+          company_id?: string
           credit?: number
           debit?: number
           description?: string | null
@@ -6985,7 +6985,7 @@ export type Database = {
           account_code?: string
           account_id?: string | null
           account_name?: string
-          company_id?: string | null
+          company_id?: string
           credit?: number
           debit?: number
           description?: string | null
@@ -7399,7 +7399,7 @@ export type Database = {
           cancellation_date: string | null
           carrier_id: string | null
           closure_date: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           driver_cpf: string | null
           driver_name: string | null
@@ -7430,7 +7430,7 @@ export type Database = {
           cancellation_date?: string | null
           carrier_id?: string | null
           closure_date?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           driver_cpf?: string | null
           driver_name?: string | null
@@ -7461,7 +7461,7 @@ export type Database = {
           cancellation_date?: string | null
           carrier_id?: string | null
           closure_date?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           driver_cpf?: string | null
           driver_name?: string | null
@@ -7499,7 +7499,7 @@ export type Database = {
       mdfe_documents: {
         Row: {
           access_key: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           document_id: string | null
           document_number: string
@@ -7512,7 +7512,7 @@ export type Database = {
         }
         Insert: {
           access_key?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           document_id?: string | null
           document_number: string
@@ -7525,7 +7525,7 @@ export type Database = {
         }
         Update: {
           access_key?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           document_id?: string | null
           document_number?: string
@@ -7554,7 +7554,7 @@ export type Database = {
           branch_id: string | null
           cancellation_date: string | null
           change_amount: number
-          company_id: string | null
+          company_id: string
           created_at: string
           customer_document: string | null
           customer_name: string | null
@@ -7580,7 +7580,7 @@ export type Database = {
           branch_id?: string | null
           cancellation_date?: string | null
           change_amount?: number
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           customer_document?: string | null
           customer_name?: string | null
@@ -7606,7 +7606,7 @@ export type Database = {
           branch_id?: string | null
           cancellation_date?: string | null
           change_amount?: number
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           customer_document?: string | null
           customer_name?: string | null
@@ -7638,7 +7638,7 @@ export type Database = {
       nfce_items: {
         Row: {
           cfop: string | null
-          company_id: string | null
+          company_id: string
           discount: number
           id: string
           ncm: string | null
@@ -7653,7 +7653,7 @@ export type Database = {
         }
         Insert: {
           cfop?: string | null
-          company_id?: string | null
+          company_id?: string
           discount?: number
           id?: string
           ncm?: string | null
@@ -7668,7 +7668,7 @@ export type Database = {
         }
         Update: {
           cfop?: string | null
-          company_id?: string | null
+          company_id?: string
           discount?: number
           id?: string
           ncm?: string | null
@@ -7709,7 +7709,7 @@ export type Database = {
           client_id: string | null
           client_name: string
           cofins: number
-          company_id: string | null
+          company_id: string
           consumer_final: boolean
           created_at: string
           difal_total: number
@@ -7752,7 +7752,7 @@ export type Database = {
           client_id?: string | null
           client_name: string
           cofins?: number
-          company_id?: string | null
+          company_id?: string
           consumer_final?: boolean
           created_at?: string
           difal_total?: number
@@ -7795,7 +7795,7 @@ export type Database = {
           client_id?: string | null
           client_name?: string
           cofins?: number
-          company_id?: string | null
+          company_id?: string
           consumer_final?: boolean
           created_at?: string
           difal_total?: number
@@ -7852,7 +7852,7 @@ export type Database = {
           cfop: string | null
           cofins_rate: number
           cofins_value: number
-          company_id: string | null
+          company_id: string
           difal_base: number
           difal_destination_rate: number
           difal_value: number
@@ -7886,7 +7886,7 @@ export type Database = {
           cfop?: string | null
           cofins_rate?: number
           cofins_value?: number
-          company_id?: string | null
+          company_id?: string
           difal_base?: number
           difal_destination_rate?: number
           difal_value?: number
@@ -7920,7 +7920,7 @@ export type Database = {
           cfop?: string | null
           cofins_rate?: number
           cofins_value?: number
-          company_id?: string | null
+          company_id?: string
           difal_base?: number
           difal_destination_rate?: number
           difal_value?: number
@@ -8908,7 +8908,7 @@ export type Database = {
           client_document: string | null
           client_id: string | null
           client_name: string | null
-          company_id: string | null
+          company_id: string
           copy_paste: string | null
           created_at: string
           description: string | null
@@ -8933,7 +8933,7 @@ export type Database = {
           client_document?: string | null
           client_id?: string | null
           client_name?: string | null
-          company_id?: string | null
+          company_id?: string
           copy_paste?: string | null
           created_at?: string
           description?: string | null
@@ -8958,7 +8958,7 @@ export type Database = {
           client_document?: string | null
           client_id?: string | null
           client_name?: string | null
-          company_id?: string | null
+          company_id?: string
           copy_paste?: string | null
           created_at?: string
           description?: string | null
@@ -9010,7 +9010,7 @@ export type Database = {
       }
       pix_webhook_events: {
         Row: {
-          company_id: string | null
+          company_id: string
           created_at: string
           end_to_end_id: string | null
           error_message: string | null
@@ -9023,7 +9023,7 @@ export type Database = {
           txid: string | null
         }
         Insert: {
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           end_to_end_id?: string | null
           error_message?: string | null
@@ -9036,7 +9036,7 @@ export type Database = {
           txid?: string | null
         }
         Update: {
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           end_to_end_id?: string | null
           error_message?: string | null
@@ -12733,7 +12733,7 @@ export type Database = {
       }
       sped_files: {
         Row: {
-          company_id: string | null
+          company_id: string
           content: string
           created_at: string
           end_date: string
@@ -12747,7 +12747,7 @@ export type Database = {
           type: string
         }
         Insert: {
-          company_id?: string | null
+          company_id?: string
           content: string
           created_at?: string
           end_date: string
@@ -12761,7 +12761,7 @@ export type Database = {
           type: string
         }
         Update: {
-          company_id?: string | null
+          company_id?: string
           content?: string
           created_at?: string
           end_date?: string
@@ -13659,7 +13659,7 @@ export type Database = {
       tax_difal_rules: {
         Row: {
           active: boolean
-          company_id: string | null
+          company_id: string
           created_at: string
           fcp_rate: number | null
           id: string
@@ -13677,7 +13677,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           fcp_rate?: number | null
           id?: string
@@ -13695,7 +13695,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           fcp_rate?: number | null
           id?: string
@@ -13717,7 +13717,7 @@ export type Database = {
         Row: {
           active: boolean
           cest: string | null
-          company_id: string | null
+          company_id: string
           created_at: string
           id: string
           internal_rate: number
@@ -13738,7 +13738,7 @@ export type Database = {
         Insert: {
           active?: boolean
           cest?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           internal_rate?: number
@@ -13759,7 +13759,7 @@ export type Database = {
         Update: {
           active?: boolean
           cest?: string | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           id?: string
           internal_rate?: number
@@ -13786,7 +13786,7 @@ export type Database = {
           cfop: string | null
           cofins_cst: string | null
           cofins_rate: number | null
-          company_id: string | null
+          company_id: string
           created_at: string
           description: string | null
           ibs_rate: number | null
@@ -13820,7 +13820,7 @@ export type Database = {
           cfop?: string | null
           cofins_cst?: string | null
           cofins_rate?: number | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           description?: string | null
           ibs_rate?: number | null
@@ -13854,7 +13854,7 @@ export type Database = {
           cfop?: string | null
           cofins_cst?: string | null
           cofins_rate?: number | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           description?: string | null
           ibs_rate?: number | null
