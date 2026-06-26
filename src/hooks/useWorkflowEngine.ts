@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { resolveNextStep, type Branch } from "@/lib/workflowConditions";
 
 export interface WorkflowStep {
   key: string;
@@ -8,7 +9,21 @@ export interface WorkflowStep {
   type?: "approval" | "task" | "automatic" | "notification";
   assignee_role?: string;
   next?: string;
-  conditions?: any;
+  branches?: Branch[];
+  sla_hours?: number;
+  conditions?: unknown;
+}
+
+export interface WorkflowTransition {
+  id: string;
+  company_id: string;
+  instance_id: string;
+  from_step: string | null;
+  to_step: string;
+  actor_id: string | null;
+  comment: string | null;
+  payload: Record<string, unknown>;
+  created_at: string;
 }
 
 export interface WorkflowDefinition {
