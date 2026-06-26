@@ -5,6 +5,8 @@ import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/ui/base/toast';
 import { useSystemParameters } from '@/hooks/system/useSystemParameters';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
+import { useEnterprise } from '@/core/auth/EnterpriseContext';
+
 
 export interface DbOrderItem {
   id: string;
