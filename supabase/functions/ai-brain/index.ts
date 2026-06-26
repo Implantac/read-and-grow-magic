@@ -1070,7 +1070,7 @@ Deno.serve(async (req) => {
             status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
-        const r = await executeAction(dec.proposed_action, userId);
+        const r = await executeAction(dec.proposed_action, userId, callerCompany);
         await admin.from("ai_brain_decisions").update({
           status: r.ok ? "executed" : "approved",
           executed_at: r.ok ? new Date().toISOString() : null,
