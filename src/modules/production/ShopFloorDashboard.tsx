@@ -1,3 +1,4 @@
+import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { useMemo, useEffect, useState } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
@@ -27,14 +28,16 @@ export default function ShopFloorDashboardPage() {
 
   useEffect(() => { const interval = setInterval(() => setNow(new Date()), 5000); return () => clearInterval(interval); }, []);
 
+  const sfCompanyId = useEnterpriseStore((s) => s.activeCompanyId);
   useEffect(() => {
+    if (!sfCompanyId) return;
     const channel = supabase
-      .channel('shopfloor-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'time_entries' }, () => { refetch(); })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'production_orders' }, () => { refetchOrders(); })
+      .channel(`shopfloor-realtime:${sfCompanyId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'time_entries', filter: `company_id=eq.${sfCompanyId}` }, () => { refetch(); })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'production_orders', filter: `company_id=eq.${sfCompanyId}` }, () => { refetchOrders(); })
       .subscribe((status) => { setRealtimeActive(status === 'SUBSCRIBED'); });
     return () => { supabase.removeChannel(channel); };
-  }, [refetch, refetchOrders]);
+  }, [refetch, refetchOrders, sfCompanyId]);
 
   const activeEntries = entries.filter(e => e.status === 'started');
   const pausedEntries = entries.filter(e => e.status === 'paused');

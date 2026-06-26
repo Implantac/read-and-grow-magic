@@ -1,3 +1,4 @@
+import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
 import { PageContainer } from '@/shared/components/PageContainer';
@@ -81,13 +82,15 @@ export default function ProductionKanban() {
   }, [orders]);
 
   // Realtime
+  const kanbanCompanyId = useEnterpriseStore((s) => s.activeCompanyId);
   useEffect(() => {
+    if (!kanbanCompanyId) return;
     const channel = supabase
-      .channel('kanban-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'production_orders' }, () => { refetch(); })
+      .channel(`kanban-realtime:${kanbanCompanyId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'production_orders', filter: `company_id=eq.${kanbanCompanyId}` }, () => { refetch(); })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [refetch]);
+  }, [refetch, kanbanCompanyId]);
 
   // Load WIP limits
   useEffect(() => {

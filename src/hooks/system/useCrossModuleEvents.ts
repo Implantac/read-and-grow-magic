@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 
 export interface CrossModuleEvent {
   id: string;
@@ -35,19 +36,21 @@ export function useCrossModuleEvents(limit = 200) {
     staleTime: 10_000,
   });
 
+  const companyId = useEnterpriseStore((s) => s.activeCompanyId);
   useEffect(() => {
+    if (!companyId) return;
     const channel = supabase
-      .channel('cross_module_events_realtime')
+      .channel(`cross_module_events_rt:${companyId}`)
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'cross_module_events' },
+        { event: 'INSERT', schema: 'public', table: 'cross_module_events', filter: `company_id=eq.${companyId}` },
         () => qc.invalidateQueries({ queryKey: ['cross_module_events'] }),
       )
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [qc]);
+  }, [qc, companyId]);
 
   return query;
 }

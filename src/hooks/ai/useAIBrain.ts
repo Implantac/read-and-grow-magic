@@ -1,3 +1,4 @@
+import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
@@ -57,18 +58,20 @@ type RunRow = Database['public']['Tables']['ai_brain_runs']['Row'];
 // ─── Decisions ─────────────────────────────
 export function useBrainDecisions(status?: string) {
   const qc = useQueryClient();
+  const companyId = useEnterpriseStore((s) => s.activeCompanyId);
   useEffect(() => {
+    if (!companyId) return;
     let mounted = true;
     const ch = supabase
-      .channel(`brain-decisions-rt-${Math.random().toString(36).slice(2)}`)
+      .channel(`brain-decisions-rt:${companyId}:${Math.random().toString(36).slice(2)}`)
       .on(
         'postgres_changes' as unknown as 'system',
-        { event: '*', schema: 'public', table: 'ai_brain_decisions' } as unknown as RealtimeFilter,
+        { event: '*', schema: 'public', table: 'ai_brain_decisions', filter: `company_id=eq.${companyId}` } as unknown as RealtimeFilter,
         () => { if (mounted) qc.invalidateQueries({ queryKey: ['brain_decisions'] }); },
       )
       .on(
         'postgres_changes' as unknown as 'system',
-        { event: '*', schema: 'public', table: 'ai_brain_runs' } as unknown as RealtimeFilter,
+        { event: '*', schema: 'public', table: 'ai_brain_runs', filter: `company_id=eq.${companyId}` } as unknown as RealtimeFilter,
         () => { if (mounted) qc.invalidateQueries({ queryKey: ['brain_runs'] }); },
       )
       .subscribe();
@@ -76,7 +79,7 @@ export function useBrainDecisions(status?: string) {
       mounted = false;
       supabase.removeChannel(ch);
     };
-  }, [qc]);
+  }, [qc, companyId]);
 
   return useQuery({
     queryKey: ['brain_decisions', status],
