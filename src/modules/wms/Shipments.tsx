@@ -224,7 +224,7 @@ export default function ShipmentsPage() {
           <DialogHeader><DialogTitle>Registrar Envio</DialogTitle></DialogHeader>
           <div>
             <Label>Código de Rastreio</Label>
-            <Input value={trackingNumber} onChange={e => setTrackingtoSafeNumber(e.target.value)} placeholder="Ex: BR123456789XX" />
+            <Input value={trackingNumber} onChange={e => setTrackingNumber(e.target.value)} placeholder="Ex: BR123456789XX" />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setTrackingOpen(false)}>Cancelar</Button>
