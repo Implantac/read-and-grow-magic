@@ -10,7 +10,8 @@ import { Badge } from "@/ui/base/badge";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/ui/base/dialog";
-import { Plus, Trash2, Play, GitBranch, History, GitFork } from "lucide-react";
+import { Plus, Trash2, Play, GitBranch, History, GitFork, Eye } from "lucide-react";
+import { WorkflowGraph } from "@/components/workflow/WorkflowGraph";
 import {
   useWorkflowDefinitions,
   useWorkflowInstances,
@@ -137,6 +138,7 @@ export default function WorkflowEngine() {
     steps: [] as WorkflowStep[],
   });
   const [historyInstanceId, setHistoryInstanceId] = useState<string | null>(null);
+  const [graphDef, setGraphDef] = useState<{ name: string; steps: WorkflowStep[] } | null>(null);
 
   const submit = async () => {
     await saveDefinition.mutateAsync(form);
@@ -163,6 +165,12 @@ export default function WorkflowEngine() {
               <div><Label>Entidade alvo</Label><Input value={form.target_entity} onChange={(e) => setForm({ ...form, target_entity: e.target.value })} placeholder="ex: orders, purchase_orders" /></div>
               <div><Label>Descrição</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
               <div><Label>Etapas</Label><StepEditor steps={form.steps} setSteps={(s) => setForm({ ...form, steps: s })} /></div>
+              {form.steps.length > 0 && (
+                <div>
+                  <Label className="flex items-center gap-1"><Eye className="h-3 w-3" /> Pré-visualização do fluxo</Label>
+                  <WorkflowGraph steps={form.steps} />
+                </div>
+              )}
             </div>
             <DialogFooter>
               <Button onClick={submit} disabled={!form.name || !form.target_entity}>Salvar</Button>
@@ -185,6 +193,9 @@ export default function WorkflowEngine() {
                     <p className="text-xs text-muted-foreground">{(d.steps as unknown as WorkflowStep[]).length} etapas · v{d.version}</p>
                   </div>
                   <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => setGraphDef({ name: d.name, steps: d.steps as unknown as WorkflowStep[] })}>
+                      <Eye className="h-4 w-4 mr-1" /> Visualizar
+                    </Button>
                     <Button size="sm" variant="outline" onClick={() => startInstance.mutate({ definition_id: d.id })}>
                       <Play className="h-4 w-4 mr-1" /> Iniciar
                     </Button>
@@ -240,6 +251,13 @@ export default function WorkflowEngine() {
         <DialogContent className="max-w-2xl">
           <DialogHeader><DialogTitle>Histórico da execução</DialogTitle></DialogHeader>
           {historyInstanceId && <WorkflowHistory instanceId={historyInstanceId} />}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!graphDef} onOpenChange={(o) => !o && setGraphDef(null)}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Fluxo: {graphDef?.name}</DialogTitle></DialogHeader>
+          {graphDef && <WorkflowGraph steps={graphDef.steps} />}
         </DialogContent>
       </Dialog>
 
