@@ -7102,6 +7102,204 @@ export type Database = {
         }
         Relationships: []
       }
+      health_appointments: {
+        Row: {
+          company_id: string
+          created_at: string
+          duration_minutes: number
+          id: string
+          notes: string | null
+          patient_id: string
+          professional_id: string | null
+          reason: string | null
+          scheduled_at: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          notes?: string | null
+          patient_id: string
+          professional_id?: string | null
+          reason?: string | null
+          scheduled_at: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          professional_id?: string | null
+          reason?: string | null
+          scheduled_at?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_appointments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "health_patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "health_appointments_professional_id_fkey"
+            columns: ["professional_id"]
+            isOneToOne: false
+            referencedRelation: "health_professionals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      health_patients: {
+        Row: {
+          active: boolean
+          birth_date: string | null
+          company_id: string
+          cpf: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          gender: string | null
+          id: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          birth_date?: string | null
+          company_id?: string
+          cpf?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          gender?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          birth_date?: string | null
+          company_id?: string
+          cpf?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          gender?: string | null
+          id?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      health_professionals: {
+        Row: {
+          active: boolean
+          company_id: string
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          phone: string | null
+          registry_number: string | null
+          specialty: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          company_id?: string
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          phone?: string | null
+          registry_number?: string | null
+          specialty?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          company_id?: string
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          phone?: string | null
+          registry_number?: string | null
+          specialty?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      health_records: {
+        Row: {
+          appointment_id: string | null
+          company_id: string
+          complaint: string | null
+          created_at: string
+          created_by: string | null
+          diagnosis: string | null
+          id: string
+          notes: string | null
+          patient_id: string
+          prescription: string | null
+          updated_at: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          company_id?: string
+          complaint?: string | null
+          created_at?: string
+          created_by?: string | null
+          diagnosis?: string | null
+          id?: string
+          notes?: string | null
+          patient_id: string
+          prescription?: string | null
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string | null
+          company_id?: string
+          complaint?: string | null
+          created_at?: string
+          created_by?: string | null
+          diagnosis?: string | null
+          id?: string
+          notes?: string | null
+          patient_id?: string
+          prescription?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_records_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "health_appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "health_records_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "health_patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       holding_entities: {
         Row: {
           created_at: string | null

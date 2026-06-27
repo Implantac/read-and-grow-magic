@@ -42,6 +42,8 @@ const ConstructionProjects = lazy(() => import("./pages/ConstructionProjects"));
 const ConstructionProjectDetail = lazy(() => import("./pages/ConstructionProjectDetail"));
 const AgroFarms = lazy(() => import("./pages/AgroFarms"));
 const AgroFarmDetail = lazy(() => import("./pages/AgroFarmDetail"));
+const HealthPatients = lazy(() => import("./pages/HealthPatients"));
+const HealthPatientDetail = lazy(() => import("./pages/HealthPatientDetail"));
 
 
 
@@ -92,6 +94,8 @@ const App = () => (
                 <Route path="/construcao/obras/:id" element={<ConstructionProjectDetail />} />
                 <Route path="/agro/fazendas" element={<AgroFarms />} />
                 <Route path="/agro/fazendas/:id" element={<AgroFarmDetail />} />
+                <Route path="/saude/pacientes" element={<HealthPatients />} />
+                <Route path="/saude/pacientes/:id" element={<HealthPatientDetail />} />
 
 
                 <Route path="/upgrade" element={<Upgrade />} />
