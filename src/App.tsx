@@ -38,6 +38,7 @@ const DashboardView = lazy(() => import("./pages/DashboardView"));
 const CustomEntityRecords = lazy(() => import("./pages/CustomEntityRecords"));
 const WorkflowInbox = lazy(() => import("./pages/WorkflowInbox"));
 const PluginMarketplace = lazy(() => import("./pages/PluginMarketplace"));
+const ConstructionProjects = lazy(() => import("./pages/ConstructionProjects"));
 
 
 
@@ -84,6 +85,7 @@ const App = () => (
                 <Route path="/custom/:entityKey" element={<CustomEntityRecords />} />
                 <Route path="/workflows/inbox" element={<WorkflowInbox />} />
                 <Route path="/marketplace" element={<PluginMarketplace />} />
+                <Route path="/construcao/obras" element={<ConstructionProjects />} />
 
                 <Route path="/upgrade" element={<Upgrade />} />
                 <Route path="/subscribe" element={<Subscribe />} />
