@@ -52,7 +52,7 @@ function NewProjectDialog() {
       name: form.name.trim(),
       city: form.city || null,
       state: form.state || null,
-      budget_total: toSafeNumber(form.budget_total, { min: 0, fallback: 0 }),
+      budget_total: toSafeNumber(form.budget_total, 0, { min: 0 }),
       status: form.status,
     });
     setOpen(false);
