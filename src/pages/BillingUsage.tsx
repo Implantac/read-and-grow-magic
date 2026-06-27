@@ -52,6 +52,19 @@ export default function BillingUsage() {
     [summary.data],
   );
 
+  const bySource = useMemo(() => {
+    const map = new Map<string, { source: string; quantity: number; amount: number; events: number }>();
+    for (const e of events.data ?? []) {
+      const key = e.source ?? "manual";
+      const row = map.get(key) ?? { source: key, quantity: 0, amount: 0, events: 0 };
+      row.quantity += Number(e.quantity || 0);
+      row.amount += Number(e.amount || 0);
+      row.events += 1;
+      map.set(key, row);
+    }
+    return Array.from(map.values()).sort((a, b) => b.amount - a.amount);
+  }, [events.data]);
+
   return (
     <PageContainer>
       <PageHeader
