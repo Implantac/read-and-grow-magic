@@ -70,6 +70,11 @@ serve(async (req) => {
       return new Response(JSON.stringify({ ok: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     
+    const AI_ACTIONS = new Set(["chat","assistant_chat","daily_summary","generate_insights","generate_scenarios","ceo_brief","autopilot_run"]);
+    if (action && AI_ACTIONS.has(action)) {
+      await recordUsage(companyId, "ai_call", 1, { source: "ai-executive", action });
+    }
+
     if (action === "chat" || action === "assistant_chat") 
       return await handleUnifiedChat(messages, supabase, lovableKey, corsHeaders, authenticatedUserId, companyId);
     
