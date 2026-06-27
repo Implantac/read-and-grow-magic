@@ -117,6 +117,8 @@ serve(async (req) => {
 
       if (updateError) throw updateError
 
+      await recordUsage(callerCompany, "nfe_issued", 1, { nfe_id: nfeId, access_key: accessKey })
+
       return new Response(
         JSON.stringify({ success: true, accessKey, protocol, authorizationDate }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
