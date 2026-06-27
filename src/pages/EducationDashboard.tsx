@@ -26,12 +26,21 @@ import { Skeleton } from "@/ui/base/skeleton";
 import { Badge } from "@/ui/base/badge";
 import { Building2, GraduationCap, Users, Wallet, Plus } from "lucide-react";
 import {
+  useCreateClass,
   useCreateSchool,
+  useCreateStudent,
   useEduClasses,
   useEduEnrollments,
   useEduSchools,
   useEduStudents,
 } from "@/hooks/useEducation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/ui/base/select";
 import { toastSuccess, toastError } from "@/lib/toastHelpers";
 
 const formatCurrencyPtBr = (v: number) =>
@@ -45,9 +54,30 @@ export default function EducationDashboard() {
   const students = useEduStudents();
   const enrollments = useEduEnrollments();
   const createSchool = useCreateSchool();
+  const createClass = useCreateClass();
+  const createStudent = useCreateStudent();
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", inep_code: "", phone: "", email: "" });
+
+  const [classOpen, setClassOpen] = useState(false);
+  const [classForm, setClassForm] = useState({
+    name: "",
+    school_id: "",
+    academic_year: new Date().getFullYear(),
+    grade: "",
+    shift: "matutino" as "matutino" | "vespertino" | "noturno" | "integral",
+    capacity: 30,
+  });
+
+  const [studentOpen, setStudentOpen] = useState(false);
+  const [studentForm, setStudentForm] = useState({
+    full_name: "",
+    document: "",
+    guardian_name: "",
+    guardian_phone: "",
+    email: "",
+  });
 
   const activeEnrollments = useMemo(
     () => (enrollments.data ?? []).filter((e) => e.status === "active"),
@@ -74,66 +104,274 @@ export default function EducationDashboard() {
     }
   }
 
+  async function handleCreateClass() {
+    if (!classForm.name.trim() || !classForm.school_id) {
+      toastError("Informe nome da turma e a escola.");
+      return;
+    }
+    try {
+      await createClass.mutateAsync(classForm);
+      toastSuccess("Turma criada.");
+      setClassOpen(false);
+      setClassForm({
+        name: "",
+        school_id: "",
+        academic_year: new Date().getFullYear(),
+        grade: "",
+        shift: "matutino",
+        capacity: 30,
+      });
+    } catch {
+      toastError("Não foi possível criar a turma.");
+    }
+  }
+
+  async function handleCreateStudent() {
+    if (!studentForm.full_name.trim()) {
+      toastError("Informe o nome do aluno.");
+      return;
+    }
+    try {
+      await createStudent.mutateAsync(studentForm);
+      toastSuccess("Aluno cadastrado.");
+      setStudentOpen(false);
+      setStudentForm({
+        full_name: "",
+        document: "",
+        guardian_name: "",
+        guardian_phone: "",
+        email: "",
+      });
+    } catch {
+      toastError("Não foi possível cadastrar o aluno.");
+    }
+  }
+
   return (
     <PageContainer>
       <PageHeader
         title="Educação"
         description="Gestão de escolas, turmas, alunos e matrículas."
         actions={
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Nova escola
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Nova escola</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-3">
-                <div>
-                  <Label>Nome *</Label>
-                  <Input
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label>Código INEP</Label>
-                  <Input
-                    value={form.inep_code}
-                    onChange={(e) => setForm({ ...form, inep_code: e.target.value })}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
+          <div className="flex gap-2 flex-wrap">
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova escola
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Nova escola</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3">
                   <div>
-                    <Label>Telefone</Label>
+                    <Label>Nome *</Label>
                     <Input
-                      value={form.phone}
-                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
                     />
                   </div>
                   <div>
-                    <Label>E-mail</Label>
+                    <Label>Código INEP</Label>
                     <Input
-                      type="email"
-                      value={form.email}
-                      onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      value={form.inep_code}
+                      onChange={(e) => setForm({ ...form, inep_code: e.target.value })}
                     />
                   </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>Telefone</Label>
+                      <Input
+                        value={form.phone}
+                        onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>E-mail</Label>
+                      <Input
+                        type="email"
+                        value={form.email}
+                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setOpen(false)}>
-                  Cancelar
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleCreate} disabled={createSchool.isPending}>
+                    Salvar
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={classOpen} onOpenChange={setClassOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" disabled={(schools.data ?? []).length === 0}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova turma
                 </Button>
-                <Button onClick={handleCreate} disabled={createSchool.isPending}>
-                  Salvar
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Nova turma</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3">
+                  <div>
+                    <Label>Escola *</Label>
+                    <Select
+                      value={classForm.school_id}
+                      onValueChange={(v) => setClassForm({ ...classForm, school_id: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a escola" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(schools.data ?? []).map((s) => (
+                          <SelectItem key={s.id} value={s.id}>
+                            {s.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>Nome da turma *</Label>
+                      <Input
+                        value={classForm.name}
+                        onChange={(e) => setClassForm({ ...classForm, name: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Série</Label>
+                      <Input
+                        value={classForm.grade}
+                        onChange={(e) => setClassForm({ ...classForm, grade: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <Label>Ano letivo</Label>
+                      <Input
+                        type="number"
+                        value={classForm.academic_year}
+                        onChange={(e) =>
+                          setClassForm({ ...classForm, academic_year: Number(e.target.value) || new Date().getFullYear() })
+                        }
+                      />
+                    </div>
+                    <div>
+                      <Label>Turno</Label>
+                      <Select
+                        value={classForm.shift}
+                        onValueChange={(v) =>
+                          setClassForm({ ...classForm, shift: v as typeof classForm.shift })
+                        }
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="matutino">Matutino</SelectItem>
+                          <SelectItem value="vespertino">Vespertino</SelectItem>
+                          <SelectItem value="noturno">Noturno</SelectItem>
+                          <SelectItem value="integral">Integral</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label>Capacidade</Label>
+                      <Input
+                        type="number"
+                        value={classForm.capacity}
+                        onChange={(e) =>
+                          setClassForm({ ...classForm, capacity: Number(e.target.value) || 0 })
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setClassOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleCreateClass} disabled={createClass.isPending}>
+                    Salvar
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={studentOpen} onOpenChange={setStudentOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo aluno
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Novo aluno</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3">
+                  <div>
+                    <Label>Nome completo *</Label>
+                    <Input
+                      value={studentForm.full_name}
+                      onChange={(e) => setStudentForm({ ...studentForm, full_name: e.target.value })}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>Documento</Label>
+                      <Input
+                        value={studentForm.document}
+                        onChange={(e) => setStudentForm({ ...studentForm, document: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>E-mail</Label>
+                      <Input
+                        type="email"
+                        value={studentForm.email}
+                        onChange={(e) => setStudentForm({ ...studentForm, email: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>Responsável</Label>
+                      <Input
+                        value={studentForm.guardian_name}
+                        onChange={(e) => setStudentForm({ ...studentForm, guardian_name: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Telefone do responsável</Label>
+                      <Input
+                        value={studentForm.guardian_phone}
+                        onChange={(e) => setStudentForm({ ...studentForm, guardian_phone: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setStudentOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleCreateStudent} disabled={createStudent.isPending}>
+                    Salvar
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
         }
       />
 
