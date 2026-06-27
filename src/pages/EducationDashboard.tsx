@@ -26,12 +26,21 @@ import { Skeleton } from "@/ui/base/skeleton";
 import { Badge } from "@/ui/base/badge";
 import { Building2, GraduationCap, Users, Wallet, Plus } from "lucide-react";
 import {
+  useCreateClass,
   useCreateSchool,
+  useCreateStudent,
   useEduClasses,
   useEduEnrollments,
   useEduSchools,
   useEduStudents,
 } from "@/hooks/useEducation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/ui/base/select";
 import { toastSuccess, toastError } from "@/lib/toastHelpers";
 
 const formatCurrencyPtBr = (v: number) =>
