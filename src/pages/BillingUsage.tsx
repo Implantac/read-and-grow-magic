@@ -30,6 +30,18 @@ export default function BillingUsage() {
   const meters = useBillingMeters();
   const summary = useCurrentUsageSummary();
   const events = useRecentUsageEvents(100);
+  const daily = useDailyUsageSeries();
+
+  const palette = [
+    "hsl(var(--primary))",
+    "hsl(var(--accent))",
+    "#10b981",
+    "#f59e0b",
+    "#6366f1",
+    "#ec4899",
+    "#14b8a6",
+    "#ef4444",
+  ];
 
   const totalMonth = useMemo(
     () => (summary.data ?? []).reduce((acc, r) => acc + Number(r.total_amount || 0), 0),
