@@ -3097,6 +3097,227 @@ export type Database = {
           },
         ]
       }
+      construction_budget_items: {
+        Row: {
+          category: string | null
+          company_id: string
+          created_at: string
+          description: string
+          id: string
+          project_id: string
+          quantity: number
+          total: number | null
+          unit: string
+          unit_cost: number
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          company_id?: string
+          created_at?: string
+          description: string
+          id?: string
+          project_id: string
+          quantity?: number
+          total?: number | null
+          unit?: string
+          unit_cost?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          company_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          project_id?: string
+          quantity?: number
+          total?: number | null
+          unit?: string
+          unit_cost?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "construction_budget_items_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "construction_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      construction_diary: {
+        Row: {
+          activities: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          entry_date: string
+          id: string
+          incidents: string | null
+          project_id: string
+          updated_at: string
+          weather: string | null
+          workforce_count: number | null
+        }
+        Insert: {
+          activities?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          entry_date?: string
+          id?: string
+          incidents?: string | null
+          project_id: string
+          updated_at?: string
+          weather?: string | null
+          workforce_count?: number | null
+        }
+        Update: {
+          activities?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          entry_date?: string
+          id?: string
+          incidents?: string | null
+          project_id?: string
+          updated_at?: string
+          weather?: string | null
+          workforce_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "construction_diary_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "construction_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      construction_measurements: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          company_id: string
+          created_at: string
+          executed_percent: number
+          id: string
+          notes: string | null
+          project_id: string
+          reference_month: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          created_at?: string
+          executed_percent?: number
+          id?: string
+          notes?: string | null
+          project_id: string
+          reference_month: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          company_id?: string
+          created_at?: string
+          executed_percent?: number
+          id?: string
+          notes?: string | null
+          project_id?: string
+          reference_month?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "construction_measurements_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "construction_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      construction_projects: {
+        Row: {
+          address: string | null
+          budget_total: number | null
+          city: string | null
+          client_id: string | null
+          code: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          end_date: string | null
+          id: string
+          name: string
+          notes: string | null
+          progress_percent: number | null
+          start_date: string | null
+          state: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          budget_total?: number | null
+          city?: string | null
+          client_id?: string | null
+          code: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          progress_percent?: number | null
+          start_date?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          budget_total?: number | null
+          city?: string | null
+          client_id?: string | null
+          code?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          end_date?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          progress_percent?: number | null
+          start_date?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "construction_projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cost_centers: {
         Row: {
           active: boolean
