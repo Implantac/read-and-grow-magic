@@ -59,6 +59,7 @@ export default function EducationDashboard() {
   const createClass = useCreateClass();
   const createStudent = useCreateStudent();
   const createEnrollment = useCreateEnrollment();
+  const generateInvoice = useGenerateEnrollmentInvoice();
 
   const [enrollOpen, setEnrollOpen] = useState(false);
   const [enrollForm, setEnrollForm] = useState({
