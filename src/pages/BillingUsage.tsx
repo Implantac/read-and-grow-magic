@@ -7,7 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/ui/base/badge";
 import { Skeleton } from "@/ui/base/skeleton";
 import { Activity, Coins, Receipt, TrendingUp } from "lucide-react";
-import { formatCurrencyPtBr } from "@/lib/numericValidation";
+const formatCurrencyPtBr = (v: number) =>
+  new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(v || 0);
 import {
   useBillingMeters,
   useCurrentUsageSummary,
