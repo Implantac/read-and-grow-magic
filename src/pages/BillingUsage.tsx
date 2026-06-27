@@ -13,7 +13,18 @@ import {
   useBillingMeters,
   useCurrentUsageSummary,
   useRecentUsageEvents,
+  useDailyUsageSeries,
 } from "@/hooks/useBillingUsage";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
+} from "recharts";
 
 export default function BillingUsage() {
   const meters = useBillingMeters();
