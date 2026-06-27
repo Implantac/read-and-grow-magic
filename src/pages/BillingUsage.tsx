@@ -52,6 +52,19 @@ export default function BillingUsage() {
     [summary.data],
   );
 
+  const bySource = useMemo(() => {
+    const map = new Map<string, { source: string; quantity: number; amount: number; events: number }>();
+    for (const e of events.data ?? []) {
+      const key = e.source ?? "manual";
+      const row = map.get(key) ?? { source: key, quantity: 0, amount: 0, events: 0 };
+      row.quantity += Number(e.quantity || 0);
+      row.amount += Number(e.amount || 0);
+      row.events += 1;
+      map.set(key, row);
+    }
+    return Array.from(map.values()).sort((a, b) => b.amount - a.amount);
+  }, [events.data]);
+
   return (
     <PageContainer>
       <PageHeader
@@ -167,6 +180,42 @@ export default function BillingUsage() {
                     <TableCell className="text-right">
                       {formatCurrencyPtBr(Number(r.total_amount))}
                     </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="h-5 w-5" /> Consumo por origem (mês corrente)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {events.isLoading ? (
+            <Skeleton className="h-24 w-full" />
+          ) : bySource.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum consumo por origem.</p>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Origem</TableHead>
+                  <TableHead className="text-right">Eventos</TableHead>
+                  <TableHead className="text-right">Quantidade</TableHead>
+                  <TableHead className="text-right">Valor estimado</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {bySource.map((r) => (
+                  <TableRow key={r.source}>
+                    <TableCell><Badge variant="outline">{r.source}</Badge></TableCell>
+                    <TableCell className="text-right">{r.events.toLocaleString("pt-BR")}</TableCell>
+                    <TableCell className="text-right">{r.quantity.toLocaleString("pt-BR")}</TableCell>
+                    <TableCell className="text-right">{formatCurrencyPtBr(r.amount)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
