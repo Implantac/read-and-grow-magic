@@ -156,6 +156,21 @@ export default function EducationDashboard() {
     }
   }
 
+  async function handleCreateEnrollment() {
+    if (!enrollForm.student_id || !enrollForm.class_id) {
+      toastError("Selecione aluno e turma.");
+      return;
+    }
+    try {
+      await createEnrollment.mutateAsync(enrollForm);
+      toastSuccess("Matrícula registrada.");
+      setEnrollOpen(false);
+      setEnrollForm({ student_id: "", class_id: "", monthly_fee: 0 });
+    } catch {
+      toastError("Não foi possível registrar a matrícula.");
+    }
+  }
+
   return (
     <PageContainer>
       <PageHeader
