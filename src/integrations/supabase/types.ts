@@ -17265,6 +17265,11 @@ export type Database = {
         Args: { _month: number; _year: number }
         Returns: Json
       }
+      close_all_billing_periods: { Args: never; Returns: undefined }
+      close_billing_period: {
+        Args: { _company_id: string; _ym: string }
+        Returns: undefined
+      }
       compensate_accounts: {
         Args: {
           _amount: number
