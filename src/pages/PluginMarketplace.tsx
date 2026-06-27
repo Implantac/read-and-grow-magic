@@ -42,7 +42,7 @@ export default function PluginMarketplace() {
   }, [plugins, search]);
 
   return (
-    <RoleGuard role="admin">
+    <RoleGuard roles={["admin"]}>
       <PageContainer>
         <PageHeader
           title="Marketplace de Plugins"
