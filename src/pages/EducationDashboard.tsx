@@ -61,16 +61,16 @@ export default function EducationDashboard() {
 
   async function handleCreate() {
     if (!form.name.trim()) {
-      showError("Informe o nome da escola.");
+      toastError("Informe o nome da escola.");
       return;
     }
     try {
       await createSchool.mutateAsync(form);
-      showSuccess("Escola criada com sucesso.");
+      toastSuccess("Escola criada com sucesso.");
       setOpen(false);
       setForm({ name: "", inep_code: "", phone: "", email: "" });
     } catch (e) {
-      showError("Não foi possível criar a escola.");
+      toastError("Não foi possível criar a escola.");
     }
   }
 
