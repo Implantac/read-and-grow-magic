@@ -12394,7 +12394,7 @@ export type Database = {
         Row: {
           action_taken: string | null
           antenna: number | null
-          company_id: string | null
+          company_id: string
           created_at: string
           event_type: string
           id: string
@@ -12412,7 +12412,7 @@ export type Database = {
         Insert: {
           action_taken?: string | null
           antenna?: number | null
-          company_id?: string | null
+          company_id: string
           created_at?: string
           event_type?: string
           id?: string
@@ -12430,7 +12430,7 @@ export type Database = {
         Update: {
           action_taken?: string | null
           antenna?: number | null
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           event_type?: string
           id?: string
