@@ -82,3 +82,56 @@ export function useRecentUsageEvents(limit = 50) {
     },
   });
 }
+
+export interface DailyUsagePoint {
+  day: string; // YYYY-MM-DD
+  total: number;
+  [meterKey: string]: number | string;
+}
+
+/**
+ * Aggregates the current-month usage events into a per-day series,
+ * with one numeric column per meter_key plus a `total`. Pure client-side
+ * aggregation over the events the user already fetched — no extra RPC.
+ */
+export function useDailyUsageSeries() {
+  const companyId = useEnterpriseStore((s) => s.activeCompanyId);
+  return useQuery({
+    queryKey: ["billing_usage_daily", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const start = new Date();
+      start.setUTCDate(1);
+      start.setUTCHours(0, 0, 0, 0);
+      const { data, error } = await supabase
+        .from("billing_usage_events")
+        .select("meter_key, amount, occurred_at")
+        .eq("company_id", companyId!)
+        .gte("occurred_at", start.toISOString())
+        .order("occurred_at", { ascending: true });
+      if (error) throw error;
+
+      const meters = new Set<string>();
+      const byDay = new Map<string, DailyUsagePoint>();
+      for (const ev of (data ?? []) as Array<{
+        meter_key: string;
+        amount: number;
+        occurred_at: string;
+      }>) {
+        const day = ev.occurred_at.slice(0, 10);
+        meters.add(ev.meter_key);
+        const row = byDay.get(day) ?? { day, total: 0 };
+        const prev = Number(row[ev.meter_key] ?? 0);
+        row[ev.meter_key] = prev + Number(ev.amount || 0);
+        row.total = Number(row.total) + Number(ev.amount || 0);
+        byDay.set(day, row);
+      }
+      return {
+        meters: Array.from(meters),
+        points: Array.from(byDay.values()).sort((a, b) =>
+          a.day.localeCompare(b.day),
+        ),
+      };
+    },
+  });
+}

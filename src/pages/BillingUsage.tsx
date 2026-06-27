@@ -13,12 +13,35 @@ import {
   useBillingMeters,
   useCurrentUsageSummary,
   useRecentUsageEvents,
+  useDailyUsageSeries,
 } from "@/hooks/useBillingUsage";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
+} from "recharts";
 
 export default function BillingUsage() {
   const meters = useBillingMeters();
   const summary = useCurrentUsageSummary();
   const events = useRecentUsageEvents(100);
+  const daily = useDailyUsageSeries();
+
+  const palette = [
+    "hsl(var(--primary))",
+    "hsl(var(--accent))",
+    "#10b981",
+    "#f59e0b",
+    "#6366f1",
+    "#ec4899",
+    "#14b8a6",
+    "#ef4444",
+  ];
 
   const totalMonth = useMemo(
     () => (summary.data ?? []).reduce((acc, r) => acc + Number(r.total_amount || 0), 0),
@@ -53,6 +76,60 @@ export default function BillingUsage() {
           icon={TrendingUp}
         />
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" /> Consumo diário por métrica (mês corrente)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {daily.isLoading ? (
+            <Skeleton className="h-64 w-full" />
+          ) : !daily.data || daily.data.points.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Sem eventos suficientes para gerar o gráfico.
+            </p>
+          ) : (
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={daily.data.points}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis
+                    dataKey="day"
+                    tickFormatter={(v: string) => v.slice(8, 10)}
+                    fontSize={12}
+                  />
+                  <YAxis
+                    tickFormatter={(v: number) =>
+                      v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v.toFixed(0)
+                    }
+                    fontSize={12}
+                  />
+                  <Tooltip
+                    formatter={(value: number) => formatCurrencyPtBr(Number(value))}
+                    labelFormatter={(label: string) =>
+                      new Date(label).toLocaleDateString("pt-BR")
+                    }
+                  />
+                  <Legend />
+                  {daily.data.meters.map((m, i) => (
+                    <Area
+                      key={m}
+                      type="monotone"
+                      dataKey={m}
+                      stackId="1"
+                      stroke={palette[i % palette.length]}
+                      fill={palette[i % palette.length]}
+                      fillOpacity={0.35}
+                    />
+                  ))}
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
