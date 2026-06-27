@@ -54,9 +54,30 @@ export default function EducationDashboard() {
   const students = useEduStudents();
   const enrollments = useEduEnrollments();
   const createSchool = useCreateSchool();
+  const createClass = useCreateClass();
+  const createStudent = useCreateStudent();
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", inep_code: "", phone: "", email: "" });
+
+  const [classOpen, setClassOpen] = useState(false);
+  const [classForm, setClassForm] = useState({
+    name: "",
+    school_id: "",
+    academic_year: new Date().getFullYear(),
+    grade: "",
+    shift: "matutino" as "matutino" | "vespertino" | "noturno" | "integral",
+    capacity: 30,
+  });
+
+  const [studentOpen, setStudentOpen] = useState(false);
+  const [studentForm, setStudentForm] = useState({
+    full_name: "",
+    document: "",
+    guardian_name: "",
+    guardian_phone: "",
+    email: "",
+  });
 
   const activeEnrollments = useMemo(
     () => (enrollments.data ?? []).filter((e) => e.status === "active"),
@@ -80,6 +101,49 @@ export default function EducationDashboard() {
       setForm({ name: "", inep_code: "", phone: "", email: "" });
     } catch (e) {
       toastError("Não foi possível criar a escola.");
+    }
+  }
+
+  async function handleCreateClass() {
+    if (!classForm.name.trim() || !classForm.school_id) {
+      toastError("Informe nome da turma e a escola.");
+      return;
+    }
+    try {
+      await createClass.mutateAsync(classForm);
+      toastSuccess("Turma criada.");
+      setClassOpen(false);
+      setClassForm({
+        name: "",
+        school_id: "",
+        academic_year: new Date().getFullYear(),
+        grade: "",
+        shift: "matutino",
+        capacity: 30,
+      });
+    } catch {
+      toastError("Não foi possível criar a turma.");
+    }
+  }
+
+  async function handleCreateStudent() {
+    if (!studentForm.full_name.trim()) {
+      toastError("Informe o nome do aluno.");
+      return;
+    }
+    try {
+      await createStudent.mutateAsync(studentForm);
+      toastSuccess("Aluno cadastrado.");
+      setStudentOpen(false);
+      setStudentForm({
+        full_name: "",
+        document: "",
+        guardian_name: "",
+        guardian_phone: "",
+        email: "",
+      });
+    } catch {
+      toastError("Não foi possível cadastrar o aluno.");
     }
   }
 
