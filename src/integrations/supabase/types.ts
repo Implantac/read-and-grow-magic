@@ -4880,6 +4880,185 @@ export type Database = {
         }
         Relationships: []
       }
+      edu_classes: {
+        Row: {
+          academic_year: number
+          capacity: number
+          company_id: string
+          created_at: string
+          grade: string | null
+          id: string
+          name: string
+          school_id: string
+          shift: string | null
+          updated_at: string
+        }
+        Insert: {
+          academic_year: number
+          capacity?: number
+          company_id: string
+          created_at?: string
+          grade?: string | null
+          id?: string
+          name: string
+          school_id: string
+          shift?: string | null
+          updated_at?: string
+        }
+        Update: {
+          academic_year?: number
+          capacity?: number
+          company_id?: string
+          created_at?: string
+          grade?: string | null
+          id?: string
+          name?: string
+          school_id?: string
+          shift?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "edu_classes_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "edu_schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      edu_enrollments: {
+        Row: {
+          class_id: string
+          company_id: string
+          created_at: string
+          enrolled_at: string
+          id: string
+          monthly_fee: number
+          status: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          class_id: string
+          company_id: string
+          created_at?: string
+          enrolled_at?: string
+          id?: string
+          monthly_fee?: number
+          status?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          class_id?: string
+          company_id?: string
+          created_at?: string
+          enrolled_at?: string
+          id?: string
+          monthly_fee?: number
+          status?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "edu_enrollments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "edu_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "edu_enrollments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "edu_students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      edu_schools: {
+        Row: {
+          address: string | null
+          company_id: string
+          created_at: string
+          email: string | null
+          id: string
+          inep_code: string | null
+          is_active: boolean
+          name: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          company_id: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          inep_code?: string | null
+          is_active?: boolean
+          name: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          company_id?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          inep_code?: string | null
+          is_active?: boolean
+          name?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      edu_students: {
+        Row: {
+          birth_date: string | null
+          company_id: string
+          created_at: string
+          document: string | null
+          email: string | null
+          full_name: string
+          guardian_name: string | null
+          guardian_phone: string | null
+          id: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          birth_date?: string | null
+          company_id: string
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          full_name: string
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          id?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          birth_date?: string | null
+          company_id?: string
+          created_at?: string
+          document?: string | null
+          email?: string | null
+          full_name?: string
+          guardian_name?: string | null
+          guardian_phone?: string | null
+          id?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       enterprise_groups: {
         Row: {
           created_at: string | null
