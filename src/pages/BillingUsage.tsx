@@ -80,6 +80,60 @@ export default function BillingUsage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" /> Consumo diário por métrica (mês corrente)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {daily.isLoading ? (
+            <Skeleton className="h-64 w-full" />
+          ) : !daily.data || daily.data.points.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              Sem eventos suficientes para gerar o gráfico.
+            </p>
+          ) : (
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={daily.data.points}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis
+                    dataKey="day"
+                    tickFormatter={(v: string) => v.slice(8, 10)}
+                    fontSize={12}
+                  />
+                  <YAxis
+                    tickFormatter={(v: number) =>
+                      v >= 1000 ? `${(v / 1000).toFixed(1)}k` : v.toFixed(0)
+                    }
+                    fontSize={12}
+                  />
+                  <Tooltip
+                    formatter={(value: number) => formatCurrencyPtBr(Number(value))}
+                    labelFormatter={(label: string) =>
+                      new Date(label).toLocaleDateString("pt-BR")
+                    }
+                  />
+                  <Legend />
+                  {daily.data.meters.map((m, i) => (
+                    <Area
+                      key={m}
+                      type="monotone"
+                      dataKey={m}
+                      stackId="1"
+                      stroke={palette[i % palette.length]}
+                      fill={palette[i % palette.length]}
+                      fillOpacity={0.35}
+                    />
+                  ))}
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
             <Receipt className="h-5 w-5" /> Resumo por métrica (mês corrente)
           </CardTitle>
         </CardHeader>
