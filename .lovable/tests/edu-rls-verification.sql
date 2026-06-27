@@ -30,11 +30,11 @@ BEGIN
   PERFORM set_config('lovable.test_user_a',    v_user_a::text,    true);
   PERFORM set_config('lovable.test_user_b',    v_user_b::text,    true);
 
-  INSERT INTO public.companies (id, name) VALUES
-    (v_company_a, 'RLS Test Tenant A'),
-    (v_company_b, 'RLS Test Tenant B');
+  INSERT INTO public.companies (id, name, cnpj) VALUES
+    (v_company_a, 'RLS Test Tenant A', '00000000000001'),
+    (v_company_b, 'RLS Test Tenant B', '00000000000002');
 
-  INSERT INTO public.profiles (id, company_id, full_name) VALUES
+  INSERT INTO public.profiles (id, company_id, name) VALUES
     (v_user_a, v_company_a, 'User A'),
     (v_user_b, v_company_b, 'User B');
 
