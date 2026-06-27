@@ -27,6 +27,7 @@ import { Badge } from "@/ui/base/badge";
 import { Building2, GraduationCap, Users, Wallet, Plus } from "lucide-react";
 import {
   useCreateClass,
+  useCreateEnrollment,
   useCreateSchool,
   useCreateStudent,
   useEduClasses,
