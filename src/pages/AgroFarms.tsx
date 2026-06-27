@@ -22,7 +22,7 @@ export default function AgroFarms() {
   const [form, setForm] = useState({ code: '', name: '', location: '', total_area_ha: '', notes: '' });
 
   const handleSubmit = async () => {
-    const area = toSafeNumber(form.total_area_ha, { min: 0, fallback: 0 });
+    const area = toSafeNumber(form.total_area_ha, 0, { min: 0 });
     await createFarm.mutateAsync({
       code: form.code,
       name: form.name,
@@ -40,7 +40,7 @@ export default function AgroFarms() {
     <PageContainer>
       <PageHeader
         title="Fazendas"
-        subtitle="Gestão de propriedades rurais"
+        description="Gestão de propriedades rurais"
         icon={Sprout}
         actions={
           <Dialog open={open} onOpenChange={setOpen}>

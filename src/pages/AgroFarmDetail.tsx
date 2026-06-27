@@ -48,7 +48,7 @@ export default function AgroFarmDetail() {
       farm_id: id!,
       code: fieldForm.code,
       name: fieldForm.name,
-      area_ha: toSafeNumber(fieldForm.area_ha, { min: 0, fallback: 0 }),
+      area_ha: toSafeNumber(fieldForm.area_ha, 0, { min: 0 }),
       soil_type: fieldForm.soil_type || null,
       current_crop: fieldForm.current_crop || null,
     });
@@ -64,8 +64,8 @@ export default function AgroFarmDetail() {
       variety: seasonForm.variety || null,
       planting_date: seasonForm.planting_date || null,
       expected_harvest_date: seasonForm.expected_harvest_date || null,
-      estimated_yield_per_ha: seasonForm.estimated_yield_per_ha ? toSafeNumber(seasonForm.estimated_yield_per_ha, { min: 0, fallback: 0 }) : null,
-      estimated_cost: toSafeNumber(seasonForm.estimated_cost, { min: 0, fallback: 0 }),
+      estimated_yield_per_ha: seasonForm.estimated_yield_per_ha ? toSafeNumber(seasonForm.estimated_yield_per_ha, 0, { min: 0 }) : null,
+      estimated_cost: toSafeNumber(seasonForm.estimated_cost, 0, { min: 0 }),
     });
     setSeasonForm({ crop: '', variety: '', planting_date: '', expected_harvest_date: '', estimated_yield_per_ha: '', estimated_cost: '' });
     setSeasonOpen(false);
@@ -76,10 +76,10 @@ export default function AgroFarmDetail() {
     await createHarvest.mutateAsync({
       season_id: selectedSeasonId,
       harvest_date: harvestForm.harvest_date,
-      quantity: toSafeNumber(harvestForm.quantity, { min: 0, fallback: 0 }),
+      quantity: toSafeNumber(harvestForm.quantity, 0, { min: 0 }),
       unit: harvestForm.unit,
       quality_grade: harvestForm.quality_grade || null,
-      revenue: toSafeNumber(harvestForm.revenue, { min: 0, fallback: 0 }),
+      revenue: toSafeNumber(harvestForm.revenue, 0, { min: 0 }),
     });
     setHarvestForm({ harvest_date: new Date().toISOString().slice(0, 10), quantity: '', unit: 'kg', quality_grade: '', revenue: '' });
     setHarvestOpen(false);
