@@ -40,6 +40,8 @@ const WorkflowInbox = lazy(() => import("./pages/WorkflowInbox"));
 const PluginMarketplace = lazy(() => import("./pages/PluginMarketplace"));
 const ConstructionProjects = lazy(() => import("./pages/ConstructionProjects"));
 const ConstructionProjectDetail = lazy(() => import("./pages/ConstructionProjectDetail"));
+const AgroFarms = lazy(() => import("./pages/AgroFarms"));
+const AgroFarmDetail = lazy(() => import("./pages/AgroFarmDetail"));
 
 
 
@@ -88,6 +90,9 @@ const App = () => (
                 <Route path="/marketplace" element={<PluginMarketplace />} />
                 <Route path="/construcao/obras" element={<ConstructionProjects />} />
                 <Route path="/construcao/obras/:id" element={<ConstructionProjectDetail />} />
+                <Route path="/agro/fazendas" element={<AgroFarms />} />
+                <Route path="/agro/fazendas/:id" element={<AgroFarmDetail />} />
+
 
                 <Route path="/upgrade" element={<Upgrade />} />
                 <Route path="/subscribe" element={<Subscribe />} />
