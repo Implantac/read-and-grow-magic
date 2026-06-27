@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Plus, HardHat, Pencil, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, HardHat, Pencil, Trash2, ChevronRight } from 'lucide-react';
 import { Button } from '@/ui/base/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/ui/base/dialog';
@@ -160,9 +161,13 @@ export default function ConstructionProjects() {
               </TableHeader>
               <TableBody>
                 {projects.map((p) => (
-                  <TableRow key={p.id}>
-                    <TableCell className="font-mono">{p.code}</TableCell>
-                    <TableCell className="font-medium">{p.name}</TableCell>
+                  <TableRow key={p.id} className="cursor-pointer hover:bg-muted/30">
+                    <TableCell className="font-mono">
+                      <Link to={`/construcao/obras/${p.id}`} className="hover:underline">{p.code}</Link>
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      <Link to={`/construcao/obras/${p.id}`} className="hover:underline">{p.name}</Link>
+                    </TableCell>
                     <TableCell>{[p.city, p.state].filter(Boolean).join(' / ') || '—'}</TableCell>
                     <TableCell className="text-right">
                       {Number(p.budget_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
@@ -171,7 +176,10 @@ export default function ConstructionProjects() {
                     <TableCell>
                       <Badge variant={STATUS_VARIANT[p.status]}>{STATUS_LABELS[p.status]}</Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="flex items-center gap-1">
+                      <Link to={`/construcao/obras/${p.id}`}>
+                        <Button size="icon" variant="ghost"><ChevronRight className="h-4 w-4" /></Button>
+                      </Link>
                       <Button
                         size="icon"
                         variant="ghost"
