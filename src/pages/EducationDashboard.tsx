@@ -27,6 +27,7 @@ import { Badge } from "@/ui/base/badge";
 import { Building2, GraduationCap, Users, Wallet, Plus } from "lucide-react";
 import {
   useCreateClass,
+  useCreateEnrollment,
   useCreateSchool,
   useCreateStudent,
   useEduClasses,
@@ -56,6 +57,14 @@ export default function EducationDashboard() {
   const createSchool = useCreateSchool();
   const createClass = useCreateClass();
   const createStudent = useCreateStudent();
+  const createEnrollment = useCreateEnrollment();
+
+  const [enrollOpen, setEnrollOpen] = useState(false);
+  const [enrollForm, setEnrollForm] = useState({
+    student_id: "",
+    class_id: "",
+    monthly_fee: 0,
+  });
 
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", inep_code: "", phone: "", email: "" });
@@ -144,6 +153,21 @@ export default function EducationDashboard() {
       });
     } catch {
       toastError("Não foi possível cadastrar o aluno.");
+    }
+  }
+
+  async function handleCreateEnrollment() {
+    if (!enrollForm.student_id || !enrollForm.class_id) {
+      toastError("Selecione aluno e turma.");
+      return;
+    }
+    try {
+      await createEnrollment.mutateAsync(enrollForm);
+      toastSuccess("Matrícula registrada.");
+      setEnrollOpen(false);
+      setEnrollForm({ student_id: "", class_id: "", monthly_fee: 0 });
+    } catch {
+      toastError("Não foi possível registrar a matrícula.");
     }
   }
 
@@ -366,6 +390,90 @@ export default function EducationDashboard() {
                     Cancelar
                   </Button>
                   <Button onClick={handleCreateStudent} disabled={createStudent.isPending}>
+                    Salvar
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={enrollOpen} onOpenChange={setEnrollOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="secondary"
+                  disabled={
+                    (students.data ?? []).length === 0 ||
+                    (classes.data ?? []).length === 0
+                  }
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nova matrícula
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Nova matrícula</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3">
+                  <div>
+                    <Label>Aluno *</Label>
+                    <Select
+                      value={enrollForm.student_id}
+                      onValueChange={(v) => setEnrollForm({ ...enrollForm, student_id: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione o aluno" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(students.data ?? []).map((s) => (
+                          <SelectItem key={s.id} value={s.id}>
+                            {s.full_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Turma *</Label>
+                    <Select
+                      value={enrollForm.class_id}
+                      onValueChange={(v) => setEnrollForm({ ...enrollForm, class_id: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione a turma" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(classes.data ?? []).map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.name} ({c.academic_year})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Mensalidade (R$)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={enrollForm.monthly_fee}
+                      onChange={(e) =>
+                        setEnrollForm({
+                          ...enrollForm,
+                          monthly_fee: Number(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setEnrollOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleCreateEnrollment}
+                    disabled={createEnrollment.isPending}
+                  >
                     Salvar
                   </Button>
                 </DialogFooter>
