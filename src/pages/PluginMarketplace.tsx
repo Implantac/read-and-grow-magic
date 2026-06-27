@@ -124,6 +124,15 @@ export default function PluginMarketplace() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            onClick={() => setRunner({ id: p.id, key: p.key, name: p.name })}
+                            disabled={inst!.status !== "active"}
+                            aria-label="Executar"
+                          >
+                            <PlayCircle className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => uninstall.mutate(inst!.id)}
                             disabled={uninstall.isPending}
                             aria-label="Desinstalar"
