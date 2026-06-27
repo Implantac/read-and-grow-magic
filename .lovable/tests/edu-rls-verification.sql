@@ -12,6 +12,7 @@
 -- =====================================================================
 
 BEGIN;
+SET LOCAL session_replication_role = replica;  -- skip side-effect triggers during seed
 
 -- ---------- Seed isolado ----------
 DO $$
