@@ -9240,6 +9240,104 @@ export type Database = {
           },
         ]
       }
+      plugin_installations: {
+        Row: {
+          company_id: string
+          config: Json
+          created_at: string
+          id: string
+          installed_at: string
+          installed_by: string | null
+          plugin_id: string
+          status: string
+          uninstalled_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          config?: Json
+          created_at?: string
+          id?: string
+          installed_at?: string
+          installed_by?: string | null
+          plugin_id: string
+          status?: string
+          uninstalled_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          config?: Json
+          created_at?: string
+          id?: string
+          installed_at?: string
+          installed_by?: string | null
+          plugin_id?: string
+          status?: string
+          uninstalled_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plugin_installations_plugin_id_fkey"
+            columns: ["plugin_id"]
+            isOneToOne: false
+            referencedRelation: "plugins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plugins: {
+        Row: {
+          category: string
+          config_schema: Json
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_published: boolean
+          key: string
+          name: string
+          price_monthly: number
+          required_modules: string[]
+          updated_at: string
+          vendor: string | null
+          version: string
+        }
+        Insert: {
+          category?: string
+          config_schema?: Json
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_published?: boolean
+          key: string
+          name: string
+          price_monthly?: number
+          required_modules?: string[]
+          updated_at?: string
+          vendor?: string | null
+          version?: string
+        }
+        Update: {
+          category?: string
+          config_schema?: Json
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_published?: boolean
+          key?: string
+          name?: string
+          price_monthly?: number
+          required_modules?: string[]
+          updated_at?: string
+          vendor?: string | null
+          version?: string
+        }
+        Relationships: []
+      }
       product_costs: {
         Row: {
           company_id: string | null
