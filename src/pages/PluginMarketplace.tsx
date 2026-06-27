@@ -6,7 +6,7 @@ import { Button } from "@/ui/base/button";
 import { Badge } from "@/ui/base/badge";
 import { Input } from "@/ui/base/input";
 import { Switch } from "@/ui/base/switch";
-import { Loader2, Package, Search, Trash2 } from "lucide-react";
+import { Loader2, Package, PlayCircle, Search, Trash2 } from "lucide-react";
 import {
   usePlugins,
   usePluginInstallations,
@@ -15,6 +15,7 @@ import {
   useTogglePlugin,
 } from "@/hooks/usePlugins";
 import { RoleGuard } from "@/components/auth/RoleGuard";
+import { PluginRunnerDialog } from "@/components/plugins/PluginRunnerDialog";
 
 export default function PluginMarketplace() {
   const { data: plugins, isLoading } = usePlugins();
