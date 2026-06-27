@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { getSystemPrompt } from "../_shared/ai-prompts.ts";
 import { checkRateLimit, rateLimitResponse } from "../_shared/rate-limit.ts";
+import { recordUsage } from "../_shared/usage.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -69,6 +70,11 @@ serve(async (req) => {
       return new Response(JSON.stringify({ ok: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
     
+    const AI_ACTIONS = new Set(["chat","assistant_chat","daily_summary","generate_insights","generate_scenarios","ceo_brief","autopilot_run"]);
+    if (action && AI_ACTIONS.has(action)) {
+      await recordUsage(companyId, "ai_call", 1, { source: "ai-executive", action });
+    }
+
     if (action === "chat" || action === "assistant_chat") 
       return await handleUnifiedChat(messages, supabase, lovableKey, corsHeaders, authenticatedUserId, companyId);
     
