@@ -464,6 +464,204 @@ export type Database = {
           },
         ]
       }
+      agro_farms: {
+        Row: {
+          code: string
+          company_id: string
+          created_at: string
+          id: string
+          location: string | null
+          name: string
+          notes: string | null
+          status: string
+          total_area_ha: number
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          location?: string | null
+          name: string
+          notes?: string | null
+          status?: string
+          total_area_ha?: number
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          location?: string | null
+          name?: string
+          notes?: string | null
+          status?: string
+          total_area_ha?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      agro_fields: {
+        Row: {
+          area_ha: number
+          code: string
+          company_id: string
+          created_at: string
+          current_crop: string | null
+          farm_id: string
+          id: string
+          name: string
+          notes: string | null
+          soil_type: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          area_ha?: number
+          code: string
+          company_id?: string
+          created_at?: string
+          current_crop?: string | null
+          farm_id: string
+          id?: string
+          name: string
+          notes?: string | null
+          soil_type?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          area_ha?: number
+          code?: string
+          company_id?: string
+          created_at?: string
+          current_crop?: string | null
+          farm_id?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          soil_type?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agro_fields_farm_id_fkey"
+            columns: ["farm_id"]
+            isOneToOne: false
+            referencedRelation: "agro_farms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agro_harvests: {
+        Row: {
+          company_id: string
+          created_at: string
+          harvest_date: string
+          id: string
+          notes: string | null
+          quality_grade: string | null
+          quantity: number
+          revenue: number
+          season_id: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string
+          created_at?: string
+          harvest_date: string
+          id?: string
+          notes?: string | null
+          quality_grade?: string | null
+          quantity?: number
+          revenue?: number
+          season_id: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          harvest_date?: string
+          id?: string
+          notes?: string | null
+          quality_grade?: string | null
+          quantity?: number
+          revenue?: number
+          season_id?: string
+          unit?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agro_harvests_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "agro_seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agro_seasons: {
+        Row: {
+          company_id: string
+          created_at: string
+          crop: string
+          estimated_cost: number
+          estimated_yield_per_ha: number | null
+          expected_harvest_date: string | null
+          field_id: string
+          id: string
+          notes: string | null
+          planting_date: string | null
+          status: string
+          updated_at: string
+          variety: string | null
+        }
+        Insert: {
+          company_id?: string
+          created_at?: string
+          crop: string
+          estimated_cost?: number
+          estimated_yield_per_ha?: number | null
+          expected_harvest_date?: string | null
+          field_id: string
+          id?: string
+          notes?: string | null
+          planting_date?: string | null
+          status?: string
+          updated_at?: string
+          variety?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          crop?: string
+          estimated_cost?: number
+          estimated_yield_per_ha?: number | null
+          expected_harvest_date?: string | null
+          field_id?: string
+          id?: string
+          notes?: string | null
+          planting_date?: string | null
+          status?: string
+          updated_at?: string
+          variety?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agro_seasons_field_id_fkey"
+            columns: ["field_id"]
+            isOneToOne: false
+            referencedRelation: "agro_fields"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_action_logs: {
         Row: {
           action_name: string
