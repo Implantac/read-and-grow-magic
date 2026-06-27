@@ -124,3 +124,57 @@ export function useCreateSchool() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["edu_schools"] }),
   });
 }
+
+export function useCreateClass() {
+  const qc = useQueryClient();
+  const companyId = useEnterpriseStore((s) => s.activeCompanyId);
+  return useMutation({
+    mutationFn: async (
+      payload: Partial<EduClass> & { name: string; school_id: string },
+    ) => {
+      if (!companyId) throw new Error("Sem empresa ativa");
+      const { error } = await supabase
+        .from("edu_classes")
+        .insert({ ...payload, company_id: companyId });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["edu_classes"] }),
+  });
+}
+
+export function useCreateStudent() {
+  const qc = useQueryClient();
+  const companyId = useEnterpriseStore((s) => s.activeCompanyId);
+  return useMutation({
+    mutationFn: async (payload: Partial<EduStudent> & { full_name: string }) => {
+      if (!companyId) throw new Error("Sem empresa ativa");
+      const { error } = await supabase
+        .from("edu_students")
+        .insert({ ...payload, company_id: companyId });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["edu_students"] }),
+  });
+}
+
+export function useCreateEnrollment() {
+  const qc = useQueryClient();
+  const companyId = useEnterpriseStore((s) => s.activeCompanyId);
+  return useMutation({
+    mutationFn: async (payload: {
+      student_id: string;
+      class_id: string;
+      monthly_fee: number;
+    }) => {
+      if (!companyId) throw new Error("Sem empresa ativa");
+      const { error } = await supabase.from("edu_enrollments").insert({
+        ...payload,
+        company_id: companyId,
+        status: "active",
+        enrolled_at: new Date().toISOString(),
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["edu_enrollments"] }),
+  });
+}
