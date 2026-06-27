@@ -32,7 +32,7 @@ import {
   useEduSchools,
   useEduStudents,
 } from "@/hooks/useEducation";
-import { showSuccess, showError } from "@/lib/toastHelpers";
+import { toastSuccess, toastError } from "@/lib/toastHelpers";
 
 const formatCurrencyPtBr = (v: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(
