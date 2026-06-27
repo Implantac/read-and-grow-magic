@@ -156,6 +156,16 @@ export default function PluginMarketplace() {
             })}
           </div>
         )}
+
+        {runner && (
+          <PluginRunnerDialog
+            open={!!runner}
+            onOpenChange={(v) => !v && setRunner(null)}
+            pluginId={runner.id}
+            pluginKey={runner.key}
+            pluginName={runner.name}
+          />
+        )}
       </PageContainer>
     </RoleGuard>
   );
