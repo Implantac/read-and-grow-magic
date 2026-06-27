@@ -12,7 +12,7 @@
 -- =====================================================================
 
 BEGIN;
-SET LOCAL session_replication_role = replica;  -- skip side-effect triggers during seed
+ALTER TABLE public.companies DISABLE TRIGGER trg_setup_fiscal_on_company_creation;
 
 -- ---------- Seed isolado ----------
 DO $$
