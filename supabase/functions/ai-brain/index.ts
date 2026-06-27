@@ -1114,6 +1114,8 @@ Deno.serve(async (req) => {
         });
     }
 
+    await recordUsage(callerCompany, "ai_call", 1, { source: "ai-brain", action });
+
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
