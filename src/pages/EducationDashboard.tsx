@@ -636,6 +636,7 @@ export default function EducationDashboard() {
                   <TableHead>Turma</TableHead>
                   <TableHead>Matrícula</TableHead>
                   <TableHead className="text-right">Mensalidade</TableHead>
+                  <TableHead className="text-right">Ação</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -659,6 +660,27 @@ export default function EducationDashboard() {
                       </TableCell>
                       <TableCell className="text-right">
                         {formatCurrencyPtBr(Number(en.monthly_fee))}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={generateInvoice.isPending || !aluno || !turma}
+                          onClick={async () => {
+                            try {
+                              await generateInvoice.mutateAsync({
+                                enrollment: en,
+                                studentName: aluno?.full_name ?? "Aluno",
+                                className: turma?.name ?? "Turma",
+                              });
+                              toastSuccess("Mensalidade gerada no contas a receber.");
+                            } catch (e: any) {
+                              toastError(e?.message ?? "Não foi possível gerar a mensalidade.");
+                            }
+                          }}
+                        >
+                          Gerar mensalidade
+                        </Button>
                       </TableCell>
                     </TableRow>
                   );
