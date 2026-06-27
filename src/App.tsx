@@ -45,6 +45,7 @@ const AgroFarmDetail = lazy(() => import("./pages/AgroFarmDetail"));
 const HealthPatients = lazy(() => import("./pages/HealthPatients"));
 const HealthPatientDetail = lazy(() => import("./pages/HealthPatientDetail"));
 const BillingUsage = lazy(() => import("./pages/BillingUsage"));
+const EducationDashboard = lazy(() => import("./pages/EducationDashboard"));
 
 
 
