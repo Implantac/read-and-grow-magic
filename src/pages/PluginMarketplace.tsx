@@ -6,7 +6,7 @@ import { Button } from "@/ui/base/button";
 import { Badge } from "@/ui/base/badge";
 import { Input } from "@/ui/base/input";
 import { Switch } from "@/ui/base/switch";
-import { Loader2, Package, Search, Trash2 } from "lucide-react";
+import { Loader2, Package, PlayCircle, Search, Trash2 } from "lucide-react";
 import {
   usePlugins,
   usePluginInstallations,
@@ -15,6 +15,7 @@ import {
   useTogglePlugin,
 } from "@/hooks/usePlugins";
 import { RoleGuard } from "@/components/auth/RoleGuard";
+import { PluginRunnerDialog } from "@/components/plugins/PluginRunnerDialog";
 
 export default function PluginMarketplace() {
   const { data: plugins, isLoading } = usePlugins();
@@ -23,6 +24,7 @@ export default function PluginMarketplace() {
   const uninstall = useUninstallPlugin();
   const toggle = useTogglePlugin();
   const [search, setSearch] = useState("");
+  const [runner, setRunner] = useState<{ id: string; key: string; name: string } | null>(null);
 
   const installMap = useMemo(() => {
     const m = new Map<string, { id: string; status: string }>();
@@ -122,6 +124,15 @@ export default function PluginMarketplace() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            onClick={() => setRunner({ id: p.id, key: p.key, name: p.name })}
+                            disabled={inst!.status !== "active"}
+                            aria-label="Executar"
+                          >
+                            <PlayCircle className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => uninstall.mutate(inst!.id)}
                             disabled={uninstall.isPending}
                             aria-label="Desinstalar"
@@ -144,6 +155,16 @@ export default function PluginMarketplace() {
               );
             })}
           </div>
+        )}
+
+        {runner && (
+          <PluginRunnerDialog
+            open={!!runner}
+            onOpenChange={(v) => !v && setRunner(null)}
+            pluginId={runner.id}
+            pluginKey={runner.key}
+            pluginName={runner.name}
+          />
         )}
       </PageContainer>
     </RoleGuard>

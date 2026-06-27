@@ -9240,6 +9240,66 @@ export type Database = {
           },
         ]
       }
+      plugin_executions: {
+        Row: {
+          action: string
+          company_id: string
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          executed_by: string | null
+          id: string
+          installation_id: string | null
+          payload: Json
+          plugin_id: string
+          result: Json | null
+          status: string
+        }
+        Insert: {
+          action: string
+          company_id: string
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          executed_by?: string | null
+          id?: string
+          installation_id?: string | null
+          payload?: Json
+          plugin_id: string
+          result?: Json | null
+          status?: string
+        }
+        Update: {
+          action?: string
+          company_id?: string
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          executed_by?: string | null
+          id?: string
+          installation_id?: string | null
+          payload?: Json
+          plugin_id?: string
+          result?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plugin_executions_installation_id_fkey"
+            columns: ["installation_id"]
+            isOneToOne: false
+            referencedRelation: "plugin_installations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plugin_executions_plugin_id_fkey"
+            columns: ["plugin_id"]
+            isOneToOne: false
+            referencedRelation: "plugins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plugin_installations: {
         Row: {
           company_id: string
