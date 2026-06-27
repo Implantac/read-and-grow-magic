@@ -183,3 +183,64 @@ export function useCreateEnrollment() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["edu_enrollments"] }),
   });
 }
+
+/**
+ * Generates a monthly accounts_receivable row for an active enrollment.
+ * Due date is set to the 10th of the next month (school billing convention).
+ * Idempotent per month: refuses to create a duplicate if a receivable for the
+ * same enrollment + competence month already exists (matched via source_id +
+ * description prefix).
+ */
+export function useGenerateEnrollmentInvoice() {
+  const qc = useQueryClient();
+  const companyId = useEnterpriseStore((s) => s.activeCompanyId);
+  return useMutation({
+    mutationFn: async (args: {
+      enrollment: EduEnrollment;
+      studentName: string;
+      className: string;
+    }) => {
+      if (!companyId) throw new Error("Sem empresa ativa");
+      const { enrollment, studentName, className } = args;
+      const now = new Date();
+      const competence = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      const dueDate = new Date(now.getFullYear(), now.getMonth() + 1, 10);
+      const description = `Mensalidade ${competence} · ${className}`;
+
+      // Idempotency check
+      const { data: existing } = await supabase
+        .from("accounts_receivable")
+        .select("id")
+        .eq("company_id", companyId)
+        .eq("source_type", "edu_enrollment")
+        .eq("source_id", enrollment.id)
+        .ilike("description", `Mensalidade ${competence}%`)
+        .limit(1);
+      if (existing && existing.length > 0) {
+        throw new Error("Mensalidade deste mês já foi gerada.");
+      }
+
+      const amount = Number(enrollment.monthly_fee || 0);
+      if (amount <= 0) throw new Error("Mensalidade inválida.");
+
+      const { error } = await supabase.from("accounts_receivable").insert({
+        company_id: companyId,
+        description,
+        client_name: studentName,
+        category: "Educação",
+        amount,
+        original_amount: amount,
+        open_amount: amount,
+        due_date: dueDate.toISOString(),
+        issue_date: now.toISOString(),
+        status: "pending",
+        source_type: "edu_enrollment",
+        source_id: enrollment.id,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["accounts_receivable"] });
+    },
+  });
+}
