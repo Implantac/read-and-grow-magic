@@ -24,6 +24,7 @@ export default function PluginMarketplace() {
   const uninstall = useUninstallPlugin();
   const toggle = useTogglePlugin();
   const [search, setSearch] = useState("");
+  const [runner, setRunner] = useState<{ id: string; key: string; name: string } | null>(null);
 
   const installMap = useMemo(() => {
     const m = new Map<string, { id: string; status: string }>();
