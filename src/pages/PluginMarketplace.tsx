@@ -24,6 +24,7 @@ export default function PluginMarketplace() {
   const uninstall = useUninstallPlugin();
   const toggle = useTogglePlugin();
   const [search, setSearch] = useState("");
+  const [category, setCategory] = useState<string>("all");
   const [runner, setRunner] = useState<{ id: string; key: string; name: string } | null>(null);
 
   const installMap = useMemo(() => {
@@ -32,16 +33,36 @@ export default function PluginMarketplace() {
     return m;
   }, [installs]);
 
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    (plugins ?? []).forEach((p) => set.add(p.category));
+    return ["all", ...Array.from(set).sort()];
+  }, [plugins]);
+
   const filtered = useMemo(() => {
     const term = search.toLowerCase().trim();
-    return (plugins ?? []).filter(
-      (p) =>
-        !term ||
+    return (plugins ?? []).filter((p) => {
+      if (category !== "all" && p.category !== category) return false;
+      if (!term) return true;
+      return (
         p.name.toLowerCase().includes(term) ||
         p.description?.toLowerCase().includes(term) ||
-        p.category.toLowerCase().includes(term),
-    );
-  }, [plugins, search]);
+        p.category.toLowerCase().includes(term)
+      );
+    });
+  }, [plugins, search, category]);
+
+  const categoryLabel: Record<string, string> = {
+    all: "Todos",
+    fiscal: "Fiscal",
+    financial: "Financeiro",
+    communication: "Comunicação",
+    logistics: "Logística",
+    bi: "BI & Analytics",
+    ai: "Inteligência Artificial",
+    payments: "Pagamentos",
+    general: "Geral",
+  };
 
   return (
     <RoleGuard roles={["admin"]}>
@@ -52,15 +73,30 @@ export default function PluginMarketplace() {
           icon={Package}
         />
 
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar plugins..."
-            className="pl-9"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+        <div className="flex flex-col md:flex-row gap-3">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar plugins..."
+              className="pl-9"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {categories.map((c) => (
+              <Button
+                key={c}
+                variant={category === c ? "default" : "outline"}
+                size="sm"
+                onClick={() => setCategory(c)}
+              >
+                {categoryLabel[c] ?? c}
+              </Button>
+            ))}
+          </div>
         </div>
+
 
         {isLoading ? (
           <div className="flex justify-center py-16">
