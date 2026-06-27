@@ -129,9 +129,14 @@ export function useCreateClass() {
   const qc = useQueryClient();
   const companyId = useEnterpriseStore((s) => s.activeCompanyId);
   return useMutation({
-    mutationFn: async (
-      payload: Partial<EduClass> & { name: string; school_id: string },
-    ) => {
+    mutationFn: async (payload: {
+      name: string;
+      school_id: string;
+      academic_year: number;
+      grade?: string;
+      shift?: "matutino" | "vespertino" | "noturno" | "integral";
+      capacity?: number;
+    }) => {
       if (!companyId) throw new Error("Sem empresa ativa");
       const { error } = await supabase
         .from("edu_classes")
