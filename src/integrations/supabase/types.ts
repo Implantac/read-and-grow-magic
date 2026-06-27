@@ -1969,6 +1969,84 @@ export type Database = {
           },
         ]
       }
+      billing_meters: {
+        Row: {
+          active: boolean
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          meter_key: string
+          name: string
+          unit: string
+          unit_price: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          meter_key: string
+          name: string
+          unit?: string
+          unit_price?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          meter_key?: string
+          name?: string
+          unit?: string
+          unit_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      billing_periods: {
+        Row: {
+          breakdown: Json
+          closed_at: string | null
+          company_id: string
+          created_at: string
+          currency: string
+          id: string
+          period_ym: string
+          status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          breakdown?: Json
+          closed_at?: string | null
+          company_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          period_ym: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          breakdown?: Json
+          closed_at?: string | null
+          company_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          period_ym?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       billing_queue: {
         Row: {
           amount: number
@@ -2041,6 +2119,62 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "orders"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_usage_events: {
+        Row: {
+          amount: number
+          company_id: string
+          created_at: string
+          currency: string
+          id: string
+          metadata: Json
+          meter_key: string
+          occurred_at: string
+          period_ym: string
+          quantity: number
+          source: string | null
+          source_id: string | null
+          unit_price: number
+        }
+        Insert: {
+          amount?: number
+          company_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json
+          meter_key: string
+          occurred_at?: string
+          period_ym?: string
+          quantity?: number
+          source?: string | null
+          source_id?: string | null
+          unit_price?: number
+        }
+        Update: {
+          amount?: number
+          company_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          metadata?: Json
+          meter_key?: string
+          occurred_at?: string
+          period_ym?: string
+          quantity?: number
+          source?: string | null
+          source_id?: string | null
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_usage_events_meter_key_fkey"
+            columns: ["meter_key"]
+            isOneToOne: false
+            referencedRelation: "billing_meters"
+            referencedColumns: ["meter_key"]
           },
         ]
       }
@@ -17252,6 +17386,16 @@ export type Database = {
           trial_end: string
         }[]
       }
+      get_current_usage_summary: {
+        Args: { _company_id: string }
+        Returns: {
+          currency: string
+          meter_key: string
+          meter_name: string
+          total_amount: number
+          total_quantity: number
+        }[]
+      }
       get_dre: {
         Args: { _from: string; _to: string }
         Returns: {
@@ -17356,6 +17500,17 @@ export type Database = {
         Returns: number
       }
       recompute_default_scores: { Args: never; Returns: Json }
+      record_usage: {
+        Args: {
+          _company_id: string
+          _metadata?: Json
+          _meter_key: string
+          _quantity?: number
+          _source?: string
+          _source_id?: string
+        }
+        Returns: string
+      }
       reopen_accounting_period: {
         Args: { _month: number; _year: number }
         Returns: Json

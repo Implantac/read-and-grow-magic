@@ -75,6 +75,19 @@ Deno.serve(async (req) => {
     duration_ms: Date.now() - startedAt,
   });
 
+  // Bill successful executions (usage-based)
+  if (status === "success") {
+    await admin.rpc("record_usage", {
+      _company_id: auth.companyId,
+      _meter_key: "plugin_execution",
+      _quantity: 1,
+      _source: "plugin-execute",
+      _source_id: plugin.id,
+      _metadata: { action: body.action, plugin_key: plugin.key },
+    });
+  }
+
+
   if (status === "error") return safeError(errorMessage ?? "Plugin error", 502);
   return new Response(JSON.stringify({ ok: true, result }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
