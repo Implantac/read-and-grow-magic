@@ -24,7 +24,7 @@ import {
 } from "@/ui/base/dialog";
 import { Skeleton } from "@/ui/base/skeleton";
 import { Badge } from "@/ui/base/badge";
-import { Building2, GraduationCap, Users, Wallet, Plus } from "lucide-react";
+import { Building2, GraduationCap, Users, Wallet, Plus, FileText, Loader2 } from "lucide-react";
 import {
   useCreateClass,
   useCreateEnrollment,
@@ -173,6 +173,37 @@ export default function EducationDashboard() {
     }
   }
 
+  const [bulkRunning, setBulkRunning] = useState(false);
+  async function handleBulkGenerate() {
+    if (activeEnrollments.length === 0) return;
+    setBulkRunning(true);
+    let ok = 0;
+    let skip = 0;
+    let fail = 0;
+    for (const en of activeEnrollments) {
+      const aluno = (students.data ?? []).find((s) => s.id === en.student_id);
+      const turma = (classes.data ?? []).find((c) => c.id === en.class_id);
+      if (!aluno || !turma) {
+        fail++;
+        continue;
+      }
+      try {
+        await generateInvoice.mutateAsync({
+          enrollment: en,
+          studentName: aluno.full_name,
+          className: turma.name,
+        });
+        ok++;
+      } catch (e: any) {
+        if (String(e?.message ?? "").includes("já foi gerada")) skip++;
+        else fail++;
+      }
+    }
+    setBulkRunning(false);
+    if (ok > 0) toastSuccess(`${ok} mensalidade(s) geradas. ${skip} já existiam. ${fail} falhas.`);
+    else toastError(`Nenhuma gerada. ${skip} já existiam. ${fail} falhas.`);
+  }
+
   return (
     <PageContainer>
       <PageHeader
@@ -180,6 +211,18 @@ export default function EducationDashboard() {
         description="Gestão de escolas, turmas, alunos e matrículas."
         actions={
           <div className="flex gap-2 flex-wrap">
+            <Button
+              variant="secondary"
+              disabled={bulkRunning || activeEnrollments.length === 0}
+              onClick={handleBulkGenerate}
+            >
+              {bulkRunning ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <FileText className="h-4 w-4 mr-2" />
+              )}
+              Gerar mensalidades do mês
+            </Button>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button>
