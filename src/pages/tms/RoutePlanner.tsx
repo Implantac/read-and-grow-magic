@@ -190,6 +190,26 @@ const RoutePlanner = () => {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
 
+  if (routesLoading || stopsLoading) return <PageLoading />;
+  if (!route) {
+    return (
+      <PageContainer>
+        <PageHeader title="Rota não encontrada" description="A rota selecionada não existe ou foi removida." />
+        <Link to="/tms/rotas" className="text-primary underline inline-flex items-center gap-1">
+          <ChevronLeft className="h-4 w-4" /> Voltar para rotas
+        </Link>
+      </PageContainer>
+    );
+  }
+
+  const move = (index: number, dir: -1 | 1) => {
+    const next = [...stops];
+    const target = index + dir;
+    if (target < 0 || target >= next.length) return;
+    [next[index], next[target]] = [next[target], next[index]];
+    reorder.mutate({ routeId: route.id, ordered: next.map((s) => s.id) });
+  };
+
   const handleDrop = (target: number) => {
     if (dragIndex === null || dragIndex === target) {
       setDragIndex(null);
