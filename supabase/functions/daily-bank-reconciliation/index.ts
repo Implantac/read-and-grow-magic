@@ -107,4 +107,9 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (e) {
     return safeError(e, "daily-bank-reconciliation");
   }
-});
+};
+
+serve(instrument(handler, {
+  source: "daily-bank-reconciliation",
+  getContext: contextFromAuth,
+}));
