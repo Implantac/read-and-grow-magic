@@ -1,6 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getSystemPrompt } from '../_shared/ai-prompts.ts'
 import { resolveContextByIds, branchScope, requireModule } from '../_shared/tenant.ts'
+import { instrument, contextFromAuth } from '../_shared/observability.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
