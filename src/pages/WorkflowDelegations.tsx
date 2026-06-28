@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnterpriseStore } from "@/core/stores/useEnterpriseStore";
-import { useAuth } from "@/hooks/system/useAuth";
+
 import { PageContainer } from "@/shared/components/PageContainer";
 import { PageHeader } from "@/shared/components/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
@@ -26,7 +26,10 @@ type Delegation = {
 
 export default function WorkflowDelegations() {
   const companyId = useEnterpriseStore((s) => s.activeCompanyId);
-  const { user } = useAuth();
+  const { data: authUser } = useQuery({
+    queryKey: ["auth-user"],
+    queryFn: async () => (await supabase.auth.getUser()).data.user,
+  });
   const qc = useQueryClient();
 
   const [toUser, setToUser] = useState("");
