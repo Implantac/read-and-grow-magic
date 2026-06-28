@@ -83,6 +83,9 @@ export default function Observability() {
   const [sevFilter, setSevFilter] = useState<string>("all");
   const [newOpen, setNewOpen] = useState(false);
   const [form, setForm] = useState({ title: "", description: "", severity: "minor" as Incident["severity"] });
+  const [ruleOpen, setRuleOpen] = useState(false);
+  const emptyRule = { name: "", source: "", min_severity: "error" as AlertRule["min_severity"], threshold: 5, window_minutes: 5, incident_severity: "major" as AlertRule["incident_severity"] };
+  const [ruleForm, setRuleForm] = useState(emptyRule);
 
   const { data: health, isLoading: loadingHealth } = useQuery({
     queryKey: ["tenant_health", companyId],
