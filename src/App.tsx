@@ -101,6 +101,7 @@ const App = () => (
                 <Route path="/sre" element={<Observability />} />
                 <Route path="/sre/configuracao" element={<SRESettings />} />
                 <Route path="/marketplace" element={<PluginMarketplace />} />
+                <Route path="/admin/marketplace/editor" element={<PluginEditor />} />
                 <Route path="/construcao/obras" element={<ConstructionProjects />} />
                 <Route path="/construcao/obras/:id" element={<ConstructionProjectDetail />} />
                 <Route path="/agro/fazendas" element={<AgroFarms />} />
