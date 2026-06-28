@@ -58,6 +58,7 @@ const RoutePlanner = () => {
 
   const qc = useQueryClient();
   const [computing, setComputing] = useState(false);
+  const [bulkGeocoding, setBulkGeocoding] = useState(false);
 
   const computeEta = async () => {
     if (!id) return;
@@ -71,6 +72,58 @@ const RoutePlanner = () => {
       handleMutationError(e);
     } finally {
       setComputing(false);
+    }
+  };
+
+  const missingGeo = useMemo(
+    () => stops.filter((s) => s.latitude == null || s.longitude == null).length,
+    [stops],
+  );
+
+  const bulkGeocode = async () => {
+    if (!id) return;
+    const pending = stops.filter(
+      (s) => s.latitude == null || s.longitude == null,
+    );
+    if (pending.length === 0) {
+      toastSuccess('Todas as paradas já possuem coordenadas');
+      return;
+    }
+    setBulkGeocoding(true);
+    let ok = 0;
+    let fail = 0;
+    try {
+      for (const s of pending) {
+        try {
+          const r = await geocodeAddress({
+            address: s.address ?? '',
+            city: s.city ?? '',
+            state: s.state ?? '',
+            zip: s.zip_code ?? '',
+          });
+          if (r) {
+            const { error } = await supabase
+              .from('route_stops')
+              .update({ latitude: r.latitude, longitude: r.longitude })
+              .eq('id', s.id);
+            if (error) throw error;
+            ok++;
+          } else {
+            fail++;
+          }
+        } catch {
+          fail++;
+        }
+        // Nominatim asks for max 1 req/s
+        await new Promise((res) => setTimeout(res, 1100));
+      }
+      qc.invalidateQueries({ queryKey: ['route_stops', id] });
+      toastSuccess(
+        'Geocodificação concluída',
+        `${ok} parada(s) atualizada(s)${fail ? ` · ${fail} não encontrada(s)` : ''}`,
+      );
+    } finally {
+      setBulkGeocoding(false);
     }
   };
 
@@ -143,7 +196,11 @@ const RoutePlanner = () => {
       <Card className="mb-6">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Paradas da rota</CardTitle>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button size="sm" variant="outline" onClick={bulkGeocode} disabled={bulkGeocoding || missingGeo === 0}>
+              {bulkGeocoding ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <MapPin className="h-4 w-4 mr-1" />}
+              Geocodificar paradas{missingGeo > 0 ? ` (${missingGeo})` : ''}
+            </Button>
             <Button size="sm" variant="outline" onClick={computeEta} disabled={computing || stops.length === 0}>
               {computing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Clock className="h-4 w-4 mr-1" />}
               Calcular ETA
