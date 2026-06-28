@@ -3,7 +3,26 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { instrument, contextFromAuth } from "../_shared/observability.ts";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
-const FROM = Deno.env.get("INCIDENT_EMAIL_FROM") ?? "SRE Alerts <onboarding@resend.dev>";
+const DEFAULT_FROM = Deno.env.get("INCIDENT_EMAIL_FROM") ?? "SRE Alerts <onboarding@resend.dev>";
+
+function isWithinQuietHours(settings: any): boolean {
+  if (!settings) return false;
+  const tz = settings.quiet_timezone || "America/Sao_Paulo";
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz, weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false,
+  }).formatToParts(now);
+  const weekday = parts.find((p) => p.type === "weekday")?.value ?? "";
+  const hh = parts.find((p) => p.type === "hour")?.value ?? "00";
+  const mm = parts.find((p) => p.type === "minute")?.value ?? "00";
+  if (settings.silence_weekends && (weekday === "Sat" || weekday === "Sun")) return true;
+  const s = settings.quiet_hours_start as string | null;
+  const e = settings.quiet_hours_end as string | null;
+  if (!s || !e) return false;
+  const cur = `${hh}:${mm}`;
+  if (s <= e) return cur >= s.slice(0, 5) && cur < e.slice(0, 5);
+  return cur >= s.slice(0, 5) || cur < e.slice(0, 5);
+}
 
 async function handler(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -58,10 +77,23 @@ async function handler(req: Request): Promise<Response> {
     });
   }
 
+  // Load tenant SRE settings (quiet hours, extra recipients, custom from)
+  const { data: settings } = await supabase
+    .from("sre_settings").select("*").eq("company_id", incident.company_id).maybeSingle();
+
+  if (isWithinQuietHours(settings)) {
+    return new Response(JSON.stringify({ skipped: "quiet_hours" }), {
+      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   const { data: usersResp } = await supabase.auth.admin.listUsers({ perPage: 200 });
-  const emails = (usersResp?.users ?? [])
+  const adminEmails = (usersResp?.users ?? [])
     .filter((u) => userIds.includes(u.id) && !!u.email)
     .map((u) => u.email!) as string[];
+
+  const extras = Array.isArray(settings?.extra_recipients) ? settings!.extra_recipients : [];
+  const emails = Array.from(new Set([...adminEmails, ...extras])).filter(Boolean);
 
   if (emails.length === 0) {
     return new Response(JSON.stringify({ skipped: "no_emails" }), {
@@ -69,6 +101,7 @@ async function handler(req: Request): Promise<Response> {
     });
   }
 
+  const FROM = settings?.from_email || DEFAULT_FROM;
   const subject = `[CRÍTICO] ${incident.title}`;
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#0f172a;color:#e2e8f0;border-radius:8px">
