@@ -14838,7 +14838,7 @@ export type Database = {
       system_audit_logs: {
         Row: {
           action: string
-          company_id: string | null
+          company_id: string
           created_at: string | null
           entity_id: string | null
           entity_name: string | null
@@ -14852,7 +14852,7 @@ export type Database = {
         }
         Insert: {
           action: string
-          company_id?: string | null
+          company_id: string
           created_at?: string | null
           entity_id?: string | null
           entity_name?: string | null
@@ -14866,7 +14866,7 @@ export type Database = {
         }
         Update: {
           action?: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string | null
           entity_id?: string | null
           entity_name?: string | null
