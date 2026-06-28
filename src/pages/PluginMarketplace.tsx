@@ -6,7 +6,10 @@ import { Button } from "@/ui/base/button";
 import { Badge } from "@/ui/base/badge";
 import { Input } from "@/ui/base/input";
 import { Switch } from "@/ui/base/switch";
-import { Loader2, Package, PlayCircle, Search, Trash2 } from "lucide-react";
+import { Code2, Loader2, Package, PlayCircle, Search, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   usePlugins,
   usePluginInstallations,
@@ -26,6 +29,18 @@ export default function PluginMarketplace() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
   const [runner, setRunner] = useState<{ id: string; key: string; name: string } | null>(null);
+
+  const { data: isSystemAdmin } = useQuery({
+    queryKey: ["is_system_admin"],
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+      const { data, error } = await supabase.rpc("is_system_admin", { _user_id: user.id });
+      if (error) return false;
+      return !!data;
+    },
+  });
 
   const installMap = useMemo(() => {
     const m = new Map<string, { id: string; status: string }>();
@@ -67,11 +82,21 @@ export default function PluginMarketplace() {
   return (
     <RoleGuard roles={["admin"]}>
       <PageContainer>
-        <PageHeader
-          title="Marketplace de Plugins"
-          description="Estenda o ERP com integrações e automações por tenant"
-          icon={Package}
-        />
+        <div className="flex items-start justify-between gap-3">
+          <PageHeader
+            title="Marketplace de Plugins"
+            description="Estenda o ERP com integrações e automações por tenant"
+            icon={Package}
+          />
+          {isSystemAdmin && (
+            <Button asChild variant="outline" size="sm" className="shrink-0">
+              <Link to="/admin/marketplace/editor">
+                <Code2 className="h-4 w-4 mr-1" />
+                Editor
+              </Link>
+            </Button>
+          )}
+        </div>
 
         <div className="flex flex-col md:flex-row gap-3">
           <div className="relative flex-1 max-w-md">

@@ -22,6 +22,7 @@ export const userRoleConfig: Record<UserRole, StatusConfig> = {
   comercial: { value: 'comercial', label: 'Comercial', color: 'text-rose-700', bgColor: 'bg-rose-100' },
   loja: { value: 'loja', label: 'Loja', color: 'text-pink-700', bgColor: 'bg-pink-100' },
   franquia: { value: 'franquia', label: 'Franquia', color: 'text-violet-700', bgColor: 'bg-violet-100' },
+  system_admin: { value: 'system_admin', label: 'Admin Plataforma', color: 'text-fuchsia-700', bgColor: 'bg-fuchsia-100' },
 };
 
 export const companyStatusConfig: Record<CompanyStatus, StatusConfig> = {
