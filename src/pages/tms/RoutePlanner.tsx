@@ -14,9 +14,10 @@ import { Label } from '@/ui/base/label';
 import { Badge } from '@/ui/base/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/ui/base/dialog';
-import { ArrowUp, ArrowDown, Trash2, Plus, MapPin, Truck, DollarSign, Fuel, ChevronLeft, Clock, Loader2, Search, GripVertical } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2, Plus, MapPin, Truck, DollarSign, Fuel, ChevronLeft, Clock, Loader2, Search, GripVertical, Wand2 } from 'lucide-react';
 import { toastSuccess, toastError, handleMutationError } from '@/lib/toastHelpers';
 import { lookupCep, geocodeAddress } from '@/lib/geocode';
+import { nearestNeighborTsp } from '@/lib/tspOptimize';
 import {
   useRouteStops,
   useCreateRouteStop,
@@ -143,6 +144,39 @@ const RoutePlanner = () => {
     }
   };
 
+  const geocodedCount = useMemo(
+    () => stops.filter((s) => s.latitude != null && s.longitude != null).length,
+    [stops],
+  );
+
+  const optimizeRoute = () => {
+    if (!route) return;
+    if (depot?.depot_latitude == null || depot?.depot_longitude == null) {
+      toastError('Defina as coordenadas do CD para otimizar a rota.');
+      return;
+    }
+    if (geocodedCount < 2) {
+      toastError('Pelo menos 2 paradas precisam estar geocodificadas.');
+      return;
+    }
+    const res = nearestNeighborTsp(
+      stops.map((s) => ({ id: s.id, latitude: s.latitude, longitude: s.longitude })),
+      { lat: depot.depot_latitude as number, lng: depot.depot_longitude as number },
+    );
+    reorder.mutate(
+      { routeId: route.id, ordered: res.ordered },
+      {
+        onSuccess: () =>
+          toastSuccess(
+            'Rota otimizada',
+            `${res.ordered.length - res.skipped} parada(s) reordenadas · ${res.totalKm.toFixed(1)} km estimados${
+              res.skipped ? ` · ${res.skipped} sem geocoding mantida(s) ao final` : ''
+            }`,
+          ),
+      },
+    );
+  };
+
   const summary = useMemo(() => {
     const totalWeight = stops.reduce((s, x) => s + Number(x.weight ?? 0), 0);
     const totalVolume = stops.reduce((s, x) => s + Number(x.volume ?? 0), 0);
@@ -239,6 +273,16 @@ const RoutePlanner = () => {
             <Button size="sm" variant="outline" onClick={computeEta} disabled={computing || stops.length === 0}>
               {computing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Clock className="h-4 w-4 mr-1" />}
               Calcular ETA
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={optimizeRoute}
+              disabled={reorder.isPending || stops.length < 2}
+              title="Reordena as paradas pelo menor caminho (nearest neighbor)"
+            >
+              <Wand2 className="h-4 w-4 mr-1" />
+              Otimizar rota
             </Button>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
