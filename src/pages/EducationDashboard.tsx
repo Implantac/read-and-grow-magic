@@ -32,6 +32,7 @@ import {
   useCreateStudent,
   useEduClasses,
   useEduEnrollments,
+  useEduReceivables,
   useEduSchools,
   useEduStudents,
   useGenerateEnrollmentInvoice,
