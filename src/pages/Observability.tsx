@@ -15,8 +15,9 @@ import {
 } from "@/ui/base/dialog";
 import {
   Activity, AlertTriangle, AlertCircle, Info, ShieldAlert,
-  Plus, RefreshCw, Loader2,
+  Plus, RefreshCw, Loader2, Bell, Trash2, Power,
 } from "lucide-react";
+import { Switch } from "@/ui/base/switch";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
