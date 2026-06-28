@@ -917,74 +917,108 @@ export default function EducationDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {items
-                      .filter((r) => {
-                        const q = billingSearch.trim().toLowerCase();
-                        if (q && !(r.client_name ?? "").toLowerCase().includes(q)) return false;
-                        if (billingStatus === "all") return true;
-                        const open = Number(r.open_amount ?? r.amount ?? 0);
-                        const isPaid = r.status === "paid" || open <= 0;
-                        const isOverdue = !isPaid && new Date(r.due_date) < today;
-                        if (billingStatus === "paid") return isPaid;
-                        if (billingStatus === "overdue") return isOverdue;
-                        return !isPaid && !isOverdue;
-                      })
-                      .sort((a, b) => {
-                        const rank = (r: typeof a) => {
+                    {(() => {
+                      const filtered = items
+                        .filter((r) => {
+                          const q = billingSearch.trim().toLowerCase();
+                          if (q && !(r.client_name ?? "").toLowerCase().includes(q)) return false;
+                          if (billingStatus === "all") return true;
                           const open = Number(r.open_amount ?? r.amount ?? 0);
                           const isPaid = r.status === "paid" || open <= 0;
-                          if (isPaid) return 2;
-                          return new Date(r.due_date) < today ? 0 : 1;
-                        };
-                        const ra = rank(a);
-                        const rb = rank(b);
-                        if (ra !== rb) return ra - rb;
-                        return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
-                      })
-                      .slice(0, 20)
-                      .map((r) => {
-                      const due = new Date(r.due_date);
-                      const open = Number(r.open_amount ?? r.amount ?? 0);
-                      const isPaid = r.status === "paid" || open <= 0;
-                      const isOverdue = !isPaid && due < today;
-                      return (
-                        <TableRow key={r.id}>
-                          <TableCell className="font-medium">{r.client_name}</TableCell>
-                          <TableCell className="text-xs">
-                            {due.toLocaleDateString("pt-BR")}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {formatCurrencyPtBr(Number(r.amount))}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Badge
-                              variant={
-                                isPaid ? "default" : isOverdue ? "destructive" : "secondary"
-                              }
-                            >
-                              {isPaid ? "Paga" : isOverdue ? "Vencida" : "Em aberto"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              disabled={isPaid || markPaid.isPending}
-                              onClick={async () => {
-                                try {
-                                  await markPaid.mutateAsync(r);
-                                  toastSuccess("Mensalidade marcada como paga.");
-                                } catch (e: any) {
-                                  toastError(e?.message ?? "Falha ao marcar como paga.");
-                                }
-                              }}
-                            >
-                              {isPaid ? "Paga" : "Marcar paga"}
-                            </Button>
-                          </TableCell>
-                        </TableRow>
+                          const isOverdue = !isPaid && new Date(r.due_date) < today;
+                          if (billingStatus === "paid") return isPaid;
+                          if (billingStatus === "overdue") return isOverdue;
+                          return !isPaid && !isOverdue;
+                        })
+                        .sort((a, b) => {
+                          const rank = (r: typeof a) => {
+                            const open = Number(r.open_amount ?? r.amount ?? 0);
+                            const isPaid = r.status === "paid" || open <= 0;
+                            if (isPaid) return 2;
+                            return new Date(r.due_date) < today ? 0 : 1;
+                          };
+                          const ra = rank(a);
+                          const rb = rank(b);
+                          if (ra !== rb) return ra - rb;
+                          return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+                        });
+                      const visible = filtered.slice(0, 20);
+                      const hidden = filtered.length - visible.length;
+                      const totalValue = filtered.reduce((acc, r) => acc + Number(r.amount ?? 0), 0);
+                      const totalOpen = filtered.reduce(
+                        (acc, r) => acc + Number(r.open_amount ?? r.amount ?? 0),
+                        0,
                       );
-                    })}
+                      return (
+                        <>
+                          {visible.map((r) => {
+                            const due = new Date(r.due_date);
+                            const open = Number(r.open_amount ?? r.amount ?? 0);
+                            const isPaid = r.status === "paid" || open <= 0;
+                            const isOverdue = !isPaid && due < today;
+                            return (
+                              <TableRow key={r.id}>
+                                <TableCell className="font-medium">{r.client_name}</TableCell>
+                                <TableCell className="text-xs">
+                                  {due.toLocaleDateString("pt-BR")}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  {formatCurrencyPtBr(Number(r.amount))}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Badge
+                                    variant={
+                                      isPaid ? "default" : isOverdue ? "destructive" : "secondary"
+                                    }
+                                  >
+                                    {isPaid ? "Paga" : isOverdue ? "Vencida" : "Em aberto"}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={isPaid || markPaid.isPending}
+                                    onClick={async () => {
+                                      try {
+                                        await markPaid.mutateAsync(r);
+                                        toastSuccess("Mensalidade marcada como paga.");
+                                      } catch (e: any) {
+                                        toastError(e?.message ?? "Falha ao marcar como paga.");
+                                      }
+                                    }}
+                                  >
+                                    {isPaid ? "Paga" : "Marcar paga"}
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                          {filtered.length === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={5} className="text-center text-xs text-muted-foreground py-6">
+                                Nenhuma cobrança corresponde aos filtros selecionados.
+                              </TableCell>
+                            </TableRow>
+                          )}
+                          {filtered.length > 0 && (
+                            <TableRow className="bg-muted/30 font-medium">
+                              <TableCell>
+                                Totais ({filtered.length}
+                                {hidden > 0 ? ` • ${hidden} ocultas` : ""})
+                              </TableCell>
+                              <TableCell className="text-xs text-muted-foreground">
+                                Em aberto: {formatCurrencyPtBr(totalOpen)}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {formatCurrencyPtBr(totalValue)}
+                              </TableCell>
+                              <TableCell colSpan={2} />
+                            </TableRow>
+                          )}
+                        </>
+                      );
+                    })()}
                   </TableBody>
                 </Table>
               </div>
