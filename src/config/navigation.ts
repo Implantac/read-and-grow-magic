@@ -327,6 +327,7 @@ export const navigationSections: NavSection[] = [
           { title: 'Transportadoras', href: '/tms/transportadoras', icon: 'Building2' },
           { title: 'Veículos / Frota', href: '/tms/veiculos', icon: 'Truck' },
           { title: 'Rotas de Entrega', href: '/tms/rotas', icon: 'MapPin' },
+          { title: 'Rastreamento ao Vivo', href: '/tms/live', icon: 'Navigation' },
           { title: 'Comprovantes', href: '/tms/comprovantes', icon: 'FileCheck' },
         ],
       },
