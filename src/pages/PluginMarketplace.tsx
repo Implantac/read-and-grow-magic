@@ -30,6 +30,18 @@ export default function PluginMarketplace() {
   const [category, setCategory] = useState<string>("all");
   const [runner, setRunner] = useState<{ id: string; key: string; name: string } | null>(null);
 
+  const { data: isSystemAdmin } = useQuery({
+    queryKey: ["is_system_admin"],
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+      const { data, error } = await supabase.rpc("is_system_admin", { _user_id: user.id });
+      if (error) return false;
+      return !!data;
+    },
+  });
+
   const installMap = useMemo(() => {
     const m = new Map<string, { id: string; status: string }>();
     (installs ?? []).forEach((i) => m.set(i.plugin_id, { id: i.id, status: i.status }));
