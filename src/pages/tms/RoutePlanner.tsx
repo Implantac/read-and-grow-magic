@@ -260,6 +260,20 @@ const RoutePlanner = () => {
         </CardContent>
       </Card>
 
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-base">Mapa da rota</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <RouteMap
+            stops={stops}
+            depot={{ lat: depot?.depot_latitude as number | null, lng: depot?.depot_longitude as number | null }}
+            height={400}
+          />
+        </CardContent>
+      </Card>
+
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
