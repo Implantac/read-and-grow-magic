@@ -6,7 +6,7 @@ interface AppState {
   // Auth
   user: User | null;
   isAuthenticated: boolean;
-  userRole: 'admin' | 'manager' | 'operator' | 'viewer' | 'diretor' | 'financeiro' | 'fiscal' | 'contabil' | 'compras' | 'producao' | 'logistica' | 'comercial' | 'loja' | 'franquia' | null;
+  userRole: 'admin' | 'manager' | 'operator' | 'viewer' | 'diretor' | 'financeiro' | 'fiscal' | 'contabil' | 'compras' | 'producao' | 'logistica' | 'comercial' | 'loja' | 'franquia' | 'system_admin' | null;
   
   // Company/Branch
   activeCompany: Company | null;
