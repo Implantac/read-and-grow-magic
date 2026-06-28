@@ -50,6 +50,18 @@ type Incident = {
   resolution_notes: string | null;
 };
 
+type AlertRule = {
+  id: string;
+  name: string;
+  source: string | null;
+  min_severity: "info" | "warning" | "error" | "critical";
+  threshold: number;
+  window_minutes: number;
+  incident_severity: "minor" | "major" | "critical";
+  enabled: boolean;
+  last_triggered_at: string | null;
+};
+
 const sevColor: Record<string, string> = {
   critical: "destructive",
   error: "destructive",
