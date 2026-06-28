@@ -173,7 +173,36 @@ export default function EducationDashboard() {
     }
   }
 
-  return (
+  const [bulkRunning, setBulkRunning] = useState(false);
+  async function handleBulkGenerate() {
+    if (activeEnrollments.length === 0) return;
+    setBulkRunning(true);
+    let ok = 0;
+    let skip = 0;
+    let fail = 0;
+    for (const en of activeEnrollments) {
+      const aluno = (students.data ?? []).find((s) => s.id === en.student_id);
+      const turma = (classes.data ?? []).find((c) => c.id === en.class_id);
+      if (!aluno || !turma) {
+        fail++;
+        continue;
+      }
+      try {
+        await generateInvoice.mutateAsync({
+          enrollment: en,
+          studentName: aluno.full_name,
+          className: turma.name,
+        });
+        ok++;
+      } catch (e: any) {
+        if (String(e?.message ?? "").includes("já foi gerada")) skip++;
+        else fail++;
+      }
+    }
+    setBulkRunning(false);
+    if (ok > 0) toastSuccess(`${ok} mensalidade(s) geradas. ${skip} já existiam. ${fail} falhas.`);
+    else toastError(`Nenhuma gerada. ${skip} já existiam. ${fail} falhas.`);
+  }
     <PageContainer>
       <PageHeader
         title="Educação"
