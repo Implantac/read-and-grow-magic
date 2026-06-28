@@ -76,6 +76,7 @@ export default function EducationDashboard() {
   const [form, setForm] = useState({ name: "", inep_code: "", phone: "", email: "" });
 
   const [billingStatus, setBillingStatus] = useState<"all" | "paid" | "open" | "overdue">("all");
+  const [billingSearch, setBillingSearch] = useState("");
   const [billingMonth, setBillingMonth] = useState<string>(() => {
     const n = new Date();
     return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}`;
@@ -774,6 +775,12 @@ export default function EducationDashboard() {
                 ))}
               </SelectContent>
             </Select>
+            <Input
+              placeholder="Buscar aluno…"
+              value={billingSearch}
+              onChange={(e) => setBillingSearch(e.target.value)}
+              className="w-[180px]"
+            />
             <Select value={billingStatus} onValueChange={(v) => setBillingStatus(v as typeof billingStatus)}>
               <SelectTrigger className="w-[150px]">
                 <SelectValue />
@@ -793,8 +800,10 @@ export default function EducationDashboard() {
                 const ym = billingMonth;
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
+                const q = billingSearch.trim().toLowerCase();
                 const items = (receivables.data ?? []).filter((r) => {
                   if (!r.description?.includes(`Mensalidade ${ym}`)) return false;
+                  if (q && !(r.client_name ?? "").toLowerCase().includes(q)) return false;
                   if (billingStatus === "all") return true;
                   const open = Number(r.open_amount ?? r.amount ?? 0);
                   const isPaid = r.status === "paid" || open <= 0;
@@ -910,6 +919,8 @@ export default function EducationDashboard() {
                   <TableBody>
                     {items
                       .filter((r) => {
+                        const q = billingSearch.trim().toLowerCase();
+                        if (q && !(r.client_name ?? "").toLowerCase().includes(q)) return false;
                         if (billingStatus === "all") return true;
                         const open = Number(r.open_amount ?? r.amount ?? 0);
                         const isPaid = r.status === "paid" || open <= 0;
