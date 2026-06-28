@@ -792,6 +792,18 @@ export default function EducationDashboard() {
                 <SelectItem value="overdue">Vencidas</SelectItem>
               </SelectContent>
             </Select>
+            {(billingStatus !== "all" || billingSearch.trim() !== "") && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  setBillingStatus("all");
+                  setBillingSearch("");
+                }}
+              >
+                Limpar filtros
+              </Button>
+            )}
             <Button
               size="sm"
               variant="outline"
