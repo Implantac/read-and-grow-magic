@@ -12837,6 +12837,148 @@ export type Database = {
           },
         ]
       }
+      route_costs: {
+        Row: {
+          company_id: string
+          created_at: string
+          driver_cost: number | null
+          fuel_cost: number | null
+          fuel_liters: number | null
+          id: string
+          maintenance_cost: number | null
+          notes: string | null
+          other_cost: number | null
+          route_id: string
+          toll_cost: number | null
+          total_distance_km: number | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          driver_cost?: number | null
+          fuel_cost?: number | null
+          fuel_liters?: number | null
+          id?: string
+          maintenance_cost?: number | null
+          notes?: string | null
+          other_cost?: number | null
+          route_id: string
+          toll_cost?: number | null
+          total_distance_km?: number | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          driver_cost?: number | null
+          fuel_cost?: number | null
+          fuel_liters?: number | null
+          id?: string
+          maintenance_cost?: number | null
+          notes?: string | null
+          other_cost?: number | null
+          route_id?: string
+          toll_cost?: number | null
+          total_distance_km?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_costs_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: true
+            referencedRelation: "delivery_routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      route_stops: {
+        Row: {
+          actual_arrival: string | null
+          actual_departure: string | null
+          address: string
+          city: string | null
+          company_id: string
+          created_at: string
+          customer_id: string | null
+          failure_reason: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          notes: string | null
+          order_id: string | null
+          planned_eta: string | null
+          route_id: string
+          sequence: number
+          state: string | null
+          status: string
+          stop_type: string
+          updated_at: string
+          volume: number | null
+          weight: number | null
+          zip_code: string | null
+        }
+        Insert: {
+          actual_arrival?: string | null
+          actual_departure?: string | null
+          address: string
+          city?: string | null
+          company_id: string
+          created_at?: string
+          customer_id?: string | null
+          failure_reason?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          order_id?: string | null
+          planned_eta?: string | null
+          route_id: string
+          sequence: number
+          state?: string | null
+          status?: string
+          stop_type?: string
+          updated_at?: string
+          volume?: number | null
+          weight?: number | null
+          zip_code?: string | null
+        }
+        Update: {
+          actual_arrival?: string | null
+          actual_departure?: string | null
+          address?: string
+          city?: string | null
+          company_id?: string
+          created_at?: string
+          customer_id?: string | null
+          failure_reason?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          order_id?: string | null
+          planned_eta?: string | null
+          route_id?: string
+          sequence?: number
+          state?: string | null
+          status?: string
+          stop_type?: string
+          updated_at?: string
+          volume?: number | null
+          weight?: number | null
+          zip_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "route_stops_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saas_invoices: {
         Row: {
           amount: number
