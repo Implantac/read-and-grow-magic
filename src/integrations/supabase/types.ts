@@ -1700,6 +1700,51 @@ export type Database = {
           },
         ]
       }
+      alert_rules: {
+        Row: {
+          company_id: string
+          created_at: string
+          enabled: boolean
+          id: string
+          incident_severity: string
+          last_triggered_at: string | null
+          min_severity: string
+          name: string
+          source: string | null
+          threshold: number
+          updated_at: string
+          window_minutes: number
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          incident_severity?: string
+          last_triggered_at?: string | null
+          min_severity?: string
+          name: string
+          source?: string | null
+          threshold?: number
+          updated_at?: string
+          window_minutes?: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          incident_severity?: string
+          last_triggered_at?: string | null
+          min_severity?: string
+          name?: string
+          source?: string | null
+          threshold?: number
+          updated_at?: string
+          window_minutes?: number
+        }
+        Relationships: []
+      }
       automation_rules: {
         Row: {
           actions: Json
@@ -14880,6 +14925,7 @@ export type Database = {
       system_incidents: {
         Row: {
           acknowledged_at: string | null
+          alert_rule_id: string | null
           assigned_to: string | null
           company_id: string
           created_at: string
@@ -14897,6 +14943,7 @@ export type Database = {
         }
         Insert: {
           acknowledged_at?: string | null
+          alert_rule_id?: string | null
           assigned_to?: string | null
           company_id: string
           created_at?: string
@@ -14914,6 +14961,7 @@ export type Database = {
         }
         Update: {
           acknowledged_at?: string | null
+          alert_rule_id?: string | null
           assigned_to?: string | null
           company_id?: string
           created_at?: string
@@ -14929,7 +14977,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "system_incidents_alert_rule_id_fkey"
+            columns: ["alert_rule_id"]
+            isOneToOne: false
+            referencedRelation: "alert_rules"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       system_metrics: {
         Row: {
@@ -17856,6 +17912,7 @@ export type Database = {
         Args: { _company_id: string; _context: Json; _event: string }
         Returns: undefined
       }
+      fn_evaluate_alert_rules: { Args: never; Returns: number }
       fn_my_pending_approvals: {
         Args: never
         Returns: {
@@ -18151,6 +18208,7 @@ export type Database = {
         }
         Returns: Json
       }
+      severity_rank: { Args: { _sev: string }; Returns: number }
       suggest_category: {
         Args: { _party_kind: string; _party_name: string }
         Returns: {
