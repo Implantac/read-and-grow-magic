@@ -241,6 +241,42 @@ export function useGenerateEnrollmentInvoice() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["accounts_receivable"] });
+      qc.invalidateQueries({ queryKey: ["edu_receivables"] });
+    },
+  });
+}
+
+export interface EduReceivable {
+  id: string;
+  description: string;
+  client_name: string;
+  amount: number;
+  open_amount: number | null;
+  paid_amount: number | null;
+  due_date: string;
+  payment_date: string | null;
+  status: string;
+  source_id: string | null;
+}
+
+/** Receivables generated from education enrollments, scoped to the active tenant. */
+export function useEduReceivables() {
+  const companyId = useEnterpriseStore((s) => s.activeCompanyId);
+  return useQuery({
+    queryKey: ["edu_receivables", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("accounts_receivable")
+        .select(
+          "id, description, client_name, amount, open_amount, paid_amount, due_date, payment_date, status, source_id",
+        )
+        .eq("company_id", companyId!)
+        .eq("source_type", "edu_enrollment")
+        .order("due_date", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      return (data ?? []) as EduReceivable[];
     },
   });
 }

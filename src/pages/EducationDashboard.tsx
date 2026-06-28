@@ -32,6 +32,7 @@ import {
   useCreateStudent,
   useEduClasses,
   useEduEnrollments,
+  useEduReceivables,
   useEduSchools,
   useEduStudents,
   useGenerateEnrollmentInvoice,
@@ -60,6 +61,7 @@ export default function EducationDashboard() {
   const createStudent = useCreateStudent();
   const createEnrollment = useCreateEnrollment();
   const generateInvoice = useGenerateEnrollmentInvoice();
+  const receivables = useEduReceivables();
 
   const [enrollOpen, setEnrollOpen] = useState(false);
   const [enrollForm, setEnrollForm] = useState({
@@ -731,6 +733,115 @@ export default function EducationDashboard() {
               </TableBody>
             </Table>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Cobranças geradas (mês corrente)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {receivables.isLoading ? (
+            <Skeleton className="h-32 w-full" />
+          ) : (() => {
+            const now = new Date();
+            const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+            const items = (receivables.data ?? []).filter((r) =>
+              r.description?.includes(`Mensalidade ${ym}`),
+            );
+            if (items.length === 0) {
+              return (
+                <p className="text-sm text-muted-foreground">
+                  Nenhuma mensalidade emitida neste mês.
+                </p>
+              );
+            }
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const summary = items.reduce(
+              (acc, r) => {
+                const open = Number(r.open_amount ?? r.amount ?? 0);
+                const paid = Number(r.paid_amount ?? 0);
+                const due = new Date(r.due_date);
+                const isPaid = r.status === "paid" || open <= 0;
+                if (isPaid) {
+                  acc.paidCount++;
+                  acc.paidValue += paid || Number(r.amount);
+                } else if (due < today) {
+                  acc.overdueCount++;
+                  acc.overdueValue += open;
+                } else {
+                  acc.openCount++;
+                  acc.openValue += open;
+                }
+                return acc;
+              },
+              { paidCount: 0, paidValue: 0, openCount: 0, openValue: 0, overdueCount: 0, overdueValue: 0 },
+            );
+            return (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <div className="rounded-lg border p-3">
+                    <div className="text-xs text-muted-foreground">Pagas</div>
+                    <div className="text-lg font-semibold">{summary.paidCount}</div>
+                    <div className="text-xs">{formatCurrencyPtBr(summary.paidValue)}</div>
+                  </div>
+                  <div className="rounded-lg border p-3">
+                    <div className="text-xs text-muted-foreground">Em aberto</div>
+                    <div className="text-lg font-semibold">{summary.openCount}</div>
+                    <div className="text-xs">{formatCurrencyPtBr(summary.openValue)}</div>
+                  </div>
+                  <div className="rounded-lg border p-3 border-destructive/40">
+                    <div className="text-xs text-destructive">Vencidas</div>
+                    <div className="text-lg font-semibold text-destructive">
+                      {summary.overdueCount}
+                    </div>
+                    <div className="text-xs text-destructive">
+                      {formatCurrencyPtBr(summary.overdueValue)}
+                    </div>
+                  </div>
+                </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Aluno</TableHead>
+                      <TableHead>Vencimento</TableHead>
+                      <TableHead className="text-right">Valor</TableHead>
+                      <TableHead className="text-right">Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {items.slice(0, 20).map((r) => {
+                      const due = new Date(r.due_date);
+                      const open = Number(r.open_amount ?? r.amount ?? 0);
+                      const isPaid = r.status === "paid" || open <= 0;
+                      const isOverdue = !isPaid && due < today;
+                      return (
+                        <TableRow key={r.id}>
+                          <TableCell className="font-medium">{r.client_name}</TableCell>
+                          <TableCell className="text-xs">
+                            {due.toLocaleDateString("pt-BR")}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {formatCurrencyPtBr(Number(r.amount))}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Badge
+                              variant={
+                                isPaid ? "default" : isOverdue ? "destructive" : "secondary"
+                              }
+                            >
+                              {isPaid ? "Paga" : isOverdue ? "Vencida" : "Em aberto"}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            );
+          })()}
         </CardContent>
       </Card>
     </PageContainer>
