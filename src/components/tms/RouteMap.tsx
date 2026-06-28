@@ -120,7 +120,7 @@ export function RouteMap({ stops, depot, height = 360 }: Props) {
           >
             <Popup>
               <div className="text-xs space-y-1">
-                <div className="font-semibold">#{s.sequence} · {s.customer_name ?? 'Cliente'}</div>
+                <div className="font-semibold">Parada #{s.sequence}</div>
                 {s.address && <div>{s.address}</div>}
                 {(s.city || s.state) && <div>{[s.city, s.state].filter(Boolean).join(' / ')}</div>}
                 <div>Status: {s.status}</div>
