@@ -80,7 +80,7 @@ const RoutePlanner = () => {
   if (!route) {
     return (
       <PageContainer>
-        <PageHeader title="Rota não encontrada" />
+        <PageHeader title="Rota não encontrada" description="A rota selecionada não existe ou foi removida." />
         <Link to="/tms/rotas" className="text-primary underline inline-flex items-center gap-1">
           <ChevronLeft className="h-4 w-4" /> Voltar para rotas
         </Link>
