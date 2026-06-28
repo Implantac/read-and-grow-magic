@@ -791,9 +791,18 @@ export default function EducationDashboard() {
               disabled={!receivables.data || receivables.data.length === 0}
               onClick={() => {
                 const ym = billingMonth;
-                const items = (receivables.data ?? []).filter((r) =>
-                  r.description?.includes(`Mensalidade ${ym}`),
-                );
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const items = (receivables.data ?? []).filter((r) => {
+                  if (!r.description?.includes(`Mensalidade ${ym}`)) return false;
+                  if (billingStatus === "all") return true;
+                  const open = Number(r.open_amount ?? r.amount ?? 0);
+                  const isPaid = r.status === "paid" || open <= 0;
+                  const isOverdue = !isPaid && new Date(r.due_date) < today;
+                  if (billingStatus === "paid") return isPaid;
+                  if (billingStatus === "overdue") return isOverdue;
+                  return !isPaid && !isOverdue;
+                });
                 if (items.length === 0) {
                   toastError("Nada para exportar.");
                   return;
