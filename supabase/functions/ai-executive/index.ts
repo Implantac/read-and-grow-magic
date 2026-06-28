@@ -105,7 +105,12 @@ const handler = async (req: Request): Promise<Response> => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+};
+
+serve(instrument(handler, {
+  source: "ai-executive",
+  getContext: contextFromAuth,
+}));
 
 // ─── Data Fetching ──────────────────────────────────────────────
 
