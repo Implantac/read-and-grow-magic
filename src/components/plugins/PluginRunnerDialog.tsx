@@ -45,23 +45,26 @@ export function usePluginExecutions(pluginId?: string) {
   });
 }
 
+interface ExecResponse {
+  ok: boolean;
+  result?: unknown;
+  error?: string;
+  logs?: string[];
+}
+
 function useExecutePlugin() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (vars: {
-      pluginKey: string;
-      action: string;
-      payload: Record<string, unknown>;
-    }) => {
+  return useMutation<ExecResponse, Error, { pluginKey: string; action: string; payload: Record<string, unknown> }>({
+    mutationFn: async (vars) => {
       const { data, error } = await supabase.functions.invoke("plugin-execute", {
         body: vars,
       });
       if (error) throw error;
-      return data;
+      return data as ExecResponse;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["plugin_executions"] });
-      toastSuccess("Execução concluída");
+      if (data?.ok) toastSuccess("Execução concluída");
     },
     onError: handleMutationError,
   });
@@ -143,6 +146,33 @@ export function PluginRunnerDialog({ open, onOpenChange, pluginId, pluginKey, pl
                   </>
                 )}
               </Button>
+
+              {execute.data && (
+                <div className="space-y-2 pt-2 border-t">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold">Resultado</span>
+                    <Badge variant={execute.data.ok ? "default" : "destructive"}>
+                      {execute.data.ok ? "ok" : "erro"}
+                    </Badge>
+                  </div>
+                  {execute.data.error && (
+                    <p className="text-xs text-destructive break-words">{execute.data.error}</p>
+                  )}
+                  <pre className="text-[10px] bg-muted/40 rounded p-2 max-h-32 overflow-auto font-mono">
+                    {JSON.stringify(execute.data.result ?? null, null, 2)}
+                  </pre>
+                  {execute.data.logs && execute.data.logs.length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-xs font-semibold text-muted-foreground">
+                        Console ({execute.data.logs.length})
+                      </span>
+                      <pre className="text-[10px] bg-foreground/5 rounded p-2 max-h-32 overflow-auto font-mono whitespace-pre-wrap">
+                        {execute.data.logs.join("\n")}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
 

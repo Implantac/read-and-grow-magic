@@ -36,14 +36,14 @@ const handler = async (req: Request): Promise<Response> => {
   // Look up plugin and confirm the tenant has an active installation
   const { data: plugin } = await admin
     .from("plugins")
-    .select("id, key, is_published")
+    .select("id, key, is_published, sandbox_script, manifest")
     .eq("key", body.pluginKey)
     .maybeSingle();
   if (!plugin || !plugin.is_published) return jsonError("Plugin not found", 404);
 
   const { data: install } = await admin
     .from("plugin_installations")
-    .select("id, status")
+    .select("id, status, config, quota_per_day")
     .eq("plugin_id", plugin.id)
     .eq("company_id", auth.companyId)
     .maybeSingle();
@@ -51,13 +51,34 @@ const handler = async (req: Request): Promise<Response> => {
     return jsonError("Plugin not installed or disabled", 403);
   }
 
+  // Per-tenant daily quota
+  const { data: remaining } = await admin.rpc("plugin_quota_remaining", {
+    _installation_id: install.id,
+  });
+  if (typeof remaining === "number" && remaining <= 0) {
+    return jsonError("Daily quota exceeded for this plugin", 429);
+  }
+
   const startedAt = Date.now();
   let status: "success" | "error" = "success";
   let result: Record<string, unknown> | null = null;
   let errorMessage: string | null = null;
+  let sandboxLogs: string[] = [];
 
   try {
-    result = await dispatch(plugin.key, body.action, body.payload ?? {});
+    if (plugin.sandbox_script && plugin.sandbox_script.trim().length > 0) {
+      const sandboxResult = await runSandbox(
+        plugin.sandbox_script,
+        body.action,
+        body.payload ?? {},
+        (install.config as Record<string, string>) ?? {},
+      );
+      sandboxLogs = sandboxResult.logs;
+      if (!sandboxResult.ok) throw new Error(sandboxResult.error);
+      result = { value: sandboxResult.result } as Record<string, unknown>;
+    } else {
+      result = await dispatch(plugin.key, body.action, body.payload ?? {});
+    }
   } catch (err) {
     status = "error";
     errorMessage = err instanceof Error ? err.message : "unknown error";
@@ -89,11 +110,58 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
 
-  if (status === "error") return safeError(errorMessage ?? "Plugin error", 502);
-  return new Response(JSON.stringify({ ok: true, result }), {
+  if (status === "error") {
+    return new Response(
+      JSON.stringify({ ok: false, error: errorMessage, logs: sandboxLogs }),
+      { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+  return new Response(JSON.stringify({ ok: true, result, logs: sandboxLogs }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 };
+
+interface SandboxOutcome {
+  ok: boolean;
+  result?: unknown;
+  error?: string;
+  logs: string[];
+}
+
+// Spawn a Web Worker with NO Deno permissions and a 3s hard timeout.
+// The worker only sees what `sandbox-worker.ts` exposes (register, console.log, ctx.fetch, ctx.secrets).
+async function runSandbox(
+  script: string,
+  action: string,
+  payload: unknown,
+  secrets: Record<string, string>,
+): Promise<SandboxOutcome> {
+  const workerUrl = new URL("./sandbox-worker.ts", import.meta.url);
+  const worker = new Worker(workerUrl.href, {
+    type: "module",
+    // Deno-specific: strip all runtime permissions from the spawned worker.
+    deno: { permissions: "none" },
+  } as WorkerOptions);
+
+  return await new Promise<SandboxOutcome>((resolve) => {
+    const timer = setTimeout(() => {
+      worker.terminate();
+      resolve({ ok: false, error: "Sandbox timeout (3s)", logs: [] });
+    }, 3000);
+
+    worker.onmessage = (ev: MessageEvent) => {
+      clearTimeout(timer);
+      worker.terminate();
+      resolve(ev.data as SandboxOutcome);
+    };
+    worker.onerror = (ev) => {
+      clearTimeout(timer);
+      worker.terminate();
+      resolve({ ok: false, error: ev.message || "Sandbox worker error", logs: [] });
+    };
+    worker.postMessage({ script, action, payload, secrets });
+  });
+}
 
 Deno.serve(instrument(handler, { source: "plugin-execute", getContext: contextFromAuth }));
 
