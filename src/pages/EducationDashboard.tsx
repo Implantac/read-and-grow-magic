@@ -211,6 +211,18 @@ export default function EducationDashboard() {
         description="Gestão de escolas, turmas, alunos e matrículas."
         actions={
           <div className="flex gap-2 flex-wrap">
+            <Button
+              variant="secondary"
+              disabled={bulkRunning || activeEnrollments.length === 0}
+              onClick={handleBulkGenerate}
+            >
+              {bulkRunning ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <FileText className="h-4 w-4 mr-2" />
+              )}
+              Gerar mensalidades do mês
+            </Button>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button>
