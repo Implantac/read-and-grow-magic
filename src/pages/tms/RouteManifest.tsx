@@ -137,13 +137,13 @@ const RouteManifest = () => {
                 <td className="py-2 font-mono font-bold">{i + 1}</td>
                 <td className="py-2">{STOP_TYPE[s.stop_type] ?? s.stop_type}</td>
                 <td className="py-2">
-                  <div className="font-medium">{s.customer_name ?? '—'}</div>
-                  <div className="text-muted-foreground">{s.address ?? '—'}</div>
+                  <div className="font-medium">{(s as any).customer_id ? `Cliente #${String((s as any).customer_id).slice(0, 8)}` : '—'}</div>
+                  <div className="text-muted-foreground">{s.address ?? '—'}{s.city ? ` — ${s.city}/${s.state ?? ''}` : ''}</div>
                   {s.notes && <div className="text-muted-foreground italic mt-1">Obs: {s.notes}</div>}
                 </td>
                 <td className="py-2 text-right">{s.weight ? `${Number(s.weight).toLocaleString('pt-BR')} kg` : '—'}</td>
                 <td className="py-2 text-right">{s.volume ? Number(s.volume).toLocaleString('pt-BR') : '—'}</td>
-                <td className="py-2">{s.estimated_arrival ? new Date(s.estimated_arrival).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</td>
+                <td className="py-2">{(s as any).planned_eta ? new Date((s as any).planned_eta).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</td>
                 <td className="py-2">
                   <div className="h-10 border-b border-dashed border-foreground/60"></div>
                 </td>
