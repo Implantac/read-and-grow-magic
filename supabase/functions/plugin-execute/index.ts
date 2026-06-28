@@ -10,7 +10,7 @@ interface ExecBody {
   payload?: Record<string, unknown>;
 }
 
-Deno.serve(async (req) => {
+const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const auth = await requireAuth(req);
