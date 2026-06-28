@@ -17,6 +17,7 @@ const DeliveryProofPage = lazy(() => import("../pages/tms/DeliveryProof"));
 const RoutePlannerPage = lazy(() => import("../pages/tms/RoutePlanner"));
 const LiveTrackingPage = lazy(() => import("../pages/tms/LiveTracking"));
 const RouteManifestPage = lazy(() => import("../pages/tms/RouteManifest"));
+const PODCapturePage = lazy(() => import("../pages/tms/PODCapture"));
 
 export const MiscellaneousRoutes = [
   <Route key="profile" path="/profile" element={<ProfilePage />} />,
@@ -35,4 +36,5 @@ export const MiscellaneousRoutes = [
   <Route key="tms-live" path="/tms/live" element={<LiveTrackingPage />} />,
   <Route key="tms-planner" path="/tms/rotas/:id/planejamento" element={<RoutePlannerPage />} />,
   <Route key="tms-manifest" path="/tms/rotas/:id/manifesto" element={<RouteManifestPage />} />,
+  <Route key="tms-pod" path="/tms/rotas/:routeId/comprovante" element={<PODCapturePage />} />,
 ];
