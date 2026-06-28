@@ -37,8 +37,8 @@ export default function WorkflowDelegations() {
   const [endsAt, setEndsAt] = useState("");
 
   const { data: rows = [], isLoading } = useQuery({
-    queryKey: ["workflow_delegations", companyId, user?.id],
-    enabled: !!companyId && !!user,
+    queryKey: ["workflow_delegations", companyId, authUser?.id],
+    enabled: !!companyId && !!authUser,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("workflow_delegations")
@@ -64,10 +64,10 @@ export default function WorkflowDelegations() {
 
   const create = useMutation({
     mutationFn: async () => {
-      if (!user || !companyId) return;
+      if (!authUser || !companyId) return;
       const { error } = await supabase.from("workflow_delegations").insert({
         company_id: companyId,
-        from_user: user.id,
+        from_user: authUser.id,
         to_user: toUser,
         reason: reason || null,
         ends_at: endsAt ? new Date(endsAt).toISOString() : null,
