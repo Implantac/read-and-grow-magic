@@ -168,4 +168,7 @@ const handler = async (req: Request): Promise<Response> => {
       status: 500,
     })
   }
-})
+}
+
+Deno.serve(instrument(handler, { source: 'pcp-bottlenecks', getContext: contextFromAuth }))
+
