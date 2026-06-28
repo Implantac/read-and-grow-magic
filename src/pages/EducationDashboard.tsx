@@ -886,17 +886,38 @@ export default function EducationDashboard() {
             return (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div className="rounded-lg border p-3">
+                  <button
+                    type="button"
+                    onClick={() => setBillingStatus((s) => (s === "paid" ? "all" : "paid"))}
+                    className={`text-left rounded-lg border p-3 transition hover:bg-muted/40 ${
+                      billingStatus === "paid" ? "ring-2 ring-primary" : ""
+                    }`}
+                    aria-pressed={billingStatus === "paid"}
+                  >
                     <div className="text-xs text-muted-foreground">Pagas</div>
                     <div className="text-lg font-semibold">{summary.paidCount}</div>
                     <div className="text-xs">{formatCurrencyPtBr(summary.paidValue)}</div>
-                  </div>
-                  <div className="rounded-lg border p-3">
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBillingStatus((s) => (s === "open" ? "all" : "open"))}
+                    className={`text-left rounded-lg border p-3 transition hover:bg-muted/40 ${
+                      billingStatus === "open" ? "ring-2 ring-primary" : ""
+                    }`}
+                    aria-pressed={billingStatus === "open"}
+                  >
                     <div className="text-xs text-muted-foreground">Em aberto</div>
                     <div className="text-lg font-semibold">{summary.openCount}</div>
                     <div className="text-xs">{formatCurrencyPtBr(summary.openValue)}</div>
-                  </div>
-                  <div className="rounded-lg border p-3 border-destructive/40">
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBillingStatus((s) => (s === "overdue" ? "all" : "overdue"))}
+                    className={`text-left rounded-lg border border-destructive/40 p-3 transition hover:bg-destructive/10 ${
+                      billingStatus === "overdue" ? "ring-2 ring-destructive" : ""
+                    }`}
+                    aria-pressed={billingStatus === "overdue"}
+                  >
                     <div className="text-xs text-destructive">Vencidas</div>
                     <div className="text-lg font-semibold text-destructive">
                       {summary.overdueCount}
@@ -904,7 +925,7 @@ export default function EducationDashboard() {
                     <div className="text-xs text-destructive">
                       {formatCurrencyPtBr(summary.overdueValue)}
                     </div>
-                  </div>
+                  </button>
                 </div>
                 <Table>
                   <TableHeader>
