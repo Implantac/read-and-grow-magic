@@ -98,6 +98,7 @@ const App = () => (
                 <Route path="/workflows/aprovacoes" element={<MyApprovals />} />
                 <Route path="/workflows/delegacoes" element={<WorkflowDelegations />} />
                 <Route path="/sre" element={<Observability />} />
+                <Route path="/sre/configuracao" element={<SRESettings />} />
                 <Route path="/marketplace" element={<PluginMarketplace />} />
                 <Route path="/construcao/obras" element={<ConstructionProjects />} />
                 <Route path="/construcao/obras/:id" element={<ConstructionProjectDetail />} />
