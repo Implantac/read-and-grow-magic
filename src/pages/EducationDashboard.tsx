@@ -1110,7 +1110,6 @@ export default function EducationDashboard() {
                                     </Button>
                                   </div>
                                 </TableCell>
-                                </TableCell>
                               </TableRow>
                             );
                           })}
