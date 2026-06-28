@@ -3,7 +3,26 @@ import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { instrument, contextFromAuth } from "../_shared/observability.ts";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
-const FROM = Deno.env.get("INCIDENT_EMAIL_FROM") ?? "SRE Alerts <onboarding@resend.dev>";
+const DEFAULT_FROM = Deno.env.get("INCIDENT_EMAIL_FROM") ?? "SRE Alerts <onboarding@resend.dev>";
+
+function isWithinQuietHours(settings: any): boolean {
+  if (!settings) return false;
+  const tz = settings.quiet_timezone || "America/Sao_Paulo";
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz, weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false,
+  }).formatToParts(now);
+  const weekday = parts.find((p) => p.type === "weekday")?.value ?? "";
+  const hh = parts.find((p) => p.type === "hour")?.value ?? "00";
+  const mm = parts.find((p) => p.type === "minute")?.value ?? "00";
+  if (settings.silence_weekends && (weekday === "Sat" || weekday === "Sun")) return true;
+  const s = settings.quiet_hours_start as string | null;
+  const e = settings.quiet_hours_end as string | null;
+  if (!s || !e) return false;
+  const cur = `${hh}:${mm}`;
+  if (s <= e) return cur >= s.slice(0, 5) && cur < e.slice(0, 5);
+  return cur >= s.slice(0, 5) || cur < e.slice(0, 5);
+}
 
 async function handler(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
