@@ -939,6 +939,34 @@ export default function EducationDashboard() {
                     </div>
                   </button>
                 </div>
+                {(() => {
+                  const totalCount =
+                    summary.paidCount + summary.openCount + summary.overdueCount;
+                  const totalValue =
+                    summary.paidValue + summary.openValue + summary.overdueValue;
+                  const delinquencyRate =
+                    totalValue > 0 ? (summary.overdueValue / totalValue) * 100 : 0;
+                  const collectionRate =
+                    totalValue > 0 ? (summary.paidValue / totalValue) * 100 : 0;
+                  return (
+                    <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-muted-foreground">
+                      <span>
+                        Total emitido: <strong className="text-foreground">{totalCount}</strong> ·{" "}
+                        <strong className="text-foreground">{formatCurrencyPtBr(totalValue)}</strong>
+                      </span>
+                      <span>
+                        Taxa de recebimento:{" "}
+                        <strong className="text-foreground">{collectionRate.toFixed(1)}%</strong>
+                      </span>
+                      <span>
+                        Inadimplência:{" "}
+                        <strong className={delinquencyRate > 0 ? "text-destructive" : "text-foreground"}>
+                          {delinquencyRate.toFixed(1)}%
+                        </strong>
+                      </span>
+                    </div>
+                  );
+                })()}
                 <Table>
                   <TableHeader>
                     <TableRow>
