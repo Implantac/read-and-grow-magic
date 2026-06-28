@@ -187,6 +187,23 @@ const RoutePlanner = () => {
     reorder.mutate({ routeId: route.id, ordered: next.map((s) => s.id) });
   };
 
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [overIndex, setOverIndex] = useState<number | null>(null);
+
+  const handleDrop = (target: number) => {
+    if (dragIndex === null || dragIndex === target) {
+      setDragIndex(null);
+      setOverIndex(null);
+      return;
+    }
+    const next = [...stops];
+    const [moved] = next.splice(dragIndex, 1);
+    next.splice(target, 0, moved);
+    reorder.mutate({ routeId: route.id, ordered: next.map((s) => s.id) });
+    setDragIndex(null);
+    setOverIndex(null);
+  };
+
   return (
     <PageContainer>
       <div className="flex items-center justify-between gap-2 mb-2">
