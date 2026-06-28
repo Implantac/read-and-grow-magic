@@ -148,7 +148,7 @@ export default function Observability() {
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status, notes }: { id: string; status: Incident["status"]; notes?: string }) => {
-      const patch: Record<string, unknown> = { status };
+      const patch: { status: Incident["status"]; acknowledged_at?: string; resolved_at?: string; resolution_notes?: string } = { status };
       if (status === "mitigating") patch.acknowledged_at = new Date().toISOString();
       if (status === "resolved") {
         patch.resolved_at = new Date().toISOString();
