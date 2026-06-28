@@ -55,6 +55,24 @@ const RoutePlanner = () => {
   const [open, setOpen] = useState(false);
   const [costOpen, setCostOpen] = useState(false);
 
+  const qc = useQueryClient();
+  const [computing, setComputing] = useState(false);
+
+  const computeEta = async () => {
+    if (!id) return;
+    setComputing(true);
+    try {
+      const { error } = await supabase.rpc('fn_route_compute_eta', { _route_id: id });
+      if (error) throw error;
+      toastSuccess('ETAs recalculados');
+      qc.invalidateQueries({ queryKey: ['route_stops', id] });
+    } catch (e) {
+      handleMutationError(e);
+    } finally {
+      setComputing(false);
+    }
+  };
+
   const summary = useMemo(() => {
     const totalWeight = stops.reduce((s, x) => s + Number(x.weight ?? 0), 0);
     const totalVolume = stops.reduce((s, x) => s + Number(x.volume ?? 0), 0);
