@@ -85,6 +85,48 @@ export function nearestNeighborTsp(
   // close the loop back to depot
   total += haversine(current, { lat: depot.lat, lng: depot.lng });
 
+  // 2-opt refinement: iteratively reverse segments while it shortens the loop.
+  const depotP = { lat: depot.lat, lng: depot.lng };
+  const coords = order.map((id) => {
+    const s = withGeo.find((x) => x.id === id)!;
+    return { lat: s.latitude as number, lng: s.longitude as number };
+  });
+
+  const tourDist = (pts: { lat: number; lng: number }[]) => {
+    if (pts.length === 0) return 0;
+    let d = haversine(depotP, pts[0]);
+    for (let i = 0; i < pts.length - 1; i++) d += haversine(pts[i], pts[i + 1]);
+    d += haversine(pts[pts.length - 1], depotP);
+    return d;
+  };
+
+  let improved = true;
+  let iter = 0;
+  const maxIter = 50;
+  while (improved && iter < maxIter) {
+    improved = false;
+    iter++;
+    for (let i = 0; i < coords.length - 1; i++) {
+      for (let k = i + 1; k < coords.length; k++) {
+        const before =
+          (i === 0 ? haversine(depotP, coords[i]) : haversine(coords[i - 1], coords[i])) +
+          (k === coords.length - 1 ? haversine(coords[k], depotP) : haversine(coords[k], coords[k + 1]));
+        const after =
+          (i === 0 ? haversine(depotP, coords[k]) : haversine(coords[i - 1], coords[k])) +
+          (k === coords.length - 1 ? haversine(coords[i], depotP) : haversine(coords[i], coords[k + 1]));
+        if (after + 1e-9 < before) {
+          const cSlice = coords.slice(i, k + 1).reverse();
+          const oSlice = order.slice(i, k + 1).reverse();
+          coords.splice(i, k - i + 1, ...cSlice);
+          order.splice(i, k - i + 1, ...oSlice);
+          improved = true;
+        }
+      }
+    }
+  }
+
+  total = tourDist(coords);
+
   return {
     ordered: [...order, ...withoutGeo.map((s) => s.id)],
     totalKm: total,
