@@ -4752,16 +4752,21 @@ export type Database = {
       delivery_routes: {
         Row: {
           arrival_time: string | null
+          avg_speed_kmh: number
           carrier_id: string | null
           company_id: string
           completed_stops: number | null
           created_at: string
           departure_time: string | null
+          depot_latitude: number | null
+          depot_longitude: number | null
           driver_name: string | null
           id: string
           notes: string | null
           planned_date: string
+          planned_start_at: string | null
           route_number: string
+          service_time_minutes: number
           status: string
           total_stops: number | null
           total_volume: number | null
@@ -4771,16 +4776,21 @@ export type Database = {
         }
         Insert: {
           arrival_time?: string | null
+          avg_speed_kmh?: number
           carrier_id?: string | null
           company_id?: string
           completed_stops?: number | null
           created_at?: string
           departure_time?: string | null
+          depot_latitude?: number | null
+          depot_longitude?: number | null
           driver_name?: string | null
           id?: string
           notes?: string | null
           planned_date: string
+          planned_start_at?: string | null
           route_number: string
+          service_time_minutes?: number
           status?: string
           total_stops?: number | null
           total_volume?: number | null
@@ -4790,16 +4800,21 @@ export type Database = {
         }
         Update: {
           arrival_time?: string | null
+          avg_speed_kmh?: number
           carrier_id?: string | null
           company_id?: string
           completed_stops?: number | null
           created_at?: string
           departure_time?: string | null
+          depot_latitude?: number | null
+          depot_longitude?: number | null
           driver_name?: string | null
           id?: string
           notes?: string | null
           planned_date?: string
+          planned_start_at?: string | null
           route_number?: string
+          service_time_minutes?: number
           status?: string
           total_stops?: number | null
           total_volume?: number | null
@@ -17995,6 +18010,15 @@ export type Database = {
           _source: string
         }
         Returns: string
+      }
+      fn_route_compute_eta: {
+        Args: { _route_id: string }
+        Returns: {
+          distance_km: number
+          eta: string
+          stop_id: string
+          stop_sequence: number
+        }[]
       }
       fn_tenant_health: { Args: never; Returns: Json }
       fn_workflow_decide: {
