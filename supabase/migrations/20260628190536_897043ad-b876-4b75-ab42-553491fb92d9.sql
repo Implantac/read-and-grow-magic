@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.fn_pqc_set_company_id() FROM anon, PUBLIC;
