@@ -110,11 +110,58 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
 
-  if (status === "error") return safeError(errorMessage ?? "Plugin error", 502);
-  return new Response(JSON.stringify({ ok: true, result }), {
+  if (status === "error") {
+    return new Response(
+      JSON.stringify({ ok: false, error: errorMessage, logs: sandboxLogs }),
+      { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+  return new Response(JSON.stringify({ ok: true, result, logs: sandboxLogs }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 };
+
+interface SandboxOutcome {
+  ok: boolean;
+  result?: unknown;
+  error?: string;
+  logs: string[];
+}
+
+// Spawn a Web Worker with NO Deno permissions and a 3s hard timeout.
+// The worker only sees what `sandbox-worker.ts` exposes (register, console.log, ctx.fetch, ctx.secrets).
+async function runSandbox(
+  script: string,
+  action: string,
+  payload: unknown,
+  secrets: Record<string, string>,
+): Promise<SandboxOutcome> {
+  const workerUrl = new URL("./sandbox-worker.ts", import.meta.url);
+  const worker = new Worker(workerUrl.href, {
+    type: "module",
+    deno: { permissions: "none" },
+    // @ts-expect-error: Deno-specific worker option
+  });
+
+  return await new Promise<SandboxOutcome>((resolve) => {
+    const timer = setTimeout(() => {
+      worker.terminate();
+      resolve({ ok: false, error: "Sandbox timeout (3s)", logs: [] });
+    }, 3000);
+
+    worker.onmessage = (ev: MessageEvent) => {
+      clearTimeout(timer);
+      worker.terminate();
+      resolve(ev.data as SandboxOutcome);
+    };
+    worker.onerror = (ev) => {
+      clearTimeout(timer);
+      worker.terminate();
+      resolve({ ok: false, error: ev.message || "Sandbox worker error", logs: [] });
+    };
+    worker.postMessage({ script, action, payload, secrets });
+  });
+}
 
 Deno.serve(instrument(handler, { source: "plugin-execute", getContext: contextFromAuth }));
 
