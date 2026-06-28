@@ -173,5 +173,11 @@ const handler = async (req: Request): Promise<Response> => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
     )
   }
-})
+}
+
+serve(instrument(handler, {
+  source: "fiscal-transmitter",
+  getContext: contextFromAuth,
+}))
+
 
