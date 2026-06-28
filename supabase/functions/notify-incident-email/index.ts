@@ -77,10 +77,23 @@ async function handler(req: Request): Promise<Response> {
     });
   }
 
+  // Load tenant SRE settings (quiet hours, extra recipients, custom from)
+  const { data: settings } = await supabase
+    .from("sre_settings").select("*").eq("company_id", incident.company_id).maybeSingle();
+
+  if (isWithinQuietHours(settings)) {
+    return new Response(JSON.stringify({ skipped: "quiet_hours" }), {
+      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   const { data: usersResp } = await supabase.auth.admin.listUsers({ perPage: 200 });
-  const emails = (usersResp?.users ?? [])
+  const adminEmails = (usersResp?.users ?? [])
     .filter((u) => userIds.includes(u.id) && !!u.email)
     .map((u) => u.email!) as string[];
+
+  const extras = Array.isArray(settings?.extra_recipients) ? settings!.extra_recipients : [];
+  const emails = Array.from(new Set([...adminEmails, ...extras])).filter(Boolean);
 
   if (emails.length === 0) {
     return new Response(JSON.stringify({ skipped: "no_emails" }), {
@@ -88,6 +101,7 @@ async function handler(req: Request): Promise<Response> {
     });
   }
 
+  const FROM = settings?.from_email || DEFAULT_FROM;
   const subject = `[CRÍTICO] ${incident.title}`;
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#0f172a;color:#e2e8f0;border-radius:8px">
