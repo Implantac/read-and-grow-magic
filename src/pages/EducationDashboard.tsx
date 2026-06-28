@@ -1068,21 +1068,47 @@ export default function EducationDashboard() {
                                   </Badge>
                                 </TableCell>
                                 <TableCell className="text-right">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    disabled={isPaid || markPaid.isPending}
-                                    onClick={async () => {
-                                      try {
-                                        await markPaid.mutateAsync(r);
-                                        toastSuccess("Mensalidade marcada como paga.");
-                                      } catch (e: any) {
-                                        toastError(e?.message ?? "Falha ao marcar como paga.");
-                                      }
-                                    }}
-                                  >
-                                    {isPaid ? "Paga" : "Marcar paga"}
-                                  </Button>
+                                  <div className="flex items-center justify-end gap-1">
+                                    {!isPaid && (
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        title="Copiar mensagem de cobrança"
+                                        onClick={async () => {
+                                          const msg = `Olá ${r.client_name ?? ""}, sua mensalidade${
+                                            r.description ? ` (${r.description})` : ""
+                                          } no valor de ${formatCurrencyPtBr(
+                                            open || Number(r.amount),
+                                          )} ${
+                                            isOverdue ? "venceu em" : "vence em"
+                                          } ${due.toLocaleDateString("pt-BR")}. Qualquer dúvida, estamos à disposição.`;
+                                          try {
+                                            await navigator.clipboard.writeText(msg);
+                                            toastSuccess("Mensagem copiada.");
+                                          } catch {
+                                            toastError("Não foi possível copiar.");
+                                          }
+                                        }}
+                                      >
+                                        Copiar
+                                      </Button>
+                                    )}
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      disabled={isPaid || markPaid.isPending}
+                                      onClick={async () => {
+                                        try {
+                                          await markPaid.mutateAsync(r);
+                                          toastSuccess("Mensalidade marcada como paga.");
+                                        } catch (e: any) {
+                                          toastError(e?.message ?? "Falha ao marcar como paga.");
+                                        }
+                                      }}
+                                    >
+                                      {isPaid ? "Paga" : "Marcar paga"}
+                                    </Button>
+                                  </div>
                                 </TableCell>
                               </TableRow>
                             );
