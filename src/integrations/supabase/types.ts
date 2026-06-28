@@ -14835,6 +14835,135 @@ export type Database = {
         }
         Relationships: []
       }
+      system_events: {
+        Row: {
+          company_id: string
+          context: Json
+          correlation_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          message: string
+          occurred_at: string
+          severity: string
+          source: string
+          user_id: string | null
+        }
+        Insert: {
+          company_id: string
+          context?: Json
+          correlation_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          message: string
+          occurred_at?: string
+          severity?: string
+          source: string
+          user_id?: string | null
+        }
+        Update: {
+          company_id?: string
+          context?: Json
+          correlation_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          message?: string
+          occurred_at?: string
+          severity?: string
+          source?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      system_incidents: {
+        Row: {
+          acknowledged_at: string | null
+          assigned_to: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          opened_at: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          severity: string
+          source: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          assigned_to?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          opened_at?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          severity?: string
+          source?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          assigned_to?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          opened_at?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          severity?: string
+          source?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      system_metrics: {
+        Row: {
+          company_id: string
+          created_at: string
+          dimensions: Json
+          id: string
+          measured_at: string
+          metric_key: string
+          metric_value: number
+          unit: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          dimensions?: Json
+          id?: string
+          measured_at?: string
+          metric_key: string
+          metric_value: number
+          unit?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          dimensions?: Json
+          id?: string
+          measured_at?: string
+          metric_key?: string
+          metric_value?: number
+          unit?: string | null
+        }
+        Relationships: []
+      }
       system_parameters: {
         Row: {
           category: string
@@ -17752,6 +17881,18 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      fn_record_event: {
+        Args: {
+          _context?: Json
+          _correlation_id?: string
+          _event_type: string
+          _message: string
+          _severity: string
+          _source: string
+        }
+        Returns: string
+      }
+      fn_tenant_health: { Args: never; Returns: Json }
       fn_workflow_decide: {
         Args: {
           _approval_id: string
