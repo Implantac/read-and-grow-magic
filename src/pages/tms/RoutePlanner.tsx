@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
@@ -11,7 +13,8 @@ import { Label } from '@/ui/base/label';
 import { Badge } from '@/ui/base/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/ui/base/dialog';
-import { ArrowUp, ArrowDown, Trash2, Plus, MapPin, Truck, DollarSign, Fuel, ChevronLeft } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2, Plus, MapPin, Truck, DollarSign, Fuel, ChevronLeft, Clock, Loader2 } from 'lucide-react';
+import { toastSuccess, handleMutationError } from '@/lib/toastHelpers';
 import {
   useRouteStops,
   useCreateRouteStop,
@@ -51,6 +54,24 @@ const RoutePlanner = () => {
 
   const [open, setOpen] = useState(false);
   const [costOpen, setCostOpen] = useState(false);
+
+  const qc = useQueryClient();
+  const [computing, setComputing] = useState(false);
+
+  const computeEta = async () => {
+    if (!id) return;
+    setComputing(true);
+    try {
+      const { error } = await supabase.rpc('fn_route_compute_eta', { _route_id: id });
+      if (error) throw error;
+      toastSuccess('ETAs recalculados');
+      qc.invalidateQueries({ queryKey: ['route_stops', id] });
+    } catch (e) {
+      handleMutationError(e);
+    } finally {
+      setComputing(false);
+    }
+  };
 
   const summary = useMemo(() => {
     const totalWeight = stops.reduce((s, x) => s + Number(x.weight ?? 0), 0);
@@ -121,19 +142,25 @@ const RoutePlanner = () => {
       <Card className="mb-6">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Paradas da rota</CardTitle>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm"><Plus className="h-4 w-4 mr-1" />Nova parada</Button>
-            </DialogTrigger>
-            <StopDialog
-              routeId={route.id}
-              nextSeq={stops.length + 1}
-              onClose={() => setOpen(false)}
-              onSubmit={(payload) => {
-                createStop.mutate(payload, { onSuccess: () => setOpen(false) });
-              }}
-            />
-          </Dialog>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={computeEta} disabled={computing || stops.length === 0}>
+              {computing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Clock className="h-4 w-4 mr-1" />}
+              Calcular ETA
+            </Button>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm"><Plus className="h-4 w-4 mr-1" />Nova parada</Button>
+              </DialogTrigger>
+              <StopDialog
+                routeId={route.id}
+                nextSeq={stops.length + 1}
+                onClose={() => setOpen(false)}
+                onSubmit={(payload) => {
+                  createStop.mutate(payload, { onSuccess: () => setOpen(false) });
+                }}
+              />
+            </Dialog>
+          </div>
         </CardHeader>
         <CardContent>
           {stops.length === 0 ? (
