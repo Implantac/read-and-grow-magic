@@ -36,6 +36,7 @@ import {
   useEduSchools,
   useEduStudents,
   useGenerateEnrollmentInvoice,
+  useMarkEduReceivablePaid,
 } from "@/hooks/useEducation";
 import {
   Select,
@@ -62,6 +63,7 @@ export default function EducationDashboard() {
   const createEnrollment = useCreateEnrollment();
   const generateInvoice = useGenerateEnrollmentInvoice();
   const receivables = useEduReceivables();
+  const markPaid = useMarkEduReceivablePaid();
 
   const [enrollOpen, setEnrollOpen] = useState(false);
   const [enrollForm, setEnrollForm] = useState({
@@ -737,8 +739,50 @@ export default function EducationDashboard() {
       </Card>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between gap-2">
           <CardTitle>Cobranças geradas (mês corrente)</CardTitle>
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!receivables.data || receivables.data.length === 0}
+            onClick={() => {
+              const now = new Date();
+              const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+              const items = (receivables.data ?? []).filter((r) =>
+                r.description?.includes(`Mensalidade ${ym}`),
+              );
+              if (items.length === 0) {
+                toastError("Nada para exportar.");
+                return;
+              }
+              const header = ["Aluno", "Descrição", "Vencimento", "Valor", "Status"];
+              const rows = items.map((r) => [
+                r.client_name ?? "",
+                r.description ?? "",
+                new Date(r.due_date).toLocaleDateString("pt-BR"),
+                String(Number(r.amount).toFixed(2)).replace(".", ","),
+                r.status ?? "",
+              ]);
+              const csv = [header, ...rows]
+                .map((row) =>
+                  row
+                    .map((c) => `"${String(c).replace(/"/g, '""')}"`)
+                    .join(";"),
+                )
+                .join("\n");
+              const blob = new Blob([`\uFEFF${csv}`], {
+                type: "text/csv;charset=utf-8;",
+              });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `mensalidades-${ym}.csv`;
+              a.click();
+              URL.revokeObjectURL(url);
+            }}
+          >
+            Exportar CSV
+          </Button>
         </CardHeader>
         <CardContent>
           {receivables.isLoading ? (
@@ -808,6 +852,7 @@ export default function EducationDashboard() {
                       <TableHead>Vencimento</TableHead>
                       <TableHead className="text-right">Valor</TableHead>
                       <TableHead className="text-right">Status</TableHead>
+                      <TableHead className="text-right">Ação</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -833,6 +878,23 @@ export default function EducationDashboard() {
                             >
                               {isPaid ? "Paga" : isOverdue ? "Vencida" : "Em aberto"}
                             </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={isPaid || markPaid.isPending}
+                              onClick={async () => {
+                                try {
+                                  await markPaid.mutateAsync(r);
+                                  toastSuccess("Mensalidade marcada como paga.");
+                                } catch (e: any) {
+                                  toastError(e?.message ?? "Falha ao marcar como paga.");
+                                }
+                              }}
+                            >
+                              {isPaid ? "Paga" : "Marcar paga"}
+                            </Button>
                           </TableCell>
                         </TableRow>
                       );
