@@ -40,6 +40,7 @@ const WorkflowInbox = lazy(() => import("./pages/WorkflowInbox"));
 const MyApprovals = lazy(() => import("./pages/MyApprovals"));
 const WorkflowDelegations = lazy(() => import("./pages/WorkflowDelegations"));
 const Observability = lazy(() => import("./pages/Observability"));
+const SRESettings = lazy(() => import("./pages/SRESettings"));
 const PluginMarketplace = lazy(() => import("./pages/PluginMarketplace"));
 const ConstructionProjects = lazy(() => import("./pages/ConstructionProjects"));
 const ConstructionProjectDetail = lazy(() => import("./pages/ConstructionProjectDetail"));
