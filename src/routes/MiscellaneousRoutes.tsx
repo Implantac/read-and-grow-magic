@@ -14,6 +14,8 @@ const CarriersPage = lazy(() => import("../pages/tms/Carriers"));
 const VehiclesPage = lazy(() => import("../pages/tms/Vehicles"));
 const RoutesPage = lazy(() => import("../pages/tms/Routes"));
 const DeliveryProofPage = lazy(() => import("../pages/tms/DeliveryProof"));
+const RoutePlannerPage = lazy(() => import("../pages/tms/RoutePlanner"));
+const LiveTrackingPage = lazy(() => import("../pages/tms/LiveTracking"));
 
 export const MiscellaneousRoutes = [
   <Route key="profile" path="/profile" element={<ProfilePage />} />,
