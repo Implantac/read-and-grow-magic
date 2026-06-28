@@ -142,19 +142,25 @@ const RoutePlanner = () => {
       <Card className="mb-6">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Paradas da rota</CardTitle>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm"><Plus className="h-4 w-4 mr-1" />Nova parada</Button>
-            </DialogTrigger>
-            <StopDialog
-              routeId={route.id}
-              nextSeq={stops.length + 1}
-              onClose={() => setOpen(false)}
-              onSubmit={(payload) => {
-                createStop.mutate(payload, { onSuccess: () => setOpen(false) });
-              }}
-            />
-          </Dialog>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={computeEta} disabled={computing || stops.length === 0}>
+              {computing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Clock className="h-4 w-4 mr-1" />}
+              Calcular ETA
+            </Button>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm"><Plus className="h-4 w-4 mr-1" />Nova parada</Button>
+              </DialogTrigger>
+              <StopDialog
+                routeId={route.id}
+                nextSeq={stops.length + 1}
+                onClose={() => setOpen(false)}
+                onSubmit={(payload) => {
+                  createStop.mutate(payload, { onSuccess: () => setOpen(false) });
+                }}
+              />
+            </Dialog>
+          </div>
         </CardHeader>
         <CardContent>
           {stops.length === 0 ? (
