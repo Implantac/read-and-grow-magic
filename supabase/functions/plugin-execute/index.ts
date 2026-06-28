@@ -139,9 +139,9 @@ async function runSandbox(
   const workerUrl = new URL("./sandbox-worker.ts", import.meta.url);
   const worker = new Worker(workerUrl.href, {
     type: "module",
+    // Deno-specific: strip all runtime permissions from the spawned worker.
     deno: { permissions: "none" },
-    // @ts-expect-error: Deno-specific worker option
-  });
+  } as WorkerOptions);
 
   return await new Promise<SandboxOutcome>((resolve) => {
     const timer = setTimeout(() => {
