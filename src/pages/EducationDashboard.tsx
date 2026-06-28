@@ -758,50 +758,63 @@ export default function EducationDashboard() {
       </Card>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-2">
-          <CardTitle>Cobranças geradas (mês corrente)</CardTitle>
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={!receivables.data || receivables.data.length === 0}
-            onClick={() => {
-              const now = new Date();
-              const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-              const items = (receivables.data ?? []).filter((r) =>
-                r.description?.includes(`Mensalidade ${ym}`),
-              );
-              if (items.length === 0) {
-                toastError("Nada para exportar.");
-                return;
-              }
-              const header = ["Aluno", "Descrição", "Vencimento", "Valor", "Status"];
-              const rows = items.map((r) => [
-                r.client_name ?? "",
-                r.description ?? "",
-                new Date(r.due_date).toLocaleDateString("pt-BR"),
-                String(Number(r.amount).toFixed(2)).replace(".", ","),
-                r.status ?? "",
-              ]);
-              const csv = [header, ...rows]
-                .map((row) =>
-                  row
-                    .map((c) => `"${String(c).replace(/"/g, '""')}"`)
-                    .join(";"),
-                )
-                .join("\n");
-              const blob = new Blob([`\uFEFF${csv}`], {
-                type: "text/csv;charset=utf-8;",
-              });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = `mensalidades-${ym}.csv`;
-              a.click();
-              URL.revokeObjectURL(url);
-            }}
-          >
-            Exportar CSV
-          </Button>
+        <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
+          <CardTitle>Cobranças geradas</CardTitle>
+          <div className="flex items-center gap-2">
+            <Select value={billingMonth} onValueChange={setBillingMonth}>
+              <SelectTrigger className="w-[200px] capitalize">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {billingMonthOptions.map((o) => (
+                  <SelectItem key={o.value} value={o.value} className="capitalize">
+                    {o.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={!receivables.data || receivables.data.length === 0}
+              onClick={() => {
+                const ym = billingMonth;
+                const items = (receivables.data ?? []).filter((r) =>
+                  r.description?.includes(`Mensalidade ${ym}`),
+                );
+                if (items.length === 0) {
+                  toastError("Nada para exportar.");
+                  return;
+                }
+                const header = ["Aluno", "Descrição", "Vencimento", "Valor", "Status"];
+                const rows = items.map((r) => [
+                  r.client_name ?? "",
+                  r.description ?? "",
+                  new Date(r.due_date).toLocaleDateString("pt-BR"),
+                  String(Number(r.amount).toFixed(2)).replace(".", ","),
+                  r.status ?? "",
+                ]);
+                const csv = [header, ...rows]
+                  .map((row) =>
+                    row
+                      .map((c) => `"${String(c).replace(/"/g, '""')}"`)
+                      .join(";"),
+                  )
+                  .join("\n");
+                const blob = new Blob([`\uFEFF${csv}`], {
+                  type: "text/csv;charset=utf-8;",
+                });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `mensalidades-${ym}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              }}
+            >
+              Exportar CSV
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {receivables.isLoading ? (
