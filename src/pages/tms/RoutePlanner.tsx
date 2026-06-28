@@ -196,7 +196,11 @@ const RoutePlanner = () => {
       <Card className="mb-6">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Paradas da rota</CardTitle>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button size="sm" variant="outline" onClick={bulkGeocode} disabled={bulkGeocoding || missingGeo === 0}>
+              {bulkGeocoding ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <MapPin className="h-4 w-4 mr-1" />}
+              Geocodificar paradas{missingGeo > 0 ? ` (${missingGeo})` : ''}
+            </Button>
             <Button size="sm" variant="outline" onClick={computeEta} disabled={computing || stops.length === 0}>
               {computing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Clock className="h-4 w-4 mr-1" />}
               Calcular ETA
