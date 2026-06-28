@@ -10299,6 +10299,7 @@ export type Database = {
           installed_at: string
           installed_by: string | null
           plugin_id: string
+          quota_per_day: number
           status: string
           uninstalled_at: string | null
           updated_at: string
@@ -10311,6 +10312,7 @@ export type Database = {
           installed_at?: string
           installed_by?: string | null
           plugin_id: string
+          quota_per_day?: number
           status?: string
           uninstalled_at?: string | null
           updated_at?: string
@@ -10323,6 +10325,7 @@ export type Database = {
           installed_at?: string
           installed_by?: string | null
           plugin_id?: string
+          quota_per_day?: number
           status?: string
           uninstalled_at?: string | null
           updated_at?: string
@@ -10347,9 +10350,11 @@ export type Database = {
           id: string
           is_published: boolean
           key: string
+          manifest: Json
           name: string
           price_monthly: number
           required_modules: string[]
+          sandbox_script: string | null
           updated_at: string
           vendor: string | null
           version: string
@@ -10363,9 +10368,11 @@ export type Database = {
           id?: string
           is_published?: boolean
           key: string
+          manifest?: Json
           name: string
           price_monthly?: number
           required_modules?: string[]
+          sandbox_script?: string | null
           updated_at?: string
           vendor?: string | null
           version?: string
@@ -10379,9 +10386,11 @@ export type Database = {
           id?: string
           is_published?: boolean
           key?: string
+          manifest?: Json
           name?: string
           price_monthly?: number
           required_modules?: string[]
+          sandbox_script?: string | null
           updated_at?: string
           vendor?: string | null
           version?: string
@@ -18213,6 +18222,10 @@ export type Database = {
         Returns: boolean
       }
       match_bank_transaction: { Args: { _bank_tx_id: string }; Returns: Json }
+      plugin_quota_remaining: {
+        Args: { _installation_id: string }
+        Returns: number
+      }
       process_charges_ruler: { Args: never; Returns: Json }
       process_pix_payment: {
         Args: {
