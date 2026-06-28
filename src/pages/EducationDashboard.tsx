@@ -75,6 +75,25 @@ export default function EducationDashboard() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", inep_code: "", phone: "", email: "" });
 
+  const [billingMonth, setBillingMonth] = useState<string>(() => {
+    const n = new Date();
+    return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}`;
+  });
+  const billingMonthOptions = useMemo(() => {
+    const opts: { value: string; label: string }[] = [];
+    const base = new Date();
+    base.setDate(1);
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(base.getFullYear(), base.getMonth() - i, 1);
+      const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      opts.push({
+        value: ym,
+        label: d.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }),
+      });
+    }
+    return opts;
+  }, []);
+
   const [classOpen, setClassOpen] = useState(false);
   const [classForm, setClassForm] = useState({
     name: "",
