@@ -75,6 +75,7 @@ export default function EducationDashboard() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", inep_code: "", phone: "", email: "" });
 
+  const [billingStatus, setBillingStatus] = useState<"all" | "paid" | "open" | "overdue">("all");
   const [billingMonth, setBillingMonth] = useState<string>(() => {
     const n = new Date();
     return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}`;
@@ -760,7 +761,7 @@ export default function EducationDashboard() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
           <CardTitle>Cobranças geradas</CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Select value={billingMonth} onValueChange={setBillingMonth}>
               <SelectTrigger className="w-[200px] capitalize">
                 <SelectValue />
@@ -773,15 +774,35 @@ export default function EducationDashboard() {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={billingStatus} onValueChange={(v) => setBillingStatus(v as typeof billingStatus)}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                <SelectItem value="paid">Pagas</SelectItem>
+                <SelectItem value="open">Em aberto</SelectItem>
+                <SelectItem value="overdue">Vencidas</SelectItem>
+              </SelectContent>
+            </Select>
             <Button
               size="sm"
               variant="outline"
               disabled={!receivables.data || receivables.data.length === 0}
               onClick={() => {
                 const ym = billingMonth;
-                const items = (receivables.data ?? []).filter((r) =>
-                  r.description?.includes(`Mensalidade ${ym}`),
-                );
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const items = (receivables.data ?? []).filter((r) => {
+                  if (!r.description?.includes(`Mensalidade ${ym}`)) return false;
+                  if (billingStatus === "all") return true;
+                  const open = Number(r.open_amount ?? r.amount ?? 0);
+                  const isPaid = r.status === "paid" || open <= 0;
+                  const isOverdue = !isPaid && new Date(r.due_date) < today;
+                  if (billingStatus === "paid") return isPaid;
+                  if (billingStatus === "overdue") return isOverdue;
+                  return !isPaid && !isOverdue;
+                });
                 if (items.length === 0) {
                   toastError("Nada para exportar.");
                   return;
@@ -887,7 +908,18 @@ export default function EducationDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {items.slice(0, 20).map((r) => {
+                    {items
+                      .filter((r) => {
+                        if (billingStatus === "all") return true;
+                        const open = Number(r.open_amount ?? r.amount ?? 0);
+                        const isPaid = r.status === "paid" || open <= 0;
+                        const isOverdue = !isPaid && new Date(r.due_date) < today;
+                        if (billingStatus === "paid") return isPaid;
+                        if (billingStatus === "overdue") return isOverdue;
+                        return !isPaid && !isOverdue;
+                      })
+                      .slice(0, 20)
+                      .map((r) => {
                       const due = new Date(r.due_date);
                       const open = Number(r.open_amount ?? r.amount ?? 0);
                       const isPaid = r.status === "paid" || open <= 0;
