@@ -262,6 +262,7 @@ const RoutePlanner = () => {
             </div>
           ) : (
             <div className="space-y-2">
+              <p className="text-xs text-muted-foreground mb-1">Arraste pelo ícone <GripVertical className="inline h-3 w-3" /> para reordenar — o mapa atualiza automaticamente.</p>
               {stops.map((s, idx) => (
                 <StopRow
                   key={s.id}
@@ -272,6 +273,12 @@ const RoutePlanner = () => {
                   onDown={() => move(idx, 1)}
                   onStatus={(status) => updateStop.mutate({ id: s.id, updates: { status } })}
                   onDelete={() => deleteStop.mutate({ id: s.id, routeId: route.id })}
+                  isDragging={dragIndex === idx}
+                  isOver={overIndex === idx && dragIndex !== null && dragIndex !== idx}
+                  onDragStart={() => setDragIndex(idx)}
+                  onDragOver={(e) => { e.preventDefault(); if (overIndex !== idx) setOverIndex(idx); }}
+                  onDragEnd={() => { setDragIndex(null); setOverIndex(null); }}
+                  onDrop={() => handleDrop(idx)}
                 />
               ))}
             </div>
