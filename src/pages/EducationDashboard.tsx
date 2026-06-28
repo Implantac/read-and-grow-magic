@@ -919,6 +919,8 @@ export default function EducationDashboard() {
                   <TableBody>
                     {items
                       .filter((r) => {
+                        const q = billingSearch.trim().toLowerCase();
+                        if (q && !(r.client_name ?? "").toLowerCase().includes(q)) return false;
                         if (billingStatus === "all") return true;
                         const open = Number(r.open_amount ?? r.amount ?? 0);
                         const isPaid = r.status === "paid" || open <= 0;
