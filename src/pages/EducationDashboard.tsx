@@ -820,8 +820,7 @@ export default function EducationDashboard() {
           {receivables.isLoading ? (
             <Skeleton className="h-32 w-full" />
           ) : (() => {
-            const now = new Date();
-            const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+            const ym = billingMonth;
             const items = (receivables.data ?? []).filter((r) =>
               r.description?.includes(`Mensalidade ${ym}`),
             );
