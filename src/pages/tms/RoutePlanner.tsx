@@ -274,6 +274,16 @@ const RoutePlanner = () => {
               {computing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Clock className="h-4 w-4 mr-1" />}
               Calcular ETA
             </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={optimizeRoute}
+              disabled={reorder.isPending || stops.length < 2}
+              title="Reordena as paradas pelo menor caminho (nearest neighbor)"
+            >
+              <Wand2 className="h-4 w-4 mr-1" />
+              Otimizar rota
+            </Button>
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button size="sm"><Plus className="h-4 w-4 mr-1" />Nova parada</Button>
