@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { instrument, contextFromAuth, recordEvent } from "../_shared/observability.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,7 +26,7 @@ function matchConditions(conditions: any[], context: Record<string, unknown>): b
   });
 }
 
-Deno.serve(async (req) => {
+const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
@@ -170,4 +171,9 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+};
+
+Deno.serve(instrument(handler, {
+  source: "automation-dispatch",
+  getContext: contextFromAuth,
+}));

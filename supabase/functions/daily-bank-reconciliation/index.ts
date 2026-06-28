@@ -2,8 +2,9 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { requireAuth } from "../_shared/require-auth.ts";
 import { corsHeaders, jsonResponse, safeError } from "../_shared/tenant.ts";
+import { instrument, contextFromAuth, recordEvent } from "../_shared/observability.ts";
 
-serve(async (req) => {
+const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const auth = await requireAuth(req, { roles: ["admin", "manager"], allowCron: true });
@@ -106,4 +107,9 @@ serve(async (req) => {
   } catch (e) {
     return safeError(e, "daily-bank-reconciliation");
   }
-});
+};
+
+serve(instrument(handler, {
+  source: "daily-bank-reconciliation",
+  getContext: contextFromAuth,
+}));
