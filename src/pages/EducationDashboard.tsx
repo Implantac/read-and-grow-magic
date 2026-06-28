@@ -761,7 +761,7 @@ export default function EducationDashboard() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
           <CardTitle>Cobranças geradas</CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Select value={billingMonth} onValueChange={setBillingMonth}>
               <SelectTrigger className="w-[200px] capitalize">
                 <SelectValue />
@@ -772,6 +772,17 @@ export default function EducationDashboard() {
                     {o.label}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+            <Select value={billingStatus} onValueChange={(v) => setBillingStatus(v as typeof billingStatus)}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todas</SelectItem>
+                <SelectItem value="paid">Pagas</SelectItem>
+                <SelectItem value="open">Em aberto</SelectItem>
+                <SelectItem value="overdue">Vencidas</SelectItem>
               </SelectContent>
             </Select>
             <Button
