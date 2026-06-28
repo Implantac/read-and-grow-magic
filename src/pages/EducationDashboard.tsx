@@ -929,6 +929,18 @@ export default function EducationDashboard() {
                         if (billingStatus === "overdue") return isOverdue;
                         return !isPaid && !isOverdue;
                       })
+                      .sort((a, b) => {
+                        const rank = (r: typeof a) => {
+                          const open = Number(r.open_amount ?? r.amount ?? 0);
+                          const isPaid = r.status === "paid" || open <= 0;
+                          if (isPaid) return 2;
+                          return new Date(r.due_date) < today ? 0 : 1;
+                        };
+                        const ra = rank(a);
+                        const rb = rank(b);
+                        if (ra !== rb) return ra - rb;
+                        return new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+                      })
                       .slice(0, 20)
                       .map((r) => {
                       const due = new Date(r.due_date);
