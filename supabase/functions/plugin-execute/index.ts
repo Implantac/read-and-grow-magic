@@ -92,7 +92,9 @@ Deno.serve(async (req) => {
   return new Response(JSON.stringify({ ok: true, result }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
-});
+};
+
+Deno.serve(instrument(handler, { source: "plugin-execute", getContext: contextFromAuth }));
 
 // Stubbed dispatch table — each plugin returns a structured envelope.
 // Real outbound calls (WhatsApp, Itaú, Serasa, Correios) plug in here behind
