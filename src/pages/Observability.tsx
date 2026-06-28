@@ -250,6 +250,9 @@ export default function Observability() {
         icon={Activity}
         actions={
           <div className="flex gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <a href="/sre/configuracao"><Bell className="h-4 w-4 mr-1" /> Configurar SRE</a>
+            </Button>
             <Button variant="outline" size="sm" onClick={() => qc.invalidateQueries({ queryKey: ["tenant_health"] })}>
               <RefreshCw className="h-4 w-4 mr-1" /> Atualizar
             </Button>
