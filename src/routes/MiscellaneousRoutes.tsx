@@ -16,6 +16,7 @@ const RoutesPage = lazy(() => import("../pages/tms/Routes"));
 const DeliveryProofPage = lazy(() => import("../pages/tms/DeliveryProof"));
 const RoutePlannerPage = lazy(() => import("../pages/tms/RoutePlanner"));
 const LiveTrackingPage = lazy(() => import("../pages/tms/LiveTracking"));
+const RouteManifestPage = lazy(() => import("../pages/tms/RouteManifest"));
 
 export const MiscellaneousRoutes = [
   <Route key="profile" path="/profile" element={<ProfilePage />} />,
