@@ -17119,6 +17119,65 @@ export type Database = {
         }
         Relationships: []
       }
+      workflow_approvals: {
+        Row: {
+          approver_id: string
+          company_id: string
+          created_at: string
+          decided_at: string | null
+          decision_comment: string | null
+          delegated_from: string | null
+          delegated_to: string | null
+          due_at: string | null
+          id: string
+          instance_id: string
+          required: boolean
+          status: string
+          step_key: string
+          updated_at: string
+        }
+        Insert: {
+          approver_id: string
+          company_id: string
+          created_at?: string
+          decided_at?: string | null
+          decision_comment?: string | null
+          delegated_from?: string | null
+          delegated_to?: string | null
+          due_at?: string | null
+          id?: string
+          instance_id: string
+          required?: boolean
+          status?: string
+          step_key: string
+          updated_at?: string
+        }
+        Update: {
+          approver_id?: string
+          company_id?: string
+          created_at?: string
+          decided_at?: string | null
+          decision_comment?: string | null
+          delegated_from?: string | null
+          delegated_to?: string | null
+          due_at?: string | null
+          id?: string
+          instance_id?: string
+          required?: boolean
+          status?: string
+          step_key?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_approvals_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_instances"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workflow_definitions: {
         Row: {
           company_id: string
@@ -17161,6 +17220,45 @@ export type Database = {
           target_entity?: string
           updated_at?: string
           version?: number
+        }
+        Relationships: []
+      }
+      workflow_delegations: {
+        Row: {
+          company_id: string
+          created_at: string
+          ends_at: string | null
+          from_user: string
+          id: string
+          is_active: boolean
+          reason: string | null
+          starts_at: string
+          to_user: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          ends_at?: string | null
+          from_user: string
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          starts_at?: string
+          to_user: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          ends_at?: string | null
+          from_user?: string
+          id?: string
+          is_active?: boolean
+          reason?: string | null
+          starts_at?: string
+          to_user?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -17628,6 +17726,40 @@ export type Database = {
       fn_emit_automation_event: {
         Args: { _company_id: string; _context: Json; _event: string }
         Returns: undefined
+      }
+      fn_my_pending_approvals: {
+        Args: never
+        Returns: {
+          approver_id: string
+          company_id: string
+          created_at: string
+          decided_at: string | null
+          decision_comment: string | null
+          delegated_from: string | null
+          delegated_to: string | null
+          due_at: string | null
+          id: string
+          instance_id: string
+          required: boolean
+          status: string
+          step_key: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "workflow_approvals"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      fn_workflow_decide: {
+        Args: {
+          _approval_id: string
+          _comment?: string
+          _decision: string
+          _delegate_to?: string
+        }
+        Returns: Json
       }
       generate_recurring_entries: { Args: never; Returns: Json }
       generate_sped_contribuicoes: {
