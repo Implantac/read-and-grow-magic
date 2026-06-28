@@ -3,6 +3,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { requireAuth } from "../_shared/require-auth.ts";
 import { corsHeaders, jsonError, safeError } from "../_shared/tenant.ts";
+import { instrument, contextFromAuth } from "../_shared/observability.ts";
 
 interface ExecBody {
   pluginKey: string;
