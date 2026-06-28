@@ -98,9 +98,12 @@ const RoutePlanner = () => {
 
   return (
     <PageContainer>
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center justify-between gap-2 mb-2">
         <Button asChild variant="ghost" size="sm">
           <Link to="/tms/rotas"><ChevronLeft className="h-4 w-4 mr-1" />Rotas</Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <Link to={`/tms/rotas/${route.id}/manifesto`}>Imprimir manifesto</Link>
         </Button>
       </div>
       <PageHeader
