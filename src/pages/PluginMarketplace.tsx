@@ -6,7 +6,10 @@ import { Button } from "@/ui/base/button";
 import { Badge } from "@/ui/base/badge";
 import { Input } from "@/ui/base/input";
 import { Switch } from "@/ui/base/switch";
-import { Loader2, Package, PlayCircle, Search, Trash2 } from "lucide-react";
+import { Code2, Loader2, Package, PlayCircle, Search, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   usePlugins,
   usePluginInstallations,
