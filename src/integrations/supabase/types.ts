@@ -18358,6 +18358,7 @@ export type Database = {
         | "comercial"
         | "loja"
         | "franquia"
+        | "system_admin"
       enterprise_tier: "small" | "medium" | "enterprise"
       org_type: "holding" | "company" | "branch" | "unit"
       tax_regime: "simples" | "presumed" | "real"
@@ -18503,6 +18504,7 @@ export const Constants = {
         "comercial",
         "loja",
         "franquia",
+        "system_admin",
       ],
       enterprise_tier: ["small", "medium", "enterprise"],
       org_type: ["holding", "company", "branch", "unit"],
