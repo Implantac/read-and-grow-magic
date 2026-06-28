@@ -203,6 +203,8 @@ export default function EducationDashboard() {
     if (ok > 0) toastSuccess(`${ok} mensalidade(s) geradas. ${skip} já existiam. ${fail} falhas.`);
     else toastError(`Nenhuma gerada. ${skip} já existiam. ${fail} falhas.`);
   }
+
+  return (
     <PageContainer>
       <PageHeader
         title="Educação"
