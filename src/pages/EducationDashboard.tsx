@@ -800,8 +800,10 @@ export default function EducationDashboard() {
                 const ym = billingMonth;
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
+                const q = billingSearch.trim().toLowerCase();
                 const items = (receivables.data ?? []).filter((r) => {
                   if (!r.description?.includes(`Mensalidade ${ym}`)) return false;
+                  if (q && !(r.client_name ?? "").toLowerCase().includes(q)) return false;
                   if (billingStatus === "all") return true;
                   const open = Number(r.open_amount ?? r.amount ?? 0);
                   const isPaid = r.status === "paid" || open <= 0;
