@@ -61,6 +61,21 @@ const RoutePlanner = () => {
   const [computing, setComputing] = useState(false);
   const [bulkGeocoding, setBulkGeocoding] = useState(false);
 
+  const { data: depot } = useQuery({
+    queryKey: ['delivery_route_depot', id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('delivery_routes')
+        .select('depot_latitude, depot_longitude')
+        .eq('id', id!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+
   const computeEta = async () => {
     if (!id) return;
     setComputing(true);
