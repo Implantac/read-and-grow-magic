@@ -350,6 +350,7 @@ const CostLine = ({ label, value, highlight }: { label: string; value: string; h
 
 const StopRow = ({
   stop, canUp, canDown, onUp, onDown, onStatus, onDelete,
+  isDragging, isOver, onDragStart, onDragOver, onDragEnd, onDrop,
 }: {
   stop: RouteStop;
   canUp: boolean;
@@ -358,10 +359,33 @@ const StopRow = ({
   onDown: () => void;
   onStatus: (status: string) => void;
   onDelete: () => void;
+  isDragging?: boolean;
+  isOver?: boolean;
+  onDragStart?: () => void;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDragEnd?: () => void;
+  onDrop?: () => void;
 }) => {
   const s = STATUS_LABEL[stop.status] ?? STATUS_LABEL.pending;
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-border/40 p-3">
+    <div
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      className={`flex items-center gap-3 rounded-lg border p-3 transition-all ${
+        isDragging ? 'opacity-50 border-primary' : isOver ? 'border-primary bg-primary/5' : 'border-border/40'
+      }`}
+    >
+      <button
+        type="button"
+        draggable
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+        className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"
+        aria-label="Arrastar para reordenar"
+        title="Arrastar para reordenar"
+      >
+        <GripVertical className="h-4 w-4" />
+      </button>
       <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-semibold flex items-center justify-center text-sm">
         {stop.sequence}
       </div>
