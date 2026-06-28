@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useQuery } from '@tanstack/react-query';
+import { RouteMap } from '@/components/tms/RouteMap';
 import { supabase } from '@/integrations/supabase/client';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
@@ -59,6 +60,21 @@ const RoutePlanner = () => {
   const qc = useQueryClient();
   const [computing, setComputing] = useState(false);
   const [bulkGeocoding, setBulkGeocoding] = useState(false);
+
+  const { data: depot } = useQuery({
+    queryKey: ['delivery_route_depot', id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('delivery_routes')
+        .select('depot_latitude, depot_longitude')
+        .eq('id', id!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
 
   const computeEta = async () => {
     if (!id) return;
@@ -243,6 +259,20 @@ const RoutePlanner = () => {
           )}
         </CardContent>
       </Card>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-base">Mapa da rota</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <RouteMap
+            stops={stops}
+            depot={{ lat: depot?.depot_latitude as number | null, lng: depot?.depot_longitude as number | null }}
+            height={400}
+          />
+        </CardContent>
+      </Card>
+
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
