@@ -31,4 +31,6 @@ export const MiscellaneousRoutes = [
   <Route key="tms-veh" path="/tms/veiculos" element={<VehiclesPage />} />,
   <Route key="tms-routes" path="/tms/rotas" element={<RoutesPage />} />,
   <Route key="tms-proof" path="/tms/comprovantes" element={<DeliveryProofPage />} />,
+  <Route key="tms-live" path="/tms/live" element={<LiveTrackingPage />} />,
+  <Route key="tms-planner" path="/tms/rotas/:id/planejamento" element={<RoutePlannerPage />} />,
 ];
