@@ -967,6 +967,38 @@ export default function EducationDashboard() {
                     </div>
                   );
                 })()}
+                {(() => {
+                  const in7 = new Date(today);
+                  in7.setDate(in7.getDate() + 7);
+                  const upcoming = items.filter((r) => {
+                    const open = Number(r.open_amount ?? r.amount ?? 0);
+                    const isPaid = r.status === "paid" || open <= 0;
+                    if (isPaid) return false;
+                    const due = new Date(r.due_date);
+                    return due >= today && due <= in7;
+                  });
+                  if (upcoming.length === 0) return null;
+                  const totalUp = upcoming.reduce(
+                    (acc, r) => acc + Number(r.open_amount ?? r.amount ?? 0),
+                    0,
+                  );
+                  return (
+                    <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs flex items-center justify-between gap-3">
+                      <span>
+                        <strong>{upcoming.length}</strong> cobrança(s) vencem nos próximos 7 dias —{" "}
+                        <strong>{formatCurrencyPtBr(totalUp)}</strong> a receber.
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7"
+                        onClick={() => setBillingStatus("open")}
+                      >
+                        Ver em aberto
+                      </Button>
+                    </div>
+                  );
+                })()}
                 <Table>
                   <TableHeader>
                     <TableRow>
