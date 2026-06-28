@@ -144,6 +144,39 @@ const RoutePlanner = () => {
     }
   };
 
+  const geocodedCount = useMemo(
+    () => stops.filter((s) => s.latitude != null && s.longitude != null).length,
+    [stops],
+  );
+
+  const optimizeRoute = () => {
+    if (!route) return;
+    if (depot?.depot_latitude == null || depot?.depot_longitude == null) {
+      toastError('Defina as coordenadas do CD para otimizar a rota.');
+      return;
+    }
+    if (geocodedCount < 2) {
+      toastError('Pelo menos 2 paradas precisam estar geocodificadas.');
+      return;
+    }
+    const res = nearestNeighborTsp(
+      stops.map((s) => ({ id: s.id, latitude: s.latitude, longitude: s.longitude })),
+      { lat: depot.depot_latitude as number, lng: depot.depot_longitude as number },
+    );
+    reorder.mutate(
+      { routeId: route.id, ordered: res.ordered },
+      {
+        onSuccess: () =>
+          toastSuccess(
+            'Rota otimizada',
+            `${res.ordered.length - res.skipped} parada(s) reordenadas · ${res.totalKm.toFixed(1)} km estimados${
+              res.skipped ? ` · ${res.skipped} sem geocoding mantida(s) ao final` : ''
+            }`,
+          ),
+      },
+    );
+  };
+
   const summary = useMemo(() => {
     const totalWeight = stops.reduce((s, x) => s + Number(x.weight ?? 0), 0);
     const totalVolume = stops.reduce((s, x) => s + Number(x.volume ?? 0), 0);
