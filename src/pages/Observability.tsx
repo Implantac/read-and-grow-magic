@@ -177,6 +177,60 @@ export default function Observability() {
     onError: (e: any) => toast.error(e.message ?? "Erro"),
   });
 
+  const { data: rules = [], isLoading: loadingRules } = useQuery({
+    queryKey: ["alert_rules", companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("alert_rules").select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as AlertRule[];
+    },
+  });
+
+  const createRule = useMutation({
+    mutationFn: async () => {
+      if (!companyId) return;
+      const { error } = await supabase.from("alert_rules").insert({
+        company_id: companyId,
+        name: ruleForm.name,
+        source: ruleForm.source.trim() || null,
+        min_severity: ruleForm.min_severity,
+        threshold: ruleForm.threshold,
+        window_minutes: ruleForm.window_minutes,
+        incident_severity: ruleForm.incident_severity,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Regra de alerta criada");
+      setRuleForm(emptyRule);
+      setRuleOpen(false);
+      qc.invalidateQueries({ queryKey: ["alert_rules"] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Erro"),
+  });
+
+  const toggleRule = useMutation({
+    mutationFn: async ({ id, enabled }: { id: string; enabled: boolean }) => {
+      const { error } = await supabase.from("alert_rules").update({ enabled }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["alert_rules"] }),
+    onError: (e: any) => toast.error(e.message ?? "Erro"),
+  });
+
+  const deleteRule = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("alert_rules").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["alert_rules"] }),
+    onError: (e: any) => toast.error(e.message ?? "Erro"),
+  });
+
+
   const kpis = useMemo(() => {
     const ev = health?.events ?? { critical: 0, error: 0, warning: 0, info: 0, total: 0 };
     const inc = health?.incidents ?? { open: 0, mitigating: 0, resolved_24h: 0 };
