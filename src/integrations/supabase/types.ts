@@ -14054,6 +14054,53 @@ export type Database = {
         }
         Relationships: []
       }
+      sre_settings: {
+        Row: {
+          company_id: string
+          created_at: string
+          extra_recipients: string[]
+          from_email: string | null
+          id: string
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          quiet_timezone: string
+          silence_weekends: boolean
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          extra_recipients?: string[]
+          from_email?: string | null
+          id?: string
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          quiet_timezone?: string
+          silence_weekends?: boolean
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          extra_recipients?: string[]
+          from_email?: string | null
+          id?: string
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          quiet_timezone?: string
+          silence_weekends?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sre_settings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_balances: {
         Row: {
           available_qty: number | null
