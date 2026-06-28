@@ -85,6 +85,7 @@ const Routes = () => {
                 <TableCell><Badge variant={statusColors[r.status] as any}>{statusLabels[r.status] || r.status}</Badge></TableCell>
                 <TableCell>
                   <div className="flex gap-1">
+                    <Button asChild size="sm" variant="ghost"><a href={`/tms/rotas/${r.id}/planejamento`}>Planejar</a></Button>
                     {r.status === 'planned' && <Button size="sm" variant="outline" onClick={() => startRoute(r.id)}>Iniciar</Button>}
                     {r.status === 'in_transit' && <Button size="sm" onClick={() => completeRoute(r.id)}>Concluir</Button>}
                   </div>
