@@ -76,6 +76,7 @@ export default function EducationDashboard() {
   const [form, setForm] = useState({ name: "", inep_code: "", phone: "", email: "" });
 
   const [billingStatus, setBillingStatus] = useState<"all" | "paid" | "open" | "overdue">("all");
+  const [billingSearch, setBillingSearch] = useState("");
   const [billingMonth, setBillingMonth] = useState<string>(() => {
     const n = new Date();
     return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}`;
