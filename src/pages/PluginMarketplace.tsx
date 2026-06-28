@@ -82,11 +82,21 @@ export default function PluginMarketplace() {
   return (
     <RoleGuard roles={["admin"]}>
       <PageContainer>
-        <PageHeader
-          title="Marketplace de Plugins"
-          description="Estenda o ERP com integrações e automações por tenant"
-          icon={Package}
-        />
+        <div className="flex items-start justify-between gap-3">
+          <PageHeader
+            title="Marketplace de Plugins"
+            description="Estenda o ERP com integrações e automações por tenant"
+            icon={Package}
+          />
+          {isSystemAdmin && (
+            <Button asChild variant="outline" size="sm" className="shrink-0">
+              <Link to="/admin/marketplace/editor">
+                <Code2 className="h-4 w-4 mr-1" />
+                Editor
+              </Link>
+            </Button>
+          )}
+        </div>
 
         <div className="flex flex-col md:flex-row gap-3">
           <div className="relative flex-1 max-w-md">
