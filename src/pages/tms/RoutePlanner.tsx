@@ -104,8 +104,8 @@ const RoutePlanner = () => {
         </Button>
       </div>
       <PageHeader
-        title={`Planejamento — ${route.route_number ?? route.id.slice(0, 8)}`}
-        description={`Motorista: ${route.driver_name ?? '—'} · Data: ${route.planned_date ?? '—'} · Status: ${route.status}`}
+        title={`Planejamento — ${route.routeNumber ?? route.id.slice(0, 8)}`}
+        description={`Motorista: ${route.driverName ?? '—'} · Data: ${route.plannedDate ?? '—'} · Status: ${route.status}`}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
