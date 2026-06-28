@@ -280,3 +280,34 @@ export function useEduReceivables() {
     },
   });
 }
+
+/**
+ * Marks an education receivable as paid (today, full amount).
+ * Updates status, paid_amount, open_amount and payment_date.
+ * Scoped to the active tenant via company_id filter (RLS also enforces).
+ */
+export function useMarkEduReceivablePaid() {
+  const qc = useQueryClient();
+  const companyId = useEnterpriseStore((s) => s.activeCompanyId);
+  return useMutation({
+    mutationFn: async (r: EduReceivable) => {
+      if (!companyId) throw new Error("Sem empresa ativa");
+      const amount = Number(r.amount || 0);
+      const { error } = await supabase
+        .from("accounts_receivable")
+        .update({
+          status: "paid",
+          paid_amount: amount,
+          open_amount: 0,
+          payment_date: new Date().toISOString(),
+        })
+        .eq("id", r.id)
+        .eq("company_id", companyId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["accounts_receivable"] });
+      qc.invalidateQueries({ queryKey: ["edu_receivables"] });
+    },
+  });
+}

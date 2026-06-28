@@ -36,6 +36,7 @@ import {
   useEduSchools,
   useEduStudents,
   useGenerateEnrollmentInvoice,
+  useMarkEduReceivablePaid,
 } from "@/hooks/useEducation";
 import {
   Select,
