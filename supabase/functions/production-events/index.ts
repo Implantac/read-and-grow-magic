@@ -1,8 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { requireAuth } from "../_shared/require-auth.ts";
 import { corsHeaders, jsonResponse, jsonError, safeError } from "../_shared/tenant.ts";
+import { instrument, contextFromAuth } from "../_shared/observability.ts";
 
-Deno.serve(async (req) => {
+const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -195,4 +196,6 @@ Deno.serve(async (req) => {
   } catch (err) {
     return safeError(err, "production-events");
   }
-});
+};
+
+Deno.serve(instrument(handler, { source: "production-events", getContext: contextFromAuth }));

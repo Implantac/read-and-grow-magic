@@ -7,6 +7,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { resolveContextByIds, branchScope, requireModule, enforceQuota, type TenantContext } from "../_shared/tenant.ts";
 import { checkRateLimit, rateLimitResponse } from "../_shared/rate-limit.ts";
 import { recordUsage } from "../_shared/usage.ts";
+import { instrument, contextFromAuth } from "../_shared/observability.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -852,7 +853,7 @@ Retorne JSON: {"lessons":[{"category":"lesson_learned","key":"evitar_X_quando_Y"
 // ─────────────────────────────────────────────
 // SERVER
 // ─────────────────────────────────────────────
-Deno.serve(async (req) => {
+const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
@@ -1126,4 +1127,6 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-});
+};
+
+Deno.serve(instrument(handler, { source: "ai-brain", getContext: contextFromAuth }));

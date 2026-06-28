@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { getSystemPrompt } from "../_shared/ai-prompts.ts";
 import { resolveContextByIds, branchScope, requireModule } from "../_shared/tenant.ts";
+import { instrument, contextFromAuth } from "../_shared/observability.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -14,7 +15,7 @@ interface SimulateRequest {
   capacityChangePct?: number; // e.g. -20 for 20% less capacity
 }
 
-Deno.serve(async (req) => {
+const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -281,4 +282,6 @@ Deno.serve(async (req) => {
       status: 500,
     });
   }
-});
+};
+
+Deno.serve(instrument(handler, { source: "pcp-schedule-simulate", getContext: contextFromAuth }));
