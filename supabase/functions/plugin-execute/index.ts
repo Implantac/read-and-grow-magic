@@ -3,6 +3,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { requireAuth } from "../_shared/require-auth.ts";
 import { corsHeaders, jsonError, safeError } from "../_shared/tenant.ts";
+import { instrument, contextFromAuth } from "../_shared/observability.ts";
 
 interface ExecBody {
   pluginKey: string;
@@ -10,7 +11,7 @@ interface ExecBody {
   payload?: Record<string, unknown>;
 }
 
-Deno.serve(async (req) => {
+const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const auth = await requireAuth(req);
@@ -92,7 +93,9 @@ Deno.serve(async (req) => {
   return new Response(JSON.stringify({ ok: true, result }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
-});
+};
+
+Deno.serve(instrument(handler, { source: "plugin-execute", getContext: contextFromAuth }));
 
 // Stubbed dispatch table — each plugin returns a structured envelope.
 // Real outbound calls (WhatsApp, Itaú, Serasa, Correios) plug in here behind

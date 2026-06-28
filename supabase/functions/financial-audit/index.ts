@@ -1,13 +1,14 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
 import { requireAuth } from '../_shared/require-auth.ts';
 import { resolveContext, requireModule } from '../_shared/tenant.ts';
+import { instrument, contextFromAuth } from "../_shared/observability.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret, x-branch-id',
 };
 
-Deno.serve(async (req) => {
+const handler = async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   const auth = await requireAuth(req, { roles: ['admin', 'manager'], allowCron: true });
@@ -80,4 +81,6 @@ Deno.serve(async (req) => {
     console.error('[financial-audit]', e);
     return Response.json({ ok: false, error: 'Erro interno. Tente novamente.' }, { status: 500, headers: corsHeaders });
   }
-});
+};
+
+Deno.serve(instrument(handler, { source: "financial-audit", getContext: contextFromAuth }));

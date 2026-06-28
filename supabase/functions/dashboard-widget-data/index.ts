@@ -5,6 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { requireAuth } from "../_shared/require-auth.ts";
 import { resolveContext, branchScope, jsonError, jsonResponse, safeError } from "../_shared/tenant.ts";
+import { instrument, contextFromAuth } from "../_shared/observability.ts";
 
 type Source = {
   type: "scalar" | "series" | "pie" | "table";
@@ -133,7 +134,7 @@ const SOURCES: Record<string, Source> = {
   },
 };
 
-Deno.serve(async (req) => {
+const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
@@ -170,4 +171,6 @@ Deno.serve(async (req) => {
   } catch (e) {
     return safeError(e, "dashboard-widget-data");
   }
-});
+};
+
+Deno.serve(instrument(handler, { source: "dashboard-widget-data", getContext: contextFromAuth }));

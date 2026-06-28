@@ -1,13 +1,14 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getSystemPrompt } from '../_shared/ai-prompts.ts'
 import { resolveContextByIds, branchScope, requireModule } from '../_shared/tenant.ts'
+import { instrument, contextFromAuth } from '../_shared/observability.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-branch-id',
 }
 
-Deno.serve(async (req) => {
+const handler = async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -167,4 +168,7 @@ Deno.serve(async (req) => {
       status: 500,
     })
   }
-})
+}
+
+Deno.serve(instrument(handler, { source: 'pcp-bottlenecks', getContext: contextFromAuth }))
+

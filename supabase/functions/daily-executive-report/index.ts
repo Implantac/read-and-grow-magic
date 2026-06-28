@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { requireAuth } from "../_shared/require-auth.ts";
 import { corsHeaders, jsonResponse, safeError } from "../_shared/tenant.ts";
+import { instrument, contextFromAuth } from "../_shared/observability.ts";
 
 interface ReportData {
   report_date: string;
@@ -112,7 +113,7 @@ async function buildReportForCompany(
   };
 }
 
-Deno.serve(async (req) => {
+const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -167,4 +168,6 @@ Deno.serve(async (req) => {
   } catch (error) {
     return safeError(error, "daily-executive-report");
   }
-});
+};
+
+Deno.serve(instrument(handler, { source: "daily-executive-report", getContext: contextFromAuth }));
