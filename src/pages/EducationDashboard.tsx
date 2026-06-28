@@ -775,6 +775,12 @@ export default function EducationDashboard() {
                 ))}
               </SelectContent>
             </Select>
+            <Input
+              placeholder="Buscar aluno…"
+              value={billingSearch}
+              onChange={(e) => setBillingSearch(e.target.value)}
+              className="w-[180px]"
+            />
             <Select value={billingStatus} onValueChange={(v) => setBillingStatus(v as typeof billingStatus)}>
               <SelectTrigger className="w-[150px]">
                 <SelectValue />
