@@ -908,7 +908,18 @@ export default function EducationDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {items.slice(0, 20).map((r) => {
+                    {items
+                      .filter((r) => {
+                        if (billingStatus === "all") return true;
+                        const open = Number(r.open_amount ?? r.amount ?? 0);
+                        const isPaid = r.status === "paid" || open <= 0;
+                        const isOverdue = !isPaid && new Date(r.due_date) < today;
+                        if (billingStatus === "paid") return isPaid;
+                        if (billingStatus === "overdue") return isOverdue;
+                        return !isPaid && !isOverdue;
+                      })
+                      .slice(0, 20)
+                      .map((r) => {
                       const due = new Date(r.due_date);
                       const open = Number(r.open_amount ?? r.amount ?? 0);
                       const isPaid = r.status === "paid" || open <= 0;
