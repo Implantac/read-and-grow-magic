@@ -42,6 +42,7 @@ const WorkflowDelegations = lazy(() => import("./pages/WorkflowDelegations"));
 const Observability = lazy(() => import("./pages/Observability"));
 const SRESettings = lazy(() => import("./pages/SRESettings"));
 const PluginMarketplace = lazy(() => import("./pages/PluginMarketplace"));
+const PluginEditor = lazy(() => import("./pages/admin/PluginEditor"));
 const ConstructionProjects = lazy(() => import("./pages/ConstructionProjects"));
 const ConstructionProjectDetail = lazy(() => import("./pages/ConstructionProjectDetail"));
 const AgroFarms = lazy(() => import("./pages/AgroFarms"));
