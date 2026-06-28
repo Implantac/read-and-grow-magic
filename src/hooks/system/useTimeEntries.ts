@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 
 export interface TimeEntryRow {
   id: string;
@@ -41,7 +42,9 @@ export function useTimeEntries() {
   };
 
   const create = async (entry: Omit<TimeEntryRow, 'id' | 'created_at'>) => {
-    const { error } = await supabase.from('time_entries').insert(entry);
+    const company_id = useEnterpriseStore.getState().activeCompanyId;
+    if (!company_id) { toast.error('Empresa não selecionada'); return; }
+    const { error } = await supabase.from('time_entries').insert({ ...entry, company_id });
     if (error) { toast.error('Erro ao criar apontamento'); return; }
     toast.success('Apontamento criado');
     await fetch();
