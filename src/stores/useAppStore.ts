@@ -20,7 +20,7 @@ interface AppState {
   // Actions
   setUser: (user: User | null) => void;
   logout: () => void;
-  setUserRole: (role: 'admin' | 'manager' | 'operator' | 'viewer' | 'diretor' | 'financeiro' | 'fiscal' | 'contabil' | 'compras' | 'producao' | 'logistica' | 'comercial' | 'loja' | 'franquia' | null) => void;
+  setUserRole: (role: 'admin' | 'manager' | 'operator' | 'viewer' | 'diretor' | 'financeiro' | 'fiscal' | 'contabil' | 'compras' | 'producao' | 'logistica' | 'comercial' | 'loja' | 'franquia' | 'system_admin' | null) => void;
   setActiveCompany: (company: Company | null) => void;
   setActiveBranch: (branch: Branch | null) => void;
   toggleSidebar: () => void;
