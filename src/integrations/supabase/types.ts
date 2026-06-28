@@ -7658,7 +7658,7 @@ export type Database = {
       industrial_alerts: {
         Row: {
           alert_type: string
-          company_id: string | null
+          company_id: string
           created_at: string
           description: string | null
           entity_id: string | null
@@ -7675,7 +7675,7 @@ export type Database = {
         }
         Insert: {
           alert_type: string
-          company_id?: string | null
+          company_id: string
           created_at?: string
           description?: string | null
           entity_id?: string | null
@@ -7692,7 +7692,7 @@ export type Database = {
         }
         Update: {
           alert_type?: string
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           description?: string | null
           entity_id?: string | null
@@ -11350,6 +11350,7 @@ export type Database = {
       production_quality_checks: {
         Row: {
           check_type: string
+          company_id: string
           created_at: string | null
           id: string
           inspector_id: string | null
@@ -11359,6 +11360,7 @@ export type Database = {
         }
         Insert: {
           check_type: string
+          company_id: string
           created_at?: string | null
           id?: string
           inspector_id?: string | null
@@ -11368,6 +11370,7 @@ export type Database = {
         }
         Update: {
           check_type?: string
+          company_id?: string
           created_at?: string | null
           id?: string
           inspector_id?: string | null
@@ -15243,7 +15246,7 @@ export type Database = {
       }
       time_entries: {
         Row: {
-          company_id: string | null
+          company_id: string
           created_at: string
           end_time: string | null
           id: string
@@ -15263,7 +15266,7 @@ export type Database = {
           work_center: string | null
         }
         Insert: {
-          company_id?: string | null
+          company_id: string
           created_at?: string
           end_time?: string | null
           id?: string
@@ -15283,7 +15286,7 @@ export type Database = {
           work_center?: string | null
         }
         Update: {
-          company_id?: string | null
+          company_id?: string
           created_at?: string
           end_time?: string | null
           id?: string
