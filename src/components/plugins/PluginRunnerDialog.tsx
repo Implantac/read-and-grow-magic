@@ -45,23 +45,26 @@ export function usePluginExecutions(pluginId?: string) {
   });
 }
 
+interface ExecResponse {
+  ok: boolean;
+  result?: unknown;
+  error?: string;
+  logs?: string[];
+}
+
 function useExecutePlugin() {
   const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async (vars: {
-      pluginKey: string;
-      action: string;
-      payload: Record<string, unknown>;
-    }) => {
+  return useMutation<ExecResponse, Error, { pluginKey: string; action: string; payload: Record<string, unknown> }>({
+    mutationFn: async (vars) => {
       const { data, error } = await supabase.functions.invoke("plugin-execute", {
         body: vars,
       });
       if (error) throw error;
-      return data;
+      return data as ExecResponse;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["plugin_executions"] });
-      toastSuccess("Execução concluída");
+      if (data?.ok) toastSuccess("Execução concluída");
     },
     onError: handleMutationError,
   });
