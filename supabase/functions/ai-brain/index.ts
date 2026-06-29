@@ -804,7 +804,7 @@ ${ctx}`;
     }
   }
 
-  return { content: finalContent || "✅ Ações executadas.", actions: executed };
+  return { content: sanitizeAssistantText(finalContent) || "✅ Ações executadas.", actions: executed };
 }
 
 async function handleApprove(decisionId: string, approve: boolean, userId: string | undefined, callerCompany: string | null) {
