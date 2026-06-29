@@ -488,6 +488,7 @@ const StopRow = ({
           )}
         </div>
       </div>
+      {late && <Badge variant="destructive">Atrasada</Badge>}
       <Badge variant={s.variant}>{s.label}</Badge>
       <Select value={stop.status} onValueChange={onStatus}>
         <SelectTrigger className="w-32 h-8 text-xs"><SelectValue /></SelectTrigger>
