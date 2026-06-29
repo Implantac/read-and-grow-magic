@@ -535,12 +535,12 @@ export default function BrainPage() {
                     )}
                   </div>
                   {d.status === 'pending' && (
-                    <div className="flex flex-col gap-1.5 shrink-0">
-                      <Button size="sm" onClick={() => approve.mutate({ id: d.id, approve: true })} disabled={approve.isPending} className="gap-1 h-8">
-                        <CheckCircle2 className="h-3.5 w-3.5" /> Aprovar
+                    <div className="flex flex-col gap-1.5 shrink-0" role="group" aria-label={`Ações para a decisão: ${d.title}`}>
+                      <Button size="sm" onClick={() => approve.mutate({ id: d.id, approve: true })} disabled={approve.isPending} className="gap-1 h-8" aria-label={`Aprovar decisão: ${d.title}`}>
+                        <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> Aprovar
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => approve.mutate({ id: d.id, approve: false })} disabled={approve.isPending} className="gap-1 h-8">
-                        <XCircle className="h-3.5 w-3.5" /> Rejeitar
+                      <Button size="sm" variant="outline" onClick={() => approve.mutate({ id: d.id, approve: false })} disabled={approve.isPending} className="gap-1 h-8" aria-label={`Rejeitar decisão: ${d.title}`}>
+                        <XCircle className="h-3.5 w-3.5" aria-hidden="true" /> Rejeitar
                       </Button>
                     </div>
                   )}
