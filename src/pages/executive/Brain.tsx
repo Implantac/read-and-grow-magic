@@ -61,9 +61,12 @@ export default function BrainPage() {
   const [input, setInput] = useState('');
   const [memorySearch, setMemorySearch] = useState('');
   const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const [activeTab, setActiveTab] = useState('chat');
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const memorySearchRef = useRef<HTMLInputElement | null>(null);
+  const suggestionsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -72,6 +75,44 @@ export default function BrainPage() {
   useEffect(() => {
     textareaRef.current?.focus();
   }, []);
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const typingInField = !!target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+
+      // "/" focuses chat composer (when not typing in a field)
+      if (e.key === '/' && !typingInField && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        setActiveTab('chat');
+        requestAnimationFrame(() => textareaRef.current?.focus());
+        return;
+      }
+      // Ctrl/Cmd+K focuses memory search
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setActiveTab('memory');
+        requestAnimationFrame(() => memorySearchRef.current?.focus());
+        return;
+      }
+      // Ctrl/Cmd+L clears chat
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l' && messages.length > 0) {
+        e.preventDefault();
+        clear();
+        requestAnimationFrame(() => textareaRef.current?.focus());
+        return;
+      }
+      // Alt+1..4 → switch tabs
+      if (e.altKey && ['1', '2', '3', '4'].includes(e.key)) {
+        e.preventDefault();
+        const tabs = ['chat', 'decisions', 'memory', 'history'];
+        setActiveTab(tabs[Number(e.key) - 1]);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [messages.length, clear]);
 
   const lastRun = runs[0];
   const veredicto = lastRun?.structured?.veredicto as string | undefined;
@@ -102,6 +143,26 @@ export default function BrainPage() {
     if (!el) return;
     const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
     setShowScrollBtn(!atBottom);
+  };
+
+  // Roving focus across suggested prompt chips
+  const handleSuggestionsKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const buttons = Array.from(suggestionsRef.current?.querySelectorAll<HTMLButtonElement>('button[data-suggestion]') ?? []);
+    if (buttons.length === 0) return;
+    const idx = buttons.findIndex((b) => b === document.activeElement);
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      buttons[(idx + 1 + buttons.length) % buttons.length]?.focus();
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      buttons[(idx - 1 + buttons.length) % buttons.length]?.focus();
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      buttons[0]?.focus();
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      buttons[buttons.length - 1]?.focus();
+    }
   };
 
   return (
