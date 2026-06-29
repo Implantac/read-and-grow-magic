@@ -1055,12 +1055,13 @@ const handler = async (req: Request): Promise<Response> => {
         break;
 
       case "save_memory":
-        await saveMemory({ ...body.memory, user_id: userId });
+        await saveMemory({ ...body.memory, user_id: userId, company_id: callerCompany });
         result = { ok: true };
         break;
       case "list_memories":
-        result = { memories: await loadMemories(userId, 100) };
+        result = { memories: await loadMemories(userId, callerCompany, 100) };
         break;
+
 
 
       case "feedback_decision": {
