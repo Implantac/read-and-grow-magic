@@ -432,8 +432,8 @@ const RoutePlanner = () => {
             height={400}
             feasibility={feasibilityMap}
             onReorder={(ordered) => {
-              if (!routeId) return;
-              reorder.mutate({ routeId, ordered });
+              if (!route?.id) return;
+              reorder.mutate({ routeId: route.id, ordered });
             }}
           />
         </CardContent>
