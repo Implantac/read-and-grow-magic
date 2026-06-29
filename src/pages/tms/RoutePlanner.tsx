@@ -353,6 +353,7 @@ const RoutePlanner = () => {
                 <StopRow
                   key={s.id}
                   stop={s}
+                  late={feasibilityMap[s.id]?.status === 'late'}
                   canUp={idx > 0}
                   canDown={idx < stops.length - 1}
                   onUp={() => move(idx, -1)}
