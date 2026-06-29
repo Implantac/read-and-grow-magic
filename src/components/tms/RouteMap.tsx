@@ -59,7 +59,7 @@ interface Props {
   feasibility?: Record<string, StopFeasibility>;
 }
 
-export function RouteMap({ stops, depot, height = 360 }: Props) {
+export function RouteMap({ stops, depot, height = 360, feasibility }: Props) {
   const geocoded = useMemo(
     () =>
       stops
