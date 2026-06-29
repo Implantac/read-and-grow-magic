@@ -229,7 +229,7 @@ export function useBrainChat() {
       const payload = (data ?? {}) as { content?: string; actions?: BrainChatAction[] };
       setMessages((prev) => [
         ...prev,
-        { id: crypto.randomUUID(), role: 'assistant', content: payload.content || '—', actions: payload.actions || [] },
+        { id: crypto.randomUUID(), role: 'assistant', content: sanitizeBrainText(payload.content || '—'), actions: payload.actions || [] },
       ]);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Erro';
