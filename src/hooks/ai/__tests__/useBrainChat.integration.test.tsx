@@ -24,7 +24,12 @@ const FORBIDDEN = [
 
 function ChatHarness() {
   const { messages, send } = useBrainChat();
-  React.useEffect(() => { void send("oi"); }, [send]);
+  const sent = React.useRef(false);
+  React.useEffect(() => {
+    if (sent.current) return;
+    sent.current = true;
+    void send("oi");
+  }, [send]);
   return (
     <ul>
       {messages.filter((m) => m.role === "assistant").map((m) => (
