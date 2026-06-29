@@ -277,16 +277,27 @@ export default function BrainPage() {
         </Card>
       )}
 
-      <Tabs defaultValue="chat" className="space-y-4">
-        <TabsList className="bg-muted/50 p-1">
-          <TabsTrigger value="chat" className="gap-1.5"><Bot className="h-4 w-4" /> Chat</TabsTrigger>
-          <TabsTrigger value="decisions" className="gap-1.5">
-            <AlertTriangle className="h-4 w-4" /> Decisões
-            {pending.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">{pending.length}</Badge>}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="bg-muted/50 p-1" aria-label="Seções do Cérebro Nativo">
+          <TabsTrigger value="chat" className="gap-1.5" aria-keyshortcuts="Alt+1">
+            <Bot className="h-4 w-4" aria-hidden="true" /> Chat
           </TabsTrigger>
-          <TabsTrigger value="memory" className="gap-1.5"><Database className="h-4 w-4" /> Memória</TabsTrigger>
-          <TabsTrigger value="history" className="gap-1.5"><History className="h-4 w-4" /> Histórico</TabsTrigger>
+          <TabsTrigger value="decisions" className="gap-1.5" aria-keyshortcuts="Alt+2">
+            <AlertTriangle className="h-4 w-4" aria-hidden="true" /> Decisões
+            {pending.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]" aria-label={`${pending.length} pendentes`}>
+                {pending.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="memory" className="gap-1.5" aria-keyshortcuts="Alt+3">
+            <Database className="h-4 w-4" aria-hidden="true" /> Memória
+          </TabsTrigger>
+          <TabsTrigger value="history" className="gap-1.5" aria-keyshortcuts="Alt+4">
+            <History className="h-4 w-4" aria-hidden="true" /> Histórico
+          </TabsTrigger>
         </TabsList>
+
 
         {/* CHAT */}
         <TabsContent value="chat">
