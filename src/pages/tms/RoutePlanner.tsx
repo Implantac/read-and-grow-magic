@@ -602,6 +602,20 @@ const StopDialog = ({
           <Label>ETA prevista</Label>
           <Input type="datetime-local" value={form.planned_eta} onChange={(e) => set('planned_eta', e.target.value)} />
         </div>
+        <div className="grid grid-cols-3 gap-2">
+          <div>
+            <Label>Janela início</Label>
+            <Input type="time" value={form.time_window_start} onChange={(e) => set('time_window_start', e.target.value)} />
+          </div>
+          <div>
+            <Label>Janela fim</Label>
+            <Input type="time" value={form.time_window_end} onChange={(e) => set('time_window_end', e.target.value)} />
+          </div>
+          <div>
+            <Label>Serviço (min)</Label>
+            <Input type="number" min={0} value={form.service_minutes} onChange={(e) => set('service_minutes', e.target.value)} />
+          </div>
+        </div>
         <div>
           <Label>Notas</Label>
           <Input value={form.notes} onChange={(e) => set('notes', e.target.value)} />
