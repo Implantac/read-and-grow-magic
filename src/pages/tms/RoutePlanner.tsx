@@ -159,20 +159,34 @@ const RoutePlanner = () => {
       toastError('Pelo menos 2 paradas precisam estar geocodificadas.');
       return;
     }
-    const res = nearestNeighborTsp(
-      stops.map((s) => ({ id: s.id, latitude: s.latitude, longitude: s.longitude })),
-      { lat: depot.depot_latitude as number, lng: depot.depot_longitude as number },
-    );
+    const geoPoints = stops.map((s) => ({
+      id: s.id,
+      latitude: s.latitude,
+      longitude: s.longitude,
+      timeWindowStart: (s as any).time_window_start ?? null,
+      timeWindowEnd: (s as any).time_window_end ?? null,
+      serviceMinutes: (s as any).service_minutes ?? 10,
+    }));
+    const depotPt = { lat: depot.depot_latitude as number, lng: depot.depot_longitude as number };
+    const res = nearestNeighborTsp(geoPoints, depotPt);
+    const feas = checkTimeWindows(res.ordered, geoPoints, depotPt);
     reorder.mutate(
       { routeId: route.id, ordered: res.ordered },
       {
-        onSuccess: () =>
-          toastSuccess(
-            'Rota otimizada',
-            `${res.ordered.length - res.skipped} parada(s) reordenadas · ${res.totalKm.toFixed(1)} km estimados${
-              res.skipped ? ` · ${res.skipped} sem geocoding mantida(s) ao final` : ''
-            }`,
-          ),
+        onSuccess: () => {
+          const parts = [
+            `${res.ordered.length - res.skipped} parada(s) reordenadas`,
+            `${res.totalKm.toFixed(1)} km`,
+            `≈ ${Math.round(feas.totalMinutes / 60 * 10) / 10} h`,
+          ];
+          if (feas.lateCount > 0) parts.push(`⚠ ${feas.lateCount} fora da janela`);
+          if (res.skipped) parts.push(`${res.skipped} sem geocoding ao final`);
+          if (feas.lateCount > 0) {
+            toastError('Rota otimizada com violações', parts.join(' · '));
+          } else {
+            toastSuccess('Rota otimizada', parts.join(' · '));
+          }
+        },
       },
     );
   };
