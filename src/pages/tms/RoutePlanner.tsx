@@ -17,7 +17,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { ArrowUp, ArrowDown, Trash2, Plus, MapPin, Truck, DollarSign, Fuel, ChevronLeft, Clock, Loader2, Search, GripVertical, Wand2 } from 'lucide-react';
 import { toastSuccess, toastError, handleMutationError } from '@/lib/toastHelpers';
 import { lookupCep, geocodeAddress } from '@/lib/geocode';
-import { nearestNeighborTsp } from '@/lib/tspOptimize';
+import { nearestNeighborTsp, checkTimeWindows } from '@/lib/tspOptimize';
 import {
   useRouteStops,
   useCreateRouteStop,
