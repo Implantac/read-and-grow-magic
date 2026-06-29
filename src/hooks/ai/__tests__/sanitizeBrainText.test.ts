@@ -87,7 +87,7 @@ describe("sanitizeBrainText — regressão Cérebro Nativo", () => {
 
   it("lida com string vazia / nula", () => {
     expect(sanitizeBrainText("")).toBe("");
-    // @ts-expect-error testando entrada inválida
-    expect(sanitizeBrainText(undefined)).toBeFalsy();
+    expect(sanitizeBrainText(null as unknown as string)).toBeFalsy();
   });
+
 });
