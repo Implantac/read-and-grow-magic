@@ -19,6 +19,7 @@ import {
 } from "@/hooks/usePlugins";
 import { RoleGuard } from "@/components/auth/RoleGuard";
 import { PluginRunnerDialog } from "@/components/plugins/PluginRunnerDialog";
+import { PluginVersionDialog } from "@/components/plugins/PluginVersionDialog";
 
 export default function PluginMarketplace() {
   const { data: plugins, isLoading } = usePlugins();
