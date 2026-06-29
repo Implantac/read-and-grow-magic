@@ -486,6 +486,7 @@ const StopDialog = ({
     address: '', city: '', state: '', zip_code: '',
     weight: '', volume: '', stop_type: 'delivery', planned_eta: '', notes: '',
     latitude: '', longitude: '',
+    time_window_start: '', time_window_end: '', service_minutes: '10',
   });
   const [geocoding, setGeocoding] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
