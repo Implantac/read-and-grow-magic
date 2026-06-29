@@ -39,6 +39,13 @@ export default function BrainPage() {
   const approve = useApproveDecision();
   const { messages, loading, send, clear } = useBrainChat();
   const [input, setInput] = useState('');
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages, loading]);
+
+
 
   const lastRun = runs[0];
   const veredicto = lastRun?.structured?.veredicto;
