@@ -431,6 +431,10 @@ const RoutePlanner = () => {
             depot={{ lat: depot?.depot_latitude as number | null, lng: depot?.depot_longitude as number | null }}
             height={400}
             feasibility={feasibilityMap}
+            onReorder={(ordered) => {
+              if (!route?.id) return;
+              reorder.mutate({ routeId: route.id, ordered });
+            }}
           />
         </CardContent>
       </Card>

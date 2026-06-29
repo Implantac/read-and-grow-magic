@@ -57,19 +57,34 @@ interface Props {
   depot?: { lat: number | null | undefined; lng: number | null | undefined } | null;
   height?: number;
   feasibility?: Record<string, StopFeasibility>;
+  onReorder?: (orderedIds: string[]) => void;
 }
 
-export function RouteMap({ stops, depot, height = 360, feasibility }: Props) {
+function haversineKm(a: [number, number], b: [number, number]): number {
+  const R = 6371;
+  const dLat = ((b[0] - a[0]) * Math.PI) / 180;
+  const dLng = ((b[1] - a[1]) * Math.PI) / 180;
+  const la1 = (a[0] * Math.PI) / 180;
+  const la2 = (b[0] * Math.PI) / 180;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+export function RouteMap({ stops, depot, height = 360, feasibility, onReorder }: Props) {
+  const orderedStops = useMemo(
+    () => [...stops].sort((a, b) => a.sequence - b.sequence),
+    [stops],
+  );
   const geocoded = useMemo(
     () =>
-      stops
+      orderedStops
         .filter((s) => s.latitude != null && s.longitude != null)
         .map((s) => ({
           ...s,
           lat: Number(s.latitude),
           lng: Number(s.longitude),
         })),
-    [stops],
+    [orderedStops],
   );
 
   const depotPoint = useMemo(() => {
@@ -78,6 +93,53 @@ export function RouteMap({ stops, depot, height = 360, feasibility }: Props) {
     }
     return null;
   }, [depot]);
+
+
+
+
+  const handleDragEnd = (stopId: string, newLat: number, newLng: number) => {
+    if (!onReorder) return;
+    const ids = orderedStops.map((s) => s.id);
+    const remaining = orderedStops.filter((s) => s.id !== stopId);
+    // Anchor points: depot (if any) + remaining stops in order + depot return.
+    const anchors: Array<{ id: string | null; pt: [number, number] }> = [];
+    if (depotPoint) anchors.push({ id: null, pt: depotPoint });
+    for (const r of remaining) {
+      if (r.latitude == null || r.longitude == null) continue;
+      anchors.push({ id: r.id, pt: [Number(r.latitude), Number(r.longitude)] });
+    }
+    if (depotPoint) anchors.push({ id: null, pt: depotPoint });
+    if (anchors.length < 2) return;
+
+    const drop: [number, number] = [newLat, newLng];
+    let bestIdx = 0;
+    let bestDelta = Infinity;
+    for (let i = 0; i < anchors.length - 1; i++) {
+      const a = anchors[i].pt;
+      const b = anchors[i + 1].pt;
+      const delta = haversineKm(a, drop) + haversineKm(drop, b) - haversineKm(a, b);
+      if (delta < bestDelta) {
+        bestDelta = delta;
+        bestIdx = i;
+      }
+    }
+    // Determine which remaining-stop position this insertion corresponds to.
+    // anchors index i -> insert after the i-th anchor. Filter to non-depot anchors only.
+    const remainingIds = remaining.map((r) => r.id);
+    // Count how many non-depot anchors come at or before bestIdx.
+    let insertAt = 0;
+    for (let i = 0; i <= bestIdx; i++) {
+      if (anchors[i].id !== null) insertAt++;
+    }
+    insertAt = Math.min(insertAt, remainingIds.length);
+    const newOrder = [...remainingIds];
+    newOrder.splice(insertAt, 0, stopId);
+    // Compare to current order to avoid no-op writes.
+    const same = newOrder.length === ids.length && newOrder.every((v, i) => v === ids[i]);
+    if (same) return;
+    onReorder(newOrder);
+  };
+
 
   const linePoints = useMemo<[number, number][]>(() => {
     const pts: [number, number][] = [];
@@ -139,6 +201,21 @@ export function RouteMap({ stops, depot, height = 360, feasibility }: Props) {
               key={s.id}
               position={[s.lat, s.lng]}
               icon={numberedIcon(s.sequence, STATUS_COLOR[s.status] ?? '#64748b', late)}
+              draggable={!!onReorder}
+              eventHandlers={
+                onReorder
+                  ? {
+                      dragend: (e) => {
+                        const m = e.target as L.Marker;
+                        const ll = m.getLatLng();
+                        // Reset marker visually — actual coords stay in DB;
+                        // we only reorder sequence based on drop position.
+                        m.setLatLng([s.lat, s.lng]);
+                        handleDragEnd(s.id, ll.lat, ll.lng);
+                      },
+                    }
+                  : undefined
+              }
             >
               <Popup>
                 <div className="text-xs space-y-1">
@@ -156,6 +233,11 @@ export function RouteMap({ stops, depot, height = 360, feasibility }: Props) {
                     <div style={{ color: late ? '#ef4444' : undefined }}>
                       Chegada simulada: +{fmtMin(fz.arrivalMin)}
                       {fz.windowEndMin != null && ` · janela até ${windowEndHHMM(fz.windowEndMin)}`}
+                    </div>
+                  )}
+                  {onReorder && (
+                    <div className="text-[10px] text-muted-foreground pt-1 border-t mt-1">
+                      Arraste o marcador para reordenar
                     </div>
                   )}
                 </div>
