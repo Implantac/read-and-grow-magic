@@ -553,6 +553,9 @@ const StopDialog = ({
       weight: form.weight ? Number(form.weight.replace(',', '.')) : 0,
       volume: form.volume ? Number(form.volume.replace(',', '.')) : 0,
       planned_eta: form.planned_eta ? new Date(form.planned_eta).toISOString() : null,
+      time_window_start: form.time_window_start || null,
+      time_window_end: form.time_window_end || null,
+      service_minutes: form.service_minutes ? Math.max(0, parseInt(form.service_minutes, 10) || 0) : 10,
       notes: form.notes || null,
     });
   };
