@@ -218,6 +218,34 @@ const RoutePlanner = () => {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
 
+  const feasibilityMap = useMemo(() => {
+    if (!stops.length || depot?.depot_latitude == null || depot?.depot_longitude == null) {
+      return {} as Record<string, { status: 'ok'|'early'|'late'|'no-window'|'no-geo'; arrivalMin?: number; windowEndMin?: number | null }>;
+    }
+    const geoPoints = stops.map((s) => ({
+      id: s.id,
+      latitude: s.latitude,
+      longitude: s.longitude,
+      timeWindowStart: (s as any).time_window_start ?? null,
+      timeWindowEnd: (s as any).time_window_end ?? null,
+      serviceMinutes: (s as any).service_minutes ?? 10,
+    }));
+    const fz = checkTimeWindows(
+      stops.map((s) => s.id),
+      geoPoints,
+      { lat: depot.depot_latitude as number, lng: depot.depot_longitude as number },
+    );
+    const out: Record<string, { status: 'ok'|'early'|'late'|'no-window'|'no-geo'; arrivalMin?: number; windowEndMin?: number | null }> = {};
+    for (const r of fz.stops) out[r.id] = { status: r.status, arrivalMin: r.arrivalMin, windowEndMin: r.windowEndMin };
+    return out;
+  }, [stops, depot]);
+
+  const lateCount = useMemo(
+    () => Object.values(feasibilityMap).filter((f) => f.status === 'late').length,
+    [feasibilityMap],
+  );
+
+
 
 
   if (routesLoading || stopsLoading) return <PageLoading />;
