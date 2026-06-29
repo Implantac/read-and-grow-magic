@@ -436,10 +436,11 @@ const CostLine = ({ label, value, highlight }: { label: string; value: string; h
 );
 
 const StopRow = ({
-  stop, canUp, canDown, onUp, onDown, onStatus, onDelete,
+  stop, late, canUp, canDown, onUp, onDown, onStatus, onDelete,
   isDragging, isOver, onDragStart, onDragOver, onDragEnd, onDrop,
 }: {
   stop: RouteStop;
+  late?: boolean;
   canUp: boolean;
   canDown: boolean;
   onUp: () => void;
