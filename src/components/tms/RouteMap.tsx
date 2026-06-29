@@ -119,25 +119,50 @@ export function RouteMap({ stops, depot, height = 360, feasibility }: Props) {
             <Popup>Centro de Distribuição</Popup>
           </Marker>
         )}
-        {geocoded.map((s) => (
-          <Marker
-            key={s.id}
-            position={[s.lat, s.lng]}
-            icon={numberedIcon(s.sequence, STATUS_COLOR[s.status] ?? '#64748b')}
-          >
-            <Popup>
-              <div className="text-xs space-y-1">
-                <div className="font-semibold">Parada #{s.sequence}</div>
-                {s.address && <div>{s.address}</div>}
-                {(s.city || s.state) && <div>{[s.city, s.state].filter(Boolean).join(' / ')}</div>}
-                <div>Status: {s.status}</div>
-                {s.planned_eta && (
-                  <div>ETA: {new Date(s.planned_eta).toLocaleString('pt-BR')}</div>
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+        {geocoded.map((s) => {
+          const fz = feasibility?.[s.id];
+          const late = fz?.status === 'late';
+          const fmtMin = (m?: number) => {
+            if (m == null) return '';
+            const h = Math.floor(m / 60);
+            const mm = String(Math.round(m % 60)).padStart(2, '0');
+            return `${h}h${mm}`;
+          };
+          const windowEndHHMM = (m?: number | null) => {
+            if (m == null) return '';
+            const h = String(Math.floor(m / 60)).padStart(2, '0');
+            const mm = String(m % 60).padStart(2, '0');
+            return `${h}:${mm}`;
+          };
+          return (
+            <Marker
+              key={s.id}
+              position={[s.lat, s.lng]}
+              icon={numberedIcon(s.sequence, STATUS_COLOR[s.status] ?? '#64748b', late)}
+            >
+              <Popup>
+                <div className="text-xs space-y-1">
+                  <div className="font-semibold">
+                    Parada #{s.sequence}
+                    {late && <span style={{ color: '#ef4444', marginLeft: 6 }}>· ATRASADA</span>}
+                  </div>
+                  {s.address && <div>{s.address}</div>}
+                  {(s.city || s.state) && <div>{[s.city, s.state].filter(Boolean).join(' / ')}</div>}
+                  <div>Status: {s.status}</div>
+                  {s.planned_eta && (
+                    <div>ETA: {new Date(s.planned_eta).toLocaleString('pt-BR')}</div>
+                  )}
+                  {fz && fz.arrivalMin != null && (
+                    <div style={{ color: late ? '#ef4444' : undefined }}>
+                      Chegada simulada: +{fmtMin(fz.arrivalMin)}
+                      {fz.windowEndMin != null && ` · janela até ${windowEndHHMM(fz.windowEndMin)}`}
+                    </div>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
         {linePoints.length >= 2 && (
           <Polyline positions={linePoints} pathOptions={{ color: '#FF9800', weight: 3, opacity: 0.75, dashArray: '6 8' }} />
         )}
