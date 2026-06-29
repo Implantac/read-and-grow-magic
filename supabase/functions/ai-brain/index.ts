@@ -1126,9 +1126,14 @@ const handler = async (req: Request): Promise<Response> => {
       case "notify_critical": {
         const webhook = Deno.env.get("BRAIN_WEBHOOK_URL");
         const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+        if (!callerCompany) {
+          result = { ok: false, error: "Forbidden: tenant required" };
+          break;
+        }
         const { data: crits } = await admin
           .from("ai_brain_decisions")
           .select("id,module,title,rationale,impact_level,confidence,created_at,proposed_action")
+          .eq("company_id", callerCompany)
           .eq("status", "pending")
           .in("impact_level", ["critical", "high"])
           .gte("created_at", since)
@@ -1138,12 +1143,14 @@ const handler = async (req: Request): Promise<Response> => {
         if (!crits?.length) { result = { ok: true, sent: 0, message: "Nenhuma decisão crítica recente." }; break; }
         const payload = {
           source: "ai-brain",
+          company_id: callerCompany,
           generated_at: new Date().toISOString(),
           critical_count: crits.filter((c: any) => c.impact_level === "critical").length,
           high_count: crits.filter((c: any) => c.impact_level === "high").length,
           summary: crits.map((c: any) => `[${c.impact_level.toUpperCase()}] ${c.module} · ${c.title}`).join("\n"),
           decisions: crits,
         };
+
         const r = await fetch(webhook, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
