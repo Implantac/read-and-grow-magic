@@ -417,6 +417,52 @@ export default function PluginEditor() {
                   />
                 </div>
 
+                {currentPluginId && (
+                  <div className="border-t pt-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm font-medium">
+                        <GitBranch className="h-4 w-4 text-primary" />
+                        Versões publicadas
+                        <Badge variant="outline" className="text-[10px]">
+                          {versions?.length ?? 0}
+                        </Badge>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => publishVersion.mutate()}
+                        disabled={publishVersion.isPending || !!manifestError}
+                      >
+                        <Upload className="h-4 w-4 mr-1" />
+                        Publicar versão {draft.version}
+                      </Button>
+                    </div>
+                    {(versions?.length ?? 0) === 0 ? (
+                      <p className="text-xs text-muted-foreground">
+                        Nenhuma versão publicada ainda. Tenants seguem o script atual.
+                      </p>
+                    ) : (
+                      <ul className="space-y-1 max-h-40 overflow-y-auto rounded-md border bg-muted/30 p-2">
+                        {versions!.map((v) => (
+                          <li key={v.id} className="flex items-start justify-between gap-3 text-xs">
+                            <div>
+                              <span className="font-mono font-semibold">v{v.version}</span>
+                              {v.changelog && (
+                                <span className="text-muted-foreground"> — {v.changelog}</span>
+                              )}
+                            </div>
+                            <span className="text-muted-foreground whitespace-nowrap">
+                              {formatDistanceToNow(new Date(v.published_at), { addSuffix: true, locale: ptBR })}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+
+
+
                 <div className="flex items-center justify-between border-t pt-3">
                   <div className="flex items-center gap-2">
                     <Switch
