@@ -377,6 +377,24 @@ const RoutePlanner = () => {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Paradas da rota</CardTitle>
           <div className="flex gap-2 flex-wrap">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleImportCsv(f);
+              }}
+            />
+            <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={importing}>
+              {importing ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Upload className="h-4 w-4 mr-1" />}
+              Importar CSV
+            </Button>
+            <Button size="sm" variant="ghost" onClick={downloadCsvTemplate} title="Baixar modelo de CSV">
+              <FileDown className="h-4 w-4 mr-1" />
+              Modelo
+            </Button>
             <Button size="sm" variant="outline" onClick={bulkGeocode} disabled={bulkGeocoding || missingGeo === 0}>
               {bulkGeocoding ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <MapPin className="h-4 w-4 mr-1" />}
               Geocodificar paradas{missingGeo > 0 ? ` (${missingGeo})` : ''}
