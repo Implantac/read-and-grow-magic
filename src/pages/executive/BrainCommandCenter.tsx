@@ -45,7 +45,15 @@ export default function BrainCommandCenter() {
   const notify = useNotifyCritical();
   const { messages, loading, send, clear } = useBrainChat();
   const [input, setInput] = useState('');
-  const [agent, setAgent] = useState('general');
+  const [agent, setAgent] = useState<string>(() => localStorage.getItem('brain.agent') || 'general');
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => { localStorage.setItem('brain.agent', agent); }, [agent]);
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages, loading]);
+
+
 
   const lastRun = runs[0];
   const veredicto = lastRun?.structured?.veredicto;
