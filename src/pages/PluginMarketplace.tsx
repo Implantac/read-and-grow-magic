@@ -258,6 +258,18 @@ export default function PluginMarketplace() {
             pluginName={runner.name}
           />
         )}
+
+        {versionDialog && (
+          <PluginVersionDialog
+            open={!!versionDialog}
+            onOpenChange={(v) => !v && setVersionDialog(null)}
+            pluginId={versionDialog.pluginId}
+            pluginName={versionDialog.pluginName}
+            installationId={versionDialog.installationId}
+            pinnedVersion={versionDialog.pinnedVersion}
+            currentVersion={versionDialog.currentVersion}
+          />
+        )}
       </PageContainer>
     </RoleGuard>
   );
