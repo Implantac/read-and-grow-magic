@@ -175,9 +175,18 @@ export default function BrainPage() {
                       )}
                     </div>
                   ))}
-                  {loading && <div className="text-xs text-muted-foreground">🧠 pensando...</div>}
+                  {loading && (
+                    <div className="text-xs text-muted-foreground flex items-center gap-2">
+                      <span className="inline-block h-2 w-2 rounded-full bg-primary animate-pulse" />
+                      <span className="inline-block h-2 w-2 rounded-full bg-primary animate-pulse [animation-delay:120ms]" />
+                      <span className="inline-block h-2 w-2 rounded-full bg-primary animate-pulse [animation-delay:240ms]" />
+                      <span>cérebro pensando…</span>
+                    </div>
+                  )}
+                  <div ref={chatEndRef} />
                 </div>
               </ScrollArea>
+
               <div className="flex gap-2">
                 <Textarea
                   value={input}
