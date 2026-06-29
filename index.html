@@ -7,8 +7,7 @@
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
     <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=(), payment=()" />
-    <!-- X-Frame-Options deve ser enviado via header HTTP, não em <meta>. Use CSP frame-ancestors. -->
-    <meta http-equiv="Content-Security-Policy" content="frame-ancestors 'self' https://*.lovable.app https://*.lovable.dev" />
+    <!-- Nota: X-Frame-Options e CSP frame-ancestors só funcionam via header HTTP, não em <meta>. Configure no servidor/CDN. -->
     <meta name="format-detection" content="telephone=no" />
     <title>USE SISTEMAS — Plataforma de Gestão Empresarial com IA</title>
     <meta name="description" content="Plataforma completa de gestão para indústrias, atacado e varejo. Vendas, produção, estoque, logística e financeiro integrados com inteligência artificial. Implantação em 7 dias." />
