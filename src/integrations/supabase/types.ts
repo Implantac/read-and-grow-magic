@@ -10298,6 +10298,7 @@ export type Database = {
           id: string
           installed_at: string
           installed_by: string | null
+          pinned_version: string | null
           plugin_id: string
           quota_per_day: number
           status: string
@@ -10311,6 +10312,7 @@ export type Database = {
           id?: string
           installed_at?: string
           installed_by?: string | null
+          pinned_version?: string | null
           plugin_id: string
           quota_per_day?: number
           status?: string
@@ -10324,6 +10326,7 @@ export type Database = {
           id?: string
           installed_at?: string
           installed_by?: string | null
+          pinned_version?: string | null
           plugin_id?: string
           quota_per_day?: number
           status?: string
@@ -10333,6 +10336,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "plugin_installations_plugin_id_fkey"
+            columns: ["plugin_id"]
+            isOneToOne: false
+            referencedRelation: "plugins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plugin_versions: {
+        Row: {
+          changelog: string | null
+          id: string
+          manifest: Json
+          plugin_id: string
+          published_at: string
+          published_by: string | null
+          sandbox_script: string | null
+          version: string
+        }
+        Insert: {
+          changelog?: string | null
+          id?: string
+          manifest?: Json
+          plugin_id: string
+          published_at?: string
+          published_by?: string | null
+          sandbox_script?: string | null
+          version: string
+        }
+        Update: {
+          changelog?: string | null
+          id?: string
+          manifest?: Json
+          plugin_id?: string
+          published_at?: string
+          published_by?: string | null
+          sandbox_script?: string | null
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plugin_versions_plugin_id_fkey"
             columns: ["plugin_id"]
             isOneToOne: false
             referencedRelation: "plugins"

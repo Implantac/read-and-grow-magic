@@ -10,7 +10,10 @@ import { Textarea } from "@/ui/base/textarea";
 import { Label } from "@/ui/base/label";
 import { Badge } from "@/ui/base/badge";
 import { Switch } from "@/ui/base/switch";
-import { Code2, Loader2, Plus, Save, Trash2 } from "lucide-react";
+import { Code2, GitBranch, Loader2, Plus, Save, Trash2, Upload } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
 import { RoleGuard } from "@/components/auth/RoleGuard";
 import { handleMutationError, toastSuccess } from "@/lib/toastHelpers";
 
@@ -64,6 +67,30 @@ function usePluginsAll() {
   });
 }
 
+interface PluginVersionRow {
+  id: string;
+  version: string;
+  changelog: string | null;
+  published_at: string;
+}
+
+function usePluginVersions(pluginId: string | null) {
+  return useQuery({
+    queryKey: ["plugin_versions", pluginId],
+    enabled: !!pluginId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("plugin_versions")
+        .select("id, version, changelog, published_at")
+        .eq("plugin_id", pluginId!)
+        .order("published_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as PluginVersionRow[];
+    },
+  });
+}
+
+
 export default function PluginEditor() {
   const qc = useQueryClient();
   const { data: plugins, isLoading } = usePluginsAll();
@@ -71,6 +98,38 @@ export default function PluginEditor() {
   const [draft, setDraft] = useState<PluginRow | (Omit<PluginRow, "id"> & { id?: string }) | null>(null);
   const [manifestText, setManifestText] = useState("");
   const [manifestError, setManifestError] = useState<string | null>(null);
+  const currentPluginId =
+    draft && "id" in draft && draft.id ? (draft.id as string) : null;
+  const { data: versions } = usePluginVersions(currentPluginId);
+
+  const publishVersion = useMutation({
+    mutationFn: async () => {
+      if (!currentPluginId || !draft) throw new Error("Salve o plugin antes de publicar uma versão");
+      let manifest: any = {};
+      try {
+        manifest = manifestText.trim() ? JSON.parse(manifestText) : {};
+      } catch (e: any) {
+        throw new Error(`Manifest JSON inválido: ${e.message}`);
+      }
+      const changelog = window.prompt(`Changelog para versão ${draft.version}:`, "") ?? "";
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error } = await supabase.from("plugin_versions").insert({
+        plugin_id: currentPluginId,
+        version: draft.version,
+        sandbox_script: draft.sandbox_script,
+        manifest,
+        changelog: changelog || null,
+        published_by: user?.id ?? null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toastSuccess("Versão publicada");
+      qc.invalidateQueries({ queryKey: ["plugin_versions", currentPluginId] });
+    },
+    onError: handleMutationError,
+  });
+
 
   const selected = useMemo(() => {
     if (selectedId === "new") return { ...BLANK } as any;
@@ -357,6 +416,52 @@ export default function PluginEditor() {
                     spellCheck={false}
                   />
                 </div>
+
+                {currentPluginId && (
+                  <div className="border-t pt-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm font-medium">
+                        <GitBranch className="h-4 w-4 text-primary" />
+                        Versões publicadas
+                        <Badge variant="outline" className="text-[10px]">
+                          {versions?.length ?? 0}
+                        </Badge>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => publishVersion.mutate()}
+                        disabled={publishVersion.isPending || !!manifestError}
+                      >
+                        <Upload className="h-4 w-4 mr-1" />
+                        Publicar versão {draft.version}
+                      </Button>
+                    </div>
+                    {(versions?.length ?? 0) === 0 ? (
+                      <p className="text-xs text-muted-foreground">
+                        Nenhuma versão publicada ainda. Tenants seguem o script atual.
+                      </p>
+                    ) : (
+                      <ul className="space-y-1 max-h-40 overflow-y-auto rounded-md border bg-muted/30 p-2">
+                        {versions!.map((v) => (
+                          <li key={v.id} className="flex items-start justify-between gap-3 text-xs">
+                            <div>
+                              <span className="font-mono font-semibold">v{v.version}</span>
+                              {v.changelog && (
+                                <span className="text-muted-foreground"> — {v.changelog}</span>
+                              )}
+                            </div>
+                            <span className="text-muted-foreground whitespace-nowrap">
+                              {formatDistanceToNow(new Date(v.published_at), { addSuffix: true, locale: ptBR })}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+
+
 
                 <div className="flex items-center justify-between border-t pt-3">
                   <div className="flex items-center gap-2">

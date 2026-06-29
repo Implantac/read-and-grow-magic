@@ -43,13 +43,27 @@ const handler = async (req: Request): Promise<Response> => {
 
   const { data: install } = await admin
     .from("plugin_installations")
-    .select("id, status, config, quota_per_day")
+    .select("id, status, config, quota_per_day, pinned_version")
     .eq("plugin_id", plugin.id)
     .eq("company_id", auth.companyId)
     .maybeSingle();
   if (!install || install.status !== "active") {
     return jsonError("Plugin not installed or disabled", 403);
   }
+
+  // Resolve sandbox script: pinned version overrides current
+  let effectiveScript: string | null = plugin.sandbox_script;
+  if (install.pinned_version) {
+    const { data: pinned } = await admin
+      .from("plugin_versions")
+      .select("sandbox_script")
+      .eq("plugin_id", plugin.id)
+      .eq("version", install.pinned_version)
+      .maybeSingle();
+    if (!pinned) return jsonError("Pinned plugin version not found", 410);
+    effectiveScript = pinned.sandbox_script;
+  }
+
 
   // Per-tenant daily quota
   const { data: remaining } = await admin.rpc("plugin_quota_remaining", {
@@ -66,9 +80,9 @@ const handler = async (req: Request): Promise<Response> => {
   let sandboxLogs: string[] = [];
 
   try {
-    if (plugin.sandbox_script && plugin.sandbox_script.trim().length > 0) {
+    if (effectiveScript && effectiveScript.trim().length > 0) {
       const sandboxResult = await runSandbox(
-        plugin.sandbox_script,
+        effectiveScript,
         body.action,
         body.payload ?? {},
         (install.config as Record<string, string>) ?? {},
@@ -79,6 +93,7 @@ const handler = async (req: Request): Promise<Response> => {
     } else {
       result = await dispatch(plugin.key, body.action, body.payload ?? {});
     }
+
   } catch (err) {
     status = "error";
     errorMessage = err instanceof Error ? err.message : "unknown error";
