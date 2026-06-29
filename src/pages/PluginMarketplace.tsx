@@ -195,6 +195,27 @@ export default function PluginMarketplace() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            onClick={() =>
+                              setVersionDialog({
+                                pluginId: p.id,
+                                pluginName: p.name,
+                                installationId: inst!.id,
+                                pinnedVersion: inst!.pinned_version,
+                                currentVersion: p.version,
+                              })
+                            }
+                            aria-label="Versões"
+                            title={
+                              inst!.pinned_version
+                                ? `Fixada em v${inst!.pinned_version}`
+                                : "Acompanhando versão atual"
+                            }
+                          >
+                            <GitBranch className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => setRunner({ id: p.id, key: p.key, name: p.name })}
                             disabled={inst!.status !== "active"}
                             aria-label="Executar"
