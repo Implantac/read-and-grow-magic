@@ -14,10 +14,12 @@ import { Label } from '@/ui/base/label';
 import { Badge } from '@/ui/base/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/ui/base/dialog';
-import { ArrowUp, ArrowDown, Trash2, Plus, MapPin, Truck, DollarSign, Fuel, ChevronLeft, Clock, Loader2, Search, GripVertical, Wand2 } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2, Plus, MapPin, Truck, DollarSign, Fuel, ChevronLeft, Clock, Loader2, Search, GripVertical, Wand2, Download, ExternalLink } from 'lucide-react';
 import { toastSuccess, toastError, handleMutationError } from '@/lib/toastHelpers';
 import { lookupCep, geocodeAddress } from '@/lib/geocode';
 import { nearestNeighborTsp, checkTimeWindows } from '@/lib/tspOptimize';
+import { buildRouteGpx, buildGoogleMapsUrl, downloadGpx } from '@/lib/routeExport';
+
 import {
   useRouteStops,
   useCreateRouteStop,
@@ -326,6 +328,47 @@ const RoutePlanner = () => {
               <Wand2 className="h-4 w-4 mr-1" />
               Otimizar rota
             </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                const geocoded = stops.filter((s) => s.latitude != null && s.longitude != null);
+                if (geocoded.length === 0) {
+                  toastError('Nenhuma parada geocodificada para exportar.');
+                  return;
+                }
+                const gpx = buildRouteGpx({
+                  routeName: `Rota ${route.routeNumber ?? route.id.slice(0, 8)}`,
+                  depot,
+                  stops: stops as any,
+                });
+                downloadGpx(`rota-${route.routeNumber ?? route.id.slice(0, 8)}`, gpx);
+                toastSuccess(`GPX exportado (${geocoded.length} paradas)`);
+              }}
+              disabled={stops.length === 0}
+              title="Baixar arquivo GPX para Garmin, Waze, OsmAnd e Google Earth"
+            >
+              <Download className="h-4 w-4 mr-1" />
+              Exportar GPX
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                const url = buildGoogleMapsUrl({ depot, stops: stops as any });
+                if (!url) {
+                  toastError('Geocodifique as paradas antes de abrir no Google Maps.');
+                  return;
+                }
+                window.open(url, '_blank', 'noopener,noreferrer');
+              }}
+              disabled={stops.length === 0}
+              title="Abrir rota completa no Google Maps"
+            >
+              <ExternalLink className="h-4 w-4 mr-1" />
+              Google Maps
+            </Button>
+
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button size="sm"><Plus className="h-4 w-4 mr-1" />Nova parada</Button>
