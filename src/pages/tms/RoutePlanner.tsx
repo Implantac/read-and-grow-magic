@@ -218,6 +218,34 @@ const RoutePlanner = () => {
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [overIndex, setOverIndex] = useState<number | null>(null);
 
+  const feasibilityMap = useMemo(() => {
+    if (!stops.length || depot?.depot_latitude == null || depot?.depot_longitude == null) {
+      return {} as Record<string, { status: 'ok'|'early'|'late'|'no-window'|'no-geo'; arrivalMin?: number; windowEndMin?: number | null }>;
+    }
+    const geoPoints = stops.map((s) => ({
+      id: s.id,
+      latitude: s.latitude,
+      longitude: s.longitude,
+      timeWindowStart: (s as any).time_window_start ?? null,
+      timeWindowEnd: (s as any).time_window_end ?? null,
+      serviceMinutes: (s as any).service_minutes ?? 10,
+    }));
+    const fz = checkTimeWindows(
+      stops.map((s) => s.id),
+      geoPoints,
+      { lat: depot.depot_latitude as number, lng: depot.depot_longitude as number },
+    );
+    const out: Record<string, { status: 'ok'|'early'|'late'|'no-window'|'no-geo'; arrivalMin?: number; windowEndMin?: number | null }> = {};
+    for (const r of fz.stops) out[r.id] = { status: r.status, arrivalMin: r.arrivalMin, windowEndMin: r.windowEndMin };
+    return out;
+  }, [stops, depot]);
+
+  const lateCount = useMemo(
+    () => Object.values(feasibilityMap).filter((f) => f.status === 'late').length,
+    [feasibilityMap],
+  );
+
+
 
 
   if (routesLoading || stopsLoading) return <PageLoading />;
@@ -325,6 +353,7 @@ const RoutePlanner = () => {
                 <StopRow
                   key={s.id}
                   stop={s}
+                  late={feasibilityMap[s.id]?.status === 'late'}
                   canUp={idx > 0}
                   canDown={idx < stops.length - 1}
                   onUp={() => move(idx, -1)}
@@ -345,14 +374,20 @@ const RoutePlanner = () => {
       </Card>
 
       <Card className="mb-6">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Mapa da rota</CardTitle>
+          {lateCount > 0 && (
+            <Badge variant="destructive">
+              {lateCount} parada{lateCount > 1 ? 's' : ''} fora da janela
+            </Badge>
+          )}
         </CardHeader>
         <CardContent>
           <RouteMap
             stops={stops}
             depot={{ lat: depot?.depot_latitude as number | null, lng: depot?.depot_longitude as number | null }}
             height={400}
+            feasibility={feasibilityMap}
           />
         </CardContent>
       </Card>
@@ -407,10 +442,11 @@ const CostLine = ({ label, value, highlight }: { label: string; value: string; h
 );
 
 const StopRow = ({
-  stop, canUp, canDown, onUp, onDown, onStatus, onDelete,
+  stop, late, canUp, canDown, onUp, onDown, onStatus, onDelete,
   isDragging, isOver, onDragStart, onDragOver, onDragEnd, onDrop,
 }: {
   stop: RouteStop;
+  late?: boolean;
   canUp: boolean;
   canDown: boolean;
   onUp: () => void;
@@ -430,7 +466,7 @@ const StopRow = ({
       onDragOver={onDragOver}
       onDrop={onDrop}
       className={`flex items-center gap-3 rounded-lg border p-3 transition-all ${
-        isDragging ? 'opacity-50 border-primary' : isOver ? 'border-primary bg-primary/5' : 'border-border/40'
+        isDragging ? 'opacity-50 border-primary' : isOver ? 'border-primary bg-primary/5' : late ? 'border-destructive/50 bg-destructive/5' : 'border-border/40'
       }`}
     >
       <button
@@ -458,6 +494,7 @@ const StopRow = ({
           )}
         </div>
       </div>
+      {late && <Badge variant="destructive">Atrasada</Badge>}
       <Badge variant={s.variant}>{s.label}</Badge>
       <Select value={stop.status} onValueChange={onStatus}>
         <SelectTrigger className="w-32 h-8 text-xs"><SelectValue /></SelectTrigger>
