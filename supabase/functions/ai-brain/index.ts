@@ -569,9 +569,10 @@ async function handleAnalyze(userId: string | undefined, authHeader?: string, mo
 
   try {
     const [snapshot, memories] = await Promise.all([
-      gatherSnapshot(authHeader),
-      loadMemories(userId, 20),
+      gatherSnapshot(authHeader, companyId),
+      loadMemories(userId, companyId, 20),
     ]);
+
 
     const userPrompt = `# CONTEXTO DO NEGÓCIO (dados reais agora)
 
