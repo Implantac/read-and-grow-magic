@@ -70,7 +70,66 @@ function haversineKm(a: [number, number], b: [number, number]): number {
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
-export function RouteMap({ stops, depot, height = 360, feasibility }: Props) {
+export function RouteMap({ stops, depot, height = 360, feasibility, onReorder }: Props) {
+  const orderedStops = useMemo(
+    () => [...stops].sort((a, b) => a.sequence - b.sequence),
+    [stops],
+  );
+  const geocoded = useMemo(
+    () =>
+      orderedStops
+        .filter((s) => s.latitude != null && s.longitude != null)
+        .map((s) => ({
+          ...s,
+          lat: Number(s.latitude),
+          lng: Number(s.longitude),
+        })),
+    [orderedStops],
+  );
+
+  const handleDragEnd = (stopId: string, newLat: number, newLng: number) => {
+    if (!onReorder) return;
+    const ids = orderedStops.map((s) => s.id);
+    const remaining = orderedStops.filter((s) => s.id !== stopId);
+    // Anchor points: depot (if any) + remaining stops in order + depot return.
+    const anchors: Array<{ id: string | null; pt: [number, number] }> = [];
+    if (depotPoint) anchors.push({ id: null, pt: depotPoint });
+    for (const r of remaining) {
+      if (r.latitude == null || r.longitude == null) continue;
+      anchors.push({ id: r.id, pt: [Number(r.latitude), Number(r.longitude)] });
+    }
+    if (depotPoint) anchors.push({ id: null, pt: depotPoint });
+    if (anchors.length < 2) return;
+
+    const drop: [number, number] = [newLat, newLng];
+    let bestIdx = 0;
+    let bestDelta = Infinity;
+    for (let i = 0; i < anchors.length - 1; i++) {
+      const a = anchors[i].pt;
+      const b = anchors[i + 1].pt;
+      const delta = haversineKm(a, drop) + haversineKm(drop, b) - haversineKm(a, b);
+      if (delta < bestDelta) {
+        bestDelta = delta;
+        bestIdx = i;
+      }
+    }
+    // Determine which remaining-stop position this insertion corresponds to.
+    // anchors index i -> insert after the i-th anchor. Filter to non-depot anchors only.
+    const remainingIds = remaining.map((r) => r.id);
+    // Count how many non-depot anchors come at or before bestIdx.
+    let insertAt = 0;
+    for (let i = 0; i <= bestIdx; i++) {
+      if (anchors[i].id !== null) insertAt++;
+    }
+    insertAt = Math.min(insertAt, remainingIds.length);
+    const newOrder = [...remainingIds];
+    newOrder.splice(insertAt, 0, stopId);
+    // Compare to current order to avoid no-op writes.
+    const same = newOrder.length === ids.length && newOrder.every((v, i) => v === ids[i]);
+    if (same) return;
+    onReorder(newOrder);
+  };
+
   const geocoded = useMemo(
     () =>
       stops
