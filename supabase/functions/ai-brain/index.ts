@@ -1109,9 +1109,17 @@ const handler = async (req: Request): Promise<Response> => {
         break;
       }
       case "invalidate_cache":
-        snapshotCache = null;
+        // Limpa só o cache do tenant atual (preserva isolamento)
+        if (callerCompany) {
+          for (const k of [...snapshotCache.keys()]) {
+            if (k.startsWith(`${callerCompany}|`)) snapshotCache.delete(k);
+          }
+        } else {
+          snapshotCache.clear();
+        }
         result = { ok: true, cleared: true };
         break;
+
 
 
 
