@@ -374,14 +374,20 @@ const RoutePlanner = () => {
       </Card>
 
       <Card className="mb-6">
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Mapa da rota</CardTitle>
+          {lateCount > 0 && (
+            <Badge variant="destructive">
+              {lateCount} parada{lateCount > 1 ? 's' : ''} fora da janela
+            </Badge>
+          )}
         </CardHeader>
         <CardContent>
           <RouteMap
             stops={stops}
             depot={{ lat: depot?.depot_latitude as number | null, lng: depot?.depot_longitude as number | null }}
             height={400}
+            feasibility={feasibilityMap}
           />
         </CardContent>
       </Card>
