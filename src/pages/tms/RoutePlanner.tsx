@@ -328,6 +328,47 @@ const RoutePlanner = () => {
               <Wand2 className="h-4 w-4 mr-1" />
               Otimizar rota
             </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                const geocoded = stops.filter((s) => s.latitude != null && s.longitude != null);
+                if (geocoded.length === 0) {
+                  toastError('Nenhuma parada geocodificada para exportar.');
+                  return;
+                }
+                const gpx = buildRouteGpx({
+                  routeName: `Rota ${route.routeNumber ?? route.id.slice(0, 8)}`,
+                  depot,
+                  stops: stops as any,
+                });
+                downloadGpx(`rota-${route.routeNumber ?? route.id.slice(0, 8)}`, gpx);
+                toastSuccess(`GPX exportado (${geocoded.length} paradas)`);
+              }}
+              disabled={stops.length === 0}
+              title="Baixar arquivo GPX para Garmin, Waze, OsmAnd e Google Earth"
+            >
+              <Download className="h-4 w-4 mr-1" />
+              Exportar GPX
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                const url = buildGoogleMapsUrl({ depot, stops: stops as any });
+                if (!url) {
+                  toastError('Geocodifique as paradas antes de abrir no Google Maps.');
+                  return;
+                }
+                window.open(url, '_blank', 'noopener,noreferrer');
+              }}
+              disabled={stops.length === 0}
+              title="Abrir rota completa no Google Maps"
+            >
+              <ExternalLink className="h-4 w-4 mr-1" />
+              Google Maps
+            </Button>
+
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
                 <Button size="sm"><Plus className="h-4 w-4 mr-1" />Nova parada</Button>
