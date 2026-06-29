@@ -683,13 +683,32 @@ const AGENT_PERSONAS: Record<string, { label: string; focus: string }> = {
   producao: { label: "Gerente de PCP", focus: "Foque em OEE, MRP, gargalos, capacidade, ordens de produção. Tom de PCP/Indústria 4.0." },
 };
 
+// Aliases UI → backend (front-end usa nomes em inglês em algumas telas)
+const AGENT_ALIASES: Record<string, string> = {
+  general: "geral",
+  financial: "financeiro",
+  commercial: "comercial",
+  operational: "logistica",
+  operations: "logistica",
+  production: "producao",
+  quality: "qualidade",
+  cfo: "financeiro",
+  sales: "comercial",
+};
+
+function resolveAgent(id?: string): string {
+  const raw = String(id || "geral").toLowerCase();
+  return AGENT_PERSONAS[raw] ? raw : (AGENT_ALIASES[raw] || "geral");
+}
+
 async function handleChat(userId: string | undefined, messages: any[], authHeader?: string, agent = "geral", companyId?: string | null) {
-  const persona = AGENT_PERSONAS[agent] || AGENT_PERSONAS.geral;
+  const persona = AGENT_PERSONAS[resolveAgent(agent)];
   const [snapshot, memories, pending] = await Promise.all([
-    gatherSnapshot(authHeader),
-    loadMemories(userId, 15),
-    loadPendingSummary(8),
+    gatherSnapshot(authHeader, companyId),
+    loadMemories(userId, companyId, 15),
+    loadPendingSummary(companyId ?? null, 8),
   ]);
+
 
   const ctx = `# CONTEXTO ATUAL DO NEGÓCIO
 ## Memórias relevantes
