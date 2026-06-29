@@ -1078,6 +1078,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         await saveMemory({
           user_id: userId,
+          company_id: callerCompany,
           category: rating === "up" ? "positive_feedback" : "lesson_learned",
           key: `feedback_${decision_id}`,
           value: {
@@ -1090,6 +1091,7 @@ const handler = async (req: Request): Promise<Response> => {
           importance: rating === "down" ? 8 : 6,
           source: "user_feedback",
         });
+
         result = { ok: true, registered: true };
         break;
       }
