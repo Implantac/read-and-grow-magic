@@ -65,6 +65,8 @@ const RoutePlanner = () => {
   const qc = useQueryClient();
   const [computing, setComputing] = useState(false);
   const [bulkGeocoding, setBulkGeocoding] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: depot } = useQuery({
     queryKey: ['delivery_route_depot', id],
