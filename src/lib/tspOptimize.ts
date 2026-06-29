@@ -7,6 +7,32 @@ export interface GeoPoint {
   id: string;
   latitude: number | null | undefined;
   longitude: number | null | undefined;
+  timeWindowStart?: string | null; // 'HH:MM' or 'HH:MM:SS'
+  timeWindowEnd?: string | null;
+  serviceMinutes?: number | null;
+}
+
+/** Per-stop arrival evaluation produced by `checkTimeWindows`. */
+export interface FeasibilityStop {
+  id: string;
+  arrivalMin: number;          // minutes from depot departure
+  windowStartMin: number | null;
+  windowEndMin: number | null;
+  status: 'ok' | 'early' | 'late' | 'no-window' | 'no-geo';
+}
+
+export interface FeasibilityReport {
+  stops: FeasibilityStop[];
+  lateCount: number;
+  earlyCount: number;
+  totalMinutes: number;        // depot → all stops → depot, incl. service & wait
+}
+
+function parseHHMM(s?: string | null): number | null {
+  if (!s) return null;
+  const m = /^(\d{1,2}):(\d{2})/.exec(s);
+  if (!m) return null;
+  return Number(m[1]) * 60 + Number(m[2]);
 }
 
 const R = 6371; // km
