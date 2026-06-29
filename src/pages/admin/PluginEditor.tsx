@@ -98,6 +98,38 @@ export default function PluginEditor() {
   const [draft, setDraft] = useState<PluginRow | (Omit<PluginRow, "id"> & { id?: string }) | null>(null);
   const [manifestText, setManifestText] = useState("");
   const [manifestError, setManifestError] = useState<string | null>(null);
+  const currentPluginId =
+    draft && "id" in draft && draft.id ? (draft.id as string) : null;
+  const { data: versions } = usePluginVersions(currentPluginId);
+
+  const publishVersion = useMutation({
+    mutationFn: async () => {
+      if (!currentPluginId || !draft) throw new Error("Salve o plugin antes de publicar uma versão");
+      let manifest: any = {};
+      try {
+        manifest = manifestText.trim() ? JSON.parse(manifestText) : {};
+      } catch (e: any) {
+        throw new Error(`Manifest JSON inválido: ${e.message}`);
+      }
+      const changelog = window.prompt(`Changelog para versão ${draft.version}:`, "") ?? "";
+      const { data: { user } } = await supabase.auth.getUser();
+      const { error } = await supabase.from("plugin_versions").insert({
+        plugin_id: currentPluginId,
+        version: draft.version,
+        sandbox_script: draft.sandbox_script,
+        manifest,
+        changelog: changelog || null,
+        published_by: user?.id ?? null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toastSuccess("Versão publicada");
+      qc.invalidateQueries({ queryKey: ["plugin_versions", currentPluginId] });
+    },
+    onError: handleMutationError,
+  });
+
 
   const selected = useMemo(() => {
     if (selectedId === "new") return { ...BLANK } as any;
