@@ -51,8 +51,10 @@ export default function PluginMarketplace() {
   });
 
   const installMap = useMemo(() => {
-    const m = new Map<string, { id: string; status: string }>();
-    (installs ?? []).forEach((i) => m.set(i.plugin_id, { id: i.id, status: i.status }));
+    const m = new Map<string, { id: string; status: string; pinned_version: string | null }>();
+    (installs ?? []).forEach((i) =>
+      m.set(i.plugin_id, { id: i.id, status: i.status, pinned_version: i.pinned_version }),
+    );
     return m;
   }, [installs]);
 
