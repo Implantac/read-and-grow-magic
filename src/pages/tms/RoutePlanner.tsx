@@ -150,6 +150,69 @@ const RoutePlanner = () => {
     }
   };
 
+  const downloadCsvTemplate = () => {
+    const blob = new Blob([STOP_CSV_TEMPLATE], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'modelo-paradas.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImportCsv = async (file: File) => {
+    if (!id || !route) return;
+    setImporting(true);
+    let ok = 0;
+    let fail = 0;
+    try {
+      const text = await file.text();
+      const rows = parseCsv(text);
+      if (rows.length === 0) {
+        toastError('CSV vazio ou sem cabeçalho válido.');
+        return;
+      }
+      const baseSeq = stops.length;
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i];
+        const name = r.customer_name || r.cliente || r.nome;
+        if (!name) { fail++; continue; }
+        const lat = r.latitude ? Number(r.latitude.replace(',', '.')) : null;
+        const lng = r.longitude ? Number(r.longitude.replace(',', '.')) : null;
+        const weight = r.weight_kg ? Number(r.weight_kg.replace(',', '.')) : null;
+        try {
+          await createStop.mutateAsync({
+            route_id: id,
+            sequence: baseSeq + i + 1,
+            customer_name: name,
+            address: r.address || null,
+            city: r.city || null,
+            state: r.state || null,
+            zip_code: r.zip_code || null,
+            latitude: Number.isFinite(lat as number) ? lat : null,
+            longitude: Number.isFinite(lng as number) ? lng : null,
+            weight_kg: Number.isFinite(weight as number) ? weight : null,
+            notes: r.notes || null,
+            time_window_start: r.time_window_start || null,
+            time_window_end: r.time_window_end || null,
+            status: 'pending',
+          } as any);
+          ok++;
+        } catch {
+          fail++;
+        }
+      }
+      qc.invalidateQueries({ queryKey: ['route_stops', id] });
+      toastSuccess('Importação concluída', `${ok} parada(s) criada(s)${fail ? ` · ${fail} com erro` : ''}`);
+    } catch (e) {
+      handleMutationError(e);
+    } finally {
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+
   const geocodedCount = useMemo(
     () => stops.filter((s) => s.latitude != null && s.longitude != null).length,
     [stops],
