@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Badge } from '@/ui/base/badge';
