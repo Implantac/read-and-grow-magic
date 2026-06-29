@@ -122,6 +122,7 @@ async function loadMemories(userId?: string, companyId?: string | null, limit = 
 
 async function saveMemory(m: {
   user_id?: string;
+  company_id?: string | null;
   scope?: string;
   category: string;
   key: string;
@@ -129,10 +130,12 @@ async function saveMemory(m: {
   importance?: number;
   source?: string;
 }) {
+  const scope = m.scope || (m.user_id ? "user" : (m.company_id ? "company" : "global"));
   await admin.from("ai_brain_memory").upsert(
     {
       user_id: m.user_id || null,
-      scope: m.scope || (m.user_id ? "user" : "global"),
+      company_id: m.company_id ?? null,
+      scope,
       category: m.category,
       key: m.key,
       value: m.value,
@@ -142,6 +145,7 @@ async function saveMemory(m: {
     { onConflict: "scope,user_id,key" },
   );
 }
+
 
 // ─────────────────────────────────────────────
 // LLM CALL — synthesis with structured JSON + retry em 429
