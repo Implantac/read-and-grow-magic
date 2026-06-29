@@ -24,6 +24,49 @@ export interface PluginInstallation {
   status: "active" | "disabled" | "uninstalled";
   config: Record<string, unknown>;
   installed_at: string;
+  pinned_version: string | null;
+}
+
+export interface PluginVersion {
+  id: string;
+  plugin_id: string;
+  version: string;
+  changelog: string | null;
+  published_at: string;
+}
+
+export function usePluginVersions(pluginId: string | null) {
+  return useQuery({
+    queryKey: ["plugin_versions", pluginId],
+    enabled: !!pluginId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("plugin_versions")
+        .select("id, plugin_id, version, changelog, published_at")
+        .eq("plugin_id", pluginId!)
+        .order("published_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as PluginVersion[];
+    },
+  });
+}
+
+export function usePinPluginVersion() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, version }: { id: string; version: string | null }) => {
+      const { error } = await supabase
+        .from("plugin_installations")
+        .update({ pinned_version: version })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["plugin_installations"] });
+      toastSuccess("Versão atualizada");
+    },
+    onError: handleMutationError,
+  });
 }
 
 export function usePlugins() {

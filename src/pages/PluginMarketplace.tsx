@@ -6,7 +6,7 @@ import { Button } from "@/ui/base/button";
 import { Badge } from "@/ui/base/badge";
 import { Input } from "@/ui/base/input";
 import { Switch } from "@/ui/base/switch";
-import { Code2, Loader2, Package, PlayCircle, Search, Trash2 } from "lucide-react";
+import { Code2, GitBranch, Loader2, Package, PlayCircle, Search, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,6 +19,7 @@ import {
 } from "@/hooks/usePlugins";
 import { RoleGuard } from "@/components/auth/RoleGuard";
 import { PluginRunnerDialog } from "@/components/plugins/PluginRunnerDialog";
+import { PluginVersionDialog } from "@/components/plugins/PluginVersionDialog";
 
 export default function PluginMarketplace() {
   const { data: plugins, isLoading } = usePlugins();
@@ -29,6 +30,13 @@ export default function PluginMarketplace() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
   const [runner, setRunner] = useState<{ id: string; key: string; name: string } | null>(null);
+  const [versionDialog, setVersionDialog] = useState<{
+    pluginId: string;
+    pluginName: string;
+    installationId: string;
+    pinnedVersion: string | null;
+    currentVersion: string;
+  } | null>(null);
 
   const { data: isSystemAdmin } = useQuery({
     queryKey: ["is_system_admin"],
@@ -43,8 +51,10 @@ export default function PluginMarketplace() {
   });
 
   const installMap = useMemo(() => {
-    const m = new Map<string, { id: string; status: string }>();
-    (installs ?? []).forEach((i) => m.set(i.plugin_id, { id: i.id, status: i.status }));
+    const m = new Map<string, { id: string; status: string; pinned_version: string | null }>();
+    (installs ?? []).forEach((i) =>
+      m.set(i.plugin_id, { id: i.id, status: i.status, pinned_version: i.pinned_version }),
+    );
     return m;
   }, [installs]);
 
@@ -185,6 +195,27 @@ export default function PluginMarketplace() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            onClick={() =>
+                              setVersionDialog({
+                                pluginId: p.id,
+                                pluginName: p.name,
+                                installationId: inst!.id,
+                                pinnedVersion: inst!.pinned_version,
+                                currentVersion: p.version,
+                              })
+                            }
+                            aria-label="Versões"
+                            title={
+                              inst!.pinned_version
+                                ? `Fixada em v${inst!.pinned_version}`
+                                : "Acompanhando versão atual"
+                            }
+                          >
+                            <GitBranch className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => setRunner({ id: p.id, key: p.key, name: p.name })}
                             disabled={inst!.status !== "active"}
                             aria-label="Executar"
@@ -225,6 +256,18 @@ export default function PluginMarketplace() {
             pluginId={runner.id}
             pluginKey={runner.key}
             pluginName={runner.name}
+          />
+        )}
+
+        {versionDialog && (
+          <PluginVersionDialog
+            open={!!versionDialog}
+            onOpenChange={(v) => !v && setVersionDialog(null)}
+            pluginId={versionDialog.pluginId}
+            pluginName={versionDialog.pluginName}
+            installationId={versionDialog.installationId}
+            pinnedVersion={versionDialog.pinnedVersion}
+            currentVersion={versionDialog.currentVersion}
           />
         )}
       </PageContainer>
