@@ -585,7 +585,7 @@ export default function BrainPage() {
           )}
           <div id="brain-memory-results" className="grid gap-2 md:grid-cols-2" role="list" aria-label="Memórias do Cérebro">
             {filteredMemories.map((m) => (
-              <Card key={m.id} className="hover:border-primary/40 transition-colors">
+              <Card key={m.id} role="listitem" className="hover:border-primary/40 transition-colors focus-within:ring-2 focus-within:ring-ring">
                 <CardContent className="p-3 space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant="outline" className="text-[10px] uppercase">{m.category}</Badge>
