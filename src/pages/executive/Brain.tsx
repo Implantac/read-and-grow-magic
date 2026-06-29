@@ -167,6 +167,14 @@ export default function BrainPage() {
 
   return (
     <PageContainer>
+      {/* Skip link — visible only on focus */}
+      <a
+        href="#brain-composer"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground focus:shadow-lg"
+      >
+        Pular para o campo de mensagem
+      </a>
+
       {/* HERO */}
       <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/10 via-background to-background p-6 md:p-8">
         <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
