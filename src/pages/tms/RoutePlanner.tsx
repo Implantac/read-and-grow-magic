@@ -460,7 +460,7 @@ const StopRow = ({
       onDragOver={onDragOver}
       onDrop={onDrop}
       className={`flex items-center gap-3 rounded-lg border p-3 transition-all ${
-        isDragging ? 'opacity-50 border-primary' : isOver ? 'border-primary bg-primary/5' : 'border-border/40'
+        isDragging ? 'opacity-50 border-primary' : isOver ? 'border-primary bg-primary/5' : late ? 'border-destructive/50 bg-destructive/5' : 'border-border/40'
       }`}
     >
       <button
