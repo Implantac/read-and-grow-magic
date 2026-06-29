@@ -85,6 +85,7 @@ export function RouteMap({ stops, depot, height = 360, feasibility, onReorder }:
           lng: Number(s.longitude),
         })),
     [orderedStops],
+  );
 
   const depotPoint = useMemo(() => {
     if (depot?.lat != null && depot?.lng != null) {
@@ -92,6 +93,8 @@ export function RouteMap({ stops, depot, height = 360, feasibility, onReorder }:
     }
     return null;
   }, [depot]);
+
+
 
 
   const handleDragEnd = (stopId: string, newLat: number, newLng: number) => {
