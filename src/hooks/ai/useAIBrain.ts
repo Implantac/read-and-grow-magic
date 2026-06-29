@@ -11,7 +11,7 @@ const BRAIN_TOOL_NAMES = [
   'release_order_block','mark_invoice_paid','assign_sales_rep',
   'log_observation','generate_report',
 ];
-function sanitizeBrainText(s: string): string {
+export function sanitizeBrainText(s: string): string {
   if (!s) return s;
   let out = s;
   out = out.replace(/```(?:tool_code|tool_call|json|function)?\s*\n?([\s\S]*?)```/gi, (m, body: string) =>
