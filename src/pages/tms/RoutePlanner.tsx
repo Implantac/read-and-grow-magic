@@ -14,11 +14,13 @@ import { Label } from '@/ui/base/label';
 import { Badge } from '@/ui/base/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/ui/base/dialog';
-import { ArrowUp, ArrowDown, Trash2, Plus, MapPin, Truck, DollarSign, Fuel, ChevronLeft, Clock, Loader2, Search, GripVertical, Wand2, Download, ExternalLink } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2, Plus, MapPin, Truck, DollarSign, Fuel, ChevronLeft, Clock, Loader2, Search, GripVertical, Wand2, Download, ExternalLink, Upload, FileDown } from 'lucide-react';
 import { toastSuccess, toastError, handleMutationError } from '@/lib/toastHelpers';
 import { lookupCep, geocodeAddress } from '@/lib/geocode';
 import { nearestNeighborTsp, checkTimeWindows } from '@/lib/tspOptimize';
 import { buildRouteGpx, buildGoogleMapsUrl, downloadGpx } from '@/lib/routeExport';
+import { parseCsv, STOP_CSV_TEMPLATE } from '@/lib/csvImport';
+import { useRef } from 'react';
 
 import {
   useRouteStops,
