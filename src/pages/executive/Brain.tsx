@@ -61,9 +61,12 @@ export default function BrainPage() {
   const [input, setInput] = useState('');
   const [memorySearch, setMemorySearch] = useState('');
   const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const [activeTab, setActiveTab] = useState('chat');
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const memorySearchRef = useRef<HTMLInputElement | null>(null);
+  const suggestionsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -72,6 +75,44 @@ export default function BrainPage() {
   useEffect(() => {
     textareaRef.current?.focus();
   }, []);
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement | null;
+      const typingInField = !!target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+
+      // "/" focuses chat composer (when not typing in a field)
+      if (e.key === '/' && !typingInField && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        setActiveTab('chat');
+        requestAnimationFrame(() => textareaRef.current?.focus());
+        return;
+      }
+      // Ctrl/Cmd+K focuses memory search
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setActiveTab('memory');
+        requestAnimationFrame(() => memorySearchRef.current?.focus());
+        return;
+      }
+      // Ctrl/Cmd+L clears chat
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l' && messages.length > 0) {
+        e.preventDefault();
+        clear();
+        requestAnimationFrame(() => textareaRef.current?.focus());
+        return;
+      }
+      // Alt+1..4 → switch tabs
+      if (e.altKey && ['1', '2', '3', '4'].includes(e.key)) {
+        e.preventDefault();
+        const tabs = ['chat', 'decisions', 'memory', 'history'];
+        setActiveTab(tabs[Number(e.key) - 1]);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [messages.length, clear]);
 
   const lastRun = runs[0];
   const veredicto = lastRun?.structured?.veredicto as string | undefined;
@@ -104,8 +145,36 @@ export default function BrainPage() {
     setShowScrollBtn(!atBottom);
   };
 
+  // Roving focus across suggested prompt chips
+  const handleSuggestionsKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const buttons = Array.from(suggestionsRef.current?.querySelectorAll<HTMLButtonElement>('button[data-suggestion]') ?? []);
+    if (buttons.length === 0) return;
+    const idx = buttons.findIndex((b) => b === document.activeElement);
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      buttons[(idx + 1 + buttons.length) % buttons.length]?.focus();
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      buttons[(idx - 1 + buttons.length) % buttons.length]?.focus();
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      buttons[0]?.focus();
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      buttons[buttons.length - 1]?.focus();
+    }
+  };
+
   return (
     <PageContainer>
+      {/* Skip link — visible only on focus */}
+      <a
+        href="#brain-composer"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground focus:shadow-lg"
+      >
+        Pular para o campo de mensagem
+      </a>
+
       {/* HERO */}
       <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/10 via-background to-background p-6 md:p-8">
         <div className="absolute -top-24 -right-24 h-64 w-64 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
@@ -208,16 +277,27 @@ export default function BrainPage() {
         </Card>
       )}
 
-      <Tabs defaultValue="chat" className="space-y-4">
-        <TabsList className="bg-muted/50 p-1">
-          <TabsTrigger value="chat" className="gap-1.5"><Bot className="h-4 w-4" /> Chat</TabsTrigger>
-          <TabsTrigger value="decisions" className="gap-1.5">
-            <AlertTriangle className="h-4 w-4" /> Decisões
-            {pending.length > 0 && <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]">{pending.length}</Badge>}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="bg-muted/50 p-1" aria-label="Seções do Cérebro Nativo">
+          <TabsTrigger value="chat" className="gap-1.5" aria-keyshortcuts="Alt+1">
+            <Bot className="h-4 w-4" aria-hidden="true" /> Chat
           </TabsTrigger>
-          <TabsTrigger value="memory" className="gap-1.5"><Database className="h-4 w-4" /> Memória</TabsTrigger>
-          <TabsTrigger value="history" className="gap-1.5"><History className="h-4 w-4" /> Histórico</TabsTrigger>
+          <TabsTrigger value="decisions" className="gap-1.5" aria-keyshortcuts="Alt+2">
+            <AlertTriangle className="h-4 w-4" aria-hidden="true" /> Decisões
+            {pending.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-[10px]" aria-label={`${pending.length} pendentes`}>
+                {pending.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="memory" className="gap-1.5" aria-keyshortcuts="Alt+3">
+            <Database className="h-4 w-4" aria-hidden="true" /> Memória
+          </TabsTrigger>
+          <TabsTrigger value="history" className="gap-1.5" aria-keyshortcuts="Alt+4">
+            <History className="h-4 w-4" aria-hidden="true" /> Histórico
+          </TabsTrigger>
         </TabsList>
+
 
         {/* CHAT */}
         <TabsContent value="chat">
@@ -228,16 +308,32 @@ export default function BrainPage() {
                 <CardTitle className="text-sm font-medium">Conversa com o cérebro</CardTitle>
               </div>
               {messages.length > 0 && (
-                <Button variant="ghost" size="sm" onClick={clear} className="h-7 text-xs">Limpar</Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clear}
+                  className="h-7 text-xs"
+                  aria-label="Limpar conversa"
+                  aria-keyshortcuts="Control+L"
+                >
+                  Limpar
+                </Button>
               )}
             </CardHeader>
             <CardContent className="p-0">
               <div className="relative">
                 <ScrollArea ref={scrollRef} className="h-[500px]" onScrollCapture={handleScroll}>
-                  <div className="p-5 space-y-4">
+                  <div
+                    className="p-5 space-y-4"
+                    role="log"
+                    aria-live="polite"
+                    aria-relevant="additions text"
+                    aria-busy={loading}
+                    aria-label="Histórico da conversa com o Cérebro Nativo"
+                  >
                     {messages.length === 0 && (
                       <div className="text-center py-10 space-y-5">
-                        <div className="mx-auto h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center ring-1 ring-primary/20">
+                        <div className="mx-auto h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center ring-1 ring-primary/20" aria-hidden="true">
                           <Brain className="h-8 w-8 text-primary" />
                         </div>
                         <div className="space-y-1">
@@ -246,12 +342,21 @@ export default function BrainPage() {
                             Pergunte sobre KPIs, financeiro, vendas, produção. O cérebro tem acesso a tudo e memória de longo prazo.
                           </p>
                         </div>
-                        <div className="flex flex-wrap justify-center gap-2 px-4">
-                          {SUGGESTED_PROMPTS.map((p) => (
+                        <div
+                          ref={suggestionsRef}
+                          role="toolbar"
+                          aria-label="Sugestões de perguntas"
+                          onKeyDown={handleSuggestionsKey}
+                          className="flex flex-wrap justify-center gap-2 px-4"
+                        >
+                          {SUGGESTED_PROMPTS.map((p, i) => (
                             <button
                               key={p}
+                              data-suggestion
+                              type="button"
+                              tabIndex={i === 0 ? 0 : -1}
                               onClick={() => handleSend(p.replace(/^\S+\s/, ''))}
-                              className="text-xs px-3 py-1.5 rounded-full border bg-background hover:bg-accent hover:border-primary/40 transition-colors"
+                              className="text-xs px-3 py-1.5 rounded-full border bg-background hover:bg-accent hover:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 transition-colors"
                             >
                               {p}
                             </button>
@@ -261,11 +366,18 @@ export default function BrainPage() {
                     )}
 
                     {messages.map((m) => (
-                      <div key={m.id} className={cn('flex gap-3', m.role === 'user' ? 'flex-row-reverse' : 'flex-row')}>
-                        <div className={cn(
-                          'shrink-0 h-8 w-8 rounded-full flex items-center justify-center ring-1',
-                          m.role === 'user' ? 'bg-primary/15 ring-primary/30' : 'bg-gradient-to-br from-primary/20 to-orange-500/10 ring-primary/30',
-                        )}>
+                      <article
+                        key={m.id}
+                        aria-label={m.role === 'user' ? 'Sua mensagem' : 'Resposta do Cérebro'}
+                        className={cn('flex gap-3', m.role === 'user' ? 'flex-row-reverse' : 'flex-row')}
+                      >
+                        <div
+                          aria-hidden="true"
+                          className={cn(
+                            'shrink-0 h-8 w-8 rounded-full flex items-center justify-center ring-1',
+                            m.role === 'user' ? 'bg-primary/15 ring-primary/30' : 'bg-gradient-to-br from-primary/20 to-orange-500/10 ring-primary/30',
+                          )}
+                        >
                           {m.role === 'user' ? <User2 className="h-4 w-4 text-primary" /> : <Brain className="h-4 w-4 text-primary" />}
                         </div>
                         <div className={cn('flex flex-col gap-1 max-w-[78%]', m.role === 'user' ? 'items-end' : 'items-start')}>
@@ -284,9 +396,9 @@ export default function BrainPage() {
                             )}
                           </div>
                           {m.actions && m.actions.length > 0 && (
-                            <div className="flex flex-col gap-1 w-full">
+                            <ul className="flex flex-col gap-1 w-full list-none p-0 m-0" aria-label="Ações executadas">
                               {m.actions.map((a, i) => (
-                                <div
+                                <li
                                   key={i}
                                   className={cn(
                                     'text-[11px] rounded-lg border px-2.5 py-1.5 flex items-center gap-2',
@@ -295,29 +407,30 @@ export default function BrainPage() {
                                     !a.result?.ok && !a.result?.pending_approval && 'border-destructive/30 bg-destructive/10 text-destructive',
                                   )}
                                 >
-                                  <Zap className="h-3 w-3 shrink-0" />
+                                  <Zap className="h-3 w-3 shrink-0" aria-hidden="true" />
                                   <span className="font-mono font-semibold">{a.tool}</span>
                                   <span className="opacity-80">
                                     {a.result?.ok ? '· executada' : a.result?.pending_approval ? '· aguarda aprovação' : `· ${a.result?.error || 'falhou'}`}
                                   </span>
-                                </div>
+                                </li>
                               ))}
-                            </div>
+                            </ul>
                           )}
                         </div>
-                      </div>
+                      </article>
                     ))}
 
                     {loading && (
-                      <div className="flex gap-3 items-center">
-                        <div className="shrink-0 h-8 w-8 rounded-full bg-gradient-to-br from-primary/20 to-orange-500/10 ring-1 ring-primary/30 flex items-center justify-center">
+                      <div className="flex gap-3 items-center" role="status" aria-label="Cérebro processando resposta">
+                        <div className="shrink-0 h-8 w-8 rounded-full bg-gradient-to-br from-primary/20 to-orange-500/10 ring-1 ring-primary/30 flex items-center justify-center" aria-hidden="true">
                           <Brain className="h-4 w-4 text-primary animate-pulse" />
                         </div>
-                        <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
+                        <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5" aria-hidden="true">
                           <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce" />
                           <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce [animation-delay:120ms]" />
                           <span className="h-2 w-2 rounded-full bg-primary/60 animate-bounce [animation-delay:240ms]" />
                         </div>
+                        <span className="sr-only">Processando…</span>
                       </div>
                     )}
 
@@ -331,40 +444,58 @@ export default function BrainPage() {
                     variant="secondary"
                     onClick={() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })}
                     className="absolute bottom-3 right-4 h-8 w-8 rounded-full shadow-lg"
+                    aria-label="Rolar para a última mensagem"
                   >
-                    <ArrowDown className="h-4 w-4" />
+                    <ArrowDown className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 )}
               </div>
 
               {/* COMPOSER */}
-              <div className="border-t bg-muted/20 p-3">
+              <form
+                className="border-t bg-muted/20 p-3"
+                onSubmit={(e) => { e.preventDefault(); handleSend(); }}
+                aria-label="Enviar mensagem ao Cérebro Nativo"
+              >
+                <label htmlFor="brain-composer" className="sr-only">Mensagem para o Cérebro Nativo</label>
                 <div className="relative flex items-end gap-2 rounded-xl border bg-background p-2 focus-within:ring-2 focus-within:ring-primary/30 transition-shadow">
                   <Textarea
+                    id="brain-composer"
                     ref={textareaRef}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+                      else if (e.key === 'Escape' && input) { e.preventDefault(); setInput(''); }
+                    }}
                     placeholder="Pergunte qualquer coisa sobre o seu negócio..."
+                    aria-label="Mensagem para o Cérebro Nativo"
+                    aria-describedby="brain-composer-hint"
+                    aria-keyshortcuts="Enter Shift+Enter Escape"
+                    aria-multiline="true"
+                    disabled={loading}
                     className="resize-none border-0 focus-visible:ring-0 shadow-none min-h-[44px] max-h-32 px-2"
                     rows={1}
                   />
                   <Button
-                    onClick={() => handleSend()}
+                    type="submit"
                     disabled={loading || !input.trim()}
                     size="icon"
                     className="h-9 w-9 shrink-0 rounded-lg"
+                    aria-label="Enviar mensagem"
                   >
-                    <Send className="h-4 w-4" />
+                    <Send className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </div>
-                <p className="mt-2 text-[10px] text-muted-foreground text-center">
-                  Enter para enviar · Shift+Enter para quebrar linha
+                <p id="brain-composer-hint" className="mt-2 text-[10px] text-muted-foreground text-center">
+                  Enter envia · Shift+Enter quebra linha · Esc limpa · / foca o chat · Ctrl+K busca memórias · Ctrl+L limpa conversa · Alt+1–4 alterna abas
                 </p>
-              </div>
+              </form>
             </CardContent>
           </Card>
         </TabsContent>
+
+
 
         {/* DECISIONS */}
         <TabsContent value="decisions" className="space-y-3">
@@ -404,12 +535,12 @@ export default function BrainPage() {
                     )}
                   </div>
                   {d.status === 'pending' && (
-                    <div className="flex flex-col gap-1.5 shrink-0">
-                      <Button size="sm" onClick={() => approve.mutate({ id: d.id, approve: true })} disabled={approve.isPending} className="gap-1 h-8">
-                        <CheckCircle2 className="h-3.5 w-3.5" /> Aprovar
+                    <div className="flex flex-col gap-1.5 shrink-0" role="group" aria-label={`Ações para a decisão: ${d.title}`}>
+                      <Button size="sm" onClick={() => approve.mutate({ id: d.id, approve: true })} disabled={approve.isPending} className="gap-1 h-8" aria-label={`Aprovar decisão: ${d.title}`}>
+                        <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> Aprovar
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => approve.mutate({ id: d.id, approve: false })} disabled={approve.isPending} className="gap-1 h-8">
-                        <XCircle className="h-3.5 w-3.5" /> Rejeitar
+                      <Button size="sm" variant="outline" onClick={() => approve.mutate({ id: d.id, approve: false })} disabled={approve.isPending} className="gap-1 h-8" aria-label={`Rejeitar decisão: ${d.title}`}>
+                        <XCircle className="h-3.5 w-3.5" aria-hidden="true" /> Rejeitar
                       </Button>
                     </div>
                   )}
@@ -422,14 +553,25 @@ export default function BrainPage() {
         {/* MEMORY */}
         <TabsContent value="memory" className="space-y-3">
           {memories.length > 0 && (
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <div className="relative" role="search">
+              <label htmlFor="brain-memory-search" className="sr-only">Buscar nas memórias</label>
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
               <Input
+                id="brain-memory-search"
+                ref={memorySearchRef}
+                type="search"
                 value={memorySearch}
                 onChange={(e) => setMemorySearch(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Escape' && memorySearch) { e.preventDefault(); setMemorySearch(''); } }}
                 placeholder="Buscar nas memórias..."
+                aria-label="Buscar nas memórias"
+                aria-keyshortcuts="Control+K Escape"
+                aria-controls="brain-memory-results"
                 className="pl-9"
               />
+              <p className="sr-only" aria-live="polite">
+                {filteredMemories.length} {filteredMemories.length === 1 ? 'memória encontrada' : 'memórias encontradas'}
+              </p>
             </div>
           )}
           {filteredMemories.length === 0 && (
@@ -441,9 +583,9 @@ export default function BrainPage() {
               </CardContent>
             </Card>
           )}
-          <div className="grid gap-2 md:grid-cols-2">
+          <div id="brain-memory-results" className="grid gap-2 md:grid-cols-2" role="list" aria-label="Memórias do Cérebro">
             {filteredMemories.map((m) => (
-              <Card key={m.id} className="hover:border-primary/40 transition-colors">
+              <Card key={m.id} role="listitem" className="hover:border-primary/40 transition-colors focus-within:ring-2 focus-within:ring-ring">
                 <CardContent className="p-3 space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant="outline" className="text-[10px] uppercase">{m.category}</Badge>
