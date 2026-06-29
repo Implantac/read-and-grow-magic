@@ -7,6 +7,32 @@ export interface GeoPoint {
   id: string;
   latitude: number | null | undefined;
   longitude: number | null | undefined;
+  timeWindowStart?: string | null; // 'HH:MM' or 'HH:MM:SS'
+  timeWindowEnd?: string | null;
+  serviceMinutes?: number | null;
+}
+
+/** Per-stop arrival evaluation produced by `checkTimeWindows`. */
+export interface FeasibilityStop {
+  id: string;
+  arrivalMin: number;          // minutes from depot departure
+  windowStartMin: number | null;
+  windowEndMin: number | null;
+  status: 'ok' | 'early' | 'late' | 'no-window' | 'no-geo';
+}
+
+export interface FeasibilityReport {
+  stops: FeasibilityStop[];
+  lateCount: number;
+  earlyCount: number;
+  totalMinutes: number;        // depot → all stops → depot, incl. service & wait
+}
+
+function parseHHMM(s?: string | null): number | null {
+  if (!s) return null;
+  const m = /^(\d{1,2}):(\d{2})/.exec(s);
+  if (!m) return null;
+  return Number(m[1]) * 60 + Number(m[2]);
 }
 
 const R = 6371; // km
@@ -131,5 +157,82 @@ export function nearestNeighborTsp(
     ordered: [...order, ...withoutGeo.map((s) => s.id)],
     totalKm: total,
     skipped: withoutGeo.length,
+  };
+}
+
+/**
+ * Simulates the planned tour against per-stop time windows.
+ *
+ * - `orderedIds` is the sequence of stops as currently planned.
+ * - `stops` provides geo + window + service info, looked up by id.
+ * - `depot` is the start/end point.
+ * - `departureHHMM` is the wall-clock start time (e.g. "08:00").
+ * - `avgSpeedKmh` defaults to 40 km/h for urban delivery.
+ *
+ * Travel time = haversine_km / avgSpeed * 60. If arrival is before the
+ * window opens, the driver waits (idle time counts toward totalMinutes).
+ * Arrival after window close marks the stop as `late`.
+ */
+export function checkTimeWindows(
+  orderedIds: string[],
+  stops: GeoPoint[],
+  depot: { lat: number | null | undefined; lng: number | null | undefined },
+  departureHHMM: string = '08:00',
+  avgSpeedKmh: number = 40,
+): FeasibilityReport {
+  const byId = new Map(stops.map((s) => [s.id, s]));
+  const depart = parseHHMM(departureHHMM) ?? 8 * 60;
+  const result: FeasibilityStop[] = [];
+
+  if (typeof depot.lat !== 'number' || typeof depot.lng !== 'number') {
+    return { stops: [], lateCount: 0, earlyCount: 0, totalMinutes: 0 };
+  }
+
+  let current = { lat: depot.lat, lng: depot.lng };
+  let clock = depart; // minutes since midnight
+
+  for (const id of orderedIds) {
+    const s = byId.get(id);
+    if (!s || typeof s.latitude !== 'number' || typeof s.longitude !== 'number') {
+      result.push({ id, arrivalMin: clock - depart, windowStartMin: null, windowEndMin: null, status: 'no-geo' });
+      continue;
+    }
+    const km = haversine(current, { lat: s.latitude, lng: s.longitude });
+    clock += (km / avgSpeedKmh) * 60;
+
+    const wStart = parseHHMM(s.timeWindowStart);
+    const wEnd = parseHHMM(s.timeWindowEnd);
+    let status: FeasibilityStop['status'] = 'no-window';
+    if (wStart != null || wEnd != null) {
+      if (wStart != null && clock < wStart) {
+        status = 'early';
+        clock = wStart; // wait for window to open
+      } else if (wEnd != null && clock > wEnd) {
+        status = 'late';
+      } else {
+        status = 'ok';
+      }
+    }
+    result.push({
+      id,
+      arrivalMin: Math.round(clock - depart),
+      windowStartMin: wStart,
+      windowEndMin: wEnd,
+      status,
+    });
+
+    clock += Math.max(0, s.serviceMinutes ?? 10);
+    current = { lat: s.latitude, lng: s.longitude };
+  }
+
+  // return to depot
+  const back = haversine(current, { lat: depot.lat, lng: depot.lng });
+  clock += (back / avgSpeedKmh) * 60;
+
+  return {
+    stops: result,
+    lateCount: result.filter((r) => r.status === 'late').length,
+    earlyCount: result.filter((r) => r.status === 'early').length,
+    totalMinutes: Math.round(clock - depart),
   };
 }

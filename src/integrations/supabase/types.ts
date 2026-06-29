@@ -12983,9 +12983,12 @@ export type Database = {
           planned_eta: string | null
           route_id: string
           sequence: number
+          service_minutes: number
           state: string | null
           status: string
           stop_type: string
+          time_window_end: string | null
+          time_window_start: string | null
           updated_at: string
           volume: number | null
           weight: number | null
@@ -13008,9 +13011,12 @@ export type Database = {
           planned_eta?: string | null
           route_id: string
           sequence: number
+          service_minutes?: number
           state?: string | null
           status?: string
           stop_type?: string
+          time_window_end?: string | null
+          time_window_start?: string | null
           updated_at?: string
           volume?: number | null
           weight?: number | null
@@ -13033,9 +13039,12 @@ export type Database = {
           planned_eta?: string | null
           route_id?: string
           sequence?: number
+          service_minutes?: number
           state?: string | null
           status?: string
           stop_type?: string
+          time_window_end?: string | null
+          time_window_start?: string | null
           updated_at?: string
           volume?: number | null
           weight?: number | null

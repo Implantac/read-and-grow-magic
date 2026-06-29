@@ -17,7 +17,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { ArrowUp, ArrowDown, Trash2, Plus, MapPin, Truck, DollarSign, Fuel, ChevronLeft, Clock, Loader2, Search, GripVertical, Wand2 } from 'lucide-react';
 import { toastSuccess, toastError, handleMutationError } from '@/lib/toastHelpers';
 import { lookupCep, geocodeAddress } from '@/lib/geocode';
-import { nearestNeighborTsp } from '@/lib/tspOptimize';
+import { nearestNeighborTsp, checkTimeWindows } from '@/lib/tspOptimize';
 import {
   useRouteStops,
   useCreateRouteStop,
@@ -159,20 +159,34 @@ const RoutePlanner = () => {
       toastError('Pelo menos 2 paradas precisam estar geocodificadas.');
       return;
     }
-    const res = nearestNeighborTsp(
-      stops.map((s) => ({ id: s.id, latitude: s.latitude, longitude: s.longitude })),
-      { lat: depot.depot_latitude as number, lng: depot.depot_longitude as number },
-    );
+    const geoPoints = stops.map((s) => ({
+      id: s.id,
+      latitude: s.latitude,
+      longitude: s.longitude,
+      timeWindowStart: (s as any).time_window_start ?? null,
+      timeWindowEnd: (s as any).time_window_end ?? null,
+      serviceMinutes: (s as any).service_minutes ?? 10,
+    }));
+    const depotPt = { lat: depot.depot_latitude as number, lng: depot.depot_longitude as number };
+    const res = nearestNeighborTsp(geoPoints, depotPt);
+    const feas = checkTimeWindows(res.ordered, geoPoints, depotPt);
     reorder.mutate(
       { routeId: route.id, ordered: res.ordered },
       {
-        onSuccess: () =>
-          toastSuccess(
-            'Rota otimizada',
-            `${res.ordered.length - res.skipped} parada(s) reordenadas · ${res.totalKm.toFixed(1)} km estimados${
-              res.skipped ? ` · ${res.skipped} sem geocoding mantida(s) ao final` : ''
-            }`,
-          ),
+        onSuccess: () => {
+          const parts = [
+            `${res.ordered.length - res.skipped} parada(s) reordenadas`,
+            `${res.totalKm.toFixed(1)} km`,
+            `≈ ${Math.round(feas.totalMinutes / 60 * 10) / 10} h`,
+          ];
+          if (feas.lateCount > 0) parts.push(`⚠ ${feas.lateCount} fora da janela`);
+          if (res.skipped) parts.push(`${res.skipped} sem geocoding ao final`);
+          if (feas.lateCount > 0) {
+            toastError('Rota otimizada com violações', parts.join(' · '));
+          } else {
+            toastSuccess('Rota otimizada', parts.join(' · '));
+          }
+        },
       },
     );
   };
@@ -439,6 +453,9 @@ const StopRow = ({
           {stop.city ?? ''}{stop.state ? ` / ${stop.state}` : ''}
           {Number(stop.weight ?? 0) > 0 && ` · ${Number(stop.weight)} kg`}
           {stop.planned_eta && ` · ETA ${new Date(stop.planned_eta).toLocaleString('pt-BR')}`}
+          {(stop as any).time_window_start && (stop as any).time_window_end && (
+            ` · Janela ${String((stop as any).time_window_start).slice(0, 5)}–${String((stop as any).time_window_end).slice(0, 5)}`
+          )}
         </div>
       </div>
       <Badge variant={s.variant}>{s.label}</Badge>
@@ -469,6 +486,7 @@ const StopDialog = ({
     address: '', city: '', state: '', zip_code: '',
     weight: '', volume: '', stop_type: 'delivery', planned_eta: '', notes: '',
     latitude: '', longitude: '',
+    time_window_start: '', time_window_end: '', service_minutes: '10',
   });
   const [geocoding, setGeocoding] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
@@ -535,6 +553,9 @@ const StopDialog = ({
       weight: form.weight ? Number(form.weight.replace(',', '.')) : 0,
       volume: form.volume ? Number(form.volume.replace(',', '.')) : 0,
       planned_eta: form.planned_eta ? new Date(form.planned_eta).toISOString() : null,
+      time_window_start: form.time_window_start || null,
+      time_window_end: form.time_window_end || null,
+      service_minutes: form.service_minutes ? Math.max(0, parseInt(form.service_minutes, 10) || 0) : 10,
       notes: form.notes || null,
     });
   };
@@ -580,6 +601,20 @@ const StopDialog = ({
         <div>
           <Label>ETA prevista</Label>
           <Input type="datetime-local" value={form.planned_eta} onChange={(e) => set('planned_eta', e.target.value)} />
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <div>
+            <Label>Janela início</Label>
+            <Input type="time" value={form.time_window_start} onChange={(e) => set('time_window_start', e.target.value)} />
+          </div>
+          <div>
+            <Label>Janela fim</Label>
+            <Input type="time" value={form.time_window_end} onChange={(e) => set('time_window_end', e.target.value)} />
+          </div>
+          <div>
+            <Label>Serviço (min)</Label>
+            <Input type="number" min={0} value={form.service_minutes} onChange={(e) => set('service_minutes', e.target.value)} />
+          </div>
         </div>
         <div>
           <Label>Notas</Label>
