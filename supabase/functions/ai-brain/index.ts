@@ -633,12 +633,14 @@ Modo: ${mode === "autopilot" ? "AUTOPILOT — sugira ações de baixo risco que 
       try {
         await saveMemory({
           user_id: userId,
+          company_id: companyId,
           category: m.category || "pattern",
           key: String(m.key || `mem_${Date.now()}`).slice(0, 200),
           value: m.value,
           importance: Number(m.importance) || 5,
         });
       } catch { /* ignore dup */ }
+
     }
 
     await admin
