@@ -533,6 +533,35 @@ CATÁLOGO DE TOOLS DISPONÍVEIS:
 - mark_invoice_paid (receivable_id, paid_amount?, payment_date?, notes?) — dá baixa em título a receber [REQUER APROVAÇÃO]
 - assign_sales_rep (client_id, sales_rep_id, notes?) — atribui vendedor a cliente [REQUER APROVAÇÃO]`;
 
+// Remove tool-call syntax que alguns modelos vazam como texto cru
+// Ex.: `escalate_alert({"title":"..."})`, ```tool_code ...```, `<tool_call>...</tool_call>`
+function sanitizeAssistantText(s: string): string {
+  if (!s) return s;
+  const toolNames = [
+    "create_alert","escalate_alert","notify_user","send_pix_reminder",
+    "create_follow_up_task","save_memory","block_client",
+    "reschedule_production_order","create_purchase_order",
+    "release_order_block","mark_invoice_paid","assign_sales_rep",
+    "log_observation","generate_report",
+  ];
+  let out = s;
+  // Blocos de código rotulados como tool/json de função
+  out = out.replace(/```(?:tool_code|tool_call|json|function)?\s*\n?([\s\S]*?)```/gi, (m, body) => {
+    return toolNames.some((n) => body.includes(n)) ? "" : m;
+  });
+  // Tags estilo <tool_call>...</tool_call>
+  out = out.replace(/<\/?tool_call[^>]*>[\s\S]*?(<\/tool_call>|$)/gi, "");
+  // Chamadas inline: name({...}) ou name ({...}) — balanceadas no nível 0 de chaves
+  for (const name of toolNames) {
+    const re = new RegExp(`\\b${name}\\s*\\(\\s*\\{[\\s\\S]*?\\}\\s*\\)\\s*;?`, "g");
+    out = out.replace(re, "");
+    // Variante truncada: name ({"...": "...",")
+    const reLoose = new RegExp(`\\b${name}\\s*\\(\\s*\\{[^\\)]*\\)?`, "g");
+    out = out.replace(reLoose, "");
+  }
+  return out.replace(/\n{3,}/g, "\n\n").trim();
+}
+
 // Schema das tools para o chat (OpenAI tool calling)
 const BRAIN_TOOLS = [
   { type: "function", function: { name: "create_alert", description: "Cria alerta financeiro", parameters: { type: "object", properties: { title: { type: "string" }, description: { type: "string" }, severity: { type: "string", enum: ["low", "medium", "high", "critical"] }, alert_type: { type: "string" } }, required: ["title", "description"] } } },
@@ -804,7 +833,7 @@ ${ctx}`;
     }
   }
 
-  return { content: finalContent || "✅ Ações executadas.", actions: executed };
+  return { content: sanitizeAssistantText(finalContent) || "✅ Ações executadas.", actions: executed };
 }
 
 async function handleApprove(decisionId: string, approve: boolean, userId: string | undefined, callerCompany: string | null) {
