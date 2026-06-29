@@ -19,8 +19,10 @@ export function sanitizeBrainText(s: string): string {
   );
   out = out.replace(/<\/?tool_call[^>]*>[\s\S]*?(<\/tool_call>|$)/gi, '');
   for (const name of BRAIN_TOOL_NAMES) {
-    out = out.replace(new RegExp(`\\b${name}\\s*\\(\\s*\\{[\\s\\S]*?\\}\\s*\\)\\s*;?`, 'g'), '');
-    out = out.replace(new RegExp(`\\b${name}\\s*\\(\\s*\\{[^\\)]*\\)?`, 'g'), '');
+    // Allow whitespace between tool name and '(' (e.g. "save_memory ({...})")
+    out = out.replace(new RegExp(`\\b${name}\\b\\s*\\(\\s*\\{[\\s\\S]*?\\}\\s*\\)\\s*;?`, 'g'), '');
+    out = out.replace(new RegExp(`\\b${name}\\b\\s*\\(\\s*\\{[\\s\\S]*?(?=\\n\\n|$)`, 'g'), '');
+    out = out.replace(new RegExp(`\\b${name}\\b\\s*\\([^\\)]*\\)?`, 'g'), '');
   }
   return out.replace(/\n{3,}/g, '\n\n').trim();
 }
