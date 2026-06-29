@@ -12,12 +12,12 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
 });
 
-const numberedIcon = (n: number, color: string) =>
+const numberedIcon = (n: number, color: string, late = false) =>
   L.divIcon({
     className: 'route-stop-marker',
-    html: `<div style="background:${color};color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);">${n}</div>`,
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
+    html: `<div style="background:${color};color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;border:${late ? '3px solid #ef4444' : '2px solid #fff'};box-shadow:0 1px 4px rgba(0,0,0,.4);${late ? 'outline:2px solid rgba(239,68,68,.35);outline-offset:1px;' : ''}">${n}</div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
   });
 
 const depotIcon = L.divIcon({
