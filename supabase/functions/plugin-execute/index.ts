@@ -80,9 +80,9 @@ const handler = async (req: Request): Promise<Response> => {
   let sandboxLogs: string[] = [];
 
   try {
-    if (plugin.sandbox_script && plugin.sandbox_script.trim().length > 0) {
+    if (effectiveScript && effectiveScript.trim().length > 0) {
       const sandboxResult = await runSandbox(
-        plugin.sandbox_script,
+        effectiveScript,
         body.action,
         body.payload ?? {},
         (install.config as Record<string, string>) ?? {},
@@ -93,6 +93,7 @@ const handler = async (req: Request): Promise<Response> => {
     } else {
       result = await dispatch(plugin.key, body.action, body.payload ?? {});
     }
+
   } catch (err) {
     status = "error";
     errorMessage = err instanceof Error ? err.message : "unknown error";
