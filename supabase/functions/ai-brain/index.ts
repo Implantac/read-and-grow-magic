@@ -45,13 +45,15 @@ async function invokeAgent(name: string, body: any, authHeader?: string) {
   }
 }
 
-// Snapshot cache em memória (TTL 3 min) — reduz custo de chat e análises consecutivas
+// Snapshot cache em memória (TTL 3 min) — PER-TENANT para evitar vazamento entre empresas
 const SNAPSHOT_TTL_MS = 3 * 60 * 1000;
-let snapshotCache: { at: number; data: any } | null = null;
+const snapshotCache = new Map<string, { at: number; data: any }>();
 
-async function gatherSnapshot(authHeader?: string, force = false) {
-  if (!force && snapshotCache && Date.now() - snapshotCache.at < SNAPSHOT_TTL_MS) {
-    return snapshotCache.data;
+async function gatherSnapshot(authHeader?: string, companyId?: string | null, force = false) {
+  const cacheKey = `${companyId || "anon"}|${authHeader ? "auth" : "service"}`;
+  const cached = snapshotCache.get(cacheKey);
+  if (!force && cached && Date.now() - cached.at < SNAPSHOT_TTL_MS) {
+    return cached.data;
   }
   const [exec, fin, finIntel, com, prod] = await Promise.allSettled([
     invokeAgent("ai-executive", { action: "dashboard", months: 6 }, authHeader),
@@ -69,39 +71,58 @@ async function gatherSnapshot(authHeader?: string, force = false) {
     commercial: pick(com),
     production: pick(prod),
   };
-  snapshotCache = { at: Date.now(), data };
+  snapshotCache.set(cacheKey, { at: Date.now(), data });
+  // LRU simples: limita a 50 tenants em memória
+  if (snapshotCache.size > 50) {
+    const oldest = [...snapshotCache.entries()].sort((a, b) => a[1].at - b[1].at)[0];
+    if (oldest) snapshotCache.delete(oldest[0]);
+  }
   return data;
 }
 
-// Resumo das últimas decisões pendentes para incluir no contexto do chat
-async function loadPendingSummary(limit = 8) {
-  const { data } = await admin
+// Resumo das últimas decisões pendentes para incluir no contexto do chat (tenant-scoped)
+async function loadPendingSummary(companyId: string | null, limit = 8) {
+  let q = admin
     .from("ai_brain_decisions")
     .select("id,module,title,impact_level,risk_level,created_at")
     .eq("status", "pending")
     .order("created_at", { ascending: false })
     .limit(limit);
+  if (companyId) q = q.eq("company_id", companyId);
+  else q = q.is("company_id", null);
+  const { data } = await q;
   return data || [];
 }
 
 
 // ─────────────────────────────────────────────
-// MEMORY
+// MEMORY (tenant-scoped)
 // ─────────────────────────────────────────────
-async function loadMemories(userId?: string, limit = 30) {
-  const q = admin
+async function loadMemories(userId?: string, companyId?: string | null, limit = 30) {
+  let q = admin
     .from("ai_brain_memory")
     .select("category,key,value,importance,scope,updated_at")
     .order("importance", { ascending: false })
     .order("updated_at", { ascending: false })
     .limit(limit);
-  if (userId) q.or(`user_id.eq.${userId},scope.in.(global,company)`);
+  // Isolamento: memórias do usuário OU da empresa OU globais da própria empresa
+  if (companyId && userId) {
+    q = q.or(
+      `and(scope.eq.user,user_id.eq.${userId}),and(scope.in.(company,global),company_id.eq.${companyId})`,
+    );
+  } else if (companyId) {
+    q = q.eq("company_id", companyId);
+  } else if (userId) {
+    q = q.eq("user_id", userId);
+  }
   const { data } = await q;
   return data || [];
 }
 
+
 async function saveMemory(m: {
   user_id?: string;
+  company_id?: string | null;
   scope?: string;
   category: string;
   key: string;
@@ -109,10 +130,12 @@ async function saveMemory(m: {
   importance?: number;
   source?: string;
 }) {
+  const scope = m.scope || (m.user_id ? "user" : (m.company_id ? "company" : "global"));
   await admin.from("ai_brain_memory").upsert(
     {
       user_id: m.user_id || null,
-      scope: m.scope || (m.user_id ? "user" : "global"),
+      company_id: m.company_id ?? null,
+      scope,
       category: m.category,
       key: m.key,
       value: m.value,
@@ -122,6 +145,7 @@ async function saveMemory(m: {
     { onConflict: "scope,user_id,key" },
   );
 }
+
 
 // ─────────────────────────────────────────────
 // LLM CALL — synthesis with structured JSON + retry em 429
@@ -422,6 +446,7 @@ async function executeAction(action: any, userId?: string, companyId?: string | 
       case "save_memory": {
         await saveMemory({
           user_id: userId,
+          company_id: companyId,
           category: p.category || "fact",
           key: p.key || `auto_${Date.now()}`,
           value: p.value,
@@ -429,6 +454,7 @@ async function executeAction(action: any, userId?: string, companyId?: string | 
         });
         return { ok: true };
       }
+
       case "log_observation":
       case "generate_report":
         return { ok: true, note: `${tool} registrado` };
@@ -543,9 +569,10 @@ async function handleAnalyze(userId: string | undefined, authHeader?: string, mo
 
   try {
     const [snapshot, memories] = await Promise.all([
-      gatherSnapshot(authHeader),
-      loadMemories(userId, 20),
+      gatherSnapshot(authHeader, companyId),
+      loadMemories(userId, companyId, 20),
     ]);
+
 
     const userPrompt = `# CONTEXTO DO NEGÓCIO (dados reais agora)
 
@@ -606,12 +633,14 @@ Modo: ${mode === "autopilot" ? "AUTOPILOT — sugira ações de baixo risco que 
       try {
         await saveMemory({
           user_id: userId,
+          company_id: companyId,
           category: m.category || "pattern",
           key: String(m.key || `mem_${Date.now()}`).slice(0, 200),
           value: m.value,
           importance: Number(m.importance) || 5,
         });
       } catch { /* ignore dup */ }
+
     }
 
     await admin
@@ -654,13 +683,32 @@ const AGENT_PERSONAS: Record<string, { label: string; focus: string }> = {
   producao: { label: "Gerente de PCP", focus: "Foque em OEE, MRP, gargalos, capacidade, ordens de produção. Tom de PCP/Indústria 4.0." },
 };
 
+// Aliases UI → backend (front-end usa nomes em inglês em algumas telas)
+const AGENT_ALIASES: Record<string, string> = {
+  general: "geral",
+  financial: "financeiro",
+  commercial: "comercial",
+  operational: "logistica",
+  operations: "logistica",
+  production: "producao",
+  quality: "qualidade",
+  cfo: "financeiro",
+  sales: "comercial",
+};
+
+function resolveAgent(id?: string): string {
+  const raw = String(id || "geral").toLowerCase();
+  return AGENT_PERSONAS[raw] ? raw : (AGENT_ALIASES[raw] || "geral");
+}
+
 async function handleChat(userId: string | undefined, messages: any[], authHeader?: string, agent = "geral", companyId?: string | null) {
-  const persona = AGENT_PERSONAS[agent] || AGENT_PERSONAS.geral;
+  const persona = AGENT_PERSONAS[resolveAgent(agent)];
   const [snapshot, memories, pending] = await Promise.all([
-    gatherSnapshot(authHeader),
-    loadMemories(userId, 15),
-    loadPendingSummary(8),
+    gatherSnapshot(authHeader, companyId),
+    loadMemories(userId, companyId, 15),
+    loadPendingSummary(companyId ?? null, 8),
   ]);
+
 
   const ctx = `# CONTEXTO ATUAL DO NEGÓCIO
 ## Memórias relevantes
@@ -803,25 +851,38 @@ async function handleApprove(decisionId: string, approve: boolean, userId: strin
 // WEEKLY LEARNING — analisa rejeitadas e salva lições
 // ─────────────────────────────────────────────
 async function handleWeeklyLearning() {
+  // Itera por tenant para preservar isolamento das lições aprendidas
   const since = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
-  const { data: rejected } = await admin
-    .from("ai_brain_decisions")
-    .select("module,title,rationale,impact_level,risk_level,confidence,proposed_action,created_at")
-    .eq("status", "rejected")
-    .gte("created_at", since)
-    .limit(100);
+  const { data: companies } = await admin.from("companies").select("id");
+  const results: any[] = [];
 
-  if (!rejected?.length) {
-    await saveMemory({
-      category: "lesson_learned",
-      key: `weekly_${new Date().toISOString().slice(0, 10)}`,
-      value: "Nenhuma rejeição na semana — Cérebro bem calibrado.",
-      importance: 4,
-    });
-    return { ok: true, rejected: 0, lessons_saved: 0 };
-  }
+  for (const c of (companies ?? [])) {
+    const companyId = (c as any).id as string;
+    const { data: rejected } = await admin
+      .from("ai_brain_decisions")
+      .select("module,title,rationale,impact_level,risk_level,confidence,proposed_action,created_at")
+      .eq("company_id", companyId)
+      .eq("status", "rejected")
+      .gte("created_at", since)
+      .limit(100);
 
-  const prompt = `Você é o CÉREBRO em modo auto-aprendizado. Abaixo estão decisões REJEITADAS por humanos na última semana.
+    if (!rejected?.length) {
+      try {
+        await saveMemory({
+          company_id: companyId,
+          scope: "company",
+          category: "lesson_learned",
+          key: `weekly_${new Date().toISOString().slice(0, 10)}`,
+          value: "Nenhuma rejeição na semana — Cérebro bem calibrado.",
+          importance: 4,
+          source: "weekly_learning",
+        });
+      } catch { /* ignore */ }
+      results.push({ company_id: companyId, rejected: 0, lessons_saved: 0 });
+      continue;
+    }
+
+    const prompt = `Você é o CÉREBRO em modo auto-aprendizado. Abaixo estão decisões REJEITADAS por humanos na última semana (tenant ${companyId}).
 Identifique PADRÕES de erro e gere até 5 lições para evitar repetir esses erros.
 
 Decisões rejeitadas:
@@ -829,26 +890,37 @@ ${JSON.stringify(rejected, null, 2).slice(0, 8000)}
 
 Retorne JSON: {"lessons":[{"category":"lesson_learned","key":"evitar_X_quando_Y","value":"regra clara em 1 frase","importance":7}]}`;
 
-  const out = await callLLM(
-    "Você é um analista que extrai aprendizados de decisões rejeitadas. Retorne JSON válido.",
-    prompt,
-  );
-  const lessons = Array.isArray(out.lessons) ? out.lessons : [];
-  let saved = 0;
-  for (const l of lessons) {
+    let saved = 0;
     try {
-      await saveMemory({
-        category: l.category || "lesson_learned",
-        key: String(l.key || `lesson_${Date.now()}_${saved}`).slice(0, 200),
-        value: l.value,
-        importance: Number(l.importance) || 7,
-        source: "weekly_learning",
-      });
-      saved++;
-    } catch { /* ignore */ }
+      const out = await callLLM(
+        "Você é um analista que extrai aprendizados de decisões rejeitadas. Retorne JSON válido.",
+        prompt,
+      );
+      const lessons = Array.isArray(out.lessons) ? out.lessons : [];
+      for (const l of lessons) {
+        try {
+          await saveMemory({
+            company_id: companyId,
+            scope: "company",
+            category: l.category || "lesson_learned",
+            key: String(l.key || `lesson_${Date.now()}_${saved}`).slice(0, 200),
+            value: l.value,
+            importance: Number(l.importance) || 7,
+            source: "weekly_learning",
+          });
+          saved++;
+        } catch { /* ignore */ }
+      }
+    } catch (e: any) {
+      results.push({ company_id: companyId, rejected: rejected.length, lessons_saved: 0, error: e?.message || String(e) });
+      continue;
+    }
+    results.push({ company_id: companyId, rejected: rejected.length, lessons_saved: saved });
   }
-  return { ok: true, rejected: rejected.length, lessons_saved: saved };
+
+  return { ok: true, companies: results.length, results };
 }
+
 
 // ─────────────────────────────────────────────
 // SERVER
@@ -983,12 +1055,13 @@ const handler = async (req: Request): Promise<Response> => {
         break;
 
       case "save_memory":
-        await saveMemory({ ...body.memory, user_id: userId });
+        await saveMemory({ ...body.memory, user_id: userId, company_id: callerCompany });
         result = { ok: true };
         break;
       case "list_memories":
-        result = { memories: await loadMemories(userId, 100) };
+        result = { memories: await loadMemories(userId, callerCompany, 100) };
         break;
+
 
 
       case "feedback_decision": {
@@ -1005,6 +1078,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         await saveMemory({
           user_id: userId,
+          company_id: callerCompany,
           category: rating === "up" ? "positive_feedback" : "lesson_learned",
           key: `feedback_${decision_id}`,
           value: {
@@ -1017,6 +1091,7 @@ const handler = async (req: Request): Promise<Response> => {
           importance: rating === "down" ? 8 : 6,
           source: "user_feedback",
         });
+
         result = { ok: true, registered: true };
         break;
       }
@@ -1034,18 +1109,31 @@ const handler = async (req: Request): Promise<Response> => {
         break;
       }
       case "invalidate_cache":
-        snapshotCache = null;
+        // Limpa só o cache do tenant atual (preserva isolamento)
+        if (callerCompany) {
+          for (const k of [...snapshotCache.keys()]) {
+            if (k.startsWith(`${callerCompany}|`)) snapshotCache.delete(k);
+          }
+        } else {
+          snapshotCache.clear();
+        }
         result = { ok: true, cleared: true };
         break;
+
 
 
 
       case "notify_critical": {
         const webhook = Deno.env.get("BRAIN_WEBHOOK_URL");
         const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+        if (!callerCompany) {
+          result = { ok: false, error: "Forbidden: tenant required" };
+          break;
+        }
         const { data: crits } = await admin
           .from("ai_brain_decisions")
           .select("id,module,title,rationale,impact_level,confidence,created_at,proposed_action")
+          .eq("company_id", callerCompany)
           .eq("status", "pending")
           .in("impact_level", ["critical", "high"])
           .gte("created_at", since)
@@ -1055,12 +1143,14 @@ const handler = async (req: Request): Promise<Response> => {
         if (!crits?.length) { result = { ok: true, sent: 0, message: "Nenhuma decisão crítica recente." }; break; }
         const payload = {
           source: "ai-brain",
+          company_id: callerCompany,
           generated_at: new Date().toISOString(),
           critical_count: crits.filter((c: any) => c.impact_level === "critical").length,
           high_count: crits.filter((c: any) => c.impact_level === "high").length,
           summary: crits.map((c: any) => `[${c.impact_level.toUpperCase()}] ${c.module} · ${c.title}`).join("\n"),
           decisions: crits,
         };
+
         const r = await fetch(webhook, {
           method: "POST",
           headers: { "Content-Type": "application/json" },

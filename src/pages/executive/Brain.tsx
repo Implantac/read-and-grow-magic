@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Badge } from '@/ui/base/badge';
@@ -39,6 +39,13 @@ export default function BrainPage() {
   const approve = useApproveDecision();
   const { messages, loading, send, clear } = useBrainChat();
   const [input, setInput] = useState('');
+  const chatEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [messages, loading]);
+
+
 
   const lastRun = runs[0];
   const veredicto = lastRun?.structured?.veredicto;
@@ -168,9 +175,18 @@ export default function BrainPage() {
                       )}
                     </div>
                   ))}
-                  {loading && <div className="text-xs text-muted-foreground">🧠 pensando...</div>}
+                  {loading && (
+                    <div className="text-xs text-muted-foreground flex items-center gap-2">
+                      <span className="inline-block h-2 w-2 rounded-full bg-primary animate-pulse" />
+                      <span className="inline-block h-2 w-2 rounded-full bg-primary animate-pulse [animation-delay:120ms]" />
+                      <span className="inline-block h-2 w-2 rounded-full bg-primary animate-pulse [animation-delay:240ms]" />
+                      <span>cérebro pensando…</span>
+                    </div>
+                  )}
+                  <div ref={chatEndRef} />
                 </div>
               </ScrollArea>
+
               <div className="flex gap-2">
                 <Textarea
                   value={input}
