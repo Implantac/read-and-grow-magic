@@ -30,6 +30,13 @@ export default function PluginMarketplace() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<string>("all");
   const [runner, setRunner] = useState<{ id: string; key: string; name: string } | null>(null);
+  const [versionDialog, setVersionDialog] = useState<{
+    pluginId: string;
+    pluginName: string;
+    installationId: string;
+    pinnedVersion: string | null;
+    currentVersion: string;
+  } | null>(null);
 
   const { data: isSystemAdmin } = useQuery({
     queryKey: ["is_system_admin"],
