@@ -46,10 +46,17 @@ function FitBounds({ points }: { points: [number, number][] }) {
   return null;
 }
 
+interface StopFeasibility {
+  status: 'ok' | 'early' | 'late' | 'no-window' | 'no-geo';
+  arrivalMin?: number;
+  windowEndMin?: number | null;
+}
+
 interface Props {
   stops: RouteStop[];
   depot?: { lat: number | null | undefined; lng: number | null | undefined } | null;
   height?: number;
+  feasibility?: Record<string, StopFeasibility>;
 }
 
 export function RouteMap({ stops, depot, height = 360 }: Props) {
