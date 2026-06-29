@@ -140,24 +140,6 @@ export function RouteMap({ stops, depot, height = 360, feasibility, onReorder }:
     onReorder(newOrder);
   };
 
-  const geocoded = useMemo(
-    () =>
-      stops
-        .filter((s) => s.latitude != null && s.longitude != null)
-        .map((s) => ({
-          ...s,
-          lat: Number(s.latitude),
-          lng: Number(s.longitude),
-        })),
-    [stops],
-  );
-
-  const depotPoint = useMemo(() => {
-    if (depot?.lat != null && depot?.lng != null) {
-      return [Number(depot.lat), Number(depot.lng)] as [number, number];
-    }
-    return null;
-  }, [depot]);
 
   const linePoints = useMemo<[number, number][]>(() => {
     const pts: [number, number][] = [];
