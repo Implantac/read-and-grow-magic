@@ -29,6 +29,13 @@ function register(action: string, fn: (payload: unknown, ctx: SandboxCtx) => unk
   handlers.set(action, fn);
 }
 
+async function evaluatePluginScript(script: string) {
+  // Avoid string evaluation primitives (eval/new Function).
+  // Load plugin code as an ESM data URL inside this isolated worker scope.
+  const moduleUrl = `data:application/javascript;charset=utf-8,${encodeURIComponent(script)}`;
+  await import(moduleUrl);
+}
+
 self.onmessage = async (ev: MessageEvent) => {
   const { script, action, payload, secrets } = ev.data as {
     script: string;
@@ -38,11 +45,13 @@ self.onmessage = async (ev: MessageEvent) => {
   };
 
   try {
+    handlers.clear();
+    logs.length = 0;
+
     // Evaluate the plugin script in the worker's global scope.
     // The worker has no Deno permissions (--allow-none), so the script can
     // only touch what we expose explicitly above.
-    const fn = new Function(script);
-    fn();
+    await evaluatePluginScript(script);
 
     const handler = handlers.get(action);
     if (!handler) throw new Error(`Action '${action}' is not registered by the plugin`);
