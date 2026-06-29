@@ -67,6 +67,30 @@ function usePluginsAll() {
   });
 }
 
+interface PluginVersionRow {
+  id: string;
+  version: string;
+  changelog: string | null;
+  published_at: string;
+}
+
+function usePluginVersions(pluginId: string | null) {
+  return useQuery({
+    queryKey: ["plugin_versions", pluginId],
+    enabled: !!pluginId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("plugin_versions")
+        .select("id, version, changelog, published_at")
+        .eq("plugin_id", pluginId!)
+        .order("published_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as PluginVersionRow[];
+    },
+  });
+}
+
+
 export default function PluginEditor() {
   const qc = useQueryClient();
   const { data: plugins, isLoading } = usePluginsAll();
