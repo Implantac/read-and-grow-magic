@@ -583,7 +583,7 @@ export default function BrainPage() {
               </CardContent>
             </Card>
           )}
-          <div className="grid gap-2 md:grid-cols-2">
+          <div id="brain-memory-results" className="grid gap-2 md:grid-cols-2" role="list" aria-label="Memórias do Cérebro">
             {filteredMemories.map((m) => (
               <Card key={m.id} className="hover:border-primary/40 transition-colors">
                 <CardContent className="p-3 space-y-2">
