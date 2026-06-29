@@ -45,13 +45,15 @@ async function invokeAgent(name: string, body: any, authHeader?: string) {
   }
 }
 
-// Snapshot cache em memória (TTL 3 min) — reduz custo de chat e análises consecutivas
+// Snapshot cache em memória (TTL 3 min) — PER-TENANT para evitar vazamento entre empresas
 const SNAPSHOT_TTL_MS = 3 * 60 * 1000;
-let snapshotCache: { at: number; data: any } | null = null;
+const snapshotCache = new Map<string, { at: number; data: any }>();
 
-async function gatherSnapshot(authHeader?: string, force = false) {
-  if (!force && snapshotCache && Date.now() - snapshotCache.at < SNAPSHOT_TTL_MS) {
-    return snapshotCache.data;
+async function gatherSnapshot(authHeader?: string, companyId?: string | null, force = false) {
+  const cacheKey = `${companyId || "anon"}|${authHeader ? "auth" : "service"}`;
+  const cached = snapshotCache.get(cacheKey);
+  if (!force && cached && Date.now() - cached.at < SNAPSHOT_TTL_MS) {
+    return cached.data;
   }
   const [exec, fin, finIntel, com, prod] = await Promise.allSettled([
     invokeAgent("ai-executive", { action: "dashboard", months: 6 }, authHeader),
@@ -69,36 +71,54 @@ async function gatherSnapshot(authHeader?: string, force = false) {
     commercial: pick(com),
     production: pick(prod),
   };
-  snapshotCache = { at: Date.now(), data };
+  snapshotCache.set(cacheKey, { at: Date.now(), data });
+  // LRU simples: limita a 50 tenants em memória
+  if (snapshotCache.size > 50) {
+    const oldest = [...snapshotCache.entries()].sort((a, b) => a[1].at - b[1].at)[0];
+    if (oldest) snapshotCache.delete(oldest[0]);
+  }
   return data;
 }
 
-// Resumo das últimas decisões pendentes para incluir no contexto do chat
-async function loadPendingSummary(limit = 8) {
-  const { data } = await admin
+// Resumo das últimas decisões pendentes para incluir no contexto do chat (tenant-scoped)
+async function loadPendingSummary(companyId: string | null, limit = 8) {
+  let q = admin
     .from("ai_brain_decisions")
     .select("id,module,title,impact_level,risk_level,created_at")
     .eq("status", "pending")
     .order("created_at", { ascending: false })
     .limit(limit);
+  if (companyId) q = q.eq("company_id", companyId);
+  else q = q.is("company_id", null);
+  const { data } = await q;
   return data || [];
 }
 
 
 // ─────────────────────────────────────────────
-// MEMORY
+// MEMORY (tenant-scoped)
 // ─────────────────────────────────────────────
-async function loadMemories(userId?: string, limit = 30) {
-  const q = admin
+async function loadMemories(userId?: string, companyId?: string | null, limit = 30) {
+  let q = admin
     .from("ai_brain_memory")
     .select("category,key,value,importance,scope,updated_at")
     .order("importance", { ascending: false })
     .order("updated_at", { ascending: false })
     .limit(limit);
-  if (userId) q.or(`user_id.eq.${userId},scope.in.(global,company)`);
+  // Isolamento: memórias do usuário OU da empresa OU globais da própria empresa
+  if (companyId && userId) {
+    q = q.or(
+      `and(scope.eq.user,user_id.eq.${userId}),and(scope.in.(company,global),company_id.eq.${companyId})`,
+    );
+  } else if (companyId) {
+    q = q.eq("company_id", companyId);
+  } else if (userId) {
+    q = q.eq("user_id", userId);
+  }
   const { data } = await q;
   return data || [];
 }
+
 
 async function saveMemory(m: {
   user_id?: string;
