@@ -446,6 +446,7 @@ async function executeAction(action: any, userId?: string, companyId?: string | 
       case "save_memory": {
         await saveMemory({
           user_id: userId,
+          company_id: companyId,
           category: p.category || "fact",
           key: p.key || `auto_${Date.now()}`,
           value: p.value,
@@ -453,6 +454,7 @@ async function executeAction(action: any, userId?: string, companyId?: string | 
         });
         return { ok: true };
       }
+
       case "log_observation":
       case "generate_report":
         return { ok: true, note: `${tool} registrado` };
