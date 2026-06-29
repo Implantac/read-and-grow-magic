@@ -201,6 +201,21 @@ export function RouteMap({ stops, depot, height = 360, feasibility, onReorder }:
               key={s.id}
               position={[s.lat, s.lng]}
               icon={numberedIcon(s.sequence, STATUS_COLOR[s.status] ?? '#64748b', late)}
+              draggable={!!onReorder}
+              eventHandlers={
+                onReorder
+                  ? {
+                      dragend: (e) => {
+                        const m = e.target as L.Marker;
+                        const ll = m.getLatLng();
+                        // Reset marker visually — actual coords stay in DB;
+                        // we only reorder sequence based on drop position.
+                        m.setLatLng([s.lat, s.lng]);
+                        handleDragEnd(s.id, ll.lat, ll.lng);
+                      },
+                    }
+                  : undefined
+              }
             >
               <Popup>
                 <div className="text-xs space-y-1">
@@ -218,6 +233,11 @@ export function RouteMap({ stops, depot, height = 360, feasibility, onReorder }:
                     <div style={{ color: late ? '#ef4444' : undefined }}>
                       Chegada simulada: +{fmtMin(fz.arrivalMin)}
                       {fz.windowEndMin != null && ` · janela até ${windowEndHHMM(fz.windowEndMin)}`}
+                    </div>
+                  )}
+                  {onReorder && (
+                    <div className="text-[10px] text-muted-foreground pt-1 border-t mt-1">
+                      Arraste o marcador para reordenar
                     </div>
                   )}
                 </div>
