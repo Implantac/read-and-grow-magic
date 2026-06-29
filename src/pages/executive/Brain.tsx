@@ -553,14 +553,25 @@ export default function BrainPage() {
         {/* MEMORY */}
         <TabsContent value="memory" className="space-y-3">
           {memories.length > 0 && (
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <div className="relative" role="search">
+              <label htmlFor="brain-memory-search" className="sr-only">Buscar nas memórias</label>
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
               <Input
+                id="brain-memory-search"
+                ref={memorySearchRef}
+                type="search"
                 value={memorySearch}
                 onChange={(e) => setMemorySearch(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Escape' && memorySearch) { e.preventDefault(); setMemorySearch(''); } }}
                 placeholder="Buscar nas memórias..."
+                aria-label="Buscar nas memórias"
+                aria-keyshortcuts="Control+K Escape"
+                aria-controls="brain-memory-results"
                 className="pl-9"
               />
+              <p className="sr-only" aria-live="polite">
+                {filteredMemories.length} {filteredMemories.length === 1 ? 'memória encontrada' : 'memórias encontradas'}
+              </p>
             </div>
           )}
           {filteredMemories.length === 0 && (
