@@ -50,7 +50,8 @@ export function ExecutiveCouncilPanel() {
   const { executiveCouncil } = useEnterprise();
   const { data: runs = [] } = useBrainRuns();
   const { data: learning } = useBrainLearning();
-  
+  const [active, setActive] = useState<SpecialistProfile | null>(null);
+
   const lastRun = runs[0];
   const saude = lastRun?.structured?.saude_geral;
   const veredicto = lastRun?.structured?.veredicto;
@@ -105,21 +106,30 @@ export function ExecutiveCouncilPanel() {
           {specialists.map((specialist) => {
             const Icon = specialist.icon;
             return (
-              <div 
-                key={specialist.role} 
-                className="flex flex-col items-center text-center p-2 rounded-lg bg-background/40 border border-primary/10 hover:border-primary/40 hover:bg-background/60 hover:shadow-lg transition-all cursor-pointer group"
+              <button
+                type="button"
+                key={specialist.role}
+                onClick={() => setActive(specialist)}
+                aria-label={`Consultar especialista ${specialist.role}`}
+                className="flex flex-col items-center text-center p-2 rounded-lg bg-background/40 border border-primary/10 hover:border-primary/40 hover:bg-background/60 hover:shadow-lg transition-all cursor-pointer group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 <div className={cn("mb-1.5 p-1.5 rounded-full bg-background ring-1 ring-primary/20 group-hover:ring-primary/40 group-hover:scale-110 transition-all shadow-sm", specialist.color)}>
-                  <Icon className="h-4 w-4" />
+                  <Icon className="h-4 w-4" aria-hidden="true" />
                 </div>
                 <span className="text-[9px] font-black leading-tight uppercase tracking-tight text-foreground/70 group-hover:text-primary transition-colors">
                   {specialist.role}
                 </span>
                 <div className="mt-1 h-1 w-0 bg-primary/40 rounded-full group-hover:w-full transition-all duration-300" />
-              </div>
+              </button>
             );
           })}
         </div>
+
+        <SpecialistDialog
+          specialist={active}
+          open={!!active}
+          onOpenChange={(o) => { if (!o) setActive(null); }}
+        />
 
         {!veredicto && (
           <div className="p-2 rounded bg-primary/10 border border-primary/10 flex items-center justify-center gap-3">
