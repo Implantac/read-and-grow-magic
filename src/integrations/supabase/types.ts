@@ -17971,6 +17971,123 @@ export type Database = {
           },
         ]
       }
+      yard_appointments: {
+        Row: {
+          carrier_name: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          dock_id: string
+          id: string
+          linked_order: string | null
+          notes: string | null
+          operation_type: string
+          plate: string | null
+          scheduled_end: string
+          scheduled_start: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          carrier_name?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          dock_id: string
+          id?: string
+          linked_order?: string | null
+          notes?: string | null
+          operation_type?: string
+          plate?: string | null
+          scheduled_end: string
+          scheduled_start: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          carrier_name?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          dock_id?: string
+          id?: string
+          linked_order?: string | null
+          notes?: string | null
+          operation_type?: string
+          plate?: string | null
+          scheduled_end?: string
+          scheduled_start?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      yard_vehicles: {
+        Row: {
+          appointment_id: string | null
+          arrived_at: string
+          carrier_name: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          dock_id: string | null
+          docked_at: string | null
+          driver_doc: string | null
+          driver_name: string | null
+          finished_at: string | null
+          id: string
+          linked_order: string | null
+          notes: string | null
+          operation_type: string
+          plate: string
+          status: string
+          updated_at: string
+          vehicle_type: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          arrived_at?: string
+          carrier_name?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          dock_id?: string | null
+          docked_at?: string | null
+          driver_doc?: string | null
+          driver_name?: string | null
+          finished_at?: string | null
+          id?: string
+          linked_order?: string | null
+          notes?: string | null
+          operation_type?: string
+          plate: string
+          status?: string
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Update: {
+          appointment_id?: string | null
+          arrived_at?: string
+          carrier_name?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          dock_id?: string | null
+          docked_at?: string | null
+          driver_doc?: string | null
+          driver_name?: string | null
+          finished_at?: string | null
+          id?: string
+          linked_order?: string | null
+          notes?: string | null
+          operation_type?: string
+          plate?: string
+          status?: string
+          updated_at?: string
+          vehicle_type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       client_current_account: {
