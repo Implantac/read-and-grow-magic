@@ -18954,6 +18954,21 @@ export type Database = {
           stock_balance: number
         }[]
       }
+      wms_move_stock: {
+        Args: {
+          p_from_location_id?: string
+          p_lot_id?: string
+          p_lot_number?: string
+          p_product_code: string
+          p_product_id: string
+          p_product_name: string
+          p_quantity: number
+          p_reason?: string
+          p_to_location_id?: string
+          p_unit?: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role:
