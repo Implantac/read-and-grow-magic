@@ -55,9 +55,9 @@ export default function RecommendationsPanel() {
   };
 
   const updateStatus = async (id: string, status: "applied" | "dismissed") => {
-    const patch: Record<string, unknown> = { status };
-    if (status === "applied") patch.applied_at = new Date().toISOString();
-    if (status === "dismissed") patch.dismissed_at = new Date().toISOString();
+    const now = new Date().toISOString();
+    const patch =
+      status === "applied" ? { status, applied_at: now } : { status, dismissed_at: now };
     await supabase.from("wms_recommendations").update(patch).eq("id", id);
     setRecs((r) => r.filter((x) => x.id !== id));
   };
