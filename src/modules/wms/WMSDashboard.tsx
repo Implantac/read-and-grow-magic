@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { Button } from "@/ui/base/button";
+import { Link } from "react-router-dom";
 import { 
   LayoutDashboard, 
   PackagePlus, 
@@ -14,26 +15,40 @@ import {
   Brain,
   BarChart3
 } from "lucide-react";
+import WMSKpiStrip from "./components/WMSKpiStrip";
 
 export default function WMSDashboard() {
   return (
     <div className="p-6 space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">WMS Enterprise</h1>
           <p className="text-muted-foreground">Gestão inteligente de armazenagem, movimentação e logística interna.</p>
         </div>
-        <div className="flex gap-3">
-          <Button variant="outline" className="gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Taxa de Ocupação
+        <div className="flex gap-3 flex-wrap">
+          <Button asChild variant="outline" className="gap-2">
+            <Link to="/wms/twin">
+              <BarChart3 className="h-4 w-4" />
+              Digital Twin
+            </Link>
           </Button>
-          <Button className="gap-2">
-            <Brain className="h-4 w-4" />
-            Otimizar Slotting
+          <Button asChild variant="outline" className="gap-2">
+            <Link to="/wms/inteligencia">
+              <Brain className="h-4 w-4" />
+              Inteligência
+            </Link>
+          </Button>
+          <Button asChild className="gap-2">
+            <Link to="/wms/slotting">
+              <Brain className="h-4 w-4" />
+              Otimizar Slotting
+            </Link>
           </Button>
         </div>
       </div>
+
+      <WMSKpiStrip />
+
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="border-l-4 border-l-primary">
