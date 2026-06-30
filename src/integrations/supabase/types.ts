@@ -17575,6 +17575,77 @@ export type Database = {
         }
         Relationships: []
       }
+      wms_return_items: {
+        Row: {
+          company_id: string
+          created_at: string
+          disposition: string | null
+          id: string
+          inspected_at: string | null
+          inspected_by: string | null
+          inspection_notes: string | null
+          location_id: string | null
+          lot_id: string | null
+          processed_at: string | null
+          product_id: string | null
+          product_name: string | null
+          product_sku: string | null
+          quantity: number
+          return_id: string
+          status: string
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          disposition?: string | null
+          id?: string
+          inspected_at?: string | null
+          inspected_by?: string | null
+          inspection_notes?: string | null
+          location_id?: string | null
+          lot_id?: string | null
+          processed_at?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          product_sku?: string | null
+          quantity?: number
+          return_id: string
+          status?: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          disposition?: string | null
+          id?: string
+          inspected_at?: string | null
+          inspected_by?: string | null
+          inspection_notes?: string | null
+          location_id?: string | null
+          lot_id?: string | null
+          processed_at?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          product_sku?: string | null
+          quantity?: number
+          return_id?: string
+          status?: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_return_items_return_id_fkey"
+            columns: ["return_id"]
+            isOneToOne: false
+            referencedRelation: "wms_returns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wms_returns: {
         Row: {
           approved_items: number | null
@@ -19296,6 +19367,10 @@ export type Database = {
           p_quantity: number
         }
         Returns: string
+      }
+      wms_dispose_return_item: {
+        Args: { _disposition: string; _item_id: string; _notes?: string }
+        Returns: Json
       }
       wms_generate_3pl_invoice: {
         Args: {

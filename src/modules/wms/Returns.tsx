@@ -9,6 +9,7 @@ import { Input } from '@/ui/base/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { RotateCcw, Search, Package, Truck, Factory, AlertTriangle, CheckCircle, Eye } from 'lucide-react';
 import { useWMSReturns } from '@/hooks/wms/useWMSReturns';
+import { ReturnItemsDialog } from './returns/ReturnItemsDialog';
 
 const typeConfig: Record<string, { label: string; icon: React.ReactNode }> = {
   customer: { label: 'Cliente', icon: <Package className="h-4 w-4" /> },
@@ -28,6 +29,7 @@ export default function ReturnsPage() {
   const { returns, loading, updateStatus } = useWMSReturns();
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [selected, setSelected] = useState<{ id: string; number: string } | null>(null);
 
   const filtered = returns.filter(r => {
     const matchSearch = r.returnNumber.toLowerCase().includes(search.toLowerCase()) ||
@@ -93,12 +95,17 @@ export default function ReturnsPage() {
                     <span>Rejeitados: <strong className="text-destructive">{ret.rejectedItems}</strong></span>
                     <span>Destino: <strong>{ret.destination}</strong></span>
                   </div>
-                  {ret.status === 'pending' && (
-                    <Button size="sm" className="w-full" onClick={() => updateStatus(ret.id, 'inspecting')}>Iniciar Inspeção</Button>
-                  )}
-                  {ret.status === 'inspecting' && (
-                    <Button size="sm" className="w-full" onClick={() => updateStatus(ret.id, 'completed')}>Concluir</Button>
-                  )}
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" className="flex-1" onClick={() => setSelected({ id: ret.id, number: ret.returnNumber })}>
+                      Itens / Disposição
+                    </Button>
+                    {ret.status === 'pending' && (
+                      <Button size="sm" onClick={() => updateStatus(ret.id, 'inspecting')}>Iniciar</Button>
+                    )}
+                    {ret.status === 'inspecting' && (
+                      <Button size="sm" onClick={() => updateStatus(ret.id, 'completed')}>Concluir</Button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             );
@@ -113,6 +120,13 @@ export default function ReturnsPage() {
           </CardContent>
         </Card>
       )}
+
+      <ReturnItemsDialog
+        open={!!selected}
+        onOpenChange={(v) => !v && setSelected(null)}
+        returnId={selected?.id ?? null}
+        returnNumber={selected?.number}
+      />
     </PageContainer>
   );
 }
