@@ -12539,6 +12539,164 @@ export type Database = {
           },
         ]
       }
+      reinf_events: {
+        Row: {
+          cnpj_beneficiario: string | null
+          cnpj_prestador: string | null
+          cod_receita: string | null
+          cod_serv: string | null
+          company_id: string
+          cpf_beneficiario: string | null
+          created_at: string
+          data_emissao: string | null
+          event_type: string
+          id: string
+          nota_fiscal: string | null
+          period_id: string
+          serie: string | null
+          source_id: string | null
+          source_table: string | null
+          status: string
+          updated_at: string
+          validation_errors: Json | null
+          vr_base_cofins: number | null
+          vr_base_csll: number | null
+          vr_base_inss: number | null
+          vr_base_ir: number | null
+          vr_base_pis: number | null
+          vr_bruto: number
+          vr_ret_cofins: number | null
+          vr_ret_csll: number | null
+          vr_ret_inss: number | null
+          vr_ret_ir: number | null
+          vr_ret_pis: number | null
+          xml_payload: string | null
+        }
+        Insert: {
+          cnpj_beneficiario?: string | null
+          cnpj_prestador?: string | null
+          cod_receita?: string | null
+          cod_serv?: string | null
+          company_id: string
+          cpf_beneficiario?: string | null
+          created_at?: string
+          data_emissao?: string | null
+          event_type: string
+          id?: string
+          nota_fiscal?: string | null
+          period_id: string
+          serie?: string | null
+          source_id?: string | null
+          source_table?: string | null
+          status?: string
+          updated_at?: string
+          validation_errors?: Json | null
+          vr_base_cofins?: number | null
+          vr_base_csll?: number | null
+          vr_base_inss?: number | null
+          vr_base_ir?: number | null
+          vr_base_pis?: number | null
+          vr_bruto?: number
+          vr_ret_cofins?: number | null
+          vr_ret_csll?: number | null
+          vr_ret_inss?: number | null
+          vr_ret_ir?: number | null
+          vr_ret_pis?: number | null
+          xml_payload?: string | null
+        }
+        Update: {
+          cnpj_beneficiario?: string | null
+          cnpj_prestador?: string | null
+          cod_receita?: string | null
+          cod_serv?: string | null
+          company_id?: string
+          cpf_beneficiario?: string | null
+          created_at?: string
+          data_emissao?: string | null
+          event_type?: string
+          id?: string
+          nota_fiscal?: string | null
+          period_id?: string
+          serie?: string | null
+          source_id?: string | null
+          source_table?: string | null
+          status?: string
+          updated_at?: string
+          validation_errors?: Json | null
+          vr_base_cofins?: number | null
+          vr_base_csll?: number | null
+          vr_base_inss?: number | null
+          vr_base_ir?: number | null
+          vr_base_pis?: number | null
+          vr_bruto?: number
+          vr_ret_cofins?: number | null
+          vr_ret_csll?: number | null
+          vr_ret_inss?: number | null
+          vr_ret_ir?: number | null
+          vr_ret_pis?: number | null
+          xml_payload?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reinf_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reinf_events_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "reinf_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reinf_periods: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          company_id: string
+          competencia: string
+          created_at: string
+          id: string
+          status: string
+          totals: Json
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          company_id: string
+          competencia: string
+          created_at?: string
+          id?: string
+          status?: string
+          totals?: Json
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          company_id?: string
+          competencia?: string
+          created_at?: string
+          id?: string
+          status?: string
+          totals?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reinf_periods_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       renegotiation_items: {
         Row: {
           company_id: string | null
@@ -19282,6 +19440,11 @@ export type Database = {
         Args: { p_company_id: string }
         Returns: undefined
       }
+      reinf_close_period: { Args: { p_competencia: string }; Returns: string }
+      reinf_generate_r2010: { Args: { p_competencia: string }; Returns: number }
+      reinf_generate_r4020: { Args: { p_competencia: string }; Returns: number }
+      reinf_open_period: { Args: { p_competencia: string }; Returns: string }
+      reinf_reopen_period: { Args: { p_period_id: string }; Returns: undefined }
       reopen_accounting_period: {
         Args: { _month: number; _year: number }
         Returns: Json

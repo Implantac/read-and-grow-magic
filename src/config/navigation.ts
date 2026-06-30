@@ -273,6 +273,7 @@ export const navigationSections: NavSection[] = [
           { title: 'ICMS ST', href: '/fiscal/icms-st', icon: 'Percent' },
           { title: 'DIFAL', href: '/fiscal/difal', icon: 'Globe' },
           { title: 'SPED Fiscal/Contrib.', href: '/fiscal/sped', icon: 'FileDown' },
+          { title: 'EFD-Reinf', href: '/fiscal/reinf', icon: 'FileBadge' },
           { title: 'Relatórios Fiscais', href: '/fiscal/relatorios', icon: 'PieChart' },
         ],
       },
