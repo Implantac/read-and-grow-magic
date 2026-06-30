@@ -16675,6 +16675,24 @@ export type Database = {
         }
         Relationships: []
       }
+      wms_kpi_cache: {
+        Row: {
+          company_id: string
+          kpis: Json
+          refreshed_at: string
+        }
+        Insert: {
+          company_id: string
+          kpis?: Json
+          refreshed_at?: string
+        }
+        Update: {
+          company_id?: string
+          kpis?: Json
+          refreshed_at?: string
+        }
+        Relationships: []
+      }
       wms_logs: {
         Row: {
           company_id: string | null
@@ -18612,6 +18630,10 @@ export type Database = {
           _source_id?: string
         }
         Returns: string
+      }
+      refresh_wms_kpi_cache: {
+        Args: { p_company_id: string }
+        Returns: undefined
       }
       reopen_accounting_period: {
         Args: { _month: number; _year: number }
