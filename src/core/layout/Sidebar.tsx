@@ -237,7 +237,7 @@ export function Sidebar() {
   const { sidebarCollapsed, user } = useAppStore();
   const { signOut } = useAuth({ initialize: false });
   const { segment } = useEnterprise();
-  const [expandedItems, setExpandedItems] = useState<string[]>(['Dashboard', 'Operacional', 'Financeiro', 'Gestão']);
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) =>
