@@ -11,6 +11,7 @@ const ICMSSTPage = lazy(() => import("../modules/fiscal/ICMSST"));
 const DIFALPage = lazy(() => import("../modules/fiscal/DIFAL"));
 const SpedFilesPage = lazy(() => import("../modules/fiscal/SpedFiles"));
 const FiscalReportsPage = lazy(() => import("../modules/fiscal/FiscalReports"));
+const ReinfPage = lazy(() => import("../modules/fiscal/Reinf"));
 
 export const FiscalRoutes = [
   <Route key="fiscal-dash" path="/fiscal/dashboard" element={<FiscalDashboardPage />} />,
@@ -22,5 +23,6 @@ export const FiscalRoutes = [
   <Route key="fiscal-icms" path="/fiscal/icms-st" element={<ICMSSTPage />} />,
   <Route key="fiscal-difal" path="/fiscal/difal" element={<DIFALPage />} />,
   <Route key="fiscal-sped" path="/fiscal/sped" element={<SpedFilesPage />} />,
+  <Route key="fiscal-reinf" path="/fiscal/reinf" element={<ReinfPage />} />,
   <Route key="fiscal-relatorios" path="/fiscal/relatorios" element={<FiscalReportsPage />} />,
 ];
