@@ -56,17 +56,17 @@ export function ExecutiveChat({ messages, isLoading, sendMessage, clearChat, onD
       <div className="hidden lg:flex flex-col w-60 shrink-0 gap-3">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Ações Rápidas</CardTitle>
+            <CardTitle className="text-sm flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" aria-hidden="true" /> Ações Rápidas</CardTitle>
           </CardHeader>
           <CardContent className="space-y-1.5">
             {quickActions.map((action, i) => (
-              <Button key={i} variant="ghost" size="sm" className="w-full justify-start text-left h-auto py-2 px-3" onClick={() => !isLoading && sendMessage(action.prompt)} disabled={isLoading}>
+              <Button key={i} variant="ghost" size="sm" className="w-full justify-start text-left h-auto py-2 px-3" onClick={() => !isLoading && sendMessage(action.prompt)} disabled={isLoading} aria-label={`Enviar consulta: ${action.label}`}>
                 <span className="text-xs leading-tight">{action.label}</span>
               </Button>
             ))}
             <Separator className="my-2" />
-            <Button variant="outline" size="sm" className="w-full" onClick={onDailySummary} disabled={dailySummaryPending || isLoading}>
-              <FileText className="h-4 w-4 mr-1" />{dailySummaryPending ? 'Gerando...' : 'Resumo do Dia'}
+            <Button variant="outline" size="sm" className="w-full" onClick={onDailySummary} disabled={dailySummaryPending || isLoading} aria-label="Gerar resumo executivo do dia">
+              <FileText className="h-4 w-4 mr-1" aria-hidden="true" />{dailySummaryPending ? 'Gerando...' : 'Resumo do Dia'}
             </Button>
           </CardContent>
         </Card>
@@ -98,7 +98,7 @@ export function ExecutiveChat({ messages, isLoading, sendMessage, clearChat, onD
         <CardHeader className="pb-2 border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center" aria-hidden="true">
                 <Brain className="h-4 w-4 text-primary" />
               </div>
               <div>
@@ -107,26 +107,26 @@ export function ExecutiveChat({ messages, isLoading, sendMessage, clearChat, onD
               </div>
             </div>
             {messages.length > 0 && (
-              <Button variant="ghost" size="sm" onClick={clearChat} className="text-xs gap-1">
-                <Trash2 className="h-3 w-3" />Limpar
+              <Button variant="ghost" size="sm" onClick={clearChat} className="text-xs gap-1" aria-label="Limpar conversa">
+                <Trash2 className="h-3 w-3" aria-hidden="true" />Limpar
               </Button>
             )}
           </div>
         </CardHeader>
         <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-          <ScrollArea className="flex-1 p-4">
+          <ScrollArea className="flex-1 p-4" role="log" aria-live="polite" aria-label="Conversa com o Diretor Digital">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center py-12">
-                <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-4" aria-hidden="true">
                   <Brain className="h-10 w-10 text-primary/40" />
                 </div>
                 <p className="text-sm font-medium mb-1">Diretor Digital</p>
                 <p className="text-xs text-muted-foreground mb-6 max-w-md">
                   Seu assistente executivo unificado. Faça perguntas, peça análises ou execute ações no sistema — tudo por linguagem natural.
                 </p>
-                <div className="grid gap-2 grid-cols-2 max-w-lg">
+                <div className="grid gap-2 grid-cols-2 max-w-lg" role="list" aria-label="Sugestões de consultas rápidas">
                   {quickActions.slice(0, 6).map(a => (
-                    <Button key={a.label} variant="outline" size="sm" className="text-[10px] h-auto py-2 px-1 whitespace-normal break-words" onClick={() => sendMessage(a.prompt)}>
+                    <Button key={a.label} variant="outline" size="sm" className="text-[10px] h-auto py-2 px-1 whitespace-normal break-words" onClick={() => sendMessage(a.prompt)} aria-label={`Enviar consulta: ${a.label}`}>
                       {a.label}
                     </Button>
                   ))}
@@ -166,9 +166,9 @@ export function ExecutiveChat({ messages, isLoading, sendMessage, clearChat, onD
                   </div>
                 ))}
                 {isLoading && (
-                  <div className="flex justify-start">
+                  <div className="flex justify-start" role="status" aria-live="polite">
                     <div className="bg-muted rounded-2xl px-4 py-3 flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />
                       <span className="text-sm text-muted-foreground">Processando...</span>
                     </div>
                   </div>
@@ -179,27 +179,34 @@ export function ExecutiveChat({ messages, isLoading, sendMessage, clearChat, onD
           </ScrollArea>
 
           {/* Mobile quick actions */}
-          <div className="lg:hidden border-t px-3 py-2 flex gap-1.5 overflow-x-auto">
+          <div className="lg:hidden border-t px-3 py-2 flex gap-1.5 overflow-x-auto" role="list" aria-label="Ações rápidas">
             {quickActions.slice(0, 4).map((a, i) => (
-              <Button key={i} variant="outline" size="sm" className="text-[10px] shrink-0 h-7 px-2 max-w-[120px] truncate" onClick={() => !isLoading && sendMessage(a.prompt)} disabled={isLoading}>
+              <Button key={i} variant="outline" size="sm" className="text-[10px] shrink-0 h-7 px-2 max-w-[120px] truncate" onClick={() => !isLoading && sendMessage(a.prompt)} disabled={isLoading} aria-label={`Enviar consulta: ${a.label}`}>
                 {a.label}
               </Button>
             ))}
           </div>
 
-          <div className="border-t p-3 flex gap-2">
+          <form
+            className="border-t p-3 flex gap-2"
+            onSubmit={(e) => { e.preventDefault(); handleSend(); }}
+            aria-label="Enviar mensagem para o Diretor Digital"
+          >
+            <label htmlFor="executive-chat-input" className="sr-only">Mensagem para o Diretor Digital</label>
             <Input
+              id="executive-chat-input"
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
+              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
               placeholder="Pergunte, analise ou execute ações..."
               disabled={isLoading}
               className="flex-1"
+              aria-label="Mensagem"
             />
-            <Button onClick={handleSend} disabled={isLoading || !chatInput.trim()} size="icon">
-              <Send className="h-4 w-4" />
+            <Button type="submit" disabled={isLoading || !chatInput.trim()} size="icon" aria-label="Enviar mensagem">
+              <Send className="h-4 w-4" aria-hidden="true" />
             </Button>
-          </div>
+          </form>
         </CardContent>
       </Card>
     </div>
