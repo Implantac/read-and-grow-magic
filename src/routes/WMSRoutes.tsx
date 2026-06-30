@@ -74,4 +74,5 @@ export const WMSRoutes = [
   <Route key="wms-crossdock" path="/wms/cross-docking" element={<CrossDockingPage />} />,
   <Route key="wms-kits" path="/wms/kits" element={<KitAssemblyPage />} />,
   <Route key="wms-dock-sched" path="/wms/agenda-docas" element={<DockSchedulingPage />} />,
+  <Route key="wms-carrier-score" path="/wms/scorecard-transportadoras" element={<CarrierScorecardPage />} />,
 ];
