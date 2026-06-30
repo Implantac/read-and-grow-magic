@@ -54,4 +54,5 @@ export const WMSRoutes = [
   <Route key="wms-locs" path="/wms/enderecos" element={<LocationsPage />} />,
   <Route key="wms-alloc" path="/wms/alocacao" element={<SkuAllocationPage />} />,
   <Route key="wms-reserv" path="/wms/reservas" element={<OrderReservationsPage />} />,
+  <Route key="wms-picking" path="/wms/separacao-pedidos" element={<OrderPickingPage />} />,
 ];
