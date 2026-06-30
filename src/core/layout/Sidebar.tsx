@@ -289,7 +289,7 @@ export function Sidebar() {
         </div>
 
         {/* Navigation Content */}
-        <nav className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin px-3 py-4 space-y-6">
+        <nav aria-label="Módulos do sistema" className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin px-3 py-4 space-y-6">
           {navigationSections.filter(section => {
             if (!segment) return true;
             
