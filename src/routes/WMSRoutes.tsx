@@ -33,6 +33,7 @@ const PickingRoutePage = lazy(() => import("../modules/wms/PickingRouteOptimizer
 const LaborManagementPage = lazy(() => import("../modules/wms/LaborManagement"));
 const CycleCountPage = lazy(() => import("../modules/wms/CycleCount"));
 const WMSAnalyticsPage = lazy(() => import("../modules/wms/WMSAnalytics"));
+const CrossDockingPage = lazy(() => import("../modules/wms/CrossDocking"));
 
 export const WMSRoutes = [
   <Route key="wms-dash" path="/wms/dashboard" element={<WMSDashboardPage />} />,
@@ -67,4 +68,5 @@ export const WMSRoutes = [
   <Route key="wms-labor" path="/wms/mao-de-obra" element={<LaborManagementPage />} />,
   <Route key="wms-cycle" path="/wms/inventario-ciclico" element={<CycleCountPage />} />,
   <Route key="wms-analytics" path="/wms/analytics" element={<WMSAnalyticsPage />} />,
+  <Route key="wms-crossdock" path="/wms/cross-docking" element={<CrossDockingPage />} />,
 ];
