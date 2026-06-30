@@ -65,9 +65,9 @@ Deno.serve(async (req) => {
 
       const metrics: Array<[string, number, number]> = [
         ["users", users.count ?? 0, Number(plan.max_users ?? 0)],
-        ["orders_month", orders.count ?? 0, Number(plan.max_orders_month ?? 0)],
-        ["nfe_month", nfes.count ?? 0, Number(plan.nfe_per_month ?? 0)],
-        ["ai_calls_month", aiCalls.count ?? 0, Number(plan.ai_calls_per_month ?? 0)],
+        ["orders", orders.count ?? 0, Number(plan.max_orders_month ?? 0)],
+        ["nfe", nfes.count ?? 0, Number(plan.nfe_per_month ?? 0)],
+        ["ai_calls", aiCalls.count ?? 0, Number(plan.ai_calls_per_month ?? 0)],
         ["branches", branches.count ?? 0, Number(plan.max_branches ?? 0)],
       ];
 
