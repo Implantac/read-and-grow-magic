@@ -106,7 +106,10 @@ export default function DockScheduling() {
       toastError('Preencha doca e janela de horário');
       return;
     }
-    const { data: company } = await supabase.rpc('get_user_company');
+    const { data: userData } = await supabase.auth.getUser();
+    const { data: company } = await supabase.rpc('get_user_company_id', {
+      _user_id: userData.user?.id as string,
+    });
     const payload = {
       ...form,
       scheduled_start: new Date(form.scheduled_start).toISOString(),
