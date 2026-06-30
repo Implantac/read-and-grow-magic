@@ -66,4 +66,5 @@ export const WMSRoutes = [
   <Route key="wms-route" path="/wms/rota-picking" element={<PickingRoutePage />} />,
   <Route key="wms-labor" path="/wms/mao-de-obra" element={<LaborManagementPage />} />,
   <Route key="wms-cycle" path="/wms/inventario-ciclico" element={<CycleCountPage />} />,
+  <Route key="wms-analytics" path="/wms/analytics" element={<WMSAnalyticsPage />} />,
 ];
