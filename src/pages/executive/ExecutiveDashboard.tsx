@@ -117,6 +117,7 @@ export default function ExecutiveDashboard() {
                 max={36}
                 step={1}
                 className="w-24 lg:w-32"
+                aria-label={`Selecionar período de análise em meses, valor atual ${tempPeriod} meses`}
               />
             </div>
             <div className="h-4 w-px bg-border hidden lg:block mx-1" />
