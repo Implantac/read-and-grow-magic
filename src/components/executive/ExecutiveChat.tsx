@@ -56,17 +56,17 @@ export function ExecutiveChat({ messages, isLoading, sendMessage, clearChat, onD
       <div className="hidden lg:flex flex-col w-60 shrink-0 gap-3">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Ações Rápidas</CardTitle>
+            <CardTitle className="text-sm flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" aria-hidden="true" /> Ações Rápidas</CardTitle>
           </CardHeader>
           <CardContent className="space-y-1.5">
             {quickActions.map((action, i) => (
-              <Button key={i} variant="ghost" size="sm" className="w-full justify-start text-left h-auto py-2 px-3" onClick={() => !isLoading && sendMessage(action.prompt)} disabled={isLoading}>
+              <Button key={i} variant="ghost" size="sm" className="w-full justify-start text-left h-auto py-2 px-3" onClick={() => !isLoading && sendMessage(action.prompt)} disabled={isLoading} aria-label={`Enviar consulta: ${action.label}`}>
                 <span className="text-xs leading-tight">{action.label}</span>
               </Button>
             ))}
             <Separator className="my-2" />
-            <Button variant="outline" size="sm" className="w-full" onClick={onDailySummary} disabled={dailySummaryPending || isLoading}>
-              <FileText className="h-4 w-4 mr-1" />{dailySummaryPending ? 'Gerando...' : 'Resumo do Dia'}
+            <Button variant="outline" size="sm" className="w-full" onClick={onDailySummary} disabled={dailySummaryPending || isLoading} aria-label="Gerar resumo executivo do dia">
+              <FileText className="h-4 w-4 mr-1" aria-hidden="true" />{dailySummaryPending ? 'Gerando...' : 'Resumo do Dia'}
             </Button>
           </CardContent>
         </Card>
