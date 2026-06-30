@@ -7,8 +7,8 @@ import { Label } from "@/ui/base/label";
 import { Badge } from "@/ui/base/badge";
 import { toast } from "sonner";
 import { Shield, ShieldCheck, ShieldOff, Loader2 } from "lucide-react";
-import PageContainer from "@/shared/components/PageContainer";
-import PageHeader from "@/shared/components/PageHeader";
+import { PageContainer } from "@/shared/components/PageContainer";
+import { PageHeader } from "@/shared/components/PageHeader";
 
 type Factor = { id: string; friendly_name?: string; factor_type: string; status: string };
 

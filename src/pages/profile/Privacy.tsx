@@ -5,8 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/
 import { Badge } from "@/ui/base/badge";
 import { toast } from "sonner";
 import { Download, Trash2, FileText, ShieldQuestion, Loader2 } from "lucide-react";
-import PageContainer from "@/shared/components/PageContainer";
-import PageHeader from "@/shared/components/PageHeader";
+import { PageContainer } from "@/shared/components/PageContainer";
+import { PageHeader } from "@/shared/components/PageHeader";
 import {
   AlertDialog,
   AlertDialogAction,
