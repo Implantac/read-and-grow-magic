@@ -3217,6 +3217,7 @@ export type Database = {
           cnpj: string
           company_size: string | null
           created_at: string
+          data_retention_days: number
           email: string | null
           enterprise_group_id: string | null
           group_id: string | null
@@ -3227,6 +3228,7 @@ export type Database = {
           operation_types: Json | null
           parent_company_id: string | null
           phone: string | null
+          require_2fa: boolean
           segment: string | null
           segment_id: string | null
           settings: Json | null
@@ -3251,6 +3253,7 @@ export type Database = {
           cnpj: string
           company_size?: string | null
           created_at?: string
+          data_retention_days?: number
           email?: string | null
           enterprise_group_id?: string | null
           group_id?: string | null
@@ -3261,6 +3264,7 @@ export type Database = {
           operation_types?: Json | null
           parent_company_id?: string | null
           phone?: string | null
+          require_2fa?: boolean
           segment?: string | null
           segment_id?: string | null
           settings?: Json | null
@@ -3285,6 +3289,7 @@ export type Database = {
           cnpj?: string
           company_size?: string | null
           created_at?: string
+          data_retention_days?: number
           email?: string | null
           enterprise_group_id?: string | null
           group_id?: string | null
@@ -3295,6 +3300,7 @@ export type Database = {
           operation_types?: Json | null
           parent_company_id?: string | null
           phone?: string | null
+          require_2fa?: boolean
           segment?: string | null
           segment_id?: string | null
           settings?: Json | null
@@ -8128,6 +8134,97 @@ export type Database = {
         }
         Relationships: []
       }
+      lgpd_consents: {
+        Row: {
+          accepted: boolean
+          company_id: string | null
+          consent_type: string
+          created_at: string
+          id: string
+          ip_address: unknown
+          user_agent: string | null
+          user_id: string
+          version: string
+        }
+        Insert: {
+          accepted?: boolean
+          company_id?: string | null
+          consent_type: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          user_agent?: string | null
+          user_id: string
+          version: string
+        }
+        Update: {
+          accepted?: boolean
+          company_id?: string | null
+          consent_type?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          user_agent?: string | null
+          user_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lgpd_consents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lgpd_data_requests: {
+        Row: {
+          company_id: string | null
+          completed_at: string | null
+          id: string
+          payload: Json | null
+          rejection_reason: string | null
+          request_type: string
+          requested_at: string
+          result_url: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          company_id?: string | null
+          completed_at?: string | null
+          id?: string
+          payload?: Json | null
+          rejection_reason?: string | null
+          request_type: string
+          requested_at?: string
+          result_url?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string | null
+          completed_at?: string | null
+          id?: string
+          payload?: Json | null
+          rejection_reason?: string | null
+          request_type?: string
+          requested_at?: string
+          result_url?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lgpd_data_requests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loading_docks: {
         Row: {
           actual_end: string | null
@@ -11992,11 +12089,13 @@ export type Database = {
       }
       profiles: {
         Row: {
+          anonymized_at: string | null
           avatar_url: string | null
           branch_id: string | null
           company_id: string | null
           created_at: string
           default_branch_id: string | null
+          deleted_at: string | null
           department: string | null
           email: string | null
           id: string
@@ -12005,11 +12104,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          anonymized_at?: string | null
           avatar_url?: string | null
           branch_id?: string | null
           company_id?: string | null
           created_at?: string
           default_branch_id?: string | null
+          deleted_at?: string | null
           department?: string | null
           email?: string | null
           id: string
@@ -12018,11 +12119,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          anonymized_at?: string | null
           avatar_url?: string | null
           branch_id?: string | null
           company_id?: string | null
           created_at?: string
           default_branch_id?: string | null
+          deleted_at?: string | null
           department?: string | null
           email?: string | null
           id?: string
