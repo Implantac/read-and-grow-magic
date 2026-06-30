@@ -16903,6 +16903,146 @@ export type Database = {
         }
         Relationships: []
       }
+      wms_kit_assemblies: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          kit_id: string
+          location_id: string | null
+          notes: string | null
+          performed_by: string | null
+          quantity: number
+          status: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          kit_id: string
+          location_id?: string | null
+          notes?: string | null
+          performed_by?: string | null
+          quantity: number
+          status?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          kit_id?: string
+          location_id?: string | null
+          notes?: string | null
+          performed_by?: string | null
+          quantity?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_kit_assemblies_kit_id_fkey"
+            columns: ["kit_id"]
+            isOneToOne: false
+            referencedRelation: "wms_kits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wms_kit_assemblies_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "wms_storage_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wms_kit_components: {
+        Row: {
+          company_id: string
+          component_product_id: string
+          created_at: string
+          id: string
+          kit_id: string
+          notes: string | null
+          quantity: number
+        }
+        Insert: {
+          company_id: string
+          component_product_id: string
+          created_at?: string
+          id?: string
+          kit_id: string
+          notes?: string | null
+          quantity: number
+        }
+        Update: {
+          company_id?: string
+          component_product_id?: string
+          created_at?: string
+          id?: string
+          kit_id?: string
+          notes?: string | null
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_kit_components_component_product_id_fkey"
+            columns: ["component_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wms_kit_components_kit_id_fkey"
+            columns: ["kit_id"]
+            isOneToOne: false
+            referencedRelation: "wms_kits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wms_kits: {
+        Row: {
+          active: boolean
+          code: string
+          company_id: string
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          parent_product_id: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          company_id: string
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          parent_product_id: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          parent_product_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_kits_parent_product_id_fkey"
+            columns: ["parent_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wms_kpi_cache: {
         Row: {
           company_id: string
@@ -19147,6 +19287,15 @@ export type Database = {
           product_id: string
           stock_balance: number
         }[]
+      }
+      wms_assemble_kit: {
+        Args: {
+          p_kit_id: string
+          p_location_id?: string
+          p_notes?: string
+          p_quantity: number
+        }
+        Returns: string
       }
       wms_generate_3pl_invoice: {
         Args: {
