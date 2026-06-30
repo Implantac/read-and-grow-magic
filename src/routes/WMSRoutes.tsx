@@ -23,6 +23,7 @@ const DigitalTwinPage = lazy(() => import("../modules/wms/twin/DigitalTwin"));
 const IntelligencePage = lazy(() => import("../modules/wms/intelligence/Intelligence"));
 const SlottingPlannerPage = lazy(() => import("../modules/wms/slotting/SlottingPlanner"));
 const YardManagementPage = lazy(() => import("../modules/wms/yard/YardManagement"));
+const LocationsPage = lazy(() => import("../modules/wms/Locations"));
 
 export const WMSRoutes = [
   <Route key="wms-dash" path="/wms/dashboard" element={<WMSDashboardPage />} />,
@@ -47,4 +48,5 @@ export const WMSRoutes = [
   <Route key="wms-intel" path="/wms/inteligencia" element={<IntelligencePage />} />,
   <Route key="wms-slot" path="/wms/slotting" element={<SlottingPlannerPage />} />,
   <Route key="wms-yard" path="/wms/yard" element={<YardManagementPage />} />,
+  <Route key="wms-locs" path="/wms/enderecos" element={<LocationsPage />} />,
 ];
