@@ -1,25 +1,49 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
-import { Brain, Cpu, Scale, BarChart3, Factory, Warehouse, Search, DollarSign, Cog, Truck, Users, Activity, Zap, ShieldAlert, Rocket, Building, Database } from 'lucide-react';
+import { Brain, Cpu, Scale, BarChart3, Factory, Warehouse, Cog, Truck, Users, Activity, Zap, ShieldAlert, Rocket, Building, Database } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBrainRuns, useBrainLearning } from '@/hooks/ai/useAIBrain';
 import { Link } from 'react-router-dom';
 import { Button } from '@/ui/base/button';
 import { ExecutiveIntelligenceStatus } from './ExecutiveIntelligenceStatus';
+import { SpecialistDialog, type SpecialistProfile } from './SpecialistDialog';
 
-const specialists = [
-  { role: 'Global CTO', icon: Cpu, color: 'text-primary' },
-  { role: 'SAP S/4HANA', icon: Building, color: 'text-blue-600' },
-  { role: 'Oracle NetSuite', icon: Database, color: 'text-orange-600' },
-  { role: 'TOTVS/Sankhya', icon: Cog, color: 'text-red-500' },
-  { role: 'Industrial/PCP', icon: Factory, color: 'text-purple-600' },
-  { role: 'WMS/TMS', icon: Warehouse, color: 'text-green-500' },
-  { role: 'Fiscal/Contábil', icon: Scale, color: 'text-red-600' },
-  { role: 'Supply Chain', icon: Truck, color: 'text-cyan-600' },
-  { role: 'HR Strategy', icon: Users, color: 'text-pink-500' },
-  { role: 'Market Intel', icon: BarChart3, color: 'text-indigo-500' },
-  { role: 'IA Specialist', icon: Brain, color: 'text-yellow-500' },
+const specialists: SpecialistProfile[] = [
+  { role: 'Global CTO', icon: Cpu, color: 'text-primary',
+    focus: 'Arquitetura, stack, performance e roadmap tecnológico do ERP.',
+    suggestions: ['Avaliar saúde da arquitetura', 'Riscos técnicos abertos', 'Próximos passos do roadmap'] },
+  { role: 'SAP S/4HANA', icon: Building, color: 'text-blue-600',
+    focus: 'Benchmarks SAP: governança, compliance e processos enterprise.',
+    suggestions: ['Gaps vs. SAP', 'Controles financeiros faltantes', 'Maturidade de processos'] },
+  { role: 'Oracle NetSuite', icon: Database, color: 'text-orange-600',
+    focus: 'Multi-subsidiária, consolidação financeira e operação cloud.',
+    suggestions: ['Consolidação multi-empresa', 'Cloud readiness', 'Relatórios financeiros'] },
+  { role: 'TOTVS/Sankhya', icon: Cog, color: 'text-red-500',
+    focus: 'Aderência ao mercado brasileiro: fiscal, folha, regimes tributários.',
+    suggestions: ['Aderência fiscal BR', 'Integrações nacionais', 'Riscos regulatórios'] },
+  { role: 'Industrial/PCP', icon: Factory, color: 'text-purple-600',
+    focus: 'Produção, OEE, MRP, ordens de fabricação e capacidade fabril.',
+    suggestions: ['Analisar OEE atual', 'Gargalos de capacidade', 'Ordens em atraso'] },
+  { role: 'WMS/TMS', icon: Warehouse, color: 'text-green-500',
+    focus: 'Armazém e transporte: acuracidade, picking, rotas e fretes.',
+    suggestions: ['Acuracidade de estoque', 'Eficiência de picking', 'Otimização de rotas'] },
+  { role: 'Fiscal/Contábil', icon: Scale, color: 'text-red-600',
+    focus: 'NF-e/NFC-e, SPED, apuração de impostos e conciliações.',
+    suggestions: ['Status SPED do mês', 'Apuração de impostos', 'Divergências fiscais'] },
+  { role: 'Supply Chain', icon: Truck, color: 'text-cyan-600',
+    focus: 'Compras, fornecedores, lead time, ruptura e demanda.',
+    suggestions: ['Risco de ruptura', 'Top fornecedores', 'Lead time crítico'] },
+  { role: 'HR Strategy', icon: Users, color: 'text-pink-500',
+    focus: 'Headcount, custo de folha, produtividade e indicadores de RH.',
+    suggestions: ['Custo de folha atual', 'Headcount por área', 'Produtividade'] },
+  { role: 'Market Intel', icon: BarChart3, color: 'text-indigo-500',
+    focus: 'Inteligência de mercado, concorrência e oportunidades comerciais.',
+    suggestions: ['Oportunidades abertas', 'Tendências do setor', 'Posição competitiva'] },
+  { role: 'IA Specialist', icon: Brain, color: 'text-yellow-500',
+    focus: 'Memória, decisões e guardrails do Cérebro Nativo.',
+    suggestions: ['Decisões pendentes', 'Aprendizado recente', 'Confiança média'] },
 ];
 
 export function ExecutiveCouncilPanel() {
