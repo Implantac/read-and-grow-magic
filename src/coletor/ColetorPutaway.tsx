@@ -11,7 +11,7 @@ import { toastSuccess, toastError } from '@/lib/toastHelpers';
 async function fetchTasks() {
   const { data, error } = await supabase
     .from('putaway_tasks')
-    .select('id, product_code, product_name, quantity, from_location, to_location, status, priority')
+    .select('id, product_code, product_name, quantity, source_location, suggested_location_code, status, priority')
     .in('status', ['pending', 'assigned'])
     .order('priority', { ascending: false })
     .limit(50);
@@ -27,12 +27,14 @@ export default function ColetorPutaway() {
 
   const onScan = async (code: string): Promise<ScanFeedback> => {
     if (!active) return { type: 'error', message: 'Selecione uma tarefa' };
-    if (code.trim().toUpperCase() !== String(active.to_location).toUpperCase()) {
-      return { type: 'error', message: `Endereço errado. Esperado ${active.to_location}`, code };
+    const target = String(active.suggested_location_code ?? '').toUpperCase();
+    if (!target) return { type: 'error', message: 'Tarefa sem endereço sugerido' };
+    if (code.trim().toUpperCase() !== target) {
+      return { type: 'error', message: `Endereço errado. Esperado ${target}`, code };
     }
     const { error } = await supabase
       .from('putaway_tasks')
-      .update({ status: 'completed', completed_at: new Date().toISOString() })
+      .update({ status: 'completed', completed_at: new Date().toISOString(), actual_location_code: target })
       .eq('id', active.id);
     if (error) return { type: 'error', message: 'Falha ao concluir', code };
     toastSuccess('Endereçamento confirmado');
@@ -61,7 +63,7 @@ export default function ColetorPutaway() {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{t.product_name}</p>
                       <p className="text-[11px] text-muted-foreground font-mono">
-                        {t.from_location || '—'} → {t.to_location}
+                        {t.source_location || '—'} → {t.suggested_location_code || '?'}
                       </p>
                     </div>
                     <Badge variant="secondary" className="text-xs">{t.quantity}</Badge>
@@ -86,7 +88,7 @@ export default function ColetorPutaway() {
 
       <Card className="p-4 space-y-2 bg-primary/5 border-primary/30">
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Destino esperado</p>
-        <p className="text-3xl font-bold font-mono tracking-wider">{active.to_location}</p>
+        <p className="text-3xl font-bold font-mono tracking-wider">{active.suggested_location_code || '?'}</p>
         <p className="text-xs text-muted-foreground">Quantidade: {active.quantity}</p>
       </Card>
 
