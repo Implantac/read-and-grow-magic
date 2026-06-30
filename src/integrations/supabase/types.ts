@@ -18969,11 +18969,13 @@ export type Database = {
         }
         Returns: Json
       }
+      wms_pick_order_stock: { Args: { p_order_id: string }; Returns: Json }
       wms_release_order_reservation: {
         Args: { p_order_id: string }
         Returns: Json
       }
       wms_reserve_order_stock: { Args: { p_order_id: string }; Returns: Json }
+      wms_ship_order: { Args: { p_order_id: string }; Returns: Json }
     }
     Enums: {
       app_role:
