@@ -253,11 +253,33 @@ export function useBrainChat() {
         body: { action: 'chat', messages: history, agent },
       });
       if (error) throw error;
-      const payload = (data ?? {}) as { content?: string; actions?: BrainChatAction[] };
+      const payload = (data ?? {}) as { content?: string; actions?: BrainChatAction[]; error?: string; message?: string; required_plan?: string };
+      if (payload.error === 'PLAN_REQUIRED') {
+        setMessages((prev) => [
+          ...prev,
+          { id: crypto.randomUUID(), role: 'assistant', content: `⚠️ ${payload.message || 'Plano da IA insuficiente.'}${payload.required_plan ? ` (Requer: ${payload.required_plan})` : ''}` },
+        ]);
+        return;
+      }
+      if (payload.error === 'RATE_LIMITED') {
+        setMessages((prev) => [
+          ...prev,
+          { id: crypto.randomUUID(), role: 'assistant', content: `⏳ ${payload.message || 'Limite de requisições atingido. Tente novamente em instantes.'}` },
+        ]);
+        return;
+      }
+      if (payload.error) {
+        setMessages((prev) => [
+          ...prev,
+          { id: crypto.randomUUID(), role: 'assistant', content: `❌ ${payload.message || 'Falha ao processar.'}` },
+        ]);
+        return;
+      }
       setMessages((prev) => [
         ...prev,
         { id: crypto.randomUUID(), role: 'assistant', content: sanitizeBrainText(payload.content || '—'), actions: payload.actions || [] },
       ]);
+
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Erro';
       setMessages((prev) => [

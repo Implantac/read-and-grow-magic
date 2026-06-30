@@ -173,8 +173,17 @@ async function callLLM(systemPrompt: string, userPrompt: string) {
   }
   if (!res.ok) {
     const text = await res.text();
+    if (res.status === 402) {
+      const err: any = new Error("plan_required");
+      err.code = "PLAN_REQUIRED";
+      err.status = 402;
+      try { err.details = JSON.parse(text); } catch { err.details = { raw: text }; }
+      throw err;
+    }
+    if (res.status === 429) { const err: any = new Error("rate_limited"); err.code = "RATE_LIMITED"; err.status = 429; throw err; }
     throw new Error(`LLM ${res.status}: ${text}`);
   }
+
   const data = await res.json();
   const content = data?.choices?.[0]?.message?.content || "{}";
   try {
@@ -766,7 +775,19 @@ ${ctx}`;
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({ model: MODEL, messages: convo, tools: BRAIN_TOOLS, tool_choice: "auto" }),
     });
-    if (!res.ok) throw new Error(`LLM ${res.status}: ${await res.text()}`);
+    if (!res.ok) {
+      const text = await res.text();
+      if (res.status === 402) {
+        const err: any = new Error("plan_required");
+        err.code = "PLAN_REQUIRED";
+        err.status = 402;
+        try { err.details = JSON.parse(text); } catch { err.details = { raw: text }; }
+        throw err;
+      }
+      if (res.status === 429) { const err: any = new Error("rate_limited"); err.code = "RATE_LIMITED"; err.status = 429; throw err; }
+      throw new Error(`LLM ${res.status}: ${text}`);
+    }
+
     const data = await res.json();
     const msg = data?.choices?.[0]?.message;
     if (!msg) break;
@@ -1240,12 +1261,28 @@ const handler = async (req: Request): Promise<Response> => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
-    console.error("[ai-brain] error", e);
-    return new Response(JSON.stringify({ error: "internal_error" }), {
-      status: 500,
+    console.error("[ai-brain] error", e?.code || e?.message);
+    if (e?.code === "PLAN_REQUIRED") {
+      return new Response(JSON.stringify({
+        error: "PLAN_REQUIRED",
+        message: "O plano atual do gateway de IA não cobre este recurso. Atualize seu plano para continuar usando o Cérebro Nativo.",
+        required_plan: e?.details?.required_plan,
+        fallback: false,
+      }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    if (e?.code === "RATE_LIMITED") {
+      return new Response(JSON.stringify({
+        error: "RATE_LIMITED",
+        message: "Muitas requisições à IA. Aguarde alguns instantes e tente novamente.",
+        fallback: true,
+      }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    return new Response(JSON.stringify({ error: "internal_error", fallback: true }), {
+      status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+
 };
 
 Deno.serve(instrument(handler, { source: "ai-brain", getContext: contextFromAuth }));
