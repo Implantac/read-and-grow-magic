@@ -40,9 +40,37 @@ interface OrderRow {
   stage: 'reserved' | 'partial_picked' | 'picked' | 'shipped' | 'none';
 }
 
+interface ShipmentInfo {
+  id: string;
+  shipment_number: string;
+  status: string;
+  carrier: string | null;
+  tracking_number: string | null;
+  shipped_at: string | null;
+  delivered_at: string | null;
+}
+
+interface TrackingEvent {
+  id: string;
+  event_type: string;
+  description: string;
+  location: string | null;
+  registered_by: string | null;
+  occurred_at: string;
+}
+
 export default function OrderPicking() {
   const qc = useQueryClient();
   const [search, setSearch] = useState('');
+  const [stageOpen, setStageOpen] = useState(false);
+  const [stageOrder, setStageOrder] = useState<OrderRow | null>(null);
+  const [stageForm, setStageForm] = useState({
+    stage: 'conferred' as ShipmentStage,
+    tracking_number: '',
+    carrier: '',
+    location: '',
+    notes: '',
+  });
 
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ['orders-for-picking'],
