@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.4";
 import { getSystemPrompt } from "../_shared/ai-prompts.ts";
 import { checkRateLimit, rateLimitResponse } from "../_shared/rate-limit.ts";
 import { recordUsage } from "../_shared/usage.ts";
+import { enforceQuota } from "../_shared/quota.ts";
 import { instrument, contextFromAuth } from "../_shared/observability.ts";
 
 const corsHeaders = {
@@ -73,6 +74,8 @@ const handler = async (req: Request): Promise<Response> => {
     
     const AI_ACTIONS = new Set(["chat","assistant_chat","daily_summary","generate_insights","generate_scenarios","ceo_brief","autopilot_run"]);
     if (action && AI_ACTIONS.has(action)) {
+      const blocked = await enforceQuota(companyId, "ai_calls", corsHeaders);
+      if (blocked) return blocked;
       await recordUsage(companyId, "ai_call", 1, { source: "ai-executive", action });
     }
 
