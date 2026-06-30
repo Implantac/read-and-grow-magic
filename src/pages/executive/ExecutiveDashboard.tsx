@@ -67,8 +67,9 @@ export default function ExecutiveDashboard() {
     return (
       <PageContainer>
         <PageHeader title="IA Executiva" description="Carregando análise..." />
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" role="status" aria-live="polite" aria-label="Carregando análise executiva">
           {[1, 2, 3, 4, 5, 6, 7, 8].map(i => <Card key={i}><CardContent className="p-6"><Skeleton className="h-16 w-full" /></CardContent></Card>)}
+          <span className="sr-only">Carregando indicadores executivos...</span>
         </div>
       </PageContainer>
     );
