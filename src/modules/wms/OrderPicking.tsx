@@ -8,10 +8,24 @@ import { Card, CardContent } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Badge } from '@/ui/base/badge';
 import { Input } from '@/ui/base/input';
+import { Label } from '@/ui/base/label';
+import { Textarea } from '@/ui/base/textarea';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from '@/ui/base/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
-import { Package, CheckCircle, Truck, Search, AlertTriangle, PackageCheck } from 'lucide-react';
+import { Package, CheckCircle, Truck, Search, AlertTriangle, PackageCheck, ClipboardList, Tag, Hand } from 'lucide-react';
 import { format } from 'date-fns';
+
+type ShipmentStage = 'conferred' | 'labeled' | 'collected' | 'shipped' | 'delivered';
+
+const STAGE_LABEL: Record<ShipmentStage, string> = {
+  conferred: 'Conferido',
+  labeled: 'Etiquetado',
+  collected: 'Coletado',
+  shipped: 'Expedido',
+  delivered: 'Entregue',
+};
 
 interface OrderRow {
   id: string;
