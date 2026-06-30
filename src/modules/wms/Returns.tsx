@@ -95,12 +95,17 @@ export default function ReturnsPage() {
                     <span>Rejeitados: <strong className="text-destructive">{ret.rejectedItems}</strong></span>
                     <span>Destino: <strong>{ret.destination}</strong></span>
                   </div>
-                  {ret.status === 'pending' && (
-                    <Button size="sm" className="w-full" onClick={() => updateStatus(ret.id, 'inspecting')}>Iniciar Inspeção</Button>
-                  )}
-                  {ret.status === 'inspecting' && (
-                    <Button size="sm" className="w-full" onClick={() => updateStatus(ret.id, 'completed')}>Concluir</Button>
-                  )}
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" className="flex-1" onClick={() => setSelected({ id: ret.id, number: ret.returnNumber })}>
+                      Itens / Disposição
+                    </Button>
+                    {ret.status === 'pending' && (
+                      <Button size="sm" onClick={() => updateStatus(ret.id, 'inspecting')}>Iniciar</Button>
+                    )}
+                    {ret.status === 'inspecting' && (
+                      <Button size="sm" onClick={() => updateStatus(ret.id, 'completed')}>Concluir</Button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             );
@@ -115,6 +120,13 @@ export default function ReturnsPage() {
           </CardContent>
         </Card>
       )}
+
+      <ReturnItemsDialog
+        open={!!selected}
+        onOpenChange={(v) => !v && setSelected(null)}
+        returnId={selected?.id ?? null}
+        returnNumber={selected?.number}
+      />
     </PageContainer>
   );
 }
