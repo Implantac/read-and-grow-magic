@@ -155,6 +155,61 @@ export default function OrderPicking() {
     onError: (err: any) => toastError(`Falha na expedição: ${err.message}`),
   });
 
+  const { data: shipmentInfo } = useQuery({
+    queryKey: ['order-shipment', stageOrder?.number],
+    enabled: !!stageOrder?.number,
+    queryFn: async (): Promise<{ shipment: ShipmentInfo | null; events: TrackingEvent[] }> => {
+      const { data: ship } = await supabase
+        .from('wms_shipments')
+        .select('id, shipment_number, status, carrier, tracking_number, shipped_at, delivered_at')
+        .eq('order_number', stageOrder!.number)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!ship) return { shipment: null, events: [] };
+      const { data: events } = await supabase
+        .from('delivery_tracking')
+        .select('id, event_type, description, location, registered_by, occurred_at')
+        .eq('shipment_id', ship.id)
+        .order('occurred_at', { ascending: false });
+      return { shipment: ship as ShipmentInfo, events: (events || []) as TrackingEvent[] };
+    },
+  });
+
+  const stageMut = useMutation({
+    mutationFn: async (orderId: string) => {
+      const { data, error } = await supabase.rpc('wms_update_shipment_stage', {
+        p_order_id: orderId,
+        p_stage: stageForm.stage,
+        p_tracking_number: stageForm.tracking_number || null,
+        p_carrier: stageForm.carrier || null,
+        p_location: stageForm.location || null,
+        p_notes: stageForm.notes || null,
+      });
+      if (error) throw error;
+      return data as any;
+    },
+    onSuccess: (data: any) => {
+      toastSuccess(`Expedição ${data?.shipment_number} → ${STAGE_LABEL[stageForm.stage]}`);
+      qc.invalidateQueries({ queryKey: ['order-shipment'] });
+      qc.invalidateQueries({ queryKey: ['orders-for-picking'] });
+      setStageForm((p) => ({ ...p, notes: '' }));
+    },
+    onError: (err: any) => toastError(`Falha: ${err.message}`),
+  });
+
+  const openStageDialog = (o: OrderRow) => {
+    setStageOrder(o);
+    setStageForm({
+      stage: o.stage === 'shipped' ? 'delivered' : 'conferred',
+      tracking_number: '',
+      carrier: '',
+      location: '',
+      notes: '',
+    });
+    setStageOpen(true);
+  };
+
   const filtered = orders.filter(
     (o) =>
       o.number.toLowerCase().includes(search.toLowerCase()) ||
