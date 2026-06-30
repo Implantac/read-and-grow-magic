@@ -14,8 +14,8 @@ function statusOf(percent: number, limit: number): 'unlimited' | 'ok' | 'warn' |
 
 function MetricRow({ m }: { m: UsageMetric }) {
   const s = statusOf(m.percent, m.limit_value);
-  const colorBar =
-    s === 'block' ? 'bg-destructive' : s === 'warn' ? 'bg-amber-500' : 'bg-primary';
+  const barTone =
+    s === 'block' ? '[&>div]:bg-destructive' : s === 'warn' ? '[&>div]:bg-amber-500' : '[&>div]:bg-primary';
   return (
     <div className="space-y-1.5">
       <div className="flex items-baseline justify-between text-sm">
@@ -28,8 +28,7 @@ function MetricRow({ m }: { m: UsageMetric }) {
       {m.limit_value > 0 ? (
         <Progress
           value={Math.min(m.percent, 100)}
-          className="h-2"
-          indicatorClassName={colorBar}
+          className={`h-2 ${barTone}`}
           aria-label={`${labelForMetric(m.metric)}: ${m.percent}% usado`}
         />
       ) : (
