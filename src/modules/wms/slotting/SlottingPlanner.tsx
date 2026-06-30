@@ -3,8 +3,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { Button } from "@/ui/base/button";
 import { Badge } from "@/ui/base/badge";
-import { Brain, CheckCircle2, X, RefreshCw, ArrowRight, TrendingDown } from "lucide-react";
+import { Brain, CheckCircle2, X, RefreshCw, ArrowRight, TrendingDown, FlaskConical, Sparkles } from "lucide-react";
 import WMSKpiStrip from "../components/WMSKpiStrip";
+import { toast } from "sonner";
+
+type Engine = "v1" | "v2";
+interface SimResult {
+  generated: number;
+  affinity_pairs: number;
+  abc_distribution: { A: number; B: number; C: number };
+  estimated_total_savings_m: number;
+  preview?: Array<{
+    product_id: string;
+    abc_class: string;
+    estimated_distance_saved_m: number;
+    estimated_picks_per_day: number;
+    reason: Record<string, unknown>;
+  }>;
+}
 
 interface Suggestion {
   id: string;
