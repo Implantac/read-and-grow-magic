@@ -98,7 +98,7 @@ export function ExecutiveChat({ messages, isLoading, sendMessage, clearChat, onD
         <CardHeader className="pb-2 border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center" aria-hidden="true">
                 <Brain className="h-4 w-4 text-primary" />
               </div>
               <div>
@@ -107,8 +107,8 @@ export function ExecutiveChat({ messages, isLoading, sendMessage, clearChat, onD
               </div>
             </div>
             {messages.length > 0 && (
-              <Button variant="ghost" size="sm" onClick={clearChat} className="text-xs gap-1">
-                <Trash2 className="h-3 w-3" />Limpar
+              <Button variant="ghost" size="sm" onClick={clearChat} className="text-xs gap-1" aria-label="Limpar conversa">
+                <Trash2 className="h-3 w-3" aria-hidden="true" />Limpar
               </Button>
             )}
           </div>
