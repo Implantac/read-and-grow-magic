@@ -98,9 +98,10 @@ export function Topbar() {
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
+          aria-label={sidebarCollapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'}
           className="h-8 w-8 text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-colors"
         >
-          <Menu className="h-4 w-4" />
+          <Menu className="h-4 w-4" aria-hidden="true" />
         </Button>
 
         {/* Company/Branch Selector */}
@@ -182,9 +183,10 @@ export function Topbar() {
           variant="ghost"
           size="icon"
           onClick={toggleTheme}
+          aria-label={theme === 'light' ? 'Ativar tema escuro' : 'Ativar tema claro'}
           className="h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
         >
-          {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+          {theme === 'light' ? <Moon className="h-4 w-4" aria-hidden="true" /> : <Sun className="h-4 w-4" aria-hidden="true" />}
         </Button>
 
         {/* Notifications - Connected to real data */}
@@ -193,11 +195,12 @@ export function Topbar() {
             <Button
               variant="ghost"
               size="icon"
+              aria-label={unreadCount > 0 ? `Notificações, ${unreadCount} não lidas` : 'Notificações'}
               className="relative h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
             >
-              <Bell className="h-4 w-4" />
+              <Bell className="h-4 w-4" aria-hidden="true" />
               {unreadCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground px-1 animate-fade-in">
+                <span aria-hidden="true" className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground px-1 animate-fade-in">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
@@ -259,9 +262,10 @@ export function Topbar() {
           size="icon"
           onClick={() => navigate('/executive/executive')}
           title="IA Executiva"
+          aria-label="Abrir IA Executiva"
           className="h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
         >
-          <Sparkles className="h-4 w-4" />
+          <Sparkles className="h-4 w-4" aria-hidden="true" />
         </Button>
 
         {/* Brain shortcut */}
@@ -270,11 +274,12 @@ export function Topbar() {
           size="icon"
           onClick={() => navigate('/executive/brain')}
           title={brainPending.length > 0 ? `${brainPending.length} decisões do Cérebro pendentes` : 'Cérebro Nativo'}
+          aria-label={brainPending.length > 0 ? `Cérebro Nativo, ${brainPending.length} decisões pendentes` : 'Cérebro Nativo'}
           className="relative h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
 
 
         >
-          <Brain className="h-4 w-4" />
+          <Brain className="h-4 w-4" aria-hidden="true" />
           {brainPending.length > 0 && (
             <span
               className={cn(

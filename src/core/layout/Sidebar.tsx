@@ -254,6 +254,7 @@ export function Sidebar() {
   return (
     <TooltipProvider delayDuration={0}>
       <aside
+        aria-label="Navegação principal"
         className={cn(
           'fixed left-0 top-0 z-40 flex h-dvh flex-col bg-sidebar transition-all duration-300 ease-in-out',
           sidebarCollapsed ? 'w-16' : 'w-64'
@@ -277,9 +278,9 @@ export function Sidebar() {
                 <img src={logoUseSistemas} alt="Use Sistemas" className="h-8 w-8 object-contain" />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-[15px] font-bold text-sidebar-foreground leading-tight tracking-tight">Use Sistemas</h1>
+                <span className="text-[15px] font-bold text-sidebar-foreground leading-tight tracking-tight">Use Sistemas</span>
                 <div className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" aria-hidden="true" />
                   <p className="text-[10px] font-bold text-primary/80 uppercase tracking-widest">ERP & WMS</p>
                 </div>
               </div>
@@ -288,7 +289,7 @@ export function Sidebar() {
         </div>
 
         {/* Navigation Content */}
-        <nav className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin px-3 py-4 space-y-6">
+        <nav aria-label="Módulos do sistema" className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin px-3 py-4 space-y-6">
           {navigationSections.filter(section => {
             if (!segment) return true;
             
