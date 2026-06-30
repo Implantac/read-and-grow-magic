@@ -28,6 +28,7 @@ const SkuAllocationPage = lazy(() => import("../modules/wms/SkuAllocation"));
 const OrderReservationsPage = lazy(() => import("../modules/wms/OrderReservations"));
 const OrderPickingPage = lazy(() => import("../modules/wms/OrderPicking"));
 const QualityControlPage = lazy(() => import("../modules/wms/QualityControl"));
+const Billing3PLPage = lazy(() => import("../modules/wms/Billing3PL"));
 
 export const WMSRoutes = [
   <Route key="wms-dash" path="/wms/dashboard" element={<WMSDashboardPage />} />,
@@ -57,4 +58,5 @@ export const WMSRoutes = [
   <Route key="wms-reserv" path="/wms/reservas" element={<OrderReservationsPage />} />,
   <Route key="wms-picking" path="/wms/separacao-pedidos" element={<OrderPickingPage />} />,
   <Route key="wms-quality" path="/wms/qualidade" element={<QualityControlPage />} />,
+  <Route key="wms-3pl" path="/wms/faturamento-3pl" element={<Billing3PLPage />} />,
 ];
