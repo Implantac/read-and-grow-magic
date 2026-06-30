@@ -17,10 +17,13 @@ export default function BrainLearningPage() {
   if (isLoading || !data) {
     return (
       <PageContainer>
-        <div className="py-12 text-center text-muted-foreground">Carregando aprendizado...</div>
+        <div role="status" aria-live="polite" className="py-12 text-center text-muted-foreground">
+          Carregando aprendizado...
+        </div>
       </PageContainer>
     );
   }
+
 
   return (
     <PageContainer>
