@@ -21,7 +21,7 @@ vi.mock('@/components/executive/ExecutiveIntelligenceStatus', () => ({
 
 // ResizeObserver shim for Radix
 class RO { observe() {} unobserve() {} disconnect() {} }
-(globalThis as { ResizeObserver?: typeof RO }).ResizeObserver = RO;
+(globalThis as unknown as { ResizeObserver: typeof RO }).ResizeObserver = RO;
 // scrollTo shim for ScrollArea/ref
 Element.prototype.scrollTo = Element.prototype.scrollTo || (() => {});
 // hasPointerCapture / scrollIntoView for Radix Dialog
