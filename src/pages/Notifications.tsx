@@ -56,7 +56,8 @@ export default function NotificationsPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 max-w-4xl">
+      <div className="space-y-6 max-w-4xl" role="status" aria-live="polite" aria-busy="true">
+        <span className="sr-only">Carregando notificações...</span>
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-10 w-full" />
         {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full" />)}
@@ -65,34 +66,35 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-4xl">
+    <main className="space-y-6 animate-fade-in max-w-4xl" aria-labelledby="notif-title">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Notificações</h1>
-          <p className="text-muted-foreground">
+          <h1 id="notif-title" className="text-3xl font-bold text-foreground">Notificações</h1>
+          <p className="text-muted-foreground" aria-live="polite">
             {unreadCount > 0 ? `${unreadCount} não lida${unreadCount > 1 ? 's' : ''}` : 'Tudo em dia'}
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleMarkAllRead} disabled={unreadCount === 0} className="gap-2">
-            <CheckCheck className="h-4 w-4" />
+          <Button variant="outline" size="sm" onClick={handleMarkAllRead} disabled={unreadCount === 0} className="gap-2" aria-label="Marcar todas as notificações como lidas">
+            <CheckCheck className="h-4 w-4" aria-hidden="true" />
             Marcar todas como lidas
           </Button>
-          <Button variant="outline" size="sm" onClick={handleClearAll} disabled={notifications.length === 0} className="gap-2 text-destructive hover:text-destructive">
-            <Trash2 className="h-4 w-4" />
+          <Button variant="outline" size="sm" onClick={handleClearAll} disabled={notifications.length === 0} className="gap-2 text-destructive hover:text-destructive" aria-label="Limpar todas as notificações">
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
             Limpar
           </Button>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3" role="search">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Buscar notificações..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
+          <label htmlFor="notif-search" className="sr-only">Buscar notificações</label>
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+          <Input id="notif-search" placeholder="Buscar notificações..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10" />
         </div>
         <Select value={filterType} onValueChange={setFilterType}>
-          <SelectTrigger className="w-[150px]">
-            <Filter className="h-4 w-4 mr-2" />
+          <SelectTrigger className="w-[150px]" aria-label="Filtrar por tipo">
+            <Filter className="h-4 w-4 mr-2" aria-hidden="true" />
             <SelectValue placeholder="Tipo" />
           </SelectTrigger>
           <SelectContent>
@@ -104,7 +106,7 @@ export default function NotificationsPage() {
           </SelectContent>
         </Select>
         <Select value={filterModule} onValueChange={setFilterModule}>
-          <SelectTrigger className="w-[150px]">
+          <SelectTrigger className="w-[150px]" aria-label="Filtrar por módulo">
             <SelectValue placeholder="Módulo" />
           </SelectTrigger>
           <SelectContent>
@@ -114,63 +116,71 @@ export default function NotificationsPage() {
         </Select>
       </div>
 
-      <div className="space-y-2">
+      <ul className="space-y-2 list-none p-0" aria-label="Lista de notificações" aria-live="polite">
         {filtered.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <BellOff className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-foreground">Nenhuma notificação</h3>
-              <p className="text-sm text-muted-foreground mt-1">Você está em dia com tudo!</p>
-            </CardContent>
-          </Card>
+          <li>
+            <Card>
+              <CardContent className="py-12 text-center">
+                <BellOff className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true" />
+                <h2 className="text-lg font-medium text-foreground">Nenhuma notificação</h2>
+                <p className="text-sm text-muted-foreground mt-1">Você está em dia com tudo!</p>
+              </CardContent>
+            </Card>
+          </li>
         ) : (
           filtered.map((n) => {
             const config = typeConfig[n.type];
             const Icon = config.icon;
             return (
-              <Card
-                key={n.id}
-                className={cn(
-                  'transition-all duration-200 hover:shadow-md cursor-pointer',
-                  !n.read && 'border-l-4 border-l-primary bg-accent/30'
-                )}
-                onClick={() => !n.read && markAsRead(n.id)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-4">
-                    <div className={cn('p-2 rounded-full shrink-0', config.bg)}>
-                      <Icon className={cn('h-4 w-4', config.color)} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className={cn('font-medium text-foreground', !n.read && 'font-semibold')}>
-                          {n.title}
-                        </h4>
-                        <Badge variant="outline" className="text-xs shrink-0">{n.module}</Badge>
-                        {!n.read && <span className="h-2 w-2 rounded-full bg-primary shrink-0" />}
+              <li key={n.id}>
+                <Card
+                  className={cn(
+                    'transition-all duration-200 hover:shadow-md cursor-pointer',
+                    !n.read && 'border-l-4 border-l-primary bg-accent/30'
+                  )}
+                  onClick={() => !n.read && markAsRead(n.id)}
+                  role="article"
+                  aria-label={`${n.title}${!n.read ? ' (não lida)' : ''}`}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-4">
+                      <div className={cn('p-2 rounded-full shrink-0', config.bg)} aria-hidden="true">
+                        <Icon className={cn('h-4 w-4', config.color)} />
                       </div>
-                      <p className="text-sm text-muted-foreground">{n.description}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {format(new Date(n.created_at), "dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
-                      </p>
-                    </div>
-                    <div className="flex gap-1 shrink-0">
-                      {!n.read && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); markAsRead(n.id); }}>
-                          <Check className="h-4 w-4" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className={cn('font-medium text-foreground text-base', !n.read && 'font-semibold')}>
+                            {n.title}
+                          </h3>
+                          <Badge variant="outline" className="text-xs shrink-0">{n.module}</Badge>
+                          {!n.read && <span className="h-2 w-2 rounded-full bg-primary shrink-0" aria-hidden="true" />}
+                        </div>
+                        <p className="text-sm text-muted-foreground">{n.description}</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          <time dateTime={n.created_at}>
+                            {format(new Date(n.created_at), "dd 'de' MMMM 'às' HH:mm", { locale: ptBR })}
+                          </time>
+                        </p>
+                      </div>
+                      <div className="flex gap-1 shrink-0">
+                        {!n.read && (
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); markAsRead(n.id); }} aria-label={`Marcar "${n.title}" como lida`}>
+                            <Check className="h-4 w-4" aria-hidden="true" />
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={(e) => { e.stopPropagation(); handleDelete(n.id); }} aria-label={`Remover "${n.title}"`}>
+                          <Trash2 className="h-4 w-4" aria-hidden="true" />
                         </Button>
-                      )}
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={(e) => { e.stopPropagation(); handleDelete(n.id); }}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </li>
             );
           })
         )}
-      </div>
-    </div>
+      </ul>
+    </main>
   );
 }
+
