@@ -36,6 +36,7 @@ const WMSAnalyticsPage = lazy(() => import("../modules/wms/WMSAnalytics"));
 const CrossDockingPage = lazy(() => import("../modules/wms/CrossDocking"));
 const KitAssemblyPage = lazy(() => import("../modules/wms/KitAssembly"));
 const DockSchedulingPage = lazy(() => import("../modules/wms/DockScheduling"));
+const CarrierScorecardPage = lazy(() => import("../modules/wms/CarrierScorecard"));
 
 export const WMSRoutes = [
   <Route key="wms-dash" path="/wms/dashboard" element={<WMSDashboardPage />} />,
