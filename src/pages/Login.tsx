@@ -92,7 +92,7 @@ export default function Login() {
   const inputClasses = "pl-10 h-11 bg-sidebar-accent/50 border-sidebar-border text-sidebar-foreground placeholder:text-sidebar-foreground/30 focus:border-primary focus:ring-primary/20 transition-colors";
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center p-4 overflow-hidden bg-sidebar">
+    <div className="relative flex min-h-dvh items-center justify-center p-4 overflow-hidden bg-sidebar">
       {/* Ambient background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-1/3 -right-1/4 w-[600px] h-[600px] rounded-full opacity-[0.04]" style={{ background: 'radial-gradient(circle, hsl(36 100% 50%), transparent 70%)' }} />

@@ -30,7 +30,7 @@ export function MainLayout() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <div className="relative">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -47,13 +47,13 @@ export function MainLayout() {
   }
 
   return (
-    <div className="h-screen overflow-hidden bg-background">
+    <div className="h-dvh overflow-hidden bg-background">
       <CommandPalette />
       <Sidebar />
       <Topbar />
       <main
         className={cn(
-          'h-screen overflow-y-auto pt-14 transition-all duration-300 ease-in-out',
+          'h-dvh overflow-y-auto pt-14 transition-all duration-300 ease-in-out',
           sidebarCollapsed ? 'pl-16' : 'pl-64'
         )}
       >
