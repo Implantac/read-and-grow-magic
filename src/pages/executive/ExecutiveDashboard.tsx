@@ -196,16 +196,16 @@ export default function ExecutiveDashboard() {
 
       {/* Proactive Auto-Alerts */}
       {autoAlerts.length > 0 && (
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3" role="list" aria-label="Alertas automáticos">
           {autoAlerts.map((alert: any, i: number) => (
-            <Card key={i} className={cn('border-l-4', alertSeverityBorder[alert.severity] || 'border-l-muted')}>
+            <Card key={i} className={cn('border-l-4', alertSeverityBorder[alert.severity] || 'border-l-muted')} role="listitem">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-1">
                   <div className="flex items-center gap-2">
-                    <Flame className="h-4 w-4 text-destructive" />
+                    <Flame className="h-4 w-4 text-destructive" aria-hidden="true" />
                     <p className="text-sm font-medium">{alert.title}</p>
                   </div>
-                  <Badge className={cn('text-[10px]', severityColor[alert.severity])}>{alert.severity}</Badge>
+                  <Badge className={cn('text-[10px]', severityColor[alert.severity])} aria-label={`Severidade ${alert.severity}`}>{alert.severity}</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">{alert.description}</p>
               </CardContent>
