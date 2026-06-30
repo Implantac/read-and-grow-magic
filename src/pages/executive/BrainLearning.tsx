@@ -82,19 +82,22 @@ export default function BrainLearningPage() {
           </CardHeader>
 
           <CardContent>
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={data.byModule}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="module" tick={{ fontSize: 11 }} />
-                <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="approved" fill="hsl(142 70% 45%)" name="Aprovadas" stackId="a" />
-                <Bar dataKey="auto" fill="hsl(var(--primary))" name="Auto-exec" stackId="a" />
-                <Bar dataKey="rejected" fill="hsl(var(--destructive))" name="Rejeitadas" stackId="a" />
-              </BarChart>
-            </ResponsiveContainer>
+            <div role="img" aria-label="Gráfico empilhado: decisões aprovadas, auto-executadas e rejeitadas por módulo" aria-describedby="bymodule-desc">
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={data.byModule}>
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                  <XAxis dataKey="module" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="approved" fill="hsl(142 70% 45%)" name="Aprovadas" stackId="a" />
+                  <Bar dataKey="auto" fill="hsl(var(--primary))" name="Auto-exec" stackId="a" />
+                  <Bar dataKey="rejected" fill="hsl(var(--destructive))" name="Rejeitadas" stackId="a" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
+
         </Card>
       </div>
 
