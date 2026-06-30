@@ -117,9 +117,11 @@ export default function PickingRouteOptimizer() {
       if (codes.length) {
         const { data: locRows } = await supabase
           .from("warehouse_locations")
-          .select("code, aisle, rack, level")
+          .select("*")
           .in("code", codes);
-        map = Object.fromEntries((locRows || []).map((l) => [l.code, l as LocationRow]));
+        map = Object.fromEntries(
+          ((locRows || []) as unknown as LocationRow[]).map((l) => [l.code, l]),
+        );
       }
       setItems((itm || []) as PickingItem[]);
       setLocs(map);
