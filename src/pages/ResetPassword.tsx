@@ -51,7 +51,7 @@ export default function ResetPassword() {
   if (!isValid) return null;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-primary/10 via-background to-primary/5 p-4">
+    <div className="flex min-h-dvh items-center justify-center bg-gradient-to-br from-primary/10 via-background to-primary/5 p-4">
       <div className="w-full max-w-md">
         <Card className="border-border/50 shadow-xl">
           <CardHeader>
