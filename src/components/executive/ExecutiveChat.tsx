@@ -166,9 +166,9 @@ export function ExecutiveChat({ messages, isLoading, sendMessage, clearChat, onD
                   </div>
                 ))}
                 {isLoading && (
-                  <div className="flex justify-start">
+                  <div className="flex justify-start" role="status" aria-live="polite">
                     <div className="bg-muted rounded-2xl px-4 py-3 flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                      <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />
                       <span className="text-sm text-muted-foreground">Processando...</span>
                     </div>
                   </div>
@@ -179,27 +179,34 @@ export function ExecutiveChat({ messages, isLoading, sendMessage, clearChat, onD
           </ScrollArea>
 
           {/* Mobile quick actions */}
-          <div className="lg:hidden border-t px-3 py-2 flex gap-1.5 overflow-x-auto">
+          <div className="lg:hidden border-t px-3 py-2 flex gap-1.5 overflow-x-auto" role="list" aria-label="Ações rápidas">
             {quickActions.slice(0, 4).map((a, i) => (
-              <Button key={i} variant="outline" size="sm" className="text-[10px] shrink-0 h-7 px-2 max-w-[120px] truncate" onClick={() => !isLoading && sendMessage(a.prompt)} disabled={isLoading}>
+              <Button key={i} variant="outline" size="sm" className="text-[10px] shrink-0 h-7 px-2 max-w-[120px] truncate" onClick={() => !isLoading && sendMessage(a.prompt)} disabled={isLoading} aria-label={`Enviar consulta: ${a.label}`}>
                 {a.label}
               </Button>
             ))}
           </div>
 
-          <div className="border-t p-3 flex gap-2">
+          <form
+            className="border-t p-3 flex gap-2"
+            onSubmit={(e) => { e.preventDefault(); handleSend(); }}
+            aria-label="Enviar mensagem para o Diretor Digital"
+          >
+            <label htmlFor="executive-chat-input" className="sr-only">Mensagem para o Diretor Digital</label>
             <Input
+              id="executive-chat-input"
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
+              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSend())}
               placeholder="Pergunte, analise ou execute ações..."
               disabled={isLoading}
               className="flex-1"
+              aria-label="Mensagem"
             />
-            <Button onClick={handleSend} disabled={isLoading || !chatInput.trim()} size="icon">
-              <Send className="h-4 w-4" />
+            <Button type="submit" disabled={isLoading || !chatInput.trim()} size="icon" aria-label="Enviar mensagem">
+              <Send className="h-4 w-4" aria-hidden="true" />
             </Button>
-          </div>
+          </form>
         </CardContent>
       </Card>
     </div>
