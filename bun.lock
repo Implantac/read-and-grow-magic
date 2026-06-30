@@ -49,9 +49,9 @@
         "next-themes": "^0.3.0",
         "pdf-lib": "^1.17.1",
         "qrcode.react": "4.2.0",
-        "react": "^18.3.1",
+        "react": "18.3.1",
         "react-day-picker": "^8.10.1",
-        "react-dom": "^18.3.1",
+        "react-dom": "18.3.1",
         "react-hook-form": "^7.61.1",
         "react-leaflet": "^5.0.0",
         "react-markdown": "^10.1.0",
@@ -94,6 +94,8 @@
   "overrides": {
     "@remix-run/router": "1.23.3",
     "lodash": "4.17.21",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
   },
   "packages": {
     "@adobe/css-tools": ["@adobe/css-tools@4.5.0", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@adobe/css-tools/-/css-tools-4.5.0.tgz", {}, "sha512-6OzddxPio9UiWTCemp4N8cYLV2ZN1ncRnV1cVGtve7dhPOtRkleRyx32GQCYSwDYgaHU3USMm84tNsvKzRCa1Q=="],
