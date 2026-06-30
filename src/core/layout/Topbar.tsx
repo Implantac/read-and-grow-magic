@@ -98,9 +98,10 @@ export function Topbar() {
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
+          aria-label={sidebarCollapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'}
           className="h-8 w-8 text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-colors"
         >
-          <Menu className="h-4 w-4" />
+          <Menu className="h-4 w-4" aria-hidden="true" />
         </Button>
 
         {/* Company/Branch Selector */}
