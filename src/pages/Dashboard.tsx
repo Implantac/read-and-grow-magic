@@ -90,7 +90,7 @@ export default function Dashboard() {
   } = data || {};
 
   return (
-    <div className="space-y-6">
+    <main className="space-y-6" aria-label="Dashboard consolidado">
       {/* Header */}
       <div className="flex items-end justify-between">
         <div>
@@ -106,11 +106,12 @@ export default function Dashboard() {
             onClick={handleRefresh}
             disabled={isRefreshing}
             className="gap-2 text-xs"
+            aria-label={isRefreshing ? 'Atualizando dashboard' : 'Atualizar dashboard'}
           >
-            <RefreshCw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} />
+            <RefreshCw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} aria-hidden="true" />
             Atualizar
           </Button>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground" aria-label="Atualização automática a cada 60 segundos">
             Auto-refresh 60s
           </p>
         </div>
