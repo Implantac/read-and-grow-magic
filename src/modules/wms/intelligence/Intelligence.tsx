@@ -1,5 +1,6 @@
 import WMSKpiStrip from "../components/WMSKpiStrip";
 import RecommendationsPanel from "./RecommendationsPanel";
+import OperatorProductivityPanel from "../components/OperatorProductivityPanel";
 
 export default function Intelligence() {
   return (
@@ -11,7 +12,10 @@ export default function Intelligence() {
         </p>
       </header>
       <WMSKpiStrip />
-      <RecommendationsPanel />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <RecommendationsPanel />
+        <OperatorProductivityPanel days={7} />
+      </div>
     </div>
   );
 }

@@ -18534,6 +18534,18 @@ export type Database = {
         Args: { _company_id: string }
         Returns: string
       }
+      get_operator_productivity: {
+        Args: { p_days?: number }
+        Returns: {
+          avg_seconds_per_task: number
+          last_activity: string
+          operator_id: string
+          operator_name: string
+          picks: number
+          putaways: number
+          tasks_completed: number
+        }[]
+      }
       get_usage_summary: {
         Args: never
         Returns: {
