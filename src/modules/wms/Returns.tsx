@@ -9,6 +9,7 @@ import { Input } from '@/ui/base/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { RotateCcw, Search, Package, Truck, Factory, AlertTriangle, CheckCircle, Eye } from 'lucide-react';
 import { useWMSReturns } from '@/hooks/wms/useWMSReturns';
+import { ReturnItemsDialog } from './returns/ReturnItemsDialog';
 
 const typeConfig: Record<string, { label: string; icon: React.ReactNode }> = {
   customer: { label: 'Cliente', icon: <Package className="h-4 w-4" /> },
@@ -28,6 +29,7 @@ export default function ReturnsPage() {
   const { returns, loading, updateStatus } = useWMSReturns();
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [selected, setSelected] = useState<{ id: string; number: string } | null>(null);
 
   const filtered = returns.filter(r => {
     const matchSearch = r.returnNumber.toLowerCase().includes(search.toLowerCase()) ||
