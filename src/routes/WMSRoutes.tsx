@@ -46,4 +46,5 @@ export const WMSRoutes = [
   <Route key="wms-twin" path="/wms/twin" element={<DigitalTwinPage />} />,
   <Route key="wms-intel" path="/wms/inteligencia" element={<IntelligencePage />} />,
   <Route key="wms-slot" path="/wms/slotting" element={<SlottingPlannerPage />} />,
+  <Route key="wms-yard" path="/wms/yard" element={<YardManagementPage />} />,
 ];
