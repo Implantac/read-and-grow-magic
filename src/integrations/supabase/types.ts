@@ -16312,6 +16312,131 @@ export type Database = {
           },
         ]
       }
+      wms_3pl_contracts: {
+        Row: {
+          client_id: string | null
+          client_name: string
+          company_id: string
+          created_at: string
+          currency: string
+          id: string
+          inbound_rate_per_unit: number
+          minimum_monthly_fee: number
+          notes: string | null
+          outbound_rate_per_unit: number
+          packing_rate_per_order: number
+          picking_rate_per_line: number
+          status: string
+          storage_rate_per_m3_day: number
+          storage_rate_per_pallet_day: number
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          client_name: string
+          company_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          inbound_rate_per_unit?: number
+          minimum_monthly_fee?: number
+          notes?: string | null
+          outbound_rate_per_unit?: number
+          packing_rate_per_order?: number
+          picking_rate_per_line?: number
+          status?: string
+          storage_rate_per_m3_day?: number
+          storage_rate_per_pallet_day?: number
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          client_name?: string
+          company_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          inbound_rate_per_unit?: number
+          minimum_monthly_fee?: number
+          notes?: string | null
+          outbound_rate_per_unit?: number
+          packing_rate_per_order?: number
+          picking_rate_per_line?: number
+          status?: string
+          storage_rate_per_m3_day?: number
+          storage_rate_per_pallet_day?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      wms_3pl_invoices: {
+        Row: {
+          breakdown: Json
+          company_id: string
+          contract_id: string
+          created_at: string
+          generated_at: string
+          id: string
+          inbound_amount: number
+          minimum_adjustment: number
+          outbound_amount: number
+          packing_amount: number
+          period_end: string
+          period_start: string
+          picking_amount: number
+          status: string
+          storage_amount: number
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          breakdown?: Json
+          company_id: string
+          contract_id: string
+          created_at?: string
+          generated_at?: string
+          id?: string
+          inbound_amount?: number
+          minimum_adjustment?: number
+          outbound_amount?: number
+          packing_amount?: number
+          period_end: string
+          period_start: string
+          picking_amount?: number
+          status?: string
+          storage_amount?: number
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          breakdown?: Json
+          company_id?: string
+          contract_id?: string
+          created_at?: string
+          generated_at?: string
+          id?: string
+          inbound_amount?: number
+          minimum_adjustment?: number
+          outbound_amount?: number
+          packing_amount?: number
+          period_end?: string
+          period_start?: string
+          picking_amount?: number
+          status?: string
+          storage_amount?: number
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_3pl_invoices_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "wms_3pl_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wms_ai_insights: {
         Row: {
           affected_locations: Json | null
@@ -19022,6 +19147,14 @@ export type Database = {
           product_id: string
           stock_balance: number
         }[]
+      }
+      wms_generate_3pl_invoice: {
+        Args: {
+          p_contract_id: string
+          p_period_end: string
+          p_period_start: string
+        }
+        Returns: string
       }
       wms_move_stock: {
         Args: {
