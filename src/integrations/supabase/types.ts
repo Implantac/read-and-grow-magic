@@ -14086,6 +14086,133 @@ export type Database = {
           },
         ]
       }
+      slotting_profiles: {
+        Row: {
+          active: boolean
+          company_id: string
+          constraints: Json
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          warehouse_id: string | null
+          weights: Json
+        }
+        Insert: {
+          active?: boolean
+          company_id?: string
+          constraints?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          warehouse_id?: string | null
+          weights?: Json
+        }
+        Update: {
+          active?: boolean
+          company_id?: string
+          constraints?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          warehouse_id?: string | null
+          weights?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slotting_profiles_warehouse_id_fkey"
+            columns: ["warehouse_id"]
+            isOneToOne: false
+            referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      slotting_suggestions: {
+        Row: {
+          abc_class: string | null
+          company_id: string
+          created_at: string
+          current_location_id: string | null
+          estimated_distance_saved_m: number | null
+          estimated_picks_per_day: number | null
+          executed_at: string | null
+          id: string
+          product_id: string
+          profile_id: string | null
+          reason: Json
+          score: number
+          status: string
+          suggested_location_id: string
+        }
+        Insert: {
+          abc_class?: string | null
+          company_id?: string
+          created_at?: string
+          current_location_id?: string | null
+          estimated_distance_saved_m?: number | null
+          estimated_picks_per_day?: number | null
+          executed_at?: string | null
+          id?: string
+          product_id: string
+          profile_id?: string | null
+          reason?: Json
+          score?: number
+          status?: string
+          suggested_location_id: string
+        }
+        Update: {
+          abc_class?: string | null
+          company_id?: string
+          created_at?: string
+          current_location_id?: string | null
+          estimated_distance_saved_m?: number | null
+          estimated_picks_per_day?: number | null
+          executed_at?: string | null
+          id?: string
+          product_id?: string
+          profile_id?: string | null
+          reason?: Json
+          score?: number
+          status?: string
+          suggested_location_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slotting_suggestions_current_location_id_fkey"
+            columns: ["current_location_id"]
+            isOneToOne: false
+            referencedRelation: "wms_storage_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "slotting_suggestions_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "slotting_suggestions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "slotting_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "slotting_suggestions_suggested_location_id_fkey"
+            columns: ["suggested_location_id"]
+            isOneToOne: false
+            referencedRelation: "wms_storage_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sped_files: {
         Row: {
           company_id: string
@@ -16362,6 +16489,42 @@ export type Database = {
           },
         ]
       }
+      wms_events: {
+        Row: {
+          actor_user_id: string | null
+          company_id: string
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          event_type: string
+          id: string
+          payload: Json
+          source_module: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          company_id?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          event_type: string
+          id?: string
+          payload?: Json
+          source_module: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          company_id?: string
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          source_module?: string
+        }
+        Relationships: []
+      }
       wms_inventory_counts: {
         Row: {
           company_id: string | null
@@ -16891,6 +17054,69 @@ export type Database = {
           received_items?: number
           status?: string
           supplier?: string
+        }
+        Relationships: []
+      }
+      wms_recommendations: {
+        Row: {
+          applied_at: string | null
+          applied_by: string | null
+          body: string | null
+          company_id: string
+          created_at: string
+          dismissed_at: string | null
+          dismissed_by: string | null
+          evidence: Json
+          expires_at: string | null
+          id: string
+          severity: string
+          status: string
+          suggested_action: Json
+          target_entity: string | null
+          target_id: string | null
+          title: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          applied_at?: string | null
+          applied_by?: string | null
+          body?: string | null
+          company_id?: string
+          created_at?: string
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          evidence?: Json
+          expires_at?: string | null
+          id?: string
+          severity?: string
+          status?: string
+          suggested_action?: Json
+          target_entity?: string | null
+          target_id?: string | null
+          title: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          applied_at?: string | null
+          applied_by?: string | null
+          body?: string | null
+          company_id?: string
+          created_at?: string
+          dismissed_at?: string | null
+          dismissed_by?: string | null
+          evidence?: Json
+          expires_at?: string | null
+          id?: string
+          severity?: string
+          status?: string
+          suggested_action?: Json
+          target_entity?: string | null
+          target_id?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -17904,6 +18130,66 @@ export type Database = {
           },
         ]
       }
+      v_wms_kpi_dock_to_stock: {
+        Row: {
+          avg_hours: number | null
+          company_id: string | null
+          day: string | null
+          samples: number | null
+        }
+        Relationships: []
+      }
+      v_wms_kpi_inventory_accuracy: {
+        Row: {
+          accuracy_pct: number | null
+          company_id: string | null
+          day: string | null
+          exact_matches: number | null
+          total_items: number | null
+        }
+        Relationships: []
+      }
+      v_wms_kpi_occupancy: {
+        Row: {
+          capacity: number | null
+          company_id: string | null
+          locations: number | null
+          occupancy_pct: number | null
+          occupied: number | null
+          zone: string | null
+        }
+        Relationships: []
+      }
+      v_wms_kpi_otif: {
+        Row: {
+          company_id: string | null
+          day: string | null
+          delivered: number | null
+          on_time: number | null
+          otif_pct: number | null
+        }
+        Relationships: []
+      }
+      v_wms_kpi_picking_accuracy: {
+        Row: {
+          accuracy_pct: number | null
+          accurate: number | null
+          company_id: string | null
+          day: string | null
+          total: number | null
+        }
+        Relationships: []
+      }
+      v_wms_kpi_productivity_operator: {
+        Row: {
+          company_id: string | null
+          operator_id: string | null
+          tasks_completed: number | null
+          tasks_per_hour: number | null
+          tasks_total: number | null
+        }
+        Relationships: []
+      }
       vw_organizational_hierarchy: {
         Row: {
           company_id: string | null
@@ -18245,6 +18531,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      get_wms_kpis: { Args: { _days?: number }; Returns: Json }
       has_branch_access: { Args: { _branch_id: string }; Returns: boolean }
       has_module_access: { Args: { _module_key: string }; Returns: boolean }
       has_permission: {
