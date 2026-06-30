@@ -62,7 +62,7 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <main className="space-y-6" role="status" aria-live="polite" aria-label="Carregando dashboard">
         <div>
           <Skeleton className="h-8 w-72 mb-2" />
           <Skeleton className="h-4 w-96" />
@@ -77,7 +77,8 @@ export default function Dashboard() {
             <Card key={i}><CardContent className="p-6"><Skeleton className="h-32 w-full" /></CardContent></Card>
           ))}
         </div>
-      </div>
+        <span className="sr-only">Carregando indicadores do dashboard…</span>
+      </main>
     );
   }
 
@@ -89,7 +90,7 @@ export default function Dashboard() {
   } = data || {};
 
   return (
-    <div className="space-y-6">
+    <main className="space-y-6" aria-label="Dashboard consolidado">
       {/* Header */}
       <div className="flex items-end justify-between">
         <div>
@@ -105,11 +106,12 @@ export default function Dashboard() {
             onClick={handleRefresh}
             disabled={isRefreshing}
             className="gap-2 text-xs"
+            aria-label={isRefreshing ? 'Atualizando dashboard' : 'Atualizar dashboard'}
           >
-            <RefreshCw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} />
+            <RefreshCw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} aria-hidden="true" />
             Atualizar
           </Button>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground" aria-label="Atualização automática a cada 60 segundos">
             Auto-refresh 60s
           </p>
         </div>
@@ -310,6 +312,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
