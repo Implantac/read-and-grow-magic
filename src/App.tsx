@@ -51,6 +51,11 @@ const HealthPatients = lazy(() => import("./pages/HealthPatients"));
 const HealthPatientDetail = lazy(() => import("./pages/HealthPatientDetail"));
 const BillingUsage = lazy(() => import("./pages/BillingUsage"));
 const EducationDashboard = lazy(() => import("./pages/EducationDashboard"));
+const ColetorLayout = lazy(() => import("./coletor/ColetorLayout"));
+const ColetorHome = lazy(() => import("./coletor/ColetorHome"));
+const ColetorReceiving = lazy(() => import("./coletor/ColetorReceiving"));
+const ColetorPutaway = lazy(() => import("./coletor/ColetorPutaway"));
+const ColetorPicking = lazy(() => import("./coletor/ColetorPicking"));
 
 
 
@@ -89,6 +94,13 @@ const App = () => (
               <Route path="/login" element={<Login />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/onboarding" element={<Onboarding />} />
+
+              <Route path="/coletor" element={<ColetorLayout />}>
+                <Route index element={<ColetorHome />} />
+                <Route path="recebimento" element={<ColetorReceiving />} />
+                <Route path="putaway" element={<ColetorPutaway />} />
+                <Route path="picking" element={<ColetorPicking />} />
+              </Route>
 
               <Route element={<MainLayout />}>
                 <Route element={<OnboardingGuard />}>
