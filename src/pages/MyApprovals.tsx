@@ -93,22 +93,27 @@ export default function MyApprovals() {
       />
 
       {isLoading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <div className="flex justify-center py-12" role="status" aria-live="polite" aria-label="Carregando aprovações">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden="true" />
+          <span className="sr-only">Carregando aprovações…</span>
         </div>
       ) : grouped.length === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <CheckCircle2 className="h-10 w-10 mx-auto mb-3 text-primary/60" />
+          <CardContent className="py-12 text-center text-muted-foreground" role="status">
+            <CheckCircle2 className="h-10 w-10 mx-auto mb-3 text-primary/60" aria-hidden="true" />
             Nenhuma aprovação pendente
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-3">
+        <div
+          className="grid gap-3"
+          role="list"
+          aria-label={`${grouped.length} aprovações pendentes`}
+        >
           {grouped.map((a) => {
             const overdue = a.due_at && isPast(new Date(a.due_at));
             return (
-              <Card key={a.id}>
+              <Card key={a.id} role="listitem">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-base">
                     Etapa: <span className="font-mono text-sm">{a.step_key}</span>
@@ -123,20 +128,20 @@ export default function MyApprovals() {
                   <div className="text-xs text-muted-foreground space-y-1">
                     <div>Instância: <span className="font-mono">{a.instance_id.slice(0, 8)}</span></div>
                     <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
+                      <Clock className="h-3 w-3" aria-hidden="true" />
                       Criada {format(new Date(a.created_at), "dd/MM/yyyy HH:mm")}
                       {a.due_at && <> · Prazo {format(new Date(a.due_at), "dd/MM/yyyy HH:mm")}</>}
                     </div>
                   </div>
                   <div className="flex gap-2 flex-wrap">
-                    <Button size="sm" onClick={() => { setActive({ approval: a, decision: "approve" }); setComment(""); }}>
-                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Aprovar
+                    <Button size="sm" aria-label={`Aprovar etapa ${a.step_key}`} onClick={() => { setActive({ approval: a, decision: "approve" }); setComment(""); }}>
+                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" aria-hidden="true" /> Aprovar
                     </Button>
-                    <Button size="sm" variant="destructive" onClick={() => { setActive({ approval: a, decision: "reject" }); setComment(""); }}>
-                      <XCircle className="h-3.5 w-3.5 mr-1" /> Rejeitar
+                    <Button size="sm" variant="destructive" aria-label={`Rejeitar etapa ${a.step_key}`} onClick={() => { setActive({ approval: a, decision: "reject" }); setComment(""); }}>
+                      <XCircle className="h-3.5 w-3.5 mr-1" aria-hidden="true" /> Rejeitar
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => { setActive({ approval: a, decision: "delegate" }); setComment(""); setDelegateTo(""); }}>
-                      <UserCheck2 className="h-3.5 w-3.5 mr-1" /> Delegar
+                    <Button size="sm" variant="outline" aria-label={`Delegar etapa ${a.step_key}`} onClick={() => { setActive({ approval: a, decision: "delegate" }); setComment(""); setDelegateTo(""); }}>
+                      <UserCheck2 className="h-3.5 w-3.5 mr-1" aria-hidden="true" /> Delegar
                     </Button>
                   </div>
                 </CardContent>
@@ -145,6 +150,7 @@ export default function MyApprovals() {
           })}
         </div>
       )}
+
 
       <Dialog open={!!active} onOpenChange={(o) => !o && setActive(null)}>
         <DialogContent>
