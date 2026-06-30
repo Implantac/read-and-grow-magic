@@ -136,7 +136,26 @@ export default function SlottingPlanner() {
             Sugestões automáticas de realocação para reduzir km percorridos no picking.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap items-center">
+          <div role="radiogroup" aria-label="Engine de slotting" className="flex rounded-md border overflow-hidden">
+            {(["v1", "v2"] as Engine[]).map((e) => (
+              <button
+                key={e}
+                role="radio"
+                aria-checked={engine === e}
+                onClick={() => setEngine(e)}
+                className={`px-3 py-1.5 text-xs font-medium transition ${
+                  engine === e ? "bg-primary text-primary-foreground" : "bg-background hover:bg-accent"
+                }`}
+              >
+                {e === "v1" ? "v1 · ABC" : "v2 · Afinidade+Peso"}
+              </button>
+            ))}
+          </div>
+          <Button onClick={simulate} disabled={simulating || engine !== "v2"} variant="outline" className="gap-2">
+            <FlaskConical className={`h-4 w-4 ${simulating ? "animate-pulse" : ""}`} aria-hidden="true" />
+            {simulating ? "Simulando…" : "Simular (what-if)"}
+          </Button>
           <Button onClick={recompute} disabled={running} variant="outline" className="gap-2">
             <RefreshCw className={`h-4 w-4 ${running ? "animate-spin" : ""}`} aria-hidden="true" />
             {running ? "Recalculando…" : "Recalcular"}
@@ -147,6 +166,45 @@ export default function SlottingPlanner() {
           </Button>
         </div>
       </header>
+
+      {sim && (
+        <Card className="border-l-4 border-l-amber-500 bg-amber-500/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-amber-500" aria-hidden="true" />
+              Simulação v2 (não aplicada)
+              <Button size="sm" variant="ghost" className="ml-auto h-7" onClick={() => setSim(null)}>
+                Fechar
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+              <div><div className="text-xs text-muted-foreground">Sugestões</div><div className="text-xl font-bold">{sim.generated}</div></div>
+              <div><div className="text-xs text-muted-foreground">Economia total</div><div className="text-xl font-bold text-emerald-600">{sim.estimated_total_savings_m.toLocaleString("pt-BR")} m/dia</div></div>
+              <div><div className="text-xs text-muted-foreground">Pares de afinidade</div><div className="text-xl font-bold">{sim.affinity_pairs}</div></div>
+              <div>
+                <div className="text-xs text-muted-foreground">ABC dinâmico</div>
+                <div className="flex gap-1 mt-1">
+                  <Badge variant="outline">A {sim.abc_distribution.A}</Badge>
+                  <Badge variant="outline">B {sim.abc_distribution.B}</Badge>
+                  <Badge variant="outline">C {sim.abc_distribution.C}</Badge>
+                </div>
+              </div>
+            </div>
+            {sim.preview && sim.preview.length > 0 && (
+              <div className="text-xs text-muted-foreground">
+                Top {sim.preview.length} sugestões preview · principais razões:{" "}
+                {Array.from(new Set(sim.preview.map((p) => String((p.reason as any)?.rationale)))).join(", ")}
+              </div>
+            )}
+            <Button size="sm" onClick={recompute} disabled={running} className="gap-2">
+              <CheckCircle2 className="h-4 w-4" /> Aplicar essa simulação
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
 
       <WMSKpiStrip />
 
