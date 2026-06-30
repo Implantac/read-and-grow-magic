@@ -49,29 +49,38 @@ export default function BrainLearningPage() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" /> Calibração de confiança</CardTitle>
-            <p className="text-xs text-muted-foreground">Confiança declarada × taxa real de aprovação. Linhas próximas = IA bem calibrada.</p>
+            <CardTitle className="text-base flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-primary" aria-hidden="true" /> Calibração de confiança
+            </CardTitle>
+            <p className="text-xs text-muted-foreground" id="calibration-desc">
+              Confiança declarada × taxa real de aprovação. Linhas próximas = IA bem calibrada.
+            </p>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={data.calibration}>
-                <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-                <XAxis dataKey="bucket" tick={{ fontSize: 11 }} />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="declared" stroke="hsl(var(--primary))" name="Declarada" strokeWidth={2} />
-                <Line type="monotone" dataKey="actual" stroke="hsl(var(--accent))" name="Real" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
+            <div role="img" aria-label="Gráfico de calibração: confiança declarada versus taxa real por faixa de confiança" aria-describedby="calibration-desc">
+              <ResponsiveContainer width="100%" height={260}>
+                <LineChart data={data.calibration}>
+                  <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+                  <XAxis dataKey="bucket" tick={{ fontSize: 11 }} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} unit="%" />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="declared" stroke="hsl(var(--primary))" name="Declarada" strokeWidth={2} />
+                  <Line type="monotone" dataKey="actual" stroke="hsl(var(--accent))" name="Real" strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2"><Brain className="h-4 w-4 text-primary" /> Aprovação por módulo</CardTitle>
-            <p className="text-xs text-muted-foreground">Onde o Cérebro entrega mais valor</p>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Brain className="h-4 w-4 text-primary" aria-hidden="true" /> Aprovação por módulo
+            </CardTitle>
+            <p className="text-xs text-muted-foreground" id="bymodule-desc">Onde o Cérebro entrega mais valor</p>
           </CardHeader>
+
           <CardContent>
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={data.byModule}>
