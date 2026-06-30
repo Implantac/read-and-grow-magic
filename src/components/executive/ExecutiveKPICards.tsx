@@ -53,7 +53,7 @@ export function PrimaryKPICards({ kpis }: Props) {
               <div className="space-y-1">
                 <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{k.label}</p>
                 <p className="text-2xl font-bold tabular-nums">{k.value}</p>
-                {k.sub && <p className="text-xs text-muted-foreground">{k.sub}</p>}
+                {k.sub && <div className="text-xs text-muted-foreground">{k.sub}</div>}
               </div>
               <div className={cn('rounded-xl p-2.5', k.bg)}>
                 <k.icon className={cn('h-5 w-5', k.color)} />
