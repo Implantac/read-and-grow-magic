@@ -278,9 +278,9 @@ export function Sidebar() {
                 <img src={logoUseSistemas} alt="Use Sistemas" className="h-8 w-8 object-contain" />
               </div>
               <div className="flex flex-col">
-                <h1 className="text-[15px] font-bold text-sidebar-foreground leading-tight tracking-tight">Use Sistemas</h1>
+                <span className="text-[15px] font-bold text-sidebar-foreground leading-tight tracking-tight">Use Sistemas</span>
                 <div className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" aria-hidden="true" />
                   <p className="text-[10px] font-bold text-primary/80 uppercase tracking-widest">ERP & WMS</p>
                 </div>
               </div>
