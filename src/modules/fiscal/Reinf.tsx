@@ -7,9 +7,86 @@ import { Label } from '@/ui/base/label';
 import { Badge } from '@/ui/base/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/ui/base/tabs';
-import { useReinf, type ReinfEvent } from '@/hooks/fiscal/useReinf';
+import { useReinf, type ReinfEvent, type ReinfPeriod } from '@/hooks/fiscal/useReinf';
 import { formatBRL } from '@/lib/formatters';
 import { toCsv, downloadCsv } from '@/lib/csv';
+
+const R2099_HEADERS = [
+  { key: 'event_type', label: 'Evento' },
+  { key: 'competencia', label: 'Competência' },
+  { key: 'status', label: 'Status' },
+  { key: 'qtd_r2010', label: 'Qtd Eventos R-2010' },
+  { key: 'vr_base_inss', label: 'Base INSS' },
+  { key: 'vr_ret_inss', label: 'INSS Retido (DARF)' },
+  { key: 'data_fechamento', label: 'Data Fechamento' },
+];
+
+const R4099_HEADERS = [
+  { key: 'event_type', label: 'Evento' },
+  { key: 'competencia', label: 'Competência' },
+  { key: 'status', label: 'Status' },
+  { key: 'qtd_r4020', label: 'Qtd Eventos R-4020' },
+  { key: 'vr_ret_ir', label: 'IR Retido' },
+  { key: 'vr_ret_csll', label: 'CSLL Retido' },
+  { key: 'vr_ret_pis', label: 'PIS Retido' },
+  { key: 'vr_ret_cofins', label: 'COFINS Retido' },
+  { key: 'vr_total_darf', label: 'Total DARF' },
+  { key: 'data_fechamento', label: 'Data Fechamento' },
+];
+
+function fmt(n: number): string {
+  return n.toFixed(2).replace('.', ',');
+}
+
+function buildR2099Rows(events: ReinfEvent[], period: ReinfPeriod | null): Record<string, string>[] {
+  const t = period?.totals || {};
+  const base = Number(t.r2010_inss ?? 0) > 0 ? Number(t.r2010_inss ?? 0) / 0.11 : 0;
+  const rows: Record<string, string>[] = events.map((e) => ({
+    event_type: String(e.event_type),
+    competencia: period?.competencia || '',
+    status: e.status,
+    qtd_r2010: String(t.r2010_qtd ?? 0),
+    vr_base_inss: fmt(base),
+    vr_ret_inss: fmt(Number(t.r2010_inss ?? 0)),
+    data_fechamento: period?.closed_at?.slice(0, 10) || '',
+  }));
+  rows.push({
+    event_type: 'TOTAL', competencia: period?.competencia || '', status: '',
+    qtd_r2010: String(t.r2010_qtd ?? 0),
+    vr_base_inss: fmt(base),
+    vr_ret_inss: fmt(Number(t.r2010_inss ?? 0)),
+    data_fechamento: '',
+  });
+  return rows;
+}
+
+function buildR4099Rows(events: ReinfEvent[], period: ReinfPeriod | null): Record<string, string>[] {
+  const t = period?.totals || {};
+  const ir = Number(t.r4020_ir ?? 0);
+  const csll = Number(t.r4020_csll ?? 0);
+  const pis = Number(t.r4020_pis ?? 0);
+  const cofins = Number(t.r4020_cofins ?? 0);
+  const total = ir + csll + pis + cofins;
+  const rows: Record<string, string>[] = events.map((e) => ({
+    event_type: String(e.event_type),
+    competencia: period?.competencia || '',
+    status: e.status,
+    qtd_r4020: String(t.r4020_qtd ?? 0),
+    vr_ret_ir: fmt(ir),
+    vr_ret_csll: fmt(csll),
+    vr_ret_pis: fmt(pis),
+    vr_ret_cofins: fmt(cofins),
+    vr_total_darf: fmt(total),
+    data_fechamento: period?.closed_at?.slice(0, 10) || '',
+  }));
+  rows.push({
+    event_type: 'TOTAL', competencia: period?.competencia || '', status: '',
+    qtd_r4020: String(t.r4020_qtd ?? 0),
+    vr_ret_ir: fmt(ir), vr_ret_csll: fmt(csll), vr_ret_pis: fmt(pis), vr_ret_cofins: fmt(cofins),
+    vr_total_darf: fmt(total), data_fechamento: '',
+  });
+  return rows;
+}
 import { Calendar, Download, FileText, Lock, RefreshCcw, Sparkles, Unlock } from 'lucide-react';
 
 const R2010_HEADERS = [
