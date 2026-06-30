@@ -107,7 +107,7 @@ export default function ExecutiveDashboard() {
           <div className="flex flex-col lg:flex-row items-center gap-2 bg-muted/50 rounded-lg px-3 py-1.5 ml-2 border border-border/50">
             <div className="flex items-center gap-4 w-full lg:w-auto">
               <div className="flex items-center gap-2">
-                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                <Calendar className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
                 <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">Período: <span className="text-foreground font-bold">{tempPeriod}m</span></span>
               </div>
               <Slider
