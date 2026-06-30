@@ -43,9 +43,9 @@ export default function WMSAnalytics() {
     try {
       const [recv, ship, pickAll, logs, qual, evts] = await Promise.all([
         supabase.from("wms_receiving_orders").select("id,status,created_at").gte("created_at", since),
-        supabase.from("wms_shipments").select("id,status,carrier,tracking_code,scheduled_at,shipped_at,delivered_at,created_at").gte("created_at", since).order("created_at", { ascending: false }),
+        supabase.from("wms_shipments").select("id,status,carrier,tracking_number,scheduled_date,shipped_at,delivered_at,created_at").gte("created_at", since).order("created_at", { ascending: false }),
         supabase.from("wms_picking_orders").select("id,status,created_at,completed_at").gte("created_at", since),
-        supabase.from("wms_task_logs").select("id,task_type,duration_seconds,started_at,completed_at").gte("started_at", since),
+        supabase.from("wms_task_logs").select("id,task_type,duration_seconds,created_at").gte("created_at", since),
         supabase.from("wms_quality_checks").select("id,status,created_at").gte("created_at", since),
         supabase.from("wms_events").select("id,event_type,created_at,payload").gte("created_at", since).order("created_at", { ascending: false }).limit(50),
       ]);
@@ -63,8 +63,8 @@ export default function WMSAnalytics() {
           }, 0) / completed.length
         : 0;
 
-      const slaOn = shipRows.filter((s: any) => s.delivered_at && s.scheduled_at && new Date(s.delivered_at) <= new Date(s.scheduled_at)).length;
-      const slaLate = shipRows.filter((s: any) => s.delivered_at && s.scheduled_at && new Date(s.delivered_at) > new Date(s.scheduled_at)).length;
+      const slaOn = shipRows.filter((s: any) => s.delivered_at && s.scheduled_date && new Date(s.delivered_at) <= new Date(s.scheduled_date)).length;
+      const slaLate = shipRows.filter((s: any) => s.delivered_at && s.scheduled_date && new Date(s.delivered_at) > new Date(s.scheduled_date)).length;
 
       const qualFails = qRows.filter((q) => q.status === "rejected" || q.status === "quarantine").length;
       const accuracy = qRows.length ? Math.max(0, 100 - (qualFails / qRows.length) * 100) : 100;
@@ -136,10 +136,10 @@ export default function WMSAnalytics() {
               <TableBody>
                 {shipments.length === 0 && (<TableRow><TableCell colSpan={3} className="text-center text-muted-foreground py-6">Sem expedições no período</TableCell></TableRow>)}
                 {shipments.map((s) => {
-                  const onTime = s.delivered_at && s.scheduled_at ? new Date(s.delivered_at) <= new Date(s.scheduled_at) : null;
+                  const onTime = s.delivered_at && s.scheduled_date ? new Date(s.delivered_at) <= new Date(s.scheduled_date) : null;
                   return (
                     <TableRow key={s.id}>
-                      <TableCell className="font-mono text-xs">{s.tracking_code ?? "—"}</TableCell>
+                      <TableCell className="font-mono text-xs">{s.tracking_number ?? "—"}</TableCell>
                       <TableCell><Badge variant="outline">{s.status}</Badge></TableCell>
                       <TableCell>
                         {onTime === null ? <Badge variant="secondary">pendente</Badge> : onTime ? <Badge className="bg-emerald-600">no prazo</Badge> : <Badge variant="destructive">atrasado</Badge>}
