@@ -96,12 +96,12 @@ export default function ExecutiveDashboard() {
       </div>
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6 border-b pb-4">
         <div className="flex items-center gap-2">
-          <Button onClick={() => generateInsights.mutate()} disabled={generateInsights.isPending} variant="outline" size="sm" className="gap-2">
-            <Brain className={cn('h-4 w-4', generateInsights.isPending && 'animate-spin')} />
+          <Button onClick={() => generateInsights.mutate()} disabled={generateInsights.isPending} variant="outline" size="sm" className="gap-2" aria-label="Gerar insights da IA executiva">
+            <Brain className={cn('h-4 w-4', generateInsights.isPending && 'animate-spin')} aria-hidden="true" />
             Gerar Insights
           </Button>
-          <Button onClick={() => generateScenarios.mutate()} disabled={generateScenarios.isPending} variant="outline" size="sm" className="gap-2">
-            <Layers className={cn('h-4 w-4', generateScenarios.isPending && 'animate-spin')} />
+          <Button onClick={() => generateScenarios.mutate()} disabled={generateScenarios.isPending} variant="outline" size="sm" className="gap-2" aria-label="Gerar cenários da IA executiva">
+            <Layers className={cn('h-4 w-4', generateScenarios.isPending && 'animate-spin')} aria-hidden="true" />
             Cenários
           </Button>
           <div className="flex flex-col lg:flex-row items-center gap-2 bg-muted/50 rounded-lg px-3 py-1.5 ml-2 border border-border/50">
