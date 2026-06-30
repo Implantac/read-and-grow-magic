@@ -17987,10 +17987,18 @@ export type Database = {
         Args: { _target_company_id: string; _user_id: string }
         Returns: boolean
       }
-      check_quota: {
-        Args: { _company_id: string; _metric: string }
-        Returns: Json
-      }
+      check_quota:
+        | { Args: { _company_id: string; _metric: string }; Returns: Json }
+        | {
+            Args: { p_metric: string }
+            Returns: {
+              current_value: number
+              limit_value: number
+              metric: string
+              ok: boolean
+              percent: number
+            }[]
+          }
       cleanup_expired_deleted_orders: { Args: never; Returns: undefined }
       close_accounting_period: {
         Args: { _month: number; _year: number }
@@ -18221,6 +18229,16 @@ export type Database = {
       get_headquarters_branch: {
         Args: { _company_id: string }
         Returns: string
+      }
+      get_usage_summary: {
+        Args: never
+        Returns: {
+          current_value: number
+          limit_value: number
+          metric: string
+          percent: number
+          period: string
+        }[]
       }
       get_user_company_id: { Args: { _user_id: string }; Returns: string }
       get_user_role: {
