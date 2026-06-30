@@ -43,6 +43,9 @@ export default function SlottingPlanner() {
   const [items, setItems] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [running, setRunning] = useState(false);
+  const [engine, setEngine] = useState<Engine>("v2");
+  const [sim, setSim] = useState<SimResult | null>(null);
+  const [simulating, setSimulating] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -73,9 +76,36 @@ export default function SlottingPlanner() {
 
   const recompute = async () => {
     setRunning(true);
-    await supabase.functions.invoke("wms-slotting-recompute", { body: {} });
-    setRunning(false);
-    await load();
+    try {
+      const fn = engine === "v2" ? "wms-slotting-v2" : "wms-slotting-recompute";
+      const body = engine === "v2" ? { mode: "persist" } : {};
+      const { error } = await supabase.functions.invoke(fn, { body });
+      if (error) throw error;
+      toast.success(`Engine ${engine.toUpperCase()} executado`);
+      setSim(null);
+      await load();
+    } catch (e: any) {
+      toast.error(e?.message || "Falha ao recalcular");
+    } finally {
+      setRunning(false);
+    }
+  };
+
+  const simulate = async () => {
+    setSimulating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("wms-slotting-v2", {
+        body: { mode: "simulate" },
+      });
+      if (error) throw error;
+      const first = data?.result ? (Object.values(data.result)[0] as SimResult) : null;
+      setSim(first);
+      if (first) toast.success(`Simulação: ${first.generated} sugestões previstas`);
+    } catch (e: any) {
+      toast.error(e?.message || "Falha na simulação");
+    } finally {
+      setSimulating(false);
+    }
   };
 
   const decide = async (id: string, status: "approved" | "rejected") => {
