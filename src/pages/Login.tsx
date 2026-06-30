@@ -127,8 +127,8 @@ export default function Login() {
             <>
               <CardHeader className="space-y-1 pb-4">
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-sidebar-accent" onClick={() => setView('login')}>
-                    <ArrowLeft className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-sidebar-accent" onClick={() => setView('login')} aria-label="Voltar ao login">
+                    <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                   </Button>
                   <div>
                     <CardTitle className="text-xl text-sidebar-foreground">Recuperar Senha</CardTitle>
@@ -155,8 +155,8 @@ export default function Login() {
             <>
               <CardHeader className="space-y-1 pb-4">
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-sidebar-accent" onClick={() => setView('login')}>
-                    <ArrowLeft className="h-4 w-4" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:bg-sidebar-accent" onClick={() => setView('login')} aria-label="Voltar ao login">
+                    <ArrowLeft className="h-4 w-4" aria-hidden="true" />
                   </Button>
                   <div>
                     <CardTitle className="text-xl text-sidebar-foreground">Criar Conta</CardTitle>
@@ -183,10 +183,10 @@ export default function Login() {
                   <div className="space-y-2">
                     <Label htmlFor="signup-password" className="text-sidebar-foreground/70 text-sm">Senha</Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/70" />
+                      <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/70" aria-hidden="true" />
                       <Input id="signup-password" type={showPassword ? 'text' : 'password'} placeholder="Mínimo 6 caracteres" value={password} onChange={(e) => setPassword(e.target.value)} className={cn(inputClasses, 'pr-10')} disabled={isLoading} />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-sidebar-foreground/40 hover:text-sidebar-foreground/60 transition-colors">
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-sidebar-foreground/40 hover:text-sidebar-foreground/60 transition-colors" aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'} aria-pressed={showPassword}>
+                        {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                       </button>
                     </div>
                   </div>
@@ -217,10 +217,10 @@ export default function Login() {
                       <button type="button" onClick={() => setView('forgot')} className="text-xs text-primary hover:text-primary/80 transition-colors">Esqueceu a senha?</button>
                     </div>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/70" />
+                      <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-primary/70" aria-hidden="true" />
                       <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} className={cn(inputClasses, 'pr-10')} disabled={isLoading} />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-sidebar-foreground/40 hover:text-sidebar-foreground/60 transition-colors">
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-sidebar-foreground/40 hover:text-sidebar-foreground/60 transition-colors" aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'} aria-pressed={showPassword}>
+                        {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
                       </button>
                     </div>
                   </div>
