@@ -19,6 +19,9 @@ const DistributionCentersPage = lazy(() => import("../modules/wms/DistributionCe
 const StockBalancesPage = lazy(() => import("../modules/wms/StockBalances"));
 const DocksPage = lazy(() => import("../modules/wms/Docks"));
 const WMSAIPage = lazy(() => import("../modules/wms/WMSAI"));
+const DigitalTwinPage = lazy(() => import("../modules/wms/twin/DigitalTwin"));
+const IntelligencePage = lazy(() => import("../modules/wms/intelligence/Intelligence"));
+const SlottingPlannerPage = lazy(() => import("../modules/wms/slotting/SlottingPlanner"));
 
 export const WMSRoutes = [
   <Route key="wms-dash" path="/wms/dashboard" element={<WMSDashboardPage />} />,
@@ -39,4 +42,7 @@ export const WMSRoutes = [
   <Route key="wms-bal" path="/wms/saldos" element={<StockBalancesPage />} />,
   <Route key="wms-docks" path="/wms/docas" element={<DocksPage />} />,
   <Route key="wms-ai" path="/wms/ia" element={<WMSAIPage />} />,
+  <Route key="wms-twin" path="/wms/twin" element={<DigitalTwinPage />} />,
+  <Route key="wms-intel" path="/wms/inteligencia" element={<IntelligencePage />} />,
+  <Route key="wms-slot" path="/wms/slotting" element={<SlottingPlannerPage />} />,
 ];
