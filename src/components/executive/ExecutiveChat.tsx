@@ -114,19 +114,19 @@ export function ExecutiveChat({ messages, isLoading, sendMessage, clearChat, onD
           </div>
         </CardHeader>
         <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-          <ScrollArea className="flex-1 p-4">
+          <ScrollArea className="flex-1 p-4" role="log" aria-live="polite" aria-label="Conversa com o Diretor Digital">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center py-12">
-                <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                <div className="h-20 w-20 rounded-2xl bg-primary/10 flex items-center justify-center mb-4" aria-hidden="true">
                   <Brain className="h-10 w-10 text-primary/40" />
                 </div>
                 <p className="text-sm font-medium mb-1">Diretor Digital</p>
                 <p className="text-xs text-muted-foreground mb-6 max-w-md">
                   Seu assistente executivo unificado. Faça perguntas, peça análises ou execute ações no sistema — tudo por linguagem natural.
                 </p>
-                <div className="grid gap-2 grid-cols-2 max-w-lg">
+                <div className="grid gap-2 grid-cols-2 max-w-lg" role="list" aria-label="Sugestões de consultas rápidas">
                   {quickActions.slice(0, 6).map(a => (
-                    <Button key={a.label} variant="outline" size="sm" className="text-[10px] h-auto py-2 px-1 whitespace-normal break-words" onClick={() => sendMessage(a.prompt)}>
+                    <Button key={a.label} variant="outline" size="sm" className="text-[10px] h-auto py-2 px-1 whitespace-normal break-words" onClick={() => sendMessage(a.prompt)} aria-label={`Enviar consulta: ${a.label}`}>
                       {a.label}
                     </Button>
                   ))}
