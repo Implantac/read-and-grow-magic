@@ -32,9 +32,12 @@ export default function BrainLearningPage() {
         description="Calibração de confiança, taxa de aprovação e onde a IA está acertando ou errando"
       >
         <Button asChild variant="outline" size="sm" className="gap-2">
-          <Link to="/executive/brain"><ArrowLeft className="h-4 w-4" /> Voltar ao Cérebro</Link>
+          <Link to="/executive/brain" aria-label="Voltar ao Cérebro Nativo">
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Voltar ao Cérebro
+          </Link>
         </Button>
       </PageHeader>
+
 
       <div className="grid gap-4 md:grid-cols-4">
         <KPICard title="Taxa de aprovação" value={`${(data.approvalRate * 100).toFixed(0)}%`} subtitle={`${data.approved + data.autoExecuted + data.executed} de ${data.approved + data.rejected + data.autoExecuted + data.executed}`} icon={<CheckCircle2 className="h-5 w-5" />} accentColor="success" index={0} />
