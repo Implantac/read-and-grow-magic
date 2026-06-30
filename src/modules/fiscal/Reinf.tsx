@@ -43,7 +43,7 @@ function num(v: unknown): number {
   return Number(v || 0);
 }
 
-function buildR2010Rows(events: ReinfEvent[]) {
+function buildR2010Rows(events: ReinfEvent[]): Record<string, string>[] {
   const rows = events.map((e) => ({
     event_type: e.event_type,
     cnpj_prestador: e.cnpj_prestador || '',
@@ -68,7 +68,7 @@ function buildR2010Rows(events: ReinfEvent[]) {
   return rows;
 }
 
-function buildR4020Rows(events: ReinfEvent[]) {
+function buildR4020Rows(events: ReinfEvent[]): Record<string, string>[] {
   const rows = events.map((e) => {
     const total = num(e.vr_ret_ir) + num(e.vr_ret_csll) + num(e.vr_ret_pis) + num(e.vr_ret_cofins);
     return {
