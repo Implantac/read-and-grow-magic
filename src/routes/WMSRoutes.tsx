@@ -35,6 +35,7 @@ const CycleCountPage = lazy(() => import("../modules/wms/CycleCount"));
 const WMSAnalyticsPage = lazy(() => import("../modules/wms/WMSAnalytics"));
 const CrossDockingPage = lazy(() => import("../modules/wms/CrossDocking"));
 const KitAssemblyPage = lazy(() => import("../modules/wms/KitAssembly"));
+const DockSchedulingPage = lazy(() => import("../modules/wms/DockScheduling"));
 
 export const WMSRoutes = [
   <Route key="wms-dash" path="/wms/dashboard" element={<WMSDashboardPage />} />,
@@ -71,4 +72,5 @@ export const WMSRoutes = [
   <Route key="wms-analytics" path="/wms/analytics" element={<WMSAnalyticsPage />} />,
   <Route key="wms-crossdock" path="/wms/cross-docking" element={<CrossDockingPage />} />,
   <Route key="wms-kits" path="/wms/kits" element={<KitAssemblyPage />} />,
+  <Route key="wms-dock-sched" path="/wms/agenda-docas" element={<DockSchedulingPage />} />,
 ];
