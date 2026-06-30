@@ -209,10 +209,34 @@ export default function Reinf() {
       </div>
 
       <Card className="mt-6 shadow-lg border-primary/10">
-        <CardHeader className="bg-primary/5 border-b flex flex-row items-center justify-between">
+        <CardHeader className="bg-primary/5 border-b flex flex-row items-center justify-between gap-4">
           <div>
             <CardTitle className="text-lg">Eventos da competência</CardTitle>
             <CardDescription>{loading ? 'Carregando…' : `${events.length} evento(s)`}</CardDescription>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={byType('R-2010').length === 0}
+              onClick={() => {
+                const rows = buildR2010Rows(byType('R-2010'));
+                downloadCsv(`reinf_R-2010_${competencia.slice(0, 7)}.csv`, toCsv(rows, R2010_HEADERS));
+              }}
+            >
+              <Download className="h-4 w-4 mr-2" /> CSV R-2010
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={byType('R-4020').length === 0}
+              onClick={() => {
+                const rows = buildR4020Rows(byType('R-4020'));
+                downloadCsv(`reinf_R-4020_${competencia.slice(0, 7)}.csv`, toCsv(rows, R4020_HEADERS));
+              }}
+            >
+              <Download className="h-4 w-4 mr-2" /> CSV R-4020
+            </Button>
           </div>
         </CardHeader>
         <CardContent className="pt-6">
