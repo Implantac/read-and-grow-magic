@@ -18976,6 +18976,17 @@ export type Database = {
       }
       wms_reserve_order_stock: { Args: { p_order_id: string }; Returns: Json }
       wms_ship_order: { Args: { p_order_id: string }; Returns: Json }
+      wms_update_shipment_stage: {
+        Args: {
+          p_carrier?: string
+          p_location?: string
+          p_notes?: string
+          p_order_id: string
+          p_stage: string
+          p_tracking_number?: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role:
