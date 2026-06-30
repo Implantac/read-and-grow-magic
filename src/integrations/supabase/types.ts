@@ -19257,17 +19257,27 @@ export type Database = {
         Returns: number
       }
       recompute_default_scores: { Args: never; Returns: Json }
-      record_usage: {
-        Args: {
-          _company_id: string
-          _metadata?: Json
-          _meter_key: string
-          _quantity?: number
-          _source?: string
-          _source_id?: string
-        }
-        Returns: string
-      }
+      record_usage:
+        | {
+            Args: {
+              _company_id: string
+              _metadata?: Json
+              _meter_key: string
+              _quantity?: number
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              _company_id: string
+              _metadata?: Json
+              _meter_key: string
+              _quantity?: number
+              _source?: string
+              _source_id?: string
+            }
+            Returns: string
+          }
       refresh_wms_kpi_cache: {
         Args: { p_company_id: string }
         Returns: undefined
