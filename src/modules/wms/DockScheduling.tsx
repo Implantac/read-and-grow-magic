@@ -115,8 +115,8 @@ export default function DockScheduling() {
       scheduled_start: new Date(form.scheduled_start).toISOString(),
       scheduled_end: new Date(form.scheduled_end).toISOString(),
       status: 'scheduled',
-      company_id: company,
-    };
+      company_id: company as unknown as string,
+    } as never;
     const { error } = await supabase.from('yard_appointments').insert(payload);
     if (error) {
       toastError('Erro ao criar agendamento', error.message);
