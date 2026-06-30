@@ -53,18 +53,23 @@ export default function WorkflowInbox() {
       <PageHeader title="Caixa de Workflows" description="Instâncias pendentes aguardando ação" icon={Inbox} />
 
       {loading ? (
-        <div className="flex justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <div className="flex justify-center py-12" role="status" aria-live="polite" aria-label="Carregando workflows">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" aria-hidden="true" />
+          <span className="sr-only">Carregando workflows…</span>
         </div>
       ) : pending.length === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <CheckCircle2 className="h-10 w-10 mx-auto mb-3 text-primary/60" />
+          <CardContent className="py-12 text-center text-muted-foreground" role="status">
+            <CheckCircle2 className="h-10 w-10 mx-auto mb-3 text-primary/60" aria-hidden="true" />
             Nenhum workflow pendente
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div
+          className="grid gap-4"
+          role="list"
+          aria-label={`${pending.length} workflows pendentes`}
+        >
           {pending.map((inst) => {
             const def = defMap.get(inst.definition_id);
             const steps = def?.steps ?? [];
@@ -74,7 +79,7 @@ export default function WorkflowInbox() {
             const isLast = !nextKey;
 
             return (
-              <Card key={inst.id}>
+              <Card key={inst.id} role="listitem">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-base">
                     {def?.name ?? "Workflow"}{" "}
@@ -87,7 +92,7 @@ export default function WorkflowInbox() {
                     <Badge>{current?.label ?? inst.current_step ?? "—"}</Badge>
                     {next && (
                       <>
-                        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
+                        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
                         <Badge variant="outline">{next.label}</Badge>
                       </>
                     )}
@@ -102,6 +107,7 @@ export default function WorkflowInbox() {
                     {next && (
                       <Button
                         size="sm"
+                        aria-label={`Avançar workflow ${def?.name ?? ""} para ${next.label}`}
                         onClick={() => {
                           setTarget({ instanceId: inst.id, toStep: next.key, complete: false });
                           setComment("");
@@ -114,6 +120,7 @@ export default function WorkflowInbox() {
                       <Button
                         size="sm"
                         variant="default"
+                        aria-label={`Concluir workflow ${def?.name ?? ""}`}
                         onClick={() => {
                           setTarget({ instanceId: inst.id, toStep: inst.current_step ?? "done", complete: true });
                           setComment("");
@@ -122,8 +129,8 @@ export default function WorkflowInbox() {
                         Concluir workflow
                       </Button>
                     )}
-                    <Button size="sm" variant="outline" onClick={() => setGraphFor(inst.id)}>
-                      <Network className="h-3.5 w-3.5 mr-1" /> Ver fluxo
+                    <Button size="sm" variant="outline" aria-label="Visualizar fluxo do workflow" onClick={() => setGraphFor(inst.id)}>
+                      <Network className="h-3.5 w-3.5 mr-1" aria-hidden="true" /> Ver fluxo
                     </Button>
                   </div>
                 </CardContent>
@@ -132,6 +139,7 @@ export default function WorkflowInbox() {
           })}
         </div>
       )}
+
 
       <Dialog open={!!target} onOpenChange={(o) => !o && setTarget(null)}>
         <DialogContent>
