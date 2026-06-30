@@ -44,8 +44,8 @@ function num(v: unknown): number {
 }
 
 function buildR2010Rows(events: ReinfEvent[]): Record<string, string>[] {
-  const rows = events.map((e) => ({
-    event_type: e.event_type,
+  const rows: Record<string, string>[] = events.map((e) => ({
+    event_type: String(e.event_type),
     cnpj_prestador: e.cnpj_prestador || '',
     nota_fiscal: e.nota_fiscal || '',
     data_emissao: e.data_emissao || '',
@@ -69,10 +69,10 @@ function buildR2010Rows(events: ReinfEvent[]): Record<string, string>[] {
 }
 
 function buildR4020Rows(events: ReinfEvent[]): Record<string, string>[] {
-  const rows = events.map((e) => {
+  const rows: Record<string, string>[] = events.map((e) => {
     const total = num(e.vr_ret_ir) + num(e.vr_ret_csll) + num(e.vr_ret_pis) + num(e.vr_ret_cofins);
     return {
-      event_type: e.event_type,
+      event_type: String(e.event_type),
       cnpj_beneficiario: e.cnpj_beneficiario || '',
       nota_fiscal: e.nota_fiscal || '',
       data_emissao: e.data_emissao || '',
