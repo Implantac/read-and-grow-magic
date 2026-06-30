@@ -254,6 +254,7 @@ export function Sidebar() {
   return (
     <TooltipProvider delayDuration={0}>
       <aside
+        aria-label="Navegação principal"
         className={cn(
           'fixed left-0 top-0 z-40 flex h-dvh flex-col bg-sidebar transition-all duration-300 ease-in-out',
           sidebarCollapsed ? 'w-16' : 'w-64'
