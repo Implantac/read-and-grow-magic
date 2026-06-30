@@ -67,8 +67,9 @@ export default function ExecutiveDashboard() {
     return (
       <PageContainer>
         <PageHeader title="IA Executiva" description="Carregando análise..." />
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" role="status" aria-live="polite" aria-label="Carregando análise executiva">
           {[1, 2, 3, 4, 5, 6, 7, 8].map(i => <Card key={i}><CardContent className="p-6"><Skeleton className="h-16 w-full" /></CardContent></Card>)}
+          <span className="sr-only">Carregando indicadores executivos...</span>
         </div>
       </PageContainer>
     );
@@ -95,18 +96,18 @@ export default function ExecutiveDashboard() {
       </div>
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6 border-b pb-4">
         <div className="flex items-center gap-2">
-          <Button onClick={() => generateInsights.mutate()} disabled={generateInsights.isPending} variant="outline" size="sm" className="gap-2">
-            <Brain className={cn('h-4 w-4', generateInsights.isPending && 'animate-spin')} />
+          <Button onClick={() => generateInsights.mutate()} disabled={generateInsights.isPending} variant="outline" size="sm" className="gap-2" aria-label="Gerar insights da IA executiva">
+            <Brain className={cn('h-4 w-4', generateInsights.isPending && 'animate-spin')} aria-hidden="true" />
             Gerar Insights
           </Button>
-          <Button onClick={() => generateScenarios.mutate()} disabled={generateScenarios.isPending} variant="outline" size="sm" className="gap-2">
-            <Layers className={cn('h-4 w-4', generateScenarios.isPending && 'animate-spin')} />
+          <Button onClick={() => generateScenarios.mutate()} disabled={generateScenarios.isPending} variant="outline" size="sm" className="gap-2" aria-label="Gerar cenários da IA executiva">
+            <Layers className={cn('h-4 w-4', generateScenarios.isPending && 'animate-spin')} aria-hidden="true" />
             Cenários
           </Button>
           <div className="flex flex-col lg:flex-row items-center gap-2 bg-muted/50 rounded-lg px-3 py-1.5 ml-2 border border-border/50">
             <div className="flex items-center gap-4 w-full lg:w-auto">
               <div className="flex items-center gap-2">
-                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                <Calendar className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
                 <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">Período: <span className="text-foreground font-bold">{tempPeriod}m</span></span>
               </div>
               <Slider
@@ -116,6 +117,7 @@ export default function ExecutiveDashboard() {
                 max={36}
                 step={1}
                 className="w-24 lg:w-32"
+                aria-label={`Selecionar período de análise em meses, valor atual ${tempPeriod} meses`}
               />
             </div>
             <div className="h-4 w-px bg-border hidden lg:block mx-1" />
@@ -148,9 +150,9 @@ export default function ExecutiveDashboard() {
       </div>
 
       {isInsufficient && (
-        <Card className="border-l-4 border-l-warning bg-warning/5">
+        <Card className="border-l-4 border-l-warning bg-warning/5" role="alert">
           <CardContent className="p-4 flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" />
+            <AlertTriangle className="h-5 w-5 text-warning shrink-0 mt-0.5" aria-hidden="true" />
             <div>
               <p className="text-sm font-semibold">Dados insuficientes para análise confiável</p>
               <p className="text-xs text-muted-foreground mt-1">
@@ -194,16 +196,16 @@ export default function ExecutiveDashboard() {
 
       {/* Proactive Auto-Alerts */}
       {autoAlerts.length > 0 && (
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3" role="list" aria-label="Alertas automáticos">
           {autoAlerts.map((alert: any, i: number) => (
-            <Card key={i} className={cn('border-l-4', alertSeverityBorder[alert.severity] || 'border-l-muted')}>
+            <Card key={i} className={cn('border-l-4', alertSeverityBorder[alert.severity] || 'border-l-muted')} role="listitem">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-1">
                   <div className="flex items-center gap-2">
-                    <Flame className="h-4 w-4 text-destructive" />
+                    <Flame className="h-4 w-4 text-destructive" aria-hidden="true" />
                     <p className="text-sm font-medium">{alert.title}</p>
                   </div>
-                  <Badge className={cn('text-[10px]', severityColor[alert.severity])}>{alert.severity}</Badge>
+                  <Badge className={cn('text-[10px]', severityColor[alert.severity])} aria-label={`Severidade ${alert.severity}`}>{alert.severity}</Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">{alert.description}</p>
               </CardContent>
