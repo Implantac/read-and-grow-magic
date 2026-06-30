@@ -49,11 +49,10 @@ export default function SlottingPlanner() {
   };
 
   const decide = async (id: string, status: "approved" | "rejected") => {
-    const now = new Date().toISOString();
     const patch =
       status === "approved"
-        ? { status, approved_at: now }
-        : { status, rejected_at: now };
+        ? { status, executed_at: new Date().toISOString() }
+        : { status };
     await supabase.from("slotting_suggestions").update(patch).eq("id", id);
     setItems((r) => r.filter((x) => x.id !== id));
   };
