@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS usage_tracking_unique ON public.usage_tracking (company_id, metric, period);
