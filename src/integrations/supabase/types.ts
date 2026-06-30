@@ -17077,6 +17077,75 @@ export type Database = {
           },
         ]
       }
+      wms_quality_checks: {
+        Row: {
+          company_id: string
+          created_at: string
+          decision: string
+          defect_categories: Json | null
+          defects_found: number | null
+          id: string
+          inspector_id: string | null
+          lot_id: string | null
+          notes: string | null
+          photos: Json | null
+          product_id: string | null
+          reason: string | null
+          receiving_item_id: string | null
+          sample_size: number | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          decision: string
+          defect_categories?: Json | null
+          defects_found?: number | null
+          id?: string
+          inspector_id?: string | null
+          lot_id?: string | null
+          notes?: string | null
+          photos?: Json | null
+          product_id?: string | null
+          reason?: string | null
+          receiving_item_id?: string | null
+          sample_size?: number | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          decision?: string
+          defect_categories?: Json | null
+          defects_found?: number | null
+          id?: string
+          inspector_id?: string | null
+          lot_id?: string | null
+          notes?: string | null
+          photos?: Json | null
+          product_id?: string | null
+          reason?: string | null
+          receiving_item_id?: string | null
+          sample_size?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wms_quality_checks_lot_id_fkey"
+            columns: ["lot_id"]
+            isOneToOne: false
+            referencedRelation: "stock_lots"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wms_quality_checks_receiving_item_id_fkey"
+            columns: ["receiving_item_id"]
+            isOneToOne: false
+            referencedRelation: "wms_receiving_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wms_receiving_items: {
         Row: {
           batch: string | null

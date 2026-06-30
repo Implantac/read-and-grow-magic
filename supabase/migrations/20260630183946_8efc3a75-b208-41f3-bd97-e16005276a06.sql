@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.tg_wms_quality_apply_lot() FROM PUBLIC, anon, authenticated;
