@@ -173,8 +173,17 @@ async function callLLM(systemPrompt: string, userPrompt: string) {
   }
   if (!res.ok) {
     const text = await res.text();
+    if (res.status === 402) {
+      const err: any = new Error("plan_required");
+      err.code = "PLAN_REQUIRED";
+      err.status = 402;
+      try { err.details = JSON.parse(text); } catch { err.details = { raw: text }; }
+      throw err;
+    }
+    if (res.status === 429) { const err: any = new Error("rate_limited"); err.code = "RATE_LIMITED"; err.status = 429; throw err; }
     throw new Error(`LLM ${res.status}: ${text}`);
   }
+
   const data = await res.json();
   const content = data?.choices?.[0]?.message?.content || "{}";
   try {
