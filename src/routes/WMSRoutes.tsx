@@ -26,6 +26,7 @@ const YardManagementPage = lazy(() => import("../modules/wms/yard/YardManagement
 const LocationsPage = lazy(() => import("../modules/wms/Locations"));
 const SkuAllocationPage = lazy(() => import("../modules/wms/SkuAllocation"));
 const OrderReservationsPage = lazy(() => import("../modules/wms/OrderReservations"));
+const OrderPickingPage = lazy(() => import("../modules/wms/OrderPicking"));
 
 export const WMSRoutes = [
   <Route key="wms-dash" path="/wms/dashboard" element={<WMSDashboardPage />} />,
