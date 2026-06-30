@@ -1,6 +1,7 @@
 import WMSKpiStrip from "../components/WMSKpiStrip";
 import RecommendationsPanel from "./RecommendationsPanel";
 import OperatorProductivityPanel from "../components/OperatorProductivityPanel";
+import WMSEventStream from "../components/WMSEventStream";
 
 export default function Intelligence() {
   return (
@@ -16,6 +17,7 @@ export default function Intelligence() {
         <RecommendationsPanel />
         <OperatorProductivityPanel days={7} />
       </div>
+      <WMSEventStream limit={30} />
     </div>
   );
 }
