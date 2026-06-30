@@ -47,13 +47,33 @@ export default function BrainCommandCenter() {
   const [input, setInput] = useState('');
   const [agent, setAgent] = useState<string>(() => localStorage.getItem('brain.agent') || 'general');
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const agentToolbarRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => { localStorage.setItem('brain.agent', agent); }, [agent]);
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   }, [messages, loading]);
 
-
+  // Atalhos de teclado globais
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const inField = target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable;
+      if (e.key === '/' && !inField) {
+        e.preventDefault();
+        textareaRef.current?.focus();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l') {
+        e.preventDefault();
+        clear();
+        toast.success('Conversa limpa');
+      } else if (e.key === 'Escape' && document.activeElement === textareaRef.current) {
+        setInput('');
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [clear]);
 
   const lastRun = runs[0];
   const veredicto = lastRun?.structured?.veredicto;
@@ -68,6 +88,21 @@ export default function BrainCommandCenter() {
     if (!t || loading) return;
     setInput('');
     send(t, agent);
+  };
+
+  const handleAgentKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const buttons = agentToolbarRef.current?.querySelectorAll<HTMLButtonElement>('button[role="radio"]');
+    if (!buttons || buttons.length === 0) return;
+    let next = index;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (index + 1) % buttons.length;
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (index - 1 + buttons.length) % buttons.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = buttons.length - 1;
+    else return;
+    e.preventDefault();
+    const target = buttons[next];
+    target.focus();
+    setAgent(AGENTS[next].id);
   };
 
   const handleNotify = async () => {
