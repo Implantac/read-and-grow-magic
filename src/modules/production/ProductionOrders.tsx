@@ -194,7 +194,7 @@ export default function ProductionOrdersPage() {
                 );
               })}
               {filteredOrders.length === 0 && (
-                <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Nenhuma ordem encontrada</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="p-4"><EmptyState compact icon={Factory} title="Nenhuma ordem encontrada" description="Crie ordens de produção para iniciar a manufatura ou ajuste os filtros." /></TableCell></TableRow>
               )}
             </TableBody>
           </Table>
