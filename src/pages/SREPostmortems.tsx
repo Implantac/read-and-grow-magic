@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Skeleton } from '@/ui/base/skeleton';
 import { FileText, Plus, CheckCircle2, Trash2, ListChecks, ChevronDown, ChevronRight, BellRing } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PostmortemActions } from '@/components/sre/PostmortemActions';
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
@@ -144,7 +145,7 @@ export default function SREPostmortems() {
         <CardHeader><CardTitle>Postmortems recentes</CardTitle></CardHeader>
         <CardContent>
           {loading ? <Skeleton className="h-40 w-full" /> : list.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhum postmortem registrado ainda.</p>
+            <EmptyState icon={FileText} title="Sem postmortems" description="Documente incidentes com causa raiz, timeline e ações preventivas para acumular aprendizado." />
           ) : (
             <Table>
               <TableHeader><TableRow>

@@ -13,6 +13,7 @@ import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { Truck, ParkingSquare, CalendarClock, LogIn, LogOut, Plus, RefreshCw } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -181,7 +182,7 @@ export default function YardManagement() {
               <ScrollArea className="h-[520px] pr-3">
                 {loadingV && <p className="text-sm text-muted-foreground">Carregando…</p>}
                 {!loadingV && vehicles.length === 0 && (
-                  <p className="text-sm text-muted-foreground text-center py-12">Nenhum veículo registrado. Faça um check-in.</p>
+                  <EmptyState icon={Truck} title="Pátio vazio" description="Faça o check-in de veículos que estão chegando para gerenciar docas e prioridades." />
                 )}
                 <div className="space-y-2">
                   {vehicles.map((v) => (
@@ -234,7 +235,7 @@ export default function YardManagement() {
               <ScrollArea className="h-[520px] pr-3">
                 {loadingA && <p className="text-sm text-muted-foreground">Carregando…</p>}
                 {!loadingA && appts.length === 0 && (
-                  <p className="text-sm text-muted-foreground text-center py-12">Nenhum agendamento. Clique em "Agendar".</p>
+                  <EmptyState icon={CalendarClock} title="Sem agendamentos" description="Programe janelas de docas para coletas e entregas evitando fila no pátio." />
                 )}
                 <div className="space-y-2">
                   {appts.map((a) => (

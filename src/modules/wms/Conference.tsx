@@ -18,6 +18,7 @@ import {
 import {
   ClipboardCheck, Search, MoreHorizontal, PlayCircle, CheckCircle, AlertTriangle, Clock, Eye, ScanBarcode,
 } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useWMSConference, ConferenceItem } from '@/hooks/wms/useWMSConference';
 import { BarcodeScanner, ScanFeedback } from '@/components/wms/BarcodeScanner';
 import { format } from 'date-fns';
@@ -215,9 +216,8 @@ export default function ConferencePage() {
                 })}
                 {filteredRecords.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      <ScanBarcode className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                      Nenhuma conferência encontrada
+                    <TableCell colSpan={8}>
+                      <EmptyState compact icon={ScanBarcode} title="Sem conferências" description="Nenhuma conferência encontrada com os filtros atuais." />
                     </TableCell>
                   </TableRow>
                 )}

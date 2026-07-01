@@ -5,6 +5,7 @@ import { Button } from '@/ui/base/button';
 import { Badge } from '@/ui/base/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { RefreshCw, Activity, Radio, CheckCircle, AlertCircle } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -72,7 +73,7 @@ export default function RFIDEventsPage() {
           {loading ? (
             <p className="text-muted-foreground text-center py-8">Carregando...</p>
           ) : events.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">Nenhum evento registrado. Os eventos aparecerão aqui quando os leitores RFID enviarem dados.</p>
+            <EmptyState icon={Activity} title="Sem eventos RFID" description="Os eventos aparecerão aqui em tempo real quando os leitores capturarem tags." />
           ) : (
             <Table>
               <TableHeader>

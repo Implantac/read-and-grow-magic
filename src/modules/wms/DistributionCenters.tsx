@@ -8,6 +8,7 @@ import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
 import { Progress } from '@/ui/base/progress';
 import { Building2, Search, Plus, MapPin, CheckCircle, Warehouse } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useDistributionCenters } from '@/hooks/wms/useDistributionCenters';
 
 import { formatNumber } from '@/lib/formatters';
@@ -85,13 +86,7 @@ export default function DistributionCentersPage() {
           })}
         </div>
       ) : (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <Building2 className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum CD cadastrado</h3>
-            <p>Cadastre centros de distribuição para operação multi-CD.</p>
-          </CardContent>
-        </Card>
+        <EmptyState icon={Building2} title="Nenhum CD cadastrado" description="Cadastre centros de distribuição para operação multi-CD com transferências e roteirização." />
       )}
     </PageContainer>
   );

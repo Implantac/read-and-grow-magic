@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Plus, Radio, Wifi, WifiOff, Settings, Trash2, RefreshCw } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -113,7 +114,7 @@ export default function RFIDReadersPage() {
           {loading ? (
             <p className="text-muted-foreground text-center py-8">Carregando...</p>
           ) : readers.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">Nenhum leitor cadastrado. Clique em "Novo Leitor" para começar.</p>
+            <EmptyState icon={Radio} title="Nenhum leitor RFID" description="Cadastre leitores fixos ou móveis para capturar leituras EPC de tags automaticamente." />
           ) : (
             <Table>
               <TableHeader>
