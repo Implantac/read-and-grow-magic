@@ -14,27 +14,37 @@ export function SalesSummary({ sales }: Props) {
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
-      <KPICard 
-        title="Total de Vendas" 
-        value={formatBRL(totalSalesValue)} 
-        icon={<DollarSign className="h-5 w-5" />} 
-        accentColor="primary" 
-        index={0} 
+      <KPICard
+        title="Total de Vendas"
+        value={formatBRL(totalSalesValue)}
+        icon={<DollarSign className="h-5 w-5" />}
+        accentColor="primary"
+        index={0}
+        entityKey="revenue"
+        numericValue={totalSalesValue}
+        source="Vendas"
       />
-      <KPICard 
-        title="Vendas Concluídas" 
-        value={salesCountValue} 
-        icon={<ShoppingBag className="h-5 w-5" />} 
-        accentColor="success" 
-        index={1} 
+      <KPICard
+        title="Vendas Concluídas"
+        value={salesCountValue}
+        icon={<ShoppingBag className="h-5 w-5" />}
+        accentColor="success"
+        index={1}
+        entityKey="conversion_rate"
+        numericValue={salesCountValue}
+        source="Vendas"
       />
-      <KPICard 
-        title="Ticket Médio" 
-        value={salesCountValue > 0 ? formatBRL(totalSalesValue / salesCountValue) : 'R$ 0,00'} 
-        icon={<TrendingUp className="h-5 w-5" />} 
-        accentColor="info" 
-        index={2} 
+      <KPICard
+        title="Ticket Médio"
+        value={salesCountValue > 0 ? formatBRL(totalSalesValue / salesCountValue) : 'R$ 0,00'}
+        icon={<TrendingUp className="h-5 w-5" />}
+        accentColor="info"
+        index={2}
+        entityKey="pipeline_amount"
+        numericValue={salesCountValue > 0 ? totalSalesValue / salesCountValue : 0}
+        source="Vendas"
       />
     </div>
   );
 }
+

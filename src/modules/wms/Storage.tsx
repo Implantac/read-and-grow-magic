@@ -75,9 +75,10 @@ export default function StoragePage() {
           />
         </div>
         <div className="grid gap-4">
-          <KPICard title="Ocupação Total" value={`${occupancyRate}%`} subtitle={`${totalOccupied}/${totalCapacity} posições`} icon={<Warehouse className="h-5 w-5" />} accentColor={occupancyRate > 85 ? 'danger' : 'primary'} index={0} />
-          <KPICard title="Endereços Vazios" value={emptyLocations} subtitle="Prontos para alocação" icon={<Grid3X3 className="h-5 w-5" />} accentColor="success" index={1} />
-          <KPICard title="Endereços Cheios" value={fullLocations} subtitle="Capacidade esgotada" icon={<Package className="h-5 w-5" />} accentColor={fullLocations > 0 ? 'danger' : 'primary'} index={2} />
+          <KPICard title="Ocupação Total" value={`${occupancyRate}%`} subtitle={`${totalOccupied}/${totalCapacity} posições`} icon={<Warehouse className="h-5 w-5" />} accentColor={occupancyRate > 85 ? 'danger' : 'primary'} index={0} entityKey="wms_occupancy" numericValue={Number(occupancyRate)} progress={Number(occupancyRate)} status={Number(occupancyRate) > 85 ? 'critical' : Number(occupancyRate) > 70 ? 'warn' : 'healthy'} source="WMS Storage" />
+          <KPICard title="Endereços Vazios" value={emptyLocations} subtitle="Prontos para alocação" icon={<Grid3X3 className="h-5 w-5" />} accentColor="success" index={1} entityKey="wms_occupancy" numericValue={emptyLocations} source="WMS Storage" />
+          <KPICard title="Endereços Cheios" value={fullLocations} subtitle="Capacidade esgotada" icon={<Package className="h-5 w-5" />} accentColor={fullLocations > 0 ? 'danger' : 'primary'} index={2} entityKey="wms_occupancy" numericValue={fullLocations} status={fullLocations > 0 ? 'warn' : 'healthy'} source="WMS Storage" />
+
         </div>
       </div>
 
