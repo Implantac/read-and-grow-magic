@@ -11,6 +11,7 @@ import { RefreshCw, FileText, AlertTriangle, DollarSign, TrendingUp, TrendingDow
 import { useDailyReports, useGenerateReport, DailyReport, DailyReportData } from '@/hooks/ai/useDailyReport';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
 function ReportDetail({ data }: { data: DailyReportData }) {
   return (
     <div className="space-y-6">
