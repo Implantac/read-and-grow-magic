@@ -24,6 +24,8 @@ import { differenceInDays } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { CheckCircle2 } from 'lucide-react';
 
 const KANBAN_STAGES = FUNNEL_STAGES.slice(0, 6);
 
