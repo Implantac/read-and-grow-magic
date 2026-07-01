@@ -64,7 +64,7 @@ export default function TechnicalSheetsPage() {
             </TableRow></TableHeader>
             <TableBody>
               {sheets.length === 0 ? (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhuma ficha técnica cadastrada</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="p-4"><EmptyState compact icon={FileText} title="Nenhuma ficha técnica cadastrada" description="Cadastre fichas técnicas com etapas e materiais para padronizar a produção." /></TableCell></TableRow>
               ) : sheets.map(sh => (
                 <TableRow key={sh.id}>
                   <TableCell className="font-medium">{sh.product_name}</TableCell>
