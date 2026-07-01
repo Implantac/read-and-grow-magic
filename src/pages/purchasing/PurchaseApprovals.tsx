@@ -36,8 +36,19 @@ import {
   usePendingPOApprovals,
   usePurchaseApprovalRules,
   useUpsertPurchaseApprovalRule,
+  useScanApprovalsSLA,
 } from "@/hooks/purchasing/usePurchaseApprovals";
-import { Trash2, ShieldCheck, CircleSlash } from "lucide-react";
+import { Trash2, ShieldCheck, CircleSlash, Timer, AlertTriangle } from "lucide-react";
+
+function slaStatus(dueAt: string | null | undefined): { label: string; tone: "success" | "warning" | "destructive" | "muted" } {
+  if (!dueAt) return { label: "Sem SLA", tone: "muted" };
+  const now = Date.now();
+  const due = new Date(dueAt).getTime();
+  if (now >= due) return { label: "Vencida", tone: "destructive" };
+  if (due - now <= 4 * 3600 * 1000) return { label: "Em risco", tone: "warning" };
+  const hours = Math.floor((due - now) / 3600000);
+  return { label: `Vence em ${hours}h`, tone: "success" };
+}
 
 const formatBRL = (n: number | null | undefined) =>
   (n ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -48,6 +59,7 @@ export default function PurchaseApprovals() {
   const upsertRule = useUpsertPurchaseApprovalRule();
   const deleteRule = useDeletePurchaseApprovalRule();
   const decide = useDecidePOApproval();
+  const scanSLA = useScanApprovalsSLA();
 
   const [openRule, setOpenRule] = useState(false);
   const [form, setForm] = useState({
@@ -55,6 +67,7 @@ export default function PurchaseApprovals() {
     min_amount: 0,
     max_amount: "" as string,
     approver_role: "manager",
+    sla_hours: 24,
     active: true,
   });
 
@@ -143,6 +156,17 @@ export default function PurchaseApprovals() {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div>
+                    <Label>SLA (horas)</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={form.sla_hours}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, sla_hours: Number(e.target.value) }))
+                      }
+                    />
+                  </div>
                 </div>
                 <DialogFooter>
                   <Button
@@ -152,6 +176,7 @@ export default function PurchaseApprovals() {
                         min_amount: form.min_amount,
                         max_amount: form.max_amount === "" ? null : Number(form.max_amount),
                         approver_role: form.approver_role,
+                        sla_hours: form.sla_hours,
                         active: true,
                       });
                       setOpenRule(false);
@@ -175,6 +200,7 @@ export default function PurchaseApprovals() {
                     <TableHead>Nível</TableHead>
                     <TableHead>Faixa</TableHead>
                     <TableHead>Papel</TableHead>
+                    <TableHead>SLA</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead />
                   </TableRow>
@@ -188,6 +214,11 @@ export default function PurchaseApprovals() {
                         {r.max_amount ? formatBRL(r.max_amount) : "∞"}
                       </TableCell>
                       <TableCell>{r.approver_role}</TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1 text-xs">
+                          <Timer className="h-3 w-3" /> {r.sla_hours}h
+                        </span>
+                      </TableCell>
                       <TableCell>
                         <Badge variant={r.active ? "default" : "outline"}>
                           {r.active ? "Ativo" : "Inativo"}
@@ -212,8 +243,17 @@ export default function PurchaseApprovals() {
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Aprovações pendentes</CardTitle>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => scanSLA.mutate()}
+              disabled={scanSLA.isPending}
+            >
+              <AlertTriangle className="mr-1 h-4 w-4" />
+              Verificar SLA
+            </Button>
           </CardHeader>
           <CardContent>
             {(pending.data ?? []).length === 0 ? (
@@ -222,43 +262,63 @@ export default function PurchaseApprovals() {
               </p>
             ) : (
               <div className="space-y-3">
-                {(pending.data ?? []).map((a: any) => (
-                  <div
-                    key={a.id}
-                    className="flex items-center justify-between gap-3 rounded-md border border-border p-3"
-                  >
-                    <div>
-                      <div className="text-sm font-medium">
-                        Ordem {a.instance_id.slice(0, 8)}…
+                {(pending.data ?? []).map((a: any) => {
+                  const sla = slaStatus(a.due_at);
+                  return (
+                    <div
+                      key={a.id}
+                      className="flex items-center justify-between gap-3 rounded-md border border-border p-3"
+                    >
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium">
+                          Ordem {a.instance_id.slice(0, 8)}…
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {a.step_key}
+                        </div>
+                        <div className="mt-1">
+                          <Badge
+                            variant={
+                              sla.tone === "destructive"
+                                ? "destructive"
+                                : sla.tone === "warning"
+                                ? "secondary"
+                                : sla.tone === "success"
+                                ? "default"
+                                : "outline"
+                            }
+                            className="text-[10px]"
+                          >
+                            <Timer className="mr-1 h-3 w-3" />
+                            {sla.label}
+                          </Badge>
+                        </div>
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        {a.step_key}
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setComment("");
+                            setDecisionOpen({ id: a.id, approve: true });
+                          }}
+                        >
+                          Aprovar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => {
+                            setComment("");
+                            setDecisionOpen({ id: a.id, approve: false });
+                          }}
+                        >
+                          <CircleSlash className="mr-1 h-4 w-4" />
+                          Rejeitar
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          setComment("");
-                          setDecisionOpen({ id: a.id, approve: true });
-                        }}
-                      >
-                        Aprovar
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => {
-                          setComment("");
-                          setDecisionOpen({ id: a.id, approve: false });
-                        }}
-                      >
-                        <CircleSlash className="mr-1 h-4 w-4" />
-                        Rejeitar
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>

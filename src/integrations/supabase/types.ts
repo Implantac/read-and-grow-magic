@@ -12285,6 +12285,7 @@ export type Database = {
           level: number
           max_amount: number | null
           min_amount: number
+          sla_hours: number
           updated_at: string
         }
         Insert: {
@@ -12296,6 +12297,7 @@ export type Database = {
           level: number
           max_amount?: number | null
           min_amount?: number
+          sla_hours?: number
           updated_at?: string
         }
         Update: {
@@ -12307,6 +12309,7 @@ export type Database = {
           level?: number
           max_amount?: number | null
           min_amount?: number
+          sla_hours?: number
           updated_at?: string
         }
         Relationships: []
@@ -18593,6 +18596,7 @@ export type Database = {
       workflow_approvals: {
         Row: {
           approver_id: string
+          breach_notified_at: string | null
           company_id: string
           created_at: string
           decided_at: string | null
@@ -18602,6 +18606,7 @@ export type Database = {
           due_at: string | null
           id: string
           instance_id: string
+          pending_notified_at: string | null
           required: boolean
           status: string
           step_key: string
@@ -18609,6 +18614,7 @@ export type Database = {
         }
         Insert: {
           approver_id: string
+          breach_notified_at?: string | null
           company_id: string
           created_at?: string
           decided_at?: string | null
@@ -18618,6 +18624,7 @@ export type Database = {
           due_at?: string | null
           id?: string
           instance_id: string
+          pending_notified_at?: string | null
           required?: boolean
           status?: string
           step_key: string
@@ -18625,6 +18632,7 @@ export type Database = {
         }
         Update: {
           approver_id?: string
+          breach_notified_at?: string | null
           company_id?: string
           created_at?: string
           decided_at?: string | null
@@ -18634,6 +18642,7 @@ export type Database = {
           due_at?: string | null
           id?: string
           instance_id?: string
+          pending_notified_at?: string | null
           required?: boolean
           status?: string
           step_key?: string
@@ -19439,6 +19448,7 @@ export type Database = {
         Args: never
         Returns: {
           approver_id: string
+          breach_notified_at: string | null
           company_id: string
           created_at: string
           decided_at: string | null
@@ -19448,6 +19458,7 @@ export type Database = {
           due_at: string | null
           id: string
           instance_id: string
+          pending_notified_at: string | null
           required: boolean
           status: string
           step_key: string
@@ -19715,14 +19726,12 @@ export type Database = {
         Args: { p_approval_id: string; p_approve: boolean; p_comment?: string }
         Returns: Json
       }
-      purchase_submit_for_approval: {
-        Args: { p_po_id: string }
-        Returns: {
-          approval_id: string
-          approver_role: string
-          level: number
-        }[]
+      purchase_approval_sla_status: {
+        Args: { p_approval_id: string }
+        Returns: Json
       }
+      purchase_approvals_sla_scan: { Args: never; Returns: Json }
+      purchase_submit_for_approval: { Args: { p_po_id: string }; Returns: Json }
       purge_old_audit_logs: { Args: { _days?: number }; Returns: number }
       purge_old_logs_all: { Args: never; Returns: Json }
       recalc_bank_balance: {

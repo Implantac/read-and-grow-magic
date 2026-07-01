@@ -10,6 +10,28 @@ export interface PurchaseApprovalRule {
   max_amount: number | null;
   approver_role: string;
   active: boolean;
+  sla_hours: number;
+}
+
+export function useScanApprovalsSLA() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.rpc(
+        "purchase_approvals_sla_scan" as any
+      );
+      if (error) throw error;
+      return data as { breached: number; pending: number };
+    },
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ["po_pending_approvals"] });
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+      toast.success(
+        `SLA verificado: ${res.breached} vencidas, ${res.pending} novas notificações.`
+      );
+    },
+    onError: (e: any) => toast.error(e.message ?? "Falha no scan de SLA"),
+  });
 }
 
 export function usePurchaseApprovalRules() {
