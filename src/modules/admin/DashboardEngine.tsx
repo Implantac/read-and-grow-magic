@@ -103,9 +103,19 @@ export default function DashboardEngine() {
           </CardHeader>
           <CardContent>
             {!activeId ? (
-              <p className="text-sm text-muted-foreground">Selecione um dashboard.</p>
+              <EmptyState
+                compact
+                icon={LayoutDashboard}
+                title="Selecione um dashboard"
+                description="Escolha um dashboard à esquerda para visualizar e configurar seus widgets."
+              />
             ) : widgets.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nenhum widget. Adicione o primeiro.</p>
+              <EmptyState
+                compact
+                icon={Plus}
+                title="Nenhum widget"
+                description="Adicione o primeiro widget para começar a visualizar dados neste dashboard."
+              />
             ) : (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
