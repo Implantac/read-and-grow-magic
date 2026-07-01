@@ -80,7 +80,7 @@ export default function AgroFarms() {
             <div className="p-8 text-center text-muted-foreground">Carregando…</div>
           ) : farms.length === 0 ? (
             <EmptyState icon={Sprout} title="Nenhuma fazenda cadastrada" description="Cadastre fazendas para gerenciar talhões, safras e operações agrícolas." action={{ label: 'Nova fazenda', onClick: () => setOpen(true), icon: Plus }} />
-          </>)
+          
           ) : (
             <Table>
               <TableHeader>
