@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useDefaultScores, useRecomputeDefaultScores, RISK_LABELS, RISK_COLORS } from '@/hooks/system/useDefaultScores';
 import { RefreshCw, AlertTriangle, TrendingDown, Users } from 'lucide-react';
 import { formatNumber } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 const RISK_BADGE: Record<string, any> = {
   low: 'secondary',
@@ -103,8 +104,8 @@ export default function DefaultManagementPage() {
             <TableBody>
               {scores.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                    Nenhum score calculado. Clique em "Recalcular scores".
+                  <TableCell colSpan={7} className="p-0">
+                    <EmptyState icon={TrendingDown} title="Nenhum score calculado" description='Clique em "Recalcular scores" para avaliar risco de inadimplência.' action={{ label: 'Recalcular scores', onClick: () => recompute.mutate(), icon: RefreshCw }} />
                   </TableCell>
                 </TableRow>
               )}

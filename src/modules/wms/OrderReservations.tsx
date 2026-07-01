@@ -11,6 +11,7 @@ import { Input } from '@/ui/base/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import { Lock, Unlock, Package, CheckCircle, Search, AlertTriangle } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { format } from 'date-fns';
 
 interface OrderRow {
@@ -158,8 +159,8 @@ export default function OrderReservations() {
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    Nenhum pedido elegível para reserva
+                  <TableCell colSpan={7} className="p-0">
+                    <EmptyState icon={Package} title="Nenhum pedido elegível para reserva" description="Pedidos confirmados aparecerão aqui para reservar estoque." />
                   </TableCell>
                 </TableRow>
               ) : (

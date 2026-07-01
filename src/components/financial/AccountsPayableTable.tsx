@@ -1,7 +1,8 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Checkbox } from '@/ui/base/checkbox';
 import { Button } from '@/ui/base/button';
-import { Eye, DollarSign, Trash2 } from 'lucide-react';
+import { Eye, DollarSign, Trash2, Receipt } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { formatBRL, formatDate } from '@/lib/formatters';
 import { Badge } from '@/ui/base/badge';
@@ -59,8 +60,8 @@ export function AccountsPayableTable({
       <TableBody>
         {accounts.length === 0 ? (
           <TableRow>
-            <TableCell colSpan={9} className="h-32 text-center text-muted-foreground">
-              Nenhum registro encontrado.
+            <TableCell colSpan={9} className="p-0">
+              <EmptyState icon={Receipt} title="Nenhuma conta a pagar" description="Cadastre títulos ou importe do módulo de compras para acompanhar seus pagamentos." />
             </TableCell>
           </TableRow>
         ) : (

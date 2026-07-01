@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Database, Search, Package, Lock, CheckCircle } from 'lucide-react';
 import { useWms } from '@/hooks/wms/useWms';
 import { ExportButton } from '@/shared/components/ExportButton';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 import { formatNumber } from '@/lib/formatters';
 const statusLabels: Record<string, string> = {
@@ -126,13 +127,7 @@ export default function StockBalancesPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum saldo encontrado</h3>
-            <p>Os saldos são atualizados com as movimentações do WMS.</p>
-          </CardContent>
-        </Card>
+        <EmptyState icon={Package} title="Nenhum saldo encontrado" description="Os saldos são atualizados automaticamente com as movimentações do WMS." />
       )}
     </PageContainer>
   );

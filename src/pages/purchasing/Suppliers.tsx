@@ -25,6 +25,8 @@ import { Textarea } from '@/ui/base/textarea';
 import { supplierCategories } from '@/config/purchasing';
 import { useCnpjLookup } from '@/hooks/system/useCnpjLookup';
 import { Supplier } from '@/types/purchasing';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { Building2 } from 'lucide-react';
 
 const statusConfig: any = {
   active: { label: 'Ativo', className: 'bg-green-100 text-green-800' },
@@ -161,7 +163,13 @@ export default function SuppliersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredSuppliers.map((supplier) => (
+              {filteredSuppliers.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="p-0">
+                    <EmptyState icon={Building2} title="Nenhum fornecedor cadastrado" description="Cadastre fornecedores para vinculá-los a cotações e pedidos de compra." />
+                  </TableCell>
+                </TableRow>
+              ) : filteredSuppliers.map((supplier) => (
                 <TableRow key={supplier.id}>
                   <TableCell className="font-medium">{supplier.code}</TableCell>
                   <TableCell>
