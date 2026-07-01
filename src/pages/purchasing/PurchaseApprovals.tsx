@@ -36,8 +36,19 @@ import {
   usePendingPOApprovals,
   usePurchaseApprovalRules,
   useUpsertPurchaseApprovalRule,
+  useScanApprovalsSLA,
 } from "@/hooks/purchasing/usePurchaseApprovals";
-import { Trash2, ShieldCheck, CircleSlash } from "lucide-react";
+import { Trash2, ShieldCheck, CircleSlash, Timer, AlertTriangle } from "lucide-react";
+
+function slaStatus(dueAt: string | null | undefined): { label: string; tone: "success" | "warning" | "destructive" | "muted" } {
+  if (!dueAt) return { label: "Sem SLA", tone: "muted" };
+  const now = Date.now();
+  const due = new Date(dueAt).getTime();
+  if (now >= due) return { label: "Vencida", tone: "destructive" };
+  if (due - now <= 4 * 3600 * 1000) return { label: "Em risco", tone: "warning" };
+  const hours = Math.floor((due - now) / 3600000);
+  return { label: `Vence em ${hours}h`, tone: "success" };
+}
 
 const formatBRL = (n: number | null | undefined) =>
   (n ?? 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
