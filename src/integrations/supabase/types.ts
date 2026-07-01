@@ -6220,6 +6220,7 @@ export type Database = {
           category_id: string | null
           chart_account_id: string | null
           company_id: string
+          cost_center_id: string | null
           created_at: string
           created_by: string | null
           description: string
@@ -6241,6 +6242,7 @@ export type Database = {
           category_id?: string | null
           chart_account_id?: string | null
           company_id: string
+          cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
           description: string
@@ -6262,6 +6264,7 @@ export type Database = {
           category_id?: string | null
           chart_account_id?: string | null
           company_id?: string
+          cost_center_id?: string | null
           created_at?: string
           created_by?: string | null
           description?: string
@@ -6316,6 +6319,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_ledger_cost_center_id_fkey"
+            columns: ["cost_center_id"]
+            isOneToOne: false
+            referencedRelation: "cost_centers"
             referencedColumns: ["id"]
           },
         ]
@@ -19339,6 +19349,40 @@ export type Database = {
       desc_similarity: { Args: { a: string; b: string }; Returns: number }
       detect_cashflow_risks: { Args: never; Returns: Json }
       detect_financial_alerts: { Args: never; Returns: Json }
+      dre_managerial: {
+        Args: { p_company_id: string; p_from: string; p_to: string }
+        Returns: {
+          category_id: string
+          category_name: string
+          category_type: string
+          cost_center_code: string
+          cost_center_id: string
+          cost_center_name: string
+          dre_section: string
+          entry_count: number
+          total_amount: number
+        }[]
+      }
+      dre_managerial_entries: {
+        Args: {
+          p_category_id?: string
+          p_company_id: string
+          p_cost_center_id?: string
+          p_from: string
+          p_to: string
+        }
+        Returns: {
+          amount: number
+          category_name: string
+          cost_center_name: string
+          description: string
+          entry_date: string
+          id: string
+          reference: string
+          source: string
+          type: string
+        }[]
+      }
       eval_wf_condition: { Args: { cond: Json; ctx: Json }; Returns: boolean }
       evaluate_transaction_risk: {
         Args: {
