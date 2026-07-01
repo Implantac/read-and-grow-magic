@@ -10025,12 +10025,14 @@ export type Database = {
           company_id: string
           completed_at: string | null
           created_at: string
+          cutoff_at: string | null
           id: string
           items_count: number | null
           name: string | null
           notes: string | null
           orders_count: number | null
           picked_items: number | null
+          planned_operators: number | null
           priority: string
           route: string | null
           shipping_window_end: string | null
@@ -10040,6 +10042,7 @@ export type Database = {
           strategy: string
           updated_at: string
           wave_number: string
+          zone: string | null
         }
         Insert: {
           assigned_to?: string | null
@@ -10047,12 +10050,14 @@ export type Database = {
           company_id?: string
           completed_at?: string | null
           created_at?: string
+          cutoff_at?: string | null
           id?: string
           items_count?: number | null
           name?: string | null
           notes?: string | null
           orders_count?: number | null
           picked_items?: number | null
+          planned_operators?: number | null
           priority?: string
           route?: string | null
           shipping_window_end?: string | null
@@ -10062,6 +10067,7 @@ export type Database = {
           strategy?: string
           updated_at?: string
           wave_number: string
+          zone?: string | null
         }
         Update: {
           assigned_to?: string | null
@@ -10069,12 +10075,14 @@ export type Database = {
           company_id?: string
           completed_at?: string | null
           created_at?: string
+          cutoff_at?: string | null
           id?: string
           items_count?: number | null
           name?: string | null
           notes?: string | null
           orders_count?: number | null
           picked_items?: number | null
+          planned_operators?: number | null
           priority?: string
           route?: string | null
           shipping_window_end?: string | null
@@ -10084,6 +10092,7 @@ export type Database = {
           strategy?: string
           updated_at?: string
           wave_number?: string
+          zone?: string | null
         }
         Relationships: []
       }
@@ -19761,6 +19770,18 @@ export type Database = {
           p_order_id: string
           p_stage: string
           p_tracking_number?: string
+        }
+        Returns: Json
+      }
+      wms_wave_plan_v2: {
+        Args: {
+          _carrier?: string
+          _commit?: boolean
+          _cutoff?: string
+          _max_orders_per_wave?: number
+          _min_priority?: string
+          _operators?: number
+          _zone?: string
         }
         Returns: Json
       }
