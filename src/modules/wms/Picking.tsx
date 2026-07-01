@@ -168,9 +168,13 @@ export default function PickingPage() {
                   <TableBody>
                     {filteredOrders.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                          <PackageSearch className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                          Nenhuma ordem de picking encontrada
+                        <TableCell colSpan={7} className="p-0">
+                          <EmptyState
+                            compact
+                            icon={PackageSearch}
+                            title="Nenhuma ordem de picking encontrada"
+                            description="Novas ordens aparecem aqui quando pedidos são liberados para separação."
+                          />
                         </TableCell>
                       </TableRow>
                     ) : filteredOrders.map((order) => {
