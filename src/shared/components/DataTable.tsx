@@ -52,7 +52,7 @@ export function DataTable<T extends { id: string }>({
   searchPlaceholder = 'Buscar...',
   pageSize = 10,
   loading = false,
-  emptyMessage = 'Nenhum registro encontrado',
+  emptyMessage,
   onRowClick,
   actions,
   className,
