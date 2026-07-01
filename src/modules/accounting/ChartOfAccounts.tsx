@@ -18,6 +18,7 @@ import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 
 import { formatBRL } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
 const typeColorMap: Record<string, string> = {
   asset: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
   liability: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
