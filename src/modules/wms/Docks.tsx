@@ -1,3 +1,4 @@
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
