@@ -5,8 +5,9 @@ import { Card, CardContent } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Badge } from '@/ui/base/badge';
 import { 
-  Edit2, Trash2, UserCheck, UserX, Clock, MoreVertical, Key, Mail 
+  Edit2, Trash2, UserCheck, UserX, Clock, MoreVertical, Key, Mail, Users
 } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import {
   DropdownMenu,
   DropdownMenuContent,
