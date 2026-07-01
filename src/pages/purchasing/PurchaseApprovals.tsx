@@ -176,6 +176,7 @@ export default function PurchaseApprovals() {
                         min_amount: form.min_amount,
                         max_amount: form.max_amount === "" ? null : Number(form.max_amount),
                         approver_role: form.approver_role,
+                        sla_hours: form.sla_hours,
                         active: true,
                       });
                       setOpenRule(false);
