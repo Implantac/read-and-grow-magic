@@ -37,6 +37,7 @@ const CrossDockingPage = lazy(() => import("../modules/wms/CrossDocking"));
 const KitAssemblyPage = lazy(() => import("../modules/wms/KitAssembly"));
 const DockSchedulingPage = lazy(() => import("../modules/wms/DockScheduling"));
 const CarrierScorecardPage = lazy(() => import("../modules/wms/CarrierScorecard"));
+const WavePlanningV2Page = lazy(() => import("../modules/wms/WavePlanningV2"));
 
 export const WMSRoutes = [
   <Route key="wms-dash" path="/wms/dashboard" element={<WMSDashboardPage />} />,
@@ -75,4 +76,5 @@ export const WMSRoutes = [
   <Route key="wms-kits" path="/wms/kits" element={<KitAssemblyPage />} />,
   <Route key="wms-dock-sched" path="/wms/agenda-docas" element={<DockSchedulingPage />} />,
   <Route key="wms-carrier-score" path="/wms/scorecard-transportadoras" element={<CarrierScorecardPage />} />,
+  <Route key="wms-wave-v2" path="/wms/wave-planning" element={<WavePlanningV2Page />} />,
 ];
