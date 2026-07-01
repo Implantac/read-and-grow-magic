@@ -97,6 +97,32 @@ async function loadPendingSummary(companyId: string | null, limit = 8) {
   return data || [];
 }
 
+// ─────────────────────────────────────────────
+// GROUND TRUTH — contagens reais direto do DB (evita alucinação)
+// ─────────────────────────────────────────────
+async function gatherGroundTruth(companyId: string | null) {
+  if (!companyId) return { available: false, reason: "sem company_id" };
+  const tables = [
+    "clients","suppliers","products","orders",
+    "accounts_payable","accounts_receivable","financial_ledger",
+    "nfe","production_orders","stock_balances","purchase_orders",
+    "quotations","financial_alerts",
+  ];
+  const results: Record<string, number> = {};
+  await Promise.all(tables.map(async (t) => {
+    const { count } = await admin.from(t).select("id", { count: "exact", head: true }).eq("company_id", companyId);
+    results[t] = count ?? 0;
+  }));
+  // Somatórios financeiros básicos
+  const { data: arOpen } = await admin.from("accounts_receivable")
+    .select("open_amount,amount,status").eq("company_id", companyId).neq("status", "paid").limit(1000);
+  const { data: apOpen } = await admin.from("accounts_payable")
+    .select("amount,status").eq("company_id", companyId).neq("status", "paid").limit(1000);
+  const ar_open_total = (arOpen || []).reduce((s: number, r: any) => s + (Number(r.open_amount || r.amount) || 0), 0);
+  const ap_open_total = (apOpen || []).reduce((s: number, r: any) => s + (Number(r.amount) || 0), 0);
+  return { available: true, counts: results, ar_open_total, ap_open_total };
+}
+
 
 // ─────────────────────────────────────────────
 // MEMORY (tenant-scoped)
@@ -166,6 +192,7 @@ async function callLLM(systemPrompt: string, userPrompt: string) {
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
+      temperature: 0,
       response_format: { type: "json_object" },
     }),
   });
@@ -499,11 +526,15 @@ PERSONALIDADE:
 - Fala em português brasileiro, sem jargão técnico desnecessário.
 
 
-REGRAS CRÍTICAS:
-- DADOS REAIS APENAS. NUNCA invente números. Se faltar dado, diga "dados insuficientes".
+REGRAS CRÍTICAS (ANTI-ALUCINAÇÃO — INEGOCIÁVEIS):
+- USE APENAS NÚMEROS QUE APARECEM LITERALMENTE no bloco "DADOS REAIS" abaixo. É PROIBIDO inventar, arredondar de memória, extrapolar ou estimar valores.
+- Se um KPI, cliente, fornecedor, valor ou data NÃO estiver no contexto: escreva EXATAMENTE "dados insuficientes" — nunca chute.
+- Se a contagem de uma entidade (ex.: clientes=11) for baixa ou zero, reporte isso como fato — NÃO fabrique registros que não existem.
+- Antes de citar qualquer valor em R$/%, confira se ele aparece no bloco "GROUND TRUTH" ou nos snapshots. Se não aparecer, use "dados insuficientes".
+- Toda decisão precisa ter evidence.dados_usados citando a fonte exata (ex.: "ground_truth.ar_open_total=R$ 1.234,00").
 - Cite valores exatos como evidência (em **R$**, **%**, **datas**).
 - Use emojis de status: ✅ ⚠️ 🔴 🔵 💡 📈 📉
-- Sempre proponha AÇÕES executáveis, não só análises.
+- Proponha AÇÕES executáveis apenas quando houver evidência concreta.
 
 RETORNE SEMPRE JSON VÁLIDO no formato:
 {
@@ -610,13 +641,17 @@ async function handleAnalyze(userId: string | undefined, authHeader?: string, mo
     .single();
 
   try {
-    const [snapshot, memories] = await Promise.all([
+    const [snapshot, memories, groundTruth] = await Promise.all([
       gatherSnapshot(authHeader, companyId),
       loadMemories(userId, companyId, 20),
+      gatherGroundTruth(companyId ?? null),
     ]);
 
 
-    const userPrompt = `# CONTEXTO DO NEGÓCIO (dados reais agora)
+    const userPrompt = `# DADOS REAIS DO NEGÓCIO (fonte única de verdade)
+
+## GROUND TRUTH (contagens e totais direto do banco — NÃO invente valores fora daqui)
+${JSON.stringify(groundTruth, null, 2)}
 
 ## Memórias de longo prazo
 ${JSON.stringify(memories, null, 2)}
@@ -745,14 +780,19 @@ function resolveAgent(id?: string): string {
 
 async function handleChat(userId: string | undefined, messages: any[], authHeader?: string, agent = "geral", companyId?: string | null) {
   const persona = AGENT_PERSONAS[resolveAgent(agent)];
-  const [snapshot, memories, pending] = await Promise.all([
+  const [snapshot, memories, pending, groundTruth] = await Promise.all([
     gatherSnapshot(authHeader, companyId),
     loadMemories(userId, companyId, 15),
     loadPendingSummary(companyId ?? null, 8),
+    gatherGroundTruth(companyId ?? null),
   ]);
 
 
-  const ctx = `# CONTEXTO ATUAL DO NEGÓCIO
+  const ctx = `# DADOS REAIS DO NEGÓCIO (fonte única de verdade)
+
+## GROUND TRUTH (contagens e totais direto do banco — NÃO invente nada fora daqui)
+${JSON.stringify(groundTruth, null, 2)}
+
 ## Memórias relevantes
 ${JSON.stringify(memories.slice(0, 10), null, 2)}
 
@@ -766,7 +806,13 @@ ${pending.length ? pending.map((d: any) => `- [${d.impact_level}] ${d.module} ·
   const knowledge = getKnowledgeBlockFor('ALL');
   const sys = `Você é o ${persona.label} — agente especializado do Cérebro do ERP.
 FOCO: ${persona.focus}
-Use o contexto (dados REAIS) para responder com precisão. Cite números exatos. Seja PROATIVO: use as TOOLS de leitura (query_data, aggregate_data) para buscar dados vivos sempre que o usuário perguntar sobre clientes, pedidos, títulos, produção, estoque, NF-e, etc. Só execute ações destrutivas (viram decisões pendentes) quando o usuário pedir explicitamente. Se houver decisões pendentes relevantes, mencione-as.
+
+REGRAS ANTI-ALUCINAÇÃO (INEGOCIÁVEIS):
+- USE APENAS números que aparecem literalmente no bloco DADOS REAIS abaixo OU que você mesmo obteve chamando as tools query_data / aggregate_data.
+- É PROIBIDO inventar clientes, fornecedores, valores, datas, percentuais ou métricas. Se o dado não estiver no contexto e você não chamou uma tool para buscá-lo, responda "Não tenho esse dado agora — vou consultar" e chame a tool.
+- Se GROUND TRUTH mostrar count=0 para uma entidade, é FATO que não existe — reporte como "nenhum registro" em vez de inventar.
+- Ao citar qualquer valor, mencione a fonte (ex.: "segundo ground_truth: 11 clientes cadastrados" ou "consultei accounts_receivable e encontrei X").
+- Só execute ações destrutivas (viram decisões pendentes) quando o usuário pedir explicitamente.
 
 ${knowledge}
 
@@ -781,7 +827,7 @@ ${ctx}`;
     const res = await fetch(GATEWAY, {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ model: MODEL, messages: convo, tools: BRAIN_TOOLS, tool_choice: "auto" }),
+      body: JSON.stringify({ model: MODEL, messages: convo, tools: BRAIN_TOOLS, tool_choice: "auto", temperature: 0 }),
     });
     if (!res.ok) {
       const text = await res.text();
