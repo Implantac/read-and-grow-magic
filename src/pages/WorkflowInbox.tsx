@@ -52,6 +52,8 @@ export default function WorkflowInbox() {
   return (
     <PageContainer>
       <PageHeader title="Caixa de Workflows" description="Instâncias pendentes aguardando ação" icon={Inbox} />
+      <SREActionsInboxCard />
+
 
       {loading ? (
         <div className="flex justify-center py-12" role="status" aria-live="polite" aria-label="Carregando workflows">
