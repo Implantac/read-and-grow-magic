@@ -16,6 +16,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from '@/ui/base/skeleton';
 import { toastSuccess } from '@/lib/toastHelpers';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 const typeConfig = {
   warning: { icon: AlertTriangle, color: 'text-warning', bg: 'bg-warning/10', badge: 'bg-warning/20 text-warning' },
@@ -119,13 +120,11 @@ export default function NotificationsPage() {
       <ul className="space-y-2 list-none p-0" aria-label="Lista de notificações" aria-live="polite">
         {filtered.length === 0 ? (
           <li>
-            <Card>
-              <CardContent className="py-12 text-center">
-                <BellOff className="h-12 w-12 text-muted-foreground mx-auto mb-4" aria-hidden="true" />
-                <h2 className="text-lg font-medium text-foreground">Nenhuma notificação</h2>
-                <p className="text-sm text-muted-foreground mt-1">Você está em dia com tudo!</p>
-              </CardContent>
-            </Card>
+            <EmptyState
+              icon={BellOff}
+              title="Nenhuma notificação"
+              description="Você está em dia com tudo!"
+            />
           </li>
         ) : (
           filtered.map((n) => {

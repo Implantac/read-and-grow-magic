@@ -15,6 +15,7 @@ import { useBankAccounts, useCreateBankAccount } from '@/hooks/financial/useBank
 import { TransferDialog } from '@/components/financial/TransferDialog';
 
 import { formatBRL } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
 export default function BankAccounts() {
   const { data: accounts = [], isLoading } = useBankAccounts();
   const createMut = useCreateBankAccount();
@@ -95,12 +96,13 @@ export default function BankAccounts() {
           </Card>
         ))}
         {accounts.length === 0 && (
-          <Card className="col-span-full">
-            <CardContent className="py-12 text-center text-muted-foreground">
-              <Building2 className="h-10 w-10 mx-auto mb-3 opacity-50" />
-              <p>Nenhuma conta bancária cadastrada</p>
-            </CardContent>
-          </Card>
+          <div className="col-span-full">
+            <EmptyState
+              icon={Building2}
+              title="Nenhuma conta bancária cadastrada"
+              description="Cadastre suas contas bancárias para acompanhar saldos, conciliar extratos e emitir boletos."
+            />
+          </div>
         )}
       </div>
     </PageContainer>

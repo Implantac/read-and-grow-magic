@@ -26,6 +26,7 @@ import { KPICard } from '@/shared/components/KPICard';
 import { useInventory } from '@/hooks/inventory/useInventoryQuery';
 import type { DbProduct } from '@/hooks/inventory/useProducts';
 import type { ProductType, ProductStatus, ProductFilters } from '@/types/inventory';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 export default function ProductsPage() {
   const { products, productsLoading: isLoading, categories, createProduct, updateProduct, deleteProduct } = useInventory();
@@ -227,8 +228,12 @@ export default function ProductsPage() {
             <TableBody>
               {filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="h-24 text-center">
-                    Nenhum produto encontrado.
+                  <TableCell colSpan={9} className="p-4">
+                    <EmptyState
+                      compact
+                      title="Nenhum produto encontrado"
+                      description="Cadastre um produto ou ajuste os filtros para visualizar seu catálogo."
+                    />
                   </TableCell>
                 </TableRow>
               ) : (

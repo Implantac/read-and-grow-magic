@@ -16,6 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import { Package, CheckCircle, Truck, Search, AlertTriangle, PackageCheck, ClipboardList, Tag, Hand } from 'lucide-react';
 import { format } from 'date-fns';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 type ShipmentStage = 'conferred' | 'labeled' | 'collected' | 'shipped' | 'delivered';
 
@@ -285,8 +286,12 @@ export default function OrderPicking() {
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-                    Nenhum pedido com reservas para separar
+                  <TableCell colSpan={9} className="p-4">
+                    <EmptyState
+                      compact
+                      title="Nada para separar agora"
+                      description="Assim que um pedido tiver reservas confirmadas, ele aparecerá aqui para picking."
+                    />
                   </TableCell>
                 </TableRow>
               ) : (

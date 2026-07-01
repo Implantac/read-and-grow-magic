@@ -15,6 +15,7 @@ import {
 import { CheckCircle2, XCircle, UserCheck2, Loader2, Inbox, Clock } from "lucide-react";
 import { format, isPast } from "date-fns";
 import { toast } from "sonner";
+import { EmptyState } from '@/shared/components/EmptyState';
 
 type Approval = {
   id: string;
@@ -98,12 +99,11 @@ export default function MyApprovals() {
           <span className="sr-only">Carregando aprovações…</span>
         </div>
       ) : grouped.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground" role="status">
-            <CheckCircle2 className="h-10 w-10 mx-auto mb-3 text-primary/60" aria-hidden="true" />
-            Nenhuma aprovação pendente
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={CheckCircle2}
+          title="Nenhuma aprovação pendente"
+          description="Assim que houver um workflow aguardando sua decisão, ele aparecerá aqui."
+        />
       ) : (
         <div
           className="grid gap-3"

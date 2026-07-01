@@ -22,6 +22,7 @@ import { useWMSShipments } from '@/hooks/wms/useWMSShipments';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toSafeNumber } from '@/lib/numericValidation';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 export default function ShipmentsPage() {
   const { shipments, loading, create, ship, deliver } = useWMSShipments();
@@ -206,9 +207,13 @@ export default function ShipmentsPage() {
                 })}
                 {filteredShipments.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-                      <Truck className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                      Nenhuma expedição encontrada
+                    <TableCell colSpan={9} className="p-4">
+                      <EmptyState
+                        compact
+                        icon={Truck}
+                        title="Nenhuma expedição encontrada"
+                        description="Gere uma nova expedição a partir de um pedido separado ou ajuste os filtros."
+                      />
                     </TableCell>
                   </TableRow>
                 )}

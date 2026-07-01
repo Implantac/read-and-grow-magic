@@ -19,6 +19,7 @@ import type { MovementType } from '@/types/wms';
 
 import { formatDate } from '@/lib/formatters';
 import { toSafeNumber } from '@/lib/numericValidation';
+import { EmptyState } from '@/shared/components/EmptyState';
 const movementTypeConfig: Record<MovementType, { label: string; icon: React.ReactNode; color: string }> = {
   inbound: { label: 'Entrada', icon: <TrendingUp className="h-4 w-4" />, color: 'text-green-600' },
   outbound: { label: 'Saída', icon: <TrendingDown className="h-4 w-4" />, color: 'text-red-600' },
@@ -141,7 +142,13 @@ export default function WMSMovementsPage() {
             <TableBody>
               {filteredMovements.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhuma movimentação encontrada</TableCell>
+                  <TableCell colSpan={8} className="p-4">
+                    <EmptyState
+                      compact
+                      title="Nenhuma movimentação encontrada"
+                      description="Movimentações de entrada, saída e transferência aparecerão aqui em tempo real."
+                    />
+                  </TableCell>
                 </TableRow>
               ) : filteredMovements.map((m) => {
                 const config = movementTypeConfig[m.type as MovementType];

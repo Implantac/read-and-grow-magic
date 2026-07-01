@@ -29,6 +29,7 @@ import { ptBR } from 'date-fns/locale';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
+import { EmptyState } from '@/shared/components/EmptyState';
 const paymentMethods: Record<PaymentMethod, string> = {
   pix: 'PIX', boleto: 'Boleto', credit_card: 'Cartão de Crédito',
   debit_card: 'Cartão de Débito', transfer: 'Transferência', cash: 'Dinheiro', check: 'Cheque',
@@ -404,7 +405,15 @@ export default function AccountsReceivable() {
                 </TableRow>
               ))}
               {filteredAccounts.length === 0 && (
-                <TableRow><TableCell colSpan={9} className="h-24 text-center text-muted-foreground">Nenhuma conta encontrada</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={9} className="p-4">
+                    <EmptyState
+                      compact
+                      title="Nenhuma conta encontrada"
+                      description="Ajuste os filtros ou registre um novo lançamento para começar."
+                    />
+                  </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>
