@@ -15786,6 +15786,7 @@ export type Database = {
           resolution_notes: string | null
           resolved_at: string | null
           severity: string
+          slo_id: string | null
           source: string | null
           status: string
           title: string
@@ -15804,6 +15805,7 @@ export type Database = {
           resolution_notes?: string | null
           resolved_at?: string | null
           severity?: string
+          slo_id?: string | null
           source?: string | null
           status?: string
           title: string
@@ -15822,6 +15824,7 @@ export type Database = {
           resolution_notes?: string | null
           resolved_at?: string | null
           severity?: string
+          slo_id?: string | null
           source?: string | null
           status?: string
           title?: string
@@ -15833,6 +15836,13 @@ export type Database = {
             columns: ["alert_rule_id"]
             isOneToOne: false
             referencedRelation: "alert_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "system_incidents_slo_id_fkey"
+            columns: ["slo_id"]
+            isOneToOne: false
+            referencedRelation: "sre_slos"
             referencedColumns: ["id"]
           },
         ]
@@ -19936,6 +19946,14 @@ export type Database = {
           steps_md: string
           title: string
           updated_at: string
+        }[]
+      }
+      sre_slo_burn_scan: {
+        Args: never
+        Returns: {
+          action: string
+          incident_id: string
+          slo_id: string
         }[]
       }
       sre_slo_status: {
