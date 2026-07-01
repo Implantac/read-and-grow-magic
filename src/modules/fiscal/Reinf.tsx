@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
@@ -11,6 +12,8 @@ import { useReinf, type ReinfEvent } from '@/hooks/fiscal/useReinf';
 import { formatBRL } from '@/lib/formatters';
 import { toCsv, downloadCsv } from '@/lib/csv';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { Send } from 'lucide-react';
 import {
   R2099_HEADERS, R4099_HEADERS,
   buildR2099Rows, buildR4099Rows,
