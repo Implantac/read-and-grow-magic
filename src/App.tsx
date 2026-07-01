@@ -172,8 +172,8 @@ const App = () => (
                 </Route>
                 {VerticalPackRoutes}
                 <Route path="/executive/*" element={<ModuleErrorBoundary moduleName="Executivo"><Routes>{ExecutiveRoutes}</Routes></ModuleErrorBoundary>} />
-
-
+                </Route>
+              </Route>
 
               <Route path="*" element={<NotFound />} />
             </Routes>
