@@ -161,7 +161,12 @@ export default function AutomationEngine() {
           {isLoading ? (
             <p className="text-muted-foreground">Carregando...</p>
           ) : rules.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Nenhuma regra configurada.</p>
+            <EmptyState
+              compact
+              icon={Zap}
+              title="Nenhuma regra configurada"
+              description="Crie regras para automatizar ações a partir de eventos do ERP."
+            />
           ) : (
             <div className="space-y-2">
               {rules.map((r) => (
