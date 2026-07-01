@@ -102,7 +102,7 @@ export function ExecutiveCouncilPanel() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-11 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
           {specialists.map((specialist) => {
             const Icon = specialist.icon;
             return (
@@ -111,12 +111,13 @@ export function ExecutiveCouncilPanel() {
                 key={specialist.role}
                 onClick={() => setActive(specialist)}
                 aria-label={`Consultar especialista ${specialist.role}`}
-                className="flex flex-col items-center text-center p-2 rounded-lg bg-background/40 border border-primary/10 hover:border-primary/40 hover:bg-background/60 hover:shadow-lg transition-all cursor-pointer group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                title={specialist.role}
+                className="flex flex-col items-center text-center p-2 rounded-lg bg-background/40 border border-primary/10 hover:border-primary/40 hover:bg-background/60 hover:shadow-lg transition-all cursor-pointer group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary min-w-0"
               >
                 <div className={cn("mb-1.5 p-1.5 rounded-full bg-background ring-1 ring-primary/20 group-hover:ring-primary/40 group-hover:scale-110 transition-all shadow-sm", specialist.color)}>
                   <Icon className="h-4 w-4" aria-hidden="true" />
                 </div>
-                <span className="text-[9px] font-black leading-tight uppercase tracking-tight text-foreground/70 group-hover:text-primary transition-colors">
+                <span className="w-full text-[10px] font-bold leading-tight uppercase tracking-tight text-foreground/80 group-hover:text-primary transition-colors break-words hyphens-auto">
                   {specialist.role}
                 </span>
                 <div className="mt-1 h-1 w-0 bg-primary/40 rounded-full group-hover:w-full transition-all duration-300" />
