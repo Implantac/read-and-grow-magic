@@ -11,6 +11,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/ui/base/dialog";
 import { Plus, Trash2, Play, GitBranch, History, GitFork, Eye } from "lucide-react";
+import { EmptyState } from "@/shared/components/EmptyState";
 import { WorkflowGraph } from "@/components/workflow/WorkflowGraph";
 import {
   useWorkflowDefinitions,
