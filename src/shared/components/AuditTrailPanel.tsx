@@ -11,14 +11,14 @@ import { Badge } from "@/ui/base/badge";
 import { History, User } from "lucide-react";
 
 interface Props {
-  entityType: string;
+  entityName: string;
   entityId?: string | null;
   limit?: number;
   height?: number;
 }
 
-export function AuditTrailPanel({ entityType, entityId, limit = 200, height = 420 }: Props) {
-  const { events, loading, error } = useAuditTrail({ entityType, entityId, limit });
+export function AuditTrailPanel({ entityName, entityId, limit = 200, height = 420 }: Props) {
+  const { events, loading, error } = useAuditTrail({ entityName, entityId, limit });
 
   if (loading) return <ListSkeleton rows={6} />;
   if (error) {
@@ -50,19 +50,20 @@ export function AuditTrailPanel({ entityType, entityId, limit = 200, height = 42
               <Badge variant="outline" className="text-[10px]">
                 {formatAuditAction(ev.action)}
               </Badge>
-              {ev.entity_type && (
-                <span className="text-[11px] text-muted-foreground truncate">{ev.entity_type}</span>
+              {ev.module && (
+                <span className="text-[11px] text-muted-foreground truncate">{ev.module}</span>
               )}
             </div>
             <p className="text-xs text-muted-foreground mt-1 truncate">
-              {ev.metadata && typeof ev.metadata === "object"
-                ? Object.entries(ev.metadata)
+              {ev.new_data && typeof ev.new_data === "object"
+                ? Object.entries(ev.new_data as Record<string, unknown>)
                     .slice(0, 3)
                     .map(([k, v]) => `${k}: ${String(v)}`)
                     .join(" · ")
-                : "—"}
+                : ev.entity_id ?? "—"}
             </p>
           </div>
+
           <div className="text-right shrink-0">
             <div className="flex items-center gap-1 justify-end text-[11px] text-muted-foreground">
               <User className="h-3 w-3" />
