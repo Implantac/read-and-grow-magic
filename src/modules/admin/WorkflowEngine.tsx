@@ -184,7 +184,12 @@ export default function WorkflowEngine() {
         <CardHeader><CardTitle>Definições ({defs.length})</CardTitle></CardHeader>
         <CardContent>
           {isLoading ? <p className="text-muted-foreground">Carregando...</p> : defs.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Nenhum workflow definido.</p>
+            <EmptyState
+              compact
+              icon={GitBranch}
+              title="Nenhum workflow definido"
+              description="Modele um fluxo de aprovação para começar a orquestrar processos."
+            />
           ) : (
             <div className="space-y-2">
               {defs.map((d) => (
