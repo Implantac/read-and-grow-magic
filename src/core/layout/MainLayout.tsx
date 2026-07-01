@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/system/useAuth';
 import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { CommandPalette } from './CommandPalette';
+import { Breadcrumbs } from '@/shared/components/Breadcrumbs';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
@@ -58,6 +59,7 @@ export function MainLayout() {
         )}
       >
         <div className="p-6">
+          <Breadcrumbs />
           <Suspense
             fallback={
               <div className="flex min-h-[40vh] items-center justify-center">
