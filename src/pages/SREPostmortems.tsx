@@ -94,7 +94,14 @@ export default function SREPostmortems() {
 
   return (
     <PageContainer>
-      <PageHeader title="Postmortems SRE" description="Registro estruturado de análise pós-incidente com raiz, impacto e ações" icon={FileText} />
+      <PageHeader title="Postmortems SRE" description="Registro estruturado de análise pós-incidente com raiz, impacto e ações" icon={FileText} actions={
+        <Button variant="outline" size="sm" onClick={async () => {
+          const { data, error } = await supabase.rpc('sre_actions_notify_due');
+          if (error) { toast.error(error.message); return; }
+          const n = (data as any)?.notifications_created ?? 0;
+          toast.success(`Varredura executada · ${n} notificações criadas`);
+        }}><BellRing className="h-4 w-4 mr-2" /> Verificar prazos agora</Button>
+      } />
 
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2"><Plus className="h-4 w-4" /> Novo postmortem</CardTitle></CardHeader>
