@@ -304,11 +304,7 @@ function OrderDetailContent({ order }: { order: ProductionOrderRow }) {
           {stepsLoading ? (
             <p className="text-center py-8 text-muted-foreground">Carregando etapas...</p>
           ) : orderSteps.length === 0 ? (
-            <Card><CardContent className="py-8 text-center text-muted-foreground">
-              <Layers className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>Nenhuma etapa cadastrada para esta OP</p>
-              <p className="text-xs">Use a tela "Etapas de Produção" para configurar</p>
-            </CardContent></Card>
+            <EmptyState icon={Layers} title="Nenhuma etapa cadastrada para esta OP" description='Use a tela "Etapas de Produção" para configurar o roteiro desta ordem.' />
           ) : (
             <div className="space-y-2">
               {orderSteps.map((step, idx) => {
