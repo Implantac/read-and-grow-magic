@@ -31,6 +31,7 @@ const ProductionLinesPage = lazy(() => import("../modules/production/ProductionL
 const ProductionResourcesPage = lazy(() => import("../modules/production/ProductionResourcesPage"));
 const ProductionRoutesPage = lazy(() => import("../modules/production/ProductionRoutesPage"));
 const OutsourcingPage = lazy(() => import("../modules/production/OutsourcingPage"));
+const APSMultiPage = lazy(() => import("../modules/production/APSMulti"));
 
 export const ProductionRoutes = [
   <Route key="prod-orders" path="/production/ordens" element={<ProductionOrdersPage />} />,
@@ -56,6 +57,7 @@ export const ProductionRoutes = [
   <Route key="prod-bi" path="/production/bi" element={<BIIndustrialPage />} />,
   <Route key="prod-twin" path="/production/twin" element={<DigitalTwinPage />} />,
   <Route key="prod-aps" path="/production/aps" element={<APSPageComponent />} />,
+  <Route key="prod-aps-multi" path="/production/aps/multi" element={<APSMultiPage />} />,
   <Route key="prod-iot" path="/production/iot" element={<IoTDashboardPage />} />,
   <Route key="prod-oee" path="/production/oee" element={<OEEDashboardPage />} />,
   <Route key="prod-ml" path="/production/previsoes" element={<MLPredictionsPage />} />,
