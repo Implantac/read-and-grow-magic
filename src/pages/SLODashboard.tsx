@@ -166,6 +166,38 @@ export default function SLODashboard() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!timelineSlo} onOpenChange={(o) => !o && setTimelineSlo(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Timeline · {timelineSlo?.name} <span className="text-xs text-muted-foreground ml-2">últimos 30 dias</span></DialogTitle>
+          </DialogHeader>
+          {timelineLoading ? <Skeleton className="h-40 w-full" /> : timeline.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum incidente registrado para este SLO na janela.</p>
+          ) : (
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>Aberto em</TableHead><TableHead>Título</TableHead>
+                <TableHead>Severidade</TableHead><TableHead>Status</TableHead>
+                <TableHead className="text-right">MTTA (min)</TableHead>
+                <TableHead className="text-right">MTTR (min)</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {timeline.map((i) => (
+                  <TableRow key={i.id}>
+                    <TableCell className="whitespace-nowrap text-xs">{new Date(i.opened_at).toLocaleString('pt-BR')}</TableCell>
+                    <TableCell className="max-w-[240px] truncate" title={i.title}>{i.title}</TableCell>
+                    <TableCell><Badge variant={i.severity === 'critical' ? 'destructive' : 'secondary'}>{i.severity}</Badge></TableCell>
+                    <TableCell><Badge variant="outline">{i.status}</Badge></TableCell>
+                    <TableCell className="text-right font-mono">{i.minutes_to_ack != null ? Number(i.minutes_to_ack).toFixed(1) : '—'}</TableCell>
+                    <TableCell className="text-right font-mono">{i.minutes_to_resolve != null ? Number(i.minutes_to_resolve).toFixed(1) : '—'}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
