@@ -316,6 +316,7 @@ export default function BankReconciliation() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <AutoReconcilePanel />
     </PageContainer>
   );
 }
