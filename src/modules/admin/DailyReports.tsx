@@ -188,13 +188,12 @@ export default function DailyReports() {
       {latestReport ? (
         <ReportDetail data={latestReport.report_data as DailyReportData} />
       ) : (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum relatório gerado</h3>
-            <p className="text-muted-foreground mb-4">Clique em "Gerar Agora" para criar o primeiro relatório executivo.</p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={FileText}
+          title="Nenhum relatório gerado"
+          description='Clique em "Gerar Agora" para criar o primeiro relatório executivo diário.'
+          action={{ label: 'Gerar Agora', icon: RefreshCw, onClick: () => generateReport.mutate() }}
+        />
       )}
     </PageContainer>
   );
