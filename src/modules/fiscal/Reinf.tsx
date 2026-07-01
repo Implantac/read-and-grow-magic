@@ -397,7 +397,7 @@ function EventTable({ events, type }: { events: any[]; type: string }) {
           {!isFechamento && <TableHead>CNPJ</TableHead>}
           {!isFechamento && <TableHead>NF / Emissão</TableHead>}
           <TableHead className="text-right">Valor</TableHead>
-          {type === 'R-2010' && <TableHead className="text-right">INSS</TableHead>}
+          {(type === 'R-2010' || type === 'R-2020') && <TableHead className="text-right">INSS</TableHead>}
           {type === 'R-4020' && <TableHead className="text-right">IR</TableHead>}
           {type === 'R-4020' && <TableHead className="text-right">CSLL</TableHead>}
           {type === 'R-4020' && <TableHead className="text-right">PIS</TableHead>}
@@ -411,7 +411,7 @@ function EventTable({ events, type }: { events: any[]; type: string }) {
             {!isFechamento && <TableCell className="font-mono text-xs">{e.cnpj_prestador || e.cnpj_beneficiario || '—'}</TableCell>}
             {!isFechamento && <TableCell className="text-xs">{e.nota_fiscal || '—'} / {e.data_emissao || '—'}</TableCell>}
             <TableCell className="text-right">{formatBRL(Number(e.vr_bruto || 0))}</TableCell>
-            {type === 'R-2010' && <TableCell className="text-right">{formatBRL(Number(e.vr_ret_inss || 0))}</TableCell>}
+            {(type === 'R-2010' || type === 'R-2020') && <TableCell className="text-right">{formatBRL(Number(e.vr_ret_inss || 0))}</TableCell>}
             {type === 'R-4020' && <TableCell className="text-right">{formatBRL(Number(e.vr_ret_ir || 0))}</TableCell>}
             {type === 'R-4020' && <TableCell className="text-right">{formatBRL(Number(e.vr_ret_csll || 0))}</TableCell>}
             {type === 'R-4020' && <TableCell className="text-right">{formatBRL(Number(e.vr_ret_pis || 0))}</TableCell>}
