@@ -43,6 +43,17 @@ export default function SLODashboard() {
   const [domain, setDomain] = useState('');
   const [target, setTarget] = useState(99.5);
   const [windowDays, setWindowDays] = useState(30);
+  const [timelineSlo, setTimelineSlo] = useState<SloRow | null>(null);
+  const [timeline, setTimeline] = useState<any[]>([]);
+  const [timelineLoading, setTimelineLoading] = useState(false);
+
+  const openTimeline = async (slo: SloRow) => {
+    setTimelineSlo(slo); setTimelineLoading(true); setTimeline([]);
+    const { data, error } = await supabase.rpc('sre_slo_incident_timeline', { _slo_id: slo.id, _days: 30 });
+    if (error) toast.error(error.message);
+    setTimeline((data ?? []) as any[]);
+    setTimelineLoading(false);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -144,7 +155,8 @@ export default function SLODashboard() {
                     </TableCell>
                     <TableCell className="text-right font-mono">{Number(r.burn_rate_1h).toFixed(2)}x</TableCell>
                     <TableCell><Badge variant={STATUS_VARIANT[r.status]}>{STATUS_LABEL[r.status]}</Badge></TableCell>
-                    <TableCell>
+                    <TableCell className="flex gap-1">
+                      <Button size="icon" variant="ghost" onClick={() => openTimeline(r)} title="Timeline"><History className="h-4 w-4" /></Button>
                       <Button size="icon" variant="ghost" onClick={() => remove(r.id)}><Trash2 className="h-4 w-4" /></Button>
                     </TableCell>
                   </TableRow>
