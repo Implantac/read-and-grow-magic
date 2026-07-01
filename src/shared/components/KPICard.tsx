@@ -1,6 +1,8 @@
 import { type ReactNode, type ElementType } from 'react';
 import { Card, CardContent } from '@/ui/base/card';
 import { cn } from '@/lib/utils';
+import { EnterpriseKPICard } from './EnterpriseKPICard';
+import type { EntityKey } from '@/core/entityRegistry';
 
 interface KPICardProps {
   title: string;
@@ -12,7 +14,21 @@ interface KPICardProps {
   color?: string;
   className?: string;
   index?: number;
+  /** Fase 2 — opt-in Enterprise slots. Se qualquer um for informado, o card
+   *  delega ao EnterpriseKPICard (drill-down + IA) mantendo o layout base. */
+  entityKey?: EntityKey;
+  numericValue?: number;
+  deltas?: { day?: number; week?: number; month?: number; year?: number };
+  goal?: number;
+  progress?: number;
+  status?: 'healthy' | 'warn' | 'critical';
+  impact?: { financial?: number; operational?: string };
+  source?: string;
+  lastUpdated?: string | Date;
+  trend?: 'up' | 'down' | 'flat';
+  onClick?: () => void;
 }
+
 
 const colorMap: Record<string, { border: string; iconBg: string; iconText: string }> = {
   primary: { border: 'border-l-primary', iconBg: 'bg-primary/10', iconText: 'text-primary' },
