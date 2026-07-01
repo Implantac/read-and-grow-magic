@@ -13,6 +13,7 @@ import { Textarea } from '@/ui/base/textarea';
 import { Switch } from '@/ui/base/switch';
 import { useTechnicalSheets } from '@/hooks/production/useTechnicalSheets';
 import { Plus, FileText, Pencil, Trash2, Clock, DollarSign, Layers } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 interface StepEntry { name: string; time_minutes: number; sector: string; }
 interface MaterialEntry { name: string; quantity: number; unit: string; unit_cost: number; }
