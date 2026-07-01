@@ -68,6 +68,14 @@ export default function SLODashboard() {
     toast.success('SLO removido'); load();
   };
 
+  const scanBurn = async () => {
+    const { data, error } = await supabase.rpc('sre_slo_burn_scan');
+    if (error) { toast.error(error.message); return; }
+    const opened = (data ?? []).filter((x: any) => x.action === 'incident_opened').length;
+    toast.success(`Scan concluído: ${opened} incidente(s) aberto(s)`);
+    load();
+  };
+
   const kpis = useMemo(() => ({
     total: rows.length,
     breached: rows.filter(r => r.status === 'breached').length,
