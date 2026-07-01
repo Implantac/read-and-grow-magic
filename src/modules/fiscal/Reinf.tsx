@@ -20,6 +20,7 @@ import {
   validateR2099Rows, validateR4099Rows,
   type ValidationResult,
 } from './reinfCsv';
+import { ReinfCertificateStatus } from './ReinfCertificateStatus';
 
 function guardExport(
   label: string,
@@ -190,6 +191,10 @@ export default function Reinf() {
         title="EFD-Reinf"
         description="Eventos de retenções de INSS (R-2010) e IR/CSLL/PIS/COFINS (R-4020) com fechamento mensal R-2099/R-4099"
       />
+
+      <div className="mb-6">
+        <ReinfCertificateStatus />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="lg:col-span-1 shadow-lg border-primary/10">
