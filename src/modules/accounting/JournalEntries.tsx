@@ -20,6 +20,7 @@ import type { JournalEntry } from '@/types/accounting';
 import type { ExportColumn } from '@/lib/exportUtils';
 
 import { formatBRL, formatDate, formatDateTime, formatNumber } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 
 const exportColumns: ExportColumn[] = [
