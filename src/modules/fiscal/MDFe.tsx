@@ -20,6 +20,7 @@ import { Badge } from '@/ui/base/badge';
 import { Checkbox } from '@/ui/base/checkbox';
 
 import { formatBRL } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
 const STEPS = [
   { id: 'docs', label: 'Documentos', icon: FileText },
   { id: 'route', label: 'Rota', icon: MapPin },
