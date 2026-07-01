@@ -210,9 +210,10 @@ export default function LaborManagement() {
           {loading ? (
             <p className="text-sm text-muted-foreground">Carregando…</p>
           ) : stats.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              Nenhuma atividade registrada no período.
-            </p>
+            <EmptyState
+              title="Nenhuma atividade no período"
+              description="Assim que operadores registrarem tarefas de picking, packing ou putaway, o ranking será exibido aqui."
+            />
           ) : (
             <Table>
               <TableHeader>
