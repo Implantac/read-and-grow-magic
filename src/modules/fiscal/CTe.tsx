@@ -25,7 +25,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/ui/base/alert';
 
 import { formatBRL } from '@/lib/formatters';
 import { EmptyState } from '@/shared/components/EmptyState';
-import { Truck } from 'lucide-react';
 import { toSafeNumber } from '@/lib/numericValidation';
 const STEPS = [
   { id: 'import', label: 'Importar NF-e', icon: FileText },
