@@ -5,6 +5,7 @@ const CRMDashboardPage = lazy(() => import("../modules/commercial/CRMDashboard")
 const ClientsPage = lazy(() => import("../modules/commercial/Clients"));
 const SalesPage = lazy(() => import("../modules/commercial/Sales"));
 const OrdersPage = lazy(() => import("../modules/commercial/Orders"));
+const OrderTimelinePage = lazy(() => import("../pages/OrderTimeline"));
 const CommercialQuotationsPage = lazy(() => import("../modules/commercial/Quotations"));
 const CommercialDashboardPage = lazy(() => import("../modules/commercial/CommercialDashboard"));
 const SalesFunnelPage = lazy(() => import("../modules/commercial/SalesFunnel"));
@@ -28,6 +29,7 @@ export const CommercialRoutes = [
   <Route key="comercial-clientes" path="/commercial/clientes" element={<ClientsPage />} />,
   <Route key="comercial-vendas" path="/commercial/vendas" element={<SalesPage />} />,
   <Route key="comercial-pedidos" path="/commercial/pedidos" element={<OrdersPage />} />,
+  <Route key="comercial-pedido-timeline" path="/commercial/pedidos/:orderId/timeline" element={<OrderTimelinePage />} />,
   <Route key="comercial-orcamentos" path="/commercial/orcamentos" element={<CommercialQuotationsPage />} />,
   <Route key="comercial-funil" path="/commercial/funil" element={<SalesFunnelPage />} />,
   <Route key="comercial-representantes" path="/commercial/representantes" element={<SalesRepsPage />} />,

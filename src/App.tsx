@@ -23,6 +23,7 @@ import { ExecutiveRoutes } from './routes/ExecutiveRoutes';
 import { FeatureGate } from '@/components/plan/FeatureGate';
 import { GatedOutlet } from '@/components/plan/GatedOutlet';
 import { OnboardingGuard } from '@/components/OnboardingGuard';
+import { ConfirmDialogProvider } from '@/shared/components/ConfirmDialog';
 
 // Eager load critical pages
 import Login from "./pages/Login";
@@ -93,9 +94,10 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <EnterpriseProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+        <ConfirmDialogProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -170,6 +172,7 @@ const App = () => (
             </Routes>
           </Suspense>
         </BrowserRouter>
+        </ConfirmDialogProvider>
       </EnterpriseProvider>
     </TooltipProvider>
   </QueryClientProvider>
