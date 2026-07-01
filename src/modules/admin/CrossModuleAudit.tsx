@@ -136,8 +136,13 @@ export default function CrossModuleAudit() {
                 {isLoading ? (
                   <TableRow><TableCell colSpan={7} className="text-center py-12 text-muted-foreground">Carregando eventos...</TableCell></TableRow>
                 ) : filtered.length === 0 ? (
-                  <TableRow><TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
-                    Nenhum evento encontrado. Eventos aparecem automaticamente ao transmitir/autorizar/cancelar NF-e, confirmar pedidos ou quitar contas.
+                  <TableRow><TableCell colSpan={7} className="p-4">
+                    <EmptyState
+                      compact
+                      icon={Radio}
+                      title="Nenhum evento encontrado"
+                      description="Eventos são registrados automaticamente ao transmitir/autorizar/cancelar NF-e, confirmar pedidos ou quitar contas."
+                    />
                   </TableCell></TableRow>
                 ) : filtered.map(event => {
                   const meta = eventTypeLabels[event.event_type] || { label: event.event_type, variant: 'outline' as const };
