@@ -220,7 +220,12 @@ export default function WorkflowEngine() {
         <CardHeader><CardTitle>Instâncias ({instances.length})</CardTitle></CardHeader>
         <CardContent>
           {instances.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Nenhuma instância ativa.</p>
+            <EmptyState
+              compact
+              icon={History}
+              title="Nenhuma instância ativa"
+              description="Instâncias em execução aparecerão aqui em tempo real."
+            />
           ) : (
             <div className="space-y-2">
               {instances.slice(0, 30).map((i) => (
