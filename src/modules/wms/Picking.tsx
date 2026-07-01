@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { supabase } from '@/integrations/supabase/client';
 import { PageHeader } from '@/shared/components/PageHeader';
