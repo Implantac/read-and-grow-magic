@@ -11,6 +11,7 @@ import {
   type CustomRecord,
 } from "@/hooks/useCustomEntities";
 import { DynamicForm } from "@/components/metadata/DynamicForm";
+import { EmptyState } from "@/shared/components/EmptyState";
 
 export default function CustomEntityRecords() {
   const { entityKey } = useParams<{ entityKey: string }>();
@@ -47,7 +48,12 @@ export default function CustomEntityRecords() {
           {loadingRecords ? (
             <p className="p-4 text-sm text-muted-foreground">Carregando…</p>
           ) : records.length === 0 ? (
-            <p className="p-4 text-sm text-muted-foreground">Nenhum registro. Crie o primeiro.</p>
+            <EmptyState
+              icon={Database}
+              title="Nenhum registro"
+              description={`Crie o primeiro registro para ${entity?.label_plural ?? entity?.label ?? "esta entidade"}.`}
+              action={fields.length > 0 ? { label: "Criar registro", onClick: () => { setEditing(null); setOpen(true); } } : undefined}
+            />
           ) : (
             <div className="overflow-auto">
               <table className="w-full text-sm">

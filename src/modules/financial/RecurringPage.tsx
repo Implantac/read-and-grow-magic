@@ -18,7 +18,8 @@ import {
   useRecurringList,
   useUpdateRecurringStatus,
 } from '@/hooks/financial/useFinancialRecurring';
-import { Pause, Play, Plus, RefreshCw, X } from 'lucide-react';
+import { Pause, Play, Plus, RefreshCw, X, Repeat } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { format } from 'date-fns';
 import { formatNumber } from '@/lib/formatters';
 import { toSafeNumber } from '@/lib/numericValidation';
@@ -223,8 +224,8 @@ export default function RecurringPage() {
             <TableBody>
               {recurring.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
-                    Nenhuma recorrência cadastrada.
+                  <TableCell colSpan={8}>
+                    <EmptyState compact icon={Repeat} title="Nenhuma recorrência" description="Cadastre assinaturas, aluguéis e contratos recorrentes para gerar títulos automaticamente." />
                   </TableCell>
                 </TableRow>
               )}

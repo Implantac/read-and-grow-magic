@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/ui/base/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Badge } from '@/ui/base/badge';
 import { useRenegotiations } from '@/hooks/financial/useRenegotiations';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -61,10 +62,7 @@ export default function Renegotiations() {
                 );
               })}
               {renegotiations.length === 0 && (
-                <TableRow><TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                  <RefreshCw className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  Nenhuma renegociação registrada
-                </TableCell></TableRow>
+                <TableRow><TableCell colSpan={7}><EmptyState compact icon={RefreshCw} title="Nenhuma renegociação" description="Renegocie títulos vencidos para parcelar dívidas e manter a saúde financeira." /></TableCell></TableRow>
               )}
             </TableBody>
           </Table>

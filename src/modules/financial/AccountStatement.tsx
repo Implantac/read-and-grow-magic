@@ -11,6 +11,7 @@ import { useClients } from '@/hooks/commercial/useClients';
 import { useSuppliers } from '@/hooks/purchasing/useSuppliers';
 import { useAccountStatement } from '@/hooks/financial/useSettlement';
 import { ArrowDownCircle, ArrowUpCircle, Wallet } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
 const fmt = (v: number) =>
@@ -99,7 +100,7 @@ export default function AccountStatement() {
                 <TableBody>
                   {isLoading && <TableRow><TableCell colSpan={6} className="text-center py-6 text-muted-foreground">Carregando…</TableCell></TableRow>}
                   {!isLoading && rows.length === 0 && (
-                    <TableRow><TableCell colSpan={6} className="text-center py-6 text-muted-foreground">Nenhum movimento no período</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6}><EmptyState compact icon={Wallet} title="Sem movimentos" description="Nenhum lançamento encontrado no período selecionado." /></TableCell></TableRow>
                   )}
                   {rows.map((r, i) => (
                     <TableRow key={i}>
