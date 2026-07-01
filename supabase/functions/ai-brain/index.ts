@@ -761,11 +761,15 @@ Score financeiro: ${JSON.stringify(snapshot.financial_intelligence?.score || {},
 ## Decisões pendentes (aguardando aprovação humana)
 ${pending.length ? pending.map((d: any) => `- [${d.impact_level}] ${d.module} · ${d.title} (${d.id.slice(0, 8)})`).join("\n") : "Nenhuma pendência."}`;
 
+  const knowledge = getKnowledgeBlockFor('ALL');
   const sys = `Você é o ${persona.label} — agente especializado do Cérebro do ERP.
 FOCO: ${persona.focus}
 Use o contexto (dados REAIS) para responder com precisão. Cite números exatos. Seja direto e PROATIVO: quando o usuário pedir uma ação executável, use as TOOLS disponíveis. Ações destrutivas viram decisões pendentes para aprovação humana — execute mesmo assim, é só uma proposta. Se houver decisões pendentes relevantes, mencione-as.
 
+${knowledge}
+
 ${ctx}`;
+
 
   const convo: any[] = [{ role: "system", content: sys }, ...messages];
   const executed: any[] = [];
