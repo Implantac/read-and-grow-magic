@@ -10,7 +10,8 @@ import { Badge } from '@/ui/base/badge';
 import { Progress } from '@/ui/base/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Skeleton } from '@/ui/base/skeleton';
-import { Activity, AlertTriangle, Plus, Target, TrendingUp, Trash2, Siren } from 'lucide-react';
+import { Activity, AlertTriangle, Plus, Target, TrendingUp, Trash2, Siren, History } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { toast } from 'sonner';
@@ -42,6 +43,17 @@ export default function SLODashboard() {
   const [domain, setDomain] = useState('');
   const [target, setTarget] = useState(99.5);
   const [windowDays, setWindowDays] = useState(30);
+  const [timelineSlo, setTimelineSlo] = useState<SloRow | null>(null);
+  const [timeline, setTimeline] = useState<any[]>([]);
+  const [timelineLoading, setTimelineLoading] = useState(false);
+
+  const openTimeline = async (slo: SloRow) => {
+    setTimelineSlo(slo); setTimelineLoading(true); setTimeline([]);
+    const { data, error } = await supabase.rpc('sre_slo_incident_timeline', { _slo_id: slo.id, _days: 30 });
+    if (error) toast.error(error.message);
+    setTimeline((data ?? []) as any[]);
+    setTimelineLoading(false);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -143,7 +155,8 @@ export default function SLODashboard() {
                     </TableCell>
                     <TableCell className="text-right font-mono">{Number(r.burn_rate_1h).toFixed(2)}x</TableCell>
                     <TableCell><Badge variant={STATUS_VARIANT[r.status]}>{STATUS_LABEL[r.status]}</Badge></TableCell>
-                    <TableCell>
+                    <TableCell className="flex gap-1">
+                      <Button size="icon" variant="ghost" onClick={() => openTimeline(r)} title="Timeline"><History className="h-4 w-4" /></Button>
                       <Button size="icon" variant="ghost" onClick={() => remove(r.id)}><Trash2 className="h-4 w-4" /></Button>
                     </TableCell>
                   </TableRow>
@@ -153,6 +166,38 @@ export default function SLODashboard() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={!!timelineSlo} onOpenChange={(o) => !o && setTimelineSlo(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Timeline · {timelineSlo?.name} <span className="text-xs text-muted-foreground ml-2">últimos 30 dias</span></DialogTitle>
+          </DialogHeader>
+          {timelineLoading ? <Skeleton className="h-40 w-full" /> : timeline.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum incidente registrado para este SLO na janela.</p>
+          ) : (
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>Aberto em</TableHead><TableHead>Título</TableHead>
+                <TableHead>Severidade</TableHead><TableHead>Status</TableHead>
+                <TableHead className="text-right">MTTA (min)</TableHead>
+                <TableHead className="text-right">MTTR (min)</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {timeline.map((i) => (
+                  <TableRow key={i.id}>
+                    <TableCell className="whitespace-nowrap text-xs">{new Date(i.opened_at).toLocaleString('pt-BR')}</TableCell>
+                    <TableCell className="max-w-[240px] truncate" title={i.title}>{i.title}</TableCell>
+                    <TableCell><Badge variant={i.severity === 'critical' ? 'destructive' : 'secondary'}>{i.severity}</Badge></TableCell>
+                    <TableCell><Badge variant="outline">{i.status}</Badge></TableCell>
+                    <TableCell className="text-right font-mono">{i.minutes_to_ack != null ? Number(i.minutes_to_ack).toFixed(1) : '—'}</TableCell>
+                    <TableCell className="text-right font-mono">{i.minutes_to_resolve != null ? Number(i.minutes_to_resolve).toFixed(1) : '—'}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </DialogContent>
+      </Dialog>
     </PageContainer>
   );
 }
