@@ -12,6 +12,7 @@ import { Badge } from '@/ui/base/badge';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { useAgroFarms, useCreateAgroFarm, useDeleteAgroFarm } from '@/hooks/useAgro';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { toSafeNumber } from '@/lib/numericValidation';
 
 export default function AgroFarms() {
@@ -78,10 +79,8 @@ export default function AgroFarms() {
           {isLoading ? (
             <div className="p-8 text-center text-muted-foreground">Carregando…</div>
           ) : farms.length === 0 ? (
-            <div className="p-12 text-center text-muted-foreground">
-              <Sprout className="h-10 w-10 mx-auto mb-2 opacity-50" />
-              Nenhuma fazenda cadastrada.
-            </div>
+            <EmptyState icon={Sprout} title="Nenhuma fazenda cadastrada" description="Cadastre fazendas para gerenciar talhões, safras e operações agrícolas." action={{ label: 'Nova fazenda', onClick: () => setOpen(true), icon: Plus }} />
+          
           ) : (
             <Table>
               <TableHeader>

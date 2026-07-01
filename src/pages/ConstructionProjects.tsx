@@ -17,6 +17,7 @@ import {
   type ConstructionProject,
 } from '@/hooks/useConstructionProjects';
 import { toSafeNumber } from '@/lib/numericValidation';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 const STATUS_LABELS: Record<ConstructionProject['status'], string> = {
   planning: 'Planejamento',
@@ -143,9 +144,7 @@ export default function ConstructionProjects() {
               <Skeleton className="h-10" /><Skeleton className="h-10" /><Skeleton className="h-10" />
             </div>
           ) : !projects || projects.length === 0 ? (
-            <div className="py-12 text-center text-muted-foreground">
-              Nenhuma obra cadastrada. Clique em "Nova obra" para começar.
-            </div>
+            <EmptyState icon={HardHat} title="Nenhuma obra cadastrada" description="Cadastre obras para acompanhar avanço físico, financeiro e cronograma." />
           ) : (
             <Table>
               <TableHeader>

@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useWMSReceiving } from '@/hooks/wms/useWMSOperations';
 import { BarcodeScanner, ScanFeedback } from '@/components/wms/BarcodeScanner';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -158,6 +159,13 @@ export default function ReceivingPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
+                {filteredOrders.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="p-0">
+                      <EmptyState icon={Truck} title="Nenhum recebimento programado" description="Ordens de compra confirmadas aparecerão aqui para conferência e entrada." />
+                    </TableCell>
+                  </TableRow>
+                )}
                 {filteredOrders.map((order) => {
                   const cfg = statusConfig[order.status] || statusConfig.pending;
                   return (

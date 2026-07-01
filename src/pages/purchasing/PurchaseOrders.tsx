@@ -26,6 +26,8 @@ import { purchaseOrderStatuses } from '@/config/purchasing';
 import { PurchaseOrder } from '@/types/purchasing';
 import { usePurchasing } from '@/hooks/purchasing/usePurchasingQuery';
 import { KPICard } from '@/shared/components/KPICard';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { ClipboardList } from 'lucide-react';
 
 const priorityConfig: any = {
   low: { label: 'Baixa', className: 'bg-muted text-muted-foreground' },
@@ -122,7 +124,13 @@ export default function PurchaseOrdersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredOrders.map((order) => (
+              {filteredOrders.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="p-0">
+                    <EmptyState icon={ClipboardList} title="Nenhum pedido de compra" description="Crie pedidos para formalizar aquisições junto aos seus fornecedores." />
+                  </TableCell>
+                </TableRow>
+              ) : filteredOrders.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium">{order.number}</TableCell>
                   <TableCell>{order.supplierName}</TableCell>

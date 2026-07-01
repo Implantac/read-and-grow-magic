@@ -19,6 +19,8 @@ import {
 import { Badge } from '@/ui/base/badge';
 import { quotationStatuses } from '@/config/purchasing';
 import { usePurchasing } from '@/hooks/purchasing/usePurchasingQuery';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { FileSearch } from 'lucide-react';
 
 const priorityConfig: any = {
   low: { label: 'Baixa', className: 'bg-gray-100 text-gray-800' },
@@ -111,7 +113,13 @@ export default function QuotationsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredQuotations.map((quotation) => (
+              {filteredQuotations.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="p-0">
+                    <EmptyState icon={FileSearch} title="Nenhuma cotação" description="Solicite cotações para comparar preços entre fornecedores." />
+                  </TableCell>
+                </TableRow>
+              ) : filteredQuotations.map((quotation) => (
                 <TableRow key={quotation.id}>
                   <TableCell className="font-medium">{quotation.number}</TableCell>
                   <TableCell>{quotation.title}</TableCell>
