@@ -15,6 +15,7 @@ import {
   useRecentUsageEvents,
   useDailyUsageSeries,
 } from "@/hooks/useBillingUsage";
+import { QuotaPanel } from "@/components/billing/QuotaPanel";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -89,6 +90,10 @@ export default function BillingUsage() {
           icon={TrendingUp}
         />
       </div>
+
+      <QuotaPanel />
+
+
 
       <Card>
         <CardHeader>
