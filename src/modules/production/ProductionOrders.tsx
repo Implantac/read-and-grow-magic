@@ -14,6 +14,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Progress } from '@/ui/base/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { Factory } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
