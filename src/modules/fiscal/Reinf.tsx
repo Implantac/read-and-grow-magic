@@ -10,6 +10,68 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/ui/base/tabs';
 import { useReinf, type ReinfEvent, type ReinfPeriod } from '@/hooks/fiscal/useReinf';
 import { formatBRL } from '@/lib/formatters';
 import { toCsv, downloadCsv } from '@/lib/csv';
+import { toast } from 'sonner';
+
+const TOLERANCE = 0.01;
+
+function parseBRL(v: string): number {
+  return Number(String(v || '0').replace(/\./g, '').replace(',', '.')) || 0;
+}
+
+type ValidationResult = { ok: boolean; errors: string[] };
+
+function validateTotalsRow(
+  rows: Record<string, string>[],
+  expected: Record<string, number>,
+): ValidationResult {
+  const errors: string[] = [];
+  const totalRow = rows.find((r) => r.event_type === 'TOTAL');
+  if (!totalRow) return { ok: false, errors: ['Linha TOTAL ausente no CSV.'] };
+  for (const [key, exp] of Object.entries(expected)) {
+    const got = parseBRL(totalRow[key]);
+    const diff = Math.abs(got - exp);
+    if (diff > TOLERANCE) {
+      errors.push(`${key}: CSV=${got.toFixed(2)} × Período=${exp.toFixed(2)} (Δ ${diff.toFixed(2)})`);
+    }
+  }
+  return { ok: errors.length === 0, errors };
+}
+
+function validateR2099Rows(rows: Record<string, string>[], period: ReinfPeriod | null): ValidationResult {
+  const t = period?.totals || {};
+  const inss = Number(t.r2010_inss ?? 0);
+  const base = inss > 0 ? inss / 0.11 : 0;
+  return validateTotalsRow(rows, { vr_base_inss: base, vr_ret_inss: inss });
+}
+
+function validateR4099Rows(rows: Record<string, string>[], period: ReinfPeriod | null): ValidationResult {
+  const t = period?.totals || {};
+  const ir = Number(t.r4020_ir ?? 0);
+  const csll = Number(t.r4020_csll ?? 0);
+  const pis = Number(t.r4020_pis ?? 0);
+  const cofins = Number(t.r4020_cofins ?? 0);
+  return validateTotalsRow(rows, {
+    vr_ret_ir: ir, vr_ret_csll: csll, vr_ret_pis: pis, vr_ret_cofins: cofins,
+    vr_total_darf: ir + csll + pis + cofins,
+  });
+}
+
+function guardExport(
+  label: string,
+  rows: Record<string, string>[],
+  validator: () => ValidationResult,
+  onOk: () => void,
+) {
+  const result = validator();
+  if (!result.ok) {
+    toast.error(`Divergência no ${label}`, {
+      description: `Totais do CSV não conferem com o período. ${result.errors.join(' • ')}`,
+    });
+    return;
+  }
+  onOk();
+  toast.success(`${label} validado`, { description: 'Linha TOTAL bate com o consolidado do período.' });
+}
 
 const R2099_HEADERS = [
   { key: 'event_type', label: 'Evento' },
