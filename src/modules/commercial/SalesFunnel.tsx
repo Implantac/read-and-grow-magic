@@ -388,7 +388,7 @@ export default function SalesFunnelPage() {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="text-center text-muted-foreground py-10">Sem dados</p>
+                <EmptyState compact icon={BarChart3} title="Sem dados" description="Cadastre oportunidades para visualizar o gráfico de conversão." />
               )}
             </CardContent>
           </Card>
