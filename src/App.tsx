@@ -146,7 +146,7 @@ const App = () => (
                 <Route path="/upgrade" element={<Upgrade />} />
                 <Route path="/subscribe" element={<Subscribe />} />
 
-                {CommercialRoutes}
+                <Route path="/comercial/*" element={<ModuleErrorBoundary moduleName="Comercial"><Routes>{CommercialRoutes}</Routes></ModuleErrorBoundary>} />
                 <Route
                   path="/financeiro/*"
                   element={
@@ -157,17 +157,21 @@ const App = () => (
                     </FeatureGate>
                   }
                 />
-                {AccountingRoutes}
-                <Route element={<GatedOutlet module="producao" />}>{ProductionRoutes}</Route>
-                <Route element={<GatedOutlet module="wms" />}>{WMSRoutes}</Route>
-                {AdminRoutes}
+                <Route path="/contabil/*" element={<ModuleErrorBoundary moduleName="Contábil"><Routes>{AccountingRoutes}</Routes></ModuleErrorBoundary>} />
+                <Route element={<GatedOutlet module="producao" />}>
+                  <Route path="/producao/*" element={<ModuleErrorBoundary moduleName="Produção"><Routes>{ProductionRoutes}</Routes></ModuleErrorBoundary>} />
+                </Route>
+                <Route element={<GatedOutlet module="wms" />}>
+                  <Route path="/wms/*" element={<ModuleErrorBoundary moduleName="WMS"><Routes>{WMSRoutes}</Routes></ModuleErrorBoundary>} />
+                </Route>
+                <Route path="/admin/*" element={<ModuleErrorBoundary moduleName="Admin"><Routes>{AdminRoutes}</Routes></ModuleErrorBoundary>} />
                 {OperationalRoutes}
                 {MiscellaneousRoutes}
-                <Route element={<GatedOutlet module="fiscal" />}>{FiscalRoutes}</Route>
-                {VerticalPackRoutes}
-                {ExecutiveRoutes}
+                <Route element={<GatedOutlet module="fiscal" />}>
+                  <Route path="/fiscal/*" element={<ModuleErrorBoundary moduleName="Fiscal"><Routes>{FiscalRoutes}</Routes></ModuleErrorBoundary>} />
                 </Route>
-              </Route>
+                {VerticalPackRoutes}
+                <Route path="/executive/*" element={<ModuleErrorBoundary moduleName="Executivo"><Routes>{ExecutiveRoutes}</Routes></ModuleErrorBoundary>} />
 
 
 
