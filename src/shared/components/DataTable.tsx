@@ -37,7 +37,7 @@ interface DataTableProps<T> {
   searchPlaceholder?: string;
   pageSize?: number;
   loading?: boolean;
-  emptyMessage?: string;
+  emptyMessage?: React.ReactNode;
   onRowClick?: (row: T) => void;
   actions?: (row: T) => React.ReactNode;
   className?: string;
