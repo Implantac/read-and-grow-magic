@@ -252,12 +252,30 @@ export function useBrainChat() {
       const { data, error } = await supabase.functions.invoke('ai-brain', {
         body: { action: 'chat', messages: history, agent },
       });
-      if (error) throw error;
-      const payload = (data ?? {}) as { content?: string; actions?: BrainChatAction[]; error?: string; message?: string; required_plan?: string };
+      let payload = (data ?? {}) as { content?: string; actions?: BrainChatAction[]; error?: string; message?: string; required_plan?: string };
+      if (error) {
+        // FunctionsHttpError carries the response body in error.context — try to
+        // recover a structured payload (QUOTA_EXCEEDED, PLAN_REQUIRED, etc.)
+        // instead of surfacing a generic "Failed to fetch" message.
+        try {
+          const resp = (error as any)?.context;
+          if (resp && typeof resp.json === 'function') {
+            payload = { ...(await resp.json()), ...payload };
+          }
+        } catch { /* ignore */ }
+        if (!payload.error) throw error;
+      }
       if (payload.error === 'PLAN_REQUIRED') {
         setMessages((prev) => [
           ...prev,
           { id: crypto.randomUUID(), role: 'assistant', content: `⚠️ ${payload.message || 'Plano da IA insuficiente.'}${payload.required_plan ? ` (Requer: ${payload.required_plan})` : ''}` },
+        ]);
+        return;
+      }
+      if (payload.error === 'QUOTA_EXCEEDED' || payload.error === 'quota_exceeded') {
+        setMessages((prev) => [
+          ...prev,
+          { id: crypto.randomUUID(), role: 'assistant', content: `⚠️ ${payload.message || 'Cota mensal de IA atingida. Faça upgrade para continuar.'}` },
         ]);
         return;
       }
