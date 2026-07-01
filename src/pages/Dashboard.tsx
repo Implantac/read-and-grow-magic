@@ -15,12 +15,13 @@ import {
   ShoppingCart, Wallet, Package, Factory, Truck, Warehouse,
   DollarSign, TrendingUp, ArrowDownCircle, ArrowUpCircle,
   RefreshCw, ShieldCheck, Scissors, Building, Database,
-  Users, Target, Navigation
+  Users, Target, Navigation, LayoutDashboard, Boxes, Brain, BarChart3,
 } from 'lucide-react';
 import { Card, CardContent } from '@/ui/base/card';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Button } from '@/ui/base/button';
 import { Badge } from '@/ui/base/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -42,6 +43,26 @@ const emptyModulePerformance = [
   { name: 'Produção', value: 0, color: 'hsl(142, 76%, 36%)' },
   { name: 'Compras', value: 0, color: 'hsl(262, 83%, 58%)' },
 ];
+
+const verticalMap: Record<string, { label: string; icon: any; color: string; path: string; cta: string }> = {
+  textile:      { label: 'Indústria Têxtil',       icon: Factory,     color: 'purple',   path: '/vertical/textile',      cta: 'Acessar Dashboard Especializado →' },
+  apparel:      { label: 'Confecção & Moda',       icon: Scissors,    color: 'orange',   path: '/vertical/apparel',      cta: 'Acessar Dashboard Especializado →' },
+  pharma:       { label: 'Farmacêutico',           icon: ShieldCheck, color: 'blue',     path: '/vertical/pharma',       cta: 'Acessar Dashboard Especializado →' },
+  retail:       { label: 'Varejo & Redes',         icon: ShoppingCart,color: 'pink',     path: '/vertical/retail',       cta: 'Acessar Dashboard Especializado →' },
+  distribution: { label: 'Distribuição & Atacado', icon: Truck,       color: 'green',    path: '/vertical/distribution', cta: 'Acessar Dashboard Especializado →' },
+  wholesaler:   { label: 'Atacadista',             icon: Database,    color: 'emerald',  path: '/vertical/wholesaler',   cta: 'Acessar Dashboard Especializado →' },
+  holding:      { label: 'Holding & Grupos',       icon: Building,    color: 'slate',    path: '/vertical/holding',      cta: 'Acessar Consolidação →' },
+};
+
+const verticalStyles: Record<string, { border: string; bg: string; bgHover: string; iconBg: string; iconText: string; cta: string }> = {
+  purple:  { border: 'border-l-purple-500',  bg: 'bg-purple-500/5',  bgHover: 'hover:bg-purple-500/10',  iconBg: 'bg-purple-500/10',  iconText: 'text-purple-600',  cta: 'text-purple-600' },
+  orange:  { border: 'border-l-orange-500',  bg: 'bg-orange-500/5',  bgHover: 'hover:bg-orange-500/10',  iconBg: 'bg-orange-500/10',  iconText: 'text-orange-600',  cta: 'text-orange-600' },
+  blue:    { border: 'border-l-blue-500',    bg: 'bg-blue-500/5',    bgHover: 'hover:bg-blue-500/10',    iconBg: 'bg-blue-500/10',    iconText: 'text-blue-600',    cta: 'text-blue-600' },
+  pink:    { border: 'border-l-pink-500',    bg: 'bg-pink-500/5',    bgHover: 'hover:bg-pink-500/10',    iconBg: 'bg-pink-500/10',    iconText: 'text-pink-600',    cta: 'text-pink-600' },
+  green:   { border: 'border-l-green-500',   bg: 'bg-green-500/5',   bgHover: 'hover:bg-green-500/10',   iconBg: 'bg-green-500/10',   iconText: 'text-green-600',   cta: 'text-green-600' },
+  emerald: { border: 'border-l-emerald-500', bg: 'bg-emerald-500/5', bgHover: 'hover:bg-emerald-500/10', iconBg: 'bg-emerald-500/10', iconText: 'text-emerald-600', cta: 'text-emerald-600' },
+  slate:   { border: 'border-l-slate-500',   bg: 'bg-slate-500/5',   bgHover: 'hover:bg-slate-500/10',   iconBg: 'bg-slate-500/10',   iconText: 'text-slate-600',   cta: 'text-slate-600' },
+};
 
 export default function Dashboard() {
   const { activeCompany, activeBranch } = useAppStore();
@@ -89,10 +110,13 @@ export default function Dashboard() {
     statusDistribution = [], alerts = [],
   } = data || {};
 
+  const vertical = verticalMap[segment as string];
+  const vStyle = vertical ? verticalStyles[vertical.color] : null;
+
   return (
     <main className="space-y-6" aria-label="Dashboard consolidado">
       {/* Header */}
-      <div className="flex items-end justify-between">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Dashboard Consolidado</h1>
           <p className="text-sm text-muted-foreground mt-0.5">
@@ -100,6 +124,9 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Badge variant="outline" className="text-[10px] bg-success/10 text-success border-success/20 gap-1">
+            <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> Auto-refresh 60s
+          </Badge>
           <Button
             variant="outline"
             size="sm"
@@ -111,62 +138,29 @@ export default function Dashboard() {
             <RefreshCw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} aria-hidden="true" />
             Atualizar
           </Button>
-          <p className="text-xs text-muted-foreground" aria-label="Atualização automática a cada 60 segundos">
-            Auto-refresh 60s
-          </p>
         </div>
-      </div>
+      </header>
 
-      {/* Centro de Comando e Orquestração IA - Cockpit Panorâmico */}
-      <div className="grid gap-6 lg:grid-cols-12 items-stretch">
-        <div className="lg:col-span-8 xl:col-span-9 h-full">
-          <ExecutiveCouncilPanel />
-        </div>
-        <div className="lg:col-span-4 xl:col-span-3 h-full">
-          <ExecutiveConsensus />
-        </div>
-      </div>
-
-      {/* Ações Recomendadas */}
-      {insights.length > 0 && (
-        <ExecutiveActionsPanel 
-          actions={insights.slice(0, 3).map((ins: any) => ({
-            title: ins.title,
-            description: ins.description,
-            impact: ins.impact_estimate,
-            priority: ins.severity,
-            module: ins.module
-          }))}
-          onExecute={sendMessage}
-        />
-      )}
-
-      {/* KPIs Principais */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* KPIs Principais — sempre visíveis */}
+      <section aria-label="Indicadores principais" className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {mainKPIs.map((kpi, idx) => {
           const Icon = iconMap[idx] || DollarSign;
           const colors = colorClasses[kpi.color] || colorClasses.primary;
           return (
-            <Card
-              key={kpi.title}
-              className="hover-lift group cursor-default"
-              style={{ animationDelay: `${idx * 80}ms` }}
-            >
+            <Card key={kpi.title} className="hover-lift group cursor-default" style={{ animationDelay: `${idx * 80}ms` }}>
               <CardContent className="p-5">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1.5">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{kpi.title}</p>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1.5 min-w-0">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider truncate">{kpi.title}</p>
                     <p className="text-2xl font-bold text-foreground tabular-nums animate-count-up">{kpi.value}</p>
                     <div className={cn(
                       "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold",
-                      kpi.change >= 0
-                        ? "bg-success/10 text-success"
-                        : "bg-destructive/10 text-destructive"
+                      kpi.change >= 0 ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
                     )}>
                       {kpi.change >= 0 ? '↑' : '↓'} {Math.abs(kpi.change).toFixed(1)}%
                     </div>
                   </div>
-                  <div className={cn('rounded-xl p-2.5 ring-1 transition-transform duration-200 group-hover:scale-110', colors.bg, colors.ring)}>
+                  <div className={cn('rounded-xl p-2.5 ring-1 transition-transform duration-200 group-hover:scale-110 shrink-0', colors.bg, colors.ring)}>
                     <Icon className={cn('h-5 w-5', colors.icon)} />
                   </div>
                 </div>
@@ -174,144 +168,125 @@ export default function Dashboard() {
             </Card>
           );
         })}
-      </div>
+      </section>
 
-      {/* KPIs por Módulo */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <ModuleKPISection title="Comercial" icon={ShoppingCart} kpis={commercialKPIs} accentColor="bg-primary" />
-        <ModuleKPISection title="Financeiro" icon={Wallet} kpis={financialKPIs} accentColor="bg-success" />
-        {segment !== 'services' && <ModuleKPISection title="Estoque" icon={Package} kpis={inventoryKPIs} accentColor="bg-info" />}
-        {segment !== 'services' && <ModuleKPISection title="WMS" icon={Warehouse} kpis={wmsKPIs} accentColor="bg-warning" />}
-        {segment === 'textile' && <ModuleKPISection title="Produção" icon={Factory} kpis={productionKPIs} accentColor="bg-[hsl(142,76%,36%)]" />}
-        
-        {/* Vertical Specific Shortcuts */}
-        {segment === 'textile' && (
-          <Card className="border-l-4 border-l-purple-500 bg-purple-500/5 hover:bg-purple-500/10 transition-all cursor-pointer" onClick={() => window.location.href='/vertical/textile'}>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="p-3 bg-purple-500/10 rounded-xl"><Factory className="text-purple-600 h-6 w-6" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Vertical</p>
-                <p className="font-bold">Indústria Têxtil</p>
-                <p className="text-[10px] text-purple-600 font-medium">Acessar Dashboard Especializado →</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-        {segment === 'apparel' && (
-          <Card className="border-l-4 border-l-orange-500 bg-orange-500/5 hover:bg-orange-500/10 transition-all cursor-pointer" onClick={() => window.location.href='/vertical/apparel'}>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="p-3 bg-orange-500/10 rounded-xl"><Scissors className="text-orange-600 h-6 w-6" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Vertical</p>
-                <p className="font-bold">Confecção & Moda</p>
-                <p className="text-[10px] text-orange-600 font-medium">Acessar Dashboard Especializado →</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-        {segment === 'pharma' && (
-          <Card className="border-l-4 border-l-blue-500 bg-blue-500/5 hover:bg-blue-500/10 transition-all cursor-pointer" onClick={() => window.location.href='/vertical/pharma'}>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="p-3 bg-blue-500/10 rounded-xl"><ShieldCheck className="text-blue-600 h-6 w-6" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Vertical</p>
-                <p className="font-bold">Farmacêutico</p>
-                <p className="text-[10px] text-blue-600 font-medium">Acessar Dashboard Especializado →</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-        {segment === 'retail' && (
-          <Card className="border-l-4 border-l-pink-500 bg-pink-500/5 hover:bg-pink-500/10 transition-all cursor-pointer" onClick={() => window.location.href='/vertical/retail'}>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="p-3 bg-pink-500/10 rounded-xl"><ShoppingCart className="text-pink-600 h-6 w-6" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Vertical</p>
-                <p className="font-bold">Varejo & Redes</p>
-                <p className="text-[10px] text-pink-600 font-medium">Acessar Dashboard Especializado →</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-        {segment === 'distribution' && (
-          <Card className="border-l-4 border-l-green-500 bg-green-500/5 hover:bg-green-500/10 transition-all cursor-pointer" onClick={() => window.location.href='/vertical/distribution'}>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="p-3 bg-green-500/10 rounded-xl"><Truck className="text-green-600 h-6 w-6" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Vertical</p>
-                <p className="font-bold">Distribuição & Atacado</p>
-                <p className="text-[10px] text-green-600 font-medium">Acessar Dashboard Especializado →</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-        {segment === 'wholesaler' && (
-          <Card className="border-l-4 border-l-emerald-500 bg-emerald-500/5 hover:bg-emerald-500/10 transition-all cursor-pointer" onClick={() => window.location.href='/vertical/wholesaler'}>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="p-3 bg-emerald-500/10 rounded-xl"><Database className="text-emerald-600 h-6 w-6" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Vertical</p>
-                <p className="font-bold">Atacadista</p>
-                <p className="text-[10px] text-emerald-600 font-medium">Acessar Dashboard Especializado →</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-        {segment === 'holding' && (
-          <Card className="border-l-4 border-l-slate-500 bg-slate-500/5 hover:bg-slate-500/10 transition-all cursor-pointer" onClick={() => window.location.href='/vertical/holding'}>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="p-3 bg-slate-500/10 rounded-xl"><Building className="text-slate-600 h-6 w-6" /></div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Vertical</p>
-                <p className="font-bold">Holding & Grupos</p>
-                <p className="text-[10px] text-slate-600 font-medium">Acessar Consolidação →</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+      {/* Ações Recomendadas — destaque quando existir */}
+      {insights.length > 0 && (
+        <ExecutiveActionsPanel
+          actions={insights.slice(0, 3).map((ins: any) => ({
+            title: ins.title,
+            description: ins.description,
+            impact: ins.impact_estimate,
+            priority: ins.severity,
+            module: ins.module,
+          }))}
+          onExecute={sendMessage}
+        />
+      )}
 
-        <ModuleKPISection title="Compras" icon={Truck} kpis={purchasingKPIs} accentColor="bg-[hsl(262,83%,58%)]" />
-        <ModuleKPISection title="RH & Capital Humano" icon={Users} kpis={hrKPIs} accentColor="bg-pink-500" />
-        <ModuleKPISection title="CRM & Marketing" icon={Target} kpis={crmKPIs} accentColor="bg-indigo-500" />
-        <ModuleKPISection title="Logística & TMS" icon={Navigation} kpis={logisticKPIs} accentColor="bg-cyan-500" />
-      </div>
+      {/* Conteúdo organizado em abas */}
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-2 sm:w-auto sm:inline-flex">
+          <TabsTrigger value="overview" className="gap-2 text-xs sm:text-sm">
+            <LayoutDashboard className="h-3.5 w-3.5" /> Visão Geral
+          </TabsTrigger>
+          <TabsTrigger value="modules" className="gap-2 text-xs sm:text-sm">
+            <Boxes className="h-3.5 w-3.5" /> Módulos
+          </TabsTrigger>
+          <TabsTrigger value="strategic" className="gap-2 text-xs sm:text-sm">
+            <Brain className="h-3.5 w-3.5" /> Estratégico IA
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="gap-2 text-xs sm:text-sm">
+            <BarChart3 className="h-3.5 w-3.5" /> Análises
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Gráficos Consolidados */}
-      <ConsolidatedCharts
-        modulePerformance={data?.modulePerformance || emptyModulePerformance}
-        statusDistribution={statusDistribution}
-      />
-
-      {/* Alertas + Faturamento + Atividades */}
-      <div className="grid gap-6 lg:grid-cols-4">
-        <div className="lg:col-span-1 space-y-6">
-          <GlobalAlerts alerts={alerts} />
-          <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
-            <h4 className="text-[10px] font-bold uppercase tracking-wider text-primary mb-3 flex items-center gap-2">
-              <ShieldCheck className="h-3 w-3" /> Integridade do Core
-            </h4>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Sincronização</span>
-                <Badge variant="outline" className="text-[9px] bg-success/10 text-success border-success/20">Real-time</Badge>
+        {/* Aba: Visão Geral — Alertas + Faturamento + Atividades + Plano */}
+        <TabsContent value="overview" className="space-y-6 mt-4">
+          <div className="grid gap-6 lg:grid-cols-4">
+            <aside className="lg:col-span-1 space-y-4" aria-label="Alertas e integridade">
+              <GlobalAlerts alerts={alerts} />
+              <div className="bg-primary/5 rounded-xl p-4 border border-primary/10">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-primary mb-3 flex items-center gap-2">
+                  <ShieldCheck className="h-3 w-3" /> Integridade do Core
+                </h4>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Sincronização</span>
+                    <Badge variant="outline" className="text-[9px] bg-success/10 text-success border-success/20">Real-time</Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Motor de Regras</span>
+                    <span className="text-[10px] font-bold">L4 Enterprise</span>
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-muted-foreground">Motor de Regras</span>
-                <span className="text-[10px] font-bold">L4 Enterprise</span>
+            </aside>
+            <div className="lg:col-span-3 space-y-6">
+              <UsagePanel />
+              <div className="grid gap-6 md:grid-cols-3">
+                <div className="md:col-span-2">
+                  <RevenueChart />
+                </div>
+                <RecentActivities />
               </div>
             </div>
           </div>
-        </div>
-        <div className="lg:col-span-3 space-y-6">
-          <UsagePanel />
-          <div className="grid gap-6 md:grid-cols-3">
-            <div className="md:col-span-2">
-              <RevenueChart />
-            </div>
-            <RecentActivities />
+        </TabsContent>
+
+        {/* Aba: Módulos — KPIs de cada área */}
+        <TabsContent value="modules" className="space-y-6 mt-4">
+          {vertical && vStyle && (
+            <Card
+              className={cn('border-l-4 transition-all cursor-pointer', vStyle.border, vStyle.bg, vStyle.bgHover)}
+              onClick={() => window.location.href = vertical.path}
+            >
+              <CardContent className="p-4 flex items-center gap-4">
+                <div className={cn('p-3 rounded-xl', vStyle.iconBg)}>
+                  <vertical.icon className={cn('h-6 w-6', vStyle.iconText)} />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase font-bold tracking-wider">Vertical Ativa</p>
+                  <p className="font-bold">{vertical.label}</p>
+                  <p className={cn('text-[10px] font-medium', vStyle.cta)}>{vertical.cta}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <ModuleKPISection title="Comercial" icon={ShoppingCart} kpis={commercialKPIs} accentColor="bg-primary" />
+            <ModuleKPISection title="Financeiro" icon={Wallet} kpis={financialKPIs} accentColor="bg-success" />
+            <ModuleKPISection title="CRM & Marketing" icon={Target} kpis={crmKPIs} accentColor="bg-indigo-500" />
+            <ModuleKPISection title="Compras" icon={Truck} kpis={purchasingKPIs} accentColor="bg-[hsl(262,83%,58%)]" />
+            {segment !== 'services' && <ModuleKPISection title="Estoque" icon={Package} kpis={inventoryKPIs} accentColor="bg-info" />}
+            {segment !== 'services' && <ModuleKPISection title="WMS" icon={Warehouse} kpis={wmsKPIs} accentColor="bg-warning" />}
+            {segment === 'textile' && <ModuleKPISection title="Produção" icon={Factory} kpis={productionKPIs} accentColor="bg-[hsl(142,76%,36%)]" />}
+            <ModuleKPISection title="Logística & TMS" icon={Navigation} kpis={logisticKPIs} accentColor="bg-cyan-500" />
+            <ModuleKPISection title="RH & Capital Humano" icon={Users} kpis={hrKPIs} accentColor="bg-pink-500" />
           </div>
-        </div>
-      </div>
+        </TabsContent>
+
+        {/* Aba: Estratégico IA — Conselho + Consenso */}
+        <TabsContent value="strategic" className="space-y-6 mt-4">
+          <div className="grid gap-6 lg:grid-cols-12 items-stretch">
+            <div className="lg:col-span-8 xl:col-span-9">
+              <ExecutiveCouncilPanel />
+            </div>
+            <div className="lg:col-span-4 xl:col-span-3">
+              <ExecutiveConsensus />
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* Aba: Análises — Gráficos consolidados */}
+        <TabsContent value="analytics" className="space-y-6 mt-4">
+          <ConsolidatedCharts
+            modulePerformance={data?.modulePerformance || emptyModulePerformance}
+            statusDistribution={statusDistribution}
+          />
+        </TabsContent>
+      </Tabs>
     </main>
   );
 }
