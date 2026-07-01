@@ -60,6 +60,7 @@ const ColetorPutaway = lazy(() => import("./coletor/ColetorPutaway"));
 const ColetorPicking = lazy(() => import("./coletor/ColetorPicking"));
 const ProfileSecurity = lazy(() => import("./pages/profile/Security"));
 const ProfilePrivacy = lazy(() => import("./pages/profile/Privacy"));
+const PurchaseApprovals = lazy(() => import("./pages/purchasing/PurchaseApprovals"));
 
 
 
@@ -130,6 +131,7 @@ const App = () => (
                 <Route path="/billing/consumo" element={<BillingUsage />} />
                 <Route path="/perfil/seguranca" element={<ProfileSecurity />} />
                 <Route path="/perfil/privacidade" element={<ProfilePrivacy />} />
+                <Route path="/compras/aprovacoes" element={<PurchaseApprovals />} />
 
 
                 <Route path="/upgrade" element={<Upgrade />} />
