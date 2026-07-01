@@ -8,6 +8,7 @@ import { Label } from "@/ui/base/label";
 import { Badge } from "@/ui/base/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/ui/base/dialog";
 import { Plus, Trash2, LayoutDashboard, ExternalLink } from "lucide-react";
+import { EmptyState } from "@/shared/components/EmptyState";
 import { Link } from "react-router-dom";
 import { useDashboards, useDashboardWidgets, useDashboardMutations } from "@/hooks/useDashboardEngine";
 import { WidgetRenderer } from "@/components/dashboard/WidgetRenderer";
