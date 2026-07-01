@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { ExecutiveKPIs } from '@/hooks/ai/useExecutiveAI';
+import { EnterpriseKPICard } from '@/shared/components/EnterpriseKPICard';
 
 import { formatters } from '@/shared/utils/formatters';
 
@@ -21,50 +22,58 @@ interface Props {
 }
 
 export function PrimaryKPICards({ kpis }: Props) {
-  const kpiCards = [
-    { 
-      label: 'Receita Total', 
-      value: fmtCompact(kpis?.totalRevenue || 0), 
-      icon: TrendingUp, 
-      color: 'text-emerald-600', 
-      bg: 'bg-emerald-500/10', 
-      sub: (
-        <div className="flex flex-col gap-0.5 mt-1">
-          <span className={cn('text-[10px]', (kpis?.moMGrowth ?? 0) >= 0 ? 'text-emerald-600' : 'text-destructive')}>
-            MoM: {(kpis?.moMGrowth ?? 0) >= 0 ? '+' : ''}{kpis?.moMGrowth || 0}%
-          </span>
-          <span className={cn('text-[10px]', (kpis?.yoYGrowth ?? 0) >= 0 ? 'text-emerald-600' : 'text-destructive')}>
-            YoY: {(kpis?.yoYGrowth ?? 0) >= 0 ? '+' : ''}{kpis?.yoYGrowth || 0}%
-          </span>
-        </div>
-      )
-    },
-    { label: 'Lucro Bruto', value: fmtCompact(kpis?.grossProfit || 0), icon: DollarSign, color: 'text-primary', bg: 'bg-primary/10', sub: <span className="text-[10px] text-muted-foreground">Margem {kpis?.grossMargin || 0}%</span> },
-    { label: 'Liquidez Corrente', value: (kpis?.currentRatio || 0).toFixed(2), icon: Scale, color: (kpis?.currentRatio || 0) >= 1 ? 'text-emerald-600' : 'text-destructive', bg: (kpis?.currentRatio || 0) >= 1 ? 'bg-emerald-500/10' : 'bg-destructive/10', sub: <span className="text-[10px] text-muted-foreground">Saúde de curto prazo</span> },
-    { label: 'Posição Líquida', value: fmtCompact(kpis?.netPosition || 0), icon: Wallet, color: (kpis?.netPosition || 0) >= 0 ? 'text-emerald-600' : 'text-destructive', bg: (kpis?.netPosition || 0) >= 0 ? 'bg-emerald-500/10' : 'bg-destructive/10' },
-  ];
-
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {kpiCards.map((k, idx) => (
-        <Card key={k.label} className="hover-lift" style={{ animationDelay: `${idx * 60}ms` }}>
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{k.label}</p>
-                <p className="text-2xl font-bold tabular-nums">{k.value}</p>
-                {k.sub && <div className="text-xs text-muted-foreground">{k.sub}</div>}
-              </div>
-              <div className={cn('rounded-xl p-2.5', k.bg)}>
-                <k.icon className={cn('h-5 w-5', k.color)} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+      <EnterpriseKPICard
+        index={0}
+        entityKey="revenue"
+        title="Receita Total"
+        value={fmtCompact(kpis?.totalRevenue || 0)}
+        numericValue={kpis?.totalRevenue || 0}
+        icon={TrendingUp}
+        color="success"
+        deltas={{ month: kpis?.moMGrowth, year: kpis?.yoYGrowth }}
+        trend={(kpis?.moMGrowth ?? 0) >= 0 ? 'up' : 'down'}
+        source="Dashboard Consolidado"
+        lastUpdated={new Date()}
+      />
+      <EnterpriseKPICard
+        index={1}
+        entityKey="gross_margin"
+        title="Lucro Bruto"
+        value={fmtCompact(kpis?.grossProfit || 0)}
+        numericValue={kpis?.grossProfit || 0}
+        icon={DollarSign}
+        color="primary"
+        subtitle={`Margem ${kpis?.grossMargin || 0}%`}
+        progress={kpis?.grossMargin}
+        source="Dashboard Consolidado"
+        lastUpdated={new Date()}
+      />
+      <EnterpriseKPICard
+        index={2}
+        title="Liquidez Corrente"
+        value={(kpis?.currentRatio || 0).toFixed(2)}
+        icon={Scale}
+        color={(kpis?.currentRatio || 0) >= 1 ? 'success' : 'danger'}
+        subtitle="Saúde de curto prazo"
+        status={(kpis?.currentRatio || 0) >= 1 ? 'healthy' : 'critical'}
+      />
+      <EnterpriseKPICard
+        index={3}
+        entityKey="cash_position"
+        title="Posição Líquida"
+        value={fmtCompact(kpis?.netPosition || 0)}
+        numericValue={kpis?.netPosition || 0}
+        icon={Wallet}
+        color={(kpis?.netPosition || 0) >= 0 ? 'success' : 'danger'}
+        source="Dashboard Consolidado"
+        lastUpdated={new Date()}
+      />
     </div>
   );
 }
+
 
 export function SecondaryKPICards({ kpis }: Props) {
   const items = [
