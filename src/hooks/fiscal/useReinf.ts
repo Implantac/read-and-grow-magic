@@ -69,7 +69,7 @@ export function useReinf() {
     load();
   }, [load]);
 
-  const call = async (fn: 'reinf_open_period' | 'reinf_generate_r2010' | 'reinf_generate_r4020' | 'reinf_close_period', label: string) => {
+  const call = async (fn: 'reinf_open_period' | 'reinf_generate_r2010' | 'reinf_generate_r2020' | 'reinf_generate_r4020' | 'reinf_close_period', label: string) => {
     setBusy(true);
     try {
       const { data, error } = await supabase.rpc(fn as any, { p_competencia: competencia });
