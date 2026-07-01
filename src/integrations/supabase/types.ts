@@ -14738,6 +14738,89 @@ export type Database = {
         }
         Relationships: []
       }
+      sre_oncall_shifts: {
+        Row: {
+          company_id: string
+          created_at: string
+          domain: string
+          ends_at: string
+          id: string
+          notes: string | null
+          starts_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          domain: string
+          ends_at: string
+          id?: string
+          notes?: string | null
+          starts_at: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          domain?: string
+          ends_at?: string
+          id?: string
+          notes?: string | null
+          starts_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sre_runbooks: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          domain: string | null
+          id: string
+          severity: string
+          slo_id: string | null
+          steps_md: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          domain?: string | null
+          id?: string
+          severity?: string
+          slo_id?: string | null
+          steps_md: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          domain?: string | null
+          id?: string
+          severity?: string
+          slo_id?: string | null
+          steps_md?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sre_runbooks_slo_id_fkey"
+            columns: ["slo_id"]
+            isOneToOne: false
+            referencedRelation: "sre_slos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sre_settings: {
         Row: {
           company_id: string
@@ -19834,6 +19917,27 @@ export type Database = {
         Returns: Json
       }
       severity_rank: { Args: { _sev: string }; Returns: number }
+      sre_current_oncall: {
+        Args: { _domain: string }
+        Returns: {
+          ends_at: string
+          notes: string
+          shift_id: string
+          starts_at: string
+          user_id: string
+        }[]
+      }
+      sre_runbooks_for_slo: {
+        Args: { _slo_id: string }
+        Returns: {
+          domain: string
+          id: string
+          severity: string
+          steps_md: string
+          title: string
+          updated_at: string
+        }[]
+      }
       sre_slo_status: {
         Args: never
         Returns: {
