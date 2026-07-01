@@ -60,20 +60,21 @@ export default function OrderTimeline() {
       const [order, history, prod, conf, nfes, ar] = await Promise.all([
         supabase.from('orders').select('*, clients(name)').eq('id', orderId!).maybeSingle(),
         supabase.from('order_status_history').select('*').eq('order_id', orderId!).order('created_at'),
-        supabase.from('production_orders').select('id, order_number, status, created_at, updated_at').eq('sales_order_id', orderId!).order('created_at'),
-        supabase.from('conference_records').select('id, code, status, created_at').eq('order_id', orderId!).order('created_at'),
-        supabase.from('nfe').select('id, numero, serie, status, data_emissao').eq('order_id', orderId!).order('data_emissao'),
-        supabase.from('accounts_receivable').select('id, document_number, status, due_date, amount, created_at').eq('order_id', orderId!).order('created_at'),
+        supabase.from('production_orders').select('id, order_number, status, created_at, updated_at').eq('sales_order_id', orderId!).order('created_at') as any,
+        supabase.from('conference_records').select('id, code, status, created_at').eq('order_id', orderId!).order('created_at') as any,
+        supabase.from('nfe').select('id, numero, serie, status, data_emissao').eq('order_id', orderId!).order('data_emissao') as any,
+        supabase.from('accounts_receivable').select('id, document_number, status, due_date, amount, created_at').eq('order_id', orderId!).order('created_at') as any,
       ]);
 
       const events: TimelineEvent[] = [];
+      const o: any = order.data;
 
-      if (order.data?.created_at) {
+      if (o?.created_at) {
         events.push({
           key: 'created',
-          at: order.data.created_at,
-          title: `Pedido ${order.data.order_number ?? ''} criado`,
-          subtitle: order.data.clients?.name ? `Cliente: ${order.data.clients.name}` : undefined,
+          at: o.created_at,
+          title: `Pedido ${o.number ?? o.order_number ?? ''} criado`,
+          subtitle: o.clients?.name ? `Cliente: ${o.clients.name}` : o.client_name || undefined,
           icon: ClipboardList,
           tone: 'primary',
         });
