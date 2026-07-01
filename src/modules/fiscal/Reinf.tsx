@@ -284,7 +284,6 @@ export default function Reinf() {
                 const rows = buildR4099Rows(byType('R-4099'), currentPeriod);
                 guardExport(
                   'CSV R-4099',
-                  rows,
                   () => validateR4099Rows(rows, currentPeriod),
                   () => downloadCsv(`reinf_R-4099_${competencia.slice(0, 7)}.csv`, toCsv(rows, R4099_HEADERS)),
                 );
