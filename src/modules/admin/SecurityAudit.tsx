@@ -124,8 +124,13 @@ function SecurityAuditInner() {
             {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">
-            Nenhum evento crítico no período selecionado.
+          <div className="p-4">
+            <EmptyState
+              compact
+              icon={ShieldAlert}
+              title="Nenhum evento crítico no período"
+              description="Ações sensíveis como exclusões, cancelamentos e alterações de permissão aparecem aqui."
+            />
           </div>
         ) : (
           <Table>
