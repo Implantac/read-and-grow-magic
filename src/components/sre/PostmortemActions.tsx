@@ -84,7 +84,7 @@ export function PostmortemActions({ postmortemId }: { postmortemId: string }) {
           <Label>Responsável</Label>
           <Select value={form.owner_id} onValueChange={v => setForm({ ...form, owner_id: v })}>
             <SelectTrigger><SelectValue placeholder="Opcional" /></SelectTrigger>
-            <SelectContent>{users.map(u => <SelectItem key={u.id} value={u.id}>{u.full_name || u.id.slice(0, 8)}</SelectItem>)}</SelectContent>
+            <SelectContent>{users.map(u => <SelectItem key={u.id} value={u.id}>{u.name || u.id.slice(0, 8)}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <div><Label>Prazo</Label><Input type="datetime-local" value={form.due_at} onChange={e => setForm({ ...form, due_at: e.target.value })} /></div>
