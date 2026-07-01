@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Company, CompanyStatus } from '@/types/administration';
 import { CompanyDialog } from './companies/CompanyDialog';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 const Companies = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -101,7 +102,19 @@ const Companies = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {companies.map((company) => (
+              {companies.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="p-4">
+                    <EmptyState
+                      compact
+                      icon={Building2}
+                      title="Nenhuma empresa cadastrada"
+                      description="Cadastre a matriz e filiais para habilitar operações multi-empresa."
+                      action={{ label: 'Nova Empresa', icon: Plus, onClick: () => setIsDialogOpen(true) }}
+                    />
+                  </TableCell>
+                </TableRow>
+              ) : companies.map((company) => (
                 <TableRow key={company.id}>
                   <TableCell>
                     <div className="flex flex-col">

@@ -20,6 +20,7 @@ import { Button } from '@/ui/base/button';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 export interface Column<T> {
   key: keyof T | string;
@@ -36,7 +37,7 @@ interface DataTableProps<T> {
   searchPlaceholder?: string;
   pageSize?: number;
   loading?: boolean;
-  emptyMessage?: string;
+  emptyMessage?: React.ReactNode;
   onRowClick?: (row: T) => void;
   actions?: (row: T) => React.ReactNode;
   className?: string;
@@ -51,7 +52,7 @@ export function DataTable<T extends { id: string }>({
   searchPlaceholder = 'Buscar...',
   pageSize = 10,
   loading = false,
-  emptyMessage = 'Nenhum registro encontrado',
+  emptyMessage,
   onRowClick,
   actions,
   className,
@@ -225,9 +226,15 @@ export function DataTable<T extends { id: string }>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length + (actions ? 1 : 0)}
-                  className="h-24 text-center text-muted-foreground"
+                  className="p-4"
                 >
-                  {emptyMessage}
+                  {emptyMessage ?? (
+                    <EmptyState
+                      compact
+                      title="Nenhum registro encontrado"
+                      description="Ajuste a busca ou os filtros para visualizar resultados."
+                    />
+                  )}
                 </TableCell>
               </TableRow>
             ) : (

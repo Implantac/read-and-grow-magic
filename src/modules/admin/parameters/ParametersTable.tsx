@@ -5,7 +5,8 @@ import {
 import { Card, CardContent } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Badge } from '@/ui/base/badge';
-import { Edit2, RefreshCw, Eye, EyeOff } from 'lucide-react';
+import { Edit2, RefreshCw, Eye, EyeOff, Settings2 } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { parameterCategoryConfig } from '@/config/administration';
@@ -51,7 +52,18 @@ export const ParametersTable = ({ parameters, onEdit }: ParametersTableProps) =>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {parameters.map((param) => (
+            {parameters.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="p-4">
+                  <EmptyState
+                    compact
+                    icon={Settings2}
+                    title="Nenhum parâmetro encontrado"
+                    description="Ajuste os filtros ou cadastre parâmetros para configurar o comportamento do sistema."
+                  />
+                </TableCell>
+              </TableRow>
+            ) : parameters.map((param) => (
               <TableRow key={param.id}>
                 <TableCell>
                   <div className="space-y-1">

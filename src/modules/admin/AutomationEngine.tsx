@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/ui/base/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/base/tabs";
 import { Plus, Trash2, Zap, History, Edit, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { EmptyState } from "@/shared/components/EmptyState";
 import {
   useAutomationRules,
   useAutomationRuns,
@@ -160,7 +161,12 @@ export default function AutomationEngine() {
           {isLoading ? (
             <p className="text-muted-foreground">Carregando...</p>
           ) : rules.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Nenhuma regra configurada.</p>
+            <EmptyState
+              compact
+              icon={Zap}
+              title="Nenhuma regra configurada"
+              description="Crie regras para automatizar ações a partir de eventos do ERP."
+            />
           ) : (
             <div className="space-y-2">
               {rules.map((r) => (

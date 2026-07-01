@@ -11,6 +11,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from "@/ui/base/dialog";
 import { Plus, Trash2, Play, GitBranch, History, GitFork, Eye } from "lucide-react";
+import { EmptyState } from "@/shared/components/EmptyState";
 import { WorkflowGraph } from "@/components/workflow/WorkflowGraph";
 import {
   useWorkflowDefinitions,
@@ -183,7 +184,12 @@ export default function WorkflowEngine() {
         <CardHeader><CardTitle>Definições ({defs.length})</CardTitle></CardHeader>
         <CardContent>
           {isLoading ? <p className="text-muted-foreground">Carregando...</p> : defs.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Nenhum workflow definido.</p>
+            <EmptyState
+              compact
+              icon={GitBranch}
+              title="Nenhum workflow definido"
+              description="Modele um fluxo de aprovação para começar a orquestrar processos."
+            />
           ) : (
             <div className="space-y-2">
               {defs.map((d) => (
@@ -214,7 +220,12 @@ export default function WorkflowEngine() {
         <CardHeader><CardTitle>Instâncias ({instances.length})</CardTitle></CardHeader>
         <CardContent>
           {instances.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Nenhuma instância ativa.</p>
+            <EmptyState
+              compact
+              icon={History}
+              title="Nenhuma instância ativa"
+              description="Instâncias em execução aparecerão aqui em tempo real."
+            />
           ) : (
             <div className="space-y-2">
               {instances.slice(0, 30).map((i) => (

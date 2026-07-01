@@ -13,6 +13,7 @@ import type { ExportColumn } from '@/lib/exportUtils';
 import type { LedgerEntry } from '@/types/accounting';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
 const exportColumns: ExportColumn[] = [
   { key: 'date', label: 'Data' },
   { key: 'journalNumber', label: 'Lançamento' },
@@ -193,10 +194,11 @@ export default function GeneralLedgerPage() {
               </TableBody>
             </Table>
           ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Nenhuma movimentação encontrada</p>
-            </div>
+            <EmptyState
+              icon={BookOpen}
+              title="Nenhuma movimentação encontrada"
+              description="Ajuste o período ou selecione outra conta para visualizar os lançamentos do Razão."
+            />
           )}
         </CardContent>
       </Card>

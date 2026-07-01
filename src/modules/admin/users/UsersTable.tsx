@@ -5,8 +5,9 @@ import { Card, CardContent } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Badge } from '@/ui/base/badge';
 import { 
-  Edit2, Trash2, UserCheck, UserX, Clock, MoreVertical, Key, Mail 
+  Edit2, Trash2, UserCheck, UserX, Clock, MoreVertical, Key, Mail, Users
 } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,7 +59,18 @@ export const UsersTable = ({ users, onEdit }: UsersTableProps) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.map((user) => (
+            {users.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="p-4">
+                  <EmptyState
+                    compact
+                    icon={Users}
+                    title="Nenhum usuário encontrado"
+                    description="Convide colaboradores ou ajuste os filtros para visualizar acessos ativos."
+                  />
+                </TableCell>
+              </TableRow>
+            ) : users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell>
                   <div className="flex items-center gap-3">

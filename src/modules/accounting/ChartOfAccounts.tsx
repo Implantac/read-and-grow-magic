@@ -18,6 +18,7 @@ import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 
 import { formatBRL } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
 const typeColorMap: Record<string, string> = {
   asset: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
   liability: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
@@ -180,11 +181,11 @@ export default function ChartOfAccountsPage() {
           {rootAccounts.length > 0 ? (
             <div className="space-y-0.5">{rootAccounts.map((a) => renderAccount(a))}</div>
           ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Nenhuma conta cadastrada</p>
-              <p className="text-sm">Clique em "Nova Conta" para começar</p>
-            </div>
+            <EmptyState
+              icon={BookOpen}
+              title="Nenhuma conta cadastrada"
+              description="Estruture o Plano de Contas para habilitar lançamentos contábeis e demonstrações."
+            />
           )}
         </CardContent>
       </Card>

@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/ui/base/skeleton";
 import { RoleGuard } from "@/components/auth/RoleGuard";
 import { ShieldAlert } from "lucide-react";
+import { EmptyState } from "@/shared/components/EmptyState";
 
 interface CriticalEvent {
   id: string;
@@ -123,8 +124,13 @@ function SecurityAuditInner() {
             {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">
-            Nenhum evento crítico no período selecionado.
+          <div className="p-4">
+            <EmptyState
+              compact
+              icon={ShieldAlert}
+              title="Nenhum evento crítico no período"
+              description="Ações sensíveis como exclusões, cancelamentos e alterações de permissão aparecem aqui."
+            />
           </div>
         ) : (
           <Table>

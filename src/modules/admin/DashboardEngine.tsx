@@ -8,6 +8,7 @@ import { Label } from "@/ui/base/label";
 import { Badge } from "@/ui/base/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/ui/base/dialog";
 import { Plus, Trash2, LayoutDashboard, ExternalLink } from "lucide-react";
+import { EmptyState } from "@/shared/components/EmptyState";
 import { Link } from "react-router-dom";
 import { useDashboards, useDashboardWidgets, useDashboardMutations } from "@/hooks/useDashboardEngine";
 import { WidgetRenderer } from "@/components/dashboard/WidgetRenderer";
@@ -45,7 +46,12 @@ export default function DashboardEngine() {
           </CardHeader>
           <CardContent>
             {dashboards.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nenhum dashboard.</p>
+              <EmptyState
+                compact
+                icon={LayoutDashboard}
+                title="Nenhum dashboard"
+                description="Crie um dashboard para consolidar KPIs e visualizações."
+              />
             ) : (
               <div className="space-y-1">
                 {dashboards.map((d) => (
@@ -97,9 +103,19 @@ export default function DashboardEngine() {
           </CardHeader>
           <CardContent>
             {!activeId ? (
-              <p className="text-sm text-muted-foreground">Selecione um dashboard.</p>
+              <EmptyState
+                compact
+                icon={LayoutDashboard}
+                title="Selecione um dashboard"
+                description="Escolha um dashboard à esquerda para visualizar e configurar seus widgets."
+              />
             ) : widgets.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nenhum widget. Adicione o primeiro.</p>
+              <EmptyState
+                compact
+                icon={Plus}
+                title="Nenhum widget"
+                description="Adicione o primeiro widget para começar a visualizar dados neste dashboard."
+              />
             ) : (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
