@@ -432,7 +432,7 @@ export default function SalesFunnelPage() {
                   })}
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground py-10">Nenhuma oportunidade estagnada 🎉</p>
+                <EmptyState compact icon={CheckCircle2} title="Nenhuma oportunidade estagnada 🎉" description="Seu funil está saudável. Continue avançando as negociações." />
               )}
             </CardContent>
           </Card>
