@@ -131,6 +131,7 @@ const App = () => (
                 <Route path="/billing/consumo" element={<BillingUsage />} />
                 <Route path="/perfil/seguranca" element={<ProfileSecurity />} />
                 <Route path="/perfil/privacidade" element={<ProfilePrivacy />} />
+                <Route path="/compras/aprovacoes" element={<PurchaseApprovals />} />
 
 
                 <Route path="/upgrade" element={<Upgrade />} />
