@@ -765,6 +765,22 @@ Modo: ${mode === "autopilot" ? "AUTOPILOT — sugira ações de baixo risco que 
 
     const structured = await callLLM(BRAIN_SYSTEM, userPrompt);
 
+    // Auto-validação: sinaliza números citados que NÃO existem no ground truth
+    const validation = validateAgainstGroundTruth(structured, groundTruth);
+    if (validation.unverified.length > 0) {
+      structured._validacao = {
+        numeros_nao_verificados: validation.unverified,
+        aviso: "Valores acima não foram encontrados no ground truth — trate com ceticismo.",
+      };
+      // Rebaixa confiança das decisões quando há números não verificados
+      if (Array.isArray(structured.decisoes)) {
+        structured.decisoes = structured.decisoes.map((d: any) => ({
+          ...d,
+          confidence: Math.min(Number(d.confidence) || 0.7, 0.5),
+        }));
+      }
+    }
+
     // Persiste decisões com guardrails
     const decisions = Array.isArray(structured.decisoes) ? structured.decisoes : [];
     let createdCount = 0;
