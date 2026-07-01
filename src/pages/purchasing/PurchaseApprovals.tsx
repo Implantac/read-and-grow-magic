@@ -243,8 +243,17 @@ export default function PurchaseApprovals() {
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Aprovações pendentes</CardTitle>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => scanSLA.mutate()}
+              disabled={scanSLA.isPending}
+            >
+              <AlertTriangle className="mr-1 h-4 w-4" />
+              Verificar SLA
+            </Button>
           </CardHeader>
           <CardContent>
             {(pending.data ?? []).length === 0 ? (
@@ -253,43 +262,63 @@ export default function PurchaseApprovals() {
               </p>
             ) : (
               <div className="space-y-3">
-                {(pending.data ?? []).map((a: any) => (
-                  <div
-                    key={a.id}
-                    className="flex items-center justify-between gap-3 rounded-md border border-border p-3"
-                  >
-                    <div>
-                      <div className="text-sm font-medium">
-                        Ordem {a.instance_id.slice(0, 8)}…
+                {(pending.data ?? []).map((a: any) => {
+                  const sla = slaStatus(a.due_at);
+                  return (
+                    <div
+                      key={a.id}
+                      className="flex items-center justify-between gap-3 rounded-md border border-border p-3"
+                    >
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium">
+                          Ordem {a.instance_id.slice(0, 8)}…
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {a.step_key}
+                        </div>
+                        <div className="mt-1">
+                          <Badge
+                            variant={
+                              sla.tone === "destructive"
+                                ? "destructive"
+                                : sla.tone === "warning"
+                                ? "secondary"
+                                : sla.tone === "success"
+                                ? "default"
+                                : "outline"
+                            }
+                            className="text-[10px]"
+                          >
+                            <Timer className="mr-1 h-3 w-3" />
+                            {sla.label}
+                          </Badge>
+                        </div>
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        {a.step_key}
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setComment("");
+                            setDecisionOpen({ id: a.id, approve: true });
+                          }}
+                        >
+                          Aprovar
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => {
+                            setComment("");
+                            setDecisionOpen({ id: a.id, approve: false });
+                          }}
+                        >
+                          <CircleSlash className="mr-1 h-4 w-4" />
+                          Rejeitar
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          setComment("");
-                          setDecisionOpen({ id: a.id, approve: true });
-                        }}
-                      >
-                        Aprovar
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => {
-                          setComment("");
-                          setDecisionOpen({ id: a.id, approve: false });
-                        }}
-                      >
-                        <CircleSlash className="mr-1 h-4 w-4" />
-                        Rejeitar
-                      </Button>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>
