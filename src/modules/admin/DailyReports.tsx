@@ -139,12 +139,11 @@ function ReportDetail({ data }: { data: DailyReportData }) {
 
       {/* Empty state */}
       {data.receivables_due_today.count === 0 && data.receivables_overdue.count === 0 && data.payables_due_today.count === 0 && data.sales_summary.count === 0 && (
-        <Card>
-          <CardContent className="p-8 text-center text-muted-foreground">
-            <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Nenhum dado financeiro registrado para esta data.</p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={FileText}
+          title="Sem dados financeiros para a data"
+          description="Nenhum recebimento, pagamento ou venda foi registrado neste dia."
+        />
       )}
     </div>
   );
