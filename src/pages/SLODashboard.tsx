@@ -11,6 +11,7 @@ import { Progress } from '@/ui/base/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Activity, AlertTriangle, Plus, Target, TrendingUp, Trash2, Siren, History } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
@@ -124,7 +125,7 @@ export default function SLODashboard() {
         <CardHeader><CardTitle>Status dos SLOs</CardTitle></CardHeader>
         <CardContent>
           {loading ? <Skeleton className="h-40 w-full" /> : rows.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhum SLO cadastrado. Crie um acima usando o domínio (`source`) dos eventos que deseja monitorar.</p>
+            <EmptyState icon={Target} title="Nenhum SLO cadastrado" description="Crie um SLO acima usando o domínio (source) dos eventos que deseja monitorar." />
           ) : (
             <Table>
               <TableHeader>
@@ -173,7 +174,7 @@ export default function SLODashboard() {
             <DialogTitle>Timeline · {timelineSlo?.name} <span className="text-xs text-muted-foreground ml-2">últimos 30 dias</span></DialogTitle>
           </DialogHeader>
           {timelineLoading ? <Skeleton className="h-40 w-full" /> : timeline.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhum incidente registrado para este SLO na janela.</p>
+            <EmptyState icon={History} title="Sem incidentes" description="Nenhum incidente registrado para este SLO na janela selecionada." />
           ) : (
             <Table>
               <TableHeader><TableRow>

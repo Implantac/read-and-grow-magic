@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/
 import { Badge } from "@/ui/base/badge";
 import { toast } from "sonner";
 import { Download, Trash2, FileText, ShieldQuestion, Loader2 } from "lucide-react";
+import { EmptyState } from "@/shared/components/EmptyState";
 import { PageContainer } from "@/shared/components/PageContainer";
 import { PageHeader } from "@/shared/components/PageHeader";
 import {
@@ -196,7 +197,7 @@ export default function ProfilePrivacy() {
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : requests.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhuma solicitação realizada ainda.</p>
+            <EmptyState icon={ShieldQuestion} title="Sem solicitações LGPD" description="Solicitações de acesso, portabilidade ou exclusão aparecerão aqui após serem registradas." />
           ) : (
             <ul className="divide-y">
               {requests.map((r) => (

@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Truck, Clock, CheckCircle2, AlertTriangle, Trophy, DollarSign } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -172,10 +173,7 @@ export default function CarrierScorecard() {
               {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}
             </div>
           ) : scores.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <AlertTriangle className="h-10 w-10 mx-auto mb-2 opacity-60" />
-              Nenhuma expedição encontrada no período selecionado.
-            </div>
+            <EmptyState icon={Truck} title="Sem expedições no período" description="Selecione outro intervalo ou aguarde expedições concluídas para gerar o scorecard." />
           ) : (
             <Table>
               <TableHeader>

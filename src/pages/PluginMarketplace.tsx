@@ -7,6 +7,7 @@ import { Badge } from "@/ui/base/badge";
 import { Input } from "@/ui/base/input";
 import { Switch } from "@/ui/base/switch";
 import { Code2, GitBranch, Loader2, Package, PlayCircle, Search, Trash2 } from "lucide-react";
+import { EmptyState } from "@/shared/components/EmptyState";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -138,11 +139,7 @@ export default function PluginMarketplace() {
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
           </div>
         ) : filtered.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center text-muted-foreground">
-              Nenhum plugin encontrado.
-            </CardContent>
-          </Card>
+          <EmptyState icon={Package} title="Nenhum plugin" description="Ajuste os filtros de busca ou publique um novo plugin no editor para estendê-lo ao ERP." />
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filtered.map((p) => {
