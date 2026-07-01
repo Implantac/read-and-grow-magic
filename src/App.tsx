@@ -171,6 +171,7 @@ const App = () => (
             </Routes>
           </Suspense>
         </BrowserRouter>
+        </ConfirmDialogProvider>
       </EnterpriseProvider>
     </TooltipProvider>
   </QueryClientProvider>
