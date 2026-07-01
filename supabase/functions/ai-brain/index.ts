@@ -103,8 +103,12 @@ async function loadPendingSummary(companyId: string | null, limit = 8) {
 async function gatherGroundTruth(companyId: string | null) {
   if (!companyId) return { available: false, reason: "sem company_id" };
   const today = new Date();
-  const todayStr = today.toISOString().slice(0, 10);
-  const d30 = new Date(today.getTime() - 30 * 86400000).toISOString().slice(0, 10);
+  const todayISO = today.toISOString();
+  const todayStr = todayISO.slice(0, 10);
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString();
+  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59).toISOString();
+  const prevMonthStart = new Date(today.getFullYear(), today.getMonth() - 1, 1).toISOString();
+  const prevMonthEnd = new Date(today.getFullYear(), today.getMonth(), 0, 23, 59, 59).toISOString();
 
   const tables = [
     "clients","suppliers","products","orders",
@@ -118,67 +122,123 @@ async function gatherGroundTruth(companyId: string | null) {
     counts[t] = count ?? 0;
   }));
 
-  // AR aberto — detalhado + aging
-  const { data: arOpen } = await admin.from("accounts_receivable")
-    .select("id,client_id,open_amount,amount,due_date,status")
-    .eq("company_id", companyId).neq("status", "paid").limit(2000);
-  const arRows = (arOpen || []).map((r: any) => ({
+  // ═══════════════════════════════════════════════════════
+  // ATENÇÃO: Estas queries DEVEM espelhar EXATAMENTE
+  // src/hooks/system/useDashboardData.ts para que os números
+  // que a IA reporta batam com o Dashboard Consolidado.
+  // Fonte única de verdade = mesmas tabelas + mesmos filtros.
+  // ═══════════════════════════════════════════════════════
+
+  // FATURAMENTO — sales completed no mês corrente (=Dashboard)
+  const [salesCurRes, salesPrevRes] = await Promise.all([
+    admin.from("sales").select("total,status,date").gte("date", monthStart).lte("date", monthEnd).eq("company_id", companyId),
+    admin.from("sales").select("total,status,date").gte("date", prevMonthStart).lte("date", prevMonthEnd).eq("company_id", companyId),
+  ]);
+  const salesCur = (salesCurRes.data || []).filter((s: any) => s.status === "completed");
+  const salesPrev = (salesPrevRes.data || []).filter((s: any) => s.status === "completed");
+  const faturamento_mes = +salesCur.reduce((s: number, r: any) => s + (Number(r.total) || 0), 0).toFixed(2);
+  const faturamento_mes_anterior = +salesPrev.reduce((s: number, r: any) => s + (Number(r.total) || 0), 0).toFixed(2);
+  const faturamento_trend_pct = faturamento_mes_anterior > 0
+    ? +(((faturamento_mes - faturamento_mes_anterior) / faturamento_mes_anterior) * 100).toFixed(2)
+    : 0;
+  const ticket_medio = salesCur.length > 0 ? +(faturamento_mes / salesCur.length).toFixed(2) : 0;
+
+  // A RECEBER — mesmo filtro do Dashboard: status='pending', campo 'amount'
+  const { data: arData } = await admin.from("accounts_receivable")
+    .select("id,client_id,amount,due_date,status").eq("status", "pending").eq("company_id", companyId).limit(2000);
+  const arRows = (arData || []).map((r: any) => ({
     id: r.id, client_id: r.client_id,
-    valor: Number(r.open_amount ?? r.amount) || 0,
+    valor: Number(r.amount) || 0,
     due_date: r.due_date,
     vencido: r.due_date && r.due_date < todayStr,
   }));
-  const ar_open_total = +arRows.reduce((s, r) => s + r.valor, 0).toFixed(2);
+  const ar_pending_total = +arRows.reduce((s, r) => s + r.valor, 0).toFixed(2);
+  const ar_pending_count = arRows.length;
   const ar_overdue = arRows.filter(r => r.vencido);
   const ar_overdue_total = +ar_overdue.reduce((s, r) => s + r.valor, 0).toFixed(2);
   const ar_top5 = [...arRows].sort((a, b) => b.valor - a.valor).slice(0, 5);
 
-  // AP aberto
-  const { data: apOpen } = await admin.from("accounts_payable")
-    .select("id,supplier_id,amount,due_date,status")
-    .eq("company_id", companyId).neq("status", "paid").limit(2000);
-  const apRows = (apOpen || []).map((r: any) => ({
+  // A PAGAR — mesmo filtro do Dashboard: status='pending', campo 'amount'
+  const { data: apData } = await admin.from("accounts_payable")
+    .select("id,supplier_id,amount,due_date,status").eq("status", "pending").eq("company_id", companyId).limit(2000);
+  const apRows = (apData || []).map((r: any) => ({
     id: r.id, supplier_id: r.supplier_id,
     valor: Number(r.amount) || 0,
     due_date: r.due_date,
     vencido: r.due_date && r.due_date < todayStr,
   }));
-  const ap_open_total = +apRows.reduce((s, r) => s + r.valor, 0).toFixed(2);
-  const ap_overdue_total = +apRows.filter(r => r.vencido).reduce((s, r) => s + r.valor, 0).toFixed(2);
+  const ap_pending_total = +apRows.reduce((s, r) => s + r.valor, 0).toFixed(2);
+  const ap_pending_count = apRows.length;
+  const ap_overdue = apRows.filter(r => r.vencido);
+  const ap_overdue_total = +ap_overdue.reduce((s, r) => s + r.valor, 0).toFixed(2);
   const ap_top5 = [...apRows].sort((a, b) => b.valor - a.valor).slice(0, 5);
 
-  // Vendas últimos 30 dias
-  const { data: recentOrders } = await admin.from("orders")
-    .select("id,total,status,created_at")
-    .eq("company_id", companyId).gte("created_at", d30).limit(2000);
-  const orders_30d_count = (recentOrders || []).length;
-  const orders_30d_total = +((recentOrders || []).reduce((s: number, r: any) => s + (Number(r.total) || 0), 0)).toFixed(2);
+  const saldo_liquido = +(ar_pending_total - ap_pending_total).toFixed(2);
 
-  // Estoque baixo
-  const { data: stock } = await admin.from("stock_balances")
-    .select("product_id,quantity,min_quantity").eq("company_id", companyId).limit(2000);
-  const low_stock_count = (stock || []).filter((r: any) => r.min_quantity != null && Number(r.quantity) < Number(r.min_quantity)).length;
+  // PEDIDOS — mês corrente (=Dashboard: filtro por 'date')
+  const { data: ordersMonth } = await admin.from("orders")
+    .select("id,status,total,priority,created_at,date")
+    .gte("date", monthStart).lte("date", monthEnd).eq("company_id", companyId).limit(2000);
+  const ordersMes = ordersMonth || [];
+  const pedidos_mes_count = ordersMes.length;
+  const pedidos_pendentes = ordersMes.filter((o: any) => o.status === "pending").length;
 
-  // OPs em aberto
-  const { count: op_open } = await admin.from("production_orders")
-    .select("id", { count: "exact", head: true })
-    .eq("company_id", companyId).not("status", "in", "(completed,cancelled,closed)");
+  // CLIENTES ATIVOS (=Dashboard)
+  const { count: clientes_ativos } = await admin.from("clients")
+    .select("id", { count: "exact", head: true }).eq("status", "active").eq("company_id", companyId);
+
+  // NF-e do mês
+  const { data: nfeMonth } = await admin.from("nfe")
+    .select("id,status,total").gte("issue_date", monthStart).eq("company_id", companyId).limit(2000);
+  const nfes = nfeMonth || [];
+  const nfe_autorizadas = nfes.filter((n: any) => n.status === "authorized").length;
+  const nfe_rascunho = nfes.filter((n: any) => n.status === "draft").length;
+
+  // PRODUÇÃO (=Dashboard)
+  const { data: prodOrdersData } = await admin.from("production_orders")
+    .select("id,status,quantity,produced_quantity").eq("company_id", companyId).limit(2000);
+  const prodOrders = prodOrdersData || [];
+  const op_ativas = prodOrders.filter((o: any) => ["in_progress", "started"].includes(o.status)).length;
+  const op_concluidas = prodOrders.filter((o: any) => o.status === "completed").length;
+
+  // COMPRAS
+  const { data: purchData } = await admin.from("purchase_orders")
+    .select("id,status,total").eq("company_id", companyId).limit(2000);
+  const purchases = purchData || [];
+  const compras_aprovacao = purchases.filter((o: any) => ["draft", "pending"].includes(o.status)).length;
 
   return {
     available: true,
     reference_date: todayStr,
+    periodo: { mes_atual_inicio: monthStart.slice(0, 10), mes_atual_fim: monthEnd.slice(0, 10) },
     counts,
+    fonte: "Espelha useDashboardData.ts — mesmos filtros do Dashboard Consolidado",
+    comercial: {
+      faturamento_mes,
+      faturamento_mes_anterior,
+      faturamento_trend_pct,
+      ticket_medio,
+      pedidos_mes_count,
+      pedidos_pendentes,
+      clientes_ativos: clientes_ativos ?? 0,
+    },
     financeiro: {
-      ar_open_total, ar_overdue_total,
+      ar_pending_total,
+      ar_pending_count,
+      ar_overdue_total,
       ar_overdue_count: ar_overdue.length,
       ar_top5,
-      ap_open_total, ap_overdue_total,
+      ap_pending_total,
+      ap_pending_count,
+      ap_overdue_total,
+      ap_overdue_count: ap_overdue.length,
       ap_top5,
+      saldo_liquido,
     },
-    comercial: { orders_30d_count, orders_30d_total },
-    estoque: { low_stock_count },
-    producao: { open_orders: op_open ?? 0 },
-    _regra: "Números aqui são a única fonte válida. Qualquer valor não presente = 'dados insuficientes'.",
+    fiscal: { nfe_autorizadas_mes: nfe_autorizadas, nfe_rascunho: nfe_rascunho },
+    producao: { op_ativas, op_concluidas_total: op_concluidas },
+    compras: { aguardando_aprovacao: compras_aprovacao },
+    _regra: "Estes números são idênticos aos exibidos no Dashboard Consolidado. Qualquer divergência = bug. Qualquer valor não presente aqui = 'dados insuficientes'.",
   };
 }
 
