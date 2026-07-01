@@ -269,14 +269,8 @@ export default function Dashboard() {
 
         {/* Aba: Estratégico IA — Conselho + Consenso */}
         <TabsContent value="strategic" className="space-y-6 mt-4">
-          <div className="grid gap-6 lg:grid-cols-12 items-stretch">
-            <div className="lg:col-span-8 xl:col-span-9">
-              <ExecutiveCouncilPanel />
-            </div>
-            <div className="lg:col-span-4 xl:col-span-3">
-              <ExecutiveConsensus />
-            </div>
-          </div>
+          <ExecutiveCouncilPanel />
+          <ExecutiveConsensus />
         </TabsContent>
 
         {/* Aba: Análises — Gráficos consolidados */}
