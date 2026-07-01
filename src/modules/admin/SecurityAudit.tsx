@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/ui/base/skeleton";
 import { RoleGuard } from "@/components/auth/RoleGuard";
 import { ShieldAlert } from "lucide-react";
+import { EmptyState } from "@/shared/components/EmptyState";
 
 interface CriticalEvent {
   id: string;
