@@ -93,9 +93,10 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <EnterpriseProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+        <ConfirmDialogProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
