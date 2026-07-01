@@ -114,11 +114,7 @@ export default function JournalEntriesPage() {
               )}
             />
           ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Nenhum lançamento encontrado</p>
-              <p className="text-sm">Clique em "Novo Lançamento" para começar</p>
-            </div>
+            <EmptyState icon={BookOpen} title="Nenhum lançamento encontrado" description='Registre partidas dobradas na contabilidade. Clique em "Novo Lançamento" para começar.' />
           )}
         </CardContent>
       </Card>
