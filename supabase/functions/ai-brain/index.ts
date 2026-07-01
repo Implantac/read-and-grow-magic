@@ -1079,7 +1079,21 @@ const handler = async (req: Request): Promise<Response> => {
         const moduleDenied = await requireModule(ctx as TenantContext, 'executivo');
         if (moduleDenied) return moduleDenied;
         const quotaDenied = await enforceQuota(ctx as TenantContext, 'ai_calls', 1);
-        if (quotaDenied) return quotaDenied;
+        if (quotaDenied) {
+          // Convert 402 to 200 with structured payload so supabase.functions.invoke
+          // does not surface it as a network error in the browser. The UI reads
+          // payload.error === 'QUOTA_EXCEEDED' and renders a friendly upgrade prompt.
+          let body: any = {};
+          try { body = await quotaDenied.clone().json(); } catch { /* ignore */ }
+          return new Response(JSON.stringify({
+            error: 'QUOTA_EXCEEDED',
+            message: body?.message || 'Limite mensal de IA atingido. Faça upgrade do plano para continuar.',
+            metric: body?.metric || 'ai_calls',
+            current: body?.current,
+            limit: body?.limit,
+            fallback: false,
+          }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
         callerScope = branchScope(ctx as TenantContext);
       }
     }
