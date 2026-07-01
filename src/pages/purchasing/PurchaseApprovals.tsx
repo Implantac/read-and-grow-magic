@@ -59,6 +59,7 @@ export default function PurchaseApprovals() {
   const upsertRule = useUpsertPurchaseApprovalRule();
   const deleteRule = useDeletePurchaseApprovalRule();
   const decide = useDecidePOApproval();
+  const scanSLA = useScanApprovalsSLA();
 
   const [openRule, setOpenRule] = useState(false);
   const [form, setForm] = useState({
@@ -66,6 +67,7 @@ export default function PurchaseApprovals() {
     min_amount: 0,
     max_amount: "" as string,
     approver_role: "manager",
+    sla_hours: 24,
     active: true,
   });
 
