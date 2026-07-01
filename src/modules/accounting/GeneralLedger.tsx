@@ -13,6 +13,7 @@ import type { ExportColumn } from '@/lib/exportUtils';
 import type { LedgerEntry } from '@/types/accounting';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
 const exportColumns: ExportColumn[] = [
   { key: 'date', label: 'Data' },
   { key: 'journalNumber', label: 'Lançamento' },
