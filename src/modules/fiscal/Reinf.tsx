@@ -143,7 +143,7 @@ export default function Reinf() {
   const {
     competencia, setCompetencia,
     events, currentPeriod, loading, busy,
-    openPeriod, generateR2010, generateR4020, closePeriod, reopen,
+    openPeriod, generateR2010, generateR2020, generateR4020, closePeriod, reopen,
   } = useReinf();
   const [transmitting, setTransmitting] = useState(false);
 
@@ -224,7 +224,10 @@ export default function Reinf() {
                 <Sparkles className="h-4 w-4 mr-2" /> Abrir competência
               </Button>
               <Button onClick={generateR2010} disabled={busy || isClosed}>
-                <FileText className="h-4 w-4 mr-2" /> Gerar R-2010 (INSS)
+                <FileText className="h-4 w-4 mr-2" /> Gerar R-2010 (INSS tomado)
+              </Button>
+              <Button onClick={generateR2020} disabled={busy || isClosed}>
+                <FileText className="h-4 w-4 mr-2" /> Gerar R-2020 (INSS prestado)
               </Button>
               <Button onClick={generateR4020} disabled={busy || isClosed}>
                 <FileText className="h-4 w-4 mr-2" /> Gerar R-4020 (IR/CSLL/PIS/COFINS)
@@ -259,7 +262,9 @@ export default function Reinf() {
           <CardContent className="pt-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <TotalBox label="R-2010 (qtd)" value={String(totals.r2010_qtd ?? 0)} />
-              <TotalBox label="INSS retido" value={formatBRL(Number(totals.r2010_inss ?? 0))} />
+              <TotalBox label="INSS tomado" value={formatBRL(Number(totals.r2010_inss ?? 0))} />
+              <TotalBox label="R-2020 (qtd)" value={String(totals.r2020_qtd ?? 0)} />
+              <TotalBox label="INSS prestado" value={formatBRL(Number(totals.r2020_inss ?? 0))} />
               <TotalBox label="R-4020 (qtd)" value={String(totals.r4020_qtd ?? 0)} />
               <TotalBox label="IR retido" value={formatBRL(Number(totals.r4020_ir ?? 0))} />
               <TotalBox label="CSLL retido" value={formatBRL(Number(totals.r4020_csll ?? 0))} />
@@ -294,6 +299,17 @@ export default function Reinf() {
               }}
             >
               <Download className="h-4 w-4 mr-2" /> CSV R-2010
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={byType('R-2020').length === 0}
+              onClick={() => {
+                const rows = buildR2010Rows(byType('R-2020'));
+                downloadCsv(`reinf_R-2020_${competencia.slice(0, 7)}.csv`, toCsv(rows, R2010_HEADERS));
+              }}
+            >
+              <Download className="h-4 w-4 mr-2" /> CSV R-2020
             </Button>
             <Button
               size="sm"
@@ -342,12 +358,13 @@ export default function Reinf() {
           <Tabs defaultValue="R-2010">
             <TabsList>
               <TabsTrigger value="R-2010">R-2010 ({byType('R-2010').length})</TabsTrigger>
+              <TabsTrigger value="R-2020">R-2020 ({byType('R-2020').length})</TabsTrigger>
               <TabsTrigger value="R-4020">R-4020 ({byType('R-4020').length})</TabsTrigger>
               <TabsTrigger value="R-2099">R-2099 ({byType('R-2099').length})</TabsTrigger>
               <TabsTrigger value="R-4099">R-4099 ({byType('R-4099').length})</TabsTrigger>
             </TabsList>
 
-            {(['R-2010', 'R-4020', 'R-2099', 'R-4099'] as const).map((t) => (
+            {(['R-2010', 'R-2020', 'R-4020', 'R-2099', 'R-4099'] as const).map((t) => (
               <TabsContent key={t} value={t}>
                 <EventTable events={byType(t)} type={t} />
               </TabsContent>
@@ -380,7 +397,7 @@ function EventTable({ events, type }: { events: any[]; type: string }) {
           {!isFechamento && <TableHead>CNPJ</TableHead>}
           {!isFechamento && <TableHead>NF / Emissão</TableHead>}
           <TableHead className="text-right">Valor</TableHead>
-          {type === 'R-2010' && <TableHead className="text-right">INSS</TableHead>}
+          {(type === 'R-2010' || type === 'R-2020') && <TableHead className="text-right">INSS</TableHead>}
           {type === 'R-4020' && <TableHead className="text-right">IR</TableHead>}
           {type === 'R-4020' && <TableHead className="text-right">CSLL</TableHead>}
           {type === 'R-4020' && <TableHead className="text-right">PIS</TableHead>}
@@ -394,7 +411,7 @@ function EventTable({ events, type }: { events: any[]; type: string }) {
             {!isFechamento && <TableCell className="font-mono text-xs">{e.cnpj_prestador || e.cnpj_beneficiario || '—'}</TableCell>}
             {!isFechamento && <TableCell className="text-xs">{e.nota_fiscal || '—'} / {e.data_emissao || '—'}</TableCell>}
             <TableCell className="text-right">{formatBRL(Number(e.vr_bruto || 0))}</TableCell>
-            {type === 'R-2010' && <TableCell className="text-right">{formatBRL(Number(e.vr_ret_inss || 0))}</TableCell>}
+            {(type === 'R-2010' || type === 'R-2020') && <TableCell className="text-right">{formatBRL(Number(e.vr_ret_inss || 0))}</TableCell>}
             {type === 'R-4020' && <TableCell className="text-right">{formatBRL(Number(e.vr_ret_ir || 0))}</TableCell>}
             {type === 'R-4020' && <TableCell className="text-right">{formatBRL(Number(e.vr_ret_csll || 0))}</TableCell>}
             {type === 'R-4020' && <TableCell className="text-right">{formatBRL(Number(e.vr_ret_pis || 0))}</TableCell>}

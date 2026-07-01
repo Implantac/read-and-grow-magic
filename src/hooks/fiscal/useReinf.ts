@@ -14,7 +14,7 @@ export type ReinfPeriod = {
 export type ReinfEvent = {
   id: string;
   period_id: string;
-  event_type: 'R-2010' | 'R-4020' | 'R-2099' | 'R-4099';
+  event_type: 'R-2010' | 'R-2020' | 'R-4020' | 'R-2099' | 'R-4099';
   status: string;
   cnpj_prestador: string | null;
   cnpj_beneficiario: string | null;
@@ -69,7 +69,7 @@ export function useReinf() {
     load();
   }, [load]);
 
-  const call = async (fn: 'reinf_open_period' | 'reinf_generate_r2010' | 'reinf_generate_r4020' | 'reinf_close_period', label: string) => {
+  const call = async (fn: 'reinf_open_period' | 'reinf_generate_r2010' | 'reinf_generate_r2020' | 'reinf_generate_r4020' | 'reinf_close_period', label: string) => {
     setBusy(true);
     try {
       const { data, error } = await supabase.rpc(fn as any, { p_competencia: competencia });
@@ -105,6 +105,7 @@ export function useReinf() {
     loading, busy,
     openPeriod: () => call('reinf_open_period', 'Abertura'),
     generateR2010: () => call('reinf_generate_r2010', 'Geração R-2010'),
+    generateR2020: () => call('reinf_generate_r2020', 'Geração R-2020'),
     generateR4020: () => call('reinf_generate_r4020', 'Geração R-4020'),
     closePeriod: () => call('reinf_close_period', 'Fechamento'),
     reopen,

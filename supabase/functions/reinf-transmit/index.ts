@@ -5,7 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { buildCorsHeaders, handleCorsPreflight } from "../_shared/cors.ts";
 import { requireAuth } from "../_shared/require-auth.ts";
 
-type EventType = "R-2010" | "R-4020" | "R-2099" | "R-4099";
+type EventType = "R-2010" | "R-2020" | "R-4020" | "R-2099" | "R-4099";
 
 function esc(v: unknown): string {
   return String(v ?? "")
@@ -32,6 +32,19 @@ function buildEventXml(e: any): string {
         <vlrBaseRet>${fmt(e.vr_bruto)}</vlrBaseRet><vlrRetencao>${fmt(e.vr_ret_inss)}</vlrRetencao></infoTpServ>
     </nfs></ideEstabObra>
 </evtRetPrestServ>`;
+    case "R-2020":
+      // R-2020: retenção INSS sobre serviços PRESTADOS. Contribuinte = a própria empresa (prestador);
+      // ideTomadorServ = CNPJ do cliente que reteve.
+      return `<evtServTom Id="${id}">
+  <ideEvento><indRetif>1</indRetif><perApur>${esc(comp)}</perApur><tpAmb>2</tpAmb><procEmi>1</procEmi><verProc>USE-ERP-1.0</verProc></ideEvento>
+  <ideContri><tpInsc>1</tpInsc><nrInsc>${esc(e.cnpj_prestador || "")}</nrInsc></ideContri>
+  <ideTomadorServ><tpInscTomador>1</tpInscTomador><nrInscTomador>${esc(e.cnpj_beneficiario || "")}</nrInscTomador>
+    <nfs><serie>1</serie><numDocto>${esc(e.nota_fiscal || "")}</numDocto><dtEmissaoNF>${esc(e.data_emissao || "")}</dtEmissaoNF>
+      <vlrBruto>${fmt(e.vr_bruto)}</vlrBruto>
+      <infoTpServ><tpServico>${esc(e.cod_serv || "100000")}</tpServico>
+        <vlrBaseRet>${fmt(e.vr_bruto)}</vlrBaseRet><vlrRetencao>${fmt(e.vr_ret_inss)}</vlrRetencao></infoTpServ>
+    </nfs></ideTomadorServ>
+</evtServTom>`;
     case "R-4020":
       return `<evtRetPF Id="${id}">
   <ideEvento><indRetif>1</indRetif><perApur>${esc(comp)}</perApur><tpAmb>2</tpAmb><procEmi>1</procEmi><verProc>USE-ERP-1.0</verProc></ideEvento>
@@ -88,7 +101,7 @@ Deno.serve(async (req) => {
     const periodId = String(body.period_id || "");
     const eventTypes: EventType[] = Array.isArray(body.event_types) && body.event_types.length
       ? body.event_types
-      : ["R-2010", "R-4020", "R-2099", "R-4099"];
+      : ["R-2010", "R-2020", "R-4020", "R-2099", "R-4099"];
     if (!periodId) {
       return new Response(JSON.stringify({ error: "period_id required" }), {
         status: 400, headers: { ...cors, "Content-Type": "application/json" },
@@ -114,10 +127,16 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Check company cert config → determines env
+    // Detecta certificado A1 via secrets do tenant (nunca expostos ao cliente).
+    // Convenção: REINF_CERT_A1_B64 + REINF_CERT_A1_PASS (globais) OU
+    // REINF_CERT_A1_B64_<COMPANY_ID_SEM_HIFEN> para multi-tenant real.
+    const compKey = auth.companyId.replace(/-/g, "").toUpperCase();
+    const certB64 = Deno.env.get(`REINF_CERT_A1_B64_${compKey}`) || Deno.env.get("REINF_CERT_A1_B64");
     const { data: company } = await admin
-      .from("companies").select("id, reinf_cert_a1_ref").eq("id", auth.companyId).maybeSingle();
-    const hasCert = Boolean((company as any)?.reinf_cert_a1_ref);
+      .from("companies").select("id").eq("id", auth.companyId).maybeSingle();
+    const certRow = false; // reserva para armazenamento futuro em Vault
+    void company;
+    const hasCert = Boolean(certB64 || certRow);
     const env: "simulated" | "sandbox" = hasCert ? "sandbox" : "simulated";
 
     const { data: events } = await admin
