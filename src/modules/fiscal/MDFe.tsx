@@ -255,7 +255,7 @@ export default function MDFePage() {
         <CardHeader><CardTitle>Manifestos</CardTitle></CardHeader>
         <CardContent>
           {isLoading ? <div className="py-8 text-center text-muted-foreground">Carregando…</div> : mdfes.length === 0 ? (
-            <div className="py-12 text-center text-muted-foreground">Nenhum MDF-e cadastrado.</div>
+            <EmptyState icon={ScrollText} title="Nenhum MDF-e cadastrado" description="Manifestos Eletrônicos consolidam NF-e e CT-e para transporte. Emita o primeiro." />
           ) : (
             <Table>
               <TableHeader>
