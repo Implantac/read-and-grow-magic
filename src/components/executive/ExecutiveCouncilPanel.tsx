@@ -59,15 +59,15 @@ export function ExecutiveCouncilPanel() {
   return (
     <Card className="border-primary/20 bg-primary/5 overflow-hidden">
       <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-primary animate-pulse" />
-            <CardTitle className="text-sm font-bold uppercase tracking-wider">Cérebro ERP Enterprise</CardTitle>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <Brain className="h-5 w-5 text-primary animate-pulse shrink-0" />
+            <CardTitle className="text-sm font-bold uppercase tracking-wider truncate">Cérebro ERP Enterprise</CardTitle>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <ExecutiveIntelligenceStatus qualityScore={saude === 'critico' ? 15 : saude === 'alerta' ? 65 : 94} />
             <Badge variant="outline" className={cn(
-              "text-[10px] border-primary/20",
+              "text-[10px] border-primary/20 whitespace-nowrap",
               saude === 'critico' ? 'bg-destructive/10 text-destructive border-destructive/20' : 
               saude === 'alerta' ? 'bg-warning/10 text-warning border-warning/20' : 
               'text-primary'
