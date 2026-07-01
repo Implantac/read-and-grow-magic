@@ -15,6 +15,7 @@ import { useBankAccounts, useCreateBankAccount } from '@/hooks/financial/useBank
 import { TransferDialog } from '@/components/financial/TransferDialog';
 
 import { formatBRL } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
 export default function BankAccounts() {
   const { data: accounts = [], isLoading } = useBankAccounts();
   const createMut = useCreateBankAccount();

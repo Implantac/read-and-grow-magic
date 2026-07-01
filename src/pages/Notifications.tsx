@@ -16,6 +16,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from '@/ui/base/skeleton';
 import { toastSuccess } from '@/lib/toastHelpers';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 const typeConfig = {
   warning: { icon: AlertTriangle, color: 'text-warning', bg: 'bg-warning/10', badge: 'bg-warning/20 text-warning' },

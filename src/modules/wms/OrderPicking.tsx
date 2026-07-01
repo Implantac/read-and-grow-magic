@@ -16,6 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import { Package, CheckCircle, Truck, Search, AlertTriangle, PackageCheck, ClipboardList, Tag, Hand } from 'lucide-react';
 import { format } from 'date-fns';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 type ShipmentStage = 'conferred' | 'labeled' | 'collected' | 'shipped' | 'delivered';
 

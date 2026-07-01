@@ -14,6 +14,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnterpriseStore } from "@/core/stores/useEnterpriseStore";
 import { SREActionsInboxCard } from "@/components/sre/SREActionsInboxCard";
+import { EmptyState } from '@/shared/components/EmptyState';
 
 export default function WorkflowInbox() {
   const { data: defs = [], isLoading: loadingDefs } = useWorkflowDefinitions();

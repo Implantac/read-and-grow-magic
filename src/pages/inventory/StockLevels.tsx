@@ -56,6 +56,7 @@ import { KPICard } from '@/shared/components/KPICard';
 import { ABCCurveChart } from '@/components/inventory/ABCCurveChart';
 import { InventoryTurnoverChart } from '@/components/inventory/InventoryTurnoverChart';
 import type { StockLevel, StockLevelStatus, StockLevelFilters } from '@/types/inventory';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 export default function StockLevelsPage() {
   const [stockLevels] = useState<StockLevel[]>([]);

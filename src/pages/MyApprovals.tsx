@@ -15,6 +15,7 @@ import {
 import { CheckCircle2, XCircle, UserCheck2, Loader2, Inbox, Clock } from "lucide-react";
 import { format, isPast } from "date-fns";
 import { toast } from "sonner";
+import { EmptyState } from '@/shared/components/EmptyState';
 
 type Approval = {
   id: string;

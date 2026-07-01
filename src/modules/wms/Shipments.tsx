@@ -22,6 +22,7 @@ import { useWMSShipments } from '@/hooks/wms/useWMSShipments';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toSafeNumber } from '@/lib/numericValidation';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 export default function ShipmentsPage() {
   const { shipments, loading, create, ship, deliver } = useWMSShipments();

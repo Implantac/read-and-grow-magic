@@ -26,6 +26,7 @@ import { KPICard } from '@/shared/components/KPICard';
 import { useInventory } from '@/hooks/inventory/useInventoryQuery';
 import type { DbProduct } from '@/hooks/inventory/useProducts';
 import type { ProductType, ProductStatus, ProductFilters } from '@/types/inventory';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 export default function ProductsPage() {
   const { products, productsLoading: isLoading, categories, createProduct, updateProduct, deleteProduct } = useInventory();
