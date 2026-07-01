@@ -118,8 +118,8 @@ export default function MDFePage() {
                               ))}
                               {availableDocs.length === 0 && (
                                 <TableRow>
-                                  <TableCell colSpan={4} className="py-12 text-center text-muted-foreground italic">
-                                    Nenhuma NF-e ou CT-e autorizada disponível para vincular.
+                                  <TableCell colSpan={4} className="p-4">
+                                    <EmptyState compact icon={FileText} title="Nenhum documento disponível" description="Autorize NF-e ou CT-e para vinculá-las ao manifesto." />
                                   </TableCell>
                                 </TableRow>
                               )}
