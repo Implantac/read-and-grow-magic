@@ -342,10 +342,7 @@ function OrderDetailContent({ order }: { order: ProductionOrderRow }) {
           {logsLoading ? (
             <p className="text-center py-8 text-muted-foreground">Carregando...</p>
           ) : logs.length === 0 ? (
-            <Card><CardContent className="py-8 text-center text-muted-foreground">
-              <History className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>Nenhum registro de histórico</p>
-            </CardContent></Card>
+            <EmptyState icon={History} title="Nenhum registro de histórico" description="Apontamentos e eventos desta OP serão exibidos aqui em tempo real." />
           ) : (
             <div className="space-y-2 max-h-[300px] overflow-y-auto">
               {logs.map(log => (
