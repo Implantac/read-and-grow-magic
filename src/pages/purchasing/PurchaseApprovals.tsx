@@ -200,6 +200,7 @@ export default function PurchaseApprovals() {
                     <TableHead>Nível</TableHead>
                     <TableHead>Faixa</TableHead>
                     <TableHead>Papel</TableHead>
+                    <TableHead>SLA</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead />
                   </TableRow>
@@ -213,6 +214,11 @@ export default function PurchaseApprovals() {
                         {r.max_amount ? formatBRL(r.max_amount) : "∞"}
                       </TableCell>
                       <TableCell>{r.approver_role}</TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1 text-xs">
+                          <Timer className="h-3 w-3" /> {r.sla_hours}h
+                        </span>
+                      </TableCell>
                       <TableCell>
                         <Badge variant={r.active ? "default" : "outline"}>
                           {r.active ? "Ativo" : "Inativo"}
