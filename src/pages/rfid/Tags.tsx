@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Plus, Tag, RefreshCw, Trash2, Search } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -122,7 +123,7 @@ export default function RFIDTagsPage() {
           {loading ? (
             <p className="text-muted-foreground text-center py-8">Carregando...</p>
           ) : filtered.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">Nenhuma tag encontrada.</p>
+            <EmptyState icon={Tag} title="Nenhuma tag RFID" description="Cadastre tags EPC para rastrear produtos, paletes e ativos em tempo real." />
           ) : (
             <Table>
               <TableHeader>
