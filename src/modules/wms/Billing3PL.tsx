@@ -271,7 +271,11 @@ export default function Billing3PL() {
         </CardHeader>
         <CardContent>
           {invoices.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhuma fatura gerada.</p>
+            <EmptyState
+              compact
+              title="Nenhuma fatura gerada"
+              description="Gere a primeira fatura a partir de um contrato ativo."
+            />
           ) : (
             <Table>
               <TableHeader>
