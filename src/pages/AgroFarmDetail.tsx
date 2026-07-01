@@ -18,6 +18,7 @@ import {
   useAgroFarms,
 } from '@/hooks/useAgro';
 import { toSafeNumber } from '@/lib/numericValidation';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 export default function AgroFarmDetail() {
   const { id } = useParams<{ id: string }>();
@@ -136,7 +137,7 @@ export default function AgroFarmDetail() {
             </CardHeader>
             <CardContent className="p-0">
               {fields.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground">Nenhum talhão cadastrado.</div>
+                <EmptyState icon={Sprout} title="Nenhum talhão cadastrado" description="Cadastre talhões para associar safras, colheitas e insumos." />
               ) : (
                 <Table>
                   <TableHeader><TableRow><TableHead>Código</TableHead><TableHead>Nome</TableHead><TableHead className="text-right">Área (ha)</TableHead><TableHead>Cultura</TableHead><TableHead>Solo</TableHead><TableHead></TableHead></TableRow></TableHeader>
@@ -194,7 +195,7 @@ export default function AgroFarmDetail() {
             </CardHeader>
             <CardContent className="p-0">
               {seasons.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground">Nenhuma safra para este talhão.</div>
+                <EmptyState icon={Calendar} title="Nenhuma safra" description="Selecione um talhão e cadastre uma safra para começar." />
               ) : (
                 <Table>
                   <TableHeader><TableRow><TableHead>Cultura</TableHead><TableHead>Variedade</TableHead><TableHead>Plantio</TableHead><TableHead>Prev. colheita</TableHead><TableHead>Status</TableHead><TableHead></TableHead></TableRow></TableHeader>
@@ -260,7 +261,7 @@ export default function AgroFarmDetail() {
             </CardHeader>
             <CardContent className="p-0">
               {harvests.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground">Sem colheitas registradas.</div>
+                <EmptyState icon={Wheat} title="Sem colheitas registradas" description="Registre colheitas para acompanhar produtividade e receita." />
               ) : (
                 <Table>
                   <TableHeader><TableRow><TableHead>Data</TableHead><TableHead className="text-right">Quantidade</TableHead><TableHead>Unidade</TableHead><TableHead>Qualidade</TableHead><TableHead className="text-right">Receita</TableHead></TableRow></TableHeader>

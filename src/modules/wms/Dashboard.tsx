@@ -17,6 +17,7 @@ import {
 import { cn } from '@/lib/utils';
 import { WarehouseMap } from '@/components/wms/WarehouseMap';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 const quickActions = [
   { to: '/wms/recebimento', icon: PackagePlus, label: 'Recebimento', color: 'text-blue-500', bg: 'bg-blue-500/10' },
@@ -255,10 +256,7 @@ export default function WMSDashboardPage() {
                     </div>
                   ))
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-12 text-muted-foreground opacity-50">
-                    <Box className="h-10 w-10 mb-2" />
-                    <p className="text-xs">Nenhum evento recente</p>
-                  </div>
+                  <EmptyState icon={Box} title="Nenhum evento recente" description="Movimentações do WMS aparecerão aqui em tempo real." />
                 )}
               </div>
             </CardContent>

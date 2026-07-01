@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Activity, TrendingUp, Clock, AlertTriangle, Target, Gauge, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toastError } from "@/lib/toastHelpers";
+import { EmptyState } from "@/shared/components/EmptyState";
+import { Truck, ListChecks } from "lucide-react";
 
 type Range = "24h" | "7d" | "30d";
 
@@ -134,7 +136,7 @@ export default function WMSAnalytics() {
             <Table>
               <TableHeader><TableRow><TableHead>Tracking</TableHead><TableHead>Status</TableHead><TableHead>SLA</TableHead></TableRow></TableHeader>
               <TableBody>
-                {shipments.length === 0 && (<TableRow><TableCell colSpan={3} className="text-center text-muted-foreground py-6">Sem expedições no período</TableCell></TableRow>)}
+                {shipments.length === 0 && (<TableRow><TableCell colSpan={3} className="p-0"><EmptyState icon={Truck} title="Sem expedições no período" description="Ajuste o período ou aguarde novas expedições." /></TableCell></TableRow>)}
                 {shipments.map((s) => {
                   const onTime = s.delivered_at && s.scheduled_date ? new Date(s.delivered_at) <= new Date(s.scheduled_date) : null;
                   return (
@@ -156,7 +158,7 @@ export default function WMSAnalytics() {
           <CardHeader><CardTitle>Eventos Operacionais</CardTitle></CardHeader>
           <CardContent className="max-h-[420px] overflow-auto">
             {events.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-6">Sem eventos registrados</p>
+              <EmptyState icon={ListChecks} title="Sem eventos registrados" description="Eventos operacionais do WMS aparecerão em tempo real." />
             ) : (
               <ul className="space-y-2">
                 {events.map((e) => (

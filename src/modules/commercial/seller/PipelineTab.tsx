@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { KPICard } from '@/shared/components/KPICard';
 import { formatBRL } from '@/lib/formatters';
 import { getFunnelStageLabel } from './constants';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 interface PipelineTabProps {
   funnel: any[];
@@ -28,7 +29,7 @@ export function PipelineTab({ funnel, openFunnel, funnelValue, openAlerts }: Pip
         </CardHeader>
         <CardContent>
           {items.length === 0 ? (
-            <p className="text-center text-muted-foreground py-8">Nenhuma oportunidade aberta</p>
+            <EmptyState icon={Target} title="Nenhuma oportunidade aberta" description="Crie propostas ou avance leads para vê-las no pipeline." />
           ) : (
             <div className="space-y-2">
               {items.slice(0, 10).map(item => {

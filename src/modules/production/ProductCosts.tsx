@@ -16,6 +16,7 @@ import { Skeleton } from '@/ui/base/skeleton';
 import { cn } from '@/lib/utils';
 import { formatBRL } from '@/lib/formatters';
 import { toSafeNumber } from '@/lib/numericValidation';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 export default function ProductCostsPage() {
   const { costs, loading, createCost, updateCost, deleteCost, calculateCost, avgMargin, totalRevenue, totalCostSum, lowMarginProducts } = useProductCosts();
@@ -114,7 +115,7 @@ export default function ProductCostsPage() {
             </TableRow></TableHeader>
             <TableBody>
               {filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Nenhum custo cadastrado</TableCell></TableRow>
+                <TableRow><TableCell colSpan={10} className="p-0"><EmptyState icon={Calculator} title="Nenhum custo cadastrado" description="Cadastre custos de produtos para calcular margem, lucro e ponto de equilíbrio." action={{ label: 'Novo custo', onClick: () => setDialogOpen(true), icon: Plus }} /></TableCell></TableRow>
               ) : filtered.map(c => (
                 <TableRow key={c.id} className={cn(c.profit_margin < 15 && 'bg-destructive/5')}>
                   <TableCell className="font-mono">{c.product_code}</TableCell>
