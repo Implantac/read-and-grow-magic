@@ -12275,6 +12275,42 @@ export type Database = {
           },
         ]
       }
+      purchase_approval_rules: {
+        Row: {
+          active: boolean
+          approver_role: string
+          company_id: string
+          created_at: string
+          id: string
+          level: number
+          max_amount: number | null
+          min_amount: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          approver_role: string
+          company_id: string
+          created_at?: string
+          id?: string
+          level: number
+          max_amount?: number | null
+          min_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          approver_role?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          level?: number
+          max_amount?: number | null
+          min_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       purchase_order_items: {
         Row: {
           company_id: string
@@ -19674,6 +19710,18 @@ export type Database = {
           _pix_charge_id: string
         }
         Returns: Json
+      }
+      purchase_approval_decide: {
+        Args: { p_approval_id: string; p_approve: boolean; p_comment?: string }
+        Returns: Json
+      }
+      purchase_submit_for_approval: {
+        Args: { p_po_id: string }
+        Returns: {
+          approval_id: string
+          approver_role: string
+          level: number
+        }[]
       }
       purge_old_audit_logs: { Args: { _days?: number }; Returns: number }
       purge_old_logs_all: { Args: never; Returns: Json }
