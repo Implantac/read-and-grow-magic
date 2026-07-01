@@ -82,7 +82,7 @@ export default function OrderBlocks() {
               {isLoading ? (
                 <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhum bloqueio encontrado</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="p-4"><EmptyState compact icon={Lock} title="Nenhum bloqueio encontrado" description="Pedidos bloqueados por crédito ou risco aparecerão aqui para análise e liberação." /></TableCell></TableRow>
               ) : filtered.map(b => (
                 <TableRow key={b.id}>
                   <TableCell className="font-mono text-xs">{b.order_id.slice(0, 8)}...</TableCell>
