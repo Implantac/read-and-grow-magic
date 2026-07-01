@@ -52,7 +52,18 @@ export const ParametersTable = ({ parameters, onEdit }: ParametersTableProps) =>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {parameters.map((param) => (
+            {parameters.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="p-4">
+                  <EmptyState
+                    compact
+                    icon={Settings2}
+                    title="Nenhum parâmetro encontrado"
+                    description="Ajuste os filtros ou cadastre parâmetros para configurar o comportamento do sistema."
+                  />
+                </TableCell>
+              </TableRow>
+            ) : parameters.map((param) => (
               <TableRow key={param.id}>
                 <TableCell>
                   <div className="space-y-1">
