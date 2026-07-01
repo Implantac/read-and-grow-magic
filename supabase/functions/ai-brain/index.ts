@@ -9,6 +9,7 @@ import { checkRateLimit, rateLimitResponse } from "../_shared/rate-limit.ts";
 import { recordUsage } from "../_shared/usage.ts";
 import { instrument, contextFromAuth } from "../_shared/observability.ts";
 import { getKnowledgeBlockFor } from "../_shared/ai-prompts.ts";
+import { DATA_TOOL_SCHEMAS, DATA_TOOL_NAMES, dispatchDataTool } from "../_shared/data-tools.ts";
 
 
 const corsHeaders = {
@@ -587,6 +588,7 @@ const BRAIN_TOOLS = [
   { type: "function", function: { name: "release_order_block", description: "Libera bloqueio comercial de um pedido. Vai para aprovação humana", parameters: { type: "object", properties: { block_id: { type: "string" }, justification: { type: "string" } }, required: ["block_id", "justification"] } } },
   { type: "function", function: { name: "mark_invoice_paid", description: "Dá baixa em título a receber. Vai para aprovação humana", parameters: { type: "object", properties: { receivable_id: { type: "string" }, paid_amount: { type: "number" }, payment_date: { type: "string" }, notes: { type: "string" } }, required: ["receivable_id"] } } },
   { type: "function", function: { name: "assign_sales_rep", description: "Atribui vendedor a um cliente. Vai para aprovação humana", parameters: { type: "object", properties: { client_id: { type: "string" }, sales_rep_id: { type: "string" }, notes: { type: "string" } }, required: ["client_id", "sales_rep_id"] } } },
+  ...DATA_TOOL_SCHEMAS,
 ];
 
 // ─────────────────────────────────────────────
@@ -764,7 +766,7 @@ ${pending.length ? pending.map((d: any) => `- [${d.impact_level}] ${d.module} ·
   const knowledge = getKnowledgeBlockFor('ALL');
   const sys = `Você é o ${persona.label} — agente especializado do Cérebro do ERP.
 FOCO: ${persona.focus}
-Use o contexto (dados REAIS) para responder com precisão. Cite números exatos. Seja direto e PROATIVO: quando o usuário pedir uma ação executável, use as TOOLS disponíveis. Ações destrutivas viram decisões pendentes para aprovação humana — execute mesmo assim, é só uma proposta. Se houver decisões pendentes relevantes, mencione-as.
+Use o contexto (dados REAIS) para responder com precisão. Cite números exatos. Seja PROATIVO: use as TOOLS de leitura (query_data, aggregate_data) para buscar dados vivos sempre que o usuário perguntar sobre clientes, pedidos, títulos, produção, estoque, NF-e, etc. Só execute ações destrutivas (viram decisões pendentes) quando o usuário pedir explicitamente. Se houver decisões pendentes relevantes, mencione-as.
 
 ${knowledge}
 
@@ -811,9 +813,14 @@ ${ctx}`;
       try { args = JSON.parse(tc.function?.arguments || "{}"); } catch { /* */ }
 
       const isRisky = RISKY_ACTIONS.has(name);
+      const isDataTool = DATA_TOOL_NAMES.has(name);
       let result: any;
 
-      if (isRisky) {
+      if (isDataTool) {
+        result = companyId
+          ? await dispatchDataTool(name, args, companyId)
+          : { ok: false, error: "company_id ausente" };
+      } else if (isRisky) {
         // Cria decisão pendente em vez de executar
         const { data: dec } = await admin.from("ai_brain_decisions").insert({
           company_id: companyId || null,
