@@ -641,13 +641,17 @@ async function handleAnalyze(userId: string | undefined, authHeader?: string, mo
     .single();
 
   try {
-    const [snapshot, memories] = await Promise.all([
+    const [snapshot, memories, groundTruth] = await Promise.all([
       gatherSnapshot(authHeader, companyId),
       loadMemories(userId, companyId, 20),
+      gatherGroundTruth(companyId ?? null),
     ]);
 
 
-    const userPrompt = `# CONTEXTO DO NEGÓCIO (dados reais agora)
+    const userPrompt = `# DADOS REAIS DO NEGÓCIO (fonte única de verdade)
+
+## GROUND TRUTH (contagens e totais direto do banco — NÃO invente valores fora daqui)
+${JSON.stringify(groundTruth, null, 2)}
 
 ## Memórias de longo prazo
 ${JSON.stringify(memories, null, 2)}
