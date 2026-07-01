@@ -2,7 +2,8 @@ import { useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { PageLoading } from '@/shared/components/PageLoading';
 import { Button } from '@/ui/base/button';
-import { Printer, ChevronLeft } from 'lucide-react';
+import { Printer, ChevronLeft, MapPin } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useRouteStops, useRouteCost } from '@/hooks/tms/useRoutePlanning';
 import { useTMS } from '@/hooks/operational/useTMSQuery';
 
@@ -131,7 +132,7 @@ const RouteManifest = () => {
           </thead>
           <tbody>
             {stops.length === 0 ? (
-              <tr><td colSpan={7} className="py-6 text-center text-muted-foreground">Nenhuma parada cadastrada</td></tr>
+              <tr><td colSpan={7}><EmptyState compact icon={MapPin} title="Nenhuma parada" description="Adicione paradas de coleta e entrega para gerar o manifesto operacional." /></td></tr>
             ) : stops.map((s, i) => (
               <tr key={s.id} className="border-b align-top">
                 <td className="py-2 font-mono font-bold">{i + 1}</td>

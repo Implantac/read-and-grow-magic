@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { ExportButton } from '@/shared/components/ExportButton';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { BookOpen } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Badge } from '@/ui/base/badge';
@@ -258,8 +260,8 @@ export default function KardexPage() {
                 <TableBody>
                   {kardexData.entries.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={10} className="h-24 text-center">
-                        Nenhuma movimentação no período.
+                      <TableCell colSpan={10}>
+                        <EmptyState compact icon={BookOpen} title="Sem lançamentos no período" description="Ajuste as datas ou selecione outro produto para visualizar o Kardex." />
                       </TableCell>
                     </TableRow>
                   ) : (

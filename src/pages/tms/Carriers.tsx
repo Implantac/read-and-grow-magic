@@ -9,7 +9,8 @@ import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/ui/base/dialog';
 import { Label } from '@/ui/base/label';
-import { Plus, Search, Pencil, Trash2 } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, Building2 } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { toast } from 'sonner';
 
 const Carriers = () => {
@@ -71,7 +72,7 @@ const Carriers = () => {
           </TableHeader>
           <TableBody>
             {filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Nenhuma transportadora cadastrada</TableCell></TableRow>
+              <TableRow><TableCell colSpan={7}><EmptyState compact icon={Building2} title="Nenhuma transportadora" description="Cadastre transportadoras parceiras para alocar cargas e monitorar performance de entregas." /></TableCell></TableRow>
             ) : filtered.map(c => (
               <TableRow key={c.id}>
                 <TableCell className="font-mono">{c.code}</TableCell>

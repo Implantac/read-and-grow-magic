@@ -15,6 +15,7 @@ import {
 } from '@/ui/base/dialog';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { Plus, Search, Edit, Trash2, FolderTree, Package, Filter, Loader2 } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory, type DbCategory } from '@/hooks/inventory/useCategories';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
@@ -121,8 +122,8 @@ export default function CategoriesPage() {
             <TableBody>
               {filteredCategories.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
-                    Nenhuma categoria encontrada
+                  <TableCell colSpan={5}>
+                    <EmptyState compact icon={FolderTree} title="Nenhuma categoria" description="Organize produtos em categorias e subcategorias para relatórios e curva ABC." />
                   </TableCell>
                 </TableRow>
               ) : (

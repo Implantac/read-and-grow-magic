@@ -9,6 +9,7 @@ import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
 import { Progress } from '@/ui/base/progress';
 import { Truck, Navigation, MapPin, CheckCircle2, AlertCircle } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useLiveRoutes } from '@/hooks/tms/useRoutePlanning';
 import { useTMS } from '@/hooks/operational/useTMSQuery';
 
@@ -57,12 +58,7 @@ const LiveTracking = () => {
       </div>
 
       {routes.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center text-sm text-muted-foreground">
-            <AlertCircle className="h-8 w-8 mx-auto mb-3 opacity-50" />
-            Nenhuma rota planejada ou em trânsito no momento.
-          </CardContent>
-        </Card>
+        <EmptyState icon={Navigation} title="Nenhuma rota ativa" description="Planeje rotas ou aguarde motoristas iniciarem entregas para acompanhar em tempo real." />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {routes.map((r: any) => {

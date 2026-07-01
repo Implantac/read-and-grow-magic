@@ -5,6 +5,8 @@ import { useTMS } from '@/hooks/operational/useTMSQuery';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Badge } from '@/ui/base/badge';
 import { format } from 'date-fns';
+import { ClipboardCheck } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 const statusLabels: Record<string, string> = { pending: 'Pendente', delivered: 'Entregue', refused: 'Recusada', partial: 'Parcial' };
 const statusColors: Record<string, string> = { pending: 'secondary', delivered: 'default', refused: 'destructive', partial: 'outline' };
@@ -32,7 +34,7 @@ const DeliveryProofPage = () => {
           </TableHeader>
           <TableBody>
             {proofs.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhum comprovante registrado</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6}><EmptyState compact icon={ClipboardCheck} title="Sem comprovantes" description="Comprovantes com foto, assinatura e geolocalização serão exibidos após as entregas." /></TableCell></TableRow>
             ) : proofs.map(p => (
               <TableRow key={p.id}>
                 <TableCell className="font-mono">{p.orderNumber || '-'}</TableCell>

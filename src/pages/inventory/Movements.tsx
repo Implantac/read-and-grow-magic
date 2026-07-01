@@ -1,5 +1,7 @@
 import { useState, useMemo } from 'react';
 import { ExportButton } from '@/shared/components/ExportButton';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { ArrowLeftRight } from 'lucide-react';
 import { useInventory } from '@/hooks/inventory/useInventoryQuery';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
@@ -227,8 +229,8 @@ export default function MovementsPage() {
             <TableBody>
               {filteredMovements.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} className="h-24 text-center">
-                    Nenhuma movimentação encontrada.
+                  <TableCell colSpan={10}>
+                    <EmptyState compact icon={ArrowLeftRight} title="Sem movimentações" description="Nenhuma entrada ou saída encontrada com os filtros aplicados." />
                   </TableCell>
                 </TableRow>
               ) : (
