@@ -10,7 +10,7 @@ import { Badge } from '@/ui/base/badge';
 import { Progress } from '@/ui/base/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Skeleton } from '@/ui/base/skeleton';
-import { Activity, AlertTriangle, Plus, Target, TrendingUp, Trash2 } from 'lucide-react';
+import { Activity, AlertTriangle, Plus, Target, TrendingUp, Trash2, Siren } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { toast } from 'sonner';
@@ -68,6 +68,14 @@ export default function SLODashboard() {
     toast.success('SLO removido'); load();
   };
 
+  const scanBurn = async () => {
+    const { data, error } = await supabase.rpc('sre_slo_burn_scan');
+    if (error) { toast.error(error.message); return; }
+    const opened = (data ?? []).filter((x: any) => x.action === 'incident_opened').length;
+    toast.success(`Scan concluído: ${opened} incidente(s) aberto(s)`);
+    load();
+  };
+
   const kpis = useMemo(() => ({
     total: rows.length,
     breached: rows.filter(r => r.status === 'breached').length,
@@ -77,7 +85,10 @@ export default function SLODashboard() {
 
   return (
     <PageContainer>
-      <PageHeader title="SLO & Error Budget" description="Objetivos de disponibilidade por domínio e orçamento de erro consumido" />
+      <div className="flex items-start justify-between gap-4">
+        <PageHeader title="SLO & Error Budget" description="Objetivos de disponibilidade por domínio e orçamento de erro consumido" />
+        <Button onClick={scanBurn} variant="outline" className="mt-2"><Siren className="h-4 w-4 mr-2" /> Verificar burn</Button>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-4">
         <KPICard title="SLOs ativos" value={kpis.total} icon={Target} index={0} />
