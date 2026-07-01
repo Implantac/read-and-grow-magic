@@ -19270,6 +19270,27 @@ export type Database = {
       }
     }
     Functions: {
+      aps_schedule_multi: {
+        Args: { _horizon_days?: number }
+        Returns: {
+          conflicts: string[]
+          due_date: string
+          duration_minutes: number
+          is_late: boolean
+          machine_id: string
+          machine_name: string
+          machine_sector: string
+          operator: string
+          order_id: string
+          order_number: string
+          planned_end: string
+          planned_start: string
+          priority: string
+          product_name: string
+          quantity: number
+          sequence_no: number
+        }[]
+      }
       auto_match_bank_transactions: {
         Args: { p_bank_account_id?: string; p_tolerance_days?: number }
         Returns: {
