@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
@@ -229,9 +230,11 @@ export default function MRPPage() {
             </CardHeader>
             <CardContent>
               {materialNeeds.length === 0 ? (
-                <p className="text-center py-8 text-muted-foreground">
-                  Nenhuma necessidade calculada. Verifique se as OPs ativas possuem fichas técnicas com materiais.
-                </p>
+                <EmptyState
+                  icon={Calculator}
+                  title="Nenhuma necessidade calculada"
+                  description="Verifique se as OPs ativas possuem fichas técnicas (BOM) com materiais cadastrados."
+                />
               ) : (
                 <Table>
                   <TableHeader>
@@ -288,7 +291,7 @@ export default function MRPPage() {
             <CardHeader><CardTitle>OPs Ativas × Materiais</CardTitle></CardHeader>
             <CardContent>
               {activeOPs.length === 0 ? (
-                <p className="text-center py-8 text-muted-foreground">Nenhuma OP ativa.</p>
+                <EmptyState compact title="Nenhuma OP ativa" description="Libere ordens de produção para calcular necessidades." />
               ) : (
                 <Table>
                   <TableHeader>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
@@ -126,7 +127,9 @@ export default function InventoryPage() {
                 <TableBody>
                   {filteredItems.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhum item encontrado</TableCell>
+                      <TableCell colSpan={8} className="p-0">
+                        <EmptyState compact title="Nenhum item encontrado" description="Ajuste os filtros ou registre entradas de estoque." />
+                      </TableCell>
                     </TableRow>
                   ) : (
                     filteredItems.map(item => {
@@ -163,7 +166,7 @@ export default function InventoryPage() {
             <CardHeader><CardTitle>Contagens de Inventário</CardTitle></CardHeader>
             <CardContent>
               {counts.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">Nenhuma contagem registrada</div>
+                <EmptyState title="Nenhuma contagem registrada" description="Programe contagens cíclicas ou gerais para manter a acurácia do inventário." />
               ) : (
                 <Table>
                   <TableHeader>

@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { PageContainer } from '@/shared/components/PageContainer';
@@ -97,7 +98,10 @@ export default function SkuAllocationPage() {
         </CardHeader>
         <CardContent>
           {filtered.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-6 text-center">Nenhum saldo encontrado. Use "Alocar SKU" para iniciar.</p>
+            <EmptyState
+              title="Nenhum saldo encontrado"
+              description='Use "Alocar SKU" para posicionar produtos nos endereços do CD.'
+            />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

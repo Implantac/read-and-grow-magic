@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
@@ -89,13 +90,11 @@ export default function ReplenishmentPage() {
           })}
         </div>
       ) : (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <RefreshCw className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum reabastecimento</h3>
-            <p>Tarefas de reabastecimento serão geradas automaticamente.</p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={RefreshCw}
+          title="Nenhum reabastecimento pendente"
+          description="Tarefas de reabastecimento são geradas automaticamente quando o estoque de picking cai abaixo do mínimo."
+        />
       )}
     </PageContainer>
   );

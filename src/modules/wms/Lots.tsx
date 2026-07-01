@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
@@ -157,7 +158,15 @@ export default function LotsPage() {
                 </TableRow>
               ))}
               {filteredLots.length === 0 && (
-                <TableRow><TableCell colSpan={10} className="text-center py-8 text-muted-foreground">Nenhum lote encontrado</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={10} className="p-0">
+                    <EmptyState
+                      compact
+                      title="Nenhum lote encontrado"
+                      description="Cadastre lotes para rastrear validade, origem e endereçamento no CD."
+                    />
+                  </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>

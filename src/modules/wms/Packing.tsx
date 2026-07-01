@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
@@ -138,9 +139,13 @@ export default function PackingPage() {
                 })}
                 {filteredOrders.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      <PackageCheck className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                      Nenhuma ordem encontrada
+                    <TableCell colSpan={8} className="p-0">
+                      <EmptyState
+                        compact
+                        icon={PackageCheck}
+                        title="Nenhuma ordem encontrada"
+                        description="Ordens de packing aparecem aqui após o picking ser concluído."
+                      />
                     </TableCell>
                   </TableRow>
                 )}
