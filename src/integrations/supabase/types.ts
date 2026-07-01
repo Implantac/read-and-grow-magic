@@ -20055,6 +20055,23 @@ export type Database = {
         Returns: Json
       }
       severity_rank: { Args: { _sev: string }; Returns: number }
+      sre_actions_due_scan: {
+        Args: { _within_hours?: number }
+        Returns: {
+          action_id: string
+          company_id: string
+          due_at: string
+          hours_remaining: number
+          overdue: boolean
+          owner_email: string
+          owner_id: string
+          owner_name: string
+          postmortem_id: string
+          priority: string
+          title: string
+        }[]
+      }
+      sre_actions_notify_due: { Args: never; Returns: Json }
       sre_current_oncall: {
         Args: { _domain: string }
         Returns: {
