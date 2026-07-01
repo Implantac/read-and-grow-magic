@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
+import { EmptyState } from "@/shared/components/EmptyState";
+import { Receipt as ReceiptIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { Button } from "@/ui/base/button";
