@@ -29,7 +29,7 @@ import {
   TableRow,
 } from "@/ui/base/table";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { ShieldCheck, ClipboardList, Search as SearchIcon } from "lucide-react";
+import { ClipboardList, Search as SearchIcon } from "lucide-react";
 import { ShieldCheck, AlertTriangle, Ban, Search, RefreshCw } from "lucide-react";
 import { useToast } from "@/ui/base/use-toast";
 

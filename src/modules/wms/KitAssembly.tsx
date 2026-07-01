@@ -29,7 +29,7 @@ import {
 } from "@/ui/base/select";
 import { Badge } from "@/ui/base/badge";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { Package, History } from "lucide-react";
+import { History } from "lucide-react";
 import { Plus, Trash2, Package, Hammer } from "lucide-react";
 import { toastSuccess, toastError } from "@/lib/toastHelpers";
 
