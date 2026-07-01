@@ -14736,6 +14736,42 @@ export type Database = {
           },
         ]
       }
+      sre_slos: {
+        Row: {
+          active: boolean
+          company_id: string
+          created_at: string
+          domain: string
+          id: string
+          name: string
+          target_pct: number
+          updated_at: string
+          window_days: number
+        }
+        Insert: {
+          active?: boolean
+          company_id: string
+          created_at?: string
+          domain: string
+          id?: string
+          name: string
+          target_pct?: number
+          updated_at?: string
+          window_days?: number
+        }
+        Update: {
+          active?: boolean
+          company_id?: string
+          created_at?: string
+          domain?: string
+          id?: string
+          name?: string
+          target_pct?: number
+          updated_at?: string
+          window_days?: number
+        }
+        Relationships: []
+      }
       stock_balances: {
         Row: {
           available_qty: number | null
@@ -19671,6 +19707,22 @@ export type Database = {
         Returns: Json
       }
       severity_rank: { Args: { _sev: string }; Returns: number }
+      sre_slo_status: {
+        Args: never
+        Returns: {
+          burn_rate_1h: number
+          domain: string
+          error_budget_consumed_pct: number
+          failed_events: number
+          id: string
+          name: string
+          status: string
+          success_rate: number
+          target_pct: number
+          total_events: number
+          window_days: number
+        }[]
+      }
       suggest_category: {
         Args: { _party_kind: string; _party_name: string }
         Returns: {
