@@ -145,11 +145,44 @@ export default function Reinf() {
     events, currentPeriod, loading, busy,
     openPeriod, generateR2010, generateR4020, closePeriod, reopen,
   } = useReinf();
+  const [transmitting, setTransmitting] = useState(false);
 
   const totals = currentPeriod?.totals || {};
   const isClosed = currentPeriod?.status === 'fechado';
 
   const byType = (t: string) => events.filter((e) => e.event_type === t);
+
+  const handleTransmit = async () => {
+    if (!currentPeriod) {
+      toast.error('Abra a competência antes de transmitir.');
+      return;
+    }
+    if (events.length === 0) {
+      toast.error('Não há eventos para transmitir nesta competência.');
+      return;
+    }
+    setTransmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('reinf-transmit', {
+        body: { period_id: currentPeriod.id },
+      });
+      if (error) throw error;
+      if (data?.ok) {
+        toast.success(`Transmissão ${data.env === 'simulated' ? 'SIMULADA' : 'enviada'}`, {
+          description: `Protocolo ${data.protocol} • ${data.events_count} evento(s)`,
+        });
+      } else {
+        toast.warning('Transmissão bloqueada', {
+          description: data?.message || 'Certificado A1 ainda não configurado (Sprint 1.1).',
+        });
+      }
+    } catch (err: any) {
+      toast.error('Falha na transmissão', { description: err.message });
+    } finally {
+      setTransmitting(false);
+    }
+  };
+
 
   return (
     <PageContainer>
