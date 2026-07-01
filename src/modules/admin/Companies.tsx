@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Company, CompanyStatus } from '@/types/administration';
 import { CompanyDialog } from './companies/CompanyDialog';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 const Companies = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
