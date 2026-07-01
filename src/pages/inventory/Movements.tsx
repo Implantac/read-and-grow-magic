@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { EmptyState } from '@/shared/components/EmptyState';
-import { ArrowLeftRight } from 'lucide-react';
 import { useInventory } from '@/hooks/inventory/useInventoryQuery';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
