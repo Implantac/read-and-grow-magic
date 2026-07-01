@@ -19730,6 +19730,10 @@ export type Database = {
         Args: { p_approval_id: string }
         Returns: Json
       }
+      purchase_approvals_metrics: {
+        Args: { p_from?: string; p_to?: string }
+        Returns: Json
+      }
       purchase_approvals_sla_scan: { Args: never; Returns: Json }
       purchase_submit_for_approval: { Args: { p_po_id: string }; Returns: Json }
       purge_old_audit_logs: { Args: { _days?: number }; Returns: number }

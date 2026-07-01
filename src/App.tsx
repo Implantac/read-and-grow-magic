@@ -61,6 +61,7 @@ const ColetorPicking = lazy(() => import("./coletor/ColetorPicking"));
 const ProfileSecurity = lazy(() => import("./pages/profile/Security"));
 const ProfilePrivacy = lazy(() => import("./pages/profile/Privacy"));
 const PurchaseApprovals = lazy(() => import("./pages/purchasing/PurchaseApprovals"));
+const PurchaseApprovalsMetrics = lazy(() => import("./pages/purchasing/PurchaseApprovalsMetrics"));
 
 
 
@@ -132,6 +133,7 @@ const App = () => (
                 <Route path="/perfil/seguranca" element={<ProfileSecurity />} />
                 <Route path="/perfil/privacidade" element={<ProfilePrivacy />} />
                 <Route path="/compras/aprovacoes" element={<PurchaseApprovals />} />
+                <Route path="/compras/aprovacoes/indicadores" element={<PurchaseApprovalsMetrics />} />
 
 
                 <Route path="/upgrade" element={<Upgrade />} />
