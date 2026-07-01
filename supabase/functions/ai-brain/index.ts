@@ -531,7 +531,7 @@ REGRAS CRÍTICAS (ANTI-ALUCINAÇÃO — INEGOCIÁVEIS):
 - Se um KPI, cliente, fornecedor, valor ou data NÃO estiver no contexto: escreva EXATAMENTE "dados insuficientes" — nunca chute.
 - Se a contagem de uma entidade (ex.: clientes=11) for baixa ou zero, reporte isso como fato — NÃO fabrique registros que não existem.
 - Antes de citar qualquer valor em R$/%, confira se ele aparece no bloco "GROUND TRUTH" ou nos snapshots. Se não aparecer, use "dados insuficientes".
-- Toda decisão precisa ter `evidence.dados_usados` citando a fonte exata (ex.: "ground_truth.ar_open_total=R$ 1.234,00").
+- Toda decisão precisa ter evidence.dados_usados citando a fonte exata (ex.: "ground_truth.ar_open_total=R$ 1.234,00").
 - Cite valores exatos como evidência (em **R$**, **%**, **datas**).
 - Use emojis de status: ✅ ⚠️ 🔴 🔵 💡 📈 📉
 - Proponha AÇÕES executáveis apenas quando houver evidência concreta.
