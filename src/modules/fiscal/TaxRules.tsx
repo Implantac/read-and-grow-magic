@@ -116,7 +116,7 @@ export default function TaxRulesPage() {
               {isLoading ? (
                 <TableRow><TableCell colSpan={8} className="text-center py-8">Carregando...</TableCell></TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={8} className="text-center py-8">Nenhuma regra cadastrada</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="p-4"><EmptyState compact icon={Calculator} title="Nenhuma regra cadastrada" description="Configure alíquotas de ICMS, PIS, COFINS e IPI por NCM e UF." /></TableCell></TableRow>
               ) : (
                 filtered.map((r) => (
                   <TableRow key={r.id}>
