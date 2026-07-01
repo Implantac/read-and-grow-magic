@@ -13,6 +13,7 @@ import type { ExportColumn } from '@/lib/exportUtils';
 import type { TrialBalanceItem } from '@/types/accounting';
 
 import { formatBRL } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
 const typeColors: Record<string, string> = {
   asset: 'text-blue-600',
   liability: 'text-red-600',
