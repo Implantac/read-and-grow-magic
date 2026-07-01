@@ -63,6 +63,7 @@ export function MainLayout() {
   return (
     <div className="h-dvh overflow-hidden bg-background">
       <CommandPalette />
+      <BrainDrawer />
       <Sidebar />
       <Topbar />
       <main
