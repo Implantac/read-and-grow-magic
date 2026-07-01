@@ -64,10 +64,11 @@ export default function FinancialReport() {
       </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <KPICard title="Receita Total" value={formatCurrency(stats.revenue)} subtitle={hasData ? 'Contas a receber' : 'Nenhum dado disponível'} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="Despesas" value={formatCurrency(stats.expenses)} subtitle={hasData ? 'Contas a pagar' : 'Nenhum dado disponível'} icon={<TrendingDown className="h-5 w-5" />} accentColor="warning" index={1} />
-        <KPICard title="Lucro Líquido" value={formatCurrency(stats.profit)} subtitle={`Margem: ${margin}%`} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={2} />
-        <KPICard title="Inadimplência" value={formatCurrency(stats.overdue)} subtitle={`${stats.overdueCount} títulos vencidos`} icon={<AlertCircle className="h-5 w-5" />} accentColor="danger" index={3} />
+        <KPICard title="Receita Total" value={formatCurrency(stats.revenue)} subtitle={hasData ? 'Contas a receber' : 'Nenhum dado disponível'} icon={<DollarSign className="h-5 w-5" />} accentColor="primary" index={0} entityKey="revenue" numericValue={stats.revenue} source="Relatório Financeiro" lastUpdated={new Date()} />
+        <KPICard title="Despesas" value={formatCurrency(stats.expenses)} subtitle={hasData ? 'Contas a pagar' : 'Nenhum dado disponível'} icon={<TrendingDown className="h-5 w-5" />} accentColor="warning" index={1} entityKey="accounts_payable" numericValue={stats.expenses} source="Relatório Financeiro" lastUpdated={new Date()} />
+        <KPICard title="Lucro Líquido" value={formatCurrency(stats.profit)} subtitle={`Margem: ${margin}%`} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={2} entityKey="gross_margin" numericValue={stats.profit} progress={Number(margin)} source="Relatório Financeiro" lastUpdated={new Date()} />
+        <KPICard title="Inadimplência" value={formatCurrency(stats.overdue)} subtitle={`${stats.overdueCount} títulos vencidos`} icon={<AlertCircle className="h-5 w-5" />} accentColor="danger" index={3} entityKey="accounts_receivable" numericValue={stats.overdue} status={stats.overdue > 0 ? 'warn' : 'healthy'} source="Relatório Financeiro" lastUpdated={new Date()} />
+
       </div>
 
       {!hasData && (

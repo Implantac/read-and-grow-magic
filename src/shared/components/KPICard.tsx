@@ -1,6 +1,8 @@
 import { type ReactNode, type ElementType } from 'react';
 import { Card, CardContent } from '@/ui/base/card';
 import { cn } from '@/lib/utils';
+import { EnterpriseKPICard } from './EnterpriseKPICard';
+import type { EntityKey } from '@/core/entityRegistry';
 
 interface KPICardProps {
   title: string;
@@ -12,7 +14,21 @@ interface KPICardProps {
   color?: string;
   className?: string;
   index?: number;
+  /** Fase 2 — opt-in Enterprise slots. Se qualquer um for informado, o card
+   *  delega ao EnterpriseKPICard (drill-down + IA) mantendo o layout base. */
+  entityKey?: EntityKey;
+  numericValue?: number;
+  deltas?: { day?: number; week?: number; month?: number; year?: number };
+  goal?: number;
+  progress?: number;
+  status?: 'healthy' | 'warn' | 'critical';
+  impact?: { financial?: number; operational?: string };
+  source?: string;
+  lastUpdated?: string | Date;
+  trend?: 'up' | 'down' | 'flat';
+  onClick?: () => void;
 }
+
 
 const colorMap: Record<string, { border: string; iconBg: string; iconText: string }> = {
   primary: { border: 'border-l-primary', iconBg: 'bg-primary/10', iconText: 'text-primary' },
@@ -23,10 +39,46 @@ const colorMap: Record<string, { border: string; iconBg: string; iconText: strin
   accent: { border: 'border-l-primary', iconBg: 'bg-accent/10', iconText: 'text-accent-foreground' },
 };
 
-export function KPICard({ title, value, subtitle, description, icon, accentColor, color, className, index = 0 }: KPICardProps) {
+export function KPICard(props: KPICardProps) {
+  const { title, value, subtitle, description, icon, accentColor, color, className, index = 0 } = props;
   const resolvedColor = accentColor || color || 'primary';
-  const colors = colorMap[resolvedColor] || colorMap.primary;
   const resolvedSubtitle = subtitle || description;
+
+  // Fase 2: se qualquer slot Enterprise foi passado, delega ao card avançado.
+  const hasEnterprise =
+    props.entityKey || props.deltas || props.goal != null || props.progress != null ||
+    props.status || props.impact || props.source || props.lastUpdated || props.trend || props.onClick;
+  if (hasEnterprise) {
+    const allowed = ['primary', 'success', 'warning', 'danger', 'info', 'accent'] as const;
+    const safeColor = (allowed as readonly string[]).includes(resolvedColor)
+      ? (resolvedColor as typeof allowed[number])
+      : 'primary';
+    return (
+      <EnterpriseKPICard
+        title={title}
+        value={value}
+        subtitle={resolvedSubtitle}
+        icon={icon}
+        color={safeColor}
+        className={className}
+        index={index}
+        entityKey={props.entityKey}
+        numericValue={props.numericValue}
+        deltas={props.deltas}
+        goal={props.goal}
+        progress={props.progress}
+        status={props.status}
+        impact={props.impact}
+        source={props.source}
+        lastUpdated={props.lastUpdated}
+        trend={props.trend}
+        onClick={props.onClick}
+      />
+    );
+  }
+
+  const colors = colorMap[resolvedColor] || colorMap.primary;
+
 
   // Support both ReactNode and ElementType (component reference)
   let iconElement: ReactNode;
