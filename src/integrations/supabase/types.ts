@@ -19665,6 +19665,7 @@ export type Database = {
       }
       reinf_close_period: { Args: { p_competencia: string }; Returns: string }
       reinf_generate_r2010: { Args: { p_competencia: string }; Returns: number }
+      reinf_generate_r2020: { Args: { p_competencia: string }; Returns: number }
       reinf_generate_r4020: { Args: { p_competencia: string }; Returns: number }
       reinf_open_period: { Args: { p_competencia: string }; Returns: string }
       reinf_reopen_period: { Args: { p_period_id: string }; Returns: undefined }
