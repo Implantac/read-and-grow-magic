@@ -15,6 +15,7 @@ import { Label } from '@/ui/base/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Textarea } from '@/ui/base/textarea';
 import { Phone, Plus, Search, AlertCircle, Clock, DollarSign } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
 const actionLabels: Record<string, string> = {
@@ -129,7 +130,7 @@ export default function Collections() {
               {isLoading ? (
                 <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhuma ação encontrada</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="p-0"><EmptyState icon={Phone} title="Nenhuma ação de cobrança" description="Registre contatos, promessas e acordos com clientes inadimplentes." /></TableCell></TableRow>
               ) : filtered.map(a => (
                 <TableRow key={a.id}>
                   <TableCell className="font-medium">{clientMap[a.client_id]?.name || '—'}</TableCell>

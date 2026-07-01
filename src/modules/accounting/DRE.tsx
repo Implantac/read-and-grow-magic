@@ -21,6 +21,8 @@ import { useState } from 'react';
 import { startOfMonth, endOfMonth, subMonths, isWithinInterval, format, eachMonthOfInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { ExportColumn } from '@/lib/exportUtils';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { BarChart3 } from 'lucide-react';
 
 const formatCompact = (value: number) =>
   formatBRLCompact(value);
@@ -209,7 +211,7 @@ export default function DREPage() {
                   );
                 })}
                 {dreRows.length <= 2 && current.revenue === 0 && (
-                  <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Nenhum dado realizado no período</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={4} className="p-0"><EmptyState icon={TrendingUp} title="Sem realizações no período" description="Lançamentos recebidos e pagos aparecerão aqui." /></TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -233,7 +235,7 @@ export default function DREPage() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[400px] flex items-center justify-center text-muted-foreground">Nenhum dado disponível</div>
+              <div className="h-[400px] flex items-center justify-center"><EmptyState icon={BarChart3} title="Sem dados no comparativo" description="Após lançamentos financeiros, o comparativo mensal aparecerá aqui." /></div>
             )}
           </CardContent>
         </Card>

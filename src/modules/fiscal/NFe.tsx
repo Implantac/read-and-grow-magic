@@ -21,6 +21,7 @@ import {
   Ban,
 } from 'lucide-react';
 import { ExportButton } from '@/shared/components/ExportButton';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
@@ -279,8 +280,8 @@ export default function NFePage() {
               ))}
               {filteredNFes.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                    Nenhuma NF-e encontrada
+                  <TableCell colSpan={6} className="p-0">
+                    <EmptyState icon={FileText} title="Nenhuma NF-e encontrada" description="Emita notas fiscais eletrônicas a partir de pedidos aprovados." />
                   </TableCell>
                 </TableRow>
               )}

@@ -28,6 +28,7 @@ import PCPIntelligencePanel from '@/components/production/PCPIntelligencePanel';
 import { usePCPIntelligence } from '@/hooks/production/usePCPIntelligence';
 import { Factory, Clock, CheckCircle, AlertTriangle, Search, Plus, Play, Pause, BarChart3, Users, Gauge, Bell, ShieldCheck, GanttChart } from 'lucide-react';
 import { format, differenceInDays, parseISO, differenceInMinutes, addDays, startOfDay, endOfDay, max as dateMax, min as dateMin } from 'date-fns';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { cn } from '@/lib/utils';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { formatNumber } from '@/lib/formatters';
@@ -72,14 +73,7 @@ function GanttTimeline({ orders }: { orders: any[] }) {
   }, [activeOPs]);
 
   if (activeOPs.length === 0) {
-    return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <GanttChart className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <p className="text-lg font-medium">Nenhuma OP ativa com prazo definido</p>
-        </CardContent>
-      </Card>
-    );
+    return <EmptyState icon={GanttChart} title="Nenhuma OP ativa com prazo definido" description="Ordens de produção em andamento com datas aparecerão no Gantt." />;
   }
 
   const statusColors: Record<string, string> = {
@@ -311,7 +305,7 @@ export default function PCPPanel() {
                 </TableRow></TableHeader>
                 <TableBody>
                   {filtered.length === 0 ? (
-                    <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Nenhuma OP encontrada</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={9} className="p-0"><EmptyState icon={Factory} title="Nenhuma OP encontrada" description="Crie ordens de produção ou ajuste os filtros." /></TableCell></TableRow>
                   ) : filtered.map(o => {
                     const pct = o.quantity > 0 ? (o.produced_quantity / o.quantity) * 100 : 0;
                     const sc = productionStatusConfig[o.status] || { label: o.status, color: '' };

@@ -8,6 +8,7 @@ import { RefreshCw, Radio, Tag, Activity, AlertTriangle, Wifi, WifiOff, MapPin, 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
 import { format, subHours, startOfHour } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 const ZONE_COLORS: Record<string, string> = {
   'Recebimento': 'hsl(var(--primary))',
@@ -221,7 +222,7 @@ export default function RFIDDashboardPage() {
           </CardHeader>
           <CardContent>
             {loading ? <Skeleton className="h-[240px] w-full" /> : readerStatusData.length === 0 ? (
-              <p className="text-muted-foreground text-center py-16 text-sm">Nenhum leitor cadastrado</p>
+              <EmptyState icon={Radio} title="Nenhum leitor cadastrado" description="Cadastre leitores RFID para monitorar status em tempo real." />
             ) : (
               <ResponsiveContainer width="100%" height={240}>
                 <PieChart>
@@ -245,7 +246,7 @@ export default function RFIDDashboardPage() {
           </CardHeader>
           <CardContent>
             {loading ? <Skeleton className="h-[260px] w-full" /> : eventsByZone.length === 0 ? (
-              <p className="text-muted-foreground text-center py-16 text-sm">Sem dados de zona</p>
+              <EmptyState icon={MapPin} title="Sem dados de zona" description="Eventos aparecerão conforme leituras acontecerem no armazém." />
             ) : (
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={eventsByZone} layout="vertical">
