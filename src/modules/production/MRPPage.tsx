@@ -291,7 +291,7 @@ export default function MRPPage() {
             <CardHeader><CardTitle>OPs Ativas × Materiais</CardTitle></CardHeader>
             <CardContent>
               {activeOPs.length === 0 ? (
-                <p className="text-center py-8 text-muted-foreground">Nenhuma OP ativa.</p>
+                <EmptyState compact title="Nenhuma OP ativa" description="Libere ordens de produção para calcular necessidades." />
               ) : (
                 <Table>
                   <TableHeader>
