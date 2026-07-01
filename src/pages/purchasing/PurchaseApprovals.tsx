@@ -156,6 +156,17 @@ export default function PurchaseApprovals() {
                       </SelectContent>
                     </Select>
                   </div>
+                  <div>
+                    <Label>SLA (horas)</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={form.sla_hours}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, sla_hours: Number(e.target.value) }))
+                      }
+                    />
+                  </div>
                 </div>
                 <DialogFooter>
                   <Button
