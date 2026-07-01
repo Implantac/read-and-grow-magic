@@ -303,6 +303,7 @@ export const navigationSections: NavSection[] = [
           { title: 'Separação de Pedidos', href: '/wms/separacao-pedidos', icon: 'ListChecks' },
           { title: 'Rota de Picking', href: '/wms/rota-picking', icon: 'Route' },
           { title: 'Ondas', href: '/wms/ondas', icon: 'Layers' },
+          { title: 'Wave Planning v2', href: '/wms/wave-planning', icon: 'Waves' },
           { title: 'Embalagem (Packing)', href: '/wms/embalagem', icon: 'PackageCheck' },
           { title: 'Conferência', href: '/wms/conferencia', icon: 'ScanBarcode' },
           { title: 'Cross-Docking', href: '/wms/cross-docking', icon: 'Shuffle' },
