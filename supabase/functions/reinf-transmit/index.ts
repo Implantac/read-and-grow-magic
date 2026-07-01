@@ -127,10 +127,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Check company cert config → determines env
-    const { data: company } = await admin
-      .from("companies").select("id, reinf_cert_a1_ref").eq("id", auth.companyId).maybeSingle();
-    const hasCert = Boolean((company as any)?.reinf_cert_a1_ref);
+    // Detecta certificado A1 via secrets do tenant (nunca expostos ao cliente).
+    // Convenção: REINF_CERT_A1_B64 + REINF_CERT_A1_PASS (globais) OU
+    // REINF_CERT_A1_B64_<COMPANY_ID_SEM_HIFEN> para multi-tenant real.
+    const compKey = auth.companyId.replace(/-/g, "").toUpperCase();
+    const certB64 = Deno.env.get(`REINF_CERT_A1_B64_${compKey}`) || Deno.env.get("REINF_CERT_A1_B64");
+    const certRow = (company as any)?.reinf_cert_a1_ref;
+    const hasCert = Boolean(certB64 || certRow);
     const env: "simulated" | "sandbox" = hasCert ? "sandbox" : "simulated";
 
     const { data: events } = await admin
