@@ -39,6 +39,7 @@ import {
   useScanApprovalsSLA,
 } from "@/hooks/purchasing/usePurchaseApprovals";
 import { Trash2, ShieldCheck, CircleSlash, Timer, AlertTriangle } from "lucide-react";
+import { EmptyState } from "@/shared/components/EmptyState";
 
 function slaStatus(dueAt: string | null | undefined): { label: string; tone: "success" | "warning" | "destructive" | "muted" } {
   if (!dueAt) return { label: "Sem SLA", tone: "muted" };
@@ -190,9 +191,7 @@ export default function PurchaseApprovals() {
           </CardHeader>
           <CardContent>
             {sortedRules.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Nenhuma alçada configurada. Adicione a primeira regra.
-              </p>
+              <EmptyState icon={ShieldCheck} title="Sem alçadas configuradas" description="Defina faixas de valor e responsáveis para automatizar aprovações de pedidos de compra." />
             ) : (
               <Table>
                 <TableHeader>
@@ -257,9 +256,7 @@ export default function PurchaseApprovals() {
           </CardHeader>
           <CardContent>
             {(pending.data ?? []).length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Nenhuma aprovação pendente.
-              </p>
+              <EmptyState icon={CircleSlash} title="Nenhuma aprovação pendente" description="Todos os pedidos dentro das alçadas estão em dia. Bom trabalho!" />
             ) : (
               <div className="space-y-3">
                 {(pending.data ?? []).map((a: any) => {

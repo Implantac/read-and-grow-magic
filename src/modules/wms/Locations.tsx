@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/ui/base/dialog';
 import { Switch } from '@/ui/base/switch';
 import { Warehouse, Layers, MapPin, Plus, Trash2 } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useLocations, type Zone, type Location } from '@/hooks/wms/useLocations';
 
 const statusColor: Record<string, string> = {
@@ -55,7 +56,7 @@ export default function LocationsPage() {
             <WarehouseDialog onCreate={createWarehouse} />
           </CardHeader>
           <CardContent className="space-y-2">
-            {warehouses.length === 0 && <p className="text-sm text-muted-foreground">Nenhum armazém cadastrado.</p>}
+            {warehouses.length === 0 && <EmptyState compact icon={Warehouse} title="Sem armazéns" description="Cadastre o primeiro armazém para iniciar o mapeamento de endereços." />}
             {warehouses.map(w => (
               <button
                 key={w.id}
@@ -82,7 +83,7 @@ export default function LocationsPage() {
           </CardHeader>
           <CardContent className="space-y-2">
             {!wId && <p className="text-sm text-muted-foreground">Selecione um armazém.</p>}
-            {wId && filteredZones.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma zona neste armazém.</p>}
+            {wId && filteredZones.length === 0 && <EmptyState compact icon={Layers} title="Sem zonas" description="Divida o armazém em zonas (picking, bulk, refrigerada) para organizar operações." />}
             {filteredZones.map(z => (
               <div key={z.id} className={`rounded-md border p-3 transition hover:bg-muted/50 ${zId === z.id ? 'border-primary bg-muted/40' : ''}`}>
                 <button onClick={() => setSelectedZone(z.id)} className="w-full text-left">
@@ -114,7 +115,7 @@ export default function LocationsPage() {
           </CardHeader>
           <CardContent className="space-y-2 max-h-[600px] overflow-y-auto">
             {!zId && <p className="text-sm text-muted-foreground">Selecione uma zona.</p>}
-            {zId && filteredLocations.length === 0 && <p className="text-sm text-muted-foreground">Nenhum endereço nesta zona.</p>}
+            {zId && filteredLocations.length === 0 && <EmptyState compact icon={MapPin} title="Sem endereços" description="Crie bins/posições para armazenar produtos com precisão." />}
             {filteredLocations.map(l => (
               <div key={l.id} className={`rounded-md border-l-4 border bg-card p-3 ${statusColor[l.status] || 'border-l-muted'}`}>
                 <div className="flex justify-between items-start">
