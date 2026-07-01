@@ -5,7 +5,8 @@ import {
 import { Card, CardContent } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Badge } from '@/ui/base/badge';
-import { Edit2, RefreshCw, Eye, EyeOff } from 'lucide-react';
+import { Edit2, RefreshCw, Eye, EyeOff, Settings2 } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { parameterCategoryConfig } from '@/config/administration';
