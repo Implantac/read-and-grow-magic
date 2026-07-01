@@ -12697,6 +12697,68 @@ export type Database = {
           },
         ]
       }
+      reinf_transmissions: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          env: string
+          error: string | null
+          event_type: string
+          events_count: number
+          id: string
+          payload_xml: string | null
+          period_id: string
+          protocol: string | null
+          response_xml: string | null
+          status: string
+          transmitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          env?: string
+          error?: string | null
+          event_type: string
+          events_count?: number
+          id?: string
+          payload_xml?: string | null
+          period_id: string
+          protocol?: string | null
+          response_xml?: string | null
+          status?: string
+          transmitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          env?: string
+          error?: string | null
+          event_type?: string
+          events_count?: number
+          id?: string
+          payload_xml?: string | null
+          period_id?: string
+          protocol?: string | null
+          response_xml?: string | null
+          status?: string
+          transmitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reinf_transmissions_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "reinf_periods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       renegotiation_items: {
         Row: {
           company_id: string | null
