@@ -6,6 +6,7 @@ import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { CommandPalette } from './CommandPalette';
 import { Breadcrumbs } from '@/shared/components/Breadcrumbs';
+import { BrainDrawer, BRAIN_OPEN_EVENT } from '@/components/ai/BrainDrawer';
 import { cn } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
@@ -29,6 +30,18 @@ export function MainLayout() {
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
 
+  // Global shortcut: Ctrl/Cmd + J opens the contextual Brain drawer.
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'j') {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent(BRAIN_OPEN_EVENT));
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
   if (loading) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-background">
@@ -50,6 +63,7 @@ export function MainLayout() {
   return (
     <div className="h-dvh overflow-hidden bg-background">
       <CommandPalette />
+      <BrainDrawer />
       <Sidebar />
       <Topbar />
       <main
