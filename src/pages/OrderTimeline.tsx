@@ -145,7 +145,7 @@ export default function OrderTimeline() {
     <PageContainer>
       <PageHeader
         title="Linha do tempo do pedido"
-        subtitle={data?.order?.order_number ? `Pedido ${data.order.order_number}` : 'Rastreamento cross-módulo'}
+        description={(data?.order as any)?.number ? `Pedido ${(data!.order as any).number}` : 'Rastreamento cross-módulo'}
         actions={
           <Button asChild variant="outline" size="sm">
             <Link to="/commercial/pedidos">
