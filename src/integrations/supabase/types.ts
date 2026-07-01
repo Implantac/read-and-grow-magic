@@ -14774,6 +14774,78 @@ export type Database = {
         }
         Relationships: []
       }
+      sre_postmortems: {
+        Row: {
+          action_items: Json
+          author_id: string | null
+          company_id: string
+          created_at: string
+          id: string
+          impact: string | null
+          incident_id: string | null
+          published_at: string | null
+          root_cause: string | null
+          severity: string
+          slo_id: string | null
+          status: string
+          summary: string | null
+          timeline: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          action_items?: Json
+          author_id?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          impact?: string | null
+          incident_id?: string | null
+          published_at?: string | null
+          root_cause?: string | null
+          severity?: string
+          slo_id?: string | null
+          status?: string
+          summary?: string | null
+          timeline?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          action_items?: Json
+          author_id?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          impact?: string | null
+          incident_id?: string | null
+          published_at?: string | null
+          root_cause?: string | null
+          severity?: string
+          slo_id?: string | null
+          status?: string
+          summary?: string | null
+          timeline?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sre_postmortems_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "system_incidents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sre_postmortems_slo_id_fkey"
+            columns: ["slo_id"]
+            isOneToOne: false
+            referencedRelation: "sre_slos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sre_runbooks: {
         Row: {
           company_id: string
@@ -19935,6 +20007,19 @@ export type Database = {
           shift_id: string
           starts_at: string
           user_id: string
+        }[]
+      }
+      sre_postmortems_by_slo: {
+        Args: { _days?: number; _slo_id: string }
+        Returns: {
+          action_items_count: number
+          created_at: string
+          id: string
+          incident_id: string
+          published_at: string
+          severity: string
+          status: string
+          title: string
         }[]
       }
       sre_runbooks_for_slo: {
