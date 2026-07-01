@@ -1881,6 +1881,102 @@ export type Database = {
           },
         ]
       }
+      bank_match_rules: {
+        Row: {
+          boost_score: number
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description_pattern: string | null
+          id: string
+          is_active: boolean
+          name: string
+          target_category: string | null
+          updated_at: string
+        }
+        Insert: {
+          boost_score?: number
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description_pattern?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          target_category?: string | null
+          updated_at?: string
+        }
+        Update: {
+          boost_score?: number
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description_pattern?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          target_category?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      bank_match_suggestions: {
+        Row: {
+          bank_transaction_id: string
+          cash_flow_entry_id: string
+          company_id: string
+          created_at: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          score: number
+          score_breakdown: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          bank_transaction_id: string
+          cash_flow_entry_id: string
+          company_id: string
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          score: number
+          score_breakdown?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          bank_transaction_id?: string
+          cash_flow_entry_id?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          score?: number
+          score_breakdown?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_match_suggestions_bank_transaction_id_fkey"
+            columns: ["bank_transaction_id"]
+            isOneToOne: false
+            referencedRelation: "bank_transactions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_match_suggestions_cash_flow_entry_id_fkey"
+            columns: ["cash_flow_entry_id"]
+            isOneToOne: false
+            referencedRelation: "cash_flow_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bank_transactions: {
         Row: {
           amount: number
@@ -19082,6 +19178,22 @@ export type Database = {
         }[]
       }
       backfill_default_lots: { Args: never; Returns: Json }
+      bank_apply_suggestion: {
+        Args: { p_suggestion_id: string }
+        Returns: boolean
+      }
+      bank_reconcile_auto: {
+        Args: {
+          p_bank_account_id?: string
+          p_date_from?: string
+          p_date_to?: string
+        }
+        Returns: Json
+      }
+      bank_reject_suggestion: {
+        Args: { p_suggestion_id: string }
+        Returns: boolean
+      }
       batch_pay_payables: {
         Args: {
           _bank_account_id: string
@@ -19179,6 +19291,7 @@ export type Database = {
         Returns: Json
       }
       current_billing_period: { Args: never; Returns: string }
+      desc_similarity: { Args: { a: string; b: string }; Returns: number }
       detect_cashflow_risks: { Args: never; Returns: Json }
       detect_financial_alerts: { Args: never; Returns: Json }
       eval_wf_condition: { Args: { cond: Json; ctx: Json }; Returns: boolean }
