@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RotateCcw, Search, Package, Truck, Factory, AlertTriangle, CheckCircle, Eye } from 'lucide-react';
 import { useWMSReturns } from '@/hooks/wms/useWMSReturns';
 import { ReturnItemsDialog } from './returns/ReturnItemsDialog';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 const typeConfig: Record<string, { label: string; icon: React.ReactNode }> = {
   customer: { label: 'Cliente', icon: <Package className="h-4 w-4" /> },
@@ -112,13 +113,11 @@ export default function ReturnsPage() {
           })}
         </div>
       ) : (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <RotateCcw className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-semibold mb-2">Nenhuma devolução</h3>
-            <p>Registre devoluções de clientes, fornecedores ou produção.</p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={RotateCcw}
+          title="Nenhuma devolução registrada"
+          description="Registre devoluções de clientes, fornecedores ou produção para acompanhar inspeção e reintegração ao estoque."
+        />
       )}
 
       <ReturnItemsDialog

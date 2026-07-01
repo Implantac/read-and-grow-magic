@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Progress } from '@/ui/base/progress';
 import { Layers, Play, CheckCircle, Clock, Search, Plus, ShoppingCart } from 'lucide-react';
 import { usePickingWaves } from '@/hooks/wms/usePickingWaves';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   planned: { label: 'Planejada', variant: 'outline' },
@@ -108,13 +109,11 @@ export default function WavesPage() {
           })}
         </div>
       ) : (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <Layers className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-semibold mb-2">Nenhuma onda encontrada</h3>
-            <p>Crie ondas de separação para otimizar o picking.</p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={Layers}
+          title="Nenhuma onda encontrada"
+          description="Crie ondas de separação para otimizar o picking em lotes."
+        />
       )}
     </PageContainer>
   );

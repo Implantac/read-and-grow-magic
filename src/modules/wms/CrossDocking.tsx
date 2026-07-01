@@ -15,6 +15,7 @@ import { toast } from "@/ui/base/use-toast";
 import {
   ArrowRightLeft, PackagePlus, Truck, Zap, Search, AlertTriangle, CheckCircle2,
 } from "lucide-react";
+import { EmptyState } from "@/shared/components/EmptyState";
 
 type ReceivingItem = {
   id: string;
@@ -270,11 +271,11 @@ export default function CrossDockingPage() {
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <AlertTriangle className="h-10 w-10 mx-auto mb-2 opacity-60" />
-              <p className="text-sm">Nenhuma oportunidade de cross-docking no momento.</p>
-              <p className="text-xs mt-1">Cadastre recebimentos pendentes e reservas em aberto para o mesmo SKU.</p>
-            </div>
+            <EmptyState
+              icon={ArrowRightLeft}
+              title="Nenhuma oportunidade de cross-docking"
+              description="Cadastre recebimentos pendentes e reservas em aberto para o mesmo SKU para gerar sugestões."
+            />
           ) : (
             <div className="overflow-x-auto">
               <Table>

@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Plus, Megaphone, Target, Calendar, TrendingUp, CheckCircle } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useCampaigns, useCreateCampaign, useUpdateCampaign, type DbCampaign } from '@/hooks/commercial/useSalesIntelligence';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -81,14 +82,14 @@ export default function Campaigns() {
       </PageHeader>
 
       {campaigns.length === 0 ? (
-        <Card className="mt-6">
-          <CardContent className="py-12 text-center">
-            <Megaphone className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <p className="text-lg font-medium mb-1">Nenhuma campanha criada</p>
-            <p className="text-sm text-muted-foreground mb-4">Crie campanhas internas para focar o time em produtos ou metas específicas.</p>
-            <Button onClick={() => setFormOpen(true)}><Plus className="h-4 w-4 mr-1" /> Criar Campanha</Button>
-          </CardContent>
-        </Card>
+        <div className="mt-6">
+          <EmptyState
+            icon={Megaphone}
+            title="Nenhuma campanha criada"
+            description="Crie campanhas internas para focar o time em produtos ou metas específicas."
+            action={{ label: 'Criar Campanha', onClick: () => setFormOpen(true), icon: Plus }}
+          />
+        </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mt-6">
           {campaigns.map(campaign => {
