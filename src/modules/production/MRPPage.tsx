@@ -229,9 +229,11 @@ export default function MRPPage() {
             </CardHeader>
             <CardContent>
               {materialNeeds.length === 0 ? (
-                <p className="text-center py-8 text-muted-foreground">
-                  Nenhuma necessidade calculada. Verifique se as OPs ativas possuem fichas técnicas com materiais.
-                </p>
+                <EmptyState
+                  icon={Calculator}
+                  title="Nenhuma necessidade calculada"
+                  description="Verifique se as OPs ativas possuem fichas técnicas (BOM) com materiais cadastrados."
+                />
               ) : (
                 <Table>
                   <TableHeader>
