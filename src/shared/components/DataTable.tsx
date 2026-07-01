@@ -226,9 +226,15 @@ export function DataTable<T extends { id: string }>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length + (actions ? 1 : 0)}
-                  className="h-24 text-center text-muted-foreground"
+                  className="p-4"
                 >
-                  {emptyMessage}
+                  {emptyMessage ?? (
+                    <EmptyState
+                      compact
+                      title="Nenhum registro encontrado"
+                      description="Ajuste a busca ou os filtros para visualizar resultados."
+                    />
+                  )}
                 </TableCell>
               </TableRow>
             ) : (
