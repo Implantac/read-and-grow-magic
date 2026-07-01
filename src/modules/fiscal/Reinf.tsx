@@ -382,7 +382,12 @@ export default function Reinf() {
               disabled={byType('R-2099').length === 0}
               onClick={() => {
                 const rows = buildR2099Rows(byType('R-2099'), currentPeriod);
-                downloadCsv(`reinf_R-2099_${competencia.slice(0, 7)}.csv`, toCsv(rows, R2099_HEADERS));
+                guardExport(
+                  'CSV R-2099',
+                  rows,
+                  () => validateR2099Rows(rows, currentPeriod),
+                  () => downloadCsv(`reinf_R-2099_${competencia.slice(0, 7)}.csv`, toCsv(rows, R2099_HEADERS)),
+                );
               }}
             >
               <Download className="h-4 w-4 mr-2" /> CSV R-2099
@@ -393,7 +398,12 @@ export default function Reinf() {
               disabled={byType('R-4099').length === 0}
               onClick={() => {
                 const rows = buildR4099Rows(byType('R-4099'), currentPeriod);
-                downloadCsv(`reinf_R-4099_${competencia.slice(0, 7)}.csv`, toCsv(rows, R4099_HEADERS));
+                guardExport(
+                  'CSV R-4099',
+                  rows,
+                  () => validateR4099Rows(rows, currentPeriod),
+                  () => downloadCsv(`reinf_R-4099_${competencia.slice(0, 7)}.csv`, toCsv(rows, R4099_HEADERS)),
+                );
               }}
             >
               <Download className="h-4 w-4 mr-2" /> CSV R-4099
