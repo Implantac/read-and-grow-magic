@@ -268,16 +268,23 @@ export function Topbar() {
           <Sparkles className="h-4 w-4" aria-hidden="true" />
         </Button>
 
-        {/* Brain shortcut */}
+        {/* Brain shortcut — click abre o drawer contextual; Shift+click ou botão do meio abre a página completa */}
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate('/executive/brain')}
-          title={brainPending.length > 0 ? `${brainPending.length} decisões do Cérebro pendentes` : 'Cérebro Nativo'}
+          onClick={(e) => {
+            if (e.shiftKey) {
+              navigate('/executive/brain');
+            } else {
+              window.dispatchEvent(new CustomEvent('brain:open'));
+            }
+          }}
+          onAuxClick={() => navigate('/executive/brain')}
+          title={brainPending.length > 0
+            ? `${brainPending.length} decisões pendentes · Ctrl+J abre o Cérebro`
+            : 'Cérebro Contextual (Ctrl+J) · Shift+clique abre a página completa'}
           aria-label={brainPending.length > 0 ? `Cérebro Nativo, ${brainPending.length} decisões pendentes` : 'Cérebro Nativo'}
           className="relative h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
-
-
         >
           <Brain className="h-4 w-4" aria-hidden="true" />
           {brainPending.length > 0 && (
