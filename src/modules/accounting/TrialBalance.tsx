@@ -178,10 +178,7 @@ export default function TrialBalancePage() {
               </Table>
             </div>
           ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <Scale className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Nenhum dado de balancete disponível</p>
-            </div>
+            <EmptyState icon={Scale} title="Nenhum dado de balancete disponível" description="Registre lançamentos contábeis para gerar o balancete do período." />
           )}
         </CardContent>
       </Card>
