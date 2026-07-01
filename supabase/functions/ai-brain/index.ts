@@ -588,6 +588,7 @@ const BRAIN_TOOLS = [
   { type: "function", function: { name: "release_order_block", description: "Libera bloqueio comercial de um pedido. Vai para aprovação humana", parameters: { type: "object", properties: { block_id: { type: "string" }, justification: { type: "string" } }, required: ["block_id", "justification"] } } },
   { type: "function", function: { name: "mark_invoice_paid", description: "Dá baixa em título a receber. Vai para aprovação humana", parameters: { type: "object", properties: { receivable_id: { type: "string" }, paid_amount: { type: "number" }, payment_date: { type: "string" }, notes: { type: "string" } }, required: ["receivable_id"] } } },
   { type: "function", function: { name: "assign_sales_rep", description: "Atribui vendedor a um cliente. Vai para aprovação humana", parameters: { type: "object", properties: { client_id: { type: "string" }, sales_rep_id: { type: "string" }, notes: { type: "string" } }, required: ["client_id", "sales_rep_id"] } } },
+  ...DATA_TOOL_SCHEMAS,
 ];
 
 // ─────────────────────────────────────────────
