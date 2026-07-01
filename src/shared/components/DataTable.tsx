@@ -20,6 +20,7 @@ import { Button } from '@/ui/base/button';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 export interface Column<T> {
   key: keyof T | string;
