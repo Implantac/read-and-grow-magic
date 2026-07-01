@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/ui/base/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/base/tabs";
 import { Plus, Trash2, Zap, History, Edit, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { EmptyState } from "@/shared/components/EmptyState";
 import {
   useAutomationRules,
   useAutomationRuns,
