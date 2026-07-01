@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '
 import { Button } from '@/ui/base/button';
 import { Textarea } from '@/ui/base/textarea';
 import { Badge } from '@/ui/base/badge';
-import { ScrollArea } from '@/ui/base/scroll-area';
+
 import { useBrainChat } from '@/hooks/ai/useAIBrain';
 import { cn } from '@/lib/utils';
 
