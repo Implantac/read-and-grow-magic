@@ -15,6 +15,7 @@ import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfQuarte
 import { ptBR } from 'date-fns/locale';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer, BarChart, Bar, Legend, Tooltip, PieChart, Pie, Cell } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/ui/base/chart';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 import { formatBRL, formatBRLCompact } from '@/lib/formatters';
 const chartConfig = {
@@ -288,7 +289,16 @@ export default function CashFlow() {
                 </TableRow>
               ))}
               {filteredEntries.length === 0 && (
-                <TableRow><TableCell colSpan={6} className="h-24 text-center text-muted-foreground">Nenhuma movimentação no período</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={6} className="p-0">
+                    <EmptyState
+                      compact
+                      icon={Wallet}
+                      title="Nenhuma movimentação no período"
+                      description="Ajuste o filtro de período ou registre entradas e saídas para visualizar o fluxo."
+                    />
+                  </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>

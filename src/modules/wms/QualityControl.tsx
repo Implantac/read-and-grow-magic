@@ -28,6 +28,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/ui/base/table";
+import { EmptyState } from "@/shared/components/EmptyState";
+import { ShieldCheck, ClipboardList, Search as SearchIcon } from "lucide-react";
 import { ShieldCheck, AlertTriangle, Ban, Search, RefreshCw } from "lucide-react";
 import { useToast } from "@/ui/base/use-toast";
 
@@ -240,9 +242,12 @@ export default function QualityControl() {
           {loading ? (
             <div className="text-center py-8 text-muted-foreground">Carregando…</div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              Nenhum lote encontrado com os filtros atuais.
-            </div>
+            <EmptyState
+              compact
+              icon={SearchIcon}
+              title="Nenhum lote encontrado"
+              description="Ajuste os filtros ou aguarde novos lotes chegarem via recebimento."
+            />
           ) : (
             <Table>
               <TableHeader>
@@ -297,7 +302,12 @@ export default function QualityControl() {
         </CardHeader>
         <CardContent>
           {recentChecks.length === 0 ? (
-            <div className="text-sm text-muted-foreground py-4 text-center">Nenhuma inspeção registrada ainda.</div>
+            <EmptyState
+              compact
+              icon={ClipboardList}
+              title="Nenhuma inspeção registrada"
+              description="Inspecione lotes recebidos para começar a acumular histórico de qualidade."
+            />
           ) : (
             <ul className="space-y-2">
               {recentChecks.map((c) => {

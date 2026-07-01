@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import { KPICard } from '@/shared/components/KPICard';
 import { CalendarClock, Truck, CheckCircle2, AlertTriangle, Plus } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 type Appt = {
   id: string;
@@ -300,7 +301,12 @@ export default function DockScheduling() {
         <CardHeader><CardTitle>Agendamentos do dia</CardTitle></CardHeader>
         <CardContent>
           {appts.length === 0 ? (
-            <div className="text-sm text-muted-foreground py-6 text-center">Nenhum agendamento.</div>
+            <EmptyState
+              compact
+              icon={CalendarClock}
+              title="Nenhum agendamento para hoje"
+              description="Agende janelas de doca para transportadoras a fim de organizar recebimento e expedição."
+            />
           ) : (
             <div className="space-y-2">
               {appts.map((a) => {

@@ -9,6 +9,7 @@ import { Input } from '@/ui/base/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { ArrowDown, Search, MapPin, Clock, CheckCircle } from 'lucide-react';
 import { usePutawayTasks } from '@/hooks/wms/usePutawayTasks';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   pending: { label: 'Pendente', variant: 'outline' },
@@ -103,13 +104,11 @@ export default function PutawayPage() {
           })}
         </div>
       ) : (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <ArrowDown className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-semibold mb-2">Nenhuma tarefa de put-away</h3>
-            <p>As tarefas são geradas automaticamente ao receber produtos.</p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={ArrowDown}
+          title="Nenhuma tarefa de put-away"
+          description="As tarefas são geradas automaticamente ao receber produtos."
+        />
       )}
     </PageContainer>
   );

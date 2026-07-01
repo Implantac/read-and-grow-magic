@@ -7,6 +7,7 @@ import { Badge } from "@/ui/base/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/ui/base/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/base/table";
 import { ClipboardCheck, Plus, Play, CheckCircle2, AlertTriangle, ListChecks } from "lucide-react";
+import { EmptyState } from "@/shared/components/EmptyState";
 import { supabase } from "@/integrations/supabase/client";
 import { toastSuccess, toastError } from "@/lib/toastHelpers";
 
@@ -241,7 +242,12 @@ export default function CycleCount() {
           {loading ? (
             <p className="text-sm text-muted-foreground">Carregando…</p>
           ) : rows.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhum inventário cadastrado ainda.</p>
+            <EmptyState
+              compact
+              icon={ClipboardCheck}
+              title="Nenhum inventário cadastrado"
+              description="Agende um inventário cíclico para iniciar contagens por zona."
+            />
           ) : (
             <Table>
               <TableHeader>

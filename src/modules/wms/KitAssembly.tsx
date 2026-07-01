@@ -28,6 +28,8 @@ import {
   SelectValue,
 } from "@/ui/base/select";
 import { Badge } from "@/ui/base/badge";
+import { EmptyState } from "@/shared/components/EmptyState";
+import { Package, History } from "lucide-react";
 import { Plus, Trash2, Package, Hammer } from "lucide-react";
 import { toastSuccess, toastError } from "@/lib/toastHelpers";
 
@@ -288,7 +290,12 @@ export default function KitAssembly() {
           {loading ? (
             <p className="text-muted-foreground text-sm">Carregando…</p>
           ) : kits.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Nenhum kit cadastrado ainda.</p>
+            <EmptyState
+              compact
+              icon={Package}
+              title="Nenhum kit cadastrado"
+              description="Cadastre kits para agrupar componentes em SKUs pai montáveis."
+            />
           ) : (
             <Table>
               <TableHeader>
@@ -340,7 +347,12 @@ export default function KitAssembly() {
         </CardHeader>
         <CardContent>
           {assemblies.length === 0 ? (
-            <p className="text-muted-foreground text-sm">Nenhuma montagem registrada.</p>
+            <EmptyState
+              compact
+              icon={History}
+              title="Nenhuma montagem registrada"
+              description="As montagens realizadas aparecerão aqui com data, kit e quantidade."
+            />
           ) : (
             <Table>
               <TableHeader>
