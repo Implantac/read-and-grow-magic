@@ -314,9 +314,7 @@ export default function SalesFunnelPage() {
                       );
                     })}
                     {items.length === 0 && (
-                      <div className="flex items-center justify-center h-24 text-xs text-muted-foreground border border-dashed rounded-lg">
-                        Nenhuma oportunidade
-                      </div>
+                      <EmptyState compact icon={Target} title="Nenhuma oportunidade" className="min-h-[96px]" />
                     )}
                   </div>
                 </div>
