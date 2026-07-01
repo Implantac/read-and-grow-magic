@@ -23,6 +23,7 @@ import { ExecutiveRoutes } from './routes/ExecutiveRoutes';
 import { FeatureGate } from '@/components/plan/FeatureGate';
 import { GatedOutlet } from '@/components/plan/GatedOutlet';
 import { OnboardingGuard } from '@/components/OnboardingGuard';
+import { ConfirmDialogProvider } from '@/shared/components/ConfirmDialog';
 
 // Eager load critical pages
 import Login from "./pages/Login";
