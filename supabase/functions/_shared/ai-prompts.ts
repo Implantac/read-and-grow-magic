@@ -1,4 +1,11 @@
 import { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  buildKnowledgeBlock,
+  PERSONA_KNOWLEDGE_MAP,
+  KNOWLEDGE_VERSION,
+  type KnowledgeModule,
+} from "./business-knowledge.ts";
+
 
 /**
  * Centralized AI Prompts Template System
