@@ -1077,7 +1077,18 @@ const handler = async (req: Request): Promise<Response> => {
           });
         }
         const moduleDenied = await requireModule(ctx as TenantContext, 'executivo');
-        if (moduleDenied) return moduleDenied;
+        if (moduleDenied) {
+          let body: any = {};
+          try { body = await moduleDenied.clone().json(); } catch { /* ignore */ }
+          return new Response(JSON.stringify({
+            error: 'PLAN_REQUIRED',
+            message: body?.message || `Este recurso requer o plano ${body?.required_plan || 'superior'}. Faça upgrade para acessar o Cérebro Nativo.`,
+            module: body?.module || 'executivo',
+            required_plan: body?.required_plan,
+            required_plan_id: body?.required_plan_id,
+            fallback: false,
+          }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
         const quotaDenied = await enforceQuota(ctx as TenantContext, 'ai_calls', 1);
         if (quotaDenied) {
           // Convert 402 to 200 with structured payload so supabase.functions.invoke
