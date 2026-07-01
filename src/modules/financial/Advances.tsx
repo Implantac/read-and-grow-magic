@@ -13,6 +13,7 @@ import { Input } from '@/ui/base/input';
 import { Label } from '@/ui/base/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Wallet, TrendingDown, TrendingUp, Sparkles } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useFinancialAdvances, type FinancialAdvanceRow } from '@/hooks/financial/useFinancialAdvances';
 import { useUseAdvance } from '@/hooks/financial/useFinancialSettlements';
 import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
@@ -84,7 +85,7 @@ export default function Advances() {
         </TableHeader>
         <TableBody>
           {rows.length === 0 ? (
-            <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-10">Nenhum adiantamento.</TableCell></TableRow>
+            <TableRow><TableCell colSpan={7}><EmptyState compact icon={Wallet} title="Nenhum adiantamento" description="Registre adiantamentos recebidos ou pagos para aplicá-los em títulos abertos." /></TableCell></TableRow>
           ) : rows.map(a => {
             const remaining = Number(a.remaining_amount);
             return (

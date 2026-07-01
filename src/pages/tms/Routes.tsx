@@ -10,7 +10,8 @@ import { Input } from '@/ui/base/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { Label } from '@/ui/base/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, MapPin } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 
@@ -75,7 +76,7 @@ const Routes = () => {
           </TableHeader>
           <TableBody>
             {filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhuma rota cadastrada</TableCell></TableRow>
+              <TableRow><TableCell colSpan={6}><EmptyState compact icon={MapPin} title="Nenhuma rota" description="Crie rotas de entrega para otimizar paradas e reduzir custos operacionais." /></TableCell></TableRow>
             ) : filtered.map(r => (
               <TableRow key={r.id}>
                 <TableCell className="font-mono font-bold">{r.routeNumber}</TableCell>

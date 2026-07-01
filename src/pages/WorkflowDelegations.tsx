@@ -11,6 +11,7 @@ import { Input } from "@/ui/base/input";
 import { Badge } from "@/ui/base/badge";
 import { Switch } from "@/ui/base/switch";
 import { Loader2, UserCheck2, Plus, Trash2 } from "lucide-react";
+import { EmptyState } from "@/shared/components/EmptyState";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -142,7 +143,7 @@ export default function WorkflowDelegations() {
           {isLoading ? (
             <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin" /></div>
           ) : rows.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">Nenhuma delegação configurada.</p>
+            <EmptyState icon={UserCheck2} title="Nenhuma delegação" description="Delegue aprovações a outros usuários durante férias ou ausências temporárias." />
           ) : (
             <div className="space-y-2">
               {rows.map((d) => (

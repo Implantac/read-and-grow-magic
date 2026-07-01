@@ -10,7 +10,8 @@ import { Input } from '@/ui/base/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { Label } from '@/ui/base/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
-import { Plus, Search, Pencil } from 'lucide-react';
+import { Plus, Search, Pencil, Truck } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { toast } from 'sonner';
 
 import { formatNumber } from '@/lib/formatters';
@@ -75,7 +76,7 @@ const Vehicles = () => {
           </TableHeader>
           <TableBody>
             {filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">Nenhum veículo cadastrado</TableCell></TableRow>
+              <TableRow><TableCell colSpan={7}><EmptyState compact icon={Truck} title="Nenhum veículo" description="Cadastre veículos da frota para planejar rotas e acompanhar entregas." /></TableCell></TableRow>
             ) : filtered.map(v => (
               <TableRow key={v.id}>
                 <TableCell className="font-mono font-bold">{v.plate}</TableCell>

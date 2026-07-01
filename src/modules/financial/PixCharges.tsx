@@ -7,6 +7,7 @@ import { Label } from '@/ui/base/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/ui/base/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { QrCode, Plus, Copy, CheckCircle2, Clock, Zap } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
@@ -95,7 +96,7 @@ export default function PixCharges() {
                 {isLoading ? (
                   <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
                 ) : charges.length === 0 ? (
-                  <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhuma cobrança ainda. Gere a primeira!</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={7}><EmptyState compact icon={QrCode} title="Nenhuma cobrança PIX" description="Gere sua primeira cobrança PIX para receber pagamentos instantâneos com QR Code." /></TableCell></TableRow>
                 ) : charges.map(c => {
                   const m = statusMeta[c.status];
                   const Icon = m.icon;

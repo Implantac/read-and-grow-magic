@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
+import { EmptyState } from '@/shared/components/EmptyState';
 import {
   useHealthPatients, useCreateHealthPatient, useDeleteHealthPatient,
   useHealthProfessionals, useCreateHealthProfessional,
@@ -135,9 +136,7 @@ export default function HealthPatients() {
               {isLoading ? (
                 <div className="p-8 text-center text-muted-foreground">Carregando…</div>
               ) : patients.length === 0 ? (
-                <div className="p-12 text-center text-muted-foreground">
-                  <HeartPulse className="h-10 w-10 mx-auto mb-2 opacity-50" />Nenhum paciente cadastrado.
-                </div>
+                <EmptyState icon={HeartPulse} title="Nenhum paciente" description="Cadastre pacientes para gerenciar prontuários, consultas e histórico clínico." />
               ) : (
                 <Table>
                   <TableHeader>
@@ -198,9 +197,7 @@ export default function HealthPatients() {
             </CardHeader>
             <CardContent className="p-0">
               {pros.length === 0 ? (
-                <div className="p-12 text-center text-muted-foreground">
-                  <Stethoscope className="h-10 w-10 mx-auto mb-2 opacity-50" />Nenhum profissional cadastrado.
-                </div>
+                <EmptyState icon={Stethoscope} title="Nenhum profissional" description="Cadastre médicos e profissionais de saúde para agendar consultas." />
               ) : (
                 <Table>
                   <TableHeader>
@@ -256,9 +253,7 @@ export default function HealthPatients() {
             </CardHeader>
             <CardContent className="p-0">
               {appts.length === 0 ? (
-                <div className="p-12 text-center text-muted-foreground">
-                  <Calendar className="h-10 w-10 mx-auto mb-2 opacity-50" />Nenhuma consulta agendada.
-                </div>
+                <EmptyState icon={Calendar} title="Nenhuma consulta" description="Agende consultas vinculando pacientes e profissionais cadastrados." />
               ) : (
                 <Table>
                   <TableHeader>
