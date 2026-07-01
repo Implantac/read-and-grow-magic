@@ -52,23 +52,42 @@ const PERSONA_DESCRIPTIONS: Record<AIPersona, string> = {
   CFO: `Você é o Diretor Financeiro (CFO). Foco em Fluxo de Caixa, Margens, Inadimplência e Risco.`,
 };
 
+export interface SystemPromptOptions {
+  /** Override dos módulos de conhecimento. Se omitido, usa PERSONA_KNOWLEDGE_MAP. */
+  knowledgeModules?: KnowledgeModule[] | 'ALL';
+  /** Desativa injeção da base de conhecimento (não recomendado). */
+  disableKnowledge?: boolean;
+}
+
 export async function getSystemPrompt(
-  persona: AIPersona, 
-  specificInstructions: string, 
-  supabase?: SupabaseClient, 
-  functionName?: string, 
-  userId?: string
+  persona: AIPersona,
+  specificInstructions: string,
+  supabase?: SupabaseClient,
+  functionName?: string,
+  userId?: string,
+  options: SystemPromptOptions = {},
 ) {
+  const modules =
+    options.knowledgeModules ?? PERSONA_KNOWLEDGE_MAP[persona] ?? 'ALL';
+  const knowledgeBlock = options.disableKnowledge
+    ? ''
+    : `\n\n${buildKnowledgeBlock(modules)}`;
+
   const prompt = `
 ${PERSONA_DESCRIPTIONS[persona]}
 
 ${SHARED_PROMPT_RULES}
+${knowledgeBlock}
 
 # 🎯 INSTRUÇÕES ESPECÍFICAS
 ${specificInstructions}
 `.trim();
 
-  console.log(`[AI-PROMPT] Executing Persona: ${persona} | Version: ${PROMPT_VERSION}`);
+  console.log(
+    `[AI-PROMPT] Persona: ${persona} | PromptV: ${PROMPT_VERSION} | KnowledgeV: ${KNOWLEDGE_VERSION} | Modules: ${
+      modules === 'ALL' ? 'ALL' : (modules as string[]).join(',')
+    }`,
+  );
 
   if (supabase && functionName) {
     try {
@@ -77,12 +96,27 @@ ${specificInstructions}
         persona,
         prompt_version: PROMPT_VERSION,
         user_id: userId,
-        metadata: { timestamp: new Date().toISOString() }
+        metadata: {
+          timestamp: new Date().toISOString(),
+          knowledge_version: KNOWLEDGE_VERSION,
+          knowledge_modules: modules === 'ALL' ? 'ALL' : modules,
+        },
       });
     } catch (e) {
       console.error("[AI-PROMPT] Failed to log audit:", e);
     }
   }
-  
+
   return prompt;
+}
+
+/** Helper standalone para agentes que montam o prompt manualmente (ai-brain). */
+export function getKnowledgeBlockFor(
+  personaOrModules: AIPersona | KnowledgeModule[] | 'ALL',
+): string {
+  if (Array.isArray(personaOrModules) || personaOrModules === 'ALL') {
+    return buildKnowledgeBlock(personaOrModules);
+  }
+  const modules = PERSONA_KNOWLEDGE_MAP[personaOrModules] ?? 'ALL';
+  return buildKnowledgeBlock(modules);
 }
