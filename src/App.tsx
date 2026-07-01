@@ -42,6 +42,7 @@ const WorkflowDelegations = lazy(() => import("./pages/WorkflowDelegations"));
 const Observability = lazy(() => import("./pages/Observability"));
 const SRESettings = lazy(() => import("./pages/SRESettings"));
 const SLODashboard = lazy(() => import("./pages/SLODashboard"));
+const MaturityAudit = lazy(() => import("./pages/MaturityAudit"));
 const PluginMarketplace = lazy(() => import("./pages/PluginMarketplace"));
 const PluginEditor = lazy(() => import("./pages/admin/PluginEditor"));
 const ConstructionProjects = lazy(() => import("./pages/ConstructionProjects"));
@@ -116,6 +117,7 @@ const App = () => (
                 <Route path="/sre" element={<Observability />} />
                 <Route path="/sre/configuracao" element={<SRESettings />} />
                 <Route path="/sre/slo" element={<SLODashboard />} />
+                <Route path="/governanca/maturity" element={<MaturityAudit />} />
                 <Route path="/marketplace" element={<PluginMarketplace />} />
                 <Route path="/admin/marketplace/editor" element={<PluginEditor />} />
                 <Route path="/construcao/obras" element={<ConstructionProjects />} />
