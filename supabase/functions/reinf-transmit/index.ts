@@ -132,7 +132,10 @@ Deno.serve(async (req) => {
     // REINF_CERT_A1_B64_<COMPANY_ID_SEM_HIFEN> para multi-tenant real.
     const compKey = auth.companyId.replace(/-/g, "").toUpperCase();
     const certB64 = Deno.env.get(`REINF_CERT_A1_B64_${compKey}`) || Deno.env.get("REINF_CERT_A1_B64");
-    const certRow = (company as any)?.reinf_cert_a1_ref;
+    const { data: company } = await admin
+      .from("companies").select("id").eq("id", auth.companyId).maybeSingle();
+    const certRow = false; // reserva para armazenamento futuro em Vault
+    void company;
     const hasCert = Boolean(certB64 || certRow);
     const env: "simulated" | "sandbox" = hasCert ? "sandbox" : "simulated";
 
