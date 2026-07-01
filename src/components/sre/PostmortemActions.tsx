@@ -29,7 +29,7 @@ const STATUS_VARIANT: Record<string, 'secondary' | 'default' | 'outline'> = {
 
 export function PostmortemActions({ postmortemId }: { postmortemId: string }) {
   const [items, setItems] = useState<Action[]>([]);
-  const [users, setUsers] = useState<Array<{ id: string; full_name?: string | null }>>([]);
+  const [users, setUsers] = useState<Array<{ id: string; name?: string | null }>>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({ title: '', owner_id: '', due_at: '', priority: 'medium' });
 
@@ -37,10 +37,10 @@ export function PostmortemActions({ postmortemId }: { postmortemId: string }) {
     setLoading(true);
     const [{ data }, { data: profs }] = await Promise.all([
       supabase.from('sre_postmortem_actions').select('*').eq('postmortem_id', postmortemId).order('created_at', { ascending: false }),
-      supabase.from('profiles').select('id, full_name').limit(100),
+      supabase.from('profiles').select('id, name').limit(100),
     ]);
     setItems((data ?? []) as any);
-    setUsers(profs ?? []);
+    setUsers((profs ?? []) as any);
     setLoading(false);
   };
   useEffect(() => { void load(); }, [postmortemId]);
