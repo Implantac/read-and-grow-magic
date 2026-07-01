@@ -1,7 +1,6 @@
 /**
  * Fase 3 — useAuditTrail
- * Hook padronizado para consumir `system_audit_logs` filtrando por entidade
- * (tabela + id). Retorna eventos ordenados por data e helpers de rótulo.
+ * Hook padronizado para consumir `system_audit_logs` filtrando por módulo/entidade.
  */
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,33 +8,35 @@ import { supabase } from "@/integrations/supabase/client";
 export interface AuditEvent {
   id: string;
   action: string;
-  entity_type: string | null;
+  module: string | null;
+  entity_name: string | null;
   entity_id: string | null;
   user_id: string | null;
-  metadata: Record<string, unknown> | null;
+  old_data: unknown;
+  new_data: unknown;
   created_at: string;
 }
 
 interface Options {
-  entityType: string;
+  entityName: string;
   entityId?: string | null;
   limit?: number;
 }
 
-export function useAuditTrail({ entityType, entityId, limit = 50 }: Options) {
+export function useAuditTrail({ entityName, entityId, limit = 50 }: Options) {
   const [events, setEvents] = useState<AuditEvent[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!entityType) return;
+    if (!entityName) return;
     setLoading(true);
     setError(null);
     try {
       let q = supabase
         .from("system_audit_logs")
-        .select("id, action, entity_type, entity_id, user_id, metadata, created_at")
-        .eq("entity_type", entityType)
+        .select("id, action, module, entity_name, entity_id, user_id, old_data, new_data, created_at")
+        .eq("entity_name", entityName)
         .order("created_at", { ascending: false })
         .limit(limit);
       if (entityId) q = q.eq("entity_id", entityId);
@@ -47,7 +48,7 @@ export function useAuditTrail({ entityType, entityId, limit = 50 }: Options) {
     } finally {
       setLoading(false);
     }
-  }, [entityType, entityId, limit]);
+  }, [entityName, entityId, limit]);
 
   useEffect(() => {
     void load();
