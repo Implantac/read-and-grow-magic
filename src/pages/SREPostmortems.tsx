@@ -10,7 +10,8 @@ import { Badge } from '@/ui/base/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Skeleton } from '@/ui/base/skeleton';
-import { FileText, Plus, CheckCircle2, Trash2 } from 'lucide-react';
+import { FileText, Plus, CheckCircle2, Trash2, ListChecks, ChevronDown, ChevronRight } from 'lucide-react';
+import { PostmortemActions } from '@/components/sre/PostmortemActions';
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { toast } from 'sonner';
@@ -40,6 +41,7 @@ export default function SREPostmortems() {
   const [loading, setLoading] = useState(true);
   const [incidents, setIncidents] = useState<any[]>([]);
   const [slos, setSlos] = useState<any[]>([]);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: '', summary: '', impact: '', root_cause: '', timeline: '',
     severity: 'major', incident_id: '', slo_id: '',
@@ -145,6 +147,7 @@ export default function SREPostmortems() {
               </TableRow></TableHeader>
               <TableBody>
                 {list.map(p => (
+                  <>
                   <TableRow key={p.id}>
                     <TableCell className="whitespace-nowrap text-xs">{new Date(p.created_at).toLocaleString('pt-BR')}</TableCell>
                     <TableCell className="max-w-[320px] truncate" title={p.title}>{p.title}</TableCell>
@@ -152,12 +155,26 @@ export default function SREPostmortems() {
                     <TableCell><Badge variant={STATUS[p.status as keyof typeof STATUS] ?? 'outline'}>{p.status}</Badge></TableCell>
                     <TableCell className="text-center">{p.action_items?.length ?? 0}</TableCell>
                     <TableCell className="flex gap-1">
+                      <Button size="icon" variant="ghost" title="Action items" onClick={() => setExpanded(expanded === p.id ? null : p.id)}>
+                        {expanded === p.id ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                      </Button>
                       {p.status === 'draft' && (
                         <Button size="icon" variant="ghost" onClick={() => publish(p.id)} title="Publicar"><CheckCircle2 className="h-4 w-4" /></Button>
                       )}
                       <Button size="icon" variant="ghost" onClick={() => remove(p.id)}><Trash2 className="h-4 w-4" /></Button>
                     </TableCell>
                   </TableRow>
+                  {expanded === p.id && (
+                    <TableRow key={p.id + '-actions'}>
+                      <TableCell colSpan={6} className="bg-muted/30">
+                        <div className="p-2">
+                          <div className="flex items-center gap-2 mb-3 text-sm font-medium"><ListChecks className="h-4 w-4" /> Action items</div>
+                          <PostmortemActions postmortemId={p.id} />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  </>
                 ))}
               </TableBody>
             </Table>

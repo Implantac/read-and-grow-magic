@@ -14774,6 +14774,62 @@ export type Database = {
         }
         Relationships: []
       }
+      sre_postmortem_actions: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_at: string | null
+          id: string
+          owner_id: string | null
+          postmortem_id: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          owner_id?: string | null
+          postmortem_id: string
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          owner_id?: string | null
+          postmortem_id?: string
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sre_postmortem_actions_postmortem_id_fkey"
+            columns: ["postmortem_id"]
+            isOneToOne: false
+            referencedRelation: "sre_postmortems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sre_postmortems: {
         Row: {
           action_items: Json
@@ -20007,6 +20063,36 @@ export type Database = {
           shift_id: string
           starts_at: string
           user_id: string
+        }[]
+      }
+      sre_postmortem_action_set_status: {
+        Args: { _id: string; _status: string }
+        Returns: undefined
+      }
+      sre_postmortem_action_upsert: {
+        Args: {
+          _description?: string
+          _due_at?: string
+          _id: string
+          _owner_id?: string
+          _postmortem_id: string
+          _priority?: string
+          _title: string
+        }
+        Returns: string
+      }
+      sre_postmortem_actions_inbox: {
+        Args: { _only_mine?: boolean }
+        Returns: {
+          due_at: string
+          id: string
+          overdue: boolean
+          owner_id: string
+          postmortem_id: string
+          postmortem_title: string
+          priority: string
+          status: string
+          title: string
         }[]
       }
       sre_postmortems_by_slo: {

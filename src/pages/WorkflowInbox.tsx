@@ -13,6 +13,7 @@ import { WorkflowGraph } from "@/components/workflow/WorkflowGraph";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnterpriseStore } from "@/core/stores/useEnterpriseStore";
+import { SREActionsInboxCard } from "@/components/sre/SREActionsInboxCard";
 
 export default function WorkflowInbox() {
   const { data: defs = [], isLoading: loadingDefs } = useWorkflowDefinitions();
@@ -51,6 +52,8 @@ export default function WorkflowInbox() {
   return (
     <PageContainer>
       <PageHeader title="Caixa de Workflows" description="Instâncias pendentes aguardando ação" icon={Inbox} />
+      <SREActionsInboxCard />
+
 
       {loading ? (
         <div className="flex justify-center py-12" role="status" aria-live="polite" aria-label="Carregando workflows">
