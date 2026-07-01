@@ -10,7 +10,7 @@ import { Badge } from '@/ui/base/badge';
 import { Progress } from '@/ui/base/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Skeleton } from '@/ui/base/skeleton';
-import { Activity, AlertTriangle, Plus, Target, TrendingUp, Trash2 } from 'lucide-react';
+import { Activity, AlertTriangle, Plus, Target, TrendingUp, Trash2, Siren } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { toast } from 'sonner';
