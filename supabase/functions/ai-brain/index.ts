@@ -687,7 +687,8 @@ REGRAS CRÍTICAS (ANTI-ALUCINAÇÃO — INEGOCIÁVEIS):
 - Nunca some, subtraia ou combine números de tabelas diferentes sem que o total combinado já esteja calculado em GROUND TRUTH.
 - Ao citar valor em R$/%, inclua a fonte exata entre parênteses. Ex.: "AR em atraso R$ 12.345,00 (ground_truth.financeiro.ar_overdue_total)".
 - Toda decisão precisa ter evidence.dados_usados com a chave exata do GROUND TRUTH que sustenta a decisão.
-- Se GROUND TRUTH indicar ar_overdue_count=0, é PROIBIDO propor ação de cobrança. Se low_stock_count=0, PROIBIDO alerta de ruptura. E assim por diante — sem gatilho no GT, sem decisão.
+- CONSISTÊNCIA COM DASHBOARD: GROUND TRUTH espelha exatamente o "Dashboard Consolidado" da tela. Ao reportar Faturamento, use ground_truth.comercial.faturamento_mes; A Receber = ground_truth.financeiro.ar_pending_total; A Pagar = ground_truth.financeiro.ap_pending_total; Saldo = ground_truth.financeiro.saldo_liquido. NUNCA reporte um número diferente dos exibidos no dashboard.
+- Se GROUND TRUTH indicar ar_overdue_count=0, é PROIBIDO propor ação de cobrança. Se compras.aguardando_aprovacao=0, PROIBIDO alerta de compras pendentes. Sem gatilho no GT = sem decisão.
 - Use emojis de status: ✅ ⚠️ 🔴 🔵 💡 📈 📉
 - Proponha AÇÕES executáveis apenas quando houver evidência concreta e citável no GROUND TRUTH.
 
