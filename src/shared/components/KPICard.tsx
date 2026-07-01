@@ -39,10 +39,46 @@ const colorMap: Record<string, { border: string; iconBg: string; iconText: strin
   accent: { border: 'border-l-primary', iconBg: 'bg-accent/10', iconText: 'text-accent-foreground' },
 };
 
-export function KPICard({ title, value, subtitle, description, icon, accentColor, color, className, index = 0 }: KPICardProps) {
+export function KPICard(props: KPICardProps) {
+  const { title, value, subtitle, description, icon, accentColor, color, className, index = 0 } = props;
   const resolvedColor = accentColor || color || 'primary';
-  const colors = colorMap[resolvedColor] || colorMap.primary;
   const resolvedSubtitle = subtitle || description;
+
+  // Fase 2: se qualquer slot Enterprise foi passado, delega ao card avançado.
+  const hasEnterprise =
+    props.entityKey || props.deltas || props.goal != null || props.progress != null ||
+    props.status || props.impact || props.source || props.lastUpdated || props.trend || props.onClick;
+  if (hasEnterprise) {
+    const allowed = ['primary', 'success', 'warning', 'danger', 'info', 'accent'] as const;
+    const safeColor = (allowed as readonly string[]).includes(resolvedColor)
+      ? (resolvedColor as typeof allowed[number])
+      : 'primary';
+    return (
+      <EnterpriseKPICard
+        title={title}
+        value={value}
+        subtitle={resolvedSubtitle}
+        icon={icon}
+        color={safeColor}
+        className={className}
+        index={index}
+        entityKey={props.entityKey}
+        numericValue={props.numericValue}
+        deltas={props.deltas}
+        goal={props.goal}
+        progress={props.progress}
+        status={props.status}
+        impact={props.impact}
+        source={props.source}
+        lastUpdated={props.lastUpdated}
+        trend={props.trend}
+        onClick={props.onClick}
+      />
+    );
+  }
+
+  const colors = colorMap[resolvedColor] || colorMap.primary;
+
 
   // Support both ReactNode and ElementType (component reference)
   let iconElement: ReactNode;
