@@ -209,7 +209,11 @@ export default function Billing3PL() {
           {loading ? (
             <p className="text-sm text-muted-foreground">Carregando…</p>
           ) : contracts.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhum contrato cadastrado.</p>
+            <EmptyState
+              icon={FileText}
+              title="Nenhum contrato cadastrado"
+              description="Cadastre contratos 3PL para gerar faturas por armazenagem, entradas, saídas, picking e packing."
+            />
           ) : (
             <Table>
               <TableHeader>
