@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Label } from '@/ui/base/label';
 import { Textarea } from '@/ui/base/textarea';
 import { Lock, Unlock, Search, AlertTriangle, CheckCircle } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 import { formatDate } from '@/lib/formatters';
 const blockTypeLabels: Record<string, string> = {
