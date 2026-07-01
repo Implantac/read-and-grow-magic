@@ -102,25 +102,118 @@ async function loadPendingSummary(companyId: string | null, limit = 8) {
 // ─────────────────────────────────────────────
 async function gatherGroundTruth(companyId: string | null) {
   if (!companyId) return { available: false, reason: "sem company_id" };
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0, 10);
+  const d30 = new Date(today.getTime() - 30 * 86400000).toISOString().slice(0, 10);
+
   const tables = [
     "clients","suppliers","products","orders",
     "accounts_payable","accounts_receivable","financial_ledger",
     "nfe","production_orders","stock_balances","purchase_orders",
     "quotations","financial_alerts",
   ];
-  const results: Record<string, number> = {};
+  const counts: Record<string, number> = {};
   await Promise.all(tables.map(async (t) => {
     const { count } = await admin.from(t).select("id", { count: "exact", head: true }).eq("company_id", companyId);
-    results[t] = count ?? 0;
+    counts[t] = count ?? 0;
   }));
-  // Somatórios financeiros básicos
+
+  // AR aberto — detalhado + aging
   const { data: arOpen } = await admin.from("accounts_receivable")
-    .select("open_amount,amount,status").eq("company_id", companyId).neq("status", "paid").limit(1000);
+    .select("id,client_id,open_amount,amount,due_date,status")
+    .eq("company_id", companyId).neq("status", "paid").limit(2000);
+  const arRows = (arOpen || []).map((r: any) => ({
+    id: r.id, client_id: r.client_id,
+    valor: Number(r.open_amount ?? r.amount) || 0,
+    due_date: r.due_date,
+    vencido: r.due_date && r.due_date < todayStr,
+  }));
+  const ar_open_total = +arRows.reduce((s, r) => s + r.valor, 0).toFixed(2);
+  const ar_overdue = arRows.filter(r => r.vencido);
+  const ar_overdue_total = +ar_overdue.reduce((s, r) => s + r.valor, 0).toFixed(2);
+  const ar_top5 = [...arRows].sort((a, b) => b.valor - a.valor).slice(0, 5);
+
+  // AP aberto
   const { data: apOpen } = await admin.from("accounts_payable")
-    .select("amount,status").eq("company_id", companyId).neq("status", "paid").limit(1000);
-  const ar_open_total = (arOpen || []).reduce((s: number, r: any) => s + (Number(r.open_amount || r.amount) || 0), 0);
-  const ap_open_total = (apOpen || []).reduce((s: number, r: any) => s + (Number(r.amount) || 0), 0);
-  return { available: true, counts: results, ar_open_total, ap_open_total };
+    .select("id,supplier_id,amount,due_date,status")
+    .eq("company_id", companyId).neq("status", "paid").limit(2000);
+  const apRows = (apOpen || []).map((r: any) => ({
+    id: r.id, supplier_id: r.supplier_id,
+    valor: Number(r.amount) || 0,
+    due_date: r.due_date,
+    vencido: r.due_date && r.due_date < todayStr,
+  }));
+  const ap_open_total = +apRows.reduce((s, r) => s + r.valor, 0).toFixed(2);
+  const ap_overdue_total = +apRows.filter(r => r.vencido).reduce((s, r) => s + r.valor, 0).toFixed(2);
+  const ap_top5 = [...apRows].sort((a, b) => b.valor - a.valor).slice(0, 5);
+
+  // Vendas últimos 30 dias
+  const { data: recentOrders } = await admin.from("orders")
+    .select("id,total,status,created_at")
+    .eq("company_id", companyId).gte("created_at", d30).limit(2000);
+  const orders_30d_count = (recentOrders || []).length;
+  const orders_30d_total = +((recentOrders || []).reduce((s: number, r: any) => s + (Number(r.total) || 0), 0)).toFixed(2);
+
+  // Estoque baixo
+  const { data: stock } = await admin.from("stock_balances")
+    .select("product_id,quantity,min_quantity").eq("company_id", companyId).limit(2000);
+  const low_stock_count = (stock || []).filter((r: any) => r.min_quantity != null && Number(r.quantity) < Number(r.min_quantity)).length;
+
+  // OPs em aberto
+  const { count: op_open } = await admin.from("production_orders")
+    .select("id", { count: "exact", head: true })
+    .eq("company_id", companyId).not("status", "in", "(completed,cancelled,closed)");
+
+  return {
+    available: true,
+    reference_date: todayStr,
+    counts,
+    financeiro: {
+      ar_open_total, ar_overdue_total,
+      ar_overdue_count: ar_overdue.length,
+      ar_top5,
+      ap_open_total, ap_overdue_total,
+      ap_top5,
+    },
+    comercial: { orders_30d_count, orders_30d_total },
+    estoque: { low_stock_count },
+    producao: { open_orders: op_open ?? 0 },
+    _regra: "Números aqui são a única fonte válida. Qualquer valor não presente = 'dados insuficientes'.",
+  };
+}
+
+// Extrai números monetários/percentuais mencionados em um texto qualquer
+function extractNumbers(text: string): number[] {
+  const nums = new Set<number>();
+  const re = /(?:R\$\s*)?(-?\d{1,3}(?:[.,]\d{3})*(?:[.,]\d+)?)\s*(?:%|reais)?/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    const raw = m[1].replace(/\./g, "").replace(",", ".");
+    const n = Number(raw);
+    if (!isNaN(n) && Math.abs(n) >= 1) nums.add(+n.toFixed(2));
+  }
+  return [...nums];
+}
+
+// Verifica se números citados pela IA existem no ground truth (tolerância 1%)
+function validateAgainstGroundTruth(structured: any, gt: any): { unverified: number[]; verified: number[] } {
+  if (!gt?.available) return { unverified: [], verified: [] };
+  const allowed = new Set<number>();
+  const walk = (v: any) => {
+    if (v == null) return;
+    if (typeof v === "number") { allowed.add(+v.toFixed(2)); return; }
+    if (typeof v === "object") for (const k of Object.keys(v)) walk(v[k]);
+  };
+  walk(gt);
+  const text = JSON.stringify(structured);
+  const cited = extractNumbers(text);
+  const verified: number[] = [];
+  const unverified: number[] = [];
+  for (const n of cited) {
+    const ok = [...allowed].some(a => a === n || (a !== 0 && Math.abs((n - a) / a) < 0.01));
+    (ok ? verified : unverified).push(n);
+  }
+  return { unverified, verified };
 }
 
 
