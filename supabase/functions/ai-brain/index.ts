@@ -813,9 +813,14 @@ ${ctx}`;
       try { args = JSON.parse(tc.function?.arguments || "{}"); } catch { /* */ }
 
       const isRisky = RISKY_ACTIONS.has(name);
+      const isDataTool = DATA_TOOL_NAMES.has(name);
       let result: any;
 
-      if (isRisky) {
+      if (isDataTool) {
+        result = companyId
+          ? await dispatchDataTool(name, args, companyId)
+          : { ok: false, error: "company_id ausente" };
+      } else if (isRisky) {
         // Cria decisão pendente em vez de executar
         const { data: dec } = await admin.from("ai_brain_decisions").insert({
           company_id: companyId || null,
