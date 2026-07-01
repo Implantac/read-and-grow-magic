@@ -181,11 +181,11 @@ export default function ChartOfAccountsPage() {
           {rootAccounts.length > 0 ? (
             <div className="space-y-0.5">{rootAccounts.map((a) => renderAccount(a))}</div>
           ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Nenhuma conta cadastrada</p>
-              <p className="text-sm">Clique em "Nova Conta" para começar</p>
-            </div>
+            <EmptyState
+              icon={BookOpen}
+              title="Nenhuma conta cadastrada"
+              description="Estruture o Plano de Contas para habilitar lançamentos contábeis e demonstrações."
+            />
           )}
         </CardContent>
       </Card>
