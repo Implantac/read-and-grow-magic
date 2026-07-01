@@ -41,6 +41,7 @@ export default function SREPostmortems() {
   const [loading, setLoading] = useState(true);
   const [incidents, setIncidents] = useState<any[]>([]);
   const [slos, setSlos] = useState<any[]>([]);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: '', summary: '', impact: '', root_cause: '', timeline: '',
     severity: 'major', incident_id: '', slo_id: '',
