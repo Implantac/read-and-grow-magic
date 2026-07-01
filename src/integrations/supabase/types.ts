@@ -3228,6 +3228,7 @@ export type Database = {
           operation_types: Json | null
           parent_company_id: string | null
           phone: string | null
+          reinf_cert_a1_ref: string | null
           require_2fa: boolean
           segment: string | null
           segment_id: string | null
@@ -3264,6 +3265,7 @@ export type Database = {
           operation_types?: Json | null
           parent_company_id?: string | null
           phone?: string | null
+          reinf_cert_a1_ref?: string | null
           require_2fa?: boolean
           segment?: string | null
           segment_id?: string | null
@@ -3300,6 +3302,7 @@ export type Database = {
           operation_types?: Json | null
           parent_company_id?: string | null
           phone?: string | null
+          reinf_cert_a1_ref?: string | null
           require_2fa?: boolean
           segment?: string | null
           segment_id?: string | null
@@ -12693,6 +12696,68 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reinf_transmissions: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          env: string
+          error: string | null
+          event_type: string
+          events_count: number
+          id: string
+          payload_xml: string | null
+          period_id: string
+          protocol: string | null
+          response_xml: string | null
+          status: string
+          transmitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          env?: string
+          error?: string | null
+          event_type: string
+          events_count?: number
+          id?: string
+          payload_xml?: string | null
+          period_id: string
+          protocol?: string | null
+          response_xml?: string | null
+          status?: string
+          transmitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          env?: string
+          error?: string | null
+          event_type?: string
+          events_count?: number
+          id?: string
+          payload_xml?: string | null
+          period_id?: string
+          protocol?: string | null
+          response_xml?: string | null
+          status?: string
+          transmitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reinf_transmissions_period_id_fkey"
+            columns: ["period_id"]
+            isOneToOne: false
+            referencedRelation: "reinf_periods"
             referencedColumns: ["id"]
           },
         ]

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
@@ -11,6 +12,8 @@ import { useReinf, type ReinfEvent } from '@/hooks/fiscal/useReinf';
 import { formatBRL } from '@/lib/formatters';
 import { toCsv, downloadCsv } from '@/lib/csv';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { Send } from 'lucide-react';
 import {
   R2099_HEADERS, R4099_HEADERS,
   buildR2099Rows, buildR4099Rows,
@@ -142,11 +145,44 @@ export default function Reinf() {
     events, currentPeriod, loading, busy,
     openPeriod, generateR2010, generateR4020, closePeriod, reopen,
   } = useReinf();
+  const [transmitting, setTransmitting] = useState(false);
 
   const totals = currentPeriod?.totals || {};
   const isClosed = currentPeriod?.status === 'fechado';
 
   const byType = (t: string) => events.filter((e) => e.event_type === t);
+
+  const handleTransmit = async () => {
+    if (!currentPeriod) {
+      toast.error('Abra a competência antes de transmitir.');
+      return;
+    }
+    if (events.length === 0) {
+      toast.error('Não há eventos para transmitir nesta competência.');
+      return;
+    }
+    setTransmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('reinf-transmit', {
+        body: { period_id: currentPeriod.id },
+      });
+      if (error) throw error;
+      if (data?.ok) {
+        toast.success(`Transmissão ${data.env === 'simulated' ? 'SIMULADA' : 'enviada'}`, {
+          description: `Protocolo ${data.protocol} • ${data.events_count} evento(s)`,
+        });
+      } else {
+        toast.warning('Transmissão bloqueada', {
+          description: data?.message || 'Certificado A1 ainda não configurado (Sprint 1.1).',
+        });
+      }
+    } catch (err: any) {
+      toast.error('Falha na transmissão', { description: err.message });
+    } finally {
+      setTransmitting(false);
+    }
+  };
+
 
   return (
     <PageContainer>
@@ -202,6 +238,15 @@ export default function Reinf() {
                   <Unlock className="h-4 w-4 mr-2" /> Reabrir competência
                 </Button>
               )}
+              <Button
+                onClick={handleTransmit}
+                disabled={transmitting || busy || !currentPeriod || events.length === 0}
+                variant="outline"
+                className="border-primary/40"
+              >
+                <Send className="h-4 w-4 mr-2" />
+                {transmitting ? 'Transmitindo…' : 'Transmitir (homologação)'}
+              </Button>
             </div>
           </CardContent>
         </Card>
