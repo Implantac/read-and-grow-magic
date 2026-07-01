@@ -19956,6 +19956,21 @@ export type Database = {
           slo_id: string
         }[]
       }
+      sre_slo_incident_timeline: {
+        Args: { _days?: number; _slo_id: string }
+        Returns: {
+          acknowledged_at: string
+          id: string
+          minutes_to_ack: number
+          minutes_to_resolve: number
+          opened_at: string
+          resolved_at: string
+          severity: string
+          source: string
+          status: string
+          title: string
+        }[]
+      }
       sre_slo_status: {
         Args: never
         Returns: {
