@@ -238,6 +238,15 @@ export default function Reinf() {
                   <Unlock className="h-4 w-4 mr-2" /> Reabrir competência
                 </Button>
               )}
+              <Button
+                onClick={handleTransmit}
+                disabled={transmitting || busy || !currentPeriod || events.length === 0}
+                variant="outline"
+                className="border-primary/40"
+              >
+                <Send className="h-4 w-4 mr-2" />
+                {transmitting ? 'Transmitindo…' : 'Transmitir (homologação)'}
+              </Button>
             </div>
           </CardContent>
         </Card>
