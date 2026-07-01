@@ -3228,6 +3228,7 @@ export type Database = {
           operation_types: Json | null
           parent_company_id: string | null
           phone: string | null
+          reinf_cert_a1_ref: string | null
           require_2fa: boolean
           segment: string | null
           segment_id: string | null
@@ -3264,6 +3265,7 @@ export type Database = {
           operation_types?: Json | null
           parent_company_id?: string | null
           phone?: string | null
+          reinf_cert_a1_ref?: string | null
           require_2fa?: boolean
           segment?: string | null
           segment_id?: string | null
@@ -3300,6 +3302,7 @@ export type Database = {
           operation_types?: Json | null
           parent_company_id?: string | null
           phone?: string | null
+          reinf_cert_a1_ref?: string | null
           require_2fa?: boolean
           segment?: string | null
           segment_id?: string | null
