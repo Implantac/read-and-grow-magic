@@ -126,7 +126,9 @@ export default function InventoryPage() {
                 <TableBody>
                   {filteredItems.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhum item encontrado</TableCell>
+                      <TableCell colSpan={8} className="p-0">
+                        <EmptyState compact title="Nenhum item encontrado" description="Ajuste os filtros ou registre entradas de estoque." />
+                      </TableCell>
                     </TableRow>
                   ) : (
                     filteredItems.map(item => {
