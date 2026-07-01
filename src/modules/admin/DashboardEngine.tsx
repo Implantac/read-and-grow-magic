@@ -46,7 +46,12 @@ export default function DashboardEngine() {
           </CardHeader>
           <CardContent>
             {dashboards.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nenhum dashboard.</p>
+              <EmptyState
+                compact
+                icon={LayoutDashboard}
+                title="Nenhum dashboard"
+                description="Crie um dashboard para consolidar KPIs e visualizações."
+              />
             ) : (
               <div className="space-y-1">
                 {dashboards.map((d) => (
