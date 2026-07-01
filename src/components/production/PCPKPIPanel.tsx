@@ -41,13 +41,19 @@ export default function PCPKPIPanel({ orders, timeEntries, capacities, sheets, s
       {/* Main KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KPICard title="Taxa No Prazo" value={`${metrics.onTimeRate}%`} icon={<Target className="h-5 w-5" />}
-          accentColor={metrics.onTimeRate >= 80 ? 'success' : metrics.onTimeRate >= 60 ? 'warning' : 'danger'} index={0} />
+          accentColor={metrics.onTimeRate >= 80 ? 'success' : metrics.onTimeRate >= 60 ? 'warning' : 'danger'} index={0}
+          entityKey="oee" numericValue={metrics.onTimeRate} progress={metrics.onTimeRate}
+          status={metrics.onTimeRate >= 80 ? 'healthy' : metrics.onTimeRate >= 60 ? 'warn' : 'critical'} source="PCP" />
         <KPICard title="Taxa de Atraso" value={`${metrics.delayRate}%`} icon={<AlertTriangle className="h-5 w-5" />}
-          accentColor={metrics.delayRate <= 10 ? 'success' : metrics.delayRate <= 30 ? 'warning' : 'danger'} index={1} />
+          accentColor={metrics.delayRate <= 10 ? 'success' : metrics.delayRate <= 30 ? 'warning' : 'danger'} index={1}
+          entityKey="oee" numericValue={metrics.delayRate}
+          status={metrics.delayRate <= 10 ? 'healthy' : metrics.delayRate <= 30 ? 'warn' : 'critical'} source="PCP" />
         <KPICard title="Eficiência" value={`${metrics.efficiency}%`} icon={<Gauge className="h-5 w-5" />}
-          accentColor={metrics.efficiency >= 90 ? 'success' : 'warning'} index={2} />
+          accentColor={metrics.efficiency >= 90 ? 'success' : 'warning'} index={2}
+          entityKey="oee" numericValue={metrics.efficiency} progress={metrics.efficiency} source="PCP" />
         <KPICard title="Throughput (30d)" value={metrics.throughput} icon={<TrendingUp className="h-5 w-5" />}
-          accentColor="primary" index={3} />
+          accentColor="primary" index={3} entityKey="oee" numericValue={metrics.throughput} source="PCP" />
+
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
