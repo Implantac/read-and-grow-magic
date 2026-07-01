@@ -12,6 +12,7 @@ const SalesRepsPage = lazy(() => import("../modules/commercial/SalesReps"));
 const CommissionsPage = lazy(() => import("../modules/commercial/Commissions"));
 const SalesTargetsPage = lazy(() => import("../modules/commercial/SalesTargets"));
 const ForecastPage = lazy(() => import("../modules/commercial/Forecast"));
+const ForecastMonteCarloPage = lazy(() => import("../modules/commercial/ForecastMonteCarlo"));
 const SellerDashboardPage = lazy(() => import("../modules/commercial/SellerDashboard"));
 const CampaignsPage = lazy(() => import("../modules/commercial/Campaigns"));
 const PerformanceDashboardPage = lazy(() => import("../modules/commercial/PerformanceDashboard"));
@@ -33,6 +34,7 @@ export const CommercialRoutes = [
   <Route key="comercial-comissoes" path="/commercial/comissoes" element={<CommissionsPage />} />,
   <Route key="comercial-metas" path="/commercial/metas" element={<SalesTargetsPage />} />,
   <Route key="comercial-forecast" path="/commercial/forecast" element={<ForecastPage />} />,
+  <Route key="comercial-forecast-mc" path="/commercial/forecast/monte-carlo" element={<ForecastMonteCarloPage />} />,
   <Route key="comercial-vendedor" path="/commercial/vendedor" element={<SellerDashboardPage />} />,
   <Route key="comercial-campanhas" path="/commercial/campanhas" element={<CampaignsPage />} />,
   <Route key="comercial-performance" path="/commercial/performance" element={<PerformanceDashboardPage />} />,
