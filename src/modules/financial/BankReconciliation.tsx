@@ -53,6 +53,7 @@ interface SystemEntry {
 import { useBankTransactions } from '@/hooks/financial/useBankReconciliation';
 import { useCashFlowEntries } from '@/hooks/financial/useCashFlow';
 import { toastSuccess } from '@/lib/toastHelpers';
+import { AutoReconcilePanel } from './AutoReconcilePanel';
 
 export default function BankReconciliation() {
   const { transactions: bankRaw, loading: bankLoading, update: updateBankTx } = useBankTransactions();
@@ -316,6 +317,7 @@ export default function BankReconciliation() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <AutoReconcilePanel />
     </PageContainer>
   );
 }
