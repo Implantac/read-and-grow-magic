@@ -152,19 +152,86 @@ Deno.serve(async (req) => {
 
     const xml = buildLoteXml(evs);
 
-    // Sandbox real transmission not yet implemented (needs XMLDSig + PFX)
+    // Sandbox mode — cert detectado: assina XMLDSig e (opcionalmente) POST SOAP.
     if (env === "sandbox") {
-      const { data: row } = await admin.from("reinf_transmissions").insert({
-        company_id: auth.companyId, period_id: periodId,
-        event_type: "LOTE", env, status: "error",
-        payload_xml: xml, events_count: evs.length,
-        error: "Assinatura XMLDSig + POST SOAP em Sprint 1.1 (requer certificado A1 configurado).",
-        created_by: auth.userId,
-      }).select().single();
-      return new Response(JSON.stringify({
-        ok: false, env, transmission: row,
-        message: "Certificado detectado, mas assinatura real ainda não implementada (Sprint 1.1).",
-      }), { status: 501, headers: { ...cors, "Content-Type": "application/json" } });
+      const certPass = Deno.env.get(`REINF_CERT_A1_PASS_${compKey}`) || Deno.env.get("REINF_CERT_A1_PASS") || "";
+      let signedXml = "";
+      let certSubject = "";
+      let certExpiry = "";
+      try {
+        const signed = signReinfXml(xml, certB64!, certPass);
+        signedXml = signed.signedXml;
+        certSubject = signed.cert.subject;
+        certExpiry = signed.cert.not_after;
+      } catch (sigErr) {
+        console.error("[reinf-transmit] sign_failed", (sigErr as Error).message);
+        const { data: row } = await admin.from("reinf_transmissions").insert({
+          company_id: auth.companyId, period_id: periodId,
+          event_type: "LOTE", env, status: "error",
+          payload_xml: xml, events_count: evs.length,
+          error: "sign_failed: verifique certificado A1 e senha do tenant.",
+          created_by: auth.userId,
+        }).select().single();
+        return new Response(JSON.stringify({ ok: false, env, transmission: row, message: "Falha na assinatura XMLDSig." }), {
+          status: 500, headers: { ...cors, "Content-Type": "application/json" },
+        });
+      }
+
+      const endpoint = Deno.env.get("REINF_WS_ENDPOINT"); // opcional — sem ele não bate rede externa
+      if (!endpoint) {
+        const { data: row } = await admin.from("reinf_transmissions").insert({
+          company_id: auth.companyId, period_id: periodId,
+          event_type: "LOTE", env, status: "signed",
+          payload_xml: signedXml, events_count: evs.length,
+          protocol: `SIGNED-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
+          error: `assinado com sucesso (subject=${certSubject}, expira=${certExpiry}). POST SOAP desativado (defina REINF_WS_ENDPOINT).`,
+          created_by: auth.userId,
+        }).select().single();
+        return new Response(JSON.stringify({
+          ok: true, env, mode: "signed_only", events_count: evs.length,
+          cert: { subject: certSubject, not_after: certExpiry }, transmission: row,
+        }), { headers: { ...cors, "Content-Type": "application/json" } });
+      }
+
+      // POST SOAP homologação
+      const soapEnvelope =
+        `<?xml version="1.0" encoding="UTF-8"?>` +
+        `<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">` +
+        `<soap:Body>${signedXml.replace(/<\?xml[^?]*\?>\s*/i, "")}</soap:Body></soap:Envelope>`;
+      try {
+        const resp = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/soap+xml; charset=utf-8" },
+          body: soapEnvelope,
+        });
+        const respText = await resp.text();
+        const status: "accepted" | "rejected" = resp.ok ? "accepted" : "rejected";
+        const protocol = (respText.match(/<nrProtocolo>([^<]+)<\/nrProtocolo>/)?.[1]) || `WS-${resp.status}`;
+        const { data: row } = await admin.from("reinf_transmissions").insert({
+          company_id: auth.companyId, period_id: periodId,
+          event_type: "LOTE", env, status, protocol,
+          payload_xml: signedXml, response_xml: respText.slice(0, 32000),
+          events_count: evs.length, transmitted_at: new Date().toISOString(),
+          error: resp.ok ? null : `HTTP ${resp.status}`,
+          created_by: auth.userId,
+        }).select().single();
+        return new Response(JSON.stringify({
+          ok: resp.ok, env, protocol, http_status: resp.status,
+          cert: { subject: certSubject, not_after: certExpiry }, transmission: row,
+        }), { status: resp.ok ? 200 : 502, headers: { ...cors, "Content-Type": "application/json" } });
+      } catch (netErr) {
+        console.error("[reinf-transmit] soap_failed", (netErr as Error).message);
+        const { data: row } = await admin.from("reinf_transmissions").insert({
+          company_id: auth.companyId, period_id: periodId,
+          event_type: "LOTE", env, status: "error",
+          payload_xml: signedXml, events_count: evs.length,
+          error: "soap_failed: endpoint indisponível.",
+          created_by: auth.userId,
+        }).select().single();
+        return new Response(JSON.stringify({ ok: false, env, transmission: row, message: "Endpoint SOAP indisponível." }), {
+          status: 502, headers: { ...cors, "Content-Type": "application/json" },
+        });
+      }
     }
 
     // Simulated mode — persist payload with mock protocol
