@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Progress } from '@/ui/base/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { toast } from 'sonner';
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -193,7 +194,7 @@ export default function ProductionOrdersPage() {
                 );
               })}
               {filteredOrders.length === 0 && (
-                <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Nenhuma ordem encontrada</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="p-4"><EmptyState compact icon={Factory} title="Nenhuma ordem encontrada" description="Crie ordens de produção para iniciar a manufatura ou ajuste os filtros." /></TableCell></TableRow>
               )}
             </TableBody>
           </Table>
@@ -303,11 +304,7 @@ function OrderDetailContent({ order }: { order: ProductionOrderRow }) {
           {stepsLoading ? (
             <p className="text-center py-8 text-muted-foreground">Carregando etapas...</p>
           ) : orderSteps.length === 0 ? (
-            <Card><CardContent className="py-8 text-center text-muted-foreground">
-              <Layers className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>Nenhuma etapa cadastrada para esta OP</p>
-              <p className="text-xs">Use a tela "Etapas de Produção" para configurar</p>
-            </CardContent></Card>
+            <EmptyState icon={Layers} title="Nenhuma etapa cadastrada para esta OP" description='Use a tela "Etapas de Produção" para configurar o roteiro desta ordem.' />
           ) : (
             <div className="space-y-2">
               {orderSteps.map((step, idx) => {
@@ -345,10 +342,7 @@ function OrderDetailContent({ order }: { order: ProductionOrderRow }) {
           {logsLoading ? (
             <p className="text-center py-8 text-muted-foreground">Carregando...</p>
           ) : logs.length === 0 ? (
-            <Card><CardContent className="py-8 text-center text-muted-foreground">
-              <History className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>Nenhum registro de histórico</p>
-            </CardContent></Card>
+            <EmptyState icon={History} title="Nenhum registro de histórico" description="Apontamentos e eventos desta OP serão exibidos aqui em tempo real." />
           ) : (
             <div className="space-y-2 max-h-[300px] overflow-y-auto">
               {logs.map(log => (

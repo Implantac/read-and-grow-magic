@@ -20,6 +20,7 @@ import { Badge } from '@/ui/base/badge';
 import { Checkbox } from '@/ui/base/checkbox';
 
 import { formatBRL } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
 const STEPS = [
   { id: 'docs', label: 'Documentos', icon: FileText },
   { id: 'route', label: 'Rota', icon: MapPin },
@@ -117,8 +118,8 @@ export default function MDFePage() {
                               ))}
                               {availableDocs.length === 0 && (
                                 <TableRow>
-                                  <TableCell colSpan={4} className="py-12 text-center text-muted-foreground italic">
-                                    Nenhuma NF-e ou CT-e autorizada disponível para vincular.
+                                  <TableCell colSpan={4} className="p-4">
+                                    <EmptyState compact icon={FileText} title="Nenhum documento disponível" description="Autorize NF-e ou CT-e para vinculá-las ao manifesto." />
                                   </TableCell>
                                 </TableRow>
                               )}
@@ -254,7 +255,7 @@ export default function MDFePage() {
         <CardHeader><CardTitle>Manifestos</CardTitle></CardHeader>
         <CardContent>
           {isLoading ? <div className="py-8 text-center text-muted-foreground">Carregando…</div> : mdfes.length === 0 ? (
-            <div className="py-12 text-center text-muted-foreground">Nenhum MDF-e cadastrado.</div>
+            <EmptyState icon={ScrollText} title="Nenhum MDF-e cadastrado" description="Manifestos Eletrônicos consolidam NF-e e CT-e para transporte. Emita o primeiro." />
           ) : (
             <Table>
               <TableHeader>

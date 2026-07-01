@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/ui/base/alert';
 
 import { formatBRL } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { toSafeNumber } from '@/lib/numericValidation';
 const STEPS = [
   { id: 'import', label: 'Importar NF-e', icon: FileText },
@@ -485,7 +486,7 @@ export default function CTePage() {
         <CardHeader><CardTitle>Conhecimentos de Transporte</CardTitle></CardHeader>
         <CardContent>
           {isLoading ? <div className="py-8 text-center text-muted-foreground">Carregando…</div> : ctes.length === 0 ? (
-            <div className="py-12 text-center text-muted-foreground">Nenhum CT-e cadastrado.</div>
+            <EmptyState icon={Truck} title="Nenhum CT-e cadastrado" description="Emita o primeiro Conhecimento de Transporte Eletrônico para suas operações logísticas." />
           ) : (
             <Table>
               <TableHeader>

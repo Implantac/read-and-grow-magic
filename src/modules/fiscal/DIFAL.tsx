@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/ui/base/dialog';
 import { Switch } from '@/ui/base/switch';
 import { Globe, Plus } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useDIFALRules, useUpsertDIFAL } from '@/hooks/fiscal/useTaxAdvancedRules';
 import { toSafeNumber } from '@/lib/numericValidation';
 
@@ -54,7 +55,7 @@ export default function DIFALPage() {
         <CardHeader><CardTitle>Regras DIFAL ({rules.length})</CardTitle></CardHeader>
         <CardContent>
           {isLoading ? <div className="py-8 text-center text-muted-foreground">Carregando…</div> : rules.length === 0 ? (
-            <div className="py-12 text-center text-muted-foreground">Nenhuma regra cadastrada.</div>
+            <EmptyState icon={Globe} title="Nenhuma regra DIFAL cadastrada" description="Configure alíquotas interestaduais e FCP para vendas B2C fora do estado." />
           ) : (
             <Table>
               <TableHeader>

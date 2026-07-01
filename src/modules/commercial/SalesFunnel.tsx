@@ -24,6 +24,8 @@ import { differenceInDays } from 'date-fns';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { CheckCircle2 } from 'lucide-react';
 
 const KANBAN_STAGES = FUNNEL_STAGES.slice(0, 6);
 
@@ -312,9 +314,7 @@ export default function SalesFunnelPage() {
                       );
                     })}
                     {items.length === 0 && (
-                      <div className="flex items-center justify-center h-24 text-xs text-muted-foreground border border-dashed rounded-lg">
-                        Nenhuma oportunidade
-                      </div>
+                      <EmptyState compact icon={Target} title="Nenhuma oportunidade" className="min-h-[96px]" />
                     )}
                   </div>
                 </div>
@@ -388,7 +388,7 @@ export default function SalesFunnelPage() {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="text-center text-muted-foreground py-10">Sem dados</p>
+                <EmptyState compact icon={BarChart3} title="Sem dados" description="Cadastre oportunidades para visualizar o gráfico de conversão." />
               )}
             </CardContent>
           </Card>
@@ -432,7 +432,7 @@ export default function SalesFunnelPage() {
                   })}
                 </div>
               ) : (
-                <p className="text-center text-muted-foreground py-10">Nenhuma oportunidade estagnada 🎉</p>
+                <EmptyState compact icon={CheckCircle2} title="Nenhuma oportunidade estagnada 🎉" description="Seu funil está saudável. Continue avançando as negociações." />
               )}
             </CardContent>
           </Card>

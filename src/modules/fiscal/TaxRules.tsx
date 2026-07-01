@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Plus, Pencil, Trash2, Search, Calculator, Sparkles } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useTaxRules, useUpsertTaxRule, useDeleteTaxRule, type TaxRule } from '@/hooks/fiscal/useTaxRules';
 import { toSafeNumber } from '@/lib/numericValidation';
 
@@ -115,7 +116,7 @@ export default function TaxRulesPage() {
               {isLoading ? (
                 <TableRow><TableCell colSpan={8} className="text-center py-8">Carregando...</TableCell></TableRow>
               ) : filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={8} className="text-center py-8">Nenhuma regra cadastrada</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="p-4"><EmptyState compact icon={Calculator} title="Nenhuma regra cadastrada" description="Configure alíquotas de ICMS, PIS, COFINS e IPI por NCM e UF." /></TableCell></TableRow>
               ) : (
                 filtered.map((r) => (
                   <TableRow key={r.id}>

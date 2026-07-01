@@ -13,6 +13,7 @@ import { Textarea } from '@/ui/base/textarea';
 import { Switch } from '@/ui/base/switch';
 import { useTechnicalSheets } from '@/hooks/production/useTechnicalSheets';
 import { Plus, FileText, Pencil, Trash2, Clock, DollarSign, Layers } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 interface StepEntry { name: string; time_minutes: number; sector: string; }
 interface MaterialEntry { name: string; quantity: number; unit: string; unit_cost: number; }
@@ -63,7 +64,7 @@ export default function TechnicalSheetsPage() {
             </TableRow></TableHeader>
             <TableBody>
               {sheets.length === 0 ? (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhuma ficha técnica cadastrada</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="p-4"><EmptyState compact icon={FileText} title="Nenhuma ficha técnica cadastrada" description="Cadastre fichas técnicas com etapas e materiais para padronizar a produção." /></TableCell></TableRow>
               ) : sheets.map(sh => (
                 <TableRow key={sh.id}>
                   <TableCell className="font-medium">{sh.product_name}</TableCell>
