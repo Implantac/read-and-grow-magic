@@ -97,6 +97,32 @@ async function loadPendingSummary(companyId: string | null, limit = 8) {
   return data || [];
 }
 
+// ─────────────────────────────────────────────
+// GROUND TRUTH — contagens reais direto do DB (evita alucinação)
+// ─────────────────────────────────────────────
+async function gatherGroundTruth(companyId: string | null) {
+  if (!companyId) return { available: false, reason: "sem company_id" };
+  const tables = [
+    "clients","suppliers","products","orders",
+    "accounts_payable","accounts_receivable","financial_ledger",
+    "nfe","production_orders","stock_balances","purchase_orders",
+    "quotations","financial_alerts",
+  ];
+  const results: Record<string, number> = {};
+  await Promise.all(tables.map(async (t) => {
+    const { count } = await admin.from(t).select("id", { count: "exact", head: true }).eq("company_id", companyId);
+    results[t] = count ?? 0;
+  }));
+  // Somatórios financeiros básicos
+  const { data: arOpen } = await admin.from("accounts_receivable")
+    .select("open_amount,amount,status").eq("company_id", companyId).neq("status", "paid").limit(1000);
+  const { data: apOpen } = await admin.from("accounts_payable")
+    .select("amount,status").eq("company_id", companyId).neq("status", "paid").limit(1000);
+  const ar_open_total = (arOpen || []).reduce((s: number, r: any) => s + (Number(r.open_amount || r.amount) || 0), 0);
+  const ap_open_total = (apOpen || []).reduce((s: number, r: any) => s + (Number(r.amount) || 0), 0);
+  return { available: true, counts: results, ar_open_total, ap_open_total };
+}
+
 
 // ─────────────────────────────────────────────
 // MEMORY (tenant-scoped)
