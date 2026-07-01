@@ -473,8 +473,12 @@ function StockLevelsTable({
           <TableBody>
             {levels.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} className="h-24 text-center">
-                  Nenhum item encontrado.
+                <TableCell colSpan={10} className="p-4">
+                  <EmptyState
+                    compact
+                    title="Nenhum item encontrado"
+                    description="Nenhum saldo de estoque corresponde aos filtros atuais."
+                  />
                 </TableCell>
               </TableRow>
             ) : (

@@ -228,8 +228,12 @@ export default function ProductsPage() {
             <TableBody>
               {filteredProducts.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="h-24 text-center">
-                    Nenhum produto encontrado.
+                  <TableCell colSpan={9} className="p-4">
+                    <EmptyState
+                      compact
+                      title="Nenhum produto encontrado"
+                      description="Cadastre um produto ou ajuste os filtros para visualizar seu catálogo."
+                    />
                   </TableCell>
                 </TableRow>
               ) : (

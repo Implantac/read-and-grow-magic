@@ -62,12 +62,11 @@ export default function WorkflowInbox() {
           <span className="sr-only">Carregando workflows…</span>
         </div>
       ) : pending.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center text-muted-foreground" role="status">
-            <CheckCircle2 className="h-10 w-10 mx-auto mb-3 text-primary/60" aria-hidden="true" />
-            Nenhum workflow pendente
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={CheckCircle2}
+          title="Nenhum workflow pendente"
+          description="Sua caixa de entrada de workflows está limpa. Novos itens aparecerão automaticamente."
+        />
       ) : (
         <div
           className="grid gap-4"

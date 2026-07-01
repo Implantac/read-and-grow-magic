@@ -405,7 +405,15 @@ export default function AccountsReceivable() {
                 </TableRow>
               ))}
               {filteredAccounts.length === 0 && (
-                <TableRow><TableCell colSpan={9} className="h-24 text-center text-muted-foreground">Nenhuma conta encontrada</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={9} className="p-4">
+                    <EmptyState
+                      compact
+                      title="Nenhuma conta encontrada"
+                      description="Ajuste os filtros ou registre um novo lançamento para começar."
+                    />
+                  </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>
