@@ -194,10 +194,11 @@ export default function GeneralLedgerPage() {
               </TableBody>
             </Table>
           ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>Nenhuma movimentação encontrada</p>
-            </div>
+            <EmptyState
+              icon={BookOpen}
+              title="Nenhuma movimentação encontrada"
+              description="Ajuste o período ou selecione outra conta para visualizar os lançamentos do Razão."
+            />
           )}
         </CardContent>
       </Card>
