@@ -13,7 +13,9 @@ import { getEntity, type EntityKey } from "@/core/entityRegistry";
 import { AIInsightPanel } from "./AIInsightPanel";
 import { Skeleton } from "@/ui/base/skeleton";
 import { EmptyState } from "./EmptyState";
+import { AuditTrailPanel } from "./AuditTrailPanel";
 import { Database, ListTree, History, FileClock } from "lucide-react";
+
 
 export const DRILLDOWN_OPEN_EVENT = "drilldown:open";
 
