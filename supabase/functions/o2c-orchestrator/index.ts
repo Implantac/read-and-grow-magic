@@ -38,7 +38,7 @@ Deno.serve(async (req) => {
     // Load order scoped by tenant
     const { data: order, error: orderErr } = await supabase
       .from("orders")
-      .select("id, company_id, client_id, total, status, payment_condition")
+      .select("id, company_id, client_id, total, status, payment_condition, seller_id")
       .eq("id", orderId)
       .eq("company_id", companyId)
       .maybeSingle();
@@ -46,6 +46,7 @@ Deno.serve(async (req) => {
     if (orderErr || !order) return json({ error: "Pedido não encontrado" }, 404);
 
     const runId = crypto.randomUUID();
+    const sellerId: string | null = (order as any).seller_id ?? null;
     const results: StepResult[] = [];
 
     const emit = async (step: StepKey, status: StepStatus, message?: string, data?: Record<string, unknown>) => {
@@ -57,7 +58,7 @@ Deno.serve(async (req) => {
         target_module: step,
         entity_type: "order",
         entity_id: orderId,
-        payload: { run_id: runId, step, status, message, data },
+        payload: { run_id: runId, step, status, message, data, seller_id: sellerId },
       });
     };
 
