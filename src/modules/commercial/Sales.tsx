@@ -240,6 +240,7 @@ export default function SalesPage() {
                 </div>
               </div>
               {selectedSale.notes && <div className="border-t pt-4"><span className="text-sm text-muted-foreground">Observações</span><p className="text-sm">{selectedSale.notes}</p></div>}
+              <AuditTrailPanel entityName="sales" entityId={selectedSale.id} height={260} />
             </div>
           )}
         </DialogContent>
