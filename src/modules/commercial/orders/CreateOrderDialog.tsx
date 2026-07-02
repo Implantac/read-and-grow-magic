@@ -15,7 +15,9 @@ import { ClientSelector } from '@/components/commercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/commercial/OrderItemsEditor';
 import type { CommercialValidation } from '@/hooks/commercial/useCommercialRules';
 import { useCreditCheck } from '@/hooks/commercial/useCreditCheck';
+import { useOrderProfitability } from '@/hooks/commercial/useOrderProfitability';
 import { CreditBadge } from './CreditBadge';
+import { ProfitabilityCard } from './ProfitabilityCard';
 
 interface CreateOrderDialogProps {
   open: boolean;
@@ -53,6 +55,7 @@ export function CreateOrderDialog({
     formItems.reduce((s, i) => s + (i.quantity * i.unit_price - i.discount), 0) +
     (Number(formShipping) || 0);
   const credit = useCreditCheck(formClient.id, orderTotal);
+  const profitability = useOrderProfitability(formItems, Number(formShipping) || 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -133,6 +136,10 @@ export function CreateOrderDialog({
           <TabsContent value="details" className="mt-4 space-y-4">
             {formClient.id && orderTotal > 0 && (
               <CreditBadge result={credit.data} loading={credit.isLoading} />
+            )}
+
+            {formItems.length > 0 && orderTotal > 0 && (
+              <ProfitabilityCard data={profitability.data} loading={profitability.isLoading} />
             )}
 
             {orderValidations.length > 0 && (
