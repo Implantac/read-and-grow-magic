@@ -161,15 +161,21 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
   const handleSave = () => {
     const e = validate();
     if (Object.keys(e).length) {
-      // Switch to first tab containing the error
       if (e.name || e.document || e.email || e.phone) setTab('identification');
       else if (e.address_zip_code || e.address_city || e.address_state) setTab('address');
       toastError('Há campos obrigatórios pendentes.', undefined, 'Verifique os campos');
       return;
     }
+    if (dup.data && dup.data.id !== client?.id) {
+      toastError(`Já existe o cadastro "${dup.data.name}" (${dup.data.code}) com este documento.`, undefined, 'Documento duplicado');
+      setTab('identification');
+      return;
+    }
 
+    const isPJ = formData.person_type === 'PJ';
     const payload: any = {
-      name: formData.name, trade_name: formData.trade_name || null, document: formData.document,
+      person_type: formData.person_type,
+      name: formData.name, trade_name: isPJ ? (formData.trade_name || null) : null, document: formData.document,
       document_type: formData.document_type, email: formData.email, phone: formData.phone,
       cellphone: formData.cellphone || null,
       address_street: formData.address_street, address_number: formData.address_number,
@@ -180,14 +186,21 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
       current_balance: 0, segment: formData.segment || null,
       sales_rep_id: formData.sales_rep_id || null,
       client_score: formData.client_score || 'medium',
-      state_registration: formData.state_registration || null,
-      municipal_registration: formData.municipal_registration || null,
+      state_registration: isPJ ? (formData.state_registration || null) : null,
+      municipal_registration: isPJ ? (formData.municipal_registration || null) : null,
       region: formData.region || null, micro_region: formData.micro_region || null,
       default_payment_condition: formData.default_payment_condition || 'À vista',
       price_table: formData.price_table || 'default',
       abc_classification: formData.abc_classification || 'C',
       commercial_notes: formData.commercial_notes || null,
       estimated_potential: Number(formData.estimated_potential) || 0,
+      rg: !isPJ ? (formData.rg || null) : null,
+      birth_date: !isPJ && formData.birth_date ? formData.birth_date : null,
+      gender: !isPJ ? (formData.gender || null) : null,
+      cnae_primary: isPJ ? (formData.cnae_primary || null) : null,
+      cnae_description: isPJ ? (formData.cnae_description || null) : null,
+      receita_status: isPJ ? (formData.receita_status || null) : null,
+      receita_status_date: isPJ && formData.receita_status_date ? formData.receita_status_date : null,
     };
 
     if (client) {
