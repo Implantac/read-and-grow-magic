@@ -33,9 +33,10 @@ export interface LineItem {
 interface OrderItemsEditorProps {
   items: LineItem[];
   onChange: (items: LineItem[]) => void;
+  dueDate?: string | null;
 }
 
-export function OrderItemsEditor({ items, onChange }: OrderItemsEditorProps) {
+export function OrderItemsEditor({ items, onChange, dueDate }: OrderItemsEditorProps) {
   const { data: products = [] } = useProducts();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
