@@ -30,6 +30,7 @@ type PeriodKey = '7d' | '30d' | '90d' | 'all';
 export default function Sales360() {
   const [sellerId, setSellerId] = useState<string>('all');
   const [period, setPeriod] = useState<PeriodKey>('30d');
+  const [drawerClient, setDrawerClient] = useState<{ id: string; name: string } | null>(null);
 
   const { data: orders = [], isLoading: lo } = useOrders();
   const { data: clients = [], isLoading: lc } = useClients();
