@@ -19,6 +19,7 @@ import {
 } from '@/ui/base/popover';
 import { useProducts, type DbProduct } from '@/hooks/inventory/useProducts';
 import { toSafeNumber } from '@/lib/numericValidation';
+import { AtpLineIndicator } from './AtpLineIndicator';
 
 export interface LineItem {
   product_id?: string | null;
