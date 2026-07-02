@@ -1208,6 +1208,7 @@ export type Database = {
       }
       ai_forecast_snapshots: {
         Row: {
+          actual_revenue: number | null
           best_case: number | null
           by_region: Json | null
           by_rep: Json | null
@@ -1215,14 +1216,21 @@ export type Database = {
           company_id: string | null
           confidence: number | null
           created_at: string
+          created_by: string | null
           factors: Json | null
           forecast_date: string
+          gap: number | null
           id: string
           period: string
+          period_key: string | null
           predicted_revenue: number | null
+          snapshot_type: string | null
+          target_revenue: number | null
+          variance_pct: number | null
           worst_case: number | null
         }
         Insert: {
+          actual_revenue?: number | null
           best_case?: number | null
           by_region?: Json | null
           by_rep?: Json | null
@@ -1230,14 +1238,21 @@ export type Database = {
           company_id?: string | null
           confidence?: number | null
           created_at?: string
+          created_by?: string | null
           factors?: Json | null
           forecast_date?: string
+          gap?: number | null
           id?: string
           period?: string
+          period_key?: string | null
           predicted_revenue?: number | null
+          snapshot_type?: string | null
+          target_revenue?: number | null
+          variance_pct?: number | null
           worst_case?: number | null
         }
         Update: {
+          actual_revenue?: number | null
           best_case?: number | null
           by_region?: Json | null
           by_rep?: Json | null
@@ -1245,11 +1260,17 @@ export type Database = {
           company_id?: string | null
           confidence?: number | null
           created_at?: string
+          created_by?: string | null
           factors?: Json | null
           forecast_date?: string
+          gap?: number | null
           id?: string
           period?: string
+          period_key?: string | null
           predicted_revenue?: number | null
+          snapshot_type?: string | null
+          target_revenue?: number | null
+          variance_pct?: number | null
           worst_case?: number | null
         }
         Relationships: []
@@ -20348,6 +20369,14 @@ export type Database = {
         Returns: number
       }
       recompute_default_scores: { Args: never; Returns: Json }
+      record_forecast_snapshot: {
+        Args: {
+          _company_id: string
+          _period_key: string
+          _snapshot_type?: string
+        }
+        Returns: string
+      }
       record_usage:
         | {
             Args: {
