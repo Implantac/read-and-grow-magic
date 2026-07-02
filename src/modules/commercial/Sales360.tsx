@@ -160,7 +160,7 @@ export default function Sales360() {
           ) : (
             <SalesKanbanBoard
               orders={filteredOrders}
-              onView={() => {}}
+              onView={(o) => o.client_id && setDrawerClient({ id: o.client_id, name: o.client_name })}
               onAdvance={() => {}}
               onAskCancel={() => {}}
             />
