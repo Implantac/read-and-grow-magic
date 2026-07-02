@@ -102,6 +102,17 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
   const isIndustry = form.product_nature === 'industry';
   const isCommerce = form.product_nature === 'commerce';
 
+  // Kinds disponíveis para a natureza atual; ajusta item_kind se ficar inválido
+  const availableKinds = useMemo(() => allowedKindsFor(form.product_nature), [form.product_nature]);
+  useEffect(() => {
+    if (!availableKinds.includes(form.item_kind)) {
+      setForm((f) => ({ ...f, item_kind: availableKinds[0] }));
+    }
+  }, [availableKinds, form.item_kind]);
+
+  const ncmError = form.ncm && !isValidNcm(form.ncm) ? 'NCM deve ter 8 dígitos numéricos' : '';
+  const gtinError = form.gtin && !isValidGtin(form.gtin) ? 'GTIN inválido (dígito verificador incorreto)' : '';
+
   const update = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
 
   const buildPayload = (): Partial<DbProduct> => {
@@ -112,12 +123,13 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
       type: form.type, category_id: form.category_id || null, unit: form.unit,
       cost_price: Number(form.cost_price) || 0, sale_price: Number(form.sale_price) || 0,
       status: form.status, product_nature: form.product_nature,
+      item_kind: form.item_kind,
       // Fiscais (comuns)
-      ncm: form.ncm || null, cest: form.cest || null,
+      ncm: form.ncm ? normalizeNcm(form.ncm) : null, cest: form.cest || null,
       cfop_default: form.cfop_default || null, origin: form.origin || null,
       icms_cst: form.icms_cst || null, ipi_cst: form.ipi_cst || null,
       pis_cst: form.pis_cst || null, cofins_cst: form.cofins_cst || null,
-    };
+    } as any;
     if (isService) {
       // Serviço: não precisa estoque físico/dimensões
       return {
