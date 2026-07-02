@@ -1,7 +1,9 @@
+import { Link } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/ui/base/sheet';
 import { Badge } from '@/ui/base/badge';
+import { Button } from '@/ui/base/button';
 import { Progress } from '@/ui/base/progress';
-import { CheckCircle2, XCircle, Loader2, MinusCircle, Circle } from 'lucide-react';
+import { CheckCircle2, XCircle, Loader2, MinusCircle, Circle, Activity } from 'lucide-react';
 import type { O2CStepEvent, O2CStepKey, O2CStepStatus } from '@/hooks/commercial/useO2COrchestrator';
 
 const STEP_LABEL: Record<O2CStepKey, string> = {
@@ -95,6 +97,13 @@ export function O2CProgressDrawer({ open, onOpenChange, orderId, events, stepOrd
               {error}
             </div>
           )}
+
+          <Button asChild variant="ghost" size="sm" className="w-full gap-2">
+            <Link to="/commercial/o2c-monitor">
+              <Activity className="h-4 w-4" />
+              Ver monitor completo
+            </Link>
+          </Button>
         </div>
       </SheetContent>
     </Sheet>

@@ -85,23 +85,48 @@ Deno.serve(async (req) => {
       .limit(1);
     await emit("fiscal", (taxRules?.length ?? 0) > 0 ? "ok" : "skipped", "Regras fiscais resolvidas");
 
-    // 3) SEFAZ — cria NF-e em rascunho (transmissão real fica com o fiscal-transmitter)
+    // 3) SEFAZ — cria NF-e em rascunho (retry com backoff para 108/109 timeouts)
+    // Códigos SEFAZ transientes: 108 (serviço paralisado momentaneamente), 109 (paralisado sem previsão).
+    const TRANSIENT_SEFAZ = new Set(["108", "109"]);
+    const MAX_ATTEMPTS = 3;
+    let nfe: { id: string; numero: number } | null = null;
+    let lastErr: { code?: string; message: string } | null = null;
     await emit("sefaz", "running");
-    const { data: nfe, error: nfeErr } = await supabase
-      .from("nfe")
-      .insert({
-        company_id: companyId,
-        client_id: order.client_id,
-        order_id: order.id,
-        total: order.total,
-        status: "draft",
-      })
-      .select("id, numero")
-      .maybeSingle();
-    if (nfeErr) {
-      await emit("sefaz", "failed", nfeErr.message);
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      const { data, error: nfeErr } = await supabase
+        .from("nfe")
+        .insert({
+          company_id: companyId,
+          client_id: order.client_id,
+          order_id: order.id,
+          total: order.total,
+          status: "draft",
+        })
+        .select("id, numero")
+        .maybeSingle();
+      if (!nfeErr && data) {
+        nfe = data as any;
+        lastErr = null;
+        break;
+      }
+      const codeMatch = nfeErr?.message?.match(/\b(1\d{2}|2\d{2}|5\d{2}|6\d{2})\b/);
+      const code = codeMatch?.[1];
+      lastErr = { code, message: nfeErr?.message ?? "Erro desconhecido" };
+      if (!code || !TRANSIENT_SEFAZ.has(code) || attempt === MAX_ATTEMPTS) break;
+      // backoff exponencial: 500ms, 1s, 2s
+      const delay = 500 * 2 ** (attempt - 1);
+      await emit("sefaz", "running", `Tentativa ${attempt} falhou (SEFAZ ${code}). Retentando em ${delay}ms…`, { attempt, code });
+      await new Promise((r) => setTimeout(r, delay));
+    }
+    if (nfe) {
+      await emit("sefaz", "ok", `NF-e ${nfe.numero ?? "rascunho"} criada`, { nfe_id: nfe.id });
     } else {
-      await emit("sefaz", "ok", `NF-e ${nfe?.numero ?? "rascunho"} criada`, { nfe_id: nfe?.id });
+      await emit("sefaz", "failed", lastErr?.message ?? "Falha na emissão", {
+        code: lastErr?.code,
+        suggestion: lastErr?.code && TRANSIENT_SEFAZ.has(lastErr.code)
+          ? "SEFAZ indisponível após 3 tentativas. Aguarde alguns minutos e retransmita."
+          : undefined,
+      });
     }
 
     // 4) Picking task
