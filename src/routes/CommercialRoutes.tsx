@@ -22,6 +22,7 @@ const SalesExecutionPage = lazy(() => import("../modules/commercial/SalesExecuti
 const PlaybookPage = lazy(() => import("../modules/commercial/Playbook"));
 const GamificationPage = lazy(() => import("../modules/commercial/Gamification"));
 const SalesAutomationPage = lazy(() => import("../modules/commercial/SalesAutomation"));
+const O2CExceptionsPage = lazy(() => import("../modules/commercial/O2CExceptions"));
 
 export const CommercialRoutes = [
   <Route key="comercial-crm" path="/commercial/crm" element={<CRMDashboardPage />} />,
@@ -45,4 +46,5 @@ export const CommercialRoutes = [
   <Route key="comercial-playbook" path="/commercial/playbook" element={<PlaybookPage />} />,
   <Route key="comercial-gamificacao" path="/commercial/gamificacao" element={<GamificationPage />} />,
   <Route key="comercial-automacao" path="/commercial/automacao" element={<SalesAutomationPage />} />,
+  <Route key="comercial-o2c-excecoes" path="/commercial/o2c-excecoes" element={<O2CExceptionsPage />} />,
 ];
