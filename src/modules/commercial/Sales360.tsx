@@ -19,6 +19,8 @@ import { useCommercialAlerts } from '@/hooks/commercial/useCommercialAlerts';
 import { statusSteps } from './orders/constants';
 import { SalesKanbanBoard } from './orders/SalesKanbanBoard';
 import { Client360Drawer } from './Client360Drawer';
+import { CommercialEffortHeatmap } from './CommercialEffortHeatmap';
+import { NextActionsQueue } from './NextActionsQueue';
 
 const statusLabels: Record<string, string> = {
   pending: 'Pendente', confirmed: 'Confirmado', processing: 'Processando',
@@ -148,9 +150,17 @@ export default function Sales360() {
       <Tabs defaultValue="pipeline" className="mt-6 space-y-4">
         <TabsList>
           <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
+          <TabsTrigger value="agenda">Agenda</TabsTrigger>
           <TabsTrigger value="excecoes">Exceções ({filteredAlerts.length})</TabsTrigger>
           <TabsTrigger value="clientes">Clientes Top</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="agenda">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <NextActionsQueue clients={clients as any} sellerId={sellerId} />
+            <CommercialEffortHeatmap orders={filteredOrders} />
+          </div>
+        </TabsContent>
 
         <TabsContent value="pipeline">
           {loading ? (
