@@ -36,8 +36,12 @@ export default function SalesDeskPage() {
   const [notes, setNotes] = useState('');
   const [delivery, setDelivery] = useState('');
 
+  const [o2cOrderId, setO2cOrderId] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
   const profile = useClientCommercialProfile(client.id);
   const createOrder = useCreateOrder();
+  const o2c = useO2COrchestrator(o2cOrderId);
 
   // Sugerir condição de pagamento e método com base no perfil do cliente
   useEffect(() => {
