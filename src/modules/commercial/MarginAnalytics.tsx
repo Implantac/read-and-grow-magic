@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { useOrders } from '@/hooks/commercial/useOrders';
-import { useLowMarginAlerts, useResolveAlert } from '@/hooks/commercial/useLowMarginAlerts';
+import { useLowMarginAlerts, useResolveAlert, useResolveAlertsBulk } from '@/hooks/commercial/useLowMarginAlerts';
 import { MarginBadge } from './orders/MarginBadge';
 import { AlertTriangle, TrendingUp, TrendingDown, Percent, DollarSign, Download, Bell, Check } from 'lucide-react';
 import { Badge } from '@/ui/base/badge';
