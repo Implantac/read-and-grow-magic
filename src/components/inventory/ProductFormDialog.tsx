@@ -233,6 +233,20 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
           })}
         </div>
 
+        {/* Tipo de item (item_kind) */}
+        <div className="grid grid-cols-[160px_1fr] items-center gap-3 rounded-lg border bg-muted/20 p-3">
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground">Tipo de Item</Label>
+          <Select value={form.item_kind} onValueChange={(v) => update({ item_kind: v as ItemKind })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {availableKinds.map((k) => (
+                <SelectItem key={k} value={k}>{ITEM_KIND_LABELS[k]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+
         <Tabs defaultValue="general" className="w-full mt-2">
           <TabsList className={cn('grid w-full', isService ? 'grid-cols-3' : 'grid-cols-4')}>
             <TabsTrigger value="general">Geral</TabsTrigger>
