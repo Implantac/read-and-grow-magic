@@ -127,7 +127,7 @@ export function CreateOrderDialog({
           </TabsContent>
 
           <TabsContent value="items" className="mt-4">
-            <OrderItemsEditor items={formItems} onChange={setFormItems} />
+            <OrderItemsEditor items={formItems} onChange={setFormItems} dueDate={formDelivery || null} />
           </TabsContent>
 
           <TabsContent value="details" className="mt-4 space-y-4">
