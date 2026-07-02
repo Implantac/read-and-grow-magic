@@ -46,3 +46,23 @@ export function useResolveAlert() {
     onError: (e: any) => toastError('Erro ao resolver alerta', e?.message),
   });
 }
+
+export function useResolveAlertsBulk() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      if (!ids.length) return 0;
+      const { error } = await supabase
+        .from('commercial_alerts')
+        .update({ status: 'resolved', resolved_at: new Date().toISOString() })
+        .in('id', ids);
+      if (error) throw error;
+      return ids.length;
+    },
+    onSuccess: (n) => {
+      toastSuccess(`${n} alerta(s) resolvido(s)`);
+      qc.invalidateQueries({ queryKey: ['commercial_alerts'] });
+    },
+    onError: (e: any) => toastError('Erro ao resolver alertas', e?.message),
+  });
+}
