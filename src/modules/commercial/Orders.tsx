@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CheckCircle, Clock, DollarSign, Package, Plus } from 'lucide-react';
+import { CheckCircle, Clock, DollarSign, Package, Plus, LayoutGrid, Table as TableIcon } from 'lucide-react';
 import { formatBRL, formatDate } from '@/lib/formatters';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
