@@ -52,6 +52,9 @@ function exportCSV(rows: Array<Record<string, string | number>>, filename: strin
 
 export default function MarginAnalytics() {
   const { data: allOrders, isLoading } = useOrders();
+  const { data: alerts } = useLowMarginAlerts();
+  const resolveAlert = useResolveAlert();
+
   const [period, setPeriod] = useState<string>('30');
 
   const orders = useMemo(() => {
