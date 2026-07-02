@@ -49,6 +49,9 @@ export interface DbOrder {
   internal_notes: string | null;
   expected_billing_date: string | null;
   max_discount_pct: number | null;
+  estimated_cost?: number | null;
+  estimated_tax?: number | null;
+  estimated_margin_pct?: number | null;
   items?: DbOrderItem[];
 }
 
