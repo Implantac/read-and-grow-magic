@@ -1,11 +1,13 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import { Button } from '@/ui/base/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { useOrders } from '@/hooks/commercial/useOrders';
 import { MarginBadge } from './orders/MarginBadge';
-import { AlertTriangle, TrendingUp, TrendingDown, Percent, DollarSign } from 'lucide-react';
+import { AlertTriangle, TrendingUp, TrendingDown, Percent, DollarSign, Download } from 'lucide-react';
 import { Skeleton } from '@/ui/base/skeleton';
 import {
   ResponsiveContainer,
@@ -21,11 +23,47 @@ import {
 const fmtBRL = (n: number) =>
   n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
+const PERIODS: Record<string, { label: string; days: number | null }> = {
+  '7': { label: 'Últimos 7 dias', days: 7 },
+  '30': { label: 'Últimos 30 dias', days: 30 },
+  '90': { label: 'Últimos 90 dias', days: 90 },
+  'all': { label: 'Todo o histórico', days: null },
+};
+
+function exportCSV(rows: Array<Record<string, string | number>>, filename: string) {
+  if (rows.length === 0) return;
+  const headers = Object.keys(rows[0]);
+  const escape = (v: unknown) => {
+    const s = v === null || v === undefined ? '' : String(v);
+    return /[";\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  };
+  const csv = [headers.join(';'), ...rows.map((r) => headers.map((h) => escape(r[h])).join(';'))].join('\n');
+  const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function MarginAnalytics() {
-  const { data: orders, isLoading } = useOrders();
+  const { data: allOrders, isLoading } = useOrders();
+  const [period, setPeriod] = useState<string>('30');
+
+  const orders = useMemo(() => {
+    if (!allOrders) return allOrders;
+    const days = PERIODS[period]?.days;
+    if (!days) return allOrders;
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - days);
+    return allOrders.filter((o) => new Date(o.date) >= cutoff);
+  }, [allOrders, period]);
 
   const analytics = useMemo(() => {
     if (!orders || orders.length === 0) return null;
+
+
 
     const withSnap = orders.filter(
       (o) => o.estimated_margin_pct !== null && o.estimated_margin_pct !== undefined,
