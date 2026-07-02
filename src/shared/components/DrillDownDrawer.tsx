@@ -181,11 +181,8 @@ export function DrillDownDrawer() {
           </TabsContent>
 
           <TabsContent value="logs" className="mt-4">
-            <EmptyState
-              icon={FileClock}
-              title="Auditoria em breve"
-              description="O trilho de auditoria (system_audit_logs) será exibido aqui na próxima onda."
-            />
+            <AuditTrailPanel entityName={entity.sourceTable ?? payload.entityKey} limit={200} height={420} />
+
           </TabsContent>
         </Tabs>
       </SheetContent>
