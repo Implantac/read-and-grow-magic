@@ -1,137 +1,120 @@
 
-# Etapa 1 — Cadastro Dinâmico de Clientes (PF/PJ)
+# Blueprint Comercial 360° — Consolidação
 
-Evolução do cadastro atual em `public.clients` (38 colunas já existentes, incluindo `document`, `document_type`, `address_*`, `state_registration`) sem migração destrutiva. Camada de UI reativa + serviços de enriquecimento por cima.
-
----
-
-## 1. [Visão do PM] — Regra de negócio e ganho operacional
-
-**Problema hoje**
-- Formulário único genérico: vendedor preenche campos irrelevantes (IE, razão social, nome fantasia) mesmo em PF.
-- Digitação manual de CNPJ, razão social, endereço → alta taxa de erro cadastral, retrabalho no fiscal (NF-e rejeitada por endereço divergente).
-- Sem validação de duplicidade de documento.
-
-**Regra otimizada**
-1. Escolha do tipo (PF/PJ) é o **primeiro e único gatilho** — o formulário se reorganiza a partir dela.
-2. PJ: digitar CNPJ dispara consulta automática (BrasilAPI → Receita) e preenche razão social, fantasia, IE, endereço, CNAE, situação cadastral.
-3. PF: campos exclusivos (RG, data de nascimento, gênero) aparecem; campos PJ desaparecem.
-4. CEP dispara ViaCEP e preenche logradouro, bairro, cidade, UF (usuário só digita número + complemento).
-5. Bloqueio de duplicidade: mesmo `document` já cadastrado na empresa → sugere abrir cadastro existente.
-6. Situação cadastral "Inapta/Suspensa" na Receita → aviso amarelo, não bloqueia (decisão comercial).
-
-**Ganho**
-- Tempo médio de cadastro: **~4 min → ~40s** (estimativa: 8 campos digitados vs. 2).
-- Redução de rejeição de NF-e por endereço/razão social divergente.
-- Base fiscal íntegra desde a origem → impacto direto em SPED, Reinf e faturamento.
+Baseado no diagnóstico do módulo atual (`src/modules/commercial/*`, `src/components/commercial/*`) e no roadmap já entregue (Sprints 1–13: Cadastro PF/PJ dinâmico, ATP, Crédito, Kanban Unificado, Margem em tempo real, Alertas). Este blueprint fecha as **lacunas remanescentes** para atingir 100% da visão apresentada.
 
 ---
 
-## 2. [Visão do UX/UI] — Comportamento dinâmico
+## Diagnóstico — o que já existe
 
-**Fluxo em uma tela, 3 seções colapsáveis** (evita wizard multi-etapa desnecessário):
-
-```text
-┌────────────────────────────────────────────────────┐
-│ [ PF ]  [ PJ ]     ← toggle grande, primeira ação  │
-├────────────────────────────────────────────────────┤
-│ IDENTIFICAÇÃO                                      │
-│  CNPJ [__.___.___/____-__]  🔍  ← autofill        │
-│  Razão Social ........... (auto)                   │
-│  Nome Fantasia .......... (auto)                   │
-│  IE [____]  IM [____]  Situação: ✅ Ativa          │
-├────────────────────────────────────────────────────┤
-│ CONTATO                                            │
-│  E-mail  ·  Telefone  ·  Celular                   │
-├────────────────────────────────────────────────────┤
-│ ENDEREÇO                                           │
-│  CEP [_____-___] 🔍   Número [__]  Compl.          │
-│  Rua/Bairro/Cidade/UF (auto, editável)             │
-├────────────────────────────────────────────────────┤
-│ COMERCIAL (colapsado por padrão)                   │
-│  Limite crédito · Cond. pagto · Tabela · Vendedor  │
-└────────────────────────────────────────────────────┘
-```
-
-**Regras de exibição condicional**
-- Toggle **PJ** → mostra: Razão Social, Nome Fantasia, IE, IM, CNAE, Situação Receita.
-- Toggle **PF** → mostra: Nome, RG, Data Nascimento, Gênero. Oculta IE/IM/Razão.
-- Campos preenchidos por API vêm com badge **"auto"** cinza; editáveis com 1 clique.
-- Loading inline no ícone 🔍 (spinner) durante fetch — sem modal, sem bloqueio da tela.
-- Duplicidade → toast + botão "Abrir cadastro existente" (não força).
-
-**Redução de cliques**: 1 clique (PF/PJ) + 2 buscas automáticas (CNPJ, CEP) substituem ~15 tabs manuais.
+| Bloco da visão | Status atual | Arquivo/Recurso |
+|---|---|---|
+| Cadastro PF/PJ dinâmico (CNPJ/CEP autofill) | ✅ Implementado | `ClientFormDialog.tsx` + BrasilAPI/ViaCEP |
+| Painel Único de Vendas (card único) | ⚠️ Parcial | `CreateOrderDialog.tsx` (multi-step, não card único) |
+| Semáforo Crédito + ATP | ✅ | `CreditBadge`, `AtpLineIndicator` |
+| Margem em tempo real | ✅ | `ProfitabilityCard`, `MarginBadge` |
+| Alertas de margem crítica | ✅ | `commercial_alerts` + realtime |
+| Cadastro Universal de Produtos (abas condicionais) | ❌ Ausente | `pages/inventory/Products.tsx` genérico |
+| Perfil comercial sugerido (Atacado/Varejo) | ❌ Ausente | — |
+| Resumo instantâneo do cliente (Crédito/Última compra/Perfil Ouro) | ⚠️ Existe crédito, falta tier e recência | `ClientSelector` |
+| Frete CIF rateado automático nos itens | ❌ | — |
+| O2C automatizado (crédito → fiscal → SEFAZ → picking → boleto) | ⚠️ Parcial (crédito e AR ok) | Falta orquestração explícita SEFAZ→Picking→Notificação |
+| Tratamento humano de rejeição SEFAZ | ⚠️ Log existe, sem CTA "atualizar cadastro agora" | `fiscal_documents` |
+| Notificação DANFE+Boleto via WhatsApp/Email pós-emissão | ⚠️ Templates existem, sem trigger automático | `whatsapp_templates` |
 
 ---
 
-## 3. [Visão do Tech Lead] — Engenharia
+## Escopo desta consolidação (4 Sprints)
 
-### 3.1 Banco (aditivo, sem breaking change)
+### Sprint A — Cadastro Universal de Produtos com Gatilho por Categoria
+- **DB**: acrescentar em `products`:
+  - `item_kind` enum (`service`, `resale`, `manufactured`) — dispara UI condicional
+  - `requires_lot_tracking` boolean (auto quando categoria = Alimentos/Farma/Química)
+  - `iss_code` / `nbs_code` (serviço)
+  - `multi_ean` jsonb (revenda)
+  - `bom_ready` boolean espelhado de `product_materials`
+- **UI**: refatorar `Products.tsx` → wizard de 1 tela com **abas condicionais**:
+  1. Padrão (sempre visível)
+  2. Engenharia/BOM (só `manufactured`)
+  3. Rastreabilidade (só se `requires_lot_tracking`)
+  4. Tributária (NCM lookup + preview cruzando UF cliente)
+  5. Fiscal Serviço (só `service`)
+- Componente novo: `ProductKindSelector.tsx` + `ProductConditionalTabs.tsx`.
 
-Migration única em `clients`:
-- `person_type text` (`PF`|`PJ`, default `PJ`, backfill via `length(document)`)
-- `rg text`, `birth_date date`, `gender text` (PF)
-- `cnae_primary text`, `cnae_description text`, `receita_status text`, `receita_status_date date`, `receita_synced_at timestamptz` (PJ enriquecido)
-- `UNIQUE (company_id, document) WHERE document IS NOT NULL` — bloqueia duplicidade por tenant.
-- Índice `idx_clients_document_company` para o lookup de duplicidade.
+### Sprint B — Painel Único de Vendas (Card-based, uma tela só)
+- Refatorar `CreateOrderDialog.tsx` de `Dialog` multi-step → página `SalesDesk.tsx` (rota `/comercial/pdv`) com **3 cards empilhados sempre visíveis**:
+  - **Card 1 — Cliente**: busca fonética (pg_trgm), ao selecionar exibe chips:
+    - Crédito disponível (verde/amarelo/vermelho)
+    - Última compra (dias)
+    - Tier: Bronze/Prata/Ouro/Diamante (calculado por RPC `get_client_tier(client_id)` baseado em faturamento 12m)
+    - Tabela de preço sugerida (Atacado se PJ, Varejo se PF)
+  - **Card 2 — Itens**: linha de digitação estilo e-commerce (`Command` do shadcn) + linhas com margem em tempo real (já existe).
+  - **Card 3 — Pagamento & Logística**: condição + forma + transportadora; se CIF, rateia frete → chama RPC `apportion_freight(order_id)` que atualiza `order_items.freight_share` e recompõe base ICMS.
+- Componente novo: `SalesDeskLayout.tsx`, `ClientInstantSummary.tsx`, `FreightApportionment.tsx`.
 
-### 3.2 Enriquecimento (Edge Functions, não expor API externa direto do browser)
+### Sprint C — Perfil Comercial e Recomendação de Tabela
+- **DB**:
+  - Tabela `client_commercial_profiles` (client_id, tier, suggested_price_list_id, credit_score, last_purchase_at, ltv_12m) — materialized view refresh diário via `pg_cron`.
+  - `price_lists` já existe? Se não, criar (`id`, `name`, `kind` = wholesale/retail, `discount_pct`).
+- **RPC** `suggest_commercial_profile(client_id)` retorna `{ price_list_id, payment_terms_suggested, tier }`.
+- UI: ao selecionar cliente no Card 1, popular defaults no Card 3 automaticamente (usuário pode sobrescrever).
 
-Duas edge functions novas, ambas com CORS, JWT em código, rate-limit simples por IP:
+### Sprint D — Order-to-Cash Orquestrado + Tratamento Humanizado
+- **Edge Function** `o2c-orchestrator`:
+  1. `check_credit` + `check_atp` (bloqueia com toast se falhar)
+  2. `calculate_taxes` (motor fiscal existente por NCM×UF)
+  3. `emit_nfe` (integra `fiscal_documents`)
+  4. Se **SEFAZ reject**: grava `nfe_rejections` com `friendly_message` (mapa de códigos SEFAZ→PT-BR) e abre modal `NfeRejectionDialog.tsx` com CTA **"Atualizar cadastro agora"** que navega ao `ClientFormDialog` no campo problemático.
+  5. Sucesso: dispara trigger `after_nfe_authorized` → cria `picking_task` ordenada por `warehouse_locations.aisle,rack` + insere `accounts_receivable` (já existe) + chama edge `notify-customer-danfe` que envia WhatsApp/Email com DANFE+Boleto usando `whatsapp_templates`.
+- Componentes novos: `O2CProgressDrawer.tsx` (mostra as 5 etapas em tempo real via realtime em `cross_module_events`), `NfeRejectionDialog.tsx`.
 
-**`lookup-cnpj`** — `POST { cnpj }`
-- Valida CNPJ (14 dígitos + dígito verificador).
-- Cache-first: `SELECT * FROM clients WHERE document=$1 AND receita_synced_at > now()-'7 days'` → devolve.
-- Chama `https://brasilapi.com.br/api/cnpj/v1/{cnpj}` (fallback `receitaws.com.br`).
-- Retorna JSON normalizado `{ razao_social, fantasia, ie, endereco, cnae, situacao }`.
+---
 
-**`lookup-cep`** — `POST { cep }`
-- Valida CEP (8 dígitos).
-- Chama `https://viacep.com.br/ws/{cep}/json/` (fallback `brasilapi/cep/v2`).
-- Retorna `{ logradouro, bairro, cidade, uf, ibge }`.
+## Detalhes técnicos
 
-Sem chaves privadas (APIs públicas) → nenhum secret novo.
-
-### 3.3 Frontend
-
-Novo componente `<PersonTypeToggle />` + refactor de `ClientFormDialog` (que hoje é único e estático) para render condicional guiado por `person_type`.
-
-Hooks:
-- `useCnpjLookup(cnpj)` — React Query, `enabled: cnpj.length === 14`, `staleTime: 7d`.
-- `useCepLookup(cep)` — idem, `enabled: cep.length === 8`.
-- `useClientDuplicateCheck(document, companyId)` — query direta ao Supabase.
-
-Validação com **zod** por variante (`clientPFSchema` / `clientPJSchema`) via `discriminatedUnion('person_type')`.
-
-### 3.4 Backfill seguro
-
-Uma execução idempotente na migration:
+**Migrations necessárias**
 ```sql
-UPDATE clients
-   SET person_type = CASE
-     WHEN length(regexp_replace(coalesce(document,''),'\D','','g')) = 11 THEN 'PF'
-     ELSE 'PJ' END
- WHERE person_type IS NULL;
+-- Sprint A
+ALTER TABLE products
+  ADD COLUMN item_kind text CHECK (item_kind IN ('service','resale','manufactured')) DEFAULT 'resale',
+  ADD COLUMN requires_lot_tracking boolean DEFAULT false,
+  ADD COLUMN iss_code text, ADD COLUMN nbs_code text,
+  ADD COLUMN multi_ean jsonb DEFAULT '[]'::jsonb;
+
+-- Sprint C
+CREATE MATERIALIZED VIEW client_commercial_profiles AS
+  SELECT c.id AS client_id, c.company_id,
+    CASE WHEN sum(o.total) > 500000 THEN 'diamond'
+         WHEN sum(o.total) > 100000 THEN 'gold'
+         WHEN sum(o.total) > 20000  THEN 'silver'
+         ELSE 'bronze' END AS tier,
+    max(o.created_at) AS last_purchase_at,
+    coalesce(sum(o.total) FILTER (WHERE o.created_at > now() - interval '12 months'),0) AS ltv_12m
+  FROM clients c LEFT JOIN orders o ON o.client_id = c.id
+  GROUP BY c.id, c.company_id;
+
+CREATE UNIQUE INDEX ON client_commercial_profiles(client_id);
+-- pg_cron: refresh diário 03:00
 ```
 
-### 3.5 Entregáveis desta etapa
+**RLS**: todas as novas estruturas escopadas por `company_id = get_user_company_id(auth.uid())`.
 
-| # | Item | Local |
-|---|------|-------|
-| 1 | Migration aditiva + índice único + backfill | `supabase/migrations/*` |
-| 2 | Edge function `lookup-cnpj` | `supabase/functions/lookup-cnpj/index.ts` |
-| 3 | Edge function `lookup-cep` | `supabase/functions/lookup-cep/index.ts` |
-| 4 | Hooks `useCnpjLookup`, `useCepLookup`, `useClientDuplicateCheck` | `src/hooks/commercial/` |
-| 5 | `PersonTypeToggle` + refactor `ClientFormDialog` dinâmico | `src/modules/commercial/clients/` |
-| 6 | Schemas zod PF/PJ com `discriminatedUnion` | `src/modules/commercial/clients/schema.ts` |
+**Rotas novas**
+- `/comercial/pdv` → `SalesDesk.tsx` (Painel Único)
+- Mantém `/comercial/pedidos` (lista/kanban) intacto.
 
-### 3.6 Critérios de aceite
-- Preencher CNPJ válido → 8 campos autocompletam em <2s.
-- Preencher CEP → 4 campos autocompletam em <1s.
-- Toggle PF esconde IE/IM/Razão sem perder dados já digitados.
-- Segundo cadastro com mesmo CNPJ na mesma empresa é bloqueado com atalho para o registro existente.
-- Cadastro existente antigo continua abrindo sem erro (backward compatible).
+**Componentes reutilizados** (não recriar): `ClientSelector`, `OrderItemsEditor`, `ProfitabilityCard`, `AtpLineIndicator`, `CreditBadge`.
 
 ---
 
-**Aguardo aprovação para iniciar a implementação da Etapa 1.** Após entrega e seu OK, avançamos para a Etapa 2 (Cadastro Universal de Produtos).
+## Ordem de execução sugerida
+1. Sprint A (Produtos Universal) — desbloqueia BOM/Rastreabilidade
+2. Sprint C (Perfil Comercial) — pré-requisito do Card 1
+3. Sprint B (Painel Único) — consome A + C
+4. Sprint D (O2C Orquestrado) — fecha o ciclo
+
+**Fora do escopo desta rodada** (já existentes/futuros): comissionamento, forecasting Monte Carlo, gamificação — permanecem inalterados.
+
+---
+
+Aprovar para iniciar pelo **Sprint A** ou reordenar?

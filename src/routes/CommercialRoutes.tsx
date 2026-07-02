@@ -24,10 +24,12 @@ const GamificationPage = lazy(() => import("../modules/commercial/Gamification")
 const SalesAutomationPage = lazy(() => import("../modules/commercial/SalesAutomation"));
 const O2CExceptionsPage = lazy(() => import("../modules/commercial/O2CExceptions"));
 const MarginAnalyticsPage = lazy(() => import("../modules/commercial/MarginAnalytics"));
+const SalesDeskPage = lazy(() => import("../modules/commercial/SalesDesk"));
 
 export const CommercialRoutes = [
   <Route key="comercial-crm" path="/commercial/crm" element={<CRMDashboardPage />} />,
   <Route key="comercial-dashboard" path="/commercial/dashboard" element={<CommercialDashboardPage />} />,
+  <Route key="comercial-pdv" path="/commercial/pdv" element={<SalesDeskPage />} />,
   <Route key="comercial-clientes" path="/commercial/clientes" element={<ClientsPage />} />,
   <Route key="comercial-vendas" path="/commercial/vendas" element={<SalesPage />} />,
   <Route key="comercial-pedidos" path="/commercial/pedidos" element={<OrdersPage />} />,

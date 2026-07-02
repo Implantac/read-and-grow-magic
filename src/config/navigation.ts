@@ -115,6 +115,7 @@ export const navigationSections: NavSection[] = [
         children: [
           { title: 'CRM Enterprise', href: '/comercial/crm', icon: 'Target' },
           { title: 'Dashboard', href: '/comercial/dashboard', icon: 'BarChart3' },
+          { title: '🛒 Painel Único (PDV)', href: '/comercial/pdv', icon: 'ShoppingCart' },
           { title: '⚡ O Que Fazer Hoje', href: '/comercial/execucao', icon: 'Zap' },
           { title: 'Painel Vendedor', href: '/comercial/vendedor', icon: 'Zap' },
           { title: 'Funil Comercial', href: '/comercial/funil', icon: 'Filter' },

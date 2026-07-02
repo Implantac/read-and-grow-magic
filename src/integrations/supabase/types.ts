@@ -445,6 +445,13 @@ export type Database = {
             foreignKeyName: "accounts_receivable_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "accounts_receivable_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -932,6 +939,13 @@ export type Database = {
             foreignKeyName: "ai_daily_actions_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "ai_daily_actions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -1378,6 +1392,13 @@ export type Database = {
             foreignKeyName: "ai_opportunity_predictions_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "ai_opportunity_predictions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -1558,6 +1579,13 @@ export type Database = {
             foreignKeyName: "ai_recommendations_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "ai_recommendations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -1691,6 +1719,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ai_sales_scores_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
           {
             foreignKeyName: "ai_sales_scores_client_id_fkey"
             columns: ["client_id"]
@@ -2709,6 +2744,13 @@ export type Database = {
             foreignKeyName: "client_timeline_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "client_timeline_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -2932,6 +2974,13 @@ export type Database = {
             foreignKeyName: "collection_actions_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "collection_actions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -3001,6 +3050,13 @@ export type Database = {
           title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "commercial_alerts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
           {
             foreignKeyName: "commercial_alerts_client_id_fkey"
             columns: ["client_id"]
@@ -3818,6 +3874,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "construction_projects_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
           {
             foreignKeyName: "construction_projects_client_id_fkey"
             columns: ["client_id"]
@@ -4668,6 +4731,13 @@ export type Database = {
             foreignKeyName: "customer_credit_profiles_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: true
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "customer_credit_profiles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -5509,6 +5579,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "bank_accounts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_advances_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
           },
           {
             foreignKeyName: "financial_advances_client_id_fkey"
@@ -7242,6 +7319,13 @@ export type Database = {
             foreignKeyName: "follow_up_tasks_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "follow_up_tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -7317,6 +7401,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "follow_ups_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
           {
             foreignKeyName: "follow_ups_client_id_fkey"
             columns: ["client_id"]
@@ -8213,6 +8304,13 @@ export type Database = {
             foreignKeyName: "lead_nurturing_enrollments_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "lead_nurturing_enrollments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -9063,6 +9161,13 @@ export type Database = {
             foreignKeyName: "nfe_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "nfe_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -9696,6 +9801,13 @@ export type Database = {
             foreignKeyName: "orders_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "orders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -10230,6 +10342,13 @@ export type Database = {
             foreignKeyName: "pix_charges_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "pix_charges_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -10689,6 +10808,42 @@ export type Database = {
           updated_at?: string
           vendor?: string | null
           version?: string
+        }
+        Relationships: []
+      }
+      price_lists: {
+        Row: {
+          active: boolean
+          company_id: string
+          created_at: string
+          discount_pct: number
+          id: string
+          is_default: boolean
+          kind: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          company_id: string
+          created_at?: string
+          discount_pct?: number
+          id?: string
+          is_default?: boolean
+          kind: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          company_id?: string
+          created_at?: string
+          discount_pct?: number
+          id?: string
+          is_default?: boolean
+          kind?: string
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -12133,6 +12288,7 @@ export type Database = {
           abc_classification: string | null
           barcode: string | null
           bom_id: string | null
+          bom_ready: boolean
           brand: string | null
           category_id: string | null
           cest: string | null
@@ -12152,20 +12308,25 @@ export type Database = {
           image_url: string | null
           ipi_cst: string | null
           is_recurring: boolean | null
+          iss_code: string | null
           iss_rate: number | null
+          item_kind: string
           lead_time_days: number
           location: string | null
           lot_control: boolean | null
           max_stock: number
           min_stock: number
           model: string | null
+          multi_ean: Json
           name: string
+          nbs_code: string | null
           ncm: string | null
           origin: string | null
           pis_cst: string | null
           product_nature: string
           production_route_id: string | null
           reorder_point: number
+          requires_lot_tracking: boolean
           sale_price: number
           service_code_lc116: string | null
           service_duration_minutes: number | null
@@ -12188,6 +12349,7 @@ export type Database = {
           abc_classification?: string | null
           barcode?: string | null
           bom_id?: string | null
+          bom_ready?: boolean
           brand?: string | null
           category_id?: string | null
           cest?: string | null
@@ -12207,20 +12369,25 @@ export type Database = {
           image_url?: string | null
           ipi_cst?: string | null
           is_recurring?: boolean | null
+          iss_code?: string | null
           iss_rate?: number | null
+          item_kind?: string
           lead_time_days?: number
           location?: string | null
           lot_control?: boolean | null
           max_stock?: number
           min_stock?: number
           model?: string | null
+          multi_ean?: Json
           name: string
+          nbs_code?: string | null
           ncm?: string | null
           origin?: string | null
           pis_cst?: string | null
           product_nature?: string
           production_route_id?: string | null
           reorder_point?: number
+          requires_lot_tracking?: boolean
           sale_price?: number
           service_code_lc116?: string | null
           service_duration_minutes?: number | null
@@ -12243,6 +12410,7 @@ export type Database = {
           abc_classification?: string | null
           barcode?: string | null
           bom_id?: string | null
+          bom_ready?: boolean
           brand?: string | null
           category_id?: string | null
           cest?: string | null
@@ -12262,20 +12430,25 @@ export type Database = {
           image_url?: string | null
           ipi_cst?: string | null
           is_recurring?: boolean | null
+          iss_code?: string | null
           iss_rate?: number | null
+          item_kind?: string
           lead_time_days?: number
           location?: string | null
           lot_control?: boolean | null
           max_stock?: number
           min_stock?: number
           model?: string | null
+          multi_ean?: Json
           name?: string
+          nbs_code?: string | null
           ncm?: string | null
           origin?: string | null
           pis_cst?: string | null
           product_nature?: string
           production_route_id?: string | null
           reorder_point?: number
+          requires_lot_tracking?: boolean
           sale_price?: number
           service_code_lc116?: string | null
           service_duration_minutes?: number | null
@@ -12790,6 +12963,13 @@ export type Database = {
             foreignKeyName: "quotations_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "quotations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -13111,6 +13291,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "renegotiations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
           {
             foreignKeyName: "renegotiations_client_id_fkey"
             columns: ["client_id"]
@@ -13851,6 +14038,13 @@ export type Database = {
             foreignKeyName: "sales_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "sales_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -13960,6 +14154,13 @@ export type Database = {
           sales_rep_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "sales_contact_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
           {
             foreignKeyName: "sales_contact_logs_client_id_fkey"
             columns: ["client_id"]
@@ -14174,6 +14375,13 @@ export type Database = {
             foreignKeyName: "sales_funnel_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "sales_funnel_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -14294,6 +14502,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "sales_opportunities_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
           {
             foreignKeyName: "sales_opportunities_client_id_fkey"
             columns: ["client_id"]
@@ -19337,6 +19552,27 @@ export type Database = {
       }
     }
     Views: {
+      client_commercial_profiles: {
+        Row: {
+          client_id: string | null
+          company_id: string | null
+          last_purchase_at: string | null
+          ltv_12m: number | null
+          order_count: number | null
+          person_type: string | null
+          refreshed_at: string | null
+          tier: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_current_account: {
         Row: {
           balance: number | null
@@ -19381,6 +19617,13 @@ export type Database = {
           status?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "accounts_receivable_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
           {
             foreignKeyName: "accounts_receivable_client_id_fkey"
             columns: ["client_id"]
@@ -19897,6 +20140,19 @@ export type Database = {
           outflow_real: number
         }[]
       }
+      get_client_commercial_profile: {
+        Args: { _client_id: string }
+        Returns: {
+          client_id: string
+          last_purchase_at: string
+          ltv_12m: number
+          order_count: number
+          suggested_payment_terms: string
+          suggested_price_list_id: string
+          suggested_price_list_name: string
+          tier: string
+        }[]
+      }
       get_consolidated_company_ids: {
         Args: { _company_id: string }
         Returns: {
@@ -20113,6 +20369,7 @@ export type Database = {
             }
             Returns: string
           }
+      refresh_client_commercial_profiles: { Args: never; Returns: undefined }
       refresh_wms_kpi_cache: {
         Args: { p_company_id: string }
         Returns: undefined
