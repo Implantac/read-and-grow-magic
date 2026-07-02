@@ -104,6 +104,7 @@ const App = () => (
         <ConfirmDialogProvider>
           <Toaster />
           <Sonner />
+          <RealtimeAlertsBridge />
           <BrowserRouter>
           <Suspense fallback={<PageLoader />}>
             <Routes>
