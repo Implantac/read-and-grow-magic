@@ -25,6 +25,7 @@ interface Props {
 }
 
 const defaultForm = {
+  person_type: 'PJ' as 'PF' | 'PJ',
   name: '', trade_name: '', document: '', document_type: 'cnpj' as string,
   email: '', phone: '', cellphone: '',
   address_street: '', address_number: '', address_complement: '',
@@ -34,6 +35,8 @@ const defaultForm = {
   region: '', micro_region: '', default_payment_condition: 'À vista',
   price_table: 'default', abc_classification: 'C', client_score: 'medium',
   commercial_notes: '', estimated_potential: '',
+  rg: '', birth_date: '', gender: '',
+  cnae_primary: '', cnae_description: '', receita_status: '', receita_status_date: '',
 };
 
 export function ClientFormDialog({ open, onOpenChange, client, totalClients }: Props) {
