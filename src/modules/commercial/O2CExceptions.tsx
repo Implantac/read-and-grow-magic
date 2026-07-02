@@ -11,7 +11,7 @@ import { Button } from '@/ui/base/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/ui/base/tabs';
 import { formatBRL, formatDate } from '@/lib/formatters';
 import { useNavigate } from 'react-router-dom';
-import { useO2CExceptions, exceptionLabel, type O2CExceptionType, type O2CException } from '@/hooks/commercial/useO2CExceptions';
+import { useO2CExceptions, exceptionLabel, type O2CExceptionType, type O2CException } from '@/hooks/comercial/useO2CExceptions';
 
 const iconFor: Record<O2CExceptionType, JSX.Element> = {
   confirmed_without_picking: <Package className="h-4 w-4" />,
@@ -98,7 +98,7 @@ export default function O2CExceptions() {
                     </div>
                     <div className="flex items-center gap-3 md:justify-end">
                       <span className="text-sm font-semibold">{formatBRL(e.total)}</span>
-                      <Button size="sm" variant="secondary" className="gap-1" onClick={() => navigate('/commercial/orders')}>
+                      <Button size="sm" variant="secondary" className="gap-1" onClick={() => navigate('/comercial/orders')}>
                         Abrir pedido <ArrowRight className="h-3 w-3" />
                       </Button>
                     </div>

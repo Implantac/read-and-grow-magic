@@ -150,7 +150,7 @@ export default function OrderTimeline() {
         description={(data?.order as any)?.number ? `Pedido ${(data!.order as any).number}` : 'Rastreamento cross-módulo'}
         actions={
           <Button asChild variant="outline" size="sm">
-            <Link to="/commercial/pedidos">
+            <Link to="/comercial/pedidos">
               <ArrowLeft className="mr-2 h-4 w-4" /> Voltar
             </Link>
           </Button>
