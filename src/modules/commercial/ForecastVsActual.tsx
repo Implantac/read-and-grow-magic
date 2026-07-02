@@ -278,6 +278,9 @@ export function ForecastVsActual({ reps }: Props) {
           </Card>
         </>
       )}
+
+      {/* Histórico de snapshots (Fase 9) */}
+      <ForecastSnapshotHistory periodKey={period} />
     </div>
   );
 }
