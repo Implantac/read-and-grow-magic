@@ -87,8 +87,22 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
 
   const update = (patch: Partial<typeof formData>) => setFormData(p => ({ ...p, ...patch }));
 
+  const dup = useClientDuplicateCheck(formData.document, client?.id ?? null);
+
+  const setPersonType = (pt: 'PF' | 'PJ') => {
+    update({
+      person_type: pt,
+      document_type: pt === 'PF' ? 'cpf' : 'cnpj',
+      document: '',
+      // limpa fields exclusivos do outro tipo
+      ...(pt === 'PF'
+        ? { trade_name: '', state_registration: '', municipal_registration: '', cnae_primary: '', cnae_description: '', receita_status: '', receita_status_date: '' }
+        : { rg: '', birth_date: '', gender: '' }),
+    });
+  };
+
   const handleCnpjLookup = async () => {
-    if (formData.document_type !== 'cnpj') return;
+    if (formData.person_type !== 'PJ') return;
     const data = await cnpjLookup.lookup(formData.document);
     if (data) {
       update({
@@ -103,6 +117,10 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
         address_city: data.municipio,
         address_state: data.uf,
         address_zip_code: maskCEP(data.cep),
+        cnae_primary: data.cnae_primary,
+        cnae_description: data.cnae_description,
+        receita_status: data.receita_status,
+        receita_status_date: data.receita_status_date,
       });
     }
   };
