@@ -140,6 +140,7 @@ export default function O2CMonitor() {
       </Card>
 
       <Card>
+        <CardHeader>
           <CardTitle className="text-base">Falhas recentes</CardTitle>
         </CardHeader>
         <CardContent>
