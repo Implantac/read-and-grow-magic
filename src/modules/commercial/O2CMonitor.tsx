@@ -139,6 +139,83 @@ export default function O2CMonitor() {
         </CardContent>
       </Card>
 
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Top 5 rejeições SEFAZ</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {snapshot.topSefazCodes.length === 0 ? (
+              <EmptyState icon={CheckCircle2} title="Sem rejeições" description="Nenhuma falha SEFAZ com código na janela." />
+            ) : (
+              <ul className="space-y-2">
+                {snapshot.topSefazCodes.map((c) => (
+                  <li key={c.code} className="flex items-start justify-between gap-3 border-b border-border/50 pb-2 last:border-0">
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium">Código {c.code}</div>
+                      {c.suggestion && (
+                        <div className="text-xs text-muted-foreground truncate">{c.suggestion}</div>
+                      )}
+                    </div>
+                    <Badge variant="destructive" className="whitespace-nowrap">{c.count}×</Badge>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Evolução semanal SEFAZ</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {snapshot.sefazByWeek.length === 0 ? (
+              <EmptyState icon={Activity} title="Sem dados" description="Sem eventos SEFAZ na janela." />
+            ) : (
+              <div className="space-y-2">
+                {snapshot.sefazByWeek.map((w) => (
+                  <div key={w.weekStart} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-medium">Semana de {new Date(w.weekStart).toLocaleDateString('pt-BR')}</span>
+                      <span className={w.rate > 0.1 ? 'text-destructive' : 'text-muted-foreground'}>
+                        {w.failed}/{w.total} · {(w.rate * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                    <Progress value={Math.round(w.rate * 100)} />
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Drill-down por vendedor</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {snapshot.bySeller.length === 0 ? (
+            <EmptyState icon={Activity} title="Sem vendedor identificado" description="Nenhum evento com seller_id na janela." />
+          ) : (
+            <ul className="divide-y divide-border/60">
+              {snapshot.bySeller.map((s) => (
+                <li key={s.sellerId} className="py-2 flex items-center justify-between gap-3">
+                  <div className="text-sm font-mono">{s.sellerId.slice(0, 8)}</div>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span>{s.total} execuções</span>
+                    <span className={s.rate > 0.1 ? 'text-destructive font-semibold' : 'text-emerald-500'}>
+                      {(s.rate * 100).toFixed(1)}% falha
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Falhas recentes</CardTitle>

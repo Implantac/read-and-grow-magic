@@ -27,6 +27,9 @@ export interface O2CMonitorSnapshot {
   }>;
   sefazByHour: Array<{ hour: number; total: number; failed: number; rate: number }>;
   sefazFailureRate: number;
+  topSefazCodes: Array<{ code: string; count: number; suggestion: string | null }>;
+  sefazByWeek: Array<{ weekStart: string; total: number; failed: number; rate: number }>;
+  bySeller: Array<{ sellerId: string; total: number; failed: number; rate: number }>;
 }
 
 interface EventRow {
@@ -117,6 +120,42 @@ export function useO2CMonitor(windowDays = 7) {
       const sefazTotal = sefaz.ok + sefaz.failed;
       const sefazFailureRate = sefazTotal ? sefaz.failed / sefazTotal : 0;
 
+      // Root-cause: top rejection codes + weekly evolution + by seller
+      const codeAgg = new Map<string, { count: number; suggestion: string | null }>();
+      const weekAgg = new Map<string, { total: number; failed: number }>();
+      const sellerAgg = new Map<string, { total: number; failed: number }>();
+      const weekStart = (iso: string) => {
+        const d = new Date(iso);
+        const day = d.getUTCDay();
+        d.setUTCDate(d.getUTCDate() - day);
+        d.setUTCHours(0, 0, 0, 0);
+        return d.toISOString().slice(0, 10);
+      };
+      for (const r of rows) {
+        const [, step, status] = r.event_type.split('.') as [string, string, string];
+        if (step !== 'sefaz') continue;
+        if (status !== 'ok' && status !== 'failed') continue;
+        const ws = weekStart(r.created_at);
+        const w = weekAgg.get(ws) ?? { total: 0, failed: 0 };
+        w.total += 1;
+        if (status === 'failed') w.failed += 1;
+        weekAgg.set(ws, w);
+        const sid = r.payload?.seller_id;
+        if (sid) {
+          const s = sellerAgg.get(sid) ?? { total: 0, failed: 0 };
+          s.total += 1;
+          if (status === 'failed') s.failed += 1;
+          sellerAgg.set(sid, s);
+        }
+        if (status === 'failed') {
+          const code = r.payload?.data?.code ?? r.payload?.code ?? 'sem-código';
+          const c = codeAgg.get(code) ?? { count: 0, suggestion: r.payload?.data?.suggestion ?? null };
+          c.count += 1;
+          if (!c.suggestion && r.payload?.data?.suggestion) c.suggestion = r.payload.data.suggestion;
+          codeAgg.set(code, c);
+        }
+      }
+
       return {
         rows: outRows,
         totalRuns: runs.size,
@@ -131,6 +170,17 @@ export function useO2CMonitor(windowDays = 7) {
           rate: h.total ? h.failed / h.total : 0,
         })),
         sefazFailureRate,
+        topSefazCodes: Array.from(codeAgg.entries())
+          .map(([code, v]) => ({ code, count: v.count, suggestion: v.suggestion }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 5),
+        sefazByWeek: Array.from(weekAgg.entries())
+          .map(([weekStart, v]) => ({ weekStart, total: v.total, failed: v.failed, rate: v.total ? v.failed / v.total : 0 }))
+          .sort((a, b) => a.weekStart.localeCompare(b.weekStart)),
+        bySeller: Array.from(sellerAgg.entries())
+          .map(([sellerId, v]) => ({ sellerId, total: v.total, failed: v.failed, rate: v.total ? v.failed / v.total : 0 }))
+          .sort((a, b) => b.failed - a.failed)
+          .slice(0, 10),
       };
     },
   });
