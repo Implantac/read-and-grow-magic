@@ -3871,7 +3871,7 @@ export type Database = {
       credit_audit_logs: {
         Row: {
           action: string
-          company_id: string | null
+          company_id: string
           entity_id: string
           entity_type: string
           id: string
@@ -3884,7 +3884,7 @@ export type Database = {
         }
         Insert: {
           action: string
-          company_id?: string | null
+          company_id: string
           entity_id: string
           entity_type: string
           id?: string
@@ -3897,7 +3897,7 @@ export type Database = {
         }
         Update: {
           action?: string
-          company_id?: string | null
+          company_id?: string
           entity_id?: string
           entity_type?: string
           id?: string
