@@ -23,6 +23,7 @@ import { ClientSelector } from '@/components/commercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/commercial/OrderItemsEditor';
 import { formatBRL, formatDate } from '@/lib/formatters';
 import { SalesSummary } from '@/components/commercial/SalesSummary';
+import { AuditTrailPanel } from '@/shared/components/AuditTrailPanel';
 
 
 const filterFields: FilterField[] = [
