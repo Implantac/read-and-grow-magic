@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Activity, CheckCircle2, XCircle, Clock, TrendingDown } from 'lucide-react';
+import { Activity, CheckCircle2, XCircle, Clock, TrendingDown, X } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
@@ -7,10 +7,12 @@ import { KPICard } from '@/shared/components/KPICard';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
+import { Button } from '@/ui/base/button';
 import { Progress } from '@/ui/base/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { formatDate } from '@/lib/formatters';
 import { useO2CMonitor, O2C_STEPS, type O2CStepKey } from '@/hooks/commercial/useO2CMonitor';
+import { SefazPlaybookDialog } from '@/components/commercial/SefazPlaybookDialog';
 
 const STEP_LABEL: Record<O2CStepKey, string> = {
   credit: 'Crédito',
@@ -29,7 +31,9 @@ function fmtMs(ms: number | null) {
 
 export default function O2CMonitor() {
   const [windowDays, setWindowDays] = useState(7);
-  const { data, isLoading } = useO2CMonitor(windowDays);
+  const [sellerFilter, setSellerFilter] = useState<string | null>(null);
+  const [playbookCode, setPlaybookCode] = useState<string | null>(null);
+  const { data, isLoading } = useO2CMonitor(windowDays, sellerFilter);
 
   if (isLoading) return <PageLoading />;
 
@@ -56,6 +60,17 @@ export default function O2CMonitor() {
           </Select>
         }
       />
+
+      {sellerFilter && (
+        <div className="flex items-center gap-2 rounded-md border border-primary/40 bg-primary/5 px-3 py-2">
+          <span className="text-xs text-muted-foreground">Filtrando por vendedor:</span>
+          <Badge variant="outline" className="font-mono text-xs">{sellerFilter.slice(0, 8)}</Badge>
+          <Button variant="ghost" size="sm" className="ml-auto h-7 px-2" onClick={() => setSellerFilter(null)}>
+            <X className="h-3 w-3 mr-1" /> Limpar
+          </Button>
+        </div>
+      )}
+
 
       <div className="grid gap-4 md:grid-cols-4">
         <KPICard title="Execuções" value={snapshot.totalRuns} icon={Activity} />
@@ -150,14 +165,21 @@ export default function O2CMonitor() {
             ) : (
               <ul className="space-y-2">
                 {snapshot.topSefazCodes.map((c) => (
-                  <li key={c.code} className="flex items-start justify-between gap-3 border-b border-border/50 pb-2 last:border-0">
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium">Código {c.code}</div>
-                      {c.suggestion && (
-                        <div className="text-xs text-muted-foreground truncate">{c.suggestion}</div>
-                      )}
-                    </div>
-                    <Badge variant="destructive" className="whitespace-nowrap">{c.count}×</Badge>
+                  <li key={c.code}>
+                    <button
+                      type="button"
+                      onClick={() => setPlaybookCode(c.code)}
+                      className="w-full flex items-start justify-between gap-3 border-b border-border/50 pb-2 last:border-0 text-left hover:bg-muted/40 rounded px-2 py-1 transition"
+                    >
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium">Código {c.code}</div>
+                        {c.suggestion && (
+                          <div className="text-xs text-muted-foreground truncate">{c.suggestion}</div>
+                        )}
+                        <div className="text-[10px] text-primary mt-0.5">Abrir playbook →</div>
+                      </div>
+                      <Badge variant="destructive" className="whitespace-nowrap">{c.count}×</Badge>
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -200,17 +222,27 @@ export default function O2CMonitor() {
             <EmptyState icon={Activity} title="Sem vendedor identificado" description="Nenhum evento com seller_id na janela." />
           ) : (
             <ul className="divide-y divide-border/60">
-              {snapshot.bySeller.map((s) => (
-                <li key={s.sellerId} className="py-2 flex items-center justify-between gap-3">
-                  <div className="text-sm font-mono">{s.sellerId.slice(0, 8)}</div>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span>{s.total} execuções</span>
-                    <span className={s.rate > 0.1 ? 'text-destructive font-semibold' : 'text-emerald-500'}>
-                      {(s.rate * 100).toFixed(1)}% falha
-                    </span>
-                  </div>
-                </li>
-              ))}
+              {snapshot.bySeller.map((s) => {
+                const active = sellerFilter === s.sellerId;
+                return (
+                  <li key={s.sellerId}>
+                    <button
+                      type="button"
+                      onClick={() => setSellerFilter(active ? null : s.sellerId)}
+                      className={`w-full py-2 px-2 rounded flex items-center justify-between gap-3 text-left hover:bg-muted/40 transition ${active ? 'bg-primary/10 border border-primary/40' : ''}`}
+                    >
+                      <div className="text-sm font-mono">{s.sellerId.slice(0, 8)}</div>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <span>{s.total} execuções</span>
+                        <span className={s.rate > 0.1 ? 'text-destructive font-semibold' : 'text-emerald-500'}>
+                          {(s.rate * 100).toFixed(1)}% falha
+                        </span>
+                        <span className="text-primary text-[10px]">{active ? 'Filtro ativo' : 'Filtrar →'}</span>
+                      </div>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </CardContent>
@@ -249,6 +281,12 @@ export default function O2CMonitor() {
           )}
         </CardContent>
       </Card>
+
+      <SefazPlaybookDialog
+        code={playbookCode}
+        open={!!playbookCode}
+        onOpenChange={(o) => !o && setPlaybookCode(null)}
+      />
     </PageContainer>
   );
 }

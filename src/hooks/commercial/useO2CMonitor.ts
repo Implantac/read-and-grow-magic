@@ -39,9 +39,9 @@ interface EventRow {
   created_at: string;
 }
 
-export function useO2CMonitor(windowDays = 7) {
+export function useO2CMonitor(windowDays = 7, sellerId?: string | null) {
   return useQuery<O2CMonitorSnapshot>({
-    queryKey: ['o2c-monitor', windowDays],
+    queryKey: ['o2c-monitor', windowDays, sellerId ?? null],
     staleTime: 60_000,
     queryFn: async () => {
       const since = new Date(Date.now() - windowDays * 86_400_000).toISOString();
@@ -53,7 +53,8 @@ export function useO2CMonitor(windowDays = 7) {
         .order('created_at', { ascending: true })
         .limit(5000);
       if (error) throw error;
-      const rows = ((data ?? []) as unknown) as EventRow[];
+      const allRows = ((data ?? []) as unknown) as EventRow[];
+      const rows = sellerId ? allRows.filter((r) => r.payload?.seller_id === sellerId) : allRows;
 
       // Agrupa por run_id (fallback: entity_id) e step
       const perStep: Record<O2CStepKey, { running: number; ok: number; failed: number; skipped: number; durations: number[] }> = {
