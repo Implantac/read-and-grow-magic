@@ -55,6 +55,10 @@ export function useCnpjLookup() {
         cep: data.cep || '',
         telefone: data.ddd_telefone_1 ? `(${data.ddd_telefone_1.substring(0, 2)}) ${data.ddd_telefone_1.substring(2)}` : '',
         email: data.email || '',
+        cnae_primary: data.cnae_fiscal ? String(data.cnae_fiscal) : '',
+        cnae_description: data.cnae_fiscal_descricao || '',
+        receita_status: data.descricao_situacao_cadastral || '',
+        receita_status_date: data.data_situacao_cadastral || '',
       };
     } catch (e: any) {
       toastError(e.message || 'Verifique o número e tente novamente.', undefined, 'Erro ao consultar CNPJ');
