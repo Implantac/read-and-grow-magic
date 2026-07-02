@@ -15,6 +15,7 @@ import type { DbOrder } from '@/hooks/commercial/useOrders';
 import { ApprovalBadge } from './ApprovalBadge';
 import { OrderStatusTimeline } from './OrderStatusTimeline';
 import { statusFlow } from './constants';
+import { AuditTrailPanel } from '@/shared/components/AuditTrailPanel';
 
 interface ViewOrderDialogProps {
   open: boolean;
