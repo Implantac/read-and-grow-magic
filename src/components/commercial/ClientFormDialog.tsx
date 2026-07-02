@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react';
-import { Loader2, Search, MapPin, AlertCircle } from 'lucide-react';
+import { Loader2, Search, MapPin, AlertCircle, Building2, User, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
 import { Label } from '@/ui/base/label';
 import { Textarea } from '@/ui/base/textarea';
+import { Badge } from '@/ui/base/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { useCnpjLookup } from '@/hooks/system/useCnpjLookup';
+import { useClientDuplicateCheck } from '@/hooks/commercial/useClientDuplicateCheck';
 import { useSalesReps } from '@/hooks/commercial/useSalesReps';
 import { clientSegments, brazilianStates } from '@/config/commercial';
 import { maskCNPJ, maskCPF, maskPhone, maskCEP, validateCNPJ, validateCPF, validateEmail, lookupCEP } from '@/lib/maskUtils';
 import { useCreateClient, useUpdateClient, type DbClient } from '@/hooks/commercial/useClients';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
+import { cn } from '@/lib/utils';
 
 interface Props {
   open: boolean;
