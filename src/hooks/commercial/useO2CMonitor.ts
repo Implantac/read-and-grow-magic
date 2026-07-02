@@ -61,11 +61,15 @@ export function useO2CMonitor(windowDays = 7) {
         notify: { running: 0, ok: 0, failed: 0, skipped: 0, durations: [] },
       };
 
-      const runStarts = new Map<string, number>(); // runId+step → startedAt
+      const runStarts = new Map<string, number>();
       const runs = new Set<string>();
       const completedRuns = new Set<string>();
       const failedRuns = new Set<string>();
       const recentFailures: O2CMonitorSnapshot['recentFailures'] = [];
+      const sefazHourly: Array<{ total: number; failed: number }> = Array.from(
+        { length: 24 },
+        () => ({ total: 0, failed: 0 })
+      );
 
       for (const r of rows) {
         const [, step, status] = r.event_type.split('.') as [string, O2CStepKey, string];
@@ -82,6 +86,11 @@ export function useO2CMonitor(windowDays = 7) {
           if (startedAt) {
             perStep[step].durations.push(new Date(r.created_at).getTime() - startedAt);
             runStarts.delete(key);
+          }
+          if (step === 'sefaz' && (status === 'ok' || status === 'failed')) {
+            const h = new Date(r.created_at).getHours();
+            sefazHourly[h].total += 1;
+            if (status === 'failed') sefazHourly[h].failed += 1;
           }
           if (status === 'failed') {
             failedRuns.add(runId);
@@ -104,6 +113,10 @@ export function useO2CMonitor(windowDays = 7) {
         return { step, running: s.running, ok: s.ok, failed: s.failed, skipped: s.skipped, avg_ms: avg };
       });
 
+      const sefaz = perStep.sefaz;
+      const sefazTotal = sefaz.ok + sefaz.failed;
+      const sefazFailureRate = sefazTotal ? sefaz.failed / sefazTotal : 0;
+
       return {
         rows: outRows,
         totalRuns: runs.size,
@@ -111,6 +124,13 @@ export function useO2CMonitor(windowDays = 7) {
         totalFailed: failedRuns.size,
         windowDays,
         recentFailures: recentFailures.slice(-25).reverse(),
+        sefazByHour: sefazHourly.map((h, hour) => ({
+          hour,
+          total: h.total,
+          failed: h.failed,
+          rate: h.total ? h.failed / h.total : 0,
+        })),
+        sefazFailureRate,
       };
     },
   });
