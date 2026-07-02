@@ -527,6 +527,7 @@ export default function AccountsReceivable() {
                 <div><p className="text-muted-foreground">Desconto</p><p>{formatBRL(Number(selectedAccount.discount_amount ?? 0))}</p></div>
               </div>
               {selectedAccount.notes && <div><p className="text-muted-foreground">Observações</p><p>{selectedAccount.notes}</p></div>}
+              <AuditTrailPanel entityName="accounts_receivable" entityId={selectedAccount.id} height={260} />
             </div>
           )}
         </DialogContent>
