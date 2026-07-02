@@ -61,6 +61,17 @@ export default function O2CMonitor() {
         }
       />
 
+      {sellerFilter && (
+        <div className="flex items-center gap-2 rounded-md border border-primary/40 bg-primary/5 px-3 py-2">
+          <span className="text-xs text-muted-foreground">Filtrando por vendedor:</span>
+          <Badge variant="outline" className="font-mono text-xs">{sellerFilter.slice(0, 8)}</Badge>
+          <Button variant="ghost" size="sm" className="ml-auto h-7 px-2" onClick={() => setSellerFilter(null)}>
+            <X className="h-3 w-3 mr-1" /> Limpar
+          </Button>
+        </div>
+      )}
+
+
       <div className="grid gap-4 md:grid-cols-4">
         <KPICard title="Execuções" value={snapshot.totalRuns} icon={Activity} />
         <KPICard title="Concluídas" value={snapshot.totalCompleted} icon={CheckCircle2} />
