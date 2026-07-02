@@ -46,4 +46,5 @@ export const CommercialRoutes = [
   <Route key="comercial-playbook" path="/commercial/playbook" element={<PlaybookPage />} />,
   <Route key="comercial-gamificacao" path="/commercial/gamificacao" element={<GamificationPage />} />,
   <Route key="comercial-automacao" path="/commercial/automacao" element={<SalesAutomationPage />} />,
+  <Route key="comercial-o2c-excecoes" path="/commercial/o2c-excecoes" element={<O2CExceptionsPage />} />,
 ];
