@@ -96,6 +96,51 @@ export default function O2CMonitor() {
 
       <Card>
         <CardHeader>
+          <CardTitle className="text-base flex items-center justify-between">
+            <span>Heatmap SEFAZ (falhas por hora)</span>
+            <Badge
+              variant="outline"
+              className={
+                snapshot.sefazFailureRate > 0.1
+                  ? 'border-destructive/40 text-destructive'
+                  : 'border-emerald-500/40 text-emerald-500'
+              }
+            >
+              Taxa {(snapshot.sefazFailureRate * 100).toFixed(1)}%
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-12 gap-1 sm:grid-cols-24">
+            {snapshot.sefazByHour.map((h) => {
+              const intensity = h.total === 0
+                ? 'bg-muted/40'
+                : h.rate >= 0.5
+                  ? 'bg-destructive/80'
+                  : h.rate >= 0.25
+                    ? 'bg-destructive/50'
+                    : h.rate >= 0.1
+                      ? 'bg-orange-500/60'
+                      : 'bg-emerald-500/40';
+              return (
+                <div
+                  key={h.hour}
+                  className={`aspect-square rounded ${intensity} flex items-end justify-center text-[9px] font-medium text-foreground/80`}
+                  title={`${h.hour}h · ${h.failed}/${h.total} falhas (${(h.rate * 100).toFixed(0)}%)`}
+                >
+                  {h.hour}
+                </div>
+              );
+            })}
+          </div>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Cada célula = 1 hora do dia. Intensidade proporcional à taxa de falha SEFAZ na janela selecionada.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
           <CardTitle className="text-base">Falhas recentes</CardTitle>
         </CardHeader>
         <CardContent>
