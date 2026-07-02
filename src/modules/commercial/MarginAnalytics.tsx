@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { PageContainer } from '@/ui/composed/PageContainer';
-import { PageHeader } from '@/ui/composed/PageHeader';
-import { KPICard } from '@/ui/composed/KPICard';
+import { PageContainer } from '@/shared/components/PageContainer';
+import { PageHeader } from '@/shared/components/PageHeader';
+import { KPICard } from '@/shared/components/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { useOrders } from '@/hooks/commercial/useOrders';
 import { MarginBadge } from './orders/MarginBadge';
