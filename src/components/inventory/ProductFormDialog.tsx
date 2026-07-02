@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Factory, Store, Briefcase, Loader2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Factory, Store, Briefcase, Loader2, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from '@/ui/base/dialog';
@@ -15,6 +16,10 @@ import {
 import { cn } from '@/lib/utils';
 import { productTypeConfig, productStatusConfig } from '@/config/inventory';
 import { useCreateProduct, useUpdateProduct, type DbProduct, type ProductNature } from '@/hooks/inventory/useProducts';
+import {
+  ITEM_KIND_LABELS, allowedKindsFor, isValidGtin, isValidNcm, normalizeNcm,
+  type ItemKind,
+} from '@/lib/validators/product';
 
 interface Props {
   open: boolean;
