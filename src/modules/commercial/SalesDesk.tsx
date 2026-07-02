@@ -94,7 +94,7 @@ export default function SalesDeskPage() {
     <PageContainer>
       <PageHeader
         title="Painel Único de Vendas"
-        subtitle="Cliente, itens e pagamento em uma única tela"
+        description="Cliente, itens e pagamento em uma única tela"
         icon={ShoppingCart}
       />
 
