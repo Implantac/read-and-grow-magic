@@ -184,7 +184,7 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
     const payload: any = {
       person_type: formData.person_type,
       name: formData.name, trade_name: isPJ ? (formData.trade_name || null) : null, document: formData.document,
-      document_type: formData.document_type, email: formData.email, phone: formData.phone,
+      document_type: formData.document_type, email: formData.email || '', phone: formData.phone || '',
       cellphone: formData.cellphone || null,
       address_street: formData.address_street, address_number: formData.address_number,
       address_complement: formData.address_complement || null, address_neighborhood: formData.address_neighborhood,
