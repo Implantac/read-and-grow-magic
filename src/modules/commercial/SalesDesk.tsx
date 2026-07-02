@@ -72,14 +72,21 @@ export default function SalesDeskPage() {
       await createOrder.mutateAsync({
         client_id: client.id!,
         client_name: client.name,
-        items,
+        items: items.map((it) => ({
+          product_id: it.product_id ?? null,
+          product_name: it.product_name,
+          product_code: it.product_code,
+          quantity: it.quantity,
+          unit_price: it.unit_price,
+          discount: it.discount,
+        })),
         payment_method: payment,
         payment_condition: condition,
         priority: 'medium',
         delivery_date: delivery || null,
-        shipping_cost: freightNum,
+        shipping: freightNum,
         notes,
-      } as any);
+      });
       toast.success('Pedido criado', { description: 'Pipeline O2C iniciado em background.' });
       // reset
       setItems([]);
