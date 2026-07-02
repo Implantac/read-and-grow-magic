@@ -30,6 +30,7 @@ import { ptBR } from 'date-fns/locale';
 import { formatBRL, formatDate } from '@/lib/formatters';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import { EmptyState } from '@/shared/components/EmptyState';
+import { AuditTrailPanel } from '@/shared/components/AuditTrailPanel';
 const paymentMethods: Record<PaymentMethod, string> = {
   pix: 'PIX', boleto: 'Boleto', credit_card: 'Cartão de Crédito',
   debit_card: 'Cartão de Débito', transfer: 'Transferência', cash: 'Dinheiro', check: 'Cheque',
@@ -526,6 +527,7 @@ export default function AccountsReceivable() {
                 <div><p className="text-muted-foreground">Desconto</p><p>{formatBRL(Number(selectedAccount.discount_amount ?? 0))}</p></div>
               </div>
               {selectedAccount.notes && <div><p className="text-muted-foreground">Observações</p><p>{selectedAccount.notes}</p></div>}
+              <AuditTrailPanel entityName="accounts_receivable" entityId={selectedAccount.id} height={260} />
             </div>
           )}
         </DialogContent>
