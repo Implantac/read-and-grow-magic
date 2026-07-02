@@ -3,7 +3,7 @@ import { Route } from 'react-router-dom';
 
 const CRMDashboardPage = lazy(() => import("../modules/commercial/CRMDashboard"));
 const ClientsPage = lazy(() => import("../modules/commercial/Clients"));
-const SalesPage = lazy(() => import("../modules/commercial/Sales"));
+
 const OrdersPage = lazy(() => import("../modules/commercial/Orders"));
 const OrderTimelinePage = lazy(() => import("../pages/OrderTimeline"));
 const CommercialQuotationsPage = lazy(() => import("../modules/commercial/Quotations"));
