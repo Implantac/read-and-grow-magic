@@ -1,102 +1,137 @@
 
-# Evolução do Módulo Comercial — Order-to-Cash Enterprise
+# Etapa 1 — Cadastro Dinâmico de Clientes (PF/PJ)
 
-Roadmap incremental sobre a base atual (`sales`, `orders`, `quotations`, `crm_leads`, `crm_pipelines`, `commissions`, `tax_rules`, `nfe`, `wms_picking_orders`, `AuditTrailPanel`, `AIInsightPanel`). Nada é reconstruído — cada etapa **acopla** uma camada de inteligência ao fluxo existente.
-
----
-
-## Etapa 1 — Pré-venda, CRM e Automação de Propostas
-
-**Estado da arte (SAP/Oracle/TOTVS):** Lead scoring automático, enriquecimento por CNPJ, propostas geradas a partir de "playbooks" (matriz produto × perfil de cliente × canal), preço e desconto sugeridos por política comercial versionada, aprovação por alçada em background.
-
-**Próximo passo (incremental):**
-- Nova tabela `pricing_policies` (perfil de cliente × faixa de desconto × alçada) + RPC `suggest_price(product_id, client_id, qty)` reutilizando `product_costs` e `customer_credit_profiles`.
-- `crm_leads` ganha coluna `score` alimentada por job que combina `sales_playbooks` + histórico de `sales`.
-- Botão "Converter em Proposta" no lead → cria `quotations` já pré-preenchido com os itens sugeridos pela IA.
-
-**Fator facilidade:** No formulário de proposta, um único badge lateral **"Sugestão inteligente"** mostra preço/desconto propostos com um clique "Aplicar tudo". Sem novas abas, sem novos menus.
+Evolução do cadastro atual em `public.clients` (38 colunas já existentes, incluindo `document`, `document_type`, `address_*`, `state_registration`) sem migração destrutiva. Camada de UI reativa + serviços de enriquecimento por cima.
 
 ---
 
-## Etapa 2 — Entrada de Pedidos e Motores de Validação
+## 1. [Visão do PM] — Regra de negócio e ganho operacional
 
-**Estado da arte:** *Available-to-Promise* (ATP) em tempo real (estoque físico − reservas + ordens de produção previstas), análise de crédito instantânea (limite − AR em aberto − pedidos em curso), bloqueios automáticos com liberação por alçada.
+**Problema hoje**
+- Formulário único genérico: vendedor preenche campos irrelevantes (IE, razão social, nome fantasia) mesmo em PF.
+- Digitação manual de CNPJ, razão social, endereço → alta taxa de erro cadastral, retrabalho no fiscal (NF-e rejeitada por endereço divergente).
+- Sem validação de duplicidade de documento.
 
-**Próximo passo:**
-- RPC `check_credit(client_id, order_total)` retornando `{approved, available_limit, blocked_reason}` usando `customer_credit_profiles` + `accounts_receivable` + `orders` (status `pending`).
-- RPC `check_atp(product_id, qty, due_date)` cruzando `stock_balances`, `stock_reservations` e `production_orders`.
-- Chamadas disparadas **on-blur** no item do pedido; resultado exibido inline (verde/âmbar/vermelho) sem bloquear digitação.
-- Fluxo de aprovação usa `workflow_approvals` já existente.
+**Regra otimizada**
+1. Escolha do tipo (PF/PJ) é o **primeiro e único gatilho** — o formulário se reorganiza a partir dela.
+2. PJ: digitar CNPJ dispara consulta automática (BrasilAPI → Receita) e preenche razão social, fantasia, IE, endereço, CNAE, situação cadastral.
+3. PF: campos exclusivos (RG, data de nascimento, gênero) aparecem; campos PJ desaparecem.
+4. CEP dispara ViaCEP e preenche logradouro, bairro, cidade, UF (usuário só digita número + complemento).
+5. Bloqueio de duplicidade: mesmo `document` já cadastrado na empresa → sugere abrir cadastro existente.
+6. Situação cadastral "Inapta/Suspensa" na Receita → aviso amarelo, não bloqueia (decisão comercial).
 
-**Fator facilidade:** Semáforo discreto ao lado da quantidade + tooltip "Disponível em 3 dias · CD-02". Se bloqueado, botão único **"Solicitar aprovação"** cria a instância de workflow.
-
----
-
-## Etapa 3 — Faturamento e Motor Fiscal Integrado
-
-**Estado da arte:** Motor fiscal pré-calcula ICMS/ST/DIFAL/PIS/COFINS/IPI **na hora da digitação**, sugere CFOP correto pela combinação origem × destino × natureza, gera NF-e em fila assíncrona com retry automático.
-
-**Próximo passo:**
-- Preview fiscal usando `tax_rules` + `tax_icms_st_rules` + `tax_difal_rules` chamado ao adicionar cada item (debounce 400ms).
-- Coluna `fiscal_preview` (jsonb) em `orders` guardando o cálculo — evita recomputar no faturamento.
-- Edge function `emit-nfe-batch` consumindo fila; vendedor clica "Faturar" e o pedido entra em `nfe` com status `queued`.
-
-**Fator facilidade:** Card **"Resumo Fiscal"** colapsado no rodapé do pedido (usa `TaxSummaryCard` já existente). Vendedor só vê o total com impostos; o fiscal aparece quando ele quiser detalhar.
+**Ganho**
+- Tempo médio de cadastro: **~4 min → ~40s** (estimativa: 8 campos digitados vs. 2).
+- Redução de rejeição de NF-e por endereço/razão social divergente.
+- Base fiscal íntegra desde a origem → impacto direto em SPED, Reinf e faturamento.
 
 ---
 
-## Etapa 4 — Integração com Logística/Expedição
+## 2. [Visão do UX/UI] — Comportamento dinâmico
 
-**Estado da arte:** Pedido aprovado gera reserva de estoque + ordem de picking automaticamente, com priorização por SLA/janela de entrega, e devolve tracking para o vendedor.
-
-**Próximo passo:**
-- Trigger `on_order_approved` já existe → estender para criar `stock_reservations` + `wms_picking_orders` na mesma transação.
-- Enum de status em `orders` amplia para `picking`, `packing`, `shipped`, `delivered` (aproveita `order_status_history`).
-- Realtime channel do Supabase transmite mudanças ao pedido aberto na tela.
-
-**Fator facilidade:** `OrderTimeline` (já existe) passa a exibir os marcos WMS ao vivo. Nada muda para o vendedor além de ver as bolinhas acenderem.
-
----
-
-## Etapa 5 — Visibilidade e Pós-venda
-
-**Estado da arte:** Curva ABC dinâmica (cliente × produto × margem), churn prediction, alertas de recompra baseados em frequência histórica, NPS pós-entrega automático.
-
-**Próximo passo:**
-- View materializada `mv_customer_abc` recalculada por cron 03:00 UTC.
-- Job `detect_repurchase_window` (`ai_daily_actions`): se cliente comprou a cada N dias e passou 1.5×N sem novo pedido → cria `follow_up_tasks`.
-- Dashboard comercial ganha `EnterpriseKPICard` com `entityKey="sales"` para drill-down + `AIInsightPanel` já disponível.
-
-**Fator facilidade:** Um único chip "🔔 12 clientes prontos para recomprar" no topo da tela Vendas abre o `DrillDownDrawer` com a lista acionável (WhatsApp em 1 clique via `whatsapp_templates`).
-
----
-
-## Três automações de IA que transformam o vendedor
-
-1. **Copilot de Proposta em 1 clique** — vendedor digita "orçamento para Cliente X, 200 peças modelo Y" no `BrainDrawer` global; a IA monta a proposta completa (preço, desconto, prazo, frete estimado) usando `business-knowledge.ts` + `data-tools.ts` e devolve link direto para revisar/enviar.
-
-2. **Guardião silencioso de margem** — trigger `before_insert` em `order_items` compara preço vs. `product_costs` e, se margem < política, injeta alerta no `AIInsightPanel` do pedido *sem bloquear* — vendedor decide, IA registra em `system_audit_logs` (a trilha que acabamos de plugar).
-
-3. **Radar de oportunidade diário** — cron 07:00 UTC (já rodando o Autopilot) roda `detect_upsell` cruzando pedidos recentes × catálogo × sazonalidade e entrega ao vendedor, no login, uma lista pronta de 5 ações do dia com script sugerido e canal (WhatsApp/e-mail/ligação).
-
----
-
-## Ordem de implementação sugerida
+**Fluxo em uma tela, 3 seções colapsáveis** (evita wizard multi-etapa desnecessário):
 
 ```text
-Sprint 1 → Etapa 2 (ATP + Crédito)      [maior ROI, destrava vendas]
-Sprint 2 → Etapa 1 (Pricing policies)   [reduz erro de vendedor]
-Sprint 3 → Etapa 3 (Preview fiscal)     [reduz retrabalho fiscal]
-Sprint 4 → Etapa 4 (Timeline logística) [visibilidade end-to-end]
-Sprint 5 → Etapa 5 (ABC + Recompra)     [cria receita recorrente]
-Sprint 6 → 3 automações de IA           [efeito "uau" para o usuário]
+┌────────────────────────────────────────────────────┐
+│ [ PF ]  [ PJ ]     ← toggle grande, primeira ação  │
+├────────────────────────────────────────────────────┤
+│ IDENTIFICAÇÃO                                      │
+│  CNPJ [__.___.___/____-__]  🔍  ← autofill        │
+│  Razão Social ........... (auto)                   │
+│  Nome Fantasia .......... (auto)                   │
+│  IE [____]  IM [____]  Situação: ✅ Ativa          │
+├────────────────────────────────────────────────────┤
+│ CONTATO                                            │
+│  E-mail  ·  Telefone  ·  Celular                   │
+├────────────────────────────────────────────────────┤
+│ ENDEREÇO                                           │
+│  CEP [_____-___] 🔍   Número [__]  Compl.          │
+│  Rua/Bairro/Cidade/UF (auto, editável)             │
+├────────────────────────────────────────────────────┤
+│ COMERCIAL (colapsado por padrão)                   │
+│  Limite crédito · Cond. pagto · Tabela · Vendedor  │
+└────────────────────────────────────────────────────┘
 ```
 
-Cada sprint é isolada, reversível por feature flag (`feature_flags` já existe) e não altera contratos de API atuais.
+**Regras de exibição condicional**
+- Toggle **PJ** → mostra: Razão Social, Nome Fantasia, IE, IM, CNAE, Situação Receita.
+- Toggle **PF** → mostra: Nome, RG, Data Nascimento, Gênero. Oculta IE/IM/Razão.
+- Campos preenchidos por API vêm com badge **"auto"** cinza; editáveis com 1 clique.
+- Loading inline no ícone 🔍 (spinner) durante fetch — sem modal, sem bloqueio da tela.
+- Duplicidade → toast + botão "Abrir cadastro existente" (não força).
 
-## Detalhes técnicos
+**Redução de cliques**: 1 clique (PF/PJ) + 2 buscas automáticas (CNPJ, CEP) substituem ~15 tabs manuais.
 
-- **Banco:** apenas *adds* (novas tabelas/RPCs/colunas jsonb). Zero `DROP`/`ALTER TYPE` destrutivo.
-- **Frontend:** reaproveita `EnterpriseKPICard`, `DrillDownDrawer`, `AIInsightPanel`, `AuditTrailPanel`, `OrderTimeline`, `BrainDrawer`, `TaxSummaryCard`, `Can`, `FeatureGate`.
-- **Segurança:** todas as RPCs `SECURITY DEFINER` com `SET search_path = public` + `REVOKE EXECUTE FROM PUBLIC` + `GRANT` só a `authenticated`. RLS por `company_id` mantida.
-- **Observabilidade:** cada job novo registra em `system_audit_logs` (entity_name apropriado) para aparecer nos painéis de auditoria já plugados.
+---
+
+## 3. [Visão do Tech Lead] — Engenharia
+
+### 3.1 Banco (aditivo, sem breaking change)
+
+Migration única em `clients`:
+- `person_type text` (`PF`|`PJ`, default `PJ`, backfill via `length(document)`)
+- `rg text`, `birth_date date`, `gender text` (PF)
+- `cnae_primary text`, `cnae_description text`, `receita_status text`, `receita_status_date date`, `receita_synced_at timestamptz` (PJ enriquecido)
+- `UNIQUE (company_id, document) WHERE document IS NOT NULL` — bloqueia duplicidade por tenant.
+- Índice `idx_clients_document_company` para o lookup de duplicidade.
+
+### 3.2 Enriquecimento (Edge Functions, não expor API externa direto do browser)
+
+Duas edge functions novas, ambas com CORS, JWT em código, rate-limit simples por IP:
+
+**`lookup-cnpj`** — `POST { cnpj }`
+- Valida CNPJ (14 dígitos + dígito verificador).
+- Cache-first: `SELECT * FROM clients WHERE document=$1 AND receita_synced_at > now()-'7 days'` → devolve.
+- Chama `https://brasilapi.com.br/api/cnpj/v1/{cnpj}` (fallback `receitaws.com.br`).
+- Retorna JSON normalizado `{ razao_social, fantasia, ie, endereco, cnae, situacao }`.
+
+**`lookup-cep`** — `POST { cep }`
+- Valida CEP (8 dígitos).
+- Chama `https://viacep.com.br/ws/{cep}/json/` (fallback `brasilapi/cep/v2`).
+- Retorna `{ logradouro, bairro, cidade, uf, ibge }`.
+
+Sem chaves privadas (APIs públicas) → nenhum secret novo.
+
+### 3.3 Frontend
+
+Novo componente `<PersonTypeToggle />` + refactor de `ClientFormDialog` (que hoje é único e estático) para render condicional guiado por `person_type`.
+
+Hooks:
+- `useCnpjLookup(cnpj)` — React Query, `enabled: cnpj.length === 14`, `staleTime: 7d`.
+- `useCepLookup(cep)` — idem, `enabled: cep.length === 8`.
+- `useClientDuplicateCheck(document, companyId)` — query direta ao Supabase.
+
+Validação com **zod** por variante (`clientPFSchema` / `clientPJSchema`) via `discriminatedUnion('person_type')`.
+
+### 3.4 Backfill seguro
+
+Uma execução idempotente na migration:
+```sql
+UPDATE clients
+   SET person_type = CASE
+     WHEN length(regexp_replace(coalesce(document,''),'\D','','g')) = 11 THEN 'PF'
+     ELSE 'PJ' END
+ WHERE person_type IS NULL;
+```
+
+### 3.5 Entregáveis desta etapa
+
+| # | Item | Local |
+|---|------|-------|
+| 1 | Migration aditiva + índice único + backfill | `supabase/migrations/*` |
+| 2 | Edge function `lookup-cnpj` | `supabase/functions/lookup-cnpj/index.ts` |
+| 3 | Edge function `lookup-cep` | `supabase/functions/lookup-cep/index.ts` |
+| 4 | Hooks `useCnpjLookup`, `useCepLookup`, `useClientDuplicateCheck` | `src/hooks/commercial/` |
+| 5 | `PersonTypeToggle` + refactor `ClientFormDialog` dinâmico | `src/modules/commercial/clients/` |
+| 6 | Schemas zod PF/PJ com `discriminatedUnion` | `src/modules/commercial/clients/schema.ts` |
+
+### 3.6 Critérios de aceite
+- Preencher CNPJ válido → 8 campos autocompletam em <2s.
+- Preencher CEP → 4 campos autocompletam em <1s.
+- Toggle PF esconde IE/IM/Razão sem perder dados já digitados.
+- Segundo cadastro com mesmo CNPJ na mesma empresa é bloqueado com atalho para o registro existente.
+- Cadastro existente antigo continua abrindo sem erro (backward compatible).
+
+---
+
+**Aguardo aprovação para iniciar a implementação da Etapa 1.** Após entrega e seu OK, avançamos para a Etapa 2 (Cadastro Universal de Produtos).
