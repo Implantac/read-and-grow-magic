@@ -20,6 +20,8 @@ import { ProfitabilityCard } from '@/modules/commercial/orders/ProfitabilityCard
 import { useClientCommercialProfile } from '@/hooks/commercial/useClientCommercialProfile';
 import { useOrderProfitability } from '@/hooks/commercial/useOrderProfitability';
 import { useCreateOrder } from '@/hooks/commercial/useOrders';
+import { useO2COrchestrator } from '@/hooks/commercial/useO2COrchestrator';
+import { O2CProgressDrawer } from '@/components/commercial/O2CProgressDrawer';
 
 const emptyItems: LineItem[] = [];
 
