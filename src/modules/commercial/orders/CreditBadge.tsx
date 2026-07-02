@@ -1,6 +1,6 @@
 import { ShieldCheck, ShieldAlert, ShieldX, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Card } from '@/components/ui/card';
+import { Card } from '@/ui/base/card';
 import type { CreditCheckResult } from '@/hooks/commercial/useCreditCheck';
 
 interface Props {

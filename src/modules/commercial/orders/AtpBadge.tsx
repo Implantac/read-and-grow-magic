@@ -1,5 +1,5 @@
 import { CheckCircle2, AlertTriangle, XCircle, Loader2 } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/base/tooltip';
 import { cn } from '@/lib/utils';
 import type { AtpCheckResult, AtpStatus } from '@/hooks/commercial/useAtpCheck';
 
