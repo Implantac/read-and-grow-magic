@@ -250,6 +250,14 @@ export default function Sales360() {
           </CardContent>
         </Card>
       )}
+
+      <Client360Drawer
+        open={!!drawerClient}
+        onOpenChange={(v) => !v && setDrawerClient(null)}
+        clientId={drawerClient?.id ?? null}
+        clientName={drawerClient?.name}
+        orders={orders}
+      />
     </PageContainer>
   );
 }
