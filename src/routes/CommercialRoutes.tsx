@@ -30,6 +30,7 @@ const Sales360Page = lazy(() => import("../modules/commercial/Sales360"));
 
 export const CommercialRoutes = [
   <Route key="comercial-crm" path="crm" element={<CRMDashboardPage />} />,
+  <Route key="comercial-vendas-360" path="vendas-360" element={<Sales360Page />} />,
   <Route key="comercial-dashboard" path="dashboard" element={<CommercialDashboardPage />} />,
   <Route key="comercial-pdv" path="pdv" element={<SalesDeskPage />} />,
   <Route key="comercial-clientes" path="clientes" element={<ClientsPage />} />,
