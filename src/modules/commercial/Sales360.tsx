@@ -206,7 +206,12 @@ export default function Sales360() {
               ) : (
                 <div className="divide-y">
                   {topClients.map((c, i) => (
-                    <div key={c.id} className="flex items-center justify-between py-3">
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setDrawerClient({ id: c.id, name: c.name })}
+                      className="flex w-full items-center justify-between py-3 text-left transition hover:bg-muted/40"
+                    >
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="w-6 text-xs font-bold text-muted-foreground">#{i + 1}</span>
                         <div className="min-w-0">
@@ -215,7 +220,7 @@ export default function Sales360() {
                         </div>
                       </div>
                       <span className="text-sm font-semibold">{formatBRL(c.total)}</span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
