@@ -27,6 +27,9 @@ export interface O2CMonitorSnapshot {
   }>;
   sefazByHour: Array<{ hour: number; total: number; failed: number; rate: number }>;
   sefazFailureRate: number;
+  topSefazCodes: Array<{ code: string; count: number; suggestion: string | null }>;
+  sefazByWeek: Array<{ weekStart: string; total: number; failed: number; rate: number }>;
+  bySeller: Array<{ sellerId: string; total: number; failed: number; rate: number }>;
 }
 
 interface EventRow {
