@@ -212,7 +212,8 @@ export default function O2CMonitor() {
                 </li>
               ))}
             </ul>
-          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
