@@ -96,7 +96,10 @@ export function OrderItemsEditor({ items, onChange, dueDate }: OrderItemsEditorP
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs">Produto</Label>
+            <div className="flex items-center justify-between">
+              <Label className="text-xs">Produto</Label>
+              <AtpLineIndicator productId={item.product_id} quantity={item.quantity} dueDate={dueDate} />
+            </div>
             <Popover open={openIndex === index} onOpenChange={(open) => setOpenIndex(open ? index : null)}>
               <PopoverTrigger asChild>
                 <Button variant="outline" className="w-full justify-start text-left font-normal">
