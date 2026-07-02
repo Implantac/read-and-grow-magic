@@ -485,7 +485,7 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={handleSave} disabled={saving || !form.code || !form.name}>
+          <Button onClick={handleSave} disabled={saving || !form.code || !form.name || !!ncmError || !!gtinError}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Salvar
           </Button>
