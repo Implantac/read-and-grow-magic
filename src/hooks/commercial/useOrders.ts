@@ -112,6 +112,24 @@ export function useCreateOrder() {
       const shipping = input.shipping || 0;
       const total = subtotal - discount + shipping;
 
+      // Snapshot de rentabilidade: CMV + impostos estimados + margem líquida %.
+      const productIds = input.items.map((i) => i.product_id).filter(Boolean) as string[];
+      let costMap = new Map<string, number>();
+      if (productIds.length > 0) {
+        const { data: prodCosts } = await supabase
+          .from('products')
+          .select('id, cost_price')
+          .in('id', productIds);
+        (prodCosts ?? []).forEach((p: any) => costMap.set(p.id, Number(p.cost_price) || 0));
+      }
+      const estimated_cost = input.items.reduce(
+        (s, i) => s + (i.product_id ? (costMap.get(i.product_id) ?? 0) : 0) * i.quantity,
+        0,
+      );
+      const estimated_tax = total * (0.18 + 0.0165 + 0.076);
+      const netMargin = total - estimated_cost - estimated_tax;
+      const estimated_margin_pct = total > 0 ? Number(((netMargin / total) * 100).toFixed(2)) : 0;
+
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -127,6 +145,9 @@ export function useCreateOrder() {
           discount,
           shipping,
           total,
+          estimated_cost: Number(estimated_cost.toFixed(2)),
+          estimated_tax: Number(estimated_tax.toFixed(2)),
+          estimated_margin_pct,
           notes: input.notes || null,
           status: 'pending',
           created_at: new Date().toISOString(),
