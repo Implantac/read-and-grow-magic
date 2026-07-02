@@ -69,6 +69,32 @@ export default function MarginAnalytics() {
     };
   }, [orders]);
 
+  const trend = useMemo(() => {
+    if (!orders) return [];
+    const now = new Date();
+    const start = new Date(now);
+    start.setDate(start.getDate() - 29);
+    const byDay = new Map<string, { sum: number; count: number }>();
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      byDay.set(d.toISOString().slice(0, 10), { sum: 0, count: 0 });
+    }
+    for (const o of orders) {
+      if (o.estimated_margin_pct === null || o.estimated_margin_pct === undefined) continue;
+      const key = String(o.date).slice(0, 10);
+      const bucket = byDay.get(key);
+      if (!bucket) continue;
+      bucket.sum += Number(o.estimated_margin_pct);
+      bucket.count += 1;
+    }
+    return Array.from(byDay.entries()).map(([date, v]) => ({
+      date: date.slice(5),
+      margin: v.count > 0 ? Number((v.sum / v.count).toFixed(2)) : null,
+    }));
+  }, [orders]);
+
+
   return (
     <PageContainer>
       <PageHeader
