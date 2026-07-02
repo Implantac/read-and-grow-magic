@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Activity, CheckCircle2, XCircle, Clock, TrendingDown } from 'lucide-react';
+import { Activity, CheckCircle2, XCircle, Clock, TrendingDown, X } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
@@ -7,10 +7,12 @@ import { KPICard } from '@/shared/components/KPICard';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
+import { Button } from '@/ui/base/button';
 import { Progress } from '@/ui/base/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { formatDate } from '@/lib/formatters';
 import { useO2CMonitor, O2C_STEPS, type O2CStepKey } from '@/hooks/commercial/useO2CMonitor';
+import { SefazPlaybookDialog } from '@/components/commercial/SefazPlaybookDialog';
 
 const STEP_LABEL: Record<O2CStepKey, string> = {
   credit: 'Crédito',
@@ -29,7 +31,9 @@ function fmtMs(ms: number | null) {
 
 export default function O2CMonitor() {
   const [windowDays, setWindowDays] = useState(7);
-  const { data, isLoading } = useO2CMonitor(windowDays);
+  const [sellerFilter, setSellerFilter] = useState<string | null>(null);
+  const [playbookCode, setPlaybookCode] = useState<string | null>(null);
+  const { data, isLoading } = useO2CMonitor(windowDays, sellerFilter);
 
   if (isLoading) return <PageLoading />;
 
