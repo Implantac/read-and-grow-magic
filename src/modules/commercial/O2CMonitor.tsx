@@ -281,6 +281,12 @@ export default function O2CMonitor() {
           )}
         </CardContent>
       </Card>
+
+      <SefazPlaybookDialog
+        code={playbookCode}
+        open={!!playbookCode}
+        onOpenChange={(o) => !o && setPlaybookCode(null)}
+      />
     </PageContainer>
   );
 }
