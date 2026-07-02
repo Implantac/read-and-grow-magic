@@ -403,6 +403,13 @@ export default function NFePage() {
                 </>
               )}
 
+              <Separator />
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-3">Trilha de auditoria</p>
+                <AuditTrailPanel entityName="nfe" entityId={selectedNFe.id} limit={100} height={280} />
+              </div>
+
+
               {/* Actions */}
               <div className="flex justify-end gap-2">
                 {selectedNFe.status === 'authorized' && (
