@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.ai-brain]
 verify_jwt = false
+
+[functions.forecast-snapshot-cron]
+verify_jwt = false
