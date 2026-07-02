@@ -22,6 +22,7 @@ import { useOrderProfitability } from '@/hooks/commercial/useOrderProfitability'
 import { useCreateOrder } from '@/hooks/commercial/useOrders';
 import { useO2COrchestrator } from '@/hooks/commercial/useO2COrchestrator';
 import { O2CProgressDrawer } from '@/components/commercial/O2CProgressDrawer';
+import { NfeRejectionDialog } from '@/components/commercial/NfeRejectionDialog';
 
 const emptyItems: LineItem[] = [];
 
@@ -38,6 +39,7 @@ export default function SalesDeskPage() {
 
   const [o2cOrderId, setO2cOrderId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [rejectionOpen, setRejectionOpen] = useState(false);
 
   const profile = useClientCommercialProfile(client.id);
   const createOrder = useCreateOrder();
@@ -50,6 +52,15 @@ export default function SalesDeskPage() {
       setPayment(profile.data.suggested_payment_terms === 'à vista' ? 'pix' : 'boleto');
     }
   }, [profile.data?.suggested_payment_terms]);
+
+  // Detecta falha SEFAZ e abre o diálogo humanizado
+  const sefazFailure = useMemo(
+    () => o2c.events.find((e) => e.step === 'sefaz' && e.status === 'failed'),
+    [o2c.events]
+  );
+  useEffect(() => {
+    if (sefazFailure) setRejectionOpen(true);
+  }, [sefazFailure]);
 
   const itemsTotal = useMemo(
     () => items.reduce((s, i) => s + (i.quantity * i.unit_price - i.discount), 0),
@@ -273,6 +284,19 @@ export default function SalesDeskPage() {
         stepOrder={o2c.stepOrder}
         running={o2c.running}
         error={o2c.error}
+      />
+
+      <NfeRejectionDialog
+        open={rejectionOpen}
+        onOpenChange={setRejectionOpen}
+        rejectionCode={(sefazFailure?.data as any)?.code ?? null}
+        rejectionReason={sefazFailure?.message ?? null}
+        suggestion={(sefazFailure?.data as any)?.suggestion ?? null}
+        onEdit={() => setRejectionOpen(false)}
+        onRetry={() => {
+          setRejectionOpen(false);
+          o2c.trigger();
+        }}
       />
     </PageContainer>
   );

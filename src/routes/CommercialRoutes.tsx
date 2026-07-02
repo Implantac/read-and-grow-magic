@@ -25,6 +25,7 @@ const SalesAutomationPage = lazy(() => import("../modules/commercial/SalesAutoma
 const O2CExceptionsPage = lazy(() => import("../modules/commercial/O2CExceptions"));
 const MarginAnalyticsPage = lazy(() => import("../modules/commercial/MarginAnalytics"));
 const SalesDeskPage = lazy(() => import("../modules/commercial/SalesDesk"));
+const O2CMonitorPage = lazy(() => import("../modules/commercial/O2CMonitor"));
 
 export const CommercialRoutes = [
   <Route key="comercial-crm" path="/commercial/crm" element={<CRMDashboardPage />} />,
@@ -51,4 +52,5 @@ export const CommercialRoutes = [
   <Route key="comercial-automacao" path="/commercial/automacao" element={<SalesAutomationPage />} />,
   <Route key="comercial-o2c-excecoes" path="/commercial/o2c-excecoes" element={<O2CExceptionsPage />} />,
   <Route key="comercial-rentabilidade" path="/commercial/rentabilidade" element={<MarginAnalyticsPage />} />,
+  <Route key="comercial-o2c-monitor" path="/commercial/o2c-monitor" element={<O2CMonitorPage />} />,
 ];
