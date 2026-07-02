@@ -25,6 +25,12 @@ import { GatedOutlet } from '@/components/plan/GatedOutlet';
 import { OnboardingGuard } from '@/components/OnboardingGuard';
 import { ConfirmDialogProvider } from '@/shared/components/ConfirmDialog';
 import { ModuleErrorBoundary } from '@/shared/components/ModuleErrorBoundary';
+import { useLowMarginAlertsRealtime } from '@/hooks/commercial/useLowMarginAlertsRealtime';
+
+const RealtimeAlertsBridge = () => {
+  useLowMarginAlertsRealtime();
+  return null;
+};
 
 // Eager load critical pages
 import Login from "./pages/Login";
@@ -98,6 +104,7 @@ const App = () => (
         <ConfirmDialogProvider>
           <Toaster />
           <Sonner />
+          <RealtimeAlertsBridge />
           <BrowserRouter>
           <Suspense fallback={<PageLoader />}>
             <Routes>
