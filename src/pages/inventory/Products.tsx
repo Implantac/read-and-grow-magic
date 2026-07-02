@@ -280,41 +280,13 @@ export default function ProductsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Form Dialog */}
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{selectedProduct ? 'Editar Produto' : 'Novo Produto'}</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Código *</Label><Input value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Código de Barras</Label><Input value={formData.barcode} onChange={e => setFormData({...formData, barcode: e.target.value})} /></div>
-            </div>
-            <div className="space-y-2"><Label>Nome *</Label><Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} /></div>
-            <div className="space-y-2"><Label>Descrição</Label><Textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Tipo</Label><Select value={formData.type} onValueChange={v => setFormData({...formData, type: v})}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{productTypeConfig.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent></Select></div>
-              <div className="space-y-2"><Label>Categoria</Label><Select value={formData.category_id} onValueChange={v => setFormData({...formData, category_id: v})}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{categories.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select></div>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2"><Label>Unidade</Label><Input value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Custo</Label><Input type="number" value={formData.cost_price} onChange={e => setFormData({...formData, cost_price: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Preço Venda</Label><Input type="number" value={formData.sale_price} onChange={e => setFormData({...formData, sale_price: e.target.value})} /></div>
-            </div>
-            <div className="grid grid-cols-4 gap-4">
-              <div className="space-y-2"><Label>Est. Mín</Label><Input type="number" value={formData.min_stock} onChange={e => setFormData({...formData, min_stock: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Est. Máx</Label><Input type="number" value={formData.max_stock} onChange={e => setFormData({...formData, max_stock: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Reorder</Label><Input type="number" value={formData.reorder_point} onChange={e => setFormData({...formData, reorder_point: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Lead Time</Label><Input type="number" value={formData.lead_time_days} onChange={e => setFormData({...formData, lead_time_days: e.target.value})} /></div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsFormOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave}>Salvar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ProductFormDialog
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        product={selectedProduct}
+        categories={categories as Array<{ id: string; name: string }>}
+      />
+
 
       {/* Delete Dialog */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
