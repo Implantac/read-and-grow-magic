@@ -27,6 +27,7 @@ import { useInventory } from '@/hooks/inventory/useInventoryQuery';
 import type { DbProduct } from '@/hooks/inventory/useProducts';
 import type { ProductType, ProductStatus, ProductFilters } from '@/types/inventory';
 import { EmptyState } from '@/shared/components/EmptyState';
+import { ProductFormDialog } from '@/components/inventory/ProductFormDialog';
 
 export default function ProductsPage() {
   const { products, productsLoading: isLoading, categories, createProduct, updateProduct, deleteProduct } = useInventory();
