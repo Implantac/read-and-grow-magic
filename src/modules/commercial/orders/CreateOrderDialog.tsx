@@ -131,6 +131,10 @@ export function CreateOrderDialog({
           </TabsContent>
 
           <TabsContent value="details" className="mt-4 space-y-4">
+            {formClient.id && orderTotal > 0 && (
+              <CreditBadge result={credit.data} loading={credit.isLoading} />
+            )}
+
             {orderValidations.length > 0 && (
               <div className="space-y-2">
                 {orderValidations.map((v, i) => (
