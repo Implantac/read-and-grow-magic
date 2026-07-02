@@ -202,6 +202,20 @@ export default function OrderTimeline() {
           </ol>
         </div>
       )}
+
+      {orderId && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <History className="h-4 w-4" /> Trilha de auditoria
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <AuditTrailPanel entityName="orders" entityId={orderId} limit={200} height={360} />
+          </CardContent>
+        </Card>
+      )}
+
     </PageContainer>
   );
 }
