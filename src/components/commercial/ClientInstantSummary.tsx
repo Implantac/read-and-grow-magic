@@ -57,7 +57,7 @@ export function ClientInstantSummary({ clientId, orderAmount = 0 }: Props) {
             )}
           >
             <CreditCard className="h-3 w-3" />
-            Crédito: {formatBRL(Number(c.available ?? 0))}
+            Crédito: {formatBRL(Number(c.available_limit ?? 0))}
           </Badge>
         )}
 
