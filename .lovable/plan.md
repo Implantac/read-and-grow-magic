@@ -1,100 +1,102 @@
 
-# USE ERP → Enterprise Product Program
+# Evolução do Módulo Comercial — Order-to-Cash Enterprise
 
-Governança: **UEEF v1.0** (Evolution Mode, nunca reconstruir) + squad multidisciplinar (Arquiteto, PO, BA, ERP/WMS/PCP/MRP/BI, UX, DB, Perf, Sec, IA, FE/BE/FS Seniors).
-
-## Fase 0 — Auditoria Consolidada (2 dias, read-only)
-
-Consolidar `.lovable/audit-2026-07.md` com 12 novos eixos e produzir **`.lovable/audit-enterprise-2026-07.md`**:
-
-| Bloco | Entregável |
-|---|---|
-| Estrutura | Grafo de dependências (`madge --json`), pastas órfãs, imports circulares |
-| Rotas | 213 rotas × uso real (react-router matches vs telemetria de acesso), mortas listadas |
-| Componentes | Duplicados por assinatura (ts-prune + jscpd), heatmap de reuso |
-| Hooks | Padrão vs anti-padrão (chamadas condicionais, sem `useCompanyScope`) |
-| Tipagens | `any` residuais, gaps entre `types.ts` (Supabase) e domínio |
-| DB | 267 tabelas: RLS/GRANT/index/FK/órfãs, tabelas sem policy de write, triggers cross-module |
-| Perf | Bundle por rota (`rollup-plugin-visualizer`), listas sem virtualização, N+1 queries |
-| Segurança | RBAC vs UI, endpoints sem `require-auth`, secrets em código |
-| UX | Telas sem EmptyState/Skeleton/Breadcrumb/aria-label, contraste WCAG AA |
-| Integração | Fluxos cross-module quebrados (Sales→OP→Conferência→NF→AR) |
-| IA | Onde há Cérebro/Copilot vs onde falta drill-down inteligente |
-| Negócio | KPIs sem dono, indicadores sem meta, cards sem drill-down |
-
-Saída: **top-50 achados** ranqueados por (impacto × esforço), classificados A/B/C.
-
-## Fase 1 — Fundação Enterprise (Onda E, 1 sprint)
-
-Componentes-plataforma que serão usados por todas as ondas seguintes. Zero reconstrução — apenas novas primitives que os módulos passam a consumir.
-
-1. **`<EnterpriseKPICard>`** substituto opt-in de `KPICard` com 24 slots do briefing (valor/deltas D-W-M-Y, meta, progresso, tendência, cor, status, impacto R$/op, origem, drill-down, filtros, export CSV/XLSX/PDF, share link, comentários, histórico, audit trail, IA embed). API 100% compatível com o atual + props opcionais → adoção incremental.
-2. **`<DrillDownDrawer>`** único e globalmente montado (padrão do BrainDrawer da Onda B) — abre para qualquer entidade: gráfico, tabela, timeline, docs, pedidos, clientes, produtos, responsáveis, plano de ação, logs, comentários, análise IA do indicador clicado.
-3. **`<AIInsightPanel>`** — contrato único (`indicatorId + payload + horizon`) que chama a edge function `ai-insight` e devolve: causa raiz, responsáveis, impacto R$/op, risco 0-100, previsão, plano de ação com tarefas atribuíveis, automações sugeridas + botões de ação executável (via tool-calling do Cérebro já existente).
-4. **`useDrillDown(entityKey, id)`** — hook agregador que já sabe puxar timeline, docs e related-items do dicionário `entityRegistry`.
-5. Tokens de design Enterprise ampliados: `--surface-elevated`, `--surface-sunken`, `--border-strong`, `--focus-ring`, `--kpi-up`, `--kpi-down`, `--kpi-warn` — nada de cor hardcoded.
-6. **DataTable virtualizada** (`@tanstack/react-virtual`) — evolução do `DataTable` atual, opt-in via `virtualized`.
-
-Aceite: 3 KPI Cards do Dashboard Consolidado migram para `EnterpriseKPICard` com drill-down + IA funcionando fim-a-fim.
-
-## Fase 2 — Dashboards como Centro de Decisão (2 sprints)
-
-Migrar KPIs para `EnterpriseKPICard` **na ordem de retorno**:
-
-| Ordem | Dashboard | KPIs |
-|---|---|---|
-| 1 | Executive Consolidado | Receita, Margem, AR, AP, Caixa, OEE, SLA WMS |
-| 2 | Financeiro | Fluxo 30d, DRE, DFC, Inadimplência, Ticket médio |
-| 3 | Comercial | Pipeline R$, Conversão, CAC, LTV, Churn, Ranking |
-| 4 | WMS | Ocupação, Acuracidade, Picking/h, Backlog, SLA saída |
-| 5 | Produção | OEE, Setup, Refugo, Aderência ao plano, Gargalos |
-| 6 | Fiscal | NF-e emitidas, Rejeições, Carga tributária, SPED |
-
-Cada card entrega as 3 perguntas: **O que / Por que / O que fazer agora**.
-
-## Fase 3 — Módulos ao padrão Enterprise (3 sprints, paralelo)
-
-Evolução em cima do que existe — nenhuma tela é recriada. Cada módulo só sai como "concluído" ao ter checklist do briefing (CRUD + regras + integrações + testes + estados + permissões + logs + IA + doc).
-
-- **WMS**: Digital Twin já existe; adicionar Wave/Cluster/Zone Picking, Cross-Docking (já iniciado), Inventário Cego/Divergência, Mapa de Ocupação heatmap, Simulador de gargalos, RFID já plugado.
-- **PCP/MRP**: Kanban inteligente com WIP limits (`kanban_limits` já existe), Capacidade finita×infinita, Carga máquina/operador, OEE consolidado, Replanejamento automático via `pcp-schedule`.
-- **Financeiro**: DFC, EBITDA, Margem/Rentabilidade/Lucratividade, Rateio de centro de custos, Cobrança inteligente (já parcial), Score de crédito (`customer_credit_profiles` já existe).
-- **Comercial**: Curva ABC clientes, LTV, Churn, Cross/Up-sell no `sales_playbooks`.
-- **BI**: Consolidar Dashboard Engine já existente como módulo `/bi` com 6 dashboards profissionais (Recharts + drill-down).
-
-## Fase 4 — UX/Perf/Sec Enterprise (1 sprint transversal)
-
-- Eliminar 64 `Loader2` → `<Skeleton>` (Onda A parcialmente feita).
-- Virtualização em 12 listas > 500 linhas.
-- Prefetch React Query em hover do Sidebar.
-- Contraste WCAG AA em 100% dos componentes.
-- CSP + rate-limit por edge function via `require-auth`.
-- Audit trail unificado (`system_audit_logs` já existe) plugado no `EnterpriseKPICard`.
-
-## Fase 5 — Qualidade & Go-to-Market (1 sprint)
-
-- Cobertura de smoke tests: 10 → 40 fluxos (expandir `.lovable/e2e/smoke.ts`).
-- Testes de contrato para 36 edge functions.
-- ADRs de arquitetura em `.lovable/adrs/`.
-- Manual do produto em `docs/handbook/` com screenshots por módulo.
-- Health-check público (`/status`) alimentado pela edge function `health-check`.
+Roadmap incremental sobre a base atual (`sales`, `orders`, `quotations`, `crm_leads`, `crm_pipelines`, `commissions`, `tax_rules`, `nfe`, `wms_picking_orders`, `AuditTrailPanel`, `AIInsightPanel`). Nada é reconstruído — cada etapa **acopla** uma camada de inteligência ao fluxo existente.
 
 ---
 
-## Como executar
+## Etapa 1 — Pré-venda, CRM e Automação de Propostas
 
-Cada onda entrega valor incremental e é mergível sozinha. Nenhuma quebra API pública dos hooks/componentes atuais — tudo é aditivo (`EnterpriseKPICard` convive com `KPICard`, drawer é global, IA usa contrato novo mas edge functions atuais).
+**Estado da arte (SAP/Oracle/TOTVS):** Lead scoring automático, enriquecimento por CNPJ, propostas geradas a partir de "playbooks" (matriz produto × perfil de cliente × canal), preço e desconto sugeridos por política comercial versionada, aprovação por alçada em background.
+
+**Próximo passo (incremental):**
+- Nova tabela `pricing_policies` (perfil de cliente × faixa de desconto × alçada) + RPC `suggest_price(product_id, client_id, qty)` reutilizando `product_costs` e `customer_credit_profiles`.
+- `crm_leads` ganha coluna `score` alimentada por job que combina `sales_playbooks` + histórico de `sales`.
+- Botão "Converter em Proposta" no lead → cria `quotations` já pré-preenchido com os itens sugeridos pela IA.
+
+**Fator facilidade:** No formulário de proposta, um único badge lateral **"Sugestão inteligente"** mostra preço/desconto propostos com um clique "Aplicar tudo". Sem novas abas, sem novos menus.
+
+---
+
+## Etapa 2 — Entrada de Pedidos e Motores de Validação
+
+**Estado da arte:** *Available-to-Promise* (ATP) em tempo real (estoque físico − reservas + ordens de produção previstas), análise de crédito instantânea (limite − AR em aberto − pedidos em curso), bloqueios automáticos com liberação por alçada.
+
+**Próximo passo:**
+- RPC `check_credit(client_id, order_total)` retornando `{approved, available_limit, blocked_reason}` usando `customer_credit_profiles` + `accounts_receivable` + `orders` (status `pending`).
+- RPC `check_atp(product_id, qty, due_date)` cruzando `stock_balances`, `stock_reservations` e `production_orders`.
+- Chamadas disparadas **on-blur** no item do pedido; resultado exibido inline (verde/âmbar/vermelho) sem bloquear digitação.
+- Fluxo de aprovação usa `workflow_approvals` já existente.
+
+**Fator facilidade:** Semáforo discreto ao lado da quantidade + tooltip "Disponível em 3 dias · CD-02". Se bloqueado, botão único **"Solicitar aprovação"** cria a instância de workflow.
+
+---
+
+## Etapa 3 — Faturamento e Motor Fiscal Integrado
+
+**Estado da arte:** Motor fiscal pré-calcula ICMS/ST/DIFAL/PIS/COFINS/IPI **na hora da digitação**, sugere CFOP correto pela combinação origem × destino × natureza, gera NF-e em fila assíncrona com retry automático.
+
+**Próximo passo:**
+- Preview fiscal usando `tax_rules` + `tax_icms_st_rules` + `tax_difal_rules` chamado ao adicionar cada item (debounce 400ms).
+- Coluna `fiscal_preview` (jsonb) em `orders` guardando o cálculo — evita recomputar no faturamento.
+- Edge function `emit-nfe-batch` consumindo fila; vendedor clica "Faturar" e o pedido entra em `nfe` com status `queued`.
+
+**Fator facilidade:** Card **"Resumo Fiscal"** colapsado no rodapé do pedido (usa `TaxSummaryCard` já existente). Vendedor só vê o total com impostos; o fiscal aparece quando ele quiser detalhar.
+
+---
+
+## Etapa 4 — Integração com Logística/Expedição
+
+**Estado da arte:** Pedido aprovado gera reserva de estoque + ordem de picking automaticamente, com priorização por SLA/janela de entrega, e devolve tracking para o vendedor.
+
+**Próximo passo:**
+- Trigger `on_order_approved` já existe → estender para criar `stock_reservations` + `wms_picking_orders` na mesma transação.
+- Enum de status em `orders` amplia para `picking`, `packing`, `shipped`, `delivered` (aproveita `order_status_history`).
+- Realtime channel do Supabase transmite mudanças ao pedido aberto na tela.
+
+**Fator facilidade:** `OrderTimeline` (já existe) passa a exibir os marcos WMS ao vivo. Nada muda para o vendedor além de ver as bolinhas acenderem.
+
+---
+
+## Etapa 5 — Visibilidade e Pós-venda
+
+**Estado da arte:** Curva ABC dinâmica (cliente × produto × margem), churn prediction, alertas de recompra baseados em frequência histórica, NPS pós-entrega automático.
+
+**Próximo passo:**
+- View materializada `mv_customer_abc` recalculada por cron 03:00 UTC.
+- Job `detect_repurchase_window` (`ai_daily_actions`): se cliente comprou a cada N dias e passou 1.5×N sem novo pedido → cria `follow_up_tasks`.
+- Dashboard comercial ganha `EnterpriseKPICard` com `entityKey="sales"` para drill-down + `AIInsightPanel` já disponível.
+
+**Fator facilidade:** Um único chip "🔔 12 clientes prontos para recomprar" no topo da tela Vendas abre o `DrillDownDrawer` com a lista acionável (WhatsApp em 1 clique via `whatsapp_templates`).
+
+---
+
+## Três automações de IA que transformam o vendedor
+
+1. **Copilot de Proposta em 1 clique** — vendedor digita "orçamento para Cliente X, 200 peças modelo Y" no `BrainDrawer` global; a IA monta a proposta completa (preço, desconto, prazo, frete estimado) usando `business-knowledge.ts` + `data-tools.ts` e devolve link direto para revisar/enviar.
+
+2. **Guardião silencioso de margem** — trigger `before_insert` em `order_items` compara preço vs. `product_costs` e, se margem < política, injeta alerta no `AIInsightPanel` do pedido *sem bloquear* — vendedor decide, IA registra em `system_audit_logs` (a trilha que acabamos de plugar).
+
+3. **Radar de oportunidade diário** — cron 07:00 UTC (já rodando o Autopilot) roda `detect_upsell` cruzando pedidos recentes × catálogo × sazonalidade e entrega ao vendedor, no login, uma lista pronta de 5 ações do dia com script sugerido e canal (WhatsApp/e-mail/ligação).
+
+---
+
+## Ordem de implementação sugerida
+
+```text
+Sprint 1 → Etapa 2 (ATP + Crédito)      [maior ROI, destrava vendas]
+Sprint 2 → Etapa 1 (Pricing policies)   [reduz erro de vendedor]
+Sprint 3 → Etapa 3 (Preview fiscal)     [reduz retrabalho fiscal]
+Sprint 4 → Etapa 4 (Timeline logística) [visibilidade end-to-end]
+Sprint 5 → Etapa 5 (ABC + Recompra)     [cria receita recorrente]
+Sprint 6 → 3 automações de IA           [efeito "uau" para o usuário]
+```
+
+Cada sprint é isolada, reversível por feature flag (`feature_flags` já existe) e não altera contratos de API atuais.
 
 ## Detalhes técnicos
 
-- Estado: React Query 5 (já em uso, staleTime 60s mantido).
-- Virtualização: `@tanstack/react-virtual`.
-- Gráficos: Recharts (já em uso), sem substituir.
-- IA: edge function `ai-brain` já suporta tool-calling; nova função `ai-insight` reusa `business-knowledge.ts` + `data-tools.ts`.
-- Drill-down: registrado em `src/core/entityRegistry.ts` mapeando `entityKey → { table, timeline, related[] }`.
-- Export: novo `src/shared/export/{csv,xlsx,pdf}.ts` unificado.
-- Testes: Vitest (unit) + Playwright (E2E) já configurados.
-
-## Pergunta antes de começar
-
-Confirmo iniciar por **Fase 0 (auditoria consolidada, read-only, 2 dias)** já nesta próxima resposta? Ou você prefere pular direto para **Fase 1 (fundação Enterprise: `EnterpriseKPICard` + `DrillDownDrawer` + `AIInsightPanel`)** para ver valor visível já na próxima entrega?
+- **Banco:** apenas *adds* (novas tabelas/RPCs/colunas jsonb). Zero `DROP`/`ALTER TYPE` destrutivo.
+- **Frontend:** reaproveita `EnterpriseKPICard`, `DrillDownDrawer`, `AIInsightPanel`, `AuditTrailPanel`, `OrderTimeline`, `BrainDrawer`, `TaxSummaryCard`, `Can`, `FeatureGate`.
+- **Segurança:** todas as RPCs `SECURITY DEFINER` com `SET search_path = public` + `REVOKE EXECUTE FROM PUBLIC` + `GRANT` só a `authenticated`. RLS por `company_id` mantida.
+- **Observabilidade:** cada job novo registra em `system_audit_logs` (entity_name apropriado) para aparecer nos painéis de auditoria já plugados.
