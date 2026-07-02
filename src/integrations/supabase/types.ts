@@ -12123,102 +12123,165 @@ export type Database = {
         Row: {
           abc_classification: string | null
           barcode: string | null
+          bom_id: string | null
+          brand: string | null
           category_id: string | null
+          cest: string | null
+          cfop_default: string | null
           code: string
+          cofins_cst: string | null
           company_id: string
           cost_price: number
           created_at: string
           depth: number | null
           description: string | null
           expiration_control: boolean | null
+          gtin: string | null
           height: number | null
+          icms_cst: string | null
           id: string
           image_url: string | null
+          ipi_cst: string | null
+          is_recurring: boolean | null
+          iss_rate: number | null
           lead_time_days: number
           location: string | null
           lot_control: boolean | null
           max_stock: number
           min_stock: number
+          model: string | null
           name: string
+          ncm: string | null
+          origin: string | null
+          pis_cst: string | null
+          product_nature: string
+          production_route_id: string | null
           reorder_point: number
           sale_price: number
+          service_code_lc116: string | null
+          service_duration_minutes: number | null
           shelf_life_days: number | null
+          standard_batch_size: number | null
           status: string
           subcategory: string | null
           supplier: string | null
+          technical_sheet_url: string | null
           type: string
           unit: string
           unit_conversions: Json | null
           updated_at: string
           volume: number | null
+          warranty_months: number | null
           weight: number | null
           width: number | null
         }
         Insert: {
           abc_classification?: string | null
           barcode?: string | null
+          bom_id?: string | null
+          brand?: string | null
           category_id?: string | null
+          cest?: string | null
+          cfop_default?: string | null
           code: string
+          cofins_cst?: string | null
           company_id?: string
           cost_price?: number
           created_at?: string
           depth?: number | null
           description?: string | null
           expiration_control?: boolean | null
+          gtin?: string | null
           height?: number | null
+          icms_cst?: string | null
           id?: string
           image_url?: string | null
+          ipi_cst?: string | null
+          is_recurring?: boolean | null
+          iss_rate?: number | null
           lead_time_days?: number
           location?: string | null
           lot_control?: boolean | null
           max_stock?: number
           min_stock?: number
+          model?: string | null
           name: string
+          ncm?: string | null
+          origin?: string | null
+          pis_cst?: string | null
+          product_nature?: string
+          production_route_id?: string | null
           reorder_point?: number
           sale_price?: number
+          service_code_lc116?: string | null
+          service_duration_minutes?: number | null
           shelf_life_days?: number | null
+          standard_batch_size?: number | null
           status?: string
           subcategory?: string | null
           supplier?: string | null
+          technical_sheet_url?: string | null
           type?: string
           unit?: string
           unit_conversions?: Json | null
           updated_at?: string
           volume?: number | null
+          warranty_months?: number | null
           weight?: number | null
           width?: number | null
         }
         Update: {
           abc_classification?: string | null
           barcode?: string | null
+          bom_id?: string | null
+          brand?: string | null
           category_id?: string | null
+          cest?: string | null
+          cfop_default?: string | null
           code?: string
+          cofins_cst?: string | null
           company_id?: string
           cost_price?: number
           created_at?: string
           depth?: number | null
           description?: string | null
           expiration_control?: boolean | null
+          gtin?: string | null
           height?: number | null
+          icms_cst?: string | null
           id?: string
           image_url?: string | null
+          ipi_cst?: string | null
+          is_recurring?: boolean | null
+          iss_rate?: number | null
           lead_time_days?: number
           location?: string | null
           lot_control?: boolean | null
           max_stock?: number
           min_stock?: number
+          model?: string | null
           name?: string
+          ncm?: string | null
+          origin?: string | null
+          pis_cst?: string | null
+          product_nature?: string
+          production_route_id?: string | null
           reorder_point?: number
           sale_price?: number
+          service_code_lc116?: string | null
+          service_duration_minutes?: number | null
           shelf_life_days?: number | null
+          standard_batch_size?: number | null
           status?: string
           subcategory?: string | null
           supplier?: string | null
+          technical_sheet_url?: string | null
           type?: string
           unit?: string
           unit_conversions?: Json | null
           updated_at?: string
           volume?: number | null
+          warranty_months?: number | null
           weight?: number | null
           width?: number | null
         }

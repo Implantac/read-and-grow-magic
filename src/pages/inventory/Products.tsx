@@ -27,9 +27,10 @@ import { useInventory } from '@/hooks/inventory/useInventoryQuery';
 import type { DbProduct } from '@/hooks/inventory/useProducts';
 import type { ProductType, ProductStatus, ProductFilters } from '@/types/inventory';
 import { EmptyState } from '@/shared/components/EmptyState';
+import { ProductFormDialog } from '@/components/inventory/ProductFormDialog';
 
 export default function ProductsPage() {
-  const { products, productsLoading: isLoading, categories, createProduct, updateProduct, deleteProduct } = useInventory();
+  const { products, productsLoading: isLoading, categories, deleteProduct } = useInventory();
 
   const [filters, setFilters] = useState<ProductFilters>({
     search: '', type: 'all', category: 'all', status: 'all',
@@ -38,12 +39,6 @@ export default function ProductsPage() {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    code: '', barcode: '', name: '', description: '', type: 'finished',
-    category_id: '', unit: 'UN', cost_price: '', sale_price: '',
-    min_stock: '0', max_stock: '0', reorder_point: '0', lead_time_days: '0',
-    supplier: '', location: '', status: 'active',
-  });
 
   const filteredProducts = useMemo(() => {
     return products.filter((product: any) => {
@@ -72,61 +67,19 @@ export default function ProductsPage() {
   };
 
   const handleOpenForm = (product?: any) => {
-    if (product) {
-      setSelectedProduct(product);
-      setFormData({
-        code: product.code, barcode: product.barcode || '', name: product.name,
-        description: product.description || '', type: product.type,
-        category_id: product.category_id || '', unit: product.unit,
-        cost_price: String(product.cost_price), sale_price: String(product.sale_price),
-        min_stock: String(product.min_stock), max_stock: String(product.max_stock),
-        reorder_point: String(product.reorder_point), lead_time_days: String(product.lead_time_days),
-        supplier: product.supplier || '', location: product.location || '', status: product.status,
-      });
-    } else {
-      setSelectedProduct(null);
-      setFormData({
-        code: '', barcode: '', name: '', description: '', type: 'finished',
-        category_id: '', unit: 'UN', cost_price: '', sale_price: '',
-        min_stock: '0', max_stock: '0', reorder_point: '0', lead_time_days: '0',
-        supplier: '', location: '', status: 'active',
-      });
-    }
+    setSelectedProduct(product || null);
     setIsFormOpen(true);
-  };
-
-  const handleSave = () => {
-    const payload = {
-      code: formData.code, barcode: formData.barcode || null, name: formData.name,
-      description: formData.description || null, type: formData.type,
-      category_id: formData.category_id || null, unit: formData.unit,
-      cost_price: Number(formData.cost_price) || 0, sale_price: Number(formData.sale_price) || 0,
-      min_stock: Number(formData.min_stock) || 0, max_stock: Number(formData.max_stock) || 0,
-      reorder_point: Number(formData.reorder_point) || 0, lead_time_days: Number(formData.lead_time_days) || 0,
-      supplier: formData.supplier || null, location: formData.location || null, status: formData.status,
-    };
-
-    if (selectedProduct) {
-      updateProduct({ id: selectedProduct.id, updates: payload }).then(() => {
-        setIsFormOpen(false);
-        setSelectedProduct(null);
-      });
-    } else {
-      createProduct(payload).then(() => {
-        setIsFormOpen(false);
-        setSelectedProduct(null);
-      });
-    }
   };
 
   const confirmDelete = () => {
     if (selectedProduct) {
-      deleteProduct(selectedProduct.id).then(() => { 
-        setIsDeleteOpen(false); 
-        setSelectedProduct(null); 
+      deleteProduct(selectedProduct.id).then(() => {
+        setIsDeleteOpen(false);
+        setSelectedProduct(null);
       });
     }
   };
+
 
   if (isLoading) return <PageLoading />;
 
@@ -327,41 +280,13 @@ export default function ProductsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Form Dialog */}
-      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{selectedProduct ? 'Editar Produto' : 'Novo Produto'}</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Código *</Label><Input value={formData.code} onChange={e => setFormData({...formData, code: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Código de Barras</Label><Input value={formData.barcode} onChange={e => setFormData({...formData, barcode: e.target.value})} /></div>
-            </div>
-            <div className="space-y-2"><Label>Nome *</Label><Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} /></div>
-            <div className="space-y-2"><Label>Descrição</Label><Textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Tipo</Label><Select value={formData.type} onValueChange={v => setFormData({...formData, type: v})}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{productTypeConfig.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}</SelectContent></Select></div>
-              <div className="space-y-2"><Label>Categoria</Label><Select value={formData.category_id} onValueChange={v => setFormData({...formData, category_id: v})}><SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger><SelectContent>{categories.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent></Select></div>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2"><Label>Unidade</Label><Input value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Custo</Label><Input type="number" value={formData.cost_price} onChange={e => setFormData({...formData, cost_price: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Preço Venda</Label><Input type="number" value={formData.sale_price} onChange={e => setFormData({...formData, sale_price: e.target.value})} /></div>
-            </div>
-            <div className="grid grid-cols-4 gap-4">
-              <div className="space-y-2"><Label>Est. Mín</Label><Input type="number" value={formData.min_stock} onChange={e => setFormData({...formData, min_stock: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Est. Máx</Label><Input type="number" value={formData.max_stock} onChange={e => setFormData({...formData, max_stock: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Reorder</Label><Input type="number" value={formData.reorder_point} onChange={e => setFormData({...formData, reorder_point: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Lead Time</Label><Input type="number" value={formData.lead_time_days} onChange={e => setFormData({...formData, lead_time_days: e.target.value})} /></div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsFormOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSave}>Salvar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ProductFormDialog
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        product={selectedProduct}
+        categories={categories as Array<{ id: string; name: string }>}
+      />
+
 
       {/* Delete Dialog */}
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
