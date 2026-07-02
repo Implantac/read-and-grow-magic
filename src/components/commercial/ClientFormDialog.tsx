@@ -241,46 +241,113 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
           <div className="flex-1 overflow-y-auto px-1 py-4">
             {/* IDENTIFICAÇÃO */}
             <TabsContent value="identification" className="mt-0 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Tipo de Documento *</Label>
-                  <Select value={formData.document_type} onValueChange={(v) => update({ document_type: v, document: '' })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cnpj">CNPJ (Pessoa Jurídica)</SelectItem>
-                      <SelectItem value="cpf">CPF (Pessoa Física)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>{formData.document_type === 'cnpj' ? 'CNPJ' : 'CPF'} *</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={formData.document}
-                      onChange={(e) => update({ document: formData.document_type === 'cnpj' ? maskCNPJ(e.target.value) : maskCPF(e.target.value) })}
-                      placeholder={formData.document_type === 'cnpj' ? '00.000.000/0000-00' : '000.000.000-00'}
-                      className={errors.document ? 'border-destructive' : ''}
-                    />
-                    {formData.document_type === 'cnpj' && (
-                      <Button type="button" variant="outline" size="icon" onClick={handleCnpjLookup} disabled={cnpjLookup.loading} title="Buscar dados na Receita Federal">
-                        {cnpjLookup.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                      </Button>
-                    )}
-                  </div>
-                  {errors.document && <p className="text-xs text-destructive">{errors.document}</p>}
-                </div>
+              {/* Toggle PF/PJ — primeira e única escolha estrutural */}
+              <div className="grid grid-cols-2 gap-3">
+                {(['PJ', 'PF'] as const).map((pt) => {
+                  const active = formData.person_type === pt;
+                  const Icon = pt === 'PJ' ? Building2 : User;
+                  return (
+                    <button
+                      key={pt}
+                      type="button"
+                      onClick={() => setPersonType(pt)}
+                      className={cn(
+                        'flex items-center gap-3 rounded-lg border-2 p-4 text-left transition-all',
+                        active
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border hover:border-primary/40'
+                      )}
+                    >
+                      <Icon className={cn('h-6 w-6', active ? 'text-primary' : 'text-muted-foreground')} />
+                      <div>
+                        <p className="font-semibold text-sm">{pt === 'PJ' ? 'Pessoa Jurídica' : 'Pessoa Física'}</p>
+                        <p className="text-xs text-muted-foreground">{pt === 'PJ' ? 'CNPJ · Razão Social · IE' : 'CPF · RG · Data de Nascimento'}</p>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="space-y-2">
-                <Label>{formData.document_type === 'cnpj' ? 'Razão Social' : 'Nome Completo'} *</Label>
+                <Label>{formData.person_type === 'PJ' ? 'CNPJ' : 'CPF'} *</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={formData.document}
+                    onChange={(e) => update({ document: formData.person_type === 'PJ' ? maskCNPJ(e.target.value) : maskCPF(e.target.value) })}
+                    placeholder={formData.person_type === 'PJ' ? '00.000.000/0000-00' : '000.000.000-00'}
+                    className={errors.document ? 'border-destructive' : ''}
+                  />
+                  {formData.person_type === 'PJ' && (
+                    <Button type="button" variant="outline" size="icon" onClick={handleCnpjLookup} disabled={cnpjLookup.loading} title="Buscar dados na Receita Federal">
+                      {cnpjLookup.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                    </Button>
+                  )}
+                </div>
+                {errors.document && <p className="text-xs text-destructive">{errors.document}</p>}
+                {dup.data && dup.data.id !== client?.id && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" />
+                    Já existe: <span className="font-medium">{dup.data.name}</span> ({dup.data.code})
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>{formData.person_type === 'PJ' ? 'Razão Social' : 'Nome Completo'} *</Label>
                 <Input value={formData.name} onChange={(e) => update({ name: e.target.value })} className={errors.name ? 'border-destructive' : ''} />
                 {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
               </div>
 
-              {formData.document_type === 'cnpj' && (
-                <div className="space-y-2">
-                  <Label>Nome Fantasia</Label>
-                  <Input value={formData.trade_name} onChange={(e) => update({ trade_name: e.target.value })} />
+              {formData.person_type === 'PJ' && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Nome Fantasia</Label>
+                    <Input value={formData.trade_name} onChange={(e) => update({ trade_name: e.target.value })} />
+                  </div>
+                  {(formData.cnae_primary || formData.receita_status) && (
+                    <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/30 p-3 text-xs">
+                      {formData.receita_status && (
+                        <Badge
+                          variant={/ATIVA/i.test(formData.receita_status) ? 'default' : 'destructive'}
+                          className="gap-1"
+                        >
+                          {/ATIVA/i.test(formData.receita_status) ? <CheckCircle2 className="h-3 w-3" /> : <AlertTriangle className="h-3 w-3" />}
+                          {formData.receita_status}
+                        </Badge>
+                      )}
+                      {formData.cnae_primary && (
+                        <span className="text-muted-foreground">
+                          <span className="font-medium text-foreground">CNAE {formData.cnae_primary}</span>
+                          {formData.cnae_description ? ` · ${formData.cnae_description}` : ''}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {formData.person_type === 'PF' && (
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>RG</Label>
+                    <Input value={formData.rg} onChange={(e) => update({ rg: e.target.value })} placeholder="00.000.000-0" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Data de Nascimento</Label>
+                    <Input type="date" value={formData.birth_date} onChange={(e) => update({ birth_date: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Gênero</Label>
+                    <Select value={formData.gender || '_none'} onValueChange={(v) => update({ gender: v === '_none' ? '' : v })}>
+                      <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="_none">Não informar</SelectItem>
+                        <SelectItem value="F">Feminino</SelectItem>
+                        <SelectItem value="M">Masculino</SelectItem>
+                        <SelectItem value="O">Outro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               )}
 
