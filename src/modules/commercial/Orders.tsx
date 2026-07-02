@@ -203,18 +203,38 @@ export default function OrdersPage() {
         <KPICard title="Entregues" value={deliveredCount} subtitle={filteredOrders.length > 0 ? `${Math.round((deliveredCount / filteredOrders.length) * 100)}% concluídos` : '—'} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={3} />
       </div>
 
-      <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
+      <div className="flex items-center justify-between gap-3">
+        <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
+        <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as 'table' | 'kanban')} className="shrink-0">
+          <ToggleGroupItem value="table" aria-label="Visualização em tabela" className="gap-1 px-3">
+            <TableIcon className="h-4 w-4" /> Tabela
+          </ToggleGroupItem>
+          <ToggleGroupItem value="kanban" aria-label="Visualização em kanban" className="gap-1 px-3">
+            <LayoutGrid className="h-4 w-4" /> Kanban
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
 
-      <OrdersTable
-        orders={filteredOrders}
-        selectedOrder={selectedOrder}
-        isDeletePending={deleteOrder.isPending}
-        isAdvancePending={updateStatus.isPending}
-        onView={(order) => { setSelectedOrder(order); setIsViewOpen(true); }}
-        onAdvance={handleAdvanceStatus}
-        onAskDelete={(order) => { setSelectedOrder(order); setIsDeleteConfirmOpen(true); }}
-        onAskCancel={(order) => { setSelectedOrder(order); setIsCancelOpen(true); }}
-      />
+      {viewMode === 'table' ? (
+        <OrdersTable
+          orders={filteredOrders}
+          selectedOrder={selectedOrder}
+          isDeletePending={deleteOrder.isPending}
+          isAdvancePending={updateStatus.isPending}
+          onView={(order) => { setSelectedOrder(order); setIsViewOpen(true); }}
+          onAdvance={handleAdvanceStatus}
+          onAskDelete={(order) => { setSelectedOrder(order); setIsDeleteConfirmOpen(true); }}
+          onAskCancel={(order) => { setSelectedOrder(order); setIsCancelOpen(true); }}
+        />
+      ) : (
+        <SalesKanbanBoard
+          orders={filteredOrders}
+          isAdvancePending={updateStatus.isPending}
+          onView={(order) => { setSelectedOrder(order); setIsViewOpen(true); }}
+          onAdvance={handleAdvanceStatus}
+          onAskCancel={(order) => { setSelectedOrder(order); setIsCancelOpen(true); }}
+        />
+      )}
 
       <CreateOrderDialog
         open={isFormOpen}
