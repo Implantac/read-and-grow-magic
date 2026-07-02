@@ -371,7 +371,13 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
                   value={isService ? form.service_code_lc116 : form.ncm}
                   onChange={(e) => update(isService ? { service_code_lc116: e.target.value } : { ncm: e.target.value })}
                   placeholder={isService ? '00.00' : '00000000'}
+                  aria-invalid={!isService && !!ncmError}
                 />
+                {!isService && ncmError && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" /> {ncmError}
+                  </p>
+                )}
               </div>
               {!isService && (
                 <>
@@ -381,8 +387,15 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
                     <Input value={form.cfop_default} onChange={(e) => update({ cfop_default: e.target.value })} placeholder="5102" /></div>
                 </>
               )}
-              <div className="space-y-2"><Label>GTIN</Label>
-                <Input value={form.gtin} onChange={(e) => update({ gtin: e.target.value })} /></div>
+              <div className="space-y-2">
+                <Label>GTIN</Label>
+                <Input value={form.gtin} onChange={(e) => update({ gtin: e.target.value })} aria-invalid={!!gtinError} />
+                {gtinError && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" /> {gtinError}
+                  </p>
+                )}
+              </div>
             </div>
             {!isService ? (
               <div className="grid grid-cols-5 gap-4">
