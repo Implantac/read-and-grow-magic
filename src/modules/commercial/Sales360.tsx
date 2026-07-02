@@ -22,6 +22,7 @@ import { Client360Drawer } from './Client360Drawer';
 import { CommercialEffortHeatmap } from './CommercialEffortHeatmap';
 import { NextActionsQueue } from './NextActionsQueue';
 import { SalesTargetsRanking } from './SalesTargetsRanking';
+import { ForecastVsActual } from './ForecastVsActual';
 
 const statusLabels: Record<string, string> = {
   pending: 'Pendente', confirmed: 'Confirmado', processing: 'Processando',
