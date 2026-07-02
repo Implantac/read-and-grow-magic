@@ -30,6 +30,7 @@ import { ptBR } from 'date-fns/locale';
 import { formatBRL, formatDate } from '@/lib/formatters';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import { EmptyState } from '@/shared/components/EmptyState';
+import { AuditTrailPanel } from '@/shared/components/AuditTrailPanel';
 const paymentMethods: Record<PaymentMethod, string> = {
   pix: 'PIX', boleto: 'Boleto', credit_card: 'Cartão de Crédito',
   debit_card: 'Cartão de Débito', transfer: 'Transferência', cash: 'Dinheiro', check: 'Cheque',
