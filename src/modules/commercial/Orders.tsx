@@ -39,6 +39,8 @@ export default function OrdersPage() {
   const [selectedOrder, setSelectedOrder] = useState<DbOrder | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
+  const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
+
   // Form state
   const [formClient, setFormClient] = useState<{ id: string | null; name: string }>({ id: null, name: '' });
   const [formItems, setFormItems] = useState<LineItem[]>([]);
