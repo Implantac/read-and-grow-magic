@@ -7,6 +7,16 @@ import { useOrders } from '@/hooks/commercial/useOrders';
 import { MarginBadge } from './orders/MarginBadge';
 import { AlertTriangle, TrendingUp, TrendingDown, Percent, DollarSign } from 'lucide-react';
 import { Skeleton } from '@/ui/base/skeleton';
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ReferenceLine,
+} from 'recharts';
 
 const fmtBRL = (n: number) =>
   n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -59,6 +69,32 @@ export default function MarginAnalytics() {
     };
   }, [orders]);
 
+  const trend = useMemo(() => {
+    if (!orders) return [];
+    const now = new Date();
+    const start = new Date(now);
+    start.setDate(start.getDate() - 29);
+    const byDay = new Map<string, { sum: number; count: number }>();
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      byDay.set(d.toISOString().slice(0, 10), { sum: 0, count: 0 });
+    }
+    for (const o of orders) {
+      if (o.estimated_margin_pct === null || o.estimated_margin_pct === undefined) continue;
+      const key = String(o.date).slice(0, 10);
+      const bucket = byDay.get(key);
+      if (!bucket) continue;
+      bucket.sum += Number(o.estimated_margin_pct);
+      bucket.count += 1;
+    }
+    return Array.from(byDay.entries()).map(([date, v]) => ({
+      date: date.slice(5),
+      margin: v.count > 0 ? Number((v.sum / v.count).toFixed(2)) : null,
+    }));
+  }, [orders]);
+
+
   return (
     <PageContainer>
       <PageHeader
@@ -90,6 +126,46 @@ export default function MarginAnalytics() {
             <KPICard title="CMV Estimado" value={fmtBRL(analytics.totalCost)} icon={TrendingDown} />
             <KPICard title="Impostos Estimados" value={fmtBRL(analytics.totalTax)} icon={Percent} />
           </div>
+
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Evolução da Margem — últimos 30 dias
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={trend} margin={{ top: 8, right: 16, left: -8, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis
+                    tick={{ fontSize: 11 }}
+                    stroke="hsl(var(--muted-foreground))"
+                    tickFormatter={(v) => `${v}%`}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: 'hsl(var(--popover))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: 8,
+                      fontSize: 12,
+                    }}
+                    formatter={(v: number) => [`${v}%`, 'Margem média']}
+                  />
+                  <ReferenceLine y={20} stroke="hsl(var(--muted-foreground))" strokeDasharray="4 4" label={{ value: 'Meta 20%', fontSize: 10, fill: 'hsl(var(--muted-foreground))', position: 'insideTopRight' }} />
+                  <Line
+                    type="monotone"
+                    dataKey="margin"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    dot={{ r: 3 }}
+                    connectNulls
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
             <Card>
