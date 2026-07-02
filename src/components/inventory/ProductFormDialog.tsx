@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
-import { Factory, Store, Briefcase, Loader2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Factory, Store, Briefcase, Loader2, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from '@/ui/base/dialog';
@@ -15,6 +16,10 @@ import {
 import { cn } from '@/lib/utils';
 import { productTypeConfig, productStatusConfig } from '@/config/inventory';
 import { useCreateProduct, useUpdateProduct, type DbProduct, type ProductNature } from '@/hooks/inventory/useProducts';
+import {
+  ITEM_KIND_LABELS, allowedKindsFor, isValidGtin, isValidNcm, normalizeNcm,
+  type ItemKind,
+} from '@/lib/validators/product';
 
 interface Props {
   open: boolean;
@@ -34,6 +39,7 @@ const emptyForm = {
   type: 'finished', category_id: '', unit: 'UN',
   cost_price: '', sale_price: '', status: 'active',
   product_nature: 'commerce' as ProductNature,
+  item_kind: 'revenda' as ItemKind,
   // Estoque
   min_stock: '0', max_stock: '0', reorder_point: '0', lead_time_days: '0',
   location: '', supplier: '',
@@ -66,6 +72,7 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
         cost_price: String(product.cost_price ?? ''), sale_price: String(product.sale_price ?? ''),
         status: product.status ?? 'active',
         product_nature: (product.product_nature as ProductNature) ?? 'commerce',
+        item_kind: (((product as any).item_kind as ItemKind) ?? 'revenda'),
         min_stock: String(product.min_stock ?? 0), max_stock: String(product.max_stock ?? 0),
         reorder_point: String(product.reorder_point ?? 0), lead_time_days: String(product.lead_time_days ?? 0),
         location: product.location ?? '', supplier: product.supplier ?? '',
@@ -95,6 +102,17 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
   const isIndustry = form.product_nature === 'industry';
   const isCommerce = form.product_nature === 'commerce';
 
+  // Kinds disponíveis para a natureza atual; ajusta item_kind se ficar inválido
+  const availableKinds = useMemo(() => allowedKindsFor(form.product_nature), [form.product_nature]);
+  useEffect(() => {
+    if (!availableKinds.includes(form.item_kind)) {
+      setForm((f) => ({ ...f, item_kind: availableKinds[0] }));
+    }
+  }, [availableKinds, form.item_kind]);
+
+  const ncmError = form.ncm && !isValidNcm(form.ncm) ? 'NCM deve ter 8 dígitos numéricos' : '';
+  const gtinError = form.gtin && !isValidGtin(form.gtin) ? 'GTIN inválido (dígito verificador incorreto)' : '';
+
   const update = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
 
   const buildPayload = (): Partial<DbProduct> => {
@@ -105,12 +123,13 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
       type: form.type, category_id: form.category_id || null, unit: form.unit,
       cost_price: Number(form.cost_price) || 0, sale_price: Number(form.sale_price) || 0,
       status: form.status, product_nature: form.product_nature,
+      item_kind: form.item_kind,
       // Fiscais (comuns)
-      ncm: form.ncm || null, cest: form.cest || null,
+      ncm: form.ncm ? normalizeNcm(form.ncm) : null, cest: form.cest || null,
       cfop_default: form.cfop_default || null, origin: form.origin || null,
       icms_cst: form.icms_cst || null, ipi_cst: form.ipi_cst || null,
       pis_cst: form.pis_cst || null, cofins_cst: form.cofins_cst || null,
-    };
+    } as any;
     if (isService) {
       // Serviço: não precisa estoque físico/dimensões
       return {
@@ -156,13 +175,28 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
 
   const handleSave = async () => {
     if (!form.code || !form.name) return;
-    const payload = buildPayload();
-    if (product) {
-      await updateProduct.mutateAsync({ id: product.id, ...payload } as any);
-    } else {
-      await createProduct.mutateAsync(payload);
+    if (ncmError || gtinError) {
+      toast.error(ncmError || gtinError);
+      return;
     }
-    onOpenChange(false);
+    const payload = buildPayload();
+    try {
+      if (product) {
+        await updateProduct.mutateAsync({ id: product.id, ...payload } as any);
+      } else {
+        await createProduct.mutateAsync(payload);
+      }
+      onOpenChange(false);
+    } catch (e: any) {
+      const msg = String(e?.message ?? '');
+      if (msg.includes('products_company_code_unique')) {
+        toast.error('Já existe um produto com este código nesta empresa.');
+      } else if (msg.includes('products_company_gtin_unique')) {
+        toast.error('Este GTIN já está cadastrado nesta empresa.');
+      } else {
+        toast.error('Erro ao salvar produto', { description: msg.slice(0, 140) });
+      }
+    }
   };
 
   const saving = createProduct.isPending || updateProduct.isPending;
@@ -198,6 +232,20 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
             );
           })}
         </div>
+
+        {/* Tipo de item (item_kind) */}
+        <div className="grid grid-cols-[160px_1fr] items-center gap-3 rounded-lg border bg-muted/20 p-3">
+          <Label className="text-xs uppercase tracking-wide text-muted-foreground">Tipo de Item</Label>
+          <Select value={form.item_kind} onValueChange={(v) => update({ item_kind: v as ItemKind })}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {availableKinds.map((k) => (
+                <SelectItem key={k} value={k}>{ITEM_KIND_LABELS[k]}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
 
         <Tabs defaultValue="general" className="w-full mt-2">
           <TabsList className={cn('grid w-full', isService ? 'grid-cols-3' : 'grid-cols-4')}>
@@ -323,7 +371,13 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
                   value={isService ? form.service_code_lc116 : form.ncm}
                   onChange={(e) => update(isService ? { service_code_lc116: e.target.value } : { ncm: e.target.value })}
                   placeholder={isService ? '00.00' : '00000000'}
+                  aria-invalid={!isService && !!ncmError}
                 />
+                {!isService && ncmError && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" /> {ncmError}
+                  </p>
+                )}
               </div>
               {!isService && (
                 <>
@@ -333,8 +387,15 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
                     <Input value={form.cfop_default} onChange={(e) => update({ cfop_default: e.target.value })} placeholder="5102" /></div>
                 </>
               )}
-              <div className="space-y-2"><Label>GTIN</Label>
-                <Input value={form.gtin} onChange={(e) => update({ gtin: e.target.value })} /></div>
+              <div className="space-y-2">
+                <Label>GTIN</Label>
+                <Input value={form.gtin} onChange={(e) => update({ gtin: e.target.value })} aria-invalid={!!gtinError} />
+                {gtinError && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" /> {gtinError}
+                  </p>
+                )}
+              </div>
             </div>
             {!isService ? (
               <div className="grid grid-cols-5 gap-4">
@@ -424,7 +485,7 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={handleSave} disabled={saving || !form.code || !form.name}>
+          <Button onClick={handleSave} disabled={saving || !form.code || !form.name || !!ncmError || !!gtinError}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Salvar
           </Button>
