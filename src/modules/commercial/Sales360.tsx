@@ -18,6 +18,7 @@ import { useSalesReps } from '@/hooks/commercial/useSalesReps';
 import { useCommercialAlerts } from '@/hooks/commercial/useCommercialAlerts';
 import { statusSteps } from './orders/constants';
 import { SalesKanbanBoard } from './orders/SalesKanbanBoard';
+import { Client360Drawer } from './Client360Drawer';
 
 const statusLabels: Record<string, string> = {
   pending: 'Pendente', confirmed: 'Confirmado', processing: 'Processando',
@@ -29,6 +30,7 @@ type PeriodKey = '7d' | '30d' | '90d' | 'all';
 export default function Sales360() {
   const [sellerId, setSellerId] = useState<string>('all');
   const [period, setPeriod] = useState<PeriodKey>('30d');
+  const [drawerClient, setDrawerClient] = useState<{ id: string; name: string } | null>(null);
 
   const { data: orders = [], isLoading: lo } = useOrders();
   const { data: clients = [], isLoading: lc } = useClients();
@@ -204,7 +206,12 @@ export default function Sales360() {
               ) : (
                 <div className="divide-y">
                   {topClients.map((c, i) => (
-                    <div key={c.id} className="flex items-center justify-between py-3">
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setDrawerClient({ id: c.id, name: c.name })}
+                      className="flex w-full items-center justify-between py-3 text-left transition hover:bg-muted/40"
+                    >
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="w-6 text-xs font-bold text-muted-foreground">#{i + 1}</span>
                         <div className="min-w-0">
@@ -213,7 +220,7 @@ export default function Sales360() {
                         </div>
                       </div>
                       <span className="text-sm font-semibold">{formatBRL(c.total)}</span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
@@ -243,6 +250,14 @@ export default function Sales360() {
           </CardContent>
         </Card>
       )}
+
+      <Client360Drawer
+        open={!!drawerClient}
+        onOpenChange={(v) => !v && setDrawerClient(null)}
+        clientId={drawerClient?.id ?? null}
+        clientName={drawerClient?.name}
+        orders={orders}
+      />
     </PageContainer>
   );
 }
