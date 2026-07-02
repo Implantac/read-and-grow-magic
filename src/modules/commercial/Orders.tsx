@@ -18,10 +18,12 @@ import { validateOrder, type CommercialValidation } from '@/hooks/commercial/use
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { filterFields, statusFlow } from './orders/constants';
 import { OrdersTable } from './orders/OrdersTable';
+import { SalesKanbanBoard } from './orders/SalesKanbanBoard';
 import { CreateOrderDialog } from './orders/CreateOrderDialog';
 import { ViewOrderDialog } from './orders/ViewOrderDialog';
 import { DeleteOrderDialog } from './orders/DeleteOrderDialog';
 import { CancelOrderDialog } from './orders/CancelOrderDialog';
+import { ToggleGroup, ToggleGroupItem } from '@/ui/base/toggle-group';
 
 export default function OrdersPage() {
   const { data: orders = [], isLoading } = useOrders();
