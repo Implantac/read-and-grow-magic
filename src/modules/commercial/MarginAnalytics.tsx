@@ -85,7 +85,6 @@ export default function MarginAnalytics() {
               title="Margem Média Estimada"
               value={`${analytics.avgMargin.toFixed(1)}%`}
               icon={Percent}
-              variant={analytics.avgMargin >= 20 ? 'success' : analytics.avgMargin >= 8 ? 'warning' : 'destructive'}
             />
             <KPICard title="Receita Total" value={fmtBRL(analytics.totalRevenue)} icon={DollarSign} />
             <KPICard title="CMV Estimado" value={fmtBRL(analytics.totalCost)} icon={TrendingDown} />
