@@ -9577,6 +9577,9 @@ export type Database = {
           date: string
           delivery_date: string | null
           discount: number
+          estimated_cost: number | null
+          estimated_margin_pct: number | null
+          estimated_tax: number | null
           expected_billing_date: string | null
           financial_approval: string | null
           fulfillment_status: string | null
@@ -9615,6 +9618,9 @@ export type Database = {
           date?: string
           delivery_date?: string | null
           discount?: number
+          estimated_cost?: number | null
+          estimated_margin_pct?: number | null
+          estimated_tax?: number | null
           expected_billing_date?: string | null
           financial_approval?: string | null
           fulfillment_status?: string | null
@@ -9653,6 +9659,9 @@ export type Database = {
           date?: string
           delivery_date?: string | null
           discount?: number
+          estimated_cost?: number | null
+          estimated_margin_pct?: number | null
+          estimated_tax?: number | null
           expected_billing_date?: string | null
           financial_approval?: string | null
           fulfillment_status?: string | null
