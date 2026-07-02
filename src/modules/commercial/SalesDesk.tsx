@@ -20,6 +20,8 @@ import { ProfitabilityCard } from '@/modules/commercial/orders/ProfitabilityCard
 import { useClientCommercialProfile } from '@/hooks/commercial/useClientCommercialProfile';
 import { useOrderProfitability } from '@/hooks/commercial/useOrderProfitability';
 import { useCreateOrder } from '@/hooks/commercial/useOrders';
+import { useO2COrchestrator } from '@/hooks/commercial/useO2COrchestrator';
+import { O2CProgressDrawer } from '@/components/commercial/O2CProgressDrawer';
 
 const emptyItems: LineItem[] = [];
 
@@ -34,8 +36,12 @@ export default function SalesDeskPage() {
   const [notes, setNotes] = useState('');
   const [delivery, setDelivery] = useState('');
 
+  const [o2cOrderId, setO2cOrderId] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
   const profile = useClientCommercialProfile(client.id);
   const createOrder = useCreateOrder();
+  const o2c = useO2COrchestrator(o2cOrderId);
 
   // Sugerir condição de pagamento e método com base no perfil do cliente
   useEffect(() => {
@@ -69,7 +75,7 @@ export default function SalesDeskPage() {
   const handleSubmit = async () => {
     if (!canSubmit) return;
     try {
-      await createOrder.mutateAsync({
+      const created: any = await createOrder.mutateAsync({
         client_id: client.id!,
         client_name: client.name,
         items: items.map((it) => ({
@@ -87,11 +93,17 @@ export default function SalesDeskPage() {
         shipping: freightNum,
         notes,
       });
+      const newId = created?.id ?? created?.data?.id ?? null;
       toast.success('Pedido criado', { description: 'Pipeline O2C iniciado em background.' });
-      // reset
       setItems([]);
       setNotes('');
       setFreight('0');
+      if (newId) {
+        setO2cOrderId(newId);
+        setDrawerOpen(true);
+        // dispara orquestrador no próximo tick (após hook re-render com novo orderId)
+        setTimeout(() => o2c.trigger(), 50);
+      }
     } catch (err: any) {
       toast.error('Falha ao criar pedido', { description: err.message });
     }
@@ -252,6 +264,16 @@ export default function SalesDeskPage() {
           </CardContent>
         </Card>
       </div>
+
+      <O2CProgressDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        orderId={o2cOrderId}
+        events={o2c.events}
+        stepOrder={o2c.stepOrder}
+        running={o2c.running}
+        error={o2c.error}
+      />
     </PageContainer>
   );
 }
