@@ -34,7 +34,7 @@ export const CommercialRoutes = [
   <Route key="comercial-dashboard" path="dashboard" element={<CommercialDashboardPage />} />,
   <Route key="comercial-pdv" path="pdv" element={<SalesDeskPage />} />,
   <Route key="comercial-clientes" path="clientes" element={<ClientsPage />} />,
-  <Route key="comercial-vendas" path="vendas" element={<SalesPage />} />,
+  
   <Route key="comercial-pedidos" path="pedidos" element={<OrdersPage />} />,
   <Route key="comercial-pedido-timeline" path="pedidos/:orderId/timeline" element={<OrderTimelinePage />} />,
   <Route key="comercial-orcamentos" path="orcamentos" element={<CommercialQuotationsPage />} />,
