@@ -14,6 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { ClientSelector } from '@/components/commercial/ClientSelector';
 import { OrderItemsEditor, type LineItem } from '@/components/commercial/OrderItemsEditor';
 import type { CommercialValidation } from '@/hooks/commercial/useCommercialRules';
+import { useCreditCheck } from '@/hooks/commercial/useCreditCheck';
+import { CreditBadge } from './CreditBadge';
 
 interface CreateOrderDialogProps {
   open: boolean;
@@ -47,6 +49,11 @@ export function CreateOrderDialog({
   formShipping, setFormShipping, formNotes, setFormNotes,
   orderValidations, isPending, onSubmit,
 }: CreateOrderDialogProps) {
+  const orderTotal =
+    formItems.reduce((s, i) => s + (i.quantity * i.unit_price - i.discount), 0) +
+    (Number(formShipping) || 0);
+  const credit = useCreditCheck(formClient.id, orderTotal);
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
