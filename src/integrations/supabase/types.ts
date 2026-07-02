@@ -8414,7 +8414,7 @@ export type Database = {
       }
       lgpd_data_requests: {
         Row: {
-          company_id: string | null
+          company_id: string
           completed_at: string | null
           id: string
           payload: Json | null
@@ -8426,7 +8426,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          company_id?: string | null
+          company_id: string
           completed_at?: string | null
           id?: string
           payload?: Json | null
@@ -8438,7 +8438,7 @@ export type Database = {
           user_id: string
         }
         Update: {
-          company_id?: string | null
+          company_id?: string
           completed_at?: string | null
           id?: string
           payload?: Json | null
