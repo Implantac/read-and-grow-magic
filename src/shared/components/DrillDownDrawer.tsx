@@ -13,7 +13,9 @@ import { getEntity, type EntityKey } from "@/core/entityRegistry";
 import { AIInsightPanel } from "./AIInsightPanel";
 import { Skeleton } from "@/ui/base/skeleton";
 import { EmptyState } from "./EmptyState";
-import { Database, ListTree, History, FileClock } from "lucide-react";
+import { AuditTrailPanel } from "./AuditTrailPanel";
+import { Database, ListTree, History } from "lucide-react";
+
 
 export const DRILLDOWN_OPEN_EVENT = "drilldown:open";
 
@@ -179,11 +181,8 @@ export function DrillDownDrawer() {
           </TabsContent>
 
           <TabsContent value="logs" className="mt-4">
-            <EmptyState
-              icon={FileClock}
-              title="Auditoria em breve"
-              description="O trilho de auditoria (system_audit_logs) será exibido aqui na próxima onda."
-            />
+            <AuditTrailPanel entityName={entity.sourceTable ?? payload.entityKey} limit={200} height={420} />
+
           </TabsContent>
         </Tabs>
       </SheetContent>
