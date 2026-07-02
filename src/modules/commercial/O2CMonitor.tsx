@@ -165,14 +165,21 @@ export default function O2CMonitor() {
             ) : (
               <ul className="space-y-2">
                 {snapshot.topSefazCodes.map((c) => (
-                  <li key={c.code} className="flex items-start justify-between gap-3 border-b border-border/50 pb-2 last:border-0">
-                    <div className="min-w-0">
-                      <div className="text-sm font-medium">Código {c.code}</div>
-                      {c.suggestion && (
-                        <div className="text-xs text-muted-foreground truncate">{c.suggestion}</div>
-                      )}
-                    </div>
-                    <Badge variant="destructive" className="whitespace-nowrap">{c.count}×</Badge>
+                  <li key={c.code}>
+                    <button
+                      type="button"
+                      onClick={() => setPlaybookCode(c.code)}
+                      className="w-full flex items-start justify-between gap-3 border-b border-border/50 pb-2 last:border-0 text-left hover:bg-muted/40 rounded px-2 py-1 transition"
+                    >
+                      <div className="min-w-0">
+                        <div className="text-sm font-medium">Código {c.code}</div>
+                        {c.suggestion && (
+                          <div className="text-xs text-muted-foreground truncate">{c.suggestion}</div>
+                        )}
+                        <div className="text-[10px] text-primary mt-0.5">Abrir playbook →</div>
+                      </div>
+                      <Badge variant="destructive" className="whitespace-nowrap">{c.count}×</Badge>
+                    </button>
                   </li>
                 ))}
               </ul>
