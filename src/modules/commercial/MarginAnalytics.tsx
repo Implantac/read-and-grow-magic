@@ -54,6 +54,28 @@ export default function MarginAnalytics() {
     const bottom = sorted.slice(0, 5);
     const top = sorted.slice(-5).reverse();
 
+    // Aggregation helper by dimension
+    const aggregate = (keyFn: (o: any) => string | null) => {
+      const map = new Map<string, { key: string; revenue: number; cost: number; tax: number; marginSum: number; count: number }>();
+      for (const o of withSnap) {
+        const k = keyFn(o);
+        if (!k) continue;
+        const cur = map.get(k) ?? { key: k, revenue: 0, cost: 0, tax: 0, marginSum: 0, count: 0 };
+        cur.revenue += Number(o.total || 0);
+        cur.cost += Number(o.estimated_cost || 0);
+        cur.tax += Number(o.estimated_tax || 0);
+        cur.marginSum += Number(o.estimated_margin_pct || 0);
+        cur.count += 1;
+        map.set(k, cur);
+      }
+      return Array.from(map.values())
+        .map((v) => ({ ...v, avgMargin: v.count > 0 ? v.marginSum / v.count : 0 }))
+        .sort((a, b) => b.revenue - a.revenue);
+    };
+
+    const bySalesRep = aggregate((o) => o.sales_rep_name || null);
+    const byClient = aggregate((o) => o.client_name || null).slice(0, 8);
+
     return {
       totalRevenue,
       totalCost,
@@ -66,8 +88,11 @@ export default function MarginAnalytics() {
       top,
       bottom,
       snapCount: withSnap.length,
+      bySalesRep,
+      byClient,
     };
   }, [orders]);
+
 
   const trend = useMemo(() => {
     if (!orders) return [];
@@ -217,11 +242,63 @@ export default function MarginAnalytics() {
               </CardContent>
             </Card>
           </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Rentabilidade por Vendedor</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {analytics.bySalesRep.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Nenhum vendedor identificado nos pedidos com snapshot.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {analytics.bySalesRep.map((r) => (
+                      <DimensionRow key={r.key} label={r.key} revenue={r.revenue} margin={r.avgMargin} count={r.count} />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Top Clientes por Receita</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {analytics.byClient.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Sem dados.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {analytics.byClient.map((r) => (
+                      <DimensionRow key={r.key} label={r.key} revenue={r.revenue} margin={r.avgMargin} count={r.count} />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </>
       )}
     </PageContainer>
   );
 }
+
+function DimensionRow({ label, revenue, margin, count }: { label: string; revenue: number; margin: number; count: number }) {
+  return (
+    <div className="flex items-center justify-between gap-3 text-sm border-b border-border/40 last:border-0 pb-2 last:pb-0">
+      <div className="min-w-0">
+        <div className="font-medium truncate">{label}</div>
+        <div className="text-xs text-muted-foreground">{count} pedido{count !== 1 ? 's' : ''}</div>
+      </div>
+      <div className="flex items-center gap-3 shrink-0">
+        <span className="font-mono text-xs text-muted-foreground">{fmtBRL(revenue)}</span>
+        <MarginBadge value={margin} />
+      </div>
+    </div>
+  );
+}
+
 
 function Row({ label, count, total, tone }: { label: string; count: number; total: number; tone: 'emerald' | 'yellow' | 'red' }) {
   const pct = total > 0 ? (count / total) * 100 : 0;
