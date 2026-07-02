@@ -365,7 +365,12 @@ function OrderDetailContent({ order }: { order: ProductionOrderRow }) {
             </div>
           )}
         </TabsContent>
+
+        <TabsContent value="audit" className="mt-4">
+          <AuditTrailPanel entityName="production_orders" entityId={order.id} limit={200} height={360} />
+        </TabsContent>
       </Tabs>
     </>
+
   );
 }
