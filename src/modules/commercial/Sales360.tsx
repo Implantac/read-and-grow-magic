@@ -18,6 +18,7 @@ import { useSalesReps } from '@/hooks/commercial/useSalesReps';
 import { useCommercialAlerts } from '@/hooks/commercial/useCommercialAlerts';
 import { statusSteps } from './orders/constants';
 import { SalesKanbanBoard } from './orders/SalesKanbanBoard';
+import { Client360Drawer } from './Client360Drawer';
 
 const statusLabels: Record<string, string> = {
   pending: 'Pendente', confirmed: 'Confirmado', processing: 'Processando',
