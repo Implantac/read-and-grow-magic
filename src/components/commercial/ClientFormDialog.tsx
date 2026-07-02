@@ -144,16 +144,24 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
 
   const validate = () => {
     const e: Record<string, string> = {};
+    const isPJ = formData.person_type === 'PJ';
     if (!formData.name.trim()) e.name = 'Nome obrigatório';
     if (!formData.document.trim()) e.document = 'Documento obrigatório';
     else if (formData.document_type === 'cnpj' && !validateCNPJ(formData.document)) e.document = 'CNPJ inválido';
     else if (formData.document_type === 'cpf' && !validateCPF(formData.document)) e.document = 'CPF inválido';
-    if (!formData.email.trim()) e.email = 'E-mail obrigatório';
-    else if (!validateEmail(formData.email)) e.email = 'E-mail inválido';
-    if (!formData.phone.trim()) e.phone = 'Telefone obrigatório';
-    if (!formData.address_zip_code.trim()) e.address_zip_code = 'CEP obrigatório';
-    if (!formData.address_city.trim()) e.address_city = 'Cidade obrigatória';
-    if (!formData.address_state.trim()) e.address_state = 'UF obrigatório';
+    // E-mail/telefone/endereço só são obrigatórios para PJ. Para PF (CPF),
+    // basta CPF + nome — os demais campos podem ser preenchidos depois.
+    if (isPJ) {
+      if (!formData.email.trim()) e.email = 'E-mail obrigatório';
+      else if (!validateEmail(formData.email)) e.email = 'E-mail inválido';
+      if (!formData.phone.trim()) e.phone = 'Telefone obrigatório';
+      if (!formData.address_zip_code.trim()) e.address_zip_code = 'CEP obrigatório';
+      if (!formData.address_city.trim()) e.address_city = 'Cidade obrigatória';
+      if (!formData.address_state.trim()) e.address_state = 'UF obrigatório';
+    } else {
+      // Para PF, validar apenas formato quando preenchidos.
+      if (formData.email.trim() && !validateEmail(formData.email)) e.email = 'E-mail inválido';
+    }
     setErrors(e);
     return e;
   };
@@ -176,7 +184,7 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
     const payload: any = {
       person_type: formData.person_type,
       name: formData.name, trade_name: isPJ ? (formData.trade_name || null) : null, document: formData.document,
-      document_type: formData.document_type, email: formData.email, phone: formData.phone,
+      document_type: formData.document_type, email: formData.email || '', phone: formData.phone || '',
       cellphone: formData.cellphone || null,
       address_street: formData.address_street, address_number: formData.address_number,
       address_complement: formData.address_complement || null, address_neighborhood: formData.address_neighborhood,
