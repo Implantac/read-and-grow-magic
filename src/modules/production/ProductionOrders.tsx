@@ -233,11 +233,13 @@ function OrderDetailContent({ order }: { order: ProductionOrderRow }) {
       </DialogHeader>
 
       <Tabs defaultValue="overview" className="mt-2">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="steps">Etapas ({orderSteps.length})</TabsTrigger>
           <TabsTrigger value="logs">Histórico ({logs.length})</TabsTrigger>
+          <TabsTrigger value="audit">Auditoria</TabsTrigger>
         </TabsList>
+
 
         <TabsContent value="overview" className="space-y-4 mt-4">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
