@@ -13,6 +13,7 @@ import { useSalesTargets } from '@/hooks/commercial/useSalesTargets';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine,
 } from 'recharts';
+import { ForecastSnapshotHistory } from './ForecastSnapshotHistory';
 
 type Rep = { id: string; name: string };
 
@@ -277,6 +278,9 @@ export function ForecastVsActual({ reps }: Props) {
           </Card>
         </>
       )}
+
+      {/* Histórico de snapshots (Fase 9) */}
+      <ForecastSnapshotHistory periodKey={period} />
     </div>
   );
 }
