@@ -561,16 +561,22 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
                 Dados fiscais usados para emissão de NF-e, NFC-e e cálculos tributários.
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Inscrição Estadual</Label>
-                  <Input value={formData.state_registration} onChange={(e) => update({ state_registration: e.target.value })} placeholder="ISENTO ou número" />
+              {formData.person_type === 'PJ' ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Inscrição Estadual</Label>
+                    <Input value={formData.state_registration} onChange={(e) => update({ state_registration: e.target.value })} placeholder="ISENTO ou número" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Inscrição Municipal</Label>
+                    <Input value={formData.municipal_registration} onChange={(e) => update({ municipal_registration: e.target.value })} />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Inscrição Municipal</Label>
-                  <Input value={formData.municipal_registration} onChange={(e) => update({ municipal_registration: e.target.value })} />
+              ) : (
+                <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground text-center">
+                  Pessoa Física não possui Inscrição Estadual/Municipal. Para NFC-e ao consumidor final apenas o CPF é necessário.
                 </div>
-              </div>
+              )}
             </TabsContent>
           </div>
         </Tabs>
