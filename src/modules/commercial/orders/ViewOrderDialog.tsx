@@ -241,6 +241,9 @@ export function ViewOrderDialog({
                 </div>
               )}
             </div>
+            <div className="px-6 pb-6">
+              <AuditTrailPanel entityType="order" entityId={order.id} title="Histórico de Auditoria" />
+            </div>
           </>
         )}
       </DialogContent>
