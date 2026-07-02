@@ -222,17 +222,27 @@ export default function O2CMonitor() {
             <EmptyState icon={Activity} title="Sem vendedor identificado" description="Nenhum evento com seller_id na janela." />
           ) : (
             <ul className="divide-y divide-border/60">
-              {snapshot.bySeller.map((s) => (
-                <li key={s.sellerId} className="py-2 flex items-center justify-between gap-3">
-                  <div className="text-sm font-mono">{s.sellerId.slice(0, 8)}</div>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                    <span>{s.total} execuções</span>
-                    <span className={s.rate > 0.1 ? 'text-destructive font-semibold' : 'text-emerald-500'}>
-                      {(s.rate * 100).toFixed(1)}% falha
-                    </span>
-                  </div>
-                </li>
-              ))}
+              {snapshot.bySeller.map((s) => {
+                const active = sellerFilter === s.sellerId;
+                return (
+                  <li key={s.sellerId}>
+                    <button
+                      type="button"
+                      onClick={() => setSellerFilter(active ? null : s.sellerId)}
+                      className={`w-full py-2 px-2 rounded flex items-center justify-between gap-3 text-left hover:bg-muted/40 transition ${active ? 'bg-primary/10 border border-primary/40' : ''}`}
+                    >
+                      <div className="text-sm font-mono">{s.sellerId.slice(0, 8)}</div>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        <span>{s.total} execuções</span>
+                        <span className={s.rate > 0.1 ? 'text-destructive font-semibold' : 'text-emerald-500'}>
+                          {(s.rate * 100).toFixed(1)}% falha
+                        </span>
+                        <span className="text-primary text-[10px]">{active ? 'Filtro ativo' : 'Filtrar →'}</span>
+                      </div>
+                    </button>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </CardContent>
