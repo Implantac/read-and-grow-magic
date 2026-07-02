@@ -14,6 +14,10 @@ export interface CnpjData {
   cep: string;
   telefone: string;
   email: string;
+  cnae_primary: string;
+  cnae_description: string;
+  receita_status: string;
+  receita_status_date: string;
 }
 
 function cleanCnpj(cnpj: string) {
