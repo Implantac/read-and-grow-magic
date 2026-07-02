@@ -72,6 +72,7 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
         cost_price: String(product.cost_price ?? ''), sale_price: String(product.sale_price ?? ''),
         status: product.status ?? 'active',
         product_nature: (product.product_nature as ProductNature) ?? 'commerce',
+        item_kind: (((product as any).item_kind as ItemKind) ?? 'revenda'),
         min_stock: String(product.min_stock ?? 0), max_stock: String(product.max_stock ?? 0),
         reorder_point: String(product.reorder_point ?? 0), lead_time_days: String(product.lead_time_days ?? 0),
         location: product.location ?? '', supplier: product.supplier ?? '',
