@@ -14,7 +14,7 @@ import { AIInsightPanel } from "./AIInsightPanel";
 import { Skeleton } from "@/ui/base/skeleton";
 import { EmptyState } from "./EmptyState";
 import { AuditTrailPanel } from "./AuditTrailPanel";
-import { Database, ListTree, History, FileClock } from "lucide-react";
+import { Database, ListTree, History } from "lucide-react";
 
 
 export const DRILLDOWN_OPEN_EVENT = "drilldown:open";
