@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CheckCircle, Clock, DollarSign, Package, Plus } from 'lucide-react';
+import { CheckCircle, Clock, DollarSign, Package, Plus, LayoutGrid, Table as TableIcon } from 'lucide-react';
 import { formatBRL, formatDate } from '@/lib/formatters';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
@@ -18,10 +18,12 @@ import { validateOrder, type CommercialValidation } from '@/hooks/commercial/use
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { filterFields, statusFlow } from './orders/constants';
 import { OrdersTable } from './orders/OrdersTable';
+import { SalesKanbanBoard } from './orders/SalesKanbanBoard';
 import { CreateOrderDialog } from './orders/CreateOrderDialog';
 import { ViewOrderDialog } from './orders/ViewOrderDialog';
 import { DeleteOrderDialog } from './orders/DeleteOrderDialog';
 import { CancelOrderDialog } from './orders/CancelOrderDialog';
+import { ToggleGroup, ToggleGroupItem } from '@/ui/base/toggle-group';
 
 export default function OrdersPage() {
   const { data: orders = [], isLoading } = useOrders();
@@ -36,6 +38,8 @@ export default function OrdersPage() {
   const [isCancelOpen, setIsCancelOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<DbOrder | null>(null);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+
+  const [viewMode, setViewMode] = useState<'table' | 'kanban'>('table');
 
   // Form state
   const [formClient, setFormClient] = useState<{ id: string | null; name: string }>({ id: null, name: '' });
@@ -199,18 +203,38 @@ export default function OrdersPage() {
         <KPICard title="Entregues" value={deliveredCount} subtitle={filteredOrders.length > 0 ? `${Math.round((deliveredCount / filteredOrders.length) * 100)}% concluídos` : '—'} icon={<CheckCircle className="h-5 w-5" />} accentColor="success" index={3} />
       </div>
 
-      <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
+      <div className="flex items-center justify-between gap-3">
+        <AdvancedFilters fields={filterFields} values={filters} onChange={setFilters} onClear={() => setFilters({})} />
+        <ToggleGroup type="single" value={viewMode} onValueChange={(v) => v && setViewMode(v as 'table' | 'kanban')} className="shrink-0">
+          <ToggleGroupItem value="table" aria-label="Visualização em tabela" className="gap-1 px-3">
+            <TableIcon className="h-4 w-4" /> Tabela
+          </ToggleGroupItem>
+          <ToggleGroupItem value="kanban" aria-label="Visualização em kanban" className="gap-1 px-3">
+            <LayoutGrid className="h-4 w-4" /> Kanban
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
 
-      <OrdersTable
-        orders={filteredOrders}
-        selectedOrder={selectedOrder}
-        isDeletePending={deleteOrder.isPending}
-        isAdvancePending={updateStatus.isPending}
-        onView={(order) => { setSelectedOrder(order); setIsViewOpen(true); }}
-        onAdvance={handleAdvanceStatus}
-        onAskDelete={(order) => { setSelectedOrder(order); setIsDeleteConfirmOpen(true); }}
-        onAskCancel={(order) => { setSelectedOrder(order); setIsCancelOpen(true); }}
-      />
+      {viewMode === 'table' ? (
+        <OrdersTable
+          orders={filteredOrders}
+          selectedOrder={selectedOrder}
+          isDeletePending={deleteOrder.isPending}
+          isAdvancePending={updateStatus.isPending}
+          onView={(order) => { setSelectedOrder(order); setIsViewOpen(true); }}
+          onAdvance={handleAdvanceStatus}
+          onAskDelete={(order) => { setSelectedOrder(order); setIsDeleteConfirmOpen(true); }}
+          onAskCancel={(order) => { setSelectedOrder(order); setIsCancelOpen(true); }}
+        />
+      ) : (
+        <SalesKanbanBoard
+          orders={filteredOrders}
+          isAdvancePending={updateStatus.isPending}
+          onView={(order) => { setSelectedOrder(order); setIsViewOpen(true); }}
+          onAdvance={handleAdvanceStatus}
+          onAskCancel={(order) => { setSelectedOrder(order); setIsCancelOpen(true); }}
+        />
+      )}
 
       <CreateOrderDialog
         open={isFormOpen}
