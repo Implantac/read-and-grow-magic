@@ -51,10 +51,11 @@ export function useO2CExceptions() {
       const orderIds = (orders ?? []).map((o) => o.id);
       if (orderIds.length === 0) return [];
 
+      const client: any = supabase;
       const [pickingRes, nfeRes, arRes] = await Promise.all([
-        supabase.from('wms_picking_orders').select('order_id').in('order_id', orderIds),
-        supabase.from('nfe').select('order_id').in('order_id', orderIds),
-        supabase.from('accounts_receivable').select('sale_id').in('sale_id', orderIds),
+        client.from('wms_picking_orders').select('order_id').in('order_id', orderIds),
+        client.from('nfe').select('order_id').in('order_id', orderIds),
+        client.from('accounts_receivable').select('sale_id').in('sale_id', orderIds),
       ]);
 
       const pickingSet = new Set((pickingRes.data ?? []).map((r: any) => r.order_id));
