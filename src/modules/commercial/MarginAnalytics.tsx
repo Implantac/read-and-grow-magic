@@ -7,6 +7,16 @@ import { useOrders } from '@/hooks/commercial/useOrders';
 import { MarginBadge } from './orders/MarginBadge';
 import { AlertTriangle, TrendingUp, TrendingDown, Percent, DollarSign } from 'lucide-react';
 import { Skeleton } from '@/ui/base/skeleton';
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  ReferenceLine,
+} from 'recharts';
 
 const fmtBRL = (n: number) =>
   n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
