@@ -165,6 +165,45 @@ export default function MarginAnalytics() {
         description="Snapshot de margem estimada (CMV + impostos) capturado no momento da criação do pedido."
       />
 
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <Select value={period} onValueChange={setPeriod}>
+          <SelectTrigger className="w-[200px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(PERIODS).map(([k, v]) => (
+              <SelectItem key={k} value={k}>{v.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={!orders || orders.length === 0}
+          onClick={() => {
+            const rows = (orders ?? []).map((o) => ({
+              numero: o.number,
+              data: String(o.date).slice(0, 10),
+              cliente: o.client_name,
+              vendedor: o.sales_rep_name ?? '',
+              receita: Number(o.total || 0).toFixed(2),
+              custo_estimado: Number(o.estimated_cost ?? 0).toFixed(2),
+              imposto_estimado: Number(o.estimated_tax ?? 0).toFixed(2),
+              margem_pct: o.estimated_margin_pct !== null && o.estimated_margin_pct !== undefined
+                ? Number(o.estimated_margin_pct).toFixed(2)
+                : '',
+              status: o.status,
+            }));
+            exportCSV(rows, `rentabilidade_${period}_${new Date().toISOString().slice(0, 10)}.csv`);
+          }}
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Exportar CSV
+        </Button>
+      </div>
+
+
+
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
