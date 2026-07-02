@@ -39,12 +39,6 @@ export default function ProductsPage() {
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    code: '', barcode: '', name: '', description: '', type: 'finished',
-    category_id: '', unit: 'UN', cost_price: '', sale_price: '',
-    min_stock: '0', max_stock: '0', reorder_point: '0', lead_time_days: '0',
-    supplier: '', location: '', status: 'active',
-  });
 
   const filteredProducts = useMemo(() => {
     return products.filter((product: any) => {
@@ -73,61 +67,19 @@ export default function ProductsPage() {
   };
 
   const handleOpenForm = (product?: any) => {
-    if (product) {
-      setSelectedProduct(product);
-      setFormData({
-        code: product.code, barcode: product.barcode || '', name: product.name,
-        description: product.description || '', type: product.type,
-        category_id: product.category_id || '', unit: product.unit,
-        cost_price: String(product.cost_price), sale_price: String(product.sale_price),
-        min_stock: String(product.min_stock), max_stock: String(product.max_stock),
-        reorder_point: String(product.reorder_point), lead_time_days: String(product.lead_time_days),
-        supplier: product.supplier || '', location: product.location || '', status: product.status,
-      });
-    } else {
-      setSelectedProduct(null);
-      setFormData({
-        code: '', barcode: '', name: '', description: '', type: 'finished',
-        category_id: '', unit: 'UN', cost_price: '', sale_price: '',
-        min_stock: '0', max_stock: '0', reorder_point: '0', lead_time_days: '0',
-        supplier: '', location: '', status: 'active',
-      });
-    }
+    setSelectedProduct(product || null);
     setIsFormOpen(true);
-  };
-
-  const handleSave = () => {
-    const payload = {
-      code: formData.code, barcode: formData.barcode || null, name: formData.name,
-      description: formData.description || null, type: formData.type,
-      category_id: formData.category_id || null, unit: formData.unit,
-      cost_price: Number(formData.cost_price) || 0, sale_price: Number(formData.sale_price) || 0,
-      min_stock: Number(formData.min_stock) || 0, max_stock: Number(formData.max_stock) || 0,
-      reorder_point: Number(formData.reorder_point) || 0, lead_time_days: Number(formData.lead_time_days) || 0,
-      supplier: formData.supplier || null, location: formData.location || null, status: formData.status,
-    };
-
-    if (selectedProduct) {
-      updateProduct({ id: selectedProduct.id, updates: payload }).then(() => {
-        setIsFormOpen(false);
-        setSelectedProduct(null);
-      });
-    } else {
-      createProduct(payload).then(() => {
-        setIsFormOpen(false);
-        setSelectedProduct(null);
-      });
-    }
   };
 
   const confirmDelete = () => {
     if (selectedProduct) {
-      deleteProduct(selectedProduct.id).then(() => { 
-        setIsDeleteOpen(false); 
-        setSelectedProduct(null); 
+      deleteProduct(selectedProduct.id).then(() => {
+        setIsDeleteOpen(false);
+        setSelectedProduct(null);
       });
     }
   };
+
 
   if (isLoading) return <PageLoading />;
 
