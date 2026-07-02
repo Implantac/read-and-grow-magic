@@ -21,6 +21,7 @@ import { SalesKanbanBoard } from './orders/SalesKanbanBoard';
 import { Client360Drawer } from './Client360Drawer';
 import { CommercialEffortHeatmap } from './CommercialEffortHeatmap';
 import { NextActionsQueue } from './NextActionsQueue';
+import { SalesTargetsRanking } from './SalesTargetsRanking';
 
 const statusLabels: Record<string, string> = {
   pending: 'Pendente', confirmed: 'Confirmado', processing: 'Processando',
@@ -151,6 +152,7 @@ export default function Sales360() {
         <TabsList>
           <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
           <TabsTrigger value="agenda">Agenda</TabsTrigger>
+          <TabsTrigger value="metas">Metas & Ranking</TabsTrigger>
           <TabsTrigger value="excecoes">Exceções ({filteredAlerts.length})</TabsTrigger>
           <TabsTrigger value="clientes">Clientes Top</TabsTrigger>
         </TabsList>
@@ -160,6 +162,10 @@ export default function Sales360() {
             <NextActionsQueue clients={clients as any} sellerId={sellerId} />
             <CommercialEffortHeatmap orders={filteredOrders} />
           </div>
+        </TabsContent>
+
+        <TabsContent value="metas">
+          <SalesTargetsRanking orders={filteredOrders} reps={reps as any} />
         </TabsContent>
 
         <TabsContent value="pipeline">
