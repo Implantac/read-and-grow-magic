@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react';
-import { Loader2, Search, MapPin, AlertCircle } from 'lucide-react';
+import { Loader2, Search, MapPin, AlertCircle, Building2, User, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
 import { Label } from '@/ui/base/label';
 import { Textarea } from '@/ui/base/textarea';
+import { Badge } from '@/ui/base/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { useCnpjLookup } from '@/hooks/system/useCnpjLookup';
+import { useClientDuplicateCheck } from '@/hooks/commercial/useClientDuplicateCheck';
 import { useSalesReps } from '@/hooks/commercial/useSalesReps';
 import { clientSegments, brazilianStates } from '@/config/commercial';
 import { maskCNPJ, maskCPF, maskPhone, maskCEP, validateCNPJ, validateCPF, validateEmail, lookupCEP } from '@/lib/maskUtils';
 import { useCreateClient, useUpdateClient, type DbClient } from '@/hooks/commercial/useClients';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
+import { cn } from '@/lib/utils';
 
 interface Props {
   open: boolean;
@@ -22,6 +25,7 @@ interface Props {
 }
 
 const defaultForm = {
+  person_type: 'PJ' as 'PF' | 'PJ',
   name: '', trade_name: '', document: '', document_type: 'cnpj' as string,
   email: '', phone: '', cellphone: '',
   address_street: '', address_number: '', address_complement: '',
@@ -31,6 +35,8 @@ const defaultForm = {
   region: '', micro_region: '', default_payment_condition: 'À vista',
   price_table: 'default', abc_classification: 'C', client_score: 'medium',
   commercial_notes: '', estimated_potential: '',
+  rg: '', birth_date: '', gender: '',
+  cnae_primary: '', cnae_description: '', receita_status: '', receita_status_date: '',
 };
 
 export function ClientFormDialog({ open, onOpenChange, client, totalClients }: Props) {
@@ -49,22 +55,30 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
     setTab('identification');
     setErrors({});
     if (client) {
+      const c = client as DbClient & Partial<{
+        person_type: 'PF' | 'PJ'; rg: string; birth_date: string; gender: string;
+        cnae_primary: string; cnae_description: string; receita_status: string; receita_status_date: string;
+      }>;
       setFormData({
-        name: client.name, trade_name: client.trade_name || '', document: client.document,
-        document_type: client.document_type, email: client.email, phone: client.phone,
-        cellphone: client.cellphone || '',
-        address_street: client.address_street, address_number: client.address_number,
-        address_complement: client.address_complement || '', address_neighborhood: client.address_neighborhood,
-        address_city: client.address_city, address_state: client.address_state,
-        address_zip_code: client.address_zip_code,
-        status: client.status, credit_limit: String(client.credit_limit), segment: client.segment || '',
-        sales_rep_id: client.sales_rep_id || '',
-        state_registration: client.state_registration || '', municipal_registration: client.municipal_registration || '',
-        region: client.region || '', micro_region: client.micro_region || '',
-        default_payment_condition: client.default_payment_condition || 'À vista',
-        price_table: client.price_table || 'default', abc_classification: client.abc_classification || 'C',
-        client_score: client.client_score || 'medium',
-        commercial_notes: client.commercial_notes || '', estimated_potential: String(client.estimated_potential || ''),
+        person_type: c.person_type || (c.document_type === 'cpf' ? 'PF' : 'PJ'),
+        name: c.name, trade_name: c.trade_name || '', document: c.document,
+        document_type: c.document_type, email: c.email, phone: c.phone,
+        cellphone: c.cellphone || '',
+        address_street: c.address_street, address_number: c.address_number,
+        address_complement: c.address_complement || '', address_neighborhood: c.address_neighborhood,
+        address_city: c.address_city, address_state: c.address_state,
+        address_zip_code: c.address_zip_code,
+        status: c.status, credit_limit: String(c.credit_limit), segment: c.segment || '',
+        sales_rep_id: c.sales_rep_id || '',
+        state_registration: c.state_registration || '', municipal_registration: c.municipal_registration || '',
+        region: c.region || '', micro_region: c.micro_region || '',
+        default_payment_condition: c.default_payment_condition || 'À vista',
+        price_table: c.price_table || 'default', abc_classification: c.abc_classification || 'C',
+        client_score: c.client_score || 'medium',
+        commercial_notes: c.commercial_notes || '', estimated_potential: String(c.estimated_potential || ''),
+        rg: c.rg || '', birth_date: c.birth_date || '', gender: c.gender || '',
+        cnae_primary: c.cnae_primary || '', cnae_description: c.cnae_description || '',
+        receita_status: c.receita_status || '', receita_status_date: c.receita_status_date || '',
       });
     } else {
       setFormData({ ...defaultForm });
@@ -73,8 +87,22 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
 
   const update = (patch: Partial<typeof formData>) => setFormData(p => ({ ...p, ...patch }));
 
+  const dup = useClientDuplicateCheck(formData.document, client?.id ?? null);
+
+  const setPersonType = (pt: 'PF' | 'PJ') => {
+    update({
+      person_type: pt,
+      document_type: pt === 'PF' ? 'cpf' : 'cnpj',
+      document: '',
+      // limpa fields exclusivos do outro tipo
+      ...(pt === 'PF'
+        ? { trade_name: '', state_registration: '', municipal_registration: '', cnae_primary: '', cnae_description: '', receita_status: '', receita_status_date: '' }
+        : { rg: '', birth_date: '', gender: '' }),
+    });
+  };
+
   const handleCnpjLookup = async () => {
-    if (formData.document_type !== 'cnpj') return;
+    if (formData.person_type !== 'PJ') return;
     const data = await cnpjLookup.lookup(formData.document);
     if (data) {
       update({
@@ -89,6 +117,10 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
         address_city: data.municipio,
         address_state: data.uf,
         address_zip_code: maskCEP(data.cep),
+        cnae_primary: data.cnae_primary,
+        cnae_description: data.cnae_description,
+        receita_status: data.receita_status,
+        receita_status_date: data.receita_status_date,
       });
     }
   };
@@ -129,15 +161,21 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
   const handleSave = () => {
     const e = validate();
     if (Object.keys(e).length) {
-      // Switch to first tab containing the error
       if (e.name || e.document || e.email || e.phone) setTab('identification');
       else if (e.address_zip_code || e.address_city || e.address_state) setTab('address');
       toastError('Há campos obrigatórios pendentes.', undefined, 'Verifique os campos');
       return;
     }
+    if (dup.data && dup.data.id !== client?.id) {
+      toastError(`Já existe o cadastro "${dup.data.name}" (${dup.data.code}) com este documento.`, undefined, 'Documento duplicado');
+      setTab('identification');
+      return;
+    }
 
+    const isPJ = formData.person_type === 'PJ';
     const payload: any = {
-      name: formData.name, trade_name: formData.trade_name || null, document: formData.document,
+      person_type: formData.person_type,
+      name: formData.name, trade_name: isPJ ? (formData.trade_name || null) : null, document: formData.document,
       document_type: formData.document_type, email: formData.email, phone: formData.phone,
       cellphone: formData.cellphone || null,
       address_street: formData.address_street, address_number: formData.address_number,
@@ -148,14 +186,21 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
       current_balance: 0, segment: formData.segment || null,
       sales_rep_id: formData.sales_rep_id || null,
       client_score: formData.client_score || 'medium',
-      state_registration: formData.state_registration || null,
-      municipal_registration: formData.municipal_registration || null,
+      state_registration: isPJ ? (formData.state_registration || null) : null,
+      municipal_registration: isPJ ? (formData.municipal_registration || null) : null,
       region: formData.region || null, micro_region: formData.micro_region || null,
       default_payment_condition: formData.default_payment_condition || 'À vista',
       price_table: formData.price_table || 'default',
       abc_classification: formData.abc_classification || 'C',
       commercial_notes: formData.commercial_notes || null,
       estimated_potential: Number(formData.estimated_potential) || 0,
+      rg: !isPJ ? (formData.rg || null) : null,
+      birth_date: !isPJ && formData.birth_date ? formData.birth_date : null,
+      gender: !isPJ ? (formData.gender || null) : null,
+      cnae_primary: isPJ ? (formData.cnae_primary || null) : null,
+      cnae_description: isPJ ? (formData.cnae_description || null) : null,
+      receita_status: isPJ ? (formData.receita_status || null) : null,
+      receita_status_date: isPJ && formData.receita_status_date ? formData.receita_status_date : null,
     };
 
     if (client) {
@@ -196,46 +241,113 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
           <div className="flex-1 overflow-y-auto px-1 py-4">
             {/* IDENTIFICAÇÃO */}
             <TabsContent value="identification" className="mt-0 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Tipo de Documento *</Label>
-                  <Select value={formData.document_type} onValueChange={(v) => update({ document_type: v, document: '' })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cnpj">CNPJ (Pessoa Jurídica)</SelectItem>
-                      <SelectItem value="cpf">CPF (Pessoa Física)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>{formData.document_type === 'cnpj' ? 'CNPJ' : 'CPF'} *</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={formData.document}
-                      onChange={(e) => update({ document: formData.document_type === 'cnpj' ? maskCNPJ(e.target.value) : maskCPF(e.target.value) })}
-                      placeholder={formData.document_type === 'cnpj' ? '00.000.000/0000-00' : '000.000.000-00'}
-                      className={errors.document ? 'border-destructive' : ''}
-                    />
-                    {formData.document_type === 'cnpj' && (
-                      <Button type="button" variant="outline" size="icon" onClick={handleCnpjLookup} disabled={cnpjLookup.loading} title="Buscar dados na Receita Federal">
-                        {cnpjLookup.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-                      </Button>
-                    )}
-                  </div>
-                  {errors.document && <p className="text-xs text-destructive">{errors.document}</p>}
-                </div>
+              {/* Toggle PF/PJ — primeira e única escolha estrutural */}
+              <div className="grid grid-cols-2 gap-3">
+                {(['PJ', 'PF'] as const).map((pt) => {
+                  const active = formData.person_type === pt;
+                  const Icon = pt === 'PJ' ? Building2 : User;
+                  return (
+                    <button
+                      key={pt}
+                      type="button"
+                      onClick={() => setPersonType(pt)}
+                      className={cn(
+                        'flex items-center gap-3 rounded-lg border-2 p-4 text-left transition-all',
+                        active
+                          ? 'border-primary bg-primary/5'
+                          : 'border-border hover:border-primary/40'
+                      )}
+                    >
+                      <Icon className={cn('h-6 w-6', active ? 'text-primary' : 'text-muted-foreground')} />
+                      <div>
+                        <p className="font-semibold text-sm">{pt === 'PJ' ? 'Pessoa Jurídica' : 'Pessoa Física'}</p>
+                        <p className="text-xs text-muted-foreground">{pt === 'PJ' ? 'CNPJ · Razão Social · IE' : 'CPF · RG · Data de Nascimento'}</p>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
 
               <div className="space-y-2">
-                <Label>{formData.document_type === 'cnpj' ? 'Razão Social' : 'Nome Completo'} *</Label>
+                <Label>{formData.person_type === 'PJ' ? 'CNPJ' : 'CPF'} *</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={formData.document}
+                    onChange={(e) => update({ document: formData.person_type === 'PJ' ? maskCNPJ(e.target.value) : maskCPF(e.target.value) })}
+                    placeholder={formData.person_type === 'PJ' ? '00.000.000/0000-00' : '000.000.000-00'}
+                    className={errors.document ? 'border-destructive' : ''}
+                  />
+                  {formData.person_type === 'PJ' && (
+                    <Button type="button" variant="outline" size="icon" onClick={handleCnpjLookup} disabled={cnpjLookup.loading} title="Buscar dados na Receita Federal">
+                      {cnpjLookup.loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+                    </Button>
+                  )}
+                </div>
+                {errors.document && <p className="text-xs text-destructive">{errors.document}</p>}
+                {dup.data && dup.data.id !== client?.id && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                    <AlertTriangle className="h-3 w-3" />
+                    Já existe: <span className="font-medium">{dup.data.name}</span> ({dup.data.code})
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>{formData.person_type === 'PJ' ? 'Razão Social' : 'Nome Completo'} *</Label>
                 <Input value={formData.name} onChange={(e) => update({ name: e.target.value })} className={errors.name ? 'border-destructive' : ''} />
                 {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
               </div>
 
-              {formData.document_type === 'cnpj' && (
-                <div className="space-y-2">
-                  <Label>Nome Fantasia</Label>
-                  <Input value={formData.trade_name} onChange={(e) => update({ trade_name: e.target.value })} />
+              {formData.person_type === 'PJ' && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Nome Fantasia</Label>
+                    <Input value={formData.trade_name} onChange={(e) => update({ trade_name: e.target.value })} />
+                  </div>
+                  {(formData.cnae_primary || formData.receita_status) && (
+                    <div className="flex flex-wrap items-center gap-2 rounded-md border bg-muted/30 p-3 text-xs">
+                      {formData.receita_status && (
+                        <Badge
+                          variant={/ATIVA/i.test(formData.receita_status) ? 'default' : 'destructive'}
+                          className="gap-1"
+                        >
+                          {/ATIVA/i.test(formData.receita_status) ? <CheckCircle2 className="h-3 w-3" /> : <AlertTriangle className="h-3 w-3" />}
+                          {formData.receita_status}
+                        </Badge>
+                      )}
+                      {formData.cnae_primary && (
+                        <span className="text-muted-foreground">
+                          <span className="font-medium text-foreground">CNAE {formData.cnae_primary}</span>
+                          {formData.cnae_description ? ` · ${formData.cnae_description}` : ''}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+
+              {formData.person_type === 'PF' && (
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>RG</Label>
+                    <Input value={formData.rg} onChange={(e) => update({ rg: e.target.value })} placeholder="00.000.000-0" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Data de Nascimento</Label>
+                    <Input type="date" value={formData.birth_date} onChange={(e) => update({ birth_date: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Gênero</Label>
+                    <Select value={formData.gender || '_none'} onValueChange={(v) => update({ gender: v === '_none' ? '' : v })}>
+                      <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="_none">Não informar</SelectItem>
+                        <SelectItem value="F">Feminino</SelectItem>
+                        <SelectItem value="M">Masculino</SelectItem>
+                        <SelectItem value="O">Outro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               )}
 
@@ -449,16 +561,22 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
                 Dados fiscais usados para emissão de NF-e, NFC-e e cálculos tributários.
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Inscrição Estadual</Label>
-                  <Input value={formData.state_registration} onChange={(e) => update({ state_registration: e.target.value })} placeholder="ISENTO ou número" />
+              {formData.person_type === 'PJ' ? (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Inscrição Estadual</Label>
+                    <Input value={formData.state_registration} onChange={(e) => update({ state_registration: e.target.value })} placeholder="ISENTO ou número" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Inscrição Municipal</Label>
+                    <Input value={formData.municipal_registration} onChange={(e) => update({ municipal_registration: e.target.value })} />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Inscrição Municipal</Label>
-                  <Input value={formData.municipal_registration} onChange={(e) => update({ municipal_registration: e.target.value })} />
+              ) : (
+                <div className="rounded-md border border-dashed p-4 text-sm text-muted-foreground text-center">
+                  Pessoa Física não possui Inscrição Estadual/Municipal. Para NFC-e ao consumidor final apenas o CPF é necessário.
                 </div>
-              </div>
+              )}
             </TabsContent>
           </div>
         </Tabs>

@@ -2725,8 +2725,11 @@ export type Database = {
           address_street: string
           address_zip_code: string
           avg_ticket: number | null
+          birth_date: string | null
           cellphone: string | null
           client_score: string | null
+          cnae_description: string | null
+          cnae_primary: string | null
           code: string
           commercial_notes: string | null
           company_id: string
@@ -2738,15 +2741,21 @@ export type Database = {
           document_type: string
           email: string
           estimated_potential: number | null
+          gender: string | null
           id: string
           last_purchase_date: string | null
           micro_region: string | null
           municipal_registration: string | null
           name: string
+          person_type: string | null
           phone: string
           price_table: string | null
           purchase_frequency: number | null
+          receita_status: string | null
+          receita_status_date: string | null
+          receita_synced_at: string | null
           region: string | null
+          rg: string | null
           sales_rep_id: string | null
           segment: string | null
           state_registration: string | null
@@ -2765,8 +2774,11 @@ export type Database = {
           address_street?: string
           address_zip_code?: string
           avg_ticket?: number | null
+          birth_date?: string | null
           cellphone?: string | null
           client_score?: string | null
+          cnae_description?: string | null
+          cnae_primary?: string | null
           code: string
           commercial_notes?: string | null
           company_id: string
@@ -2778,15 +2790,21 @@ export type Database = {
           document_type?: string
           email: string
           estimated_potential?: number | null
+          gender?: string | null
           id?: string
           last_purchase_date?: string | null
           micro_region?: string | null
           municipal_registration?: string | null
           name: string
+          person_type?: string | null
           phone: string
           price_table?: string | null
           purchase_frequency?: number | null
+          receita_status?: string | null
+          receita_status_date?: string | null
+          receita_synced_at?: string | null
           region?: string | null
+          rg?: string | null
           sales_rep_id?: string | null
           segment?: string | null
           state_registration?: string | null
@@ -2805,8 +2823,11 @@ export type Database = {
           address_street?: string
           address_zip_code?: string
           avg_ticket?: number | null
+          birth_date?: string | null
           cellphone?: string | null
           client_score?: string | null
+          cnae_description?: string | null
+          cnae_primary?: string | null
           code?: string
           commercial_notes?: string | null
           company_id?: string
@@ -2818,15 +2839,21 @@ export type Database = {
           document_type?: string
           email?: string
           estimated_potential?: number | null
+          gender?: string | null
           id?: string
           last_purchase_date?: string | null
           micro_region?: string | null
           municipal_registration?: string | null
           name?: string
+          person_type?: string | null
           phone?: string
           price_table?: string | null
           purchase_frequency?: number | null
+          receita_status?: string | null
+          receita_status_date?: string | null
+          receita_synced_at?: string | null
           region?: string | null
+          rg?: string | null
           sales_rep_id?: string | null
           segment?: string | null
           state_registration?: string | null
