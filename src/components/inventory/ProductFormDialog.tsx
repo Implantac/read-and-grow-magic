@@ -175,13 +175,28 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
 
   const handleSave = async () => {
     if (!form.code || !form.name) return;
-    const payload = buildPayload();
-    if (product) {
-      await updateProduct.mutateAsync({ id: product.id, ...payload } as any);
-    } else {
-      await createProduct.mutateAsync(payload);
+    if (ncmError || gtinError) {
+      toast.error(ncmError || gtinError);
+      return;
     }
-    onOpenChange(false);
+    const payload = buildPayload();
+    try {
+      if (product) {
+        await updateProduct.mutateAsync({ id: product.id, ...payload } as any);
+      } else {
+        await createProduct.mutateAsync(payload);
+      }
+      onOpenChange(false);
+    } catch (e: any) {
+      const msg = String(e?.message ?? '');
+      if (msg.includes('products_company_code_unique')) {
+        toast.error('Já existe um produto com este código nesta empresa.');
+      } else if (msg.includes('products_company_gtin_unique')) {
+        toast.error('Este GTIN já está cadastrado nesta empresa.');
+      } else {
+        toast.error('Erro ao salvar produto', { description: msg.slice(0, 140) });
+      }
+    }
   };
 
   const saving = createProduct.isPending || updateProduct.isPending;
