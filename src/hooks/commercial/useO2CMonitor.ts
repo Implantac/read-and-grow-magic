@@ -25,6 +25,8 @@ export interface O2CMonitorSnapshot {
     message: string | null;
     at: string;
   }>;
+  sefazByHour: Array<{ hour: number; total: number; failed: number; rate: number }>;
+  sefazFailureRate: number;
 }
 
 interface EventRow {
