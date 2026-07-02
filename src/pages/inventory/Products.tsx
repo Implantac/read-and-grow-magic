@@ -30,7 +30,7 @@ import { EmptyState } from '@/shared/components/EmptyState';
 import { ProductFormDialog } from '@/components/inventory/ProductFormDialog';
 
 export default function ProductsPage() {
-  const { products, productsLoading: isLoading, categories, createProduct, updateProduct, deleteProduct } = useInventory();
+  const { products, productsLoading: isLoading, categories, deleteProduct } = useInventory();
 
   const [filters, setFilters] = useState<ProductFilters>({
     search: '', type: 'all', category: 'all', status: 'all',
