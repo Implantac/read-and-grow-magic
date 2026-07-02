@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/ui/base/sheet';
 import { Badge } from '@/ui/base/badge';
@@ -6,11 +6,16 @@ import { Card, CardContent } from '@/ui/base/card';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Button } from '@/ui/base/button';
 import { ScrollArea } from '@/ui/base/scroll-area';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
+import { Input } from '@/ui/base/input';
+import { Textarea } from '@/ui/base/textarea';
+import { Label } from '@/ui/base/label';
 import { formatBRL, formatDate } from '@/lib/formatters';
 import { useClientCommercialProfile } from '@/hooks/commercial/useClientCommercialProfile';
 import { useClientTimeline } from '@/hooks/commercial/useClientTimeline';
+import { useCreateFollowUp } from '@/hooks/commercial/useSalesIntelligence';
 import type { DbOrder } from '@/hooks/commercial/useOrders';
-import { ExternalLink } from 'lucide-react';
+import { CalendarPlus, ExternalLink, ShoppingCart } from 'lucide-react';
 
 interface Props {
   open: boolean;
@@ -30,6 +35,14 @@ const tierColors: Record<string, string> = {
 export function Client360Drawer({ open, onOpenChange, clientId, clientName, orders }: Props) {
   const { data: profile, isLoading: lp } = useClientCommercialProfile(clientId);
   const { data: timeline = [], isLoading: lt } = useClientTimeline(clientId ?? undefined);
+  const createFollowUp = useCreateFollowUp();
+
+  const [followOpen, setFollowOpen] = useState(false);
+  const [subject, setSubject] = useState('');
+  const [description, setDescription] = useState('');
+  const [scheduledDate, setScheduledDate] = useState<string>(() =>
+    new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16)
+  );
 
   const clientOrders = useMemo(
     () => orders.filter((o) => o.client_id === clientId).sort((a, b) =>
@@ -47,6 +60,20 @@ export function Client360Drawer({ open, onOpenChange, clientId, clientName, orde
     };
   }, [clientOrders]);
 
+  const handleCreateFollowUp = async () => {
+    if (!clientId || !subject.trim()) return;
+    await createFollowUp.mutateAsync({
+      client_id: clientId,
+      subject: subject.trim(),
+      description: description.trim() || null,
+      scheduled_date: new Date(scheduledDate).toISOString(),
+      type: 'call',
+      status: 'pending',
+    });
+    setSubject(''); setDescription('');
+    setFollowOpen(false);
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-xl overflow-y-auto">
@@ -56,6 +83,18 @@ export function Client360Drawer({ open, onOpenChange, clientId, clientName, orde
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
+          {/* Ações rápidas */}
+          <div className="grid grid-cols-2 gap-2">
+            <Button asChild size="sm" variant="default">
+              <Link to={`/comercial/pdv?client=${clientId ?? ''}`}>
+                <ShoppingCart className="mr-1 h-4 w-4" /> Novo pedido
+              </Link>
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => setFollowOpen(true)} disabled={!clientId}>
+              <CalendarPlus className="mr-1 h-4 w-4" /> Novo follow-up
+            </Button>
+          </div>
+
           {/* Perfil */}
           {lp ? (
             <Skeleton className="h-28" />
@@ -170,6 +209,38 @@ export function Client360Drawer({ open, onOpenChange, clientId, clientName, orde
             <Link to={`/comercial/clientes`}>Abrir cadastro completo</Link>
           </Button>
         </div>
+
+        {/* Follow-up dialog */}
+        <Dialog open={followOpen} onOpenChange={setFollowOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Novo follow-up · {clientName}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div>
+                <Label htmlFor="fu-subject">Assunto *</Label>
+                <Input id="fu-subject" value={subject} onChange={(e) => setSubject(e.target.value)}
+                  placeholder="Ex.: Retomar proposta" />
+              </div>
+              <div>
+                <Label htmlFor="fu-date">Data agendada *</Label>
+                <Input id="fu-date" type="datetime-local" value={scheduledDate}
+                  onChange={(e) => setScheduledDate(e.target.value)} />
+              </div>
+              <div>
+                <Label htmlFor="fu-desc">Observações</Label>
+                <Textarea id="fu-desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setFollowOpen(false)}>Cancelar</Button>
+              <Button onClick={handleCreateFollowUp}
+                disabled={!subject.trim() || createFollowUp.isPending}>
+                {createFollowUp.isPending ? 'Salvando…' : 'Agendar'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </SheetContent>
     </Sheet>
   );
