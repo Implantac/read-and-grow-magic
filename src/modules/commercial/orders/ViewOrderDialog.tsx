@@ -15,6 +15,7 @@ import type { DbOrder } from '@/hooks/commercial/useOrders';
 import { ApprovalBadge } from './ApprovalBadge';
 import { OrderStatusTimeline } from './OrderStatusTimeline';
 import { statusFlow } from './constants';
+import { AuditTrailPanel } from '@/shared/components/AuditTrailPanel';
 
 interface ViewOrderDialogProps {
   open: boolean;
@@ -239,6 +240,9 @@ export function ViewOrderDialog({
                   )}
                 </div>
               )}
+            </div>
+            <div className="px-6 pb-6">
+              <AuditTrailPanel entityName="orders" entityId={order.id} />
             </div>
           </>
         )}
