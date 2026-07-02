@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Progress } from '@/ui/base/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { EmptyState } from '@/shared/components/EmptyState';
+import { AuditTrailPanel } from '@/shared/components/AuditTrailPanel';
+
 import { toast } from 'sonner';
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -231,11 +233,13 @@ function OrderDetailContent({ order }: { order: ProductionOrderRow }) {
       </DialogHeader>
 
       <Tabs defaultValue="overview" className="mt-2">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="steps">Etapas ({orderSteps.length})</TabsTrigger>
           <TabsTrigger value="logs">Histórico ({logs.length})</TabsTrigger>
+          <TabsTrigger value="audit">Auditoria</TabsTrigger>
         </TabsList>
+
 
         <TabsContent value="overview" className="space-y-4 mt-4">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -361,7 +365,12 @@ function OrderDetailContent({ order }: { order: ProductionOrderRow }) {
             </div>
           )}
         </TabsContent>
+
+        <TabsContent value="audit" className="mt-4">
+          <AuditTrailPanel entityName="production_orders" entityId={order.id} limit={200} height={360} />
+        </TabsContent>
       </Tabs>
     </>
+
   );
 }

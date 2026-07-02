@@ -65,6 +65,8 @@ import type { NFe } from '@/types/fiscal';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
+import { AuditTrailPanel } from '@/shared/components/AuditTrailPanel';
+
 
 
 export default function NFePage() {
@@ -400,6 +402,13 @@ export default function NFePage() {
                   </div>
                 </>
               )}
+
+              <Separator />
+              <div>
+                <p className="text-sm font-medium text-muted-foreground mb-3">Trilha de auditoria</p>
+                <AuditTrailPanel entityName="nfe" entityId={selectedNFe.id} limit={100} height={280} />
+              </div>
+
 
               {/* Actions */}
               <div className="flex justify-end gap-2">
