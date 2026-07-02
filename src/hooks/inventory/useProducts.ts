@@ -4,6 +4,8 @@ import { useSupabaseQuery, useSupabaseMutation } from '@/hooks/shared/useSupabas
 import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 
+export type ProductNature = 'industry' | 'commerce' | 'service';
+
 export interface DbProduct {
   id: string;
   code: string;
@@ -11,6 +13,7 @@ export interface DbProduct {
   name: string;
   description: string | null;
   type: string;
+  product_nature: ProductNature;
   category_id: string | null;
   subcategory: string | null;
   unit: string;
@@ -31,6 +34,30 @@ export interface DbProduct {
   created_at: string;
   updated_at: string;
   category_name?: string;
+  // Fiscais
+  ncm: string | null;
+  cest: string | null;
+  cfop_default: string | null;
+  origin: string | null;
+  icms_cst: string | null;
+  ipi_cst: string | null;
+  pis_cst: string | null;
+  cofins_cst: string | null;
+  gtin: string | null;
+  // Indústria
+  production_route_id: string | null;
+  bom_id: string | null;
+  standard_batch_size: number | null;
+  technical_sheet_url: string | null;
+  // Comércio
+  brand: string | null;
+  model: string | null;
+  warranty_months: number | null;
+  // Serviços
+  service_code_lc116: string | null;
+  iss_rate: number | null;
+  service_duration_minutes: number | null;
+  is_recurring: boolean | null;
 }
 
 export function useProducts() {
@@ -41,7 +68,7 @@ export function useCreateProduct() {
   const queryClient = useQueryClient();
   const { currentCompany } = useEnterprise();
   return useSupabaseMutation(
-    (product: Omit<DbProduct, 'id' | 'created_at' | 'updated_at' | 'category_name'>) => 
+    (product: Partial<DbProduct>) =>
       productsService.create({ ...product, company_id: currentCompany?.id } as any),
     {
       onSuccess: () => {
@@ -56,7 +83,7 @@ export function useCreateProduct() {
 export function useUpdateProduct() {
   const queryClient = useQueryClient();
   return useSupabaseMutation(
-    ({ id, category_name, ...product }: Partial<DbProduct> & { id: string; category_name?: string }) => 
+    ({ id, category_name, ...product }: Partial<DbProduct> & { id: string; category_name?: string }) =>
       productsService.update(id, product),
     {
       onSuccess: () => {
