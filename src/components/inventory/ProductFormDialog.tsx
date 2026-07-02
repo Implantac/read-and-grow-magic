@@ -39,6 +39,7 @@ const emptyForm = {
   type: 'finished', category_id: '', unit: 'UN',
   cost_price: '', sale_price: '', status: 'active',
   product_nature: 'commerce' as ProductNature,
+  item_kind: 'revenda' as ItemKind,
   // Estoque
   min_stock: '0', max_stock: '0', reorder_point: '0', lead_time_days: '0',
   location: '', supplier: '',
