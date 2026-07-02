@@ -54,8 +54,15 @@ export default function MarginAnalytics() {
   const { data: allOrders, isLoading } = useOrders();
   const { data: alerts } = useLowMarginAlerts();
   const resolveAlert = useResolveAlert();
+  const resolveBulk = useResolveAlertsBulk();
 
   const [period, setPeriod] = useState<string>('30');
+  const [severityFilter, setSeverityFilter] = useState<string>('all');
+
+  const filteredAlerts = useMemo(
+    () => (alerts ?? []).filter((a) => severityFilter === 'all' || a.severity === severityFilter),
+    [alerts, severityFilter],
+  );
 
   const orders = useMemo(() => {
     if (!allOrders) return allOrders;
