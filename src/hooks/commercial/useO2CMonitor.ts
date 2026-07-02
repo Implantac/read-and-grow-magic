@@ -40,7 +40,7 @@ export function useO2CMonitor(windowDays = 7) {
     staleTime: 60_000,
     queryFn: async () => {
       const since = new Date(Date.now() - windowDays * 86_400_000).toISOString();
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('cross_module_events')
         .select('entity_id, event_type, payload, created_at')
         .like('event_type', 'o2c.%')
@@ -48,7 +48,7 @@ export function useO2CMonitor(windowDays = 7) {
         .order('created_at', { ascending: true })
         .limit(5000);
       if (error) throw error;
-      const rows = (data ?? []) as EventRow[];
+      const rows = ((data ?? []) as unknown) as EventRow[];
 
       // Agrupa por run_id (fallback: entity_id) e step
       const perStep: Record<O2CStepKey, { running: number; ok: number; failed: number; skipped: number; durations: number[] }> = {
