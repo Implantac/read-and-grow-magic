@@ -22,6 +22,7 @@ import { Client360Drawer } from './Client360Drawer';
 import { CommercialEffortHeatmap } from './CommercialEffortHeatmap';
 import { NextActionsQueue } from './NextActionsQueue';
 import { SalesTargetsRanking } from './SalesTargetsRanking';
+import { ForecastVsActual } from './ForecastVsActual';
 
 const statusLabels: Record<string, string> = {
   pending: 'Pendente', confirmed: 'Confirmado', processing: 'Processando',
@@ -153,6 +154,7 @@ export default function Sales360() {
           <TabsTrigger value="pipeline">Pipeline</TabsTrigger>
           <TabsTrigger value="agenda">Agenda</TabsTrigger>
           <TabsTrigger value="metas">Metas & Ranking</TabsTrigger>
+          <TabsTrigger value="forecast">Forecast IA</TabsTrigger>
           <TabsTrigger value="excecoes">Exceções ({filteredAlerts.length})</TabsTrigger>
           <TabsTrigger value="clientes">Clientes Top</TabsTrigger>
         </TabsList>
@@ -167,6 +169,11 @@ export default function Sales360() {
         <TabsContent value="metas">
           <SalesTargetsRanking orders={filteredOrders} reps={reps as any} />
         </TabsContent>
+
+        <TabsContent value="forecast">
+          <ForecastVsActual reps={reps as any} />
+        </TabsContent>
+
 
         <TabsContent value="pipeline">
           {loading ? (
