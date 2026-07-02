@@ -19589,6 +19589,14 @@ export type Database = {
         }
         Returns: Json
       }
+      check_atp: {
+        Args: { _due_date?: string; _product_id: string; _qty: number }
+        Returns: Json
+      }
+      check_credit: {
+        Args: { _client_id: string; _order_total: number }
+        Returns: Json
+      }
       check_hierarchy_access: {
         Args: { _target_company_id: string; _user_id: string }
         Returns: boolean
