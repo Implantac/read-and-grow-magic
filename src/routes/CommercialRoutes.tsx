@@ -22,6 +22,7 @@ const SalesExecutionPage = lazy(() => import("../modules/commercial/SalesExecuti
 const PlaybookPage = lazy(() => import("../modules/commercial/Playbook"));
 const GamificationPage = lazy(() => import("../modules/commercial/Gamification"));
 const SalesAutomationPage = lazy(() => import("../modules/commercial/SalesAutomation"));
+const O2CExceptionsPage = lazy(() => import("../modules/commercial/O2CExceptions"));
 
 export const CommercialRoutes = [
   <Route key="comercial-crm" path="/commercial/crm" element={<CRMDashboardPage />} />,
