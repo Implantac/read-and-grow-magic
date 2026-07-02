@@ -242,11 +242,63 @@ export default function MarginAnalytics() {
               </CardContent>
             </Card>
           </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Rentabilidade por Vendedor</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {analytics.bySalesRep.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Nenhum vendedor identificado nos pedidos com snapshot.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {analytics.bySalesRep.map((r) => (
+                      <DimensionRow key={r.key} label={r.key} revenue={r.revenue} margin={r.avgMargin} count={r.count} />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Top Clientes por Receita</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {analytics.byClient.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Sem dados.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {analytics.byClient.map((r) => (
+                      <DimensionRow key={r.key} label={r.key} revenue={r.revenue} margin={r.avgMargin} count={r.count} />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </>
       )}
     </PageContainer>
   );
 }
+
+function DimensionRow({ label, revenue, margin, count }: { label: string; revenue: number; margin: number; count: number }) {
+  return (
+    <div className="flex items-center justify-between gap-3 text-sm border-b border-border/40 last:border-0 pb-2 last:pb-0">
+      <div className="min-w-0">
+        <div className="font-medium truncate">{label}</div>
+        <div className="text-xs text-muted-foreground">{count} pedido{count !== 1 ? 's' : ''}</div>
+      </div>
+      <div className="flex items-center gap-3 shrink-0">
+        <span className="font-mono text-xs text-muted-foreground">{fmtBRL(revenue)}</span>
+        <MarginBadge value={margin} />
+      </div>
+    </div>
+  );
+}
+
 
 function Row({ label, count, total, tone }: { label: string; count: number; total: number; tone: 'emerald' | 'yellow' | 'red' }) {
   const pct = total > 0 ? (count / total) * 100 : 0;
