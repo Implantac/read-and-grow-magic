@@ -75,7 +75,7 @@ export default function SalesDeskPage() {
   const handleSubmit = async () => {
     if (!canSubmit) return;
     try {
-      await createOrder.mutateAsync({
+      const created: any = await createOrder.mutateAsync({
         client_id: client.id!,
         client_name: client.name,
         items: items.map((it) => ({
@@ -93,11 +93,17 @@ export default function SalesDeskPage() {
         shipping: freightNum,
         notes,
       });
+      const newId = created?.id ?? created?.data?.id ?? null;
       toast.success('Pedido criado', { description: 'Pipeline O2C iniciado em background.' });
-      // reset
       setItems([]);
       setNotes('');
       setFreight('0');
+      if (newId) {
+        setO2cOrderId(newId);
+        setDrawerOpen(true);
+        // dispara orquestrador no próximo tick (após hook re-render com novo orderId)
+        setTimeout(() => o2c.trigger(), 50);
+      }
     } catch (err: any) {
       toast.error('Falha ao criar pedido', { description: err.message });
     }
