@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.trg_alert_low_margin_order() FROM PUBLIC, anon, authenticated;
