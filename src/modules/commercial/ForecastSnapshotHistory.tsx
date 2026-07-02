@@ -37,8 +37,8 @@ export function ForecastSnapshotHistory({ periodKey }: Props) {
     }));
   }, [snapshots]);
 
-  const last = snapshots.at(-1) as ForecastSnapshot | undefined;
-  const prev = snapshots.at(-2) as ForecastSnapshot | undefined;
+  const last = snapshots.length > 0 ? snapshots[snapshots.length - 1] as ForecastSnapshot : undefined;
+  const prev = snapshots.length > 1 ? snapshots[snapshots.length - 2] as ForecastSnapshot : undefined;
   const deltaForecast = last && prev ? Number(last.predicted_revenue) - Number(prev.predicted_revenue) : 0;
 
   return (
