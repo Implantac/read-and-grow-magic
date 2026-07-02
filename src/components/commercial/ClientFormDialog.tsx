@@ -55,22 +55,30 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
     setTab('identification');
     setErrors({});
     if (client) {
+      const c = client as DbClient & Partial<{
+        person_type: 'PF' | 'PJ'; rg: string; birth_date: string; gender: string;
+        cnae_primary: string; cnae_description: string; receita_status: string; receita_status_date: string;
+      }>;
       setFormData({
-        name: client.name, trade_name: client.trade_name || '', document: client.document,
-        document_type: client.document_type, email: client.email, phone: client.phone,
-        cellphone: client.cellphone || '',
-        address_street: client.address_street, address_number: client.address_number,
-        address_complement: client.address_complement || '', address_neighborhood: client.address_neighborhood,
-        address_city: client.address_city, address_state: client.address_state,
-        address_zip_code: client.address_zip_code,
-        status: client.status, credit_limit: String(client.credit_limit), segment: client.segment || '',
-        sales_rep_id: client.sales_rep_id || '',
-        state_registration: client.state_registration || '', municipal_registration: client.municipal_registration || '',
-        region: client.region || '', micro_region: client.micro_region || '',
-        default_payment_condition: client.default_payment_condition || 'À vista',
-        price_table: client.price_table || 'default', abc_classification: client.abc_classification || 'C',
-        client_score: client.client_score || 'medium',
-        commercial_notes: client.commercial_notes || '', estimated_potential: String(client.estimated_potential || ''),
+        person_type: c.person_type || (c.document_type === 'cpf' ? 'PF' : 'PJ'),
+        name: c.name, trade_name: c.trade_name || '', document: c.document,
+        document_type: c.document_type, email: c.email, phone: c.phone,
+        cellphone: c.cellphone || '',
+        address_street: c.address_street, address_number: c.address_number,
+        address_complement: c.address_complement || '', address_neighborhood: c.address_neighborhood,
+        address_city: c.address_city, address_state: c.address_state,
+        address_zip_code: c.address_zip_code,
+        status: c.status, credit_limit: String(c.credit_limit), segment: c.segment || '',
+        sales_rep_id: c.sales_rep_id || '',
+        state_registration: c.state_registration || '', municipal_registration: c.municipal_registration || '',
+        region: c.region || '', micro_region: c.micro_region || '',
+        default_payment_condition: c.default_payment_condition || 'À vista',
+        price_table: c.price_table || 'default', abc_classification: c.abc_classification || 'C',
+        client_score: c.client_score || 'medium',
+        commercial_notes: c.commercial_notes || '', estimated_potential: String(c.estimated_potential || ''),
+        rg: c.rg || '', birth_date: c.birth_date || '', gender: c.gender || '',
+        cnae_primary: c.cnae_primary || '', cnae_description: c.cnae_description || '',
+        receita_status: c.receita_status || '', receita_status_date: c.receita_status_date || '',
       });
     } else {
       setFormData({ ...defaultForm });
