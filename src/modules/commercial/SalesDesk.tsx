@@ -264,6 +264,16 @@ export default function SalesDeskPage() {
           </CardContent>
         </Card>
       </div>
+
+      <O2CProgressDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        orderId={o2cOrderId}
+        events={o2c.events}
+        stepOrder={o2c.stepOrder}
+        running={o2c.running}
+        error={o2c.error}
+      />
     </PageContainer>
   );
 }
