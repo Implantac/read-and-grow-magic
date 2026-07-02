@@ -14,6 +14,7 @@ import { StatusBadge } from '@/shared/components/StatusBadge';
 import { getOrderStatusLabel, getPaymentMethodLabel } from '@/config/commercial';
 import type { DbOrder } from '@/hooks/commercial/useOrders';
 import { statusFlow } from './constants';
+import { MarginBadge } from './MarginBadge';
 
 interface OrdersTableProps {
   orders: DbOrder[];
@@ -65,6 +66,10 @@ export function OrdersTable({
     {
       key: 'total', label: 'Total', sortable: true,
       render: (v) => <span className="font-semibold">{formatBRL(v as number)}</span>,
+    },
+    {
+      key: 'estimated_margin_pct', label: 'Margem', sortable: true,
+      render: (v) => <MarginBadge value={v as number | null | undefined} />,
     },
     { key: 'priority', label: 'Prioridade', render: (v) => <StatusBadge type="priority" status={v as string} /> },
     { key: 'status', label: 'Status', render: (v) => <StatusBadge type="order" status={v as string} /> },

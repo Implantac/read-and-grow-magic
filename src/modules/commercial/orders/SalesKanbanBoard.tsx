@@ -6,6 +6,7 @@ import { ScrollArea, ScrollBar } from '@/ui/base/scroll-area';
 import { formatBRL, formatDate } from '@/lib/formatters';
 import type { DbOrder } from '@/hooks/commercial/useOrders';
 import { statusFlow, statusSteps } from './constants';
+import { MarginBadge } from './MarginBadge';
 
 const statusLabels: Record<string, string> = {
   pending: 'Pendente',
@@ -78,6 +79,9 @@ export function SalesKanbanBoard({ orders, onView, onAdvance, onAskCancel, isAdv
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-muted-foreground">{formatDate(order.date)}</span>
                         <span className="font-semibold">{formatBRL(order.total)}</span>
+                      </div>
+                      <div className="flex items-center justify-end">
+                        <MarginBadge value={order.estimated_margin_pct} />
                       </div>
                       <div className="flex gap-1 pt-1">
                         <Button size="sm" variant="ghost" className="h-7 flex-1 gap-1 px-2 text-xs" onClick={() => onView(order)}>
