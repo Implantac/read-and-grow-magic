@@ -1,0 +1,1 @@
+UPDATE public.sales SET notes = COALESCE(notes,'') WHERE id = (SELECT id FROM public.sales LIMIT 1);
