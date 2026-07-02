@@ -65,6 +65,8 @@ import type { NFe } from '@/types/fiscal';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
+import { AuditTrailPanel } from '@/shared/components/AuditTrailPanel';
+
 
 
 export default function NFePage() {
