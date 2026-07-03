@@ -57,7 +57,7 @@ import {
 import { Badge } from '@/ui/base/badge';
 import { Separator } from '@/ui/base/separator';
 import { useNFCe } from '@/hooks/fiscal/useNFCe';
-import { PDVDialog } from '@/components/fiscal/PDVDialog';
+
 import { NFCeCancelDialog } from '@/components/fiscal/NFCeCancelDialog';
 import { NFCeReturnDialog } from '@/components/fiscal/NFCeReturnDialog';
 import type { NFCe } from '@/types/fiscal';
