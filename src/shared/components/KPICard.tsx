@@ -30,13 +30,13 @@ interface KPICardProps {
 }
 
 
-const colorMap: Record<string, { border: string; iconBg: string; iconText: string }> = {
-  primary: { border: 'border-l-primary', iconBg: 'bg-primary/10', iconText: 'text-primary' },
-  success: { border: 'border-l-green-500', iconBg: 'bg-green-500/10', iconText: 'text-green-600' },
-  warning: { border: 'border-l-yellow-500', iconBg: 'bg-yellow-500/10', iconText: 'text-yellow-600' },
-  danger: { border: 'border-l-destructive', iconBg: 'bg-destructive/10', iconText: 'text-destructive' },
-  info: { border: 'border-l-blue-500', iconBg: 'bg-blue-500/10', iconText: 'text-blue-600' },
-  accent: { border: 'border-l-primary', iconBg: 'bg-accent/10', iconText: 'text-accent-foreground' },
+const colorMap: Record<string, { border: string; iconBg: string; iconText: string; glow: string }> = {
+  primary: { border: 'border-l-primary', iconBg: 'bg-gradient-to-br from-primary/15 to-primary/5', iconText: 'text-primary', glow: 'group-hover:shadow-glow' },
+  success: { border: 'border-l-success', iconBg: 'bg-gradient-to-br from-success/15 to-success/5', iconText: 'text-success', glow: '' },
+  warning: { border: 'border-l-warning', iconBg: 'bg-gradient-to-br from-warning/15 to-warning/5', iconText: 'text-warning', glow: '' },
+  danger: { border: 'border-l-destructive', iconBg: 'bg-gradient-to-br from-destructive/15 to-destructive/5', iconText: 'text-destructive', glow: '' },
+  info: { border: 'border-l-info', iconBg: 'bg-gradient-to-br from-info/15 to-info/5', iconText: 'text-info', glow: '' },
+  accent: { border: 'border-l-primary', iconBg: 'bg-gradient-to-br from-accent to-accent/50', iconText: 'text-primary', glow: '' },
 };
 
 export function KPICard(props: KPICardProps) {
