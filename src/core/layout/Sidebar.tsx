@@ -34,6 +34,8 @@ import {
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/base/tooltip';
 import { Separator } from '@/ui/base/separator';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutDashboard, Users, Wallet, FileCheck, Package, ShoppingCart,
@@ -237,9 +239,13 @@ function CustomEntitiesNav({ sidebarCollapsed, isActive }: { sidebarCollapsed: b
 
 export function Sidebar() {
   const location = useLocation();
-  const { sidebarCollapsed, sidebarMobileOpen, setSidebarMobileOpen, user } = useAppStore();
+  const { sidebarCollapsed: rawCollapsed, sidebarMobileOpen, setSidebarMobileOpen, user } = useAppStore();
+  const isMobile = useIsMobile();
+  // On mobile drawer, always show full sidebar (labels visible), ignore collapsed setting
+  const sidebarCollapsed = isMobile ? false : rawCollapsed;
   const { signOut } = useAuth({ initialize: false });
   const { segment } = useEnterprise();
+
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const toggleExpanded = (title: string) => {
