@@ -94,10 +94,16 @@ function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, ex
   );
 
 
+  const submenuId = `sidebar-submenu-${item.title.replace(/\s+/g, '-').toLowerCase()}`;
+
   const navButton = (
     <button
+      type="button"
       onClick={() => hasChildren ? toggleExpanded(item.title) : undefined}
       className={baseClasses}
+      aria-expanded={hasChildren ? isExpanded : undefined}
+      aria-controls={hasChildren ? submenuId : undefined}
+      aria-current={isItemActive && !hasChildren ? 'page' : undefined}
     >
       {indicator}
       {iconElement}
@@ -105,7 +111,7 @@ function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, ex
         <>
           <span className="flex-1 text-left truncate font-medium">{item.title}</span>
           {hasChildren && (
-            <ChevronRight className={cn(
+            <ChevronRight aria-hidden="true" className={cn(
               'h-3.5 w-3.5 opacity-50 transition-transform duration-300',
               isExpanded ? 'rotate-90 opacity-100' : 'rotate-0'
             )} />
@@ -116,12 +122,17 @@ function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, ex
   );
 
   const navLink = (
-    <Link to={item.href} className={baseClasses}>
+    <Link
+      to={item.href}
+      className={baseClasses}
+      aria-current={isItemActive ? 'page' : undefined}
+    >
       {indicator}
       {iconElement}
       {!sidebarCollapsed && <span className="truncate font-medium">{item.title}</span>}
     </Link>
   );
+
 
   const wrappedElement = sidebarCollapsed ? (
     <Tooltip delayDuration={0}>
@@ -141,10 +152,14 @@ function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, ex
       {wrappedElement}
       {hasChildren && !sidebarCollapsed && (
         <div
+          id={submenuId}
+          role="region"
+          aria-label={`Submenu ${item.title}`}
           className={cn(
             'grid transition-all duration-300 ease-in-out',
             isExpanded ? 'grid-rows-[1fr] opacity-100 mt-1' : 'grid-rows-[0fr] opacity-0 pointer-events-none'
           )}
+          aria-hidden={!isExpanded}
         >
           <div className="overflow-hidden">
             <ul className="ml-5 space-y-1 border-l border-sidebar-border/60 pl-3">
@@ -157,14 +172,17 @@ function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, ex
                   <li key={child.title} className="list-none">
                     <Link
                       to={child.href}
+                      aria-current={isChildActive ? 'page' : undefined}
+                      tabIndex={isExpanded ? 0 : -1}
                       className={cn(
                         'group flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[12px] transition-all duration-150',
+                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar',
                         isChildActive
                           ? 'bg-primary/5 text-primary font-semibold'
                           : 'text-sidebar-foreground/50 hover:bg-sidebar-accent/30 hover:text-sidebar-foreground/80'
                       )}
                     >
-                      {ChildIcon && <ChildIcon className={cn("h-3.5 w-3.5 shrink-0", isChildActive ? "text-primary" : "text-sidebar-foreground/30 group-hover:text-primary/50")} />}
+                      {ChildIcon && <ChildIcon aria-hidden="true" className={cn("h-3.5 w-3.5 shrink-0", isChildActive ? "text-primary" : "text-sidebar-foreground/30 group-hover:text-primary/50")} />}
                       <span className="truncate">{child.title}</span>
                     </Link>
                   </li>
@@ -173,6 +191,7 @@ function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, ex
             </ul>
           </div>
         </div>
+
       )}
     </li>
   );
@@ -266,6 +285,16 @@ export function Sidebar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
+  // Close mobile drawer on Escape
+  useEffect(() => {
+    if (!sidebarMobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSidebarMobileOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [sidebarMobileOpen, setSidebarMobileOpen]);
+
   return (
     <TooltipProvider delayDuration={0}>
       {/* Mobile backdrop */}
@@ -278,7 +307,12 @@ export function Sidebar() {
         )}
       />
       <aside
+        id="app-sidebar"
         aria-label="Navegação principal"
+        role={isMobile ? 'dialog' : undefined}
+        aria-modal={isMobile && sidebarMobileOpen ? true : undefined}
+        aria-hidden={isMobile && !sidebarMobileOpen ? true : undefined}
+
         className={cn(
           'fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden bg-sidebar transition-[width,transform] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
           'w-64',
