@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { toastSuccess } from '@/lib/toastHelpers';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -56,7 +57,7 @@ import {
 import { Badge } from '@/ui/base/badge';
 import { Separator } from '@/ui/base/separator';
 import { useNFCe } from '@/hooks/fiscal/useNFCe';
-import { PDVDialog } from '@/components/fiscal/PDVDialog';
+
 import { NFCeCancelDialog } from '@/components/fiscal/NFCeCancelDialog';
 import { NFCeReturnDialog } from '@/components/fiscal/NFCeReturnDialog';
 import type { NFCe } from '@/types/fiscal';
@@ -90,8 +91,8 @@ const paymentIcons: Record<string, React.ComponentType<{ className?: string }>> 
 };
 
 export default function NFCePage() {
-  const { nfces, loading, cancel: cancelNFCe, emit, createReturn } = useNFCe();
-  const [pdvOpen, setPdvOpen] = useState(false);
+  const navigate = useNavigate();
+  const { nfces, loading, cancel: cancelNFCe, createReturn } = useNFCe();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [terminalFilter, setTerminalFilter] = useState<string>('all');
@@ -193,7 +194,7 @@ export default function NFCePage() {
           ]}
           filename="nfce"
         />
-        <Button className="gap-2" onClick={() => setPdvOpen(true)}>
+        <Button className="gap-2" onClick={() => navigate('/comercial/pdv')}>
           <Plus className="h-4 w-4" />
           Nova Venda PDV
         </Button>
@@ -504,8 +505,7 @@ export default function NFCePage() {
         </DialogContent>
       </Dialog>
 
-      {/* PDV Dialog */}
-      <PDVDialog open={pdvOpen} onOpenChange={setPdvOpen} onEmit={emit} />
+      {/* PDV movido para /comercial/pdv — fonte única */}
 
       {/* Cancel Dialog */}
       <NFCeCancelDialog
