@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import logoUseSistemas from '@/assets/logo.png';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -285,15 +285,74 @@ export function Sidebar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
-  // Close mobile drawer on Escape
+  // Focus trap + focus restoration for mobile drawer
+  const asideRef = useRef<HTMLElement | null>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
-    if (!sidebarMobileOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSidebarMobileOpen(false);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [sidebarMobileOpen, setSidebarMobileOpen]);
+    if (!isMobile) return;
+
+    if (sidebarMobileOpen) {
+      // Save the element that opened the drawer
+      previouslyFocusedRef.current = document.activeElement as HTMLElement | null;
+
+      // Move focus to first focusable item inside the drawer
+      const aside = asideRef.current;
+      if (aside) {
+        const first = aside.querySelector<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        );
+        // Defer to next frame so the slide-in transition doesn't fight the focus
+        requestAnimationFrame(() => first?.focus());
+      }
+
+      const onKey = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          setSidebarMobileOpen(false);
+          return;
+        }
+        if (e.key !== 'Tab') return;
+        const aside = asideRef.current;
+        if (!aside) return;
+
+        const focusables = Array.from(
+          aside.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])'
+          )
+        ).filter((el) => el.offsetParent !== null || el === document.activeElement);
+
+        if (focusables.length === 0) return;
+        const firstEl = focusables[0];
+        const lastEl = focusables[focusables.length - 1];
+        const active = document.activeElement as HTMLElement | null;
+
+        if (e.shiftKey) {
+          if (active === firstEl || !aside.contains(active)) {
+            e.preventDefault();
+            lastEl.focus();
+          }
+        } else {
+          if (active === lastEl || !aside.contains(active)) {
+            e.preventDefault();
+            firstEl.focus();
+          }
+        }
+      };
+
+      window.addEventListener('keydown', onKey);
+      return () => window.removeEventListener('keydown', onKey);
+    } else {
+      // Restore focus to the element that opened the drawer
+      const prev = previouslyFocusedRef.current;
+      if (prev && typeof prev.focus === 'function') {
+        // Defer restore so it doesn't collide with the closing transition/state updates
+        requestAnimationFrame(() => prev.focus());
+      }
+      previouslyFocusedRef.current = null;
+    }
+  }, [sidebarMobileOpen, isMobile, setSidebarMobileOpen]);
+
+
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -308,10 +367,12 @@ export function Sidebar() {
       />
       <aside
         id="app-sidebar"
+        ref={asideRef}
         aria-label="Navegação principal"
         role={isMobile ? 'dialog' : undefined}
         aria-modal={isMobile && sidebarMobileOpen ? true : undefined}
         aria-hidden={isMobile && !sidebarMobileOpen ? true : undefined}
+
 
         className={cn(
           'fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden bg-sidebar transition-[width,transform] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
