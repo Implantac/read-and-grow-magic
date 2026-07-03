@@ -208,6 +208,27 @@ export function useNFCe() {
 
   useEffect(() => { fetchNFCes(); }, [fetchNFCes]);
 
+  // Realtime: refetch quando NFC-e, itens ou devoluções mudarem em qualquer terminal
+  useEffect(() => {
+    let debounce: ReturnType<typeof setTimeout> | null = null;
+    const schedule = () => {
+      if (debounce) clearTimeout(debounce);
+      debounce = setTimeout(() => { fetchNFCes(); }, 250);
+    };
+    const channel = supabase
+      .channel('nfce-live')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'nfce' }, schedule)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'nfce_items' }, schedule)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'nfce_returns' }, schedule)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'nfce_return_items' }, schedule)
+      .subscribe();
+    return () => {
+      if (debounce) clearTimeout(debounce);
+      supabase.removeChannel(channel);
+    };
+  }, [fetchNFCes]);
+
   return { nfces, loading, refetch: fetchNFCes, emit, cancel, createReturn };
 }
+
 

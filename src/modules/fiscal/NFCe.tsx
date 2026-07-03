@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toastSuccess } from '@/lib/toastHelpers';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -99,6 +99,14 @@ export default function NFCePage() {
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [cancelTarget, setCancelTarget] = useState<NFCe | null>(null);
   const [returnTarget, setReturnTarget] = useState<NFCe | null>(null);
+
+  // Mantém o modal de detalhes sincronizado com atualizações em tempo real
+  useEffect(() => {
+    if (!selectedNFCe) return;
+    const fresh = nfces.find((n) => n.id === selectedNFCe.id);
+    if (fresh && fresh !== selectedNFCe) setSelectedNFCe(fresh);
+  }, [nfces, selectedNFCe]);
+
 
 
   const terminals = [...new Set(nfces.map((n) => n.terminalId))];
