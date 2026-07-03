@@ -95,9 +95,11 @@ export default function OrderBlocks() {
                   <TableCell>{b.released_by || '—'}</TableCell>
                   <TableCell>
                     {b.status === 'active' && (
-                      <Button variant="outline" size="sm" onClick={() => setReleaseDialog(b)}>
-                        <CheckCircle className="h-3 w-3 mr-1" />Liberar
-                      </Button>
+                      <Can resource="credit.blocks" action="manage">
+                        <Button variant="outline" size="sm" onClick={() => setReleaseDialog(b)}>
+                          <CheckCircle className="h-3 w-3 mr-1" />Liberar
+                        </Button>
+                      </Can>
                     )}
                   </TableCell>
                 </TableRow>
