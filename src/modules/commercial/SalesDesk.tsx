@@ -41,6 +41,7 @@ export default function SalesDeskPage() {
   const [o2cOrderId, setO2cOrderId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [rejectionOpen, setRejectionOpen] = useState(false);
+  const [pdvOpen, setPdvOpen] = useState(false);
 
   const profile = useClientCommercialProfile(client.id);
   const createOrder = useCreateOrder();
