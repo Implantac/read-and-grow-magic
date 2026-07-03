@@ -502,7 +502,17 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
         ...prev,
         movements: [...prev.movements, { type: 'sale', amount: cashPortion, at: new Date().toISOString(), note: `Venda ${formatBRL(total)}` }],
       } : prev);
-      logAudit('sale.finalized', { total, methods: splits.map((s) => s.method), customer: customer?.id });
+      // Fiado: debita do saldo do cliente (current_balance sobe = dívida cresce)
+      const fiadoAmount = splits.filter((s) => s.method === 'credit').reduce((s, p) => s + p.amount, 0);
+      if (fiadoAmount > 0 && customer) {
+        try {
+          await updateClient.mutateAsync({
+            id: customer.id,
+            current_balance: Math.round(((customer.current_balance || 0) + fiadoAmount) * 100) / 100,
+          });
+        } catch { toastError('Falha ao debitar fiado do cliente.'); }
+      }
+      logAudit('sale.finalized', { total, methods: splits.map((s) => s.method), customer: customer?.id, fiado: fiadoAmount });
 
       // Emissão do comprovante (PDF + impressão) em nova janela
       const emitData = (emitResult ?? {}) as { number?: string; accessKey?: string; protocol?: string };
