@@ -663,9 +663,28 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     ? Math.floor((Date.now() - new Date(session.openedAt).getTime()) / 60000)
     : 0;
 
+  const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    if (asPage) {
+      return (
+        <div className="relative w-full h-[calc(100vh-4rem)] min-h-[600px] rounded-lg border bg-background overflow-hidden">
+          {children}
+        </div>
+      );
+    }
+    return (
+      <Dialog open={open} onOpenChange={(o) => { if (!o) stopCamera(); onOpenChange(o); }}>
+        <DialogContent className="max-w-[98vw] w-[1500px] h-[94vh] p-0 overflow-hidden bg-background gap-0">
+          {children}
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
+  if (!asPage && !open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) stopCamera(); onOpenChange(o); }}>
-      <DialogContent className="max-w-[98vw] w-[1500px] h-[94vh] p-0 overflow-hidden bg-background gap-0">
+    <Shell>
+      <>
         {/* Lock overlay */}
         {screenLocked && (
           <div className="absolute inset-0 z-50 bg-background/95 backdrop-blur-xl flex flex-col items-center justify-center gap-6">
