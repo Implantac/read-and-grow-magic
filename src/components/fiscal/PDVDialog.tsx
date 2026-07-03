@@ -759,11 +759,13 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                   <div className="text-[10px] text-muted-foreground uppercase tracking-widest">Caixa</div>
                 </div>
               </div>
-              <DialogClose asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                  <X className="h-4 w-4" />
-                </Button>
-              </DialogClose>
+              {!asPage && (
+                <DialogClose asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                    <X className="h-4 w-4" />
+                  </Button>
+                </DialogClose>
+              )}
             </div>
           </div>
 
