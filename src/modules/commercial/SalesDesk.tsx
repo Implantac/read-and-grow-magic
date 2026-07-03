@@ -128,7 +128,18 @@ export default function SalesDeskPage() {
         title="Painel Único de Vendas"
         description="Cliente, itens e pagamento em uma única tela"
         icon={ShoppingCart}
+        actions={
+          <Button
+            size="lg"
+            onClick={() => setPdvOpen(true)}
+            className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg"
+          >
+            <Zap className="h-5 w-5" />
+            Abrir PDV Varejo
+          </Button>
+        }
       />
+
 
       <div className="grid gap-4 lg:grid-cols-3">
         {/* CARD 1 — Cliente */}
