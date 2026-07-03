@@ -190,7 +190,8 @@ const App = () => (
                     </FeatureGate>
                   }
                 />
-                <Route path="/contabil/*" element={<ModuleErrorBoundary moduleName="Contábil"><Routes>{AccountingRoutes}</Routes></ModuleErrorBoundary>} />
+                <Route path="/contabilidade/*" element={<ModuleErrorBoundary moduleName="Contábil"><Routes>{AccountingRoutes}</Routes></ModuleErrorBoundary>} />
+                <Route path="/contabil/*" element={<Navigate to="/contabilidade" replace />} />
                 <Route element={<GatedOutlet module="producao" />}>
                   <Route path="/producao/*" element={<ModuleErrorBoundary moduleName="Produção"><Routes>{ProductionRoutes}</Routes></ModuleErrorBoundary>} />
                 </Route>
