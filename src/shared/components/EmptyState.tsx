@@ -60,27 +60,29 @@ export function EmptyState({
     <div
       role="status"
       className={cn(
-        'flex flex-col items-center justify-center text-center rounded-lg border border-dashed border-border/60 bg-card/30 backdrop-blur-sm',
-        compact ? 'py-8 px-4 gap-2' : 'py-14 px-6 gap-3',
+        'flex flex-col items-center justify-center text-center rounded-xl border border-dashed border-border/60 bg-gradient-to-b from-card/50 to-muted/20 backdrop-blur-sm animate-fade-in',
+        compact ? 'py-8 px-4 gap-2' : 'py-16 px-6 gap-4',
         className,
       )}
     >
       <div
         className={cn(
-          'flex items-center justify-center rounded-full bg-primary/10 text-primary ring-1 ring-primary/20',
-          compact ? 'h-10 w-10' : 'h-14 w-14',
+          'flex items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 text-primary ring-1 ring-inset ring-primary/20 shadow-elevation-1',
+          compact ? 'h-11 w-11' : 'h-16 w-16',
         )}
       >
-        <Icon className={compact ? 'h-5 w-5' : 'h-7 w-7'} aria-hidden="true" />
+        <Icon className={compact ? 'h-5 w-5' : 'h-8 w-8'} aria-hidden="true" />
       </div>
-      <h3 className={cn('font-semibold text-foreground', compact ? 'text-sm' : 'text-base')}>
-        {title}
-      </h3>
-      {description && (
-        <p className={cn('max-w-md text-muted-foreground', compact ? 'text-xs' : 'text-sm')}>
-          {description}
-        </p>
-      )}
+      <div className="space-y-1">
+        <h3 className={cn('font-semibold text-foreground', compact ? 'text-sm' : 'text-lg')}>
+          {title}
+        </h3>
+        {description && (
+          <p className={cn('max-w-md text-muted-foreground mx-auto', compact ? 'text-xs' : 'text-sm leading-relaxed')}>
+            {description}
+          </p>
+        )}
+      </div>
       {(action || secondaryAction) && (
         <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
           {action && renderAction(action)}
