@@ -214,9 +214,9 @@ export function Topbar() {
           size="icon"
           onClick={toggleTheme}
           aria-label={theme === 'light' ? 'Ativar tema escuro' : 'Ativar tema claro'}
-          className="h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
+          className="h-9 w-9 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-all"
         >
-          {theme === 'light' ? <Moon className="h-4 w-4" aria-hidden="true" /> : <Sun className="h-4 w-4" aria-hidden="true" />}
+          {theme === 'light' ? <Moon className="h-[18px] w-[18px]" aria-hidden="true" /> : <Sun className="h-[18px] w-[18px]" aria-hidden="true" />}
         </Button>
 
         {/* Notifications - Connected to real data */}
@@ -226,11 +226,11 @@ export function Topbar() {
               variant="ghost"
               size="icon"
               aria-label={unreadCount > 0 ? `Notificações, ${unreadCount} não lidas` : 'Notificações'}
-              className="relative h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
+              className="relative h-9 w-9 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-all"
             >
-              <Bell className="h-4 w-4" aria-hidden="true" />
+              <Bell className="h-[18px] w-[18px]" aria-hidden="true" />
               {unreadCount > 0 && (
-                <span aria-hidden="true" className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground px-1 animate-fade-in">
+                <span aria-hidden="true" className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground px-1 ring-2 ring-sidebar animate-fade-in">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
@@ -293,9 +293,9 @@ export function Topbar() {
           onClick={() => navigate('/executive/executive')}
           title="IA Executiva"
           aria-label="Abrir IA Executiva"
-          className="h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
+          className="h-9 w-9 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-all"
         >
-          <Sparkles className="h-4 w-4" aria-hidden="true" />
+          <Sparkles className="h-[18px] w-[18px]" aria-hidden="true" />
         </Button>
 
         {/* Brain shortcut — click abre o drawer contextual; Shift+click ou botão do meio abre a página completa */}
@@ -314,13 +314,13 @@ export function Topbar() {
             ? `${brainPending.length} decisões pendentes · Ctrl+J abre o Cérebro`
             : 'Cérebro Contextual (Ctrl+J) · Shift+clique abre a página completa'}
           aria-label={brainPending.length > 0 ? `Cérebro Nativo, ${brainPending.length} decisões pendentes` : 'Cérebro Nativo'}
-          className="relative h-8 w-8 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50"
+          className="relative h-9 w-9 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-all"
         >
-          <Brain className="h-4 w-4" aria-hidden="true" />
+          <Brain className="h-[18px] w-[18px]" aria-hidden="true" />
           {brainPending.length > 0 && (
             <span
               className={cn(
-                'absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full text-[10px] font-bold px-1 animate-fade-in',
+                'absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full text-[10px] font-bold px-1 ring-2 ring-sidebar animate-fade-in',
                 brainCritical > 0
                   ? 'bg-destructive text-destructive-foreground animate-pulse'
                   : 'bg-primary text-primary-foreground'
@@ -332,20 +332,25 @@ export function Topbar() {
         </Button>
 
         {/* Divider */}
-        <div className="mx-1 h-6 w-px bg-sidebar-border/50" />
+        <div className="mx-2 h-6 w-px bg-sidebar-border/60" aria-hidden="true" />
 
         {/* User Menu */}
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2 h-8 px-2 hover:bg-sidebar-accent/50">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/20 ring-1 ring-primary/30">
-                <User className="h-3.5 w-3.5 text-primary" />
+            <Button
+              variant="ghost"
+              className="group flex items-center gap-2 h-9 pl-1.5 pr-2 rounded-lg hover:bg-sidebar-accent/50 transition-all"
+            >
+              <div className="relative flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-primary/30 to-primary-glow/20 ring-1 ring-primary/40 shadow-[0_0_10px_hsl(var(--primary)/0.25)]">
+                <User className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
               </div>
-              <span className="hidden md:inline-block text-sm text-sidebar-foreground/80 font-medium max-w-[100px] truncate">
+              <span className="hidden md:inline-block text-sm text-sidebar-foreground font-medium max-w-[120px] truncate">
                 {user?.name || 'Usuário'}
               </span>
+              <ChevronDown className="hidden md:inline-block h-3.5 w-3.5 opacity-50 transition-transform group-data-[state=open]:rotate-180" />
             </Button>
           </DropdownMenuTrigger>
+
           <DropdownMenuContent align="end" className="w-56 bg-sidebar border-sidebar-border">
             <DropdownMenuLabel className="text-sidebar-foreground">
               <div className="flex flex-col">
