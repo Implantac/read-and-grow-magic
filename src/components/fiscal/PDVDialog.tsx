@@ -227,29 +227,62 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
     window.setTimeout(() => setFlashId((cur) => (cur === productId ? null : cur)), 350);
   };
 
+  const MAX_QTY = 9999;
+  const MAX_PRICE = 1_000_000;
+
   const updateQty = (productId: string, delta: number) => {
     setCart((prev) =>
       prev
-        .map((i) => (i.productId === productId ? { ...i, quantity: Math.max(0, i.quantity + delta) } : i))
+        .map((i) => {
+          if (i.productId !== productId) return i;
+          const next = i.quantity + delta;
+          return { ...i, quantity: Math.min(MAX_QTY, Math.max(0, next)) };
+        })
         .filter((i) => i.quantity > 0),
     );
     flashLine(productId);
   };
 
-  const setQty = (productId: string, value: number) => {
-    const v = Math.max(0, Number.isFinite(value) ? value : 0);
+  const setQty = (productId: string, raw: number): boolean => {
+    if (!Number.isFinite(raw)) {
+      toastError('Quantidade inválida.');
+      return false;
+    }
+    if (raw < 0) {
+      toastError('Quantidade não pode ser negativa.');
+      return false;
+    }
+    if (raw > MAX_QTY) {
+      toastError(`Quantidade máxima por item é ${MAX_QTY}.`);
+      return false;
+    }
+    const v = Math.floor(raw * 1000) / 1000; // até 3 casas
     setCart((prev) =>
       v === 0
         ? prev.filter((i) => i.productId !== productId)
         : prev.map((i) => (i.productId === productId ? { ...i, quantity: v } : i)),
     );
     flashLine(productId);
+    return true;
   };
 
-  const setUnitPrice = (productId: string, value: number) => {
-    const v = Math.max(0, Number.isFinite(value) ? value : 0);
+  const setUnitPrice = (productId: string, raw: number): boolean => {
+    if (!Number.isFinite(raw)) {
+      toastError('Preço inválido.');
+      return false;
+    }
+    if (raw < 0) {
+      toastError('Preço unitário não pode ser negativo.');
+      return false;
+    }
+    if (raw > MAX_PRICE) {
+      toastError('Preço unitário acima do limite permitido.');
+      return false;
+    }
+    const v = Math.round(raw * 100) / 100; // 2 casas
     setCart((prev) => prev.map((i) => (i.productId === productId ? { ...i, unitPrice: v } : i)));
     flashLine(productId);
+    return true;
   };
 
   const removeFromCart = (productId: string) => {
@@ -588,8 +621,22 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">R$</span>
                           <Input
                             type="number"
+                            min={0}
+                            step="0.01"
                             value={discount || ''}
-                            onChange={(e) => setDiscount(toSafeNumber(e.target.value))}
+                            onChange={(e) => {
+                              const v = toSafeNumber(e.target.value);
+                              if (!Number.isFinite(v) || v < 0) {
+                                toastError('Desconto inválido.');
+                                return;
+                              }
+                              if (v > subtotal) {
+                                toastError('Desconto não pode ser maior que o subtotal.');
+                                setDiscount(subtotal);
+                                return;
+                              }
+                              setDiscount(Math.round(v * 100) / 100);
+                            }}
                             className="text-right font-bold h-10 pl-8 bg-background border-2"
                             placeholder="0,00"
                           />
@@ -664,8 +711,17 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-black text-muted-foreground">R$</span>
                         <Input
                           type="number"
+                          min={0}
+                          step="0.01"
                           value={amountPaid || ''}
-                          onChange={(e) => setAmountPaid(toSafeNumber(e.target.value))}
+                          onChange={(e) => {
+                            const v = toSafeNumber(e.target.value);
+                            if (!Number.isFinite(v) || v < 0) {
+                              toastError('Valor recebido inválido.');
+                              return;
+                            }
+                            setAmountPaid(Math.round(v * 100) / 100);
+                          }}
                           className="h-16 pl-14 text-3xl font-black tabular-nums border-none shadow-none focus-visible:ring-0"
                           autoFocus
                         />
