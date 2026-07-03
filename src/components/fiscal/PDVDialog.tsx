@@ -1237,10 +1237,10 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                     )}
                   </Button>
                 )}
-                <div className="mt-3 flex items-center justify-center gap-3 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
-                  <span>F1 Dinh</span><span>F2 Créd</span><span>F3 Déb</span><span>F4 PIX</span>
+                <div className="mt-3 flex items-center justify-center gap-3 text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex-wrap">
+                  <span>F1 Dinh</span><span>F2 Créd</span><span>F3 Déb</span><span>F4 PIX</span><span>F5 Voucher</span><span>F6 Fiado</span>
                   <span className="opacity-40">|</span>
-                  <span>F9 Limpar</span><span>F10 Finalizar</span><span>F12 Bloq</span>
+                  <span>F7 Suspender</span><span>F8 Retomar</span><span>F9 Limpar</span><span>F10 Finalizar</span><span>F12 Bloq</span>
                 </div>
               </div>
             </div>
