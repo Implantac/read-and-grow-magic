@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, CheckCircle, User, ShoppingCart, Wallet } from 'lucide-react';
+import { Loader2, CheckCircle, User, ShoppingCart, Wallet, Zap } from 'lucide-react';
+import { PDVDialog } from '@/components/fiscal/PDVDialog';
 import { Button } from '@/ui/base/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Input } from '@/ui/base/input';
