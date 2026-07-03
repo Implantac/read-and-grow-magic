@@ -130,9 +130,14 @@ export default function NFCePage() {
     toastSuccess('Imprimindo Cupom', `Cupom fiscal ${nfce.number} enviado para impressão`);
   };
 
-  const handleCancel = async (nfce: NFCe) => {
-    await cancelNFCe(nfce.id);
+  const handleCancel = (nfce: NFCe) => {
+    setCancelTarget(nfce);
   };
+
+  const handleReturn = (nfce: NFCe) => {
+    setReturnTarget(nfce);
+  };
+
 
   const handleReprint = (nfce: NFCe) => {
     toastSuccess('2ª Via', `Reimpressão do cupom ${nfce.number} enviada`);
