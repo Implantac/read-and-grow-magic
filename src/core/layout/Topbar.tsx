@@ -87,7 +87,7 @@ export function Topbar() {
   return (
     <header
       className={cn(
-        'fixed right-0 top-0 z-30 flex h-14 items-center justify-between border-b border-sidebar-border/40 px-3 sm:px-4 transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] backdrop-blur-xl supports-[backdrop-filter]:bg-[hsl(var(--sidebar-background)/0.72)]',
+        'fixed right-0 top-0 z-30 flex h-14 items-center justify-between gap-2 border-b border-sidebar-border/40 px-2 sm:px-4 transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] backdrop-blur-xl supports-[backdrop-filter]:bg-[hsl(var(--sidebar-background)/0.72)]',
         'left-0',
         sidebarCollapsed ? 'md:left-16' : 'md:left-64'
       )}
