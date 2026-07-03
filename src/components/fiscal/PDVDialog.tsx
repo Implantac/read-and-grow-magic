@@ -76,6 +76,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const scanRafRef = useRef<number | null>(null);
+  const [flashId, setFlashId] = useState<string | null>(null);
 
   const term = search.trim().toLowerCase();
   const filteredProducts = useMemo(() => {
@@ -115,6 +116,8 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
         ...prev,
       ];
     });
+    setFlashId(product.id);
+    window.setTimeout(() => setFlashId((cur) => (cur === product.id ? null : cur)), 350);
   };
 
   const findByCode = (raw: string): DbProduct | undefined => {
@@ -219,12 +222,34 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
     if (!open) stopCamera();
   }, [open]);
 
+  const flashLine = (productId: string) => {
+    setFlashId(productId);
+    window.setTimeout(() => setFlashId((cur) => (cur === productId ? null : cur)), 350);
+  };
+
   const updateQty = (productId: string, delta: number) => {
     setCart((prev) =>
       prev
         .map((i) => (i.productId === productId ? { ...i, quantity: Math.max(0, i.quantity + delta) } : i))
         .filter((i) => i.quantity > 0),
     );
+    flashLine(productId);
+  };
+
+  const setQty = (productId: string, value: number) => {
+    const v = Math.max(0, Number.isFinite(value) ? value : 0);
+    setCart((prev) =>
+      v === 0
+        ? prev.filter((i) => i.productId !== productId)
+        : prev.map((i) => (i.productId === productId ? { ...i, quantity: v } : i)),
+    );
+    flashLine(productId);
+  };
+
+  const setUnitPrice = (productId: string, value: number) => {
+    const v = Math.max(0, Number.isFinite(value) ? value : 0);
+    setCart((prev) => prev.map((i) => (i.productId === productId ? { ...i, unitPrice: v } : i)));
+    flashLine(productId);
   };
 
   const removeFromCart = (productId: string) => {
@@ -475,7 +500,12 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                   {cart.map((item, idx) => (
                     <div
                       key={item.productId}
-                      className="flex items-center gap-3 bg-background p-3 rounded-xl border hover:border-primary/40 transition-all animate-in slide-in-from-left-2"
+                      className={cn(
+                        'flex items-center gap-3 bg-background p-3 rounded-xl border transition-all animate-in slide-in-from-left-2',
+                        flashId === item.productId
+                          ? 'border-primary ring-2 ring-primary/30 bg-primary/5'
+                          : 'hover:border-primary/40',
+                      )}
                     >
                       <div className="bg-primary/10 text-primary w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shrink-0">
                         {cart.length - idx}
@@ -483,20 +513,48 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                       <div className="flex-1 min-w-0">
                         <div className="font-semibold truncate">{item.productName}</div>
                         <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider truncate">
-                          {item.productCode} • {formatBRL(item.unitPrice)} / {item.unit}
+                          {item.productCode} • {item.unit}
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-lg">
+
+                      {/* Unit price inline edit */}
+                      <div className="w-24 shrink-0">
+                        <div className="relative">
+                          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">R$</span>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min={0}
+                            value={item.unitPrice}
+                            onChange={(e) => setUnitPrice(item.productId, toSafeNumber(e.target.value))}
+                            onFocus={(e) => e.currentTarget.select()}
+                            className="h-9 pl-7 pr-1 text-right font-bold tabular-nums text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Quantity: -/input/+ */}
+                      <div className="flex items-center gap-1 bg-muted/60 p-1 rounded-lg shrink-0">
                         <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md bg-background" onClick={() => updateQty(item.productId, -1)}>
                           <Minus className="h-3 w-3" />
                         </Button>
-                        <span className="w-8 text-center font-bold tabular-nums">{item.quantity}</span>
+                        <Input
+                          type="number"
+                          min={0}
+                          step="1"
+                          value={item.quantity}
+                          onChange={(e) => setQty(item.productId, toSafeNumber(e.target.value))}
+                          onFocus={(e) => e.currentTarget.select()}
+                          className="h-7 w-12 px-1 text-center font-bold tabular-nums border-none shadow-none focus-visible:ring-1 bg-background"
+                        />
                         <Button variant="ghost" size="icon" className="h-7 w-7 rounded-md bg-background" onClick={() => updateQty(item.productId, 1)}>
                           <Plus className="h-3 w-3" />
                         </Button>
                       </div>
+
                       <div className="w-24 text-right shrink-0">
-                        <div className="font-black tabular-nums">{formatBRL(item.quantity * item.unitPrice)}</div>
+                        <div className="text-[9px] uppercase text-muted-foreground font-bold">Total</div>
+                        <div className="font-black tabular-nums text-primary">{formatBRL(item.quantity * item.unitPrice)}</div>
                       </div>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10 rounded-full shrink-0" onClick={() => removeFromCart(item.productId)}>
                         <Trash2 className="h-4 w-4" />
