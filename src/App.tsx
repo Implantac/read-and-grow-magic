@@ -169,10 +169,11 @@ const App = () => (
                 <Route path="/estoque/movimentacoes" element={<InventoryMovements />} />
                 <Route path="/estoque/kardex" element={<InventoryKardex />} />
                 <Route path="/estoque/saldos" element={<InventoryStockLevels />} />
-                <Route path="/credito/dashboard" element={<CreditRiskDashboard />} />
-                <Route path="/credito/analise" element={<CreditAnalysis />} />
-                <Route path="/credito/bloqueios" element={<CreditOrderBlocks />} />
-                <Route path="/credito/cobranca" element={<CreditCollections />} />
+                <Route path="/credito/dashboard" element={<RequirePermission resource="credit.risk" action="view"><CreditRiskDashboard /></RequirePermission>} />
+                <Route path="/credito/analise" element={<RequirePermission resource="credit.risk" action="view"><CreditAnalysis /></RequirePermission>} />
+                <Route path="/credito/bloqueios" element={<RequirePermission resource="credit.blocks" action="view"><CreditOrderBlocks /></RequirePermission>} />
+                <Route path="/credito/cobranca" element={<RequirePermission resource="credit.collections" action="view"><CreditCollections /></RequirePermission>} />
+                <Route path="/credito" element={<Navigate to="/credito/dashboard" replace />} />
 
 
                 <Route path="/upgrade" element={<Upgrade />} />
