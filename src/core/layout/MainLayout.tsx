@@ -63,12 +63,22 @@ export function MainLayout() {
 
   return (
     <div className="h-dvh overflow-hidden bg-background">
+      {/* Skip link for keyboard users */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground focus:shadow-lg"
+      >
+        Pular para o conteúdo
+      </a>
       <CommandPalette />
       <BrainDrawer />
       <DrillDownDrawer />
       <Sidebar />
       <Topbar />
       <main
+        id="main-content"
+        tabIndex={-1}
+
         className={cn(
           'h-dvh overflow-y-auto pt-14 transition-[padding] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] scrollbar-thin',
           'pl-0',

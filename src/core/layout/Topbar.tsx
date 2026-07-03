@@ -109,11 +109,14 @@ export function Topbar() {
               toggleSidebar();
             }
           }}
-          aria-label="Alternar menu lateral"
-          className="h-8 w-8 text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-colors"
+          aria-label={sidebarCollapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'}
+          aria-controls="app-sidebar"
+          aria-expanded={!sidebarCollapsed}
+          className="h-8 w-8 text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-colors focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
         >
           <Menu className="h-4 w-4" aria-hidden="true" />
         </Button>
+
 
 
         {/* Company/Branch Selector */}
