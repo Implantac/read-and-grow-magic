@@ -541,15 +541,19 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       const typing = target && ['INPUT', 'TEXTAREA'].includes(target.tagName);
+      if (e.key === 'Escape' && !typing && !showPayment && search) { e.preventDefault(); setSearch(''); return; }
       if (e.key === 'F9' && !typing) { e.preventDefault(); clearAll(); }
       if (e.key === 'F10') { e.preventDefault(); if (!showPayment && cart.length > 0) setShowPayment(true); else if (showPayment) handleFinalize(); }
       if (e.key === 'F12') { e.preventDefault(); setScreenLocked(true); }
+      if (e.key === 'F7' && !typing && cart.length > 0) { e.preventDefault(); suspendSale(); }
+      if (e.key === 'F8' && !typing) { e.preventDefault(); setShowParked(true); }
       if (!showPayment) return;
       if (e.key === 'F1') { e.preventDefault(); addSplit('cash'); }
       if (e.key === 'F2') { e.preventDefault(); addSplit('credit_card'); }
       if (e.key === 'F3') { e.preventDefault(); addSplit('debit_card'); }
       if (e.key === 'F4') { e.preventDefault(); addSplit('pix'); }
       if (e.key === 'F5') { e.preventDefault(); addSplit('voucher'); }
+      if (e.key === 'F6') { e.preventDefault(); addSplit('credit'); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
