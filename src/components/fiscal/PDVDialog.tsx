@@ -55,6 +55,8 @@ interface CashSession {
 interface PDVDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Renderiza como página (sem overlay/dialog). Padrão: false = modal. */
+  asPage?: boolean;
   onEmit: (data: {
     items: { productCode: string; productName: string; productId?: string; quantity: number; unitPrice: number; unit?: string }[];
     paymentMethod: string;
