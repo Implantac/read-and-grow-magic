@@ -39,7 +39,7 @@ interface CartItem {
 
 interface SplitPayment {
   id: string;
-  method: 'cash' | 'credit_card' | 'debit_card' | 'pix' | 'voucher';
+  method: 'cash' | 'credit_card' | 'debit_card' | 'pix' | 'voucher' | 'credit';
   amount: number;
   installments?: number;
 }
