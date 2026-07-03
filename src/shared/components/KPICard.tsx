@@ -92,20 +92,20 @@ export function KPICard(props: KPICardProps) {
   return (
     <Card
       className={cn(
-        'border-l-4 hover-lift opacity-0 animate-slide-in-bottom',
+        'group border-l-4 hover-lift opacity-0 animate-slide-in-bottom overflow-hidden relative',
         colors.border,
         className
       )}
       style={{ animationDelay: `${index * 80}ms`, animationFillMode: 'forwards' }}
     >
       <CardContent className="flex items-center gap-4 p-5">
-        <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110', colors.iconBg)}>
+        <div className={cn('flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110 ring-1 ring-inset ring-border/50', colors.iconBg, colors.glow)}>
           <div className={colors.iconText}>{iconElement}</div>
         </div>
-        <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground truncate">{title}</p>
-          <p className="text-xl font-bold text-foreground tabular-nums">{value}</p>
-          {resolvedSubtitle && <p className="text-[11px] text-muted-foreground truncate">{resolvedSubtitle}</p>}
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground truncate">{title}</p>
+          <p className="text-2xl font-bold text-foreground tabular-nums leading-tight mt-0.5">{value}</p>
+          {resolvedSubtitle && <p className="text-xs text-muted-foreground truncate mt-0.5">{resolvedSubtitle}</p>}
         </div>
       </CardContent>
     </Card>
