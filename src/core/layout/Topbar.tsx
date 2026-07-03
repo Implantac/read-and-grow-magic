@@ -86,12 +86,14 @@ export function Topbar() {
   return (
     <header
       className={cn(
-        'fixed right-0 top-0 z-30 flex h-14 items-center justify-between border-b border-sidebar-border/30 px-4 transition-all duration-300 ease-in-out backdrop-blur-xl',
+        'fixed right-0 top-0 z-30 flex h-14 items-center justify-between border-b border-sidebar-border/40 px-4 transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] backdrop-blur-xl supports-[backdrop-filter]:bg-[hsl(var(--sidebar-background)/0.75)]',
         sidebarCollapsed ? 'left-16' : 'left-64'
-
       )}
-      style={{ background: 'hsl(222 33% 15% / 0.95)' }}
+      style={{
+        boxShadow: '0 1px 0 0 hsl(var(--sidebar-border) / 0.4), 0 8px 24px -12px hsl(222 33% 4% / 0.4)'
+      }}
     >
+
       {/* Left Section */}
       <div className="flex items-center gap-3">
         <Button
