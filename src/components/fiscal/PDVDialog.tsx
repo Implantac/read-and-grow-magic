@@ -19,6 +19,7 @@ import { ScrollArea } from '@/ui/base/scroll-area';
 import { cn } from '@/lib/utils';
 import { toSafeNumber } from '@/lib/numericValidation';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
+import { openReceipt } from './pdvReceipt';
 
 interface CartItem {
   productCode: string;
