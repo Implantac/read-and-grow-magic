@@ -71,10 +71,12 @@ export function MainLayout() {
       <main
         className={cn(
           'h-dvh overflow-y-auto pt-14 transition-[padding] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] scrollbar-thin',
-          sidebarCollapsed ? 'pl-16' : 'pl-64'
+          'pl-0',
+          sidebarCollapsed ? 'md:pl-16' : 'md:pl-64'
         )}
       >
-        <div className="mx-auto w-full max-w-[1600px] px-6 py-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[1600px] px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
+
           <Breadcrumbs />
           <Suspense
             fallback={
