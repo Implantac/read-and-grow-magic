@@ -98,10 +98,11 @@ const LiveTracking = () => {
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground mt-4 flex items-center gap-1">
+      <div className="text-xs text-muted-foreground mt-4 flex items-center gap-1">
         <Badge variant="outline" className="text-[10px] px-1 py-0">LIVE</Badge>
-        Atualizações via Realtime — paradas marcadas como concluídas aparecem aqui em segundos.
-      </p>
+        <span>Atualizações via Realtime — paradas marcadas como concluídas aparecem aqui em segundos.</span>
+      </div>
+
     </PageContainer>
   );
 };
