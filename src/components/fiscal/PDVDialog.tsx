@@ -895,8 +895,18 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                   <Badge variant="outline" className="h-5 text-[10px]">{totalItems} un.</Badge>
                 </div>
                 {cart.length > 0 && (
-                  <Button variant="ghost" size="sm" onClick={clearAll} className="h-7 text-xs text-muted-foreground gap-1">
-                    <Trash2 className="h-3 w-3" /> Limpar (F9)
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="sm" onClick={suspendSale} className="h-7 text-xs text-amber-600 gap-1" title="Suspender cupom (F7)">
+                      <Pause className="h-3 w-3" /> Suspender
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={clearAll} className="h-7 text-xs text-muted-foreground gap-1">
+                      <Trash2 className="h-3 w-3" /> Limpar (F9)
+                    </Button>
+                  </div>
+                )}
+                {cart.length === 0 && parkedList.length > 0 && (
+                  <Button variant="outline" size="sm" onClick={() => setShowParked(true)} className="h-7 text-xs gap-1 border-amber-500/40 text-amber-700">
+                    <Play className="h-3 w-3" /> Retomar ({parkedList.length})
                   </Button>
                 )}
               </div>
