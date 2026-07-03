@@ -273,7 +273,22 @@ export default function NFCePage() {
                   </TableCell>
                   <TableCell>{renderPaymentBadge(nfce.paymentMethod)}</TableCell>
                   <TableCell className="font-medium">{formatCurrency(nfce.total)}</TableCell>
-                  <TableCell>{renderStatusBadge(nfce.status)}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {renderStatusBadge(nfce.status)}
+                      {nfce.returnStatus === 'partial' && (
+                        <Badge variant="outline" className="border-warning/40 text-warning gap-1">
+                          <Undo2 className="h-3 w-3" /> Dev. parcial
+                        </Badge>
+                      )}
+                      {nfce.returnStatus === 'full' && (
+                        <Badge variant="outline" className="border-destructive/40 text-destructive gap-1">
+                          <Undo2 className="h-3 w-3" /> Devolvida
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
+
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
