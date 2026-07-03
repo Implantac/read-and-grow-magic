@@ -87,14 +87,19 @@ export function Topbar() {
   return (
     <header
       className={cn(
-        'fixed right-0 top-0 z-30 flex h-14 items-center justify-between border-b border-sidebar-border/40 px-3 sm:px-4 transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] backdrop-blur-xl supports-[backdrop-filter]:bg-[hsl(var(--sidebar-background)/0.75)]',
+        'fixed right-0 top-0 z-30 flex h-14 items-center justify-between border-b border-sidebar-border/40 px-3 sm:px-4 transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] backdrop-blur-xl supports-[backdrop-filter]:bg-[hsl(var(--sidebar-background)/0.72)]',
         'left-0',
         sidebarCollapsed ? 'md:left-16' : 'md:left-64'
       )}
       style={{
-        boxShadow: '0 1px 0 0 hsl(var(--sidebar-border) / 0.4), 0 8px 24px -12px hsl(222 33% 4% / 0.4)'
+        boxShadow: '0 1px 0 0 hsl(var(--sidebar-border) / 0.4), 0 10px 30px -18px hsl(222 33% 4% / 0.55)'
       }}
     >
+      {/* Subtle top gradient accent to align with sidebar aesthetic */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent"
+      />
 
 
       {/* Left Section */}
