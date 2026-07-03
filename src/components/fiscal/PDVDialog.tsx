@@ -816,6 +816,43 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                 )}
               </div>
 
+              {/* Category tabs */}
+              {inputMode !== 'camera' && categories.length > 0 && (
+                <div className="px-6 pt-3">
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                    <button
+                      onClick={() => setSelectedCategoryId(null)}
+                      className={cn(
+                        'shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all border-2',
+                        !selectedCategoryId
+                          ? 'bg-primary text-primary-foreground border-primary shadow-md'
+                          : 'bg-background border-transparent hover:border-primary/30 text-muted-foreground',
+                      )}
+                    >
+                      <LayoutGrid className="h-3 w-3" /> Todas
+                    </button>
+                    {categories.map((cat) => {
+                      const c = cat.color || hashColor(cat.name);
+                      const active = selectedCategoryId === cat.id;
+                      return (
+                        <button
+                          key={cat.id}
+                          onClick={() => setSelectedCategoryId(cat.id)}
+                          style={active ? { backgroundColor: c, borderColor: c, color: '#fff' } : { borderColor: `${c}55` }}
+                          className={cn(
+                            'shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all border-2',
+                            !active && 'bg-background hover:brightness-95',
+                          )}
+                        >
+                          <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: active ? '#fff' : c }} />
+                          {cat.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Product grid */}
               {inputMode !== 'camera' && (
                 <div className="px-6 pt-4">
