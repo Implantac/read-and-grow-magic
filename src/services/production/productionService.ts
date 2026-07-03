@@ -1,45 +1,45 @@
 import { supabase } from '@/integrations/supabase/client';
 
+/**
+ * ProductionService — pedidos, recursos e inspeções de qualidade.
+ * Tabelas: production_orders, production_resources, production_quality_checks.
+ */
 export class ProductionService {
-  private readonly supabase = supabase;
-
-  // Production Orders
-  async getProductionOrders(): Promise<any[]> {
-    const { data, error } = await this.supabase
-      .from('production_orders' as any)
+  async getProductionOrders() {
+    const { data, error } = await supabase
+      .from('production_orders')
       .select('*')
-      .order('created_at', { ascending: false });
-
+      .order('created_at', { ascending: false })
+      .limit(500);
     if (error) throw error;
-    return data || [];
+    return data ?? [];
   }
 
-  async updateOrderStatus(id: string, status: string): Promise<void> {
-    const { error } = await this.supabase
-      .from('production_orders' as any)
+  async updateOrderStatus(id: string, status: string) {
+    const { error } = await supabase
+      .from('production_orders')
       .update({ status })
       .eq('id', id);
     if (error) throw error;
   }
 
-  // Production Resources
-  async getResources(): Promise<any[]> {
-    const { data, error } = await this.supabase
-      .from('production_resources' as any)
+  async getResources() {
+    const { data, error } = await supabase
+      .from('production_resources')
       .select('*')
       .order('name');
     if (error) throw error;
-    return data || [];
+    return data ?? [];
   }
 
-  // Quality Control
-  async getQualityInspections(): Promise<any[]> {
-    const { data, error } = await this.supabase
-      .from('quality_inspections' as any)
+  async getQualityInspections() {
+    const { data, error } = await supabase
+      .from('production_quality_checks')
       .select('*')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(500);
     if (error) throw error;
-    return data || [];
+    return data ?? [];
   }
 }
 
