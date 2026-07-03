@@ -119,6 +119,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [search, setSearch] = useState('');
   const [inputMode, setInputMode] = useState<InputMode>('search');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [discount, setDiscount] = useState(0);
   const [discountType, setDiscountType] = useState<'value' | 'percent'>('value');
   const [customer, setCustomer] = useState<DbClient | null>(null);
