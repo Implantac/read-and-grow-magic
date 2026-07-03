@@ -40,10 +40,12 @@ export const inventoryService = {
 
   // Movements
   async getMovements() {
+    // Tabela real é `stock_movements` (inventory_movements não existe → causava 404 no PostgREST).
     const { data, error } = await supabase
-      .from('inventory_movements' as any)
-      .select('*, products(name)')
-      .order('created_at', { ascending: false });
+      .from('stock_movements')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(200);
     if (error) throw error;
     return data || [];
   }
