@@ -6,6 +6,7 @@ import {
   ChevronRight, ArrowLeft, Monitor, Send, Keyboard, ScanLine,
   Camera, CameraOff, Package, Lock, Unlock, ArrowDownLeft, ArrowUpRight,
   Percent, Wallet, Star, Clock, UserCheck, Loader2, AlertCircle,
+  Pause, Play, HandCoins, LayoutGrid,
 } from 'lucide-react';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -14,12 +15,17 @@ import { Dialog, DialogContent, DialogClose } from '@/ui/base/dialog';
 import { Separator } from '@/ui/base/separator';
 import { Badge } from '@/ui/base/badge';
 import { useProducts, type DbProduct } from '@/hooks/inventory/useProducts';
-import { useClients, type DbClient } from '@/hooks/commercial/useClients';
+import { useClients, type DbClient, useUpdateClient } from '@/hooks/commercial/useClients';
+import { useActiveCategories, hashColor } from '@/hooks/inventory/useCategories';
 import { ScrollArea } from '@/ui/base/scroll-area';
 import { cn } from '@/lib/utils';
 import { toSafeNumber } from '@/lib/numericValidation';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { openReceipt } from './pdvReceipt';
+import { PDVPixDialog } from './PDVPixDialog';
+import { PDVCloseSessionDialog, type CashCloseSummary } from './PDVCloseSessionDialog';
+import { PDVParkedDialog } from './PDVParkedDialog';
+import { loadParked, parkSale, removeParked, type ParkedSale } from './pdvParkedStorage';
 
 interface CartItem {
   productCode: string;
@@ -33,7 +39,7 @@ interface CartItem {
 
 interface SplitPayment {
   id: string;
-  method: 'cash' | 'credit_card' | 'debit_card' | 'pix' | 'voucher';
+  method: 'cash' | 'credit_card' | 'debit_card' | 'pix' | 'voucher' | 'credit';
   amount: number;
   installments?: number;
 }
@@ -69,6 +75,7 @@ const paymentMethods = [
   { value: 'debit_card', label: 'Débito', hint: 'F3', icon: CreditCard, color: 'text-indigo-600 bg-indigo-500/10 border-indigo-500/30' },
   { value: 'pix', label: 'PIX', hint: 'F4', icon: QrCode, color: 'text-cyan-600 bg-cyan-500/10 border-cyan-500/30' },
   { value: 'voucher', label: 'Voucher', hint: 'F5', icon: Wallet, color: 'text-amber-600 bg-amber-500/10 border-amber-500/30' },
+  { value: 'credit', label: 'Fiado', hint: 'F6', icon: HandCoins, color: 'text-rose-600 bg-rose-500/10 border-rose-500/30' },
 ] as const;
 
 const SESSION_KEY = 'pdv:session:v1';
@@ -101,6 +108,8 @@ const logAudit = (event: string, payload: Record<string, unknown> = {}) => {
 export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
   const productsQuery = useProducts();
   const clientsQuery = useClients();
+  const updateClient = useUpdateClient();
+  const { categories } = useActiveCategories();
   const products = useMemo(
     () => (productsQuery.data || []).filter((p) => p.status === 'active'),
     [productsQuery.data],
@@ -110,6 +119,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [search, setSearch] = useState('');
   const [inputMode, setInputMode] = useState<InputMode>('search');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [discount, setDiscount] = useState(0);
   const [discountType, setDiscountType] = useState<'value' | 'percent'>('value');
   const [customer, setCustomer] = useState<DbClient | null>(null);
@@ -133,6 +143,13 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
   const [movementAmount, setMovementAmount] = useState(0);
   const [movementNote, setMovementNote] = useState('');
 
+  // Novos gaps
+  const [showPixDialog, setShowPixDialog] = useState<{ splitId: string; amount: number } | null>(null);
+  const [showCloseSession, setShowCloseSession] = useState(false);
+  const [showParked, setShowParked] = useState(false);
+  const [parkedList, setParkedList] = useState<ParkedSale[]>(() => loadParked());
+  const refreshParked = useCallback(() => setParkedList(loadParked()), []);
+
   const searchRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -155,8 +172,10 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
 
   const term = search.trim().toLowerCase();
   const filteredProducts = useMemo(() => {
-    if (!term) return products.slice(0, 24);
-    return products
+    let list = products;
+    if (selectedCategoryId) list = list.filter((p) => p.category_id === selectedCategoryId);
+    if (!term) return list.slice(0, 24);
+    return list
       .filter(
         (p) =>
           p.name.toLowerCase().includes(term) ||
@@ -164,7 +183,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
           (p.barcode || '').includes(term),
       )
       .slice(0, 24);
-  }, [products, term]);
+  }, [products, term, selectedCategoryId]);
 
   const filteredClients = useMemo(() => {
     const q = customerQuery.trim().toLowerCase();
@@ -369,12 +388,65 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
     toastSuccess(`Cliente vinculado: ${c.name}`);
   };
 
+  // Crédito (fiado) disponível para o cliente selecionado
+  const availableCredit = useMemo(() => {
+    if (!customer) return 0;
+    return Math.max(0, (customer.credit_limit || 0) - (customer.current_balance || 0));
+  }, [customer]);
+
   const addSplit = (method: SplitPayment['method']) => {
     const amount = Math.round(remaining * 100) / 100;
     if (amount <= 0) { toastError('Total já foi pago.'); return; }
+
+    if (method === 'credit') {
+      if (!customer) { toastError('Selecione um cliente antes de vender no fiado.'); setShowCustomerPicker(true); return; }
+      const jaFiado = splits.filter((s) => s.method === 'credit').reduce((s, p) => s + p.amount, 0);
+      if (jaFiado + amount > availableCredit + 0.001) {
+        toastError(`Crédito insuficiente. Disponível: ${formatBRL(availableCredit - jaFiado)}`);
+        return;
+      }
+    }
+
     const inst = method === 'credit_card' ? installments : undefined;
-    setSplits((prev) => [...prev, { id: crypto.randomUUID(), method, amount, installments: inst }]);
+    const id = crypto.randomUUID();
+    setSplits((prev) => [...prev, { id, method, amount, installments: inst }]);
+    if (method === 'pix') setShowPixDialog({ splitId: id, amount });
   };
+
+  // Suspender / retomar cupom
+  const suspendSale = () => {
+    if (cart.length === 0) { toastError('Carrinho vazio.'); return; }
+    parkSale({
+      items: cart,
+      discount,
+      discountType,
+      customerId: customer?.id || null,
+      customerName: customer?.name || customerName || undefined,
+      customerDocument: customerDocument || undefined,
+      total,
+      label: customer?.name ? `${customer.name} · ${cart.length} itens` : undefined,
+    });
+    refreshParked();
+    clearAll();
+    logAudit('sale.suspended', { total, items: cart.length });
+    toastSuccess('Cupom suspenso. Retome pelo menu de suspensos.');
+  };
+
+  const resumeParked = (id: string) => {
+    const p = parkedList.find((x) => x.id === id);
+    if (!p) return;
+    setCart(p.items);
+    setDiscount(p.discount);
+    setDiscountType(p.discountType);
+    setCustomerName(p.customerName || '');
+    setCustomerDocument(p.customerDocument || '');
+    const c = clients.find((cl) => cl.id === p.customerId);
+    if (c) setCustomer(c);
+    removeParked(id); refreshParked(); setShowParked(false);
+    toastSuccess('Cupom retomado.');
+  };
+
+  const discardParked = (id: string) => { removeParked(id); refreshParked(); };
 
   const updateSplitAmount = (id: string, raw: number) => {
     if (!Number.isFinite(raw) || raw < 0) { toastError('Valor inválido.'); return; }
@@ -430,7 +502,17 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
         ...prev,
         movements: [...prev.movements, { type: 'sale', amount: cashPortion, at: new Date().toISOString(), note: `Venda ${formatBRL(total)}` }],
       } : prev);
-      logAudit('sale.finalized', { total, methods: splits.map((s) => s.method), customer: customer?.id });
+      // Fiado: debita do saldo do cliente (current_balance sobe = dívida cresce)
+      const fiadoAmount = splits.filter((s) => s.method === 'credit').reduce((s, p) => s + p.amount, 0);
+      if (fiadoAmount > 0 && customer) {
+        try {
+          await updateClient.mutateAsync({
+            id: customer.id,
+            current_balance: Math.round(((customer.current_balance || 0) + fiadoAmount) * 100) / 100,
+          });
+        } catch { toastError('Falha ao debitar fiado do cliente.'); }
+      }
+      logAudit('sale.finalized', { total, methods: splits.map((s) => s.method), customer: customer?.id, fiado: fiadoAmount });
 
       // Emissão do comprovante (PDF + impressão) em nova janela
       const emitData = (emitResult ?? {}) as { number?: string; accessKey?: string; protocol?: string };
@@ -459,15 +541,19 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       const typing = target && ['INPUT', 'TEXTAREA'].includes(target.tagName);
+      if (e.key === 'Escape' && !typing && !showPayment && search) { e.preventDefault(); setSearch(''); return; }
       if (e.key === 'F9' && !typing) { e.preventDefault(); clearAll(); }
       if (e.key === 'F10') { e.preventDefault(); if (!showPayment && cart.length > 0) setShowPayment(true); else if (showPayment) handleFinalize(); }
       if (e.key === 'F12') { e.preventDefault(); setScreenLocked(true); }
+      if (e.key === 'F7' && !typing && cart.length > 0) { e.preventDefault(); suspendSale(); }
+      if (e.key === 'F8' && !typing) { e.preventDefault(); setShowParked(true); }
       if (!showPayment) return;
       if (e.key === 'F1') { e.preventDefault(); addSplit('cash'); }
       if (e.key === 'F2') { e.preventDefault(); addSplit('credit_card'); }
       if (e.key === 'F3') { e.preventDefault(); addSplit('debit_card'); }
       if (e.key === 'F4') { e.preventDefault(); addSplit('pix'); }
       if (e.key === 'F5') { e.preventDefault(); addSplit('voucher'); }
+      if (e.key === 'F6') { e.preventDefault(); addSplit('credit'); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -507,11 +593,46 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
     toastSuccess('Caixa aberto com sucesso.');
   };
 
-  const closeSession = () => {
+  // Fechamento com contagem cega
+  const closeSessionSummary: CashCloseSummary | null = useMemo(() => {
+    if (!session) return null;
+    const sales = session.movements.filter((m) => m.type === 'sale');
+    const sangria = session.movements.filter((m) => m.type === 'sangria').reduce((s, m) => s + m.amount, 0);
+    const suprimento = session.movements.filter((m) => m.type === 'suprimento').reduce((s, m) => s + m.amount, 0);
+    const totalSales = sales.reduce((s, m) => s + m.amount, 0);
+    return {
+      operatorName: session.operatorName,
+      terminalId: session.terminalId,
+      openedAt: session.openedAt,
+      openingAmount: session.openingAmount,
+      totalSales,
+      salesCount: sales.length,
+      sangria,
+      suprimento,
+      expectedCash: cashBalance,
+    };
+  }, [session, cashBalance]);
+
+  const requestCloseSession = () => {
     if (!session) return;
-    logAudit('session.close', { closingBalance: cashBalance, movements: session.movements.length });
+    setShowCloseSession(true);
+  };
+
+  const confirmCloseSession = (result: { countedAmount: number; difference: number }) => {
+    if (!session) return;
+    logAudit('session.close', {
+      closingBalance: cashBalance,
+      counted: result.countedAmount,
+      difference: result.difference,
+      movements: session.movements.length,
+    });
     setSession(null);
-    toastSuccess(`Caixa fechado. Saldo final: ${formatBRL(cashBalance)}`);
+    setShowCloseSession(false);
+    toastSuccess(
+      Math.abs(result.difference) < 0.005
+        ? 'Caixa fechado sem divergência.'
+        : `Caixa fechado com ${result.difference > 0 ? 'sobra' : 'falta'} de ${formatBRL(Math.abs(result.difference))}.`,
+    );
   };
 
   const registerMovement = () => {
@@ -600,7 +721,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                   <Button size="sm" variant="ghost" className="h-8" onClick={() => setScreenLocked(true)}>
                     <Lock className="h-3.5 w-3.5" />
                   </Button>
-                  <Button size="sm" variant="ghost" className="h-8 text-destructive" onClick={closeSession}>
+                  <Button size="sm" variant="ghost" className="h-8 text-destructive" onClick={requestCloseSession}>
                     Fechar caixa
                   </Button>
                 </>
@@ -695,6 +816,43 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                 )}
               </div>
 
+              {/* Category tabs */}
+              {inputMode !== 'camera' && categories.length > 0 && (
+                <div className="px-6 pt-3">
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                    <button
+                      onClick={() => setSelectedCategoryId(null)}
+                      className={cn(
+                        'shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all border-2',
+                        !selectedCategoryId
+                          ? 'bg-primary text-primary-foreground border-primary shadow-md'
+                          : 'bg-background border-transparent hover:border-primary/30 text-muted-foreground',
+                      )}
+                    >
+                      <LayoutGrid className="h-3 w-3" /> Todas
+                    </button>
+                    {categories.map((cat) => {
+                      const c = cat.color || hashColor(cat.name);
+                      const active = selectedCategoryId === cat.id;
+                      return (
+                        <button
+                          key={cat.id}
+                          onClick={() => setSelectedCategoryId(cat.id)}
+                          style={active ? { backgroundColor: c, borderColor: c, color: '#fff' } : { borderColor: `${c}55` }}
+                          className={cn(
+                            'shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all border-2',
+                            !active && 'bg-background hover:brightness-95',
+                          )}
+                        >
+                          <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: active ? '#fff' : c }} />
+                          {cat.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Product grid */}
               {inputMode !== 'camera' && (
                 <div className="px-6 pt-4">
@@ -737,8 +895,18 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                   <Badge variant="outline" className="h-5 text-[10px]">{totalItems} un.</Badge>
                 </div>
                 {cart.length > 0 && (
-                  <Button variant="ghost" size="sm" onClick={clearAll} className="h-7 text-xs text-muted-foreground gap-1">
-                    <Trash2 className="h-3 w-3" /> Limpar (F9)
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="sm" onClick={suspendSale} className="h-7 text-xs text-amber-600 gap-1" title="Suspender cupom (F7)">
+                      <Pause className="h-3 w-3" /> Suspender
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={clearAll} className="h-7 text-xs text-muted-foreground gap-1">
+                      <Trash2 className="h-3 w-3" /> Limpar (F9)
+                    </Button>
+                  </div>
+                )}
+                {cart.length === 0 && parkedList.length > 0 && (
+                  <Button variant="outline" size="sm" onClick={() => setShowParked(true)} className="h-7 text-xs gap-1 border-amber-500/40 text-amber-700">
+                    <Play className="h-3 w-3" /> Retomar ({parkedList.length})
                   </Button>
                 )}
               </div>
@@ -855,6 +1023,14 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                               <div className="text-xs font-bold tabular-nums text-amber-600">+{loyaltyPoints}</div>
                             </div>
                           </div>
+                          {(customer.credit_limit || 0) > 0 && (
+                            <div className="mt-2 rounded-md bg-rose-500/5 border border-rose-500/20 p-2 flex items-center justify-between">
+                              <div className="flex items-center gap-1.5 text-[10px] font-bold text-rose-700 uppercase tracking-widest">
+                                <HandCoins className="h-3 w-3" /> Crédito p/ fiado
+                              </div>
+                              <div className="text-xs font-black tabular-nums text-rose-700">{formatBRL(availableCredit)}</div>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <Button variant="outline" className="w-full h-11 gap-2" onClick={() => setShowCustomerPicker(true)}>
@@ -1069,10 +1245,10 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                     )}
                   </Button>
                 )}
-                <div className="mt-3 flex items-center justify-center gap-3 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
-                  <span>F1 Dinh</span><span>F2 Créd</span><span>F3 Déb</span><span>F4 PIX</span>
+                <div className="mt-3 flex items-center justify-center gap-3 text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex-wrap">
+                  <span>F1 Dinh</span><span>F2 Créd</span><span>F3 Déb</span><span>F4 PIX</span><span>F5 Voucher</span><span>F6 Fiado</span>
                   <span className="opacity-40">|</span>
-                  <span>F9 Limpar</span><span>F10 Finalizar</span><span>F12 Bloq</span>
+                  <span>F7 Suspender</span><span>F8 Retomar</span><span>F9 Limpar</span><span>F10 Finalizar</span><span>F12 Bloq</span>
                 </div>
               </div>
             </div>
@@ -1201,6 +1377,34 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
             </div>
           </div>
         )}
+
+        {/* PIX QR dialog */}
+        <PDVPixDialog
+          open={!!showPixDialog}
+          amount={showPixDialog?.amount || 0}
+          onConfirm={() => setShowPixDialog(null)}
+          onCancel={() => {
+            if (showPixDialog) removeSplit(showPixDialog.splitId);
+            setShowPixDialog(null);
+          }}
+        />
+
+        {/* Blind cash close */}
+        <PDVCloseSessionDialog
+          open={showCloseSession}
+          summary={closeSessionSummary}
+          onCancel={() => setShowCloseSession(false)}
+          onClose={confirmCloseSession}
+        />
+
+        {/* Parked sales */}
+        <PDVParkedDialog
+          open={showParked}
+          parked={parkedList}
+          onClose={() => setShowParked(false)}
+          onResume={resumeParked}
+          onDelete={discardParked}
+        />
       </DialogContent>
     </Dialog>
   );

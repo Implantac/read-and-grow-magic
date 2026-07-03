@@ -2551,9 +2551,11 @@ export type Database = {
       categories: {
         Row: {
           active: boolean
+          color: string | null
           company_id: string | null
           created_at: string
           description: string | null
+          icon: string | null
           id: string
           name: string
           parent_id: string | null
@@ -2561,9 +2563,11 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          color?: string | null
           company_id?: string | null
           created_at?: string
           description?: string | null
+          icon?: string | null
           id?: string
           name: string
           parent_id?: string | null
@@ -2571,9 +2575,11 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          color?: string | null
           company_id?: string | null
           created_at?: string
           description?: string | null
+          icon?: string | null
           id?: string
           name?: string
           parent_id?: string | null
