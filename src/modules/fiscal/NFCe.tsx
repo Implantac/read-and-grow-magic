@@ -14,10 +14,12 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
+  Undo2,
   CreditCard,
   Banknote,
   QrCode,
 } from 'lucide-react';
+
 import { ExportButton } from '@/shared/components/ExportButton';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
