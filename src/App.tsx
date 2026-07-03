@@ -25,6 +25,7 @@ import { GatedOutlet } from '@/components/plan/GatedOutlet';
 import { OnboardingGuard } from '@/components/OnboardingGuard';
 import { ConfirmDialogProvider } from '@/shared/components/ConfirmDialog';
 import { ModuleErrorBoundary } from '@/shared/components/ModuleErrorBoundary';
+import { RequirePermission } from '@/components/auth/RequirePermission';
 import { useLowMarginAlertsRealtime } from '@/hooks/commercial/useLowMarginAlertsRealtime';
 
 const RealtimeAlertsBridge = () => {
