@@ -50,6 +50,8 @@ export function useNFCe() {
       change: Number(row.change_amount),
       authorizationDate: row.authorization_date,
       cancellationDate: row.cancellation_date,
+      cancellationReason: row.cancellation_reason,
+      returnStatus: row.return_status || 'none',
       items: itemsMap.get(row.id) || [],
       createdAt: row.created_at,
     }));
@@ -57,6 +59,7 @@ export function useNFCe() {
     setNfces(mapped);
     setLoading(false);
   }, []);
+
 
   const emit = useCallback(async (data: {
     items: { productCode: string; productName: string; productId?: string; quantity: number; unitPrice: number; unit?: string }[];
