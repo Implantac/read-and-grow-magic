@@ -311,6 +311,15 @@ export default function SalesDeskPage() {
           o2c.trigger();
         }}
       />
+
+      <PDVDialog
+        open={pdvOpen}
+        onOpenChange={setPdvOpen}
+        onEmit={() => {
+          toast.success('Venda registrada no PDV', { description: 'Cupom emitido com sucesso.' });
+        }}
+      />
     </PageContainer>
   );
+
 }
