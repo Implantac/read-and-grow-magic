@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import logoUseSistemas from '@/assets/logo.png';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -237,7 +237,7 @@ function CustomEntitiesNav({ sidebarCollapsed, isActive }: { sidebarCollapsed: b
 
 export function Sidebar() {
   const location = useLocation();
-  const { sidebarCollapsed, user } = useAppStore();
+  const { sidebarCollapsed, sidebarMobileOpen, setSidebarMobileOpen, user } = useAppStore();
   const { signOut } = useAuth({ initialize: false });
   const { segment } = useEnterprise();
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
@@ -254,19 +254,40 @@ export function Sidebar() {
     return location.pathname.startsWith(href);
   };
 
+  // Auto-close mobile drawer on route change
+  useEffect(() => {
+    if (sidebarMobileOpen) setSidebarMobileOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
   return (
     <TooltipProvider delayDuration={0}>
+      {/* Mobile backdrop */}
+      <div
+        onClick={() => setSidebarMobileOpen(false)}
+        aria-hidden="true"
+        className={cn(
+          'fixed inset-0 z-30 bg-background/60 backdrop-blur-sm md:hidden transition-opacity duration-300',
+          sidebarMobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        )}
+      />
       <aside
         aria-label="Navegação principal"
         className={cn(
-          'fixed left-0 top-0 z-40 flex h-dvh flex-col bg-sidebar transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
-          sidebarCollapsed ? 'w-16' : 'w-64'
+          'fixed left-0 top-0 z-40 flex h-dvh flex-col bg-sidebar transition-[width,transform] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
+          // Width: on md+ respect collapsed; on mobile always full drawer width
+          'w-64',
+          sidebarCollapsed ? 'md:w-16' : 'md:w-64',
+          // Slide off-canvas on mobile
+          sidebarMobileOpen ? 'translate-x-0' : '-translate-x-full',
+          'md:translate-x-0'
         )}
         style={{
           boxShadow: '1px 0 0 0 hsl(var(--sidebar-border) / 0.6), 6px 0 32px -8px hsl(222 33% 4% / 0.55)',
           background: 'var(--gradient-sidebar)'
         }}
       >
+
 
         {/* Header/Logo */}
         <div className="flex h-14 shrink-0 items-center border-b border-sidebar-border/40 px-3">
