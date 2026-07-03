@@ -505,8 +505,7 @@ export default function NFCePage() {
         </DialogContent>
       </Dialog>
 
-      {/* PDV Dialog */}
-      <PDVDialog open={pdvOpen} onOpenChange={setPdvOpen} onEmit={emit} />
+      {/* PDV movido para /comercial/pdv — fonte única */}
 
       {/* Cancel Dialog */}
       <NFCeCancelDialog
