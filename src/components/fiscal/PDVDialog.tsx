@@ -621,8 +621,22 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">R$</span>
                           <Input
                             type="number"
+                            min={0}
+                            step="0.01"
                             value={discount || ''}
-                            onChange={(e) => setDiscount(toSafeNumber(e.target.value))}
+                            onChange={(e) => {
+                              const v = toSafeNumber(e.target.value);
+                              if (!Number.isFinite(v) || v < 0) {
+                                toastError('Desconto inválido.');
+                                return;
+                              }
+                              if (v > subtotal) {
+                                toastError('Desconto não pode ser maior que o subtotal.');
+                                setDiscount(subtotal);
+                                return;
+                              }
+                              setDiscount(Math.round(v * 100) / 100);
+                            }}
                             className="text-right font-bold h-10 pl-8 bg-background border-2"
                             placeholder="0,00"
                           />
