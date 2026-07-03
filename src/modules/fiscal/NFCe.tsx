@@ -498,6 +498,36 @@ export default function NFCePage() {
 
       {/* PDV Dialog */}
       <PDVDialog open={pdvOpen} onOpenChange={setPdvOpen} onEmit={emit} />
+
+      {/* Cancel Dialog */}
+      <NFCeCancelDialog
+        nfce={cancelTarget}
+        open={!!cancelTarget}
+        onOpenChange={(v) => { if (!v) setCancelTarget(null); }}
+        onConfirm={async (reason) => {
+          if (!cancelTarget) return false;
+          return cancelNFCe(cancelTarget.id, reason);
+        }}
+      />
+
+      {/* Return Dialog */}
+      <NFCeReturnDialog
+        nfce={returnTarget}
+        open={!!returnTarget}
+        onOpenChange={(v) => { if (!v) setReturnTarget(null); }}
+        onConfirm={async ({ reason, refundMethod, items }) => {
+          if (!returnTarget) return null;
+          return createReturn({
+            nfceId: returnTarget.id,
+            reason,
+            refundMethod,
+            items,
+            terminalId: returnTarget.terminalId,
+            operatorName: returnTarget.operatorName,
+          });
+        }}
+      />
     </PageContainer>
   );
+
 }
