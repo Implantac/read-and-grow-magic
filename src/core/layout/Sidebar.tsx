@@ -342,14 +342,20 @@ export function Sidebar() {
       window.addEventListener('keydown', onKey);
       return () => window.removeEventListener('keydown', onKey);
     } else {
-      // Restore focus to the element that opened the drawer
+      // Restore focus to the trigger that opened the drawer.
+      // Prefer the saved reference; fall back to the element with aria-controls="app-sidebar"
+      // (the hamburger button in the Topbar) if the ref was lost (e.g. re-render/HMR).
       const prev = previouslyFocusedRef.current;
-      if (prev && typeof prev.focus === 'function') {
-        // Defer restore so it doesn't collide with the closing transition/state updates
-        requestAnimationFrame(() => prev.focus());
+      const fallback = document.querySelector<HTMLElement>('[aria-controls="app-sidebar"]');
+      const target = (prev && document.body.contains(prev) ? prev : fallback) || null;
+      if (target && typeof target.focus === 'function') {
+        // Double rAF: waits for React commit + route transition before restoring focus,
+        // so it survives closes triggered by nav-item clicks or backdrop clicks.
+        requestAnimationFrame(() => requestAnimationFrame(() => target.focus()));
       }
       previouslyFocusedRef.current = null;
     }
+
   }, [sidebarMobileOpen, isMobile, setSidebarMobileOpen]);
 
 
