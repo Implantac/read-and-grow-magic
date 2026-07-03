@@ -1426,7 +1426,8 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
           onResume={resumeParked}
           onDelete={discardParked}
         />
-      </DialogContent>
-    </Dialog>
+      </>
+    </Shell>
+
   );
 }
