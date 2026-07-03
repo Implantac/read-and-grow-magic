@@ -7,8 +7,8 @@ const BrainCommandCenter = lazy(() => import("../pages/executive/BrainCommandCen
 const BrainLearning = lazy(() => import("../pages/executive/BrainLearning"));
 
 export const ExecutiveRoutes = [
-  <Route key="exec-dash" path="/executive/executive" element={<ExecutiveDashboard />} />,
-  <Route key="exec-brain" path="/executive/brain" element={<Brain />} />,
-  <Route key="exec-brain-cmd" path="/executive/brain/comando" element={<BrainCommandCenter />} />,
-  <Route key="exec-brain-learn" path="/executive/brain/aprendizado" element={<BrainLearning />} />,
+  <Route key="exec-dash" path="executive" element={<ExecutiveDashboard />} />,
+  <Route key="exec-brain" path="brain" element={<Brain />} />,
+  <Route key="exec-brain-cmd" path="brain/comando" element={<BrainCommandCenter />} />,
+  <Route key="exec-brain-learn" path="brain/aprendizado" element={<BrainLearning />} />,
 ];

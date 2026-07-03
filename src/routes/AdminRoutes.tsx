@@ -23,16 +23,16 @@ const superOnly = (el: JSX.Element) => (
 );
 
 export const AdminRoutes = [
-  <Route key="adm-users" path="/admin/usuarios" element={adminOnly(<UsersPage />)} />,
-  <Route key="adm-comp" path="/admin/empresas" element={adminOnly(<CompaniesPage />)} />,
-  <Route key="adm-param" path="/admin/parametros" element={adminOnly(<ParametersPage />)} />,
-  <Route key="adm-super" path="/admin/super" element={superOnly(<SuperAdminPage />)} />,
-  <Route key="adm-rep" path="/admin/relatorios" element={adminOnly(<DailyReportsPage />)} />,
-  <Route key="adm-audit" path="/admin/auditoria" element={adminOnly(<CrossModuleAuditPage />)} />,
-  <Route key="adm-metadata" path="/admin/metadata" element={adminOnly(<MetadataConfiguratorPage />)} />,
-  <Route key="adm-workflow" path="/admin/workflows" element={adminOnly(<WorkflowEnginePage />)} />,
-  <Route key="adm-automation" path="/admin/automacoes" element={adminOnly(<AutomationEnginePage />)} />,
-  <Route key="adm-dashboards" path="/admin/dashboards" element={adminOnly(<DashboardEnginePage />)} />,
-  <Route key="adm-security-audit" path="/admin/seguranca/auditoria" element={adminOnly(<SecurityAuditPage />)} />,
+  <Route key="adm-users" path="usuarios" element={adminOnly(<UsersPage />)} />,
+  <Route key="adm-comp" path="empresas" element={adminOnly(<CompaniesPage />)} />,
+  <Route key="adm-param" path="parametros" element={adminOnly(<ParametersPage />)} />,
+  <Route key="adm-super" path="super" element={superOnly(<SuperAdminPage />)} />,
+  <Route key="adm-rep" path="relatorios" element={adminOnly(<DailyReportsPage />)} />,
+  <Route key="adm-audit" path="auditoria" element={adminOnly(<CrossModuleAuditPage />)} />,
+  <Route key="adm-metadata" path="metadata" element={adminOnly(<MetadataConfiguratorPage />)} />,
+  <Route key="adm-workflow" path="workflows" element={adminOnly(<WorkflowEnginePage />)} />,
+  <Route key="adm-automation" path="automacoes" element={adminOnly(<AutomationEnginePage />)} />,
+  <Route key="adm-dashboards" path="dashboards" element={adminOnly(<DashboardEnginePage />)} />,
+  <Route key="adm-security-audit" path="seguranca/auditoria" element={adminOnly(<SecurityAuditPage />)} />,
 ];
 
