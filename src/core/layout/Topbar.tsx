@@ -332,7 +332,7 @@ export function Topbar() {
         </Button>
 
         {/* Divider */}
-        <div className="mx-2 h-6 w-px bg-sidebar-border/60" aria-hidden="true" />
+        <div className="mx-2 hidden sm:block h-6 w-px bg-sidebar-border/60" aria-hidden="true" />
 
         {/* User Menu */}
         <DropdownMenu modal={false}>
