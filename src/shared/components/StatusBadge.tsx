@@ -183,11 +183,12 @@ export function StatusBadge({ type, status, className }: StatusBadgeProps) {
     <Badge
       variant="outline"
       className={cn(
-        'font-medium border',
+        'font-medium border gap-1.5 pl-2',
         variantStyles[config.variant],
         className
       )}
     >
+      <span className={cn('inline-block h-1.5 w-1.5 rounded-full', dotStyles[config.variant])} aria-hidden="true" />
       {config.label}
     </Badge>
   );
