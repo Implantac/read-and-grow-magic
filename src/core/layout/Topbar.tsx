@@ -103,7 +103,7 @@ export function Topbar() {
 
 
       {/* Left Section */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <Button
           variant="ghost"
           size="icon"
@@ -117,21 +117,25 @@ export function Topbar() {
           aria-label={sidebarCollapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'}
           aria-controls="app-sidebar"
           aria-expanded={!sidebarCollapsed}
-          className="h-8 w-8 text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-colors focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+          className="h-9 w-9 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-all focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
         >
-          <Menu className="h-4 w-4" aria-hidden="true" />
+          <Menu className="h-[18px] w-[18px]" aria-hidden="true" />
         </Button>
 
-
+        <div className="mx-1 hidden sm:block h-6 w-px bg-sidebar-border/60" aria-hidden="true" />
 
         {/* Company/Branch Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2 h-8 px-3 text-sidebar-foreground/80 hover:text-primary hover:bg-sidebar-accent/50 text-sm font-medium">
+            <Button
+              variant="ghost"
+              className="group flex items-center gap-2 h-9 px-3 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 text-sidebar-foreground hover:text-primary hover:bg-sidebar-accent/50 hover:border-primary/30 text-sm font-medium transition-all"
+            >
+              <Building2 className="h-3.5 w-3.5 text-primary/70 group-hover:text-primary" aria-hidden="true" />
               <span className="max-w-[180px] truncate">
                 {activeCompany?.name || 'Selecionar Empresa'}
               </span>
-              <ChevronDown className="h-3.5 w-3.5 opacity-50" />
+              <ChevronDown className="h-3.5 w-3.5 opacity-50 transition-transform group-data-[state=open]:rotate-180" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-64 bg-sidebar border-sidebar-border">
@@ -155,11 +159,15 @@ export function Topbar() {
         {activeCompany && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2 h-8 px-3 text-sidebar-foreground/50 hover:text-sidebar-foreground/80 hover:bg-sidebar-accent/50 text-sm">
+              <Button
+                variant="ghost"
+                className="group hidden sm:flex items-center gap-2 h-9 px-3 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 text-sm transition-all"
+              >
+                <span className="text-sidebar-foreground/40">/</span>
                 <span className="max-w-[120px] truncate">
                   {activeBranch?.name || 'Filial'}
                 </span>
-                <ChevronDown className="h-3 w-3 opacity-50" />
+                <ChevronDown className="h-3 w-3 opacity-50 transition-transform group-data-[state=open]:rotate-180" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56 bg-sidebar border-sidebar-border">
@@ -189,14 +197,16 @@ export function Topbar() {
           variant="ghost"
           size="sm"
           onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
-          className="hidden md:flex items-center gap-2 h-8 px-3 text-sidebar-foreground/40 hover:text-sidebar-foreground/70 hover:bg-sidebar-accent/50 text-xs"
+          className="hidden md:flex items-center gap-2 h-9 px-3 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 text-sidebar-foreground/50 hover:text-primary hover:bg-sidebar-accent/50 hover:border-primary/30 text-xs transition-all"
         >
           <Search className="h-3.5 w-3.5" />
-          <span>Buscar</span>
-          <kbd className="ml-1 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-sidebar-border/50 bg-sidebar-accent/30 px-1.5 font-mono text-[10px] font-medium text-sidebar-foreground/40">
+          <span>Buscar…</span>
+          <kbd className="ml-2 pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border border-sidebar-border/60 bg-sidebar-background/60 px-1.5 font-mono text-[10px] font-medium text-sidebar-foreground/50">
             <Command className="h-2.5 w-2.5" />K
           </kbd>
         </Button>
+
+
 
         {/* Theme Toggle */}
         <Button
