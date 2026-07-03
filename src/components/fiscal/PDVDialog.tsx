@@ -593,11 +593,46 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
     toastSuccess('Caixa aberto com sucesso.');
   };
 
-  const closeSession = () => {
+  // Fechamento com contagem cega
+  const closeSessionSummary: CashCloseSummary | null = useMemo(() => {
+    if (!session) return null;
+    const sales = session.movements.filter((m) => m.type === 'sale');
+    const sangria = session.movements.filter((m) => m.type === 'sangria').reduce((s, m) => s + m.amount, 0);
+    const suprimento = session.movements.filter((m) => m.type === 'suprimento').reduce((s, m) => s + m.amount, 0);
+    const totalSales = sales.reduce((s, m) => s + m.amount, 0);
+    return {
+      operatorName: session.operatorName,
+      terminalId: session.terminalId,
+      openedAt: session.openedAt,
+      openingAmount: session.openingAmount,
+      totalSales,
+      salesCount: sales.length,
+      sangria,
+      suprimento,
+      expectedCash: cashBalance,
+    };
+  }, [session, cashBalance]);
+
+  const requestCloseSession = () => {
     if (!session) return;
-    logAudit('session.close', { closingBalance: cashBalance, movements: session.movements.length });
+    setShowCloseSession(true);
+  };
+
+  const confirmCloseSession = (result: { countedAmount: number; difference: number }) => {
+    if (!session) return;
+    logAudit('session.close', {
+      closingBalance: cashBalance,
+      counted: result.countedAmount,
+      difference: result.difference,
+      movements: session.movements.length,
+    });
     setSession(null);
-    toastSuccess(`Caixa fechado. Saldo final: ${formatBRL(cashBalance)}`);
+    setShowCloseSession(false);
+    toastSuccess(
+      Math.abs(result.difference) < 0.005
+        ? 'Caixa fechado sem divergência.'
+        : `Caixa fechado com ${result.difference > 0 ? 'sobra' : 'falta'} de ${formatBRL(Math.abs(result.difference))}.`,
+    );
   };
 
   const registerMovement = () => {
