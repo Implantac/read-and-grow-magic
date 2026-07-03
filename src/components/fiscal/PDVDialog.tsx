@@ -143,6 +143,13 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
   const [movementAmount, setMovementAmount] = useState(0);
   const [movementNote, setMovementNote] = useState('');
 
+  // Novos gaps
+  const [showPixDialog, setShowPixDialog] = useState<{ splitId: string; amount: number } | null>(null);
+  const [showCloseSession, setShowCloseSession] = useState(false);
+  const [showParked, setShowParked] = useState(false);
+  const [parkedList, setParkedList] = useState<ParkedSale[]>(() => loadParked());
+  const refreshParked = useCallback(() => setParkedList(loadParked()), []);
+
   const searchRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
