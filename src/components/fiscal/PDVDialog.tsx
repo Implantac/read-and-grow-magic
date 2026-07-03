@@ -391,8 +391,29 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
 
     setSaving(true);
     const primary = splits.length === 1 ? splits[0].method : 'multiple';
+    // Snapshot para o comprovante (o clearAll limpa o estado depois)
+    const receiptSnapshot = {
+      items: cart.map((i) => ({
+        productCode: i.productCode,
+        productName: i.productName,
+        quantity: i.quantity,
+        unitPrice: i.unitPrice,
+        unit: i.unit,
+      })),
+      subtotal,
+      discount: discountValue,
+      total,
+      paid: paidTotal,
+      change,
+      splits: splits.map((s) => ({ method: s.method, amount: s.amount, installments: s.installments })),
+      customerName: customerName || undefined,
+      customerDocument: customerDocument || undefined,
+      loyaltyPoints,
+      terminalId: session.terminalId,
+      operatorName: session.operatorName,
+    };
     try {
-      await onEmit({
+      const emitResult = await onEmit({
         items: cart,
         paymentMethod: primary,
         amountPaid: paidTotal,
@@ -409,6 +430,20 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
         movements: [...prev.movements, { type: 'sale', amount: cashPortion, at: new Date().toISOString(), note: `Venda ${formatBRL(total)}` }],
       } : prev);
       logAudit('sale.finalized', { total, methods: splits.map((s) => s.method), customer: customer?.id });
+
+      // Emissão do comprovante (PDF + impressão) em nova janela
+      const emitData = (emitResult ?? {}) as { number?: string; accessKey?: string; protocol?: string };
+      const printed = openReceipt({
+        ...receiptSnapshot,
+        issuedAt: new Date(),
+        saleNumber: emitData.number,
+        accessKey: emitData.accessKey,
+        authorizationProtocol: emitData.protocol,
+      });
+      if (!printed) {
+        toastError('Popup bloqueado: libere a janela para imprimir o comprovante.');
+      }
+
       clearAll();
       setShowPayment(false);
       onOpenChange(false);
