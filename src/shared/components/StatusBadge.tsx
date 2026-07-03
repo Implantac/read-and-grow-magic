@@ -123,6 +123,15 @@ const variantStyles: Record<StatusVariant, string> = {
   secondary: 'bg-muted text-muted-foreground border-border',
 };
 
+const dotStyles: Record<StatusVariant, string> = {
+  default: 'bg-primary',
+  success: 'bg-success',
+  warning: 'bg-warning',
+  destructive: 'bg-destructive',
+  info: 'bg-info',
+  secondary: 'bg-muted-foreground',
+};
+
 export interface StatusBadgeProps {
   type: 'order' | 'sale' | 'client' | 'priority' | 'payment' | 'quotation' | 'inventory' | 'shipment' | 'production' | 'nfe' | 'accounting';
   status: string;
