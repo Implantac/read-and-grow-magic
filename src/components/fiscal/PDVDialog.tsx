@@ -721,7 +721,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                   <Button size="sm" variant="ghost" className="h-8" onClick={() => setScreenLocked(true)}>
                     <Lock className="h-3.5 w-3.5" />
                   </Button>
-                  <Button size="sm" variant="ghost" className="h-8 text-destructive" onClick={closeSession}>
+                  <Button size="sm" variant="ghost" className="h-8 text-destructive" onClick={requestCloseSession}>
                     Fechar caixa
                   </Button>
                 </>
