@@ -99,6 +99,23 @@ export function useCreateOrder() {
   return useMutation({
     mutationFn: async (input: CreateOrderInput) => {
       if (!currentCompany?.id) throw new Error('Empresa não selecionada');
+
+      // Valida client_id antes de inserir (evita FK 23503 → PostgREST 409 opaco).
+      let safeClientId: string | null = input.client_id || null;
+      if (safeClientId) {
+        const { data: clientRow, error: clientErr } = await supabase
+          .from('clients')
+          .select('id')
+          .eq('id', safeClientId)
+          .eq('company_id', currentCompany.id)
+          .maybeSingle();
+        if (clientErr) throw clientErr;
+        if (!clientRow) {
+          // cliente foi deletado ou pertence a outro tenant → grava sem vínculo em vez de estourar 409
+          safeClientId = null;
+        }
+      }
+
       const { data: lastOrder } = await supabase
         .from('orders')
         .select('number')
@@ -138,7 +155,7 @@ export function useCreateOrder() {
         .insert({
           company_id: currentCompany.id,
           number: nextNum,
-          client_id: input.client_id || null,
+          client_id: safeClientId,
           client_name: input.client_name,
           delivery_date: input.delivery_date || null,
           payment_method: input.payment_method,
@@ -158,7 +175,16 @@ export function useCreateOrder() {
         .select()
         .single();
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        // Loga metadados completos do Postgres (code/details/hint) para debug de futuros 409.
+        console.error('[useCreateOrder] insert failed', {
+          code: (orderError as any).code,
+          message: orderError.message,
+          details: (orderError as any).details,
+          hint: (orderError as any).hint,
+        });
+        throw orderError;
+      }
 
       const items = input.items.map((item) => ({
         company_id: currentCompany.id,
