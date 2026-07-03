@@ -68,15 +68,17 @@ function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, ex
   const isItemActive = isActive(item.href) || isParentActive(item.href);
 
   const baseClasses = cn(
-    'group relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-200 outline-none',
+    'group relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium outline-none',
+    'transition-[background-color,color,box-shadow,transform] duration-200 ease-out',
+    'focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar',
     isItemActive
-      ? 'bg-primary/10 text-primary shadow-sm ring-1 ring-primary/20'
-      : 'text-sidebar-foreground/60 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+      ? 'bg-primary/10 text-primary ring-1 ring-primary/20 shadow-[0_1px_0_0_hsl(var(--sidebar-border)/0.4),inset_0_1px_0_0_hsl(var(--primary)/0.08)]'
+      : 'text-sidebar-foreground/65 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground active:scale-[0.985]'
   );
 
   const indicator = isItemActive && (
     <span
-      className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r-full bg-primary"
+      className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r-full bg-gradient-to-b from-primary to-primary-glow shadow-[0_0_8px_hsl(var(--primary)/0.5)]"
       style={{ height: '18px', animation: 'sidebar-indicator 0.3s cubic-bezier(0.16, 1, 0.3, 1)' }}
     />
   );
@@ -85,9 +87,10 @@ function NavItemComponent({ item, sidebarCollapsed, isActive, isParentActive, ex
   const iconElement = Icon && (
     <Icon className={cn(
       'h-[18px] w-[18px] shrink-0 transition-all duration-200',
-      isItemActive ? 'text-primary' : 'text-sidebar-foreground/40 group-hover:text-primary/70'
+      isItemActive ? 'text-primary' : 'text-sidebar-foreground/45 group-hover:text-primary/80'
     )} />
   );
+
 
   const navButton = (
     <button
@@ -256,37 +259,39 @@ export function Sidebar() {
       <aside
         aria-label="Navegação principal"
         className={cn(
-          'fixed left-0 top-0 z-40 flex h-dvh flex-col bg-sidebar transition-all duration-300 ease-in-out',
+          'fixed left-0 top-0 z-40 flex h-dvh flex-col bg-sidebar transition-[width] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
           sidebarCollapsed ? 'w-16' : 'w-64'
         )}
-        style={{ 
-          boxShadow: '1px 0 0 0 hsl(var(--sidebar-border)), 4px 0 24px -4px hsl(222 33% 8% / 0.5)',
-          background: 'linear-gradient(180deg, hsl(var(--sidebar-background)) 0%, hsl(var(--sidebar-background) / 0.98) 100%)'
+        style={{
+          boxShadow: '1px 0 0 0 hsl(var(--sidebar-border) / 0.6), 6px 0 32px -8px hsl(222 33% 4% / 0.55)',
+          background: 'var(--gradient-sidebar)'
         }}
       >
+
         {/* Header/Logo */}
-        <div className="flex h-16 shrink-0 items-center border-b border-sidebar-border/40 px-4">
+        <div className="flex h-14 shrink-0 items-center border-b border-sidebar-border/40 px-3">
           {sidebarCollapsed ? (
             <div className="flex w-full justify-center">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 transition-all duration-300 hover:scale-105 hover:bg-primary/20 ring-1 ring-primary/20">
-                <img src={logoUseSistemas} alt="Use Sistemas" className="h-7 w-7 object-contain" />
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/25 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_16px_hsl(var(--primary)/0.35)]">
+                <img src={logoUseSistemas} alt="Use Sistemas" className="h-6 w-6 object-contain" />
               </div>
             </div>
           ) : (
-            <div className="flex items-center gap-3.5 px-1 animate-fade-in">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 shadow-inner ring-1 ring-primary/20">
-                <img src={logoUseSistemas} alt="Use Sistemas" className="h-8 w-8 object-contain" />
+            <div className="flex items-center gap-3 px-1 animate-fade-in">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/25 shadow-inner">
+                <img src={logoUseSistemas} alt="Use Sistemas" className="h-7 w-7 object-contain" />
               </div>
-              <div className="flex flex-col">
-                <span className="text-[15px] font-bold text-sidebar-foreground leading-tight tracking-tight">Use Sistemas</span>
+              <div className="flex flex-col min-w-0">
+                <span className="text-[14px] font-bold text-sidebar-foreground leading-tight tracking-tight truncate">Use Sistemas</span>
                 <div className="flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" aria-hidden="true" />
-                  <p className="text-[10px] font-bold text-primary/80 uppercase tracking-widest">ERP & WMS</p>
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_6px_hsl(var(--primary)/0.8)] animate-pulse" aria-hidden="true" />
+                  <p className="text-[9px] font-bold text-primary/85 uppercase tracking-[0.14em]">ERP & WMS</p>
                 </div>
               </div>
             </div>
           )}
         </div>
+
 
         {/* Navigation Content */}
         <nav aria-label="Módulos do sistema" className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin px-3 py-4 space-y-6">
