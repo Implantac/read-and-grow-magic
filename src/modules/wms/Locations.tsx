@@ -85,24 +85,23 @@ export default function LocationsPage() {
             {!wId && <p className="text-sm text-muted-foreground">Selecione um armazém.</p>}
             {wId && filteredZones.length === 0 && <EmptyState compact icon={Layers} title="Sem zonas" description="Divida o armazém em zonas (picking, bulk, refrigerada) para organizar operações." />}
             {filteredZones.map(z => (
-              <div key={z.id} className={`rounded-md border p-3 transition hover:bg-muted/50 ${zId === z.id ? 'border-primary bg-muted/40' : ''}`}>
-                <button onClick={() => setSelectedZone(z.id)} className="w-full text-left">
-                  <div className="flex justify-between items-start gap-2">
-                    <div>
-                      <p className="font-medium">{z.code} — {z.name}</p>
-                      <div className="flex gap-1 mt-1 flex-wrap">
-                        <Badge variant="outline" className="text-xs">{z.zone_type}</Badge>
-                        {z.is_picking_zone && <Badge variant="secondary" className="text-xs">Picking</Badge>}
-                        {z.is_bulk_zone && <Badge variant="secondary" className="text-xs">Bulk</Badge>}
-                        {z.temperature_range && <Badge variant="outline" className="text-xs">{z.temperature_range}</Badge>}
-                      </div>
+              <div key={z.id} className={`rounded-md border p-3 transition hover:bg-muted/50 cursor-pointer ${zId === z.id ? 'border-primary bg-muted/40' : ''}`} onClick={() => setSelectedZone(z.id)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelectedZone(z.id); }}>
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <p className="font-medium">{z.code} — {z.name}</p>
+                    <div className="flex gap-1 mt-1 flex-wrap">
+                      <Badge variant="outline" className="text-xs">{z.zone_type}</Badge>
+                      {z.is_picking_zone && <Badge variant="secondary" className="text-xs">Picking</Badge>}
+                      {z.is_bulk_zone && <Badge variant="secondary" className="text-xs">Bulk</Badge>}
+                      {z.temperature_range && <Badge variant="outline" className="text-xs">{z.temperature_range}</Badge>}
                     </div>
-                    <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); deleteZone(z.id); }}>
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
                   </div>
-                </button>
+                  <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); deleteZone(z.id); }}>
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
               </div>
+
             ))}
           </CardContent>
         </Card>
