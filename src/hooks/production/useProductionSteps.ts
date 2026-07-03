@@ -93,7 +93,7 @@ export function useProductionOrderSteps(productionOrderId?: string) {
       .order('sequence', { ascending: true });
     if (error) { console.error(error); toast.error('Erro ao carregar etapas da OP'); setLoading(false); return; }
 
-    const stepIds = Array.from(new Set((data || []).map((d: any) => d.step_id).filter(Boolean)));
+    const stepIds = Array.from(new Set((data || []).map((d: any) => d.step_id as string).filter(Boolean))) as string[];
     let stepsMap = new Map<string, any>();
     if (stepIds.length > 0) {
       const { data: steps } = await supabase
