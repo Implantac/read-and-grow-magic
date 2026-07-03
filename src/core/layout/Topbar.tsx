@@ -87,7 +87,7 @@ export function Topbar() {
   return (
     <header
       className={cn(
-        'fixed right-0 top-0 z-30 flex h-14 items-center justify-between border-b border-sidebar-border/40 px-3 sm:px-4 transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] backdrop-blur-xl supports-[backdrop-filter]:bg-[hsl(var(--sidebar-background)/0.72)]',
+        'fixed right-0 top-0 z-30 flex h-14 items-center justify-between gap-2 border-b border-sidebar-border/40 px-2 sm:px-4 transition-[left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] backdrop-blur-xl supports-[backdrop-filter]:bg-[hsl(var(--sidebar-background)/0.72)]',
         'left-0',
         sidebarCollapsed ? 'md:left-16' : 'md:left-64'
       )}
@@ -129,11 +129,11 @@ export function Topbar() {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="group flex items-center gap-2 h-9 px-3 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 text-sidebar-foreground hover:text-primary hover:bg-sidebar-accent/50 hover:border-primary/30 text-sm font-medium transition-all"
+              className="group flex items-center gap-2 h-9 px-2 sm:px-3 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 text-sidebar-foreground hover:text-primary hover:bg-sidebar-accent/50 hover:border-primary/30 text-sm font-medium transition-all"
             >
-              <Building2 className="h-3.5 w-3.5 text-primary/70 group-hover:text-primary" aria-hidden="true" />
-              <span className="max-w-[180px] truncate">
-                {activeCompany?.name || 'Selecionar Empresa'}
+              <Building2 className="h-3.5 w-3.5 text-primary/70 group-hover:text-primary shrink-0" aria-hidden="true" />
+              <span className="max-w-[110px] sm:max-w-[180px] truncate">
+                {activeCompany?.name || 'Empresa'}
               </span>
               <ChevronDown className="h-3.5 w-3.5 opacity-50 transition-transform group-data-[state=open]:rotate-180" />
             </Button>
@@ -293,7 +293,7 @@ export function Topbar() {
           onClick={() => navigate('/executive/executive')}
           title="IA Executiva"
           aria-label="Abrir IA Executiva"
-          className="h-9 w-9 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-all"
+          className="hidden sm:inline-flex h-9 w-9 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-all"
         >
           <Sparkles className="h-[18px] w-[18px]" aria-hidden="true" />
         </Button>
@@ -332,7 +332,7 @@ export function Topbar() {
         </Button>
 
         {/* Divider */}
-        <div className="mx-2 h-6 w-px bg-sidebar-border/60" aria-hidden="true" />
+        <div className="mx-2 hidden sm:block h-6 w-px bg-sidebar-border/60" aria-hidden="true" />
 
         {/* User Menu */}
         <DropdownMenu modal={false}>
