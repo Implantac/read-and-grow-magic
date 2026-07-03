@@ -85,20 +85,27 @@ export function useProductionOrderSteps(productionOrderId?: string) {
   const fetchOrderSteps = useCallback(async () => {
     if (!productionOrderId) { setOrderSteps([]); setLoading(false); return; }
     setLoading(true);
+    // Sem FK entre production_order_steps.step_id e production_steps → merge manual.
     const { data, error } = await (supabase as any)
       .from('production_order_steps')
-      .select('*, production_steps:step_id(name, code, sector)')
+      .select('*')
       .eq('production_order_id', productionOrderId)
       .order('sequence', { ascending: true });
-    if (error) { console.error(error); toast.error('Erro ao carregar etapas da OP'); }
-    else {
-      setOrderSteps((data || []).map((d: any) => ({
-        ...d,
-        step_name: d.production_steps?.name,
-        step_code: d.production_steps?.code,
-        step_sector: d.production_steps?.sector,
-      })));
+    if (error) { console.error(error); toast.error('Erro ao carregar etapas da OP'); setLoading(false); return; }
+
+    const stepIds = Array.from(new Set((data || []).map((d: any) => d.step_id).filter(Boolean)));
+    let stepsMap = new Map<string, any>();
+    if (stepIds.length > 0) {
+      const { data: steps } = await supabase
+        .from('production_steps')
+        .select('id, name, code, sector')
+        .in('id', stepIds);
+      (steps || []).forEach((s: any) => stepsMap.set(s.id, s));
     }
+    setOrderSteps((data || []).map((d: any) => {
+      const s = stepsMap.get(d.step_id);
+      return { ...d, step_name: s?.name, step_code: s?.code, step_sector: s?.sector };
+    }));
     setLoading(false);
   }, [productionOrderId]);
 
