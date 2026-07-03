@@ -107,7 +107,7 @@ const logAudit = (event: string, payload: Record<string, unknown> = {}) => {
   } catch { /* noop */ }
 };
 
-export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
+export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDialogProps) {
   const productsQuery = useProducts();
   const clientsQuery = useClients();
   const updateClient = useUpdateClient();
