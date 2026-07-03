@@ -1023,6 +1023,14 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                               <div className="text-xs font-bold tabular-nums text-amber-600">+{loyaltyPoints}</div>
                             </div>
                           </div>
+                          {(customer.credit_limit || 0) > 0 && (
+                            <div className="mt-2 rounded-md bg-rose-500/5 border border-rose-500/20 p-2 flex items-center justify-between">
+                              <div className="flex items-center gap-1.5 text-[10px] font-bold text-rose-700 uppercase tracking-widest">
+                                <HandCoins className="h-3 w-3" /> Crédito p/ fiado
+                              </div>
+                              <div className="text-xs font-black tabular-nums text-rose-700">{formatBRL(availableCredit)}</div>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <Button variant="outline" className="w-full h-11 gap-2" onClick={() => setShowCustomerPicker(true)}>
