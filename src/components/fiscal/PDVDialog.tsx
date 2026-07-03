@@ -219,12 +219,34 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
     if (!open) stopCamera();
   }, [open]);
 
+  const flashLine = (productId: string) => {
+    setFlashId(productId);
+    window.setTimeout(() => setFlashId((cur) => (cur === productId ? null : cur)), 350);
+  };
+
   const updateQty = (productId: string, delta: number) => {
     setCart((prev) =>
       prev
         .map((i) => (i.productId === productId ? { ...i, quantity: Math.max(0, i.quantity + delta) } : i))
         .filter((i) => i.quantity > 0),
     );
+    flashLine(productId);
+  };
+
+  const setQty = (productId: string, value: number) => {
+    const v = Math.max(0, Number.isFinite(value) ? value : 0);
+    setCart((prev) =>
+      v === 0
+        ? prev.filter((i) => i.productId !== productId)
+        : prev.map((i) => (i.productId === productId ? { ...i, quantity: v } : i)),
+    );
+    flashLine(productId);
+  };
+
+  const setUnitPrice = (productId: string, value: number) => {
+    const v = Math.max(0, Number.isFinite(value) ? value : 0);
+    setCart((prev) => prev.map((i) => (i.productId === productId ? { ...i, unitPrice: v } : i)));
+    flashLine(productId);
   };
 
   const removeFromCart = (productId: string) => {
