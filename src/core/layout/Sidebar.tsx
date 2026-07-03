@@ -34,6 +34,8 @@ import {
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/base/tooltip';
 import { Separator } from '@/ui/base/separator';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutDashboard, Users, Wallet, FileCheck, Package, ShoppingCart,
@@ -237,9 +239,13 @@ function CustomEntitiesNav({ sidebarCollapsed, isActive }: { sidebarCollapsed: b
 
 export function Sidebar() {
   const location = useLocation();
-  const { sidebarCollapsed, sidebarMobileOpen, setSidebarMobileOpen, user } = useAppStore();
+  const { sidebarCollapsed: rawCollapsed, sidebarMobileOpen, setSidebarMobileOpen, user } = useAppStore();
+  const isMobile = useIsMobile();
+  // On mobile drawer, always show full sidebar (labels visible), ignore collapsed setting
+  const sidebarCollapsed = isMobile ? false : rawCollapsed;
   const { signOut } = useAuth({ initialize: false });
   const { segment } = useEnterprise();
+
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   const toggleExpanded = (title: string) => {
@@ -274,11 +280,9 @@ export function Sidebar() {
       <aside
         aria-label="Navegação principal"
         className={cn(
-          'fixed left-0 top-0 z-40 flex h-dvh flex-col bg-sidebar transition-[width,transform] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
-          // Width: on md+ respect collapsed; on mobile always full drawer width
+          'fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden bg-sidebar transition-[width,transform] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
           'w-64',
           sidebarCollapsed ? 'md:w-16' : 'md:w-64',
-          // Slide off-canvas on mobile
           sidebarMobileOpen ? 'translate-x-0' : '-translate-x-full',
           'md:translate-x-0'
         )}
@@ -287,6 +291,7 @@ export function Sidebar() {
           background: 'var(--gradient-sidebar)'
         }}
       >
+
 
 
         {/* Header/Logo */}
