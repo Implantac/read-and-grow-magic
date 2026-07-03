@@ -285,6 +285,16 @@ export function Sidebar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
+  // Close mobile drawer on Escape
+  useEffect(() => {
+    if (!sidebarMobileOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSidebarMobileOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [sidebarMobileOpen, setSidebarMobileOpen]);
+
   return (
     <TooltipProvider delayDuration={0}>
       {/* Mobile backdrop */}
@@ -297,7 +307,12 @@ export function Sidebar() {
         )}
       />
       <aside
+        id="app-sidebar"
         aria-label="Navegação principal"
+        role={isMobile ? 'dialog' : undefined}
+        aria-modal={isMobile && sidebarMobileOpen ? true : undefined}
+        aria-hidden={isMobile && !sidebarMobileOpen ? true : undefined}
+
         className={cn(
           'fixed left-0 top-0 z-40 flex h-dvh flex-col overflow-hidden bg-sidebar transition-[width,transform] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]',
           'w-64',
