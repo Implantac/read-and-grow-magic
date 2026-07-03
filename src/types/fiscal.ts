@@ -79,12 +79,39 @@ export interface NFCe {
   protocol?: string;
   authorizationDate?: string;
   cancellationDate?: string;
+  cancellationReason?: string;
+  returnStatus?: 'none' | 'partial' | 'full';
   qrCode?: string;
   operatorId: string;
   operatorName: string;
   terminalId: string;
   createdAt: string;
 }
+
+export interface NFCeReturn {
+  id: string;
+  nfceId: string;
+  number: string;
+  reason: string;
+  refundMethod: string;
+  refundAmount: number;
+  status: 'draft' | 'authorized' | 'cancelled';
+  operatorName?: string;
+  terminalId?: string;
+  createdAt: string;
+  items: NFCeReturnItem[];
+}
+
+export interface NFCeReturnItem {
+  id: string;
+  nfceItemId?: string;
+  productCode?: string;
+  productName?: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
+}
+
 
 export interface NFCeItem {
   id: string;
