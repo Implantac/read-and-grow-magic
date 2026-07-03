@@ -388,12 +388,65 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
     toastSuccess(`Cliente vinculado: ${c.name}`);
   };
 
+  // Crédito (fiado) disponível para o cliente selecionado
+  const availableCredit = useMemo(() => {
+    if (!customer) return 0;
+    return Math.max(0, (customer.credit_limit || 0) - (customer.current_balance || 0));
+  }, [customer]);
+
   const addSplit = (method: SplitPayment['method']) => {
     const amount = Math.round(remaining * 100) / 100;
     if (amount <= 0) { toastError('Total já foi pago.'); return; }
+
+    if (method === 'credit') {
+      if (!customer) { toastError('Selecione um cliente antes de vender no fiado.'); setShowCustomerPicker(true); return; }
+      const jaFiado = splits.filter((s) => s.method === 'credit').reduce((s, p) => s + p.amount, 0);
+      if (jaFiado + amount > availableCredit + 0.001) {
+        toastError(`Crédito insuficiente. Disponível: ${formatBRL(availableCredit - jaFiado)}`);
+        return;
+      }
+    }
+
     const inst = method === 'credit_card' ? installments : undefined;
-    setSplits((prev) => [...prev, { id: crypto.randomUUID(), method, amount, installments: inst }]);
+    const id = crypto.randomUUID();
+    setSplits((prev) => [...prev, { id, method, amount, installments: inst }]);
+    if (method === 'pix') setShowPixDialog({ splitId: id, amount });
   };
+
+  // Suspender / retomar cupom
+  const suspendSale = () => {
+    if (cart.length === 0) { toastError('Carrinho vazio.'); return; }
+    parkSale({
+      items: cart,
+      discount,
+      discountType,
+      customerId: customer?.id || null,
+      customerName: customer?.name || customerName || undefined,
+      customerDocument: customerDocument || undefined,
+      total,
+      label: customer?.name ? `${customer.name} · ${cart.length} itens` : undefined,
+    });
+    refreshParked();
+    clearAll();
+    logAudit('sale.suspended', { total, items: cart.length });
+    toastSuccess('Cupom suspenso. Retome pelo menu de suspensos.');
+  };
+
+  const resumeParked = (id: string) => {
+    const p = parkedList.find((x) => x.id === id);
+    if (!p) return;
+    setCart(p.items);
+    setDiscount(p.discount);
+    setDiscountType(p.discountType);
+    setCustomerName(p.customerName || '');
+    setCustomerDocument(p.customerDocument || '');
+    const c = clients.find((cl) => cl.id === p.customerId);
+    if (c) setCustomer(c);
+    removeParked(id); refreshParked(); setShowParked(false);
+    toastSuccess('Cupom retomado.');
+  };
+
+  const discardParked = (id: string) => { removeParked(id); refreshParked(); };
 
   const updateSplitAmount = (id: string, raw: number) => {
     if (!Number.isFinite(raw) || raw < 0) { toastError('Valor inválido.'); return; }
