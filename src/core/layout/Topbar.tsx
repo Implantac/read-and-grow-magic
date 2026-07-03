@@ -129,11 +129,11 @@ export function Topbar() {
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
-              className="group flex items-center gap-2 h-9 px-3 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 text-sidebar-foreground hover:text-primary hover:bg-sidebar-accent/50 hover:border-primary/30 text-sm font-medium transition-all"
+              className="group flex items-center gap-2 h-9 px-2 sm:px-3 rounded-lg border border-sidebar-border/50 bg-sidebar-accent/20 text-sidebar-foreground hover:text-primary hover:bg-sidebar-accent/50 hover:border-primary/30 text-sm font-medium transition-all"
             >
-              <Building2 className="h-3.5 w-3.5 text-primary/70 group-hover:text-primary" aria-hidden="true" />
-              <span className="max-w-[180px] truncate">
-                {activeCompany?.name || 'Selecionar Empresa'}
+              <Building2 className="h-3.5 w-3.5 text-primary/70 group-hover:text-primary shrink-0" aria-hidden="true" />
+              <span className="max-w-[110px] sm:max-w-[180px] truncate">
+                {activeCompany?.name || 'Empresa'}
               </span>
               <ChevronDown className="h-3.5 w-3.5 opacity-50 transition-transform group-data-[state=open]:rotate-180" />
             </Button>
