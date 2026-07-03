@@ -108,6 +108,8 @@ const logAudit = (event: string, payload: Record<string, unknown> = {}) => {
 export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
   const productsQuery = useProducts();
   const clientsQuery = useClients();
+  const updateClient = useUpdateClient();
+  const { categories } = useActiveCategories();
   const products = useMemo(
     () => (productsQuery.data || []).filter((p) => p.status === 'active'),
     [productsQuery.data],
