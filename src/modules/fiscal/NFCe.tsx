@@ -90,13 +90,16 @@ const paymentIcons: Record<string, React.ComponentType<{ className?: string }>> 
 };
 
 export default function NFCePage() {
-  const { nfces, loading, cancel: cancelNFCe, emit } = useNFCe();
+  const { nfces, loading, cancel: cancelNFCe, emit, createReturn } = useNFCe();
   const [pdvOpen, setPdvOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [terminalFilter, setTerminalFilter] = useState<string>('all');
   const [selectedNFCe, setSelectedNFCe] = useState<NFCe | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [cancelTarget, setCancelTarget] = useState<NFCe | null>(null);
+  const [returnTarget, setReturnTarget] = useState<NFCe | null>(null);
+
 
   const terminals = [...new Set(nfces.map((n) => n.terminalId))];
 
