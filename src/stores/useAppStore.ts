@@ -15,6 +15,7 @@ interface AppState {
   
   // UI State
   sidebarCollapsed: boolean;
+  sidebarMobileOpen: boolean;
   theme: 'light' | 'dark';
   
   // Actions
@@ -25,7 +26,10 @@ interface AppState {
   setActiveBranch: (branch: Branch | null) => void;
   toggleSidebar: () => void;
   setSidebarCollapsed: (collapsed: boolean) => void;
+  toggleSidebarMobile: () => void;
+  setSidebarMobileOpen: (open: boolean) => void;
   toggleTheme: () => void;
+
   setCompanies: (companies: Company[]) => void;
 }
 
@@ -40,7 +44,9 @@ export const useAppStore = create<AppState>()(
       activeBranch: null,
       companies: [],
       sidebarCollapsed: false,
+      sidebarMobileOpen: false,
       theme: 'light',
+
       
       // Actions
       setUser: (user) => set({ 
@@ -73,6 +79,10 @@ export const useAppStore = create<AppState>()(
       })),
       
       setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
+
+      toggleSidebarMobile: () => set((state) => ({ sidebarMobileOpen: !state.sidebarMobileOpen })),
+      setSidebarMobileOpen: (open) => set({ sidebarMobileOpen: open }),
+
       
       toggleTheme: () => set((state) => ({
         theme: state.theme === 'light' ? 'dark' : 'light'
