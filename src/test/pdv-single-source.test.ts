@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
+// @ts-expect-error node builtin
 import { readFileSync, readdirSync, statSync } from 'node:fs';
+// @ts-expect-error node builtin
 import { join, relative } from 'node:path';
+declare const process: { cwd(): string };
 
 /**
  * Garante que o PDV varejo (`PDVDialog`) só é renderizado pela rota
