@@ -6,6 +6,7 @@ import {
   ChevronRight, ArrowLeft, Monitor, Send, Keyboard, ScanLine,
   Camera, CameraOff, Package, Lock, Unlock, ArrowDownLeft, ArrowUpRight,
   Percent, Wallet, Star, Clock, UserCheck, Loader2, AlertCircle,
+  Pause, Play, HandCoins, LayoutGrid,
 } from 'lucide-react';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -14,12 +15,17 @@ import { Dialog, DialogContent, DialogClose } from '@/ui/base/dialog';
 import { Separator } from '@/ui/base/separator';
 import { Badge } from '@/ui/base/badge';
 import { useProducts, type DbProduct } from '@/hooks/inventory/useProducts';
-import { useClients, type DbClient } from '@/hooks/commercial/useClients';
+import { useClients, type DbClient, useUpdateClient } from '@/hooks/commercial/useClients';
+import { useActiveCategories, hashColor } from '@/hooks/inventory/useCategories';
 import { ScrollArea } from '@/ui/base/scroll-area';
 import { cn } from '@/lib/utils';
 import { toSafeNumber } from '@/lib/numericValidation';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { openReceipt } from './pdvReceipt';
+import { PDVPixDialog } from './PDVPixDialog';
+import { PDVCloseSessionDialog, type CashCloseSummary } from './PDVCloseSessionDialog';
+import { PDVParkedDialog } from './PDVParkedDialog';
+import { loadParked, parkSale, removeParked, type ParkedSale } from './pdvParkedStorage';
 
 interface CartItem {
   productCode: string;
