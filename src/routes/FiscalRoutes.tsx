@@ -14,15 +14,15 @@ const FiscalReportsPage = lazy(() => import("../modules/fiscal/FiscalReports"));
 const ReinfPage = lazy(() => import("../modules/fiscal/Reinf"));
 
 export const FiscalRoutes = [
-  <Route key="fiscal-dash" path="/fiscal/dashboard" element={<FiscalDashboardPage />} />,
-  <Route key="fiscal-nfe" path="/fiscal/nfe" element={<NFePage />} />,
-  <Route key="fiscal-nfce" path="/fiscal/nfce" element={<NFCePage />} />,
-  <Route key="fiscal-cte" path="/fiscal/cte" element={<CTePage />} />,
-  <Route key="fiscal-mdfe" path="/fiscal/mdfe" element={<MDFePage />} />,
-  <Route key="fiscal-regras" path="/fiscal/regras-fiscais" element={<TaxRulesPage />} />,
-  <Route key="fiscal-icms" path="/fiscal/icms-st" element={<ICMSSTPage />} />,
-  <Route key="fiscal-difal" path="/fiscal/difal" element={<DIFALPage />} />,
-  <Route key="fiscal-sped" path="/fiscal/sped" element={<SpedFilesPage />} />,
-  <Route key="fiscal-reinf" path="/fiscal/reinf" element={<ReinfPage />} />,
-  <Route key="fiscal-relatorios" path="/fiscal/relatorios" element={<FiscalReportsPage />} />,
+  <Route key="fiscal-dash" path="dashboard" element={<FiscalDashboardPage />} />,
+  <Route key="fiscal-nfe" path="nfe" element={<NFePage />} />,
+  <Route key="fiscal-nfce" path="nfce" element={<NFCePage />} />,
+  <Route key="fiscal-cte" path="cte" element={<CTePage />} />,
+  <Route key="fiscal-mdfe" path="mdfe" element={<MDFePage />} />,
+  <Route key="fiscal-regras" path="regras-fiscais" element={<TaxRulesPage />} />,
+  <Route key="fiscal-icms" path="icms-st" element={<ICMSSTPage />} />,
+  <Route key="fiscal-difal" path="difal" element={<DIFALPage />} />,
+  <Route key="fiscal-sped" path="sped" element={<SpedFilesPage />} />,
+  <Route key="fiscal-reinf" path="reinf" element={<ReinfPage />} />,
+  <Route key="fiscal-relatorios" path="relatorios" element={<FiscalReportsPage />} />,
 ];
