@@ -75,6 +75,7 @@ const paymentMethods = [
   { value: 'debit_card', label: 'Débito', hint: 'F3', icon: CreditCard, color: 'text-indigo-600 bg-indigo-500/10 border-indigo-500/30' },
   { value: 'pix', label: 'PIX', hint: 'F4', icon: QrCode, color: 'text-cyan-600 bg-cyan-500/10 border-cyan-500/30' },
   { value: 'voucher', label: 'Voucher', hint: 'F5', icon: Wallet, color: 'text-amber-600 bg-amber-500/10 border-amber-500/30' },
+  { value: 'credit', label: 'Fiado', hint: 'F6', icon: HandCoins, color: 'text-rose-600 bg-rose-500/10 border-rose-500/30' },
 ] as const;
 
 const SESSION_KEY = 'pdv:session:v1';
