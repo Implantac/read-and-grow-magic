@@ -76,6 +76,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const scanRafRef = useRef<number | null>(null);
+  const [flashId, setFlashId] = useState<string | null>(null);
 
   const term = search.trim().toLowerCase();
   const filteredProducts = useMemo(() => {
