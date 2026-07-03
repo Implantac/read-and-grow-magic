@@ -48,7 +48,7 @@ export default function WMSAnalytics() {
         supabase.from("wms_shipments").select("id,status,carrier,tracking_number,scheduled_date,shipped_at,delivered_at,created_at").gte("created_at", since).order("created_at", { ascending: false }),
         supabase.from("wms_picking_orders").select("id,status,created_at,completed_at").gte("created_at", since),
         supabase.from("wms_task_logs").select("id,task_type,duration_seconds,created_at").gte("created_at", since),
-        supabase.from("wms_quality_checks").select("id,status,created_at").gte("created_at", since),
+        supabase.from("wms_quality_checks").select("id,decision,created_at").gte("created_at", since),
         supabase.from("wms_events").select("id,event_type,created_at,payload").gte("created_at", since).order("created_at", { ascending: false }).limit(50),
       ]);
 
@@ -68,7 +68,7 @@ export default function WMSAnalytics() {
       const slaOn = shipRows.filter((s: any) => s.delivered_at && s.scheduled_date && new Date(s.delivered_at) <= new Date(s.scheduled_date)).length;
       const slaLate = shipRows.filter((s: any) => s.delivered_at && s.scheduled_date && new Date(s.delivered_at) > new Date(s.scheduled_date)).length;
 
-      const qualFails = qRows.filter((q) => q.status === "rejected" || q.status === "quarantine").length;
+      const qualFails = qRows.filter((q) => q.decision === "rejected" || q.decision === "quarantine").length;
       const accuracy = qRows.length ? Math.max(0, 100 - (qualFails / qRows.length) * 100) : 100;
 
       const totalSeconds = logRows.reduce((a, l) => a + (l.duration_seconds || 0), 0);
