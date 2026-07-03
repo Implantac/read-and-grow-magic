@@ -30,10 +30,11 @@ export const purchasingService = {
     return data;
   },
 
-  // Quotations
+  // Quotations — tabela real é `quotations` (não `purchase_quotations`).
   async getQuotations() {
-    const { data, error } = await (supabase.from('purchase_quotations' as any)
-      .select('*') as any)
+    const { data, error } = await supabase
+      .from('quotations')
+      .select('*')
       .order('created_at', { ascending: false });
     if (error) throw error;
     return data || [];

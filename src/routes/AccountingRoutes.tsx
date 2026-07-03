@@ -11,14 +11,16 @@ const AccountingDashboardPage = lazy(() => import("../modules/accounting/Account
 const PeriodClosingPage = lazy(() => import("../modules/accounting/PeriodClosing"));
 const DREManagerialPage = lazy(() => import("../modules/accounting/DREManagerial"));
 
+// Paths relativos: montados sob `/contabilidade/*` em App.tsx.
 export const AccountingRoutes = [
-  <Route key="acc-chart" path="/accounting/plano-contas" element={<ChartOfAccountsPage />} />,
-  <Route key="acc-journal" path="/accounting/lancamentos" element={<JournalEntriesPage />} />,
-  <Route key="acc-ledger" path="/accounting/razao" element={<GeneralLedgerPage />} />,
-  <Route key="acc-trial" path="/accounting/balancete" element={<TrialBalancePage />} />,
-  <Route key="acc-dre" path="/accounting/dre" element={<DREPage />} />,
-  <Route key="acc-dre-gerencial" path="/accounting/dre-gerencial" element={<DREManagerialPage />} />,
-  <Route key="acc-balance" path="/accounting/balanco" element={<BalanceSheetPage />} />,
-  <Route key="acc-dash" path="/accounting/dashboard" element={<AccountingDashboardPage />} />,
-  <Route key="acc-closing" path="/accounting/fechamento" element={<PeriodClosingPage />} />,
+  <Route key="acc-chart" path="plano-contas" element={<ChartOfAccountsPage />} />,
+  <Route key="acc-journal" path="lancamentos" element={<JournalEntriesPage />} />,
+  <Route key="acc-ledger" path="razao" element={<GeneralLedgerPage />} />,
+  <Route key="acc-trial" path="balancete" element={<TrialBalancePage />} />,
+  <Route key="acc-dre" path="dre" element={<DREPage />} />,
+  <Route key="acc-dre-gerencial" path="dre-gerencial" element={<DREManagerialPage />} />,
+  <Route key="acc-balance" path="balanco" element={<BalanceSheetPage />} />,
+  <Route key="acc-dash" path="dashboard" element={<AccountingDashboardPage />} />,
+  <Route key="acc-painel" path="painel" element={<AccountingDashboardPage />} />,
+  <Route key="acc-closing" path="fechamento" element={<PeriodClosingPage />} />,
 ];
