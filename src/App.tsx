@@ -72,6 +72,18 @@ const ProfileSecurity = lazy(() => import("./pages/profile/Security"));
 const ProfilePrivacy = lazy(() => import("./pages/profile/Privacy"));
 const PurchaseApprovals = lazy(() => import("./pages/purchasing/PurchaseApprovals"));
 const PurchaseApprovalsMetrics = lazy(() => import("./pages/purchasing/PurchaseApprovalsMetrics"));
+const PurchaseOrders = lazy(() => import("./pages/purchasing/PurchaseOrders"));
+const Suppliers = lazy(() => import("./pages/purchasing/Suppliers"));
+const Quotations = lazy(() => import("./pages/purchasing/Quotations"));
+const InventoryProducts = lazy(() => import("./pages/inventory/Products"));
+const InventoryCategories = lazy(() => import("./pages/inventory/Categories"));
+const InventoryMovements = lazy(() => import("./pages/inventory/Movements"));
+const InventoryKardex = lazy(() => import("./pages/inventory/Kardex"));
+const InventoryStockLevels = lazy(() => import("./pages/inventory/StockLevels"));
+const CreditRiskDashboard = lazy(() => import("./pages/credit/RiskDashboard"));
+const CreditAnalysis = lazy(() => import("./pages/credit/CreditAnalysis"));
+const CreditOrderBlocks = lazy(() => import("./pages/credit/OrderBlocks"));
+const CreditCollections = lazy(() => import("./pages/credit/Collections"));
 
 
 
@@ -148,6 +160,18 @@ const App = () => (
                 <Route path="/perfil/privacidade" element={<ProfilePrivacy />} />
                 <Route path="/compras/aprovacoes" element={<PurchaseApprovals />} />
                 <Route path="/compras/aprovacoes/indicadores" element={<PurchaseApprovalsMetrics />} />
+                <Route path="/compras/pedidos" element={<PurchaseOrders />} />
+                <Route path="/compras/fornecedores" element={<Suppliers />} />
+                <Route path="/compras/cotacoes" element={<Quotations />} />
+                <Route path="/estoque/produtos" element={<InventoryProducts />} />
+                <Route path="/estoque/categorias" element={<InventoryCategories />} />
+                <Route path="/estoque/movimentacoes" element={<InventoryMovements />} />
+                <Route path="/estoque/kardex" element={<InventoryKardex />} />
+                <Route path="/estoque/saldos" element={<InventoryStockLevels />} />
+                <Route path="/credito/dashboard" element={<CreditRiskDashboard />} />
+                <Route path="/credito/analise" element={<CreditAnalysis />} />
+                <Route path="/credito/bloqueios" element={<CreditOrderBlocks />} />
+                <Route path="/credito/cobranca" element={<CreditCollections />} />
 
 
                 <Route path="/upgrade" element={<Upgrade />} />
