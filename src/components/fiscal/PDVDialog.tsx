@@ -172,8 +172,10 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
 
   const term = search.trim().toLowerCase();
   const filteredProducts = useMemo(() => {
-    if (!term) return products.slice(0, 24);
-    return products
+    let list = products;
+    if (selectedCategoryId) list = list.filter((p) => p.category_id === selectedCategoryId);
+    if (!term) return list.slice(0, 24);
+    return list
       .filter(
         (p) =>
           p.name.toLowerCase().includes(term) ||
@@ -181,7 +183,7 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
           (p.barcode || '').includes(term),
       )
       .slice(0, 24);
-  }, [products, term]);
+  }, [products, term, selectedCategoryId]);
 
   const filteredClients = useMemo(() => {
     const q = customerQuery.trim().toLowerCase();
