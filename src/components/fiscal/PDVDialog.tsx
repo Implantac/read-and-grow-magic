@@ -116,6 +116,8 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
         ...prev,
       ];
     });
+    setFlashId(product.id);
+    window.setTimeout(() => setFlashId((cur) => (cur === product.id ? null : cur)), 350);
   };
 
   const findByCode = (raw: string): DbProduct | undefined => {
