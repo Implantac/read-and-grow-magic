@@ -55,6 +55,8 @@ interface CashSession {
 interface PDVDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Renderiza como página (sem overlay/dialog). Padrão: false = modal. */
+  asPage?: boolean;
   onEmit: (data: {
     items: { productCode: string; productName: string; productId?: string; quantity: number; unitPrice: number; unit?: string }[];
     paymentMethod: string;
@@ -105,7 +107,7 @@ const logAudit = (event: string, payload: Record<string, unknown> = {}) => {
   } catch { /* noop */ }
 };
 
-export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
+export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDialogProps) {
   const productsQuery = useProducts();
   const clientsQuery = useClients();
   const updateClient = useUpdateClient();
@@ -661,9 +663,28 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
     ? Math.floor((Date.now() - new Date(session.openedAt).getTime()) / 60000)
     : 0;
 
+  const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    if (asPage) {
+      return (
+        <div className="relative w-full h-[calc(100vh-4rem)] min-h-[600px] rounded-lg border bg-background overflow-hidden">
+          {children}
+        </div>
+      );
+    }
+    return (
+      <Dialog open={open} onOpenChange={(o) => { if (!o) stopCamera(); onOpenChange(o); }}>
+        <DialogContent className="max-w-[98vw] w-[1500px] h-[94vh] p-0 overflow-hidden bg-background gap-0">
+          {children}
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
+  if (!asPage && !open) return null;
+
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) stopCamera(); onOpenChange(o); }}>
-      <DialogContent className="max-w-[98vw] w-[1500px] h-[94vh] p-0 overflow-hidden bg-background gap-0">
+    <Shell>
+      <>
         {/* Lock overlay */}
         {screenLocked && (
           <div className="absolute inset-0 z-50 bg-background/95 backdrop-blur-xl flex flex-col items-center justify-center gap-6">
@@ -738,11 +759,13 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                   <div className="text-[10px] text-muted-foreground uppercase tracking-widest">Caixa</div>
                 </div>
               </div>
-              <DialogClose asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                  <X className="h-4 w-4" />
-                </Button>
-              </DialogClose>
+              {!asPage && (
+                <DialogClose asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                    <X className="h-4 w-4" />
+                  </Button>
+                </DialogClose>
+              )}
             </div>
           </div>
 
@@ -1405,7 +1428,8 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
           onResume={resumeParked}
           onDelete={discardParked}
         />
-      </DialogContent>
-    </Dialog>
+      </>
+    </Shell>
+
   );
 }
