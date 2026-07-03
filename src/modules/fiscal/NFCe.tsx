@@ -292,6 +292,12 @@ export default function NFCePage() {
                               <Printer className="mr-2 h-4 w-4" />
                               Reimprimir Cupom
                             </DropdownMenuItem>
+                            {nfce.returnStatus !== 'full' && (
+                              <DropdownMenuItem onClick={() => handleReturn(nfce)}>
+                                <Undo2 className="mr-2 h-4 w-4" />
+                                Devolver itens
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               onClick={() => handleCancel(nfce)}
@@ -302,6 +308,7 @@ export default function NFCePage() {
                             </DropdownMenuItem>
                           </>
                         )}
+
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
