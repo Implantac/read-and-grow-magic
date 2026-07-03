@@ -1369,6 +1369,34 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
             </div>
           </div>
         )}
+
+        {/* PIX QR dialog */}
+        <PDVPixDialog
+          open={!!showPixDialog}
+          amount={showPixDialog?.amount || 0}
+          onConfirm={() => setShowPixDialog(null)}
+          onCancel={() => {
+            if (showPixDialog) removeSplit(showPixDialog.splitId);
+            setShowPixDialog(null);
+          }}
+        />
+
+        {/* Blind cash close */}
+        <PDVCloseSessionDialog
+          open={showCloseSession}
+          summary={closeSessionSummary}
+          onCancel={() => setShowCloseSession(false)}
+          onClose={confirmCloseSession}
+        />
+
+        {/* Parked sales */}
+        <PDVParkedDialog
+          open={showParked}
+          parked={parkedList}
+          onClose={() => setShowParked(false)}
+          onResume={resumeParked}
+          onDelete={discardParked}
+        />
       </DialogContent>
     </Dialog>
   );
