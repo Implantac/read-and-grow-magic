@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Loader2, CheckCircle, User, ShoppingCart, Wallet } from 'lucide-react';
+import { Loader2, CheckCircle, User, ShoppingCart, Wallet, Zap } from 'lucide-react';
+import { PDVDialog } from '@/components/fiscal/PDVDialog';
 import { Button } from '@/ui/base/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Input } from '@/ui/base/input';
@@ -40,6 +41,7 @@ export default function SalesDeskPage() {
   const [o2cOrderId, setO2cOrderId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [rejectionOpen, setRejectionOpen] = useState(false);
+  const [pdvOpen, setPdvOpen] = useState(false);
 
   const profile = useClientCommercialProfile(client.id);
   const createOrder = useCreateOrder();
@@ -126,7 +128,18 @@ export default function SalesDeskPage() {
         title="Painel Único de Vendas"
         description="Cliente, itens e pagamento em uma única tela"
         icon={ShoppingCart}
+        actions={
+          <Button
+            size="lg"
+            onClick={() => setPdvOpen(true)}
+            className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-lg"
+          >
+            <Zap className="h-5 w-5" />
+            Abrir PDV Varejo
+          </Button>
+        }
       />
+
 
       <div className="grid gap-4 lg:grid-cols-3">
         {/* CARD 1 — Cliente */}
@@ -298,6 +311,16 @@ export default function SalesDeskPage() {
           o2c.trigger();
         }}
       />
+
+      <PDVDialog
+        open={pdvOpen}
+        onOpenChange={setPdvOpen}
+        onEmit={async () => {
+          toast.success('Venda registrada no PDV', { description: 'Cupom emitido com sucesso.' });
+        }}
+      />
+
     </PageContainer>
   );
+
 }
