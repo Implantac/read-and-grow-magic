@@ -293,7 +293,7 @@ export function Topbar() {
           onClick={() => navigate('/executive/executive')}
           title="IA Executiva"
           aria-label="Abrir IA Executiva"
-          className="h-9 w-9 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-all"
+          className="hidden sm:inline-flex h-9 w-9 rounded-lg text-sidebar-foreground/60 hover:text-primary hover:bg-sidebar-accent/50 transition-all"
         >
           <Sparkles className="h-[18px] w-[18px]" aria-hidden="true" />
         </Button>
