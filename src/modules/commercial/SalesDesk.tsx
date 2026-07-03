@@ -315,8 +315,9 @@ export default function SalesDeskPage() {
       <PDVDialog
         open={pdvOpen}
         onOpenChange={setPdvOpen}
-        onEmit={async () => {
+        onEmit={async (): Promise<any> => {
           toast.success('Venda registrada no PDV', { description: 'Cupom emitido com sucesso.' });
+          return { ok: true };
         }}
       />
 
