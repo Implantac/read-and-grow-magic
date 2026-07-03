@@ -87,7 +87,7 @@ export function useProductionOrderSteps(productionOrderId?: string) {
     setLoading(true);
     const { data, error } = await (supabase as any)
       .from('production_order_steps')
-      .select('*, production_steps(name, code, sector)')
+      .select('*, production_steps:step_id(name, code, sector)')
       .eq('production_order_id', productionOrderId)
       .order('sequence', { ascending: true });
     if (error) { console.error(error); toast.error('Erro ao carregar etapas da OP'); }

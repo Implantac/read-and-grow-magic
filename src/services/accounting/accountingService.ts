@@ -90,55 +90,19 @@ export class AccountingService {
     if (error) throw error;
   }
 
-  // Reports
+  // Reports — as tabelas `accounting_reports` e `accounting_dashboard_stats`
+  // não existem no schema atual. Retornamos [] para não quebrar as telas até
+  // a estrutura de relatórios contábeis materializados ser definida.
   async getBalanceSheet(): Promise<BalanceSheetItem[]> {
-    const { data, error } = await this.supabase
-      .from('accounting_reports' as any)
-      .select('*')
-      .eq('report_type', 'balance_sheet')
-      .order('code');
-
-    if (error) throw error;
-    return (data || []).map((row: any) => ({
-      id: row.id,
-      code: row.code,
-      description: row.description,
-      currentPeriod: Number(row.current_period),
-      previousPeriod: Number(row.previous_period),
-      level: row.level,
-      isTotal: row.is_total,
-      section: row.section as BalanceSheetItem['section']
-    }));
+    return [];
   }
 
   async getDRE(): Promise<DREItem[]> {
-    const { data, error } = await this.supabase
-      .from('accounting_reports' as any)
-      .select('*')
-      .eq('report_type', 'dre')
-      .order('order_index');
-
-    if (error) throw error;
-    return (data || []).map((row: any) => ({
-      id: row.id,
-      code: row.code,
-      description: row.description,
-      currentPeriod: Number(row.current_period),
-      previousPeriod: Number(row.previous_period),
-      variation: Number(row.variation),
-      level: row.level,
-      isTotal: row.is_total
-    }));
+    return [];
   }
 
   async getDashboardData(): Promise<any> {
-    const { data, error } = await this.supabase
-      .from('accounting_dashboard_stats' as any)
-      .select('*')
-      .maybeSingle();
-
-    if (error) throw error;
-    return data;
+    return null;
   }
 }
 
