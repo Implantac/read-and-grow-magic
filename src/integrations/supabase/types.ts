@@ -8895,6 +8895,8 @@ export type Database = {
           authorization_date: string | null
           branch_id: string | null
           cancellation_date: string | null
+          cancellation_reason: string | null
+          cancelled_by: string | null
           change_amount: number
           company_id: string
           created_at: string
@@ -8909,6 +8911,7 @@ export type Database = {
           payment_method: string
           protocol: string | null
           qr_code: string | null
+          return_status: string
           series: string
           status: string
           subtotal: number
@@ -8921,6 +8924,8 @@ export type Database = {
           authorization_date?: string | null
           branch_id?: string | null
           cancellation_date?: string | null
+          cancellation_reason?: string | null
+          cancelled_by?: string | null
           change_amount?: number
           company_id?: string
           created_at?: string
@@ -8935,6 +8940,7 @@ export type Database = {
           payment_method?: string
           protocol?: string | null
           qr_code?: string | null
+          return_status?: string
           series?: string
           status?: string
           subtotal?: number
@@ -8947,6 +8953,8 @@ export type Database = {
           authorization_date?: string | null
           branch_id?: string | null
           cancellation_date?: string | null
+          cancellation_reason?: string | null
+          cancelled_by?: string | null
           change_amount?: number
           company_id?: string
           created_at?: string
@@ -8961,6 +8969,7 @@ export type Database = {
           payment_method?: string
           protocol?: string | null
           qr_code?: string | null
+          return_status?: string
           series?: string
           status?: string
           subtotal?: number
@@ -9036,6 +9045,132 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nfce_return_items: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          nfce_item_id: string | null
+          product_code: string | null
+          product_id: string | null
+          product_name: string | null
+          quantity: number
+          return_id: string
+          total: number
+          unit_price: number
+        }
+        Insert: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          nfce_item_id?: string | null
+          product_code?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          quantity?: number
+          return_id: string
+          total?: number
+          unit_price?: number
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          nfce_item_id?: string | null
+          product_code?: string | null
+          product_id?: string | null
+          product_name?: string | null
+          quantity?: number
+          return_id?: string
+          total?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfce_return_items_nfce_item_id_fkey"
+            columns: ["nfce_item_id"]
+            isOneToOne: false
+            referencedRelation: "nfce_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfce_return_items_return_id_fkey"
+            columns: ["return_id"]
+            isOneToOne: false
+            referencedRelation: "nfce_returns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nfce_returns: {
+        Row: {
+          branch_id: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          nfce_id: string
+          number: string
+          operator_id: string | null
+          operator_name: string | null
+          reason: string
+          refund_amount: number
+          refund_method: string
+          status: string
+          terminal_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          branch_id?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nfce_id: string
+          number: string
+          operator_id?: string | null
+          operator_name?: string | null
+          reason: string
+          refund_amount?: number
+          refund_method?: string
+          status?: string
+          terminal_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nfce_id?: string
+          number?: string
+          operator_id?: string | null
+          operator_name?: string | null
+          reason?: string
+          refund_amount?: number
+          refund_method?: string
+          status?: string
+          terminal_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfce_returns_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfce_returns_nfce_id_fkey"
+            columns: ["nfce_id"]
+            isOneToOne: false
+            referencedRelation: "nfce"
             referencedColumns: ["id"]
           },
         ]

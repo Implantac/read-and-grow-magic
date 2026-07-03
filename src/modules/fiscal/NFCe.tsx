@@ -14,10 +14,12 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
+  Undo2,
   CreditCard,
   Banknote,
   QrCode,
 } from 'lucide-react';
+
 import { ExportButton } from '@/shared/components/ExportButton';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -55,10 +57,13 @@ import { Badge } from '@/ui/base/badge';
 import { Separator } from '@/ui/base/separator';
 import { useNFCe } from '@/hooks/fiscal/useNFCe';
 import { PDVDialog } from '@/components/fiscal/PDVDialog';
+import { NFCeCancelDialog } from '@/components/fiscal/NFCeCancelDialog';
+import { NFCeReturnDialog } from '@/components/fiscal/NFCeReturnDialog';
 import type { NFCe } from '@/types/fiscal';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
+
 
 const statusConfig: Record<string, { color: string; icon: React.ComponentType<{ className?: string }> }> = {
   authorized: { color: 'bg-success/10 text-success', icon: CheckCircle },
@@ -85,13 +90,16 @@ const paymentIcons: Record<string, React.ComponentType<{ className?: string }>> 
 };
 
 export default function NFCePage() {
-  const { nfces, loading, cancel: cancelNFCe, emit } = useNFCe();
+  const { nfces, loading, cancel: cancelNFCe, emit, createReturn } = useNFCe();
   const [pdvOpen, setPdvOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [terminalFilter, setTerminalFilter] = useState<string>('all');
   const [selectedNFCe, setSelectedNFCe] = useState<NFCe | null>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [cancelTarget, setCancelTarget] = useState<NFCe | null>(null);
+  const [returnTarget, setReturnTarget] = useState<NFCe | null>(null);
+
 
   const terminals = [...new Set(nfces.map((n) => n.terminalId))];
 
@@ -122,9 +130,14 @@ export default function NFCePage() {
     toastSuccess('Imprimindo Cupom', `Cupom fiscal ${nfce.number} enviado para impressão`);
   };
 
-  const handleCancel = async (nfce: NFCe) => {
-    await cancelNFCe(nfce.id);
+  const handleCancel = (nfce: NFCe) => {
+    setCancelTarget(nfce);
   };
+
+  const handleReturn = (nfce: NFCe) => {
+    setReturnTarget(nfce);
+  };
+
 
   const handleReprint = (nfce: NFCe) => {
     toastSuccess('2ª Via', `Reimpressão do cupom ${nfce.number} enviada`);
@@ -260,7 +273,22 @@ export default function NFCePage() {
                   </TableCell>
                   <TableCell>{renderPaymentBadge(nfce.paymentMethod)}</TableCell>
                   <TableCell className="font-medium">{formatCurrency(nfce.total)}</TableCell>
-                  <TableCell>{renderStatusBadge(nfce.status)}</TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {renderStatusBadge(nfce.status)}
+                      {nfce.returnStatus === 'partial' && (
+                        <Badge variant="outline" className="border-warning/40 text-warning gap-1">
+                          <Undo2 className="h-3 w-3" /> Dev. parcial
+                        </Badge>
+                      )}
+                      {nfce.returnStatus === 'full' && (
+                        <Badge variant="outline" className="border-destructive/40 text-destructive gap-1">
+                          <Undo2 className="h-3 w-3" /> Devolvida
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
+
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -279,6 +307,12 @@ export default function NFCePage() {
                               <Printer className="mr-2 h-4 w-4" />
                               Reimprimir Cupom
                             </DropdownMenuItem>
+                            {nfce.returnStatus !== 'full' && (
+                              <DropdownMenuItem onClick={() => handleReturn(nfce)}>
+                                <Undo2 className="mr-2 h-4 w-4" />
+                                Devolver itens
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               onClick={() => handleCancel(nfce)}
@@ -289,6 +323,7 @@ export default function NFCePage() {
                             </DropdownMenuItem>
                           </>
                         )}
+
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -463,6 +498,36 @@ export default function NFCePage() {
 
       {/* PDV Dialog */}
       <PDVDialog open={pdvOpen} onOpenChange={setPdvOpen} onEmit={emit} />
+
+      {/* Cancel Dialog */}
+      <NFCeCancelDialog
+        nfce={cancelTarget}
+        open={!!cancelTarget}
+        onOpenChange={(v) => { if (!v) setCancelTarget(null); }}
+        onConfirm={async (reason) => {
+          if (!cancelTarget) return false;
+          return cancelNFCe(cancelTarget.id, reason);
+        }}
+      />
+
+      {/* Return Dialog */}
+      <NFCeReturnDialog
+        nfce={returnTarget}
+        open={!!returnTarget}
+        onOpenChange={(v) => { if (!v) setReturnTarget(null); }}
+        onConfirm={async ({ reason, refundMethod, items }) => {
+          if (!returnTarget) return null;
+          return createReturn({
+            nfceId: returnTarget.id,
+            reason,
+            refundMethod,
+            items,
+            terminalId: returnTarget.terminalId,
+            operatorName: returnTarget.operatorName,
+          });
+        }}
+      />
     </PageContainer>
   );
+
 }
