@@ -711,8 +711,17 @@ export function PDVDialog({ open, onOpenChange, onEmit }: PDVDialogProps) {
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xl font-black text-muted-foreground">R$</span>
                         <Input
                           type="number"
+                          min={0}
+                          step="0.01"
                           value={amountPaid || ''}
-                          onChange={(e) => setAmountPaid(toSafeNumber(e.target.value))}
+                          onChange={(e) => {
+                            const v = toSafeNumber(e.target.value);
+                            if (!Number.isFinite(v) || v < 0) {
+                              toastError('Valor recebido inválido.');
+                              return;
+                            }
+                            setAmountPaid(Math.round(v * 100) / 100);
+                          }}
                           className="h-16 pl-14 text-3xl font-black tabular-nums border-none shadow-none focus-visible:ring-0"
                           autoFocus
                         />
