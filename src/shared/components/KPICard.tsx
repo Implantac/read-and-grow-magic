@@ -30,13 +30,13 @@ interface KPICardProps {
 }
 
 
-const colorMap: Record<string, { border: string; iconBg: string; iconText: string }> = {
-  primary: { border: 'border-l-primary', iconBg: 'bg-primary/10', iconText: 'text-primary' },
-  success: { border: 'border-l-green-500', iconBg: 'bg-green-500/10', iconText: 'text-green-600' },
-  warning: { border: 'border-l-yellow-500', iconBg: 'bg-yellow-500/10', iconText: 'text-yellow-600' },
-  danger: { border: 'border-l-destructive', iconBg: 'bg-destructive/10', iconText: 'text-destructive' },
-  info: { border: 'border-l-blue-500', iconBg: 'bg-blue-500/10', iconText: 'text-blue-600' },
-  accent: { border: 'border-l-primary', iconBg: 'bg-accent/10', iconText: 'text-accent-foreground' },
+const colorMap: Record<string, { border: string; iconBg: string; iconText: string; glow: string }> = {
+  primary: { border: 'border-l-primary', iconBg: 'bg-gradient-to-br from-primary/15 to-primary/5', iconText: 'text-primary', glow: 'group-hover:shadow-glow' },
+  success: { border: 'border-l-success', iconBg: 'bg-gradient-to-br from-success/15 to-success/5', iconText: 'text-success', glow: '' },
+  warning: { border: 'border-l-warning', iconBg: 'bg-gradient-to-br from-warning/15 to-warning/5', iconText: 'text-warning', glow: '' },
+  danger: { border: 'border-l-destructive', iconBg: 'bg-gradient-to-br from-destructive/15 to-destructive/5', iconText: 'text-destructive', glow: '' },
+  info: { border: 'border-l-info', iconBg: 'bg-gradient-to-br from-info/15 to-info/5', iconText: 'text-info', glow: '' },
+  accent: { border: 'border-l-primary', iconBg: 'bg-gradient-to-br from-accent to-accent/50', iconText: 'text-primary', glow: '' },
 };
 
 export function KPICard(props: KPICardProps) {
@@ -92,20 +92,20 @@ export function KPICard(props: KPICardProps) {
   return (
     <Card
       className={cn(
-        'border-l-4 hover-lift opacity-0 animate-slide-in-bottom',
+        'group border-l-4 hover-lift opacity-0 animate-slide-in-bottom overflow-hidden relative',
         colors.border,
         className
       )}
       style={{ animationDelay: `${index * 80}ms`, animationFillMode: 'forwards' }}
     >
       <CardContent className="flex items-center gap-4 p-5">
-        <div className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110', colors.iconBg)}>
+        <div className={cn('flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110 ring-1 ring-inset ring-border/50', colors.iconBg, colors.glow)}>
           <div className={colors.iconText}>{iconElement}</div>
         </div>
-        <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground truncate">{title}</p>
-          <p className="text-xl font-bold text-foreground tabular-nums">{value}</p>
-          {resolvedSubtitle && <p className="text-[11px] text-muted-foreground truncate">{resolvedSubtitle}</p>}
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground truncate">{title}</p>
+          <p className="text-2xl font-bold text-foreground tabular-nums leading-tight mt-0.5">{value}</p>
+          {resolvedSubtitle && <p className="text-xs text-muted-foreground truncate mt-0.5">{resolvedSubtitle}</p>}
         </div>
       </CardContent>
     </Card>
