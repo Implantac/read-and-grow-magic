@@ -7,7 +7,7 @@ export class FiscalService {
   // NF-e
   async getNFes(): Promise<NFe[]> {
     const { data, error } = await this.supabase
-      .from('nfes' as any)
+      .from('nfe' as any)
       .select('*')
       .order('issue_date', { ascending: false });
 
@@ -44,7 +44,7 @@ export class FiscalService {
 
   async transmitNFe(id: string): Promise<void> {
     const { error } = await this.supabase
-      .from('nfes' as any)
+      .from('nfe' as any)
       .update({ status: 'authorized', protocol: '123456789', authorization_date: new Date().toISOString() })
       .eq('id', id);
     if (error) throw error;
@@ -52,7 +52,7 @@ export class FiscalService {
 
   async cancelNFe(id: string, reason: string): Promise<void> {
     const { error } = await this.supabase
-      .from('nfes' as any)
+      .from('nfe' as any)
       .update({ status: 'cancelled', cancellation_reason: reason, cancellation_date: new Date().toISOString() })
       .eq('id', id);
     if (error) throw error;
