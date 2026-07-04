@@ -770,9 +770,10 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
           </div>
 
           {/* MAIN */}
-          <div className="flex flex-1 min-h-0">
+          <div className="flex flex-1 min-h-0 flex-col lg:flex-row">
             {/* LEFT: catalog + cart */}
-            <div className="flex-1 flex flex-col border-r bg-muted/10 min-w-0">
+            <div className="flex-1 flex flex-col border-b lg:border-b-0 lg:border-r bg-muted/10 min-w-0 min-h-0">
+
               {/* Input mode tabs */}
               <div className="px-6 pt-4 flex items-center justify-between">
                 <div className="inline-flex bg-muted/60 rounded-lg p-1 gap-1">
