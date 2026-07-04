@@ -1005,7 +1005,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
             </div>
 
             {/* RIGHT: checkout */}
-            <div className="w-[460px] bg-muted/30 flex flex-col shrink-0">
+            <div className="w-full lg:w-[400px] xl:w-[460px] bg-muted/30 flex flex-col shrink-0 min-h-0">
               <div className="flex-1 overflow-y-auto p-6 space-y-5">
                 {!showPayment ? (
                   <>
