@@ -666,7 +666,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
   const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (asPage) {
       return (
-        <div className="relative w-full h-[calc(100vh-4rem)] min-h-[600px] rounded-lg border bg-background overflow-hidden">
+        <div className="relative w-full h-[calc(100dvh-13rem)] min-h-[560px] max-h-[calc(100dvh-8rem)] rounded-lg border bg-background overflow-hidden shadow-sm">
           {children}
         </div>
       );
