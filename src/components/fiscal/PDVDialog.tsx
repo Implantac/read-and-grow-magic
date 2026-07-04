@@ -701,7 +701,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
 
         <div className="flex flex-col h-full">
           {/* TOP BAR: session + operator */}
-          <div className="h-14 border-b bg-gradient-to-r from-primary/5 via-background to-primary/5 px-6 flex items-center justify-between shrink-0">
+          <div className="min-h-14 border-b bg-gradient-to-r from-primary/5 via-background to-primary/5 px-3 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2 shrink-0">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2.5">
                 <div className="bg-primary p-1.5 rounded-md text-primary-foreground">
