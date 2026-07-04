@@ -666,7 +666,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
   const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (asPage) {
       return (
-        <div className="relative w-full h-[calc(100vh-4rem)] min-h-[600px] rounded-lg border bg-background overflow-hidden">
+        <div className="relative w-full h-[calc(100dvh-13rem)] min-h-[560px] max-h-[calc(100dvh-8rem)] rounded-lg border bg-background overflow-hidden shadow-sm">
           {children}
         </div>
       );
@@ -701,7 +701,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
 
         <div className="flex flex-col h-full">
           {/* TOP BAR: session + operator */}
-          <div className="h-14 border-b bg-gradient-to-r from-primary/5 via-background to-primary/5 px-6 flex items-center justify-between shrink-0">
+          <div className="min-h-14 border-b bg-gradient-to-r from-primary/5 via-background to-primary/5 px-3 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2 shrink-0">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2.5">
                 <div className="bg-primary p-1.5 rounded-md text-primary-foreground">
@@ -770,9 +770,10 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
           </div>
 
           {/* MAIN */}
-          <div className="flex flex-1 min-h-0">
+          <div className="flex flex-1 min-h-0 flex-col lg:flex-row">
             {/* LEFT: catalog + cart */}
-            <div className="flex-1 flex flex-col border-r bg-muted/10 min-w-0">
+            <div className="flex-1 flex flex-col border-b lg:border-b-0 lg:border-r bg-muted/10 min-w-0 min-h-0">
+
               {/* Input mode tabs */}
               <div className="px-6 pt-4 flex items-center justify-between">
                 <div className="inline-flex bg-muted/60 rounded-lg p-1 gap-1">
@@ -1004,7 +1005,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
             </div>
 
             {/* RIGHT: checkout */}
-            <div className="w-[460px] bg-muted/30 flex flex-col shrink-0">
+            <div className="w-full lg:w-[400px] xl:w-[460px] bg-muted/30 flex flex-col shrink-0 min-h-0">
               <div className="flex-1 overflow-y-auto p-6 space-y-5">
                 {!showPayment ? (
                   <>
