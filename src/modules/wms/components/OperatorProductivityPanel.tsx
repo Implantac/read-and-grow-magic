@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { Badge } from "@/ui/base/badge";
 import { Button } from "@/ui/base/button";
 import { Users, RefreshCw, Trophy } from "lucide-react";
+import { EmptyState } from "@/shared/components/EmptyState";
 
 interface OperatorRow {
   operator_id: string;
@@ -67,9 +68,11 @@ export default function OperatorProductivityPanel({ days = 7 }: { days?: number 
         {loading ? (
           <div className="text-sm text-muted-foreground py-8 text-center">Carregando…</div>
         ) : rows.length === 0 ? (
-          <div className="text-sm text-muted-foreground py-8 text-center">
-            Nenhuma atividade registrada no período.
-          </div>
+          <EmptyState
+            icon={Users}
+            title="Nenhuma atividade registrada"
+            description="Ainda não há tarefas concluídas por operadores no período selecionado."
+          />
         ) : (
           <ol role="list" className="space-y-2">
             {rows.map((r, idx) => (
