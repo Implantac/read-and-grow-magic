@@ -30,9 +30,12 @@ export function AutoReconcilePanel() {
         {loading ? (
           <div className="text-sm text-muted-foreground py-6 text-center">Carregando…</div>
         ) : suggestions.length === 0 ? (
-          <div className="text-sm text-muted-foreground py-6 text-center">
-            Nenhuma sugestão pendente. Rode o motor para gerar novas.
-          </div>
+          <EmptyState
+            icon={Sparkles}
+            title="Nenhuma sugestão pendente"
+            description="Rode o motor de conciliação para gerar novas correspondências entre transações bancárias e lançamentos."
+            action={{ label: 'Rodar auto-conciliação', onClick: () => runAuto(), icon: Sparkles }}
+          />
         ) : (
           <Table>
             <TableHeader>
