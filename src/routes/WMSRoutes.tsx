@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 
 const WMSDashboardPage = lazy(() => import("../modules/wms/WMSDashboard"));
 const ReceivingPage = lazy(() => import("../modules/wms/Receiving"));
