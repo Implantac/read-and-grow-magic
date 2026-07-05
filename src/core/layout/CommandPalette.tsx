@@ -43,13 +43,17 @@ export function CommandPalette() {
 
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
+      const isK = e.key === 'k' || e.key === 'K' || e.code === 'KeyK';
+      if (isK && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
+        e.stopPropagation();
         setOpen((o) => !o);
       }
     };
-    document.addEventListener('keydown', down);
-    return () => document.removeEventListener('keydown', down);
+    // Capture phase + window ensures we catch the event before any focused
+    // element (inputs, editors) can swallow it, and works reliably in headless.
+    window.addEventListener('keydown', down, true);
+    return () => window.removeEventListener('keydown', down, true);
   }, []);
 
   const flatItems = useMemo(() => {
