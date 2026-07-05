@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { useProductionRoutes, useProductionRouteSteps, ProductionRouteRow, ProductionRouteStep } from '@/hooks/production/useProductionRoutes';
 import { useProductionSectors } from '@/hooks/production/useProductionSectors';
@@ -95,12 +96,17 @@ export default function ProductionRoutesPage() {
           {loading ? (
             <div className="space-y-2">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 w-full rounded-xl" />)}</div>
           ) : filtered.length === 0 ? (
-            <Card className="border-border/40">
-              <CardContent className="flex flex-col items-center py-16 text-muted-foreground">
-                <Route className="h-12 w-12 mb-3 opacity-20" />
-                <p className="font-semibold">Nenhuma rota cadastrada</p>
-              </CardContent>
-            </Card>
+            <EmptyState
+              icon={Route}
+              title={search ? 'Nenhuma rota encontrada' : 'Nenhuma rota cadastrada'}
+              description={search
+                ? 'Ajuste a busca para localizar a rota desejada.'
+                : 'Cadastre rotas de produção para definir o fluxo padrão de fabricação por produto.'}
+              action={search
+                ? { label: 'Limpar busca', onClick: () => setSearch(''), variant: 'outline' }
+                : { label: 'Nova Rota', onClick: openNew, icon: Plus }}
+              compact
+            />
           ) : filtered.map(r => (
             <Card
               key={r.id}
@@ -274,13 +280,13 @@ function RouteStepsPanel({ routeId, onClose }: { routeId: string; onClose: () =>
         {loading ? (
           <div className="space-y-3">{[1, 2].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}</div>
         ) : steps.length === 0 ? (
-          <div className="text-center py-16 text-muted-foreground">
-            <div className="h-14 w-14 rounded-2xl bg-muted/40 flex items-center justify-center mx-auto mb-3">
-              <GitBranch className="h-7 w-7 opacity-30" />
-            </div>
-            <p className="font-semibold">Nenhuma etapa definida</p>
-            <p className="text-sm mt-1">Adicione a primeira etapa da rota</p>
-          </div>
+          <EmptyState
+            icon={GitBranch}
+            title="Nenhuma etapa definida"
+            description="Adicione a primeira etapa da rota (setor, recurso e tempos de setup/operação)."
+            action={{ label: 'Adicionar Etapa', onClick: () => setShowAdd(true), icon: Plus }}
+            compact
+          />
         ) : (
           <div className="space-y-0">
             {/* Horizontal Flow Summary */}
