@@ -81,15 +81,6 @@ export default function ProductionSchedulePage() {
                 ? { label: 'Agendar OP', onClick: () => setShowCreate(true), icon: Plus }
                 : undefined}
             />
-          ) : false ? (
-            <p />
-          ) : enriched.length === 0 ? (
-            <p />
-          ) : (
-            <p />
-          )}
-          {enriched.length > 0 && (
-            <p style={{ display: 'none' }}>_</p>
           ) : (
             <Table>
               <TableHeader><TableRow>
