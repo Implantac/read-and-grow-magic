@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { ShieldAlert, ShieldCheck, AlertTriangle, Activity, Check } from 'lucide-react';
 import { formatBRL, formatDateTime, formatNumber } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
 import {
   useRiskProfiles, useSecurityLogs, useFraudRules, useUpdateFraudRule, useResolveSecurityLog,
 } from '@/hooks/financial/useFinancialSecurity';
@@ -57,10 +58,11 @@ export default function FinancialAntifraud() {
             <CardContent>
               {ll ? <p className="text-sm text-muted-foreground">Carregando...</p> :
                logs.length === 0 ? (
-                <div className="py-12 text-center">
-                  <ShieldCheck className="h-12 w-12 mx-auto mb-4 text-green-500" />
-                  <p className="font-medium">Tudo limpo. Nenhum alerta de segurança ativo.</p>
-                </div>
+                <EmptyState
+                  icon={ShieldCheck}
+                  title="Tudo limpo"
+                  description="Nenhum alerta de segurança ativo no momento. Continuamos monitorando anomalias em tempo real."
+                />
               ) : (
                 <Table>
                   <TableHeader>
@@ -100,7 +102,11 @@ export default function FinancialAntifraud() {
             <CardHeader><CardTitle>Top entidades por risco</CardTitle></CardHeader>
             <CardContent>
               {profiles.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-12 text-center">Nenhum perfil computado ainda. Os perfis são gerados após movimentações no ledger.</p>
+                <EmptyState
+                  icon={Activity}
+                  title="Nenhum perfil computado"
+                  description="Os perfis de risco são gerados automaticamente após movimentações no ledger financeiro."
+                />
               ) : (
                 <Table>
                   <TableHeader>

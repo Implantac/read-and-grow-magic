@@ -15,6 +15,7 @@ import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from '@/ui/base/dialog';
 import { ExportButton } from '@/shared/components/ExportButton';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
@@ -227,7 +228,7 @@ export default function BankReconciliation() {
                   </TableRow>
                 ))}
                 {filteredBank.length === 0 && (
-                  <TableRow><TableCell colSpan={5} className="h-24 text-center text-muted-foreground">Nenhuma transação encontrada</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={5}><EmptyState compact icon={Building2} title="Nenhuma transação encontrada" description="Importe um extrato bancário ou ajuste os filtros para visualizar as transações." /></TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
@@ -281,7 +282,7 @@ export default function BankReconciliation() {
                   </TableRow>
                 ))}
                 {filteredSystem.length === 0 && (
-                  <TableRow><TableCell colSpan={5} className="h-24 text-center text-muted-foreground">Nenhum lançamento encontrado</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={5}><EmptyState compact icon={Calendar} title="Nenhum lançamento encontrado" description="Registre movimentações financeiras ou ajuste os filtros para conciliar com o extrato bancário." /></TableCell></TableRow>
                 )}
               </TableBody>
             </Table>
