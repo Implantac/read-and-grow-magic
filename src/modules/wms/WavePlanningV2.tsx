@@ -93,7 +93,11 @@ export default function WavePlanningV2() {
           </CardHeader>
           <CardContent className="space-y-4">
             {result.waves.length === 0 && (
-              <p className="text-sm text-muted-foreground">Nenhum pedido elegível encontrado com esses filtros.</p>
+              <EmptyState
+                icon={PackageX}
+                title="Nenhum pedido elegível"
+                description="Ajuste os filtros de prioridade, transportadora, zona ou cutoff para gerar ondas."
+              />
             )}
             {result.waves.map((w, i) => (
               <div key={i} className="rounded-lg border p-3">
