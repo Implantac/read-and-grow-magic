@@ -247,9 +247,11 @@ export default function SlottingPlanner() {
           {loading ? (
             <div className="text-sm text-muted-foreground py-8 text-center">Carregando…</div>
           ) : items.length === 0 ? (
-            <div className="text-sm text-muted-foreground py-8 text-center">
-              Nenhuma sugestão pendente. Clique em "Recalcular" para gerar novas.
-            </div>
+            <EmptyState
+              icon={Sparkles}
+              title="Nenhuma sugestão pendente"
+              description='Clique em "Recalcular" para gerar novas sugestões de slotting.'
+            />
           ) : (
             <ul role="list" className="space-y-2">
               {items.map((s) => {
