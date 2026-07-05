@@ -170,7 +170,15 @@ export default function SuperAdmin() {
                 );
               })}
               {filteredCompanies.length === 0 && (
-                <TableRow><TableCell colSpan={5} className="h-20 text-center text-muted-foreground">Nenhuma empresa encontrada</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={5} className="p-0">
+                    <EmptyState
+                      icon={Building2}
+                      title="Nenhuma empresa encontrada"
+                      description="Ajuste o filtro de busca ou cadastre uma nova empresa."
+                    />
+                  </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>
