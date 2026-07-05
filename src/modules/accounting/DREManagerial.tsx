@@ -172,7 +172,11 @@ export default function DREManagerialPage() {
           {loadingEntries ? (
             <div className="py-8 text-center text-muted-foreground">Carregando…</div>
           ) : entries.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">Nenhum lançamento.</div>
+            <EmptyState
+              icon={FileBarChart}
+              title="Nenhum lançamento"
+              description="Não há lançamentos para este centro de custo e categoria no período."
+            />
           ) : (
             <div className="max-h-[60vh] overflow-auto">
               <Table>
