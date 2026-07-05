@@ -40,6 +40,7 @@ const CarrierScorecardPage = lazy(() => import("../modules/wms/CarrierScorecard"
 const WavePlanningV2Page = lazy(() => import("../modules/wms/WavePlanningV2"));
 
 export const WMSRoutes = [
+  <Route key="wms-index" index element={<Navigate to="dashboard" replace />} />,
   <Route key="wms-dash" path="dashboard" element={<WMSDashboardPage />} />,
   <Route key="wms-rec" path="recebimento" element={<ReceivingPage />} />,
   <Route key="wms-store" path="armazenagem" element={<StoragePage />} />,
