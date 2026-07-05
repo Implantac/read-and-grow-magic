@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 
 const ProductionOrdersPage = lazy(() => import("../modules/production/ProductionOrders"));
 const MaterialConsumptionPage = lazy(() => import("../modules/production/MaterialConsumption"));
