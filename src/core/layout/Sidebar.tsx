@@ -279,6 +279,24 @@ export function Sidebar() {
     return location.pathname.startsWith(href);
   };
 
+  // Auto-expand any parent whose child matches the current route so users
+  // see where they are within the sidebar hierarchy.
+  useEffect(() => {
+    const toExpand: string[] = [];
+    for (const section of navigationSections) {
+      for (const item of section.items) {
+        if (item.children && item.children.length > 0) {
+          const hit = item.children.some((c) => c && location.pathname.startsWith(c.href));
+          if (hit) toExpand.push(item.title);
+        }
+      }
+    }
+    if (toExpand.length > 0) {
+      setExpandedItems((prev) => Array.from(new Set([...prev, ...toExpand])));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
   // Auto-close mobile drawer on route change
   useEffect(() => {
     if (sidebarMobileOpen) setSidebarMobileOpen(false);
