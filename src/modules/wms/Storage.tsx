@@ -182,14 +182,16 @@ export default function StoragePage() {
         </div>
       ) : (
         <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <MapPin className="h-12 w-12 mx-auto mb-4 opacity-30" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum endereço encontrado</h3>
-            <p className="text-sm">
-              {locations.length === 0
-                ? 'Configure os endereços do armazém para começar a operação WMS.'
-                : 'Nenhum endereço corresponde aos filtros aplicados.'}
-            </p>
+          <CardContent className="p-0">
+            <EmptyState
+              icon={MapPin}
+              title="Nenhum endereço encontrado"
+              description={
+                locations.length === 0
+                  ? 'Configure os endereços do armazém para começar a operação WMS.'
+                  : 'Nenhum endereço corresponde aos filtros aplicados.'
+              }
+            />
           </CardContent>
         </Card>
       )}
