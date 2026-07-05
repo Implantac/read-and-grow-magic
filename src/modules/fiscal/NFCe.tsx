@@ -341,8 +341,12 @@ export default function NFCePage() {
               ))}
               {filteredNFCes.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
-                    Nenhuma NFC-e encontrada
+                  <TableCell colSpan={7} className="p-0">
+                    <EmptyState
+                      icon={Receipt}
+                      title="Nenhuma NFC-e encontrada"
+                      description="Emita uma nova NFC-e ou ajuste os filtros para visualizar registros."
+                    />
                   </TableCell>
                 </TableRow>
               )}
