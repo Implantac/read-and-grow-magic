@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Database, Plus, Trash2, Settings2, FileText, GitBranch, Pencil } from "lucide-react";
 import { PageContainer } from "@/shared/components/PageContainer";
 import { PageHeader } from "@/shared/components/PageHeader";
+import { EmptyState } from "@/shared/components/EmptyState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { Button } from "@/ui/base/button";
 import { Input } from "@/ui/base/input";
