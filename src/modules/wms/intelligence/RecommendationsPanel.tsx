@@ -87,9 +87,11 @@ export default function RecommendationsPanel() {
         {loading ? (
           <div className="text-sm text-muted-foreground py-8 text-center">Carregando…</div>
         ) : recs.length === 0 ? (
-          <div className="text-sm text-muted-foreground py-8 text-center">
-            Nenhuma recomendação aberta. Operação saudável.
-          </div>
+          <EmptyState
+            icon={CheckCircle2}
+            title="Nenhuma recomendação aberta"
+            description="A IA não detectou riscos ou oportunidades — a operação está saudável."
+          />
         ) : (
           <ul role="list" className="space-y-2">
             {recs.map((r) => (
