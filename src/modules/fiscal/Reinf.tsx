@@ -13,8 +13,9 @@ import { formatBRL } from '@/lib/formatters';
 import { toCsv, downloadCsv } from '@/lib/csv';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { Send, FileText } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { EmptyState } from '@/shared/components/EmptyState';
+import { FileX } from 'lucide-react';
 import {
   R2099_HEADERS, R4099_HEADERS,
   buildR2099Rows, buildR4099Rows,
