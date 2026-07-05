@@ -41,10 +41,11 @@ export function ReturnItemsDialog({ open, onOpenChange, returnId, returnNumber }
         {isLoading ? (
           <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin" /></div>
         ) : items.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <PackageCheck className="h-10 w-10 mx-auto mb-3 opacity-50" />
-            <p>Nenhum item cadastrado para esta devolução.</p>
-          </div>
+          <EmptyState
+            icon={PackageCheck}
+            title="Nenhum item cadastrado"
+            description="Esta devolução ainda não possui itens registrados para tratamento."
+          />
         ) : (
           <div className="space-y-3">
             {items.map((it) => {
