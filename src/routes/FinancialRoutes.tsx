@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 
 const AccountsPayable = lazy(() => import("../modules/financial/AccountsPayable"));
 const AccountsReceivable = lazy(() => import("../modules/financial/AccountsReceivable"));
