@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "lint:ci": "node scripts/lint-ci.mjs",
     "typecheck": "tsgo --noEmit",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "e2e": "playwright test --project=chromium",
+    "e2e:cmdk": "playwright test .lovable/e2e/cmdk.spec.ts --project=chromium"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
