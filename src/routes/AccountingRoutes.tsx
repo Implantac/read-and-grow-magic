@@ -13,6 +13,7 @@ const DREManagerialPage = lazy(() => import("../modules/accounting/DREManagerial
 
 // Paths relativos: montados sob `/contabilidade/*` em App.tsx.
 export const AccountingRoutes = [
+  <Route key="acc-index" index element={<Navigate to="dre" replace />} />,
   <Route key="acc-chart" path="plano-contas" element={<ChartOfAccountsPage />} />,
   <Route key="acc-journal" path="lancamentos" element={<JournalEntriesPage />} />,
   <Route key="acc-ledger" path="razao" element={<GeneralLedgerPage />} />,
