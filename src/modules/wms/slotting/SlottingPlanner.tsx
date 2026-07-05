@@ -5,6 +5,7 @@ import { Button } from "@/ui/base/button";
 import { Badge } from "@/ui/base/badge";
 import { Brain, CheckCircle2, X, RefreshCw, ArrowRight, TrendingDown, FlaskConical, Sparkles } from "lucide-react";
 import WMSKpiStrip from "../components/WMSKpiStrip";
+import { EmptyState } from "@/shared/components/EmptyState";
 import { toast } from "sonner";
 
 type Engine = "v1" | "v2";
@@ -246,9 +247,11 @@ export default function SlottingPlanner() {
           {loading ? (
             <div className="text-sm text-muted-foreground py-8 text-center">Carregando…</div>
           ) : items.length === 0 ? (
-            <div className="text-sm text-muted-foreground py-8 text-center">
-              Nenhuma sugestão pendente. Clique em "Recalcular" para gerar novas.
-            </div>
+            <EmptyState
+              icon={Sparkles}
+              title="Nenhuma sugestão pendente"
+              description='Clique em "Recalcular" para gerar novas sugestões de slotting.'
+            />
           ) : (
             <ul role="list" className="space-y-2">
               {items.map((s) => {

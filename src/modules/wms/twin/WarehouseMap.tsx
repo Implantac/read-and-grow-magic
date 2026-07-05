@@ -2,6 +2,8 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { Button } from "@/ui/base/button";
+import { EmptyState } from "@/shared/components/EmptyState";
+import { MapPin } from "lucide-react";
 
 interface LocationRow {
   id: string;
@@ -155,8 +157,12 @@ export default function WarehouseMap() {
   if (locs.length === 0) {
     return (
       <Card>
-        <CardContent className="py-12 text-center text-muted-foreground">
-          Nenhum endereço cadastrado em wms_storage_locations.
+        <CardContent className="p-0">
+          <EmptyState
+            icon={MapPin}
+            title="Nenhum endereço cadastrado"
+            description="Configure endereços de armazenagem para renderizar o mapa do CD."
+          />
         </CardContent>
       </Card>
     );
