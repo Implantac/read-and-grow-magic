@@ -124,6 +124,10 @@ export function Topbar() {
 
         <div className="mx-1 hidden sm:block h-6 w-px bg-sidebar-border/60" aria-hidden="true" />
 
+        <span className="hidden lg:inline-block text-[10px] font-bold uppercase tracking-[0.14em] text-sidebar-foreground/40 mr-1">
+          Contexto
+        </span>
+
         {/* Company/Branch Selector */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
