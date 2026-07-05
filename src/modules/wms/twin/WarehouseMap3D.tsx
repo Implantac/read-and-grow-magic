@@ -5,6 +5,8 @@ import * as THREE from "three";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { Button } from "@/ui/base/button";
+import { EmptyState } from "@/shared/components/EmptyState";
+import { Box } from "lucide-react";
 
 interface LocationRow {
   id: string;
