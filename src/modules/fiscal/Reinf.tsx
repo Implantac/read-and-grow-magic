@@ -14,6 +14,8 @@ import { toCsv, downloadCsv } from '@/lib/csv';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Send } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { FileX } from 'lucide-react';
 import {
   R2099_HEADERS, R4099_HEADERS,
   buildR2099Rows, buildR4099Rows,
@@ -392,7 +394,13 @@ function TotalBox({ label, value }: { label: string; value: string }) {
 
 function EventTable({ events, type }: { events: any[]; type: string }) {
   if (events.length === 0) {
-    return <div className="text-sm text-muted-foreground py-6 text-center">Nenhum evento {type} gerado nesta competência.</div>;
+    return (
+      <EmptyState
+        icon={FileX}
+        title={`Nenhum evento ${type}`}
+        description="Não há eventos gerados nesta competência para este tipo de registro."
+      />
+    );
   }
   const isFechamento = type === 'R-2099' || type === 'R-4099';
   return (
