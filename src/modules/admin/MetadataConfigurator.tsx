@@ -228,9 +228,11 @@ function FieldsPanel({ entityId }: { entityId: string }) {
       </CardHeader>
       <CardContent>
         {fields.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Nenhum campo. Adicione o primeiro.
-          </p>
+          <EmptyState
+            icon={Settings2}
+            title="Nenhum campo"
+            description="Adicione o primeiro campo para esta entidade."
+          />
         ) : (
           <Table>
             <TableHeader>
