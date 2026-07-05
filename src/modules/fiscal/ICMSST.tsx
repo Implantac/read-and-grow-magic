@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/ui/base/dialog';
 import { Switch } from '@/ui/base/switch';
 import { Percent, Plus } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useICMSSTRules, useUpsertICMSST } from '@/hooks/fiscal/useTaxAdvancedRules';
 import { toSafeNumber } from '@/lib/numericValidation';
 
