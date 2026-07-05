@@ -151,7 +151,7 @@ export default function OperationalDashboard() {
                   <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
-            ) : <p className="text-sm text-muted-foreground text-center py-8">Sem dados</p>}
+            ) : <EmptyState icon={BarChart3} title="Sem pedidos no período" description="Cadastre pedidos para acompanhar a distribuição por status." compact />}
           </CardContent>
         </Card>
 
@@ -167,7 +167,7 @@ export default function OperationalDashboard() {
                   <Tooltip />
                 </PieChart>
               </ResponsiveContainer>
-            ) : <p className="text-sm text-muted-foreground text-center py-8">Sem dados</p>}
+            ) : <EmptyState icon={PieChartIcon} title="Sem ordens de produção" description="Ordens ativas aparecerão distribuídas por status." compact />}
           </CardContent>
         </Card>
       </div>
