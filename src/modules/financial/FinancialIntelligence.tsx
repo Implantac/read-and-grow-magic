@@ -2,10 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Badge } from '@/ui/base/badge';
 import { Progress } from '@/ui/base/progress';
-import { Brain, AlertTriangle, TrendingUp, RefreshCw, Activity, Wallet, AlertCircle } from 'lucide-react';
+import { Brain, AlertTriangle, TrendingUp, RefreshCw, Activity, Wallet, AlertCircle, ShieldCheck } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useLatestHealthScore, usePredictiveAlerts, useComputeIntelligence, useAutoReconcile } from '@/hooks/financial/useFinancialIntelligence';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -80,7 +81,11 @@ export default function FinancialIntelligence() {
         <CardHeader><CardTitle className="text-base flex items-center gap-2"><AlertTriangle className="h-4 w-4" />Alertas preditivos ativos</CardTitle></CardHeader>
         <CardContent>
           {alerts.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground text-sm">✅ Nenhum risco detectado nos próximos 30 dias</div>
+            <EmptyState
+              icon={ShieldCheck}
+              title="Nenhum risco detectado"
+              description="Os motores preditivos não encontraram riscos financeiros nos próximos 30 dias."
+            />
           ) : (
             <div className="space-y-3">
               {alerts.map(a => (

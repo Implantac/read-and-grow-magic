@@ -14,6 +14,7 @@ import { useLatestHealthScore } from '@/hooks/financial/useFinancialIntelligence
 import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/financial/useAccountsPayable';
 import { Wallet, TrendingUp, TrendingDown, Activity, Brain, RefreshCw } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { formatBRL, formatDate } from '@/lib/formatters';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -185,7 +186,11 @@ export default function FinancialBI() {
           <CardHeader><CardTitle className="flex items-center gap-2"><Activity className="h-4 w-4" /> Últimas movimentações no ledger</CardTitle></CardHeader>
           <CardContent>
             {ledger.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-12 text-center">Nenhum lançamento registrado ainda.</p>
+              <EmptyState
+                icon={Activity}
+                title="Nenhum lançamento registrado"
+                description="Assim que houver movimentações no ledger financeiro, elas aparecerão aqui."
+              />
             ) : (
               <Table>
                 <TableHeader>

@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Input } from '@/ui/base/input';
 import { Label } from '@/ui/base/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { FileBarChart } from 'lucide-react';
 import { useDREDynamic } from '@/hooks/accounting/useDREDynamic';
 import { formatNumber } from '@/lib/formatters';
 
@@ -74,7 +76,11 @@ export default function DREDynamicPage() {
           {isLoading ? (
             <p className="text-center py-8 text-muted-foreground">Carregando...</p>
           ) : data.length === 0 ? (
-            <p className="text-center py-8 text-muted-foreground">Sem lançamentos no período.</p>
+            <EmptyState
+              icon={FileBarChart}
+              title="Sem lançamentos no período"
+              description="Ajuste o intervalo de datas ou o filtro de canal para visualizar a DRE."
+            />
           ) : (
             <Table>
               <TableHeader>
