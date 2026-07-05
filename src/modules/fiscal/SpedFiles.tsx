@@ -13,6 +13,7 @@ import { Download, Trash2, FileText, Loader2, Calendar, Sparkles, CheckCircle2, 
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { formatBRL } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 export default function SpedFiles() {
   const { files, loading, generating, generate, download, remove } = useSpedFiles();
