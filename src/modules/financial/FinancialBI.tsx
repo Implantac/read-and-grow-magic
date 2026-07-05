@@ -14,6 +14,7 @@ import { useLatestHealthScore } from '@/hooks/financial/useFinancialIntelligence
 import { useAccountsReceivable } from '@/hooks/financial/useAccountsReceivable';
 import { useAccountsPayable } from '@/hooks/financial/useAccountsPayable';
 import { Wallet, TrendingUp, TrendingDown, Activity, Brain, RefreshCw } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { formatBRL, formatDate } from '@/lib/formatters';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
