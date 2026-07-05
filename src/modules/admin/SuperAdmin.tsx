@@ -3,6 +3,7 @@ import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
 import { KPICard } from '@/shared/components/KPICard';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Badge } from '@/ui/base/badge';
