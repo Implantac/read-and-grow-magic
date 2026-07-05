@@ -50,6 +50,7 @@ jobs:
 
       - name: Upload Playwright report
         if: always()
+        id: upload-report
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report
@@ -57,3 +58,21 @@ jobs:
             playwright-report
             test-results
           retention-days: 14
+
+      - name: Build PR summary
+        if: always() && github.event_name == 'pull_request'
+        id: summary
+        run: |
+          {
+            echo 'body<<__EOF__'
+            node scripts/pr-playwright-summary.mjs
+            echo '__EOF__'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Comment PR with Playwright summary
+        if: always() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: playwright-e2e
+          message: ${{ steps.summary.outputs.body }}
+
