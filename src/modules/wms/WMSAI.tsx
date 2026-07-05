@@ -1,6 +1,7 @@
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
@@ -71,10 +72,13 @@ export default function WMSAIPage() {
         </div>
       ) : (
         <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
-            <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <h3 className="text-lg font-semibold mb-2">Nenhum insight no momento</h3>
-            <p>A IA está monitorando a operação e gerará insights automaticamente.</p>
+          <CardContent className="p-0">
+            <EmptyState
+              icon={Brain}
+              title="Nenhum insight no momento"
+              description="A IA está monitorando a operação e gerará insights automaticamente."
+              action={{ label: 'Atualizar', onClick: () => refetch(), icon: RefreshCw }}
+            />
           </CardContent>
         </Card>
       )}
