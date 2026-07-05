@@ -5,6 +5,7 @@ import { Button } from "@/ui/base/button";
 import { Badge } from "@/ui/base/badge";
 import { Brain, CheckCircle2, X, RefreshCw, ArrowRight, TrendingDown, FlaskConical, Sparkles } from "lucide-react";
 import WMSKpiStrip from "../components/WMSKpiStrip";
+import { EmptyState } from "@/shared/components/EmptyState";
 import { toast } from "sonner";
 
 type Engine = "v1" | "v2";
