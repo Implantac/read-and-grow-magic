@@ -14,7 +14,12 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 2 : undefined,
   reporter: process.env.CI
-    ? [["github"], ["html", { open: "never" }], ["list"]]
+    ? [
+        ["github"],
+        ["html", { open: "never" }],
+        ["json", { outputFile: "playwright-report/results.json" }],
+        ["list"],
+      ]
     : [["list"]],
   use: {
     baseURL: process.env.BASE_URL ?? "http://localhost:8080",
