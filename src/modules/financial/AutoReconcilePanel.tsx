@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/
 import { Button } from '@/ui/base/button';
 import { Badge } from '@/ui/base/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { formatBRL } from '@/lib/formatters';
 import { Sparkles, Check, X, Loader2 } from 'lucide-react';
 import { useBankReconcileEngine } from '@/hooks/financial/useBankReconcileEngine';
