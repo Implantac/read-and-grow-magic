@@ -78,7 +78,11 @@ export default function BalanceSheetPage() {
             </TableBody>
           </Table>
         ) : (
-          <p className="text-muted-foreground text-center py-8">Nenhum dado disponível</p>
+          <EmptyState
+            icon={Scale}
+            title="Nenhum dado disponível"
+            description="Não há saldos contábeis para exibir neste grupo."
+          />
         )}
       </CardContent>
     </Card>
