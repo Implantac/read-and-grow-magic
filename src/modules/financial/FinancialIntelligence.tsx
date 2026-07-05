@@ -81,7 +81,11 @@ export default function FinancialIntelligence() {
         <CardHeader><CardTitle className="text-base flex items-center gap-2"><AlertTriangle className="h-4 w-4" />Alertas preditivos ativos</CardTitle></CardHeader>
         <CardContent>
           {alerts.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground text-sm">✅ Nenhum risco detectado nos próximos 30 dias</div>
+            <EmptyState
+              icon={ShieldCheck}
+              title="Nenhum risco detectado"
+              description="Os motores preditivos não encontraram riscos financeiros nos próximos 30 dias."
+            />
           ) : (
             <div className="space-y-3">
               {alerts.map(a => (
