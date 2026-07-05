@@ -120,7 +120,11 @@ export default function SuperAdmin() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[250px] flex items-center justify-center text-muted-foreground">Sem dados</div>
+              <EmptyState
+                icon={TrendingUp}
+                title="Sem dados de receita"
+                description="Cadastre planos e assinaturas para visualizar receita mensal por plano."
+              />
             )}
           </CardContent>
         </Card>
