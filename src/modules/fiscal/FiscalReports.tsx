@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/ui/base/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
+import { EmptyState } from '@/shared/components/EmptyState';
 import {
   Table,
   TableBody,
