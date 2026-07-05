@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 
 const CRMDashboardPage = lazy(() => import("../modules/commercial/CRMDashboard"));
 const ClientsPage = lazy(() => import("../modules/commercial/Clients"));
