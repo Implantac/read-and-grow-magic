@@ -14,6 +14,7 @@ const FiscalReportsPage = lazy(() => import("../modules/fiscal/FiscalReports"));
 const ReinfPage = lazy(() => import("../modules/fiscal/Reinf"));
 
 export const FiscalRoutes = [
+  <Route key="fiscal-index" index element={<Navigate to="dashboard" replace />} />,
   <Route key="fiscal-dash" path="dashboard" element={<FiscalDashboardPage />} />,
   <Route key="fiscal-nfe" path="nfe" element={<NFePage />} />,
   <Route key="fiscal-nfce" path="nfce" element={<NFCePage />} />,
