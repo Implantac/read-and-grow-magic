@@ -17794,6 +17794,7 @@ export type Database = {
       }
       wms_docks: {
         Row: {
+          company_id: string | null
           created_at: string | null
           id: string
           name: string
@@ -17802,6 +17803,7 @@ export type Database = {
           warehouse_id: string | null
         }
         Insert: {
+          company_id?: string | null
           created_at?: string | null
           id?: string
           name: string
@@ -17810,6 +17812,7 @@ export type Database = {
           warehouse_id?: string | null
         }
         Update: {
+          company_id?: string | null
           created_at?: string | null
           id?: string
           name?: string
