@@ -14,7 +14,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/ui/base/dialog';
 import { formatBRL } from '@/lib/formatters';
-import { ChevronRight, TrendingUp } from 'lucide-react';
+import { ChevronRight, TrendingUp, FileBarChart } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import {
   useDREManagerial,
   useDREManagerialEntries,
