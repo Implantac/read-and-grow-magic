@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, CheckCircle2, XCircle, Trash2, FileCheck } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
 import { KPICard } from '@/shared/components/KPICard';
@@ -193,7 +194,9 @@ export default function Checks() {
                 </TableRow>
               ))}
               {checks.length === 0 && (
-                <TableRow><TableCell colSpan={8} className="h-24 text-center text-muted-foreground">Nenhum cheque cadastrado</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="p-0">
+                  <EmptyState icon={FileCheck} title="Nenhum cheque cadastrado" description="Registre cheques emitidos ou recebidos para controlar compensações, devoluções e conciliação bancária." />
+                </TableCell></TableRow>
               )}
             </TableBody>
           </Table>

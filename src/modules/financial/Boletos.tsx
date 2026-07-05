@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, Copy, CheckCircle2, XCircle, Receipt } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
 import { KPICard } from '@/shared/components/KPICard';
@@ -156,7 +157,9 @@ export default function Boletos() {
                 </TableRow>
               ))}
               {boletos.length === 0 && (
-                <TableRow><TableCell colSpan={7} className="h-24 text-center text-muted-foreground">Nenhum boleto gerado</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="p-0">
+                  <EmptyState icon={Receipt} title="Nenhum boleto gerado" description="Emita boletos a partir de contas a receber para cobrar clientes de forma automática." />
+                </TableCell></TableRow>
               )}
             </TableBody>
           </Table>

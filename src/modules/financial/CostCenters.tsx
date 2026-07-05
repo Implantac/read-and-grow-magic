@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, FolderTree } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
 import { Button } from '@/ui/base/button';
@@ -65,7 +66,14 @@ export default function CostCenters() {
                 </TableRow>
               ))}
               {centers.length === 0 && (
-                <TableRow><TableCell colSpan={3} className="h-24 text-center text-muted-foreground">Nenhum centro de custo cadastrado</TableCell></TableRow>
+                <TableRow><TableCell colSpan={3} className="p-0">
+                  <EmptyState
+                    icon={FolderTree}
+                    title="Nenhum centro de custo cadastrado"
+                    description="Cadastre centros de custo para segmentar despesas por área, filial ou projeto e habilitar rateios contábeis."
+                    action={{ label: 'Novo Centro de Custo', onClick: () => setOpen(true), icon: Plus }}
+                  />
+                </TableCell></TableRow>
               )}
             </TableBody>
           </Table>
