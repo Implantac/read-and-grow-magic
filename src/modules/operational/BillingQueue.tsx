@@ -4,12 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Button } from '@/ui/base/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { Skeleton } from '@/ui/base/skeleton';
 import { useBillingQueue, useUpdateBillingStatus } from '@/hooks/commercial/useOrderFlow';
 import { useOrders } from '@/hooks/commercial/useOrders';
 import { useOrderLifecycle } from '@/hooks/commercial/useOrderLifecycle';
 import { FileText, Clock, CheckCircle, DollarSign, Play, Ban } from 'lucide-react';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
 import { formatBRL, formatNumber } from '@/lib/formatters';
 
 export default function BillingQueuePage() {
@@ -74,31 +75,36 @@ export default function BillingQueuePage() {
       <Card>
         <CardHeader><CardTitle>Fila de Faturamento</CardTitle></CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader><TableRow>
-              <TableHead>Status</TableHead>
-              <TableHead>Tipo</TableHead>
-              <TableHead>Valor Total</TableHead>
-              <TableHead>Faturado</TableHead>
-              <TableHead>Pendente</TableHead>
-              <TableHead>Nota</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow></TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
-              ) : !items?.length ? (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhum item na fila de faturamento</TableCell></TableRow>
-              ) : items.map((item: any) => {
-                return (
+          {isLoading ? (
+            <div className="space-y-2" aria-busy="true">
+              {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+            </div>
+          ) : !items?.length ? (
+            <EmptyState
+              icon={FileText}
+              title="Nenhum item na fila de faturamento"
+              description="Pedidos conferidos aparecerão aqui prontos para emissão de nota fiscal."
+            />
+          ) : (
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>Status</TableHead>
+                <TableHead>Tipo</TableHead>
+                <TableHead>Valor Total</TableHead>
+                <TableHead>Faturado</TableHead>
+                <TableHead>Pendente</TableHead>
+                <TableHead>Nota</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {items.map((item: any) => (
                   <TableRow key={item.id}>
                     <TableCell><StatusBadge status={item.status} type="order" /></TableCell>
                     <TableCell>{item.billing_type === 'full' ? 'Total' : 'Parcial'}</TableCell>
                     <TableCell>{formatBRL(item.amount)}</TableCell>
                     <TableCell>{formatBRL(item.billed_amount)}</TableCell>
                     <TableCell>{formatBRL(item.pending_amount)}</TableCell>
-
                     <TableCell>{item.invoice_number || '-'}</TableCell>
                     <TableCell>{format(new Date(item.created_at), 'dd/MM/yyyy')}</TableCell>
                     <TableCell className="text-right">
@@ -121,10 +127,10 @@ export default function BillingQueuePage() {
                       </div>
                     </TableCell>
                   </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </PageContainer>
