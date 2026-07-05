@@ -752,7 +752,11 @@ function RelationshipsPanel({ entityId }: { entityId: string }) {
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : rels.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum relacionamento definido.</p>
+          <EmptyState
+            icon={GitBranch}
+            title="Nenhum relacionamento definido"
+            description="Crie relacionamentos entre entidades para modelar seu domínio."
+          />
         ) : (
           <Table>
             <TableHeader>
