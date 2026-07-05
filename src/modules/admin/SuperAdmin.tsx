@@ -3,6 +3,7 @@ import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
 import { KPICard } from '@/shared/components/KPICard';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Badge } from '@/ui/base/badge';
@@ -92,7 +93,11 @@ export default function SuperAdmin() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[250px] flex items-center justify-center text-muted-foreground">Nenhuma assinatura ativa</div>
+              <EmptyState
+                icon={DollarSign}
+                title="Nenhuma assinatura ativa"
+                description="Nenhum tenant possui plano ativo no momento."
+              />
             )}
           </CardContent>
         </Card>
@@ -115,7 +120,11 @@ export default function SuperAdmin() {
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[250px] flex items-center justify-center text-muted-foreground">Sem dados</div>
+              <EmptyState
+                icon={TrendingUp}
+                title="Sem dados de receita"
+                description="Cadastre planos e assinaturas para visualizar receita mensal por plano."
+              />
             )}
           </CardContent>
         </Card>
@@ -161,7 +170,15 @@ export default function SuperAdmin() {
                 );
               })}
               {filteredCompanies.length === 0 && (
-                <TableRow><TableCell colSpan={5} className="h-20 text-center text-muted-foreground">Nenhuma empresa encontrada</TableCell></TableRow>
+                <TableRow>
+                  <TableCell colSpan={5} className="p-0">
+                    <EmptyState
+                      icon={Building2}
+                      title="Nenhuma empresa encontrada"
+                      description="Ajuste o filtro de busca ou cadastre uma nova empresa."
+                    />
+                  </TableCell>
+                </TableRow>
               )}
             </TableBody>
           </Table>
