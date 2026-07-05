@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { Badge } from "@/ui/base/badge";
 import { Button } from "@/ui/base/button";
 import { Users, RefreshCw, Trophy } from "lucide-react";
+import { EmptyState } from "@/shared/components/EmptyState";
 
 interface OperatorRow {
   operator_id: string;
