@@ -93,7 +93,11 @@ export default function SuperAdmin() {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[250px] flex items-center justify-center text-muted-foreground">Nenhuma assinatura ativa</div>
+              <EmptyState
+                icon={DollarSign}
+                title="Nenhuma assinatura ativa"
+                description="Nenhum tenant possui plano ativo no momento."
+              />
             )}
           </CardContent>
         </Card>
