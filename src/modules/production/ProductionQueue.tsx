@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
@@ -61,44 +62,51 @@ export default function ProductionQueuePage() {
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2"><ListOrdered className="h-5 w-5" /> Fila Ordenada por Prioridade</CardTitle></CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader><TableRow>
-              <TableHead className="w-10">#</TableHead><TableHead>Nº OP</TableHead><TableHead>Produto</TableHead>
-              <TableHead>Cliente</TableHead><TableHead>Qtde</TableHead><TableHead>Progresso</TableHead>
-              <TableHead>Prioridade</TableHead><TableHead>Prazo</TableHead><TableHead>Setor</TableHead>
-              <TableHead>Status</TableHead><TableHead className="text-right">Ações</TableHead>
-            </TableRow></TableHeader>
-            <TableBody>
-              {activeOrders.length === 0 ? (
-                <TableRow><TableCell colSpan={11} className="text-center py-8 text-muted-foreground">Fila de produção vazia</TableCell></TableRow>
-              ) : activeOrders.map((o, idx) => {
-                const pct = o.quantity > 0 ? (o.produced_quantity / o.quantity) * 100 : 0;
-                const isDelayed = o.due_date && differenceInDays(today, parseISO(o.due_date)) > 0;
-                const sc = productionStatusConfig[o.status] || { label: o.status, color: '' };
-                const pc = priorityConfig[o.priority] || { label: o.priority, color: '' };
-                return (
-                  <TableRow key={o.id} className={cn(isDelayed && 'bg-destructive/5')}>
-                    <TableCell className="font-bold text-muted-foreground">{idx + 1}</TableCell>
-                    <TableCell className="font-mono font-medium">{o.order_number}</TableCell>
-                    <TableCell>{o.product_name}</TableCell>
-                    <TableCell>{(o as any).client_name || '-'}</TableCell>
-                    <TableCell>{o.produced_quantity}/{o.quantity} {o.unit}</TableCell>
-                    <TableCell><div className="flex items-center gap-2"><Progress value={pct} className="h-2 w-16" /><span className="text-xs">{pct.toFixed(0)}%</span></div></TableCell>
-                    <TableCell><StatusBadge status={o.priority} type="priority" /></TableCell>
-                    <TableCell><div className="flex items-center gap-1">{o.due_date ? format(new Date(o.due_date), 'dd/MM/yyyy') : '-'}{isDelayed && <AlertTriangle className="h-3 w-3 text-destructive" />}</div></TableCell>
-                    <TableCell>{o.work_center || (o as any).sector || '-'}</TableCell>
-                    <TableCell><StatusBadge status={o.status} type="production" /></TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex gap-1 justify-end">
-                        {o.status === 'planned' && <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStart(o)}><Play className="h-3 w-3 mr-1" /> Iniciar</Button>}
-                        {o.status === 'in_progress' && <Button size="sm" className="h-7 text-xs" onClick={() => handleComplete(o)}><CheckCircle className="h-3 w-3 mr-1" /> Finalizar</Button>}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+          {activeOrders.length === 0 ? (
+            <EmptyState
+              icon={ListOrdered}
+              title={sectorFilter === 'all' ? 'Fila de produção vazia' : 'Nenhuma ordem para este setor'}
+              description={sectorFilter === 'all'
+                ? 'Não há ordens planejadas, em andamento ou pausadas no momento.'
+                : 'Ajuste o filtro de setor ou crie novas ordens de produção.'}
+              action={sectorFilter !== 'all' ? { label: 'Limpar filtro', onClick: () => setSectorFilter('all'), variant: 'outline' } : undefined}
+            />
+          ) : (
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead className="w-10">#</TableHead><TableHead>Nº OP</TableHead><TableHead>Produto</TableHead>
+                <TableHead>Cliente</TableHead><TableHead>Qtde</TableHead><TableHead>Progresso</TableHead>
+                <TableHead>Prioridade</TableHead><TableHead>Prazo</TableHead><TableHead>Setor</TableHead>
+                <TableHead>Status</TableHead><TableHead className="text-right">Ações</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {activeOrders.map((o, idx) => {
+                  const pct = o.quantity > 0 ? (o.produced_quantity / o.quantity) * 100 : 0;
+                  const isDelayed = o.due_date && differenceInDays(today, parseISO(o.due_date)) > 0;
+                  return (
+                    <TableRow key={o.id} className={cn(isDelayed && 'bg-destructive/5')}>
+                      <TableCell className="font-bold text-muted-foreground">{idx + 1}</TableCell>
+                      <TableCell className="font-mono font-medium">{o.order_number}</TableCell>
+                      <TableCell>{o.product_name}</TableCell>
+                      <TableCell>{(o as any).client_name || '-'}</TableCell>
+                      <TableCell>{o.produced_quantity}/{o.quantity} {o.unit}</TableCell>
+                      <TableCell><div className="flex items-center gap-2"><Progress value={pct} className="h-2 w-16" /><span className="text-xs">{pct.toFixed(0)}%</span></div></TableCell>
+                      <TableCell><StatusBadge status={o.priority} type="priority" /></TableCell>
+                      <TableCell><div className="flex items-center gap-1">{o.due_date ? format(new Date(o.due_date), 'dd/MM/yyyy') : '-'}{isDelayed && <AlertTriangle className="h-3 w-3 text-destructive" />}</div></TableCell>
+                      <TableCell>{o.work_center || (o as any).sector || '-'}</TableCell>
+                      <TableCell><StatusBadge status={o.status} type="production" /></TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-1 justify-end">
+                          {o.status === 'planned' && <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStart(o)}><Play className="h-3 w-3 mr-1" /> Iniciar</Button>}
+                          {o.status === 'in_progress' && <Button size="sm" className="h-7 text-xs" onClick={() => handleComplete(o)}><CheckCircle className="h-3 w-3 mr-1" /> Finalizar</Button>}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </PageContainer>
