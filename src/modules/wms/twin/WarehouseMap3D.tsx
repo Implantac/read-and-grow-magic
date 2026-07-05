@@ -235,8 +235,12 @@ export default function WarehouseMap3D() {
   if (cells.length === 0) {
     return (
       <Card>
-        <CardContent className="py-12 text-center text-muted-foreground">
-          Nenhum endereço cadastrado para renderizar.
+        <CardContent className="p-0">
+          <EmptyState
+            icon={Box}
+            title="Nenhum endereço para renderizar"
+            description="Cadastre endereços de armazenagem para visualizar o Digital Twin 3D."
+          />
         </CardContent>
       </Card>
     );
