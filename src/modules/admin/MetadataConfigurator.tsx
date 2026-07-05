@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Database, Plus, Trash2, Settings2, FileText, GitBranch, Pencil } from "lucide-react";
 import { PageContainer } from "@/shared/components/PageContainer";
 import { PageHeader } from "@/shared/components/PageHeader";
+import { EmptyState } from "@/shared/components/EmptyState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { Button } from "@/ui/base/button";
 import { Input } from "@/ui/base/input";
@@ -90,9 +91,11 @@ export default function MetadataConfigurator() {
               <p className="text-sm text-muted-foreground">Carregando...</p>
             )}
             {!isLoading && entities.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                Nenhuma entidade. Crie a primeira.
-              </p>
+              <EmptyState
+                icon={Database}
+                title="Nenhuma entidade"
+                description="Crie a primeira entidade personalizada para começar."
+              />
             )}
             {entities.map((e) => (
               <button
@@ -225,9 +228,11 @@ function FieldsPanel({ entityId }: { entityId: string }) {
       </CardHeader>
       <CardContent>
         {fields.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Nenhum campo. Adicione o primeiro.
-          </p>
+          <EmptyState
+            icon={Settings2}
+            title="Nenhum campo"
+            description="Adicione o primeiro campo para esta entidade."
+          />
         ) : (
           <Table>
             <TableHeader>
@@ -417,11 +422,17 @@ function RecordsPanel({ entityId }: { entityId: string }) {
       </CardHeader>
       <CardContent>
         {fields.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Adicione campos antes de criar registros.
-          </p>
+          <EmptyState
+            icon={Settings2}
+            title="Configure os campos primeiro"
+            description="Adicione campos à entidade antes de criar registros."
+          />
         ) : records.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum registro.</p>
+          <EmptyState
+            icon={FileText}
+            title="Nenhum registro"
+            description="Nenhum registro criado para esta entidade ainda."
+          />
         ) : (
           <Table>
             <TableHeader>
@@ -741,7 +752,11 @@ function RelationshipsPanel({ entityId }: { entityId: string }) {
         {isLoading ? (
           <p className="text-sm text-muted-foreground">Carregando...</p>
         ) : rels.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum relacionamento definido.</p>
+          <EmptyState
+            icon={GitBranch}
+            title="Nenhum relacionamento definido"
+            description="Crie relacionamentos entre entidades para modelar seu domínio."
+          />
         ) : (
           <Table>
             <TableHeader>
