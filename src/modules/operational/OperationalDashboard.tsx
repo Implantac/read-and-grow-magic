@@ -2,11 +2,12 @@ import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useOrders } from '@/hooks/commercial/useOrders';
 import { useProductionOrders } from '@/hooks/production/useProductionOrders';
 import { useBillingQueue, useShipmentOrders, useConferenceRecords, getOrderFlowStatus } from '@/hooks/commercial/useOrderFlow';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { FileText, Factory, Package, Truck, ClipboardCheck, DollarSign, AlertTriangle, Clock, TrendingUp, Timer, Target } from 'lucide-react';
+import { FileText, Factory, Package, Truck, ClipboardCheck, DollarSign, AlertTriangle, Clock, TrendingUp, Timer, Target, BarChart3, PieChart as PieChartIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { differenceInDays, differenceInHours, parseISO } from 'date-fns';
 
