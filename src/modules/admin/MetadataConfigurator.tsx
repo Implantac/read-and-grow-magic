@@ -422,11 +422,17 @@ function RecordsPanel({ entityId }: { entityId: string }) {
       </CardHeader>
       <CardContent>
         {fields.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Adicione campos antes de criar registros.
-          </p>
+          <EmptyState
+            icon={Settings2}
+            title="Configure os campos primeiro"
+            description="Adicione campos à entidade antes de criar registros."
+          />
         ) : records.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum registro.</p>
+          <EmptyState
+            icon={FileText}
+            title="Nenhum registro"
+            description="Nenhum registro criado para esta entidade ainda."
+          />
         ) : (
           <Table>
             <TableHeader>
