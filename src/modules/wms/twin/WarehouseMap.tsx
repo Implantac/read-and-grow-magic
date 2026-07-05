@@ -157,8 +157,12 @@ export default function WarehouseMap() {
   if (locs.length === 0) {
     return (
       <Card>
-        <CardContent className="py-12 text-center text-muted-foreground">
-          Nenhum endereço cadastrado em wms_storage_locations.
+        <CardContent className="p-0">
+          <EmptyState
+            icon={MapPin}
+            title="Nenhum endereço cadastrado"
+            description="Configure endereços de armazenagem para renderizar o mapa do CD."
+          />
         </CardContent>
       </Card>
     );
