@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
@@ -174,61 +175,72 @@ export default function OutsourcingPage() {
           {/* Table */}
           <Card>
             <CardContent className="pt-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nº OS</TableHead>
-                    <TableHead>Fornecedor</TableHead>
-                    <TableHead>OP Vinculada</TableHead>
-                    <TableHead>Qtde</TableHead>
-                    <TableHead>Envio</TableHead>
-                    <TableHead>Prev. Retorno</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Custo</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filtered.length === 0 ? (
-                    <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Nenhuma OS encontrada</TableCell></TableRow>
-                  ) : filtered.map(o => {
-                    const isLate = o.expected_return_date && new Date(o.expected_return_date) < new Date() && o.status !== 'returned';
-                    const sc = outsourcingStatusConfig[isLate ? 'late' : o.status] || { label: o.status, color: '' };
-                    const linkedOP = productionOrders.find(p => p.id === o.production_order_id);
-                    return (
-                      <TableRow key={o.id} className={cn(isLate && 'bg-destructive/5')}>
-                        <TableCell className="font-mono text-sm">{o.order_number}</TableCell>
-                        <TableCell>{o.supplier_name}</TableCell>
-                        <TableCell className="font-mono text-xs">{linkedOP?.order_number || '-'}</TableCell>
-                        <TableCell>{o.quantity_sent}</TableCell>
-                        <TableCell>{format(new Date(o.sent_date), 'dd/MM/yyyy')}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            {o.expected_return_date ? format(new Date(o.expected_return_date), 'dd/MM/yyyy') : '-'}
-                            {isLate && <AlertTriangle className="h-3 w-3 text-destructive" />}
-                          </div>
-                        </TableCell>
-                        <TableCell><Badge className={cn('text-xs', sc.color)}>{sc.label}</Badge></TableCell>
-                        <TableCell>R$ {(o.total_cost || formatNumber(0), 2)}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex gap-1 justify-end">
-                            {o.status === 'sent' && (
-                              <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'in_production')}>
-                                Em Produção
-                              </Button>
-                            )}
-                            {(o.status === 'sent' || o.status === 'in_production') && (
-                              <Button size="sm" className="h-7 text-xs" onClick={() => setEditingOrder(o)}>
-                                Receber
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+              {filtered.length === 0 ? (
+                <EmptyState
+                  icon={Truck}
+                  title={outsourcingOrders.length === 0 ? 'Nenhuma OS terceirizada' : 'Nenhuma OS encontrada'}
+                  description={outsourcingOrders.length === 0
+                    ? 'Envie serviços para fornecedores externos e acompanhe prazos, custos e qualidade.'
+                    : 'Ajuste a busca ou o status para localizar a OS desejada.'}
+                  action={outsourcingOrders.length === 0
+                    ? { label: 'Nova OS Terceirizada', onClick: () => setShowCreateDialog(true), icon: Plus }
+                    : { label: 'Limpar filtros', onClick: () => { setSearch(''); setStatusFilter('all'); }, variant: 'outline' }}
+                />
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nº OS</TableHead>
+                      <TableHead>Fornecedor</TableHead>
+                      <TableHead>OP Vinculada</TableHead>
+                      <TableHead>Qtde</TableHead>
+                      <TableHead>Envio</TableHead>
+                      <TableHead>Prev. Retorno</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Custo</TableHead>
+                      <TableHead className="text-right">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filtered.map(o => {
+                      const isLate = o.expected_return_date && new Date(o.expected_return_date) < new Date() && o.status !== 'returned';
+                      const sc = outsourcingStatusConfig[isLate ? 'late' : o.status] || { label: o.status, color: '' };
+                      const linkedOP = productionOrders.find(p => p.id === o.production_order_id);
+                      return (
+                        <TableRow key={o.id} className={cn(isLate && 'bg-destructive/5')}>
+                          <TableCell className="font-mono text-sm">{o.order_number}</TableCell>
+                          <TableCell>{o.supplier_name}</TableCell>
+                          <TableCell className="font-mono text-xs">{linkedOP?.order_number || '-'}</TableCell>
+                          <TableCell>{o.quantity_sent}</TableCell>
+                          <TableCell>{format(new Date(o.sent_date), 'dd/MM/yyyy')}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              {o.expected_return_date ? format(new Date(o.expected_return_date), 'dd/MM/yyyy') : '-'}
+                              {isLate && <AlertTriangle className="h-3 w-3 text-destructive" />}
+                            </div>
+                          </TableCell>
+                          <TableCell><Badge className={cn('text-xs', sc.color)}>{sc.label}</Badge></TableCell>
+                          <TableCell>R$ {(o.total_cost || formatNumber(0), 2)}</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex gap-1 justify-end">
+                              {o.status === 'sent' && (
+                                <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => handleStatusChange(o, 'in_production')}>
+                                  Em Produção
+                                </Button>
+                              )}
+                              {(o.status === 'sent' || o.status === 'in_production') && (
+                                <Button size="sm" className="h-7 text-xs" onClick={() => setEditingOrder(o)}>
+                                  Receber
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

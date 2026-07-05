@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
@@ -126,34 +127,41 @@ export default function ProductionStepsPage() {
               <CardTitle className="flex items-center gap-2"><Layers className="h-5 w-5" /> Fluxo Produtivo</CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader><TableRow>
-                  <TableHead className="w-10">#</TableHead>
-                  <TableHead>Nome</TableHead><TableHead>Código</TableHead>
-                  <TableHead>Setor</TableHead><TableHead>Tempo Est.</TableHead>
-                  <TableHead>Status</TableHead><TableHead className="text-right">Ações</TableHead>
-                </TableRow></TableHeader>
-                <TableBody>
-                  {steps.length === 0 ? (
-                    <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhuma etapa cadastrada</TableCell></TableRow>
-                  ) : steps.map((s) => (
-                    <TableRow key={s.id} className={!s.is_active ? 'opacity-50' : ''}>
-                      <TableCell><GripVertical className="h-4 w-4 text-muted-foreground" /></TableCell>
-                      <TableCell className="font-medium">{s.name}</TableCell>
-                      <TableCell className="font-mono text-xs">{s.code}</TableCell>
-                      <TableCell>{s.sector || '-'}</TableCell>
-                      <TableCell>{s.estimated_time_minutes} min</TableCell>
-                      <TableCell><StatusBadge status={s.is_active ? 'active' : 'inactive'} type="client" /></TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex gap-1 justify-end">
-                          <Button variant="ghost" size="sm" onClick={() => openEdit(s)}><Pencil className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="sm" onClick={() => deleteStep(s.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              {steps.length === 0 ? (
+                <EmptyState
+                  icon={Layers}
+                  title="Nenhuma etapa cadastrada"
+                  description="Cadastre as etapas do fluxo produtivo (corte, costura, acabamento, etc.) para gerá-las automaticamente por OP."
+                  action={{ label: 'Nova Etapa', onClick: openNew, icon: Plus }}
+                />
+              ) : (
+                <Table>
+                  <TableHeader><TableRow>
+                    <TableHead className="w-10">#</TableHead>
+                    <TableHead>Nome</TableHead><TableHead>Código</TableHead>
+                    <TableHead>Setor</TableHead><TableHead>Tempo Est.</TableHead>
+                    <TableHead>Status</TableHead><TableHead className="text-right">Ações</TableHead>
+                  </TableRow></TableHeader>
+                  <TableBody>
+                    {steps.map((s) => (
+                      <TableRow key={s.id} className={!s.is_active ? 'opacity-50' : ''}>
+                        <TableCell><GripVertical className="h-4 w-4 text-muted-foreground" /></TableCell>
+                        <TableCell className="font-medium">{s.name}</TableCell>
+                        <TableCell className="font-mono text-xs">{s.code}</TableCell>
+                        <TableCell>{s.sector || '-'}</TableCell>
+                        <TableCell>{s.estimated_time_minutes} min</TableCell>
+                        <TableCell><StatusBadge status={s.is_active ? 'active' : 'inactive'} type="client" /></TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex gap-1 justify-end">
+                            <Button variant="ghost" size="sm" onClick={() => openEdit(s)}><Pencil className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => deleteStep(s.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
