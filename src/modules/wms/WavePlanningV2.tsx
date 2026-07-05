@@ -7,7 +7,8 @@ import { Input } from '@/ui/base/input';
 import { Label } from '@/ui/base/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Badge } from '@/ui/base/badge';
-import { Layers, Play, Save, Users } from 'lucide-react';
+import { Layers, Play, Save, Users, PackageX } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useWavePlanning } from '@/hooks/wms/useWavePlanning';
 
 export default function WavePlanningV2() {
