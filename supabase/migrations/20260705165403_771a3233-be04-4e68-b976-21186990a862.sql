@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.wms_docks_sync_company_id() FROM anon, PUBLIC;
