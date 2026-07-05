@@ -76,7 +76,11 @@ export default function DREDynamicPage() {
           {isLoading ? (
             <p className="text-center py-8 text-muted-foreground">Carregando...</p>
           ) : data.length === 0 ? (
-            <p className="text-center py-8 text-muted-foreground">Sem lançamentos no período.</p>
+            <EmptyState
+              icon={FileBarChart}
+              title="Sem lançamentos no período"
+              description="Ajuste o intervalo de datas ou o filtro de canal para visualizar a DRE."
+            />
           ) : (
             <Table>
               <TableHeader>
