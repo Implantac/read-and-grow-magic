@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Eye, EyeOff, Loader2, Lock, Mail, ArrowLeft, UserPlus } from 'lucide-react';
 import logoUseSistemas from '@/assets/logo.png';
 import { useAuth } from '@/hooks/system/useAuth';
@@ -15,6 +15,9 @@ type View = 'login' | 'signup' | 'forgot';
 
 export default function Login() {
   const navigate = useNavigate();
+  const [params] = useSearchParams();
+  const rawNext = params.get('next');
+  const nextTarget = rawNext && rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/dashboard';
   const { isAuthenticated } = useAppStore();
   const { signIn, signUp, resetPassword } = useAuth();
 
@@ -26,8 +29,8 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) navigate('/dashboard');
-  }, [isAuthenticated, navigate]);
+    if (isAuthenticated) navigate(nextTarget);
+  }, [isAuthenticated, navigate, nextTarget]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +42,7 @@ export default function Login() {
     try {
       await signIn(email, password);
       toastSuccess('Bem-vindo!', 'Login realizado com sucesso');
-      navigate('/dashboard');
+      navigate(nextTarget);
     } catch (error: any) {
       toastError(error.message || 'Email ou senha inválidos', undefined, 'Erro de autenticação');
     }
