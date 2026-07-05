@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
@@ -70,7 +71,16 @@ export default function ProductionSchedulePage() {
         <CardHeader><CardTitle>Programação</CardTitle></CardHeader>
         <CardContent>
           {enriched.length === 0 ? (
-            <p className="text-center py-8 text-muted-foreground">Nenhum agendamento criado. Clique em "Agendar OP".</p>
+            <EmptyState
+              icon={Calendar}
+              title="Nenhum agendamento criado"
+              description={unscheduledOrders.length > 0
+                ? `Você tem ${unscheduledOrders.length} ordem(ns) aguardando agendamento.`
+                : 'Crie uma ordem de produção primeiro para poder agendá-la.'}
+              action={unscheduledOrders.length > 0
+                ? { label: 'Agendar OP', onClick: () => setShowCreate(true), icon: Plus }
+                : undefined}
+            />
           ) : (
             <Table>
               <TableHeader><TableRow>
