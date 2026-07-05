@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { useCommissionPolicies, useCommissions, useCommissionMutations } from '@/hooks/financial/useCommissions';
@@ -119,7 +120,13 @@ export default function CommissionsPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredCommissions.length === 0 ? (
-                    <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhuma comissão encontrada para este período</TableCell></TableRow>
+                    <TableRow><TableCell colSpan={8} className="p-0">
+                      <EmptyState
+                        icon={DollarSign}
+                        title="Nenhuma comissão encontrada para este período"
+                        description="Comissões são calculadas automaticamente conforme as políticas configuradas e os pedidos faturados/recebidos no período."
+                      />
+                    </TableCell></TableRow>
                   ) : filteredCommissions.map(c => (
                     <TableRow key={c.id}>
                       <TableCell className="font-mono text-sm">{c.order_number || '-'}</TableCell>
@@ -220,7 +227,13 @@ export default function CommissionsPage() {
               </Card>
             ))}
             {policies.length === 0 && !loadingPolicies && (
-              <div className="col-span-full text-center py-12 text-muted-foreground">Nenhuma política cadastrada</div>
+              <div className="col-span-full">
+                <EmptyState
+                  icon={TrendingUp}
+                  title="Nenhuma política cadastrada"
+                  description="Crie políticas de comissão com percentuais, bônus, margens mínimas e regras de faturamento/recebimento."
+                />
+              </div>
             )}
           </div>
         </TabsContent>

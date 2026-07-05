@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { useSalesTargets, useSalesTargetMutations } from '@/hooks/commercial/useSalesTargets';
@@ -143,7 +144,13 @@ export default function SalesTargetsPage() {
             </TableHeader>
             <TableBody>
               {targets.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhuma meta cadastrada para este período</TableCell></TableRow>
+                <TableRow><TableCell colSpan={7} className="p-0">
+                  <EmptyState
+                    icon={Target}
+                    title="Nenhuma meta cadastrada para este período"
+                    description="Defina metas de faturamento, quantidade, margem ou conversão por representante, equipe, filial ou região."
+                  />
+                </TableCell></TableRow>
               ) : targets.map(t => (
                 <TableRow key={t.id}>
                   <TableCell className="font-medium">{t.name}</TableCell>
