@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 
 import { ExportButton } from '@/shared/components/ExportButton';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
