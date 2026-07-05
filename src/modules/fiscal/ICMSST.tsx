@@ -60,7 +60,12 @@ export default function ICMSSTPage() {
         <CardHeader><CardTitle>Regras ICMS ST ({rules.length})</CardTitle></CardHeader>
         <CardContent>
           {isLoading ? <div className="py-8 text-center text-muted-foreground">Carregando…</div> : rules.length === 0 ? (
-            <div className="py-12 text-center text-muted-foreground">Nenhuma regra cadastrada.</div>
+            <EmptyState
+              icon={Percent}
+              title="Nenhuma regra cadastrada"
+              description="Cadastre regras de ICMS Substituição Tributária por NCM e UF de destino."
+              action={{ label: 'Nova Regra', onClick: () => setOpen(true), icon: Plus }}
+            />
           ) : (
             <Table>
               <TableHeader>
