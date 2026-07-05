@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
@@ -97,37 +98,48 @@ export default function QualityControlPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader><TableRow>
-              <TableHead>OP</TableHead>
-              <TableHead>Etapa</TableHead>
-              <TableHead>Inspetor</TableHead>
-              <TableHead>Aprovadas</TableHead>
-              <TableHead>Rejeitadas</TableHead>
-              <TableHead>Categoria</TableHead>
-              <TableHead>Severidade</TableHead>
-              <TableHead>Data</TableHead>
-            </TableRow></TableHeader>
-            <TableBody>
-              {filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhuma inspeção registrada</TableCell></TableRow>
-              ) : filtered.map(i => {
-                const sev = severityConfig[i.severity] || { label: i.severity, color: '' };
-                return (
-                  <TableRow key={i.id}>
-                    <TableCell className="font-mono">{i.order_number || '-'}</TableCell>
-                    <TableCell>{i.step_name || '-'}</TableCell>
-                    <TableCell>{i.inspector}</TableCell>
-                    <TableCell className="text-green-600 font-medium">{i.approved_quantity}</TableCell>
-                    <TableCell className="text-destructive font-medium">{i.rejected_quantity}</TableCell>
-                    <TableCell>{i.defect_category || '-'}</TableCell>
-                    <TableCell><Badge className={sev.color}>{sev.label}</Badge></TableCell>
-                    <TableCell>{format(new Date(i.inspection_date), 'dd/MM/yyyy HH:mm')}</TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+          {filtered.length === 0 ? (
+            <EmptyState
+              icon={ShieldCheck}
+              title={search ? 'Nenhuma inspeção encontrada' : 'Nenhuma inspeção registrada'}
+              description={search
+                ? 'Ajuste a busca ou limpe o filtro para ver todas as inspeções.'
+                : 'Registre inspeções para acompanhar aprovações, rejeições e taxa de defeito.'}
+              action={search
+                ? { label: 'Limpar busca', onClick: () => setSearch(''), variant: 'outline' }
+                : { label: 'Nova Inspeção', onClick: () => setDialogOpen(true), icon: Plus }}
+            />
+          ) : (
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>OP</TableHead>
+                <TableHead>Etapa</TableHead>
+                <TableHead>Inspetor</TableHead>
+                <TableHead>Aprovadas</TableHead>
+                <TableHead>Rejeitadas</TableHead>
+                <TableHead>Categoria</TableHead>
+                <TableHead>Severidade</TableHead>
+                <TableHead>Data</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {filtered.map(i => {
+                  const sev = severityConfig[i.severity] || { label: i.severity, color: '' };
+                  return (
+                    <TableRow key={i.id}>
+                      <TableCell className="font-mono">{i.order_number || '-'}</TableCell>
+                      <TableCell>{i.step_name || '-'}</TableCell>
+                      <TableCell>{i.inspector}</TableCell>
+                      <TableCell className="text-green-600 font-medium">{i.approved_quantity}</TableCell>
+                      <TableCell className="text-destructive font-medium">{i.rejected_quantity}</TableCell>
+                      <TableCell>{i.defect_category || '-'}</TableCell>
+                      <TableCell><Badge className={sev.color}>{sev.label}</Badge></TableCell>
+                      <TableCell>{format(new Date(i.inspection_date), 'dd/MM/yyyy HH:mm')}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
