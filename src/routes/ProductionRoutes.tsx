@@ -34,6 +34,7 @@ const OutsourcingPage = lazy(() => import("../modules/production/OutsourcingPage
 const APSMultiPage = lazy(() => import("../modules/production/APSMulti"));
 
 export const ProductionRoutes = [
+  <Route key="prod-index" index element={<Navigate to="dashboard" replace />} />,
   <Route key="prod-orders" path="ordens" element={<ProductionOrdersPage />} />,
   <Route key="prod-cons" path="consumo" element={<MaterialConsumptionPage />} />,
   <Route key="prod-time" path="apontamento" element={<TimeEntriesPage />} />,
