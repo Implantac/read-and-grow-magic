@@ -91,9 +91,11 @@ export default function MetadataConfigurator() {
               <p className="text-sm text-muted-foreground">Carregando...</p>
             )}
             {!isLoading && entities.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                Nenhuma entidade. Crie a primeira.
-              </p>
+              <EmptyState
+                icon={Database}
+                title="Nenhuma entidade"
+                description="Crie a primeira entidade personalizada para começar."
+              />
             )}
             {entities.map((e) => (
               <button
