@@ -17,7 +17,7 @@ import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { useTimeEntries, TimeEntryRow } from '@/hooks/system/useTimeEntries';
 import { useProductionOrders } from '@/hooks/production/useProductionOrders';
-import { Skeleton } from '@/ui/base/skeleton';
+
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline'; icon: React.ReactNode }> = {
   started: { label: 'Em Andamento', variant: 'default', icon: <PlayCircle className="h-4 w-4" /> },
