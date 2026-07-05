@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Input } from '@/ui/base/input';
 import { Label } from '@/ui/base/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { FileBarChart } from 'lucide-react';
 import { useDREDynamic } from '@/hooks/accounting/useDREDynamic';
 import { formatNumber } from '@/lib/formatters';
 
