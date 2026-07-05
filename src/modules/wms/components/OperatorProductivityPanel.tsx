@@ -68,9 +68,11 @@ export default function OperatorProductivityPanel({ days = 7 }: { days?: number 
         {loading ? (
           <div className="text-sm text-muted-foreground py-8 text-center">Carregando…</div>
         ) : rows.length === 0 ? (
-          <div className="text-sm text-muted-foreground py-8 text-center">
-            Nenhuma atividade registrada no período.
-          </div>
+          <EmptyState
+            icon={Users}
+            title="Nenhuma atividade registrada"
+            description="Ainda não há tarefas concluídas por operadores no período selecionado."
+          />
         ) : (
           <ol role="list" className="space-y-2">
             {rows.map((r, idx) => (
