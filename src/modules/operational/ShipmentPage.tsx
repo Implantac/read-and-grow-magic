@@ -6,8 +6,10 @@ import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/base/dialog';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { Skeleton } from '@/ui/base/skeleton';
 import { useOperational } from '@/hooks/operational/useOperational';
-import { Truck, Clock, CheckCircle, Package, MapPin, Play, Eye, ArrowRight } from 'lucide-react';
+import { Truck, Clock, CheckCircle, MapPin, Play, Eye } from 'lucide-react';
 
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
