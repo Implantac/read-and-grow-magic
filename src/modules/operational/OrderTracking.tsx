@@ -10,11 +10,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/ui/base/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Textarea } from '@/ui/base/textarea';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { Skeleton } from '@/ui/base/skeleton';
 import { useOrders } from '@/hooks/commercial/useOrders';
 import { useOrderStatusHistory, getOrderFlowStatus, orderFlowStatuses } from '@/hooks/commercial/useOrderFlow';
 import { useOrderLifecycle } from '@/hooks/commercial/useOrderLifecycle';
 import { getAllowedTransitions, ORDER_FLOW_STEPS, getFlowStepIndex } from '@/lib/orderFlowEngine';
-import { Search, Eye, ArrowRight, Clock, CheckCircle, XCircle, AlertTriangle, Package, Truck, FileText, Play } from 'lucide-react';
+import { Search, Eye, ArrowRight, Clock, CheckCircle, XCircle, AlertTriangle, Package, FileText, Play, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -162,53 +164,75 @@ export default function OrderTracking() {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nº Pedido</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Data</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="hidden lg:table-cell min-w-[160px]">Progresso</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
-              ) : filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Nenhum pedido encontrado</TableCell></TableRow>
-              ) : filtered.map(o => {
-                const nextStatuses = getAllowedTransitions(o.status).filter(s => s !== 'cancelled').slice(0, 2);
-                return (
-                  <TableRow key={o.id}>
-                    <TableCell className="font-mono font-medium">{o.number}</TableCell>
-                    <TableCell>{o.client_name}</TableCell>
-                    <TableCell>{format(new Date(o.date), 'dd/MM/yyyy')}</TableCell>
-                    <TableCell>R$ {formatNumber(o.total, 2)}</TableCell>
-                    <TableCell><OrderFlowBadge status={o.status} /></TableCell>
-                    <TableCell className="hidden lg:table-cell"><OrderProgressBar status={o.status} /></TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex gap-1 justify-end">
-                        {nextStatuses.map(ns => (
-                          <Button key={ns} variant="outline" size="sm" className="text-xs h-7 px-2"
-                            onClick={e => { e.stopPropagation(); handleTransition(o, ns); }}
-                            disabled={lifecycle.isPending}>
-                            <Play className="h-3 w-3 mr-1" />
-                            {getOrderFlowStatus(ns).label}
+          {isLoading ? (
+            <div className="space-y-2" aria-busy="true">
+              {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+            </div>
+          ) : !orders?.length ? (
+            <EmptyState
+              icon={FileText}
+              title="Nenhum pedido cadastrado"
+              description="Crie seu primeiro pedido no módulo Comercial para acompanhar o fluxo aqui."
+              action={{ label: 'Ir para Pedidos', href: '/comercial/pedidos', icon: FileText }}
+            />
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              icon={Filter}
+              title="Nenhum pedido encontrado"
+              description={search || statusFilter !== 'all'
+                ? 'Ajuste os filtros ou termos de busca para ver resultados.'
+                : 'Nenhum pedido corresponde aos critérios atuais.'}
+              action={{
+                label: 'Limpar filtros',
+                onClick: () => { setSearch(''); setStatusFilter('all'); },
+                variant: 'outline',
+              }}
+            />
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nº Pedido</TableHead>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="hidden lg:table-cell min-w-[160px]">Progresso</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map(o => {
+                  const nextStatuses = getAllowedTransitions(o.status).filter(s => s !== 'cancelled').slice(0, 2);
+                  return (
+                    <TableRow key={o.id}>
+                      <TableCell className="font-mono font-medium">{o.number}</TableCell>
+                      <TableCell>{o.client_name}</TableCell>
+                      <TableCell>{format(new Date(o.date), 'dd/MM/yyyy')}</TableCell>
+                      <TableCell>R$ {formatNumber(o.total, 2)}</TableCell>
+                      <TableCell><OrderFlowBadge status={o.status} /></TableCell>
+                      <TableCell className="hidden lg:table-cell"><OrderProgressBar status={o.status} /></TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-1 justify-end">
+                          {nextStatuses.map(ns => (
+                            <Button key={ns} variant="outline" size="sm" className="text-xs h-7 px-2"
+                              onClick={e => { e.stopPropagation(); handleTransition(o, ns); }}
+                              disabled={lifecycle.isPending}>
+                              <Play className="h-3 w-3 mr-1" />
+                              {getOrderFlowStatus(ns).label}
+                            </Button>
+                          ))}
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); setSelectedOrder(o); }}>
+                            <Eye className="h-4 w-4" />
                           </Button>
-                        ))}
-                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={e => { e.stopPropagation(); setSelectedOrder(o); }}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 

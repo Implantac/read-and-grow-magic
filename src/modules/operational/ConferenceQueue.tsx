@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { Button } from '@/ui/base/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { Skeleton } from '@/ui/base/skeleton';
 import { useConferenceRecords } from '@/hooks/commercial/useOrderFlow';
 import { useOrders } from '@/hooks/commercial/useOrders';
 import { useOrderLifecycle } from '@/hooks/commercial/useOrderLifecycle';
@@ -12,7 +14,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { CheckCircle, Clock, AlertTriangle, ClipboardCheck, Play } from 'lucide-react';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
 
 export default function ConferenceQueue() {
   const { data: conferences, isLoading } = useConferenceRecords();
@@ -77,24 +78,30 @@ export default function ConferenceQueue() {
       <Card>
         <CardHeader><CardTitle>Conferências</CardTitle></CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader><TableRow>
-              <TableHead>Número</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Itens</TableHead>
-              <TableHead>Conferidos</TableHead>
-              <TableHead>Divergentes</TableHead>
-              <TableHead>Conferente</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow></TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
-              ) : !conferences?.length ? (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhuma conferência na fila</TableCell></TableRow>
-              ) : conferences.map((c: any) => {
-                return (
+          {isLoading ? (
+            <div className="space-y-2" aria-busy="true">
+              {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+            </div>
+          ) : !conferences?.length ? (
+            <EmptyState
+              icon={ClipboardCheck}
+              title="Nenhuma conferência na fila"
+              description="Pedidos separados chegarão aqui para validação de itens antes do faturamento."
+            />
+          ) : (
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>Número</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Itens</TableHead>
+                <TableHead>Conferidos</TableHead>
+                <TableHead>Divergentes</TableHead>
+                <TableHead>Conferente</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {conferences.map((c: any) => (
                   <TableRow key={c.id}>
                     <TableCell className="font-mono">{c.conference_number}</TableCell>
                     <TableCell><StatusBadge status={c.status} type="order" /></TableCell>
@@ -123,10 +130,10 @@ export default function ConferenceQueue() {
                       </div>
                     </TableCell>
                   </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </PageContainer>

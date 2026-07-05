@@ -5,12 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
+import { EmptyState } from '@/shared/components/EmptyState';
+import { Skeleton } from '@/ui/base/skeleton';
 import { useStockReservations } from '@/hooks/commercial/useOrderFlow';
 import { useOrders } from '@/hooks/commercial/useOrders';
 import { useOrderLifecycle } from '@/hooks/commercial/useOrderLifecycle';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
-import { Package, Lock, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
+import { Package, Lock, CheckCircle, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -96,59 +98,67 @@ export default function SeparationQueue() {
       <Card>
         <CardHeader><CardTitle>Reservas de Estoque</CardTitle></CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader><TableRow>
-              <TableHead>Código</TableHead>
-              <TableHead>Produto</TableHead>
-              <TableHead>Solicitado</TableHead>
-              <TableHead>Reservado</TableHead>
-              <TableHead>Separado</TableHead>
-              <TableHead>Local</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow></TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
-              ) : !reservations?.length ? (
-                <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Nenhuma reserva na fila</TableCell></TableRow>
-              ) : reservations.map((r: any) => {
-                const sc = reservationStatusConfig[r.status] || { label: r.status, color: '' };
-                return (
-                  <TableRow key={r.id}>
-                    <TableCell className="font-mono">{r.product_code}</TableCell>
-                    <TableCell>{r.product_name}</TableCell>
-                    <TableCell>{r.requested_qty}</TableCell>
-                    <TableCell>{r.reserved_qty}</TableCell>
-                    <TableCell>{r.picked_qty}</TableCell>
-                    <TableCell>{r.location || '-'}</TableCell>
-                    <TableCell><Badge variant="outline" className={cn('font-medium border', sc.color)}>{sc.label}</Badge></TableCell>
-                    <TableCell>{format(new Date(r.created_at), 'dd/MM/yyyy')}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex gap-1 justify-end">
-                        {r.status === 'pending' && (
-                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateReservationStatus(r.id, 'reserved', r.order_id)}>
-                            <Lock className="h-3 w-3 mr-1" /> Reservar
-                          </Button>
-                        )}
-                        {r.status === 'reserved' && (
-                          <Button size="sm" className="h-7 text-xs" onClick={() => updateReservationStatus(r.id, 'picked', r.order_id)}>
-                            <CheckCircle className="h-3 w-3 mr-1" /> Separar
-                          </Button>
-                        )}
-                        {(r.status === 'pending' || r.status === 'reserved') && (
-                          <Button size="sm" variant="destructive" className="h-7 text-xs" onClick={() => updateReservationStatus(r.id, 'cancelled', r.order_id)}>
-                            <XCircle className="h-3 w-3" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+          {isLoading ? (
+            <div className="space-y-2" aria-busy="true">
+              {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+            </div>
+          ) : !reservations?.length ? (
+            <EmptyState
+              icon={Package}
+              title="Nenhuma reserva na fila"
+              description="Reservas de estoque para pedidos aprovados aparecerão aqui para separação."
+            />
+          ) : (
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>Código</TableHead>
+                <TableHead>Produto</TableHead>
+                <TableHead>Solicitado</TableHead>
+                <TableHead>Reservado</TableHead>
+                <TableHead>Separado</TableHead>
+                <TableHead>Local</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {reservations.map((r: any) => {
+                  const sc = reservationStatusConfig[r.status] || { label: r.status, color: '' };
+                  return (
+                    <TableRow key={r.id}>
+                      <TableCell className="font-mono">{r.product_code}</TableCell>
+                      <TableCell>{r.product_name}</TableCell>
+                      <TableCell>{r.requested_qty}</TableCell>
+                      <TableCell>{r.reserved_qty}</TableCell>
+                      <TableCell>{r.picked_qty}</TableCell>
+                      <TableCell>{r.location || '-'}</TableCell>
+                      <TableCell><Badge variant="outline" className={cn('font-medium border', sc.color)}>{sc.label}</Badge></TableCell>
+                      <TableCell>{format(new Date(r.created_at), 'dd/MM/yyyy')}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-1 justify-end">
+                          {r.status === 'pending' && (
+                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => updateReservationStatus(r.id, 'reserved', r.order_id)}>
+                              <Lock className="h-3 w-3 mr-1" /> Reservar
+                            </Button>
+                          )}
+                          {r.status === 'reserved' && (
+                            <Button size="sm" className="h-7 text-xs" onClick={() => updateReservationStatus(r.id, 'picked', r.order_id)}>
+                              <CheckCircle className="h-3 w-3 mr-1" /> Separar
+                            </Button>
+                          )}
+                          {(r.status === 'pending' || r.status === 'reserved') && (
+                            <Button size="sm" variant="destructive" className="h-7 text-xs" onClick={() => updateReservationStatus(r.id, 'cancelled', r.order_id)}>
+                              <XCircle className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </PageContainer>

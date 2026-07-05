@@ -2,11 +2,12 @@ import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useOrders } from '@/hooks/commercial/useOrders';
 import { useProductionOrders } from '@/hooks/production/useProductionOrders';
 import { useBillingQueue, useShipmentOrders, useConferenceRecords, getOrderFlowStatus } from '@/hooks/commercial/useOrderFlow';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { FileText, Factory, Package, Truck, ClipboardCheck, DollarSign, AlertTriangle, Clock, TrendingUp, Timer, Target } from 'lucide-react';
+import { FileText, Factory, Package, Truck, ClipboardCheck, DollarSign, AlertTriangle, Clock, TrendingUp, Timer, Target, BarChart3, PieChart as PieChartIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { differenceInDays, differenceInHours, parseISO } from 'date-fns';
 
@@ -150,7 +151,7 @@ export default function OperationalDashboard() {
                   <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
-            ) : <p className="text-sm text-muted-foreground text-center py-8">Sem dados</p>}
+            ) : <EmptyState icon={BarChart3} title="Sem pedidos no período" description="Cadastre pedidos para acompanhar a distribuição por status." compact />}
           </CardContent>
         </Card>
 
@@ -166,7 +167,7 @@ export default function OperationalDashboard() {
                   <Tooltip />
                 </PieChart>
               </ResponsiveContainer>
-            ) : <p className="text-sm text-muted-foreground text-center py-8">Sem dados</p>}
+            ) : <EmptyState icon={PieChartIcon} title="Sem ordens de produção" description="Ordens ativas aparecerão distribuídas por status." compact />}
           </CardContent>
         </Card>
       </div>
