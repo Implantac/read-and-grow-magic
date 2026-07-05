@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 
 const FiscalDashboardPage = lazy(() => import("../modules/fiscal/FiscalDashboard"));
 const NFePage = lazy(() => import("../modules/fiscal/NFe"));
