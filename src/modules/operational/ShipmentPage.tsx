@@ -78,52 +78,60 @@ export default function ShipmentPage() {
       <Card>
         <CardHeader><CardTitle>Expedições</CardTitle></CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader><TableRow>
-              <TableHead>Nº Expedição</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Transportadora</TableHead>
-              <TableHead>Volumes</TableHead>
-              <TableHead>Peso (kg)</TableHead>
-              <TableHead>Rastreio</TableHead>
-              <TableHead>Prev. Entrega</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow></TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
-              ) : !shipments?.length ? (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhuma expedição registrada</TableCell></TableRow>
-              ) : shipments.map((s: any) => {
-                const sc = shipmentStatusConfig[s.status] || { label: s.status, color: '' };
-                const nextStatuses = SHIPMENT_TRANSITIONS[s.status] || [];
-                return (
-                  <TableRow key={s.id}>
-                    <TableCell className="font-mono">{s.shipment_number}</TableCell>
-                    <TableCell><Badge variant="outline" className={cn('font-medium border', sc.color)}>{sc.label}</Badge></TableCell>
-                    <TableCell>{s.carrier || '-'}</TableCell>
-                    <TableCell>{s.volumes}</TableCell>
-                    <TableCell>{s.total_weight?.toFixed(1)}</TableCell>
-                    <TableCell className="font-mono text-xs">{s.tracking_code || '-'}</TableCell>
-                    <TableCell>{s.expected_delivery ? format(new Date(s.expected_delivery), 'dd/MM/yyyy') : '-'}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex gap-1 justify-end">
-                        {nextStatuses.map(ns => (
-                          <Button key={ns} size="sm" variant="outline" className="h-7 text-xs"
-                            onClick={() => handleAdvance(s, ns)}>
-                            <Play className="h-3 w-3 mr-1" /> {shipmentStatusConfig[ns]?.label}
+          {isLoading ? (
+            <div className="space-y-2" aria-busy="true">
+              {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+            </div>
+          ) : !shipments?.length ? (
+            <EmptyState
+              icon={Truck}
+              title="Nenhuma expedição registrada"
+              description="Pedidos faturados gerarão expedições aqui para despacho, rastreamento e entrega."
+            />
+          ) : (
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>Nº Expedição</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Transportadora</TableHead>
+                <TableHead>Volumes</TableHead>
+                <TableHead>Peso (kg)</TableHead>
+                <TableHead>Rastreio</TableHead>
+                <TableHead>Prev. Entrega</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {shipments.map((s: any) => {
+                  const sc = shipmentStatusConfig[s.status] || { label: s.status, color: '' };
+                  const nextStatuses = SHIPMENT_TRANSITIONS[s.status] || [];
+                  return (
+                    <TableRow key={s.id}>
+                      <TableCell className="font-mono">{s.shipment_number}</TableCell>
+                      <TableCell><Badge variant="outline" className={cn('font-medium border', sc.color)}>{sc.label}</Badge></TableCell>
+                      <TableCell>{s.carrier || '-'}</TableCell>
+                      <TableCell>{s.volumes}</TableCell>
+                      <TableCell>{s.total_weight?.toFixed(1)}</TableCell>
+                      <TableCell className="font-mono text-xs">{s.tracking_code || '-'}</TableCell>
+                      <TableCell>{s.expected_delivery ? format(new Date(s.expected_delivery), 'dd/MM/yyyy') : '-'}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex gap-1 justify-end">
+                          {nextStatuses.map(ns => (
+                            <Button key={ns} size="sm" variant="outline" className="h-7 text-xs"
+                              onClick={() => handleAdvance(s, ns)}>
+                              <Play className="h-3 w-3 mr-1" /> {shipmentStatusConfig[ns]?.label}
+                            </Button>
+                          ))}
+                          <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setSelectedShipment(s)}>
+                            <Eye className="h-4 w-4" />
                           </Button>
-                        ))}
-                        <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setSelectedShipment(s)}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
@@ -135,7 +143,12 @@ export default function ShipmentPage() {
           </DialogHeader>
           <div className="space-y-3">
             {!tracking?.length ? (
-              <p className="text-sm text-muted-foreground text-center py-4">Nenhum evento registrado</p>
+              <EmptyState
+                icon={MapPin}
+                title="Sem eventos de rastreamento"
+                description="Eventos aparecerão à medida que a expedição avança."
+                compact
+              />
             ) : tracking.map((t: any) => (
               <div key={t.id} className="flex gap-3 items-start">
                 <div className="mt-1 h-2 w-2 rounded-full bg-primary flex-shrink-0" />
