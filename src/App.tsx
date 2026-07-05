@@ -169,6 +169,8 @@ const App = () => (
                 <Route path="/estoque/movimentacoes" element={<InventoryMovements />} />
                 <Route path="/estoque/kardex" element={<InventoryKardex />} />
                 <Route path="/estoque/saldos" element={<InventoryStockLevels />} />
+                <Route path="/estoque" element={<Navigate to="/estoque/produtos" replace />} />
+                <Route path="/compras" element={<Navigate to="/compras/pedidos" replace />} />
                 <Route path="/credito/dashboard" element={<RequirePermission resource="credit.risk" action="view"><CreditRiskDashboard /></RequirePermission>} />
                 <Route path="/credito/analise" element={<RequirePermission resource="credit.risk" action="view"><CreditAnalysis /></RequirePermission>} />
                 <Route path="/credito/bloqueios" element={<RequirePermission resource="credit.blocks" action="view"><CreditOrderBlocks /></RequirePermission>} />
