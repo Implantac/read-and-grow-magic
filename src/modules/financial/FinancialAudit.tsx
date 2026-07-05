@@ -7,6 +7,7 @@ import { ShieldCheck, AlertTriangle, AlertCircle, Info, Play, CheckCircle2, Wren
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { useFinancialAuditLogs, useRunFinancialAudit, useResolveAuditLog } from '@/hooks/financial/useFinancialAudit';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -72,7 +73,7 @@ export default function FinancialAudit() {
                 {isLoading ? (
                   <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
                 ) : logs.length === 0 ? (
-                  <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhum log ainda. Execute uma auditoria.</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={8}><EmptyState compact icon={ShieldCheck} title="Nenhum log de auditoria" description="Execute uma auditoria rápida ou completa para verificar a integridade dos dados financeiros." action={{ label: 'Auditoria Completa', onClick: () => runAudit.mutate('full'), icon: ShieldCheck }} /></TableCell></TableRow>
                 ) : logs.map(log => {
                   const meta = levelMeta[log.level];
                   const Icon = meta.icon;

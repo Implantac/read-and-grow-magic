@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Input } from '@/ui/base/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Badge } from '@/ui/base/badge';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
 
@@ -48,9 +49,12 @@ function CurrentAccountTable({ rows, search }: { rows: Row[]; search: string }) 
   if (groups.length === 0) {
     return (
       <Card>
-        <CardContent className="py-12 text-center text-muted-foreground">
-          <Wallet className="h-10 w-10 mx-auto mb-3 opacity-30" />
-          Nenhum lançamento encontrado
+        <CardContent className="p-0">
+          <EmptyState
+            icon={Wallet}
+            title="Nenhum lançamento encontrado"
+            description="Não há lançamentos em aberto ou movimentações registradas para os filtros atuais."
+          />
         </CardContent>
       </Card>
     );

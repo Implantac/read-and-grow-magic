@@ -13,6 +13,7 @@ import { ArrowDownCircle, ArrowUpCircle, Wallet, Banknote, QrCode, CreditCard, R
 import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
 import { useFinancialLedger, useCreateManualLedger } from '@/hooks/financial/useFinancialLedger';
 import { cn } from '@/lib/utils';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
 type QuickAction = 'receive' | 'pay' | null;
@@ -182,7 +183,7 @@ export default function FinancialHub() {
               </button>
             ))}
             {accounts.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">Nenhuma conta cadastrada</p>
+              <EmptyState compact icon={Wallet} title="Nenhuma conta cadastrada" description="Cadastre contas bancárias para começar a movimentar." />
             )}
           </CardContent>
         </Card>
@@ -201,10 +202,11 @@ export default function FinancialHub() {
             {loadingLedger ? (
               <div className="space-y-2">{Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-14" />)}</div>
             ) : filteredLedger.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <Receipt className="h-12 w-12 mx-auto mb-2 opacity-40" />
-                <p>Nenhuma movimentação no período</p>
-              </div>
+              <EmptyState
+                icon={Receipt}
+                title="Nenhuma movimentação no período"
+                description="Registre uma entrada ou saída para começar a alimentar o extrato em tempo real."
+              />
             ) : (
               <div className="space-y-1 max-h-[500px] overflow-y-auto">
                 {filteredLedger.map((l) => (
