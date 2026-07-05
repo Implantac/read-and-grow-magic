@@ -96,8 +96,12 @@ export default function DREManagerialPage() {
       {isLoading ? (
         <PageLoading />
       ) : byCostCenter.length === 0 ? (
-        <Card><CardContent className="py-12 text-center text-muted-foreground">
-          Nenhum lançamento no período selecionado.
+        <Card><CardContent className="py-6">
+          <EmptyState
+            icon={FileBarChart}
+            title="Nenhum lançamento no período"
+            description="Ajuste o intervalo de datas para visualizar a DRE gerencial por centro de custo."
+          />
         </CardContent></Card>
       ) : (
         byCostCenter.map(([key, cc]) => (
