@@ -102,10 +102,11 @@ export default function SpedFiles() {
                 <p>Carregando histórico...</p>
               </div>
             ) : files.length === 0 ? (
-              <div className="py-20 text-center text-muted-foreground flex flex-col items-center gap-4">
-                <AlertCircle className="h-12 w-12 opacity-10" />
-                <p className="text-sm font-medium">Nenhum arquivo SPED gerado para este período.</p>
-              </div>
+              <EmptyState
+                icon={FileText}
+                title="Nenhum arquivo SPED gerado"
+                description="Gere arquivos SPED Fiscal ou Contribuições para o período selecionado."
+              />
             ) : (
               <Table>
                 <TableHeader className="bg-muted/30">
