@@ -6,6 +6,7 @@ import { Textarea } from '@/ui/base/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { useReturnItems, useDisposeReturnItem, Disposition } from '@/hooks/wms/useReturnItems';
 import { Loader2, PackageCheck } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 interface Props {
   open: boolean;
