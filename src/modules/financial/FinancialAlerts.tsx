@@ -1,4 +1,5 @@
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Button } from '@/ui/base/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
@@ -63,9 +64,12 @@ export default function FinancialAlertsPage() {
         <CardHeader><CardTitle>Alertas abertos</CardTitle></CardHeader>
         <CardContent className="space-y-3">
           {alerts.length === 0 && (
-            <p className="text-center text-muted-foreground py-8">
-              Nenhum alerta aberto. Clique em "Analisar agora" para detectar.
-            </p>
+            <EmptyState
+              icon={Bell}
+              title="Nenhum alerta aberto"
+              description="Alertas financeiros detectam inadimplência, fluxo negativo, concentração de risco e outros eventos críticos."
+              action={{ label: 'Analisar agora', onClick: () => detect.mutate(), icon: RefreshCw }}
+            />
           )}
           {alerts.map((a) => {
             const sev = SEVERITY[a.severity] || SEVERITY.info;

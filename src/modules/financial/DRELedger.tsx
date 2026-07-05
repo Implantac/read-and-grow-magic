@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Skeleton } from '@/ui/base/skeleton';
@@ -97,10 +98,11 @@ export default function DRELedgerPage() {
         </CardHeader>
         <CardContent className="space-y-2">
           {!hasData && !isLoading ? (
-            <div className="py-12 text-center text-muted-foreground">
-              <Receipt className="h-10 w-10 mx-auto mb-3 opacity-40" />
-              Nenhuma movimentação no ledger neste período. Registre baixas em contas a pagar/receber para popular a DRE.
-            </div>
+            <EmptyState
+              icon={Receipt}
+              title="Sem movimentações no período"
+              description="Registre baixas em contas a pagar/receber ou lançamentos contábeis para popular a DRE deste período."
+            />
           ) : (
             <Table>
               <TableHeader>

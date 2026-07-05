@@ -1,4 +1,5 @@
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Button } from '@/ui/base/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
@@ -140,8 +141,12 @@ export default function ChargesRulerPage() {
             <TableBody>
               {logs.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
-                    Nenhuma cobrança registrada. Execute a régua para gerar.
+                  <TableCell colSpan={7} className="p-0">
+                    <EmptyState
+                      icon={Bell}
+                      title="Nenhuma cobrança registrada"
+                      description="A régua de cobrança envia lembretes automáticos por e-mail/WhatsApp conforme dias de atraso. Execute a régua para gerar as primeiras cobranças."
+                    />
                   </TableCell>
                 </TableRow>
               )}
