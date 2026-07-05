@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/ui/base/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
+import { EmptyState } from '@/shared/components/EmptyState';
 import {
   Table,
   TableBody,
@@ -370,8 +371,12 @@ export default function FiscalReportsPage() {
                 ))}
                 {filteredReports.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={8} className="py-8 text-center text-muted-foreground">
-                      Nenhum relatório encontrado
+                    <TableCell colSpan={8} className="p-0">
+                      <EmptyState
+                        icon={FileText}
+                        title="Nenhum relatório encontrado"
+                        description="Gere um novo relatório fiscal para o período desejado."
+                      />
                     </TableCell>
                   </TableRow>
                 )}

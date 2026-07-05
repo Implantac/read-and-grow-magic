@@ -7,6 +7,7 @@ import { Scale, Building2, Landmark, PiggyBank } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { PageLoading } from '@/shared/components/PageLoading';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { EquityEvolutionChart } from '@/components/accounting/EquityEvolutionChart';
 import { FinancialIndicatorsPanel } from '@/components/accounting/FinancialIndicatorsPanel';
 import { useAccounting } from '@/hooks/accounting/useAccounting';
@@ -77,7 +78,11 @@ export default function BalanceSheetPage() {
             </TableBody>
           </Table>
         ) : (
-          <p className="text-muted-foreground text-center py-8">Nenhum dado disponível</p>
+          <EmptyState
+            icon={Scale}
+            title="Nenhum dado disponível"
+            description="Não há saldos contábeis para exibir neste grupo."
+          />
         )}
       </CardContent>
     </Card>

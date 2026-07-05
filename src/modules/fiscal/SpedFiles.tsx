@@ -13,6 +13,7 @@ import { Download, Trash2, FileText, Loader2, Calendar, Sparkles, CheckCircle2, 
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { formatBRL } from '@/lib/formatters';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 export default function SpedFiles() {
   const { files, loading, generating, generate, download, remove } = useSpedFiles();
@@ -101,10 +102,11 @@ export default function SpedFiles() {
                 <p>Carregando histórico...</p>
               </div>
             ) : files.length === 0 ? (
-              <div className="py-20 text-center text-muted-foreground flex flex-col items-center gap-4">
-                <AlertCircle className="h-12 w-12 opacity-10" />
-                <p className="text-sm font-medium">Nenhum arquivo SPED gerado para este período.</p>
-              </div>
+              <EmptyState
+                icon={FileText}
+                title="Nenhum arquivo SPED gerado"
+                description="Gere arquivos SPED Fiscal ou Contribuições para o período selecionado."
+              />
             ) : (
               <Table>
                 <TableHeader className="bg-muted/30">

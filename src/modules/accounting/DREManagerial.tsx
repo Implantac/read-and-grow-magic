@@ -14,7 +14,8 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from '@/ui/base/dialog';
 import { formatBRL } from '@/lib/formatters';
-import { ChevronRight, TrendingUp } from 'lucide-react';
+import { ChevronRight, TrendingUp, FileBarChart } from 'lucide-react';
+import { EmptyState } from '@/shared/components/EmptyState';
 import {
   useDREManagerial,
   useDREManagerialEntries,
@@ -95,8 +96,12 @@ export default function DREManagerialPage() {
       {isLoading ? (
         <PageLoading />
       ) : byCostCenter.length === 0 ? (
-        <Card><CardContent className="py-12 text-center text-muted-foreground">
-          Nenhum lançamento no período selecionado.
+        <Card><CardContent className="py-6">
+          <EmptyState
+            icon={FileBarChart}
+            title="Nenhum lançamento no período"
+            description="Ajuste o intervalo de datas para visualizar a DRE gerencial por centro de custo."
+          />
         </CardContent></Card>
       ) : (
         byCostCenter.map(([key, cc]) => (
@@ -167,7 +172,11 @@ export default function DREManagerialPage() {
           {loadingEntries ? (
             <div className="py-8 text-center text-muted-foreground">Carregando…</div>
           ) : entries.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">Nenhum lançamento.</div>
+            <EmptyState
+              icon={FileBarChart}
+              title="Nenhum lançamento"
+              description="Não há lançamentos para este centro de custo e categoria no período."
+            />
           ) : (
             <div className="max-h-[60vh] overflow-auto">
               <Table>
