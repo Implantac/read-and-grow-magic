@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 
 const ChartOfAccountsPage = lazy(() => import("../modules/accounting/ChartOfAccounts"));
 const JournalEntriesPage = lazy(() => import("../modules/accounting/JournalEntries"));
