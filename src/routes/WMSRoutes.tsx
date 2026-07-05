@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 
 const WMSDashboardPage = lazy(() => import("../modules/wms/WMSDashboard"));
 const ReceivingPage = lazy(() => import("../modules/wms/Receiving"));
@@ -40,6 +40,7 @@ const CarrierScorecardPage = lazy(() => import("../modules/wms/CarrierScorecard"
 const WavePlanningV2Page = lazy(() => import("../modules/wms/WavePlanningV2"));
 
 export const WMSRoutes = [
+  <Route key="wms-index" index element={<Navigate to="dashboard" replace />} />,
   <Route key="wms-dash" path="dashboard" element={<WMSDashboardPage />} />,
   <Route key="wms-rec" path="recebimento" element={<ReceivingPage />} />,
   <Route key="wms-store" path="armazenagem" element={<StoragePage />} />,

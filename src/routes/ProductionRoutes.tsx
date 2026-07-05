@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 
 const ProductionOrdersPage = lazy(() => import("../modules/production/ProductionOrders"));
 const MaterialConsumptionPage = lazy(() => import("../modules/production/MaterialConsumption"));
@@ -34,6 +34,7 @@ const OutsourcingPage = lazy(() => import("../modules/production/OutsourcingPage
 const APSMultiPage = lazy(() => import("../modules/production/APSMulti"));
 
 export const ProductionRoutes = [
+  <Route key="prod-index" index element={<Navigate to="dashboard" replace />} />,
   <Route key="prod-orders" path="ordens" element={<ProductionOrdersPage />} />,
   <Route key="prod-cons" path="consumo" element={<MaterialConsumptionPage />} />,
   <Route key="prod-time" path="apontamento" element={<TimeEntriesPage />} />,

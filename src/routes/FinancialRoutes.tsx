@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { Route } from 'react-router-dom';
+import { Route, Navigate } from 'react-router-dom';
 
 const AccountsPayable = lazy(() => import("../modules/financial/AccountsPayable"));
 const AccountsReceivable = lazy(() => import("../modules/financial/AccountsReceivable"));
@@ -30,6 +30,7 @@ const FinancialAlertsPage = lazy(() => import("../modules/financial/FinancialAle
 const DREDynamicPage = lazy(() => import("../modules/financial/DREDynamicPage"));
 
 export const FinancialRoutes = [
+  <Route key="fin-index" index element={<Navigate to="dashboard" replace />} />,
   <Route key="fin-hub" path="central" element={<FinancialHubPage />} />,
   <Route key="fin-dash" path="dashboard" element={<FinancialDashboardPage />} />,
   <Route key="fin-pay" path="pagar" element={<AccountsPayable />} />,
