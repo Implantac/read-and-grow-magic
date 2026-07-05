@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { ExportButton } from '@/shared/components/ExportButton';
@@ -142,61 +143,72 @@ export default function MaterialConsumptionPage() {
       <Card>
         <CardHeader><CardTitle className="flex items-center gap-2"><PackageMinus className="h-5 w-5" /> Registros de Consumo</CardTitle></CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader><TableRow>
-              <TableHead>Ordem</TableHead><TableHead>Componente</TableHead><TableHead>Esperado</TableHead>
-              <TableHead>Consumido</TableHead><TableHead>Progresso</TableHead><TableHead>Lote</TableHead>
-              <TableHead>Status</TableHead><TableHead className="text-right">Ações</TableHead>
-            </TableRow></TableHeader>
-            <TableBody>
-              {filtered.length === 0 ? (
-                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Nenhum registro encontrado</TableCell></TableRow>
-              ) : filtered.map(c => {
-                const status = getStatus(c);
-                const progress = c.expected_quantity > 0 ? Math.round((c.consumed_quantity / c.expected_quantity) * 100) : 0;
-                return (
-                  <TableRow key={c.id}>
-                    <TableCell className="font-mono text-sm">{c.order_number}</TableCell>
-                    <TableCell>
-                      <p className="font-medium">{c.component_name}</p>
-                      <p className="text-xs text-muted-foreground">{c.component_code}</p>
-                    </TableCell>
-                    <TableCell>{c.expected_quantity} {c.unit}</TableCell>
-                    <TableCell>{c.consumed_quantity} {c.unit}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Progress value={progress} className="w-20 h-2" />
-                        <span className="text-xs text-muted-foreground">{progress}%</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Box className="h-3 w-3 text-muted-foreground" />
-                        {c.batch || '-'}
-                      </div>
-                    </TableCell>
-                    <TableCell><Badge variant={status.variant}>{status.label}</Badge></TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="sm" onClick={() => { setSelected(c); setDetailsOpen(true); }}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        {c.consumed_quantity < c.expected_quantity && (
-                          <Button variant="outline" size="sm" onClick={() => {
-                            setSelected(c);
-                            setConsumeQty(c.expected_quantity - c.consumed_quantity);
-                            setConsumeOpen(true);
-                          }}>
-                            <PackageMinus className="h-4 w-4 mr-1" /> Consumir
+          {filtered.length === 0 ? (
+            <EmptyState
+              icon={PackageMinus}
+              title={consumptions.length === 0 ? 'Nenhum consumo registrado' : 'Nenhum registro encontrado'}
+              description={consumptions.length === 0
+                ? 'Registre o consumo de matéria-prima para acompanhar o uso por ordem de produção.'
+                : 'Ajuste a busca ou os filtros para localizar o registro desejado.'}
+              action={consumptions.length === 0
+                ? { label: 'Registrar Consumo', onClick: () => setCreateOpen(true), icon: Plus }
+                : { label: 'Limpar filtros', onClick: () => { setSearchTerm(''); setOrderFilter('all'); }, variant: 'outline' }}
+            />
+          ) : (
+            <Table>
+              <TableHeader><TableRow>
+                <TableHead>Ordem</TableHead><TableHead>Componente</TableHead><TableHead>Esperado</TableHead>
+                <TableHead>Consumido</TableHead><TableHead>Progresso</TableHead><TableHead>Lote</TableHead>
+                <TableHead>Status</TableHead><TableHead className="text-right">Ações</TableHead>
+              </TableRow></TableHeader>
+              <TableBody>
+                {filtered.map(c => {
+                  const status = getStatus(c);
+                  const progress = c.expected_quantity > 0 ? Math.round((c.consumed_quantity / c.expected_quantity) * 100) : 0;
+                  return (
+                    <TableRow key={c.id}>
+                      <TableCell className="font-mono text-sm">{c.order_number}</TableCell>
+                      <TableCell>
+                        <p className="font-medium">{c.component_name}</p>
+                        <p className="text-xs text-muted-foreground">{c.component_code}</p>
+                      </TableCell>
+                      <TableCell>{c.expected_quantity} {c.unit}</TableCell>
+                      <TableCell>{c.consumed_quantity} {c.unit}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Progress value={progress} className="w-20 h-2" />
+                          <span className="text-xs text-muted-foreground">{progress}%</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Box className="h-3 w-3 text-muted-foreground" />
+                          {c.batch || '-'}
+                        </div>
+                      </TableCell>
+                      <TableCell><Badge variant={status.variant}>{status.label}</Badge></TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button variant="ghost" size="sm" onClick={() => { setSelected(c); setDetailsOpen(true); }}>
+                            <Eye className="h-4 w-4" />
                           </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                          {c.consumed_quantity < c.expected_quantity && (
+                            <Button variant="outline" size="sm" onClick={() => {
+                              setSelected(c);
+                              setConsumeQty(c.expected_quantity - c.consumed_quantity);
+                              setConsumeOpen(true);
+                            }}>
+                              <PackageMinus className="h-4 w-4 mr-1" /> Consumir
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 
