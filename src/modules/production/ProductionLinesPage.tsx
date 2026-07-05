@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { useProductionLines, ProductionLine } from '@/hooks/production/useProductionLines';
 import { useProductionSectors } from '@/hooks/production/useProductionSectors';
@@ -121,10 +122,15 @@ export default function ProductionLinesPage() {
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-16 text-muted-foreground">
-                    <Layers className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                    <p className="font-semibold text-base">Nenhuma linha encontrada</p>
-                    <p className="text-sm mt-1">Cadastre a primeira linha produtiva</p>
+                  <TableCell colSpan={8} className="p-0">
+                    <EmptyState
+                      icon={Layers}
+                      title={search ? 'Nenhuma linha encontrada' : 'Nenhuma linha cadastrada'}
+                      description={search ? 'Ajuste a busca para localizar a linha desejada.' : 'Cadastre a primeira linha produtiva para organizar sua fábrica.'}
+                      action={search
+                        ? { label: 'Limpar busca', onClick: () => setSearch(''), variant: 'outline' }
+                        : { label: 'Nova Linha', onClick: openNew, icon: Plus }}
+                    />
                   </TableCell>
                 </TableRow>
               ) : filtered.map(l => (

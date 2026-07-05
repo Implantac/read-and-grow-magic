@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { useProductionSectors, ProductionSector } from '@/hooks/production/useProductionSectors';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
@@ -108,10 +109,15 @@ export default function ProductionSectorsPage() {
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-16 text-muted-foreground">
-                    <Factory className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                    <p className="font-semibold text-base">Nenhum setor encontrado</p>
-                    <p className="text-sm mt-1">Cadastre o primeiro setor para começar</p>
+                  <TableCell colSpan={6} className="p-0">
+                    <EmptyState
+                      icon={Factory}
+                      title={search ? 'Nenhum setor encontrado' : 'Nenhum setor cadastrado'}
+                      description={search ? 'Ajuste a busca para localizar o setor desejado.' : 'Cadastre o primeiro setor (produção ou apoio) para organizar sua planta.'}
+                      action={search
+                        ? { label: 'Limpar busca', onClick: () => setSearch(''), variant: 'outline' }
+                        : { label: 'Novo Setor', onClick: openNew, icon: Plus }}
+                    />
                   </TableCell>
                 </TableRow>
               ) : filtered.map(s => (

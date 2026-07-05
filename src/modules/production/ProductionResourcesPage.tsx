@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
+import { EmptyState } from '@/shared/components/EmptyState';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { useProductionResources, ProductionResource } from '@/hooks/production/useProductionResources';
 import { useProductionSectors } from '@/hooks/production/useProductionSectors';
@@ -126,10 +127,17 @@ export default function ProductionResourcesPage() {
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-16 text-muted-foreground">
-                    <Wrench className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                    <p className="font-semibold text-base">Nenhum recurso encontrado</p>
-                    <p className="text-sm mt-1">Cadastre máquinas, operadores ou postos de trabalho</p>
+                  <TableCell colSpan={9} className="p-0">
+                    <EmptyState
+                      icon={Wrench}
+                      title={search ? 'Nenhum recurso encontrado' : 'Nenhum recurso cadastrado'}
+                      description={search
+                        ? 'Ajuste a busca para localizar máquinas, operadores ou postos de trabalho.'
+                        : 'Cadastre máquinas, operadores ou postos de trabalho para planejar a capacidade produtiva.'}
+                      action={search
+                        ? { label: 'Limpar busca', onClick: () => setSearch(''), variant: 'outline' }
+                        : { label: 'Novo Recurso', onClick: openNew, icon: Plus }}
+                    />
                   </TableCell>
                 </TableRow>
               ) : filtered.map(r => {
