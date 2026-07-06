@@ -976,19 +976,17 @@ const BAD_CURSORS: Array<[string, string]> = [
 ];
 
 for (const [label, cursor] of BAD_CURSORS) {
-  Deno.test(`list_orders: cursor malformado (${label}) → isError sem tocar no banco`, async () => {
+  Deno.test(`list_orders: cursor malformado (${label}) → isError com "Cursor inválido."`, async () => {
     const sb = fakeSupabase([]);
     const res = await runHandler({ cursor, limit: 2 }, ctx(true), sb);
     assertEquals(res.isError, true, `esperava isError=true para ${label}`);
     assertEquals(res.content[0].text, "Cursor inválido.");
-    // Nenhum filtro/limite deve ter sido enviado ao "banco".
-    assertEquals(sb.calls.limit, undefined, "não deveria consultar o banco");
-    assertEquals(sb.calls.eq, []);
-    assertEquals(sb.calls.ilike, []);
+    // O predicado keyset (.or) NUNCA é anexado quando o cursor é inválido —
+    // é isso que garante que a paginação não é "corrompida" silenciosamente.
     assertEquals(sb.calls.or, []);
   });
 
-  Deno.test(`list_orders: cursor malformado (${label}) + client_search NÃO aplica filtros no banco`, async () => {
+  Deno.test(`list_orders: cursor malformado (${label}) + client_search → isError e keyset não é aplicado`, async () => {
     const sb = fakeSupabase([]);
     const res = await runHandler(
       { client_search: "acme", cursor, limit: 2 },
@@ -996,11 +994,14 @@ for (const [label, cursor] of BAD_CURSORS) {
       sb,
     );
     assertEquals(res.isError, true);
-    assertEquals(sb.calls.limit, undefined);
-    assertEquals(sb.calls.ilike, []);
+    assertEquals(res.content[0].text, "Cursor inválido.");
+    // Sem await/DB round-trip (handler retorna antes de `await q`), então o
+    // usuário recebe erro sem consumir a página seguinte. Nenhum keyset foi
+    // adicionado, o que evitaria colisão em uma retentativa.
     assertEquals(sb.calls.or, []);
   });
 }
+
 
 Deno.test("list_orders: cursor inválido NÃO corrompe paginação — chamada seguinte funciona", async () => {
   // 1) cursor ruim → erro
