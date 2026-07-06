@@ -1093,3 +1093,163 @@ Deno.test("MCP endpoint: cursor malformado sem Authorization retorna 401/403 (au
 });
 
 
+
+// -------- Fuzz tests -------------------------------------------------------
+// Garantia: para QUALQUER string aleatória enviada como cursor/status/
+// client_id/client_search, o handler:
+//   • nunca lança exceção (equivalente a "nunca 5xx" no HTTP);
+//   • sempre devolve uma resposta bem-formada (isError:true com mensagem
+//     conhecida OU um resultado válido com structuredContent);
+//   • quando não autenticado, retorna "Não autenticado" (401 lógico);
+//   • quando o cursor é rejeitado, retorna "Cursor inválido." (400 lógico).
+// PRNG seedado para reprodutibilidade.
+
+function mulberry32(seed: number) {
+  let t = seed >>> 0;
+  return () => {
+    t = (t + 0x6D2B79F5) >>> 0;
+    let r = t;
+    r = Math.imul(r ^ (r >>> 15), r | 1);
+    r ^= r + Math.imul(r ^ (r >>> 7), r | 61);
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function randomString(rand: () => number, maxLen = 128): string {
+  const len = Math.floor(rand() * maxLen);
+  // Mistura ASCII imprimível, controles, símbolos SQL/JSON e alguns unicode
+  // para forçar caminhos de erro do decodeCursor e sanitização.
+  const pool =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" +
+    "%,'\";\\/(){}[]<>=+-*&|!?#@$^~`\n\r\t\0" +
+    "áéíóúçãõ日本語😀🔥";
+  let s = "";
+  for (let i = 0; i < len; i++) {
+    s += pool[Math.floor(rand() * pool.length)];
+  }
+  return s;
+}
+
+const KNOWN_ERRORS = new Set(["Cursor inválido.", "Não autenticado"]);
+
+function assertWellFormed(res: any, ctx: string) {
+  assert(res && typeof res === "object", `${ctx}: resposta não é objeto`);
+  assert(Array.isArray(res.content) && res.content.length > 0, `${ctx}: sem content`);
+  assert(typeof res.content[0].text === "string", `${ctx}: content[0].text não é string`);
+  if (res.isError) {
+    assert(
+      KNOWN_ERRORS.has(res.content[0].text),
+      `${ctx}: mensagem de erro inesperada "${res.content[0].text}"`,
+    );
+  } else {
+    // Resultado normal precisa expor os campos de paginação.
+    const sc = res.structuredContent;
+    assert(sc && typeof sc === "object", `${ctx}: sem structuredContent`);
+    assert(Array.isArray(sc.rows), `${ctx}: rows não é array`);
+    assertEquals(typeof sc.count, "number");
+    assertEquals(typeof sc.has_more, "boolean");
+    assert(sc.next_cursor === null || typeof sc.next_cursor === "string");
+  }
+}
+
+Deno.test("fuzz: cursor aleatório (autenticado) nunca lança e devolve resposta válida", async () => {
+  const rand = mulberry32(0xC0FFEE);
+  for (let i = 0; i < 300; i++) {
+    const cursor = randomString(rand);
+    const sb = fakeSupabase([]);
+    let res: any;
+    try {
+      res = await runHandler({ cursor, limit: 2 }, ctx(true), sb);
+    } catch (e) {
+      throw new Error(`iter ${i}: handler lançou (equivalente a 5xx): ${e}`);
+    }
+    assertWellFormed(res, `iter ${i} cursor=${JSON.stringify(cursor).slice(0, 60)}`);
+  }
+});
+
+Deno.test("fuzz: cursor + client_search + status aleatórios nunca lançam", async () => {
+  const rand = mulberry32(0xBADF00D);
+  for (let i = 0; i < 300; i++) {
+    const input = {
+      cursor: rand() < 0.7 ? randomString(rand) : undefined,
+      client_search: rand() < 0.7 ? randomString(rand, 40) : undefined,
+      client_id: rand() < 0.3 ? randomString(rand, 40) : undefined,
+      status: rand() < 0.5 ? randomString(rand, 20) : undefined,
+      limit: Math.max(1, Math.floor(rand() * 100)),
+    };
+    const sb = fakeSupabase([]);
+    let res: any;
+    try {
+      res = await runHandler(input, ctx(true), sb);
+    } catch (e) {
+      throw new Error(`iter ${i}: handler lançou: ${e}\ninput=${JSON.stringify(input)}`);
+    }
+    assertWellFormed(res, `iter ${i}`);
+  }
+});
+
+Deno.test("fuzz: input aleatório SEM auth sempre retorna 'Não autenticado' (401 lógico)", async () => {
+  const rand = mulberry32(0xDEADBEEF);
+  for (let i = 0; i < 200; i++) {
+    const input = {
+      cursor: rand() < 0.5 ? randomString(rand) : undefined,
+      client_search: rand() < 0.5 ? randomString(rand, 40) : undefined,
+      status: rand() < 0.5 ? randomString(rand, 20) : undefined,
+    };
+    const sb = fakeSupabase([]);
+    let res: any;
+    try {
+      res = await runHandler(input, ctx(false), sb);
+    } catch (e) {
+      throw new Error(`iter ${i}: handler lançou sem auth: ${e}`);
+    }
+    assertEquals(res.isError, true);
+    assertEquals(res.content[0].text, "Não autenticado");
+    // Auth vence tudo — nenhuma consulta é montada.
+    assertEquals(sb.calls.limit, undefined);
+    assertEquals(sb.calls.or, []);
+    assertEquals(sb.calls.ilike, []);
+  }
+});
+
+// -------- Fuzz E2E contra endpoint deployado ------------------------------
+// Envia payloads aleatórios SEM Authorization e confirma que o endpoint
+// sempre responde 401/403 (autenticação primeiro) — nunca 5xx.
+
+Deno.test("fuzz E2E: payloads aleatórios sem Authorization → sempre 401/403 (nunca 5xx)", async () => {
+  const base = Deno.env.get("VITE_SUPABASE_URL") ?? Deno.env.get("SUPABASE_URL");
+  if (!base) {
+    console.warn("SUPABASE_URL/VITE_SUPABASE_URL ausente — pulando fuzz E2E");
+    return;
+  }
+  const rand = mulberry32(0xF0F0F0);
+  const url = `${base}/functions/v1/mcp/.mcp/invoke-tool/list_orders`;
+
+  for (let i = 0; i < 20; i++) {
+    const payload: Record<string, unknown> = {};
+    if (rand() < 0.7) payload.cursor = randomString(rand, 200);
+    if (rand() < 0.6) payload.client_search = randomString(rand, 40);
+    if (rand() < 0.4) payload.client_id = randomString(rand, 40);
+    if (rand() < 0.5) payload.status = randomString(rand, 30);
+    if (rand() < 0.5) payload.limit = Math.floor(rand() * 10000) - 1000; // inclui negativos
+
+    let body: string;
+    try {
+      body = JSON.stringify(payload);
+    } catch {
+      continue;
+    }
+
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+    });
+    await res.text(); // consome body (Deno resource leak guard)
+    assert(
+      res.status === 401 || res.status === 403,
+      `iter ${i}: esperado 401/403, veio ${res.status} para payload ${body.slice(0, 120)}`,
+    );
+    assert(res.status < 500, `iter ${i}: 5xx inaceitável (${res.status})`);
+  }
+});
