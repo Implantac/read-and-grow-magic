@@ -650,9 +650,11 @@ Deno.test("next_cursor: quando página 1 não enche (has_more=false), next_curso
   assertEquals(rB.structuredContent.next_cursor, null);
 });
 
-
+// -------- Cross-tenant leak: paginação nunca vaza pedidos de outro tenant --
 // Simula RLS aplicando `company_id = caller_tenant` no próprio fake — se o
 // handler algum dia esquecer o token/contexto ao paginar, o teste quebra.
+
+
 
 type TenantRow = Row & { company_id: string; id: string; date: string };
 
