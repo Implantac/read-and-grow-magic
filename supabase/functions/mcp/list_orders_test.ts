@@ -289,7 +289,98 @@ Deno.test("list_orders: navegação em 2 páginas consecutivas cobre todos os re
   ]);
 });
 
-// -------- Smoke E2E --------------------------------------------------------
+// -------- Filtros por cliente --------------------------------------------
+
+Deno.test("list_orders: filtra por client_id (UUID)", async () => {
+  const sb = fakeSupabase([
+    { id: "o1", client_id: "c-1", total: 10, date: "2026-05-01T00:00:00Z" },
+  ]);
+  const res = await runHandler(
+    { client_id: "11111111-1111-1111-1111-111111111111" },
+    ctx(true),
+    sb,
+  );
+  assertEquals(res.isError, false);
+  assertEquals(sb.calls.eq, [["client_id", "11111111-1111-1111-1111-111111111111"]]);
+  assertEquals(sb.calls.ilike, []);
+});
+
+Deno.test("list_orders: filtra por client_search (ILIKE %termo%)", async () => {
+  const sb = fakeSupabase([]);
+  await runHandler({ client_search: "ACME" }, ctx(true), sb);
+  assertEquals(sb.calls.ilike, [["client_name", "%ACME%"]]);
+  assertEquals(sb.calls.eq, []);
+});
+
+Deno.test("list_orders: client_search sanitiza % e vírgula (evita injection de predicado)", async () => {
+  const sb = fakeSupabase([]);
+  await runHandler({ client_search: "ac%me,corp" }, ctx(true), sb);
+  assertEquals(sb.calls.ilike, [["client_name", "%ac me corp%"]]);
+});
+
+Deno.test("list_orders: combina status + datas + client_id + paginação", async () => {
+  const sb = fakeSupabase([
+    { id: "o1", client_id: "c-1", total: 100, status: "delivered", date: "2026-06-10T00:00:00Z" },
+    { id: "o2", client_id: "c-1", total: 200, status: "delivered", date: "2026-06-09T00:00:00Z" },
+    { id: "o3", client_id: "c-1", total: 300, status: "delivered", date: "2026-06-08T00:00:00Z" },
+  ]);
+  const res = await runHandler(
+    {
+      status: "delivered",
+      date_from: "2026-06-01",
+      date_to: "2026-06-30",
+      client_id: "22222222-2222-2222-2222-222222222222",
+      limit: 2,
+    },
+    ctx(true),
+    sb,
+  );
+  const sc = (res as any).structuredContent;
+  assertEquals(sb.calls.eq, [
+    ["status", "delivered"],
+    ["client_id", "22222222-2222-2222-2222-222222222222"],
+  ]);
+  assertEquals(sb.calls.gte, [["date", "2026-06-01T00:00:00.000Z"]]);
+  assertEquals(sb.calls.lte, [["date", "2026-06-30T23:59:59.999Z"]]);
+  assertEquals(sb.calls.limit, 3); // pageSize+1
+  assertEquals(sc.count, 2);
+  assertEquals(sc.has_more, true);
+  assert(typeof sc.next_cursor === "string");
+});
+
+Deno.test("list_orders: combina client_search + status + intervalo de datas", async () => {
+  const sb = fakeSupabase([]);
+  await runHandler(
+    {
+      client_search: "acme",
+      status: "confirmed",
+      date_from: "2026-01-01",
+      date_to: "2026-01-31",
+    },
+    ctx(true),
+    sb,
+  );
+  assertEquals(sb.calls.eq, [["status", "confirmed"]]);
+  assertEquals(sb.calls.gte, [["date", "2026-01-01T00:00:00.000Z"]]);
+  assertEquals(sb.calls.lte, [["date", "2026-01-31T23:59:59.999Z"]]);
+  assertEquals(sb.calls.ilike, [["client_name", "%acme%"]]);
+});
+
+Deno.test("list_orders: RLS bloqueia pedidos de cliente de outro tenant → count=0", async () => {
+  // Mesmo com client_id válido de OUTRO tenant, RLS filtra tudo (SELECT policy
+  // exige company_id = get_user_company_id(auth.uid())). O tool devolve
+  // lista vazia — nunca vaza existência do cliente/pedido.
+  const sb = fakeSupabase([]);
+  const res = await runHandler(
+    { client_id: "99999999-9999-9999-9999-999999999999" },
+    ctx(true),
+    sb,
+  );
+  assertEquals(res.isError, false);
+  assertEquals((res as any).structuredContent.rows, []);
+  assertEquals((res as any).structuredContent.count, 0);
+  assertEquals((res as any).structuredContent.has_more, false);
+});
 
 Deno.test("MCP endpoint: list_orders sem Authorization retorna 401/403", async () => {
   const base = Deno.env.get("VITE_SUPABASE_URL") ?? Deno.env.get("SUPABASE_URL");
