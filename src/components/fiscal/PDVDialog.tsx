@@ -452,12 +452,47 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
   const discardParked = (id: string) => { removeParked(id); refreshParked(); };
 
   const updateSplitAmount = (id: string, raw: number) => {
-    if (!Number.isFinite(raw) || raw < 0) { toastError('Valor inválido.'); return; }
+    if (!Number.isFinite(raw) || raw < 0) return; // silencioso: não bloqueia digitação
     const v = Math.round(raw * 100) / 100;
     setSplits((prev) => prev.map((p) => (p.id === id ? { ...p, amount: v } : p)));
   };
 
-  const removeSplit = (id: string) => setSplits((prev) => prev.filter((p) => p.id !== id));
+  // Aceita digitação livre (vazio, "12,", "12.5") sem quebrar o input controlado
+  const handleSplitAmountChange = (id: string, text: string) => {
+    // normaliza vírgula → ponto; aceita apenas dígitos e um separador decimal
+    const cleaned = text.replace(',', '.').replace(/[^0-9.]/g, '');
+    // impede múltiplos pontos
+    const parts = cleaned.split('.');
+    const normalized = parts.length > 2 ? `${parts[0]}.${parts.slice(1).join('')}` : cleaned;
+    setSplitDrafts((prev) => ({ ...prev, [id]: normalized }));
+    if (normalized === '' || normalized === '.') {
+      setSplits((prev) => prev.map((p) => (p.id === id ? { ...p, amount: 0 } : p)));
+      return;
+    }
+    const n = Number(normalized);
+    if (Number.isFinite(n) && n >= 0) {
+      setSplits((prev) => prev.map((p) => (p.id === id ? { ...p, amount: Math.round(n * 100) / 100 } : p)));
+    }
+  };
+
+  const commitSplitAmount = (id: string) => {
+    setSplitDrafts((prev) => {
+      if (!(id in prev)) return prev;
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
+  const removeSplit = (id: string) => {
+    setSplits((prev) => prev.filter((p) => p.id !== id));
+    setSplitDrafts((prev) => {
+      if (!(id in prev)) return prev;
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
 
   const handleFinalize = async () => {
     if (cart.length === 0) return;
