@@ -581,11 +581,12 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
       const typing = target && ['INPUT', 'TEXTAREA'].includes(target.tagName);
       if (e.key === 'Escape' && !typing && !showPayment && search) { e.preventDefault(); setSearch(''); return; }
       if (e.key === 'F9' && !typing) { e.preventDefault(); clearAll(); }
-      if (e.key === 'F10') { e.preventDefault(); if (!showPayment && cart.length > 0) setShowPayment(true); else if (showPayment) handleFinalize(); }
-      if (e.key === 'F12') { e.preventDefault(); setScreenLocked(true); }
+      if (e.key === 'F10' && !typing) { e.preventDefault(); if (!showPayment && cart.length > 0) setShowPayment(true); else if (showPayment) handleFinalize(); }
+      // Bloqueio agora em Ctrl/Cmd+L para evitar acionamento acidental de F12 durante venda
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'l' || e.key === 'L')) { e.preventDefault(); setScreenLocked(true); }
       if (e.key === 'F7' && !typing && cart.length > 0) { e.preventDefault(); suspendSale(); }
       if (e.key === 'F8' && !typing) { e.preventDefault(); setShowParked(true); }
-      if (!showPayment) return;
+      if (!showPayment || typing) return;
       if (e.key === 'F1') { e.preventDefault(); addSplit('cash'); }
       if (e.key === 'F2') { e.preventDefault(); addSplit('credit_card'); }
       if (e.key === 'F3') { e.preventDefault(); addSplit('debit_card'); }
@@ -1261,7 +1262,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                                   <Input
                                     type="text"
                                     inputMode="decimal"
-                                    value={splitDrafts[s.id] ?? (s.amount ? String(s.amount) : '')}
+                                    value={splitDrafts[s.id] ?? (s.amount ? s.amount.toFixed(2).replace('.', ',') : '')}
                                     onChange={(e) => handleSplitAmountChange(s.id, e.target.value)}
                                     onFocus={(e) => e.currentTarget.select()}
                                     onBlur={() => commitSplitAmount(s.id)}
@@ -1312,7 +1313,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                 <div className="mt-3 flex items-center justify-center gap-3 text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex-wrap">
                   <span>F1 Dinh</span><span>F2 Créd</span><span>F3 Déb</span><span>F4 PIX</span><span>F5 Voucher</span><span>F6 Fiado</span>
                   <span className="opacity-40">|</span>
-                  <span>F7 Suspender</span><span>F8 Retomar</span><span>F9 Limpar</span><span>F10 Finalizar</span><span>F12 Bloq</span>
+                  <span>F7 Suspender</span><span>F8 Retomar</span><span>F9 Limpar</span><span>F10 Finalizar</span><span>Ctrl+L Bloq</span>
                 </div>
               </div>
             </div>
@@ -1321,8 +1322,11 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
 
         {/* Open session dialog */}
         {showOpenSession && (
-          <div className="absolute inset-0 z-40 bg-background/80 backdrop-blur-sm flex items-center justify-center" onClick={() => setShowOpenSession(false)}>
-            <div className="bg-background border-2 rounded-2xl p-6 w-96 space-y-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="absolute inset-0 z-40 bg-background/80 backdrop-blur-sm flex items-center justify-center"
+            onKeyDown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); setShowOpenSession(false); } }}
+          >
+            <div className="bg-background border-2 rounded-2xl p-6 w-96 space-y-4 shadow-2xl" role="dialog" aria-label="Abertura de caixa" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center gap-3">
                 <div className="p-2.5 bg-emerald-500/10 text-emerald-600 rounded-lg"><Unlock className="h-5 w-5" /></div>
                 <div>
@@ -1335,8 +1339,16 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">R$</span>
                   <Input
-                    type="number" step="0.01" min={0} value={openingAmount || ''}
-                    onChange={(e) => setOpeningAmount(toSafeNumber(e.target.value))}
+                    type="text"
+                    inputMode="decimal"
+                    value={openingAmount ? openingAmount.toFixed(2).replace('.', ',') : ''}
+                    onChange={(e) => {
+                      const cleaned = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '');
+                      const n = Number(cleaned);
+                      setOpeningAmount(Number.isFinite(n) && n >= 0 ? n : 0);
+                    }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); openSession(); } }}
+                    placeholder="0,00"
                     className="pl-10 h-12 text-lg font-bold tabular-nums" autoFocus
                   />
                 </div>
@@ -1351,8 +1363,11 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
 
         {/* Cash movement dialog */}
         {showCashMovement && (
-          <div className="absolute inset-0 z-40 bg-background/80 backdrop-blur-sm flex items-center justify-center" onClick={() => setShowCashMovement(null)}>
-            <div className="bg-background border-2 rounded-2xl p-6 w-96 space-y-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="absolute inset-0 z-40 bg-background/80 backdrop-blur-sm flex items-center justify-center"
+            onKeyDown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); setShowCashMovement(null); } }}
+          >
+            <div className="bg-background border-2 rounded-2xl p-6 w-96 space-y-4 shadow-2xl" role="dialog" aria-label={showCashMovement === 'sangria' ? 'Sangria' : 'Suprimento'} onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center gap-3">
                 <div className={cn('p-2.5 rounded-lg', showCashMovement === 'sangria' ? 'bg-red-500/10 text-red-600' : 'bg-emerald-500/10 text-emerald-600')}>
                   {showCashMovement === 'sangria' ? <ArrowUpRight className="h-5 w-5" /> : <ArrowDownLeft className="h-5 w-5" />}
@@ -1373,8 +1388,16 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">R$</span>
                   <Input
-                    type="number" step="0.01" min={0} value={movementAmount || ''}
-                    onChange={(e) => setMovementAmount(toSafeNumber(e.target.value))}
+                    type="text"
+                    inputMode="decimal"
+                    value={movementAmount ? movementAmount.toFixed(2).replace('.', ',') : ''}
+                    onChange={(e) => {
+                      const cleaned = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '');
+                      const n = Number(cleaned);
+                      setMovementAmount(Number.isFinite(n) && n >= 0 ? n : 0);
+                    }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); registerMovement(); } }}
+                    placeholder="0,00"
                     className="pl-10 h-12 text-lg font-bold tabular-nums" autoFocus
                   />
                 </div>
