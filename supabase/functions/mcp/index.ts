@@ -163,47 +163,80 @@ var STATUS_VALUES = [
   "conferenced",
   "awaiting_billing"
 ];
+function encodeCursor(p) {
+  return btoa(JSON.stringify(p));
+}
+function decodeCursor(raw) {
+  try {
+    const p = JSON.parse(atob(raw));
+    if (typeof p?.d === "string" && typeof p?.i === "string") return p;
+    return null;
+  } catch {
+    return null;
+  }
+}
 var list_orders_default = defineTool4({
   name: "list_orders",
   title: "Listar pedidos",
-  description: "Lista pedidos comerciais (orders) filtrando por status e intervalo de datas (campo `date`). Respeita RLS multi-tenant e retorna at\xE9 `limit` registros ordenados por data desc.",
+  description: "Lista pedidos comerciais (orders) filtrando por status e intervalo de datas (campo `date`). Respeita RLS multi-tenant. Ordena\xE7\xE3o est\xE1vel por (date desc, id desc). Pagina\xE7\xE3o por cursor keyset: passe `cursor` (retornado como `next_cursor` na resposta anterior) para buscar a pr\xF3xima p\xE1gina. `has_more=true` indica que existem mais resultados.",
   inputSchema: {
     status: z3.enum(STATUS_VALUES).optional().describe("Filtra pelo status do pedido."),
     date_from: z3.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("Data inicial (YYYY-MM-DD), inclusive."),
     date_to: z3.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("Data final (YYYY-MM-DD), inclusive."),
-    limit: z3.number().int().positive().max(100).optional().describe("M\xE1ximo de resultados (padr\xE3o 20).")
+    limit: z3.number().int().positive().max(100).optional().describe("M\xE1ximo de resultados por p\xE1gina (padr\xE3o 20, teto 100)."),
+    cursor: z3.string().optional().describe(
+      "Cursor opaco de pagina\xE7\xE3o (use `next_cursor` da resposta anterior). Ignorar na primeira chamada."
+    )
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: async ({ status, date_from, date_to, limit }, ctx) => {
+  handler: async ({ status, date_from, date_to, limit, cursor }, ctx) => {
     if (!ctx.isAuthenticated()) {
       return { content: [{ type: "text", text: "N\xE3o autenticado" }], isError: true };
     }
     const supabase = userClient3(ctx);
+    const pageSize = limit ?? 20;
     let q = supabase.from("orders").select(
       "id, number, client_name, date, delivery_date, total, status, priority, payment_method"
-    ).order("date", { ascending: false }).limit(limit ?? 20);
+    ).order("date", { ascending: false }).order("id", { ascending: false }).limit(pageSize + 1);
     if (status) q = q.eq("status", status);
     if (date_from) q = q.gte("date", `${date_from}T00:00:00.000Z`);
     if (date_to) q = q.lte("date", `${date_to}T23:59:59.999Z`);
+    if (cursor) {
+      const c = decodeCursor(cursor);
+      if (!c) {
+        return {
+          content: [{ type: "text", text: "Cursor inv\xE1lido." }],
+          isError: true
+        };
+      }
+      q = q.or(`date.lt.${c.d},and(date.eq.${c.d},id.lt.${c.i})`);
+    }
     const { data, error } = await q;
     if (error) {
       return { content: [{ type: "text", text: error.message }], isError: true };
     }
-    const total = (data ?? []).reduce((s, r) => s + Number(r.total ?? 0), 0);
+    const rowsAll = data ?? [];
+    const hasMore = rowsAll.length > pageSize;
+    const rows = hasMore ? rowsAll.slice(0, pageSize) : rowsAll;
+    const last = rows[rows.length - 1];
+    const nextCursor = hasMore && last ? encodeCursor({ d: last.date, i: last.id }) : null;
+    const pageTotal = rows.reduce((s, r) => s + Number(r.total ?? 0), 0);
     return {
       content: [
         {
           type: "text",
-          text: `Encontrados ${data?.length ?? 0} pedidos (soma R$ ${total.toFixed(2)})
+          text: `P\xE1gina com ${rows.length} pedidos (soma R$ ${pageTotal.toFixed(2)})` + (hasMore ? " \u2014 h\xE1 mais resultados (use next_cursor)." : " \u2014 fim dos resultados.") + `
 
-${JSON.stringify(
-            data ?? [],
-            null,
-            2
-          )}`
+${JSON.stringify(rows, null, 2)}`
         }
       ],
-      structuredContent: { rows: data ?? [], count: data?.length ?? 0, total_amount: total }
+      structuredContent: {
+        rows,
+        count: rows.length,
+        total_amount: pageTotal,
+        has_more: hasMore,
+        next_cursor: nextCursor
+      }
     };
   }
 });
