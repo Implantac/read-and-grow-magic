@@ -1253,3 +1253,76 @@ Deno.test("fuzz E2E: payloads aleatórios sem Authorization → sempre 401/403 (
     assert(res.status < 500, `iter ${i}: 5xx inaceitável (${res.status})`);
   }
 });
+
+// -------- Regressão: casos capturados nos fuzz runs ----------------------
+// Estes inputs foram extraídos das seeds `0xC0FFEE` (cursor-only fuzz) e
+// `0xBADF00D` (mixed fuzz) — iterações que exercitaram o caminho de erro
+// do decodeCursor (base64/JSON inválido, unicode/surrogates, controles).
+// Como o fuzz é seedado, esses inputs são estáveis: congelá-los aqui
+// garante que qualquer regressão futura no parser de cursor seja pega
+// mesmo se a suíte fuzz for alterada (nº de iterações, seed, etc.).
+//
+// Invariantes validadas:
+//   • handler NUNCA lança (equivalente a 5xx no HTTP);
+//   • cursor inválido devolve { isError:true, "Cursor inválido." } (400 lógico);
+//   • predicado keyset (.or) nunca é anexado quando cursor é rejeitado —
+//     evita corrupção silenciosa de paginação em retentativas;
+//   • sem auth, "Não autenticado" (401 lógico) vence sobre "Cursor inválido".
+
+const FUZZ_REGRESSION_CASES: {
+  cursorOnly: Array<{ iter: number; cursor: string }>;
+  mixed: Array<{ iter: number; input: {
+    cursor?: string; client_search?: string; client_id?: string;
+    status?: string; limit?: number;
+  } }>;
+} = JSON.parse(`{"cursorOnly": [{"iter": 0, "cursor": "[#"}, {"iter": 1, "cursor": "l3qO#GRf\\u00008zM4?DT7$U,\\u672cf}EA]lwE[)0\\\\c[7DS'FWU\\u672c&\\u00fa$1D\\u00f5PLrmWd}J)D8CrSX\\u8a9e\\t\\ts4IJgC\\u0000X\\ud83d~0#\\ud83d\\u00e9BD\\u00e7\\u65e5Ps4e\\u00edjpH\\u00ed"}, {"iter": 2, "cursor": "\\u00eduB!N\\u00e1b\\u00e9b3mc{/\\u00ed7WD\\ud83dcL;\\u00e7xEB-e\\u00f5IL\\u672ck"}, {"iter": 3, "cursor": "%ruQ&nR@7=ui(JH\\u00falzMT'M#\\u00e3\\udd25'r6#\\u00ed\\ud83dqq*ef\\u00faH,G\\u00e9!\\t\\u00f3H!O,<iH4<24Oq|'B6|?jq2\\t"}, {"iter": 4, "cursor": "O'g)K@\\u00f3FDI\\u00ed\\u00edIy6S84k\`r?KKS&\\u00e1\\u65e5\\u00e9qa!2\\udd25A}-%u\\u00e1NW9^q=\\th\\ud83df+"}], "mixed": [{"iter": 1, "input": {"cursor": "3MM'\\udd25'\\u00e7&?\\t\\ude00\\u8a9e8Y\\u672c\`|)<\\u00faW6t\\udd253pyMaf~[W2G>\\u00f36\`EEUc\`bAwa7KPvh/U[\`mm\\u00e1+%P\\"@\\ty\\u00edqd)0|VgI>R6QZUf\\u0000\\u672c\\u00e7?3fu^)\\u65e56=1L/n6~n#,13\\n7^", "client_search": "dR\\ude00D=93wla}\\u00faC\\u00e1(\\ude00>?LO<mYE4yB3\\u00e7<0*+,#e\\u00e1", "status": "", "limit": 91}}, {"iter": 2, "input": {"cursor": "X\\u00e9o#xboZQ9\`re#->at", "status": "<o", "limit": 1}}, {"iter": 5, "input": {"cursor": "A+x\\ude00\\\\I\\u00e9\\"d<\\u00e7kL$\\ude001", "client_search": "*ME11\\ud83dx", "limit": 97}}, {"iter": 6, "input": {"cursor": "wn9I+6*?nQhjCX\\thE~dp\\r,21R\\u00ed/\\u00e1ft*\\u00e3EX\\nN4[\\nsW[5IBHPA\\u00e1E\\u00e7nzk&i52\\u00f5@\\udd25b\\"o{D-a\\n\\u00e3LA#\\u00e3@qJ!o~q#]Xp'I7\\u00e9+S@\\"q\\ud83d\\u00e9\\u00e3}90P!h=b3yQm\\u00e9G", "client_search": "rUTpaE\\udd256\\ud83dM\\ude00j?p\\u00f3\\u0000gp^\\u00e3\\u00faXXG%Msq;\\u8a9e(^\\u00f3\\\\v", "status": "0X~+", "limit": 41}}, {"iter": 9, "input": {"cursor": "<Vf*O}n\\u0000TxnvL\\ude00]@#[]=\\ude00J\\udd250&W7$W\\"T]<$3\\u00e3Jl(\\u00e7\\u00e79>\\u00fa\\ud83d[\\u00faf\\u00ed}X?sW\`d1uW2z", "status": "OA", "limit": 31}}]}`);
+
+for (const { iter, cursor } of FUZZ_REGRESSION_CASES.cursorOnly) {
+  Deno.test(`regressão fuzz [seed 0xC0FFEE #${iter}]: cursor bruto rejeitado sem 5xx`, async () => {
+    const sb = fakeSupabase([]);
+    let res: any;
+    try {
+      res = await runHandler({ cursor, limit: 2 }, ctx(true), sb);
+    } catch (e) {
+      throw new Error(`handler lançou (5xx) para caso fixo #${iter}: ${e}`);
+    }
+    assertEquals(res.isError, true);
+    assertEquals(res.content[0].text, "Cursor inválido.");
+    // Nenhum keyset foi montado — retentativa não fica presa em predicado
+    // corrompido de uma chamada anterior.
+    assertEquals(sb.calls.or, []);
+  });
+
+  Deno.test(`regressão fuzz [seed 0xC0FFEE #${iter}]: mesmo cursor sem auth → 401 lógico primeiro`, async () => {
+    const sb = fakeSupabase([]);
+    const res = await runHandler({ cursor, limit: 2 }, ctx(false), sb);
+    assertEquals(res.isError, true);
+    assertEquals(res.content[0].text, "Não autenticado");
+    assertEquals(sb.calls.limit, undefined);
+  });
+}
+
+for (const { iter, input } of FUZZ_REGRESSION_CASES.mixed) {
+  Deno.test(`regressão fuzz [seed 0xBADF00D #${iter}]: cursor + filtros aleatórios rejeitado sem 5xx`, async () => {
+    const sb = fakeSupabase([]);
+    let res: any;
+    try {
+      res = await runHandler(input, ctx(true), sb);
+    } catch (e) {
+      throw new Error(`handler lançou (5xx) para caso fixo mixed #${iter}: ${e}`);
+    }
+    // Todos os casos capturados carregam cursor não-decodificável.
+    assertEquals(res.isError, true);
+    assertEquals(res.content[0].text, "Cursor inválido.");
+    assertEquals(sb.calls.or, []);
+  });
+
+  Deno.test(`regressão fuzz [seed 0xBADF00D #${iter}]: mesmo payload sem auth → 401 lógico`, async () => {
+    const sb = fakeSupabase([]);
+    const res = await runHandler(input, ctx(false), sb);
+    assertEquals(res.isError, true);
+    assertEquals(res.content[0].text, "Não autenticado");
+    assertEquals(sb.calls.or, []);
+    assertEquals(sb.calls.ilike, []);
+  });
+}
