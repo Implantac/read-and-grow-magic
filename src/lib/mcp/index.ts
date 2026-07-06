@@ -19,10 +19,11 @@ export default defineMcp({
     "Use `whoami` para confirmar o usuário conectado. " +
     "Use `search_products` para consultar o cadastro de produtos. " +
     "Use `list_payables` para revisar contas a pagar por status e vencimento. " +
+    "Use `list_orders` para consultar pedidos comerciais por status e intervalo de datas. " +
     "Todas as consultas respeitam o escopo de empresa do usuário autenticado.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated",
   }),
-  tools: [whoamiTool, searchProductsTool, listPayablesTool],
+  tools: [whoamiTool, searchProductsTool, listPayablesTool, listOrdersTool],
 });

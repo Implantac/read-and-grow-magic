@@ -127,18 +127,99 @@ ${JSON.stringify(
   }
 });
 
+// src/lib/mcp/tools/list-orders.ts
+import { createClient as createClient3 } from "npm:@supabase/supabase-js@^2.108.2";
+import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z3 } from "npm:zod@^3.25.76";
+function userClient3(ctx) {
+  return createClient3(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_PUBLISHABLE_KEY,
+    {
+      global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
+      auth: { persistSession: false, autoRefreshToken: false }
+    }
+  );
+}
+var STATUS_VALUES = [
+  "pending",
+  "confirmed",
+  "processing",
+  "separated",
+  "invoiced",
+  "shipped",
+  "delivered",
+  "cancelled",
+  "quote",
+  "awaiting_commercial_approval",
+  "awaiting_financial_approval",
+  "blocked",
+  "awaiting_separation",
+  "in_separation",
+  "awaiting_production",
+  "in_production",
+  "partial_production",
+  "awaiting_conference",
+  "conferenced",
+  "awaiting_billing"
+];
+var list_orders_default = defineTool4({
+  name: "list_orders",
+  title: "Listar pedidos",
+  description: "Lista pedidos comerciais (orders) filtrando por status e intervalo de datas (campo `date`). Respeita RLS multi-tenant e retorna at\xE9 `limit` registros ordenados por data desc.",
+  inputSchema: {
+    status: z3.enum(STATUS_VALUES).optional().describe("Filtra pelo status do pedido."),
+    date_from: z3.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("Data inicial (YYYY-MM-DD), inclusive."),
+    date_to: z3.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("Data final (YYYY-MM-DD), inclusive."),
+    limit: z3.number().int().positive().max(100).optional().describe("M\xE1ximo de resultados (padr\xE3o 20).")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ status, date_from, date_to, limit }, ctx) => {
+    if (!ctx.isAuthenticated()) {
+      return { content: [{ type: "text", text: "N\xE3o autenticado" }], isError: true };
+    }
+    const supabase = userClient3(ctx);
+    let q = supabase.from("orders").select(
+      "id, number, client_name, date, delivery_date, total, status, priority, payment_method"
+    ).order("date", { ascending: false }).limit(limit ?? 20);
+    if (status) q = q.eq("status", status);
+    if (date_from) q = q.gte("date", `${date_from}T00:00:00.000Z`);
+    if (date_to) q = q.lte("date", `${date_to}T23:59:59.999Z`);
+    const { data, error } = await q;
+    if (error) {
+      return { content: [{ type: "text", text: error.message }], isError: true };
+    }
+    const total = (data ?? []).reduce((s, r) => s + Number(r.total ?? 0), 0);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Encontrados ${data?.length ?? 0} pedidos (soma R$ ${total.toFixed(2)})
+
+${JSON.stringify(
+            data ?? [],
+            null,
+            2
+          )}`
+        }
+      ],
+      structuredContent: { rows: data ?? [], count: data?.length ?? 0, total_amount: total }
+    };
+  }
+});
+
 // src/lib/mcp/index.ts
 var projectRef = "arcuhqdiydlvekanychw";
 var mcp_default = defineMcp({
   name: "use-sistemas-erp-mcp",
   title: "Use Sistemas ERP",
   version: "0.1.0",
-  instructions: "Ferramentas do ERP Use Sistemas (multi-tenant, RLS por empresa). Use `whoami` para confirmar o usu\xE1rio conectado. Use `search_products` para consultar o cadastro de produtos. Use `list_payables` para revisar contas a pagar por status e vencimento. Todas as consultas respeitam o escopo de empresa do usu\xE1rio autenticado.",
+  instructions: "Ferramentas do ERP Use Sistemas (multi-tenant, RLS por empresa). Use `whoami` para confirmar o usu\xE1rio conectado. Use `search_products` para consultar o cadastro de produtos. Use `list_payables` para revisar contas a pagar por status e vencimento. Use `list_orders` para consultar pedidos comerciais por status e intervalo de datas. Todas as consultas respeitam o escopo de empresa do usu\xE1rio autenticado.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated"
   }),
-  tools: [whoami_default, search_products_default, list_payables_default]
+  tools: [whoami_default, search_products_default, list_payables_default, list_orders_default]
 });
 
 // lovable-mcp-supabase-entry.ts
