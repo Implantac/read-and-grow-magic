@@ -101,7 +101,7 @@ export const navigationSections: NavSection[] = [
         icon: 'ArrowRightLeft',
         children: [
           { title: 'Dashboard Operacional', href: '/operacional/dashboard', icon: 'BarChart3' },
-          { title: 'Acompanhamento', href: '/operacional/acompanhamento', icon: 'Eye' },
+          { title: 'Acompanhamento', href: '/operacional/rastreamento', icon: 'Eye' },
           { title: 'Separação', href: '/operacional/separacao', icon: 'PackageSearch' },
           { title: 'Conferência', href: '/operacional/conferencia', icon: 'ClipboardCheck' },
           { title: 'Faturamento', href: '/operacional/faturamento', icon: 'FileText' },
