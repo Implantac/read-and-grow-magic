@@ -382,6 +382,180 @@ Deno.test("list_orders: RLS bloqueia pedidos de cliente de outro tenant → coun
   assertEquals((res as any).structuredContent.has_more, false);
 });
 
+// -------- Paginação combinada com filtros por cliente -------------------
+// Garante que ao paginar por cursor keyset (date desc, id desc), TODOS os
+// filtros originais (client_id, client_search, status, datas) permanecem
+// aplicados nas páginas seguintes — se algum for perdido, o consumidor
+// veria pedidos de outros clientes/status/datas ao avançar.
+
+Deno.test("paginação + client_id: predicado se mantém em todas as páginas", async () => {
+  const CID = "11111111-1111-1111-1111-111111111111";
+  const p1 = [
+    { id: "a", client_id: CID, total: 10, date: "2026-07-10T00:00:00Z" },
+    { id: "b", client_id: CID, total: 20, date: "2026-07-09T00:00:00Z" },
+    { id: "c", client_id: CID, total: 30, date: "2026-07-08T00:00:00Z" }, // sentinela pageSize+1
+  ];
+
+  // Página 1
+  const sb1 = fakeSupabase(p1);
+  const r1 = await runHandler({ client_id: CID, limit: 2 }, ctx(true), sb1);
+  const sc1 = (r1 as any).structuredContent;
+  assertEquals(sc1.count, 2);
+  assertEquals(sc1.has_more, true);
+  assertEquals(sb1.calls.eq, [["client_id", CID]]);
+  assertEquals(sb1.calls.or, []); // sem cursor na 1ª página
+
+  // Página 2 usando next_cursor
+  const p2 = [{ id: "c", client_id: CID, total: 30, date: "2026-07-08T00:00:00Z" }];
+  const sb2 = fakeSupabase(p2);
+  const r2 = await runHandler(
+    { client_id: CID, limit: 2, cursor: sc1.next_cursor },
+    ctx(true),
+    sb2,
+  );
+  const sc2 = (r2 as any).structuredContent;
+  assertEquals(sc2.count, 1);
+  assertEquals(sc2.has_more, false);
+  assertEquals(sc2.next_cursor, null);
+  // Filtro por cliente PERMANECE aplicado na 2ª página.
+  assertEquals(sb2.calls.eq, [["client_id", CID]]);
+  // Cursor gera predicado keyset baseado na última tupla da página 1 (id="b").
+  assertEquals(sb2.calls.or, [
+    "date.lt.2026-07-09T00:00:00Z,and(date.eq.2026-07-09T00:00:00Z,id.lt.b)",
+  ]);
+});
+
+Deno.test("paginação + client_search: ILIKE se mantém em todas as páginas", async () => {
+  const p1 = [
+    { id: "x", client_name: "ACME LTDA", total: 5, date: "2026-08-05T00:00:00Z" },
+    { id: "y", client_name: "ACME SA", total: 15, date: "2026-08-04T00:00:00Z" },
+    { id: "z", client_name: "ACMEZINHA", total: 25, date: "2026-08-03T00:00:00Z" },
+  ];
+
+  const sb1 = fakeSupabase(p1);
+  const r1 = await runHandler({ client_search: "acme", limit: 2 }, ctx(true), sb1);
+  const sc1 = (r1 as any).structuredContent;
+  assertEquals(sc1.count, 2);
+  assertEquals(sc1.has_more, true);
+  assertEquals(sb1.calls.ilike, [["client_name", "%acme%"]]);
+  assertEquals(sb1.calls.or, []);
+
+  const sb2 = fakeSupabase([p1[2]]);
+  const r2 = await runHandler(
+    { client_search: "acme", limit: 2, cursor: sc1.next_cursor },
+    ctx(true),
+    sb2,
+  );
+  const sc2 = (r2 as any).structuredContent;
+  assertEquals(sc2.count, 1);
+  assertEquals(sc2.has_more, false);
+  // ILIKE PERMANECE na 2ª página (senão viria cliente de outro nome).
+  assertEquals(sb2.calls.ilike, [["client_name", "%acme%"]]);
+  assertEquals(sb2.calls.or, [
+    "date.lt.2026-08-04T00:00:00Z,and(date.eq.2026-08-04T00:00:00Z,id.lt.y)",
+  ]);
+});
+
+Deno.test("paginação + client_id + status + datas: predicados combinados persistem", async () => {
+  const CID = "22222222-2222-2222-2222-222222222222";
+  const p1 = [
+    { id: "a", client_id: CID, status: "delivered", total: 100, date: "2026-09-10T00:00:00Z" },
+    { id: "b", client_id: CID, status: "delivered", total: 200, date: "2026-09-09T00:00:00Z" },
+    { id: "c", client_id: CID, status: "delivered", total: 300, date: "2026-09-08T00:00:00Z" },
+  ];
+  const sb1 = fakeSupabase(p1);
+  const r1 = await runHandler(
+    {
+      client_id: CID,
+      status: "delivered",
+      date_from: "2026-09-01",
+      date_to: "2026-09-30",
+      limit: 2,
+    },
+    ctx(true),
+    sb1,
+  );
+  const sc1 = (r1 as any).structuredContent;
+  assertEquals(sc1.count, 2);
+  assertEquals(sc1.has_more, true);
+  assertEquals(sb1.calls.eq, [["status", "delivered"], ["client_id", CID]]);
+  assertEquals(sb1.calls.gte, [["date", "2026-09-01T00:00:00.000Z"]]);
+  assertEquals(sb1.calls.lte, [["date", "2026-09-30T23:59:59.999Z"]]);
+
+  const sb2 = fakeSupabase([p1[2]]);
+  const r2 = await runHandler(
+    {
+      client_id: CID,
+      status: "delivered",
+      date_from: "2026-09-01",
+      date_to: "2026-09-30",
+      limit: 2,
+      cursor: sc1.next_cursor,
+    },
+    ctx(true),
+    sb2,
+  );
+  const sc2 = (r2 as any).structuredContent;
+  assertEquals(sc2.count, 1);
+  assertEquals(sc2.has_more, false);
+  // Todos os predicados permanecem aplicados na página 2.
+  assertEquals(sb2.calls.eq, [["status", "delivered"], ["client_id", CID]]);
+  assertEquals(sb2.calls.gte, [["date", "2026-09-01T00:00:00.000Z"]]);
+  assertEquals(sb2.calls.lte, [["date", "2026-09-30T23:59:59.999Z"]]);
+  assertEquals(sb2.calls.or, [
+    "date.lt.2026-09-09T00:00:00Z,and(date.eq.2026-09-09T00:00:00Z,id.lt.b)",
+  ]);
+});
+
+Deno.test("paginação + client_id: 3 páginas cobrem exatamente todos os pedidos, sem duplicar", async () => {
+  const CID = "33333333-3333-3333-3333-333333333333";
+  const allRows = [
+    { id: "a", client_id: CID, total: 1, date: "2026-10-05T00:00:00Z" },
+    { id: "b", client_id: CID, total: 2, date: "2026-10-04T00:00:00Z" },
+    { id: "c", client_id: CID, total: 3, date: "2026-10-03T00:00:00Z" },
+    { id: "d", client_id: CID, total: 4, date: "2026-10-02T00:00:00Z" },
+    { id: "e", client_id: CID, total: 5, date: "2026-10-01T00:00:00Z" },
+  ];
+  const collected: string[] = [];
+
+  // Página 1: retorna limit+1=3 → mostra a,b + has_more.
+  const sb1 = fakeSupabase(allRows.slice(0, 3));
+  const r1 = await runHandler({ client_id: CID, limit: 2 }, ctx(true), sb1);
+  const sc1 = (r1 as any).structuredContent;
+  collected.push(...sc1.rows.map((r: any) => r.id));
+  assertEquals(sc1.has_more, true);
+
+  // Página 2: cursor após "b" → c,d + has_more.
+  const sb2 = fakeSupabase(allRows.slice(2, 5));
+  const r2 = await runHandler(
+    { client_id: CID, limit: 2, cursor: sc1.next_cursor },
+    ctx(true),
+    sb2,
+  );
+  const sc2 = (r2 as any).structuredContent;
+  collected.push(...sc2.rows.map((r: any) => r.id));
+  assertEquals(sc2.has_more, true);
+  assertEquals(sb2.calls.eq, [["client_id", CID]]);
+
+  // Página 3: cursor após "d" → apenas e, fim.
+  const sb3 = fakeSupabase(allRows.slice(4, 5));
+  const r3 = await runHandler(
+    { client_id: CID, limit: 2, cursor: sc2.next_cursor },
+    ctx(true),
+    sb3,
+  );
+  const sc3 = (r3 as any).structuredContent;
+  collected.push(...sc3.rows.map((r: any) => r.id));
+  assertEquals(sc3.has_more, false);
+  assertEquals(sc3.next_cursor, null);
+  assertEquals(sb3.calls.eq, [["client_id", CID]]);
+
+  // Cobertura completa, sem duplicatas, na ordem correta.
+  assertEquals(collected, ["a", "b", "c", "d", "e"]);
+});
+
+
+
 Deno.test("MCP endpoint: list_orders sem Authorization retorna 401/403", async () => {
   const base = Deno.env.get("VITE_SUPABASE_URL") ?? Deno.env.get("SUPABASE_URL");
   if (!base) {
