@@ -28,25 +28,26 @@ function fakeSupabase(rows: Row[]) {
     eq: Array<[string, unknown]>;
     gte: Array<[string, unknown]>;
     lte: Array<[string, unknown]>;
-    order?: { col: string; ascending: boolean };
+    or: string[];
+    order: Array<{ col: string; ascending: boolean }>;
     limit?: number;
-  } = { eq: [], gte: [], lte: [] };
+  } = { eq: [], gte: [], lte: [], or: [], order: [] };
 
   const builder: any = {
     select(_cols?: string) { return builder; },
     order(col: string, opts: { ascending: boolean }) {
-      calls.order = { col, ascending: opts.ascending };
+      calls.order.push({ col, ascending: opts.ascending });
       return builder;
     },
     limit(n: number) {
       calls.limit = n;
-      // Emula PostgREST: retorna o promise resolvido no await final.
       const thenable = Promise.resolve({ data: rows, error: null });
       return Object.assign(builder, { then: thenable.then.bind(thenable) });
     },
     eq(col: string, val: unknown) { calls.eq.push([col, val]); return builder; },
     gte(col: string, val: unknown) { calls.gte.push([col, val]); return builder; },
     lte(col: string, val: unknown) { calls.lte.push([col, val]); return builder; },
+    or(expr: string) { calls.or.push(expr); return builder; },
   };
   return {
     calls,
@@ -66,14 +67,23 @@ function ctx(authed: boolean) {
 }
 
 // Reimplementa a mesma lógica de src/lib/mcp/tools/list-orders.ts para
-// injetar o Supabase fake — se o handler mudar, este helper deve mudar
-// junto: é o contrato que estamos protegendo.
+// injetar o Supabase fake — inclui paginação keyset (date desc, id desc).
+function encodeCursor(p: { d: string; i: string }) { return btoa(JSON.stringify(p)); }
+function decodeCursor(raw: string): { d: string; i: string } | null {
+  try {
+    const p = JSON.parse(atob(raw));
+    if (typeof p?.d === "string" && typeof p?.i === "string") return p;
+    return null;
+  } catch { return null; }
+}
+
 async function runHandler(
   input: {
     status?: string;
     date_from?: string;
     date_to?: string;
     limit?: number;
+    cursor?: string;
   },
   context: ReturnType<typeof ctx>,
   supabase: ReturnType<typeof fakeSupabase>,
@@ -81,20 +91,35 @@ async function runHandler(
   if (!context.isAuthenticated()) {
     return { content: [{ type: "text", text: "Não autenticado" }], isError: true };
   }
+  const pageSize = input.limit ?? 20;
   let q: any = supabase
     .from("orders")
     .select("id, number, client_name, date, delivery_date, total, status, priority, payment_method")
     .order("date", { ascending: false })
-    .limit(input.limit ?? 20);
+    .order("id", { ascending: false })
+    .limit(pageSize + 1);
   if (input.status) q = q.eq("status", input.status);
   if (input.date_from) q = q.gte("date", `${input.date_from}T00:00:00.000Z`);
   if (input.date_to) q = q.lte("date", `${input.date_to}T23:59:59.999Z`);
+  if (input.cursor) {
+    const c = decodeCursor(input.cursor);
+    if (!c) return { content: [{ type: "text", text: "Cursor inválido." }], isError: true };
+    q = q.or(`date.lt.${c.d},and(date.eq.${c.d},id.lt.${c.i})`);
+  }
   const { data, error } = await q;
   if (error) return { content: [{ type: "text", text: String(error) }], isError: true };
-  const total = (data ?? []).reduce((s: number, r: any) => s + Number(r.total ?? 0), 0);
+  const rowsAll = (data ?? []) as any[];
+  const hasMore = rowsAll.length > pageSize;
+  const rows = hasMore ? rowsAll.slice(0, pageSize) : rowsAll;
+  const last = rows[rows.length - 1];
+  const nextCursor = hasMore && last ? encodeCursor({ d: last.date, i: last.id }) : null;
+  const pageTotal = rows.reduce((s, r) => s + Number(r.total ?? 0), 0);
   return {
-    content: [{ type: "text", text: `Encontrados ${data?.length ?? 0} pedidos` }],
-    structuredContent: { rows: data ?? [], count: data?.length ?? 0, total_amount: total },
+    content: [{ type: "text", text: `Página com ${rows.length} pedidos` }],
+    structuredContent: {
+      rows, count: rows.length, total_amount: pageTotal,
+      has_more: hasMore, next_cursor: nextCursor,
+    },
     isError: false as const,
   };
 }
