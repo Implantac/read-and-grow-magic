@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { formatBRL } from '@/lib/formatters';
 import {
-  Search, Plus, Minus, Trash2, ShoppingCart, CreditCard,
-  Banknote, QrCode, User, X, CheckCircle2,
-  ChevronRight, ArrowLeft, Monitor, Send, Keyboard, ScanLine,
+  Search, Plus, Minus, Trash2, ShoppingCart,
+  X, ChevronRight, Monitor, Send, Keyboard, ScanLine,
   Camera, CameraOff, Package, Lock, Unlock, ArrowDownLeft, ArrowUpRight,
-  Percent, Wallet, Star, Clock, UserCheck, Loader2, AlertCircle,
-  Pause, Play, HandCoins, LayoutGrid,
+  Percent, Clock, Loader2, AlertCircle,
+  Pause, Play, LayoutGrid, QrCode,
 } from 'lucide-react';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -26,23 +25,11 @@ import { PDVPixDialog } from './PDVPixDialog';
 import { PDVCloseSessionDialog, type CashCloseSummary } from './PDVCloseSessionDialog';
 import { PDVParkedDialog } from './PDVParkedDialog';
 import { loadParked, parkSale, removeParked, type ParkedSale } from './pdvParkedStorage';
-
-interface CartItem {
-  productCode: string;
-  productName: string;
-  productId: string;
-  quantity: number;
-  unitPrice: number;
-  unit: string;
-  itemDiscount?: number;
-}
-
-interface SplitPayment {
-  id: string;
-  method: 'cash' | 'credit_card' | 'debit_card' | 'pix' | 'voucher' | 'credit';
-  amount: number;
-  installments?: number;
-}
+import { PDVCustomerCard } from './pdv/PDVCustomerCard';
+import { PDVCustomerPicker } from './pdv/PDVCustomerPicker';
+import { PDVPaymentPanel } from './pdv/PDVPaymentPanel';
+import { PDVFinalizeConfirmDialog } from './pdv/PDVFinalizeConfirmDialog';
+import { onlyDigits, type CartItem, type SplitPayment } from './pdv/types';
 
 interface CashSession {
   operatorName: string;
@@ -71,33 +58,8 @@ interface PDVDialogProps {
 
 type InputMode = 'search' | 'scanner' | 'camera';
 
-const paymentMethods = [
-  { value: 'cash', label: 'Dinheiro', hint: 'F1', icon: Banknote, color: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/30' },
-  { value: 'credit_card', label: 'Crédito', hint: 'F2', icon: CreditCard, color: 'text-blue-600 bg-blue-500/10 border-blue-500/30' },
-  { value: 'debit_card', label: 'Débito', hint: 'F3', icon: CreditCard, color: 'text-indigo-600 bg-indigo-500/10 border-indigo-500/30' },
-  { value: 'pix', label: 'PIX', hint: 'F4', icon: QrCode, color: 'text-cyan-600 bg-cyan-500/10 border-cyan-500/30' },
-  { value: 'voucher', label: 'Voucher', hint: 'F5', icon: Wallet, color: 'text-amber-600 bg-amber-500/10 border-amber-500/30' },
-  { value: 'credit', label: 'Fiado', hint: 'F6', icon: HandCoins, color: 'text-rose-600 bg-rose-500/10 border-rose-500/30' },
-] as const;
-
 const SESSION_KEY = 'pdv:session:v1';
 const AUDIT_KEY = 'pdv:audit:v1';
-
-const onlyDigits = (s: string) => (s || '').replace(/\D/g, '');
-const maskDoc = (s: string) => {
-  const d = onlyDigits(s);
-  if (d.length <= 11) {
-    return d.replace(/(\d{3})(\d{3})?(\d{3})?(\d{2})?/, (_, a, b, c, e) => [a, b, c, e].filter(Boolean).join('.').replace(/\.(\d{2})$/, '-$1'));
-  }
-  return d.replace(/(\d{2})(\d{3})?(\d{3})?(\d{4})?(\d{2})?/, (_, a, b, c, d2, e) => {
-    let out = a;
-    if (b) out += '.' + b;
-    if (c) out += '.' + c;
-    if (d2) out += '/' + d2;
-    if (e) out += '-' + e;
-    return out;
-  });
-};
 
 const logAudit = (event: string, payload: Record<string, unknown> = {}) => {
   try {
@@ -494,7 +456,9 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     });
   };
 
-  const handleFinalize = async () => {
+  const [showFinalizeConfirm, setShowFinalizeConfirm] = useState(false);
+
+  const handleFinalize = async (skipConfirm = false) => {
     if (cart.length === 0) return;
     if (!session) { toastError('Abra o caixa antes de finalizar uma venda.'); setShowOpenSession(true); return; }
     if (splits.length === 0) { toastError('Adicione ao menos uma forma de pagamento.'); return; }
@@ -511,12 +475,12 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     // Confirmação para vendas de valor alto ou muitos itens — evita F10 duplo acidental
     const HIGH_VALUE = 1000;
     const HIGH_ITEMS = 20;
-    if (total >= HIGH_VALUE || totalItems >= HIGH_ITEMS) {
-      const ok = window.confirm(
-        `Confirmar finalização?\n\nTotal: ${formatBRL(total)}\nItens: ${totalItems}\nFormas: ${splits.length}`,
-      );
-      if (!ok) return;
+    if (!skipConfirm && (total >= HIGH_VALUE || totalItems >= HIGH_ITEMS)) {
+      setShowFinalizeConfirm(true);
+      return;
     }
+
+
 
 
 
@@ -1067,63 +1031,16 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                 {!showPayment ? (
                   <>
                     {/* Customer card */}
-                    <div className="rounded-xl bg-background border p-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Label className="font-black text-xs uppercase tracking-widest text-muted-foreground">Cliente</Label>
-                        {customer && (
-                          <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { setCustomer(null); setCustomerName(''); setCustomerDocument(''); }}>
-                            Remover
-                          </Button>
-                        )}
-                      </div>
-                      {customer ? (
-                        <div className="space-y-2">
-                          <div className="flex items-start gap-3">
-                            <div className="h-10 w-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                              <UserCheck className="h-5 w-5" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="font-bold text-sm truncate">{customer.name}</div>
-                              <div className="text-[10px] text-muted-foreground font-mono">{maskDoc(customer.document || '')}</div>
-                            </div>
-                            {customer.abc_classification && (
-                              <Badge variant="secondary" className="text-[9px] h-5">Cliente {customer.abc_classification}</Badge>
-                            )}
-                          </div>
-                          <div className="grid grid-cols-3 gap-2 pt-2 border-t">
-                            <div>
-                              <div className="text-[9px] uppercase font-bold text-muted-foreground">Ticket médio</div>
-                              <div className="text-xs font-bold tabular-nums">{formatBRL(customer.avg_ticket || 0)}</div>
-                            </div>
-                            <div>
-                              <div className="text-[9px] uppercase font-bold text-muted-foreground">Compras</div>
-                              <div className="text-xs font-bold tabular-nums">{customer.total_purchases || 0}</div>
-                            </div>
-                            <div>
-                              <div className="text-[9px] uppercase font-bold text-muted-foreground flex items-center gap-0.5"><Star className="h-2.5 w-2.5" />Pontos</div>
-                              <div className="text-xs font-bold tabular-nums text-amber-600">+{loyaltyPoints}</div>
-                            </div>
-                          </div>
-                          {(customer.credit_limit || 0) > 0 && (
-                            <div className="mt-2 rounded-md bg-rose-500/5 border border-rose-500/20 p-2 flex items-center justify-between">
-                              <div className="flex items-center gap-1.5 text-[10px] font-bold text-rose-700 uppercase tracking-widest">
-                                <HandCoins className="h-3 w-3" /> Crédito p/ fiado
-                              </div>
-                              <div className="text-xs font-black tabular-nums text-rose-700">{formatBRL(availableCredit)}</div>
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <Button variant="outline" className="w-full h-11 gap-2" onClick={() => setShowCustomerPicker(true)}>
-                          <User className="h-4 w-4" /> Identificar cliente
-                        </Button>
-                      )}
-                      {!customer && (
-                        <div className="grid gap-2">
-                          <Input placeholder="CPF/CNPJ no cupom (opcional)" value={customerDocument} onChange={(e) => setCustomerDocument(maskDoc(e.target.value))} className="h-10 bg-background" />
-                        </div>
-                      )}
-                    </div>
+                    <PDVCustomerCard
+                      customer={customer}
+                      customerDocument={customerDocument}
+                      loyaltyPoints={loyaltyPoints}
+                      availableCredit={availableCredit}
+                      onClear={() => { setCustomer(null); setCustomerName(''); setCustomerDocument(''); }}
+                      onDocumentChange={setCustomerDocument}
+                      onOpenPicker={() => setShowCustomerPicker(true)}
+                    />
+
 
                     {/* Totals */}
                     <div className="rounded-xl bg-background border p-4 space-y-3">
@@ -1177,129 +1094,22 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                     </div>
                   </>
                 ) : (
-                  <div className="space-y-5 animate-in zoom-in-95">
-                    <Button variant="ghost" size="sm" onClick={() => setShowPayment(false)} className="-ml-3 gap-2">
-                      <ArrowLeft className="h-4 w-4" /> Voltar ao resumo
-                    </Button>
+                  <PDVPaymentPanel
+                    total={total}
+                    paidTotal={paidTotal}
+                    remaining={remaining}
+                    change={change}
+                    splits={splits}
+                    splitDrafts={splitDrafts}
+                    installments={installments}
+                    onBack={() => setShowPayment(false)}
+                    onInstallmentsChange={setInstallments}
+                    onAddSplit={addSplit}
+                    onSplitAmountChange={handleSplitAmountChange}
+                    onCommitSplitAmount={commitSplitAmount}
+                    onRemoveSplit={removeSplit}
+                  />
 
-                    {/* Payment status */}
-                    <div className="rounded-xl bg-background border-2 border-primary/20 p-4 space-y-2">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[10px] uppercase font-bold text-muted-foreground">Total</span>
-                        <span className="text-lg font-bold tabular-nums">{formatBRL(total)}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[10px] uppercase font-bold text-muted-foreground">Pago</span>
-                        <span className="text-lg font-bold tabular-nums text-emerald-600">{formatBRL(paidTotal)}</span>
-                      </div>
-                      <Separator />
-                      <div className="flex justify-between items-end">
-                        <span className="text-[10px] uppercase font-bold text-muted-foreground">
-                          {remaining > 0 ? 'Restante' : change > 0 ? 'Troco' : 'Pago integralmente'}
-                        </span>
-                        <span className={cn(
-                          'text-2xl font-black tabular-nums',
-                          remaining > 0 ? 'text-primary' : 'text-emerald-600',
-                        )}>
-                          {remaining > 0 ? formatBRL(remaining) : formatBRL(change)}
-                        </span>
-                      </div>
-                      {remaining > 0 && (
-                        <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
-                          <div className="h-full bg-primary transition-all" style={{ width: `${Math.min(100, (paidTotal / total) * 100)}%` }} />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Installments for credit */}
-                    <div className="space-y-2">
-                      <Label className="font-black text-[10px] uppercase tracking-widest text-muted-foreground">Parcelas (crédito)</Label>
-                      <div className="grid grid-cols-6 gap-1">
-                        {[1, 2, 3, 4, 6, 12].map((n) => (
-                          <button
-                            key={n}
-                            onClick={() => setInstallments(n)}
-                            className={cn(
-                              'h-9 rounded text-xs font-bold border-2 transition-all',
-                              installments === n ? 'border-primary bg-primary/10 text-primary' : 'bg-background hover:border-primary/40',
-                            )}
-                          >{n}x</button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Payment method buttons */}
-                    <div className="space-y-2">
-                      <Label className="font-black text-[10px] uppercase tracking-widest text-muted-foreground">Formas de pagamento</Label>
-                      <div className="grid grid-cols-2 gap-2">
-                        {paymentMethods.map((pm) => {
-                          const Icon = pm.icon;
-                          return (
-                            <button
-                              key={pm.value}
-                              disabled={remaining <= 0}
-                              onClick={() => addSplit(pm.value as SplitPayment['method'])}
-                              className={cn(
-                                'flex items-center gap-2 p-3 rounded-lg border-2 transition-all text-left group',
-                                remaining <= 0 ? 'opacity-40 cursor-not-allowed bg-background' : `bg-background hover:${pm.color}`,
-                              )}
-                            >
-                              <div className={cn('p-1.5 rounded', pm.color)}>
-                                <Icon className="h-4 w-4" />
-                              </div>
-                              <div className="flex-1">
-                                <div className="font-bold text-xs uppercase">{pm.label}</div>
-                                <div className="text-[9px] text-muted-foreground font-bold">{pm.hint}</div>
-                              </div>
-                              <Plus className="h-4 w-4 text-muted-foreground" />
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-
-                    {/* Splits list */}
-                    {splits.length > 0 && (
-                      <div className="space-y-2">
-                        <Label className="font-black text-[10px] uppercase tracking-widest text-muted-foreground">Pagamentos aplicados</Label>
-                        <div className="space-y-1.5">
-                          {splits.map((s) => {
-                            const meta = paymentMethods.find((pm) => pm.value === s.method)!;
-                            const Icon = meta.icon;
-                            return (
-                              <div key={s.id} className="flex items-center gap-2 bg-background p-2 rounded-lg border">
-                                <div className={cn('p-1.5 rounded', meta.color)}>
-                                  <Icon className="h-3.5 w-3.5" />
-                                </div>
-                                <div className="flex-1">
-                                  <div className="font-bold text-xs">{meta.label}{s.installments && s.installments > 1 ? ` · ${s.installments}x` : ''}</div>
-                                  {s.method === 'credit_card' && s.installments && s.installments > 1 && (
-                                    <div className="text-[9px] text-muted-foreground">{formatBRL(s.amount / s.installments)} / parcela</div>
-                                  )}
-                                </div>
-                                <div className="relative w-28">
-                                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">R$</span>
-                                  <Input
-                                    type="text"
-                                    inputMode="decimal"
-                                    value={splitDrafts[s.id] ?? (s.amount ? s.amount.toFixed(2).replace('.', ',') : '')}
-                                    onChange={(e) => handleSplitAmountChange(s.id, e.target.value)}
-                                    onFocus={(e) => e.currentTarget.select()}
-                                    onBlur={() => commitSplitAmount(s.id)}
-                                    placeholder="0,00"
-                                    className="h-8 pl-7 pr-1 text-right font-bold tabular-nums text-xs"
-                                  />
-                                </div>
-                                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => removeSplit(s.id)}>
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
                 )}
               </div>
 
@@ -1321,7 +1131,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                   <Button
                     className="w-full h-14 text-sm font-black uppercase tracking-[0.2em] bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xl shadow-emerald-500/30"
                     disabled={saving || remaining > 0.001 || cart.length === 0}
-                    onClick={handleFinalize}
+                    onClick={() => handleFinalize()}
                   >
                     {saving ? (
                       <div className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Emitindo NFC-e...</div>
@@ -1435,55 +1245,15 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
         )}
 
         {/* Customer picker dialog */}
-        {showCustomerPicker && (
-          <div className="absolute inset-0 z-40 bg-background/80 backdrop-blur-sm flex items-center justify-center" onClick={() => setShowCustomerPicker(false)}>
-            <div className="bg-background border-2 rounded-2xl p-6 w-[520px] max-h-[70vh] flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2.5 bg-primary/10 text-primary rounded-lg"><User className="h-5 w-5" /></div>
-                <div>
-                  <h3 className="font-black text-lg">Identificar cliente</h3>
-                  <p className="text-xs text-muted-foreground">Busque por nome, CPF/CNPJ ou email.</p>
-                </div>
-              </div>
-              <div className="relative mb-3">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  autoFocus placeholder="Buscar cliente..." value={customerQuery}
-                  onChange={(e) => setCustomerQuery(e.target.value)}
-                  className="pl-9 h-11"
-                />
-              </div>
-              <ScrollArea className="flex-1 -mx-2 px-2">
-                <div className="space-y-1">
-                  {filteredClients.length === 0 ? (
-                    <div className="text-center py-8 text-sm text-muted-foreground">Nenhum cliente encontrado.</div>
-                  ) : filteredClients.map((c) => (
-                    <button
-                      key={c.id}
-                      className="w-full text-left p-3 rounded-lg border hover:border-primary hover:bg-primary/5 transition-all"
-                      onClick={() => applyCustomer(c)}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0">
-                          {c.name.slice(0, 2).toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-bold text-sm truncate">{c.name}</div>
-                          <div className="text-[10px] font-mono text-muted-foreground truncate">
-                            {maskDoc(c.document || '')} {c.email ? `· ${c.email}` : ''}
-                          </div>
-                        </div>
-                        {c.abc_classification && (
-                          <Badge variant="secondary" className="text-[9px]">{c.abc_classification}</Badge>
-                        )}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-          </div>
-        )}
+        <PDVCustomerPicker
+          open={showCustomerPicker}
+          query={customerQuery}
+          filteredClients={filteredClients}
+          onQueryChange={setCustomerQuery}
+          onSelect={applyCustomer}
+          onClose={() => setShowCustomerPicker(false)}
+        />
+
 
         {/* PIX QR dialog */}
         <PDVPixDialog
@@ -1511,6 +1281,16 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
           onClose={() => setShowParked(false)}
           onResume={resumeParked}
           onDelete={discardParked}
+        />
+
+        {/* Finalize confirm (alto valor / muitos itens) */}
+        <PDVFinalizeConfirmDialog
+          open={showFinalizeConfirm}
+          total={total}
+          totalItems={totalItems}
+          splitsCount={splits.length}
+          onCancel={() => setShowFinalizeConfirm(false)}
+          onConfirm={() => { setShowFinalizeConfirm(false); handleFinalize(true); }}
         />
       </>
     </Shell>
