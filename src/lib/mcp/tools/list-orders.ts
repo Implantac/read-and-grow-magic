@@ -62,7 +62,8 @@ export default defineTool({
   name: "list_orders",
   title: "Listar pedidos",
   description:
-    "Lista pedidos comerciais (orders) filtrando por status e intervalo de datas (campo `date`). " +
+    "Lista pedidos comerciais (orders) filtrando por status, intervalo de datas (campo `date`), " +
+    "cliente (`client_id` UUID ou `client_search` por nome ILIKE). " +
     "Respeita RLS multi-tenant. Ordenação estável por (date desc, id desc). " +
     "Paginação por cursor keyset: passe `cursor` (retornado como `next_cursor` na resposta anterior) " +
     "para buscar a próxima página. `has_more=true` indica que existem mais resultados.",
@@ -78,6 +79,20 @@ export default defineTool({
       .regex(/^\d{4}-\d{2}-\d{2}$/)
       .optional()
       .describe("Data final (YYYY-MM-DD), inclusive."),
+    client_id: z
+      .string()
+      .uuid()
+      .optional()
+      .describe("Filtra pelo UUID do cliente (orders.client_id). Combina com os demais filtros."),
+    client_search: z
+      .string()
+      .trim()
+      .min(2)
+      .optional()
+      .describe(
+        "Busca case-insensitive por nome do cliente (orders.client_name ILIKE %termo%). " +
+          "Use quando não souber o UUID. Combina com os demais filtros.",
+      ),
     limit: z
       .number()
       .int()
@@ -93,7 +108,10 @@ export default defineTool({
       ),
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: async ({ status, date_from, date_to, limit, cursor }, ctx) => {
+  handler: async (
+    { status, date_from, date_to, client_id, client_search, limit, cursor },
+    ctx,
+  ) => {
     if (!ctx.isAuthenticated()) {
       return { content: [{ type: "text", text: "Não autenticado" }], isError: true };
     }
@@ -104,7 +122,7 @@ export default defineTool({
     let q = supabase
       .from("orders")
       .select(
-        "id, number, client_name, date, delivery_date, total, status, priority, payment_method",
+        "id, number, client_id, client_name, date, delivery_date, total, status, priority, payment_method",
       )
       .order("date", { ascending: false })
       .order("id", { ascending: false })
@@ -113,6 +131,12 @@ export default defineTool({
     if (status) q = q.eq("status", status);
     if (date_from) q = q.gte("date", `${date_from}T00:00:00.000Z`);
     if (date_to) q = q.lte("date", `${date_to}T23:59:59.999Z`);
+    if (client_id) q = q.eq("client_id", client_id);
+    if (client_search) {
+      // ILIKE via PostgREST — escape %/, para não construir predicado extra.
+      const term = client_search.replace(/[,%]/g, " ").trim();
+      if (term.length > 0) q = q.ilike("client_name", `%${term}%`);
+    }
 
     if (cursor) {
       const c = decodeCursor(cursor);

@@ -178,29 +178,38 @@ function decodeCursor(raw) {
 var list_orders_default = defineTool4({
   name: "list_orders",
   title: "Listar pedidos",
-  description: "Lista pedidos comerciais (orders) filtrando por status e intervalo de datas (campo `date`). Respeita RLS multi-tenant. Ordena\xE7\xE3o est\xE1vel por (date desc, id desc). Pagina\xE7\xE3o por cursor keyset: passe `cursor` (retornado como `next_cursor` na resposta anterior) para buscar a pr\xF3xima p\xE1gina. `has_more=true` indica que existem mais resultados.",
+  description: "Lista pedidos comerciais (orders) filtrando por status, intervalo de datas (campo `date`), cliente (`client_id` UUID ou `client_search` por nome ILIKE). Respeita RLS multi-tenant. Ordena\xE7\xE3o est\xE1vel por (date desc, id desc). Pagina\xE7\xE3o por cursor keyset: passe `cursor` (retornado como `next_cursor` na resposta anterior) para buscar a pr\xF3xima p\xE1gina. `has_more=true` indica que existem mais resultados.",
   inputSchema: {
     status: z3.enum(STATUS_VALUES).optional().describe("Filtra pelo status do pedido."),
     date_from: z3.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("Data inicial (YYYY-MM-DD), inclusive."),
     date_to: z3.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("Data final (YYYY-MM-DD), inclusive."),
+    client_id: z3.string().uuid().optional().describe("Filtra pelo UUID do cliente (orders.client_id). Combina com os demais filtros."),
+    client_search: z3.string().trim().min(2).optional().describe(
+      "Busca case-insensitive por nome do cliente (orders.client_name ILIKE %termo%). Use quando n\xE3o souber o UUID. Combina com os demais filtros."
+    ),
     limit: z3.number().int().positive().max(100).optional().describe("M\xE1ximo de resultados por p\xE1gina (padr\xE3o 20, teto 100)."),
     cursor: z3.string().optional().describe(
       "Cursor opaco de pagina\xE7\xE3o (use `next_cursor` da resposta anterior). Ignorar na primeira chamada."
     )
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: async ({ status, date_from, date_to, limit, cursor }, ctx) => {
+  handler: async ({ status, date_from, date_to, client_id, client_search, limit, cursor }, ctx) => {
     if (!ctx.isAuthenticated()) {
       return { content: [{ type: "text", text: "N\xE3o autenticado" }], isError: true };
     }
     const supabase = userClient3(ctx);
     const pageSize = limit ?? 20;
     let q = supabase.from("orders").select(
-      "id, number, client_name, date, delivery_date, total, status, priority, payment_method"
+      "id, number, client_id, client_name, date, delivery_date, total, status, priority, payment_method"
     ).order("date", { ascending: false }).order("id", { ascending: false }).limit(pageSize + 1);
     if (status) q = q.eq("status", status);
     if (date_from) q = q.gte("date", `${date_from}T00:00:00.000Z`);
     if (date_to) q = q.lte("date", `${date_to}T23:59:59.999Z`);
+    if (client_id) q = q.eq("client_id", client_id);
+    if (client_search) {
+      const term = client_search.replace(/[,%]/g, " ").trim();
+      if (term.length > 0) q = q.ilike("client_name", `%${term}%`);
+    }
     if (cursor) {
       const c = decodeCursor(cursor);
       if (!c) {
