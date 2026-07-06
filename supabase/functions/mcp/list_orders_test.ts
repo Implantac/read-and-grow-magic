@@ -554,9 +554,107 @@ Deno.test("paginação + client_id: 3 páginas cobrem exatamente todos os pedido
   assertEquals(collected, ["a", "b", "c", "d", "e"]);
 });
 
+// -------- next_cursor: valor exato quando combinado com filtros de cliente --
+// Garante que o cursor devolvido codifica {d,i} da ÚLTIMA linha da página 1
+// (não da linha sentinela pageSize+1) e que decodificá-lo produz o predicado
+// keyset correto na página 2.
+
+Deno.test("next_cursor + client_id: codifica {d,i} da última linha visível da página 1", async () => {
+  const CID = "44444444-4444-4444-4444-444444444444";
+  // 3 rows retornadas (pageSize+1=3) → visíveis: p1r1, p1r2; sentinela: p1r3.
+  const p1 = [
+    { id: "p1r1", client_id: CID, total: 10, date: "2026-12-10T00:00:00Z" },
+    { id: "p1r2", client_id: CID, total: 20, date: "2026-12-09T00:00:00Z" },
+    { id: "p1r3", client_id: CID, total: 30, date: "2026-12-08T00:00:00Z" },
+  ];
+  const sb1 = fakeSupabase(p1);
+  const r1: any = await runHandler({ client_id: CID, limit: 2 }, ctx(true), sb1);
+  const sc1 = r1.structuredContent;
+
+  assertEquals(sc1.has_more, true);
+  assert(typeof sc1.next_cursor === "string" && sc1.next_cursor.length > 0);
+
+  // Decodifica o cursor e confirma que aponta para p1r2 (última visível),
+  // NÃO para p1r3 (sentinela). Caso contrário, a página 2 pularia p1r3.
+  const decoded = decodeCursor(sc1.next_cursor);
+  assertEquals(decoded, { d: "2026-12-09T00:00:00Z", i: "p1r2" });
+
+  // Página 2 usando esse cursor deve emitir predicado keyset com esses
+  // mesmos valores, mantendo o client_id.
+  const sb2 = fakeSupabase([p1[2]]);
+  const r2: any = await runHandler(
+    { client_id: CID, limit: 2, cursor: sc1.next_cursor },
+    ctx(true),
+    sb2,
+  );
+  assertEquals(sb2.calls.eq, [["client_id", CID]]);
+  assertEquals(sb2.calls.or, [
+    "date.lt.2026-12-09T00:00:00Z,and(date.eq.2026-12-09T00:00:00Z,id.lt.p1r2)",
+  ]);
+  // Página 2 devolve exatamente a sentinela, na ordem esperada.
+  assertEquals(r2.structuredContent.rows.map((r: any) => r.id), ["p1r3"]);
+  assertEquals(r2.structuredContent.has_more, false);
+  assertEquals(r2.structuredContent.next_cursor, null);
+});
+
+Deno.test("next_cursor + client_search: codifica {d,i} da última linha visível e continua na página 2", async () => {
+  const p1 = [
+    { id: "s1", client_name: "ACME NORTE", total: 5, date: "2027-01-10T12:00:00Z" },
+    { id: "s2", client_name: "ACME SUL", total: 15, date: "2027-01-09T12:00:00Z" },
+    { id: "s3", client_name: "ACME LESTE", total: 25, date: "2027-01-08T12:00:00Z" },
+  ];
+  const sb1 = fakeSupabase(p1);
+  const r1: any = await runHandler(
+    { client_search: "acme", limit: 2 },
+    ctx(true),
+    sb1,
+  );
+  const sc1 = r1.structuredContent;
+
+  assertEquals(sc1.has_more, true);
+  const decoded = decodeCursor(sc1.next_cursor);
+  // Cursor aponta para s2 (última visível), não para s3 (sentinela).
+  assertEquals(decoded, { d: "2027-01-09T12:00:00Z", i: "s2" });
+
+  // Página 2: ILIKE PERMANECE e keyset usa exatamente {d,i} de s2.
+  const sb2 = fakeSupabase([p1[2]]);
+  const r2: any = await runHandler(
+    { client_search: "acme", limit: 2, cursor: sc1.next_cursor },
+    ctx(true),
+    sb2,
+  );
+  assertEquals(sb2.calls.ilike, [["client_name", "%acme%"]]);
+  assertEquals(sb2.calls.or, [
+    "date.lt.2027-01-09T12:00:00Z,and(date.eq.2027-01-09T12:00:00Z,id.lt.s2)",
+  ]);
+  assertEquals(r2.structuredContent.rows.map((r: any) => r.id), ["s3"]);
+});
+
+Deno.test("next_cursor: quando página 1 não enche (has_more=false), next_cursor é null mesmo com client_id/client_search", async () => {
+  const CID = "55555555-5555-5555-5555-555555555555";
+  const rows = [
+    { id: "u1", client_id: CID, client_name: "ACME", total: 1, date: "2027-02-02T00:00:00Z" },
+    { id: "u2", client_id: CID, client_name: "ACME", total: 2, date: "2027-02-01T00:00:00Z" },
+  ];
+
+  // client_id: apenas 2 linhas ≤ limit=5 → sem próxima página.
+  const sbA = fakeSupabase(rows);
+  const rA: any = await runHandler({ client_id: CID, limit: 5 }, ctx(true), sbA);
+  assertEquals(rA.structuredContent.has_more, false);
+  assertEquals(rA.structuredContent.next_cursor, null);
+
+  // client_search: mesmo resultado, cursor não é emitido à toa.
+  const sbB = fakeSupabase(rows);
+  const rB: any = await runHandler({ client_search: "acme", limit: 5 }, ctx(true), sbB);
+  assertEquals(rB.structuredContent.has_more, false);
+  assertEquals(rB.structuredContent.next_cursor, null);
+});
+
 // -------- Cross-tenant leak: paginação nunca vaza pedidos de outro tenant --
 // Simula RLS aplicando `company_id = caller_tenant` no próprio fake — se o
 // handler algum dia esquecer o token/contexto ao paginar, o teste quebra.
+
+
 
 type TenantRow = Row & { company_id: string; id: string; date: string };
 
