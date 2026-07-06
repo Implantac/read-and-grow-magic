@@ -180,7 +180,7 @@ async function runCursorPipe(
   if (!ctx(authed).isAuthenticated()) {
     return { content: [{ type: "text", text: "Não autenticado" }], isError: true };
   }
-  let q: any = sb.from("orders").select().order().limit(21);
+  let q: any = sb.from("orders").select("*").order("date", { ascending: false }).limit(21);
   const c = decodeCursor(cursor);
   if (!c) return { content: [{ type: "text", text: "Cursor inválido." }], isError: true };
   q = q.or(`date.lt.${c.d},and(date.eq.${c.d},id.lt.${c.i})`);
