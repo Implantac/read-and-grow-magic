@@ -554,6 +554,148 @@ Deno.test("paginação + client_id: 3 páginas cobrem exatamente todos os pedido
   assertEquals(collected, ["a", "b", "c", "d", "e"]);
 });
 
+// -------- Cross-tenant leak: paginação nunca vaza pedidos de outro tenant --
+// Simula RLS aplicando `company_id = caller_tenant` no próprio fake — se o
+// handler algum dia esquecer o token/contexto ao paginar, o teste quebra.
+
+type TenantRow = Row & { company_id: string; id: string; date: string };
+
+function fakeSupabaseRLS(allRows: TenantRow[], callerTenant: string) {
+  // Aplica RLS + filtros (eq/ilike/or keyset) sobre `allRows`, devolvendo até
+  // `limit` linhas em ordem date desc, id desc — como faria o Postgres real.
+  const calls = {
+    tenant: callerTenant,
+    eq: [] as Array<[string, unknown]>,
+    ilike: [] as Array<[string, unknown]>,
+    or: [] as string[],
+    limit: undefined as number | undefined,
+  };
+  let filters: Array<(r: TenantRow) => boolean> = [
+    (r) => r.company_id === callerTenant, // RLS
+  ];
+  const builder: any = {
+    select: () => builder,
+    order: () => builder,
+    eq(col: string, val: unknown) {
+      calls.eq.push([col, val]);
+      filters.push((r) => (r as any)[col] === val);
+      return builder;
+    },
+    gte: () => builder,
+    lte: () => builder,
+    ilike(col: string, val: string) {
+      calls.ilike.push([col, val]);
+      const needle = val.replace(/%/g, "").toLowerCase();
+      filters.push((r) => String((r as any)[col] ?? "").toLowerCase().includes(needle));
+      return builder;
+    },
+    or(expr: string) {
+      calls.or.push(expr);
+      // Parse keyset: date.lt.<D>,and(date.eq.<D>,id.lt.<I>)
+      const m = expr.match(/^date\.lt\.(.+?),and\(date\.eq\.\1,id\.lt\.(.+)\)$/);
+      if (m) {
+        const [, d, i] = m;
+        filters.push((r) => r.date < d || (r.date === d && r.id < i));
+      }
+      return builder;
+    },
+    limit(n: number) {
+      calls.limit = n;
+      const out = allRows
+        .filter((r) => filters.every((f) => f(r)))
+        .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.id < b.id ? 1 : -1))
+        .slice(0, n);
+      const p = Promise.resolve({ data: out, error: null });
+      return Object.assign(builder, { then: p.then.bind(p) });
+    },
+  };
+  return { calls, from: (_t: string) => builder };
+}
+
+const TENANT_A = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
+const TENANT_B = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb";
+const CID_SHARED = "cccccccc-cccc-cccc-cccc-cccccccccccc"; // mesmo client_id nos 2 tenants
+
+// Dataset intercalado: se pagination esquecer o tenant, veríamos B no meio.
+const MIXED_ROWS: TenantRow[] = [
+  { id: "a1", company_id: TENANT_A, client_id: CID_SHARED, client_name: "ACME A", total: 10, date: "2026-11-10T00:00:00Z" },
+  { id: "b1", company_id: TENANT_B, client_id: CID_SHARED, client_name: "ACME B", total: 999, date: "2026-11-09T00:00:00Z" },
+  { id: "a2", company_id: TENANT_A, client_id: CID_SHARED, client_name: "ACME A", total: 20, date: "2026-11-08T00:00:00Z" },
+  { id: "b2", company_id: TENANT_B, client_id: CID_SHARED, client_name: "ACME B", total: 999, date: "2026-11-07T00:00:00Z" },
+  { id: "a3", company_id: TENANT_A, client_id: CID_SHARED, client_name: "ACME A", total: 30, date: "2026-11-06T00:00:00Z" },
+  { id: "b3", company_id: TENANT_B, client_id: CID_SHARED, client_name: "ACME B", total: 999, date: "2026-11-05T00:00:00Z" },
+  { id: "a4", company_id: TENANT_A, client_id: CID_SHARED, client_name: "ACME A", total: 40, date: "2026-11-04T00:00:00Z" },
+  { id: "b4", company_id: TENANT_B, client_id: CID_SHARED, client_name: "ACME B", total: 999, date: "2026-11-03T00:00:00Z" },
+  { id: "a5", company_id: TENANT_A, client_id: CID_SHARED, client_name: "ACME A", total: 50, date: "2026-11-02T00:00:00Z" },
+  { id: "b5", company_id: TENANT_B, client_id: CID_SHARED, client_name: "ACME B", total: 999, date: "2026-11-01T00:00:00Z" },
+];
+
+async function paginateAll(
+  base: { client_id?: string; client_search?: string; limit: number },
+  tenant: string,
+): Promise<TenantRow[]> {
+  const collected: TenantRow[] = [];
+  let cursor: string | undefined = undefined;
+  for (let page = 0; page < 5; page++) {
+    const sb = fakeSupabaseRLS(MIXED_ROWS, tenant);
+    const res: any = await runHandler({ ...base, cursor }, ctx(true), sb);
+    const sc = res.structuredContent;
+    collected.push(...(sc.rows as TenantRow[]));
+    if (!sc.has_more) return collected;
+    cursor = sc.next_cursor;
+  }
+  throw new Error("paginação não terminou em 5 páginas");
+}
+
+Deno.test("cross-tenant + client_id: páginas 1/2/3 NUNCA vazam pedidos de outro tenant", async () => {
+  const rows = await paginateAll({ client_id: CID_SHARED, limit: 2 }, TENANT_A);
+  // Somente linhas do tenant A, exatamente 5, sem duplicatas.
+  assertEquals(rows.map((r) => r.id), ["a1", "a2", "a3", "a4", "a5"]);
+  assert(rows.every((r) => r.company_id === TENANT_A), "vazou linha de outro tenant");
+});
+
+Deno.test("cross-tenant + client_search: páginas 1/2/3 NUNCA vazam pedidos de outro tenant", async () => {
+  // "ACME" bate em nomes dos dois tenants — RLS é a única defesa.
+  const rows = await paginateAll({ client_search: "acme", limit: 2 }, TENANT_A);
+  assertEquals(rows.map((r) => r.id), ["a1", "a2", "a3", "a4", "a5"]);
+  assert(rows.every((r) => r.company_id === TENANT_A), "vazou linha de outro tenant");
+});
+
+Deno.test("cross-tenant: mesmo dataset visto por tenant B só devolve linhas de B", async () => {
+  const rowsA = await paginateAll({ client_id: CID_SHARED, limit: 2 }, TENANT_A);
+  const rowsB = await paginateAll({ client_id: CID_SHARED, limit: 2 }, TENANT_B);
+  assert(rowsA.every((r) => r.company_id === TENANT_A));
+  assert(rowsB.every((r) => r.company_id === TENANT_B));
+  // Conjuntos disjuntos — nenhum id compartilhado entre as duas paginacões.
+  const idsA = new Set(rowsA.map((r) => r.id));
+  assert(rowsB.every((r) => !idsA.has(r.id)), "IDs cruzaram entre tenants");
+});
+
+Deno.test("cross-tenant + client_id: página 2 continua filtrada por client_id (predicado não é dropado no cursor)", async () => {
+  // Página 1
+  const sb1 = fakeSupabaseRLS(MIXED_ROWS, TENANT_A);
+  const r1: any = await runHandler(
+    { client_id: CID_SHARED, limit: 2 },
+    ctx(true),
+    sb1,
+  );
+  assertEquals(sb1.calls.eq, [["client_id", CID_SHARED]]);
+  const cursor = r1.structuredContent.next_cursor;
+  assert(cursor, "esperava next_cursor após página 1");
+
+  // Página 2 — client_id DEVE ser reenviado; sem isso, veríamos linhas de
+  // outro cliente do mesmo tenant caso existissem.
+  const sb2 = fakeSupabaseRLS(MIXED_ROWS, TENANT_A);
+  const r2: any = await runHandler(
+    { client_id: CID_SHARED, limit: 2, cursor },
+    ctx(true),
+    sb2,
+  );
+  assertEquals(sb2.calls.eq, [["client_id", CID_SHARED]]);
+  assertEquals(sb2.calls.or.length, 1);
+  assert(r2.structuredContent.rows.every((r: TenantRow) => r.company_id === TENANT_A));
+});
+
 
 
 Deno.test("MCP endpoint: list_orders sem Authorization retorna 401/403", async () => {
