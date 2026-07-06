@@ -149,7 +149,7 @@ export function PDVPaymentPanel({
                     <Input
                       type="text"
                       inputMode="decimal"
-                      value={splitDrafts[s.id] ?? (s.amount ? s.amount.toFixed(2).replace('.', ',') : '')}
+                      value={(splitDrafts[s.id] ?? (s.amount ? s.amount.toFixed(2) : '')).replace('.', ',')}
                       onChange={(e) => onSplitAmountChange(s.id, e.target.value)}
                       onFocus={(e) => e.currentTarget.select()}
                       onBlur={() => onCommitSplitAmount(s.id)}
