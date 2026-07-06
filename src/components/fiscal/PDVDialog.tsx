@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { formatBRL } from '@/lib/formatters';
 import {
-  Search, Plus, Minus, Trash2, ShoppingCart, CreditCard,
-  Banknote, QrCode, User, X, CheckCircle2,
-  ChevronRight, ArrowLeft, Monitor, Send, Keyboard, ScanLine,
-  Camera, CameraOff, Package, Lock, Unlock, ArrowDownLeft, ArrowUpRight,
-  Percent, Wallet, Star, Clock, UserCheck, Loader2, AlertCircle,
-  Pause, Play, HandCoins, LayoutGrid,
+  Plus, Minus, Trash2, ShoppingCart,
+  X, ChevronRight, Monitor, Send, Keyboard, ScanLine,
+  Package, Lock, Unlock, ArrowDownLeft, ArrowUpRight,
+  Percent, Clock, Loader2, AlertCircle,
+  QrCode,
 } from 'lucide-react';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -26,23 +25,11 @@ import { PDVPixDialog } from './PDVPixDialog';
 import { PDVCloseSessionDialog, type CashCloseSummary } from './PDVCloseSessionDialog';
 import { PDVParkedDialog } from './PDVParkedDialog';
 import { loadParked, parkSale, removeParked, type ParkedSale } from './pdvParkedStorage';
-
-interface CartItem {
-  productCode: string;
-  productName: string;
-  productId: string;
-  quantity: number;
-  unitPrice: number;
-  unit: string;
-  itemDiscount?: number;
-}
-
-interface SplitPayment {
-  id: string;
-  method: 'cash' | 'credit_card' | 'debit_card' | 'pix' | 'voucher' | 'credit';
-  amount: number;
-  installments?: number;
-}
+import { PDVCustomerCard } from './pdv/PDVCustomerCard';
+import { PDVCustomerPicker } from './pdv/PDVCustomerPicker';
+import { PDVPaymentPanel } from './pdv/PDVPaymentPanel';
+import { PDVFinalizeConfirmDialog } from './pdv/PDVFinalizeConfirmDialog';
+import { onlyDigits, type CartItem, type SplitPayment } from './pdv/types';
 
 interface CashSession {
   operatorName: string;
@@ -71,33 +58,8 @@ interface PDVDialogProps {
 
 type InputMode = 'search' | 'scanner' | 'camera';
 
-const paymentMethods = [
-  { value: 'cash', label: 'Dinheiro', hint: 'F1', icon: Banknote, color: 'text-emerald-600 bg-emerald-500/10 border-emerald-500/30' },
-  { value: 'credit_card', label: 'Crédito', hint: 'F2', icon: CreditCard, color: 'text-blue-600 bg-blue-500/10 border-blue-500/30' },
-  { value: 'debit_card', label: 'Débito', hint: 'F3', icon: CreditCard, color: 'text-indigo-600 bg-indigo-500/10 border-indigo-500/30' },
-  { value: 'pix', label: 'PIX', hint: 'F4', icon: QrCode, color: 'text-cyan-600 bg-cyan-500/10 border-cyan-500/30' },
-  { value: 'voucher', label: 'Voucher', hint: 'F5', icon: Wallet, color: 'text-amber-600 bg-amber-500/10 border-amber-500/30' },
-  { value: 'credit', label: 'Fiado', hint: 'F6', icon: HandCoins, color: 'text-rose-600 bg-rose-500/10 border-rose-500/30' },
-] as const;
-
 const SESSION_KEY = 'pdv:session:v1';
 const AUDIT_KEY = 'pdv:audit:v1';
-
-const onlyDigits = (s: string) => (s || '').replace(/\D/g, '');
-const maskDoc = (s: string) => {
-  const d = onlyDigits(s);
-  if (d.length <= 11) {
-    return d.replace(/(\d{3})(\d{3})?(\d{3})?(\d{2})?/, (_, a, b, c, e) => [a, b, c, e].filter(Boolean).join('.').replace(/\.(\d{2})$/, '-$1'));
-  }
-  return d.replace(/(\d{2})(\d{3})?(\d{3})?(\d{4})?(\d{2})?/, (_, a, b, c, d2, e) => {
-    let out = a;
-    if (b) out += '.' + b;
-    if (c) out += '.' + c;
-    if (d2) out += '/' + d2;
-    if (e) out += '-' + e;
-    return out;
-  });
-};
 
 const logAudit = (event: string, payload: Record<string, unknown> = {}) => {
   try {
