@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { formatBRL } from '@/lib/formatters';
 import {
-  Plus, Minus, Trash2, ShoppingCart,
+  Search, Plus, Minus, Trash2, ShoppingCart,
   X, ChevronRight, Monitor, Send, Keyboard, ScanLine,
-  Package, Lock, Unlock, ArrowDownLeft, ArrowUpRight,
+  Camera, CameraOff, Package, Lock, Unlock, ArrowDownLeft, ArrowUpRight,
   Percent, Clock, Loader2, AlertCircle,
-  QrCode,
+  Pause, Play, LayoutGrid, QrCode,
 } from 'lucide-react';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
