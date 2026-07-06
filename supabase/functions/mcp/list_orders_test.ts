@@ -84,6 +84,8 @@ async function runHandler(
     status?: string;
     date_from?: string;
     date_to?: string;
+    client_id?: string;
+    client_search?: string;
     limit?: number;
     cursor?: string;
   },
@@ -96,13 +98,18 @@ async function runHandler(
   const pageSize = input.limit ?? 20;
   let q: any = supabase
     .from("orders")
-    .select("id, number, client_name, date, delivery_date, total, status, priority, payment_method")
+    .select("id, number, client_id, client_name, date, delivery_date, total, status, priority, payment_method")
     .order("date", { ascending: false })
     .order("id", { ascending: false })
     .limit(pageSize + 1);
   if (input.status) q = q.eq("status", input.status);
   if (input.date_from) q = q.gte("date", `${input.date_from}T00:00:00.000Z`);
   if (input.date_to) q = q.lte("date", `${input.date_to}T23:59:59.999Z`);
+  if (input.client_id) q = q.eq("client_id", input.client_id);
+  if (input.client_search) {
+    const term = input.client_search.replace(/[,%]/g, " ").trim();
+    if (term.length > 0) q = q.ilike("client_name", `%${term}%`);
+  }
   if (input.cursor) {
     const c = decodeCursor(input.cursor);
     if (!c) return { content: [{ type: "text", text: "Cursor inválido." }], isError: true };
