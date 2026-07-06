@@ -86,9 +86,12 @@ function fakeSupabaseWithKeyset(rows: Row[]) {
     },
     limit(n: number) {
       calls.limit = n;
-      const data = filtered.slice(0, n);
-      const thenable = Promise.resolve({ data, error: null });
-      return Object.assign(builder, { then: thenable.then.bind(thenable) });
+      // Avaliação lazy: PostgREST resolve a query só no await, então .or()
+      // chamado APÓS .limit() ainda entra no filtro. Reflete isso aqui.
+      return Object.assign(builder, {
+        then: (resolve: (v: unknown) => unknown, reject?: (e: unknown) => unknown) =>
+          Promise.resolve({ data: filtered.slice(0, n), error: null }).then(resolve, reject),
+      });
     },
   };
   return {
