@@ -175,19 +175,10 @@ function sortedDesc(rs: Row[]): Row[] {
 }
 
 function isStrictlyDescending(rs: Row[]): boolean {
+  // cmpDesc(a,b) < 0 ⇔ a "vem antes" de b em ordem (date desc, id desc).
+  // Estritamente decrescente ⇒ para todo par consecutivo, cmpDesc < 0.
   for (let k = 1; k < rs.length; k++) {
-    if (cmpDesc(rs[k - 1], rs[k]) >= 0) {
-      // igual ou fora de ordem — em keyset não pode haver empate total
-      if (cmpDesc(rs[k - 1], rs[k]) === 0) return false;
-      continue;
-    }
-    // rs[k-1] < rs[k] → ordem quebrada
-    return false;
-  }
-  // Reescreve corretamente: (date desc, id desc) estrito
-  for (let k = 1; k < rs.length; k++) {
-    if (cmpDesc(rs[k - 1], rs[k]) >= 0) continue;
-    return false;
+    if (cmpDesc(rs[k - 1], rs[k]) >= 0) return false;
   }
   return true;
 }
