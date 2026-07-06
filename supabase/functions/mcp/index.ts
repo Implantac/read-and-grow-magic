@@ -178,7 +178,7 @@ function decodeCursor(raw) {
 var list_orders_default = defineTool4({
   name: "list_orders",
   title: "Listar pedidos",
-  description: "Lista pedidos comerciais (orders) filtrando por status e intervalo de datas (campo `date`). Respeita RLS multi-tenant. Ordena\xE7\xE3o est\xE1vel por (date desc, id desc). Pagina\xE7\xE3o por cursor keyset: passe `cursor` (retornado como `next_cursor` na resposta anterior) para buscar a pr\xF3xima p\xE1gina. `has_more=true` indica que existem mais resultados.",
+  description: "Lista pedidos comerciais (orders) filtrando por status, intervalo de datas (campo `date`), cliente (`client_id` UUID ou `client_search` por nome ILIKE). Respeita RLS multi-tenant. Ordena\xE7\xE3o est\xE1vel por (date desc, id desc). Pagina\xE7\xE3o por cursor keyset: passe `cursor` (retornado como `next_cursor` na resposta anterior) para buscar a pr\xF3xima p\xE1gina. `has_more=true` indica que existem mais resultados.",
   inputSchema: {
     status: z3.enum(STATUS_VALUES).optional().describe("Filtra pelo status do pedido."),
     date_from: z3.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().describe("Data inicial (YYYY-MM-DD), inclusive."),

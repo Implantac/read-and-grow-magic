@@ -62,7 +62,8 @@ export default defineTool({
   name: "list_orders",
   title: "Listar pedidos",
   description:
-    "Lista pedidos comerciais (orders) filtrando por status e intervalo de datas (campo `date`). " +
+    "Lista pedidos comerciais (orders) filtrando por status, intervalo de datas (campo `date`), " +
+    "cliente (`client_id` UUID ou `client_search` por nome ILIKE). " +
     "Respeita RLS multi-tenant. Ordenação estável por (date desc, id desc). " +
     "Paginação por cursor keyset: passe `cursor` (retornado como `next_cursor` na resposta anterior) " +
     "para buscar a próxima página. `has_more=true` indica que existem mais resultados.",
