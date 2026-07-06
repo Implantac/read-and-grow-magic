@@ -96,7 +96,7 @@
       {
         "name": "list_orders",
         "title": "Listar pedidos",
-        "description": "Lista pedidos comerciais (orders) filtrando por status e intervalo de datas (campo `date`). Respeita RLS multi-tenant e retorna até `limit` registros ordenados por data desc.",
+        "description": "Lista pedidos comerciais (orders) filtrando por status e intervalo de datas (campo `date`). Respeita RLS multi-tenant. Ordenação estável por (date desc, id desc). Paginação por cursor keyset: passe `cursor` (retornado como `next_cursor` na resposta anterior) para buscar a próxima página. `has_more=true` indica que existem mais resultados.",
         "annotations": {
           "readOnlyHint": true,
           "idempotentHint": true,
@@ -145,7 +145,11 @@
               "type": "integer",
               "exclusiveMinimum": 0,
               "maximum": 100,
-              "description": "Máximo de resultados (padrão 20)."
+              "description": "Máximo de resultados por página (padrão 20, teto 100)."
+            },
+            "cursor": {
+              "type": "string",
+              "description": "Cursor opaco de paginação (use `next_cursor` da resposta anterior). Ignorar na primeira chamada."
             }
           },
           "additionalProperties": false,
