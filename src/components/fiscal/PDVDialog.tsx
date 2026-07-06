@@ -1262,7 +1262,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                                   <Input
                                     type="text"
                                     inputMode="decimal"
-                                    value={splitDrafts[s.id] ?? (s.amount ? String(s.amount) : '')}
+                                    value={splitDrafts[s.id] ?? (s.amount ? s.amount.toFixed(2).replace('.', ',') : '')}
                                     onChange={(e) => handleSplitAmountChange(s.id, e.target.value)}
                                     onFocus={(e) => e.currentTarget.select()}
                                     onBlur={() => commitSplitAmount(s.id)}
