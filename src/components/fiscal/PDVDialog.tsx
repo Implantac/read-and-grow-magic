@@ -1131,7 +1131,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                   <Button
                     className="w-full h-14 text-sm font-black uppercase tracking-[0.2em] bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xl shadow-emerald-500/30"
                     disabled={saving || remaining > 0.001 || cart.length === 0}
-                    onClick={handleFinalize}
+                    onClick={() => handleFinalize()}
                   >
                     {saving ? (
                       <div className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" /> Emitindo NFC-e...</div>
