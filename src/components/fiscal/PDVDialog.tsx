@@ -456,7 +456,9 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     });
   };
 
-  const handleFinalize = async () => {
+  const [showFinalizeConfirm, setShowFinalizeConfirm] = useState(false);
+
+  const handleFinalize = async (skipConfirm = false) => {
     if (cart.length === 0) return;
     if (!session) { toastError('Abra o caixa antes de finalizar uma venda.'); setShowOpenSession(true); return; }
     if (splits.length === 0) { toastError('Adicione ao menos uma forma de pagamento.'); return; }
@@ -473,12 +475,12 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     // Confirmação para vendas de valor alto ou muitos itens — evita F10 duplo acidental
     const HIGH_VALUE = 1000;
     const HIGH_ITEMS = 20;
-    if (total >= HIGH_VALUE || totalItems >= HIGH_ITEMS) {
-      const ok = window.confirm(
-        `Confirmar finalização?\n\nTotal: ${formatBRL(total)}\nItens: ${totalItems}\nFormas: ${splits.length}`,
-      );
-      if (!ok) return;
+    if (!skipConfirm && (total >= HIGH_VALUE || totalItems >= HIGH_ITEMS)) {
+      setShowFinalizeConfirm(true);
+      return;
     }
+
+
 
 
 
