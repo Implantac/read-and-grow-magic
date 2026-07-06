@@ -2,6 +2,7 @@ import { auth, defineMcp } from "@lovable.dev/mcp-js";
 import whoamiTool from "./tools/whoami";
 import searchProductsTool from "./tools/search-products";
 import listPayablesTool from "./tools/list-payables";
+import listOrdersTool from "./tools/list-orders";
 
 // O issuer OAuth precisa ser o host direto supabase.co (mcp-js valida contra o
 // documento de discovery — RFC 8414 §3.3). Nunca usar SUPABASE_URL (pode ser
