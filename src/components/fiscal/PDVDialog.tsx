@@ -500,6 +500,26 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     if (splits.length === 0) { toastError('Adicione ao menos uma forma de pagamento.'); return; }
     if (paidTotal + 0.001 < total) { toastError('Valor pago insuficiente.'); return; }
 
+    // Trava definitiva: fiado exige cliente identificado (o valor iria "sumir" sem debitar do saldo)
+    const fiadoInSplits = splits.filter((s) => s.method === 'credit').reduce((s, p) => s + p.amount, 0);
+    if (fiadoInSplits > 0 && !customer) {
+      toastError('Identifique o cliente antes de finalizar venda no fiado.');
+      setShowCustomerPicker(true);
+      return;
+    }
+
+    // Confirmação para vendas de valor alto ou muitos itens — evita F10 duplo acidental
+    const HIGH_VALUE = 1000;
+    const HIGH_ITEMS = 20;
+    if (total >= HIGH_VALUE || totalItems >= HIGH_ITEMS) {
+      const ok = window.confirm(
+        `Confirmar finalização?\n\nTotal: ${formatBRL(total)}\nItens: ${totalItems}\nFormas: ${splits.length}`,
+      );
+      if (!ok) return;
+    }
+
+
+
     setSaving(true);
     const primary = splits.length === 1 ? splits[0].method : 'multiple';
     // Snapshot para o comprovante (o clearAll limpa o estado depois)
