@@ -28,10 +28,11 @@ function fakeSupabase(rows: Row[]) {
     eq: Array<[string, unknown]>;
     gte: Array<[string, unknown]>;
     lte: Array<[string, unknown]>;
+    ilike: Array<[string, unknown]>;
     or: string[];
     order: Array<{ col: string; ascending: boolean }>;
     limit?: number;
-  } = { eq: [], gte: [], lte: [], or: [], order: [] };
+  } = { eq: [], gte: [], lte: [], ilike: [], or: [], order: [] };
 
   const builder: any = {
     select(_cols?: string) { return builder; },
@@ -47,6 +48,7 @@ function fakeSupabase(rows: Row[]) {
     eq(col: string, val: unknown) { calls.eq.push([col, val]); return builder; },
     gte(col: string, val: unknown) { calls.gte.push([col, val]); return builder; },
     lte(col: string, val: unknown) { calls.lte.push([col, val]); return builder; },
+    ilike(col: string, val: unknown) { calls.ilike.push([col, val]); return builder; },
     or(expr: string) { calls.or.push(expr); return builder; },
   };
   return {
