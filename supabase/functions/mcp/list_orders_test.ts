@@ -819,3 +819,140 @@ Deno.test("MCP endpoint: list_orders sem Authorization retorna 401/403", async (
     `esperado 401/403, veio ${res.status}`,
   );
 });
+
+// -------- E2E: alternância de filtro (client_id ↔ client_search) entre páginas
+// Um consumidor pode mudar o filtro na página 2 (ex.: refinou a busca). O
+// cursor precisa continuar funcional como predicado keyset (date,id), o novo
+// filtro precisa ser aplicado, e o filtro antigo NÃO pode persistir.
+
+Deno.test("E2E fake: página 1 client_id → página 2 client_search aplica novo filtro + keyset (e não vaza o antigo)", async () => {
+  const CID = "77777777-7777-7777-7777-777777777777";
+  // Página 1: filtra por client_id específico.
+  const p1 = [
+    { id: "z1", client_id: CID, client_name: "ACME NORTE", total: 10, date: "2027-03-10T00:00:00Z" },
+    { id: "z2", client_id: CID, client_name: "ACME NORTE", total: 20, date: "2027-03-09T00:00:00Z" },
+    { id: "z3", client_id: CID, client_name: "ACME NORTE", total: 30, date: "2027-03-08T00:00:00Z" }, // sentinela
+  ];
+  const sb1 = fakeSupabase(p1);
+  const r1: any = await runHandler({ client_id: CID, limit: 2 }, ctx(true), sb1);
+  const sc1 = r1.structuredContent;
+  assertEquals(sc1.has_more, true);
+  assertEquals(sb1.calls.eq, [["client_id", CID]]);
+  assertEquals(sb1.calls.ilike, []);
+  const cursor = sc1.next_cursor;
+
+  // Página 2: consumidor troca para busca por nome (não passa client_id).
+  const p2 = [{ id: "z3", client_name: "ACME NORTE", total: 30, date: "2027-03-08T00:00:00Z" }];
+  const sb2 = fakeSupabase(p2);
+  const r2: any = await runHandler(
+    { client_search: "acme", limit: 2, cursor },
+    ctx(true),
+    sb2,
+  );
+  // Novo filtro aplicado.
+  assertEquals(sb2.calls.ilike, [["client_name", "%acme%"]]);
+  // Filtro antigo NÃO persiste (nenhum eq de client_id).
+  assertEquals(sb2.calls.eq, []);
+  // Keyset baseado na última linha visível da página 1 (z2).
+  assertEquals(sb2.calls.or, [
+    "date.lt.2027-03-09T00:00:00Z,and(date.eq.2027-03-09T00:00:00Z,id.lt.z2)",
+  ]);
+  assertEquals(r2.structuredContent.rows.map((r: any) => r.id), ["z3"]);
+  assertEquals(r2.structuredContent.has_more, false);
+});
+
+Deno.test("E2E fake: página 1 client_search → página 2 client_id aplica novo filtro + keyset (e não vaza o antigo)", async () => {
+  const CID = "88888888-8888-8888-8888-888888888888";
+  const p1 = [
+    { id: "w1", client_id: "outro-a", client_name: "ACME A", total: 5, date: "2027-04-10T00:00:00Z" },
+    { id: "w2", client_id: "outro-b", client_name: "ACME B", total: 15, date: "2027-04-09T00:00:00Z" },
+    { id: "w3", client_id: CID,       client_name: "ACME C", total: 25, date: "2027-04-08T00:00:00Z" },
+  ];
+  const sb1 = fakeSupabase(p1);
+  const r1: any = await runHandler({ client_search: "acme", limit: 2 }, ctx(true), sb1);
+  const sc1 = r1.structuredContent;
+  assertEquals(sc1.has_more, true);
+  assertEquals(sb1.calls.ilike, [["client_name", "%acme%"]]);
+  const cursor = sc1.next_cursor;
+
+  // Página 2: consumidor refinou para um client_id específico.
+  const p2 = [{ id: "w3", client_id: CID, client_name: "ACME C", total: 25, date: "2027-04-08T00:00:00Z" }];
+  const sb2 = fakeSupabase(p2);
+  const r2: any = await runHandler(
+    { client_id: CID, limit: 2, cursor },
+    ctx(true),
+    sb2,
+  );
+  assertEquals(sb2.calls.eq, [["client_id", CID]]);
+  // ILIKE antigo NÃO persiste.
+  assertEquals(sb2.calls.ilike, []);
+  assertEquals(sb2.calls.or, [
+    "date.lt.2027-04-09T00:00:00Z,and(date.eq.2027-04-09T00:00:00Z,id.lt.w2)",
+  ]);
+  assertEquals(r2.structuredContent.rows.map((r: any) => r.id), ["w3"]);
+});
+
+Deno.test("E2E fake+RLS: alternar client_id → client_search entre páginas nunca vaza outro tenant", async () => {
+  // Reutiliza MIXED_ROWS + fakeSupabaseRLS: RLS filtra por company_id.
+  // Página 1: client_id compartilhado; página 2: client_search "acme".
+  const sb1 = fakeSupabaseRLS(MIXED_ROWS, TENANT_A);
+  const r1: any = await runHandler(
+    { client_id: CID_SHARED, limit: 2 },
+    ctx(true),
+    sb1,
+  );
+  const sc1 = r1.structuredContent;
+  assert(sc1.has_more, "esperava has_more=true na página 1");
+  const cursor = sc1.next_cursor;
+  assert(sc1.rows.every((r: any) => r.company_id === TENANT_A));
+
+  const sb2 = fakeSupabaseRLS(MIXED_ROWS, TENANT_A);
+  const r2: any = await runHandler(
+    { client_search: "acme", limit: 2, cursor },
+    ctx(true),
+    sb2,
+  );
+  const sc2 = r2.structuredContent;
+  // Novo filtro ILIKE aplicado; client_id antigo dropado.
+  assertEquals(sb2.calls.ilike, [["client_name", "%acme%"]]);
+  assertEquals(sb2.calls.eq, []);
+  // Nenhuma linha do tenant B, apesar de "ACME" bater em ambos.
+  assert(
+    sc2.rows.every((r: any) => r.company_id === TENANT_A),
+    "vazou linha de outro tenant após troca de filtro",
+  );
+  // Keyset avança monotonicamente: todas as linhas da página 2 têm
+  // (date,id) estritamente menores que a última da página 1.
+  const lastP1 = sc1.rows[sc1.rows.length - 1];
+  for (const r of sc2.rows) {
+    assert(
+      r.date < lastP1.date || (r.date === lastP1.date && r.id < lastP1.id),
+      `linha ${r.id}@${r.date} não respeita keyset da página 1 (${lastP1.id}@${lastP1.date})`,
+    );
+  }
+});
+
+// -------- Smoke E2E contra função deployada -------------------------------
+// Confirma que a combinação cursor + client_search (troca de filtro) é
+// aceita pelo endpoint (não gera 5xx) e continua bloqueando sem auth.
+
+Deno.test("MCP endpoint: cursor + client_search sem Authorization retorna 401/403 (não 5xx)", async () => {
+  const base = Deno.env.get("VITE_SUPABASE_URL") ?? Deno.env.get("SUPABASE_URL");
+  if (!base) {
+    console.warn("SUPABASE_URL/VITE_SUPABASE_URL ausente — pulando smoke E2E");
+    return;
+  }
+  // Cursor bem-formado (base64 de {d,i}) — não deve causar 500 nem vazar.
+  const cursor = btoa(JSON.stringify({ d: "2027-01-01T00:00:00Z", i: "any-id" }));
+  const res = await fetch(`${base}/functions/v1/mcp/.mcp/invoke-tool/list_orders`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ client_search: "acme", limit: 2, cursor }),
+  });
+  await res.text();
+  assert(
+    res.status === 401 || res.status === 403,
+    `esperado 401/403 (auth), veio ${res.status}`,
+  );
+});
+
