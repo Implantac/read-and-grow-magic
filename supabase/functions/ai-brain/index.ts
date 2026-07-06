@@ -1225,10 +1225,19 @@ const handler = async (req: Request): Promise<Response> => {
     // Validate UUIDs for decision actions
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const DECISION_ACTIONS = new Set(["approve_decision","reject_decision","feedback_decision","execute_decision"]);
-    if (DECISION_ACTIONS.has(action) && (typeof body.decisionId !== "string" || !UUID_RE.test(body.decisionId))) {
-      return new Response(JSON.stringify({ error: "decisionId inválido" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    if (DECISION_ACTIONS.has(action)) {
+      // Aceita tanto decisionId (camelCase) quanto decision_id (snake_case),
+      // já que os handlers abaixo leem body.decision_id.
+      const rawId = typeof body.decisionId === "string" ? body.decisionId
+        : typeof body.decision_id === "string" ? body.decision_id
+        : undefined;
+      if (!rawId || !UUID_RE.test(rawId)) {
+        return new Response(JSON.stringify({ error: "decisionId inválido" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      body.decisionId = rawId;
+      body.decision_id = rawId;
     }
     const authHeader = req.headers.get("Authorization") || undefined;
 
