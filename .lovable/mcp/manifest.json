@@ -152,6 +152,32 @@
           "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
+      },
+      {
+        "name": "get_order",
+        "title": "Buscar pedido por ID",
+        "description": "Retorna um pedido comercial (orders) pelo `order_id` com seus itens (order_items). Respeita RLS multi-tenant — só retorna o pedido se o usuário tiver acesso.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "order_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID do pedido."
+            }
+          },
+          "required": [
+            "order_id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
       }
     ]
   }

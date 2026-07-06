@@ -208,18 +208,73 @@ ${JSON.stringify(
   }
 });
 
+// src/lib/mcp/tools/get-order.ts
+import { createClient as createClient4 } from "npm:@supabase/supabase-js@^2.108.2";
+import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z4 } from "npm:zod@^3.25.76";
+function userClient4(ctx) {
+  return createClient4(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_PUBLISHABLE_KEY,
+    {
+      global: { headers: { Authorization: `Bearer ${ctx.getToken()}` } },
+      auth: { persistSession: false, autoRefreshToken: false }
+    }
+  );
+}
+var get_order_default = defineTool5({
+  name: "get_order",
+  title: "Buscar pedido por ID",
+  description: "Retorna um pedido comercial (orders) pelo `order_id` com seus itens (order_items). Respeita RLS multi-tenant \u2014 s\xF3 retorna o pedido se o usu\xE1rio tiver acesso.",
+  inputSchema: {
+    order_id: z4.string().uuid().describe("UUID do pedido.")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ order_id }, ctx) => {
+    if (!ctx.isAuthenticated()) {
+      return { content: [{ type: "text", text: "N\xE3o autenticado" }], isError: true };
+    }
+    const supabase = userClient4(ctx);
+    const { data, error } = await supabase.from("orders").select(
+      `id, number, client_id, client_name, date, delivery_date,
+         subtotal, discount, shipping, total,
+         payment_method, payment_condition,
+         status, priority,
+         sales_rep_id, sales_rep_name,
+         fulfillment_status, production_status, separation_status,
+         conference_status, billing_status, shipment_status,
+         commercial_approval, financial_approval,
+         notes, created_at, updated_at,
+         items:order_items(id, product_id, product_name, product_code, quantity, unit_price, discount, total)`
+    ).eq("id", order_id).maybeSingle();
+    if (error) {
+      return { content: [{ type: "text", text: error.message }], isError: true };
+    }
+    if (!data) {
+      return {
+        content: [{ type: "text", text: "Pedido n\xE3o encontrado ou sem permiss\xE3o de acesso." }],
+        isError: true
+      };
+    }
+    return {
+      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+      structuredContent: { order: data }
+    };
+  }
+});
+
 // src/lib/mcp/index.ts
 var projectRef = "arcuhqdiydlvekanychw";
 var mcp_default = defineMcp({
   name: "use-sistemas-erp-mcp",
   title: "Use Sistemas ERP",
   version: "0.1.0",
-  instructions: "Ferramentas do ERP Use Sistemas (multi-tenant, RLS por empresa). Use `whoami` para confirmar o usu\xE1rio conectado. Use `search_products` para consultar o cadastro de produtos. Use `list_payables` para revisar contas a pagar por status e vencimento. Use `list_orders` para consultar pedidos comerciais por status e intervalo de datas. Todas as consultas respeitam o escopo de empresa do usu\xE1rio autenticado.",
+  instructions: "Ferramentas do ERP Use Sistemas (multi-tenant, RLS por empresa). Use `whoami` para confirmar o usu\xE1rio conectado. Use `search_products` para consultar o cadastro de produtos. Use `list_payables` para revisar contas a pagar por status e vencimento. Use `list_orders` para consultar pedidos comerciais por status e intervalo de datas. Use `get_order` para obter um pedido espec\xEDfico (com itens) pelo seu UUID. Todas as consultas respeitam o escopo de empresa do usu\xE1rio autenticado.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated"
   }),
-  tools: [whoami_default, search_products_default, list_payables_default, list_orders_default]
+  tools: [whoami_default, search_products_default, list_payables_default, list_orders_default, get_order_default]
 });
 
 // lovable-mcp-supabase-entry.ts
