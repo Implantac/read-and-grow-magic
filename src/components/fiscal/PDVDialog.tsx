@@ -1282,6 +1282,16 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
           onResume={resumeParked}
           onDelete={discardParked}
         />
+
+        {/* Finalize confirm (alto valor / muitos itens) */}
+        <PDVFinalizeConfirmDialog
+          open={showFinalizeConfirm}
+          total={total}
+          totalItems={totalItems}
+          splitsCount={splits.length}
+          onCancel={() => setShowFinalizeConfirm(false)}
+          onConfirm={() => { setShowFinalizeConfirm(false); handleFinalize(true); }}
+        />
       </>
     </Shell>
 
