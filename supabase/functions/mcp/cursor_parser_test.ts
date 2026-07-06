@@ -155,7 +155,7 @@ function fakeSupabase() {
       return Object.assign(builder, { then: thenable.then.bind(thenable) });
     },
   };
-  return { calls, from: () => builder };
+  return { calls, from: (_table: string) => builder };
 }
 
 function ctx(authed: boolean) {
