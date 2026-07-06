@@ -141,6 +141,16 @@
               "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
               "description": "Data final (YYYY-MM-DD), inclusive."
             },
+            "client_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Filtra pelo UUID do cliente (orders.client_id). Combina com os demais filtros."
+            },
+            "client_search": {
+              "type": "string",
+              "minLength": 2,
+              "description": "Busca case-insensitive por nome do cliente (orders.client_name ILIKE %termo%). Use quando não souber o UUID. Combina com os demais filtros."
+            },
             "limit": {
               "type": "integer",
               "exclusiveMinimum": 0,
