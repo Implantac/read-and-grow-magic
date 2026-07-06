@@ -90,7 +90,7 @@ async function runHandler(
     cursor?: string;
   },
   context: ReturnType<typeof ctx>,
-  supabase: ReturnType<typeof fakeSupabase>,
+  supabase: { from: (t: string) => any },
 ) {
   if (!context.isAuthenticated()) {
     return { content: [{ type: "text", text: "Não autenticado" }], isError: true };
