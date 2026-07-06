@@ -1259,9 +1259,13 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                                 <div className="relative w-28">
                                   <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground">R$</span>
                                   <Input
-                                    type="number" step="0.01" min={0} value={s.amount}
-                                    onChange={(e) => updateSplitAmount(s.id, toSafeNumber(e.target.value))}
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={splitDrafts[s.id] ?? (s.amount ? String(s.amount) : '')}
+                                    onChange={(e) => handleSplitAmountChange(s.id, e.target.value)}
                                     onFocus={(e) => e.currentTarget.select()}
+                                    onBlur={() => commitSplitAmount(s.id)}
+                                    placeholder="0,00"
                                     className="h-8 pl-7 pr-1 text-right font-bold tabular-nums text-xs"
                                   />
                                 </div>
