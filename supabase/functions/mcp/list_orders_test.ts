@@ -956,3 +956,140 @@ Deno.test("MCP endpoint: cursor + client_search sem Authorization retorna 401/40
   );
 });
 
+// -------- Cursor malformado / de outra query ------------------------------
+// Todo cursor inválido deve:
+//   1. Fazer o handler devolver { isError: true, "Cursor inválido." } — no MCP
+//      isso equivale a 400 (validation error); auth ausente já dispara 401.
+//   2. NÃO consultar o banco (sem .limit chamado no fake).
+//   3. Não corromper o estado global — chamadas seguintes com cursor válido
+//      (ou sem cursor) continuam funcionando normalmente.
+
+const BAD_CURSORS: Array<[string, string]> = [
+  ["string vazia após espaços",           "   "],
+  ["não é base64",                        "###nao-base64###"],
+  ["base64 de texto puro (JSON inválido)", btoa("nao-e-json")],
+  ["base64 de JSON sem campo d",           btoa(JSON.stringify({ i: "abc" }))],
+  ["base64 de JSON sem campo i",           btoa(JSON.stringify({ d: "2026-01-01T00:00:00Z" }))],
+  ["base64 de JSON com tipos errados",     btoa(JSON.stringify({ d: 123, i: 456 }))],
+  ["base64 de array em vez de objeto",     btoa(JSON.stringify(["2026-01-01", "abc"]))],
+  ["base64 de null",                       btoa("null")],
+];
+
+for (const [label, cursor] of BAD_CURSORS) {
+  Deno.test(`list_orders: cursor malformado (${label}) → isError com "Cursor inválido."`, async () => {
+    const sb = fakeSupabase([]);
+    const res = await runHandler({ cursor, limit: 2 }, ctx(true), sb);
+    assertEquals(res.isError, true, `esperava isError=true para ${label}`);
+    assertEquals(res.content[0].text, "Cursor inválido.");
+    // O predicado keyset (.or) NUNCA é anexado quando o cursor é inválido —
+    // é isso que garante que a paginação não é "corrompida" silenciosamente.
+    assertEquals(sb.calls.or, []);
+  });
+
+  Deno.test(`list_orders: cursor malformado (${label}) + client_search → isError e keyset não é aplicado`, async () => {
+    const sb = fakeSupabase([]);
+    const res = await runHandler(
+      { client_search: "acme", cursor, limit: 2 },
+      ctx(true),
+      sb,
+    );
+    assertEquals(res.isError, true);
+    assertEquals(res.content[0].text, "Cursor inválido.");
+    // Sem await/DB round-trip (handler retorna antes de `await q`), então o
+    // usuário recebe erro sem consumir a página seguinte. Nenhum keyset foi
+    // adicionado, o que evitaria colisão em uma retentativa.
+    assertEquals(sb.calls.or, []);
+  });
+}
+
+
+Deno.test("list_orders: cursor inválido NÃO corrompe paginação — chamada seguinte funciona", async () => {
+  // 1) cursor ruim → erro
+  const sbBad = fakeSupabase([]);
+  const rBad = await runHandler(
+    { client_search: "acme", cursor: "###bad###", limit: 2 },
+    ctx(true),
+    sbBad,
+  );
+  assertEquals(rBad.isError, true);
+
+  // 2) mesma sessão lógica, agora SEM cursor: deve funcionar normalmente.
+  const rows = [
+    { id: "n1", client_name: "ACME", total: 10, date: "2027-05-10T00:00:00Z" },
+    { id: "n2", client_name: "ACME", total: 20, date: "2027-05-09T00:00:00Z" },
+    { id: "n3", client_name: "ACME", total: 30, date: "2027-05-08T00:00:00Z" }, // sentinela
+  ];
+  const sbOk = fakeSupabase(rows);
+  const rOk: any = await runHandler(
+    { client_search: "acme", limit: 2 },
+    ctx(true),
+    sbOk,
+  );
+  assertEquals(rOk.isError, false);
+  assertEquals(rOk.structuredContent.count, 2);
+  assertEquals(rOk.structuredContent.has_more, true);
+  assert(typeof rOk.structuredContent.next_cursor === "string");
+
+  // 3) 2ª página com esse next_cursor válido continua funcionando.
+  const sbP2 = fakeSupabase([rows[2]]);
+  const rP2: any = await runHandler(
+    { client_search: "acme", limit: 2, cursor: rOk.structuredContent.next_cursor },
+    ctx(true),
+    sbP2,
+  );
+  assertEquals(rP2.isError, false);
+  assertEquals(rP2.structuredContent.rows.map((r: any) => r.id), ["n3"]);
+});
+
+Deno.test("list_orders: cursor válido SEM demais filtros (ex.: só cursor) é aceito como paginação pura", async () => {
+  // "Cursor de outra query" que apenas contém {d,i}: deve ser tratado como
+  // avanço keyset — sem crash, sem inventar filtros extras.
+  const cursor = btoa(JSON.stringify({ d: "2027-06-10T00:00:00Z", i: "prev" }));
+  const rows = [
+    { id: "x1", total: 10, date: "2027-06-09T00:00:00Z" },
+    { id: "x2", total: 20, date: "2027-06-08T00:00:00Z" },
+  ];
+  const sb = fakeSupabase(rows);
+  const res: any = await runHandler({ cursor, limit: 5 }, ctx(true), sb);
+  assertEquals(res.isError, false);
+  // Sem client_id / client_search / status — só o predicado keyset.
+  assertEquals(sb.calls.eq, []);
+  assertEquals(sb.calls.ilike, []);
+  assertEquals(sb.calls.or, [
+    "date.lt.2027-06-10T00:00:00Z,and(date.eq.2027-06-10T00:00:00Z,id.lt.prev)",
+  ]);
+  assertEquals(res.structuredContent.count, 2);
+});
+
+Deno.test("list_orders: cursor malformado + sem auth → 'Não autenticado' vence (auth checado antes)", async () => {
+  const sb = fakeSupabase([]);
+  const res = await runHandler(
+    { cursor: "###bad###", client_search: "acme" },
+    ctx(false),
+    sb,
+  );
+  assertEquals(res.isError, true);
+  assertEquals(res.content[0].text, "Não autenticado");
+  assertEquals(sb.calls.limit, undefined);
+});
+
+// -------- Smoke E2E: cursor malformado no endpoint deployado --------------
+Deno.test("MCP endpoint: cursor malformado sem Authorization retorna 401/403 (auth primeiro, nunca 5xx)", async () => {
+  const base = Deno.env.get("VITE_SUPABASE_URL") ?? Deno.env.get("SUPABASE_URL");
+  if (!base) {
+    console.warn("SUPABASE_URL/VITE_SUPABASE_URL ausente — pulando smoke E2E");
+    return;
+  }
+  const res = await fetch(`${base}/functions/v1/mcp/.mcp/invoke-tool/list_orders`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ cursor: "###nao-base64###", client_search: "acme" }),
+  });
+  await res.text();
+  assert(
+    res.status === 401 || res.status === 403,
+    `esperado 401/403, veio ${res.status}`,
+  );
+});
+
+
