@@ -132,6 +132,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
   const [saving, setSaving] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [splits, setSplits] = useState<SplitPayment[]>([]);
+  const [splitDrafts, setSplitDrafts] = useState<Record<string, string>>({});
   const [installments, setInstallments] = useState(1);
   const [screenLocked, setScreenLocked] = useState(false);
 
