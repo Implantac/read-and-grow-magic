@@ -27,10 +27,10 @@ type Row = Record<string, unknown> | null;
 function fakeSupabase(row: Row) {
   const calls: { table?: string; eq?: [string, unknown] } = {};
   const builder = {
-    select() { return this; },
-    eq(col: string, val: unknown) { calls.eq = [col, val]; return this; },
+    select(_cols?: string) { return builder; },
+    eq(col: string, val: unknown) { calls.eq = [col, val]; return builder; },
     maybeSingle() { return Promise.resolve({ data: row, error: null }); },
-  };
+  } as any;
   return {
     calls,
     from(table: string) { calls.table = table; return builder; },
