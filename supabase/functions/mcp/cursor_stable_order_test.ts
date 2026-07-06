@@ -370,3 +370,108 @@ Deno.test("order O5: next_cursor referencia o último item retornado, não a son
   assertEquals(decoded.d, sameDate);
   assertEquals(decoded.i, "aa-7777", "cursor deve ser do último retornado, não da sonda");
 });
+
+// ==========================================================================
+// O6 — Paginação estável para diferentes pageSize (1, 2, 10, 25).
+//
+// Roda o mesmo dataset (com muitos empates de date) sob vários pageSize e
+// verifica, para cada um, que:
+//   a) toda página intermediária tem exatamente pageSize itens;
+//   b) toda página tem rows estritamente decrescentes por (date desc, id desc);
+//   c) a concatenação das páginas === dataset ordenado (sem dup / sem gap);
+//   d) o número de páginas === ceil(total / pageSize);
+//   e) apenas a última página pode ter has_more:false / next_cursor:null;
+//   f) pageSize=1 (caso extremo) itera item-a-item corretamente;
+//   g) pageSize=25 >= total devolve tudo em UMA página, has_more:false.
+// ==========================================================================
+
+async function paginateAll(
+  data: Row[],
+  pageSize: number,
+): Promise<{ pages: Row[][]; cursors: (string | null)[] }> {
+  const pages: Row[][] = [];
+  const cursors: (string | null)[] = [];
+  let cursor: string | undefined = undefined;
+  let guard = 0;
+  while (true) {
+    if (++guard > 1000) throw new Error(`loop não convergiu (pageSize=${pageSize})`);
+    const sb = fakeSupabaseWithKeyset(data);
+    const res: any = await runHandler({ limit: pageSize, cursor }, sb);
+    assertEquals(res.isError, false, `erro em página (pageSize=${pageSize})`);
+    // O fake DEVE ter recebido pageSize+1 na sonda de has_more.
+    assertEquals(sb.calls.limit, pageSize + 1);
+    pages.push(res.structuredContent.rows);
+    cursors.push(res.structuredContent.next_cursor);
+    if (!res.structuredContent.has_more) break;
+    cursor = res.structuredContent.next_cursor;
+    assert(typeof cursor === "string", `next_cursor nulo com has_more (pageSize=${pageSize})`);
+  }
+  return { pages, cursors };
+}
+
+Deno.test("order O6: paginação estável para pageSize ∈ {1, 2, 10, 25}", async () => {
+  // 4 datas × 5 = 20 rows, muitos empates de date → exercita o tie-break.
+  const data = buildDataset(4, 5);
+  const expected = sortedDesc(data);
+  const total = expected.length;
+
+  for (const pageSize of [1, 2, 10, 25]) {
+    const { pages, cursors } = await paginateAll(data, pageSize);
+    const flat = pages.flat();
+    const label = `pageSize=${pageSize}`;
+
+    // (d) número esperado de páginas
+    const expectedPages = Math.max(1, Math.ceil(total / pageSize));
+    assertEquals(pages.length, expectedPages, `${label}: nº de páginas`);
+
+    // (a) toda página exceto a última tem exatamente pageSize; última <= pageSize
+    for (let idx = 0; idx < pages.length; idx++) {
+      const p = pages[idx];
+      const isLast = idx === pages.length - 1;
+      if (isLast) {
+        assert(
+          p.length > 0 && p.length <= pageSize,
+          `${label}: última página com tamanho inválido ${p.length}`,
+        );
+      } else {
+        assertEquals(p.length, pageSize, `${label}: página ${idx} não cheia`);
+      }
+      // (b) ordem estrita dentro de cada página
+      assert(isStrictlyDescending(p), `${label}: página ${idx} fora de ordem`);
+    }
+
+    // (e) apenas o último cursor é null
+    for (let idx = 0; idx < cursors.length - 1; idx++) {
+      assert(typeof cursors[idx] === "string", `${label}: cursor intermediário ${idx} nulo`);
+    }
+    assertEquals(cursors[cursors.length - 1], null, `${label}: último cursor deve ser null`);
+
+    // (c) concatenação === dataset ordenado (sem dup, sem gap, mesma ordem)
+    assertEquals(flat.length, expected.length, `${label}: total de itens`);
+    assertEquals(new Set(flat.map((r) => r.id)).size, flat.length, `${label}: duplicatas`);
+    assertEquals(flat.map((r) => r.id), expected.map((r) => r.id), `${label}: ordem global`);
+    // (b, global) e a sequência inter-páginas é estritamente decrescente
+    assert(isStrictlyDescending(flat), `${label}: fronteiras entre páginas quebradas`);
+  }
+});
+
+Deno.test("order O6.g: pageSize >= total → 1 página, has_more:false, next_cursor:null", async () => {
+  const data = buildDataset(3, 4); // 12 rows
+  const { pages, cursors } = await paginateAll(data, 25);
+  assertEquals(pages.length, 1);
+  assertEquals(pages[0].length, 12);
+  assertEquals(cursors[0], null);
+});
+
+Deno.test("order O6.f: pageSize=1 percorre item-a-item na ordem exata do dataset", async () => {
+  // Dataset pequeno mas com empates de date para forçar tie-break por id.
+  const data = buildDataset(2, 3); // 6 rows
+  const expected = sortedDesc(data);
+  const { pages } = await paginateAll(data, 1);
+  assertEquals(pages.length, expected.length);
+  for (let idx = 0; idx < expected.length; idx++) {
+    assertEquals(pages[idx].length, 1, `página ${idx} deve ter 1 item`);
+    assertEquals(pages[idx][0].id, expected[idx].id, `posição ${idx}`);
+  }
+});
+
