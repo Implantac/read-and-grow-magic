@@ -601,13 +601,19 @@ function fakeSupabaseRLS(allRows: TenantRow[], callerTenant: string) {
     },
     limit(n: number) {
       calls.limit = n;
+      return builder;
+    },
+    // Thenable lazy: só computa quando `await` é chamado (após todos os
+    // .eq/.or/.ilike encadeados). Necessário porque no handler o .limit()
+    // é chamado ANTES dos filtros condicionais.
+    then(onFulfilled: (v: any) => any, onRejected?: (e: any) => any) {
       const out = allRows
         .filter((r) => filters.every((f) => f(r)))
         .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.id < b.id ? 1 : -1))
-        .slice(0, n);
-      const p = Promise.resolve({ data: out, error: null });
-      return Object.assign(builder, { then: p.then.bind(p) });
+        .slice(0, calls.limit ?? allRows.length);
+      return Promise.resolve({ data: out, error: null }).then(onFulfilled, onRejected);
     },
+
   };
   return { calls, from: (_t: string) => builder };
 }
