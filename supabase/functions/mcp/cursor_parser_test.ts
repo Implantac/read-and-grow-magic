@@ -142,12 +142,12 @@ Deno.test("decodeCursor: aceita d/i vazios (contrato documentado, sem validaçã
 function fakeSupabase() {
   const calls = { or: [] as string[], limit: undefined as number | undefined };
   const builder: any = {
-    select: () => builder,
-    order: () => builder,
-    eq: () => builder,
-    gte: () => builder,
-    lte: () => builder,
-    ilike: () => builder,
+    select: (_c?: string) => builder,
+    order: (_c?: string, _o?: unknown) => builder,
+    eq: (_c?: string, _v?: unknown) => builder,
+    gte: (_c?: string, _v?: unknown) => builder,
+    lte: (_c?: string, _v?: unknown) => builder,
+    ilike: (_c?: string, _v?: unknown) => builder,
     or: (expr: string) => { calls.or.push(expr); return builder; },
     limit(n: number) {
       calls.limit = n;
