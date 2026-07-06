@@ -581,11 +581,12 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
       const typing = target && ['INPUT', 'TEXTAREA'].includes(target.tagName);
       if (e.key === 'Escape' && !typing && !showPayment && search) { e.preventDefault(); setSearch(''); return; }
       if (e.key === 'F9' && !typing) { e.preventDefault(); clearAll(); }
-      if (e.key === 'F10') { e.preventDefault(); if (!showPayment && cart.length > 0) setShowPayment(true); else if (showPayment) handleFinalize(); }
-      if (e.key === 'F12') { e.preventDefault(); setScreenLocked(true); }
+      if (e.key === 'F10' && !typing) { e.preventDefault(); if (!showPayment && cart.length > 0) setShowPayment(true); else if (showPayment) handleFinalize(); }
+      // Bloqueio agora em Ctrl/Cmd+L para evitar acionamento acidental de F12 durante venda
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'l' || e.key === 'L')) { e.preventDefault(); setScreenLocked(true); }
       if (e.key === 'F7' && !typing && cart.length > 0) { e.preventDefault(); suspendSale(); }
       if (e.key === 'F8' && !typing) { e.preventDefault(); setShowParked(true); }
-      if (!showPayment) return;
+      if (!showPayment || typing) return;
       if (e.key === 'F1') { e.preventDefault(); addSplit('cash'); }
       if (e.key === 'F2') { e.preventDefault(); addSplit('credit_card'); }
       if (e.key === 'F3') { e.preventDefault(); addSplit('debit_card'); }
