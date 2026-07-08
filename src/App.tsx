@@ -87,6 +87,7 @@ const CreditAnalysis = lazy(() => import("./pages/credit/CreditAnalysis"));
 const CreditOrderBlocks = lazy(() => import("./pages/credit/OrderBlocks"));
 const CreditCollections = lazy(() => import("./pages/credit/Collections"));
 const SuccessDashboard = lazy(() => import("./modules/success/SuccessDashboard"));
+const SuccessProductsDetail = lazy(() => import("./modules/success/SuccessProductsDetail"));
 
 
 
@@ -180,6 +181,7 @@ const App = () => (
                 <Route path="/credito/cobranca" element={<RequirePermission resource="credit.collections" action="view"><CreditCollections /></RequirePermission>} />
                 <Route path="/credito" element={<Navigate to="/credito/dashboard" replace />} />
                 <Route path="/success" element={<ModuleErrorBoundary moduleName="Use Success"><SuccessDashboard /></ModuleErrorBoundary>} />
+                <Route path="/success/produtos/:type" element={<ModuleErrorBoundary moduleName="Use Success"><SuccessProductsDetail /></ModuleErrorBoundary>} />
 
 
 
