@@ -20,6 +20,7 @@ import { MiscellaneousRoutes } from './routes/MiscellaneousRoutes';
 import { FiscalRoutes } from './routes/FiscalRoutes';
 import { VerticalPackRoutes } from './core/routes/VerticalPackRoutes';
 import { ExecutiveRoutes } from './routes/ExecutiveRoutes';
+import { RelacionamentoRoutes } from './routes/RelacionamentoRoutes';
 import { FeatureGate } from '@/components/plan/FeatureGate';
 import { GatedOutlet } from '@/components/plan/GatedOutlet';
 import { OnboardingGuard } from '@/components/OnboardingGuard';
@@ -88,6 +89,7 @@ const CreditOrderBlocks = lazy(() => import("./pages/credit/OrderBlocks"));
 const CreditCollections = lazy(() => import("./pages/credit/Collections"));
 const SuccessDashboard = lazy(() => import("./modules/success/SuccessDashboard"));
 const SuccessProductsDetail = lazy(() => import("./modules/success/SuccessProductsDetail"));
+const PublicNPS = lazy(() => import("./pages/PublicNPS"));
 
 
 
@@ -129,6 +131,7 @@ const App = () => (
               <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/nps/:token" element={<PublicNPS />} />
 
               <Route path="/coletor" element={<ColetorLayout />}>
                 <Route index element={<ColetorHome />} />
@@ -215,6 +218,7 @@ const App = () => (
                 </Route>
                 {VerticalPackRoutes}
                 <Route path="/executive/*" element={<ModuleErrorBoundary moduleName="Executivo"><Routes>{ExecutiveRoutes}</Routes></ModuleErrorBoundary>} />
+                <Route path="/relacionamento/*" element={<ModuleErrorBoundary moduleName="Relacionamento"><Routes>{RelacionamentoRoutes}</Routes></ModuleErrorBoundary>} />
                 </Route>
               </Route>
 

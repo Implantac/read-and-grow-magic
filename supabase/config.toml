@@ -1,13 +1,7 @@
 project_id = "arcuhqdiydlvekanychw"
 
-[functions.rfid-webhook]
+[functions.nps-public-get]
 verify_jwt = false
 
-[functions.daily-bank-reconciliation]
-verify_jwt = false
-
-[functions.ai-brain]
-verify_jwt = false
-
-[functions.forecast-snapshot-cron]
+[functions.nps-public-submit]
 verify_jwt = false

@@ -29,7 +29,8 @@ import {
   ShieldAlert, Upload, QrCode, FileCheck2, FileDown,
   Percent, Globe, ScrollText, ArrowRightLeft,
   BellRing, RotateCw, AlertOctagon, GitBranch, Siren, Scissors,
-  LogOut, User as UserIcon, HelpCircle, ChevronRight, Inbox, Heart
+  LogOut, User as UserIcon, HelpCircle, ChevronRight, Inbox, Heart,
+  Send, MessageSquare, Palette
 } from 'lucide-react';
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/base/tooltip';
@@ -53,6 +54,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Bell, Repeat, TrendingDown, LineChart, AlertTriangle, ShieldAlert, Upload, QrCode,
   FileCheck2, FileDown, Percent, Globe, ScrollText, ArrowRightLeft,
   BellRing, RotateCw, AlertOctagon, GitBranch, Siren, Scissors, Inbox, Heart,
+  Send, MessageSquare, Palette,
 };
 
 
