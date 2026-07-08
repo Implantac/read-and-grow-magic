@@ -141,6 +141,22 @@ export const navigationSections: NavSection[] = [
         ],
       },
       {
+        title: 'Relacionamento',
+        href: '/relacionamento',
+        icon: 'Heart',
+        children: [
+          { title: 'NPS · Dashboard', href: '/relacionamento/nps/dashboard', icon: 'BarChart3' },
+          { title: 'Campanhas', href: '/relacionamento/nps/campanhas', icon: 'Megaphone' },
+          { title: 'Pesquisas', href: '/relacionamento/nps/pesquisas', icon: 'ClipboardList' },
+          { title: 'Convites', href: '/relacionamento/nps/convites', icon: 'Send' as any },
+          { title: 'Respostas', href: '/relacionamento/nps/respostas', icon: 'MessageSquare' as any },
+          { title: 'Relatórios', href: '/relacionamento/nps/relatorios', icon: 'FileText' },
+          { title: 'Templates', href: '/relacionamento/nps/templates', icon: 'Palette' as any },
+          { title: 'Automações', href: '/relacionamento/nps/automacoes', icon: 'Zap' },
+          { title: 'Configurações', href: '/relacionamento/nps/configuracoes', icon: 'Settings' },
+        ],
+      },
+      {
         title: 'Compras',
         href: '/compras',
         icon: 'ShoppingCart',
