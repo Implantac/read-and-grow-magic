@@ -261,16 +261,49 @@ export function useSuccessData() {
         soldRevMap.set(code, (soldRevMap.get(code) ?? 0) + Number(it.total || 0));
       }
 
+      // --- Last sale date per product (12m window) ---
+      const lastSaleMap = new Map<string, number>();
+      for (const it of saleItems12m) {
+        const code = String(it.product_code || "");
+        if (!code) continue;
+        const t = new Date(it.sales?.date).getTime();
+        if (!Number.isFinite(t)) continue;
+        const cur = lastSaleMap.get(code);
+        if (cur === undefined || t > cur) lastSaleMap.set(code, t);
+      }
+
       const productByCode = new Map(products.map((p) => [p.code, p]));
 
       const productInsights: SuccessProductInsight[] = stock.map((s) => {
-        const p = productByCode.get(s.product_code);
+        const p = productByCode.get(s.product_code) as any;
         const sale = Number(p?.sale_price || 0);
         const cost = Number(p?.cost_price || 0);
         const margin = sale > 0 ? ((sale - cost) / sale) * 100 : 0;
         const qty = Number(s.quantity || 0);
         const sold = soldQtyMap.get(s.product_code) ?? 0;
         const rev = soldRevMap.get(s.product_code) ?? 0;
+        const lastMs = lastSaleMap.get(s.product_code);
+        const lastIso = lastMs ? new Date(lastMs).toISOString() : null;
+        const daysSince = lastMs ? Math.floor((now.getTime() - lastMs) / 86400000) : null;
+        const capital = Math.round(qty * cost * 100) / 100;
+
+        const reasons: string[] = [];
+        if (qty > 0 && sold === 0) {
+          reasons.push(
+            daysSince === null
+              ? "Sem registro de venda nos últimos 12 meses"
+              : `Sem vender há ${daysSince} dias`,
+          );
+        }
+        if (margin < 15 && sale > 0) reasons.push(`Margem baixa (${Math.round(margin)}%) — pouco lucro por unidade`);
+        if (margin >= 45) reasons.push(`Alta margem (${Math.round(margin)}%) — item premium`);
+        if (capital >= 5000 && sold === 0) reasons.push(`Capital elevado imobilizado (${Math.round(capital / 1000)}k)`);
+        if (qty > 0 && sold > 0 && qty / Math.max(sold, 1) > 6) {
+          reasons.push(`Cobertura alta: estoque cobre ~${Math.round(qty / Math.max(sold, 1))} ciclos de venda`);
+        }
+        if (sold > 0 && rev > 0 && sold >= 20) reasons.push(`Alta rotatividade: ${sold} un vendidas em 90d`);
+        if (p?.subcategory) reasons.push(`Família: ${p.subcategory}`);
+
         return {
           product_code: s.product_code,
           product_name: s.product_name,
@@ -281,7 +314,11 @@ export function useSuccessData() {
           margin_pct: Math.round(margin * 10) / 10,
           sale_price: sale,
           cost_price: cost,
-          capital_locked: Math.round(qty * cost * 100) / 100,
+          capital_locked: capital,
+          subcategory: p?.subcategory,
+          last_sale_at: lastIso,
+          days_since_last_sale: daysSince,
+          reasons,
         };
       });
 
