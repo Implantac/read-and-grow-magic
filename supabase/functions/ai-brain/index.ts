@@ -10,6 +10,7 @@ import { recordUsage } from "../_shared/usage.ts";
 import { instrument, contextFromAuth } from "../_shared/observability.ts";
 import { getKnowledgeBlockFor } from "../_shared/ai-prompts.ts";
 import { DATA_TOOL_SCHEMAS, DATA_TOOL_NAMES, dispatchDataTool } from "../_shared/data-tools.ts";
+import { buildCanonicalMetrics } from "../_shared/canonical-metrics.ts";
 
 
 const corsHeaders = {
