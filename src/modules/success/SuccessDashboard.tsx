@@ -76,7 +76,11 @@ export default function SuccessDashboard() {
     );
   }
 
-  const { health, revenue12m, cashflow, slowMoving, topMargin, topCustomers, delinquents, monthGoal, recommendations, totals } = data;
+  const {
+    health, revenue12m, cashflow, slowMoving, topMargin, bestSellers,
+    subcategoryStock, topSuppliers, topCustomers, inactiveTopCustomers,
+    delinquents, monthGoal, recommendations, totals,
+  } = data;
   const monthDelta = totals.revenuePrevMonth > 0
     ? ((totals.revenueMonth - totals.revenuePrevMonth) / totals.revenuePrevMonth) * 100
     : 0;
