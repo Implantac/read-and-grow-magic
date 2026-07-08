@@ -148,7 +148,7 @@ export function useSuccessData() {
       const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1);
       const ninetyDaysAgo = new Date(now.getTime() - 90 * 86400000);
 
-      const [salesRes, arRes, apRes, productsRes, stockRes, ordersRes, saleItemsRes, poRes] = await Promise.all([
+      const [salesRes, arRes, apRes, productsRes, stockRes, ordersRes, saleItemsRes, saleItems12mRes, poRes] = await Promise.all([
         supabase.from("sales").select("id, client_id, client_name, total, date").gte("date", twelveMonthsAgo.toISOString()),
         supabase.from("accounts_receivable").select("client_name, amount, due_date, status, invoice_number, payment_date, category"),
         supabase.from("accounts_payable").select("amount, due_date, status, payment_date"),
@@ -159,6 +159,10 @@ export function useSuccessData() {
           .from("sale_items")
           .select("product_id, product_code, product_name, quantity, total, sale_id, sales!inner(date, client_id, client_name)")
           .gte("sales.date", ninetyDaysAgo.toISOString()),
+        supabase
+          .from("sale_items")
+          .select("product_code, sales!inner(date)")
+          .gte("sales.date", twelveMonthsAgo.toISOString()),
         supabase
           .from("purchase_orders")
           .select("supplier_name, total, date, status")
@@ -172,6 +176,7 @@ export function useSuccessData() {
       const stock = stockRes.data ?? [];
       const orders = ordersRes.data ?? [];
       const saleItems90 = (saleItemsRes.data ?? []) as any[];
+      const saleItems12m = (saleItems12mRes.data ?? []) as any[];
       const purchaseOrders90 = poRes.data ?? [];
 
       // --- Revenue 12m ---
