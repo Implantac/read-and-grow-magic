@@ -117,7 +117,7 @@ export default function Invites() {
               {clients.map((c: any) => (
                 <label key={c.id} className="flex items-center gap-2 p-2 hover:bg-muted cursor-pointer border-b border-border last:border-0">
                   <input type="checkbox" checked={selected.has(c.id)} onChange={(e) => { const s = new Set(selected); e.target.checked ? s.add(c.id) : s.delete(c.id); setSelected(s); }} />
-                  <div className="flex-1"><div>{c.name}</div><div className="text-xs text-muted-foreground">{c.email ?? ''} · {c.city ?? ''}</div></div>
+                  <div className="flex-1"><div>{c.name}</div><div className="text-xs text-muted-foreground">{c.email ?? ''} · {c.address_city ?? ''}</div></div>
                 </label>
               ))}
               {clients.length === 0 && <p className="p-4 text-sm text-muted-foreground">Sem clientes</p>}
