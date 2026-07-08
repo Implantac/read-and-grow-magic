@@ -65,7 +65,7 @@ export function useCreateCampaign() {
   const companyId = useCompanyId();
   return useMutation({
     mutationFn: async (input: Partial<any> & { name: string }) => {
-      const { data, error } = await supabase.from('nps_campaigns').insert({ ...input, company_id: companyId! }).select().single();
+      const { data, error } = await supabase.from('nps_campaigns').insert({ ...input, company_id: companyId! } as any).select().single();
       if (error) throw error;
       return data;
     },
@@ -81,7 +81,7 @@ export function useUpdateCampaign() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...patch }: { id: string } & Record<string, any>) => {
-      const { error } = await supabase.from('nps_campaigns').update(patch).eq('id', id);
+      const { error } = await supabase.from('nps_campaigns').update(patch as any).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['nps'] }),
@@ -166,10 +166,10 @@ export function useSaveTemplate() {
   return useMutation({
     mutationFn: async (input: any) => {
       if (input.id) {
-        const { error } = await supabase.from('nps_templates').update(input).eq('id', input.id);
+        const { error } = await supabase.from('nps_templates').update(input as any).eq('id', input.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('nps_templates').insert({ ...input, company_id: companyId! });
+        const { error } = await supabase.from('nps_templates').insert({ ...input, company_id: companyId! } as any);
         if (error) throw error;
       }
     },
@@ -197,10 +197,10 @@ export function useSaveAutomation() {
   return useMutation({
     mutationFn: async (input: any) => {
       if (input.id) {
-        const { error } = await supabase.from('nps_automations').update(input).eq('id', input.id);
+        const { error } = await supabase.from('nps_automations').update(input as any).eq('id', input.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('nps_automations').insert({ ...input, company_id: companyId! });
+        const { error } = await supabase.from('nps_automations').insert({ ...input, company_id: companyId! } as any);
         if (error) throw error;
       }
     },
@@ -228,10 +228,10 @@ export function useSaveWebhook() {
   return useMutation({
     mutationFn: async (input: any) => {
       if (input.id) {
-        const { error } = await supabase.from('nps_webhooks').update(input).eq('id', input.id);
+        const { error } = await supabase.from('nps_webhooks').update(input as any).eq('id', input.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('nps_webhooks').insert({ ...input, company_id: companyId! });
+        const { error } = await supabase.from('nps_webhooks').insert({ ...input, company_id: companyId! } as any);
         if (error) throw error;
       }
     },
