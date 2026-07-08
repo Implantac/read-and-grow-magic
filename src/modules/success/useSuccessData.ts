@@ -46,6 +46,20 @@ export interface SuccessCashFlow90d {
   outflow_90: number;
 }
 
+export type HealthPillarKey = "cashflow" | "delinquency" | "margin" | "trend";
+
+export interface HealthPillar {
+  key: HealthPillarKey;
+  label: string;
+  score: number;         // 0-100 (nota do pilar)
+  weight: number;        // 0-1 (peso na composição)
+  contribution: number;  // score * weight (pontos aportados ao score final)
+  status: "good" | "warn" | "bad";
+  metricLabel: string;   // ex.: "Saldo líquido 90d"
+  metricValue: string;   // ex.: "R$ 12.400"
+  explanation: string;   // como o pilar impacta
+}
+
 export interface SuccessHealthBreakdown {
   score: number;
   grade: "A" | "B" | "C" | "D" | "E";
@@ -53,6 +67,7 @@ export interface SuccessHealthBreakdown {
   operational: number;
   commercial: number;
   drivers: string[];
+  pillars: HealthPillar[];
 }
 
 export interface SuccessAIRecommendation {
@@ -272,6 +287,79 @@ export function useSuccessData() {
       const grade: SuccessHealthBreakdown["grade"] =
         score >= 85 ? "A" : score >= 70 ? "B" : score >= 55 ? "C" : score >= 40 ? "D" : "E";
 
+      // --- Pillar breakdown (4 pilares que compõem o score) ---
+      const wCash = 0.30;
+      const wDelq = 0.25;
+      const wMargin = 0.25;
+      const wTrend = 0.20;
+
+      const trendPct = revenuePrevMonth > 0 ? ((revenueMonth - revenuePrevMonth) / revenuePrevMonth) * 100 : 0;
+
+      const pillars: HealthPillar[] = [
+        {
+          key: "cashflow",
+          label: "Fluxo de caixa",
+          score: Math.round(cashScore),
+          weight: wCash,
+          contribution: Math.round(cashScore * wCash * 10) / 10,
+          status: cashflow.net >= 0 ? (cashflow.net > 50000 ? "good" : "warn") : "bad",
+          metricLabel: "Saldo líquido projetado 90d",
+          metricValue: cashflow.net.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }),
+          explanation:
+            cashflow.net >= 0
+              ? "Entradas projetadas superam saídas — capacidade de honrar compromissos preservada."
+              : "Saídas projetadas maiores que entradas — risco de aperto de caixa nos próximos 90 dias.",
+        },
+        {
+          key: "delinquency",
+          label: "Inadimplência",
+          score: Math.round(arScore),
+          weight: wDelq,
+          contribution: Math.round(arScore * wDelq * 10) / 10,
+          status: delinquencyRatio <= 0.05 ? "good" : delinquencyRatio <= 0.15 ? "warn" : "bad",
+          metricLabel: "% da carteira vencida",
+          metricValue: `${(delinquencyRatio * 100).toFixed(1)}%`,
+          explanation:
+            delinquencyRatio <= 0.05
+              ? "Carteira saudável, cobrança sob controle."
+              : delinquencyRatio <= 0.15
+              ? "Nível moderado de atraso — priorize régua de cobrança."
+              : "Inadimplência elevada compromete o caixa e reduz a nota do pilar.",
+        },
+        {
+          key: "margin",
+          label: "Margem bruta",
+          score: Math.round(marginScore),
+          weight: wMargin,
+          contribution: Math.round(marginScore * wMargin * 10) / 10,
+          status: grossMarginAvg >= 35 ? "good" : grossMarginAvg >= 20 ? "warn" : "bad",
+          metricLabel: "Margem média do portfólio",
+          metricValue: `${grossMarginAvg.toFixed(1)}%`,
+          explanation:
+            grossMarginAvg >= 35
+              ? "Portfólio com boa rentabilidade unitária."
+              : grossMarginAvg >= 20
+              ? "Margem aceitável — revise preços e custos dos itens fracos."
+              : "Margem baixa — cada real vendido gera pouco lucro; risco operacional.",
+        },
+        {
+          key: "trend",
+          label: "Tendência de vendas",
+          score: Math.round(trendScore),
+          weight: wTrend,
+          contribution: Math.round(trendScore * wTrend * 10) / 10,
+          status: trendPct >= 0 ? (trendPct >= 5 ? "good" : "warn") : "bad",
+          metricLabel: "Variação vs. mês anterior",
+          metricValue: `${trendPct >= 0 ? "+" : ""}${trendPct.toFixed(1)}%`,
+          explanation:
+            trendPct >= 5
+              ? "Vendas acelerando — momento favorável para investir em expansão."
+              : trendPct >= 0
+              ? "Vendas estáveis — sem tração, mas sem retração."
+              : "Queda vs. mês anterior — puxa a nota para baixo e pede reação comercial.",
+        },
+      ];
+
       const drivers: string[] = [];
       if (delinquencyRatio > 0.15) drivers.push(`Inadimplência alta (${(delinquencyRatio * 100).toFixed(0)}%)`);
       if (cashflow.net < 0) drivers.push("Saldo projetado 90d negativo");
@@ -352,7 +440,7 @@ export function useSuccessData() {
       }
 
       return {
-        health: { score, grade, financial, operational, commercial, drivers },
+        health: { score, grade, financial, operational, commercial, drivers, pillars },
         revenue12m,
         cashflow,
         slowMoving,
