@@ -1402,7 +1402,7 @@ ${contextSummary}
 Financeiro: registrar pagamento, adiar vencimento, criar conta a pagar/receber.
 Comercial: alterar status pedido | Produção: alterar/priorizar OP | Estoque: ajustar estoque.
 SEMPRE peça confirmação antes de executar (confirmado=false primeiro).
-${patternInsights}${realDataSnapshot}`, supabase, 'ai-executive-chat', user_id);
+${patternInsights}${realDataSnapshot}${canonicalBlock}`, supabase, 'ai-executive-chat', user_id);
 
   const aiMessages = [{ role: "system", content: systemPrompt }, ...contextMessages];
 
