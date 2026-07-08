@@ -29,7 +29,7 @@ import {
   ShieldAlert, Upload, QrCode, FileCheck2, FileDown,
   Percent, Globe, ScrollText, ArrowRightLeft,
   BellRing, RotateCw, AlertOctagon, GitBranch, Siren, Scissors,
-  LogOut, User as UserIcon, HelpCircle, ChevronRight, Inbox
+  LogOut, User as UserIcon, HelpCircle, ChevronRight, Inbox, Heart
 } from 'lucide-react';
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/base/tooltip';
