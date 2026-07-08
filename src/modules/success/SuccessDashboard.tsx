@@ -6,6 +6,7 @@ import { Skeleton } from "@/ui/base/skeleton";
 import {
   Heart, TrendingUp, TrendingDown, Wallet, Package, ShoppingCart,
   Users, AlertTriangle, Target, Sparkles, Lightbulb, Info, Zap,
+  Snowflake, Truck, Layers, Flame,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
