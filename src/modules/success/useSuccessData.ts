@@ -111,6 +111,7 @@ export interface SuccessData {
   slowMoving: SuccessProductInsight[];
   topMargin: SuccessProductInsight[];
   bestSellers: SuccessProductInsight[];
+  allProductInsights: SuccessProductInsight[];
   subcategoryStock: SuccessSubcategoryStock[];
   topSuppliers: SuccessSupplierSpend[];
   topCustomers: SuccessTopCustomer[];
