@@ -1346,6 +1346,15 @@ async function handleUnifiedChat(messages: any[], supabase: any, lovableKey: str
     console.error("realDataSnapshot error:", e);
   }
 
+  // Fonte única de verdade — mesmos números do Dashboard/Cérebro/CEO Brief
+  let canonicalBlock = "";
+  try {
+    const canonical = await buildCanonicalMetrics(supabase, company_id ?? null);
+    canonicalBlock = "\n\n" + formatCanonicalBlock(canonical);
+  } catch (e) {
+    console.error("canonical metrics error:", e);
+  }
+
   // ─── Log consultation queries for learning ───
   if (user_id && lastUserMsg) {
     const queryText = lastUserMsg.content.toLowerCase();
