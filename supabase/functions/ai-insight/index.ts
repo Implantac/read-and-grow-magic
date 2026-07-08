@@ -2,6 +2,7 @@
 // Contract: { entityKey, value, delta, goal, horizon } -> { insight }
 // Uses Lovable AI Gateway with gemini-3-flash-preview and returns a strict JSON.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { buildCanonicalMetrics, formatCanonicalBlock } from "../_shared/canonical-metrics.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
