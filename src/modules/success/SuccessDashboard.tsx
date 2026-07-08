@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useSuccessData } from "./useSuccessData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { Badge } from "@/ui/base/badge";
@@ -6,7 +7,7 @@ import { Skeleton } from "@/ui/base/skeleton";
 import {
   Heart, TrendingUp, TrendingDown, Wallet, Package, ShoppingCart,
   Users, AlertTriangle, Target, Sparkles, Lightbulb, Info, Zap,
-  Snowflake, Truck, Layers, Flame,
+  Snowflake, Truck, Layers, Flame, ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
