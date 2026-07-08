@@ -46,6 +46,20 @@ export interface SuccessCashFlow90d {
   outflow_90: number;
 }
 
+export type HealthPillarKey = "cashflow" | "delinquency" | "margin" | "trend";
+
+export interface HealthPillar {
+  key: HealthPillarKey;
+  label: string;
+  score: number;         // 0-100 (nota do pilar)
+  weight: number;        // 0-1 (peso na composição)
+  contribution: number;  // score * weight (pontos aportados ao score final)
+  status: "good" | "warn" | "bad";
+  metricLabel: string;   // ex.: "Saldo líquido 90d"
+  metricValue: string;   // ex.: "R$ 12.400"
+  explanation: string;   // como o pilar impacta
+}
+
 export interface SuccessHealthBreakdown {
   score: number;
   grade: "A" | "B" | "C" | "D" | "E";
@@ -53,6 +67,7 @@ export interface SuccessHealthBreakdown {
   operational: number;
   commercial: number;
   drivers: string[];
+  pillars: HealthPillar[];
 }
 
 export interface SuccessAIRecommendation {
