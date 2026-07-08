@@ -9491,6 +9491,843 @@ export type Database = {
         }
         Relationships: []
       }
+      nps_alerts_config: {
+        Row: {
+          active: boolean
+          channels: Json | null
+          company_id: string
+          created_at: string
+          id: string
+          name: string
+          notify_roles: Json | null
+          notify_users: Json | null
+          score_max: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          channels?: Json | null
+          company_id: string
+          created_at?: string
+          id?: string
+          name: string
+          notify_roles?: Json | null
+          notify_users?: Json | null
+          score_max?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          channels?: Json | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          notify_roles?: Json | null
+          notify_users?: Json | null
+          score_max?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_alerts_config_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nps_answer_items: {
+        Row: {
+          answer_id: string
+          company_id: string
+          created_at: string
+          id: string
+          question_id: string
+          value_json: Json | null
+          value_number: number | null
+          value_text: string | null
+        }
+        Insert: {
+          answer_id: string
+          company_id: string
+          created_at?: string
+          id?: string
+          question_id: string
+          value_json?: Json | null
+          value_number?: number | null
+          value_text?: string | null
+        }
+        Update: {
+          answer_id?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          question_id?: string
+          value_json?: Json | null
+          value_number?: number | null
+          value_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_answer_items_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: false
+            referencedRelation: "nps_answers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_answer_items_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_answer_items_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "nps_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nps_answers: {
+        Row: {
+          ai_categories: Json | null
+          ai_keywords: Json | null
+          ai_summary: string | null
+          anonymized: boolean
+          branch_id: string | null
+          browser: string | null
+          campaign_id: string
+          category: string
+          channel: string | null
+          city: string | null
+          client_id: string | null
+          comment: string | null
+          company_id: string
+          country: string | null
+          created_at: string
+          device: string | null
+          id: string
+          invite_id: string | null
+          ip: unknown
+          metadata: Json | null
+          order_id: string | null
+          origin: string | null
+          os: string | null
+          product_id: string | null
+          region: string | null
+          responded_at: string
+          response_time_seconds: number | null
+          score: number
+          seller_id: string | null
+          sentiment: string | null
+          token_id: string | null
+        }
+        Insert: {
+          ai_categories?: Json | null
+          ai_keywords?: Json | null
+          ai_summary?: string | null
+          anonymized?: boolean
+          branch_id?: string | null
+          browser?: string | null
+          campaign_id: string
+          category: string
+          channel?: string | null
+          city?: string | null
+          client_id?: string | null
+          comment?: string | null
+          company_id: string
+          country?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          invite_id?: string | null
+          ip?: unknown
+          metadata?: Json | null
+          order_id?: string | null
+          origin?: string | null
+          os?: string | null
+          product_id?: string | null
+          region?: string | null
+          responded_at?: string
+          response_time_seconds?: number | null
+          score: number
+          seller_id?: string | null
+          sentiment?: string | null
+          token_id?: string | null
+        }
+        Update: {
+          ai_categories?: Json | null
+          ai_keywords?: Json | null
+          ai_summary?: string | null
+          anonymized?: boolean
+          branch_id?: string | null
+          browser?: string | null
+          campaign_id?: string
+          category?: string
+          channel?: string | null
+          city?: string | null
+          client_id?: string | null
+          comment?: string | null
+          company_id?: string
+          country?: string | null
+          created_at?: string
+          device?: string | null
+          id?: string
+          invite_id?: string | null
+          ip?: unknown
+          metadata?: Json | null
+          order_id?: string | null
+          origin?: string | null
+          os?: string | null
+          product_id?: string | null
+          region?: string | null
+          responded_at?: string
+          response_time_seconds?: number | null
+          score?: number
+          seller_id?: string | null
+          sentiment?: string | null
+          token_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_answers_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "nps_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_answers_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "nps_answers_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_answers_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_answers_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "nps_invites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_answers_token_id_fkey"
+            columns: ["token_id"]
+            isOneToOne: false
+            referencedRelation: "nps_tokens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nps_automations: {
+        Row: {
+          active: boolean
+          campaign_id: string | null
+          channel: string
+          company_id: string
+          created_at: string
+          created_by: string | null
+          delay_unit: string | null
+          delay_value: number | null
+          filter: Json | null
+          id: string
+          name: string
+          trigger: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          campaign_id?: string | null
+          channel?: string
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          delay_unit?: string | null
+          delay_value?: number | null
+          filter?: Json | null
+          id?: string
+          name: string
+          trigger: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          campaign_id?: string | null
+          channel?: string
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          delay_unit?: string | null
+          delay_value?: number | null
+          filter?: Json | null
+          id?: string
+          name?: string
+          trigger?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_automations_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "nps_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_automations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nps_campaigns: {
+        Row: {
+          banner_url: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          logo_url: string | null
+          message: string | null
+          name: string
+          primary_color: string | null
+          recaptcha_enabled: boolean | null
+          require_open_comment: boolean | null
+          scheduled_at: string | null
+          send_channels: Json | null
+          start_date: string | null
+          status: string
+          subtitle: string | null
+          survey_type: string
+          target_filter: Json | null
+          template_id: string | null
+          thanks_message: string | null
+          thanks_title: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          banner_url?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          logo_url?: string | null
+          message?: string | null
+          name: string
+          primary_color?: string | null
+          recaptcha_enabled?: boolean | null
+          require_open_comment?: boolean | null
+          scheduled_at?: string | null
+          send_channels?: Json | null
+          start_date?: string | null
+          status?: string
+          subtitle?: string | null
+          survey_type?: string
+          target_filter?: Json | null
+          template_id?: string | null
+          thanks_message?: string | null
+          thanks_title?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          banner_url?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          logo_url?: string | null
+          message?: string | null
+          name?: string
+          primary_color?: string | null
+          recaptcha_enabled?: boolean | null
+          require_open_comment?: boolean | null
+          scheduled_at?: string | null
+          send_channels?: Json | null
+          start_date?: string | null
+          status?: string
+          subtitle?: string | null
+          survey_type?: string
+          target_filter?: Json | null
+          template_id?: string | null
+          thanks_message?: string | null
+          thanks_title?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_campaigns_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_campaigns_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "nps_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nps_invites: {
+        Row: {
+          attempts: number
+          campaign_id: string
+          channel: string
+          client_id: string | null
+          company_id: string
+          created_at: string
+          destination: string | null
+          error: string | null
+          id: string
+          metadata: Json | null
+          opened_at: string | null
+          responded_at: string | null
+          scheduled_at: string | null
+          sent_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          campaign_id: string
+          channel?: string
+          client_id?: string | null
+          company_id: string
+          created_at?: string
+          destination?: string | null
+          error?: string | null
+          id?: string
+          metadata?: Json | null
+          opened_at?: string | null
+          responded_at?: string | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          campaign_id?: string
+          channel?: string
+          client_id?: string | null
+          company_id?: string
+          created_at?: string
+          destination?: string | null
+          error?: string | null
+          id?: string
+          metadata?: Json | null
+          opened_at?: string | null
+          responded_at?: string | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_invites_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "nps_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_invites_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "nps_invites_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_invites_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nps_logs: {
+        Row: {
+          campaign_id: string | null
+          company_id: string
+          created_at: string
+          event: string
+          id: string
+          level: string
+          payload: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          company_id: string
+          created_at?: string
+          event: string
+          id?: string
+          level?: string
+          payload?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          campaign_id?: string | null
+          company_id?: string
+          created_at?: string
+          event?: string
+          id?: string
+          level?: string
+          payload?: Json | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_logs_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "nps_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nps_questions: {
+        Row: {
+          campaign_id: string
+          company_id: string
+          condition: Json | null
+          created_at: string
+          id: string
+          options: Json | null
+          order_index: number
+          question_text: string
+          question_type: string
+          required: boolean
+        }
+        Insert: {
+          campaign_id: string
+          company_id: string
+          condition?: Json | null
+          created_at?: string
+          id?: string
+          options?: Json | null
+          order_index?: number
+          question_text: string
+          question_type?: string
+          required?: boolean
+        }
+        Update: {
+          campaign_id?: string
+          company_id?: string
+          condition?: Json | null
+          created_at?: string
+          id?: string
+          options?: Json | null
+          order_index?: number
+          question_text?: string
+          question_type?: string
+          required?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_questions_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "nps_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_questions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nps_reports: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          filters: Json | null
+          id: string
+          last_generated_at: string | null
+          name: string
+          report_type: string
+          schedule_cron: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          filters?: Json | null
+          id?: string
+          last_generated_at?: string | null
+          name: string
+          report_type: string
+          schedule_cron?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          filters?: Json | null
+          id?: string
+          last_generated_at?: string | null
+          name?: string
+          report_type?: string
+          schedule_cron?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_reports_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nps_templates: {
+        Row: {
+          background_color: string | null
+          banner_url: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          custom_domain: string | null
+          font_family: string | null
+          footer_text: string | null
+          id: string
+          is_default: boolean
+          logo_url: string | null
+          name: string
+          primary_color: string | null
+          social_links: Json | null
+          updated_at: string
+        }
+        Insert: {
+          background_color?: string | null
+          banner_url?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          custom_domain?: string | null
+          font_family?: string | null
+          footer_text?: string | null
+          id?: string
+          is_default?: boolean
+          logo_url?: string | null
+          name: string
+          primary_color?: string | null
+          social_links?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          background_color?: string | null
+          banner_url?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          custom_domain?: string | null
+          font_family?: string | null
+          footer_text?: string | null
+          id?: string
+          is_default?: boolean
+          logo_url?: string | null
+          name?: string
+          primary_color?: string | null
+          social_links?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_templates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nps_tokens: {
+        Row: {
+          campaign_id: string
+          client_id: string | null
+          company_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          invite_id: string | null
+          single_use: boolean
+          token: string
+          used_at: string | null
+          used_ip: unknown
+          used_user_agent: string | null
+        }
+        Insert: {
+          campaign_id: string
+          client_id?: string | null
+          company_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          invite_id?: string | null
+          single_use?: boolean
+          token: string
+          used_at?: string | null
+          used_ip?: unknown
+          used_user_agent?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          client_id?: string | null
+          company_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          invite_id?: string | null
+          single_use?: boolean
+          token?: string
+          used_at?: string | null
+          used_ip?: unknown
+          used_user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_tokens_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "nps_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_tokens_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_commercial_profiles"
+            referencedColumns: ["client_id"]
+          },
+          {
+            foreignKeyName: "nps_tokens_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_tokens_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nps_tokens_invite_id_fkey"
+            columns: ["invite_id"]
+            isOneToOne: false
+            referencedRelation: "nps_invites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nps_webhooks: {
+        Row: {
+          active: boolean
+          company_id: string
+          created_at: string
+          events: Json
+          id: string
+          last_delivery_at: string | null
+          last_status: number | null
+          name: string
+          secret: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          active?: boolean
+          company_id: string
+          created_at?: string
+          events?: Json
+          id?: string
+          last_delivery_at?: string | null
+          last_status?: number | null
+          name: string
+          secret?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          active?: boolean
+          company_id?: string
+          created_at?: string
+          events?: Json
+          id?: string
+          last_delivery_at?: string | null
+          last_status?: number | null
+          name?: string
+          secret?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_webhooks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       open_finance_connections: {
         Row: {
           access_token_encrypted: string | null
