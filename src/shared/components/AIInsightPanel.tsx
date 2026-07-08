@@ -118,7 +118,7 @@ export function AIInsightPanel({ entityKey, value, delta, goal, horizon = "month
           <p className="text-xs text-muted-foreground">
             Impacto financeiro estimado:{" "}
             <strong className="text-foreground">
-              {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(insight!.financial_impact!)}
+              {formatBRL(insight!.financial_impact!)}
             </strong>
           </p>
         )}
