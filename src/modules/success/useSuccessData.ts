@@ -440,7 +440,7 @@ export function useSuccessData() {
       }
 
       return {
-        health: { score, grade, financial, operational, commercial, drivers },
+        health: { score, grade, financial, operational, commercial, drivers, pillars },
         revenue12m,
         cashflow,
         slowMoving,
