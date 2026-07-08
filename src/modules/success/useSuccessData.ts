@@ -672,6 +672,7 @@ export function useSuccessData() {
         slowMoving,
         topMargin,
         bestSellers,
+        allProductInsights: productInsights,
         subcategoryStock,
         topSuppliers,
         topCustomers,
