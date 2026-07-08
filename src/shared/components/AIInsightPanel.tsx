@@ -12,6 +12,7 @@ import { Badge } from "@/ui/base/badge";
 import { Button } from "@/ui/base/button";
 import { Skeleton } from "@/ui/base/skeleton";
 import { getEntity, type EntityKey } from "@/core/entityRegistry";
+import { formatBRL } from "@/lib/formatters";
 
 interface AIInsight {
   root_cause: string;
@@ -118,7 +119,7 @@ export function AIInsightPanel({ entityKey, value, delta, goal, horizon = "month
           <p className="text-xs text-muted-foreground">
             Impacto financeiro estimado:{" "}
             <strong className="text-foreground">
-              {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(insight!.financial_impact!)}
+              {formatBRL(insight!.financial_impact!)}
             </strong>
           </p>
         )}

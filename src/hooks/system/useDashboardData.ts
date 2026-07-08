@@ -4,11 +4,8 @@ import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { useAppStore } from '@/stores/useAppStore';
 
 import { formatBRL } from '@/lib/formatters';
-const fmtShort = (v: number) => {
-  if (v >= 1_000_000) return `R$ ${(v / 1_000_000).toFixed(1)}M`;
-  if (v >= 1_000) return `R$ ${(v / 1_000).toFixed(0)}k`;
-  return formatBRL(v);
-};
+// KPI values sempre em formato completo R$ X.XXX,XX (fonte única de verdade)
+const fmtShort = (v: number) => formatBRL(v);
 
 export function useDashboardData() {
   const { activeCompany } = useAppStore();
