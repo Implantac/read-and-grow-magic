@@ -13,6 +13,7 @@ import { getEntity, type EntityKey } from "@/core/entityRegistry";
 import { AIInsightPanel } from "./AIInsightPanel";
 import { Skeleton } from "@/ui/base/skeleton";
 import { EmptyState } from "./EmptyState";
+import { formatBRL } from "@/lib/formatters";
 import { AuditTrailPanel } from "./AuditTrailPanel";
 import { Database, ListTree, History } from "lucide-react";
 
