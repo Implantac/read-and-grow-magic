@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ClientAIWidget } from './ClientAIWidget';
+import { ClientNPSPanel } from '@/modules/relacionamento/nps/ClientNPSPanel';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Badge } from '@/ui/base/badge';
