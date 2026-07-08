@@ -371,6 +371,10 @@ export function ClientDetailDialog({ client, open, onOpenChange }: Props) {
               </div>
             )}
           </TabsContent>
+
+          <TabsContent value="nps" className="mt-4">
+            <ClientNPSPanel clientId={client.id} />
+          </TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>
