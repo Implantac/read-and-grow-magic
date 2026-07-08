@@ -19,7 +19,7 @@ export default function Surveys() {
   const { data: campaigns = [] } = useNPSCampaigns();
   const [campaignId, setCampaignId] = useState<string | undefined>(undefined);
   const { data: questions = [], isLoading } = useNPSQuestions(campaignId);
-  const { activeCompanyId } = useEnterprise() as any;
+  const { currentCompany } = useEnterprise() as any; const activeCompanyId = currentCompany?.id;
   const qc = useQueryClient();
 
   const create = useMutation({

@@ -19,7 +19,7 @@ export default function Invites() {
   const [campaignId, setCampaignId] = useState<string | undefined>();
   const { data: invites = [], isLoading } = useNPSInvites(campaignId);
   const generate = useGenerateInvites();
-  const { activeCompanyId } = useEnterprise() as any;
+  const { currentCompany } = useEnterprise() as any; const activeCompanyId = currentCompany?.id;
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<Set<string>>(new Set());
