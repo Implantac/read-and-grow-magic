@@ -92,17 +92,17 @@ const handler = async (req: Request): Promise<Response> => {
     const todayStr = iso(today);
     const overdueReceivable = (recRes.data ?? [])
       .filter((r: any) => r.due_date < todayStr)
-      .reduce((s: number, r: any) => s + Number(r.open_amount ?? r.amount ?? 0), 0);
+      .reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
     const overduePayable = (payRes.data ?? [])
       .filter((p: any) => p.due_date < todayStr)
-      .reduce((s: number, p: any) => s + Number(p.open_amount ?? p.amount ?? 0), 0);
+      .reduce((s: number, p: any) => s + Number(p.amount ?? 0), 0);
 
     const projectIn = (limit: string) => (recRes.data ?? [])
       .filter((r: any) => r.due_date >= todayStr && r.due_date <= limit)
-      .reduce((s: number, r: any) => s + Number(r.open_amount ?? r.amount ?? 0), 0);
+      .reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
     const projectOut = (limit: string) => (payRes.data ?? [])
       .filter((p: any) => p.due_date >= todayStr && p.due_date <= limit)
-      .reduce((s: number, p: any) => s + Number(p.open_amount ?? p.amount ?? 0), 0);
+      .reduce((s: number, p: any) => s + Number(p.amount ?? 0), 0);
 
     const projectedBalance30d = currentBalance + projectIn(iso(future30)) - projectOut(iso(future30));
     const projectedBalance60d = currentBalance + projectIn(iso(future60)) - projectOut(iso(future60));
