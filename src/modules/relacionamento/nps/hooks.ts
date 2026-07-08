@@ -107,7 +107,7 @@ export function useNPSAnswers(campaignId?: string | null, limit = 500) {
     queryKey: QK.answers(companyId, campaignId),
     enabled: !!companyId,
     queryFn: async () => {
-      let q = supabase.from('nps_answers').select('*, clients(name,city,segment)').eq('company_id', companyId!).order('responded_at', { ascending: false }).limit(limit);
+      let q = supabase.from('nps_answers').select('*, clients(name,address_city,segment)').eq('company_id', companyId!).order('responded_at', { ascending: false }).limit(limit);
       if (campaignId) q = q.eq('campaign_id', campaignId);
       const { data, error } = await q;
       if (error) throw error;
