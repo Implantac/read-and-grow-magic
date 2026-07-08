@@ -17,8 +17,8 @@ const QK = {
 };
 
 function useCompanyId() {
-  const { activeCompanyId } = useEnterprise() as any;
-  return activeCompanyId as string | undefined;
+  const { currentCompany } = useEnterprise() as any;
+  return currentCompany?.id as string | undefined;
 }
 
 export function useNPSStats() {
