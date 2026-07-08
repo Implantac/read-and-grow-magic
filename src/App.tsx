@@ -86,6 +86,7 @@ const CreditRiskDashboard = lazy(() => import("./pages/credit/RiskDashboard"));
 const CreditAnalysis = lazy(() => import("./pages/credit/CreditAnalysis"));
 const CreditOrderBlocks = lazy(() => import("./pages/credit/OrderBlocks"));
 const CreditCollections = lazy(() => import("./pages/credit/Collections"));
+const SuccessDashboard = lazy(() => import("./modules/success/SuccessDashboard"));
 
 
 
