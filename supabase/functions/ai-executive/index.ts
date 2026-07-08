@@ -1715,11 +1715,17 @@ export async function handleCEOBrief(supabase: any, lovableKey: string, corsHead
   const kpiRows = await persistKPIs(supabase, kpis, forecast, companyId);
   await recordLearning(supabase, data, companyId);
 
+  // Fonte única de verdade — mesmos números do Dashboard/Cérebro
+  const canonical = await buildCanonicalMetrics(supabase, companyId ?? null);
+  const canonicalBlock = formatCanonicalBlock(canonical);
+
   // Detecta se há dados reais suficientes para análise confiável
   // Usa o helper compartilhado (campos plurais conforme fetchAllData)
   const hasRealData = checkHasRealData(data);
 
   const ceoPrompt = await getSystemPrompt('CEO', `Prioridades: Proteger caixa, maximizar lucro, antecipar problemas, decidir (não descrever).
+
+${canonicalBlock}
 
 ## ESTRUTURA OBRIGATÓRIA DA RESPOSTA (JSON/Markdown)
 ## 👑 Veredicto Executivo
@@ -1731,6 +1737,7 @@ export async function handleCEOBrief(supabase: any, lovableKey: string, corsHead
 ## ⚡ Prioridade do Dia (Top 3)
 
 - Valores em **R$ X.XXX,XX**, porcentagens em **negrito**.
+- Use SOMENTE números do bloco "MÉTRICAS CANÔNICAS" acima.
 - Tom direto de dono.`, supabase, 'ai-executive-ceo-brief');
 
   const userPayload = {
