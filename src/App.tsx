@@ -86,6 +86,7 @@ const CreditRiskDashboard = lazy(() => import("./pages/credit/RiskDashboard"));
 const CreditAnalysis = lazy(() => import("./pages/credit/CreditAnalysis"));
 const CreditOrderBlocks = lazy(() => import("./pages/credit/OrderBlocks"));
 const CreditCollections = lazy(() => import("./pages/credit/Collections"));
+const SuccessDashboard = lazy(() => import("./modules/success/SuccessDashboard"));
 
 
 
@@ -178,6 +179,8 @@ const App = () => (
                 <Route path="/credito/bloqueios" element={<RequirePermission resource="credit.blocks" action="view"><CreditOrderBlocks /></RequirePermission>} />
                 <Route path="/credito/cobranca" element={<RequirePermission resource="credit.collections" action="view"><CreditCollections /></RequirePermission>} />
                 <Route path="/credito" element={<Navigate to="/credito/dashboard" replace />} />
+                <Route path="/success" element={<ModuleErrorBoundary moduleName="Use Success"><SuccessDashboard /></ModuleErrorBoundary>} />
+
 
 
                 <Route path="/upgrade" element={<Upgrade />} />

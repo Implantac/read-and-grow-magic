@@ -86,6 +86,11 @@ export const navigationSections: NavSection[] = [
         icon: 'Brain',
       },
       {
+        title: '💚 Use Success',
+        href: '/success',
+        icon: 'Heart',
+      },
+      {
         title: '🧠 Cérebro Nativo',
         href: '/executive/brain',
         icon: 'Sparkles',
