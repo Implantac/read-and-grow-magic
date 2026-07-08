@@ -33,6 +33,10 @@ export interface SuccessProductInsight {
   sale_price: number;
   cost_price: number;
   capital_locked: number;
+  subcategory?: string;
+  last_sale_at: string | null;
+  days_since_last_sale: number | null; // null => nunca vendeu no período analisado
+  reasons: string[];
 }
 
 export interface SuccessSubcategoryStock {
