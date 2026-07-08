@@ -19,7 +19,7 @@ export default function Settings() {
   const { data: webhooks = [], isLoading } = useNPSWebhooks();
   const saveWH = useSaveWebhook();
   const qc = useQueryClient();
-  const { activeCompanyId } = useEnterprise() as any;
+  const { currentCompany } = useEnterprise() as any; const activeCompanyId = currentCompany?.id;
   const delWH = useMutation({
     mutationFn: async (id: string) => { const { error } = await supabase.from('nps_webhooks').delete().eq('id', id); if (error) throw error; },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['nps'] }); toast.success('Removido'); },

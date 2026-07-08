@@ -32,7 +32,7 @@ export default function NPSDashboard() {
 
   const byCity = useMemo(() => {
     const map = new Map<string, number>();
-    answers.forEach((a: any) => { const c = a.clients?.city ?? a.city ?? 'N/D'; map.set(c, (map.get(c) ?? 0) + 1); });
+    answers.forEach((a: any) => { const c = a.clients?.address_city ?? a.city ?? 'N/D'; map.set(c, (map.get(c) ?? 0) + 1); });
     return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8);
   }, [answers]);
 

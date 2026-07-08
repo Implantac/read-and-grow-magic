@@ -16,7 +16,7 @@ export default function Reports() {
   const grouped = useMemo(() => {
     const map = new Map<string, { key: string; total: number; p: number; d: number; pas: number; nps: number }>();
     answers.forEach((a: any) => {
-      const key = groupBy === 'city' ? (a.clients?.city ?? a.city ?? 'N/D')
+      const key = groupBy === 'city' ? (a.clients?.address_city ?? a.city ?? 'N/D')
         : groupBy === 'segment' ? (a.clients?.segment ?? 'N/D')
         : groupBy === 'category' ? a.category
         : (a.responded_at ?? '').slice(0, 7);
