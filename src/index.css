@@ -315,10 +315,11 @@
     word-break: break-word;
   }
 
-  /* Tables scroll horizontally on narrow screens instead of breaking layout */
-  .table-responsive,
-  main table {
-    display: block;
+  /* Tables scroll horizontally on narrow screens instead of breaking layout.
+   * Apply .table-responsive on the wrapper of a raw <table>. shadcn's Table
+   * component already ships its own overflow-auto wrapper, so we DON'T force
+   * display:block on every <table> (that would break table semantics). */
+  .table-responsive {
     width: 100%;
     max-width: 100%;
     overflow-x: auto;
