@@ -179,6 +179,8 @@ const App = () => (
                 <Route path="/credito/bloqueios" element={<RequirePermission resource="credit.blocks" action="view"><CreditOrderBlocks /></RequirePermission>} />
                 <Route path="/credito/cobranca" element={<RequirePermission resource="credit.collections" action="view"><CreditCollections /></RequirePermission>} />
                 <Route path="/credito" element={<Navigate to="/credito/dashboard" replace />} />
+                <Route path="/success" element={<ModuleErrorBoundary moduleName="Use Success"><SuccessDashboard /></ModuleErrorBoundary>} />
+
 
 
                 <Route path="/upgrade" element={<Upgrade />} />
