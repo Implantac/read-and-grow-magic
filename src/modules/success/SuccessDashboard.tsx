@@ -129,6 +129,63 @@ export default function SuccessDashboard() {
                 <p className="text-xl font-bold">{health.commercial}</p>
               </div>
             </div>
+
+            {/* Detalhamento por pilar */}
+            <div className="pt-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Como cada pilar contribui
+                </p>
+                <span className="text-[10px] text-muted-foreground">
+                  Σ contribuições = {health.pillars.reduce((a, p) => a + p.contribution, 0).toFixed(1)} / 100
+                </span>
+              </div>
+              <div className="space-y-2">
+                {health.pillars.map((p) => {
+                  const barColor =
+                    p.status === "good" ? "bg-emerald-500"
+                    : p.status === "warn" ? "bg-amber-500"
+                    : "bg-red-500";
+                  const dot =
+                    p.status === "good" ? "bg-emerald-500"
+                    : p.status === "warn" ? "bg-amber-500"
+                    : "bg-red-500";
+                  return (
+                    <div key={p.key} className="rounded-lg border p-3 space-y-1.5 bg-card/40">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className={cn("h-2 w-2 rounded-full shrink-0", dot)} />
+                          <p className="text-sm font-semibold truncate">{p.label}</p>
+                          <Badge variant="outline" className="text-[10px] font-mono">
+                            peso {Math.round(p.weight * 100)}%
+                          </Badge>
+                        </div>
+                        <div className="flex items-baseline gap-2 shrink-0">
+                          <span className="text-[10px] text-muted-foreground">nota</span>
+                          <span className="font-mono font-bold tabular-nums">{p.score}</span>
+                          <span className="text-[10px] text-muted-foreground">→</span>
+                          <span className="font-mono font-bold tabular-nums text-primary">
+                            +{p.contribution.toFixed(1)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                        <div
+                          className={cn("h-full transition-all", barColor)}
+                          style={{ width: `${Math.max(2, p.score)}%` }}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-muted-foreground">{p.metricLabel}</span>
+                        <span className="font-mono tabular-nums font-medium">{p.metricValue}</span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">{p.explanation}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
             <div className="flex flex-wrap gap-1.5 pt-1">
               {health.drivers.map((d, i) => (
                 <Badge key={i} variant="secondary" className="text-[11px] font-normal">
