@@ -335,14 +335,17 @@ export default function SuccessDashboard() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between gap-2">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Snowflake className="h-4 w-4 text-amber-500" /> Produtos sem giro
-              </CardTitle>
+              <Link to="/success/produtos/sem-giro" className="group inline-flex items-center gap-1.5 hover:underline underline-offset-4">
+                <CardTitle className="flex items-center gap-2 text-base group-hover:text-primary transition-colors">
+                  <Snowflake className="h-4 w-4 text-amber-500" /> Produtos sem giro
+                </CardTitle>
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+              </Link>
               <Badge variant="outline" className="text-[10px]">
                 {totals.stagnantSkuCount} SKUs · {brl(totals.stagnantCapital)}
               </Badge>
             </div>
-            <p className="text-[11px] text-muted-foreground">0 vendas nos últimos 90 dias · ordenado por capital imobilizado</p>
+            <p className="text-[11px] text-muted-foreground">0 vendas nos últimos 90 dias · ordenado por capital imobilizado · <Link to="/success/produtos/sem-giro" className="text-primary hover:underline">ver todos</Link></p>
           </CardHeader>
           <CardContent className="space-y-2">
             {slowMoving.length === 0 && <p className="text-sm text-muted-foreground">Todos os SKUs venderam nos últimos 90 dias. 🎉</p>}
