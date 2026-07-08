@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const brl = (v: number) =>
-  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+  v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function GradePill({ grade, score }: { grade: string; score: number }) {
   const color =

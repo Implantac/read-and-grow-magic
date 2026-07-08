@@ -478,7 +478,7 @@ export function useSuccessData() {
           contribution: Math.round(cashScore * wCash * 10) / 10,
           status: cashflow.net >= 0 ? (cashflow.net > 50000 ? "good" : "warn") : "bad",
           metricLabel: "Saldo líquido projetado 90d",
-          metricValue: cashflow.net.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }),
+          metricValue: cashflow.net.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 2 }),
           explanation: cashflow.net >= 0
             ? "Entradas projetadas superam saídas — capacidade de honrar compromissos preservada."
             : "Saídas projetadas maiores que entradas — risco de aperto de caixa nos próximos 90 dias.",
@@ -535,7 +535,7 @@ export function useSuccessData() {
       // AI-STYLE RECOMMENDATIONS — data-driven, concrete numbers, PT-BR
       // ================================================================
       const recommendations: SuccessAIRecommendation[] = [];
-      const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+      const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
       // 1) Estoque acima do ideal por família (ex.: camisetas)
       const bloatedSub = subcategoryStock.find((s) => s.stagnation_pct >= 40 && s.capital_locked > 1000);
