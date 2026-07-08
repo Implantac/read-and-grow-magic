@@ -184,7 +184,7 @@ export function EnterpriseKPICard(props: EnterpriseKPICardProps) {
             <DeltaChip label="A" value={deltas?.year} />
             {impact?.financial != null && (
               <Badge variant="outline" className="text-[10px] h-5">
-                Impacto {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(impact.financial)}
+                Impacto {new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(impact.financial)}
               </Badge>
             )}
           </div>
