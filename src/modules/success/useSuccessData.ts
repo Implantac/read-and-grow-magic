@@ -12,6 +12,7 @@ export interface SuccessTopCustomer {
   client_name: string;
   total: number;
   orders: number;
+  last_purchase_days: number | null;
 }
 
 export interface SuccessDelinquent {
@@ -27,9 +28,29 @@ export interface SuccessProductInsight {
   quantity: number;
   unit: string;
   sold_last_90d: number;
+  revenue_last_90d: number;
   margin_pct: number;
   sale_price: number;
   cost_price: number;
+  capital_locked: number;
+}
+
+export interface SuccessSubcategoryStock {
+  subcategory: string;
+  skus: number;
+  stock_qty: number;
+  capital_locked: number;
+  sold_90d: number;
+  turnover_ratio: number; // sold_90d / stock_qty
+  stagnation_pct: number; // % of SKUs with 0 sales in 90d
+}
+
+export interface SuccessSupplierSpend {
+  supplier_name: string;
+  spend_90d: number;
+  orders: number;
+  share_pct: number;
+  potential_savings: number;
 }
 
 export interface SuccessCashFlow90d {
@@ -51,13 +72,13 @@ export type HealthPillarKey = "cashflow" | "delinquency" | "margin" | "trend";
 export interface HealthPillar {
   key: HealthPillarKey;
   label: string;
-  score: number;         // 0-100 (nota do pilar)
-  weight: number;        // 0-1 (peso na composição)
-  contribution: number;  // score * weight (pontos aportados ao score final)
+  score: number;
+  weight: number;
+  contribution: number;
   status: "good" | "warn" | "bad";
-  metricLabel: string;   // ex.: "Saldo líquido 90d"
-  metricValue: string;   // ex.: "R$ 12.400"
-  explanation: string;   // como o pilar impacta
+  metricLabel: string;
+  metricValue: string;
+  explanation: string;
 }
 
 export interface SuccessHealthBreakdown {
@@ -76,6 +97,7 @@ export interface SuccessAIRecommendation {
   title: string;
   detail: string;
   impact?: string;
+  priority: number; // 1 = crítica, 5 = informativa
 }
 
 export interface SuccessData {
@@ -84,7 +106,11 @@ export interface SuccessData {
   cashflow: SuccessCashFlow90d;
   slowMoving: SuccessProductInsight[];
   topMargin: SuccessProductInsight[];
+  bestSellers: SuccessProductInsight[];
+  subcategoryStock: SuccessSubcategoryStock[];
+  topSuppliers: SuccessSupplierSpend[];
   topCustomers: SuccessTopCustomer[];
+  inactiveTopCustomers: SuccessTopCustomer[];
   delinquents: SuccessDelinquent[];
   monthGoal: { goal: number; achieved: number; pct: number };
   recommendations: SuccessAIRecommendation[];
@@ -96,6 +122,8 @@ export interface SuccessData {
     revenuePrevWeek: number;
     activeCustomers: number;
     ordersOpen: number;
+    stagnantSkuCount: number;
+    stagnantCapital: number;
   };
 }
 
