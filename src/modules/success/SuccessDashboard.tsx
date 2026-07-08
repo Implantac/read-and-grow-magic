@@ -396,10 +396,13 @@ export default function SuccessDashboard() {
         {/* Best sellers */}
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Flame className="h-4 w-4 text-red-500" /> Mais vendidos (90d)
-            </CardTitle>
-            <p className="text-[11px] text-muted-foreground">Produtos que puxam o faturamento</p>
+            <Link to="/success/produtos/mais-vendidos" className="group inline-flex items-center gap-1.5 hover:underline underline-offset-4">
+              <CardTitle className="flex items-center gap-2 text-base group-hover:text-primary transition-colors">
+                <Flame className="h-4 w-4 text-red-500" /> Mais vendidos (90d)
+              </CardTitle>
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+            </Link>
+            <p className="text-[11px] text-muted-foreground">Produtos que puxam o faturamento · <Link to="/success/produtos/mais-vendidos" className="text-primary hover:underline">ver todos</Link></p>
           </CardHeader>
           <CardContent className="space-y-2">
             {bestSellers.length === 0 && <p className="text-sm text-muted-foreground">Sem vendas.</p>}
