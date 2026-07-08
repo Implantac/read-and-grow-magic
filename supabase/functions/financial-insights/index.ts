@@ -70,8 +70,9 @@ const handler = async (req: Request): Promise<Response> => {
       supabase.from('bank_accounts').select('balance').eq('active', true).eq('company_id', callerCompany),
       scopeBranch(supabase.from('financial_ledger').select('type,amount,entry_date,category_id').gte('entry_date', iso(d30)).eq('company_id', callerCompany)),
       scopeBranch(supabase.from('financial_ledger').select('type,amount,entry_date').gte('entry_date', iso(d60)).lt('entry_date', iso(d30)).eq('company_id', callerCompany)),
-      scopeBranch(supabase.from('accounts_receivable').select('amount,open_amount,due_date,status').neq('status', 'paid').eq('company_id', callerCompany)),
-      scopeBranch(supabase.from('accounts_payable').select('amount,open_amount,due_date,status').neq('status', 'paid').eq('company_id', callerCompany)),
+      // AR/AP: definição canônica (mesmo filtro do Dashboard/Cérebro) — status='pending', campo 'amount'.
+      scopeBranch(supabase.from('accounts_receivable').select('amount,due_date,status').eq('status', 'pending').eq('company_id', callerCompany)),
+      scopeBranch(supabase.from('accounts_payable').select('amount,due_date,status').eq('status', 'pending').eq('company_id', callerCompany)),
     ]);
 
 
