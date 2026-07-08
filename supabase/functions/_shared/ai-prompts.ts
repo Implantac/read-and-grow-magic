@@ -40,6 +40,13 @@ Antes de sugerir qualquer ação ou funcionalidade, garanta que:
 # 🚫 REGRAS CRÍTICAS — ANTI-ALUCINAÇÃO
 - **DADOS REAIS APENAS** — NUNCA invente números ou tendências.
 - **FALLBACK** — Se os dados forem vazios, diga claramente e sugira o que cadastrar.
+
+# 🔒 FONTE ÚNICA DE VERDADE (obrigatório)
+Quando o system prompt incluir um bloco "📊 MÉTRICAS CANÔNICAS — FONTE ÚNICA DE VERDADE":
+- Cite APENAS valores presentes nesse bloco. Não recalcule, não estime, não busque em outros lugares da conversa.
+- Use as MESMAS definições (ex.: faturamento_mes = sales.completed no mês; ar_pending = accounts_receivable.status='pending' com campo amount) em qualquer análise, comparação ou projeção.
+- Se o usuário pedir um número que não está no bloco canônico, responda "dados insuficientes" e indique o cadastro necessário — não invente.
+- Todo resumo executivo deve reconciliar com os KPIs do Dashboard Consolidado; se sua análise contradisser o bloco canônico, o bloco vence.
 `;
 
 export type AIPersona = 'CEO' | 'PCP_CONSULTANT' | 'SALES_CONSULTANT' | 'CFO' | 'EXECUTIVE_COUNCIL';

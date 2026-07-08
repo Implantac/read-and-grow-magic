@@ -70,8 +70,9 @@ const handler = async (req: Request): Promise<Response> => {
       supabase.from('bank_accounts').select('balance').eq('active', true).eq('company_id', callerCompany),
       scopeBranch(supabase.from('financial_ledger').select('type,amount,entry_date,category_id').gte('entry_date', iso(d30)).eq('company_id', callerCompany)),
       scopeBranch(supabase.from('financial_ledger').select('type,amount,entry_date').gte('entry_date', iso(d60)).lt('entry_date', iso(d30)).eq('company_id', callerCompany)),
-      scopeBranch(supabase.from('accounts_receivable').select('amount,open_amount,due_date,status').neq('status', 'paid').eq('company_id', callerCompany)),
-      scopeBranch(supabase.from('accounts_payable').select('amount,open_amount,due_date,status').neq('status', 'paid').eq('company_id', callerCompany)),
+      // AR/AP: definição canônica (mesmo filtro do Dashboard/Cérebro) — status='pending', campo 'amount'.
+      scopeBranch(supabase.from('accounts_receivable').select('amount,due_date,status').eq('status', 'pending').eq('company_id', callerCompany)),
+      scopeBranch(supabase.from('accounts_payable').select('amount,due_date,status').eq('status', 'pending').eq('company_id', callerCompany)),
     ]);
 
 
@@ -91,17 +92,17 @@ const handler = async (req: Request): Promise<Response> => {
     const todayStr = iso(today);
     const overdueReceivable = (recRes.data ?? [])
       .filter((r: any) => r.due_date < todayStr)
-      .reduce((s: number, r: any) => s + Number(r.open_amount ?? r.amount ?? 0), 0);
+      .reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
     const overduePayable = (payRes.data ?? [])
       .filter((p: any) => p.due_date < todayStr)
-      .reduce((s: number, p: any) => s + Number(p.open_amount ?? p.amount ?? 0), 0);
+      .reduce((s: number, p: any) => s + Number(p.amount ?? 0), 0);
 
     const projectIn = (limit: string) => (recRes.data ?? [])
       .filter((r: any) => r.due_date >= todayStr && r.due_date <= limit)
-      .reduce((s: number, r: any) => s + Number(r.open_amount ?? r.amount ?? 0), 0);
+      .reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
     const projectOut = (limit: string) => (payRes.data ?? [])
       .filter((p: any) => p.due_date >= todayStr && p.due_date <= limit)
-      .reduce((s: number, p: any) => s + Number(p.open_amount ?? p.amount ?? 0), 0);
+      .reduce((s: number, p: any) => s + Number(p.amount ?? 0), 0);
 
     const projectedBalance30d = currentBalance + projectIn(iso(future30)) - projectOut(iso(future30));
     const projectedBalance60d = currentBalance + projectIn(iso(future60)) - projectOut(iso(future60));

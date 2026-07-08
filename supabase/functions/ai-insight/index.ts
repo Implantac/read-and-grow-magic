@@ -2,6 +2,7 @@
 // Contract: { entityKey, value, delta, goal, horizon } -> { insight }
 // Uses Lovable AI Gateway with gemini-3-flash-preview and returns a strict JSON.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { buildCanonicalMetrics, formatCanonicalBlock } from "../_shared/canonical-metrics.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -73,6 +74,21 @@ Deno.serve(async (req) => {
     }
 
     const hint = ENTITY_HINTS[body.entityKey] ?? { agent: "CTO", hint: "Indicador genérico." };
+    // Fonte única de verdade: injeta métricas canônicas quando temos companyId
+    let canonicalBlock = "";
+    if (body.companyId) {
+      try {
+        const admin = createClient(
+          Deno.env.get("SUPABASE_URL")!,
+          Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+        );
+        const canonical = await buildCanonicalMetrics(admin, body.companyId);
+        canonicalBlock = "\n\n" + formatCanonicalBlock(canonical);
+      } catch (e) {
+        console.error("canonical metrics error:", e);
+      }
+    }
+
     const system = `Você é um consultor Enterprise ${hint.agent} de ERP. Responda SEMPRE em JSON válido no schema:
 {
  "root_cause": string (1-2 frases, PT-BR),
@@ -83,7 +99,8 @@ Deno.serve(async (req) => {
  "action_plan": [ { "title": string, "owner": string?, "due": string? } ] (3-5 itens),
  "automations": [ { "label": string, "action": string } ] (0-3 itens)
 }
-Sem markdown, sem texto fora do JSON.`;
+Sem markdown, sem texto fora do JSON.
+Use SOMENTE valores presentes no bloco de MÉTRICAS CANÔNICAS abaixo — se o número necessário não estiver lá, retorne financial_impact=0 e diga em root_cause que faltam dados.${canonicalBlock}`;
 
     const prompt = `Indicador: ${body.entityKey} (${hint.hint})
 Valor atual: ${body.value ?? "N/A"}
