@@ -12,6 +12,7 @@ import { Badge } from "@/ui/base/badge";
 import { Button } from "@/ui/base/button";
 import { Skeleton } from "@/ui/base/skeleton";
 import { getEntity, type EntityKey } from "@/core/entityRegistry";
+import { formatBRL } from "@/lib/formatters";
 
 interface AIInsight {
   root_cause: string;

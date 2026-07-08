@@ -78,7 +78,7 @@ export function DrillDownDrawer() {
   const displayValue =
     typeof payload.value === "number"
       ? entity.unit === "currency"
-        ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(payload.value)
+        ? formatBRL(payload.value)
         : entity.unit === "percent"
         ? `${payload.value.toFixed(1)}%`
         : payload.value.toLocaleString("pt-BR")
