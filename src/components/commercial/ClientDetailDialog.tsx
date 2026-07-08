@@ -141,12 +141,13 @@ export function ClientDetailDialog({ client, open, onOpenChange }: Props) {
         )}
 
         <Tabs defaultValue="info" className="mt-1">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="info" className="text-xs">Dados</TabsTrigger>
             <TabsTrigger value="commercial" className="text-xs">Comercial</TabsTrigger>
             <TabsTrigger value="orders" className="text-xs">Pedidos ({clientOrders.length})</TabsTrigger>
             <TabsTrigger value="financial" className="text-xs">Financeiro</TabsTrigger>
             <TabsTrigger value="timeline" className="text-xs">Histórico ({timeline.length})</TabsTrigger>
+            <TabsTrigger value="nps" className="text-xs">NPS</TabsTrigger>
           </TabsList>
 
           <TabsContent value="info" className="space-y-4 mt-4">
