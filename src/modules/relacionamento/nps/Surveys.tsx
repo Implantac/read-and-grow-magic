@@ -6,6 +6,8 @@ import {
   useSaveQuestionToBank,
   useImportQuestionsFromBank,
   useDeleteQuestionFromBank,
+  useReorderQuestion,
+  publicSurveyUrl,
 } from './hooks';
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
@@ -26,8 +28,9 @@ import { Skeleton } from '@/ui/base/skeleton';
 import { Badge } from '@/ui/base/badge';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
-import { Plus, Trash2, Library, BookmarkPlus, Search, Sparkles, Trash } from 'lucide-react';
+import { Plus, Trash2, Library, BookmarkPlus, Search, Sparkles, Trash, ArrowUp, ArrowDown, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
+
 
 const TYPES = [
   { v: 'text', label: 'Texto livre' },
@@ -104,6 +107,35 @@ export default function Surveys() {
     });
   };
 
+  const reorder = useReorderQuestion();
+
+  const move = (idx: number, dir: -1 | 1) => {
+    const target = idx + dir;
+    if (target < 0 || target >= questions.length) return;
+    const a = questions[idx] as any;
+    const b = questions[target] as any;
+    reorder.mutate({ id: a.id, order_index: b.order_index ?? target });
+    reorder.mutate({ id: b.id, order_index: a.order_index ?? idx });
+  };
+
+  const previewCampaign = async () => {
+    if (!campaignId) return;
+    // Pega um token existente da campanha para abrir a pesquisa como o cliente veria
+    const { data } = await supabase
+      .from('nps_tokens')
+      .select('token, nps_invites!inner(campaign_id,status)')
+      .eq('nps_invites.campaign_id', campaignId)
+      .neq('nps_invites.status', 'responded')
+      .limit(1)
+      .maybeSingle();
+    if (data?.token) {
+      window.open(`${window.location.origin}/nps/${data.token}`, '_blank');
+    } else {
+      toast.info('Gere um convite primeiro na aba Convites para visualizar como o cliente verá.');
+    }
+  };
+
+
   return (
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-3">
@@ -113,9 +145,14 @@ export default function Surveys() {
             Além da nota NPS, adicione perguntas específicas por campanha. Use a <strong>biblioteca de perguntas</strong> para reaproveitar em segundos.
           </p>
         </div>
-        <Button variant="outline" onClick={() => setBankOpen(true)} disabled={!campaignId}>
-          <Library className="mr-2 h-4 w-4" /> Biblioteca de perguntas
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={previewCampaign} disabled={!campaignId}>
+            <ExternalLink className="mr-2 h-4 w-4" /> Visualizar
+          </Button>
+          <Button variant="outline" onClick={() => setBankOpen(true)} disabled={!campaignId}>
+            <Library className="mr-2 h-4 w-4" /> Biblioteca de perguntas
+          </Button>
+        </div>
       </div>
 
       <div className="max-w-md">
@@ -188,6 +225,12 @@ export default function Surveys() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
+                      <Button size="icon" variant="ghost" title="Mover para cima" disabled={i === 0} onClick={() => move(i, -1)}>
+                        <ArrowUp className="h-4 w-4" />
+                      </Button>
+                      <Button size="icon" variant="ghost" title="Mover para baixo" disabled={i === questions.length - 1} onClick={() => move(i, 1)}>
+                        <ArrowDown className="h-4 w-4" />
+                      </Button>
                       <Button size="icon" variant="ghost" title="Salvar na biblioteca" onClick={() => saveCurrentToBank(q)}>
                         <BookmarkPlus className="h-4 w-4" />
                       </Button>
@@ -207,6 +250,7 @@ export default function Surveys() {
           )}
         </>
       )}
+
 
       <BankDialog open={bankOpen} onOpenChange={setBankOpen} campaignId={campaignId} currentCount={questions.length} />
     </div>

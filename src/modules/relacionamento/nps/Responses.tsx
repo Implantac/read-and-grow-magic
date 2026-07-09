@@ -13,7 +13,12 @@ import { toast } from 'sonner';
 export default function Responses() {
   const { data: campaigns = [] } = useNPSCampaigns();
   const [campaignId, setCampaignId] = useState<string | undefined>();
-  const { data: answers = [], isLoading } = useNPSAnswers(campaignId ?? null);
+  const [page, setPage] = useState(0);
+  const pageSize = 25;
+  const { data: allAnswers = [], isLoading } = useNPSAnswers(campaignId ?? null, 5000);
+  const total = allAnswers.length;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const answers = allAnswers.slice(page * pageSize, page * pageSize + pageSize);
 
   const analyze = async (id: string) => {
     toast.loading('Analisando com IA...', { id: 'ai' });
@@ -31,7 +36,7 @@ export default function Responses() {
 
       <div className="max-w-md">
         <Label>Filtrar por campanha</Label>
-        <Select value={campaignId ?? 'all'} onValueChange={(v) => setCampaignId(v === 'all' ? undefined : v)}>
+        <Select value={campaignId ?? 'all'} onValueChange={(v) => { setCampaignId(v === 'all' ? undefined : v); setPage(0); }}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas</SelectItem>
@@ -68,8 +73,21 @@ export default function Responses() {
             </Card>
           ))}
           {answers.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma resposta ainda.</p>}
+
+          {total > pageSize && (
+            <div className="flex items-center justify-between pt-3 text-sm">
+              <span className="text-muted-foreground">
+                Página {page + 1} de {totalPages} · {total} resposta(s)
+              </span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(page - 1)}>Anterior</Button>
+                <Button variant="outline" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage(page + 1)}>Próxima</Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
+
