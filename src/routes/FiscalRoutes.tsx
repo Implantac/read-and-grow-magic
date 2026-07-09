@@ -12,6 +12,7 @@ const DIFALPage = lazy(() => import("../modules/fiscal/DIFAL"));
 const SpedFilesPage = lazy(() => import("../modules/fiscal/SpedFiles"));
 const FiscalReportsPage = lazy(() => import("../modules/fiscal/FiscalReports"));
 const ReinfPage = lazy(() => import("../modules/fiscal/Reinf"));
+const NFeCertificatePage = lazy(() => import("../modules/fiscal/NFeCertificate"));
 
 export const FiscalRoutes = [
   <Route key="fiscal-index" index element={<Navigate to="dashboard" replace />} />,
