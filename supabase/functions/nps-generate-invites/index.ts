@@ -15,8 +15,12 @@ Deno.serve(async (req) => {
     const anon = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!, {
       global: { headers: { Authorization: auth } },
     });
-    const { data: cl } = await anon.auth.getClaims(auth.replace('Bearer ', ''));
-    if (!cl?.claims?.sub) return json({ error: 'Não autenticado' }, 401);
+    const { data: userData, error: userErr } = await anon.auth.getUser();
+    if (userErr || !userData?.user?.id) {
+      console.error('nps-generate-invites auth error', userErr);
+      return json({ error: 'Não autenticado' }, 401);
+    }
+    const userId = userData.user.id;
 
     const { campaign_id, client_ids, channel = 'link', expires_in_days } = await req.json();
     if (!campaign_id || !Array.isArray(client_ids) || client_ids.length === 0) {
@@ -27,7 +31,7 @@ Deno.serve(async (req) => {
     const { data: campaign } = await admin.from('nps_campaigns').select('id,company_id').eq('id', campaign_id).maybeSingle();
     if (!campaign) return json({ error: 'Campanha inexistente' }, 404);
 
-    const { data: profile } = await admin.from('profiles').select('company_id').eq('id', cl.claims.sub).maybeSingle();
+    const { data: profile } = await admin.from('profiles').select('company_id').eq('id', userId).maybeSingle();
     if (!profile || profile.company_id !== campaign.company_id) return json({ error: 'Sem permissão' }, 403);
 
     const expires_at = expires_in_days ? new Date(Date.now() + expires_in_days * 86400000).toISOString() : null;
@@ -55,7 +59,7 @@ Deno.serve(async (req) => {
 
     await admin.from('nps_logs').insert({
       company_id: campaign.company_id, campaign_id, event: 'invite.batch_created',
-      payload: { count: invites.length }, user_id: cl.claims.sub,
+      payload: { count: invites.length }, user_id: userId,
     });
 
     return json({ ok: true, invites, tokens });
