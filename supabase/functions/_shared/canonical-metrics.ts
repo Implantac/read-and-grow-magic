@@ -115,6 +115,10 @@ export async function buildCanonicalMetrics(
     fiscal: { nfe_autorizadas_mes: 0, nfe_rascunho: 0 },
     producao: { op_ativas: 0, op_concluidas_total: 0 },
     compras: { aguardando_aprovacao: 0 },
+    relacionamento: {
+      nps_score: 0, nps_total_respostas: 0, nps_promotores: 0, nps_neutros: 0,
+      nps_detratores: 0, nps_taxa_resposta_pct: 0, nps_comentarios_criticos: 0,
+    },
     _definitions: CANONICAL_DEFINITIONS,
     _regra: "Estes números são idênticos aos exibidos no Dashboard Consolidado. Qualquer valor não presente aqui = 'dados insuficientes'.",
   };
