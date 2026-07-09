@@ -52,6 +52,13 @@ export default function Invites() {
   const [qrUrl, setQrUrl] = useState<string | null>(null);
 
   const [selectedInvites, setSelectedInvites] = useState<Set<string>>(new Set());
+  const [bulkResult, setBulkResult] = useState<BulkResult>(null);
+  const confirm = useConfirm();
+
+  const inviteNameById = (id: string) => {
+    const inv = (invites as any[]).find((i) => i.id === id);
+    return inv?.clients?.name || inv?.clients?.email || inv?.clients?.phone || id.slice(0, 8);
+  };
 
   const { data: clients = [] } = useQuery({
     queryKey: ['nps', 'clients-picker', activeCompanyId, search],
