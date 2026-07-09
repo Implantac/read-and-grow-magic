@@ -21361,6 +21361,10 @@ export type Database = {
           skipped: number
         }[]
       }
+      increment_nps_bank_usage: {
+        Args: { p_ids: string[] }
+        Returns: undefined
+      }
       increment_usage: {
         Args: { _company_id: string; _delta?: number; _metric: string }
         Returns: number
