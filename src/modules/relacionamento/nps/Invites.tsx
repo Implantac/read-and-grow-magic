@@ -173,7 +173,24 @@ export default function Invites() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (d: any) => { qc.invalidateQueries({ queryKey: ['nps'] }); toast.success(`Enviados: ${d?.sent ?? 0} · Falhas: ${d?.failed ?? 0}`); setSelectedInvites(new Set()); },
+    onSuccess: (d: any) => {
+      qc.invalidateQueries({ queryKey: ['nps'] });
+      const sent = d?.sent ?? 0;
+      const failed = d?.failed ?? 0;
+      const results: any[] = Array.isArray(d?.results) ? d.results : [];
+      const items: BulkResultItem[] = results.map((r) => ({
+        id: r.id,
+        name: inviteNameById(r.id),
+        ok: !!r.ok,
+        error: r.error,
+      }));
+      if (failed === 0) toast.success(`Enviados: ${sent}`);
+      else toast.error(`Enviados: ${sent} · Falhas: ${failed}`);
+      if (items.length > 0 && (failed > 0 || items.length > 1)) {
+        setBulkResult({ title: 'Resultado do envio', items });
+      }
+      setSelectedInvites(new Set());
+    },
     onError: (e: any) => toast.error(e.message ?? 'Erro ao enviar'),
   });
 
@@ -195,13 +212,68 @@ export default function Invites() {
     setSelectedInvites(s);
   };
 
-  const copyAllLinks = () => {
+  const copyAllLinks = async () => {
     const ids = Array.from(selectedInvites);
-    const links = ids.map((id) => tokensByInvite.get(id)).filter(Boolean).map((t) => publicSurveyUrl(t!)).join('\n');
-    if (!links) { toast.error('Nenhum link disponível na página atual'); return; }
-    navigator.clipboard.writeText(links);
-    toast.success(`${links.split('\n').length} link(s) copiado(s)`);
+    if (ids.length === 0) return;
+    const { data: tokens, error } = await supabase.from('nps_tokens').select('invite_id,token').in('invite_id', ids);
+    if (error) { toast.error('Erro ao buscar tokens'); return; }
+    const map = new Map<string, string>();
+    (tokens ?? []).forEach((t: any) => { if (t.invite_id) map.set(t.invite_id, t.token); });
+    const items: BulkResultItem[] = ids.map((id) => {
+      const tk = map.get(id);
+      return tk
+        ? { id, name: inviteNameById(id), ok: true }
+        : { id, name: inviteNameById(id), ok: false, error: 'Token indisponível' };
+    });
+    const links = items.filter((r) => r.ok).map((r) => publicSurveyUrl(map.get(r.id)!)).join('\n');
+    const okCount = items.filter((r) => r.ok).length;
+    const failCount = items.length - okCount;
+    if (!links) {
+      toast.error('Nenhum link disponível');
+      setBulkResult({ title: 'Copiar links', items });
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(links);
+      if (failCount === 0) toast.success(`${okCount} link(s) copiado(s)`);
+      else { toast.error(`${okCount} copiado(s) · ${failCount} sem link`); setBulkResult({ title: 'Copiar links', items }); }
+    } catch {
+      toast.error('Não foi possível copiar para a área de transferência');
+    }
   };
+
+  const confirmSendBulk = async () => {
+    if (selectedSendable.length === 0) return;
+    const ok = await confirm({
+      title: `Enviar ${selectedSendable.length} convite(s) por e-mail?`,
+      description: 'Os convites elegíveis (pendentes ou com falha, canal e-mail) serão disparados agora.',
+      confirmLabel: 'Enviar',
+    });
+    if (ok) sendInvites.mutate(selectedSendable);
+  };
+
+  const confirmRevokeBulk = async () => {
+    const ids = Array.from(selectedInvites);
+    if (ids.length === 0) return;
+    const ok = await confirm({
+      title: `Revogar ${ids.length} convite(s)?`,
+      description: 'Links revogados deixam de aceitar respostas. Esta ação não pode ser desfeita.',
+      confirmLabel: 'Revogar',
+      variant: 'destructive',
+    });
+    if (ok) revoke.mutate(ids);
+  };
+
+  const confirmRevokeOne = async (id: string) => {
+    const ok = await confirm({
+      title: 'Revogar convite?',
+      description: `O link enviado para ${inviteNameById(id)} deixará de funcionar.`,
+      confirmLabel: 'Revogar',
+      variant: 'destructive',
+    });
+    if (ok) revoke.mutate([id]);
+  };
+
 
   const exportCsv = () => {
     if (filteredInvites.length === 0) { toast.error('Sem dados para exportar'); return; }
