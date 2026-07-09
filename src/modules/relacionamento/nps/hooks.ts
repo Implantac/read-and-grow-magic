@@ -379,3 +379,65 @@ export function useNPSTokenForInvite(inviteId?: string | null) {
     },
   });
 }
+
+// ============ Follow-ups (detratores) ============
+export function useNPSFollowups(status?: string) {
+  const companyId = useCompanyId();
+  return useQuery({
+    queryKey: ['nps', 'followups', companyId, status ?? 'all'],
+    enabled: !!companyId,
+    queryFn: async () => {
+      let q = (supabase.from('nps_followups' as any) as any)
+        .select('*, clients(name,email,phone,address_city), nps_campaigns(name)')
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false });
+      if (status && status !== 'all') q = q.eq('status', status);
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data as any[]) ?? [];
+    },
+  });
+}
+
+export function useUpdateFollowup() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...patch }: { id: string } & Record<string, any>) => {
+      const { error } = await (supabase.from('nps_followups' as any) as any).update(patch).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['nps', 'followups'] }); toast.success('Follow-up atualizado'); },
+    onError: (e: any) => toast.error(e.message),
+  });
+}
+
+// ============ Logs ============
+export function useNPSLogs(filter?: { level?: string; event?: string }) {
+  const companyId = useCompanyId();
+  return useQuery({
+    queryKey: ['nps', 'logs', companyId, filter?.level ?? 'all', filter?.event ?? ''],
+    enabled: !!companyId,
+    queryFn: async () => {
+      let q = supabase.from('nps_logs').select('*').eq('company_id', companyId!).order('created_at', { ascending: false }).limit(500);
+      if (filter?.level && filter.level !== 'all') q = q.eq('level', filter.level);
+      if (filter?.event) q = q.ilike('event', `%${filter.event}%`);
+      const { data, error } = await q;
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+}
+
+// ============ Reorder questions ============
+export function useReorderQuestion() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, order_index }: { id: string; order_index: number }) => {
+      const { error } = await supabase.from('nps_questions').update({ order_index }).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['nps'] }),
+    onError: (e: any) => toast.error(e.message),
+  });
+}
+
