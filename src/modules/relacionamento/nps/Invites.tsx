@@ -466,7 +466,7 @@ export default function Invites() {
                             </Button>
                           )}
                           {i.status !== 'responded' && i.status !== 'revoked' && (
-                            <Button size="sm" variant="ghost" title="Revogar" onClick={() => revoke.mutate([i.id])}>
+                            <Button size="sm" variant="ghost" title="Revogar" onClick={() => confirmRevokeOne(i.id)}>
                               <Trash2 className="h-3.5 w-3.5 text-red-500" />
                             </Button>
                           )}
