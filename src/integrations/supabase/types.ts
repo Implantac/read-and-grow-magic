@@ -10034,6 +10034,62 @@ export type Database = {
           },
         ]
       }
+      nps_question_bank: {
+        Row: {
+          category: string
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          is_global: boolean
+          options: Json | null
+          question_text: string
+          question_type: string
+          required: boolean
+          tags: string[]
+          updated_at: string
+          usage_count: number
+        }
+        Insert: {
+          category: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_global?: boolean
+          options?: Json | null
+          question_text: string
+          question_type?: string
+          required?: boolean
+          tags?: string[]
+          updated_at?: string
+          usage_count?: number
+        }
+        Update: {
+          category?: string
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_global?: boolean
+          options?: Json | null
+          question_text?: string
+          question_type?: string
+          required?: boolean
+          tags?: string[]
+          updated_at?: string
+          usage_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_question_bank_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nps_questions: {
         Row: {
           campaign_id: string
@@ -21304,6 +21360,10 @@ export type Database = {
           inserted: number
           skipped: number
         }[]
+      }
+      increment_nps_bank_usage: {
+        Args: { p_ids: string[] }
+        Returns: undefined
       }
       increment_usage: {
         Args: { _company_id: string; _delta?: number; _metric: string }
