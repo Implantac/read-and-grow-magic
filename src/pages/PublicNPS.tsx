@@ -128,7 +128,7 @@ export default function PublicNPS() {
     );
 
   if (state === 'done')
-    return <DoneView survey={survey} hasComment={comment.trim().length > 5} />;
+    return <DoneView survey={survey} hasComment={comment.trim().length > 5} token={token} projectUrl={projectUrl} anon={anon} />;
 
 
   const c = survey.campaign;
