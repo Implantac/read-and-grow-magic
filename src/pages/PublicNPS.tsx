@@ -357,3 +357,68 @@ export default function PublicNPS() {
     </div>
   );
 }
+
+function DoneView({ survey, hasComment }: { survey: any; hasComment: boolean }) {
+  const primary = survey?.campaign?.primary_color ?? '#10b981';
+  const [phase, setPhase] = useState<'analyzing' | 'complete'>(hasComment ? 'analyzing' : 'complete');
+  const [progress, setProgress] = useState(hasComment ? 8 : 100);
+
+  useEffect(() => {
+    if (!hasComment) return;
+    const started = Date.now();
+    const duration = 9000; // ~9s p/ acompanhar o tempo médio da IA
+    const id = window.setInterval(() => {
+      const pct = Math.min(97, Math.round(((Date.now() - started) / duration) * 100));
+      setProgress(pct);
+      if (Date.now() - started >= duration) {
+        window.clearInterval(id);
+        setProgress(100);
+        setPhase('complete');
+      }
+    }, 200);
+    return () => window.clearInterval(id);
+  }, [hasComment]);
+
+  return (
+    <div className="min-h-screen grid place-items-center p-4" style={{ background: '#0f172a', color: '#f1f5f9' }}>
+      <Card className="max-w-md w-full bg-slate-900 border-slate-800">
+        <CardContent className="pt-8 text-center space-y-4">
+          <CheckCircle2 className="h-14 w-14 mx-auto" style={{ color: primary }} />
+          <h1 className="text-2xl font-bold">{survey?.campaign?.thanks_title ?? 'Obrigado!'}</h1>
+          <p className="text-slate-300">{survey?.campaign?.thanks_message ?? 'Sua opinião é muito importante.'}</p>
+
+          {hasComment && (
+            <div
+              className="mt-4 rounded-lg border border-slate-800 bg-slate-950/60 p-4 text-left space-y-2 transition-all"
+              aria-live="polite"
+            >
+              <div className="flex items-center gap-2 text-sm">
+                {phase === 'analyzing' ? (
+                  <>
+                    <Sparkles className="h-4 w-4 animate-pulse" style={{ color: primary }} />
+                    <span className="font-medium">Analisando seu feedback com IA…</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="h-4 w-4" style={{ color: primary }} />
+                    <span className="font-medium">Análise concluída</span>
+                  </>
+                )}
+              </div>
+              <Progress value={progress} className="h-1 bg-slate-800" />
+              <p className="text-xs text-slate-400">
+                {phase === 'analyzing'
+                  ? 'Estamos identificando sentimento e temas do seu comentário para ajudar a empresa a melhorar. Você já pode fechar esta página.'
+                  : 'Seu comentário foi processado e encaminhado à equipe responsável. Obrigado!'}
+              </p>
+            </div>
+          )}
+
+          <p className="flex items-center justify-center gap-2 text-xs text-slate-500 pt-2">
+            <ShieldCheck className="h-3.5 w-3.5" /> Respostas confidenciais.
+          </p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
