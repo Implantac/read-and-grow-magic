@@ -100,11 +100,23 @@ export default function Invites() {
 
   const revoke = useMutation({
     mutationFn: async (ids: string[]) => {
-      const { error } = await supabase.from('nps_invites').update({ status: 'revoked' }).in('id', ids);
-      if (error) throw error;
-      return ids.length;
+      const results = await Promise.all(
+        ids.map(async (id) => {
+          const { error } = await supabase.from('nps_invites').update({ status: 'revoked' }).eq('id', id);
+          return { id, name: inviteNameById(id), ok: !error, error: error?.message };
+        }),
+      );
+      return results;
     },
-    onSuccess: (n) => { qc.invalidateQueries({ queryKey: ['nps'] }); toast.success(`${n} convite(s) revogado(s)`); setSelectedInvites(new Set()); },
+    onSuccess: (items) => {
+      qc.invalidateQueries({ queryKey: ['nps'] });
+      const ok = items.filter((r) => r.ok).length;
+      const fail = items.length - ok;
+      if (fail === 0) toast.success(`${ok} convite(s) revogado(s)`);
+      else toast.error(`${ok} revogado(s) · ${fail} falha(s)`);
+      if (fail > 0) setBulkResult({ title: 'Resultado da revogação', items });
+      setSelectedInvites(new Set());
+    },
     onError: (e: any) => toast.error(e.message),
   });
 
