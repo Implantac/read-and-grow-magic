@@ -106,7 +106,7 @@ export default function Dashboard() {
   const {
     mainKPIs = [], commercialKPIs = [], financialKPIs = [], inventoryKPIs = [],
     productionKPIs = [], purchasingKPIs = [], wmsKPIs = [],
-    hrKPIs = [], crmKPIs = [], logisticKPIs = [],
+    hrKPIs = [], crmKPIs = [], logisticKPIs = [], npsKPIs = [],
     statusDistribution = [], alerts = [],
   } = data || {};
 
