@@ -81,8 +81,12 @@ export default function PublicNPS() {
     try {
       const payloadAnswers: Array<{ question_id: string; value_text?: string; value_number?: number; value_json?: unknown }> = [];
       Object.entries(answers).forEach(([question_id, value]) => {
+        if (question_id.endsWith('__other')) return; // tratado junto com a resposta principal
         if (value === undefined || value === null || value === '') return;
-        if (typeof value === 'number') payloadAnswers.push({ question_id, value_number: value });
+        const otherText = (answers[`${question_id}__other`] as string | undefined)?.trim();
+        if (otherText) {
+          payloadAnswers.push({ question_id, value_json: { value, other: otherText } });
+        } else if (typeof value === 'number') payloadAnswers.push({ question_id, value_number: value });
         else if (Array.isArray(value) || typeof value === 'object') payloadAnswers.push({ question_id, value_json: value });
         else payloadAnswers.push({ question_id, value_text: String(value) });
       });
@@ -158,6 +162,28 @@ export default function PublicNPS() {
         : { label: String(o?.label ?? o?.value ?? ''), value: String(o?.value ?? o?.label ?? '') },
     );
     const missing = touched && q.required && (val === undefined || val === '' || (Array.isArray(val) && val.length === 0));
+
+    // Detecta se a opção selecionada é "Outro/Outros/Especificar" e exige texto complementar
+    const isOtherLabel = (label: string) => /^(outro|outros|other|especificar|especifique)\b/i.test((label ?? '').trim());
+    const otherValues = new Set(choices.filter((o) => isOtherLabel(o.label)).map((o) => o.value));
+    const currentOther: string = (answers[`${q.id}__other`] as string) ?? '';
+    const setOther = (v: string) => setAnswers((prev) => ({ ...prev, [`${q.id}__other`]: v }));
+    const showOtherFor = (selected: string | string[]) => {
+      if (otherValues.size === 0) return false;
+      if (Array.isArray(selected)) return selected.some((s) => otherValues.has(s));
+      return otherValues.has(selected);
+    };
+    const OtherField = ({ show }: { show: boolean }) =>
+      show ? (
+        <Textarea
+          value={currentOther}
+          onChange={(e) => setOther(e.target.value)}
+          rows={2}
+          placeholder="Descreva sua resposta"
+          className="bg-slate-950 border-slate-700 text-slate-100 placeholder:text-slate-500 text-sm mt-2"
+          maxLength={500}
+        />
+      ) : null;
 
 
     switch (q.question_type) {
@@ -242,6 +268,7 @@ export default function PublicNPS() {
                 <span>{opt.label}</span>
               </label>
             ))}
+            <OtherField show={showOtherFor(val)} />
           </div>
         );
       case 'checkbox': {
@@ -261,22 +288,26 @@ export default function PublicNPS() {
                 </label>
               );
             })}
+            <OtherField show={showOtherFor(Array.isArray(val) ? val : [])} />
           </div>
         );
       }
       case 'dropdown':
         return (
-          <select
-            value={val ?? ''}
-            onChange={(e) => set(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-700 rounded-md h-11 px-3 text-sm text-slate-100"
-            aria-invalid={missing}
-          >
-            <option value="">Selecione…</option>
-            {choices.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
+          <div className="space-y-2">
+            <select
+              value={val ?? ''}
+              onChange={(e) => set(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-700 rounded-md h-11 px-3 text-sm text-slate-100"
+              aria-invalid={missing}
+            >
+              <option value="">Selecione…</option>
+              {choices.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            <OtherField show={showOtherFor(val)} />
+          </div>
         );
       default:
         return <Input value={val ?? ''} onChange={(e) => set(e.target.value)} className="bg-slate-950 border-slate-700 text-slate-100" />;
