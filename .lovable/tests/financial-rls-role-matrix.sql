@@ -15,34 +15,32 @@
 
 BEGIN;
 
--- Skip user triggers (fiscal defaults, cx weights, etc.) that require extra
--- fixtures beyond RLS scope. Everything is rolled back at the end.
-ALTER TABLE public.companies DISABLE TRIGGER USER;
-
 -- ---------- Fixtures ---------------------------------------------------------
+-- Reuse the first existing company (we cannot create one here because the
+-- fiscal setup trigger requires additional NOT NULL fields, and the test
+-- role is not the table owner so we cannot disable that trigger).
+-- All writes happen inside this transaction and are rolled back at the end.
 DO $$
 DECLARE
-  v_company uuid := gen_random_uuid();
+  v_company uuid;
   v_admin   uuid := gen_random_uuid();
   v_manager uuid := gen_random_uuid();
   v_operator uuid := gen_random_uuid();
   v_viewer  uuid := gen_random_uuid();
 BEGIN
-  -- Isolated company
-  INSERT INTO public.companies (id, name, cnpj)
-    VALUES (v_company, 'RLS Test Co', '00000000000000');
+  SELECT id INTO v_company FROM public.companies ORDER BY created_at LIMIT 1;
+  IF v_company IS NULL THEN
+    RAISE EXCEPTION 'No existing company found; create one before running this test';
+  END IF;
 
-  -- Fake auth users (avoid touching auth.users triggers; write minimal row)
   INSERT INTO auth.users (id, instance_id, email, aud, role, created_at, updated_at)
   VALUES
-    (v_admin,    '00000000-0000-0000-0000-000000000000', 'admin_rls@test.local',    'authenticated','authenticated', now(), now()),
-    (v_manager,  '00000000-0000-0000-0000-000000000000', 'manager_rls@test.local',  'authenticated','authenticated', now(), now()),
-    (v_operator, '00000000-0000-0000-0000-000000000000', 'operator_rls@test.local', 'authenticated','authenticated', now(), now()),
-    (v_viewer,   '00000000-0000-0000-0000-000000000000', 'viewer_rls@test.local',   'authenticated','authenticated', now(), now());
+    (v_admin,    '00000000-0000-0000-0000-000000000000', 'admin_rls_'||v_admin||'@test.local',    'authenticated','authenticated', now(), now()),
+    (v_manager,  '00000000-0000-0000-0000-000000000000', 'manager_rls_'||v_manager||'@test.local','authenticated','authenticated', now(), now()),
+    (v_operator, '00000000-0000-0000-0000-000000000000', 'operator_rls_'||v_operator||'@test.local','authenticated','authenticated', now(), now()),
+    (v_viewer,   '00000000-0000-0000-0000-000000000000', 'viewer_rls_'||v_viewer||'@test.local',  'authenticated','authenticated', now(), now());
 
-  -- profiles linking user -> company (needed by get_user_company_id)
-  INSERT INTO public.profiles (id, company_id, email, full_name)
-  VALUES
+  INSERT INTO public.profiles (id, company_id, email, full_name) VALUES
     (v_admin,    v_company, 'admin_rls@test.local',    'Admin RLS'),
     (v_manager,  v_company, 'manager_rls@test.local',  'Manager RLS'),
     (v_operator, v_company, 'operator_rls@test.local', 'Operator RLS'),
@@ -54,7 +52,6 @@ BEGIN
     (v_operator, 'operator'::app_role, v_company),
     (v_viewer,   'viewer'::app_role,   v_company);
 
-  -- Stash ids for later steps
   CREATE TEMP TABLE _ctx(k text PRIMARY KEY, v uuid) ON COMMIT DROP;
   INSERT INTO _ctx VALUES
     ('company', v_company),
