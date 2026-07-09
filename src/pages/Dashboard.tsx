@@ -15,7 +15,7 @@ import {
   ShoppingCart, Wallet, Package, Factory, Truck, Warehouse,
   DollarSign, TrendingUp, ArrowDownCircle, ArrowUpCircle,
   RefreshCw, ShieldCheck, Scissors, Building, Database,
-  Users, Target, Navigation, LayoutDashboard, Boxes, Brain, BarChart3,
+  Users, Target, Navigation, LayoutDashboard, Boxes, Brain, BarChart3, Heart,
 } from 'lucide-react';
 import { Card, CardContent } from '@/ui/base/card';
 import { Skeleton } from '@/ui/base/skeleton';
