@@ -264,6 +264,7 @@ export default function PublicNPS() {
                 <span>{opt.label}</span>
               </label>
             ))}
+            <OtherField show={showOtherFor(val)} />
           </div>
         );
       case 'checkbox': {
