@@ -120,10 +120,21 @@ export default function Surveys() {
 
   const previewCampaign = async () => {
     if (!campaignId) return;
-    // Gera um token de preview temporário para visualizar como o cliente veria
-    const preview = new URL(`${window.location.origin}/nps/preview/${campaignId}`);
-    window.open(preview.toString(), '_blank');
+    // Pega um token existente da campanha para abrir a pesquisa como o cliente veria
+    const { data } = await supabase
+      .from('nps_tokens')
+      .select('token, nps_invites!inner(campaign_id,status)')
+      .eq('nps_invites.campaign_id', campaignId)
+      .neq('nps_invites.status', 'responded')
+      .limit(1)
+      .maybeSingle();
+    if (data?.token) {
+      window.open(`${window.location.origin}/nps/${data.token}`, '_blank');
+    } else {
+      toast.info('Gere um convite primeiro na aba Convites para visualizar como o cliente verá.');
+    }
   };
+
 
   return (
     <div className="space-y-4">
