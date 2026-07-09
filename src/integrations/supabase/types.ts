@@ -9900,6 +9900,77 @@ export type Database = {
           },
         ]
       }
+      nps_followups: {
+        Row: {
+          action_taken: string | null
+          answer_id: string
+          assigned_to: string | null
+          campaign_id: string | null
+          client_id: string | null
+          comment: string | null
+          company_id: string
+          contacted_at: string | null
+          created_at: string
+          due_date: string | null
+          id: string
+          priority: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          root_cause: string | null
+          score: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          action_taken?: string | null
+          answer_id: string
+          assigned_to?: string | null
+          campaign_id?: string | null
+          client_id?: string | null
+          comment?: string | null
+          company_id: string
+          contacted_at?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          priority?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          root_cause?: string | null
+          score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          action_taken?: string | null
+          answer_id?: string
+          assigned_to?: string | null
+          campaign_id?: string | null
+          client_id?: string | null
+          comment?: string | null
+          company_id?: string
+          contacted_at?: string | null
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          priority?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          root_cause?: string | null
+          score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nps_followups_answer_id_fkey"
+            columns: ["answer_id"]
+            isOneToOne: true
+            referencedRelation: "nps_answers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nps_invites: {
         Row: {
           attempts: number
