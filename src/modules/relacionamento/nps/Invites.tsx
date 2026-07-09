@@ -222,6 +222,9 @@ export default function Invites() {
                               <Button size="sm" variant="ghost" title="E-mail" onClick={() => shareUrl(tk, 'email', i.clients)}>
                                 <Mail className="h-3.5 w-3.5" />
                               </Button>
+                              <Button size="sm" variant="ghost" title="QR Code" onClick={() => setQrUrl(publicSurveyUrl(tk))}>
+                                <QrCode className="h-3.5 w-3.5" />
+                              </Button>
                             </>
                           )}
                           {i.status !== 'responded' && i.status !== 'revoked' && (
