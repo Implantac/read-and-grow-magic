@@ -9,6 +9,7 @@ const Invites = lazy(() => import('../modules/relacionamento/nps/Invites'));
 const Responses = lazy(() => import('../modules/relacionamento/nps/Responses'));
 const Followups = lazy(() => import('../modules/relacionamento/nps/Followups'));
 const Reports = lazy(() => import('../modules/relacionamento/nps/Reports'));
+const SavedReports = lazy(() => import('../modules/relacionamento/nps/SavedReports'));
 const Templates = lazy(() => import('../modules/relacionamento/nps/Templates'));
 const Automations = lazy(() => import('../modules/relacionamento/nps/Automations'));
 const Logs = lazy(() => import('../modules/relacionamento/nps/Logs'));
@@ -25,6 +26,7 @@ export const RelacionamentoRoutes = [
     <Route path="respostas" element={<Responses />} />
     <Route path="followups" element={<Followups />} />
     <Route path="relatorios" element={<Reports />} />
+    <Route path="relatorios-salvos" element={<SavedReports />} />
     <Route path="templates" element={<Templates />} />
     <Route path="automacoes" element={<Automations />} />
     <Route path="logs" element={<Logs />} />

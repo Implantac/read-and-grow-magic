@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Megaphone, ListChecks, Send, MessageSquare, FileText, Palette, Zap, Settings2, AlertTriangle, ScrollText } from 'lucide-react';
+import { LayoutDashboard, Megaphone, ListChecks, Send, MessageSquare, FileText, Palette, Zap, Settings2, AlertTriangle, ScrollText, BookMarked } from 'lucide-react';
 
 const items = [
   { to: '/relacionamento/nps/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -11,6 +11,7 @@ const items = [
   { to: '/relacionamento/nps/respostas', label: 'Respostas', icon: MessageSquare },
   { to: '/relacionamento/nps/followups', label: 'Follow-ups', icon: AlertTriangle },
   { to: '/relacionamento/nps/relatorios', label: 'Relatórios', icon: FileText },
+  { to: '/relacionamento/nps/relatorios-salvos', label: 'Salvos', icon: BookMarked },
   { to: '/relacionamento/nps/templates', label: 'Templates', icon: Palette },
   { to: '/relacionamento/nps/automacoes', label: 'Automações', icon: Zap },
   { to: '/relacionamento/nps/logs', label: 'Logs', icon: ScrollText },
