@@ -295,6 +295,12 @@ _Estes números são IDÊNTICOS aos exibidos no Dashboard Consolidado. Qualquer 
 - OPs ativas: **${m.producao.op_ativas}** • concluídas (total): ${m.producao.op_concluidas_total}
 - Compras aguardando aprovação: **${m.compras.aguardando_aprovacao}**
 
+## Relacionamento / CX (NPS)
+- NPS Score: **${m.relacionamento.nps_score}** (${m.relacionamento.nps_total_respostas} respostas)
+- Promotores: **${m.relacionamento.nps_promotores}** • Neutros: ${m.relacionamento.nps_neutros} • Detratores: **${m.relacionamento.nps_detratores}**
+- Taxa de resposta: **${m.relacionamento.nps_taxa_resposta_pct}%**
+- Comentários críticos pendentes: **${m.relacionamento.nps_comentarios_criticos}**
+
 ## Regras
 - Cite APENAS valores presentes neste bloco. Não recalcule por conta própria.
 - Formate SEMPRE como **R$ X.XXX,XX** e porcentagens em **negrito** (**15,5%**).
