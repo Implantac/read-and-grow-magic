@@ -81,8 +81,12 @@ export default function PublicNPS() {
     try {
       const payloadAnswers: Array<{ question_id: string; value_text?: string; value_number?: number; value_json?: unknown }> = [];
       Object.entries(answers).forEach(([question_id, value]) => {
+        if (question_id.endsWith('__other')) return; // tratado junto com a resposta principal
         if (value === undefined || value === null || value === '') return;
-        if (typeof value === 'number') payloadAnswers.push({ question_id, value_number: value });
+        const otherText = (answers[`${question_id}__other`] as string | undefined)?.trim();
+        if (otherText) {
+          payloadAnswers.push({ question_id, value_json: { value, other: otherText } });
+        } else if (typeof value === 'number') payloadAnswers.push({ question_id, value_number: value });
         else if (Array.isArray(value) || typeof value === 'object') payloadAnswers.push({ question_id, value_json: value });
         else payloadAnswers.push({ question_id, value_text: String(value) });
       });
