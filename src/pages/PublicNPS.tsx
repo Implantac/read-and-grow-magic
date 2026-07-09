@@ -153,14 +153,14 @@ export default function PublicNPS() {
             value={val ?? ''}
             onChange={(e) => set(e.target.value)}
             rows={3}
-            className="bg-slate-950 border-slate-800"
+            className="bg-slate-950 border-slate-700 text-slate-100 placeholder:text-slate-500"
             aria-invalid={missing}
           />
         );
       case 'number':
-        return <Input type="number" value={val ?? ''} onChange={(e) => set(Number(e.target.value))} className="bg-slate-950 border-slate-800" aria-invalid={missing} />;
+        return <Input type="number" value={val ?? ''} onChange={(e) => set(Number(e.target.value))} className="bg-slate-950 border-slate-700 text-slate-100" aria-invalid={missing} />;
       case 'date':
-        return <Input type="date" value={val ?? ''} onChange={(e) => set(e.target.value)} className="bg-slate-950 border-slate-800" aria-invalid={missing} />;
+        return <Input type="date" value={val ?? ''} onChange={(e) => set(e.target.value)} className="bg-slate-950 border-slate-700 text-slate-100" aria-invalid={missing} />;
       case 'stars':
         return (
           <div className="flex gap-1" role="radiogroup">
@@ -221,7 +221,7 @@ export default function PublicNPS() {
         return (
           <div className="space-y-2" role="radiogroup">
             {choices.map((opt) => (
-              <label key={opt} className="flex items-center gap-2 p-2 rounded-md cursor-pointer hover:bg-slate-800/40 border" style={{ borderColor: val === opt ? primary : 'rgba(255,255,255,0.08)' }}>
+              <label key={opt} className="flex items-center gap-2 p-2 rounded-md cursor-pointer hover:bg-slate-800/60 border text-slate-100" style={{ borderColor: val === opt ? primary : 'rgba(255,255,255,0.12)' }}>
                 <input type="radio" name={q.id} checked={val === opt} onChange={() => set(opt)} className="accent-current" />
                 <span>{opt}</span>
               </label>
@@ -235,7 +235,7 @@ export default function PublicNPS() {
             {choices.map((opt) => {
               const checked = arr.includes(opt);
               return (
-                <label key={opt} className="flex items-center gap-2 p-2 rounded-md cursor-pointer hover:bg-slate-800/40 border" style={{ borderColor: checked ? primary : 'rgba(255,255,255,0.08)' }}>
+                <label key={opt} className="flex items-center gap-2 p-2 rounded-md cursor-pointer hover:bg-slate-800/60 border text-slate-100" style={{ borderColor: checked ? primary : 'rgba(255,255,255,0.12)' }}>
                   <input
                     type="checkbox"
                     checked={checked}
@@ -253,7 +253,7 @@ export default function PublicNPS() {
           <select
             value={val ?? ''}
             onChange={(e) => set(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-800 rounded-md h-10 px-3 text-sm"
+            className="w-full bg-slate-950 border border-slate-700 rounded-md h-10 px-3 text-sm text-slate-100"
             aria-invalid={missing}
           >
             <option value="">Selecione…</option>
@@ -263,7 +263,7 @@ export default function PublicNPS() {
           </select>
         );
       default:
-        return <Input value={val ?? ''} onChange={(e) => set(e.target.value)} className="bg-slate-950 border-slate-800" />;
+        return <Input value={val ?? ''} onChange={(e) => set(e.target.value)} className="bg-slate-950 border-slate-700 text-slate-100" />;
     }
   };
 
@@ -274,9 +274,9 @@ export default function PublicNPS() {
           {(c.logo_url ?? survey.company?.logo_url) && (
             <img src={c.logo_url ?? survey.company.logo_url} alt={survey.company?.name ?? 'Logo'} className="h-12 mx-auto" />
           )}
-          <h1 className="text-2xl font-bold leading-tight">{c.title ?? 'Como avalia sua experiência?'}</h1>
-          {c.subtitle && <p className="text-slate-300">{c.subtitle}</p>}
-          {c.message && <p className="text-slate-400 text-sm">{c.message}</p>}
+          <h1 className="text-2xl font-bold leading-tight text-white">{c.title ?? 'Como avalia sua experiência?'}</h1>
+          {c.subtitle && <p className="text-slate-200">{c.subtitle}</p>}
+          {c.message && <p className="text-slate-300 text-sm">{c.message}</p>}
         </div>
 
         <Progress value={progress} className="h-1 bg-slate-800" />
@@ -284,7 +284,7 @@ export default function PublicNPS() {
         <Card className="bg-slate-900 border-slate-800">
           <CardContent className="pt-6 space-y-6">
             <div className="space-y-3">
-              <label className="block text-sm font-medium">
+              <label className="block text-base font-semibold text-white">
                 De 0 a 10, qual a probabilidade de recomendar {survey.company?.name ?? 'nossa empresa'} a um amigo ou colega? <span className="text-red-400">*</span>
               </label>
               <div className="grid grid-cols-11 gap-1 md:gap-1.5">
@@ -311,7 +311,7 @@ export default function PublicNPS() {
                   </button>
                 ))}
               </div>
-              <div className="flex justify-between text-xs text-slate-400 px-1">
+              <div className="flex justify-between text-xs text-slate-300 px-1">
                 <span>Nada provável</span>
                 <span>Muito provável</span>
               </div>
@@ -320,15 +320,15 @@ export default function PublicNPS() {
 
             {score !== null && (
               <div className="space-y-2 pt-2 border-t border-slate-800">
-                <label className="block text-sm">{followUp}</label>
-                <Textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3} className="bg-slate-950 border-slate-800" maxLength={2000} />
-                <p className="text-xs text-slate-500 text-right">{comment.length}/2000</p>
+                <label className="block text-base font-semibold text-white">{followUp}</label>
+                <Textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3} className="bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-500" maxLength={2000} />
+                <p className="text-xs text-slate-400 text-right">{comment.length}/2000</p>
               </div>
             )}
 
             {questions.map((q, i) => (
               <div key={q.id} className="space-y-2 pt-2 border-t border-slate-800">
-                <label className="block text-sm font-medium">
+                <label className="block text-base font-semibold text-white">
                   {i + 1}. {q.question_text}
                   {q.required && <span className="text-red-400"> *</span>}
                 </label>
