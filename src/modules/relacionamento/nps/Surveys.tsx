@@ -260,34 +260,28 @@ export default function Surveys() {
             <Skeleton className="h-40" />
           ) : (
             <div className="space-y-2">
-              {questions.map((q: any, i: number) => (
-                <Card key={q.id}>
-                  <CardContent className="pt-4 flex justify-between items-start gap-3">
-                    <div className="flex-1">
-                      <div className="font-medium">{i + 1}. {q.question_text}</div>
-                      <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-1.5 mt-1">
-                        <Badge variant="outline">{q.question_type}</Badge>
-                        {q.required && <Badge variant="secondary">obrigatória</Badge>}
-                        {q.options?.choices?.length ? <span>{q.options.choices.length} opções</span> : null}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Button size="icon" variant="ghost" title="Mover para cima" disabled={i === 0} onClick={() => move(i, -1)}>
-                        <ArrowUp className="h-4 w-4" />
-                      </Button>
-                      <Button size="icon" variant="ghost" title="Mover para baixo" disabled={i === questions.length - 1} onClick={() => move(i, 1)}>
-                        <ArrowDown className="h-4 w-4" />
-                      </Button>
-                      <Button size="icon" variant="ghost" title="Salvar na biblioteca" onClick={() => saveCurrentToBank(q)}>
-                        <BookmarkPlus className="h-4 w-4" />
-                      </Button>
-                      <Button size="icon" variant="ghost" onClick={() => del.mutate(q.id)}>
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {questions.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Arraste as perguntas pelo ícone <GripVertical className="inline h-3 w-3" /> para reordenar. Use o switch para marcar como obrigatória.
+                </p>
+              )}
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+                <SortableContext items={(questions as any[]).map((q) => q.id)} strategy={verticalListSortingStrategy}>
+                  {(questions as any[]).map((q, i) => (
+                    <SortableQuestion
+                      key={q.id}
+                      q={q}
+                      index={i}
+                      total={questions.length}
+                      onMoveUp={() => move(i, -1)}
+                      onMoveDown={() => move(i, 1)}
+                      onToggleRequired={(v) => updateReq.mutate({ id: q.id, required: v })}
+                      onSaveToBank={() => saveCurrentToBank(q)}
+                      onDelete={() => del.mutate(q.id)}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
               {questions.length === 0 && (
                 <p className="text-sm text-muted-foreground">
                   Sem perguntas extras. A pesquisa exibirá apenas a nota NPS e um comentário aberto.
@@ -295,6 +289,7 @@ export default function Surveys() {
               )}
             </div>
           )}
+
         </>
       )}
 
