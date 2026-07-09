@@ -321,7 +321,10 @@ export default function Invites() {
         </div>
         <div className="flex gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={exportCsv}><Download className="mr-2 h-4 w-4" /> Exportar CSV</Button>
-          <Button variant="outline" size="sm" onClick={() => sendInvites.mutate(undefined)} disabled={sendInvites.isPending}>
+          <Button variant="outline" size="sm" onClick={async () => {
+            const ok = await confirm({ title: 'Enviar todos os convites pendentes?', description: 'Serão disparados até 50 convites por vez.', confirmLabel: 'Enviar' });
+            if (ok) sendInvites.mutate(undefined);
+          }} disabled={sendInvites.isPending}>
             <Mail className="mr-2 h-4 w-4" /> Enviar pendentes
           </Button>
           <Button size="sm" onClick={() => setOpen(true)} disabled={!campaignId}><Send className="mr-2 h-4 w-4" /> Gerar convites</Button>
