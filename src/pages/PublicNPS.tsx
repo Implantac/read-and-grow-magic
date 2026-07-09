@@ -5,7 +5,7 @@ import { Button } from '@/ui/base/button';
 import { Textarea } from '@/ui/base/textarea';
 import { Input } from '@/ui/base/input';
 import { Progress } from '@/ui/base/progress';
-import { Loader2, CheckCircle2, XCircle, ShieldCheck } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, ShieldCheck, Sparkles } from 'lucide-react';
 
 /**
  * Rota pública /nps/:token — sem autenticação.
