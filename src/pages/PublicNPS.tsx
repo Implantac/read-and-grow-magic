@@ -209,15 +209,17 @@ export default function PublicNPS() {
           </div>
         );
       case 'likert': {
-        const labels: string[] = (q.options?.labels as string[]) ?? ['1', '2', '3', '4', '5'];
+        const labels: string[] = choices.length > 0
+          ? choices.map((c) => c.label)
+          : ['1', '2', '3', '4', '5'];
         return (
-          <div className="grid grid-cols-5 gap-1">
+          <div className={`grid gap-1.5 ${labels.length > 5 ? 'grid-cols-2 sm:grid-cols-' + labels.length : 'grid-cols-' + labels.length}`}>
             {labels.map((lbl, i) => (
               <button
                 key={i}
                 type="button"
                 onClick={() => set(i + 1)}
-                className="rounded-md py-2 text-xs font-medium transition-all"
+                className="rounded-md py-2.5 px-2 text-xs font-medium transition-all min-h-[44px]"
                 style={{
                   background: val === i + 1 ? primary : 'rgba(255,255,255,0.05)',
                   color: val === i + 1 ? '#0f172a' : '#f1f5f9',
@@ -235,9 +237,9 @@ export default function PublicNPS() {
         return (
           <div className="space-y-2" role="radiogroup">
             {choices.map((opt) => (
-              <label key={opt} className="flex items-center gap-2 p-2 rounded-md cursor-pointer hover:bg-slate-800/60 border text-slate-100" style={{ borderColor: val === opt ? primary : 'rgba(255,255,255,0.12)' }}>
-                <input type="radio" name={q.id} checked={val === opt} onChange={() => set(opt)} className="accent-current" />
-                <span>{opt}</span>
+              <label key={opt.value} className="flex items-center gap-2 p-3 rounded-md cursor-pointer hover:bg-slate-800/60 border text-slate-100" style={{ borderColor: val === opt.value ? primary : 'rgba(255,255,255,0.12)' }}>
+                <input type="radio" name={q.id} checked={val === opt.value} onChange={() => set(opt.value)} className="accent-current" />
+                <span>{opt.label}</span>
               </label>
             ))}
           </div>
@@ -247,15 +249,15 @@ export default function PublicNPS() {
         return (
           <div className="space-y-2">
             {choices.map((opt) => {
-              const checked = arr.includes(opt);
+              const checked = arr.includes(opt.value);
               return (
-                <label key={opt} className="flex items-center gap-2 p-2 rounded-md cursor-pointer hover:bg-slate-800/60 border text-slate-100" style={{ borderColor: checked ? primary : 'rgba(255,255,255,0.12)' }}>
+                <label key={opt.value} className="flex items-center gap-2 p-3 rounded-md cursor-pointer hover:bg-slate-800/60 border text-slate-100" style={{ borderColor: checked ? primary : 'rgba(255,255,255,0.12)' }}>
                   <input
                     type="checkbox"
                     checked={checked}
-                    onChange={(e) => set(e.target.checked ? [...arr, opt] : arr.filter((x) => x !== opt))}
+                    onChange={(e) => set(e.target.checked ? [...arr, opt.value] : arr.filter((x) => x !== opt.value))}
                   />
-                  <span>{opt}</span>
+                  <span>{opt.label}</span>
                 </label>
               );
             })}
@@ -267,12 +269,12 @@ export default function PublicNPS() {
           <select
             value={val ?? ''}
             onChange={(e) => set(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-700 rounded-md h-10 px-3 text-sm text-slate-100"
+            className="w-full bg-slate-950 border border-slate-700 rounded-md h-11 px-3 text-sm text-slate-100"
             aria-invalid={missing}
           >
             <option value="">Selecione…</option>
             {choices.map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
         );
