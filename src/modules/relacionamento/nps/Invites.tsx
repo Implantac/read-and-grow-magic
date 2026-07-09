@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNPSCampaigns, useNPSInvites, useGenerateInvites, publicSurveyUrl } from './hooks';
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
@@ -32,8 +32,11 @@ const CHANNELS = [
 const PAGE_SIZE = 20;
 
 export default function Invites() {
-  const { data: campaigns = [] } = useNPSCampaigns();
+  const { data: campaigns = [], isLoading: campaignsLoading } = useNPSCampaigns();
   const [campaignId, setCampaignId] = useState<string | undefined>();
+  useEffect(() => {
+    if (!campaignId && campaigns.length > 0) setCampaignId((campaigns[0] as any).id);
+  }, [campaigns, campaignId]);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [channelFilter, setChannelFilter] = useState<string>('all');
   const [textFilter, setTextFilter] = useState('');
@@ -327,7 +330,20 @@ export default function Invites() {
           }} disabled={sendInvites.isPending}>
             <Mail className="mr-2 h-4 w-4" /> Enviar pendentes
           </Button>
-          <Button size="sm" onClick={() => setOpen(true)} disabled={!campaignId}><Send className="mr-2 h-4 w-4" /> Gerar convites</Button>
+          <Button
+            size="sm"
+            onClick={() => {
+              if (!campaignId) {
+                toast.error(campaigns.length === 0 ? 'Crie uma campanha antes de gerar convites.' : 'Selecione uma campanha.');
+                return;
+              }
+              setOpen(true);
+            }}
+            disabled={campaignsLoading}
+            title={campaigns.length === 0 ? 'Crie uma campanha primeiro' : undefined}
+          >
+            <Send className="mr-2 h-4 w-4" /> Gerar convites
+          </Button>
         </div>
       </div>
 
