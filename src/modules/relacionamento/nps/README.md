@@ -55,3 +55,19 @@ Filtra por `company_id` do usuário e `periodo_dias` (default 30).
 - Dark Mode Premium (tokens semânticos, sem cores hard-coded).
 - Tokens de resposta são single-use por padrão; expiram com a campanha.
 - Comentários com ≥5 chars disparam análise IA em fire-and-forget.
+
+## Onda 7 — QR Code
+
+Componente `QRCodeDialog.tsx` (usa `qrcode.react`) exibe QR do link do token, com ações Copiar / Baixar SVG / Imprimir (folha pronta para balcão, embalagem ou NF). Disponível na aba **Convites** (botão QR por convite).
+
+## Onda 8 — Timeline unificada do cliente
+
+Trigger `nps_answer_to_timeline` (AFTER INSERT em `nps_answers`) grava automaticamente um evento na `client_timeline` do cliente vinculado, com título `NPS <score> — <categoria>`, comentário resumido e metadata (score, category, campaign_id, channel, origin). Assim o cadastro do cliente (Detalhes → Timeline) mostra o NPS lado a lado com contatos, propostas, pedidos e ocorrências, sem lógica adicional no frontend.
+
+## Onda 9 — SMS (stub)
+
+O canal `sms` já existe em `nps_invites.channel` e `nps-send-invite`, mas ainda **loga apenas**. Para ativar, adicionar secret `TWILIO_ACCOUNT_SID` + `TWILIO_AUTH_TOKEN` (ou provider preferido como Zenvia) e completar o branch do canal em `nps-send-invite/index.ts` — a estrutura de retry/error/logging já está no lugar.
+
+## Onda 10 — White-label / domínio próprio (fora do escopo de código)
+
+A página pública já usa branding da campanha (logo, cores, título, mensagem). Para expor em domínio próprio do cliente (`empresa.com.br/nps/<token>`), é necessário configurar Custom Domain no host + rewrite para o mesmo `index.html`. Nenhuma mudança de código adicional é necessária — o roteador React resolve `/nps/:token` em qualquer origem.
