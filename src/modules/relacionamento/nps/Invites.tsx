@@ -12,10 +12,14 @@ import { Badge } from '@/ui/base/badge';
 import { Checkbox } from '@/ui/base/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
-import { Send, Copy, MessageCircle, Mail, Link2, QrCode, Search, RotateCcw, Trash2, RefreshCw, Download, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { Send, Copy, MessageCircle, Mail, Link2, QrCode, Search, RotateCcw, Trash2, RefreshCw, Download, ChevronLeft, ChevronRight, Eye, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { QRCodeDialog } from './QRCodeDialog';
 import { exportToCSV } from '@/lib/exportUtils';
+import { useConfirm } from '@/shared/components/ConfirmDialog';
+
+type BulkResultItem = { id: string; name: string; ok: boolean; error?: string };
+type BulkResult = { title: string; items: BulkResultItem[] } | null;
 
 const CHANNELS = [
   { v: 'link', label: 'Link manual', icon: Link2 },
@@ -48,6 +52,13 @@ export default function Invites() {
   const [qrUrl, setQrUrl] = useState<string | null>(null);
 
   const [selectedInvites, setSelectedInvites] = useState<Set<string>>(new Set());
+  const [bulkResult, setBulkResult] = useState<BulkResult>(null);
+  const confirm = useConfirm();
+
+  const inviteNameById = (id: string) => {
+    const inv = (invites as any[]).find((i) => i.id === id);
+    return inv?.clients?.name || inv?.clients?.email || inv?.clients?.phone || id.slice(0, 8);
+  };
 
   const { data: clients = [] } = useQuery({
     queryKey: ['nps', 'clients-picker', activeCompanyId, search],
@@ -89,11 +100,23 @@ export default function Invites() {
 
   const revoke = useMutation({
     mutationFn: async (ids: string[]) => {
-      const { error } = await supabase.from('nps_invites').update({ status: 'revoked' }).in('id', ids);
-      if (error) throw error;
-      return ids.length;
+      const results = await Promise.all(
+        ids.map(async (id) => {
+          const { error } = await supabase.from('nps_invites').update({ status: 'revoked' }).eq('id', id);
+          return { id, name: inviteNameById(id), ok: !error, error: error?.message };
+        }),
+      );
+      return results;
     },
-    onSuccess: (n) => { qc.invalidateQueries({ queryKey: ['nps'] }); toast.success(`${n} convite(s) revogado(s)`); setSelectedInvites(new Set()); },
+    onSuccess: (items) => {
+      qc.invalidateQueries({ queryKey: ['nps'] });
+      const ok = items.filter((r) => r.ok).length;
+      const fail = items.length - ok;
+      if (fail === 0) toast.success(`${ok} convite(s) revogado(s)`);
+      else toast.error(`${ok} revogado(s) · ${fail} falha(s)`);
+      if (fail > 0) setBulkResult({ title: 'Resultado da revogação', items });
+      setSelectedInvites(new Set());
+    },
     onError: (e: any) => toast.error(e.message),
   });
 
@@ -150,7 +173,24 @@ export default function Invites() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (d: any) => { qc.invalidateQueries({ queryKey: ['nps'] }); toast.success(`Enviados: ${d?.sent ?? 0} · Falhas: ${d?.failed ?? 0}`); setSelectedInvites(new Set()); },
+    onSuccess: (d: any) => {
+      qc.invalidateQueries({ queryKey: ['nps'] });
+      const sent = d?.sent ?? 0;
+      const failed = d?.failed ?? 0;
+      const results: any[] = Array.isArray(d?.results) ? d.results : [];
+      const items: BulkResultItem[] = results.map((r) => ({
+        id: r.id,
+        name: inviteNameById(r.id),
+        ok: !!r.ok,
+        error: r.error,
+      }));
+      if (failed === 0) toast.success(`Enviados: ${sent}`);
+      else toast.error(`Enviados: ${sent} · Falhas: ${failed}`);
+      if (items.length > 0 && (failed > 0 || items.length > 1)) {
+        setBulkResult({ title: 'Resultado do envio', items });
+      }
+      setSelectedInvites(new Set());
+    },
     onError: (e: any) => toast.error(e.message ?? 'Erro ao enviar'),
   });
 
@@ -172,13 +212,68 @@ export default function Invites() {
     setSelectedInvites(s);
   };
 
-  const copyAllLinks = () => {
+  const copyAllLinks = async () => {
     const ids = Array.from(selectedInvites);
-    const links = ids.map((id) => tokensByInvite.get(id)).filter(Boolean).map((t) => publicSurveyUrl(t!)).join('\n');
-    if (!links) { toast.error('Nenhum link disponível na página atual'); return; }
-    navigator.clipboard.writeText(links);
-    toast.success(`${links.split('\n').length} link(s) copiado(s)`);
+    if (ids.length === 0) return;
+    const { data: tokens, error } = await supabase.from('nps_tokens').select('invite_id,token').in('invite_id', ids);
+    if (error) { toast.error('Erro ao buscar tokens'); return; }
+    const map = new Map<string, string>();
+    (tokens ?? []).forEach((t: any) => { if (t.invite_id) map.set(t.invite_id, t.token); });
+    const items: BulkResultItem[] = ids.map((id) => {
+      const tk = map.get(id);
+      return tk
+        ? { id, name: inviteNameById(id), ok: true }
+        : { id, name: inviteNameById(id), ok: false, error: 'Token indisponível' };
+    });
+    const links = items.filter((r) => r.ok).map((r) => publicSurveyUrl(map.get(r.id)!)).join('\n');
+    const okCount = items.filter((r) => r.ok).length;
+    const failCount = items.length - okCount;
+    if (!links) {
+      toast.error('Nenhum link disponível');
+      setBulkResult({ title: 'Copiar links', items });
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(links);
+      if (failCount === 0) toast.success(`${okCount} link(s) copiado(s)`);
+      else { toast.error(`${okCount} copiado(s) · ${failCount} sem link`); setBulkResult({ title: 'Copiar links', items }); }
+    } catch {
+      toast.error('Não foi possível copiar para a área de transferência');
+    }
   };
+
+  const confirmSendBulk = async () => {
+    if (selectedSendable.length === 0) return;
+    const ok = await confirm({
+      title: `Enviar ${selectedSendable.length} convite(s) por e-mail?`,
+      description: 'Os convites elegíveis (pendentes ou com falha, canal e-mail) serão disparados agora.',
+      confirmLabel: 'Enviar',
+    });
+    if (ok) sendInvites.mutate(selectedSendable);
+  };
+
+  const confirmRevokeBulk = async () => {
+    const ids = Array.from(selectedInvites);
+    if (ids.length === 0) return;
+    const ok = await confirm({
+      title: `Revogar ${ids.length} convite(s)?`,
+      description: 'Links revogados deixam de aceitar respostas. Esta ação não pode ser desfeita.',
+      confirmLabel: 'Revogar',
+      variant: 'destructive',
+    });
+    if (ok) revoke.mutate(ids);
+  };
+
+  const confirmRevokeOne = async (id: string) => {
+    const ok = await confirm({
+      title: 'Revogar convite?',
+      description: `O link enviado para ${inviteNameById(id)} deixará de funcionar.`,
+      confirmLabel: 'Revogar',
+      variant: 'destructive',
+    });
+    if (ok) revoke.mutate([id]);
+  };
+
 
   const exportCsv = () => {
     if (filteredInvites.length === 0) { toast.error('Sem dados para exportar'); return; }
@@ -226,7 +321,10 @@ export default function Invites() {
         </div>
         <div className="flex gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={exportCsv}><Download className="mr-2 h-4 w-4" /> Exportar CSV</Button>
-          <Button variant="outline" size="sm" onClick={() => sendInvites.mutate(undefined)} disabled={sendInvites.isPending}>
+          <Button variant="outline" size="sm" onClick={async () => {
+            const ok = await confirm({ title: 'Enviar todos os convites pendentes?', description: 'Serão disparados até 50 convites por vez.', confirmLabel: 'Enviar' });
+            if (ok) sendInvites.mutate(undefined);
+          }} disabled={sendInvites.isPending}>
             <Mail className="mr-2 h-4 w-4" /> Enviar pendentes
           </Button>
           <Button size="sm" onClick={() => setOpen(true)} disabled={!campaignId}><Send className="mr-2 h-4 w-4" /> Gerar convites</Button>
@@ -292,10 +390,10 @@ export default function Invites() {
           <span>{selectedInvites.size} selecionado(s)</span>
           <div className="flex gap-2 flex-wrap">
             <Button size="sm" variant="outline" onClick={copyAllLinks}><Copy className="mr-2 h-3.5 w-3.5" /> Copiar links</Button>
-            <Button size="sm" variant="outline" onClick={() => sendInvites.mutate(selectedSendable)} disabled={selectedSendable.length === 0 || sendInvites.isPending}>
+            <Button size="sm" variant="outline" onClick={confirmSendBulk} disabled={selectedSendable.length === 0 || sendInvites.isPending}>
               <Mail className="mr-2 h-3.5 w-3.5" /> Enviar por e-mail ({selectedSendable.length})
             </Button>
-            <Button size="sm" variant="outline" onClick={() => revoke.mutate(Array.from(selectedInvites))}>
+            <Button size="sm" variant="outline" onClick={confirmRevokeBulk} disabled={revoke.isPending}>
               <Trash2 className="mr-2 h-3.5 w-3.5 text-red-500" /> Revogar
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setSelectedInvites(new Set())}>Limpar</Button>
@@ -368,7 +466,7 @@ export default function Invites() {
                             </Button>
                           )}
                           {i.status !== 'responded' && i.status !== 'revoked' && (
-                            <Button size="sm" variant="ghost" title="Revogar" onClick={() => revoke.mutate([i.id])}>
+                            <Button size="sm" variant="ghost" title="Revogar" onClick={() => confirmRevokeOne(i.id)}>
                               <Trash2 className="h-3.5 w-3.5 text-red-500" />
                             </Button>
                           )}
@@ -476,6 +574,56 @@ export default function Invites() {
       </Dialog>
 
       <QRCodeDialog open={!!qrUrl} onOpenChange={(v) => !v && setQrUrl(null)} url={qrUrl ?? ''} />
+
+      <Dialog open={!!bulkResult} onOpenChange={(v) => !v && setBulkResult(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{bulkResult?.title ?? 'Resultado'}</DialogTitle>
+          </DialogHeader>
+          {bulkResult && (() => {
+            const ok = bulkResult.items.filter((r) => r.ok).length;
+            const fail = bulkResult.items.length - ok;
+            return (
+              <div className="space-y-3">
+                <div className="flex gap-2 text-sm">
+                  <Badge className="bg-green-500/20 text-green-500 border-green-500/30" variant="outline">
+                    <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> {ok} sucesso(s)
+                  </Badge>
+                  {fail > 0 && (
+                    <Badge className="text-red-500 border-red-500/40" variant="outline">
+                      <XCircle className="h-3.5 w-3.5 mr-1" /> {fail} falha(s)
+                    </Badge>
+                  )}
+                </div>
+                <div className="max-h-80 overflow-y-auto border rounded divide-y divide-border">
+                  {bulkResult.items.map((r) => (
+                    <div key={r.id} className="flex items-start gap-2 p-2 text-sm">
+                      {r.ok
+                        ? <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                        : <XCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />}
+                      <div className="flex-1 min-w-0">
+                        <div className="truncate">{r.name}</div>
+                        {!r.ok && r.error && (
+                          <div className="text-xs text-red-500 truncate" title={r.error}>{r.error}</div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => {
+              if (!bulkResult) return;
+              const txt = bulkResult.items.map((r) => `${r.ok ? 'OK' : 'FALHA'}\t${r.name}${r.error ? `\t${r.error}` : ''}`).join('\n');
+              navigator.clipboard.writeText(txt);
+              toast.success('Resultado copiado');
+            }}><Copy className="h-3.5 w-3.5 mr-2" /> Copiar</Button>
+            <Button onClick={() => setBulkResult(null)}>Fechar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
