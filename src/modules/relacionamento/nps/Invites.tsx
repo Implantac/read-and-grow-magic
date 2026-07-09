@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { Send, Copy, MessageCircle, Mail, Link2, QrCode, Search, RotateCcw, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { QRCodeDialog } from './QRCodeDialog';
 
 const CHANNELS = [
   { v: 'link', label: 'Link manual', icon: Link2 },
