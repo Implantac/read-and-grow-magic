@@ -363,6 +363,7 @@ function computeKPIs(d: any, months: number = 12) {
     lowMarginProducts: productMargins.filter((p: any) => p.marginPct < 10).slice(0, 5),
     revenueByRegion: d.clients.reduce((acc: any, c: any) => ({ ...acc, [c.region || 'Outros']: (acc[c.region || 'Outros'] || 0) + (c.total_purchases || 0) }), {}),
     autoAlerts: d.alerts,
+    criticalNpsComments,
     swot: {
       strengths: [
         { title: "Margem Bruta", description: `Margem de ${kpis.grossMargin}% acima da meta setorial`, impact: "high" },
