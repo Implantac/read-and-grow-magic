@@ -1,0 +1,17 @@
+{
+  "name": "sefaz-mtls-proxy",
+  "version": "1.0.0",
+  "description": "Proxy mTLS para SEFAZ NFe — recebe SOAP + PFX, apresenta certificado A1 no handshake TLS e devolve resposta.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "fastify": "^4.28.1"
+  }
+}

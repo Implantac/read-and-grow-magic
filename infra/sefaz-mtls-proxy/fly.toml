@@ -1,0 +1,40 @@
+# fly.toml — deploy do proxy mTLS SEFAZ na Fly.io
+# Uso:
+#   fly launch --no-deploy --copy-config
+#   fly secrets set PROXY_TOKEN=$(openssl rand -hex 32)
+#   fly deploy
+#
+# Depois: registrar a URL pública como secret no ERP:
+#   SEFAZ_MTLS_PROXY_URL   = https://<app>.fly.dev/soap
+#   SEFAZ_MTLS_PROXY_TOKEN = <mesmo PROXY_TOKEN>
+
+app = "sefaz-mtls-proxy"
+primary_region = "gru"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "8443"
+  LOG_LEVEL = "info"
+
+[http_service]
+  internal_port = 8443
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    path = "/health"
+    protocol = "http"
+    timeout = "5s"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512
