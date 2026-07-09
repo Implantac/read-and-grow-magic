@@ -79,11 +79,12 @@ export default function PublicNPS() {
     if (score === null || requiredMissing) return;
     setState('submitting');
     try {
-      const payloadAnswers = Object.entries(answers).flatMap(([question_id, value]) => {
-        if (value === undefined || value === null || value === '') return [];
-        if (typeof value === 'number') return [{ question_id, value_number: value }];
-        if (Array.isArray(value) || typeof value === 'object') return [{ question_id, value_json: value }];
-        return [{ question_id, value_text: String(value) }];
+      const payloadAnswers: Array<{ question_id: string; value_text?: string; value_number?: number; value_json?: unknown }> = [];
+      Object.entries(answers).forEach(([question_id, value]) => {
+        if (value === undefined || value === null || value === '') return;
+        if (typeof value === 'number') payloadAnswers.push({ question_id, value_number: value });
+        else if (Array.isArray(value) || typeof value === 'object') payloadAnswers.push({ question_id, value_json: value });
+        else payloadAnswers.push({ question_id, value_text: String(value) });
       });
       const resp = await fetch(`${projectUrl}/functions/v1/nps-public-submit`, {
         method: 'POST',
