@@ -107,6 +107,24 @@ export default function Surveys() {
     });
   };
 
+  const reorder = useReorderQuestion();
+
+  const move = (idx: number, dir: -1 | 1) => {
+    const target = idx + dir;
+    if (target < 0 || target >= questions.length) return;
+    const a = questions[idx] as any;
+    const b = questions[target] as any;
+    reorder.mutate({ id: a.id, order_index: b.order_index ?? target });
+    reorder.mutate({ id: b.id, order_index: a.order_index ?? idx });
+  };
+
+  const previewCampaign = async () => {
+    if (!campaignId) return;
+    // Gera um token de preview temporário para visualizar como o cliente veria
+    const preview = new URL(`${window.location.origin}/nps/preview/${campaignId}`);
+    window.open(preview.toString(), '_blank');
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-3">
@@ -116,9 +134,14 @@ export default function Surveys() {
             Além da nota NPS, adicione perguntas específicas por campanha. Use a <strong>biblioteca de perguntas</strong> para reaproveitar em segundos.
           </p>
         </div>
-        <Button variant="outline" onClick={() => setBankOpen(true)} disabled={!campaignId}>
-          <Library className="mr-2 h-4 w-4" /> Biblioteca de perguntas
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={previewCampaign} disabled={!campaignId}>
+            <ExternalLink className="mr-2 h-4 w-4" /> Visualizar
+          </Button>
+          <Button variant="outline" onClick={() => setBankOpen(true)} disabled={!campaignId}>
+            <Library className="mr-2 h-4 w-4" /> Biblioteca de perguntas
+          </Button>
+        </div>
       </div>
 
       <div className="max-w-md">
@@ -191,6 +214,12 @@ export default function Surveys() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
+                      <Button size="icon" variant="ghost" title="Mover para cima" disabled={i === 0} onClick={() => move(i, -1)}>
+                        <ArrowUp className="h-4 w-4" />
+                      </Button>
+                      <Button size="icon" variant="ghost" title="Mover para baixo" disabled={i === questions.length - 1} onClick={() => move(i, 1)}>
+                        <ArrowDown className="h-4 w-4" />
+                      </Button>
                       <Button size="icon" variant="ghost" title="Salvar na biblioteca" onClick={() => saveCurrentToBank(q)}>
                         <BookmarkPlus className="h-4 w-4" />
                       </Button>
@@ -210,6 +239,7 @@ export default function Surveys() {
           )}
         </>
       )}
+
 
       <BankDialog open={bankOpen} onOpenChange={setBankOpen} campaignId={campaignId} currentCount={questions.length} />
     </div>
