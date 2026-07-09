@@ -27,4 +27,5 @@ export const FiscalRoutes = [
   <Route key="fiscal-sped" path="sped" element={<SpedFilesPage />} />,
   <Route key="fiscal-reinf" path="reinf" element={<ReinfPage />} />,
   <Route key="fiscal-relatorios" path="relatorios" element={<FiscalReportsPage />} />,
+  <Route key="fiscal-cert" path="certificado" element={<NFeCertificatePage />} />,
 ];
