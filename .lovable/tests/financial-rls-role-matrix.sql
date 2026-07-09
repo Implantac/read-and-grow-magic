@@ -4,6 +4,13 @@
 -- Runs entirely in a single transaction and ROLLBACKs at the end so no
 -- real data is touched. Prints a PASS/FAIL summary per (table, role, op).
 --
+-- REQUIREMENTS
+--   Must be executed as a DB superuser / owner (can INSERT into auth.users
+--   and reuse public.companies). On Lovable Cloud, run this via a local
+--   `supabase db connect` shell or use the edge function
+--   supabase/functions/test-financial-rls (which uses the admin API and
+--   works from CI).
+--
 -- Usage:  psql "$PG_URL" -v ON_ERROR_STOP=1 -f .lovable/tests/financial-rls-role-matrix.sql
 --
 -- Roles tested: admin, manager, operator, viewer
