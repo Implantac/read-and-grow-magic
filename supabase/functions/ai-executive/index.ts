@@ -328,7 +328,27 @@ function computeKPIs(d: any, months: number = 12) {
       activeTaxRules: d.taxRules.filter((t: any) => t.active).length,
       spedFilesGenerated: d.spedFiles.length,
       lastSpedDate: d.spedFiles[0]?.generated_at || null,
+      // NPS / CX
+      ...(() => {
+        const ans = d.npsAnswers || [];
+        const total = ans.length;
+        const promoters = ans.filter((a: any) => (a.score ?? -1) >= 9).length;
+        const detractors = ans.filter((a: any) => (a.score ?? -1) <= 6 && a.score != null).length;
+        const passives = total - promoters - detractors;
+        const npsScore = total > 0 ? Math.round(((promoters - detractors) / total) * 100) : 0;
+        const invitesTotal = (d.npsInvites || []).length;
+        const responded = (d.npsInvites || []).filter((i: any) => i.responded_at).length;
+        const responseRate = invitesTotal > 0 ? Math.min(100, Math.round((responded / invitesTotal) * 100)) : 0;
+        return { npsScore, npsTotal: total, npsPromoters: promoters, npsPassives: passives, npsDetractors: detractors, npsResponseRate: responseRate };
+      })(),
   };
+
+  // NPS: comentários críticos (detratores com sentimento negativo ou score <= 4)
+  const criticalNpsComments = (d.npsAnswers || [])
+    .filter((a: any) => (a.score != null && a.score <= 4) || a.ai_sentiment === 'negative')
+    .filter((a: any) => (a.comment || '').trim().length > 0)
+    .slice(0, 10)
+    .map((a: any) => ({ score: a.score, sentiment: a.ai_sentiment, summary: a.ai_summary || a.comment?.slice(0, 200), created_at: a.created_at }));
 
   return {
     kpis,
