@@ -4770,6 +4770,317 @@ export type Database = {
           },
         ]
       }
+      cx_churn_predictions: {
+        Row: {
+          ai_summary: string | null
+          client_id: string
+          company_id: string
+          created_at: string
+          id: string
+          model: string | null
+          predicted_at: string
+          probability: number
+          reasons: Json
+          risk_level: string
+          suggested_actions: Json
+          updated_at: string
+        }
+        Insert: {
+          ai_summary?: string | null
+          client_id: string
+          company_id: string
+          created_at?: string
+          id?: string
+          model?: string | null
+          predicted_at?: string
+          probability: number
+          reasons?: Json
+          risk_level: string
+          suggested_actions?: Json
+          updated_at?: string
+        }
+        Update: {
+          ai_summary?: string | null
+          client_id?: string
+          company_id?: string
+          created_at?: string
+          id?: string
+          model?: string | null
+          predicted_at?: string
+          probability?: number
+          reasons?: Json
+          risk_level?: string
+          suggested_actions?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cx_comment_clusters: {
+        Row: {
+          campaign_id: string | null
+          clusters: Json
+          company_id: string
+          created_at: string
+          id: string
+          model: string | null
+          period_end: string
+          period_start: string
+          total_comments: number
+        }
+        Insert: {
+          campaign_id?: string | null
+          clusters?: Json
+          company_id: string
+          created_at?: string
+          id?: string
+          model?: string | null
+          period_end: string
+          period_start: string
+          total_comments?: number
+        }
+        Update: {
+          campaign_id?: string | null
+          clusters?: Json
+          company_id?: string
+          created_at?: string
+          id?: string
+          model?: string | null
+          period_end?: string
+          period_start?: string
+          total_comments?: number
+        }
+        Relationships: []
+      }
+      cx_executive_summaries: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          key_insights: Json
+          metrics: Json
+          model: string | null
+          period_end: string
+          period_start: string
+          recommendations: Json
+          summary: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          key_insights?: Json
+          metrics?: Json
+          model?: string | null
+          period_end: string
+          period_start: string
+          recommendations?: Json
+          summary: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          key_insights?: Json
+          metrics?: Json
+          model?: string | null
+          period_end?: string
+          period_start?: string
+          recommendations?: Json
+          summary?: string
+        }
+        Relationships: []
+      }
+      cx_health_scores: {
+        Row: {
+          client_id: string
+          company_id: string
+          computed_at: string
+          created_at: string
+          factors: Json
+          id: string
+          score: number
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          company_id: string
+          computed_at?: string
+          created_at?: string
+          factors?: Json
+          id?: string
+          score: number
+          tier: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          company_id?: string
+          computed_at?: string
+          created_at?: string
+          factors?: Json
+          id?: string
+          score?: number
+          tier?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cx_health_weights: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          updated_at: string
+          weights: Json
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          weights?: Json
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          weights?: Json
+        }
+        Relationships: []
+      }
+      cx_survey_templates: {
+        Row: {
+          branding: Json
+          company_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_public: boolean
+          metric: string
+          name: string
+          questions: Json
+          updated_at: string
+        }
+        Insert: {
+          branding?: Json
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          metric: string
+          name: string
+          questions?: Json
+          updated_at?: string
+        }
+        Update: {
+          branding?: Json
+          company_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean
+          metric?: string
+          name?: string
+          questions?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      cx_workflow_runs: {
+        Row: {
+          company_id: string
+          context: Json
+          created_at: string
+          error: string | null
+          finished_at: string | null
+          id: string
+          started_at: string
+          status: string
+          steps: Json
+          workflow_id: string
+        }
+        Insert: {
+          company_id: string
+          context?: Json
+          created_at?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          steps?: Json
+          workflow_id: string
+        }
+        Update: {
+          company_id?: string
+          context?: Json
+          created_at?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          steps?: Json
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cx_workflow_runs_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "cx_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cx_workflows: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          edges: Json
+          id: string
+          name: string
+          nodes: Json
+          status: string
+          trigger: Json
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          edges?: Json
+          id?: string
+          name: string
+          nodes?: Json
+          status?: string
+          trigger?: Json
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          edges?: Json
+          id?: string
+          name?: string
+          nodes?: Json
+          status?: string
+          trigger?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       daily_executive_reports: {
         Row: {
           company_id: string | null

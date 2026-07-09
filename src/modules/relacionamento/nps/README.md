@@ -71,3 +71,22 @@ O canal `sms` já existe em `nps_invites.channel` e `nps-send-invite`, mas ainda
 ## Onda 10 — White-label / domínio próprio (fora do escopo de código)
 
 A página pública já usa branding da campanha (logo, cores, título, mensagem). Para expor em domínio próprio do cliente (`empresa.com.br/nps/<token>`), é necessário configurar Custom Domain no host + rewrite para o mesmo `index.html`. Nenhuma mudança de código adicional é necessária — o roteador React resolve `/nps/:token` em qualquer origem.
+
+## Ondas 11–17 — Customer Experience Center
+
+Módulo evoluiu de "NPS" para **Customer Experience Center**, mantendo 100% retrocompatibilidade (rotas antigas preservadas). Novas capacidades:
+
+- **Onda 11 — Customer Health Score** (`cx_health_scores` + `cx_health_weights`, edge `cx-health-recalc`): pontuação 0-100 por cliente com tiers `excellent/good/attention/critical`. Pesos configuráveis por tenant (frequência, valor, recência, NPS, chamados, atrasos, devoluções, engajamento). UI: `/relacionamento/nps/health`.
+- **Onda 12 — Churn Prediction** (`cx_churn_predictions`, edge `cx-churn-predict`): probabilidade + risco + motivos + resumo IA + ações sugeridas. Roda sobre clientes com Health em `attention`/`critical`. UI: `/relacionamento/nps/churn`.
+- **Onda 13 — Survey Templates** (`cx_survey_templates`): 6 templates públicos seed (NPS, CSAT, CES 2.0, Likert, Emoji, Estrelas). Tenants podem criar seus próprios. UI: `/relacionamento/nps/cx-templates`.
+- **Onda 14 — Workflow Builder** (`cx_workflows` + `cx_workflow_runs`): fluxos no-code com trigger/nodes/edges em JSONB. UI base para CRUD; editor visual react-flow em roadmap. `/relacionamento/nps/workflows`.
+- **Onda 15 — White-label** (concluída na Onda 10 + branding por campanha).
+- **Onda 16 — IA de clusterização e resumo executivo** (`cx_comment_clusters` + `cx_executive_summaries`, edges `cx-ai-cluster` e `cx-executive-summary`): agrupa comentários por tema (positivo/neutro/negativo) e gera resumo executivo em PT-BR com insights e recomendações. UI: `/relacionamento/nps/clusters` e `/resumo-executivo`.
+- **Onda 17 — Rebrand para CX Center**: cabeçalho e nav atualizados; alias `/cx/*` redireciona para `/relacionamento/nps/*` (URLs antigas continuam válidas).
+
+**Tabelas novas:** `cx_health_scores`, `cx_health_weights`, `cx_churn_predictions`, `cx_survey_templates`, `cx_workflows`, `cx_workflow_runs`, `cx_comment_clusters`, `cx_executive_summaries`.
+**Edge functions novas:** `cx-health-recalc`, `cx-churn-predict`, `cx-ai-cluster`, `cx-executive-summary`.
+
+Todas RLS-isoladas por `company_id`. IA usa Lovable AI Gateway (`google/gemini-2.5-flash`) via `LOVABLE_API_KEY` (server-only).
+
+

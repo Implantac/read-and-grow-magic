@@ -1,7 +1,11 @@
 import { ReactNode } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Megaphone, ListChecks, Send, MessageSquare, FileText, Palette, Zap, Settings2, AlertTriangle, ScrollText, BookMarked } from 'lucide-react';
+import {
+  LayoutDashboard, Megaphone, ListChecks, Send, MessageSquare, FileText,
+  Palette, Zap, Settings2, AlertTriangle, ScrollText, BookMarked,
+  Heart, Brain, Workflow, Sparkles, LayoutTemplate,
+} from 'lucide-react';
 
 const items = [
   { to: '/relacionamento/nps/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -16,14 +20,21 @@ const items = [
   { to: '/relacionamento/nps/automacoes', label: 'Automações', icon: Zap },
   { to: '/relacionamento/nps/logs', label: 'Logs', icon: ScrollText },
   { to: '/relacionamento/nps/configuracoes', label: 'Configurações', icon: Settings2 },
+  // CX Center — Ondas 11..17
+  { to: '/relacionamento/nps/health', label: 'Health Score', icon: Heart },
+  { to: '/relacionamento/nps/churn', label: 'Churn IA', icon: Brain },
+  { to: '/relacionamento/nps/clusters', label: 'Clusters IA', icon: Sparkles },
+  { to: '/relacionamento/nps/resumo-executivo', label: 'Resumo Exec.', icon: FileText },
+  { to: '/relacionamento/nps/workflows', label: 'Workflows', icon: Workflow },
+  { to: '/relacionamento/nps/cx-templates', label: 'CX Templates', icon: LayoutTemplate },
 ];
 
 export function NPSLayout({ children }: { children?: ReactNode }) {
   return (
     <div className="p-6 space-y-6">
       <header>
-        <h1 className="text-2xl font-bold flex items-center gap-2">💬 NPS — Net Promoter Score</h1>
-        <p className="text-sm text-muted-foreground">Gestão de experiência do cliente e voz da marca</p>
+        <h1 className="text-2xl font-bold flex items-center gap-2">💬 Customer Experience Center</h1>
+        <p className="text-sm text-muted-foreground">NPS, Health Score, Churn IA e voz da marca</p>
       </header>
       <nav className="flex flex-wrap gap-2 border-b border-border pb-2 overflow-x-auto">
         {items.map((it) => (
