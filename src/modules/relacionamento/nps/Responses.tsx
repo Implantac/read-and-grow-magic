@@ -14,11 +14,28 @@ export default function Responses() {
   const { data: campaigns = [] } = useNPSCampaigns();
   const [campaignId, setCampaignId] = useState<string | undefined>();
   const [page, setPage] = useState(0);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const pageSize = 25;
   const { data: allAnswers = [], isLoading } = useNPSAnswers(campaignId ?? null, 5000);
   const total = allAnswers.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const answers = allAnswers.slice(page * pageSize, page * pageSize + pageSize);
+
+  const formatItemValue = (it: any): { display: string; other?: string } => {
+    const vj = it.value_json;
+    let other: string | undefined;
+    let value: any = it.value_text ?? it.value_number;
+    if (vj && typeof vj === 'object') {
+      if ('other' in vj && vj.other) other = String(vj.other);
+      if ('value' in vj) value = vj.value;
+      else if (value == null) value = vj;
+    }
+    let display = '';
+    if (Array.isArray(value)) display = value.join(', ');
+    else if (value !== null && value !== undefined && typeof value === 'object') display = JSON.stringify(value);
+    else if (value !== null && value !== undefined) display = String(value);
+    return { display, other };
+  };
 
   const analyze = async (id: string) => {
     toast.loading('Analisando com IA...', { id: 'ai' });
