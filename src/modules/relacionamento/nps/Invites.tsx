@@ -115,6 +115,16 @@ export default function Invites() {
     toast.success('Link copiado');
   };
 
+  const sendPending = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('nps-send-invite', { body: {} });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (d: any) => { qc.invalidateQueries({ queryKey: ['nps'] }); toast.success(`Enviados: ${d?.sent ?? 0} · Falhas: ${d?.failed ?? 0}`); },
+    onError: (e: any) => toast.error(e.message ?? 'Erro ao enviar'),
+  });
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
@@ -122,8 +132,14 @@ export default function Invites() {
           <h2 className="text-lg font-semibold">Convites</h2>
           <p className="text-sm text-muted-foreground">Envie a pesquisa por link, e-mail, WhatsApp, SMS ou QR Code.</p>
         </div>
-        <Button onClick={() => setOpen(true)} disabled={!campaignId}><Send className="mr-2 h-4 w-4" /> Gerar convites</Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => sendPending.mutate()} disabled={sendPending.isPending}>
+            <Mail className="mr-2 h-4 w-4" /> Enviar pendentes por e-mail
+          </Button>
+          <Button onClick={() => setOpen(true)} disabled={!campaignId}><Send className="mr-2 h-4 w-4" /> Gerar convites</Button>
+        </div>
       </div>
+
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div>

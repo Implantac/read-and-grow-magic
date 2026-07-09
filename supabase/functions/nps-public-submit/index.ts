@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
       payload: { answer_id: ans.id, score: body.score, category: ans.category },
     });
 
-    // Dispatch AI sentiment (fire-and-forget: não aguarda para não bloquear a resposta ao cliente)
+    // Dispatch AI sentiment (fire-and-forget)
     if (body.comment && body.comment.length > 5) {
       fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/nps-ai-analyze`, {
         method: 'POST',
@@ -91,6 +91,25 @@ Deno.serve(async (req) => {
         body: JSON.stringify({ answer_id: ans.id }),
       }).catch(() => { /* ignore */ });
     }
+
+    // Webhooks fire-and-forget
+    fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/nps-webhooks-dispatch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+      body: JSON.stringify({
+        company_id: tok.company_id,
+        event: 'survey.completed',
+        payload: { answer_id: ans.id, campaign_id: tok.campaign_id, score: body.score, category: ans.category, client_id: tok.client_id },
+      }),
+    }).catch(() => {});
+
+    // Alertas fire-and-forget (detratores/notas baixas)
+    fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/nps-alerts-dispatch`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
+      body: JSON.stringify({ company_id: tok.company_id, answer_id: ans.id }),
+    }).catch(() => {});
+
 
     return json({ ok: true, category: ans.category });
   } catch (e) {

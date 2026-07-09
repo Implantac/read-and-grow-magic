@@ -8,3 +8,13 @@ verify_jwt = false
 
 [functions.nps-public-status]
 verify_jwt = false
+
+[functions.nps-webhooks-dispatch]
+verify_jwt = false
+
+[functions.nps-alerts-dispatch]
+verify_jwt = false
+
+[functions.nps-automation-dispatch]
+verify_jwt = false
+
