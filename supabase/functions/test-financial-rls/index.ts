@@ -130,7 +130,7 @@ async function testOp(
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
-  const auth = await requireAuth(req, { roles: ["admin", "system_admin"] });
+  const auth = await requireAuth(req, { roles: ["admin"] });
   if (!auth.ok) {
     return new Response(JSON.stringify({ error: auth.message }), {
       status: auth.status, headers: { ...corsHeaders, "Content-Type": "application/json" },
