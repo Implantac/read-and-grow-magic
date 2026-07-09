@@ -268,23 +268,23 @@ export default function PublicNPS() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8" style={{ background: '#0f172a', color: '#f1f5f9' }}>
-      <div className="max-w-xl mx-auto space-y-5">
-        <div className="text-center space-y-3">
+    <div className="min-h-screen px-3 py-5 sm:p-6 md:p-8" style={{ background: '#0f172a', color: '#f1f5f9' }}>
+      <div className="w-full max-w-[640px] mx-auto space-y-4 sm:space-y-5">
+        <div className="text-center space-y-2 sm:space-y-3 px-1">
           {(c.logo_url ?? survey.company?.logo_url) && (
-            <img src={c.logo_url ?? survey.company.logo_url} alt={survey.company?.name ?? 'Logo'} className="h-12 mx-auto" />
+            <img src={c.logo_url ?? survey.company.logo_url} alt={survey.company?.name ?? 'Logo'} className="h-10 sm:h-12 mx-auto" />
           )}
-          <h1 className="text-2xl font-bold leading-tight text-white">{c.title ?? 'Como avalia sua experiência?'}</h1>
-          {c.subtitle && <p className="text-slate-200">{c.subtitle}</p>}
-          {c.message && <p className="text-slate-300 text-sm">{c.message}</p>}
+          <h1 className="text-xl sm:text-2xl font-bold leading-snug text-white">{c.title ?? 'Como avalia sua experiência?'}</h1>
+          {c.subtitle && <p className="text-sm sm:text-base text-slate-200 leading-relaxed">{c.subtitle}</p>}
+          {c.message && <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">{c.message}</p>}
         </div>
 
         <Progress value={progress} className="h-1 bg-slate-800" />
 
-        <Card className="bg-slate-900 border-slate-800">
-          <CardContent className="pt-6 space-y-6">
+        <Card className="bg-slate-900 border-slate-800 rounded-xl">
+          <CardContent className="p-4 sm:p-6 space-y-5 sm:space-y-6">
             <div className="space-y-3">
-              <label className="block text-base font-semibold text-white">
+              <label className="block text-[15px] sm:text-base font-semibold text-white leading-snug">
                 De 0 a 10, qual a probabilidade de recomendar {survey.company?.name ?? 'nossa empresa'} a um amigo ou colega? <span className="text-red-400">*</span>
               </label>
               <div className="grid grid-cols-11 gap-1 md:gap-1.5">
@@ -292,7 +292,7 @@ export default function PublicNPS() {
                   <button
                     key={n}
                     onClick={() => setScore(n)}
-                    className="rounded-md py-2 text-sm font-semibold transition-all hover:scale-105 min-w-0"
+                    className="rounded-md py-2.5 sm:py-2 text-[13px] sm:text-sm font-semibold transition-all hover:scale-105 min-w-0"
                     aria-pressed={score === n}
                     style={{
                       background:
@@ -311,7 +311,7 @@ export default function PublicNPS() {
                   </button>
                 ))}
               </div>
-              <div className="flex justify-between text-xs text-slate-300 px-1">
+              <div className="flex justify-between text-[11px] sm:text-xs text-slate-300 px-1">
                 <span>Nada provável</span>
                 <span>Muito provável</span>
               </div>
@@ -319,16 +319,16 @@ export default function PublicNPS() {
             </div>
 
             {score !== null && (
-              <div className="space-y-2 pt-2 border-t border-slate-800">
-                <label className="block text-base font-semibold text-white">{followUp}</label>
-                <Textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3} className="bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-500" maxLength={2000} />
+              <div className="space-y-2 pt-3 sm:pt-2 border-t border-slate-800">
+                <label className="block text-[15px] sm:text-base font-semibold text-white leading-snug">{followUp}</label>
+                <Textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3} className="bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-500 text-sm" maxLength={2000} />
                 <p className="text-xs text-slate-400 text-right">{comment.length}/2000</p>
               </div>
             )}
 
             {questions.map((q, i) => (
-              <div key={q.id} className="space-y-2 pt-2 border-t border-slate-800">
-                <label className="block text-base font-semibold text-white">
+              <div key={q.id} className="space-y-2.5 pt-3 sm:pt-2 border-t border-slate-800">
+                <label className="block text-[15px] sm:text-base font-semibold text-white leading-snug">
                   {i + 1}. {q.question_text}
                   {q.required && <span className="text-red-400"> *</span>}
                 </label>
@@ -339,7 +339,7 @@ export default function PublicNPS() {
             <Button
               onClick={submit}
               disabled={state === 'submitting'}
-              className="w-full h-11 text-base font-semibold"
+              className="w-full h-12 text-base font-semibold"
               style={{ background: primary, color: '#0f172a' }}
             >
               {state === 'submitting' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Enviar avaliação'}
