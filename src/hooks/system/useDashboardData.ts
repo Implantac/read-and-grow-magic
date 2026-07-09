@@ -244,11 +244,6 @@ export function useDashboardData() {
         { label: 'Detratores', value: String(npsDetractors), trend: npsDetractors > 0 ? 'down' as const : 'up' as const },
         { label: 'Taxa Resposta', value: `${npsResponseRate}%`, trend: 'neutral' as const, trendValue: `${npsCriticalComments} crítico(s)` },
       ];
-        { label: 'Transportadoras', value: String(carriersRes.count || 0), trend: 'neutral' as const },
-        { label: 'Entregas Pontuais', value: '96%', trend: 'up' as const },
-        { label: 'Frete Médio', value: 'R$ 42', trend: 'down' as const },
-        { label: 'Tempo Médio', value: '2.4 dias', trend: 'down' as const },
-      ];
 
       // === STATUS DISTRIBUTION ===
       const completedCount = orders.filter(o => o.status === 'delivered').length + completedSales.length + completedProdOrders.length;
