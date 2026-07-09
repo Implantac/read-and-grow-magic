@@ -284,22 +284,26 @@ export default function PublicNPS() {
                 </label>
               );
             })}
+            <OtherField show={showOtherFor(Array.isArray(val) ? val : [])} />
           </div>
         );
       }
       case 'dropdown':
         return (
-          <select
-            value={val ?? ''}
-            onChange={(e) => set(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-700 rounded-md h-11 px-3 text-sm text-slate-100"
-            aria-invalid={missing}
-          >
-            <option value="">Selecione…</option>
-            {choices.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
+          <div className="space-y-2">
+            <select
+              value={val ?? ''}
+              onChange={(e) => set(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-700 rounded-md h-11 px-3 text-sm text-slate-100"
+              aria-invalid={missing}
+            >
+              <option value="">Selecione…</option>
+              {choices.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            <OtherField show={showOtherFor(val)} />
+          </div>
         );
       default:
         return <Input value={val ?? ''} onChange={(e) => set(e.target.value)} className="bg-slate-950 border-slate-700 text-slate-100" />;
