@@ -304,7 +304,7 @@ export default function Surveys() {
 }
 
 function SortableQuestion({
-  q, index, total, onMoveUp, onMoveDown, onToggleRequired, onSaveToBank, onDelete,
+  q, index, total, onMoveUp, onMoveDown, onToggleRequired, onEdit, onSaveToBank, onDelete,
 }: {
   q: any;
   index: number;
@@ -312,6 +312,7 @@ function SortableQuestion({
   onMoveUp: () => void;
   onMoveDown: () => void;
   onToggleRequired: (v: boolean) => void;
+  onEdit: (patch: Record<string, any>) => void;
   onSaveToBank: () => void;
   onDelete: () => void;
 }) {
@@ -321,6 +322,36 @@ function SortableQuestion({
     transition,
     opacity: isDragging ? 0.6 : 1,
   } as React.CSSProperties;
+
+  const hasOptions = ['radio', 'checkbox', 'dropdown', 'multi_choice'].includes(q.question_type);
+  const [editing, setEditing] = useState(false);
+  const [text, setText] = useState<string>(q.question_text ?? '');
+  const [choices, setChoices] = useState<string>((q.options?.choices ?? []).join('\n'));
+
+  const startEdit = () => {
+    setText(q.question_text ?? '');
+    setChoices((q.options?.choices ?? []).join('\n'));
+    setEditing(true);
+  };
+
+  const save = () => {
+    const trimmed = text.trim();
+    if (!trimmed) {
+      toast.error('O texto da pergunta não pode ficar em branco.');
+      return;
+    }
+    const patch: Record<string, any> = { question_text: trimmed };
+    if (hasOptions) {
+      const arr = choices.split('\n').map((s) => s.trim()).filter(Boolean);
+      if (arr.length < 2) {
+        toast.error('Adicione pelo menos 2 opções (uma por linha).');
+        return;
+      }
+      patch.options = { ...(q.options ?? {}), choices: arr };
+    }
+    onEdit(patch);
+    setEditing(false);
+  };
 
   return (
     <div ref={setNodeRef} style={style}>
@@ -335,19 +366,56 @@ function SortableQuestion({
           >
             <GripVertical className="h-5 w-5" />
           </button>
-          <div className="flex-1">
-            <div className="font-medium">{index + 1}. {q.question_text}</div>
-            <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-1.5 mt-1">
-              <Badge variant="outline">{q.question_type}</Badge>
-              {q.required && <Badge variant="secondary">obrigatória</Badge>}
-              {q.options?.choices?.length ? <span>{q.options.choices.length} opções</span> : null}
-            </div>
+          <div className="flex-1 min-w-0">
+            {editing ? (
+              <div className="space-y-2">
+                <div>
+                  <Label className="text-xs">Texto da pergunta</Label>
+                  <Input value={text} onChange={(e) => setText(e.target.value)} autoFocus />
+                </div>
+                {hasOptions && (
+                  <div>
+                    <Label className="text-xs">Opções (uma por linha)</Label>
+                    <textarea
+                      value={choices}
+                      onChange={(e) => setChoices(e.target.value)}
+                      className="w-full min-h-[90px] rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    />
+                  </div>
+                )}
+                <div className="flex gap-2 pt-1">
+                  <Button size="sm" onClick={save}>Salvar</Button>
+                  <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>Cancelar</Button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={startEdit}
+                className="text-left w-full group"
+                title="Clique para editar"
+              >
+                <div className="font-medium group-hover:underline decoration-dotted underline-offset-4">
+                  {index + 1}. {q.question_text}
+                </div>
+                <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-1.5 mt-1">
+                  <Badge variant="outline">{q.question_type}</Badge>
+                  {q.required && <Badge variant="secondary">obrigatória</Badge>}
+                  {q.options?.choices?.length ? <span>{q.options.choices.length} opções</span> : null}
+                </div>
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <label className="flex items-center gap-2 text-xs text-muted-foreground">
               Obrig.
               <Switch checked={!!q.required} onCheckedChange={onToggleRequired} />
             </label>
+            {!editing && (
+              <Button size="icon" variant="ghost" title="Editar" onClick={startEdit}>
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
             <Button size="icon" variant="ghost" title="Mover para cima" disabled={index === 0} onClick={onMoveUp}>
               <ArrowUp className="h-4 w-4" />
             </Button>
@@ -366,6 +434,7 @@ function SortableQuestion({
     </div>
   );
 }
+
 
 function BankDialog({ open, onOpenChange, campaignId, currentCount }: { open: boolean; onOpenChange: (b: boolean) => void; campaignId?: string; currentCount: number }) {
 
