@@ -759,6 +759,20 @@ const ERP_TOOLS = [
   {
     type: "function",
     function: {
+      name: "consultar_nps",
+      description: "Consulta dados de NPS/CSAT/CES: score atual, tendência, promotores/detratores, follow-ups pendentes, respostas recentes com comentários e principais alertas de experiência do cliente.",
+      parameters: {
+        type: "object",
+        properties: {
+          tipo: { type: "string", enum: ["resumo", "tendencia", "detratores", "comentarios_recentes", "followups", "csat_ces"], description: "Tipo de consulta NPS" },
+          periodo_dias: { type: "number", description: "Período em dias (padrão 90)" },
+        },
+        required: ["tipo"],
+      },
+    },
+  },
+    type: "function",
+    function: {
       name: "analise_estrategica",
       description: "Gera análise estratégica detalhada com KPIs, tendências e recomendações da empresa toda",
       parameters: {
