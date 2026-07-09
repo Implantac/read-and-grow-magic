@@ -213,7 +213,7 @@ export default function PublicNPS() {
           ? choices.map((c) => c.label)
           : ['1', '2', '3', '4', '5'];
         return (
-          <div className={`grid gap-1.5 ${labels.length > 5 ? 'grid-cols-2 sm:grid-cols-' + labels.length : 'grid-cols-' + labels.length}`}>
+          <div className="grid gap-1.5" style={{ gridTemplateColumns: `repeat(${labels.length > 5 ? Math.ceil(labels.length / 2) : labels.length}, minmax(0, 1fr))` }}>
             {labels.map((lbl, i) => (
               <button
                 key={i}
