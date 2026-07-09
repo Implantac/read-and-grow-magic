@@ -27,6 +27,7 @@ export function useDashboardData() {
         receivableRes, payableRes, nfeRes, productionRes, purchaseRes,
         stockMovRes, overduePayableRes, overdueReceivableRes,
         lowStockRes, recentOrdersRes, hrRes, crmRes, carriersRes,
+        npsAnswersRes, npsInvitesRes,
       ] = await Promise.all([
         // Current month sales
         supabase.from('sales').select('total, status').gte('date', monthStart).lte('date', monthEnd).eq('company_id', companyId),
@@ -64,6 +65,10 @@ export function useDashboardData() {
         supabase.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'draft').eq('company_id', companyId),
         // Logistics & Fleet Management
         supabase.from('carriers').select('id', { count: 'exact', head: true }).eq('company_id', companyId),
+        // NPS answers (last 500)
+        supabase.from('nps_answers').select('score, ai_sentiment, comment, created_at').eq('company_id', companyId).order('created_at', { ascending: false }).limit(500),
+        // NPS invites (for response rate)
+        supabase.from('nps_invites').select('id, responded_at').eq('company_id', companyId).limit(2000),
       ]);
 
       // === COMMERCIAL ===
