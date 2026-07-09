@@ -10,7 +10,7 @@ import { recordUsage } from "../_shared/usage.ts";
 import { instrument, contextFromAuth } from "../_shared/observability.ts";
 import { getKnowledgeBlockFor } from "../_shared/ai-prompts.ts";
 import { DATA_TOOL_SCHEMAS, DATA_TOOL_NAMES, dispatchDataTool } from "../_shared/data-tools.ts";
-import { buildCanonicalMetrics } from "../_shared/canonical-metrics.ts";
+import { buildCanonicalMetrics, formatCanonicalBlock } from "../_shared/canonical-metrics.ts";
 
 
 const corsHeaders = {
@@ -670,7 +670,9 @@ async function handleAnalyze(userId: string | undefined, authHeader?: string, mo
 
     const userPrompt = `# DADOS REAIS DO NEGÓCIO (fonte única de verdade)
 
-## GROUND TRUTH (contagens e totais direto do banco — NÃO invente valores fora daqui)
+${formatCanonicalBlock(groundTruth)}
+
+## GROUND TRUTH BRUTO (JSON — mesmos números do bloco acima)
 ${JSON.stringify(groundTruth, null, 2)}
 
 ## Memórias de longo prazo
@@ -826,7 +828,9 @@ async function handleChat(userId: string | undefined, messages: any[], authHeade
 
   const ctx = `# DADOS REAIS DO NEGÓCIO (fonte única de verdade)
 
-## GROUND TRUTH (contagens e totais direto do banco — NÃO invente nada fora daqui)
+${formatCanonicalBlock(groundTruth)}
+
+## GROUND TRUTH BRUTO (JSON — mesmos números do bloco acima)
 ${JSON.stringify(groundTruth, null, 2)}
 
 ## Memórias relevantes
