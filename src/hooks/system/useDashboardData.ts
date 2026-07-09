@@ -288,6 +288,8 @@ export function useDashboardData() {
         hrKPIs,
         crmKPIs,
         logisticKPIs,
+        npsKPIs,
+        npsSummary: { score: npsScore, total: npsTotal, promoters: npsPromoters, passives: npsPassives, detractors: npsDetractors, responseRate: npsResponseRate, criticalComments: npsCriticalComments },
         statusDistribution,
         modulePerformance,
         alerts,
