@@ -1,16 +1,30 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Textarea } from '@/ui/base/textarea';
-import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { Input } from '@/ui/base/input';
+import { Progress } from '@/ui/base/progress';
+import { Loader2, CheckCircle2, XCircle, ShieldCheck } from 'lucide-react';
 
 /**
  * Rota pública /nps/:token — sem autenticação.
- * Renderiza a pesquisa e envia a resposta via edge function.
+ * Envia respostas via edge function nps-public-submit.
  */
+
+type QType = 'text' | 'number' | 'stars' | 'radio' | 'checkbox' | 'dropdown' | 'likert' | 'emoji' | 'multi_choice' | 'date' | 'file';
+
+interface Question {
+  id: string;
+  order_index: number;
+  question_text: string;
+  question_type: QType;
+  required: boolean;
+  options: any;
+}
+
+const EMOJIS = ['😡', '😞', '😐', '🙂', '😍'];
+
 export default function PublicNPS() {
   const { token = '' } = useParams();
   const [state, setState] = useState<'loading' | 'ready' | 'submitting' | 'done' | 'error'>('loading');
@@ -19,20 +33,20 @@ export default function PublicNPS() {
   const [score, setScore] = useState<number | null>(null);
   const [comment, setComment] = useState('');
   const [answers, setAnswers] = useState<Record<string, any>>({});
-  const startedAt = Date.now();
+  const [touched, setTouched] = useState(false);
+  const [startedAt] = useState(() => Date.now());
+
+  const projectUrl = (import.meta as any).env.VITE_SUPABASE_URL;
+  const anon = (import.meta as any).env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
   useEffect(() => {
     (async () => {
       try {
-        const { data, error } = await supabase.functions.invoke('nps-public-get', { body: {}, method: 'GET' } as any);
-        // Prefer manual fetch to allow query param
-        const projectUrl = (import.meta as any).env.VITE_SUPABASE_URL;
-        const anon = (import.meta as any).env.VITE_SUPABASE_PUBLISHABLE_KEY;
         const resp = await fetch(`${projectUrl}/functions/v1/nps-public-get?token=${encodeURIComponent(token)}`, {
           headers: { apikey: anon, Authorization: `Bearer ${anon}` },
         });
         const json = await resp.json();
-        if (!resp.ok) throw new Error(json.error ?? 'Erro');
+        if (!resp.ok) throw new Error(json.error ?? 'Pesquisa indisponível');
         setSurvey(json);
         setState('ready');
       } catch (e: any) {
@@ -40,15 +54,37 @@ export default function PublicNPS() {
         setState('error');
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, projectUrl, anon]);
+
+  const questions: Question[] = useMemo(() => (survey?.questions ?? []) as Question[], [survey]);
+  const requiredMissing = useMemo(() => {
+    if (score === null) return true;
+    return questions.some((q) => {
+      if (!q.required) return false;
+      const v = answers[q.id];
+      if (Array.isArray(v)) return v.length === 0;
+      return v === undefined || v === null || v === '';
+    });
+  }, [questions, answers, score]);
+
+  const totalSteps = 1 + questions.length; // nota + perguntas
+  const doneSteps = (score !== null ? 1 : 0) + questions.filter((q) => {
+    const v = answers[q.id];
+    return Array.isArray(v) ? v.length > 0 : v !== undefined && v !== '' && v !== null;
+  }).length;
+  const progress = Math.round((doneSteps / totalSteps) * 100);
 
   const submit = async () => {
-    if (score === null) return;
+    setTouched(true);
+    if (score === null || requiredMissing) return;
     setState('submitting');
     try {
-      const projectUrl = (import.meta as any).env.VITE_SUPABASE_URL;
-      const anon = (import.meta as any).env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      const payloadAnswers = Object.entries(answers).flatMap(([question_id, value]) => {
+        if (value === undefined || value === null || value === '') return [];
+        if (typeof value === 'number') return [{ question_id, value_number: value }];
+        if (Array.isArray(value) || typeof value === 'object') return [{ question_id, value_json: value }];
+        return [{ question_id, value_text: String(value) }];
+      });
       const resp = await fetch(`${projectUrl}/functions/v1/nps-public-submit`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', apikey: anon, Authorization: `Bearer ${anon}` },
@@ -56,13 +92,13 @@ export default function PublicNPS() {
           token,
           score,
           comment,
-          answers: Object.entries(answers).map(([question_id, value]) => ({ question_id, value_text: String(value) })),
+          answers: payloadAnswers,
           response_time_seconds: Math.round((Date.now() - startedAt) / 1000),
           ua: navigator.userAgent,
         }),
       });
       const j = await resp.json();
-      if (!resp.ok) throw new Error(j.error ?? 'Erro');
+      if (!resp.ok) throw new Error(j.error ?? 'Erro ao enviar');
       setState('done');
     } catch (e: any) {
       setError(e.message);
@@ -70,102 +106,261 @@ export default function PublicNPS() {
     }
   };
 
-  if (state === 'loading') return <div className="min-h-screen grid place-items-center bg-slate-950 text-slate-100"><Loader2 className="h-8 w-8 animate-spin" /></div>;
-  if (state === 'error') return (
-    <div className="min-h-screen grid place-items-center bg-slate-950 text-slate-100 p-4">
-      <Card className="max-w-md w-full bg-slate-900 border-slate-800">
-        <CardContent className="pt-6 text-center space-y-3">
-          <XCircle className="h-12 w-12 text-red-500 mx-auto" />
-          <p className="text-lg">{error}</p>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  if (state === 'loading')
+    return (
+      <div className="min-h-screen grid place-items-center bg-slate-950 text-slate-100">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
 
-  if (state === 'done') return (
-    <div className="min-h-screen grid place-items-center p-4" style={{ background: '#0f172a', color: '#f1f5f9' }}>
-      <Card className="max-w-md w-full bg-slate-900 border-slate-800">
-        <CardContent className="pt-8 text-center space-y-3">
-          <CheckCircle2 className="h-14 w-14 mx-auto" style={{ color: survey?.campaign?.primary_color ?? '#10b981' }} />
-          <h1 className="text-2xl font-bold">{survey?.campaign?.thanks_title ?? 'Obrigado!'}</h1>
-          <p className="text-slate-300">{survey?.campaign?.thanks_message ?? 'Sua opinião é muito importante.'}</p>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  if (state === 'error')
+    return (
+      <div className="min-h-screen grid place-items-center bg-slate-950 text-slate-100 p-4">
+        <Card className="max-w-md w-full bg-slate-900 border-slate-800">
+          <CardContent className="pt-6 text-center space-y-3">
+            <XCircle className="h-12 w-12 text-red-500 mx-auto" />
+            <p className="text-lg">{error}</p>
+            <p className="text-xs text-slate-400">Se você acredita que é um engano, entre em contato com o remetente.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+
+  if (state === 'done')
+    return (
+      <div className="min-h-screen grid place-items-center p-4" style={{ background: '#0f172a', color: '#f1f5f9' }}>
+        <Card className="max-w-md w-full bg-slate-900 border-slate-800">
+          <CardContent className="pt-8 text-center space-y-3">
+            <CheckCircle2 className="h-14 w-14 mx-auto" style={{ color: survey?.campaign?.primary_color ?? '#10b981' }} />
+            <h1 className="text-2xl font-bold">{survey?.campaign?.thanks_title ?? 'Obrigado!'}</h1>
+            <p className="text-slate-300">{survey?.campaign?.thanks_message ?? 'Sua opinião é muito importante.'}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
 
   const c = survey.campaign;
   const primary = c.primary_color ?? '#FF9800';
-  const followUp = score !== null && score >= 9 ? 'O que você mais gostou?' : score !== null && score <= 6 ? 'O que podemos melhorar?' : 'Deixe seu comentário (opcional)';
+  const followUp =
+    score !== null && score >= 9
+      ? 'O que você mais gostou? (opcional)'
+      : score !== null && score <= 6
+      ? 'O que podemos melhorar? (opcional)'
+      : 'Deixe um comentário (opcional)';
+
+  const renderQuestion = (q: Question) => {
+    const val = answers[q.id];
+    const set = (v: any) => setAnswers((prev) => ({ ...prev, [q.id]: v }));
+    const choices: string[] = (q.options?.choices as string[]) ?? [];
+    const missing = touched && q.required && (val === undefined || val === '' || (Array.isArray(val) && val.length === 0));
+
+    switch (q.question_type) {
+      case 'text':
+        return (
+          <Textarea
+            value={val ?? ''}
+            onChange={(e) => set(e.target.value)}
+            rows={3}
+            className="bg-slate-950 border-slate-800"
+            aria-invalid={missing}
+          />
+        );
+      case 'number':
+        return <Input type="number" value={val ?? ''} onChange={(e) => set(Number(e.target.value))} className="bg-slate-950 border-slate-800" aria-invalid={missing} />;
+      case 'date':
+        return <Input type="date" value={val ?? ''} onChange={(e) => set(e.target.value)} className="bg-slate-950 border-slate-800" aria-invalid={missing} />;
+      case 'stars':
+        return (
+          <div className="flex gap-1" role="radiogroup">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                type="button"
+                aria-label={`${n} estrela${n > 1 ? 's' : ''}`}
+                onClick={() => set(n)}
+                className="text-3xl leading-none transition-transform hover:scale-110"
+                style={{ color: (val ?? 0) >= n ? primary : '#334155' }}
+              >
+                ★
+              </button>
+            ))}
+          </div>
+        );
+      case 'emoji':
+        return (
+          <div className="flex gap-2">
+            {EMOJIS.map((emo, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => set(i + 1)}
+                className="text-3xl transition-transform hover:scale-110 rounded-md px-2 py-1"
+                style={{ background: val === i + 1 ? 'rgba(255,152,0,0.15)' : 'transparent', border: `1px solid ${val === i + 1 ? primary : 'rgba(255,255,255,0.1)'}` }}
+              >
+                {emo}
+              </button>
+            ))}
+          </div>
+        );
+      case 'likert': {
+        const labels: string[] = (q.options?.labels as string[]) ?? ['1', '2', '3', '4', '5'];
+        return (
+          <div className="grid grid-cols-5 gap-1">
+            {labels.map((lbl, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => set(i + 1)}
+                className="rounded-md py-2 text-xs font-medium transition-all"
+                style={{
+                  background: val === i + 1 ? primary : 'rgba(255,255,255,0.05)',
+                  color: val === i + 1 ? '#0f172a' : '#f1f5f9',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                }}
+              >
+                {lbl}
+              </button>
+            ))}
+          </div>
+        );
+      }
+      case 'radio':
+      case 'multi_choice':
+        return (
+          <div className="space-y-2" role="radiogroup">
+            {choices.map((opt) => (
+              <label key={opt} className="flex items-center gap-2 p-2 rounded-md cursor-pointer hover:bg-slate-800/40 border" style={{ borderColor: val === opt ? primary : 'rgba(255,255,255,0.08)' }}>
+                <input type="radio" name={q.id} checked={val === opt} onChange={() => set(opt)} className="accent-current" />
+                <span>{opt}</span>
+              </label>
+            ))}
+          </div>
+        );
+      case 'checkbox': {
+        const arr: string[] = Array.isArray(val) ? val : [];
+        return (
+          <div className="space-y-2">
+            {choices.map((opt) => {
+              const checked = arr.includes(opt);
+              return (
+                <label key={opt} className="flex items-center gap-2 p-2 rounded-md cursor-pointer hover:bg-slate-800/40 border" style={{ borderColor: checked ? primary : 'rgba(255,255,255,0.08)' }}>
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    onChange={(e) => set(e.target.checked ? [...arr, opt] : arr.filter((x) => x !== opt))}
+                  />
+                  <span>{opt}</span>
+                </label>
+              );
+            })}
+          </div>
+        );
+      }
+      case 'dropdown':
+        return (
+          <select
+            value={val ?? ''}
+            onChange={(e) => set(e.target.value)}
+            className="w-full bg-slate-950 border border-slate-800 rounded-md h-10 px-3 text-sm"
+            aria-invalid={missing}
+          >
+            <option value="">Selecione…</option>
+            {choices.map((opt) => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+        );
+      default:
+        return <Input value={val ?? ''} onChange={(e) => set(e.target.value)} className="bg-slate-950 border-slate-800" />;
+    }
+  };
 
   return (
     <div className="min-h-screen p-4 md:p-8" style={{ background: '#0f172a', color: '#f1f5f9' }}>
-      <div className="max-w-xl mx-auto space-y-6">
+      <div className="max-w-xl mx-auto space-y-5">
         <div className="text-center space-y-3">
-          {(c.logo_url ?? survey.company?.logo_url) && <img src={c.logo_url ?? survey.company.logo_url} alt="" className="h-12 mx-auto" />}
-          <h1 className="text-2xl font-bold">{c.title ?? 'Como avalia sua experiência?'}</h1>
+          {(c.logo_url ?? survey.company?.logo_url) && (
+            <img src={c.logo_url ?? survey.company.logo_url} alt={survey.company?.name ?? 'Logo'} className="h-12 mx-auto" />
+          )}
+          <h1 className="text-2xl font-bold leading-tight">{c.title ?? 'Como avalia sua experiência?'}</h1>
           {c.subtitle && <p className="text-slate-300">{c.subtitle}</p>}
           {c.message && <p className="text-slate-400 text-sm">{c.message}</p>}
         </div>
 
+        <Progress value={progress} className="h-1 bg-slate-800" />
+
         <Card className="bg-slate-900 border-slate-800">
-          <CardContent className="pt-6 space-y-4">
-            <label className="block text-sm">De 0 a 10, qual a probabilidade de recomendar {survey.company?.name ?? 'nossa empresa'} a um amigo ou colega?</label>
-            <div className="grid grid-cols-11 gap-1">
-              {Array.from({ length: 11 }, (_, n) => (
-                <button
-                  key={n}
-                  onClick={() => setScore(n)}
-                  className="rounded-md py-2 font-semibold transition-all hover:scale-105"
-                  style={{
-                    background: score === n ? primary : 'rgba(255,255,255,0.05)',
-                    color: score === n ? '#0f172a' : '#f1f5f9',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                  }}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
-            <div className="flex justify-between text-xs text-slate-400 px-1">
-              <span>Nada provável</span>
-              <span>Muito provável</span>
+          <CardContent className="pt-6 space-y-6">
+            <div className="space-y-3">
+              <label className="block text-sm font-medium">
+                De 0 a 10, qual a probabilidade de recomendar {survey.company?.name ?? 'nossa empresa'} a um amigo ou colega? <span className="text-red-400">*</span>
+              </label>
+              <div className="grid grid-cols-11 gap-1 md:gap-1.5">
+                {Array.from({ length: 11 }, (_, n) => (
+                  <button
+                    key={n}
+                    onClick={() => setScore(n)}
+                    className="rounded-md py-2 text-sm font-semibold transition-all hover:scale-105 min-w-0"
+                    aria-pressed={score === n}
+                    style={{
+                      background:
+                        score === n
+                          ? primary
+                          : n <= 6
+                          ? 'rgba(239,68,68,0.08)'
+                          : n <= 8
+                          ? 'rgba(245,158,11,0.08)'
+                          : 'rgba(16,185,129,0.08)',
+                      color: score === n ? '#0f172a' : '#f1f5f9',
+                      border: `1px solid ${score === n ? primary : 'rgba(255,255,255,0.08)'}`,
+                    }}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+              <div className="flex justify-between text-xs text-slate-400 px-1">
+                <span>Nada provável</span>
+                <span>Muito provável</span>
+              </div>
+              {touched && score === null && <p className="text-xs text-red-400">Por favor, escolha uma nota.</p>}
             </div>
 
             {score !== null && (
-              <div className="space-y-2">
+              <div className="space-y-2 pt-2 border-t border-slate-800">
                 <label className="block text-sm">{followUp}</label>
-                <Textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3} className="bg-slate-950 border-slate-800" />
+                <Textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3} className="bg-slate-950 border-slate-800" maxLength={2000} />
+                <p className="text-xs text-slate-500 text-right">{comment.length}/2000</p>
               </div>
             )}
 
-            {(survey.questions ?? []).map((q: any) => (
-              <div key={q.id} className="space-y-1">
-                <label className="block text-sm">{q.question_text}{q.required && ' *'}</label>
-                {q.question_type === 'text' ? (
-                  <Textarea value={answers[q.id] ?? ''} onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })} rows={2} className="bg-slate-950 border-slate-800" />
-                ) : q.question_type === 'number' ? (
-                  <Input type="number" value={answers[q.id] ?? ''} onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })} className="bg-slate-950 border-slate-800" />
-                ) : q.question_type === 'stars' ? (
-                  <div className="flex gap-1">{[1,2,3,4,5].map(n => <button key={n} type="button" onClick={() => setAnswers({ ...answers, [q.id]: n })} className="text-2xl" style={{ color: (answers[q.id] ?? 0) >= n ? primary : '#334155' }}>★</button>)}</div>
-                ) : (
-                  <Input value={answers[q.id] ?? ''} onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })} className="bg-slate-950 border-slate-800" />
-                )}
+            {questions.map((q, i) => (
+              <div key={q.id} className="space-y-2 pt-2 border-t border-slate-800">
+                <label className="block text-sm font-medium">
+                  {i + 1}. {q.question_text}
+                  {q.required && <span className="text-red-400"> *</span>}
+                </label>
+                {renderQuestion(q)}
               </div>
             ))}
 
             <Button
               onClick={submit}
-              disabled={score === null || state === 'submitting'}
-              className="w-full font-semibold"
+              disabled={state === 'submitting'}
+              className="w-full h-11 text-base font-semibold"
               style={{ background: primary, color: '#0f172a' }}
             >
               {state === 'submitting' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Enviar avaliação'}
             </Button>
+            {touched && requiredMissing && score !== null && (
+              <p className="text-xs text-red-400 text-center">Responda as perguntas obrigatórias antes de enviar.</p>
+            )}
           </CardContent>
         </Card>
 
-        <p className="text-center text-xs text-slate-500">Suas respostas são confidenciais e utilizadas somente para melhorar sua experiência.</p>
+        <p className="flex items-center justify-center gap-2 text-xs text-slate-500">
+          <ShieldCheck className="h-3.5 w-3.5" /> Suas respostas são confidenciais e utilizadas somente para melhorar sua experiência.
+        </p>
       </div>
     </div>
   );
