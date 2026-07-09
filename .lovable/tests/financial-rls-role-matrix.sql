@@ -15,6 +15,10 @@
 
 BEGIN;
 
+-- Skip user triggers (e.g. fn_setup_new_company_fiscal) that require extra
+-- fixtures beyond RLS scope. RLS itself is enforced independently.
+SET LOCAL session_replication_role = 'replica';
+
 -- ---------- Fixtures ---------------------------------------------------------
 DO $$
 DECLARE
