@@ -207,6 +207,24 @@ export async function buildCanonicalMetrics(
   const purchases = purchData || [];
   const compras_aprovacao = purchases.filter((o: any) => ["draft", "pending"].includes(o.status)).length;
 
+  // NPS / Relacionamento
+  const [{ data: npsAnsData }, { data: npsInvData }] = await Promise.all([
+    admin.from("nps_answers").select("score,ai_sentiment,comment").eq("company_id", companyId).limit(2000),
+    admin.from("nps_invites").select("id,responded_at").eq("company_id", companyId).limit(5000),
+  ]);
+  const npsRows = npsAnsData || [];
+  const npsTotal = npsRows.length;
+  const promotores = npsRows.filter((a: any) => (a.score ?? -1) >= 9).length;
+  const detratores = npsRows.filter((a: any) => a.score != null && a.score <= 6).length;
+  const neutros = Math.max(0, npsTotal - promotores - detratores);
+  const npsScore = npsTotal > 0 ? Math.round(((promotores - detratores) / npsTotal) * 100) : 0;
+  const invTotal = (npsInvData || []).length;
+  const respondidos = (npsInvData || []).filter((i: any) => i.responded_at).length;
+  const npsResposta = invTotal > 0 ? Math.min(100, Math.round((respondidos / invTotal) * 100)) : 0;
+  const npsCriticos = npsRows.filter((a: any) =>
+    ((a.score != null && a.score <= 4) || a.ai_sentiment === 'negative') && (a.comment || '').trim().length > 0
+  ).length;
+
   return {
     available: true,
     version: CANONICAL_METRICS_VERSION,
@@ -227,6 +245,15 @@ export async function buildCanonicalMetrics(
     fiscal: { nfe_autorizadas_mes: nfe_autorizadas, nfe_rascunho },
     producao: { op_ativas, op_concluidas_total: op_concluidas },
     compras: { aguardando_aprovacao: compras_aprovacao },
+    relacionamento: {
+      nps_score: npsScore,
+      nps_total_respostas: npsTotal,
+      nps_promotores: promotores,
+      nps_neutros: neutros,
+      nps_detratores: detratores,
+      nps_taxa_resposta_pct: npsResposta,
+      nps_comentarios_criticos: npsCriticos,
+    },
     _definitions: CANONICAL_DEFINITIONS,
     _regra: "Estes números são idênticos aos exibidos no Dashboard Consolidado. Qualquer divergência = bug. Qualquer valor não presente aqui = 'dados insuficientes'.",
   };
