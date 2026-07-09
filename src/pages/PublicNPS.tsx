@@ -287,12 +287,12 @@ export default function PublicNPS() {
               <label className="block text-[15px] sm:text-base font-semibold text-white leading-snug">
                 De 0 a 10, qual a probabilidade de recomendar {survey.company?.name ?? 'nossa empresa'} a um amigo ou colega? <span className="text-red-400">*</span>
               </label>
-              <div className="grid grid-cols-11 gap-1 md:gap-1.5">
+              <div className="grid grid-cols-6 sm:grid-cols-11 gap-1.5 sm:gap-1.5">
                 {Array.from({ length: 11 }, (_, n) => (
                   <button
                     key={n}
                     onClick={() => setScore(n)}
-                    className="rounded-md py-2.5 sm:py-2 text-[13px] sm:text-sm font-semibold transition-all hover:scale-105 min-w-0"
+                    className="rounded-lg h-11 sm:h-10 text-[15px] sm:text-sm font-semibold transition-all active:scale-95 hover:scale-105 min-w-0 flex items-center justify-center"
                     aria-pressed={score === n}
                     style={{
                       background:
@@ -304,7 +304,7 @@ export default function PublicNPS() {
                           ? 'rgba(245,158,11,0.08)'
                           : 'rgba(16,185,129,0.08)',
                       color: score === n ? '#0f172a' : '#f1f5f9',
-                      border: `1px solid ${score === n ? primary : 'rgba(255,255,255,0.08)'}`,
+                      border: `1px solid ${score === n ? primary : 'rgba(255,255,255,0.12)'}`,
                     }}
                   >
                     {n}
