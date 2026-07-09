@@ -7,7 +7,7 @@ import { Skeleton } from '@/ui/base/skeleton';
 import { Button } from '@/ui/base/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Label } from '@/ui/base/label';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function Responses() {
