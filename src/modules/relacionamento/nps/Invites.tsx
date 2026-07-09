@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNPSCampaigns, useNPSInvites, useGenerateInvites, publicSurveyUrl } from './hooks';
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
