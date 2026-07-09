@@ -28,8 +28,28 @@ import { Skeleton } from '@/ui/base/skeleton';
 import { Badge } from '@/ui/base/badge';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
-import { Plus, Trash2, Library, BookmarkPlus, Search, Sparkles, Trash, ArrowUp, ArrowDown, ExternalLink } from 'lucide-react';
+import { Plus, Trash2, Library, BookmarkPlus, Search, Sparkles, Trash, ArrowUp, ArrowDown, ExternalLink, GripVertical } from 'lucide-react';
+import { Switch } from '@/ui/base/switch';
 import { toast } from 'sonner';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+
 
 
 const TYPES = [
@@ -109,14 +129,41 @@ export default function Surveys() {
 
   const reorder = useReorderQuestion();
 
+  const updateReq = useMutation({
+    mutationFn: async ({ id, required }: { id: string; required: boolean }) => {
+      const { error } = await supabase.from('nps_questions').update({ required }).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['nps'] }),
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const move = (idx: number, dir: -1 | 1) => {
     const target = idx + dir;
     if (target < 0 || target >= questions.length) return;
-    const a = questions[idx] as any;
-    const b = questions[target] as any;
-    reorder.mutate({ id: a.id, order_index: b.order_index ?? target });
-    reorder.mutate({ id: b.id, order_index: a.order_index ?? idx });
+    persistOrder(arrayMove(questions as any[], idx, target));
   };
+
+  const persistOrder = (ordered: any[]) => {
+    ordered.forEach((q, i) => {
+      if (q.order_index !== i) reorder.mutate({ id: q.id, order_index: i });
+    });
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const onDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+    const oldIdx = (questions as any[]).findIndex((q) => q.id === active.id);
+    const newIdx = (questions as any[]).findIndex((q) => q.id === over.id);
+    if (oldIdx < 0 || newIdx < 0) return;
+    persistOrder(arrayMove(questions as any[], oldIdx, newIdx));
+  };
+
 
   const previewCampaign = async () => {
     if (!campaignId) return;
@@ -213,34 +260,28 @@ export default function Surveys() {
             <Skeleton className="h-40" />
           ) : (
             <div className="space-y-2">
-              {questions.map((q: any, i: number) => (
-                <Card key={q.id}>
-                  <CardContent className="pt-4 flex justify-between items-start gap-3">
-                    <div className="flex-1">
-                      <div className="font-medium">{i + 1}. {q.question_text}</div>
-                      <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-1.5 mt-1">
-                        <Badge variant="outline">{q.question_type}</Badge>
-                        {q.required && <Badge variant="secondary">obrigatória</Badge>}
-                        {q.options?.choices?.length ? <span>{q.options.choices.length} opções</span> : null}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Button size="icon" variant="ghost" title="Mover para cima" disabled={i === 0} onClick={() => move(i, -1)}>
-                        <ArrowUp className="h-4 w-4" />
-                      </Button>
-                      <Button size="icon" variant="ghost" title="Mover para baixo" disabled={i === questions.length - 1} onClick={() => move(i, 1)}>
-                        <ArrowDown className="h-4 w-4" />
-                      </Button>
-                      <Button size="icon" variant="ghost" title="Salvar na biblioteca" onClick={() => saveCurrentToBank(q)}>
-                        <BookmarkPlus className="h-4 w-4" />
-                      </Button>
-                      <Button size="icon" variant="ghost" onClick={() => del.mutate(q.id)}>
-                        <Trash2 className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {questions.length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Arraste as perguntas pelo ícone <GripVertical className="inline h-3 w-3" /> para reordenar. Use o switch para marcar como obrigatória.
+                </p>
+              )}
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+                <SortableContext items={(questions as any[]).map((q) => q.id)} strategy={verticalListSortingStrategy}>
+                  {(questions as any[]).map((q, i) => (
+                    <SortableQuestion
+                      key={q.id}
+                      q={q}
+                      index={i}
+                      total={questions.length}
+                      onMoveUp={() => move(i, -1)}
+                      onMoveDown={() => move(i, 1)}
+                      onToggleRequired={(v) => updateReq.mutate({ id: q.id, required: v })}
+                      onSaveToBank={() => saveCurrentToBank(q)}
+                      onDelete={() => del.mutate(q.id)}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
               {questions.length === 0 && (
                 <p className="text-sm text-muted-foreground">
                   Sem perguntas extras. A pesquisa exibirá apenas a nota NPS e um comentário aberto.
@@ -248,6 +289,7 @@ export default function Surveys() {
               )}
             </div>
           )}
+
         </>
       )}
 
@@ -257,7 +299,72 @@ export default function Surveys() {
   );
 }
 
+function SortableQuestion({
+  q, index, total, onMoveUp, onMoveDown, onToggleRequired, onSaveToBank, onDelete,
+}: {
+  q: any;
+  index: number;
+  total: number;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  onToggleRequired: (v: boolean) => void;
+  onSaveToBank: () => void;
+  onDelete: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: q.id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+  } as React.CSSProperties;
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <Card className={isDragging ? 'ring-2 ring-primary/40' : ''}>
+        <CardContent className="pt-4 flex justify-between items-start gap-3">
+          <button
+            type="button"
+            className="mt-1 cursor-grab active:cursor-grabbing touch-none text-muted-foreground hover:text-foreground"
+            aria-label="Arrastar para reordenar"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical className="h-5 w-5" />
+          </button>
+          <div className="flex-1">
+            <div className="font-medium">{index + 1}. {q.question_text}</div>
+            <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-1.5 mt-1">
+              <Badge variant="outline">{q.question_type}</Badge>
+              {q.required && <Badge variant="secondary">obrigatória</Badge>}
+              {q.options?.choices?.length ? <span>{q.options.choices.length} opções</span> : null}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="flex items-center gap-2 text-xs text-muted-foreground">
+              Obrig.
+              <Switch checked={!!q.required} onCheckedChange={onToggleRequired} />
+            </label>
+            <Button size="icon" variant="ghost" title="Mover para cima" disabled={index === 0} onClick={onMoveUp}>
+              <ArrowUp className="h-4 w-4" />
+            </Button>
+            <Button size="icon" variant="ghost" title="Mover para baixo" disabled={index === total - 1} onClick={onMoveDown}>
+              <ArrowDown className="h-4 w-4" />
+            </Button>
+            <Button size="icon" variant="ghost" title="Salvar na biblioteca" onClick={onSaveToBank}>
+              <BookmarkPlus className="h-4 w-4" />
+            </Button>
+            <Button size="icon" variant="ghost" onClick={onDelete}>
+              <Trash2 className="h-4 w-4 text-red-500" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 function BankDialog({ open, onOpenChange, campaignId, currentCount }: { open: boolean; onOpenChange: (b: boolean) => void; campaignId?: string; currentCount: number }) {
+
   const [tab, setTab] = useState<'global' | 'company'>('global');
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string | undefined>(undefined);
