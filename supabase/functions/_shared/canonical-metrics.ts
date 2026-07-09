@@ -47,6 +47,15 @@ export interface CanonicalMetrics {
   fiscal: { nfe_autorizadas_mes: number; nfe_rascunho: number };
   producao: { op_ativas: number; op_concluidas_total: number };
   compras: { aguardando_aprovacao: number };
+  relacionamento: {
+    nps_score: number;
+    nps_total_respostas: number;
+    nps_promotores: number;
+    nps_neutros: number;
+    nps_detratores: number;
+    nps_taxa_resposta_pct: number;
+    nps_comentarios_criticos: number;
+  };
   _definitions: Record<string, string>;
   _regra: string;
 }
