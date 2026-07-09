@@ -47,6 +47,15 @@ export interface CanonicalMetrics {
   fiscal: { nfe_autorizadas_mes: number; nfe_rascunho: number };
   producao: { op_ativas: number; op_concluidas_total: number };
   compras: { aguardando_aprovacao: number };
+  relacionamento: {
+    nps_score: number;
+    nps_total_respostas: number;
+    nps_promotores: number;
+    nps_neutros: number;
+    nps_detratores: number;
+    nps_taxa_resposta_pct: number;
+    nps_comentarios_criticos: number;
+  };
   _definitions: Record<string, string>;
   _regra: string;
 }
@@ -106,6 +115,10 @@ export async function buildCanonicalMetrics(
     fiscal: { nfe_autorizadas_mes: 0, nfe_rascunho: 0 },
     producao: { op_ativas: 0, op_concluidas_total: 0 },
     compras: { aguardando_aprovacao: 0 },
+    relacionamento: {
+      nps_score: 0, nps_total_respostas: 0, nps_promotores: 0, nps_neutros: 0,
+      nps_detratores: 0, nps_taxa_resposta_pct: 0, nps_comentarios_criticos: 0,
+    },
     _definitions: CANONICAL_DEFINITIONS,
     _regra: "Estes números são idênticos aos exibidos no Dashboard Consolidado. Qualquer valor não presente aqui = 'dados insuficientes'.",
   };
@@ -194,6 +207,24 @@ export async function buildCanonicalMetrics(
   const purchases = purchData || [];
   const compras_aprovacao = purchases.filter((o: any) => ["draft", "pending"].includes(o.status)).length;
 
+  // NPS / Relacionamento
+  const [{ data: npsAnsData }, { data: npsInvData }] = await Promise.all([
+    admin.from("nps_answers").select("score,ai_sentiment,comment").eq("company_id", companyId).limit(2000),
+    admin.from("nps_invites").select("id,responded_at").eq("company_id", companyId).limit(5000),
+  ]);
+  const npsRows = npsAnsData || [];
+  const npsTotal = npsRows.length;
+  const promotores = npsRows.filter((a: any) => (a.score ?? -1) >= 9).length;
+  const detratores = npsRows.filter((a: any) => a.score != null && a.score <= 6).length;
+  const neutros = Math.max(0, npsTotal - promotores - detratores);
+  const npsScore = npsTotal > 0 ? Math.round(((promotores - detratores) / npsTotal) * 100) : 0;
+  const invTotal = (npsInvData || []).length;
+  const respondidos = (npsInvData || []).filter((i: any) => i.responded_at).length;
+  const npsResposta = invTotal > 0 ? Math.min(100, Math.round((respondidos / invTotal) * 100)) : 0;
+  const npsCriticos = npsRows.filter((a: any) =>
+    ((a.score != null && a.score <= 4) || a.ai_sentiment === 'negative') && (a.comment || '').trim().length > 0
+  ).length;
+
   return {
     available: true,
     version: CANONICAL_METRICS_VERSION,
@@ -214,6 +245,15 @@ export async function buildCanonicalMetrics(
     fiscal: { nfe_autorizadas_mes: nfe_autorizadas, nfe_rascunho },
     producao: { op_ativas, op_concluidas_total: op_concluidas },
     compras: { aguardando_aprovacao: compras_aprovacao },
+    relacionamento: {
+      nps_score: npsScore,
+      nps_total_respostas: npsTotal,
+      nps_promotores: promotores,
+      nps_neutros: neutros,
+      nps_detratores: detratores,
+      nps_taxa_resposta_pct: npsResposta,
+      nps_comentarios_criticos: npsCriticos,
+    },
     _definitions: CANONICAL_DEFINITIONS,
     _regra: "Estes números são idênticos aos exibidos no Dashboard Consolidado. Qualquer divergência = bug. Qualquer valor não presente aqui = 'dados insuficientes'.",
   };
@@ -254,6 +294,12 @@ _Estes números são IDÊNTICOS aos exibidos no Dashboard Consolidado. Qualquer 
 - NF-e autorizadas no mês: **${m.fiscal.nfe_autorizadas_mes}** • rascunho: ${m.fiscal.nfe_rascunho}
 - OPs ativas: **${m.producao.op_ativas}** • concluídas (total): ${m.producao.op_concluidas_total}
 - Compras aguardando aprovação: **${m.compras.aguardando_aprovacao}**
+
+## Relacionamento / CX (NPS)
+- NPS Score: **${m.relacionamento.nps_score}** (${m.relacionamento.nps_total_respostas} respostas)
+- Promotores: **${m.relacionamento.nps_promotores}** • Neutros: ${m.relacionamento.nps_neutros} • Detratores: **${m.relacionamento.nps_detratores}**
+- Taxa de resposta: **${m.relacionamento.nps_taxa_resposta_pct}%**
+- Comentários críticos pendentes: **${m.relacionamento.nps_comentarios_criticos}**
 
 ## Regras
 - Cite APENAS valores presentes neste bloco. Não recalcule por conta própria.

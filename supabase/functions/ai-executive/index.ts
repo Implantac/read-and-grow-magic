@@ -157,6 +157,12 @@ async function fetchAllData(supabase: any, companyId?: string) {
     query("sped_files").order("generated_at", { ascending: false }).limit(50).then((r: any) => r).catch(() => ({ data: [] })),
   ]);
 
+  // NPS / Relacionamento (Voice of Customer)
+  const [npsAnswersRes, npsInvitesRes] = await Promise.all([
+    query("nps_answers").order("created_at", { ascending: false }).limit(500).then((r: any) => r).catch(() => ({ data: [] })),
+    query("nps_invites").limit(1000).then((r: any) => r).catch(() => ({ data: [] })),
+  ]);
+
   return {
     orders: ordersRes.data || [],
     receivables: receivableRes.data || [],
@@ -178,6 +184,8 @@ async function fetchAllData(supabase: any, companyId?: string) {
     nfeItems: nfeItemsRes.data || [],
     taxRules: taxRulesRes.data || [],
     spedFiles: spedRes.data || [],
+    npsAnswers: npsAnswersRes.data || [],
+    npsInvites: npsInvitesRes.data || [],
   };
 }
 
@@ -320,7 +328,27 @@ function computeKPIs(d: any, months: number = 12) {
       activeTaxRules: d.taxRules.filter((t: any) => t.active).length,
       spedFilesGenerated: d.spedFiles.length,
       lastSpedDate: d.spedFiles[0]?.generated_at || null,
+      // NPS / CX
+      ...(() => {
+        const ans = d.npsAnswers || [];
+        const total = ans.length;
+        const promoters = ans.filter((a: any) => (a.score ?? -1) >= 9).length;
+        const detractors = ans.filter((a: any) => (a.score ?? -1) <= 6 && a.score != null).length;
+        const passives = total - promoters - detractors;
+        const npsScore = total > 0 ? Math.round(((promoters - detractors) / total) * 100) : 0;
+        const invitesTotal = (d.npsInvites || []).length;
+        const responded = (d.npsInvites || []).filter((i: any) => i.responded_at).length;
+        const responseRate = invitesTotal > 0 ? Math.min(100, Math.round((responded / invitesTotal) * 100)) : 0;
+        return { npsScore, npsTotal: total, npsPromoters: promoters, npsPassives: passives, npsDetractors: detractors, npsResponseRate: responseRate };
+      })(),
   };
+
+  // NPS: comentários críticos (detratores com sentimento negativo ou score <= 4)
+  const criticalNpsComments = (d.npsAnswers || [])
+    .filter((a: any) => (a.score != null && a.score <= 4) || a.ai_sentiment === 'negative')
+    .filter((a: any) => (a.comment || '').trim().length > 0)
+    .slice(0, 10)
+    .map((a: any) => ({ score: a.score, sentiment: a.ai_sentiment, summary: a.ai_summary || a.comment?.slice(0, 200), created_at: a.created_at }));
 
   return {
     kpis,
@@ -335,6 +363,7 @@ function computeKPIs(d: any, months: number = 12) {
     lowMarginProducts: productMargins.filter((p: any) => p.marginPct < 10).slice(0, 5),
     revenueByRegion: d.clients.reduce((acc: any, c: any) => ({ ...acc, [c.region || 'Outros']: (acc[c.region || 'Outros'] || 0) + (c.total_purchases || 0) }), {}),
     autoAlerts: d.alerts,
+    criticalNpsComments,
     swot: {
       strengths: [
         { title: "Margem Bruta", description: `Margem de ${kpis.grossMargin}% acima da meta setorial`, impact: "high" },
@@ -492,6 +521,8 @@ MARGEM POR PRODUTO (top 10): ${JSON.stringify(computed.productMargins)}
 PRODUTOS BAIXA MARGEM: ${JSON.stringify(computed.lowMarginProducts)}
 RECEITA POR REGIÃO: ${JSON.stringify(computed.revenueByRegion)}
 ALERTAS AUTO: ${JSON.stringify(computed.autoAlerts)}
+NPS / VOZ DO CLIENTE: score=${computed.kpis.npsScore}, respostas=${computed.kpis.npsTotal}, promotores=${computed.kpis.npsPromoters}, neutros=${computed.kpis.npsPassives}, detratores=${computed.kpis.npsDetractors}, taxa_resposta=${computed.kpis.npsResponseRate}%
+COMENTÁRIOS CRÍTICOS NPS: ${JSON.stringify(computed.criticalNpsComments)}
 RESUMO: ${JSON.stringify(computed.summary)}
 
 Gere insights estratégicos: { "insights": [...] }`;

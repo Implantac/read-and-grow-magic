@@ -15,7 +15,7 @@ import {
   ShoppingCart, Wallet, Package, Factory, Truck, Warehouse,
   DollarSign, TrendingUp, ArrowDownCircle, ArrowUpCircle,
   RefreshCw, ShieldCheck, Scissors, Building, Database,
-  Users, Target, Navigation, LayoutDashboard, Boxes, Brain, BarChart3,
+  Users, Target, Navigation, LayoutDashboard, Boxes, Brain, BarChart3, Heart,
 } from 'lucide-react';
 import { Card, CardContent } from '@/ui/base/card';
 import { Skeleton } from '@/ui/base/skeleton';
@@ -106,7 +106,7 @@ export default function Dashboard() {
   const {
     mainKPIs = [], commercialKPIs = [], financialKPIs = [], inventoryKPIs = [],
     productionKPIs = [], purchasingKPIs = [], wmsKPIs = [],
-    hrKPIs = [], crmKPIs = [], logisticKPIs = [],
+    hrKPIs = [], crmKPIs = [], logisticKPIs = [], npsKPIs = [],
     statusDistribution = [], alerts = [],
   } = data || {};
 
@@ -264,6 +264,7 @@ export default function Dashboard() {
             {segment === 'textile' && <ModuleKPISection title="Produção" icon={Factory} kpis={productionKPIs} accentColor="bg-[hsl(142,76%,36%)]" />}
             <ModuleKPISection title="Logística & TMS" icon={Navigation} kpis={logisticKPIs} accentColor="bg-cyan-500" />
             <ModuleKPISection title="RH & Capital Humano" icon={Users} kpis={hrKPIs} accentColor="bg-pink-500" />
+            <ModuleKPISection title="Relacionamento & CX (NPS)" icon={Heart} kpis={npsKPIs} accentColor="bg-rose-500" />
           </div>
         </TabsContent>
 

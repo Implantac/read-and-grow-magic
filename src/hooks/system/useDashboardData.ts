@@ -27,6 +27,7 @@ export function useDashboardData() {
         receivableRes, payableRes, nfeRes, productionRes, purchaseRes,
         stockMovRes, overduePayableRes, overdueReceivableRes,
         lowStockRes, recentOrdersRes, hrRes, crmRes, carriersRes,
+        npsAnswersRes, npsInvitesRes,
       ] = await Promise.all([
         // Current month sales
         supabase.from('sales').select('total, status').gte('date', monthStart).lte('date', monthEnd).eq('company_id', companyId),
@@ -64,6 +65,10 @@ export function useDashboardData() {
         supabase.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'draft').eq('company_id', companyId),
         // Logistics & Fleet Management
         supabase.from('carriers').select('id', { count: 'exact', head: true }).eq('company_id', companyId),
+        // NPS answers (last 500)
+        supabase.from('nps_answers').select('score, ai_sentiment, comment, created_at').eq('company_id', companyId).order('created_at', { ascending: false }).limit(500),
+        // NPS invites (for response rate)
+        supabase.from('nps_invites').select('id, responded_at').eq('company_id', companyId).limit(2000),
       ]);
 
       // === COMMERCIAL ===
@@ -117,6 +122,21 @@ export function useDashboardData() {
       const nfes = nfeRes.data || [];
       const authorizedNfes = nfes.filter(n => n.status === 'authorized');
 
+      // === NPS / CX ===
+      const npsAnswers = npsAnswersRes.data || [];
+      const npsInvites = npsInvitesRes.data || [];
+      const npsTotal = npsAnswers.length;
+      const npsPromoters = npsAnswers.filter((a: any) => (a.score ?? -1) >= 9).length;
+      const npsDetractors = npsAnswers.filter((a: any) => a.score != null && a.score <= 6).length;
+      const npsPassives = Math.max(0, npsTotal - npsPromoters - npsDetractors);
+      const npsScore = npsTotal > 0 ? Math.round(((npsPromoters - npsDetractors) / npsTotal) * 100) : 0;
+      const npsInvitesTotal = npsInvites.length;
+      const npsResponded = npsInvites.filter((i: any) => i.responded_at).length;
+      const npsResponseRate = npsInvitesTotal > 0 ? Math.min(100, Math.round((npsResponded / npsInvitesTotal) * 100)) : 0;
+      const npsCriticalComments = npsAnswers.filter((a: any) =>
+        ((a.score != null && a.score <= 4) || a.ai_sentiment === 'negative') && (a.comment || '').trim().length > 0
+      ).length;
+
       // === ALERTS ===
       const alerts: Array<{ id: string; type: 'error' | 'warning' | 'info' | 'success'; module: string; message: string; timestamp: string }> = [];
 
@@ -139,6 +159,11 @@ export function useDashboardData() {
       const draftNfes = nfes.filter(n => n.status === 'draft');
       if (draftNfes.length > 0) {
         alerts.push({ id: 'a6', type: 'info', module: 'Fiscal', message: `${draftNfes.length} NF-e(s) em rascunho aguardando transmissão`, timestamp: 'Agora' });
+      }
+      if (npsTotal >= 5 && npsScore < 0) {
+        alerts.push({ id: 'a7', type: 'error', module: 'Relacionamento', message: `NPS crítico: ${npsScore} (${npsDetractors} detratores em ${npsTotal} respostas)`, timestamp: 'Agora' });
+      } else if (npsCriticalComments > 0) {
+        alerts.push({ id: 'a7', type: 'warning', module: 'Relacionamento', message: `${npsCriticalComments} comentário(s) crítico(s) de NPS aguardando ação`, timestamp: 'Agora' });
       }
 
       // === MAIN KPIs ===
@@ -213,6 +238,13 @@ export function useDashboardData() {
         { label: 'Tempo Médio', value: '2.4 dias', trend: 'down' as const },
       ];
 
+      const npsKPIs = [
+        { label: 'NPS Score', value: String(npsScore), trend: npsScore >= 50 ? 'up' as const : npsScore < 0 ? 'down' as const : 'neutral' as const, trendValue: `${npsTotal} resp.` },
+        { label: 'Promotores', value: String(npsPromoters), trend: 'up' as const },
+        { label: 'Detratores', value: String(npsDetractors), trend: npsDetractors > 0 ? 'down' as const : 'up' as const },
+        { label: 'Taxa Resposta', value: `${npsResponseRate}%`, trend: 'neutral' as const, trendValue: `${npsCriticalComments} crítico(s)` },
+      ];
+
       // === STATUS DISTRIBUTION ===
       const completedCount = orders.filter(o => o.status === 'delivered').length + completedSales.length + completedProdOrders.length;
       const processingCount = orders.filter(o => ['processing', 'separated', 'invoiced', 'shipped'].includes(o.status)).length + activeProdOrders.length;
@@ -256,6 +288,8 @@ export function useDashboardData() {
         hrKPIs,
         crmKPIs,
         logisticKPIs,
+        npsKPIs,
+        npsSummary: { score: npsScore, total: npsTotal, promoters: npsPromoters, passives: npsPassives, detractors: npsDetractors, responseRate: npsResponseRate, criticalComments: npsCriticalComments },
         statusDistribution,
         modulePerformance,
         alerts,
