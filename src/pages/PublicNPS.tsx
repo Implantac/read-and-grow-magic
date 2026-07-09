@@ -274,9 +274,9 @@ export default function PublicNPS() {
           {(c.logo_url ?? survey.company?.logo_url) && (
             <img src={c.logo_url ?? survey.company.logo_url} alt={survey.company?.name ?? 'Logo'} className="h-12 mx-auto" />
           )}
-          <h1 className="text-2xl font-bold leading-tight">{c.title ?? 'Como avalia sua experiência?'}</h1>
-          {c.subtitle && <p className="text-slate-300">{c.subtitle}</p>}
-          {c.message && <p className="text-slate-400 text-sm">{c.message}</p>}
+          <h1 className="text-2xl font-bold leading-tight text-white">{c.title ?? 'Como avalia sua experiência?'}</h1>
+          {c.subtitle && <p className="text-slate-200">{c.subtitle}</p>}
+          {c.message && <p className="text-slate-300 text-sm">{c.message}</p>}
         </div>
 
         <Progress value={progress} className="h-1 bg-slate-800" />
@@ -284,7 +284,7 @@ export default function PublicNPS() {
         <Card className="bg-slate-900 border-slate-800">
           <CardContent className="pt-6 space-y-6">
             <div className="space-y-3">
-              <label className="block text-sm font-medium">
+              <label className="block text-base font-semibold text-white">
                 De 0 a 10, qual a probabilidade de recomendar {survey.company?.name ?? 'nossa empresa'} a um amigo ou colega? <span className="text-red-400">*</span>
               </label>
               <div className="grid grid-cols-11 gap-1 md:gap-1.5">
