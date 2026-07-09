@@ -311,7 +311,7 @@ export default function PublicNPS() {
                   </button>
                 ))}
               </div>
-              <div className="flex justify-between text-xs text-slate-400 px-1">
+              <div className="flex justify-between text-xs text-slate-300 px-1">
                 <span>Nada provável</span>
                 <span>Muito provável</span>
               </div>
@@ -320,15 +320,15 @@ export default function PublicNPS() {
 
             {score !== null && (
               <div className="space-y-2 pt-2 border-t border-slate-800">
-                <label className="block text-sm">{followUp}</label>
-                <Textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3} className="bg-slate-950 border-slate-800" maxLength={2000} />
-                <p className="text-xs text-slate-500 text-right">{comment.length}/2000</p>
+                <label className="block text-base font-semibold text-white">{followUp}</label>
+                <Textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3} className="bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-500" maxLength={2000} />
+                <p className="text-xs text-slate-400 text-right">{comment.length}/2000</p>
               </div>
             )}
 
             {questions.map((q, i) => (
               <div key={q.id} className="space-y-2 pt-2 border-t border-slate-800">
-                <label className="block text-sm font-medium">
+                <label className="block text-base font-semibold text-white">
                   {i + 1}. {q.question_text}
                   {q.required && <span className="text-red-400"> *</span>}
                 </label>
