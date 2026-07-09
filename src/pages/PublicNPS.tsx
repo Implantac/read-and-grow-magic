@@ -143,8 +143,22 @@ export default function PublicNPS() {
   const renderQuestion = (q: Question) => {
     const val = answers[q.id];
     const set = (v: any) => setAnswers((prev) => ({ ...prev, [q.id]: v }));
-    const choices: string[] = (q.options?.choices as string[]) ?? [];
+    // Normaliza opções: aceita { choices: string[] }, array de strings, ou array de { label, value }
+    const rawOpts: any = q.options;
+    const optsArr: any[] = Array.isArray(rawOpts)
+      ? rawOpts
+      : Array.isArray(rawOpts?.choices)
+      ? rawOpts.choices
+      : Array.isArray(rawOpts?.labels)
+      ? rawOpts.labels
+      : [];
+    const choices: Array<{ label: string; value: string }> = optsArr.map((o: any) =>
+      typeof o === 'string' || typeof o === 'number'
+        ? { label: String(o), value: String(o) }
+        : { label: String(o?.label ?? o?.value ?? ''), value: String(o?.value ?? o?.label ?? '') },
+    );
     const missing = touched && q.required && (val === undefined || val === '' || (Array.isArray(val) && val.length === 0));
+
 
     switch (q.question_type) {
       case 'text':
