@@ -390,10 +390,10 @@ export default function Invites() {
           <span>{selectedInvites.size} selecionado(s)</span>
           <div className="flex gap-2 flex-wrap">
             <Button size="sm" variant="outline" onClick={copyAllLinks}><Copy className="mr-2 h-3.5 w-3.5" /> Copiar links</Button>
-            <Button size="sm" variant="outline" onClick={() => sendInvites.mutate(selectedSendable)} disabled={selectedSendable.length === 0 || sendInvites.isPending}>
+            <Button size="sm" variant="outline" onClick={confirmSendBulk} disabled={selectedSendable.length === 0 || sendInvites.isPending}>
               <Mail className="mr-2 h-3.5 w-3.5" /> Enviar por e-mail ({selectedSendable.length})
             </Button>
-            <Button size="sm" variant="outline" onClick={() => revoke.mutate(Array.from(selectedInvites))}>
+            <Button size="sm" variant="outline" onClick={confirmRevokeBulk} disabled={revoke.isPending}>
               <Trash2 className="mr-2 h-3.5 w-3.5 text-red-500" /> Revogar
             </Button>
             <Button size="sm" variant="ghost" onClick={() => setSelectedInvites(new Set())}>Limpar</Button>
