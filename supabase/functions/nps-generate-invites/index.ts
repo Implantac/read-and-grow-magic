@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
 
     await admin.from('nps_logs').insert({
       company_id: campaign.company_id, campaign_id, event: 'invite.batch_created',
-      payload: { count: invites.length }, user_id: cl.claims.sub,
+      payload: { count: invites.length }, user_id: userId,
     });
 
     return json({ ok: true, invites, tokens });
