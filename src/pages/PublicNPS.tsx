@@ -159,6 +159,28 @@ export default function PublicNPS() {
     );
     const missing = touched && q.required && (val === undefined || val === '' || (Array.isArray(val) && val.length === 0));
 
+    // Detecta se a opção selecionada é "Outro/Outros/Especificar" e exige texto complementar
+    const isOtherLabel = (label: string) => /^(outro|outros|other|especificar|especifique)\b/i.test((label ?? '').trim());
+    const otherValues = new Set(choices.filter((o) => isOtherLabel(o.label)).map((o) => o.value));
+    const currentOther: string = (answers[`${q.id}__other`] as string) ?? '';
+    const setOther = (v: string) => setAnswers((prev) => ({ ...prev, [`${q.id}__other`]: v }));
+    const showOtherFor = (selected: string | string[]) => {
+      if (otherValues.size === 0) return false;
+      if (Array.isArray(selected)) return selected.some((s) => otherValues.has(s));
+      return otherValues.has(selected);
+    };
+    const OtherField = ({ show }: { show: boolean }) =>
+      show ? (
+        <Textarea
+          value={currentOther}
+          onChange={(e) => setOther(e.target.value)}
+          rows={2}
+          placeholder="Descreva sua resposta"
+          className="bg-slate-950 border-slate-700 text-slate-100 placeholder:text-slate-500 text-sm mt-2"
+          maxLength={500}
+        />
+      ) : null;
+
 
     switch (q.question_type) {
       case 'text':
