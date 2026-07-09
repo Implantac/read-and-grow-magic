@@ -238,6 +238,18 @@ export function useDashboardData() {
         { label: 'Tempo Médio', value: '2.4 dias', trend: 'down' as const },
       ];
 
+      const npsKPIs = [
+        { label: 'NPS Score', value: String(npsScore), trend: npsScore >= 50 ? 'up' as const : npsScore < 0 ? 'down' as const : 'neutral' as const, trendValue: `${npsTotal} resp.` },
+        { label: 'Promotores', value: String(npsPromoters), trend: 'up' as const },
+        { label: 'Detratores', value: String(npsDetractors), trend: npsDetractors > 0 ? 'down' as const : 'up' as const },
+        { label: 'Taxa Resposta', value: `${npsResponseRate}%`, trend: 'neutral' as const, trendValue: `${npsCriticalComments} crítico(s)` },
+      ];
+        { label: 'Transportadoras', value: String(carriersRes.count || 0), trend: 'neutral' as const },
+        { label: 'Entregas Pontuais', value: '96%', trend: 'up' as const },
+        { label: 'Frete Médio', value: 'R$ 42', trend: 'down' as const },
+        { label: 'Tempo Médio', value: '2.4 dias', trend: 'down' as const },
+      ];
+
       // === STATUS DISTRIBUTION ===
       const completedCount = orders.filter(o => o.status === 'delivered').length + completedSales.length + completedProdOrders.length;
       const processingCount = orders.filter(o => ['processing', 'separated', 'invoiced', 'shipped'].includes(o.status)).length + activeProdOrders.length;
