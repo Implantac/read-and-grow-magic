@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.nps-public-submit]
 verify_jwt = false
+
+[functions.nps-public-status]
+verify_jwt = false
