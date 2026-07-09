@@ -129,14 +129,15 @@ export default function Surveys() {
 
   const reorder = useReorderQuestion();
 
-  const updateReq = useMutation({
-    mutationFn: async ({ id, required }: { id: string; required: boolean }) => {
-      const { error } = await supabase.from('nps_questions').update({ required }).eq('id', id);
+  const updateQ = useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: Record<string, any> }) => {
+      const { error } = await supabase.from('nps_questions').update(patch).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['nps'] }),
     onError: (e: any) => toast.error(e.message),
   });
+
 
   const move = (idx: number, dir: -1 | 1) => {
     const target = idx + dir;
