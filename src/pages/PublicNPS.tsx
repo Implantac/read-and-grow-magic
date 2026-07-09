@@ -128,17 +128,8 @@ export default function PublicNPS() {
     );
 
   if (state === 'done')
-    return (
-      <div className="min-h-screen grid place-items-center p-4" style={{ background: '#0f172a', color: '#f1f5f9' }}>
-        <Card className="max-w-md w-full bg-slate-900 border-slate-800">
-          <CardContent className="pt-8 text-center space-y-3">
-            <CheckCircle2 className="h-14 w-14 mx-auto" style={{ color: survey?.campaign?.primary_color ?? '#10b981' }} />
-            <h1 className="text-2xl font-bold">{survey?.campaign?.thanks_title ?? 'Obrigado!'}</h1>
-            <p className="text-slate-300">{survey?.campaign?.thanks_message ?? 'Sua opinião é muito importante.'}</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <DoneView survey={survey} hasComment={comment.trim().length > 5} />;
+
 
   const c = survey.campaign;
   const primary = c.primary_color ?? '#FF9800';
