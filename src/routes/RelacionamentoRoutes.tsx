@@ -22,6 +22,7 @@ const CommentClusters = lazy(() => import('../modules/relacionamento/cx/CommentC
 const ExecutiveSummary = lazy(() => import('../modules/relacionamento/cx/ExecutiveSummary'));
 const Workflows = lazy(() => import('../modules/relacionamento/cx/Workflows'));
 const SurveyTemplates = lazy(() => import('../modules/relacionamento/cx/SurveyTemplates'));
+const CXDashboard = lazy(() => import('../modules/relacionamento/cx/CXDashboard'));
 
 export const RelacionamentoRoutes = [
   <Route key="rel-index" index element={<Navigate to="nps/dashboard" replace />} />,
@@ -46,6 +47,7 @@ export const RelacionamentoRoutes = [
     <Route path="resumo-executivo" element={<ExecutiveSummary />} />
     <Route path="workflows" element={<Workflows />} />
     <Route path="cx-templates" element={<SurveyTemplates />} />
+    <Route path="cx-dashboard" element={<CXDashboard />} />
   </Route>,
   // Alias /cx → /relacionamento/nps (Onda 17 - renomeação retrocompatível)
   <Route key="rel-cx-alias" path="cx/*" element={<Navigate to="/relacionamento/nps/dashboard" replace />} />,
