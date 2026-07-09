@@ -221,7 +221,7 @@ export default function PublicNPS() {
         return (
           <div className="space-y-2" role="radiogroup">
             {choices.map((opt) => (
-              <label key={opt} className="flex items-center gap-2 p-2 rounded-md cursor-pointer hover:bg-slate-800/40 border" style={{ borderColor: val === opt ? primary : 'rgba(255,255,255,0.08)' }}>
+              <label key={opt} className="flex items-center gap-2 p-2 rounded-md cursor-pointer hover:bg-slate-800/60 border text-slate-100" style={{ borderColor: val === opt ? primary : 'rgba(255,255,255,0.12)' }}>
                 <input type="radio" name={q.id} checked={val === opt} onChange={() => set(opt)} className="accent-current" />
                 <span>{opt}</span>
               </label>
@@ -235,7 +235,7 @@ export default function PublicNPS() {
             {choices.map((opt) => {
               const checked = arr.includes(opt);
               return (
-                <label key={opt} className="flex items-center gap-2 p-2 rounded-md cursor-pointer hover:bg-slate-800/40 border" style={{ borderColor: checked ? primary : 'rgba(255,255,255,0.08)' }}>
+                <label key={opt} className="flex items-center gap-2 p-2 rounded-md cursor-pointer hover:bg-slate-800/60 border text-slate-100" style={{ borderColor: checked ? primary : 'rgba(255,255,255,0.12)' }}>
                   <input
                     type="checkbox"
                     checked={checked}
@@ -253,7 +253,7 @@ export default function PublicNPS() {
           <select
             value={val ?? ''}
             onChange={(e) => set(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-800 rounded-md h-10 px-3 text-sm"
+            className="w-full bg-slate-950 border border-slate-700 rounded-md h-10 px-3 text-sm text-slate-100"
             aria-invalid={missing}
           >
             <option value="">Selecione…</option>
@@ -263,7 +263,7 @@ export default function PublicNPS() {
           </select>
         );
       default:
-        return <Input value={val ?? ''} onChange={(e) => set(e.target.value)} className="bg-slate-950 border-slate-800" />;
+        return <Input value={val ?? ''} onChange={(e) => set(e.target.value)} className="bg-slate-950 border-slate-700 text-slate-100" />;
     }
   };
 
