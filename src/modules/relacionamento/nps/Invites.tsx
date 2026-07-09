@@ -12,10 +12,14 @@ import { Badge } from '@/ui/base/badge';
 import { Checkbox } from '@/ui/base/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
-import { Send, Copy, MessageCircle, Mail, Link2, QrCode, Search, RotateCcw, Trash2, RefreshCw, Download, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { Send, Copy, MessageCircle, Mail, Link2, QrCode, Search, RotateCcw, Trash2, RefreshCw, Download, ChevronLeft, ChevronRight, Eye, CheckCircle2, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { QRCodeDialog } from './QRCodeDialog';
 import { exportToCSV } from '@/lib/exportUtils';
+import { useConfirm } from '@/shared/components/ConfirmDialog';
+
+type BulkResultItem = { id: string; name: string; ok: boolean; error?: string };
+type BulkResult = { title: string; items: BulkResultItem[] } | null;
 
 const CHANNELS = [
   { v: 'link', label: 'Link manual', icon: Link2 },
