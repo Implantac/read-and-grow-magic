@@ -28,8 +28,28 @@ import { Skeleton } from '@/ui/base/skeleton';
 import { Badge } from '@/ui/base/badge';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
-import { Plus, Trash2, Library, BookmarkPlus, Search, Sparkles, Trash, ArrowUp, ArrowDown, ExternalLink } from 'lucide-react';
+import { Plus, Trash2, Library, BookmarkPlus, Search, Sparkles, Trash, ArrowUp, ArrowDown, ExternalLink, GripVertical } from 'lucide-react';
+import { Switch } from '@/ui/base/switch';
 import { toast } from 'sonner';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+
 
 
 const TYPES = [
