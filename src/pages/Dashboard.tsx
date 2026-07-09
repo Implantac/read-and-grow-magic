@@ -264,6 +264,7 @@ export default function Dashboard() {
             {segment === 'textile' && <ModuleKPISection title="Produção" icon={Factory} kpis={productionKPIs} accentColor="bg-[hsl(142,76%,36%)]" />}
             <ModuleKPISection title="Logística & TMS" icon={Navigation} kpis={logisticKPIs} accentColor="bg-cyan-500" />
             <ModuleKPISection title="RH & Capital Humano" icon={Users} kpis={hrKPIs} accentColor="bg-pink-500" />
+            <ModuleKPISection title="Relacionamento & CX (NPS)" icon={Heart} kpis={npsKPIs} accentColor="bg-rose-500" />
           </div>
         </TabsContent>
 
