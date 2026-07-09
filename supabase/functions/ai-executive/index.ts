@@ -157,6 +157,12 @@ async function fetchAllData(supabase: any, companyId?: string) {
     query("sped_files").order("generated_at", { ascending: false }).limit(50).then((r: any) => r).catch(() => ({ data: [] })),
   ]);
 
+  // NPS / Relacionamento (Voice of Customer)
+  const [npsAnswersRes, npsInvitesRes] = await Promise.all([
+    query("nps_answers").order("created_at", { ascending: false }).limit(500).then((r: any) => r).catch(() => ({ data: [] })),
+    query("nps_invites").limit(1000).then((r: any) => r).catch(() => ({ data: [] })),
+  ]);
+
   return {
     orders: ordersRes.data || [],
     receivables: receivableRes.data || [],
@@ -178,6 +184,8 @@ async function fetchAllData(supabase: any, companyId?: string) {
     nfeItems: nfeItemsRes.data || [],
     taxRules: taxRulesRes.data || [],
     spedFiles: spedRes.data || [],
+    npsAnswers: npsAnswersRes.data || [],
+    npsInvites: npsInvitesRes.data || [],
   };
 }
 
