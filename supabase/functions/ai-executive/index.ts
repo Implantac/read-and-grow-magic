@@ -571,7 +571,10 @@ Gere insights estratégicos: { "insights": [...] }`;
     });
   }
 
-
+  return new Response(JSON.stringify({ insights, generated: insights.length }), {
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
 
 // ─── Generate Scenarios ──────────────────────────────────────────
 
