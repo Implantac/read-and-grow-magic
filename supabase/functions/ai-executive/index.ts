@@ -1242,9 +1242,71 @@ const TOOL_EXECUTORS: Record<string, (supabase: any, args: any, user_id?: string
   consultar_producao: executeConsultaProducao,
   consultar_estoque: executeConsultaEstoque,
   consultar_fiscal: executeConsultaFiscal,
+  consultar_nps: executeConsultaNPS,
   executar_acao: executeAcao,
   analise_estrategica: executeAnaliseEstrategica,
 };
+
+// ─── NPS Executor ───────────────────────────────────────────────
+async function executeConsultaNPS(supabase: any, args: any, _user_id?: string, company_id?: string) {
+  if (!company_id) return { erro: "Empresa não identificada." };
+  const dias = args.periodo_dias ?? 90;
+  const cutoff = new Date(Date.now() - dias * 86400_000).toISOString();
+  const base = () => supabase.from("nps_answers").select("*").eq("company_id", company_id).gte("responded_at", cutoff);
+
+  switch (args.tipo) {
+    case "resumo": {
+      const { data } = await base().limit(5000);
+      const rows = data || [];
+      const total = rows.length;
+      const p = rows.filter((r: any) => r.category === "promoter").length;
+      const d = rows.filter((r: any) => r.category === "detractor").length;
+      const pas = total - p - d;
+      const nps = total ? Math.round(((p - d) / total) * 100) : 0;
+      return { periodo_dias: dias, total_respostas: total, nps, promotores: p, neutros: pas, detratores: d, taxa_detratores_pct: total ? Math.round((d / total) * 100) : 0 };
+    }
+    case "tendencia": {
+      const { data } = await base().limit(5000);
+      const rows = data || [];
+      const byMonth = new Map<string, { total: number; p: number; d: number }>();
+      rows.forEach((r: any) => {
+        const m = (r.responded_at || "").slice(0, 7);
+        if (!m) return;
+        const e = byMonth.get(m) || { total: 0, p: 0, d: 0 };
+        e.total++;
+        if (r.category === "promoter") e.p++;
+        else if (r.category === "detractor") e.d++;
+        byMonth.set(m, e);
+      });
+      return { tendencia: Array.from(byMonth.entries()).map(([mes, s]) => ({ mes, total: s.total, nps: s.total ? Math.round(((s.p - s.d) / s.total) * 100) : 0 })).sort((a, b) => a.mes.localeCompare(b.mes)) };
+    }
+    case "detratores": {
+      const { data } = await supabase.from("nps_answers").select("*, clients(name,email,phone)").eq("company_id", company_id).eq("category", "detractor").gte("responded_at", cutoff).order("responded_at", { ascending: false }).limit(30);
+      return { detratores: (data || []).map((r: any) => ({ cliente: r.clients?.name, email: r.clients?.email, score: r.score, comentario: r.comment, data: r.responded_at?.slice(0, 10) })) };
+    }
+    case "comentarios_recentes": {
+      const { data } = await supabase.from("nps_answers").select("score,category,comment,responded_at, clients(name)").eq("company_id", company_id).not("comment", "is", null).gte("responded_at", cutoff).order("responded_at", { ascending: false }).limit(20);
+      return { comentarios: (data || []).map((r: any) => ({ cliente: r.clients?.name, score: r.score, categoria: r.category, comentario: r.comment, data: r.responded_at?.slice(0, 10) })) };
+    }
+    case "followups": {
+      const { data } = await supabase.from("nps_followups").select("*, clients(name,email)").eq("company_id", company_id).in("status", ["open", "in_progress", "overdue"]).order("due_date", { ascending: true }).limit(50);
+      return { followups_pendentes: (data || []).map((f: any) => ({ cliente: f.clients?.name, status: f.status, prazo: f.due_date, motivo: f.reason })) };
+    }
+    case "csat_ces": {
+      const { data } = await supabase.from("nps_answer_items").select("question_type,score,answer:answer_json").eq("company_id", company_id).gte("created_at", cutoff).limit(5000);
+      const rows = data || [];
+      const csat = rows.filter((r: any) => r.question_type === "csat");
+      const ces = rows.filter((r: any) => r.question_type === "ces");
+      const avg = (arr: any[]) => arr.length ? arr.reduce((s, r) => s + (r.score || 0), 0) / arr.length : 0;
+      return {
+        csat: { total: csat.length, media: Number(avg(csat).toFixed(2)), satisfeitos_pct: csat.length ? Math.round(csat.filter((r: any) => (r.score || 0) >= 4).length / csat.length * 100) : 0 },
+        ces: { total: ces.length, media: Number(avg(ces).toFixed(2)), baixo_esforco_pct: ces.length ? Math.round(ces.filter((r: any) => (r.score || 0) <= 3).length / ces.length * 100) : 0 },
+      };
+    }
+    default:
+      return { erro: "Tipo não suportado" };
+  }
+}
 
 // ─── Pattern Analysis ───────────────────────────────────────────
 
