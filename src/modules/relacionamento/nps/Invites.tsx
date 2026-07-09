@@ -40,6 +40,7 @@ export default function Invites() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [channel, setChannel] = useState('link');
   const [expiresDays, setExpiresDays] = useState<number>(30);
+  const [qrUrl, setQrUrl] = useState<string | null>(null);
 
   const { data: clients = [] } = useQuery({
     queryKey: ['nps', 'clients-picker', activeCompanyId, search],
