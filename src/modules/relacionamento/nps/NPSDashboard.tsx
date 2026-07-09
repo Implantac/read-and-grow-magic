@@ -2,9 +2,9 @@ import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Badge } from '@/ui/base/badge';
-import { useNPSStats, useNPSAnswers, useNPSCampaigns } from './hooks';
+import { useNPSStats, useNPSAnswers, useNPSCampaigns, useCSATCESMetrics } from './hooks';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, LineChart, Line, PieChart, Pie, Cell, Legend } from 'recharts';
-import { Smile, Meh, Frown, TrendingUp, Users, Send, AlertTriangle } from 'lucide-react';
+import { Smile, Meh, Frown, TrendingUp, Users, Send, AlertTriangle, Heart, Gauge } from 'lucide-react';
 
 const COLORS = { promoter: '#10b981', passive: '#eab308', detractor: '#ef4444' };
 
@@ -12,6 +12,7 @@ export default function NPSDashboard() {
   const { data: stats, isLoading } = useNPSStats();
   const { data: answers = [] } = useNPSAnswers();
   const { data: campaigns = [] } = useNPSCampaigns();
+  const { data: csatCes } = useCSATCESMetrics();
 
   const byMonth = useMemo(() => {
     const map = new Map<string, { m: string; total: number; p: number; d: number; pas: number; nps: number }>();
@@ -70,6 +71,26 @@ export default function NPSDashboard() {
           <CardContent className="text-2xl font-bold">{stats?.detractors ?? 0}</CardContent>
         </Card>
       </div>
+
+      {(csatCes?.csat.total || csatCes?.ces.total) ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-base flex gap-2 items-center"><Heart className="h-4 w-4 text-pink-500" /> CSAT — Satisfação</CardTitle></CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{csatCes?.csat.media ?? 0}<span className="text-base text-muted-foreground">/5</span></div>
+              <p className="text-xs text-muted-foreground">{csatCes?.csat.satisfeitosPct ?? 0}% satisfeitos · {csatCes?.csat.total ?? 0} respostas</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-base flex gap-2 items-center"><Gauge className="h-4 w-4 text-blue-500" /> CES — Esforço do cliente</CardTitle></CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{csatCes?.ces.media ?? 0}<span className="text-base text-muted-foreground">/7</span></div>
+              <p className="text-xs text-muted-foreground">{csatCes?.ces.baixoEsforcoPct ?? 0}% com baixo esforço · {csatCes?.ces.total ?? 0} respostas</p>
+            </CardContent>
+          </Card>
+        </div>
+      ) : null}
+
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
