@@ -32,8 +32,11 @@ const CHANNELS = [
 const PAGE_SIZE = 20;
 
 export default function Invites() {
-  const { data: campaigns = [] } = useNPSCampaigns();
+  const { data: campaigns = [], isLoading: campaignsLoading } = useNPSCampaigns();
   const [campaignId, setCampaignId] = useState<string | undefined>();
+  useEffect(() => {
+    if (!campaignId && campaigns.length > 0) setCampaignId((campaigns[0] as any).id);
+  }, [campaigns, campaignId]);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [channelFilter, setChannelFilter] = useState<string>('all');
   const [textFilter, setTextFilter] = useState('');
