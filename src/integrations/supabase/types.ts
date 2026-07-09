@@ -9505,9 +9505,13 @@ export type Database = {
           cofins: number
           company_id: string
           consumer_final: boolean
+          contingency: boolean | null
           created_at: string
+          danfe_url: string | null
           difal_total: number
           discount: number
+          environment: number | null
+          error_details: Json | null
           fcp_total: number
           icms: number
           icms_st_total: number
@@ -9535,6 +9539,8 @@ export type Database = {
           uf_destination: string | null
           uf_origin: string | null
           updated_at: string
+          xml_authorized: string | null
+          xml_signed: string | null
         }
         Insert: {
           access_key?: string | null
@@ -9548,9 +9554,13 @@ export type Database = {
           cofins?: number
           company_id?: string
           consumer_final?: boolean
+          contingency?: boolean | null
           created_at?: string
+          danfe_url?: string | null
           difal_total?: number
           discount?: number
+          environment?: number | null
+          error_details?: Json | null
           fcp_total?: number
           icms?: number
           icms_st_total?: number
@@ -9578,6 +9588,8 @@ export type Database = {
           uf_destination?: string | null
           uf_origin?: string | null
           updated_at?: string
+          xml_authorized?: string | null
+          xml_signed?: string | null
         }
         Update: {
           access_key?: string | null
@@ -9591,9 +9603,13 @@ export type Database = {
           cofins?: number
           company_id?: string
           consumer_final?: boolean
+          contingency?: boolean | null
           created_at?: string
+          danfe_url?: string | null
           difal_total?: number
           discount?: number
+          environment?: number | null
+          error_details?: Json | null
           fcp_total?: number
           icms?: number
           icms_st_total?: number
@@ -9621,6 +9637,8 @@ export type Database = {
           uf_destination?: string | null
           uf_origin?: string | null
           updated_at?: string
+          xml_authorized?: string | null
+          xml_signed?: string | null
         }
         Relationships: [
           {
@@ -9642,6 +9660,146 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nfe_certificates: {
+        Row: {
+          active: boolean
+          company_id: string
+          created_at: string
+          environment: number
+          filename: string
+          id: string
+          issuer: string | null
+          not_after: string | null
+          not_before: string | null
+          password_secret_name: string
+          serial: string | null
+          storage_path: string
+          subject: string | null
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          active?: boolean
+          company_id: string
+          created_at?: string
+          environment?: number
+          filename: string
+          id?: string
+          issuer?: string | null
+          not_after?: string | null
+          not_before?: string | null
+          password_secret_name: string
+          serial?: string | null
+          storage_path: string
+          subject?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          active?: boolean
+          company_id?: string
+          created_at?: string
+          environment?: number
+          filename?: string
+          id?: string
+          issuer?: string | null
+          not_after?: string | null
+          not_before?: string | null
+          password_secret_name?: string
+          serial?: string | null
+          storage_path?: string
+          subject?: string | null
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfe_certificates_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nfe_events: {
+        Row: {
+          company_id: string
+          correction: string | null
+          created_at: string
+          created_by: string | null
+          event_type: string
+          id: string
+          nfe_id: string
+          processed_at: string | null
+          protocol: string | null
+          reason: string | null
+          sent_at: string | null
+          sequence: number
+          status: string
+          status_code: string | null
+          status_reason: string | null
+          updated_at: string
+          xml_event: string | null
+          xml_response: string | null
+        }
+        Insert: {
+          company_id: string
+          correction?: string | null
+          created_at?: string
+          created_by?: string | null
+          event_type: string
+          id?: string
+          nfe_id: string
+          processed_at?: string | null
+          protocol?: string | null
+          reason?: string | null
+          sent_at?: string | null
+          sequence?: number
+          status?: string
+          status_code?: string | null
+          status_reason?: string | null
+          updated_at?: string
+          xml_event?: string | null
+          xml_response?: string | null
+        }
+        Update: {
+          company_id?: string
+          correction?: string | null
+          created_at?: string
+          created_by?: string | null
+          event_type?: string
+          id?: string
+          nfe_id?: string
+          processed_at?: string | null
+          protocol?: string | null
+          reason?: string | null
+          sent_at?: string | null
+          sequence?: number
+          status?: string
+          status_code?: string | null
+          status_reason?: string | null
+          updated_at?: string
+          xml_event?: string | null
+          xml_response?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nfe_events_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nfe_events_nfe_id_fkey"
+            columns: ["nfe_id"]
+            isOneToOne: false
+            referencedRelation: "nfe"
             referencedColumns: ["id"]
           },
         ]
@@ -16127,6 +16285,42 @@ export type Database = {
           target_type?: string
           target_value?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      sefaz_status_uf: {
+        Row: {
+          avg_response_ms: number | null
+          environment: number
+          id: string
+          motivo: string | null
+          observed_at: string
+          service: string
+          status: string
+          status_code: string | null
+          uf: string
+        }
+        Insert: {
+          avg_response_ms?: number | null
+          environment: number
+          id?: string
+          motivo?: string | null
+          observed_at?: string
+          service?: string
+          status: string
+          status_code?: string | null
+          uf: string
+        }
+        Update: {
+          avg_response_ms?: number | null
+          environment?: number
+          id?: string
+          motivo?: string | null
+          observed_at?: string
+          service?: string
+          status?: string
+          status_code?: string | null
+          uf?: string
         }
         Relationships: []
       }
