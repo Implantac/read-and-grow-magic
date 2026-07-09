@@ -299,7 +299,72 @@ export default function Surveys() {
   );
 }
 
+function SortableQuestion({
+  q, index, total, onMoveUp, onMoveDown, onToggleRequired, onSaveToBank, onDelete,
+}: {
+  q: any;
+  index: number;
+  total: number;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  onToggleRequired: (v: boolean) => void;
+  onSaveToBank: () => void;
+  onDelete: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: q.id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+  } as React.CSSProperties;
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <Card className={isDragging ? 'ring-2 ring-primary/40' : ''}>
+        <CardContent className="pt-4 flex justify-between items-start gap-3">
+          <button
+            type="button"
+            className="mt-1 cursor-grab active:cursor-grabbing touch-none text-muted-foreground hover:text-foreground"
+            aria-label="Arrastar para reordenar"
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical className="h-5 w-5" />
+          </button>
+          <div className="flex-1">
+            <div className="font-medium">{index + 1}. {q.question_text}</div>
+            <div className="text-xs text-muted-foreground flex flex-wrap items-center gap-1.5 mt-1">
+              <Badge variant="outline">{q.question_type}</Badge>
+              {q.required && <Badge variant="secondary">obrigatória</Badge>}
+              {q.options?.choices?.length ? <span>{q.options.choices.length} opções</span> : null}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="flex items-center gap-2 text-xs text-muted-foreground">
+              Obrig.
+              <Switch checked={!!q.required} onCheckedChange={onToggleRequired} />
+            </label>
+            <Button size="icon" variant="ghost" title="Mover para cima" disabled={index === 0} onClick={onMoveUp}>
+              <ArrowUp className="h-4 w-4" />
+            </Button>
+            <Button size="icon" variant="ghost" title="Mover para baixo" disabled={index === total - 1} onClick={onMoveDown}>
+              <ArrowDown className="h-4 w-4" />
+            </Button>
+            <Button size="icon" variant="ghost" title="Salvar na biblioteca" onClick={onSaveToBank}>
+              <BookmarkPlus className="h-4 w-4" />
+            </Button>
+            <Button size="icon" variant="ghost" onClick={onDelete}>
+              <Trash2 className="h-4 w-4 text-red-500" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 function BankDialog({ open, onOpenChange, campaignId, currentCount }: { open: boolean; onOpenChange: (b: boolean) => void; campaignId?: string; currentCount: number }) {
+
   const [tab, setTab] = useState<'global' | 'company'>('global');
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<string | undefined>(undefined);
