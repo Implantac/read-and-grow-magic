@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { Send, Copy, MessageCircle, Mail, Link2, QrCode, Search, RotateCcw, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { QRCodeDialog } from './QRCodeDialog';
 
 const CHANNELS = [
   { v: 'link', label: 'Link manual', icon: Link2 },
@@ -39,6 +40,7 @@ export default function Invites() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [channel, setChannel] = useState('link');
   const [expiresDays, setExpiresDays] = useState<number>(30);
+  const [qrUrl, setQrUrl] = useState<string | null>(null);
 
   const { data: clients = [] } = useQuery({
     queryKey: ['nps', 'clients-picker', activeCompanyId, search],
@@ -220,6 +222,9 @@ export default function Invites() {
                               <Button size="sm" variant="ghost" title="E-mail" onClick={() => shareUrl(tk, 'email', i.clients)}>
                                 <Mail className="h-3.5 w-3.5" />
                               </Button>
+                              <Button size="sm" variant="ghost" title="QR Code" onClick={() => setQrUrl(publicSurveyUrl(tk))}>
+                                <QrCode className="h-3.5 w-3.5" />
+                              </Button>
                             </>
                           )}
                           {i.status !== 'responded' && i.status !== 'revoked' && (
@@ -315,6 +320,8 @@ export default function Invites() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <QRCodeDialog open={!!qrUrl} onOpenChange={(v) => !v && setQrUrl(null)} url={qrUrl ?? ''} />
     </div>
   );
 }
