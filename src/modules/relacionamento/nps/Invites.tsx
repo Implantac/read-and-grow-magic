@@ -320,6 +320,8 @@ export default function Invites() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <QRCodeDialog open={!!qrUrl} onOpenChange={(v) => !v && setQrUrl(null)} url={qrUrl ?? ''} />
     </div>
   );
 }
