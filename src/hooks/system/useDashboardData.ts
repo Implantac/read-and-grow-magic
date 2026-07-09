@@ -160,6 +160,11 @@ export function useDashboardData() {
       if (draftNfes.length > 0) {
         alerts.push({ id: 'a6', type: 'info', module: 'Fiscal', message: `${draftNfes.length} NF-e(s) em rascunho aguardando transmissão`, timestamp: 'Agora' });
       }
+      if (npsTotal >= 5 && npsScore < 0) {
+        alerts.push({ id: 'a7', type: 'error', module: 'Relacionamento', message: `NPS crítico: ${npsScore} (${npsDetractors} detratores em ${npsTotal} respostas)`, timestamp: 'Agora' });
+      } else if (npsCriticalComments > 0) {
+        alerts.push({ id: 'a7', type: 'warning', module: 'Relacionamento', message: `${npsCriticalComments} comentário(s) crítico(s) de NPS aguardando ação`, timestamp: 'Agora' });
+      }
 
       // === MAIN KPIs ===
       const mainKPIs = [
