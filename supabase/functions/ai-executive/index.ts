@@ -521,6 +521,8 @@ MARGEM POR PRODUTO (top 10): ${JSON.stringify(computed.productMargins)}
 PRODUTOS BAIXA MARGEM: ${JSON.stringify(computed.lowMarginProducts)}
 RECEITA POR REGIÃO: ${JSON.stringify(computed.revenueByRegion)}
 ALERTAS AUTO: ${JSON.stringify(computed.autoAlerts)}
+NPS / VOZ DO CLIENTE: score=${computed.kpis.npsScore}, respostas=${computed.kpis.npsTotal}, promotores=${computed.kpis.npsPromoters}, neutros=${computed.kpis.npsPassives}, detratores=${computed.kpis.npsDetractors}, taxa_resposta=${computed.kpis.npsResponseRate}%
+COMENTÁRIOS CRÍTICOS NPS: ${JSON.stringify(computed.criticalNpsComments)}
 RESUMO: ${JSON.stringify(computed.summary)}
 
 Gere insights estratégicos: { "insights": [...] }`;
