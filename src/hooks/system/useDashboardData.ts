@@ -122,6 +122,21 @@ export function useDashboardData() {
       const nfes = nfeRes.data || [];
       const authorizedNfes = nfes.filter(n => n.status === 'authorized');
 
+      // === NPS / CX ===
+      const npsAnswers = npsAnswersRes.data || [];
+      const npsInvites = npsInvitesRes.data || [];
+      const npsTotal = npsAnswers.length;
+      const npsPromoters = npsAnswers.filter((a: any) => (a.score ?? -1) >= 9).length;
+      const npsDetractors = npsAnswers.filter((a: any) => a.score != null && a.score <= 6).length;
+      const npsPassives = Math.max(0, npsTotal - npsPromoters - npsDetractors);
+      const npsScore = npsTotal > 0 ? Math.round(((npsPromoters - npsDetractors) / npsTotal) * 100) : 0;
+      const npsInvitesTotal = npsInvites.length;
+      const npsResponded = npsInvites.filter((i: any) => i.responded_at).length;
+      const npsResponseRate = npsInvitesTotal > 0 ? Math.min(100, Math.round((npsResponded / npsInvitesTotal) * 100)) : 0;
+      const npsCriticalComments = npsAnswers.filter((a: any) =>
+        ((a.score != null && a.score <= 4) || a.ai_sentiment === 'negative') && (a.comment || '').trim().length > 0
+      ).length;
+
       // === ALERTS ===
       const alerts: Array<{ id: string; type: 'error' | 'warning' | 'info' | 'success'; module: string; message: string; timestamp: string }> = [];
 
