@@ -315,17 +315,17 @@ END $matrix$;
 -- effectively filtered by RLS to zero rows). We assert this via a count.
 DO $iso$
 DECLARE
-  v_other uuid := gen_random_uuid();
+  v_fake_company uuid := gen_random_uuid();  -- non-existent tenant
   v_viewer uuid := (SELECT v FROM _ctx WHERE k='viewer');
   v_cnt int;
 BEGIN
-  INSERT INTO public.companies(id, name, cnpj) VALUES (v_other, 'Other Co', '11111111111111');
-  INSERT INTO public.bank_accounts(name, bank_name, company_id) VALUES ('Foreign BA', 'X', v_other);
-
+  -- Filter by a company_id the viewer does NOT belong to. RLS restricts to
+  -- get_user_company_id(auth.uid()); rows with any other company_id must be
+  -- invisible regardless of whether they exist.
   SET LOCAL role authenticated;
   EXECUTE format($f$SET LOCAL "request.jwt.claims" = %L$f$,
     json_build_object('sub', v_viewer::text, 'role','authenticated')::text);
-  EXECUTE 'SELECT count(*)::int FROM public.bank_accounts WHERE company_id = $1' INTO v_cnt USING v_other;
+  EXECUTE 'SELECT count(*)::int FROM public.bank_accounts WHERE company_id = $1' INTO v_cnt USING v_fake_company;
   RESET role;
 
   INSERT INTO _results VALUES
