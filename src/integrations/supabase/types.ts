@@ -21423,6 +21423,10 @@ export type Database = {
         Returns: Json
       }
       current_billing_period: { Args: never; Returns: string }
+      cx_ensure_default_weights: {
+        Args: { _company_id: string }
+        Returns: undefined
+      }
       desc_similarity: { Args: { a: string; b: string }; Returns: number }
       detect_cashflow_risks: { Args: never; Returns: Json }
       detect_financial_alerts: { Args: never; Returns: Json }

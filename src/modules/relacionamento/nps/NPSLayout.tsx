@@ -4,11 +4,12 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Megaphone, ListChecks, Send, MessageSquare, FileText,
   Palette, Zap, Settings2, AlertTriangle, ScrollText, BookMarked,
-  Heart, Brain, Workflow, Sparkles, LayoutTemplate,
+  Heart, Brain, Workflow, Sparkles, LayoutTemplate, Activity,
 } from 'lucide-react';
 
 const items = [
   { to: '/relacionamento/nps/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/relacionamento/nps/cx-dashboard', label: 'CX 360°', icon: Activity },
   { to: '/relacionamento/nps/campanhas', label: 'Campanhas', icon: Megaphone },
   { to: '/relacionamento/nps/pesquisas', label: 'Pesquisas', icon: ListChecks },
   { to: '/relacionamento/nps/convites', label: 'Convites', icon: Send },
