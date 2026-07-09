@@ -68,7 +68,17 @@ export function useCreateCampaign() {
   const companyId = useCompanyId();
   return useMutation({
     mutationFn: async (input: Partial<any> & { name: string }) => {
-      const { data, error } = await supabase.from('nps_campaigns').insert({ ...input, company_id: companyId! } as any).select().single();
+      // Resolve tenant from profile to satisfy RLS (nps_campaigns.company_id must match profiles.company_id of auth.uid()).
+      let effectiveCompanyId = companyId;
+      if (!effectiveCompanyId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Sessão expirada. Faça login novamente.');
+        const { data: profile, error: profErr } = await supabase.from('profiles').select('company_id').eq('id', user.id).maybeSingle();
+        if (profErr) throw profErr;
+        effectiveCompanyId = profile?.company_id ?? undefined;
+      }
+      if (!effectiveCompanyId) throw new Error('Empresa ativa não encontrada. Selecione uma empresa antes de criar campanhas.');
+      const { data, error } = await supabase.from('nps_campaigns').insert({ ...input, company_id: effectiveCompanyId } as any).select().single();
       if (error) throw error;
       return data;
     },
