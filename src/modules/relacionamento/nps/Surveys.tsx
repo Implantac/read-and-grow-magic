@@ -129,14 +129,41 @@ export default function Surveys() {
 
   const reorder = useReorderQuestion();
 
+  const updateReq = useMutation({
+    mutationFn: async ({ id, required }: { id: string; required: boolean }) => {
+      const { error } = await supabase.from('nps_questions').update({ required }).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['nps'] }),
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const move = (idx: number, dir: -1 | 1) => {
     const target = idx + dir;
     if (target < 0 || target >= questions.length) return;
-    const a = questions[idx] as any;
-    const b = questions[target] as any;
-    reorder.mutate({ id: a.id, order_index: b.order_index ?? target });
-    reorder.mutate({ id: b.id, order_index: a.order_index ?? idx });
+    persistOrder(arrayMove(questions as any[], idx, target));
   };
+
+  const persistOrder = (ordered: any[]) => {
+    ordered.forEach((q, i) => {
+      if (q.order_index !== i) reorder.mutate({ id: q.id, order_index: i });
+    });
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const onDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (!over || active.id === over.id) return;
+    const oldIdx = (questions as any[]).findIndex((q) => q.id === active.id);
+    const newIdx = (questions as any[]).findIndex((q) => q.id === over.id);
+    if (oldIdx < 0 || newIdx < 0) return;
+    persistOrder(arrayMove(questions as any[], oldIdx, newIdx));
+  };
+
 
   const previewCampaign = async () => {
     if (!campaignId) return;
