@@ -276,7 +276,9 @@ export default function Surveys() {
                       total={questions.length}
                       onMoveUp={() => move(i, -1)}
                       onMoveDown={() => move(i, 1)}
-                      onToggleRequired={(v) => updateReq.mutate({ id: q.id, required: v })}
+                      onToggleRequired={(v) => updateQ.mutate({ id: q.id, patch: { required: v } })}
+                      onEdit={(patch) => updateQ.mutate({ id: q.id, patch })}
+
                       onSaveToBank={() => saveCurrentToBank(q)}
                       onDelete={() => del.mutate(q.id)}
                     />
