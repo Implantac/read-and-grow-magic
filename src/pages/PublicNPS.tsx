@@ -153,14 +153,14 @@ export default function PublicNPS() {
             value={val ?? ''}
             onChange={(e) => set(e.target.value)}
             rows={3}
-            className="bg-slate-950 border-slate-800"
+            className="bg-slate-950 border-slate-700 text-slate-100 placeholder:text-slate-500"
             aria-invalid={missing}
           />
         );
       case 'number':
-        return <Input type="number" value={val ?? ''} onChange={(e) => set(Number(e.target.value))} className="bg-slate-950 border-slate-800" aria-invalid={missing} />;
+        return <Input type="number" value={val ?? ''} onChange={(e) => set(Number(e.target.value))} className="bg-slate-950 border-slate-700 text-slate-100" aria-invalid={missing} />;
       case 'date':
-        return <Input type="date" value={val ?? ''} onChange={(e) => set(e.target.value)} className="bg-slate-950 border-slate-800" aria-invalid={missing} />;
+        return <Input type="date" value={val ?? ''} onChange={(e) => set(e.target.value)} className="bg-slate-950 border-slate-700 text-slate-100" aria-invalid={missing} />;
       case 'stars':
         return (
           <div className="flex gap-1" role="radiogroup">
