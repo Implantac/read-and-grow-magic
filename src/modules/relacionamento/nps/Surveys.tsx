@@ -323,13 +323,16 @@ function SortableQuestion({
     opacity: isDragging ? 0.6 : 1,
   } as React.CSSProperties;
 
-  const hasOptions = ['radio', 'checkbox', 'dropdown', 'multi_choice'].includes(q.question_type);
+  const OPTION_TYPES = ['radio', 'checkbox', 'dropdown', 'multi_choice'];
   const [editing, setEditing] = useState(false);
   const [text, setText] = useState<string>(q.question_text ?? '');
+  const [type, setType] = useState<string>(q.question_type ?? 'text');
   const [choices, setChoices] = useState<string>((q.options?.choices ?? []).join('\n'));
+  const editingHasOptions = OPTION_TYPES.includes(type);
 
   const startEdit = () => {
     setText(q.question_text ?? '');
+    setType(q.question_type ?? 'text');
     setChoices((q.options?.choices ?? []).join('\n'));
     setEditing(true);
   };
@@ -340,14 +343,16 @@ function SortableQuestion({
       toast.error('O texto da pergunta não pode ficar em branco.');
       return;
     }
-    const patch: Record<string, any> = { question_text: trimmed };
-    if (hasOptions) {
+    const patch: Record<string, any> = { question_text: trimmed, question_type: type };
+    if (editingHasOptions) {
       const arr = choices.split('\n').map((s) => s.trim()).filter(Boolean);
       if (arr.length < 2) {
         toast.error('Adicione pelo menos 2 opções (uma por linha).');
         return;
       }
       patch.options = { ...(q.options ?? {}), choices: arr };
+    } else {
+      patch.options = null;
     }
     onEdit(patch);
     setEditing(false);
@@ -369,17 +374,36 @@ function SortableQuestion({
           <div className="flex-1 min-w-0">
             {editing ? (
               <div className="space-y-2">
-                <div>
-                  <Label className="text-xs">Texto da pergunta</Label>
-                  <Input value={text} onChange={(e) => setText(e.target.value)} autoFocus />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <div className="md:col-span-2">
+                    <Label className="text-xs">Texto da pergunta</Label>
+                    <Input value={text} onChange={(e) => setText(e.target.value)} autoFocus />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Tipo</Label>
+                    <Select
+                      value={type}
+                      onValueChange={(v) => {
+                        setType(v);
+                        // Pré-popula opções ao trocar para um tipo com alternativas
+                        if (OPTION_TYPES.includes(v) && choices.trim() === '') {
+                          setChoices('Opção 1\nOpção 2');
+                        }
+                      }}
+                    >
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{TYPES.map(t => <SelectItem key={t.v} value={t.v}>{t.label}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                {hasOptions && (
+                {editingHasOptions && (
                   <div>
                     <Label className="text-xs">Opções (uma por linha)</Label>
                     <textarea
                       value={choices}
                       onChange={(e) => setChoices(e.target.value)}
                       className="w-full min-h-[90px] rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      placeholder={'Ótimo\nBom\nRegular\nRuim'}
                     />
                   </div>
                 )}
@@ -388,6 +412,7 @@ function SortableQuestion({
                   <Button size="sm" variant="ghost" onClick={() => setEditing(false)}>Cancelar</Button>
                 </div>
               </div>
+
             ) : (
               <button
                 type="button"
