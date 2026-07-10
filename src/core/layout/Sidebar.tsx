@@ -30,7 +30,7 @@ import {
   Percent, Globe, ScrollText, ArrowRightLeft,
   BellRing, RotateCw, AlertOctagon, GitBranch, Siren, Scissors,
   LogOut, User as UserIcon, HelpCircle, ChevronRight, Inbox, Heart,
-  Send, MessageSquare, Palette
+  Send, MessageSquare, Palette, BookOpenCheck
 } from 'lucide-react';
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/base/tooltip';
