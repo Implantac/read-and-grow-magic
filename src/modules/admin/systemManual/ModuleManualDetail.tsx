@@ -33,6 +33,11 @@ export default function ModuleManualDetail() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const manual = useMemo(() => MANUAL_MODULES.find((m) => m.slug === slug), [slug]);
+  const { isDone, toggle } = useManualProgress();
+
+  const currentIndex = useMemo(() => MANUAL_MODULES.findIndex((m) => m.slug === slug), [slug]);
+  const prevModule = currentIndex > 0 ? MANUAL_MODULES[currentIndex - 1] : null;
+  const nextModule = currentIndex >= 0 && currentIndex < MANUAL_MODULES.length - 1 ? MANUAL_MODULES[currentIndex + 1] : null;
 
   if (!manual) {
     return (
@@ -50,6 +55,17 @@ export default function ModuleManualDetail() {
   const beginner = getBeginner(manual.slug);
   const difficulty = getDifficulty(manual.slug);
   const foundation = getFoundation(manual.slug);
+  const completed = isDone(manual.slug);
+
+  const handleToggleComplete = () => {
+    toggle(manual.slug);
+    if (!completed) {
+      toast({
+        title: '✓ Módulo concluído',
+        description: nextModule ? `Próximo sugerido: ${nextModule.title}` : 'Você completou todos os módulos!',
+      });
+    }
+  };
 
   return (
     <PageContainer>
