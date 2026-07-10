@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ArrowRight, GraduationCap, Sparkles, Map, CheckCircle2, Clock, Users, Trophy, RotateCcw, Circle, Route } from 'lucide-react';
+import { Search, ArrowRight, GraduationCap, Sparkles, Map, CheckCircle2, Clock, Users, Trophy, RotateCcw, Circle, Route, BookMarked, HelpCircle, Award, Rocket, Printer } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
@@ -13,6 +13,7 @@ import { MANUAL_MODULES, MANUAL_CATEGORIES, getDifficulty, getBeginner, DIFFICUL
 import { IMPLEMENTATION_ROADMAP } from './foundation';
 import { LEARNING_PATHS } from './paths';
 import { useManualProgress } from './useManualProgress';
+import { GLOBAL_GLOSSARY, GENERAL_FAQ, type GlossaryTerm } from './glossary';
 import manualIcon from './assets/manual-icon.png';
 
 export default function SystemManual() {
