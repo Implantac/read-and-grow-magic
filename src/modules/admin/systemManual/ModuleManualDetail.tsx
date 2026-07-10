@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, CheckCircle2, Lightbulb, AlertTriangle, HelpCircle, Users, ListChecks,
+  ArrowLeft, ArrowRight, CheckCircle2, Lightbulb, AlertTriangle, HelpCircle, Users, ListChecks,
   ExternalLink, Camera, Video, BookOpen, Sparkles, Printer, Shield, Target, Clock,
-  Gauge, Ban, Link2, XCircle,
+  Gauge, Ban, Link2, XCircle, Circle,
 } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
@@ -15,6 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/ui/base/accordion';
 import { MANUAL_MODULES, MANUAL_CATEGORIES, getBeginner, getDifficulty, DIFFICULTY_STYLE } from './content';
 import { getFoundation } from './foundation';
+import { useManualProgress } from './useManualProgress';
+import { toast } from '@/ui/base/use-toast';
 
 const SEVERITY_STYLE: Record<'blocking' | 'warning' | 'info', string> = {
   blocking: 'bg-rose-500/10 text-rose-500 border-rose-500/30',
