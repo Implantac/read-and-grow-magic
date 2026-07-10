@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Search, ArrowRight, GraduationCap } from 'lucide-react';
+import { BookOpen, Search, ArrowRight, GraduationCap, Sparkles } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
 import { Input } from '@/ui/base/input';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
-import { MANUAL_MODULES, MANUAL_CATEGORIES } from './content';
+import { MANUAL_MODULES, MANUAL_CATEGORIES, getDifficulty, getBeginner, DIFFICULTY_STYLE } from './content';
+import manualIcon from './assets/manual-icon.png';
 
 export default function SystemManual() {
   const [q, setQ] = useState('');
