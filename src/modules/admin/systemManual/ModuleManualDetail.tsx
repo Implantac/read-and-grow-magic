@@ -89,6 +89,18 @@ export default function ModuleManualDetail() {
             <Button variant="outline" size="sm" onClick={() => window.print()}>
               <Printer className="h-4 w-4 mr-2" /> Imprimir
             </Button>
+            <Button
+              variant={completed ? 'outline' : 'default'}
+              size="sm"
+              onClick={handleToggleComplete}
+              className={completed ? 'border-green-500/40 text-green-600 dark:text-green-400 hover:bg-green-500/10' : ''}
+            >
+              {completed ? (
+                <><CheckCircle2 className="h-4 w-4 mr-2" /> Concluído</>
+              ) : (
+                <><Circle className="h-4 w-4 mr-2" /> Marcar como concluído</>
+              )}
+            </Button>
           </>
         }
       />
