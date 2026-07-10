@@ -38,5 +38,8 @@ export const AdminRoutes = [
   <Route key="adm-automation" path="automacoes" element={adminOnly(<AutomationEnginePage />)} />,
   <Route key="adm-dashboards" path="dashboards" element={adminOnly(<DashboardEnginePage />)} />,
   <Route key="adm-security-audit" path="seguranca/auditoria" element={adminOnly(<SecurityAuditPage />)} />,
+  <Route key="adm-manual" path="manual" element={<SystemManualPage />} />,
+  <Route key="adm-manual-detail" path="manual/:slug" element={<ModuleManualDetailPage />} />,
 ];
+
 
