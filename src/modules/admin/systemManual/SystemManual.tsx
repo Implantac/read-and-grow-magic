@@ -92,6 +92,8 @@ export default function SystemManual() {
         {filtered.map((m) => {
           const Icon = m.icon;
           const catStyle = MANUAL_CATEGORIES[m.category];
+          const difficulty = getDifficulty(m.slug);
+          const beg = getBeginner(m.slug);
           return (
             <Link
               key={m.slug}
@@ -104,18 +106,21 @@ export default function SystemManual() {
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 text-primary ring-1 ring-inset ring-primary/20">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <Badge variant="outline" className={catStyle.color}>
-                      {m.category}
-                    </Badge>
+                    <div className="flex flex-col items-end gap-1">
+                      <Badge variant="outline" className={catStyle.color}>{m.category}</Badge>
+                      <Badge variant="outline" className={`${DIFFICULTY_STYLE[difficulty]} text-[10px]`}>
+                        {difficulty}
+                      </Badge>
+                    </div>
                   </div>
                   <CardTitle className="text-lg mt-3 group-hover:text-primary transition-colors">
                     {m.title}
                   </CardTitle>
-                  <CardDescription className="line-clamp-2">{m.short}</CardDescription>
+                  <CardDescription className="line-clamp-2">{beg.inPlainWords}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{m.steps.length} passos · {m.faq.length} FAQs</span>
+                    <span>⏱ {beg.timeToLearn}</span>
                     <span className="flex items-center gap-1 text-primary font-medium">
                       Abrir guia <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
                     </span>
