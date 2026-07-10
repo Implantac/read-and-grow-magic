@@ -47,6 +47,7 @@ export default function ModuleManualDetail() {
   const catStyle = MANUAL_CATEGORIES[manual.category];
   const beginner = getBeginner(manual.slug);
   const difficulty = getDifficulty(manual.slug);
+  const foundation = getFoundation(manual.slug);
 
   return (
     <PageContainer>
