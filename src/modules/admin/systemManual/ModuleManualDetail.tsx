@@ -32,6 +32,8 @@ export default function ModuleManualDetail() {
 
   const Icon = manual.icon;
   const catStyle = MANUAL_CATEGORIES[manual.category];
+  const beginner = getBeginner(manual.slug);
+  const difficulty = getDifficulty(manual.slug);
 
   return (
     <PageContainer>
@@ -50,6 +52,8 @@ export default function ModuleManualDetail() {
         actions={
           <>
             <Badge variant="outline" className={catStyle.color}>{manual.category}</Badge>
+            <Badge variant="outline" className={DIFFICULTY_STYLE[difficulty]}>{difficulty}</Badge>
+            <Badge variant="outline" className="border-primary/30 text-primary">⏱ {beginner.timeToLearn}</Badge>
             <Button variant="outline" size="sm" onClick={() => window.print()}>
               <Printer className="h-4 w-4 mr-2" /> Imprimir
             </Button>
