@@ -37,18 +37,30 @@ export default function SystemManual() {
         icon={GraduationCap}
       />
 
-      <Card className="mb-6 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-primary" />
-            Como usar este manual
-          </CardTitle>
-          <CardDescription>
-            Cada card abaixo abre um guia completo do módulo: visão geral, pré-requisitos, passo a passo, boas práticas,
-            perguntas frequentes e solução de problemas. Ideal para onboarding de novos usuários, treinamento de equipes
-            e consulta rápida durante a operação.
-          </CardDescription>
-        </CardHeader>
+      <Card className="mb-6 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 overflow-hidden">
+        <div className="grid md:grid-cols-[1fr_auto] gap-4 items-center">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Um manual pensado para quem nunca usou um ERP
+            </CardTitle>
+            <CardDescription className="text-sm leading-relaxed">
+              Cada módulo tem uma aba <strong>👋 Para leigos</strong> com linguagem simples, uma analogia do dia a dia,
+              os primeiros passos em português claro e um mini-dicionário. Se você é novo por aqui, comece pelos módulos
+              marcados como <Badge variant="outline" className={DIFFICULTY_STYLE.Iniciante}>Iniciante</Badge>.
+            </CardDescription>
+          </CardHeader>
+          <div className="pr-6 pb-6 md:pb-0 md:pr-8 hidden md:block">
+            <img
+              src={manualIcon}
+              alt="Manual do sistema — livro aberto com lâmpada"
+              width={140}
+              height={140}
+              loading="lazy"
+              className="drop-shadow-xl"
+            />
+          </div>
+        </div>
       </Card>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
