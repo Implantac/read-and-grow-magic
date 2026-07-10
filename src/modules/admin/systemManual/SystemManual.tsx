@@ -421,61 +421,132 @@ export default function SystemManual() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col sm:flex-row gap-3 mb-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Buscar termo (ex: NF-e, DRE, Picking...)"
-                value={glossaryQ}
-                onChange={(e) => setGlossaryQ(e.target.value)}
-                className="pl-9"
-              />
+          <div className="flex flex-col gap-3 mb-4">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar por termo, sigla, definição ou exemplo (ex: NF-e imposto, picking FEFO)"
+                  value={glossaryQ}
+                  onChange={(e) => setGlossaryQ(e.target.value)}
+                  className="pl-9 pr-9"
+                  aria-label="Buscar no glossário"
+                />
+                {glossaryQ && (
+                  <button
+                    type="button"
+                    onClick={() => setGlossaryQ('')}
+                    aria-label="Limpar busca"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center rounded-md text-muted-foreground hover:bg-muted"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-1.5 shrink-0">
+                <Button
+                  variant={glossarySort === 'az' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setGlossarySort('az')}
+                  className="text-xs"
+                  aria-pressed={glossarySort === 'az'}
+                >
+                  <ArrowUpAZ className="h-3.5 w-3.5 mr-1" /> A–Z
+                </Button>
+                <Button
+                  variant={glossarySort === 'category' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setGlossarySort('category')}
+                  className="text-xs"
+                  aria-pressed={glossarySort === 'category'}
+                >
+                  <Layers className="h-3.5 w-3.5 mr-1" /> Categoria
+                </Button>
+              </div>
             </div>
             <div className="flex flex-wrap gap-1.5">
-              {(['all', 'Fiscal', 'Financeiro', 'Operacional', 'Comercial', 'Produção', 'Sistema'] as const).map((c) => (
-                <Button
-                  key={c}
-                  variant={glossaryCat === c ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setGlossaryCat(c)}
-                  className="text-xs"
+              {GLOSSARY_CATS.map(({ key, icon: CIcon }) => {
+                const active = glossaryCat === key;
+                const label = key === 'all' ? 'Todos' : key;
+                return (
+                  <Button
+                    key={key}
+                    variant={active ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setGlossaryCat(key)}
+                    className="text-xs gap-1.5"
+                    aria-pressed={active}
+                  >
+                    <CIcon className="h-3.5 w-3.5" />
+                    {label}
+                    <Badge
+                      variant="secondary"
+                      className={`text-[10px] ml-0.5 h-4 px-1.5 ${active ? 'bg-primary-foreground/20 text-primary-foreground' : ''}`}
+                    >
+                      {glossaryCounts[key] ?? 0}
+                    </Badge>
+                  </Button>
+                );
+              })}
+            </div>
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>
+                Mostrando <strong className="text-foreground tabular-nums">{filteredGlossary.length}</strong>
+                {' '}de {GLOBAL_GLOSSARY.length} termos
+                {glossaryTokens.length > 0 && (
+                  <> para <em className="text-foreground">"{glossaryQ}"</em></>
+                )}
+                {glossaryCat !== 'all' && <> em <strong className="text-foreground">{glossaryCat}</strong></>}
+              </span>
+              {(glossaryQ || glossaryCat !== 'all') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setGlossaryQ('');
+                    setGlossaryCat('all');
+                  }}
+                  className="text-primary hover:underline"
                 >
-                  {c === 'all' ? 'Todos' : c}
-                </Button>
-              ))}
+                  Limpar filtros
+                </button>
+              )}
             </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 max-h-[420px] overflow-y-auto pr-2">
-            {GLOBAL_GLOSSARY
-              .filter((g: GlossaryTerm) => {
-                if (glossaryCat !== 'all' && g.category !== glossaryCat) return false;
-                const t = glossaryQ.trim().toLowerCase();
-                if (!t) return true;
-                return (
-                  g.term.toLowerCase().includes(t) ||
-                  (g.acronym?.toLowerCase().includes(t) ?? false) ||
-                  g.definition.toLowerCase().includes(t)
-                );
-              })
-              .map((g, i) => (
-                <div key={i} className="rounded-lg border p-3 bg-muted/10">
+          {filteredGlossary.length === 0 ? (
+            <div className="rounded-lg border border-dashed py-10 text-center text-sm text-muted-foreground">
+              <BookMarked className="h-8 w-8 mx-auto mb-2 opacity-40" />
+              <p>Nenhum termo encontrado{glossaryQ && <> para <strong>"{glossaryQ}"</strong></>}.</p>
+              <p className="text-xs mt-1">Tente outra palavra-chave ou remova os filtros de categoria.</p>
+            </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 max-h-[460px] overflow-y-auto pr-2">
+              {filteredGlossary.map((g: GlossaryTerm, i) => (
+                <div key={`${g.term}-${i}`} className="rounded-lg border p-3 bg-muted/10 hover:border-primary/40 transition-colors">
                   <div className="flex items-center justify-between gap-2 mb-1.5">
                     <p className="text-sm font-semibold text-primary flex items-center gap-2 flex-wrap">
-                      {g.term}
-                      {g.acronym && <Badge variant="outline" className="text-[10px] font-mono">{g.acronym}</Badge>}
+                      <HighlightText text={g.term} search={glossaryQ} />
+                      {g.acronym && (
+                        <Badge variant="outline" className="text-[10px] font-mono">
+                          <HighlightText text={g.acronym} search={glossaryQ} />
+                        </Badge>
+                      )}
                     </p>
                     <Badge variant="secondary" className="text-[10px] shrink-0">{g.category}</Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{g.definition}</p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    <HighlightText text={g.definition} search={glossaryQ} />
+                  </p>
                   {g.example && (
                     <p className="text-xs text-foreground/70 mt-2 italic border-l-2 border-primary/30 pl-2">
-                      Ex: {g.example}
+                      Ex: <HighlightText text={g.example} search={glossaryQ} />
                     </p>
                   )}
                 </div>
               ))}
-          </div>
+            </div>
+          )}
         </CardContent>
+
       </Card>
 
       {/* FAQ Global */}
