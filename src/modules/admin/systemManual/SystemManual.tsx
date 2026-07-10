@@ -230,7 +230,7 @@ export default function SystemManual() {
                 <div key={path.id} className="rounded-lg border bg-muted/20 p-4 hover:border-primary/40 transition-colors">
                   <div className="flex items-start gap-3 mb-3">
                     <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-background ring-1 ring-border ${path.color}`}>
-                      <PIcon className="h-4.5 w-4.5" />
+                      <PIcon className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-semibold text-sm">{path.title}</p>
