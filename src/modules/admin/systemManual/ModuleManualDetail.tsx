@@ -78,8 +78,10 @@ export default function ModuleManualDetail() {
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6 min-w-0">
           <Tabs defaultValue="beginner">
-            <TabsList className="grid grid-cols-3 sm:grid-cols-6 w-full">
-              <TabsTrigger value="beginner">👋 Para leigos</TabsTrigger>
+            <TabsList className="grid grid-cols-4 sm:grid-cols-8 w-full">
+              <TabsTrigger value="beginner">👋 Leigos</TabsTrigger>
+              <TabsTrigger value="foundation">🎯 Fundamentos</TabsTrigger>
+              <TabsTrigger value="rules">📏 Regras</TabsTrigger>
               <TabsTrigger value="overview">Visão geral</TabsTrigger>
               <TabsTrigger value="steps">Passo a passo</TabsTrigger>
               <TabsTrigger value="media">Telas & vídeos</TabsTrigger>
