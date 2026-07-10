@@ -1,13 +1,15 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ArrowRight, GraduationCap, Sparkles } from 'lucide-react';
+import { Search, ArrowRight, GraduationCap, Sparkles, Map, CheckCircle2, Clock, Users } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
 import { Input } from '@/ui/base/input';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/ui/base/accordion';
 import { MANUAL_MODULES, MANUAL_CATEGORIES, getDifficulty, getBeginner, DIFFICULTY_STYLE } from './content';
+import { IMPLEMENTATION_ROADMAP } from './foundation';
 import manualIcon from './assets/manual-icon.png';
 
 export default function SystemManual() {
