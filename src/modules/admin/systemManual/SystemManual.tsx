@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ArrowRight, GraduationCap, Sparkles, Map, CheckCircle2, Clock, Users, Trophy, RotateCcw, Circle, Route, BookMarked, HelpCircle, Award, Rocket, Printer } from 'lucide-react';
+import { Search, ArrowRight, GraduationCap, Sparkles, Map, CheckCircle2, Clock, Users, Trophy, RotateCcw, Circle, Route, BookMarked, HelpCircle, Award, Rocket, Printer, X, ArrowUpAZ, Layers, Landmark, Wallet, Boxes, Factory, ShoppingCart, Cog } from 'lucide-react';
+import { HighlightText } from '@/shared/components/HighlightText';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
