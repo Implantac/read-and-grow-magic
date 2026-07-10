@@ -18,6 +18,7 @@ import manualIcon from './assets/manual-icon.png';
 export default function SystemManual() {
   const [q, setQ] = useState('');
   const [cat, setCat] = useState<string>('all');
+  const { isDone, count, reset } = useManualProgress();
 
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -31,6 +32,9 @@ export default function SystemManual() {
       );
     });
   }, [q, cat]);
+
+  const total = MANUAL_MODULES.length;
+  const progressPct = total ? Math.round((count / total) * 100) : 0;
 
   const categories = Object.keys(MANUAL_CATEGORIES) as (keyof typeof MANUAL_CATEGORIES)[];
 
