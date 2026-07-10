@@ -19,6 +19,8 @@ import manualIcon from './assets/manual-icon.png';
 export default function SystemManual() {
   const [q, setQ] = useState('');
   const [cat, setCat] = useState<string>('all');
+  const [glossaryQ, setGlossaryQ] = useState('');
+  const [glossaryCat, setGlossaryCat] = useState<string>('all');
   const { isDone, count, reset } = useManualProgress();
 
   const filtered = useMemo(() => {
