@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, CheckCircle2, Lightbulb, AlertTriangle, HelpCircle, Users, ListChecks,
-  ExternalLink, Camera, Video, BookOpen, Sparkles, Printer,
+  ExternalLink, Camera, Video, BookOpen, Sparkles, Printer, Shield, Target, Clock,
+  Gauge, Ban, Link2, XCircle,
 } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
@@ -13,6 +14,18 @@ import { Separator } from '@/ui/base/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/ui/base/accordion';
 import { MANUAL_MODULES, MANUAL_CATEGORIES, getBeginner, getDifficulty, DIFFICULTY_STYLE } from './content';
+import { getFoundation } from './foundation';
+
+const SEVERITY_STYLE: Record<'blocking' | 'warning' | 'info', string> = {
+  blocking: 'bg-rose-500/10 text-rose-500 border-rose-500/30',
+  warning: 'bg-amber-500/10 text-amber-500 border-amber-500/30',
+  info: 'bg-sky-500/10 text-sky-500 border-sky-500/30',
+};
+const SEVERITY_LABEL: Record<'blocking' | 'warning' | 'info', string> = {
+  blocking: 'Bloqueante',
+  warning: 'Atenção',
+  info: 'Informativo',
+};
 
 export default function ModuleManualDetail() {
   const { slug } = useParams<{ slug: string }>();
