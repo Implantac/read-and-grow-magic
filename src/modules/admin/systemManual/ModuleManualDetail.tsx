@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, CheckCircle2, Lightbulb, AlertTriangle, HelpCircle, Users, ListChecks,
+  ArrowLeft, ArrowRight, CheckCircle2, Lightbulb, AlertTriangle, HelpCircle, Users, ListChecks,
   ExternalLink, Camera, Video, BookOpen, Sparkles, Printer, Shield, Target, Clock,
-  Gauge, Ban, Link2, XCircle,
+  Gauge, Ban, Link2, XCircle, Circle,
 } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
@@ -15,6 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/ui/base/accordion';
 import { MANUAL_MODULES, MANUAL_CATEGORIES, getBeginner, getDifficulty, DIFFICULTY_STYLE } from './content';
 import { getFoundation } from './foundation';
+import { useManualProgress } from './useManualProgress';
+import { toast } from '@/ui/base/use-toast';
 
 const SEVERITY_STYLE: Record<'blocking' | 'warning' | 'info', string> = {
   blocking: 'bg-rose-500/10 text-rose-500 border-rose-500/30',
@@ -31,6 +33,11 @@ export default function ModuleManualDetail() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const manual = useMemo(() => MANUAL_MODULES.find((m) => m.slug === slug), [slug]);
+  const { isDone, toggle } = useManualProgress();
+
+  const currentIndex = useMemo(() => MANUAL_MODULES.findIndex((m) => m.slug === slug), [slug]);
+  const prevModule = currentIndex > 0 ? MANUAL_MODULES[currentIndex - 1] : null;
+  const nextModule = currentIndex >= 0 && currentIndex < MANUAL_MODULES.length - 1 ? MANUAL_MODULES[currentIndex + 1] : null;
 
   if (!manual) {
     return (
@@ -48,6 +55,17 @@ export default function ModuleManualDetail() {
   const beginner = getBeginner(manual.slug);
   const difficulty = getDifficulty(manual.slug);
   const foundation = getFoundation(manual.slug);
+  const completed = isDone(manual.slug);
+
+  const handleToggleComplete = () => {
+    toggle(manual.slug);
+    if (!completed) {
+      toast({
+        title: '✓ Módulo concluído',
+        description: nextModule ? `Próximo sugerido: ${nextModule.title}` : 'Você completou todos os módulos!',
+      });
+    }
+  };
 
   return (
     <PageContainer>
@@ -70,6 +88,18 @@ export default function ModuleManualDetail() {
             <Badge variant="outline" className="border-primary/30 text-primary">⏱ {beginner.timeToLearn}</Badge>
             <Button variant="outline" size="sm" onClick={() => window.print()}>
               <Printer className="h-4 w-4 mr-2" /> Imprimir
+            </Button>
+            <Button
+              variant={completed ? 'outline' : 'default'}
+              size="sm"
+              onClick={handleToggleComplete}
+              className={completed ? 'border-green-500/40 text-green-600 dark:text-green-400 hover:bg-green-500/10' : ''}
+            >
+              {completed ? (
+                <><CheckCircle2 className="h-4 w-4 mr-2" /> Concluído</>
+              ) : (
+                <><Circle className="h-4 w-4 mr-2" /> Marcar como concluído</>
+              )}
             </Button>
           </>
         }
@@ -525,6 +555,42 @@ export default function ModuleManualDetail() {
           </div>
         </aside>
       </div>
+
+      <Card className="mt-6">
+        <CardContent className="p-4 flex items-center justify-between gap-3">
+          {prevModule ? (
+            <Link to={`/admin/manual/${prevModule.slug}`} className="group flex items-center gap-3 min-w-0 flex-1">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border bg-muted/30 group-hover:border-primary/40 group-hover:text-primary transition-colors">
+                <ArrowLeft className="h-4 w-4" />
+              </div>
+              <div className="min-w-0 hidden sm:block">
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Anterior</p>
+                <p className="text-sm font-medium truncate group-hover:text-primary">{prevModule.title}</p>
+              </div>
+            </Link>
+          ) : (
+            <div className="flex-1" />
+          )}
+
+          <Link to="/admin/manual" className="text-xs text-muted-foreground hover:text-primary underline underline-offset-2 shrink-0">
+            Índice
+          </Link>
+
+          {nextModule ? (
+            <Link to={`/admin/manual/${nextModule.slug}`} className="group flex items-center gap-3 min-w-0 flex-1 justify-end text-right">
+              <div className="min-w-0 hidden sm:block">
+                <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Próximo</p>
+                <p className="text-sm font-medium truncate group-hover:text-primary">{nextModule.title}</p>
+              </div>
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border bg-muted/30 group-hover:border-primary/40 group-hover:text-primary transition-colors">
+                <ArrowRight className="h-4 w-4" />
+              </div>
+            </Link>
+          ) : (
+            <div className="flex-1" />
+          )}
+        </CardContent>
+      </Card>
     </PageContainer>
   );
 }
