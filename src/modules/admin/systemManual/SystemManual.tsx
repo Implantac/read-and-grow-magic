@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Search, ArrowRight, GraduationCap } from 'lucide-react';
+import { Search, ArrowRight, GraduationCap, Sparkles } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
 import { Input } from '@/ui/base/input';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
-import { MANUAL_MODULES, MANUAL_CATEGORIES } from './content';
+import { MANUAL_MODULES, MANUAL_CATEGORIES, getDifficulty, getBeginner, DIFFICULTY_STYLE } from './content';
+import manualIcon from './assets/manual-icon.png';
 
 export default function SystemManual() {
   const [q, setQ] = useState('');
@@ -36,18 +37,30 @@ export default function SystemManual() {
         icon={GraduationCap}
       />
 
-      <Card className="mb-6 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-primary" />
-            Como usar este manual
-          </CardTitle>
-          <CardDescription>
-            Cada card abaixo abre um guia completo do módulo: visão geral, pré-requisitos, passo a passo, boas práticas,
-            perguntas frequentes e solução de problemas. Ideal para onboarding de novos usuários, treinamento de equipes
-            e consulta rápida durante a operação.
-          </CardDescription>
-        </CardHeader>
+      <Card className="mb-6 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20 overflow-hidden">
+        <div className="grid md:grid-cols-[1fr_auto] gap-4 items-center">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              Um manual pensado para quem nunca usou um ERP
+            </CardTitle>
+            <CardDescription className="text-sm leading-relaxed">
+              Cada módulo tem uma aba <strong>👋 Para leigos</strong> com linguagem simples, uma analogia do dia a dia,
+              os primeiros passos em português claro e um mini-dicionário. Se você é novo por aqui, comece pelos módulos
+              marcados como <Badge variant="outline" className={DIFFICULTY_STYLE.Iniciante}>Iniciante</Badge>.
+            </CardDescription>
+          </CardHeader>
+          <div className="pr-6 pb-6 md:pb-0 md:pr-8 hidden md:block">
+            <img
+              src={manualIcon}
+              alt="Manual do sistema — livro aberto com lâmpada"
+              width={140}
+              height={140}
+              loading="lazy"
+              className="drop-shadow-xl"
+            />
+          </div>
+        </div>
       </Card>
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -79,6 +92,8 @@ export default function SystemManual() {
         {filtered.map((m) => {
           const Icon = m.icon;
           const catStyle = MANUAL_CATEGORIES[m.category];
+          const difficulty = getDifficulty(m.slug);
+          const beg = getBeginner(m.slug);
           return (
             <Link
               key={m.slug}
@@ -91,18 +106,21 @@ export default function SystemManual() {
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 text-primary ring-1 ring-inset ring-primary/20">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <Badge variant="outline" className={catStyle.color}>
-                      {m.category}
-                    </Badge>
+                    <div className="flex flex-col items-end gap-1">
+                      <Badge variant="outline" className={catStyle.color}>{m.category}</Badge>
+                      <Badge variant="outline" className={`${DIFFICULTY_STYLE[difficulty]} text-[10px]`}>
+                        {difficulty}
+                      </Badge>
+                    </div>
                   </div>
                   <CardTitle className="text-lg mt-3 group-hover:text-primary transition-colors">
                     {m.title}
                   </CardTitle>
-                  <CardDescription className="line-clamp-2">{m.short}</CardDescription>
+                  <CardDescription className="line-clamp-2">{beg.inPlainWords}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{m.steps.length} passos · {m.faq.length} FAQs</span>
+                    <span>⏱ {beg.timeToLearn}</span>
                     <span className="flex items-center gap-1 text-primary font-medium">
                       Abrir guia <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
                     </span>
