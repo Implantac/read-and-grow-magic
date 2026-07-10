@@ -12,7 +12,7 @@ import { Button } from '@/ui/base/button';
 import { Separator } from '@/ui/base/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/ui/base/accordion';
-import { MANUAL_MODULES, MANUAL_CATEGORIES } from './content';
+import { MANUAL_MODULES, MANUAL_CATEGORIES, getBeginner, getDifficulty, DIFFICULTY_STYLE } from './content';
 
 export default function ModuleManualDetail() {
   const { slug } = useParams<{ slug: string }>();
