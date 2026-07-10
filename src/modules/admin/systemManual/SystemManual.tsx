@@ -22,7 +22,46 @@ export default function SystemManual() {
   const [cat, setCat] = useState<string>('all');
   const [glossaryQ, setGlossaryQ] = useState('');
   const [glossaryCat, setGlossaryCat] = useState<string>('all');
+  const [glossarySort, setGlossarySort] = useState<'az' | 'category'>('az');
   const { isDone, count, reset } = useManualProgress();
+
+  // Glossário — busca multi-token (todos os tokens devem aparecer em algum campo)
+  const glossaryTokens = useMemo(
+    () => glossaryQ.trim().toLowerCase().split(/\s+/).filter(Boolean),
+    [glossaryQ],
+  );
+
+  const glossaryCounts = useMemo(() => {
+    const acc: Record<string, number> = { all: GLOBAL_GLOSSARY.length };
+    for (const g of GLOBAL_GLOSSARY) acc[g.category] = (acc[g.category] ?? 0) + 1;
+    return acc;
+  }, []);
+
+  const filteredGlossary = useMemo(() => {
+    const list = GLOBAL_GLOSSARY.filter((g) => {
+      if (glossaryCat !== 'all' && g.category !== glossaryCat) return false;
+      if (glossaryTokens.length === 0) return true;
+      const haystack = `${g.term} ${g.acronym ?? ''} ${g.definition} ${g.example ?? ''}`.toLowerCase();
+      return glossaryTokens.every((tok) => haystack.includes(tok));
+    });
+    if (glossarySort === 'az') {
+      return [...list].sort((a, b) => a.term.localeCompare(b.term, 'pt-BR'));
+    }
+    return [...list].sort((a, b) =>
+      a.category === b.category ? a.term.localeCompare(b.term, 'pt-BR') : a.category.localeCompare(b.category, 'pt-BR'),
+    );
+  }, [glossaryCat, glossaryTokens, glossarySort]);
+
+  const GLOSSARY_CATS: Array<{ key: string; icon: typeof Layers }> = [
+    { key: 'all', icon: Layers },
+    { key: 'Fiscal', icon: Landmark },
+    { key: 'Financeiro', icon: Wallet },
+    { key: 'Operacional', icon: Boxes },
+    { key: 'Comercial', icon: ShoppingCart },
+    { key: 'Produção', icon: Factory },
+    { key: 'Sistema', icon: Cog },
+  ];
+
 
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
