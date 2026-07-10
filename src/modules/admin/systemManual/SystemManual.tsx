@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ArrowRight, GraduationCap, Sparkles, Map, CheckCircle2, Clock, Users, Trophy, RotateCcw, Circle, Route } from 'lucide-react';
+import { Search, ArrowRight, GraduationCap, Sparkles, Map, CheckCircle2, Clock, Users, Trophy, RotateCcw, Circle, Route, BookMarked, HelpCircle, Award, Rocket, Printer } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
@@ -13,11 +13,14 @@ import { MANUAL_MODULES, MANUAL_CATEGORIES, getDifficulty, getBeginner, DIFFICUL
 import { IMPLEMENTATION_ROADMAP } from './foundation';
 import { LEARNING_PATHS } from './paths';
 import { useManualProgress } from './useManualProgress';
+import { GLOBAL_GLOSSARY, GENERAL_FAQ, type GlossaryTerm } from './glossary';
 import manualIcon from './assets/manual-icon.png';
 
 export default function SystemManual() {
   const [q, setQ] = useState('');
   const [cat, setCat] = useState<string>('all');
+  const [glossaryQ, setGlossaryQ] = useState('');
+  const [glossaryCat, setGlossaryCat] = useState<string>('all');
   const { isDone, count, reset } = useManualProgress();
 
   const filtered = useMemo(() => {
@@ -330,6 +333,150 @@ export default function SystemManual() {
         <Card className="mt-6">
           <CardContent className="py-12 text-center text-muted-foreground">
             Nenhum módulo encontrado para "{q}".
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Início rápido - 5 passos para não travar */}
+      <Card className="mt-8 border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-transparent">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Rocket className="h-5 w-5 text-primary" /> Início rápido — 5 passos para não travar no primeiro dia
+          </CardTitle>
+          <CardDescription>
+            Se você acabou de entrar no ERP, faça esta sequência antes de qualquer outra coisa.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {[
+              { n: 1, t: 'Confira seu perfil', d: 'Veja em qual empresa/filial você está logado e qual é seu papel (canto superior).' },
+              { n: 2, t: 'Explore o menu', d: 'Passe o mouse em cada seção lateral. Ícones esmaecidos = módulo não contratado no seu plano.' },
+              { n: 3, t: 'Abra o Dashboard', d: 'É o painel-mãe. Se algo estiver zerado, é porque falta cadastro — não é bug.' },
+              { n: 4, t: 'Leia esta página', d: 'Escolha uma trilha de aprendizado que combine com seu perfil e siga na ordem.' },
+              { n: 5, t: 'Treine em sandbox', d: 'Use dados de teste antes de operar em produção. Nada substitui a prática.' },
+            ].map((s) => (
+              <li key={s.n} className="rounded-lg border bg-background p-3">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                    {s.n}
+                  </div>
+                  <p className="text-sm font-semibold">{s.t}</p>
+                </div>
+                <p className="text-xs text-muted-foreground leading-relaxed">{s.d}</p>
+              </li>
+            ))}
+          </ol>
+        </CardContent>
+      </Card>
+
+      {/* Glossário global */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <BookMarked className="h-5 w-5 text-primary" /> Glossário do ERP — a linguagem que você vai ouvir
+          </CardTitle>
+          <CardDescription>
+            {GLOBAL_GLOSSARY.length} termos técnicos, fiscais e operacionais traduzidos para linguagem de negócio.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar termo (ex: NF-e, DRE, Picking...)"
+                value={glossaryQ}
+                onChange={(e) => setGlossaryQ(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {(['all', 'Fiscal', 'Financeiro', 'Operacional', 'Comercial', 'Produção', 'Sistema'] as const).map((c) => (
+                <Button
+                  key={c}
+                  variant={glossaryCat === c ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setGlossaryCat(c)}
+                  className="text-xs"
+                >
+                  {c === 'all' ? 'Todos' : c}
+                </Button>
+              ))}
+            </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 max-h-[420px] overflow-y-auto pr-2">
+            {GLOBAL_GLOSSARY
+              .filter((g: GlossaryTerm) => {
+                if (glossaryCat !== 'all' && g.category !== glossaryCat) return false;
+                const t = glossaryQ.trim().toLowerCase();
+                if (!t) return true;
+                return (
+                  g.term.toLowerCase().includes(t) ||
+                  (g.acronym?.toLowerCase().includes(t) ?? false) ||
+                  g.definition.toLowerCase().includes(t)
+                );
+              })
+              .map((g, i) => (
+                <div key={i} className="rounded-lg border p-3 bg-muted/10">
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <p className="text-sm font-semibold text-primary flex items-center gap-2 flex-wrap">
+                      {g.term}
+                      {g.acronym && <Badge variant="outline" className="text-[10px] font-mono">{g.acronym}</Badge>}
+                    </p>
+                    <Badge variant="secondary" className="text-[10px] shrink-0">{g.category}</Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{g.definition}</p>
+                  {g.example && (
+                    <p className="text-xs text-foreground/70 mt-2 italic border-l-2 border-primary/30 pl-2">
+                      Ex: {g.example}
+                    </p>
+                  )}
+                </div>
+              ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* FAQ Global */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <HelpCircle className="h-5 w-5 text-primary" /> Perguntas frequentes do implantador
+          </CardTitle>
+          <CardDescription>
+            Dúvidas reais que aparecem em toda implantação. Se a sua não estiver aqui, veja o FAQ do módulo específico.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Accordion type="single" collapsible className="w-full">
+            {GENERAL_FAQ.map((f, i) => (
+              <AccordionItem key={i} value={`faq-${i}`}>
+                <AccordionTrigger className="text-sm text-left hover:no-underline">
+                  {f.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+                  {f.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </CardContent>
+      </Card>
+
+      {/* Certificado de conclusão */}
+      {count === total && total > 0 && (
+        <Card className="mt-6 border-amber-500/40 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-transparent">
+          <CardContent className="pt-6 text-center">
+            <Award className="h-16 w-16 text-amber-500 mx-auto mb-3 drop-shadow-lg" />
+            <h3 className="text-xl font-bold mb-2">🎉 Treinamento completo!</h3>
+            <p className="text-sm text-muted-foreground max-w-xl mx-auto mb-4">
+              Você percorreu os {total} módulos do manual. Está pronto para operar o ERP com autonomia,
+              treinar sua equipe e liderar a implantação nas suas empresas.
+            </p>
+            <Button variant="outline" onClick={() => window.print()}>
+              <Printer className="h-4 w-4 mr-2" /> Imprimir certificado
+            </Button>
           </CardContent>
         </Card>
       )}
