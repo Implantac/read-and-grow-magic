@@ -431,6 +431,16 @@ export default function PluginDetail() {
             pluginName={plugin.name}
           />
         )}
+        {lifecycle && (
+          <PluginLifecycleDialog
+            open={!!lifecycle}
+            onOpenChange={(o) => !o && setLifecycle(null)}
+            action={lifecycle}
+            pluginId={plugin.id}
+            pluginName={plugin.name}
+            installationId={installation?.id ?? null}
+          />
+        )}
 
         {/* Lightbox for screenshots */}
         {lightbox && (
