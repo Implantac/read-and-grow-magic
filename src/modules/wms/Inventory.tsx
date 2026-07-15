@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Progress } from '@/ui/base/progress';
 import { Search, Package, AlertTriangle, ClipboardList, DollarSign } from 'lucide-react';
 import { useWMSInventory } from '@/hooks/wms/useWMSInventory';
+import { RealtimeStatus } from '@/modules/wms/components/RealtimeStatus';
 import type { InventoryStatus } from '@/types/wms';
 
 
@@ -46,20 +47,23 @@ export default function InventoryPage() {
         title="Inventário WMS"
         description="Controle de estoque, contagens e rastreabilidade"
         actions={
-          <ExportButton
-            data={filteredItems as unknown as Record<string, unknown>[]}
-            columns={[
-              { key: 'productCode', label: 'Código' },
-              { key: 'productName', label: 'Produto' },
-              { key: 'category', label: 'Categoria' },
-              { key: 'location', label: 'Localização' },
-              { key: 'quantity', label: 'Quantidade' },
-              { key: 'availableQty', label: 'Disponível' },
-              { key: 'value', label: 'Valor', format: (v) => formatBRL(Number(v)) },
-              { key: 'status', label: 'Status' },
-            ]}
-            filename="inventario_wms"
-          />
+          <div className="flex items-center gap-2">
+            <RealtimeStatus />
+            <ExportButton
+              data={filteredItems as unknown as Record<string, unknown>[]}
+              columns={[
+                { key: 'productCode', label: 'Código' },
+                { key: 'productName', label: 'Produto' },
+                { key: 'category', label: 'Categoria' },
+                { key: 'location', label: 'Localização' },
+                { key: 'quantity', label: 'Quantidade' },
+                { key: 'availableQty', label: 'Disponível' },
+                { key: 'value', label: 'Valor', format: (v) => formatBRL(Number(v)) },
+                { key: 'status', label: 'Status' },
+              ]}
+              filename="inventario_wms"
+            />
+          </div>
         }
       />
 

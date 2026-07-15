@@ -65,5 +65,15 @@ export function useWMSInventory() {
     fetchData();
   }, [fetchData]);
 
+  // Realtime: qualquer mudança nas tabelas do WMS re-busca os dados
+  useEffect(() => {
+    const channel = supabase
+      .channel('wms-inventory-hook')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'wms_inventory_items' }, () => fetchData())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'wms_inventory_counts' }, () => fetchData())
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [fetchData]);
+
   return { items, counts, loading, refetch: fetchData };
 }
