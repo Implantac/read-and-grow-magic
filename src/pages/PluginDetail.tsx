@@ -35,6 +35,10 @@ import {
 import { PluginRunnerDialog } from "@/components/plugins/PluginRunnerDialog";
 import { PluginVersionDialog } from "@/components/plugins/PluginVersionDialog";
 import { PluginReviewsDialog } from "@/components/plugins/PluginReviewsDialog";
+import {
+  PluginLifecycleDialog,
+  type LifecycleAction,
+} from "@/components/plugins/PluginLifecycleDialog";
 import { MODULE_LABELS } from "@/lib/moduleLabels";
 
 function Stars({ value, size = 4 }: { value: number; size?: number }) {
