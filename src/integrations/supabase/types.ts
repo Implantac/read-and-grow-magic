@@ -12257,6 +12257,7 @@ export type Database = {
       }
       plugin_installations: {
         Row: {
+          auto_update: boolean
           company_id: string
           config: Json
           created_at: string
@@ -12271,6 +12272,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          auto_update?: boolean
           company_id: string
           config?: Json
           created_at?: string
@@ -12285,6 +12287,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          auto_update?: boolean
           company_id?: string
           config?: Json
           created_at?: string
@@ -12301,6 +12304,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "plugin_installations_plugin_id_fkey"
+            columns: ["plugin_id"]
+            isOneToOne: false
+            referencedRelation: "plugins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plugin_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          plugin_id: string
+          rating: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          plugin_id: string
+          rating: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          plugin_id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plugin_reviews_plugin_id_fkey"
             columns: ["plugin_id"]
             isOneToOne: false
             referencedRelation: "plugins"
