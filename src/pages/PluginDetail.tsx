@@ -23,15 +23,9 @@ import { RoleGuard } from "@/components/auth/RoleGuard";
 import {
   usePluginDetail,
   usePluginInstallations,
-  useInstallPlugin,
-  useUninstallPlugin,
-  useTogglePlugin,
   usePluginVersions,
 } from "@/hooks/usePlugins";
-import {
-  usePluginReviews,
-  useToggleAutoUpdate,
-} from "@/hooks/usePluginReviews";
+import { usePluginReviews, useToggleAutoUpdate } from "@/hooks/usePluginReviews";
 import { PluginRunnerDialog } from "@/components/plugins/PluginRunnerDialog";
 import { PluginVersionDialog } from "@/components/plugins/PluginVersionDialog";
 import { PluginReviewsDialog } from "@/components/plugins/PluginReviewsDialog";
