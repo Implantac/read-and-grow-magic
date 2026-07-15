@@ -279,7 +279,12 @@ export default function PluginMarketplace() {
                 <Card key={p.id} className="flex flex-col">
                   <CardHeader>
                     <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="text-base">{p.name}</CardTitle>
+                      <Link
+                        to={`/marketplace/${p.id}`}
+                        className="text-base font-semibold hover:underline underline-offset-2"
+                      >
+                        {p.name}
+                      </Link>
                       <Badge variant="outline">{p.category}</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">
