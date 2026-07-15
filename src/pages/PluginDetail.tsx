@@ -173,17 +173,17 @@ export default function PluginDetail() {
                 </div>
                 {installed ? (
                   <div className="flex flex-wrap items-center justify-end gap-2">
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={installation!.status === "active"}
-                        onCheckedChange={(v) =>
-                          toggle.mutate({ id: installation!.id, enabled: v })
-                        }
-                      />
-                      <span className="text-xs text-muted-foreground">
-                        {installation!.status === "active" ? "Ativo" : "Pausado"}
-                      </span>
-                    </div>
+                    <Button
+                      size="sm"
+                      variant={installation!.status === "active" ? "outline" : "default"}
+                      onClick={() =>
+                        setLifecycle(
+                          installation!.status === "active" ? "pause" : "resume",
+                        )
+                      }
+                    >
+                      {installation!.status === "active" ? "Pausar" : "Retomar"}
+                    </Button>
                     <Button
                       size="sm"
                       variant="outline"
@@ -202,17 +202,13 @@ export default function PluginDetail() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => uninstall.mutate(installation!.id)}
-                      disabled={uninstall.isPending}
+                      onClick={() => setLifecycle("uninstall")}
                     >
                       <Trash2 className="h-4 w-4 mr-1" /> Remover
                     </Button>
                   </div>
                 ) : (
-                  <Button
-                    onClick={() => install.mutate(plugin.id)}
-                    disabled={install.isPending}
-                  >
+                  <Button onClick={() => setLifecycle("install")}>
                     Instalar plugin
                   </Button>
                 )}
