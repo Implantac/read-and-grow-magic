@@ -156,6 +156,7 @@ const App = () => (
                 <Route path="/sre/postmortems" element={<SREPostmortems />} />
                 <Route path="/governanca/maturity" element={<MaturityAudit />} />
                 <Route path="/marketplace" element={<PluginMarketplace />} />
+                <Route path="/marketplace/:pluginId" element={<PluginDetail />} />
                 <Route path="/admin/marketplace/editor" element={<PluginEditor />} />
                 <Route path="/construcao/obras" element={<ConstructionProjects />} />
                 <Route path="/construcao/obras/:id" element={<ConstructionProjectDetail />} />
