@@ -3027,6 +3027,60 @@ export type Database = {
           },
         ]
       }
+      commerce_themes: {
+        Row: {
+          author: string | null
+          category: string
+          created_at: string
+          default_config: Json
+          description: string | null
+          id: string
+          is_premium: boolean
+          is_published: boolean
+          key: string
+          name: string
+          preview_url: string | null
+          price: number
+          tags: string[]
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          author?: string | null
+          category?: string
+          created_at?: string
+          default_config?: Json
+          description?: string | null
+          id?: string
+          is_premium?: boolean
+          is_published?: boolean
+          key: string
+          name: string
+          preview_url?: string | null
+          price?: number
+          tags?: string[]
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author?: string | null
+          category?: string
+          created_at?: string
+          default_config?: Json
+          description?: string | null
+          id?: string
+          is_premium?: boolean
+          is_published?: boolean
+          key?: string
+          name?: string
+          preview_url?: string | null
+          price?: number
+          tags?: string[]
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       commercial_alerts: {
         Row: {
           alert_type: string
@@ -17490,6 +17544,206 @@ export type Database = {
             columns: ["warehouse_id"]
             isOneToOne: false
             referencedRelation: "warehouses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      storefront_pages: {
+        Row: {
+          blocks: Json
+          created_at: string
+          id: string
+          is_homepage: boolean
+          is_published: boolean
+          page_type: string
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          storefront_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          blocks?: Json
+          created_at?: string
+          id?: string
+          is_homepage?: boolean
+          is_published?: boolean
+          page_type?: string
+          seo_description?: string | null
+          seo_title?: string | null
+          slug: string
+          storefront_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          blocks?: Json
+          created_at?: string
+          id?: string
+          is_homepage?: boolean
+          is_published?: boolean
+          page_type?: string
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string
+          storefront_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storefront_pages_storefront_id_fkey"
+            columns: ["storefront_id"]
+            isOneToOne: false
+            referencedRelation: "storefronts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      storefront_products: {
+        Row: {
+          compare_at_price: number | null
+          created_at: string
+          display_order: number
+          gallery_urls: string[]
+          id: string
+          is_featured: boolean
+          is_visible: boolean
+          product_id: string
+          public_price: number | null
+          seo_description: string | null
+          seo_title: string | null
+          storefront_id: string
+          updated_at: string
+        }
+        Insert: {
+          compare_at_price?: number | null
+          created_at?: string
+          display_order?: number
+          gallery_urls?: string[]
+          id?: string
+          is_featured?: boolean
+          is_visible?: boolean
+          product_id: string
+          public_price?: number | null
+          seo_description?: string | null
+          seo_title?: string | null
+          storefront_id: string
+          updated_at?: string
+        }
+        Update: {
+          compare_at_price?: number | null
+          created_at?: string
+          display_order?: number
+          gallery_urls?: string[]
+          id?: string
+          is_featured?: boolean
+          is_visible?: boolean
+          product_id?: string
+          public_price?: number | null
+          seo_description?: string | null
+          seo_title?: string | null
+          storefront_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storefront_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "storefront_products_storefront_id_fkey"
+            columns: ["storefront_id"]
+            isOneToOne: false
+            referencedRelation: "storefronts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      storefronts: {
+        Row: {
+          company_id: string
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          favicon_url: string | null
+          id: string
+          logo_url: string | null
+          name: string
+          primary_color: string
+          published_at: string | null
+          secondary_color: string
+          settings: Json
+          slug: string
+          status: string
+          storefront_type: string
+          subdomain: string | null
+          theme_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          favicon_url?: string | null
+          id?: string
+          logo_url?: string | null
+          name: string
+          primary_color?: string
+          published_at?: string | null
+          secondary_color?: string
+          settings?: Json
+          slug: string
+          status?: string
+          storefront_type?: string
+          subdomain?: string | null
+          theme_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          favicon_url?: string | null
+          id?: string
+          logo_url?: string | null
+          name?: string
+          primary_color?: string
+          published_at?: string | null
+          secondary_color?: string
+          settings?: Json
+          slug?: string
+          status?: string
+          storefront_type?: string
+          subdomain?: string | null
+          theme_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storefronts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "storefronts_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "commerce_themes"
             referencedColumns: ["id"]
           },
         ]
