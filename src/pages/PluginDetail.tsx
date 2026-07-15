@@ -75,6 +75,7 @@ export default function PluginDetail() {
   const [versionOpen, setVersionOpen] = useState(false);
   const [reviewsOpen, setReviewsOpen] = useState(false);
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const [lifecycle, setLifecycle] = useState<LifecycleAction | null>(null);
 
   const installation = useMemo(
     () => (installs ?? []).find((i) => i.plugin_id === pluginId) ?? null,
