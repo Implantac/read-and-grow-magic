@@ -25,6 +25,7 @@ export interface PluginInstallation {
   config: Record<string, unknown>;
   installed_at: string;
   pinned_version: string | null;
+  auto_update: boolean;
 }
 
 export interface PluginVersion {
