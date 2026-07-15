@@ -60,9 +60,6 @@ export default function PluginDetail() {
   const { data: installs } = usePluginInstallations();
   const { data: versions } = usePluginVersions(pluginId);
   const { data: reviews } = usePluginReviews(pluginId);
-  const install = useInstallPlugin();
-  const uninstall = useUninstallPlugin();
-  const toggle = useTogglePlugin();
   const autoUpdate = useToggleAutoUpdate();
 
   const [runnerOpen, setRunnerOpen] = useState(false);
