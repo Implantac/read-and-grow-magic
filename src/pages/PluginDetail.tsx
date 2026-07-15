@@ -23,18 +23,16 @@ import { RoleGuard } from "@/components/auth/RoleGuard";
 import {
   usePluginDetail,
   usePluginInstallations,
-  useInstallPlugin,
-  useUninstallPlugin,
-  useTogglePlugin,
   usePluginVersions,
 } from "@/hooks/usePlugins";
-import {
-  usePluginReviews,
-  useToggleAutoUpdate,
-} from "@/hooks/usePluginReviews";
+import { usePluginReviews, useToggleAutoUpdate } from "@/hooks/usePluginReviews";
 import { PluginRunnerDialog } from "@/components/plugins/PluginRunnerDialog";
 import { PluginVersionDialog } from "@/components/plugins/PluginVersionDialog";
 import { PluginReviewsDialog } from "@/components/plugins/PluginReviewsDialog";
+import {
+  PluginLifecycleDialog,
+  type LifecycleAction,
+} from "@/components/plugins/PluginLifecycleDialog";
 import { MODULE_LABELS } from "@/lib/moduleLabels";
 
 function Stars({ value, size = 4 }: { value: number; size?: number }) {
@@ -62,15 +60,13 @@ export default function PluginDetail() {
   const { data: installs } = usePluginInstallations();
   const { data: versions } = usePluginVersions(pluginId);
   const { data: reviews } = usePluginReviews(pluginId);
-  const install = useInstallPlugin();
-  const uninstall = useUninstallPlugin();
-  const toggle = useTogglePlugin();
   const autoUpdate = useToggleAutoUpdate();
 
   const [runnerOpen, setRunnerOpen] = useState(false);
   const [versionOpen, setVersionOpen] = useState(false);
   const [reviewsOpen, setReviewsOpen] = useState(false);
   const [lightbox, setLightbox] = useState<string | null>(null);
+  const [lifecycle, setLifecycle] = useState<LifecycleAction | null>(null);
 
   const installation = useMemo(
     () => (installs ?? []).find((i) => i.plugin_id === pluginId) ?? null,
@@ -168,17 +164,17 @@ export default function PluginDetail() {
                 </div>
                 {installed ? (
                   <div className="flex flex-wrap items-center justify-end gap-2">
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={installation!.status === "active"}
-                        onCheckedChange={(v) =>
-                          toggle.mutate({ id: installation!.id, enabled: v })
-                        }
-                      />
-                      <span className="text-xs text-muted-foreground">
-                        {installation!.status === "active" ? "Ativo" : "Pausado"}
-                      </span>
-                    </div>
+                    <Button
+                      size="sm"
+                      variant={installation!.status === "active" ? "outline" : "default"}
+                      onClick={() =>
+                        setLifecycle(
+                          installation!.status === "active" ? "pause" : "resume",
+                        )
+                      }
+                    >
+                      {installation!.status === "active" ? "Pausar" : "Retomar"}
+                    </Button>
                     <Button
                       size="sm"
                       variant="outline"
@@ -197,17 +193,13 @@ export default function PluginDetail() {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => uninstall.mutate(installation!.id)}
-                      disabled={uninstall.isPending}
+                      onClick={() => setLifecycle("uninstall")}
                     >
                       <Trash2 className="h-4 w-4 mr-1" /> Remover
                     </Button>
                   </div>
                 ) : (
-                  <Button
-                    onClick={() => install.mutate(plugin.id)}
-                    disabled={install.isPending}
-                  >
+                  <Button onClick={() => setLifecycle("install")}>
                     Instalar plugin
                   </Button>
                 )}
@@ -428,6 +420,16 @@ export default function PluginDetail() {
             onOpenChange={setReviewsOpen}
             pluginId={plugin.id}
             pluginName={plugin.name}
+          />
+        )}
+        {lifecycle && (
+          <PluginLifecycleDialog
+            open={!!lifecycle}
+            onOpenChange={(o) => !o && setLifecycle(null)}
+            action={lifecycle}
+            pluginId={plugin.id}
+            pluginName={plugin.name}
+            installationId={installation?.id ?? null}
           />
         )}
 
