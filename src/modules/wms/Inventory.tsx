@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Progress } from '@/ui/base/progress';
 import { Search, Package, AlertTriangle, ClipboardList, DollarSign } from 'lucide-react';
 import { useWMSInventory } from '@/hooks/wms/useWMSInventory';
+import { RealtimeStatus } from '@/modules/wms/components/RealtimeStatus';
 import type { InventoryStatus } from '@/types/wms';
 
 
