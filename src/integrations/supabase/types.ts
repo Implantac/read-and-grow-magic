@@ -12396,15 +12396,19 @@ export type Database = {
           config_schema: Json
           created_at: string
           description: string | null
+          homepage_url: string | null
           icon: string | null
           id: string
           is_published: boolean
           key: string
+          long_description: string | null
           manifest: Json
+          min_app_version: string | null
           name: string
           price_monthly: number
           required_modules: string[]
           sandbox_script: string | null
+          screenshots: string[]
           updated_at: string
           vendor: string | null
           version: string
@@ -12414,15 +12418,19 @@ export type Database = {
           config_schema?: Json
           created_at?: string
           description?: string | null
+          homepage_url?: string | null
           icon?: string | null
           id?: string
           is_published?: boolean
           key: string
+          long_description?: string | null
           manifest?: Json
+          min_app_version?: string | null
           name: string
           price_monthly?: number
           required_modules?: string[]
           sandbox_script?: string | null
+          screenshots?: string[]
           updated_at?: string
           vendor?: string | null
           version?: string
@@ -12432,15 +12440,19 @@ export type Database = {
           config_schema?: Json
           created_at?: string
           description?: string | null
+          homepage_url?: string | null
           icon?: string | null
           id?: string
           is_published?: boolean
           key?: string
+          long_description?: string | null
           manifest?: Json
+          min_app_version?: string | null
           name?: string
           price_monthly?: number
           required_modules?: string[]
           sandbox_script?: string | null
+          screenshots?: string[]
           updated_at?: string
           vendor?: string | null
           version?: string
