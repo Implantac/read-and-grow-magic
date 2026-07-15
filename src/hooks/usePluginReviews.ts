@@ -119,7 +119,9 @@ export function useToggleAutoUpdate() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, enabled }: { id: string; enabled: boolean }) => {
-      const patch: Record<string, unknown> = { auto_update: enabled };
+      const patch: { auto_update: boolean; pinned_version?: string | null } = {
+        auto_update: enabled,
+      };
       // When enabling auto-update, unpin so the user follows the current version.
       if (enabled) patch.pinned_version = null;
       const { error } = await supabase
