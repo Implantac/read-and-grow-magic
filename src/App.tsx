@@ -57,6 +57,7 @@ const SREOncall = lazy(() => import("./pages/SREOncall"));
 const SREPostmortems = lazy(() => import("./pages/SREPostmortems"));
 const MaturityAudit = lazy(() => import("./pages/MaturityAudit"));
 const PluginMarketplace = lazy(() => import("./pages/PluginMarketplace"));
+const PluginDetail = lazy(() => import("./pages/PluginDetail"));
 const PluginEditor = lazy(() => import("./pages/admin/PluginEditor"));
 const ConstructionProjects = lazy(() => import("./pages/ConstructionProjects"));
 const ConstructionProjectDetail = lazy(() => import("./pages/ConstructionProjectDetail"));
