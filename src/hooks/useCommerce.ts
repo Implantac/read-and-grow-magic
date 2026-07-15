@@ -176,11 +176,13 @@ export function useUpdateStorefrontStatus() {
       id: string;
       status: Storefront["status"];
     }) => {
-      const patch: Record<string, unknown> = { status };
-      if (status === "published") patch.published_at = new Date().toISOString();
       const { error } = await supabase
         .from("storefronts")
-        .update(patch)
+        .update(
+          status === "published"
+            ? { status, published_at: new Date().toISOString() }
+            : { status },
+        )
         .eq("id", id);
       if (error) throw error;
     },
