@@ -15,6 +15,26 @@ export interface Plugin {
   required_modules: string[];
   price_monthly: number;
   is_published: boolean;
+  long_description?: string | null;
+  screenshots?: string[];
+  homepage_url?: string | null;
+  min_app_version?: string | null;
+}
+
+export function usePluginDetail(pluginId: string | null) {
+  return useQuery({
+    queryKey: ["plugin_detail", pluginId],
+    enabled: !!pluginId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("plugins")
+        .select("*")
+        .eq("id", pluginId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data as Plugin | null;
+    },
+  });
 }
 
 export interface PluginInstallation {
