@@ -59,6 +59,10 @@ const MaturityAudit = lazy(() => import("./pages/MaturityAudit"));
 const PluginMarketplace = lazy(() => import("./pages/PluginMarketplace"));
 const PluginDetail = lazy(() => import("./pages/PluginDetail"));
 const PluginEditor = lazy(() => import("./pages/admin/PluginEditor"));
+const CommerceStorefronts = lazy(() => import("./pages/commerce/CommerceStorefronts"));
+const CommerceStorefrontNew = lazy(() => import("./pages/commerce/CommerceStorefrontNew"));
+const CommerceStorefrontDetail = lazy(() => import("./pages/commerce/CommerceStorefrontDetail"));
+const CommerceStorefrontTheme = lazy(() => import("./pages/commerce/CommerceStorefrontTheme"));
 const ConstructionProjects = lazy(() => import("./pages/ConstructionProjects"));
 const ConstructionProjectDetail = lazy(() => import("./pages/ConstructionProjectDetail"));
 const AgroFarms = lazy(() => import("./pages/AgroFarms"));
@@ -158,6 +162,10 @@ const App = () => (
                 <Route path="/marketplace" element={<PluginMarketplace />} />
                 <Route path="/marketplace/:pluginId" element={<PluginDetail />} />
                 <Route path="/admin/marketplace/editor" element={<PluginEditor />} />
+                <Route path="/commerce/lojas" element={<CommerceStorefronts />} />
+                <Route path="/commerce/lojas/nova" element={<CommerceStorefrontNew />} />
+                <Route path="/commerce/lojas/:storefrontId" element={<CommerceStorefrontDetail />} />
+                <Route path="/commerce/lojas/:storefrontId/tema" element={<CommerceStorefrontTheme />} />
                 <Route path="/construcao/obras" element={<ConstructionProjects />} />
                 <Route path="/construcao/obras/:id" element={<ConstructionProjectDetail />} />
                 <Route path="/agro/fazendas" element={<AgroFarms />} />
