@@ -69,7 +69,7 @@ export default function CommerceStorefrontDetail() {
         <PageHeader
           title={storefront.name}
           description={`Loja ${storefront.storefront_type.toUpperCase()} · /${storefront.slug}`}
-          onBack={() => navigate("/commerce/lojas")}
+
           actions={
             <div className="flex flex-wrap gap-2">
               <Badge variant={st.variant}>{st.label}</Badge>

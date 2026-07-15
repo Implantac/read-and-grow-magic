@@ -92,7 +92,7 @@ export default function CommerceStorefrontNew() {
         <PageHeader
           title="Nova loja"
           description="Escolha um layout do marketplace e configure os dados básicos."
-          onBack={() => navigate("/commerce/lojas")}
+
         />
 
         {/* Basic info */}

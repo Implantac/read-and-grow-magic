@@ -55,7 +55,7 @@ export default function CommerceStorefrontTheme() {
         <PageHeader
           title="Trocar layout"
           description={`Selecione um novo layout para ${storefront?.name ?? "esta loja"}.`}
-          onBack={() => navigate(`/commerce/lojas/${storefrontId}`)}
+
         />
 
         <div className="flex flex-wrap gap-2">
