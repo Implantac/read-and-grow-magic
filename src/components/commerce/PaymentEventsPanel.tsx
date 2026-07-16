@@ -24,7 +24,18 @@ import {
   PopoverTrigger,
 } from "@/ui/base/popover";
 import { Separator } from "@/ui/base/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/ui/base/select";
 import { usePaymentEventsForStorefront } from "@/hooks/usePaymentEvents";
+
+type SortKey = "created_at" | "provider";
+type SortDir = "asc" | "desc";
+const PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
 const STATUS_OPTIONS = [
   { value: "pending", label: "Pendente" },
