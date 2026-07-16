@@ -1,5 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Package, ShoppingCart } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ShieldAlert, Webhook } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
+import { usePaymentEventsForStorefront } from "@/hooks/usePaymentEvents";
 import { PageContainer } from "@/shared/components/PageContainer";
 import { PageHeader } from "@/shared/components/PageHeader";
 import { Card, CardContent } from "@/ui/base/card";
@@ -193,24 +195,101 @@ export default function StorefrontOrders() {
           </Card>
         )}
 
-        <Card>
-          <CardContent className="p-4 flex items-start gap-3">
-            <Package className="h-5 w-5 text-primary mt-0.5" />
-            <div className="text-xs text-muted-foreground">
-              <p className="font-medium text-foreground mb-1">
-                Integração de pagamentos
-              </p>
-              <p>
-                O checkout gera pedidos com PIX (QR + copia-e-cola) e cartão
-                (simulado). Para produção, conecte um PSP como Efí, Mercado
-                Pago, PagSeguro ou Asaas via edge function e atualize
-                <code className="mx-1 rounded bg-muted px-1">payment_status</code>
-                automaticamente via webhook.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <PaymentEventsPanel storefrontId={storefrontId} />
       </PageContainer>
     </RoleGuard>
+  );
+}
+
+function PaymentEventsPanel({ storefrontId }: { storefrontId: string }) {
+  const { data: events = [], isLoading } = usePaymentEventsForStorefront(storefrontId);
+  const projectRef = "arcuhqdiydlvekanychw";
+  const webhookUrl = `https://${projectRef}.supabase.co/functions/v1/psp-webhook`;
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <Card>
+        <CardContent className="p-4 space-y-2">
+          <div className="flex items-center gap-2">
+            <Webhook className="h-5 w-5 text-primary" />
+            <h3 className="font-medium text-sm">Endpoint de webhook</h3>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Configure esta URL no painel do seu PSP (Mercado Pago, Asaas, Efí, Stripe, Pagar.me):
+          </p>
+          <code className="block break-all rounded bg-muted p-2 text-xs">{webhookUrl}</code>
+          <p className="text-xs text-muted-foreground">Headers exigidos:</p>
+          <code className="block rounded bg-muted p-2 text-xs">
+            X-Webhook-Secret: &lt;PSP_WEBHOOK_SECRET&gt;
+            <br />
+            X-Provider: mercadopago | asaas | efi | stripe | generic
+          </code>
+          <p className="text-[10px] text-muted-foreground">
+            O segredo já foi gerado e está armazenado como variável do backend. Cole-o no painel do PSP.
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-medium text-sm flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              Últimos eventos de pagamento
+            </h3>
+            <Badge variant="outline" className="text-xs">
+              {events.length}
+            </Badge>
+          </div>
+          {isLoading ? (
+            <Skeleton className="h-32 w-full" />
+          ) : events.length === 0 ? (
+            <p className="text-xs text-muted-foreground py-6 text-center">
+              Nenhum evento recebido ainda.
+            </p>
+          ) : (
+            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+              {events.map((e) => (
+                <div key={e.id} className="rounded border p-2 text-xs space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <Badge variant="secondary" className="text-[10px]">
+                      {e.provider}
+                    </Badge>
+                    <span className="text-muted-foreground text-[10px]">
+                      {new Date(e.processed_at).toLocaleString("pt-BR")}
+                    </span>
+                  </div>
+                  <div className="font-medium">{e.event_type}</div>
+                  <div className="flex items-center gap-1 text-muted-foreground">
+                    {e.status_before && (
+                      <>
+                        <span>{e.status_before}</span>
+                        <span>→</span>
+                      </>
+                    )}
+                    <Badge
+                      variant={e.status_after === "paid" ? "default" : "outline"}
+                      className="text-[10px]"
+                    >
+                      {e.status_after ?? "—"}
+                    </Badge>
+                    {e.signature_valid === false && (
+                      <span className="ml-auto flex items-center gap-1 text-destructive">
+                        <ShieldAlert className="h-3 w-3" /> assinatura inválida
+                      </span>
+                    )}
+                  </div>
+                  {e.external_id && (
+                    <div className="text-[10px] text-muted-foreground font-mono truncate">
+                      {e.external_id}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
