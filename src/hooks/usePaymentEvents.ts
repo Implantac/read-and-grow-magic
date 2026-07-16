@@ -35,7 +35,7 @@ export function usePaymentEventsForStorefront(storefrontId: string | undefined) 
         .select("*")
         .in("order_id", ids)
         .order("processed_at", { ascending: false })
-        .limit(50);
+        .limit(500);
       if (error) throw error;
       return (data ?? []) as unknown as PaymentEvent[];
     },

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   CheckCircle2,
   ShieldAlert,
@@ -7,6 +7,9 @@ import {
   X,
   Search,
   Inbox,
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Card, CardContent } from "@/ui/base/card";
 import { Badge } from "@/ui/base/badge";
@@ -21,7 +24,18 @@ import {
   PopoverTrigger,
 } from "@/ui/base/popover";
 import { Separator } from "@/ui/base/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/ui/base/select";
 import { usePaymentEventsForStorefront } from "@/hooks/usePaymentEvents";
+
+type SortKey = "created_at" | "provider";
+type SortDir = "asc" | "desc";
+const PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
 const STATUS_OPTIONS = [
   { value: "pending", label: "Pendente" },
@@ -57,6 +71,10 @@ export function PaymentEventsPanel({
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
   const [orderQuery, setOrderQuery] = useState<string>("");
+  const [sortPrimary, setSortPrimary] = useState<SortKey>("created_at");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(25);
 
   const orderIdToNumber = useMemo(() => {
     const map = new Map<string, string>();
@@ -98,6 +116,33 @@ export function PaymentEventsPanel({
       return true;
     });
   }, [events, providers, statusBefore, statusAfter, dateFrom, dateTo, orderQuery, orderIdToNumber]);
+
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    const dir = sortDir === "asc" ? 1 : -1;
+    const cmp = (a: typeof arr[number], b: typeof arr[number], k: SortKey) => {
+      if (k === "created_at") {
+        return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * dir;
+      }
+      return a.provider.localeCompare(b.provider, "pt-BR") * dir;
+    };
+    const secondary: SortKey = sortPrimary === "created_at" ? "provider" : "created_at";
+    arr.sort((a, b) => cmp(a, b, sortPrimary) || cmp(a, b, secondary));
+    return arr;
+  }, [filtered, sortPrimary, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / perPage));
+  useEffect(() => {
+    if (page > totalPages) setPage(1);
+  }, [page, totalPages]);
+  useEffect(() => {
+    setPage(1);
+  }, [providers, statusBefore, statusAfter, dateFrom, dateTo, orderQuery, perPage, sortPrimary, sortDir]);
+
+  const paginated = useMemo(
+    () => sorted.slice((page - 1) * perPage, page * perPage),
+    [sorted, page, perPage],
+  );
 
   const activeFilters =
     providers.length +
@@ -147,8 +192,8 @@ export function PaymentEventsPanel({
               <CheckCircle2 className="h-4 w-4 text-primary" />
               Eventos de pagamento
               <Badge variant="outline" className="text-xs">
-                {filtered.length}
-                {filtered.length !== events.length && ` / ${events.length}`}
+                {sorted.length}
+                {sorted.length !== events.length && ` / ${events.length}`}
               </Badge>
             </h3>
             <div className="flex items-center gap-2">
@@ -244,7 +289,7 @@ export function PaymentEventsPanel({
             <p className="text-xs text-muted-foreground py-8 text-center">
               Nenhum evento recebido ainda. Configure o webhook no seu PSP para começar.
             </p>
-          ) : filtered.length === 0 ? (
+          ) : sorted.length === 0 ? (
             <div className="py-8 text-center space-y-2">
               <Inbox className="h-8 w-8 text-muted-foreground mx-auto" />
               <p className="text-sm font-medium">Nenhum evento encontrado</p>
@@ -256,59 +301,127 @@ export function PaymentEventsPanel({
               </Button>
             </div>
           ) : (
-            <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
-              {filtered.map((e) => {
-                const orderNumber = e.order_id
-                  ? orderIdToNumber.get(e.order_id)
-                  : null;
-                return (
-                  <div key={e.id} className="rounded border p-2.5 text-xs space-y-1.5">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="text-[10px]">
-                          {e.provider}
+            <>
+              {/* Sort controls */}
+              <div className="flex items-center gap-2 flex-wrap mb-3 text-xs">
+                <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
+                <Label className="text-xs text-muted-foreground">Ordenar por:</Label>
+                <Select value={sortPrimary} onValueChange={(v) => setSortPrimary(v as SortKey)}>
+                  <SelectTrigger className="h-8 w-40 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="created_at">Data de criação</SelectItem>
+                    <SelectItem value="provider">Provedor</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={sortDir} onValueChange={(v) => setSortDir(v as SortDir)}>
+                  <SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="desc">Decrescente</SelectItem>
+                    <SelectItem value="asc">Crescente</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span className="text-[10px] text-muted-foreground ml-1">
+                  Secundário: {sortPrimary === "created_at" ? "provedor" : "data"}
+                </span>
+              </div>
+
+              <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
+                {paginated.map((e) => {
+                  const orderNumber = e.order_id
+                    ? orderIdToNumber.get(e.order_id)
+                    : null;
+                  return (
+                    <div key={e.id} className="rounded border p-2.5 text-xs space-y-1.5">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-[10px]">
+                            {e.provider}
+                          </Badge>
+                          {orderNumber && (
+                            <code className="text-[10px] text-muted-foreground">
+                              {orderNumber}
+                            </code>
+                          )}
+                        </div>
+                        <span className="text-muted-foreground text-[10px]">
+                          {new Date(e.created_at).toLocaleString("pt-BR")}
+                        </span>
+                      </div>
+                      <div className="font-medium">{e.event_type}</div>
+                      <div className="flex items-center gap-1 text-muted-foreground flex-wrap">
+                        {e.status_before && (
+                          <>
+                            <Badge variant="outline" className="text-[10px]">
+                              {e.status_before}
+                            </Badge>
+                            <span>→</span>
+                          </>
+                        )}
+                        <Badge
+                          variant={e.status_after === "paid" ? "default" : "outline"}
+                          className="text-[10px]"
+                        >
+                          {e.status_after ?? "—"}
                         </Badge>
-                        {orderNumber && (
-                          <code className="text-[10px] text-muted-foreground">
-                            {orderNumber}
-                          </code>
+                        {e.signature_valid === false && (
+                          <span className="ml-auto flex items-center gap-1 text-destructive">
+                            <ShieldAlert className="h-3 w-3" /> assinatura inválida
+                          </span>
                         )}
                       </div>
-                      <span className="text-muted-foreground text-[10px]">
-                        {new Date(e.processed_at).toLocaleString("pt-BR")}
-                      </span>
-                    </div>
-                    <div className="font-medium">{e.event_type}</div>
-                    <div className="flex items-center gap-1 text-muted-foreground flex-wrap">
-                      {e.status_before && (
-                        <>
-                          <Badge variant="outline" className="text-[10px]">
-                            {e.status_before}
-                          </Badge>
-                          <span>→</span>
-                        </>
-                      )}
-                      <Badge
-                        variant={e.status_after === "paid" ? "default" : "outline"}
-                        className="text-[10px]"
-                      >
-                        {e.status_after ?? "—"}
-                      </Badge>
-                      {e.signature_valid === false && (
-                        <span className="ml-auto flex items-center gap-1 text-destructive">
-                          <ShieldAlert className="h-3 w-3" /> assinatura inválida
-                        </span>
+                      {e.external_id && (
+                        <div className="text-[10px] text-muted-foreground font-mono truncate">
+                          ext: {e.external_id}
+                        </div>
                       )}
                     </div>
-                    {e.external_id && (
-                      <div className="text-[10px] text-muted-foreground font-mono truncate">
-                        ext: {e.external_id}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+
+              {/* Pagination */}
+              <div className="flex items-center justify-between gap-2 flex-wrap mt-3 pt-3 border-t text-xs">
+                <div className="flex items-center gap-2">
+                  <Label className="text-xs text-muted-foreground">Por página:</Label>
+                  <Select value={String(perPage)} onValueChange={(v) => setPerPage(Number(v))}>
+                    <SelectTrigger className="h-8 w-20 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {PER_PAGE_OPTIONS.map((n) => (
+                        <SelectItem key={n} value={String(n)}>{n}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <span className="text-muted-foreground">
+                    {(page - 1) * perPage + 1}–{Math.min(page * perPage, sorted.length)} de {sorted.length}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8"
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    aria-label="Página anterior"
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" />
+                  </Button>
+                  <span className="text-xs px-2">
+                    Página {page} / {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8"
+                    disabled={page >= totalPages}
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    aria-label="Próxima página"
+                  >
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
