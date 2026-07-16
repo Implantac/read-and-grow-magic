@@ -63,6 +63,8 @@ const CommerceStorefronts = lazy(() => import("./pages/commerce/CommerceStorefro
 const CommerceStorefrontNew = lazy(() => import("./pages/commerce/CommerceStorefrontNew"));
 const CommerceStorefrontDetail = lazy(() => import("./pages/commerce/CommerceStorefrontDetail"));
 const CommerceStorefrontTheme = lazy(() => import("./pages/commerce/CommerceStorefrontTheme"));
+const StorefrontCheckout = lazy(() => import("./pages/commerce/StorefrontCheckout"));
+const StorefrontOrders = lazy(() => import("./pages/commerce/StorefrontOrders"));
 const ConstructionProjects = lazy(() => import("./pages/ConstructionProjects"));
 const ConstructionProjectDetail = lazy(() => import("./pages/ConstructionProjectDetail"));
 const AgroFarms = lazy(() => import("./pages/AgroFarms"));
@@ -137,6 +139,7 @@ const App = () => (
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/nps/:token" element={<PublicNPS />} />
+              <Route path="/loja/:slug/checkout" element={<StorefrontCheckout />} />
 
               <Route path="/coletor" element={<ColetorLayout />}>
                 <Route index element={<ColetorHome />} />
@@ -166,6 +169,7 @@ const App = () => (
                 <Route path="/commerce/lojas/nova" element={<CommerceStorefrontNew />} />
                 <Route path="/commerce/lojas/:storefrontId" element={<CommerceStorefrontDetail />} />
                 <Route path="/commerce/lojas/:storefrontId/tema" element={<CommerceStorefrontTheme />} />
+                <Route path="/commerce/lojas/:storefrontId/pedidos" element={<StorefrontOrders />} />
                 <Route path="/construcao/obras" element={<ConstructionProjects />} />
                 <Route path="/construcao/obras/:id" element={<ConstructionProjectDetail />} />
                 <Route path="/agro/fazendas" element={<AgroFarms />} />
