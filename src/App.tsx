@@ -169,6 +169,7 @@ const App = () => (
                 <Route path="/commerce/lojas/nova" element={<CommerceStorefrontNew />} />
                 <Route path="/commerce/lojas/:storefrontId" element={<CommerceStorefrontDetail />} />
                 <Route path="/commerce/lojas/:storefrontId/tema" element={<CommerceStorefrontTheme />} />
+                <Route path="/commerce/lojas/:storefrontId/pedidos" element={<StorefrontOrders />} />
                 <Route path="/construcao/obras" element={<ConstructionProjects />} />
                 <Route path="/construcao/obras/:id" element={<ConstructionProjectDetail />} />
                 <Route path="/agro/fazendas" element={<AgroFarms />} />
