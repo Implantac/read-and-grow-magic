@@ -17807,6 +17807,8 @@ export type Database = {
           is_visible: boolean
           product_id: string
           public_price: number | null
+          rating: number | null
+          rating_count: number
           seo_description: string | null
           seo_title: string | null
           storefront_id: string
@@ -17822,6 +17824,8 @@ export type Database = {
           is_visible?: boolean
           product_id: string
           public_price?: number | null
+          rating?: number | null
+          rating_count?: number
           seo_description?: string | null
           seo_title?: string | null
           storefront_id: string
@@ -17837,6 +17841,8 @@ export type Database = {
           is_visible?: boolean
           product_id?: string
           public_price?: number | null
+          rating?: number | null
+          rating_count?: number
           seo_description?: string | null
           seo_title?: string | null
           storefront_id?: string
