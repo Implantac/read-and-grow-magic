@@ -141,6 +141,9 @@ const App = () => (
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/nps/:token" element={<PublicNPS />} />
               <Route path="/loja/:slug/checkout" element={<StorefrontCheckout />} />
+              <Route path="/loja/:slug/busca" element={<StorefrontSearch />} />
+              <Route path="/loja/:slug" element={<StorefrontSearch />} />
+
 
               <Route path="/coletor" element={<ColetorLayout />}>
                 <Route index element={<ColetorHome />} />
