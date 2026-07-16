@@ -140,6 +140,10 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
       cfop_default: form.cfop_default || null, origin: form.origin || null,
       icms_cst: form.icms_cst || null, ipi_cst: form.ipi_cst || null,
       pis_cst: form.pis_cst || null, cofins_cst: form.cofins_cst || null,
+      requires_lot_tracking: form.requires_lot_tracking,
+      shelf_life_days: form.shelf_life_days ? Number(form.shelf_life_days) : null,
+      storage_conditions: form.storage_conditions || null,
+      multi_ean: isCommerce ? form.multi_ean : [],
     } as any;
     if (isService) {
       // Serviço: não precisa estoque físico/dimensões
