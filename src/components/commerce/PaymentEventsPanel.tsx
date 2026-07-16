@@ -71,6 +71,10 @@ export function PaymentEventsPanel({
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
   const [orderQuery, setOrderQuery] = useState<string>("");
+  const [sortPrimary, setSortPrimary] = useState<SortKey>("created_at");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(25);
 
   const orderIdToNumber = useMemo(() => {
     const map = new Map<string, string>();
