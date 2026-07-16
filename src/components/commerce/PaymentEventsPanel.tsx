@@ -117,6 +117,33 @@ export function PaymentEventsPanel({
     });
   }, [events, providers, statusBefore, statusAfter, dateFrom, dateTo, orderQuery, orderIdToNumber]);
 
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    const dir = sortDir === "asc" ? 1 : -1;
+    const cmp = (a: typeof arr[number], b: typeof arr[number], k: SortKey) => {
+      if (k === "created_at") {
+        return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * dir;
+      }
+      return a.provider.localeCompare(b.provider, "pt-BR") * dir;
+    };
+    const secondary: SortKey = sortPrimary === "created_at" ? "provider" : "created_at";
+    arr.sort((a, b) => cmp(a, b, sortPrimary) || cmp(a, b, secondary));
+    return arr;
+  }, [filtered, sortPrimary, sortDir]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / perPage));
+  useEffect(() => {
+    if (page > totalPages) setPage(1);
+  }, [page, totalPages]);
+  useEffect(() => {
+    setPage(1);
+  }, [providers, statusBefore, statusAfter, dateFrom, dateTo, orderQuery, perPage, sortPrimary, sortDir]);
+
+  const paginated = useMemo(
+    () => sorted.slice((page - 1) * perPage, page * perPage),
+    [sorted, page, perPage],
+  );
+
   const activeFilters =
     providers.length +
     statusBefore.length +
