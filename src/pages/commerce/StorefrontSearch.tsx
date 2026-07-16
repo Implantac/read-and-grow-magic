@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Search, Star, SlidersHorizontal, X, ChevronRight, Store as StoreIcon, ShoppingCart } from "lucide-react";
+import { Search, Star, SlidersHorizontal, X, ChevronRight, Store as StoreIcon, ShoppingCart, Loader2, ChevronLeft } from "lucide-react";
 import { Input } from "@/ui/base/input";
 import { Button } from "@/ui/base/button";
 import { Card, CardContent } from "@/ui/base/card";
