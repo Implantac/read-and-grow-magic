@@ -54,6 +54,12 @@ const emptyForm = {
   brand: '', model: '', warranty_months: '',
   // Serviço
   service_code_lc116: '', iss_rate: '', service_duration_minutes: '', is_recurring: false,
+  // Rastreabilidade
+  requires_lot_tracking: false,
+  shelf_life_days: '', storage_conditions: '',
+  // Multi-EAN (revenda)
+  multi_ean: [] as string[],
+  new_ean: '',
 };
 
 export function ProductFormDialog({ open, onOpenChange, product, categories }: Props) {
