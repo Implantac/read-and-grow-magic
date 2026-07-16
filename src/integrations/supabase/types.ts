@@ -17743,6 +17743,59 @@ export type Database = {
           },
         ]
       }
+      storefront_payment_events: {
+        Row: {
+          amount: number | null
+          created_at: string
+          event_type: string
+          external_id: string | null
+          id: string
+          order_id: string | null
+          processed_at: string
+          provider: string
+          raw_payload: Json
+          signature_valid: boolean | null
+          status_after: string | null
+          status_before: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          event_type: string
+          external_id?: string | null
+          id?: string
+          order_id?: string | null
+          processed_at?: string
+          provider: string
+          raw_payload?: Json
+          signature_valid?: boolean | null
+          status_after?: string | null
+          status_before?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          event_type?: string
+          external_id?: string | null
+          id?: string
+          order_id?: string | null
+          processed_at?: string
+          provider?: string
+          raw_payload?: Json
+          signature_valid?: boolean | null
+          status_after?: string | null
+          status_before?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storefront_payment_events_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "storefront_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       storefront_products: {
         Row: {
           compare_at_price: number | null
