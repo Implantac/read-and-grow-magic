@@ -51,6 +51,20 @@ export default function StorefrontSearch() {
   );
   const [suggestOpen, setSuggestOpen] = useState(false);
 
+  // Pagination / infinite scroll
+  type ViewMode = "pagination" | "infinite";
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    (searchParams.get("view") as ViewMode) ?? "pagination"
+  );
+  const [perPage, setPerPage] = useState<number>(
+    Number(searchParams.get("pp") ?? 12)
+  );
+  const [page, setPage] = useState<number>(
+    Math.max(1, Number(searchParams.get("page") ?? 1))
+  );
+  const [infiniteCount, setInfiniteCount] = useState<number>(perPage);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
   // Price bounds derived from data
   const priceBounds = useMemo(() => {
     if (!items.length) return { min: 0, max: 1000 };
