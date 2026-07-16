@@ -139,6 +139,7 @@ const App = () => (
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/nps/:token" element={<PublicNPS />} />
+              <Route path="/loja/:slug/checkout" element={<StorefrontCheckout />} />
 
               <Route path="/coletor" element={<ColetorLayout />}>
                 <Route index element={<ColetorHome />} />
