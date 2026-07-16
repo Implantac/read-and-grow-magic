@@ -163,6 +163,7 @@ export default function StorefrontCheckout() {
         card_brand: payment === "credit_card" ? detectBrand(clean) : undefined,
       });
       setPlacedOrder(order);
+      cart.clear();
     } catch {
       // toast handled by mutation
     }
