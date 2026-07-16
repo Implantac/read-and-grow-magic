@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, CheckCircle2, ShieldAlert, Webhook } from "lucide-react";
-import { ShoppingCart } from "lucide-react";
-import { usePaymentEventsForStorefront } from "@/hooks/usePaymentEvents";
+import { ArrowLeft, ShoppingCart } from "lucide-react";
+import { PaymentEventsPanel } from "@/components/commerce/PaymentEventsPanel";
 import { PageContainer } from "@/shared/components/PageContainer";
 import { PageHeader } from "@/shared/components/PageHeader";
 import { Card, CardContent } from "@/ui/base/card";
