@@ -65,6 +65,8 @@ const CommerceStorefrontDetail = lazy(() => import("./pages/commerce/CommerceSto
 const CommerceStorefrontTheme = lazy(() => import("./pages/commerce/CommerceStorefrontTheme"));
 const StorefrontCheckout = lazy(() => import("./pages/commerce/StorefrontCheckout"));
 const StorefrontSearch = lazy(() => import("./pages/commerce/StorefrontSearch"));
+const StorefrontHome = lazy(() => import("./pages/commerce/StorefrontHome"));
+const StorefrontProduct = lazy(() => import("./pages/commerce/StorefrontProduct"));
 const StorefrontOrders = lazy(() => import("./pages/commerce/StorefrontOrders"));
 const ConstructionProjects = lazy(() => import("./pages/ConstructionProjects"));
 const ConstructionProjectDetail = lazy(() => import("./pages/ConstructionProjectDetail"));
@@ -142,7 +144,8 @@ const App = () => (
               <Route path="/nps/:token" element={<PublicNPS />} />
               <Route path="/loja/:slug/checkout" element={<StorefrontCheckout />} />
               <Route path="/loja/:slug/busca" element={<StorefrontSearch />} />
-              <Route path="/loja/:slug" element={<StorefrontSearch />} />
+              <Route path="/loja/:slug/produto/:productId" element={<StorefrontProduct />} />
+              <Route path="/loja/:slug" element={<StorefrontHome />} />
 
 
               <Route path="/coletor" element={<ColetorLayout />}>
