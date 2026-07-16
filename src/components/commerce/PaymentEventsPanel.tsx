@@ -192,8 +192,8 @@ export function PaymentEventsPanel({
               <CheckCircle2 className="h-4 w-4 text-primary" />
               Eventos de pagamento
               <Badge variant="outline" className="text-xs">
-                {filtered.length}
-                {filtered.length !== events.length && ` / ${events.length}`}
+                {sorted.length}
+                {sorted.length !== events.length && ` / ${events.length}`}
               </Badge>
             </h3>
             <div className="flex items-center gap-2">
