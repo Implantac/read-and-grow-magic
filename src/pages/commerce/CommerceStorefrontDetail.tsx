@@ -15,6 +15,7 @@ import {
   Package,
   FileText,
   Store as StoreIcon,
+  ShoppingCart,
 } from "lucide-react";
 import {
   useStorefront,
