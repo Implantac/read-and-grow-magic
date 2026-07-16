@@ -263,9 +263,19 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
 
 
         <Tabs defaultValue="general" className="w-full mt-2">
-          <TabsList className={cn('grid w-full', isService ? 'grid-cols-3' : 'grid-cols-4')}>
+          <TabsList
+            className={cn(
+              'grid w-full',
+              isService
+                ? form.requires_lot_tracking ? 'grid-cols-4' : 'grid-cols-3'
+                : form.requires_lot_tracking ? 'grid-cols-5' : 'grid-cols-4'
+            )}
+          >
             <TabsTrigger value="general">Geral</TabsTrigger>
             {!isService && <TabsTrigger value="stock">Estoque</TabsTrigger>}
+            {form.requires_lot_tracking && (
+              <TabsTrigger value="lot">Rastreabilidade</TabsTrigger>
+            )}
             <TabsTrigger value="fiscal">Fiscal</TabsTrigger>
             <TabsTrigger value="specific">
               {isIndustry ? 'Produção' : isService ? 'Serviço' : 'Comércio'}
