@@ -54,6 +54,12 @@ const emptyForm = {
   brand: '', model: '', warranty_months: '',
   // Serviço
   service_code_lc116: '', iss_rate: '', service_duration_minutes: '', is_recurring: false,
+  // Rastreabilidade
+  requires_lot_tracking: false,
+  shelf_life_days: '', storage_conditions: '',
+  // Multi-EAN (revenda)
+  multi_ean: [] as string[],
+  new_ean: '',
 };
 
 export function ProductFormDialog({ open, onOpenChange, product, categories }: Props) {
@@ -92,6 +98,11 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
         iss_rate: product.iss_rate != null ? String(product.iss_rate) : '',
         service_duration_minutes: product.service_duration_minutes != null ? String(product.service_duration_minutes) : '',
         is_recurring: !!product.is_recurring,
+        requires_lot_tracking: !!(product as any).requires_lot_tracking,
+        shelf_life_days: (product as any).shelf_life_days != null ? String((product as any).shelf_life_days) : '',
+        storage_conditions: (product as any).storage_conditions ?? '',
+        multi_ean: Array.isArray((product as any).multi_ean) ? (product as any).multi_ean : [],
+        new_ean: '',
       });
     } else {
       setForm(emptyForm);
@@ -129,6 +140,10 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
       cfop_default: form.cfop_default || null, origin: form.origin || null,
       icms_cst: form.icms_cst || null, ipi_cst: form.ipi_cst || null,
       pis_cst: form.pis_cst || null, cofins_cst: form.cofins_cst || null,
+      requires_lot_tracking: form.requires_lot_tracking,
+      shelf_life_days: form.shelf_life_days ? Number(form.shelf_life_days) : null,
+      storage_conditions: form.storage_conditions || null,
+      multi_ean: isCommerce ? form.multi_ean : [],
     } as any;
     if (isService) {
       // Serviço: não precisa estoque físico/dimensões
@@ -248,9 +263,19 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
 
 
         <Tabs defaultValue="general" className="w-full mt-2">
-          <TabsList className={cn('grid w-full', isService ? 'grid-cols-3' : 'grid-cols-4')}>
+          <TabsList
+            className={cn(
+              'grid w-full',
+              isService
+                ? form.requires_lot_tracking ? 'grid-cols-4' : 'grid-cols-3'
+                : form.requires_lot_tracking ? 'grid-cols-5' : 'grid-cols-4'
+            )}
+          >
             <TabsTrigger value="general">Geral</TabsTrigger>
             {!isService && <TabsTrigger value="stock">Estoque</TabsTrigger>}
+            {form.requires_lot_tracking && (
+              <TabsTrigger value="lot">Rastreabilidade</TabsTrigger>
+            )}
             <TabsTrigger value="fiscal">Fiscal</TabsTrigger>
             <TabsTrigger value="specific">
               {isIndustry ? 'Produção' : isService ? 'Serviço' : 'Comércio'}
@@ -328,7 +353,54 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
                 </Select>
               </div>
             </div>
+            {!isService && (
+              <div className="flex items-center justify-between rounded-md border p-3">
+                <div>
+                  <Label className="text-sm">Exige rastreabilidade por lote</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Obrigatório para alimentos, farmacêuticos, químicos e produtos perecíveis
+                  </p>
+                </div>
+                <Switch
+                  checked={form.requires_lot_tracking}
+                  onCheckedChange={(v) => update({ requires_lot_tracking: v })}
+                />
+              </div>
+            )}
           </TabsContent>
+
+          {/* RASTREABILIDADE — condicional */}
+          {form.requires_lot_tracking && (
+            <TabsContent value="lot" className="space-y-4 pt-4">
+              <div className="rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
+                Este produto será controlado por <strong>lote e validade</strong> em todas as movimentações
+                (entrada, saída, inventário e picking). O motor FEFO é aplicado automaticamente no WMS.
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Validade padrão (dias)</Label>
+                  <Input
+                    type="number"
+                    value={form.shelf_life_days}
+                    onChange={(e) => update({ shelf_life_days: e.target.value })}
+                    placeholder="Ex: 180"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Data de validade sugerida ao entrar um lote novo.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Condições de armazenamento</Label>
+                  <Input
+                    value={form.storage_conditions}
+                    onChange={(e) => update({ storage_conditions: e.target.value })}
+                    placeholder="Ex: 2°C a 8°C, seco, ao abrigo da luz"
+                  />
+                </div>
+              </div>
+            </TabsContent>
+          )}
+
 
           {/* ESTOQUE — oculta para serviços */}
           {!isService && (
@@ -453,14 +525,69 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
               </div>
             )}
             {isCommerce && (
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2"><Label>Marca</Label>
-                  <Input value={form.brand} onChange={(e) => update({ brand: e.target.value })} /></div>
-                <div className="space-y-2"><Label>Modelo</Label>
-                  <Input value={form.model} onChange={(e) => update({ model: e.target.value })} /></div>
-                <div className="space-y-2"><Label>Garantia (meses)</Label>
-                  <Input type="number" value={form.warranty_months}
-                    onChange={(e) => update({ warranty_months: e.target.value })} /></div>
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2"><Label>Marca</Label>
+                    <Input value={form.brand} onChange={(e) => update({ brand: e.target.value })} /></div>
+                  <div className="space-y-2"><Label>Modelo</Label>
+                    <Input value={form.model} onChange={(e) => update({ model: e.target.value })} /></div>
+                  <div className="space-y-2"><Label>Garantia (meses)</Label>
+                    <Input type="number" value={form.warranty_months}
+                      onChange={(e) => update({ warranty_months: e.target.value })} /></div>
+                </div>
+                <div className="space-y-2 rounded-md border p-3">
+                  <Label className="text-sm">Códigos EAN adicionais (multi-embalagem)</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Cadastre variações de embalagem (unidade, pack, caixa) que compartilham o mesmo SKU.
+                  </p>
+                  <div className="flex gap-2">
+                    <Input
+                      value={form.new_ean}
+                      onChange={(e) => update({ new_ean: e.target.value.replace(/\D/g, '') })}
+                      placeholder="Digite o EAN e clique em Adicionar"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        const v = form.new_ean.trim();
+                        if (!v) return;
+                        if (form.multi_ean.includes(v)) {
+                          toast.error('Este EAN já foi adicionado');
+                          return;
+                        }
+                        if (!isValidGtin(v)) {
+                          toast.error('EAN inválido (dígito verificador incorreto)');
+                          return;
+                        }
+                        update({ multi_ean: [...form.multi_ean, v], new_ean: '' });
+                      }}
+                    >
+                      Adicionar
+                    </Button>
+                  </div>
+                  {form.multi_ean.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      {form.multi_ean.map((ean) => (
+                        <div
+                          key={ean}
+                          className="flex items-center gap-2 rounded-full border bg-muted/40 px-3 py-1 text-xs"
+                        >
+                          <span className="font-mono">{ean}</span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              update({ multi_ean: form.multi_ean.filter((e) => e !== ean) })
+                            }
+                            className="text-muted-foreground hover:text-destructive"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
             {isService && (
