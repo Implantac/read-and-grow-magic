@@ -29,6 +29,7 @@ import {
   type CheckoutItem,
   type StorefrontOrder,
 } from "@/hooks/useCommerceCheckout";
+import { useStorefrontCart } from "@/hooks/useStorefrontCart";
 
 interface LocationCartState {
   items?: CheckoutItem[];
@@ -49,8 +50,20 @@ export default function StorefrontCheckout() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const cart = useStorefrontCart(slug);
   const cartState = (location.state ?? null) as LocationCartState | null;
-  const initialItems = cartState?.items?.length ? cartState.items : DEMO_ITEMS;
+  const cartItemsFromStore: CheckoutItem[] = cart.lines.map((l) => ({
+    product_id: l.product_id,
+    product_name: l.product_name,
+    product_sku: l.product_sku ?? undefined,
+    quantity: l.quantity,
+    unit_price: l.unit_price,
+  }));
+  const initialItems = cartState?.items?.length
+    ? cartState.items
+    : cartItemsFromStore.length > 0
+      ? cartItemsFromStore
+      : DEMO_ITEMS;
   const shipping = cartState?.shipping ?? 15;
 
   const { data: storefront, isLoading, error } = useStorefrontBySlug(slug);
@@ -150,6 +163,7 @@ export default function StorefrontCheckout() {
         card_brand: payment === "credit_card" ? detectBrand(clean) : undefined,
       });
       setPlacedOrder(order);
+      cart.clear();
     } catch {
       // toast handled by mutation
     }
