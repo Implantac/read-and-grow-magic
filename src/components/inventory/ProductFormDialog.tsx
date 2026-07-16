@@ -353,7 +353,54 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
                 </Select>
               </div>
             </div>
+            {!isService && (
+              <div className="flex items-center justify-between rounded-md border p-3">
+                <div>
+                  <Label className="text-sm">Exige rastreabilidade por lote</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Obrigatório para alimentos, farmacêuticos, químicos e produtos perecíveis
+                  </p>
+                </div>
+                <Switch
+                  checked={form.requires_lot_tracking}
+                  onCheckedChange={(v) => update({ requires_lot_tracking: v })}
+                />
+              </div>
+            )}
           </TabsContent>
+
+          {/* RASTREABILIDADE — condicional */}
+          {form.requires_lot_tracking && (
+            <TabsContent value="lot" className="space-y-4 pt-4">
+              <div className="rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
+                Este produto será controlado por <strong>lote e validade</strong> em todas as movimentações
+                (entrada, saída, inventário e picking). O motor FEFO é aplicado automaticamente no WMS.
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Validade padrão (dias)</Label>
+                  <Input
+                    type="number"
+                    value={form.shelf_life_days}
+                    onChange={(e) => update({ shelf_life_days: e.target.value })}
+                    placeholder="Ex: 180"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Data de validade sugerida ao entrar um lote novo.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label>Condições de armazenamento</Label>
+                  <Input
+                    value={form.storage_conditions}
+                    onChange={(e) => update({ storage_conditions: e.target.value })}
+                    placeholder="Ex: 2°C a 8°C, seco, ao abrigo da luz"
+                  />
+                </div>
+              </div>
+            </TabsContent>
+          )}
+
 
           {/* ESTOQUE — oculta para serviços */}
           {!isService && (
