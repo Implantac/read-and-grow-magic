@@ -628,68 +628,148 @@ export default function StorefrontSearch() {
               }
             />
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filtered.map((it) => {
-                const price = priceOf(it);
-                const compare = it.compare_at_price;
-                const hasDiscount = compare && compare > price;
-                return (
-                  <Card
-                    key={it.id}
-                    className="overflow-hidden group hover:shadow-lg transition-shadow"
-                  >
-                    <div className="aspect-square bg-muted relative overflow-hidden">
-                      {it.product.image_url ? (
-                        <img
-                          src={it.product.image_url}
-                          alt={it.product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                          <StoreIcon className="h-12 w-12" />
-                        </div>
-                      )}
-                      {it.is_featured && (
-                        <Badge className="absolute top-2 left-2" style={{ backgroundColor: store.primary_color }}>
-                          Destaque
-                        </Badge>
-                      )}
-                      {hasDiscount && (
-                        <Badge variant="destructive" className="absolute top-2 right-2">
-                          -{Math.round(((compare! - price) / compare!) * 100)}%
-                        </Badge>
-                      )}
-                    </div>
-                    <CardContent className="p-3 space-y-1">
-                      <h3 className="font-medium text-sm line-clamp-2 min-h-[2.5rem]">
-                        {it.product.name}
-                      </h3>
-                      {it.rating != null && it.rating_count > 0 ? (
-                        <div className="flex items-center gap-1 text-xs">
-                          <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-                          <span className="font-medium">{it.rating.toFixed(1)}</span>
-                          <span className="text-muted-foreground">({it.rating_count})</span>
-                        </div>
-                      ) : (
-                        <div className="text-xs text-muted-foreground">Sem avaliações</div>
-                      )}
-                      <div className="flex items-baseline gap-2 pt-1">
-                        <span className="font-bold text-base">
-                          {BRL(price, store.currency)}
-                        </span>
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                {visibleItems.map((it) => {
+                  const price = priceOf(it);
+                  const compare = it.compare_at_price;
+                  const hasDiscount = compare && compare > price;
+                  return (
+                    <Card
+                      key={it.id}
+                      className="overflow-hidden group hover:shadow-lg transition-shadow"
+                    >
+                      <div className="aspect-square bg-muted relative overflow-hidden">
+                        {it.product.image_url ? (
+                          <img
+                            src={it.product.image_url}
+                            alt={it.product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                            <StoreIcon className="h-12 w-12" />
+                          </div>
+                        )}
+                        {it.is_featured && (
+                          <Badge className="absolute top-2 left-2" style={{ backgroundColor: store.primary_color }}>
+                            Destaque
+                          </Badge>
+                        )}
                         {hasDiscount && (
-                          <span className="text-xs text-muted-foreground line-through">
-                            {BRL(compare!, store.currency)}
-                          </span>
+                          <Badge variant="destructive" className="absolute top-2 right-2">
+                            -{Math.round(((compare! - price) / compare!) * 100)}%
+                          </Badge>
                         )}
                       </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+                      <CardContent className="p-3 space-y-1">
+                        <h3 className="font-medium text-sm line-clamp-2 min-h-[2.5rem]">
+                          {it.product.name}
+                        </h3>
+                        {it.rating != null && it.rating_count > 0 ? (
+                          <div className="flex items-center gap-1 text-xs">
+                            <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
+                            <span className="font-medium">{it.rating.toFixed(1)}</span>
+                            <span className="text-muted-foreground">({it.rating_count})</span>
+                          </div>
+                        ) : (
+                          <div className="text-xs text-muted-foreground">Sem avaliações</div>
+                        )}
+                        <div className="flex items-baseline gap-2 pt-1">
+                          <span className="font-bold text-base">
+                            {BRL(price, store.currency)}
+                          </span>
+                          {hasDiscount && (
+                            <span className="text-xs text-muted-foreground line-through">
+                              {BRL(compare!, store.currency)}
+                            </span>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              {/* Infinite scroll sentinel + loading indicator */}
+              {viewMode === "infinite" && (
+                <div className="mt-6 flex flex-col items-center gap-2" aria-live="polite">
+                  {hasMoreInfinite ? (
+                    <>
+                      <div ref={sentinelRef} className="h-1 w-full" aria-hidden="true" />
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Carregando mais produtos...
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-xs text-muted-foreground py-4">
+                      Você chegou ao fim — {filtered.length} produto(s) exibido(s).
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Pagination controls */}
+              {viewMode === "pagination" && totalPages > 1 && (
+                <nav
+                  className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3"
+                  aria-label="Paginação de resultados"
+                >
+                  <p className="text-xs text-muted-foreground">
+                    Mostrando {(page - 1) * perPage + 1}
+                    {"–"}
+                    {Math.min(page * perPage, filtered.length)} de {filtered.length} · Página {page} de {totalPages}
+                  </p>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      aria-label="Página anterior"
+                    >
+                      <ChevronLeft className="h-4 w-4 mr-1" />
+                      Anterior
+                    </Button>
+                    {(() => {
+                      const nodes: JSX.Element[] = [];
+                      const maxVisible = 5;
+                      let start = Math.max(1, page - Math.floor(maxVisible / 2));
+                      const end = Math.min(totalPages, start + maxVisible - 1);
+                      if (end - start + 1 < maxVisible) start = Math.max(1, end - maxVisible + 1);
+                      for (let i = start; i <= end; i++) {
+                        nodes.push(
+                          <Button
+                            key={i}
+                            variant={i === page ? "default" : "ghost"}
+                            size="sm"
+                            className="min-w-9"
+                            onClick={() => setPage(i)}
+                            aria-current={i === page ? "page" : undefined}
+                            aria-label={`Ir para página ${i}`}
+                          >
+                            {i}
+                          </Button>
+                        );
+                      }
+                      return nodes;
+                    })()}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
+                      aria-label="Próxima página"
+                    >
+                      Próximo
+                      <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
+                </nav>
+              )}
+            </>
           )}
         </main>
       </div>
