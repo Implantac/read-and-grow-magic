@@ -74,6 +74,26 @@ export default function CommerceStorefrontDetail() {
           actions={
             <div className="flex flex-wrap gap-2">
               <Badge variant={st.variant}>{st.label}</Badge>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() =>
+                  navigate(`/commerce/lojas/${storefront.id}/pedidos`)
+                }
+              >
+                <ShoppingCart className="h-4 w-4 mr-1" /> Ver pedidos
+              </Button>
+              {storefront.status === "published" && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    window.open(`/loja/${storefront.slug}/checkout`, "_blank")
+                  }
+                >
+                  <ExternalLink className="h-4 w-4 mr-1" /> Testar checkout
+                </Button>
+              )}
               {storefront.status === "published" ? (
                 <Button
                   size="sm"
