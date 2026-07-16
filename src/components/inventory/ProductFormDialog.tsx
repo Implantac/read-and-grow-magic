@@ -98,6 +98,11 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
         iss_rate: product.iss_rate != null ? String(product.iss_rate) : '',
         service_duration_minutes: product.service_duration_minutes != null ? String(product.service_duration_minutes) : '',
         is_recurring: !!product.is_recurring,
+        requires_lot_tracking: !!(product as any).requires_lot_tracking,
+        shelf_life_days: (product as any).shelf_life_days != null ? String((product as any).shelf_life_days) : '',
+        storage_conditions: (product as any).storage_conditions ?? '',
+        multi_ean: Array.isArray((product as any).multi_ean) ? (product as any).multi_ean : [],
+        new_ean: '',
       });
     } else {
       setForm(emptyForm);
