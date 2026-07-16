@@ -14035,6 +14035,7 @@ export type Database = {
           shelf_life_days: number | null
           standard_batch_size: number | null
           status: string
+          storage_conditions: string | null
           subcategory: string | null
           supplier: string | null
           technical_sheet_url: string | null
@@ -14096,6 +14097,7 @@ export type Database = {
           shelf_life_days?: number | null
           standard_batch_size?: number | null
           status?: string
+          storage_conditions?: string | null
           subcategory?: string | null
           supplier?: string | null
           technical_sheet_url?: string | null
@@ -14157,6 +14159,7 @@ export type Database = {
           shelf_life_days?: number | null
           standard_batch_size?: number | null
           status?: string
+          storage_conditions?: string | null
           subcategory?: string | null
           supplier?: string | null
           technical_sheet_url?: string | null
