@@ -17548,6 +17548,148 @@ export type Database = {
           },
         ]
       }
+      storefront_order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          product_id: string | null
+          product_name: string
+          product_sku: string | null
+          quantity: number
+          total: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          product_id?: string | null
+          product_name: string
+          product_sku?: string | null
+          quantity: number
+          total: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          product_id?: string | null
+          product_name?: string
+          product_sku?: string | null
+          quantity?: number
+          total?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storefront_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "storefront_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      storefront_orders: {
+        Row: {
+          card_brand: string | null
+          card_last4: string | null
+          company_id: string
+          created_at: string
+          currency: string
+          customer_document: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          discount: number
+          id: string
+          notes: string | null
+          order_number: string
+          order_status: string
+          paid_at: string | null
+          payment_intent_id: string | null
+          payment_method: string
+          payment_status: string
+          pix_copy_paste: string | null
+          pix_expires_at: string | null
+          pix_qr_code: string | null
+          shipping: number
+          shipping_address: Json
+          storefront_id: string
+          subtotal: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          card_brand?: string | null
+          card_last4?: string | null
+          company_id: string
+          created_at?: string
+          currency?: string
+          customer_document?: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          discount?: number
+          id?: string
+          notes?: string | null
+          order_number: string
+          order_status?: string
+          paid_at?: string | null
+          payment_intent_id?: string | null
+          payment_method: string
+          payment_status?: string
+          pix_copy_paste?: string | null
+          pix_expires_at?: string | null
+          pix_qr_code?: string | null
+          shipping?: number
+          shipping_address?: Json
+          storefront_id: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          card_brand?: string | null
+          card_last4?: string | null
+          company_id?: string
+          created_at?: string
+          currency?: string
+          customer_document?: string | null
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          discount?: number
+          id?: string
+          notes?: string | null
+          order_number?: string
+          order_status?: string
+          paid_at?: string | null
+          payment_intent_id?: string | null
+          payment_method?: string
+          payment_status?: string
+          pix_copy_paste?: string | null
+          pix_expires_at?: string | null
+          pix_qr_code?: string | null
+          shipping?: number
+          shipping_address?: Json
+          storefront_id?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storefront_orders_storefront_id_fkey"
+            columns: ["storefront_id"]
+            isOneToOne: false
+            referencedRelation: "storefronts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       storefront_pages: {
         Row: {
           blocks: Json
