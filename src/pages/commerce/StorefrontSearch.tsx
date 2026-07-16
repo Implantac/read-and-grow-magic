@@ -173,6 +173,58 @@ export default function StorefrontSearch() {
     return list;
   }, [items, query, selectedCategories, catById, priceRange, minRating, sort]);
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+
+  // Reset page/infinite count when filters, sort, perPage, or view change
+  useEffect(() => {
+    setPage(1);
+    setInfiniteCount(perPage);
+  }, [query, selectedCategories, priceRange, minRating, sort, perPage, viewMode]);
+
+  // Clamp page to totalPages after filters change
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+  // Persist pagination state to URL
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    params.set("view", viewMode);
+    params.set("pp", String(perPage));
+    if (viewMode === "pagination" && page > 1) params.set("page", String(page));
+    else params.delete("page");
+    setSearchParams(params, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMode, perPage, page]);
+
+  // Visible items
+  const visibleItems = useMemo(() => {
+    if (viewMode === "infinite") {
+      return filtered.slice(0, Math.min(infiniteCount, filtered.length));
+    }
+    const start = (page - 1) * perPage;
+    return filtered.slice(start, start + perPage);
+  }, [filtered, viewMode, infiniteCount, page, perPage]);
+
+  const hasMoreInfinite = viewMode === "infinite" && infiniteCount < filtered.length;
+
+  // IntersectionObserver for infinite scroll
+  useEffect(() => {
+    if (viewMode !== "infinite") return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && infiniteCount < filtered.length) {
+          setInfiniteCount((c) => Math.min(c + perPage, filtered.length));
+        }
+      },
+      { rootMargin: "400px 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [viewMode, infiniteCount, filtered.length, perPage]);
+
   // Suggestions (top 5 by product name / category name match)
   const suggestions = useMemo(() => {
     const q = query.trim().toLowerCase();
