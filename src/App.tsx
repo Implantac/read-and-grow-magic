@@ -64,6 +64,7 @@ const CommerceStorefrontNew = lazy(() => import("./pages/commerce/CommerceStoref
 const CommerceStorefrontDetail = lazy(() => import("./pages/commerce/CommerceStorefrontDetail"));
 const CommerceStorefrontTheme = lazy(() => import("./pages/commerce/CommerceStorefrontTheme"));
 const StorefrontCheckout = lazy(() => import("./pages/commerce/StorefrontCheckout"));
+const StorefrontSearch = lazy(() => import("./pages/commerce/StorefrontSearch"));
 const StorefrontOrders = lazy(() => import("./pages/commerce/StorefrontOrders"));
 const ConstructionProjects = lazy(() => import("./pages/ConstructionProjects"));
 const ConstructionProjectDetail = lazy(() => import("./pages/ConstructionProjectDetail"));
