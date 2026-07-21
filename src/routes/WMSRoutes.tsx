@@ -39,6 +39,7 @@ const DockSchedulingPage = lazy(() => import("../modules/wms/DockScheduling"));
 const CarrierScorecardPage = lazy(() => import("../modules/wms/CarrierScorecard"));
 const WavePlanningV2Page = lazy(() => import("../modules/wms/WavePlanningV2"));
 const EstoqueMatrixPage = lazy(() => import("../modules/wms/EstoqueMatrix"));
+const TransferenciasCanalPage = lazy(() => import("../modules/wms/TransferenciasCanal"));
 
 export const WMSRoutes = [
   <Route key="wms-index" index element={<Navigate to="dashboard" replace />} />,
@@ -80,4 +81,5 @@ export const WMSRoutes = [
   <Route key="wms-carrier-score" path="scorecard-transportadoras" element={<CarrierScorecardPage />} />,
   <Route key="wms-wave-v2" path="wave-planning" element={<WavePlanningV2Page />} />,
   <Route key="wms-matrix" path="matriz-estoque" element={<EstoqueMatrixPage />} />,
+  <Route key="wms-transf-canal" path="transferencias-canal" element={<TransferenciasCanalPage />} />,
 ];
