@@ -7,6 +7,7 @@ import { UserPlus, Edit2, Loader2 } from 'lucide-react';
 import { SystemUser, UserRole } from '@/types/administration';
 import { userRoleConfig } from '@/config/administration';
 import { useUsers } from '@/hooks/system/useUsers';
+import { useBranches } from '@/hooks/useBranches';
 
 interface UserDialogProps {
   open: boolean;
@@ -16,6 +17,7 @@ interface UserDialogProps {
 
 export const UserDialog = ({ open, onOpenChange, editingUser }: UserDialogProps) => {
   const { inviteUser, changeRole, isInviting, isChangingRole } = useUsers();
+  const { data: branches = [] } = useBranches();
 
   const handleSaveUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -24,7 +26,8 @@ export const UserDialog = ({ open, onOpenChange, editingUser }: UserDialogProps)
     const role = formData.get('role') as UserRole;
     const phone = formData.get('phone') as string;
     const department = formData.get('department') as string;
-    const branch_id = formData.get('branch_id') as string;
+    const rawBranch = formData.get('branch_id') as string;
+    const branch_id = rawBranch && rawBranch !== 'none' ? rawBranch : '';
     
     try {
       if (editingUser) {
@@ -90,6 +93,21 @@ export const UserDialog = ({ open, onOpenChange, editingUser }: UserDialogProps)
           <div className="space-y-2">
             <Label htmlFor="phone">Telefone</Label>
             <Input id="phone" name="phone" defaultValue={editingUser?.phone} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="branch_id">Filial de acesso</Label>
+            <Select name="branch_id" defaultValue={editingUser?.branchId || 'none'}>
+              <SelectTrigger><SelectValue placeholder="Selecione a filial" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">— Sem filial (apenas gestores da matriz veem tudo) —</SelectItem>
+                {branches.map((b) => (
+                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Operadores/vendedores só enxergam dados da filial atribuída. Escolha <strong>Admin Matriz</strong> no perfil para visão consolidada de todas as filiais.
+            </p>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
