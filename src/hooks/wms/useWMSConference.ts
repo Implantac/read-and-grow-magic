@@ -226,7 +226,7 @@ export function useWMSConference() {
    * Requer que todos os itens conferidos (checked_qty > 0) tenham product_id vinculado.
    */
   const finalizeReceivingToLedger = async (id: string): Promise<boolean> => {
-    const { data, error } = await (supabase as any).rpc('finalize_receiving_conference', { _conference_id: id });
+    const { data, error } = await supabase.rpc('finalize_receiving_conference', { _conference_id: id });
     if (error) {
       toast.error(error.message || 'Erro ao finalizar recebimento');
       return false;
