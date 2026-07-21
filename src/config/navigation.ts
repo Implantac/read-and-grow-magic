@@ -248,6 +248,7 @@ export const navigationSections: NavSection[] = [
           { title: 'Centros de Custo', href: '/financeiro/centros-custo', icon: 'FolderTree' },
           { title: 'Renegociações', href: '/financeiro/renegociacoes', icon: 'RefreshCw' },
           { title: 'Conciliação', href: '/financeiro/conciliacao', icon: 'CheckCircle' },
+          { title: 'Conciliação por Canal', href: '/financeiro/conciliacao-canal', icon: 'Split' },
           { title: 'Cobranças PIX', href: '/financeiro/pix', icon: 'QrCode' },
           { title: 'Boletos', href: '/financeiro/boletos', icon: 'Receipt' },
           { title: 'Cheques', href: '/financeiro/cheques', icon: 'FileCheck' },

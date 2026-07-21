@@ -29,6 +29,7 @@ const CashflowScenariosPage = lazy(() => import("../modules/financial/CashflowSc
 const FinancialAlertsPage = lazy(() => import("../modules/financial/FinancialAlerts"));
 const DREDynamicPage = lazy(() => import("../modules/financial/DREDynamicPage"));
 const FinancialSegmentadoPage = lazy(() => import("../modules/financial/FinancialSegmentado"));
+const ConciliacaoBancariaCanalPage = lazy(() => import("../modules/financial/ConciliacaoBancariaCanal"));
 
 export const FinancialRoutes = [
   <Route key="fin-index" index element={<Navigate to="dashboard" replace />} />,
@@ -41,6 +42,7 @@ export const FinancialRoutes = [
   <Route key="fin-cc" path="centros-custo" element={<CostCentersPage />} />,
   <Route key="fin-reneg" path="renegociacoes" element={<RenegotiationsPage />} />,
   <Route key="fin-recon" path="conciliacao" element={<BankReconciliation />} />,
+  <Route key="fin-recon-canal" path="conciliacao-canal" element={<ConciliacaoBancariaCanalPage />} />,
   <Route key="fin-dre" path="dre" element={<DRELedgerPage />} />,
   <Route key="fin-audit" path="auditoria" element={<FinancialAuditPage />} />,
   <Route key="fin-pix" path="pix" element={<PixChargesPage />} />,
