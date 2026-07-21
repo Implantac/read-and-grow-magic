@@ -38,6 +38,7 @@ const KitAssemblyPage = lazy(() => import("../modules/wms/KitAssembly"));
 const DockSchedulingPage = lazy(() => import("../modules/wms/DockScheduling"));
 const CarrierScorecardPage = lazy(() => import("../modules/wms/CarrierScorecard"));
 const WavePlanningV2Page = lazy(() => import("../modules/wms/WavePlanningV2"));
+const EstoqueMatrixPage = lazy(() => import("../modules/wms/EstoqueMatrix"));
 
 export const WMSRoutes = [
   <Route key="wms-index" index element={<Navigate to="dashboard" replace />} />,
