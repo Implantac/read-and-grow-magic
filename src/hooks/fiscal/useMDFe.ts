@@ -46,7 +46,7 @@ export function useMDFes() {
 export function useCreateMDFe() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: Partial<MDFe> & { uf_origin: string; uf_destination: string }) => {
+    mutationFn: async (payload: any & { uf_origin: string; uf_destination: string }) => {
       const number = 'MDFE-' + Date.now().toString().slice(-8);
       const { data, error } = await supabase.from('mdfe' as any).insert({ ...payload, number, status: 'draft' }).select().single();
       if (error) throw error;

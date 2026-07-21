@@ -54,7 +54,7 @@ export function useTaxRules() {
 export function useUpsertTaxRule() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (rule: Partial<TaxRule> & { name: string }) => {
+    mutationFn: async (rule: any & { name: string }) => {
       const { id, created_at, updated_at, ...payload } = rule as any;
       if (id) {
         const { data, error } = await supabase

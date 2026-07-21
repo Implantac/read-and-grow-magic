@@ -27,7 +27,7 @@ export function useRFID() {
 
   // Readers Mutations
   const createReaderMutation = useMutation({
-    mutationFn: async (reader: Partial<RFIDReader>) => {
+    mutationFn: async (reader: any) => {
       const { data, error } = await supabase.from('rfid_readers').insert({
         code: reader.code, 
         name: reader.name, 
@@ -68,7 +68,7 @@ export function useRFID() {
 
   // Tags Mutations
   const createTagMutation = useMutation({
-    mutationFn: async (tag: Partial<RFIDTag>) => {
+    mutationFn: async (tag: any) => {
       const { data, error } = await supabase.from('rfid_tags').insert({
         epc: tag.epc, 
         tag_type: tag.tagType || 'product', 

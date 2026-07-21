@@ -97,7 +97,7 @@ export function useOpportunities(status?: string) {
 export function useCreateOpportunity() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (item: Partial<DbOpportunity>) => {
+    mutationFn: async (item: any) => {
       const { data, error } = await supabase.from('sales_opportunities').insert(item as OpportunityInsert).select().single();
       if (error) throw error;
       return data;
@@ -113,7 +113,7 @@ export function useCreateOpportunity() {
 export function useUpdateOpportunity() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<DbOpportunity> & { id: string }) => {
+    mutationFn: async ({ id, ...updates }: any & { id: string }) => {
       const { data, error } = await supabase.from('sales_opportunities').update({ ...updates, updated_at: new Date().toISOString() } as OpportunityUpdate).eq('id', id).select().single();
       if (error) throw error;
       return data;
@@ -139,7 +139,7 @@ export function useFollowUps(status?: string) {
 export function useCreateFollowUp() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (item: Partial<DbFollowUp>) => {
+    mutationFn: async (item: any) => {
       const { data, error } = await supabase.from('follow_ups').insert(item as FollowUpInsert).select().single();
       if (error) throw error;
       return data;
@@ -155,7 +155,7 @@ export function useCreateFollowUp() {
 export function useUpdateFollowUp() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<DbFollowUp> & { id: string }) => {
+    mutationFn: async ({ id, ...updates }: any & { id: string }) => {
       const { data, error } = await supabase.from('follow_ups').update({ ...updates, updated_at: new Date().toISOString() } as FollowUpUpdate).eq('id', id).select().single();
       if (error) throw error;
       return data;
@@ -181,7 +181,7 @@ export function useCampaigns(status?: string) {
 export function useCreateCampaign() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (item: Partial<DbCampaign>) => {
+    mutationFn: async (item: any) => {
       const { data, error } = await supabase.from('sales_campaigns').insert(item as CampaignInsert).select().single();
       if (error) throw error;
       return data;
@@ -197,7 +197,7 @@ export function useCreateCampaign() {
 export function useUpdateCampaign() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<DbCampaign> & { id: string }) => {
+    mutationFn: async ({ id, ...updates }: any & { id: string }) => {
       const { data, error } = await supabase.from('sales_campaigns').update({ ...updates, updated_at: new Date().toISOString() } as CampaignUpdate).eq('id', id).select().single();
       if (error) throw error;
       return data;

@@ -114,7 +114,7 @@ export function useCreateSchool() {
   const qc = useQueryClient();
   const companyId = useEnterpriseStore((s) => s.activeCompanyId);
   return useMutation({
-    mutationFn: async (payload: Partial<EduSchool> & { name: string }) => {
+    mutationFn: async (payload: any & { name: string }) => {
       if (!companyId) throw new Error("Sem empresa ativa");
       const { error } = await supabase
         .from("edu_schools")
@@ -151,7 +151,7 @@ export function useCreateStudent() {
   const qc = useQueryClient();
   const companyId = useEnterpriseStore((s) => s.activeCompanyId);
   return useMutation({
-    mutationFn: async (payload: Partial<EduStudent> & { full_name: string }) => {
+    mutationFn: async (payload: any & { full_name: string }) => {
       if (!companyId) throw new Error("Sem empresa ativa");
       const { error } = await supabase
         .from("edu_students")

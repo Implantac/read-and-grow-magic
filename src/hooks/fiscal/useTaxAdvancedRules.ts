@@ -51,7 +51,7 @@ export function useICMSSTRules() {
 export function useUpsertICMSST() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (rule: Partial<ICMSSTRule> & { name: string }) => {
+    mutationFn: async (rule: any & { name: string }) => {
       const { id, ...payload } = rule as any;
       const q = id
         ? supabase.from('tax_icms_st_rules' as any).update(payload as any).eq('id', id).select().single()
@@ -82,7 +82,7 @@ export function useDIFALRules() {
 export function useUpsertDIFAL() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (rule: Partial<DIFALRule> & { name: string; uf_origin: string; uf_destination: string }) => {
+    mutationFn: async (rule: any & { name: string; uf_origin: string; uf_destination: string }) => {
       const { id, ...payload } = rule as any;
       const q = id
         ? supabase.from('tax_difal_rules' as any).update(payload as any).eq('id', id).select().single()

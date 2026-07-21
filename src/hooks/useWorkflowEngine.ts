@@ -98,7 +98,7 @@ export function useWorkflowMutations() {
   const qc = useQueryClient();
   return {
     saveDefinition: useMutation({
-      mutationFn: async (payload: Partial<WorkflowDefinition> & { name: string; target_entity: string; steps: WorkflowStep[] }) => {
+      mutationFn: async (payload: any & { name: string; target_entity: string; steps: WorkflowStep[] }) => {
         const { companyId, userId } = await currentCompanyId();
         if (payload.id) {
           const { error } = await supabase

@@ -36,7 +36,7 @@ export function useContactLogs(salesRepId?: string, dateFrom?: string) {
 export function useCreateContactLog() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (log: Partial<ContactLog>) => {
+    mutationFn: async (log: any) => {
       const { data, error } = await supabase.from('sales_contact_logs').insert(log as any).select().single();
       if (error) throw error;
       return data;
@@ -82,7 +82,7 @@ export function useDailyGoals(salesRepId?: string, date?: string) {
 export function useUpsertDailyGoal() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (goal: Partial<DailyGoal>) => {
+    mutationFn: async (goal: any) => {
       const { data, error } = await supabase.from('sales_daily_goals').upsert(goal as any, { onConflict: 'sales_rep_id,goal_date' }).select().single();
       if (error) throw error;
       return data;

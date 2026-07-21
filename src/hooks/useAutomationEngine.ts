@@ -74,7 +74,7 @@ export function useAutomationMutations() {
   const qc = useQueryClient();
   return {
     save: useMutation({
-      mutationFn: async (payload: Partial<AutomationRule> & { name: string; trigger_event: string; actions: AutomationAction[] }) => {
+      mutationFn: async (payload: any & { name: string; trigger_event: string; actions: AutomationAction[] }) => {
         const { companyId, userId } = await ctx();
         if (payload.id) {
           const { error } = await supabase

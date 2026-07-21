@@ -66,7 +66,7 @@ export function useDashboardMutations() {
   const qc = useQueryClient();
   return {
     saveDashboard: useMutation({
-      mutationFn: async (payload: Partial<DashboardDefinition> & { name: string }) => {
+      mutationFn: async (payload: any & { name: string }) => {
         const { companyId, userId } = await ctx();
         if (payload.id) {
           const { error } = await supabase
@@ -111,7 +111,7 @@ export function useDashboardMutations() {
       onError: (e: any) => toast.error(e.message),
     }),
     saveWidget: useMutation({
-      mutationFn: async (payload: Partial<DashboardWidget> & { dashboard_id: string; title: string; widget_type: string; data_source: string }) => {
+      mutationFn: async (payload: any & { dashboard_id: string; title: string; widget_type: string; data_source: string }) => {
         const { companyId } = await ctx();
         if (payload.id) {
           const { error } = await supabase
