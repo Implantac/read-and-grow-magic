@@ -64,6 +64,7 @@ import { NFCeReturnDialog } from '@/components/fiscal/NFCeReturnDialog';
 import type { NFCe } from '@/types/fiscal';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
+import { OfflinePDVIndicator } from '@/components/pdv/OfflinePDVIndicator';
 import { KPICard } from '@/shared/components/KPICard';
 
 
@@ -195,6 +196,7 @@ export default function NFCePage() {
           ]}
           filename="nfce"
         />
+        <OfflinePDVIndicator />
         <Button className="gap-2" onClick={() => navigate('/comercial/pdv')}>
           <Plus className="h-4 w-4" />
           Nova Venda PDV
