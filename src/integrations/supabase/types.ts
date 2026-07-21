@@ -177,6 +177,9 @@ export type Database = {
           amount: number
           bank_account_id: string | null
           branch_id: string | null
+          canal_operacional:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           category: string
           category_id: string | null
           company_id: string
@@ -211,6 +214,9 @@ export type Database = {
           amount?: number
           bank_account_id?: string | null
           branch_id?: string | null
+          canal_operacional?:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           category?: string
           category_id?: string | null
           company_id: string
@@ -245,6 +251,9 @@ export type Database = {
           amount?: number
           bank_account_id?: string | null
           branch_id?: string | null
+          canal_operacional?:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           category?: string
           category_id?: string | null
           company_id?: string
@@ -318,6 +327,9 @@ export type Database = {
           amount: number
           bank_account_id: string | null
           branch_id: string | null
+          canal_operacional:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           category: string
           category_id: string | null
           client_id: string | null
@@ -353,6 +365,9 @@ export type Database = {
           amount?: number
           bank_account_id?: string | null
           branch_id?: string | null
+          canal_operacional?:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           category?: string
           category_id?: string | null
           client_id?: string | null
@@ -388,6 +403,9 @@ export type Database = {
           amount?: number
           bank_account_id?: string | null
           branch_id?: string | null
+          canal_operacional?:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           category?: string
           category_id?: string | null
           client_id?: string | null
@@ -2419,6 +2437,7 @@ export type Database = {
           address_state: string | null
           address_street: string | null
           address_zip: string | null
+          canal_padrao: Database["public"]["Enums"]["canal_operacional"]
           cnpj: string | null
           code: string
           company_id: string
@@ -2432,6 +2451,7 @@ export type Database = {
           name: string
           phone: string | null
           tax_regime: string | null
+          tipo: Database["public"]["Enums"]["branch_tipo"]
           updated_at: string
         }
         Insert: {
@@ -2442,6 +2462,7 @@ export type Database = {
           address_state?: string | null
           address_street?: string | null
           address_zip?: string | null
+          canal_padrao?: Database["public"]["Enums"]["canal_operacional"]
           cnpj?: string | null
           code: string
           company_id: string
@@ -2455,6 +2476,7 @@ export type Database = {
           name: string
           phone?: string | null
           tax_regime?: string | null
+          tipo?: Database["public"]["Enums"]["branch_tipo"]
           updated_at?: string
         }
         Update: {
@@ -2465,6 +2487,7 @@ export type Database = {
           address_state?: string | null
           address_street?: string | null
           address_zip?: string | null
+          canal_padrao?: Database["public"]["Enums"]["canal_operacional"]
           cnpj?: string | null
           code?: string
           company_id?: string
@@ -2478,6 +2501,7 @@ export type Database = {
           name?: string
           phone?: string | null
           tax_regime?: string | null
+          tipo?: Database["public"]["Enums"]["branch_tipo"]
           updated_at?: string
         }
         Relationships: [
@@ -2546,6 +2570,10 @@ export type Database = {
           account: string
           amount: number
           balance: number
+          branch_id: string | null
+          canal_operacional:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           category: string
           company_id: string
           created_at: string
@@ -2559,6 +2587,10 @@ export type Database = {
           account?: string
           amount?: number
           balance?: number
+          branch_id?: string | null
+          canal_operacional?:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           category: string
           company_id?: string
           created_at?: string
@@ -2572,6 +2604,10 @@ export type Database = {
           account?: string
           amount?: number
           balance?: number
+          branch_id?: string | null
+          canal_operacional?:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           category?: string
           company_id?: string
           created_at?: string
@@ -2581,7 +2617,15 @@ export type Database = {
           reference?: string | null
           type?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "cash_flow_entries_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       categories: {
         Row: {
@@ -6790,6 +6834,9 @@ export type Database = {
           bank_account_id: string | null
           bank_transaction_id: string | null
           branch_id: string | null
+          canal_operacional:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           category_id: string | null
           chart_account_id: string | null
           company_id: string
@@ -6812,6 +6859,9 @@ export type Database = {
           bank_account_id?: string | null
           bank_transaction_id?: string | null
           branch_id?: string | null
+          canal_operacional?:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           category_id?: string | null
           chart_account_id?: string | null
           company_id: string
@@ -6834,6 +6884,9 @@ export type Database = {
           bank_account_id?: string | null
           bank_transaction_id?: string | null
           branch_id?: string | null
+          canal_operacional?:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           category_id?: string | null
           chart_account_id?: string | null
           company_id?: string
@@ -9363,6 +9416,7 @@ export type Database = {
           amount_paid: number
           authorization_date: string | null
           branch_id: string | null
+          canal_operacional: Database["public"]["Enums"]["canal_operacional"]
           cancellation_date: string | null
           cancellation_reason: string | null
           cancelled_by: string | null
@@ -9392,6 +9446,7 @@ export type Database = {
           amount_paid?: number
           authorization_date?: string | null
           branch_id?: string | null
+          canal_operacional?: Database["public"]["Enums"]["canal_operacional"]
           cancellation_date?: string | null
           cancellation_reason?: string | null
           cancelled_by?: string | null
@@ -9421,6 +9476,7 @@ export type Database = {
           amount_paid?: number
           authorization_date?: string | null
           branch_id?: string | null
+          canal_operacional?: Database["public"]["Enums"]["canal_operacional"]
           cancellation_date?: string | null
           cancellation_reason?: string | null
           cancelled_by?: string | null
@@ -9649,6 +9705,7 @@ export type Database = {
           access_key: string | null
           authorization_date: string | null
           branch_id: string | null
+          canal_operacional: Database["public"]["Enums"]["canal_operacional"]
           cancellation_date: string | null
           cancellation_reason: string | null
           client_document: string | null
@@ -9698,6 +9755,7 @@ export type Database = {
           access_key?: string | null
           authorization_date?: string | null
           branch_id?: string | null
+          canal_operacional?: Database["public"]["Enums"]["canal_operacional"]
           cancellation_date?: string | null
           cancellation_reason?: string | null
           client_document?: string | null
@@ -9747,6 +9805,7 @@ export type Database = {
           access_key?: string | null
           authorization_date?: string | null
           branch_id?: string | null
+          canal_operacional?: Database["public"]["Enums"]["canal_operacional"]
           cancellation_date?: string | null
           cancellation_reason?: string | null
           client_document?: string | null
@@ -11446,6 +11505,9 @@ export type Database = {
           approved_by: string | null
           billing_status: string | null
           branch_id: string | null
+          canal_operacional:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           client_id: string | null
           client_name: string
           commercial_approval: string | null
@@ -11487,6 +11549,9 @@ export type Database = {
           approved_by?: string | null
           billing_status?: string | null
           branch_id?: string | null
+          canal_operacional?:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           client_id?: string | null
           client_name: string
           commercial_approval?: string | null
@@ -11528,6 +11593,9 @@ export type Database = {
           approved_by?: string | null
           billing_status?: string | null
           branch_id?: string | null
+          canal_operacional?:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           client_id?: string | null
           client_name?: string
           commercial_approval?: string | null
@@ -17272,6 +17340,8 @@ export type Database = {
       stock_balances: {
         Row: {
           available_qty: number | null
+          branch_id: string | null
+          canal_operacional: Database["public"]["Enums"]["canal_operacional"]
           company_id: string
           created_at: string
           dc_id: string | null
@@ -17293,6 +17363,8 @@ export type Database = {
         }
         Insert: {
           available_qty?: number | null
+          branch_id?: string | null
+          canal_operacional?: Database["public"]["Enums"]["canal_operacional"]
           company_id?: string
           created_at?: string
           dc_id?: string | null
@@ -17314,6 +17386,8 @@ export type Database = {
         }
         Update: {
           available_qty?: number | null
+          branch_id?: string | null
+          canal_operacional?: Database["public"]["Enums"]["canal_operacional"]
           company_id?: string
           created_at?: string
           dc_id?: string | null
@@ -17334,6 +17408,13 @@ export type Database = {
           warehouse_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "stock_balances_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "stock_balances_dc_id_fkey"
             columns: ["dc_id"]
@@ -17503,6 +17584,9 @@ export type Database = {
         Row: {
           batch: string | null
           branch_id: string | null
+          canal_operacional:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           company_id: string
           created_at: string
           destination: string | null
@@ -17529,6 +17613,9 @@ export type Database = {
         Insert: {
           batch?: string | null
           branch_id?: string | null
+          canal_operacional?:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           company_id?: string
           created_at?: string
           destination?: string | null
@@ -17555,6 +17642,9 @@ export type Database = {
         Update: {
           batch?: string | null
           branch_id?: string | null
+          canal_operacional?:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           company_id?: string
           created_at?: string
           destination?: string | null
@@ -19204,6 +19294,110 @@ export type Database = {
             columns: ["production_order_id"]
             isOneToOne: false
             referencedRelation: "production_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transferencias_canal: {
+        Row: {
+          canal_destino: Database["public"]["Enums"]["canal_operacional"]
+          canal_origem: Database["public"]["Enums"]["canal_operacional"]
+          company_id: string
+          confirmed_at: string | null
+          confirmed_by: string | null
+          created_at: string
+          created_by: string | null
+          destino_branch_id: string
+          id: string
+          numero: string
+          observacoes: string | null
+          origem_branch_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          canal_destino?: Database["public"]["Enums"]["canal_operacional"]
+          canal_origem?: Database["public"]["Enums"]["canal_operacional"]
+          company_id: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          destino_branch_id: string
+          id?: string
+          numero: string
+          observacoes?: string | null
+          origem_branch_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          canal_destino?: Database["public"]["Enums"]["canal_operacional"]
+          canal_origem?: Database["public"]["Enums"]["canal_operacional"]
+          company_id?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          destino_branch_id?: string
+          id?: string
+          numero?: string
+          observacoes?: string | null
+          origem_branch_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transferencias_canal_destino_branch_id_fkey"
+            columns: ["destino_branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transferencias_canal_origem_branch_id_fkey"
+            columns: ["origem_branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transferencias_canal_itens: {
+        Row: {
+          created_at: string
+          id: string
+          observacoes: string | null
+          product_id: string
+          quantidade: number
+          quantidade_recebida: number | null
+          transferencia_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          observacoes?: string | null
+          product_id: string
+          quantidade: number
+          quantidade_recebida?: number | null
+          transferencia_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          observacoes?: string | null
+          product_id?: string
+          quantidade?: number
+          quantidade_recebida?: number | null
+          transferencia_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transferencias_canal_itens_transferencia_id_fkey"
+            columns: ["transferencia_id"]
+            isOneToOne: false
+            referencedRelation: "transferencias_canal"
             referencedColumns: ["id"]
           },
         ]
@@ -22702,6 +22896,7 @@ export type Database = {
           period: string
         }[]
       }
+      get_user_branch_ids: { Args: { _user_id: string }; Returns: string[] }
       get_user_company_id: { Args: { _user_id: string }; Returns: string }
       get_user_role: {
         Args: { _user_id: string }
@@ -23127,6 +23322,8 @@ export type Database = {
         | "loja"
         | "franquia"
         | "system_admin"
+      branch_tipo: "industria" | "filial" | "cd"
+      canal_operacional: "VAREJO_PDV" | "ATACADO_INDUSTRIA"
       enterprise_tier: "small" | "medium" | "enterprise"
       org_type: "holding" | "company" | "branch" | "unit"
       tax_regime: "simples" | "presumed" | "real"
@@ -23274,6 +23471,8 @@ export const Constants = {
         "franquia",
         "system_admin",
       ],
+      branch_tipo: ["industria", "filial", "cd"],
+      canal_operacional: ["VAREJO_PDV", "ATACADO_INDUSTRIA"],
       enterprise_tier: ["small", "medium", "enterprise"],
       org_type: ["holding", "company", "branch", "unit"],
       tax_regime: ["simples", "presumed", "real"],
