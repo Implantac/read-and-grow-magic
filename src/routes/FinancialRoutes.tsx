@@ -30,6 +30,9 @@ const FinancialAlertsPage = lazy(() => import("../modules/financial/FinancialAle
 const DREDynamicPage = lazy(() => import("../modules/financial/DREDynamicPage"));
 const FinancialSegmentadoPage = lazy(() => import("../modules/financial/FinancialSegmentado"));
 const ConciliacaoBancariaCanalPage = lazy(() => import("../modules/financial/ConciliacaoBancariaCanal"));
+const DivergenceDashboardPage = lazy(() => import("../modules/financial/DivergenceDashboard"));
+
+
 
 export const FinancialRoutes = [
   <Route key="fin-index" index element={<Navigate to="dashboard" replace />} />,
@@ -62,5 +65,6 @@ export const FinancialRoutes = [
   <Route key="fin-alerts" path="alertas" element={<FinancialAlertsPage />} />,
   <Route key="fin-dre-dyn" path="dre-dinamico" element={<DREDynamicPage />} />,
   <Route key="fin-segmentado" path="segmentado" element={<FinancialSegmentadoPage />} />,
+  <Route key="fin-divergences" path="divergencias" element={<DivergenceDashboardPage />} />,
 ];
 
