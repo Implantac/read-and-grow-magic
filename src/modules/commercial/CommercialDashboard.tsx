@@ -129,6 +129,12 @@ export default function CommercialDashboard() {
     // Clients without rep
     const noRepClients = clients.filter(c => !c.sales_rep_id).length;
 
+    // Breakdown por canal operacional (usa `channel` gravado em orders quando disponível)
+    const varejoOrders = ordersMonth.filter((o: any) => o.channel === 'VAREJO_PDV' && o.status !== 'cancelled');
+    const atacadoOrders = ordersMonth.filter((o: any) => o.channel === 'ATACADO_INDUSTRIA' && o.status !== 'cancelled');
+    const varejoBilling = varejoOrders.reduce((s, o) => s + o.total, 0);
+    const atacadoBilling = atacadoOrders.reduce((s, o) => s + o.total, 0);
+
     return {
       ordersToday: ordersToday.length,
       billingToday,
@@ -151,6 +157,10 @@ export default function CommercialDashboard() {
       inactiveClients,
       blockedClients,
       noRepClients,
+      varejoBilling,
+      atacadoBilling,
+      varejoOrders: varejoOrders.length,
+      atacadoOrders: atacadoOrders.length,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `sales` é mantido para invalidar quando vendas mudam (efeito downstream)
   }, [orders, clients, funnel, alerts, sales, reps]);
