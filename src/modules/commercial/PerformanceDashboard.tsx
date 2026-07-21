@@ -8,6 +8,7 @@ import { Progress } from '@/ui/base/progress';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { formatBRL } from '@/lib/formatters';
+import { CanalFilter } from '@/components/shared/CanalFilter';
 import {
   Target, TrendingUp, Users, Trophy, DollarSign, BarChart3,
   AlertTriangle, XCircle, ArrowDownRight, ArrowUpRight, Medal,
