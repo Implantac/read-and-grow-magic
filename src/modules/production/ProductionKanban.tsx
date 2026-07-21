@@ -1,15 +1,10 @@
 import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { useState, useMemo, useCallback, useEffect } from 'react';
-import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd';
+import { type DropResult } from '@hello-pangea/dnd';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
-import { Card, CardContent } from '@/ui/base/card';
-import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
-import { Input } from '@/ui/base/input';
 import { Skeleton } from '@/ui/base/skeleton';
-import { KPICard } from '@/shared/components/KPICard';
 import { useProductionOrders } from '@/hooks/production/useProductionOrders';
 import { useProductionTimeLogs } from '@/hooks/production/useProductionTimeLogs';
 import { useOutsourcingOrders } from '@/hooks/production/useOutsourcingOrders';
@@ -19,21 +14,20 @@ import { useSupplyStock } from '@/hooks/inventory/useSupplyStock';
 import { useProductionCapacity } from '@/hooks/production/useProductionCapacity';
 import { useWorkCenters } from '@/hooks/production/useWorkCenters';
 import { supabase } from '@/integrations/supabase/client';
-import { formatBRL, formatNumber } from '@/lib/formatters';
+import { formatBRL } from '@/lib/formatters';
 import { WarModeService } from '@/lib/pcpServices';
 import { cn } from '@/lib/utils';
 import { parseISO, differenceInDays } from 'date-fns';
 import { toast } from 'sonner';
-import {
-  Activity, AlertTriangle, Factory, Layers, ListOrdered, PackageX, RefreshCw,
-  Search, Star, Swords, TrendingUp, Truck,
-} from 'lucide-react';
+import { Activity, ListOrdered, RefreshCw, Swords } from 'lucide-react';
 
 import { KANBAN_COLUMNS, VALID_TRANSITIONS, STATUS_LABELS } from './kanban/constants';
-import { KanbanCard } from './kanban/KanbanCard';
 import { WarModeDialog } from './kanban/WarModeDialog';
 import { SequenceDialog } from './kanban/SequenceDialog';
 import { BottleneckDialog } from './kanban/BottleneckDialog';
+import { KanbanBoard } from './kanban/KanbanBoard';
+import { KanbanKPIs, KanbanWipPanel, KanbanSuggestions, KanbanFilters } from './kanban/KanbanTopPanels';
+
 
 
 export default function ProductionKanban() {
