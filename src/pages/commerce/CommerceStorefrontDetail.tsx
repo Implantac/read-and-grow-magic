@@ -234,28 +234,30 @@ export default function CommerceStorefrontDetail() {
               <p className="text-xs text-muted-foreground">
                 Ao ativar, o rascunho da NFC-e gerado no pagamento é enviado automaticamente à SEFAZ.
               </p>
-              <div className="flex items-center gap-2">
-                <Badge variant={storefront.auto_authorize_nfce ? "default" : "outline"}>
-                  {storefront.auto_authorize_nfce ? "Ativada" : "Desativada"}
-                </Badge>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={async () => {
-                    const { useToggleAutoAuthorizeNfce } = await import("@/hooks/useStorefrontNotifications");
-                    // simple inline dispatch via a fresh mutation call
-                    const { supabase } = await import("@/integrations/supabase/client");
-                    await supabase
-                      .from("storefronts")
-                      .update({ auto_authorize_nfce: !storefront.auto_authorize_nfce } as any)
-                      .eq("id", storefront.id);
-                    window.location.reload();
-                    void useToggleAutoAuthorizeNfce;
-                  }}
-                >
-                  {storefront.auto_authorize_nfce ? "Desativar" : "Ativar"}
-                </Button>
-              </div>
+              {(() => {
+                const autoNfce = Boolean((storefront as any).auto_authorize_nfce);
+                return (
+                  <div className="flex items-center gap-2">
+                    <Badge variant={autoNfce ? "default" : "outline"}>
+                      {autoNfce ? "Ativada" : "Desativada"}
+                    </Badge>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        const { supabase } = await import("@/integrations/supabase/client");
+                        await supabase
+                          .from("storefronts")
+                          .update({ auto_authorize_nfce: !autoNfce } as any)
+                          .eq("id", storefront.id);
+                        window.location.reload();
+                      }}
+                    >
+                      {autoNfce ? "Desativar" : "Ativar"}
+                    </Button>
+                  </div>
+                );
+              })()}
             </CardContent>
           </Card>
           <div className="lg:col-span-2">
