@@ -121,7 +121,7 @@ export async function calculateItemTaxes(args: {
   unit_price: number;
   discount?: number;
 }): Promise<TaxCalculation> {
-  const { data, error } = await supabase.rpc('calculate_nfe_item_taxes' as any, {
+  const { data, error } = await supabase.rpc('calculate_nfe_item_taxes', {
     _ncm: args.ncm ?? null,
     _cfop: args.cfop ?? null,
     _quantity: args.quantity,

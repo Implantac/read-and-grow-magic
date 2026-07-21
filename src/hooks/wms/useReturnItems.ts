@@ -43,7 +43,7 @@ export function useDisposeReturnItem(returnId: string | null) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (params: { itemId: string; disposition: Disposition; notes?: string }) => {
-      const { data, error } = await supabase.rpc('wms_dispose_return_item' as any, {
+      const { data, error } = await supabase.rpc('wms_dispose_return_item', {
         _item_id: params.itemId,
         _disposition: params.disposition,
         _notes: params.notes ?? null,

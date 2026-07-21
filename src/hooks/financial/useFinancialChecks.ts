@@ -81,7 +81,7 @@ export function useCompensateCheck() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (params: { id: string; bank_account_id?: string; clear_date?: string }) => {
-      const { data, error } = await supabase.rpc('compensate_check' as any, {
+      const { data, error } = await supabase.rpc('compensate_check', {
         _check_id: params.id,
         _bank_account_id: params.bank_account_id ?? null,
         _clear_date: params.clear_date ?? new Date().toISOString().split('T')[0],
