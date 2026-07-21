@@ -53,6 +53,8 @@ interface Notif {
   assigned_to: string | null;
   due_at: string | null;
   resolved_at: string | null;
+  escalated_at?: string | null;
+  escalated_from?: string | null;
 }
 
 interface CompanyUser {
