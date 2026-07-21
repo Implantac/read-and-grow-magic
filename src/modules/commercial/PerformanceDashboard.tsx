@@ -8,6 +8,7 @@ import { Progress } from '@/ui/base/progress';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { formatBRL } from '@/lib/formatters';
+import { CanalFilter } from '@/components/shared/CanalFilter';
 import {
   Target, TrendingUp, Users, Trophy, DollarSign, BarChart3,
   AlertTriangle, XCircle, ArrowDownRight, ArrowUpRight, Medal,
@@ -97,7 +98,11 @@ export default function PerformanceDashboard() {
 
   return (
     <PageContainer>
-      <PageHeader title="Performance Comercial" description="Análise completa do desempenho da equipe e indicadores de conversão" />
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <PageHeader title="Performance Comercial" description="Análise completa do desempenho da equipe e indicadores de conversão" />
+        <CanalFilter />
+      </div>
+
 
       {/* KPIs */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5 mb-6 mt-6">

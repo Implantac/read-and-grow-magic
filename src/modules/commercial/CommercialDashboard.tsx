@@ -24,6 +24,7 @@ import { startOfMonth, endOfMonth, isToday, differenceInDays, subMonths, format,
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Progress } from '@/ui/base/progress';
+import { CanalFilter } from '@/components/shared/CanalFilter';
 
 const fmtShort = (v: number) => {
   if (v >= 1000000) return `R$ ${(v / 1000000).toFixed(1)}M`;
@@ -128,6 +129,12 @@ export default function CommercialDashboard() {
     // Clients without rep
     const noRepClients = clients.filter(c => !c.sales_rep_id).length;
 
+    // Breakdown por canal operacional (usa `channel` gravado em orders quando disponível)
+    const varejoOrders = ordersMonth.filter((o: any) => o.canal_operacional === 'VAREJO_PDV' && o.status !== 'cancelled');
+    const atacadoOrders = ordersMonth.filter((o: any) => o.canal_operacional === 'ATACADO_INDUSTRIA' && o.status !== 'cancelled');
+    const varejoBilling = varejoOrders.reduce((s, o) => s + o.total, 0);
+    const atacadoBilling = atacadoOrders.reduce((s, o) => s + o.total, 0);
+
     return {
       ordersToday: ordersToday.length,
       billingToday,
@@ -150,6 +157,10 @@ export default function CommercialDashboard() {
       inactiveClients,
       blockedClients,
       noRepClients,
+      varejoBilling,
+      atacadoBilling,
+      varejoOrders: varejoOrders.length,
+      atacadoOrders: atacadoOrders.length,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `sales` é mantido para invalidar quando vendas mudam (efeito downstream)
   }, [orders, clients, funnel, alerts, sales, reps]);
@@ -167,10 +178,39 @@ export default function CommercialDashboard() {
 
   return (
     <PageContainer>
-      <PageHeader title="Dashboard Comercial" description="Centro de inteligência e performance de vendas" />
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <PageHeader title="Dashboard Comercial" description="Centro de inteligência e performance de vendas" />
+        <CanalFilter />
+      </div>
+
+      {/* Breakdown Varejo × Atacado */}
+      <div className="grid gap-4 md:grid-cols-2 mt-6 mb-6">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <ShoppingCart className="h-4 w-4 text-primary" /> Varejo (PDV)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-primary">{formatBRL(stats.varejoBilling)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{stats.varejoOrders} pedidos no mês</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-accent" /> Atacado / Indústria
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-accent">{formatBRL(stats.atacadoBilling)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{stats.atacadoOrders} pedidos no mês</p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* KPIs Row 1 */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 mt-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
         <KPICard index={0} title="Faturamento Hoje" value={formatBRL(stats.billingToday)} subtitle={`${stats.ordersToday} pedidos`} icon={<ShoppingCart className="h-5 w-5" />} accentColor="primary" />
         <KPICard index={1} title="Faturamento do Mês" value={formatBRL(stats.billingMonth)} subtitle={
           stats.billingGrowth !== 0
