@@ -42,6 +42,7 @@ const EstoqueMatrixPage = lazy(() => import("../modules/wms/EstoqueMatrix"));
 const TransferenciasCanalPage = lazy(() => import("../modules/wms/TransferenciasCanal"));
 const StockReportCanalPage = lazy(() => import("../modules/wms/StockReportCanal"));
 const EstoqueAuditoriaPage = lazy(() => import("../modules/wms/EstoqueAuditoria"));
+const ReconciliacaoFatEstoquePage = lazy(() => import("../modules/wms/ReconciliacaoFaturamentoEstoque"));
 
 export const WMSRoutes = [
   <Route key="wms-index" index element={<Navigate to="dashboard" replace />} />,
