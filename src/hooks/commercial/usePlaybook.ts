@@ -65,7 +65,7 @@ export function useLogPlaybookUsage() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (log: { playbook_id?: string; objection_id?: string; action_type: string; context?: string; result?: string }) => {
-      const { error } = await supabase.from('playbook_usage_logs').insert(log as any);
+      const { error } = await supabase.from('playbook_usage_logs').insert(log);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['playbook_usage'] }),

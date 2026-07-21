@@ -130,7 +130,7 @@ export function useNFCe() {
       cancellation_date: new Date().toISOString(),
       cancellation_reason: trimmed,
       cancelled_by: userRes?.user?.id ?? null,
-    } as any).eq('id', id);
+    }).eq('id', id);
 
     if (error) { toast.error('Erro ao cancelar NFC-e'); return false; }
     toast.success('NFC-e cancelada com sucesso');
@@ -199,7 +199,7 @@ export function useNFCe() {
     const { data: nfceRow } = await supabase.from('nfce').select('total').eq('id', params.nfceId).single();
     const nfceTotal = Number(nfceRow?.total || 0);
     const newStatus = totalReturned <= 0 ? 'none' : (totalReturned + 0.001 >= nfceTotal ? 'full' : 'partial');
-    await supabase.from('nfce').update({ return_status: newStatus } as any).eq('id', params.nfceId);
+    await supabase.from('nfce').update({ return_status: newStatus }).eq('id', params.nfceId);
 
     toast.success(`Devolução ${number} registrada — reembolso ${refundAmount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`);
     await fetchNFCes();

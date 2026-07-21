@@ -42,7 +42,7 @@ export function useCreateFollowUp() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (task: Partial<FollowUpTask>) => {
-      const { error } = await supabase.from('follow_up_tasks').insert(task as any);
+      const { error } = await supabase.from('follow_up_tasks').insert(task);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -57,7 +57,7 @@ export function useCompleteFollowUp() {
   return useMutation({
     mutationFn: async ({ id, result }: { id: string; result: string }) => {
       const { error } = await supabase.from('follow_up_tasks')
-        .update({ status: 'completed', completed_at: new Date().toISOString(), result } as any)
+        .update({ status: 'completed', completed_at: new Date().toISOString(), result })
         .eq('id', id);
       if (error) throw error;
     },

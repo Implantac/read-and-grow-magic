@@ -36,7 +36,7 @@ export function useProductionLines() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const create = async (item: Partial<ProductionLine>) => {
-    const { error } = await (supabase as any).from('production_lines').insert(item);
+    const { error } = await supabase.from('production_lines').insert(item);
     if (error) { toast.error('Erro ao criar linha'); return false; }
     toast.success('Linha cadastrada');
     await fetch();
@@ -44,7 +44,7 @@ export function useProductionLines() {
   };
 
   const update = async (id: string, updates: Partial<ProductionLine>) => {
-    const { error } = await (supabase as any).from('production_lines').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await supabase.from('production_lines').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
     if (error) { toast.error('Erro ao atualizar linha'); return false; }
     toast.success('Linha atualizada');
     await fetch();
@@ -52,7 +52,7 @@ export function useProductionLines() {
   };
 
   const remove = async (id: string) => {
-    const { error } = await (supabase as any).from('production_lines').delete().eq('id', id);
+    const { error } = await supabase.from('production_lines').delete().eq('id', id);
     if (error) { toast.error('Erro ao excluir linha'); return; }
     toast.success('Linha excluída');
     await fetch();

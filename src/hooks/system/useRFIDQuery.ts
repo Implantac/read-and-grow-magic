@@ -28,7 +28,7 @@ export function useRFID() {
   // Readers Mutations
   const createReaderMutation = useMutation({
     mutationFn: async (reader: Partial<RFIDReader>) => {
-      const { data, error } = await supabase.from('rfid_readers' as any).insert({
+      const { data, error } = await supabase.from('rfid_readers').insert({
         code: reader.code, 
         name: reader.name, 
         location: reader.location, 
@@ -54,7 +54,7 @@ export function useRFID() {
 
   const deleteReaderMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('rfid_readers' as any).delete().eq('id', id);
+      const { error } = await supabase.from('rfid_readers').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -69,7 +69,7 @@ export function useRFID() {
   // Tags Mutations
   const createTagMutation = useMutation({
     mutationFn: async (tag: Partial<RFIDTag>) => {
-      const { data, error } = await supabase.from('rfid_tags' as any).insert({
+      const { data, error } = await supabase.from('rfid_tags').insert({
         epc: tag.epc, 
         tag_type: tag.tagType || 'product', 
         product_id: tag.productId,
@@ -94,7 +94,7 @@ export function useRFID() {
 
   const deleteTagMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('rfid_tags' as any).delete().eq('id', id);
+      const { error } = await supabase.from('rfid_tags').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {

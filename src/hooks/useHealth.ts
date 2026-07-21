@@ -76,7 +76,7 @@ export function useCreateHealthPatient() {
     mutationFn: async (input: Partial<HealthPatient>) => {
       const { data, error } = await supabase
         .from('health_patients' as any)
-        .insert(input as any)
+        .insert(input)
         .select()
         .single();
       if (error) throw error;
@@ -128,7 +128,7 @@ export function useCreateHealthProfessional() {
     mutationFn: async (input: Partial<HealthProfessional>) => {
       const { data, error } = await supabase
         .from('health_professionals' as any)
-        .insert(input as any)
+        .insert(input)
         .select()
         .single();
       if (error) throw error;
@@ -164,7 +164,7 @@ export function useCreateHealthAppointment() {
     mutationFn: async (input: Partial<HealthAppointment>) => {
       const { data, error } = await supabase
         .from('health_appointments' as any)
-        .insert(input as any)
+        .insert(input)
         .select()
         .single();
       if (error) throw error;
@@ -219,7 +219,7 @@ export function useCreateHealthRecord() {
     mutationFn: async (input: Partial<HealthRecord>) => {
       const { data, error } = await supabase
         .from('health_records' as any)
-        .insert(input as any)
+        .insert(input)
         .select()
         .single();
       if (error) throw error;

@@ -38,7 +38,7 @@ export function useProductionRoutes() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('production_routes')
       .select('*')
       .order('code');
@@ -50,7 +50,7 @@ export function useProductionRoutes() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const create = async (item: Partial<ProductionRouteRow>) => {
-    const { error } = await (supabase as any).from('production_routes').insert(item);
+    const { error } = await supabase.from('production_routes').insert(item);
     if (error) { toast.error('Erro ao criar rota'); return false; }
     toast.success('Rota cadastrada');
     await fetch();
@@ -58,7 +58,7 @@ export function useProductionRoutes() {
   };
 
   const update = async (id: string, updates: Partial<ProductionRouteRow>) => {
-    const { error } = await (supabase as any).from('production_routes').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await supabase.from('production_routes').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
     if (error) { toast.error('Erro ao atualizar rota'); return false; }
     toast.success('Rota atualizada');
     await fetch();
@@ -67,8 +67,8 @@ export function useProductionRoutes() {
 
   const remove = async (id: string) => {
     // Delete steps first (cascade should handle, but be safe)
-    await (supabase as any).from('production_route_steps').delete().eq('route_id', id);
-    const { error } = await (supabase as any).from('production_routes').delete().eq('id', id);
+    await supabase.from('production_route_steps').delete().eq('route_id', id);
+    const { error } = await supabase.from('production_routes').delete().eq('id', id);
     if (error) { toast.error('Erro ao excluir rota'); return; }
     toast.success('Rota excluída');
     await fetch();
@@ -84,7 +84,7 @@ export function useProductionRouteSteps(routeId?: string) {
   const fetch = useCallback(async () => {
     if (!routeId) { setSteps([]); setLoading(false); return; }
     setLoading(true);
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('production_route_steps')
       .select('*, production_sectors(name), production_resources(name)')
       .eq('route_id', routeId)
@@ -101,7 +101,7 @@ export function useProductionRouteSteps(routeId?: string) {
   useEffect(() => { fetch(); }, [fetch]);
 
   const addStep = async (step: Partial<ProductionRouteStep>) => {
-    const { error } = await (supabase as any).from('production_route_steps').insert({ ...step, route_id: routeId });
+    const { error } = await supabase.from('production_route_steps').insert({ ...step, route_id: routeId });
     if (error) { toast.error('Erro ao adicionar etapa'); return false; }
     toast.success('Etapa adicionada');
     await fetch();
@@ -111,14 +111,14 @@ export function useProductionRouteSteps(routeId?: string) {
   };
 
   const updateStep = async (id: string, updates: Partial<ProductionRouteStep>) => {
-    const { error } = await (supabase as any).from('production_route_steps').update(updates).eq('id', id);
+    const { error } = await supabase.from('production_route_steps').update(updates).eq('id', id);
     if (error) { toast.error('Erro ao atualizar etapa'); return; }
     await fetch();
     await recalcTotalTime();
   };
 
   const removeStep = async (id: string) => {
-    const { error } = await (supabase as any).from('production_route_steps').delete().eq('id', id);
+    const { error } = await supabase.from('production_route_steps').delete().eq('id', id);
     if (error) { toast.error('Erro ao excluir etapa'); return; }
     toast.success('Etapa removida');
     await fetch();
@@ -127,9 +127,9 @@ export function useProductionRouteSteps(routeId?: string) {
 
   const recalcTotalTime = async () => {
     if (!routeId) return;
-    const { data } = await (supabase as any).from('production_route_steps').select('setup_time_minutes, operation_time_minutes').eq('route_id', routeId);
+    const { data } = await supabase.from('production_route_steps').select('setup_time_minutes, operation_time_minutes').eq('route_id', routeId);
     const total = (data || []).reduce((s: number, r: any) => s + (r.setup_time_minutes || 0) + (r.operation_time_minutes || 0), 0);
-    await (supabase as any).from('production_routes').update({ total_time_minutes: total, updated_at: new Date().toISOString() }).eq('id', routeId);
+    await supabase.from('production_routes').update({ total_time_minutes: total, updated_at: new Date().toISOString() }).eq('id', routeId);
   };
 
   return { steps, loading, refetch: fetch, addStep, updateStep, removeStep };

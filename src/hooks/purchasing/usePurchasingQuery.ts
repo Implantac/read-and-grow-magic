@@ -38,7 +38,7 @@ export function usePurchasing() {
         taxes: o.tax_amount || 0, total: o.total_amount,
         paymentTerms: o.payment_terms, status: o.status, priority: o.priority,
         buyerId: o.buyer_id, buyerName: '', createdAt: o.created_at, updatedAt: o.updated_at
-      } as any));
+      }));
     },
   });
 
@@ -51,7 +51,7 @@ export function usePurchasing() {
         date: q.created_at, deadline: q.deadline, items: q.items || [],
         suppliers: q.suppliers || [], status: q.status, priority: q.priority,
         buyerId: q.buyer_id, buyerName: '', createdAt: q.created_at, updatedAt: q.updated_at
-      } as any));
+      }));
     },
   });
 
