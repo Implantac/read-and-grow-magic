@@ -54,7 +54,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Bell, Repeat, TrendingDown, LineChart, AlertTriangle, ShieldAlert, Upload, QrCode,
   FileCheck2, FileDown, Percent, Globe, ScrollText, ArrowRightLeft,
   BellRing, RotateCw, AlertOctagon, GitBranch, Siren, Scissors, Inbox, Heart,
-  Send, MessageSquare, Palette, BookOpenCheck,
+  Send, MessageSquare, Palette, BookOpenCheck, LayoutGrid,
 };
 
 
