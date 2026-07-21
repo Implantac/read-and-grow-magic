@@ -129,5 +129,5 @@ export async function calculateItemTaxes(args: {
     _discount: args.discount ?? 0,
   });
   if (error) throw error;
-  return data as TaxCalculation;
+  return data as unknown as TaxCalculation;
 }
