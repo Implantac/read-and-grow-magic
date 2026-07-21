@@ -58,7 +58,7 @@ export function useCreateBoleto() {
         ...fake,
         provider: 'mock',
         status: 'registered',
-      } as any).select().single();
+      }).select().single();
       if (error) throw error;
       return data;
     },
