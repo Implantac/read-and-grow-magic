@@ -45,7 +45,7 @@ export function useO2CMonitor(windowDays = 7, sellerId?: string | null) {
     staleTime: 60_000,
     queryFn: async () => {
       const since = new Date(Date.now() - windowDays * 86_400_000).toISOString();
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('cross_module_events')
         .select('entity_id, event_type, payload, created_at')
         .like('event_type', 'o2c.%')

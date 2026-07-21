@@ -23,7 +23,7 @@ export function useProductionEvents(limit = 50) {
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('production_events')
       .select('*')
       .order('created_at', { ascending: false })
@@ -47,7 +47,7 @@ export function useProductionEvents(limit = 50) {
   }, [limit]);
 
   const emitEvent = useCallback(async (event: Partial<ProductionEvent>) => {
-    const { error } = await (supabase as any).from('production_events').insert(event);
+    const { error } = await supabase.from('production_events').insert(event);
     if (error) console.error('Error emitting event:', error);
   }, []);
 
