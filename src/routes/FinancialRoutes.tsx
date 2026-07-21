@@ -28,6 +28,7 @@ const DefaultManagementPage = lazy(() => import("../modules/financial/DefaultMan
 const CashflowScenariosPage = lazy(() => import("../modules/financial/CashflowScenarios"));
 const FinancialAlertsPage = lazy(() => import("../modules/financial/FinancialAlerts"));
 const DREDynamicPage = lazy(() => import("../modules/financial/DREDynamicPage"));
+const FinancialSegmentadoPage = lazy(() => import("../modules/financial/FinancialSegmentado"));
 
 export const FinancialRoutes = [
   <Route key="fin-index" index element={<Navigate to="dashboard" replace />} />,
@@ -58,5 +59,6 @@ export const FinancialRoutes = [
   <Route key="fin-scen" path="cenarios" element={<CashflowScenariosPage />} />,
   <Route key="fin-alerts" path="alertas" element={<FinancialAlertsPage />} />,
   <Route key="fin-dre-dyn" path="dre-dinamico" element={<DREDynamicPage />} />,
+  <Route key="fin-segmentado" path="segmentado" element={<FinancialSegmentadoPage />} />,
 ];
 
