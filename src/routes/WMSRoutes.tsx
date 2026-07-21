@@ -19,7 +19,7 @@ const DistributionCentersPage = lazy(() => import("../modules/wms/DistributionCe
 const StockBalancesPage = lazy(() => import("../modules/wms/StockBalances"));
 const DocksPage = lazy(() => import("../modules/wms/Docks"));
 const WMSAIPage = lazy(() => import("../modules/wms/WMSAI"));
-const DigitalTwinPage = lazy(() => import("../modules/wms/twin/DigitalTwin"));
+// DigitalTwinPage consolidated under /producao/twin
 const IntelligencePage = lazy(() => import("../modules/wms/intelligence/Intelligence"));
 const SlottingPlannerPage = lazy(() => import("../modules/wms/slotting/SlottingPlanner"));
 const YardManagementPage = lazy(() => import("../modules/wms/yard/YardManagement"));
@@ -27,7 +27,7 @@ const LocationsPage = lazy(() => import("../modules/wms/Locations"));
 const SkuAllocationPage = lazy(() => import("../modules/wms/SkuAllocation"));
 const OrderReservationsPage = lazy(() => import("../modules/wms/OrderReservations"));
 const OrderPickingPage = lazy(() => import("../modules/wms/OrderPicking"));
-const QualityControlPage = lazy(() => import("../modules/wms/QualityControl"));
+// QualityControlPage consolidated under /producao/qualidade
 const Billing3PLPage = lazy(() => import("../modules/wms/Billing3PL"));
 const PickingRoutePage = lazy(() => import("../modules/wms/PickingRouteOptimizer"));
 const LaborManagementPage = lazy(() => import("../modules/wms/LaborManagement"));
@@ -64,7 +64,7 @@ export const WMSRoutes = [
   <Route key="wms-bal" path="saldos" element={<StockBalancesPage />} />,
   <Route key="wms-docks" path="docas" element={<DocksPage />} />,
   <Route key="wms-ai" path="ia" element={<WMSAIPage />} />,
-  <Route key="wms-twin" path="twin" element={<DigitalTwinPage />} />,
+  <Route key="wms-twin" path="twin" element={<Navigate to="/producao/twin" replace />} />,
   <Route key="wms-intel" path="inteligencia" element={<IntelligencePage />} />,
   <Route key="wms-slot" path="slotting" element={<SlottingPlannerPage />} />,
   <Route key="wms-yard" path="yard" element={<YardManagementPage />} />,
@@ -72,7 +72,7 @@ export const WMSRoutes = [
   <Route key="wms-alloc" path="alocacao" element={<SkuAllocationPage />} />,
   <Route key="wms-reserv" path="reservas" element={<OrderReservationsPage />} />,
   <Route key="wms-picking" path="separacao-pedidos" element={<OrderPickingPage />} />,
-  <Route key="wms-quality" path="qualidade" element={<QualityControlPage />} />,
+  <Route key="wms-quality" path="qualidade" element={<Navigate to="/producao/qualidade" replace />} />,
   <Route key="wms-3pl" path="faturamento-3pl" element={<Billing3PLPage />} />,
   <Route key="wms-route" path="rota-picking" element={<PickingRoutePage />} />,
   <Route key="wms-labor" path="mao-de-obra" element={<LaborManagementPage />} />,

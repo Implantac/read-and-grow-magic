@@ -25,7 +25,7 @@ export const AccountingRoutes = [
   <Route key="acc-dre-gerencial" path="dre-gerencial" element={<DREManagerialPage />} />,
   <Route key="acc-balance" path="balanco" element={<BalanceSheetPage />} />,
   <Route key="acc-dash" path="dashboard" element={<AccountingDashboardPage />} />,
-  <Route key="acc-painel" path="painel" element={<AccountingDashboardPage />} />,
+  <Route key="acc-painel" path="painel" element={<Navigate to="/contabilidade/dashboard" replace />} />,
   <Route key="acc-closing" path="fechamento" element={<PeriodClosingPage />} />,
   <Route key="acc-fiscal-close" path="fechamento-diario" element={<FiscalCloseDashboardPage />} />,
 ];
