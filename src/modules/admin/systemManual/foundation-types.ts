@@ -22,3 +22,23 @@ export interface RoadmapPhase {
  * Implementação → Review Loop → Entrega) e boas práticas de mercado
  * (ASAP/Activate, Signature Method, Sure Step).
 
+export interface BusinessRule {
+  rule: string;
+  reason: string;
+  severity: 'blocking' | 'warning' | 'info';
+}
+
+export interface DailyRoutine {
+  when: string; // "Diariamente 09:00" / "Ao chegar mercadoria" / "Fim do mês"
+  action: string;
+  responsible: string;
+}
+
+export interface ModuleFoundation {
+  concept: string; // conceito-chave (2-3 frases fortes)
+  businessRules: BusinessRule[];
+  keyMetrics: { name: string; formula: string; target: string }[];
+  routines: DailyRoutine[];
+  integrations: { with: string; what: string }[];
+  antipatterns: string[]; // o que NUNCA fazer
+}
