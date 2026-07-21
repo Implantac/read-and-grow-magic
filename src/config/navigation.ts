@@ -316,6 +316,7 @@ export const navigationSections: NavSection[] = [
           { title: 'Armazenagem', href: '/wms/armazenagem', icon: 'Boxes' },
           { title: 'Endereços', href: '/wms/enderecos', icon: 'MapPin' },
           { title: 'Saldos', href: '/wms/saldos', icon: 'Database' },
+          { title: 'Matriz Multi-Loja', href: '/wms/matriz-estoque', icon: 'LayoutGrid' },
           { title: 'Alocação de SKU', href: '/wms/alocacao', icon: 'Move' },
           { title: 'Lotes', href: '/wms/lotes', icon: 'Layers' },
           { title: 'Recebimento', href: '/wms/recebimento', icon: 'PackagePlus' },
