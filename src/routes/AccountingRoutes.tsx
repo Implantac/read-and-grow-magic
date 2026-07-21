@@ -10,6 +10,9 @@ const BalanceSheetPage = lazy(() => import("../modules/accounting/BalanceSheet")
 const AccountingDashboardPage = lazy(() => import("../modules/accounting/AccountingDashboard"));
 const PeriodClosingPage = lazy(() => import("../modules/accounting/PeriodClosing"));
 const DREManagerialPage = lazy(() => import("../modules/accounting/DREManagerial"));
+const FiscalCloseDashboardPage = lazy(() => import("../modules/accounting/FiscalCloseDashboard"));
+
+
 
 // Paths relativos: montados sob `/contabilidade/*` em App.tsx.
 export const AccountingRoutes = [
@@ -24,4 +27,5 @@ export const AccountingRoutes = [
   <Route key="acc-dash" path="dashboard" element={<AccountingDashboardPage />} />,
   <Route key="acc-painel" path="painel" element={<AccountingDashboardPage />} />,
   <Route key="acc-closing" path="fechamento" element={<PeriodClosingPage />} />,
+  <Route key="acc-fiscal-close" path="fechamento-diario" element={<FiscalCloseDashboardPage />} />,
 ];
