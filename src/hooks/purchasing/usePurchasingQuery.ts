@@ -38,7 +38,7 @@ export function usePurchasing() {
         taxes: o.tax_amount || 0, total: o.total_amount,
         paymentTerms: o.payment_terms, status: o.status, priority: o.priority,
         buyerId: o.buyer_id, buyerName: '', createdAt: o.created_at, updatedAt: o.updated_at
-      }));
+      })) as PurchaseOrder[];
     },
   });
 
