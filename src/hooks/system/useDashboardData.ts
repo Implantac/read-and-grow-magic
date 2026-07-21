@@ -9,12 +9,12 @@ import { formatBRL } from '@/lib/formatters';
 const fmtShort = (v: number) => formatBRL(v);
 
 // Aplica filtros de canal operacional e filial em queries que suportam essas colunas.
-function withCanal<Q extends { eq: (c: string, v: any) => Q }>(
-  q: Q,
+function withCanal(
+  q: any,
   canal: CanalFilter,
   branchId: string | null,
   opts: { branch?: boolean; canal?: boolean } = {}
-): Q {
+): any {
   let r = q;
   const wantCanal = opts.canal !== false;
   const wantBranch = opts.branch !== false;
