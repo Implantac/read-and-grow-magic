@@ -178,10 +178,39 @@ export default function CommercialDashboard() {
 
   return (
     <PageContainer>
-      <PageHeader title="Dashboard Comercial" description="Centro de inteligência e performance de vendas" />
+      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+        <PageHeader title="Dashboard Comercial" description="Centro de inteligência e performance de vendas" />
+        <CanalFilter />
+      </div>
+
+      {/* Breakdown Varejo × Atacado */}
+      <div className="grid gap-4 md:grid-cols-2 mt-6 mb-6">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <ShoppingCart className="h-4 w-4 text-primary" /> Varejo (PDV)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-primary">{formatBRL(stats.varejoBilling)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{stats.varejoOrders} pedidos no mês</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-accent" /> Atacado / Indústria
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold text-accent">{formatBRL(stats.atacadoBilling)}</p>
+            <p className="text-xs text-muted-foreground mt-1">{stats.atacadoOrders} pedidos no mês</p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* KPIs Row 1 */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 mt-6">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
         <KPICard index={0} title="Faturamento Hoje" value={formatBRL(stats.billingToday)} subtitle={`${stats.ordersToday} pedidos`} icon={<ShoppingCart className="h-5 w-5" />} accentColor="primary" />
         <KPICard index={1} title="Faturamento do Mês" value={formatBRL(stats.billingMonth)} subtitle={
           stats.billingGrowth !== 0
