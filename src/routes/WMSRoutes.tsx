@@ -83,4 +83,5 @@ export const WMSRoutes = [
   <Route key="wms-wave-v2" path="wave-planning" element={<WavePlanningV2Page />} />,
   <Route key="wms-matrix" path="matriz-estoque" element={<EstoqueMatrixPage />} />,
   <Route key="wms-transf-canal" path="transferencias-canal" element={<TransferenciasCanalPage />} />,
+  <Route key="wms-stock-report-canal" path="relatorio-estoque-canal" element={<StockReportCanalPage />} />,
 ];
