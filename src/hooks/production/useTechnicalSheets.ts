@@ -23,7 +23,7 @@ export function useTechnicalSheets() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any).from('product_technical_sheets').select('*').order('product_name');
+    const { data, error } = await supabase.from('product_technical_sheets').select('*').order('product_name');
     if (error) { console.error(error); toast.error('Erro ao carregar fichas técnicas'); }
     else setSheets(data || []);
     setLoading(false);
@@ -32,7 +32,7 @@ export function useTechnicalSheets() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const create = async (item: Partial<TechnicalSheetRow>) => {
-    const { error } = await (supabase as any).from('product_technical_sheets').insert(item);
+    const { error } = await supabase.from('product_technical_sheets').insert(item);
     if (error) { toast.error('Erro ao criar ficha técnica'); return false; }
     toast.success('Ficha técnica criada');
     await fetchData();
@@ -40,14 +40,14 @@ export function useTechnicalSheets() {
   };
 
   const update = async (id: string, updates: Partial<TechnicalSheetRow>) => {
-    const { error } = await (supabase as any).from('product_technical_sheets').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await supabase.from('product_technical_sheets').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
     if (error) { toast.error('Erro ao atualizar'); return; }
     toast.success('Ficha atualizada');
     await fetchData();
   };
 
   const remove = async (id: string) => {
-    const { error } = await (supabase as any).from('product_technical_sheets').delete().eq('id', id);
+    const { error } = await supabase.from('product_technical_sheets').delete().eq('id', id);
     if (error) { toast.error('Erro ao excluir'); return; }
     toast.success('Ficha excluída');
     await fetchData();

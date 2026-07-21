@@ -29,7 +29,7 @@ export function useOutsourcingOrders() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('outsourcing_orders')
       .select('*')
       .order('created_at', { ascending: false });
@@ -45,7 +45,7 @@ export function useOutsourcingOrders() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const create = async (order: Partial<OutsourcingOrderRow>) => {
-    const { error } = await (supabase as any).from('outsourcing_orders').insert(order);
+    const { error } = await supabase.from('outsourcing_orders').insert(order);
     if (error) { toast.error('Erro ao criar ordem de terceirização'); return false; }
     toast.success('Ordem de terceirização criada');
     await fetchData();
@@ -53,7 +53,7 @@ export function useOutsourcingOrders() {
   };
 
   const update = async (id: string, updates: Partial<OutsourcingOrderRow>) => {
-    const { error } = await (supabase as any)
+    const { error } = await supabase
       .from('outsourcing_orders')
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', id);
@@ -64,7 +64,7 @@ export function useOutsourcingOrders() {
   };
 
   const remove = async (id: string) => {
-    const { error } = await (supabase as any).from('outsourcing_orders').delete().eq('id', id);
+    const { error } = await supabase.from('outsourcing_orders').delete().eq('id', id);
     if (error) { toast.error('Erro ao excluir'); return; }
     toast.success('Ordem excluída');
     await fetchData();
