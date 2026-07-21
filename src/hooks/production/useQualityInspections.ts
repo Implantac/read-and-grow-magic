@@ -27,7 +27,7 @@ export function useQualityInspections() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('quality_inspections')
       .select('*, production_orders(order_number), production_steps(name)')
       .order('inspection_date', { ascending: false });
