@@ -403,167 +403,36 @@ export default function ProductionKanban() {
         </div>
       </PageHeader>
 
-      {/* KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <KPICard title="Em Produção" value={inProgressCount} icon={<Factory className="h-5 w-5" />} accentColor="primary" index={0} />
-        <KPICard title="Aguardando Material" value={waitingMaterialCount} icon={<PackageX className="h-5 w-5" />} accentColor="warning" index={1} />
-        <KPICard title="Terceirizado" value={outsourcedCount} icon={<Truck className="h-5 w-5" />} accentColor="info" index={2} />
-        <KPICard title="Atrasadas" value={lateCount} icon={<AlertTriangle className="h-5 w-5" />} accentColor="danger" index={3} />
-        <KPICard title="Concluídas Hoje" value={completedToday} icon={<TrendingUp className="h-5 w-5" />} accentColor="success" index={4} />
-      </div>
+      <KanbanKPIs
+        inProgressCount={inProgressCount}
+        waitingMaterialCount={waitingMaterialCount}
+        outsourcedCount={outsourcedCount}
+        lateCount={lateCount}
+        completedToday={completedToday}
+      />
 
-      {/* WIP Panel */}
-      <Card className="border-primary/30 bg-primary/5">
-        <CardContent className="py-3 px-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Layers className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">WIP — Material em Processo</span>
-            <Badge variant="outline" className="ml-auto text-[10px]">{wipMetrics.totalOrders} OPs</Badge>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="text-center">
-              <p className="text-lg font-bold text-primary">{formatNumber(wipMetrics.totalQty)}</p>
-              <p className="text-[10px] text-muted-foreground uppercase">Unidades em Processo</p>
-            </div>
-            <div className="text-center">
-              <p className="text-lg font-bold text-emerald-400">R$ {formatNumber(wipMetrics.totalCost, 0)}</p>
-              <p className="text-[10px] text-muted-foreground uppercase">Custo Estimado WIP</p>
-            </div>
-            {Object.entries(wipMetrics.byColumn).slice(0, 2).map(([status, data]) => {
-              const label = KANBAN_COLUMNS.find(c => c.key === status)?.label || status;
-              return (
-                <div key={status} className="text-center">
-                  <p className="text-lg font-bold text-foreground">{data.count}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase truncate">{label}</p>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+      <KanbanWipPanel wipMetrics={wipMetrics} />
 
-      {/* Suggestions */}
-      {suggestions.length > 0 && (
-        <Card className="border-warning/30 bg-warning/5">
-          <CardContent className="py-3 px-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Star className="h-4 w-4 text-warning" />
-              <span className="text-sm font-medium">Sugestões Inteligentes</span>
-            </div>
-            <div className="space-y-1">
-              {suggestions.map((s, i) => (
-                <p key={i} className={cn(
-                  'text-xs',
-                  s.severity === 'critical' ? 'text-destructive font-medium'
-                    : s.severity === 'warning' ? 'text-warning' : 'text-muted-foreground'
-                )}>
-                  {s.icon} {s.text}
-                </p>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <KanbanSuggestions suggestions={suggestions} />
 
-      {/* Filters */}
-      <Card className="border-border/50">
-        <CardContent className="pt-4 pb-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input placeholder="Buscar OP, produto ou cliente..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-9" />
-            </div>
-            <Select value={sectorFilter} onValueChange={setSectorFilter}>
-              <SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Setor" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos Setores</SelectItem>
-                {sectors.map(s => <SelectItem key={s!} value={s!}>{s}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger className="w-full md:w-[180px]"><SelectValue placeholder="Prioridade" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                <SelectItem value="urgent">🔴 Urgente</SelectItem>
-                <SelectItem value="high">🟠 Alta</SelectItem>
-                <SelectItem value="medium">🔵 Média</SelectItem>
-                <SelectItem value="low">⚪ Baixa</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+      <KanbanFilters
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        sectorFilter={sectorFilter}
+        setSectorFilter={setSectorFilter}
+        priorityFilter={priorityFilter}
+        setPriorityFilter={setPriorityFilter}
+        sectors={sectors}
+      />
 
-      {/* Kanban Board */}
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-3">
-          {columns.map(col => {
-            const Icon = col.icon;
-            const isOverWip = col.wipLimit > 0 && col.items.length >= col.wipLimit;
-            const isNearWip = col.wipLimit > 0 && col.items.length >= col.wipLimit * 0.9 && !isOverWip;
-            return (
-              <div key={col.key} className="space-y-2">
-                <div className={cn(
-                  'flex items-center gap-2 p-2.5 rounded-xl border-t-2 bg-gradient-to-b',
-                  col.gradient, col.border,
-                  isOverWip && 'ring-2 ring-destructive/40'
-                )}>
-                  <Icon className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-semibold text-xs">{col.label}</span>
-                  <Badge className={cn('ml-auto text-[10px] font-bold', col.badge)}>
-                    {col.items.length}
-                    {col.wipLimit > 0 && <span className="opacity-60">/{col.wipLimit}</span>}
-                  </Badge>
-                  {isOverWip && <span className="text-[10px] text-destructive">⚠</span>}
-                  {isNearWip && <span className="text-[10px] text-warning">⚡</span>}
-                </div>
+      <KanbanBoard
+        columns={columns}
+        onDragEnd={handleDragEnd}
+        onMove={moveOrder}
+        outsourcingByOP={outsourcingByOP}
+        timeLogs={timeLogs}
+      />
 
-                <Droppable droppableId={col.key}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className={cn(
-                        'space-y-2 min-h-[200px] rounded-xl p-1.5 transition-colors duration-200',
-                        snapshot.isDraggingOver && 'bg-primary/5 ring-2 ring-primary/20 ring-dashed',
-                        isOverWip && snapshot.isDraggingOver && 'ring-destructive/30 bg-destructive/5'
-                      )}
-                    >
-                      {col.items.map((order, index) => (
-                        <Draggable key={order.id} draggableId={order.id} index={index}>
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              className={cn('transition-shadow', snapshot.isDragging && 'z-50')}
-                            >
-                              <KanbanCard
-                                order={order}
-                                dragHandleProps={provided.dragHandleProps}
-                                isDragging={snapshot.isDragging}
-                                columnKey={col.key}
-                                onMove={moveOrder}
-                                outsourcingData={outsourcingByOP[order.id]}
-                                timeLogs={timeLogs}
-                              />
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                      {col.items.length === 0 && !snapshot.isDraggingOver && (
-                        <div className="text-center text-[11px] text-muted-foreground py-10 border border-dashed rounded-xl opacity-50">
-                          Arraste OPs aqui
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </Droppable>
-              </div>
-            );
-          })}
-        </div>
-      </DragDropContext>
 
       <WarModeDialog
         open={warModeOpen}
