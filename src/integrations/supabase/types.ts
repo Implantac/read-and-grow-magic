@@ -22993,6 +22993,10 @@ export type Database = {
         Returns: number
       }
       recompute_default_scores: { Args: never; Returns: Json }
+      recompute_stock_balance: {
+        Args: { _product_id: string }
+        Returns: undefined
+      }
       record_forecast_snapshot: {
         Args: {
           _company_id: string
