@@ -378,6 +378,11 @@ export default function DivergenceDashboard() {
                                 <Clock className="h-3 w-3" /> Vencido
                               </Badge>
                             )}
+                            {n.escalated_at && (
+                              <Badge variant="destructive" className="text-xs gap-1">
+                                🚨 Escalonado
+                              </Badge>
+                            )}
                             {assignedName && (
                               <Badge variant="outline" className="text-xs">
                                 {assignedName}
