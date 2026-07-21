@@ -51,7 +51,7 @@ export function useBudgetItems(projectId: string) {
     queryKey: ['construction_budget_items', projectId],
     enabled: !!projectId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('construction_budget_items')
         .select('*')
         .eq('project_id', projectId)
@@ -66,7 +66,7 @@ export function useCreateBudgetItem(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: Partial<BudgetItem>) => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('construction_budget_items')
         .insert({ ...payload, project_id: projectId })
         .select()
@@ -86,7 +86,7 @@ export function useDeleteBudgetItem(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('construction_budget_items')
         .delete()
         .eq('id', id);
@@ -103,7 +103,7 @@ export function useMeasurements(projectId: string) {
     queryKey: ['construction_measurements', projectId],
     enabled: !!projectId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('construction_measurements')
         .select('*')
         .eq('project_id', projectId)
@@ -118,7 +118,7 @@ export function useCreateMeasurement(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: Partial<Measurement>) => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('construction_measurements')
         .insert({ ...payload, project_id: projectId })
         .select()
@@ -138,7 +138,7 @@ export function useUpdateMeasurement(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...patch }: Partial<Measurement> & { id: string }) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('construction_measurements')
         .update(patch)
         .eq('id', id);
@@ -155,7 +155,7 @@ export function useDiary(projectId: string) {
     queryKey: ['construction_diary', projectId],
     enabled: !!projectId,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('construction_diary')
         .select('*')
         .eq('project_id', projectId)
@@ -171,7 +171,7 @@ export function useCreateDiaryEntry(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: Partial<DiaryEntry>) => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('construction_diary')
         .insert({ ...payload, project_id: projectId })
         .select()

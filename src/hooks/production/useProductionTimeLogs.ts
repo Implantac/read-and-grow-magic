@@ -21,7 +21,7 @@ export function useProductionTimeLogs(orderId?: string) {
 
   const fetchLogs = useCallback(async () => {
     setLoading(true);
-    let query = (supabase as any).from('production_time_logs').select('*').order('created_at', { ascending: false });
+    let query = supabase.from('production_time_logs').select('*').order('created_at', { ascending: false });
     if (orderId) query = query.eq('order_id', orderId);
     else query = query.limit(500);
     const { data, error } = await query;
@@ -48,7 +48,7 @@ export function useProductionTimeLogs(orderId?: string) {
     const active = getActiveLog(oid);
     if (active) { toast.info('Timer já está ativo para esta OP'); return; }
     
-    const { error } = await (supabase as any).from('production_time_logs').insert({
+    const { error } = await supabase.from('production_time_logs').insert({
       order_id: oid,
       action: 'start',
       started_at: new Date().toISOString(),
@@ -67,7 +67,7 @@ export function useProductionTimeLogs(orderId?: string) {
     const now = new Date();
     const elapsed = Math.floor((now.getTime() - startedAt.getTime()) / 1000) + active.elapsed_seconds;
 
-    const { error } = await (supabase as any).from('production_time_logs').update({
+    const { error } = await supabase.from('production_time_logs').update({
       action: 'pause',
       paused_at: now.toISOString(),
       elapsed_seconds: elapsed,
@@ -82,7 +82,7 @@ export function useProductionTimeLogs(orderId?: string) {
     const paused = getPausedLog(oid);
     if (!paused) { toast.info('Nenhum timer pausado'); return; }
 
-    const { error } = await (supabase as any).from('production_time_logs').update({
+    const { error } = await supabase.from('production_time_logs').update({
       action: 'start',
       started_at: new Date().toISOString(),
       paused_at: null,
@@ -104,7 +104,7 @@ export function useProductionTimeLogs(orderId?: string) {
       elapsed += Math.floor((new Date().getTime() - new Date(active.started_at).getTime()) / 1000);
     }
 
-    const { error } = await (supabase as any).from('production_time_logs').update({
+    const { error } = await supabase.from('production_time_logs').update({
       action: 'finish',
       finished_at: new Date().toISOString(),
       elapsed_seconds: elapsed,
