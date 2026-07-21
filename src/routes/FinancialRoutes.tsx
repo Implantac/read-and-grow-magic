@@ -65,5 +65,6 @@ export const FinancialRoutes = [
   <Route key="fin-alerts" path="alertas" element={<FinancialAlertsPage />} />,
   <Route key="fin-dre-dyn" path="dre-dinamico" element={<DREDynamicPage />} />,
   <Route key="fin-segmentado" path="segmentado" element={<FinancialSegmentadoPage />} />,
+  <Route key="fin-divergences" path="divergencias" element={<DivergenceDashboardPage />} />,
 ];
 
