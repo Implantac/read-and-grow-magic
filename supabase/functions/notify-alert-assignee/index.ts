@@ -38,10 +38,37 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
-  let payload: { notification_id?: string; mode?: "assigned" | "sla_warning" } = {};
+  let payload: { notification_id?: string; mode?: "assigned" | "sla_warning" | "escalated" } = {};
   try { payload = await req.json(); } catch { /* cron call has no body */ }
 
   const mode = payload.mode ?? (payload.notification_id ? "assigned" : "sla_warning");
+
+  // ------------ Modo "escalated": alerta foi reatribuído por vencimento de SLA ------------
+  if (mode === "escalated" && payload.notification_id) {
+    const { data: n } = await supabase
+      .from("notifications").select("*").eq("id", payload.notification_id).maybeSingle();
+    if (!n?.assigned_to) {
+      return new Response(JSON.stringify({ skipped: "no_assignee" }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const { data: users } = await supabase.auth.admin.listUsers({ perPage: 500 });
+    const email = users?.users.find((u) => u.id === n.assigned_to)?.email;
+    if (!email) return new Response(JSON.stringify({ skipped: "no_email" }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+    const dueTxt = n.due_at ? new Date(n.due_at).toLocaleString("pt-BR") : "—";
+    const fromName = (n as any).escalated_from ? String((n as any).escalated_from).slice(0, 8) : "—";
+    const html = `
+      <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#0f172a;color:#e2e8f0;border-radius:8px">
+        <h2 style="color:#ef4444;margin:0 0 12px">🚨 Alerta escalonado para você</h2>
+        <p style="margin:0 0 8px">O SLA venceu sem tratamento e o alerta foi reatribuído a você.</p>
+        <p style="margin:12px 0 8px"><strong>${esc(n.title)}</strong></p>
+        ${n.message ? `<p style="opacity:.85">${esc(n.message)}</p>` : ""}
+        <p style="margin-top:12px"><strong>Prazo original:</strong> ${esc(dueTxt)}</p>
+        <p style="margin-top:6px"><strong>Responsável anterior:</strong> ${esc(fromName)}</p>
+        <p style="margin-top:20px;font-size:13px;opacity:.75">Trate imediatamente em <strong>/financeiro/divergencias</strong>.</p>
+      </div>`;
+    const r = await sendEmail([email], `[ESCALONADO] ${n.title}`, html);
+    return new Response(JSON.stringify({ ok: r.ok, mode }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
 
   // ------------ Modo "assigned": envia e-mail a um único responsável ------------
   if (mode === "assigned" && payload.notification_id) {
