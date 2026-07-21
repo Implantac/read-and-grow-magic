@@ -34,14 +34,14 @@ export function useProductionSchedule() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const create = async (schedule: Partial<ProductionScheduleRow>) => {
-    const { error } = await supabase.from('production_schedule').insert(schedule);
+    const { error } = await supabase.from('production_schedule').insert(schedule as any);
     if (error) { toast.error('Erro ao criar agendamento'); return; }
     toast.success('Agendamento criado');
     await fetchData();
   };
 
   const update = async (id: string, updates: Partial<ProductionScheduleRow>) => {
-    const { error } = await supabase.from('production_schedule').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await supabase.from('production_schedule').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
     if (error) { toast.error('Erro ao atualizar agendamento'); return; }
     await fetchData();
   };

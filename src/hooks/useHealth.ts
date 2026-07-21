@@ -73,10 +73,10 @@ export function useHealthPatients() {
 export function useCreateHealthPatient() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: Partial<HealthPatient>) => {
+    mutationFn: async (input: any) => {
       const { data, error } = await supabase
         .from('health_patients' as any)
-        .insert(input)
+        .insert(input as any)
         .select()
         .single();
       if (error) throw error;
@@ -125,10 +125,10 @@ export function useHealthProfessionals() {
 export function useCreateHealthProfessional() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: Partial<HealthProfessional>) => {
+    mutationFn: async (input: any) => {
       const { data, error } = await supabase
         .from('health_professionals' as any)
-        .insert(input)
+        .insert(input as any)
         .select()
         .single();
       if (error) throw error;
@@ -161,10 +161,10 @@ export function useHealthAppointments(patientId?: string) {
 export function useCreateHealthAppointment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: Partial<HealthAppointment>) => {
+    mutationFn: async (input: any) => {
       const { data, error } = await supabase
         .from('health_appointments' as any)
-        .insert(input)
+        .insert(input as any)
         .select()
         .single();
       if (error) throw error;
@@ -216,10 +216,10 @@ export function useHealthRecords(patientId?: string) {
 export function useCreateHealthRecord() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: Partial<HealthRecord>) => {
+    mutationFn: async (input: any) => {
       const { data, error } = await supabase
         .from('health_records' as any)
-        .insert(input)
+        .insert(input as any)
         .select()
         .single();
       if (error) throw error;

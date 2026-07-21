@@ -30,7 +30,7 @@ export function useWorkflowTriggers() {
   });
 
   const upsert = useMutation({
-    mutationFn: async (payload: Partial<WorkflowTrigger> & { workflow_definition_id: string; event_type: string }) => {
+    mutationFn: async (payload: any & { workflow_definition_id: string; event_type: string }) => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) throw new Error("Não autenticado");
       const { data: prof } = await supabase.from("profiles").select("company_id").eq("id", u.user.id).maybeSingle();

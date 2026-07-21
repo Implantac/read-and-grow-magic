@@ -46,7 +46,7 @@ export function useMDFes() {
 export function useCreateMDFe() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: Partial<MDFe> & { uf_origin: string; uf_destination: string }) => {
+    mutationFn: async (payload: any & { uf_origin: string; uf_destination: string }) => {
       const number = 'MDFE-' + Date.now().toString().slice(-8);
       const { data, error } = await supabase.from('mdfe' as any).insert({ ...payload, number, status: 'draft' }).select().single();
       if (error) throw error;
@@ -100,7 +100,7 @@ export function useAddMDFeDocument() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { mdfe_id: string; document_type: 'nfe' | 'cte'; document_number: string; access_key?: string; document_value?: number; document_weight?: number; unloading_city?: string }) => {
-      const { error } = await supabase.from('mdfe_documents' as any).insert(payload);
+      const { error } = await supabase.from('mdfe_documents' as any).insert(payload as any);
       if (error) throw error;
       // Atualiza totais
       const { data: docs } = await supabase.from('mdfe_documents' as any).select('*').eq('mdfe_id', payload.mdfe_id);

@@ -52,7 +52,7 @@ export function useCTes() {
 export function useCreateCTe() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: Partial<CTe> & { carrier_name: string; sender_name: string; recipient_name: string }) => {
+    mutationFn: async (payload: any & { carrier_name: string; sender_name: string; recipient_name: string }) => {
       const number = 'CTE-' + Date.now().toString().slice(-8);
       const icms_base = payload.freight_value ?? 0;
       const icms_rate = payload.icms_rate ?? 12;

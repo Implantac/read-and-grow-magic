@@ -29,7 +29,7 @@ export function useProductionSectors() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const create = async (item: Partial<ProductionSector>) => {
-    const { error } = await supabase.from('production_sectors').insert(item);
+    const { error } = await supabase.from('production_sectors').insert(item as any);
     if (error) { toast.error('Erro ao criar setor'); return false; }
     toast.success('Setor cadastrado');
     await fetch();
@@ -37,7 +37,7 @@ export function useProductionSectors() {
   };
 
   const update = async (id: string, updates: Partial<ProductionSector>) => {
-    const { error } = await supabase.from('production_sectors').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await supabase.from('production_sectors').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
     if (error) { toast.error('Erro ao atualizar setor'); return false; }
     toast.success('Setor atualizado');
     await fetch();

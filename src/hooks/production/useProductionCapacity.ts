@@ -31,7 +31,7 @@ export function useProductionCapacity() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const create = async (item: Partial<ProductionCapacityRow>) => {
-    const { error } = await supabase.from('production_capacity').insert(item);
+    const { error } = await supabase.from('production_capacity').insert(item as any);
     if (error) { toast.error('Erro ao criar capacidade'); return false; }
     toast.success('Capacidade cadastrada');
     await fetchData();
@@ -39,7 +39,7 @@ export function useProductionCapacity() {
   };
 
   const update = async (id: string, updates: Partial<ProductionCapacityRow>) => {
-    const { error } = await supabase.from('production_capacity').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await supabase.from('production_capacity').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
     if (error) { toast.error('Erro ao atualizar'); return; }
     toast.success('Atualizado');
     await fetchData();

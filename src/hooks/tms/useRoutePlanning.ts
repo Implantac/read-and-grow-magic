@@ -71,7 +71,7 @@ export function useUpdateRouteStop() {
     mutationFn: async ({ id, updates }: { id: string; updates: RouteStopUpdate }) => {
       const { data, error } = await supabase
         .from('route_stops')
-        .update(updates)
+        .update(updates as any)
         .eq('id', id)
         .select()
         .single();
@@ -149,7 +149,7 @@ export function useRouteCost(routeId?: string) {
 export function useUpsertRouteCost() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: Partial<RouteCost> & { route_id: string }) => {
+    mutationFn: async (payload: any & { route_id: string }) => {
       const company_id = useEnterpriseStore.getState().activeCompanyId;
       if (!company_id) throw new Error('Empresa não selecionada');
       const { data, error } = await supabase

@@ -45,7 +45,7 @@ export function useOutsourcingOrders() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const create = async (order: Partial<OutsourcingOrderRow>) => {
-    const { error } = await supabase.from('outsourcing_orders').insert(order);
+    const { error } = await supabase.from('outsourcing_orders').insert(order as any);
     if (error) { toast.error('Erro ao criar ordem de terceirização'); return false; }
     toast.success('Ordem de terceirização criada');
     await fetchData();
@@ -55,7 +55,7 @@ export function useOutsourcingOrders() {
   const update = async (id: string, updates: Partial<OutsourcingOrderRow>) => {
     const { error } = await supabase
       .from('outsourcing_orders')
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .update({ ...updates, updated_at: new Date().toISOString() } as any)
       .eq('id', id);
     if (error) { toast.error('Erro ao atualizar'); return false; }
     toast.success('Ordem atualizada');

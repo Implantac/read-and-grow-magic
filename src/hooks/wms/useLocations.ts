@@ -85,7 +85,7 @@ export function useLocations() {
       type: payload.type || null,
       manager: payload.manager || null,
       address: payload.address || null,
-    });
+    } as any);
     if (error) return toast.error(error.message);
     toast.success('Armazém criado');
     fetchAll();
@@ -106,7 +106,7 @@ export function useLocations() {
       is_bulk_zone: payload.is_bulk_zone ?? false,
       temperature_range: payload.temperature_range || null,
       priority: payload.priority ?? 1,
-    });
+    } as any);
     if (error) return toast.error(error.message);
     toast.success('Zona criada');
     fetchAll();
@@ -130,7 +130,7 @@ export function useLocations() {
       max_weight: payload.max_weight ?? null,
       max_volume: payload.max_volume ?? null,
       abc_classification: payload.abc_classification || null,
-    });
+    } as any);
     if (error) return toast.error(error.message);
     toast.success('Endereço criado');
     fetchAll();

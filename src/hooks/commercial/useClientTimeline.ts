@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert } from '@/integrations/supabase/types';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export const TIMELINE_EVENT_TYPES = [
@@ -47,7 +48,7 @@ export function useClientTimeline(clientId: string | undefined) {
 export function useCreateTimelineEvent() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (event: Partial<DbTimelineEvent>) => {
+    mutationFn: async (event: TablesInsert<'client_timeline'>) => {
       const { data, error } = await supabase.from('client_timeline').insert(event).select().single();
       if (error) throw error;
       return data;

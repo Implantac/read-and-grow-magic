@@ -54,12 +54,12 @@ export function useTaxRules() {
 export function useUpsertTaxRule() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (rule: Partial<TaxRule> & { name: string }) => {
+    mutationFn: async (rule: any & { name: string }) => {
       const { id, created_at, updated_at, ...payload } = rule as any;
       if (id) {
         const { data, error } = await supabase
           .from('tax_rules' as any)
-          .update(payload)
+          .update(payload as any)
           .eq('id', id)
           .select()
           .single();
@@ -68,7 +68,7 @@ export function useUpsertTaxRule() {
       }
       const { data, error } = await supabase
         .from('tax_rules' as any)
-        .insert(payload)
+        .insert(payload as any)
         .select()
         .single();
       if (error) throw error;

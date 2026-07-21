@@ -64,7 +64,7 @@ export function useSupplyStock() {
 
   const createSupply = async (supply: Partial<SupplyItem>) => {
     const totalValue = (supply.current_quantity || 0) * (supply.unit_cost || 0);
-    const { error } = await (supabase as any).from('supply_stock').insert({ ...supply, total_value: totalValue });
+    const { error } = await (supabase as any).from('supply_stock').insert({ ...supply, total_value: totalValue } as any);
     if (error) { toast.error('Erro ao criar insumo'); return false; }
     toast.success('Insumo cadastrado');
     await fetchSupplies();
@@ -72,13 +72,13 @@ export function useSupplyStock() {
   };
 
   const updateSupply = async (id: string, updates: Partial<SupplyItem>) => {
-    const { error } = await (supabase as any).from('supply_stock').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await (supabase as any).from('supply_stock').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
     if (error) { toast.error('Erro ao atualizar insumo'); return; }
     await fetchSupplies();
   };
 
   const registerMovement = async (movement: Partial<SupplyMovement>) => {
-    const { error: movErr } = await (supabase as any).from('supply_movements').insert(movement);
+    const { error: movErr } = await (supabase as any).from('supply_movements').insert(movement as any);
     if (movErr) { toast.error('Erro ao registrar movimentação'); return false; }
 
     // Update supply stock
@@ -94,7 +94,7 @@ export function useSupplyStock() {
         total_value: Math.max(0, newTotal),
         [dateField]: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      }).eq('id', movement.supply_id);
+      } as any).eq('id', movement.supply_id);
     }
 
     toast.success('Movimentação registrada');

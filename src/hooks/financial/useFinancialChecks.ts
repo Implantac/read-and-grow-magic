@@ -46,8 +46,8 @@ export function useFinancialChecks(filters?: { status?: string; type?: string })
 export function useCreateCheck() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: Partial<FinancialCheck> & { check_type: 'received' | 'issued'; check_number: string; amount: number }) => {
-      const { data, error } = await supabase.from('financial_checks' as any).insert(input).select().single();
+    mutationFn: async (input: any & { check_type: 'received' | 'issued'; check_number: string; amount: number }) => {
+      const { data, error } = await supabase.from('financial_checks' as any).insert(input as any).select().single();
       if (error) throw error;
       return data;
     },
@@ -65,7 +65,7 @@ export function useUpdateCheckStatus() {
     mutationFn: async ({ id, status, deposit_date }: { id: string; status: CheckStatus; deposit_date?: string }) => {
       const updates: any = { status };
       if (deposit_date) updates.deposit_date = deposit_date;
-      const { data, error } = await supabase.from('financial_checks' as any).update(updates).eq('id', id).select().single();
+      const { data, error } = await supabase.from('financial_checks' as any).update(updates as any).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },

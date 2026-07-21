@@ -58,10 +58,10 @@ export function useRecurringList(filters?: { kind?: RecurringKind; status?: Recu
 export function useCreateRecurring() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: Partial<RecurringRow>) => {
+    mutationFn: async (payload: any) => {
       const { data, error } = await supabase
         .from('financial_recurring')
-        .insert(payload)
+        .insert(payload as any)
         .select()
         .single();
       if (error) throw error;

@@ -38,7 +38,7 @@ export function useCreateSalesRep() {
   const qc = useQueryClient();
   const { currentCompany } = useEnterprise();
   return useMutation({
-    mutationFn: async (rep: Partial<DbSalesRep>) => {
+    mutationFn: async (rep: any) => {
       const { data, error } = await supabase.from('sales_reps').insert({
         ...rep,
         company_id: currentCompany?.id
@@ -57,8 +57,8 @@ export function useCreateSalesRep() {
 export function useUpdateSalesRep() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<DbSalesRep> & { id: string }) => {
-      const { data, error } = await supabase.from('sales_reps').update(updates).eq('id', id).select().single();
+    mutationFn: async ({ id, ...updates }: any & { id: string }) => {
+      const { data, error } = await supabase.from('sales_reps').update(updates as any).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },

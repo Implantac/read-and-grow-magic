@@ -33,7 +33,7 @@ export function useRFIDReaders() {
       ip_address: reader.ipAddress, port: reader.port, model: reader.model,
       manufacturer: reader.manufacturer, antenna_count: reader.antennaCount || 1,
       status: reader.status || 'active',
-    });
+    } as any);
     if (error) { toast.error('Erro ao criar leitor'); return false; }
     toast.success('Leitor RFID cadastrado!');
     await fetch();
@@ -54,7 +54,7 @@ export function useRFIDReaders() {
     if (updates.status !== undefined) mapped.status = updates.status;
     mapped.updated_at = new Date().toISOString();
 
-    const { error } = await supabase.from('rfid_readers').update(mapped).eq('id', id);
+    const { error } = await supabase.from('rfid_readers').update(mapped as any).eq('id', id);
     if (error) { toast.error('Erro ao atualizar leitor'); return false; }
     toast.success('Leitor atualizado!');
     await fetch();
@@ -97,7 +97,7 @@ export function useRFIDTags() {
       product_code: tag.productCode, product_name: tag.productName,
       batch: tag.batch, pallet_id: tag.palletId, location: tag.location,
       status: tag.status || 'active',
-    });
+    } as any);
     if (error) { toast.error('Erro ao registrar tag'); return false; }
     toast.success('Tag RFID registrada!');
     await fetch();
@@ -105,7 +105,7 @@ export function useRFIDTags() {
   };
 
   const update = async (id: string, updates: TagUpdate) => {
-    const { error } = await supabase.from('rfid_tags').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await supabase.from('rfid_tags').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
     if (error) { toast.error('Erro ao atualizar tag'); return false; }
     toast.success('Tag atualizada!');
     await fetch();

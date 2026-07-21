@@ -29,7 +29,7 @@ export function useBankTransactions() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const update = async (id: string, updates: Partial<BankTransactionRow>) => {
-    const { error } = await supabase.from('bank_transactions').update(updates).eq('id', id);
+    const { error } = await supabase.from('bank_transactions').update(updates as any).eq('id', id);
     if (error) { toast.error('Erro ao atualizar transação'); return; }
     await fetch();
   };

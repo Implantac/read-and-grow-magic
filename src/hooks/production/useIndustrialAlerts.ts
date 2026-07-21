@@ -34,7 +34,7 @@ export function useIndustrialAlerts() {
   useEffect(() => { fetchAlerts(); }, [fetchAlerts]);
 
   const createAlert = async (alert: Partial<IndustrialAlert>) => {
-    const { error } = await supabase.from('industrial_alerts').insert(alert);
+    const { error } = await supabase.from('industrial_alerts').insert(alert as any);
     if (error) return false;
     await fetchAlerts();
     return true;
@@ -43,7 +43,7 @@ export function useIndustrialAlerts() {
   const resolveAlert = async (id: string) => {
     const { error } = await supabase.from('industrial_alerts').update({
       status: 'resolved', resolved_at: new Date().toISOString(),
-    }).eq('id', id);
+    } as any).eq('id', id);
     if (error) { toast.error('Erro ao resolver alerta'); return; }
     toast.success('Alerta resolvido');
     await fetchAlerts();

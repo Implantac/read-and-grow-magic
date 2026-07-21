@@ -31,7 +31,7 @@ export function useProductionLogs(orderId?: string) {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const addLog = async (log: Partial<ProductionLogRow>) => {
-    const { error } = await supabase.from('production_logs').insert(log);
+    const { error } = await supabase.from('production_logs').insert(log as any);
     if (error) console.error('Erro ao registrar log', error);
     else await fetchData();
   };

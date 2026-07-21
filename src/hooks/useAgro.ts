@@ -74,10 +74,10 @@ export function useAgroFarms() {
 export function useCreateAgroFarm() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: Partial<AgroFarm>) => {
+    mutationFn: async (input: any) => {
       const { data, error } = await supabase
         .from('agro_farms' as any)
-        .insert(input)
+        .insert(input as any)
         .select()
         .single();
       if (error) throw error;
@@ -125,10 +125,10 @@ export function useAgroFields(farmId?: string) {
 export function useCreateAgroField() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: Partial<AgroField>) => {
+    mutationFn: async (input: any) => {
       const { data, error } = await supabase
         .from('agro_fields' as any)
-        .insert(input)
+        .insert(input as any)
         .select()
         .single();
       if (error) throw error;
@@ -161,10 +161,10 @@ export function useAgroSeasons(fieldId?: string) {
 export function useCreateAgroSeason() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: Partial<AgroSeason>) => {
+    mutationFn: async (input: any) => {
       const { data, error } = await supabase
         .from('agro_seasons' as any)
-        .insert(input)
+        .insert(input as any)
         .select()
         .single();
       if (error) throw error;
@@ -197,10 +197,10 @@ export function useAgroHarvests(seasonId?: string) {
 export function useCreateAgroHarvest() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: Partial<AgroHarvest>) => {
+    mutationFn: async (input: any) => {
       const { data, error } = await supabase
         .from('agro_harvests' as any)
-        .insert(input)
+        .insert(input as any)
         .select()
         .single();
       if (error) throw error;

@@ -51,7 +51,7 @@ export function usePurchaseApprovalRules() {
 export function useUpsertPurchaseApprovalRule() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (rule: Partial<PurchaseApprovalRule>) => {
+    mutationFn: async (rule: any) => {
       const { data, error } = await supabase
         .from("purchase_approval_rules" as any)
         .upsert(rule as any, { onConflict: "company_id,level" })
