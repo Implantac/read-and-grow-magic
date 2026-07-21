@@ -22611,6 +22611,7 @@ export type Database = {
           total_pending: number
         }[]
       }
+      auto_resolve_reconciliation_alerts: { Args: never; Returns: Json }
       backfill_default_lots: { Args: never; Returns: Json }
       bank_apply_suggestion: {
         Args: { p_suggestion_id: string }
