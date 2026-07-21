@@ -33,7 +33,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export default function ConferencePage() {
-  const { records, loading, startConference, completeConference, fetchItems, checkItem, scanBarcode, createConference } = useWMSConference();
+  const { records, loading, startConference, completeConference, fetchItems, checkItem, scanBarcode, createConference, finalizeReceivingToLedger } = useWMSConference();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [detailOpen, setDetailOpen] = useState(false);
