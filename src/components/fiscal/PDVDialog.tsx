@@ -2,15 +2,14 @@ import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { formatBRL } from '@/lib/formatters';
 import {
   Search, Plus, Minus, Trash2, ShoppingCart,
-  X, ChevronRight, Monitor, Send, Keyboard, ScanLine,
-  Camera, CameraOff, Package, Lock, Unlock, ArrowDownLeft, ArrowUpRight,
-  Percent, Clock, Loader2, AlertCircle,
+  ChevronRight, Send, Keyboard, ScanLine,
+  Camera, CameraOff, Package, Lock, Unlock,
+  Percent, Loader2, AlertCircle,
   Pause, Play, LayoutGrid, QrCode,
 } from 'lucide-react';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
-import { Label } from '@/ui/base/label';
-import { Dialog, DialogContent, DialogClose } from '@/ui/base/dialog';
+import { Dialog, DialogContent } from '@/ui/base/dialog';
 import { Separator } from '@/ui/base/separator';
 import { Badge } from '@/ui/base/badge';
 import { useProducts, type DbProduct } from '@/hooks/inventory/useProducts';
