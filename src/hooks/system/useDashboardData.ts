@@ -2,17 +2,34 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { useAppStore } from '@/stores/useAppStore';
+import { useCanalStore, type CanalFilter } from '@/stores/useCanalStore';
 
 import { formatBRL } from '@/lib/formatters';
 // KPI values sempre em formato completo R$ X.XXX,XX (fonte única de verdade)
 const fmtShort = (v: number) => formatBRL(v);
 
+// Aplica filtros de canal operacional e filial em queries que suportam essas colunas.
+function withCanal<Q extends { eq: (c: string, v: any) => Q }>(
+  q: Q,
+  canal: CanalFilter,
+  branchId: string | null,
+  opts: { branch?: boolean; canal?: boolean } = {}
+): Q {
+  let r = q;
+  const wantCanal = opts.canal !== false;
+  const wantBranch = opts.branch !== false;
+  if (wantCanal && canal !== 'CONSOLIDADO') r = r.eq('canal_operacional', canal);
+  if (wantBranch && branchId) r = r.eq('branch_id', branchId);
+  return r;
+}
+
 export function useDashboardData() {
   const { activeCompany } = useAppStore();
+  const { canal, branchId } = useCanalStore();
   const companyId = activeCompany?.id;
 
   return useQuery({
-    queryKey: ['dashboard-consolidated', companyId],
+    queryKey: ['dashboard-consolidated', companyId, canal, branchId],
     enabled: !!companyId,
     queryFn: async () => {
       if (!companyId) return null;
