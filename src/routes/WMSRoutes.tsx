@@ -79,4 +79,5 @@ export const WMSRoutes = [
   <Route key="wms-dock-sched" path="agenda-docas" element={<DockSchedulingPage />} />,
   <Route key="wms-carrier-score" path="scorecard-transportadoras" element={<CarrierScorecardPage />} />,
   <Route key="wms-wave-v2" path="wave-planning" element={<WavePlanningV2Page />} />,
+  <Route key="wms-matrix" path="matriz-estoque" element={<EstoqueMatrixPage />} />,
 ];
