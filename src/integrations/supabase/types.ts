@@ -23098,6 +23098,7 @@ export type Database = {
         Args: { _reason?: string; _settlement_id: string }
         Returns: Json
       }
+      run_daily_reconciliation_alerts: { Args: never; Returns: undefined }
       run_financial_audit: { Args: { _mode?: string }; Returns: Json }
       settle_account: {
         Args: {
