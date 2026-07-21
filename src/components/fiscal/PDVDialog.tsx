@@ -1095,98 +1095,26 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
         </div>
 
         {/* Open session dialog */}
-        {showOpenSession && (
-          <div
-            className="absolute inset-0 z-40 bg-background/80 backdrop-blur-sm flex items-center justify-center"
-            onKeyDown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); setShowOpenSession(false); } }}
-          >
-            <div className="bg-background border-2 rounded-2xl p-6 w-96 space-y-4 shadow-2xl" role="dialog" aria-label="Abertura de caixa" onClick={(e) => e.stopPropagation()}>
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-emerald-500/10 text-emerald-600 rounded-lg"><Unlock className="h-5 w-5" /></div>
-                <div>
-                  <h3 className="font-black text-lg">Abertura de caixa</h3>
-                  <p className="text-xs text-muted-foreground">Informe o troco inicial em dinheiro.</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs uppercase font-bold text-muted-foreground">Valor de abertura</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">R$</span>
-                  <Input
-                    type="text"
-                    inputMode="decimal"
-                    value={openingAmount ? openingAmount.toFixed(2).replace('.', ',') : ''}
-                    onChange={(e) => {
-                      const cleaned = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '');
-                      const n = Number(cleaned);
-                      setOpeningAmount(Number.isFinite(n) && n >= 0 ? n : 0);
-                    }}
-                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); openSession(); } }}
-                    placeholder="0,00"
-                    className="pl-10 h-12 text-lg font-bold tabular-nums" autoFocus
-                  />
-                </div>
-              </div>
-              <div className="flex gap-2 justify-end">
-                <Button variant="ghost" onClick={() => setShowOpenSession(false)}>Cancelar</Button>
-                <Button onClick={openSession} className="gap-2"><Unlock className="h-4 w-4" /> Abrir caixa</Button>
-              </div>
-            </div>
-          </div>
-        )}
+        <PDVOpenSessionDialog
+          open={showOpenSession}
+          openingAmount={openingAmount}
+          onChangeAmount={setOpeningAmount}
+          onCancel={() => setShowOpenSession(false)}
+          onConfirm={openSession}
+        />
 
         {/* Cash movement dialog */}
-        {showCashMovement && (
-          <div
-            className="absolute inset-0 z-40 bg-background/80 backdrop-blur-sm flex items-center justify-center"
-            onKeyDown={(e) => { if (e.key === 'Escape') { e.stopPropagation(); setShowCashMovement(null); } }}
-          >
-            <div className="bg-background border-2 rounded-2xl p-6 w-96 space-y-4 shadow-2xl" role="dialog" aria-label={showCashMovement === 'sangria' ? 'Sangria' : 'Suprimento'} onClick={(e) => e.stopPropagation()}>
-              <div className="flex items-center gap-3">
-                <div className={cn('p-2.5 rounded-lg', showCashMovement === 'sangria' ? 'bg-red-500/10 text-red-600' : 'bg-emerald-500/10 text-emerald-600')}>
-                  {showCashMovement === 'sangria' ? <ArrowUpRight className="h-5 w-5" /> : <ArrowDownLeft className="h-5 w-5" />}
-                </div>
-                <div>
-                  <h3 className="font-black text-lg capitalize">{showCashMovement}</h3>
-                  <p className="text-xs text-muted-foreground">
-                    {showCashMovement === 'sangria' ? 'Retirar dinheiro do caixa' : 'Adicionar dinheiro ao caixa'}
-                  </p>
-                </div>
-              </div>
-              <div className="rounded-lg bg-muted/50 p-3 flex justify-between items-center">
-                <span className="text-xs font-bold text-muted-foreground uppercase">Saldo atual</span>
-                <span className="font-black tabular-nums text-primary">{formatBRL(cashBalance)}</span>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs uppercase font-bold text-muted-foreground">Valor</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">R$</span>
-                  <Input
-                    type="text"
-                    inputMode="decimal"
-                    value={movementAmount ? movementAmount.toFixed(2).replace('.', ',') : ''}
-                    onChange={(e) => {
-                      const cleaned = e.target.value.replace(',', '.').replace(/[^0-9.]/g, '');
-                      const n = Number(cleaned);
-                      setMovementAmount(Number.isFinite(n) && n >= 0 ? n : 0);
-                    }}
-                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); registerMovement(); } }}
-                    placeholder="0,00"
-                    className="pl-10 h-12 text-lg font-bold tabular-nums" autoFocus
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs uppercase font-bold text-muted-foreground">Observação (opcional)</Label>
-                <Input value={movementNote} onChange={(e) => setMovementNote(e.target.value)} placeholder="Motivo da movimentação" />
-              </div>
-              <div className="flex gap-2 justify-end">
-                <Button variant="ghost" onClick={() => setShowCashMovement(null)}>Cancelar</Button>
-                <Button onClick={registerMovement}>Confirmar</Button>
-              </div>
-            </div>
-          </div>
-        )}
+        <PDVCashMovementDialog
+          type={showCashMovement}
+          cashBalance={cashBalance}
+          amount={movementAmount}
+          note={movementNote}
+          onChangeAmount={setMovementAmount}
+          onChangeNote={setMovementNote}
+          onCancel={() => setShowCashMovement(null)}
+          onConfirm={registerMovement}
+        />
+
 
         {/* Customer picker dialog */}
         <PDVCustomerPicker
