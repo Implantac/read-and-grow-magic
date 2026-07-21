@@ -54,7 +54,7 @@ export function useProductionSteps() {
   useEffect(() => { fetchSteps(); }, [fetchSteps]);
 
   const createStep = async (step: Partial<ProductionStep>) => {
-    const { error } = await supabase.from('production_steps').insert(step);
+    const { error } = await supabase.from('production_steps').insert(step as any);
     if (error) { toast.error('Erro ao criar etapa'); return false; }
     toast.success('Etapa criada');
     await fetchSteps();
@@ -62,7 +62,7 @@ export function useProductionSteps() {
   };
 
   const updateStep = async (id: string, updates: Partial<ProductionStep>) => {
-    const { error } = await supabase.from('production_steps').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await supabase.from('production_steps').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
     if (error) { toast.error('Erro ao atualizar etapa'); return; }
     toast.success('Etapa atualizada');
     await fetchSteps();
@@ -112,7 +112,7 @@ export function useProductionOrderSteps(productionOrderId?: string) {
   useEffect(() => { fetchOrderSteps(); }, [fetchOrderSteps]);
 
   const updateOrderStep = async (id: string, updates: Partial<ProductionOrderStep>) => {
-    const { error } = await supabase.from('production_order_steps').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await supabase.from('production_order_steps').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
     if (error) { toast.error('Erro ao atualizar etapa'); return; }
     await fetchOrderSteps();
   };
@@ -135,7 +135,7 @@ export function useProductionOrderSteps(productionOrderId?: string) {
       status: 'pending',
     }));
 
-    const { error } = await supabase.from('production_order_steps').insert(inserts);
+    const { error } = await supabase.from('production_order_steps').insert(inserts as any);
     if (error) { toast.error('Erro ao gerar etapas'); return; }
     toast.success(`${inserts.length} etapas geradas`);
     await fetchOrderSteps();

@@ -45,7 +45,7 @@ export function useQualityInspections() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const create = async (inspection: Partial<QualityInspection>) => {
-    const { error } = await supabase.from('quality_inspections').insert(inspection);
+    const { error } = await supabase.from('quality_inspections').insert(inspection as any);
     if (error) { toast.error('Erro ao registrar inspeção'); return false; }
     toast.success('Inspeção registrada');
     await fetch();

@@ -47,7 +47,7 @@ export function useProductionEvents(limit = 50) {
   }, [limit]);
 
   const emitEvent = useCallback(async (event: Partial<ProductionEvent>) => {
-    const { error } = await supabase.from('production_events').insert(event);
+    const { error } = await supabase.from('production_events').insert(event as any);
     if (error) console.error('Error emitting event:', error);
   }, []);
 

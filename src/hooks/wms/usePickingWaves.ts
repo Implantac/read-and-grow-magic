@@ -87,7 +87,7 @@ export function usePickingWaves() {
       const updates: { status: string; started_at?: string; completed_at?: string } = { status };
       if (status === 'in_progress') updates.started_at = new Date().toISOString();
       if (status === 'completed') updates.completed_at = new Date().toISOString();
-      const { error } = await supabase.from('picking_waves').update(updates).eq('id', id);
+      const { error } = await supabase.from('picking_waves').update(updates as any).eq('id', id);
       if (error) throw error;
       toast.success('Status atualizado');
       fetchData();

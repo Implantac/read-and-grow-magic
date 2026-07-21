@@ -42,7 +42,7 @@ export function useProductionResources() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const create = async (item: Partial<ProductionResource>) => {
-    const { error } = await supabase.from('production_resources').insert(item);
+    const { error } = await supabase.from('production_resources').insert(item as any);
     if (error) { toast.error('Erro ao criar recurso'); return false; }
     toast.success('Recurso cadastrado');
     await fetch();
@@ -50,7 +50,7 @@ export function useProductionResources() {
   };
 
   const update = async (id: string, updates: Partial<ProductionResource>) => {
-    const { error } = await supabase.from('production_resources').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await supabase.from('production_resources').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
     if (error) { toast.error('Erro ao atualizar recurso'); return false; }
     toast.success('Recurso atualizado');
     await fetch();

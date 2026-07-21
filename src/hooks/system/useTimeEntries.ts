@@ -36,7 +36,7 @@ export function useTimeEntries() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const update = async (id: string, updates: Partial<TimeEntryRow>) => {
-    const { error } = await supabase.from('time_entries').update(updates).eq('id', id);
+    const { error } = await supabase.from('time_entries').update(updates as any).eq('id', id);
     if (error) { toast.error('Erro ao atualizar apontamento'); return; }
     await fetch();
   };
@@ -44,7 +44,7 @@ export function useTimeEntries() {
   const create = async (entry: Omit<TimeEntryRow, 'id' | 'created_at'>) => {
     const company_id = useEnterpriseStore.getState().activeCompanyId;
     if (!company_id) { toast.error('Empresa não selecionada'); return; }
-    const { error } = await supabase.from('time_entries').insert({ ...entry, company_id });
+    const { error } = await supabase.from('time_entries').insert({ ...entry, company_id } as any);
     if (error) { toast.error('Erro ao criar apontamento'); return; }
     toast.success('Apontamento criado');
     await fetch();

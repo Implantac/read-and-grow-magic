@@ -33,7 +33,7 @@ export function useMaterialConsumptions() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const update = async (id: string, updates: Partial<MaterialConsumptionRow>) => {
-    const { error } = await supabase.from('material_consumptions').update(updates).eq('id', id);
+    const { error } = await supabase.from('material_consumptions').update(updates as any).eq('id', id);
     if (error) { toast.error('Erro ao atualizar consumo'); return; }
     await fetch();
   };

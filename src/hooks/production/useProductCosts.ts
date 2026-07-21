@@ -53,7 +53,7 @@ export function useProductCosts() {
     );
     const { error } = await supabase.from('product_costs').insert({
       ...cost, ...calc, last_calculated_at: new Date().toISOString(),
-    });
+    } as any);
     if (error) { toast.error('Erro ao criar custo'); return false; }
     toast.success('Custo cadastrado');
     await fetchCosts();
@@ -72,7 +72,7 @@ export function useProductCosts() {
     );
     const { error } = await supabase.from('product_costs').update({
       ...updates, ...calc, last_calculated_at: new Date().toISOString(), updated_at: new Date().toISOString(),
-    }).eq('id', id);
+    } as any).eq('id', id);
     if (error) { toast.error('Erro ao atualizar custo'); return; }
     toast.success('Custo atualizado');
     await fetchCosts();

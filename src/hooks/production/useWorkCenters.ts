@@ -29,7 +29,7 @@ export function useWorkCenters() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const create = async (item: { code: string; name: string } & Partial<WorkCenterRow>) => {
-    const { error } = await supabase.from('work_centers').insert(item);
+    const { error } = await supabase.from('work_centers').insert(item as any);
     if (error) { toast.error('Erro ao criar centro de trabalho'); return false; }
     toast.success('Centro de trabalho criado');
     await fetchData();
@@ -37,7 +37,7 @@ export function useWorkCenters() {
   };
 
   const update = async (id: string, updates: Partial<WorkCenterRow>) => {
-    const { error } = await supabase.from('work_centers').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await supabase.from('work_centers').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
     if (error) { toast.error('Erro ao atualizar'); return; }
     toast.success('Atualizado');
     await fetchData();
