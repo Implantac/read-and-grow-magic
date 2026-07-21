@@ -17,6 +17,7 @@ interface UserDialogProps {
 
 export const UserDialog = ({ open, onOpenChange, editingUser }: UserDialogProps) => {
   const { inviteUser, changeRole, isInviting, isChangingRole } = useUsers();
+  const { data: branches = [] } = useBranches();
 
   const handleSaveUser = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
