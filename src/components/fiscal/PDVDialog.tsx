@@ -721,73 +721,18 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
 
         <div className="flex flex-col h-full">
           {/* TOP BAR: session + operator */}
-          <div className="min-h-14 border-b bg-gradient-to-r from-primary/5 via-background to-primary/5 px-3 sm:px-6 py-2 flex flex-wrap items-center justify-between gap-2 shrink-0">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2.5">
-                <div className="bg-primary p-1.5 rounded-md text-primary-foreground">
-                  <Monitor className="h-4 w-4" />
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold leading-none">Terminal</div>
-                  <div className="font-black text-sm leading-tight">PDV-01 · Loja Matriz</div>
-                </div>
-              </div>
-              <Separator orientation="vertical" className="h-8" />
-              <div className="flex items-center gap-2">
-                <div className={cn(
-                  'h-2 w-2 rounded-full',
-                  session ? 'bg-emerald-500 animate-pulse' : 'bg-red-500',
-                )} />
-                <div>
-                  <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold leading-none">
-                    {session ? 'Caixa aberto' : 'Caixa fechado'}
-                  </div>
-                  <div className="text-xs font-semibold leading-tight">
-                    {session ? (
-                      <>Saldo <span className="tabular-nums font-bold text-primary">{formatBRL(cashBalance)}</span> · <Clock className="inline h-3 w-3 -mt-0.5" /> {sessionElapsed}min</>
-                    ) : 'Abra o caixa para iniciar as vendas'}
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {session ? (
-                <>
-                  <Button size="sm" variant="outline" className="h-8 gap-1.5" onClick={() => setShowCashMovement('suprimento')}>
-                    <ArrowDownLeft className="h-3.5 w-3.5 text-emerald-600" /> Suprimento
-                  </Button>
-                  <Button size="sm" variant="outline" className="h-8 gap-1.5" onClick={() => setShowCashMovement('sangria')}>
-                    <ArrowUpRight className="h-3.5 w-3.5 text-red-600" /> Sangria
-                  </Button>
-                  <Button size="sm" variant="ghost" className="h-8" onClick={() => setScreenLocked(true)}>
-                    <Lock className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button size="sm" variant="ghost" className="h-8 text-destructive" onClick={requestCloseSession}>
-                    Fechar caixa
-                  </Button>
-                </>
-              ) : (
-                <Button size="sm" className="h-8 gap-1.5" onClick={() => setShowOpenSession(true)}>
-                  <Unlock className="h-3.5 w-3.5" /> Abrir caixa
-                </Button>
-              )}
-              <Separator orientation="vertical" className="h-6 mx-1" />
-              <div className="flex items-center gap-2 text-xs">
-                <div className="h-7 w-7 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-[10px]">OS</div>
-                <div className="leading-tight">
-                  <div className="font-bold">Operador Sistema</div>
-                  <div className="text-[10px] text-muted-foreground uppercase tracking-widest">Caixa</div>
-                </div>
-              </div>
-              {!asPage && (
-                <DialogClose asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                    <X className="h-4 w-4" />
-                  </Button>
-                </DialogClose>
-              )}
-            </div>
-          </div>
+          <PDVSessionBar
+            hasSession={!!session}
+            cashBalance={cashBalance}
+            sessionElapsed={sessionElapsed}
+            asPage={asPage}
+            onSuprimento={() => setShowCashMovement('suprimento')}
+            onSangria={() => setShowCashMovement('sangria')}
+            onLock={() => setScreenLocked(true)}
+            onCloseSession={requestCloseSession}
+            onOpenSession={() => setShowOpenSession(true)}
+          />
+
 
           {/* MAIN */}
           <div className="flex flex-1 min-h-0 flex-col lg:flex-row">
