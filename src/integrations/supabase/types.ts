@@ -23322,6 +23322,7 @@ export type Database = {
         | "loja"
         | "franquia"
         | "system_admin"
+        | "admin_matriz"
       branch_tipo: "industria" | "filial" | "cd"
       canal_operacional: "VAREJO_PDV" | "ATACADO_INDUSTRIA"
       enterprise_tier: "small" | "medium" | "enterprise"
@@ -23470,6 +23471,7 @@ export const Constants = {
         "loja",
         "franquia",
         "system_admin",
+        "admin_matriz",
       ],
       branch_tipo: ["industria", "filial", "cd"],
       canal_operacional: ["VAREJO_PDV", "ATACADO_INDUSTRIA"],
