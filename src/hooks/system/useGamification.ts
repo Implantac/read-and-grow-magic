@@ -83,7 +83,7 @@ export function useAddPoints() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (entry: { sales_rep_id: string; action_type: string; points: number; description?: string; reference_id?: string }) => {
-      const { error } = await supabase.from('gamification_points').insert(entry as any);
+      const { error } = await supabase.from('gamification_points').insert(entry);
       if (error) throw error;
     },
     onSuccess: () => {
