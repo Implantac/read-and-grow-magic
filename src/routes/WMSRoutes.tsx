@@ -87,4 +87,5 @@ export const WMSRoutes = [
   <Route key="wms-transf-canal" path="transferencias-canal" element={<TransferenciasCanalPage />} />,
   <Route key="wms-stock-report-canal" path="relatorio-estoque-canal" element={<StockReportCanalPage />} />,
   <Route key="wms-auditoria-estoque" path="auditoria-estoque" element={<EstoqueAuditoriaPage />} />,
+  <Route key="wms-reconcile-fat-estoque" path="reconciliacao-faturamento" element={<ReconciliacaoFatEstoquePage />} />,
 ];
