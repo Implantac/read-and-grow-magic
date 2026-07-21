@@ -9,14 +9,11 @@ import { PageLoading } from '@/shared/components/PageLoading';
 import { KPICard } from '@/shared/components/KPICard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
-import { Input } from '@/ui/base/input';
-import { Label } from '@/ui/base/label';
 import { Badge } from '@/ui/base/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/ui/base/dialog';
-import { ArrowUp, ArrowDown, Trash2, Plus, MapPin, Truck, DollarSign, Fuel, ChevronLeft, Clock, Loader2, Search, GripVertical, Wand2, Download, ExternalLink, Upload, FileDown } from 'lucide-react';
+import { Dialog, DialogTrigger } from '@/ui/base/dialog';
+import { Plus, MapPin, Truck, DollarSign, Fuel, ChevronLeft, Clock, Loader2, GripVertical, Wand2, Download, ExternalLink, Upload, FileDown } from 'lucide-react';
 import { toastSuccess, toastError, handleMutationError } from '@/lib/toastHelpers';
-import { lookupCep, geocodeAddress } from '@/lib/geocode';
+import { geocodeAddress } from '@/lib/geocode';
 import { nearestNeighborTsp, checkTimeWindows } from '@/lib/tspOptimize';
 import { buildRouteGpx, buildGoogleMapsUrl, downloadGpx } from '@/lib/routeExport';
 import { parseCsv, STOP_CSV_TEMPLATE } from '@/lib/csvImport';
@@ -30,18 +27,11 @@ import {
   useReorderStops,
   useRouteCost,
   useUpsertRouteCost,
-  type RouteStop,
 } from '@/hooks/tms/useRoutePlanning';
 import { useTMS } from '@/hooks/operational/useTMSQuery';
-
-const STATUS_LABEL: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-  pending: { label: 'Pendente', variant: 'secondary' },
-  en_route: { label: 'Em rota', variant: 'default' },
-  arrived: { label: 'Chegou', variant: 'default' },
-  completed: { label: 'Concluída', variant: 'outline' },
-  failed: { label: 'Falhou', variant: 'destructive' },
-  skipped: { label: 'Pulada', variant: 'secondary' },
-};
+import { StopRow, CostLine } from './route-planner/StopRow';
+import { StopDialog } from './route-planner/StopDialog';
+import { CostDialog } from './route-planner/CostDialog';
 
 const fmtBRL = (v: number) =>
   v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
