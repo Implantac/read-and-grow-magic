@@ -1,3 +1,8 @@
+---
+name: erp-multi-loja-resiliencia
+description: Regras de arquitetura para ERP multi-loja com canais VAREJO_PDV vs ATACADO_INDUSTRIA — RLS por loja, ledger imutável de estoque, PDV offline-first e idempotente, compliance NFC-e/NF-e, filtros globais de canal e UX por teclado.
+---
+
 # Arquitetura ERP Multi-Loja, Canais de Venda Segregados e Resiliência Operacional
 
 Aplique esta skill em qualquer feature que toque PDV, estoque, financeiro, dashboard consolidado ou frente de caixa deste ERP.
