@@ -20,7 +20,7 @@ export function useWorkCenters() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any).from('work_centers').select('*').order('name');
+    const { data, error } = await supabase.from('work_centers').select('*').order('name');
     if (error) { console.error(error); }
     else setWorkCenters(data || []);
     setLoading(false);
@@ -28,8 +28,8 @@ export function useWorkCenters() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const create = async (item: Partial<WorkCenterRow>) => {
-    const { error } = await (supabase as any).from('work_centers').insert(item);
+  const create = async (item: { code: string; name: string } & Partial<WorkCenterRow>) => {
+    const { error } = await supabase.from('work_centers').insert(item);
     if (error) { toast.error('Erro ao criar centro de trabalho'); return false; }
     toast.success('Centro de trabalho criado');
     await fetchData();
@@ -37,7 +37,7 @@ export function useWorkCenters() {
   };
 
   const update = async (id: string, updates: Partial<WorkCenterRow>) => {
-    const { error } = await (supabase as any).from('work_centers').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await supabase.from('work_centers').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
     if (error) { toast.error('Erro ao atualizar'); return; }
     toast.success('Atualizado');
     await fetchData();

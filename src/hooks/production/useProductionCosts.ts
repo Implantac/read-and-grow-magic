@@ -25,7 +25,7 @@ export function useProductionCostsOP() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any).from('production_costs').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('production_costs').select('*').order('created_at', { ascending: false });
     if (error) { console.error(error); }
     else setCosts(data || []);
     setLoading(false);
@@ -34,7 +34,7 @@ export function useProductionCostsOP() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const upsert = async (cost: Partial<ProductionCostRow>) => {
-    const { error } = await (supabase as any).from('production_costs').upsert(cost, { onConflict: 'production_order_id' });
+    const { error } = await supabase.from('production_costs').upsert(cost, { onConflict: 'production_order_id' });
     if (error) { toast.error('Erro ao salvar custo'); return; }
     toast.success('Custo calculado');
     await fetchData();
