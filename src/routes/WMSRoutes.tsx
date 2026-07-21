@@ -19,7 +19,7 @@ const DistributionCentersPage = lazy(() => import("../modules/wms/DistributionCe
 const StockBalancesPage = lazy(() => import("../modules/wms/StockBalances"));
 const DocksPage = lazy(() => import("../modules/wms/Docks"));
 const WMSAIPage = lazy(() => import("../modules/wms/WMSAI"));
-const DigitalTwinPage = lazy(() => import("../modules/wms/twin/DigitalTwin"));
+// DigitalTwinPage consolidated under /producao/twin
 const IntelligencePage = lazy(() => import("../modules/wms/intelligence/Intelligence"));
 const SlottingPlannerPage = lazy(() => import("../modules/wms/slotting/SlottingPlanner"));
 const YardManagementPage = lazy(() => import("../modules/wms/yard/YardManagement"));
@@ -27,7 +27,7 @@ const LocationsPage = lazy(() => import("../modules/wms/Locations"));
 const SkuAllocationPage = lazy(() => import("../modules/wms/SkuAllocation"));
 const OrderReservationsPage = lazy(() => import("../modules/wms/OrderReservations"));
 const OrderPickingPage = lazy(() => import("../modules/wms/OrderPicking"));
-const QualityControlPage = lazy(() => import("../modules/wms/QualityControl"));
+// QualityControlPage consolidated under /producao/qualidade
 const Billing3PLPage = lazy(() => import("../modules/wms/Billing3PL"));
 const PickingRoutePage = lazy(() => import("../modules/wms/PickingRouteOptimizer"));
 const LaborManagementPage = lazy(() => import("../modules/wms/LaborManagement"));
