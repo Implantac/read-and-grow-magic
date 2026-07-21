@@ -12,6 +12,7 @@ export interface EstoqueMatrixRow {
   branch_tipo: string | null;
   canal_operacional: 'VAREJO_PDV' | 'ATACADO_INDUSTRIA';
   quantity: number;
+  min_stock: number;
 }
 
 /**
