@@ -79,16 +79,25 @@ export default function ConciliacaoBancariaCanal() {
       Liquido: r.ledgerNet.toFixed(2),
       Conciliado: r.ledgerReconciled.toFixed(2),
       Pendente: r.ledgerPending.toFixed(2),
-      Lancamentos: r.entries,
+      Lancamentos: String(r.entries),
     }));
-    downloadCSV(`conciliacao-canal-${from}_${to}.csv`, toCSV(rows));
+    const csv = toCSV(rows, [
+      { key: 'Canal', label: 'Canal' },
+      { key: 'Entradas', label: 'Entradas' },
+      { key: 'Saidas', label: 'Saídas' },
+      { key: 'Liquido', label: 'Líquido' },
+      { key: 'Conciliado', label: 'Conciliado' },
+      { key: 'Pendente', label: 'Pendente' },
+      { key: 'Lancamentos', label: 'Lançamentos' },
+    ]);
+    downloadCSV(`conciliacao-canal-${from}_${to}.csv`, csv);
   };
 
   return (
     <PageContainer>
       <PageHeader
         title="Conciliação Bancária por Canal"
-        subtitle="Extrato bancário × ledger financeiro consolidado por Atacado / Varejo / E-commerce"
+        description="Extrato bancário × ledger financeiro consolidado por Atacado / Varejo / E-commerce"
         icon={Building2}
       />
 
