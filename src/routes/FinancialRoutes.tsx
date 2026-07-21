@@ -30,6 +30,9 @@ const FinancialAlertsPage = lazy(() => import("../modules/financial/FinancialAle
 const DREDynamicPage = lazy(() => import("../modules/financial/DREDynamicPage"));
 const FinancialSegmentadoPage = lazy(() => import("../modules/financial/FinancialSegmentado"));
 const ConciliacaoBancariaCanalPage = lazy(() => import("../modules/financial/ConciliacaoBancariaCanal"));
+const DivergenceDashboardPage = lazy(() => import("../modules/financial/DivergenceDashboard"));
+
+
 
 export const FinancialRoutes = [
   <Route key="fin-index" index element={<Navigate to="dashboard" replace />} />,
