@@ -22,7 +22,7 @@ export function useProductionCapacity() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('production_capacity').select('*').order('sector');
+    const { data, error } = await (supabase as any).from('production_capacity').select('*').order('sector');
     if (error) { console.error(error); toast.error('Erro ao carregar capacidade'); }
     else setCapacities(data || []);
     setLoading(false);
@@ -31,7 +31,7 @@ export function useProductionCapacity() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const create = async (item: Partial<ProductionCapacityRow>) => {
-    const { error } = await supabase.from('production_capacity').insert(item);
+    const { error } = await (supabase as any).from('production_capacity').insert(item);
     if (error) { toast.error('Erro ao criar capacidade'); return false; }
     toast.success('Capacidade cadastrada');
     await fetchData();
@@ -39,14 +39,14 @@ export function useProductionCapacity() {
   };
 
   const update = async (id: string, updates: Partial<ProductionCapacityRow>) => {
-    const { error } = await supabase.from('production_capacity').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await (supabase as any).from('production_capacity').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
     if (error) { toast.error('Erro ao atualizar'); return; }
     toast.success('Atualizado');
     await fetchData();
   };
 
   const remove = async (id: string) => {
-    const { error } = await supabase.from('production_capacity').delete().eq('id', id);
+    const { error } = await (supabase as any).from('production_capacity').delete().eq('id', id);
     if (error) { toast.error('Erro ao excluir'); return; }
     toast.success('Excluído');
     await fetchData();

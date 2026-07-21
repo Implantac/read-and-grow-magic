@@ -24,7 +24,7 @@ export function useProductionMachines() {
 
   const fetchMachines = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('production_machines').select('*').order('code');
+    const { data, error } = await (supabase as any).from('production_machines').select('*').order('code');
     if (error) console.error(error);
     else setMachines(data || []);
     setLoading(false);
@@ -42,7 +42,7 @@ export function useProductionMachines() {
   }, [fetchMachines]);
 
   const create = async (machine: Partial<ProductionMachine>) => {
-    const { error } = await supabase.from('production_machines').insert(machine);
+    const { error } = await (supabase as any).from('production_machines').insert(machine);
     if (error) { toast.error('Erro ao criar máquina'); return false; }
     toast.success('Máquina cadastrada');
     await fetchMachines();
@@ -50,7 +50,7 @@ export function useProductionMachines() {
   };
 
   const update = async (id: string, updates: Partial<ProductionMachine>) => {
-    const { error } = await supabase.from('production_machines').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await (supabase as any).from('production_machines').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
     if (error) { toast.error('Erro ao atualizar máquina'); return; }
     await fetchMachines();
   };
