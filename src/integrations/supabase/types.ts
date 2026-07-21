@@ -5279,6 +5279,60 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_fiscal_snapshots: {
+        Row: {
+          branch_id: string | null
+          canal_operacional: string | null
+          closed_at: string
+          closed_by: string | null
+          company_id: string
+          created_at: string
+          financial_in: number
+          financial_out: number
+          id: string
+          net_flow: number
+          snapshot_date: string
+          stock_in_cost: number
+          stock_in_qty: number
+          stock_out_cost: number
+          stock_out_qty: number
+        }
+        Insert: {
+          branch_id?: string | null
+          canal_operacional?: string | null
+          closed_at?: string
+          closed_by?: string | null
+          company_id: string
+          created_at?: string
+          financial_in?: number
+          financial_out?: number
+          id?: string
+          net_flow?: number
+          snapshot_date: string
+          stock_in_cost?: number
+          stock_in_qty?: number
+          stock_out_cost?: number
+          stock_out_qty?: number
+        }
+        Update: {
+          branch_id?: string | null
+          canal_operacional?: string | null
+          closed_at?: string
+          closed_by?: string | null
+          company_id?: string
+          created_at?: string
+          financial_in?: number
+          financial_out?: number
+          id?: string
+          net_flow?: number
+          snapshot_date?: string
+          stock_in_cost?: number
+          stock_in_qty?: number
+          stock_out_cost?: number
+          stock_out_qty?: number
+        }
+        Relationships: []
+      }
       dashboard_definitions: {
         Row: {
           company_id: string
@@ -22632,6 +22686,7 @@ export type Database = {
         Args: { _company_id: string; _ym: string }
         Returns: undefined
       }
+      close_fiscal_day: { Args: { p_date?: string }; Returns: number }
       compensate_accounts: {
         Args: {
           _amount: number
