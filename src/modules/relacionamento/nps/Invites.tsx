@@ -3,33 +3,20 @@ import { useNPSCampaigns, useNPSInvites, useGenerateInvites, publicSurveyUrl } f
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { Card, CardContent } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
 import { Label } from '@/ui/base/label';
 import { Skeleton } from '@/ui/base/skeleton';
-import { Badge } from '@/ui/base/badge';
-import { Checkbox } from '@/ui/base/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
-import { Send, Copy, MessageCircle, Mail, Link2, QrCode, Search, RotateCcw, Trash2, RefreshCw, Download, ChevronLeft, ChevronRight, Eye, CheckCircle2, XCircle } from 'lucide-react';
+import { Send, Copy, MessageCircle, Mail, Search, Trash2, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { QRCodeDialog } from './QRCodeDialog';
 import { exportToCSV } from '@/lib/exportUtils';
 import { useConfirm } from '@/shared/components/ConfirmDialog';
-
-type BulkResultItem = { id: string; name: string; ok: boolean; error?: string };
-type BulkResult = { title: string; items: BulkResultItem[] } | null;
-
-const CHANNELS = [
-  { v: 'link', label: 'Link manual', icon: Link2 },
-  { v: 'email', label: 'E-mail', icon: Mail },
-  { v: 'whatsapp', label: 'WhatsApp', icon: MessageCircle },
-  { v: 'sms', label: 'SMS', icon: MessageCircle },
-  { v: 'qr', label: 'QR Code', icon: QrCode },
-];
-
-const PAGE_SIZE = 20;
+import { CHANNELS, PAGE_SIZE, KPI, useTokensMap, type BulkResult, type BulkResultItem } from './invites/parts';
+import { InvitesTable } from './invites/InvitesTable';
+import { GenerateInvitesDialog } from './invites/GenerateInvitesDialog';
+import { BulkResultDialog } from './invites/BulkResultDialog';
 
 export default function Invites() {
   const { data: campaigns = [], isLoading: campaignsLoading } = useNPSCampaigns();
@@ -245,6 +232,11 @@ export default function Invites() {
     }
   };
 
+  const selectedSendable = Array.from(selectedInvites).filter((id) => {
+    const inv = filteredInvites.find((i: any) => i.id === id);
+    return inv && ['pending', 'failed', 'bounced'].includes(inv.status) && inv.channel === 'email';
+  });
+
   const confirmSendBulk = async () => {
     if (selectedSendable.length === 0) return;
     const ok = await confirm({
@@ -276,7 +268,6 @@ export default function Invites() {
     });
     if (ok) revoke.mutate([id]);
   };
-
 
   const exportCsv = () => {
     if (filteredInvites.length === 0) { toast.error('Sem dados para exportar'); return; }
@@ -310,10 +301,6 @@ export default function Invites() {
   };
 
   const allPageChecked = pageInvites.length > 0 && pageInvites.every((i: any) => selectedInvites.has(i.id));
-  const selectedSendable = Array.from(selectedInvites).filter((id) => {
-    const inv = filteredInvites.find((i: any) => i.id === id);
-    return inv && ['pending', 'failed', 'bounced'].includes(inv.status) && inv.channel === 'email';
-  });
 
   return (
     <div className="space-y-4">
@@ -347,7 +334,6 @@ export default function Invites() {
         </div>
       </div>
 
-      {/* KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         <KPI label="Total" value={stats.total} />
         <KPI label="Enviados" value={stats.sent} tone="default" />
@@ -357,7 +343,6 @@ export default function Invites() {
         <KPI label="Falhas" value={stats.bounced} tone="danger" />
       </div>
 
-      {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div>
           <Label>Campanha</Label>
@@ -400,7 +385,6 @@ export default function Invites() {
         </div>
       </div>
 
-      {/* Bulk toolbar */}
       {selectedInvites.size > 0 && (
         <div className="flex items-center justify-between gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-sm">
           <span>{selectedInvites.size} selecionado(s)</span>
@@ -418,278 +402,47 @@ export default function Invites() {
       )}
 
       {isLoading ? <Skeleton className="h-64" /> : (
-        <Card>
-          <CardContent className="p-0 overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/40 text-xs text-muted-foreground">
-                <tr>
-                  <th className="p-3 w-10"><Checkbox checked={allPageChecked} onCheckedChange={(v) => togglePageSelection(!!v)} /></th>
-                  <th className="text-left p-3">Cliente</th>
-                  <th className="text-left p-3">Canal</th>
-                  <th className="text-left p-3">Status</th>
-                  <th className="text-left p-3">Tent.</th>
-                  <th className="text-left p-3">Enviado</th>
-                  <th className="text-left p-3">Aberto</th>
-                  <th className="text-right p-3">Ações</th>
-                </tr>
-              </thead>
-              <tbody>
-                {pageInvites.map((i: any) => {
-                  const tk = tokensByInvite.get(i.id);
-                  const checked = selectedInvites.has(i.id);
-                  return (
-                    <tr key={i.id} className="border-t border-border hover:bg-muted/20">
-                      <td className="p-3">
-                        <Checkbox checked={checked} onCheckedChange={(v) => {
-                          const s = new Set(selectedInvites);
-                          v ? s.add(i.id) : s.delete(i.id);
-                          setSelectedInvites(s);
-                        }} />
-                      </td>
-                      <td className="p-3">
-                        <div className="font-medium">{i.clients?.name ?? '—'}</div>
-                        <div className="text-xs text-muted-foreground truncate max-w-[240px]">{i.clients?.email ?? i.clients?.phone ?? ''}</div>
-                      </td>
-                      <td className="p-3"><Badge variant="outline">{i.channel}</Badge></td>
-                      <td className="p-3"><StatusBadge status={i.status} /></td>
-                      <td className="p-3 text-xs">{i.attempts ?? 0}</td>
-                      <td className="p-3 text-xs text-muted-foreground">{i.sent_at ? new Date(i.sent_at).toLocaleDateString('pt-BR') : '—'}</td>
-                      <td className="p-3 text-xs text-muted-foreground">{i.opened_at ? new Date(i.opened_at).toLocaleDateString('pt-BR') : '—'}</td>
-                      <td className="p-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          {tk && (
-                            <>
-                              <Button size="sm" variant="ghost" title="Abrir pesquisa" onClick={() => window.open(publicSurveyUrl(tk), '_blank')}>
-                                <Eye className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button size="sm" variant="ghost" title="Copiar link" onClick={() => { navigator.clipboard.writeText(publicSurveyUrl(tk)); toast.success('Link copiado'); }}>
-                                <Copy className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button size="sm" variant="ghost" title="WhatsApp" onClick={() => shareUrl(tk, 'whatsapp', i.clients)}>
-                                <MessageCircle className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button size="sm" variant="ghost" title="E-mail" onClick={() => shareUrl(tk, 'email', i.clients)}>
-                                <Mail className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button size="sm" variant="ghost" title="QR Code" onClick={() => setQrUrl(publicSurveyUrl(tk))}>
-                                <QrCode className="h-3.5 w-3.5" />
-                              </Button>
-                            </>
-                          )}
-                          {i.status !== 'responded' && i.status !== 'revoked' && i.channel === 'email' && (
-                            <Button size="sm" variant="ghost" title="Reenviar" onClick={() => resend.mutate(i.id)} disabled={resend.isPending}>
-                              <RefreshCw className="h-3.5 w-3.5 text-blue-500" />
-                            </Button>
-                          )}
-                          {i.status !== 'responded' && i.status !== 'revoked' && (
-                            <Button size="sm" variant="ghost" title="Revogar" onClick={() => confirmRevokeOne(i.id)}>
-                              <Trash2 className="h-3.5 w-3.5 text-red-500" />
-                            </Button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-                {pageInvites.length === 0 && (
-                  <tr><td colSpan={8} className="p-8 text-center text-muted-foreground">
-                    {campaignId ? 'Nenhum convite com esses filtros.' : 'Selecione uma campanha para começar.'}
-                  </td></tr>
-                )}
-              </tbody>
-            </table>
-
-            {filteredInvites.length > PAGE_SIZE && (
-              <div className="flex items-center justify-between px-3 py-2 border-t border-border text-xs text-muted-foreground">
-                <span>Página {currentPage} de {totalPages} · {filteredInvites.length} registros</span>
-                <div className="flex gap-1">
-                  <Button size="sm" variant="ghost" disabled={currentPage <= 1} onClick={() => setPage(currentPage - 1)}>
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" variant="ghost" disabled={currentPage >= totalPages} onClick={() => setPage(currentPage + 1)}>
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <InvitesTable
+          pageInvites={pageInvites}
+          filteredInvites={filteredInvites}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={PAGE_SIZE}
+          campaignId={campaignId}
+          tokensByInvite={tokensByInvite}
+          selectedInvites={selectedInvites}
+          setSelectedInvites={setSelectedInvites}
+          allPageChecked={allPageChecked}
+          togglePageSelection={togglePageSelection}
+          setQrUrl={(u) => setQrUrl(u)}
+          shareUrl={shareUrl}
+          resendMutate={(id) => resend.mutate(id)}
+          resendPending={resend.isPending}
+          confirmRevokeOne={confirmRevokeOne}
+          setPage={setPage}
+        />
       )}
 
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader><DialogTitle>Gerar convites</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Canal de envio</Label>
-                <Select value={channel} onValueChange={setChannel}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{CHANNELS.map((c) => <SelectItem key={c.v} value={c.v}>{c.label}</SelectItem>)}</SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Link válido por (dias)</Label>
-                <Input type="number" min={1} max={365} value={expiresDays} onChange={(e) => setExpiresDays(Number(e.target.value) || 30)} />
-              </div>
-            </div>
-
-            <div>
-              <Label>Buscar cliente</Label>
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Nome do cliente…" className="pl-8" />
-              </div>
-            </div>
-
-            {clients.length > 0 && (
-              <label className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Checkbox
-                  checked={clients.every((c: any) => selectedClients.has(c.id))}
-                  onCheckedChange={(v) => toggleAllClientsVisible(!!v)}
-                />
-                Selecionar todos os {clients.length} visíveis
-              </label>
-            )}
-
-            <div className="max-h-64 overflow-y-auto border rounded">
-              {clients.map((c: any) => {
-                const hasEmail = !!c.email;
-                const hasPhone = !!c.phone;
-                const invalid = (channel === 'email' && !hasEmail) || ((channel === 'whatsapp' || channel === 'sms') && !hasPhone);
-                return (
-                  <label key={c.id} className={`flex items-center gap-2 p-2 hover:bg-muted cursor-pointer border-b border-border last:border-0 ${invalid ? 'opacity-60' : ''}`}>
-                    <Checkbox
-                      checked={selectedClients.has(c.id)}
-                      onCheckedChange={(v) => { const s = new Set(selectedClients); v ? s.add(c.id) : s.delete(c.id); setSelectedClients(s); }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm">{c.name}</div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {c.email ?? '—'} · {c.phone ?? '—'} {c.address_city ? `· ${c.address_city}` : ''}
-                      </div>
-                    </div>
-                    {invalid && <Badge variant="outline" className="text-xs">sem contato</Badge>}
-                  </label>
-                );
-              })}
-              {clients.length === 0 && <p className="p-4 text-sm text-muted-foreground">Nenhum cliente encontrado.</p>}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {selectedClients.size} selecionado(s). Após gerar, você poderá copiar o link ou disparar pelo WhatsApp/e-mail direto da lista.
-            </p>
-          </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button onClick={submit} disabled={selectedClients.size === 0 || generate.isPending}>
-              {generate.isPending ? <RotateCcw className="h-4 w-4 mr-2 animate-spin" /> : <Send className="h-4 w-4 mr-2" />}
-              Gerar {selectedClients.size} convite(s)
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <GenerateInvitesDialog
+        open={open}
+        onOpenChange={setOpen}
+        channel={channel}
+        setChannel={setChannel}
+        expiresDays={expiresDays}
+        setExpiresDays={setExpiresDays}
+        search={search}
+        setSearch={setSearch}
+        clients={clients as any[]}
+        selectedClients={selectedClients}
+        setSelectedClients={setSelectedClients}
+        toggleAllClientsVisible={toggleAllClientsVisible}
+        submit={submit}
+        generating={generate.isPending}
+      />
 
       <QRCodeDialog open={!!qrUrl} onOpenChange={(v) => !v && setQrUrl(null)} url={qrUrl ?? ''} />
 
-      <Dialog open={!!bulkResult} onOpenChange={(v) => !v && setBulkResult(null)}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{bulkResult?.title ?? 'Resultado'}</DialogTitle>
-          </DialogHeader>
-          {bulkResult && (() => {
-            const ok = bulkResult.items.filter((r) => r.ok).length;
-            const fail = bulkResult.items.length - ok;
-            return (
-              <div className="space-y-3">
-                <div className="flex gap-2 text-sm">
-                  <Badge className="bg-green-500/20 text-green-500 border-green-500/30" variant="outline">
-                    <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> {ok} sucesso(s)
-                  </Badge>
-                  {fail > 0 && (
-                    <Badge className="text-red-500 border-red-500/40" variant="outline">
-                      <XCircle className="h-3.5 w-3.5 mr-1" /> {fail} falha(s)
-                    </Badge>
-                  )}
-                </div>
-                <div className="max-h-80 overflow-y-auto border rounded divide-y divide-border">
-                  {bulkResult.items.map((r) => (
-                    <div key={r.id} className="flex items-start gap-2 p-2 text-sm">
-                      {r.ok
-                        ? <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
-                        : <XCircle className="h-4 w-4 text-red-500 mt-0.5 shrink-0" />}
-                      <div className="flex-1 min-w-0">
-                        <div className="truncate">{r.name}</div>
-                        {!r.ok && r.error && (
-                          <div className="text-xs text-red-500 truncate" title={r.error}>{r.error}</div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
-          <DialogFooter>
-            <Button variant="outline" size="sm" onClick={() => {
-              if (!bulkResult) return;
-              const txt = bulkResult.items.map((r) => `${r.ok ? 'OK' : 'FALHA'}\t${r.name}${r.error ? `\t${r.error}` : ''}`).join('\n');
-              navigator.clipboard.writeText(txt);
-              toast.success('Resultado copiado');
-            }}><Copy className="h-3.5 w-3.5 mr-2" /> Copiar</Button>
-            <Button onClick={() => setBulkResult(null)}>Fechar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <BulkResultDialog bulkResult={bulkResult} onClose={() => setBulkResult(null)} />
     </div>
   );
-}
-
-function KPI({ label, value, sub, tone = 'default' }: { label: string; value: number | string; sub?: string; tone?: 'default' | 'success' | 'warn' | 'danger' | 'info' }) {
-  const toneClass = {
-    default: 'text-foreground',
-    success: 'text-green-500',
-    warn: 'text-amber-500',
-    danger: 'text-red-500',
-    info: 'text-blue-500',
-  }[tone];
-  return (
-    <Card>
-      <CardContent className="pt-4 pb-4">
-        <div className="text-xs text-muted-foreground">{label}</div>
-        <div className={`text-2xl font-semibold ${toneClass}`}>{value}</div>
-        {sub && <div className="text-xs text-muted-foreground">{sub}</div>}
-      </CardContent>
-    </Card>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, { label: string; variant: any; className?: string }> = {
-    pending: { label: 'Pendente', variant: 'secondary' },
-    sent: { label: 'Enviado', variant: 'default' },
-    opened: { label: 'Aberto', variant: 'default', className: 'bg-blue-500/20 text-blue-500 border-blue-500/30' },
-    responded: { label: 'Respondido', variant: 'default', className: 'bg-green-500/20 text-green-500 border-green-500/30' },
-    bounced: { label: 'Falha', variant: 'outline', className: 'text-red-500 border-red-500/40' },
-    failed: { label: 'Falha', variant: 'outline', className: 'text-red-500 border-red-500/40' },
-    revoked: { label: 'Revogado', variant: 'outline' },
-  };
-  const s = map[status] ?? { label: status, variant: 'outline' };
-  return <Badge variant={s.variant} className={s.className}>{s.label}</Badge>;
-}
-
-function useTokensMap(invites: any[]) {
-  const inviteIds = useMemo(() => invites.map((i) => i.id), [invites]);
-  const { data } = useQuery({
-    queryKey: ['nps', 'tokens', inviteIds.join(',')],
-    enabled: inviteIds.length > 0,
-    queryFn: async () => {
-      const { data } = await supabase.from('nps_tokens').select('invite_id,token').in('invite_id', inviteIds);
-      return data ?? [];
-    },
-  });
-  return useMemo(() => {
-    const m = new Map<string, string>();
-    (data ?? []).forEach((t: any) => { if (t.invite_id) m.set(t.invite_id, t.token); });
-    return m;
-  }, [data]);
 }
