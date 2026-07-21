@@ -1,6 +1,5 @@
 // ============================================================================
-// Fundamentos do sistema — visão de implantador (consultor ERP)
-// Ordem cronológica de implantação + regras de negócio por módulo.
+// Fundamentos do sistema — tipos compartilhados
 // ============================================================================
 
 export interface RoadmapPhase {
@@ -15,12 +14,6 @@ export interface RoadmapPhase {
   gate: string; // critério de saída (go/no-go)
   modules: string[]; // slugs envolvidos
 }
-
-/**
- * Roteiro cronológico global de implantação de ERP.
- * Baseado em metodologia UEEF (Diagnóstico → Mapeamento → Desenho →
- * Implementação → Review Loop → Entrega) e boas práticas de mercado
- * (ASAP/Activate, Signature Method, Sure Step).
 
 export interface BusinessRule {
   rule: string;
