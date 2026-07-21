@@ -322,6 +322,7 @@ export const navigationSections: NavSection[] = [
           { title: 'Transferências entre Canais', href: '/wms/transferencias-canal', icon: 'ArrowRightLeft' },
           { title: 'Relatório Estoque × Canal', href: '/wms/relatorio-estoque-canal', icon: 'FileBarChart' },
           { title: 'Auditoria de Estoque', href: '/wms/auditoria-estoque', icon: 'ClipboardList' },
+          { title: 'Reconciliação Fat. × Saída', href: '/wms/reconciliacao-faturamento', icon: 'Scale' },
           { title: 'Alocação de SKU', href: '/wms/alocacao', icon: 'Move' },
           { title: 'Lotes', href: '/wms/lotes', icon: 'Layers' },
           { title: 'Recebimento', href: '/wms/recebimento', icon: 'PackagePlus' },
