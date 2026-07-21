@@ -7,6 +7,7 @@ import { UserPlus, Edit2, Loader2 } from 'lucide-react';
 import { SystemUser, UserRole } from '@/types/administration';
 import { userRoleConfig } from '@/config/administration';
 import { useUsers } from '@/hooks/system/useUsers';
+import { useBranches } from '@/hooks/useBranches';
 
 interface UserDialogProps {
   open: boolean;
