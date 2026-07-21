@@ -130,8 +130,8 @@ export default function CommercialDashboard() {
     const noRepClients = clients.filter(c => !c.sales_rep_id).length;
 
     // Breakdown por canal operacional (usa `channel` gravado em orders quando disponível)
-    const varejoOrders = ordersMonth.filter((o: any) => o.channel === 'VAREJO_PDV' && o.status !== 'cancelled');
-    const atacadoOrders = ordersMonth.filter((o: any) => o.channel === 'ATACADO_INDUSTRIA' && o.status !== 'cancelled');
+    const varejoOrders = ordersMonth.filter((o: any) => o.canal_operacional === 'VAREJO_PDV' && o.status !== 'cancelled');
+    const atacadoOrders = ordersMonth.filter((o: any) => o.canal_operacional === 'ATACADO_INDUSTRIA' && o.status !== 'cancelled');
     const varejoBilling = varejoOrders.reduce((s, o) => s + o.total, 0);
     const atacadoBilling = atacadoOrders.reduce((s, o) => s + o.total, 0);
 
