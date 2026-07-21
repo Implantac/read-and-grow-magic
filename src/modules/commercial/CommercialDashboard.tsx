@@ -24,6 +24,7 @@ import { startOfMonth, endOfMonth, isToday, differenceInDays, subMonths, format,
 import { ptBR } from 'date-fns/locale';
 import { Skeleton } from '@/ui/base/skeleton';
 import { Progress } from '@/ui/base/progress';
+import { CanalFilter } from '@/components/shared/CanalFilter';
 
 const fmtShort = (v: number) => {
   if (v >= 1000000) return `R$ ${(v / 1000000).toFixed(1)}M`;
