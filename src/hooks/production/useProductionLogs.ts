@@ -20,7 +20,7 @@ export function useProductionLogs(orderId?: string) {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    let query = supabase.from('production_logs').select('*').order('created_at', { ascending: false }).limit(200);
+    let query = (supabase as any).from('production_logs').select('*').order('created_at', { ascending: false }).limit(200);
     if (orderId) query = query.eq('production_order_id', orderId);
     const { data, error } = await query;
     if (error) { console.error(error); }
@@ -31,7 +31,7 @@ export function useProductionLogs(orderId?: string) {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const addLog = async (log: Partial<ProductionLogRow>) => {
-    const { error } = await supabase.from('production_logs').insert(log);
+    const { error } = await (supabase as any).from('production_logs').insert(log);
     if (error) console.error('Erro ao registrar log', error);
     else await fetchData();
   };

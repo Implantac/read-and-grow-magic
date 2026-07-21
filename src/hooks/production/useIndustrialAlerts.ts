@@ -25,7 +25,7 @@ export function useIndustrialAlerts() {
 
   const fetchAlerts = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('industrial_alerts').select('*').order('created_at', { ascending: false });
+    const { data, error } = await (supabase as any).from('industrial_alerts').select('*').order('created_at', { ascending: false });
     if (error) console.error(error);
     else setAlerts(data || []);
     setLoading(false);
@@ -34,14 +34,14 @@ export function useIndustrialAlerts() {
   useEffect(() => { fetchAlerts(); }, [fetchAlerts]);
 
   const createAlert = async (alert: Partial<IndustrialAlert>) => {
-    const { error } = await supabase.from('industrial_alerts').insert(alert);
+    const { error } = await (supabase as any).from('industrial_alerts').insert(alert);
     if (error) return false;
     await fetchAlerts();
     return true;
   };
 
   const resolveAlert = async (id: string) => {
-    const { error } = await supabase.from('industrial_alerts').update({
+    const { error } = await (supabase as any).from('industrial_alerts').update({
       status: 'resolved', resolved_at: new Date().toISOString(),
     }).eq('id', id);
     if (error) { toast.error('Erro ao resolver alerta'); return; }

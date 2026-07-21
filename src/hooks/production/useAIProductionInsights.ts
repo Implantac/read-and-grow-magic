@@ -24,7 +24,7 @@ export function useAIProductionInsights() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('ai_production_insights').select('*').order('created_at', { ascending: false }).limit(50);
+    const { data, error } = await (supabase as any).from('ai_production_insights').select('*').order('created_at', { ascending: false }).limit(50);
     if (error) console.error(error);
     else setInsights(data || []);
     setLoading(false);
@@ -49,7 +49,7 @@ export function useAIProductionInsights() {
   };
 
   const resolveInsight = async (id: string) => {
-    const { error } = await supabase.from('ai_production_insights').update({ status: 'resolved', resolved_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await (supabase as any).from('ai_production_insights').update({ status: 'resolved', resolved_at: new Date().toISOString() }).eq('id', id);
     if (error) toast.error('Erro ao resolver');
     else { toast.success('Insight resolvido'); await fetchData(); }
   };
