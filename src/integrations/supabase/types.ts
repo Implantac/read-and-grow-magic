@@ -10207,34 +10207,46 @@ export type Database = {
       }
       notifications: {
         Row: {
+          assigned_to: string | null
           company_id: string | null
           created_at: string
           description: string
+          due_at: string | null
           id: string
           module: string
           read: boolean
+          resolved_at: string | null
+          resolved_by: string | null
           title: string
           type: string
           user_id: string | null
         }
         Insert: {
+          assigned_to?: string | null
           company_id?: string | null
           created_at?: string
           description: string
+          due_at?: string | null
           id?: string
           module?: string
           read?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
           title: string
           type?: string
           user_id?: string | null
         }
         Update: {
+          assigned_to?: string | null
           company_id?: string | null
           created_at?: string
           description?: string
+          due_at?: string | null
           id?: string
           module?: string
           read?: boolean
+          resolved_at?: string | null
+          resolved_by?: string | null
           title?: string
           type?: string
           user_id?: string | null
@@ -22583,6 +22595,14 @@ export type Database = {
           quantity: number
           sequence_no: number
         }[]
+      }
+      assign_notification: {
+        Args: {
+          _assigned_to: string
+          _due_at: string
+          _notification_id: string
+        }
+        Returns: undefined
       }
       auto_match_bank_transactions: {
         Args: { p_bank_account_id?: string; p_tolerance_days?: number }
