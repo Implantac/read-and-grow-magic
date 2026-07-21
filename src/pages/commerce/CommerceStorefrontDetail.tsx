@@ -22,6 +22,7 @@ import {
   useCommerceTheme,
   useUpdateStorefrontStatus,
 } from "@/hooks/useCommerce";
+import { StorefrontNotificationsPanel } from "@/components/commerce/StorefrontNotificationsPanel";
 
 const STATUS_LABELS: Record<string, { label: string; variant: "default" | "secondary" | "outline" }> = {
   draft: { label: "Rascunho", variant: "outline" },
@@ -221,7 +222,48 @@ export default function CommerceStorefrontDetail() {
             </CardContent>
           </Card>
         </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm flex items-center gap-2">
+                <FileText className="h-4 w-4" /> NFC-e automática
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                Ao ativar, o rascunho da NFC-e gerado no pagamento é enviado automaticamente à SEFAZ.
+              </p>
+              <div className="flex items-center gap-2">
+                <Badge variant={storefront.auto_authorize_nfce ? "default" : "outline"}>
+                  {storefront.auto_authorize_nfce ? "Ativada" : "Desativada"}
+                </Badge>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    const { useToggleAutoAuthorizeNfce } = await import("@/hooks/useStorefrontNotifications");
+                    // simple inline dispatch via a fresh mutation call
+                    const { supabase } = await import("@/integrations/supabase/client");
+                    await supabase
+                      .from("storefronts")
+                      .update({ auto_authorize_nfce: !storefront.auto_authorize_nfce } as any)
+                      .eq("id", storefront.id);
+                    window.location.reload();
+                    void useToggleAutoAuthorizeNfce;
+                  }}
+                >
+                  {storefront.auto_authorize_nfce ? "Desativar" : "Ativar"}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+          <div className="lg:col-span-2">
+            <StorefrontNotificationsPanel />
+          </div>
+        </div>
       </PageContainer>
     </RoleGuard>
   );
 }
+
