@@ -135,6 +135,7 @@ export const navigationSections: NavSection[] = [
           { title: 'Forecast', href: '/comercial/forecast', icon: 'TrendingUp' },
           { title: 'Campanhas', href: '/comercial/campanhas', icon: 'Megaphone' },
           { title: 'Performance', href: '/comercial/performance', icon: 'BarChart3' },
+          { title: 'Relatório Vendas × Canal', href: '/comercial/relatorio-canal', icon: 'FileBarChart' },
           { title: '📘 Playbook', href: '/comercial/playbook', icon: 'BookOpen' },
           { title: '🎮 Gamificação', href: '/comercial/gamificacao', icon: 'Trophy' },
           { title: '🧠 IA Comercial', href: '/comercial/ia', icon: 'Brain' },
