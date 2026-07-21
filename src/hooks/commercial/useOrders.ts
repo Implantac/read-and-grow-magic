@@ -250,7 +250,7 @@ export function useUpdateOrderFields() {
   const qc = useQueryClient();
   const { toast } = useToast();
   return useMutation({
-    mutationFn: async ({ id, ...fields }: { id: string } & Partial<Omit<DbOrder, 'items' | 'id'>>) => {
+    mutationFn: async ({ id, ...fields }: { id: string } & Record<string, any>) => {
       const payload = { ...fields, updated_at: new Date().toISOString() };
       const { error } = await supabase
         .from('orders')
