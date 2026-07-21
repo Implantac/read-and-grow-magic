@@ -2,10 +2,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { BaseService } from '../shared/baseService';
 
 /**
- * Service para gerenciamento de clientes.
- * Herda operações base e implementa lógicas específicas.
+ * Service consolidado para gerenciamento de clientes.
+ * AUD-5: unifica clientService + clientsService.
  */
-
 class ClientsService {
   private base = new BaseService('clients');
 
@@ -32,3 +31,5 @@ class ClientsService {
 }
 
 export const clientsService = new ClientsService();
+// Backwards-compat alias (deprecated — usar clientsService).
+export const clientService = clientsService;

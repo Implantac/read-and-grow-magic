@@ -1,10 +1,10 @@
 // Service Locator Pattern for future-proofing and easier mocking/testing
-import { clientService } from '@/services/commercial/clientService';
+import { clientsService } from '@/services/commercial/clientsService';
 import { financialService } from '@/services/financial/financialService';
 import { orderService } from '@/services/commercial/orderService';
 
 export const services = {
-  clients: clientService,
+  clients: clientsService,
   financial: financialService,
   orders: orderService,
 };
