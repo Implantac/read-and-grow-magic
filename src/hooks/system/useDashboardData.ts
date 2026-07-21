@@ -2,17 +2,34 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { useAppStore } from '@/stores/useAppStore';
+import { useCanalStore, type CanalFilter } from '@/stores/useCanalStore';
 
 import { formatBRL } from '@/lib/formatters';
 // KPI values sempre em formato completo R$ X.XXX,XX (fonte única de verdade)
 const fmtShort = (v: number) => formatBRL(v);
 
+// Aplica filtros de canal operacional e filial em queries que suportam essas colunas.
+function withCanal(
+  q: any,
+  canal: CanalFilter,
+  branchId: string | null,
+  opts: { branch?: boolean; canal?: boolean } = {}
+): any {
+  let r = q;
+  const wantCanal = opts.canal !== false;
+  const wantBranch = opts.branch !== false;
+  if (wantCanal && canal !== 'CONSOLIDADO') r = r.eq('canal_operacional', canal);
+  if (wantBranch && branchId) r = r.eq('branch_id', branchId);
+  return r;
+}
+
 export function useDashboardData() {
   const { activeCompany } = useAppStore();
+  const { canal, branchId } = useCanalStore();
   const companyId = activeCompany?.id;
 
   return useQuery({
-    queryKey: ['dashboard-consolidated', companyId],
+    queryKey: ['dashboard-consolidated', companyId, canal, branchId],
     enabled: !!companyId,
     queryFn: async () => {
       if (!companyId) return null;
@@ -29,40 +46,40 @@ export function useDashboardData() {
         lowStockRes, recentOrdersRes, hrRes, crmRes, carriersRes,
         npsAnswersRes, npsInvitesRes,
       ] = await Promise.all([
-        // Current month sales
+        // Current month sales (não possui canal_operacional em `sales` legada — só branch se existir)
         supabase.from('sales').select('total, status').gte('date', monthStart).lte('date', monthEnd).eq('company_id', companyId),
         // Previous month sales
         supabase.from('sales').select('total, status').gte('date', prevMonthStart).lte('date', prevMonthEnd).eq('company_id', companyId),
         // Current month orders
-        supabase.from('orders').select('id, status, total, priority, created_at').gte('date', monthStart).lte('date', monthEnd).eq('company_id', companyId),
+        withCanal(supabase.from('orders').select('id, status, total, priority, created_at').gte('date', monthStart).lte('date', monthEnd).eq('company_id', companyId), canal, branchId),
         // Active clients
         supabase.from('clients').select('id', { count: 'exact', head: true }).eq('status', 'active').eq('company_id', companyId),
         // Active products
         supabase.from('products').select('id, cost_price, sale_price, min_stock, reorder_point, status', { count: 'exact' }).eq('status', 'active').eq('company_id', companyId),
         // Accounts receivable pending
-        supabase.from('accounts_receivable').select('amount, status, due_date').eq('status', 'pending').eq('company_id', companyId),
+        withCanal(supabase.from('accounts_receivable').select('amount, status, due_date').eq('status', 'pending').eq('company_id', companyId), canal, branchId),
         // Accounts payable pending
-        supabase.from('accounts_payable').select('amount, status, due_date').eq('status', 'pending').eq('company_id', companyId),
+        withCanal(supabase.from('accounts_payable').select('amount, status, due_date').eq('status', 'pending').eq('company_id', companyId), canal, branchId),
         // NF-e this month
-        supabase.from('nfe').select('id, status, total').gte('issue_date', monthStart).eq('company_id', companyId),
+        withCanal(supabase.from('nfe').select('id, status, total').gte('issue_date', monthStart).eq('company_id', companyId), canal, branchId),
         // Production orders active
         supabase.from('production_orders').select('id, status, quantity, produced_quantity').eq('company_id', companyId),
         // Purchase orders
         supabase.from('purchase_orders').select('id, status, total').eq('company_id', companyId),
         // Stock movements this month
-        supabase.from('stock_movements').select('id, direction, quantity').gte('created_at', monthStart).eq('company_id', companyId),
+        withCanal(supabase.from('stock_movements').select('id, direction, quantity').gte('created_at', monthStart).eq('company_id', companyId), canal, branchId),
         // Overdue payables
-        supabase.from('accounts_payable').select('amount').eq('status', 'pending').lt('due_date', now.toISOString()).eq('company_id', companyId),
+        withCanal(supabase.from('accounts_payable').select('amount').eq('status', 'pending').lt('due_date', now.toISOString()).eq('company_id', companyId), canal, branchId),
         // Overdue receivables
-        supabase.from('accounts_receivable').select('amount').eq('status', 'pending').lt('due_date', now.toISOString()).eq('company_id', companyId),
+        withCanal(supabase.from('accounts_receivable').select('amount').eq('status', 'pending').lt('due_date', now.toISOString()).eq('company_id', companyId), canal, branchId),
         // Low stock products
         supabase.from('products').select('id, name, min_stock, reorder_point').eq('status', 'active').eq('company_id', companyId),
         // Recent orders for activity feed
-        supabase.from('orders').select('number, client_name, total, status, created_at').eq('company_id', companyId).order('created_at', { ascending: false }).limit(5),
+        withCanal(supabase.from('orders').select('number, client_name, total, status, created_at').eq('company_id', companyId).order('created_at', { ascending: false }).limit(5), canal, branchId),
         // HR & People Strategy
         supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('company_id', companyId),
         // CRM & Growth Opportunities
-        supabase.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'draft').eq('company_id', companyId),
+        withCanal(supabase.from('orders').select('id', { count: 'exact', head: true }).eq('status', 'draft').eq('company_id', companyId), canal, branchId),
         // Logistics & Fleet Management
         supabase.from('carriers').select('id', { count: 'exact', head: true }).eq('company_id', companyId),
         // NPS answers (last 500)
