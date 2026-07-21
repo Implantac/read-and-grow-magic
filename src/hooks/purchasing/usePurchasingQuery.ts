@@ -64,11 +64,11 @@ export function usePurchasing() {
   });
 
   return {
-    suppliers: suppliersQuery.data || [],
+    suppliers: (suppliersQuery.data || []) as Supplier[],
     suppliersLoading: suppliersQuery.isLoading,
-    orders: ordersQuery.data || [],
+    orders: (ordersQuery.data || []) as PurchaseOrder[],
     ordersLoading: ordersQuery.isLoading,
-    quotations: quotationsQuery.data || [],
+    quotations: (quotationsQuery.data || []) as Quotation[],
     quotationsLoading: quotationsQuery.isLoading,
     
     createSupplier: createSupplierMutation.mutateAsync,
