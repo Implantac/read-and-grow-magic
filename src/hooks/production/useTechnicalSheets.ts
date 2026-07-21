@@ -25,7 +25,7 @@ export function useTechnicalSheets() {
     setLoading(true);
     const { data, error } = await supabase.from('product_technical_sheets').select('*').order('product_name');
     if (error) { console.error(error); toast.error('Erro ao carregar fichas técnicas'); }
-    else setSheets(data || []);
+    else setSheets((data || []) as any);
     setLoading(false);
   }, []);
 

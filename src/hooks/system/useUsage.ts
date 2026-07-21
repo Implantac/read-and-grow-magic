@@ -44,7 +44,7 @@ export async function checkQuota(
   companyId: string,
   metric: UsageMetric,
 ): Promise<{ allowed: boolean; current: number; limit: number | null; remaining: number | null }> {
-  const { data, error } = await supabase.rpc('check_quota' as any, {
+  const { data, error } = await supabase.rpc('check_quota', {
     _company_id: companyId,
     _metric: metric,
   });

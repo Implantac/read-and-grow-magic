@@ -24,7 +24,7 @@ export function useAPSMulti(horizonDays = 14) {
   return useQuery({
     queryKey: ['aps-multi', horizonDays],
     queryFn: async (): Promise<APSAssignment[]> => {
-      const { data, error } = await supabase.rpc('aps_schedule_multi' as any, {
+      const { data, error } = await supabase.rpc('aps_schedule_multi', {
         _horizon_days: horizonDays,
       });
       if (error) throw error;

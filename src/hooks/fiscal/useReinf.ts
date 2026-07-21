@@ -86,7 +86,7 @@ export function useReinf() {
   const reopen = async (periodId: string) => {
     setBusy(true);
     try {
-      const { error } = await supabase.rpc('reinf_reopen_period' as any, { p_period_id: periodId });
+      const { error } = await supabase.rpc('reinf_reopen_period', { p_period_id: periodId });
       if (error) throw error;
       toast.success('Competência reaberta');
       await load();

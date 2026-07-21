@@ -34,7 +34,7 @@ export function useBankReconcileEngine() {
   const runAuto = useCallback(async (bankAccountId?: string) => {
     setRunning(true);
     try {
-      const { data, error } = await supabase.rpc('bank_reconcile_auto' as any, {
+      const { data, error } = await supabase.rpc('bank_reconcile_auto', {
         p_bank_account_id: bankAccountId ?? null,
       });
       if (error) throw error;
@@ -52,14 +52,14 @@ export function useBankReconcileEngine() {
   }, [load]);
 
   const accept = useCallback(async (id: string) => {
-    const { error } = await supabase.rpc('bank_apply_suggestion' as any, { p_suggestion_id: id });
+    const { error } = await supabase.rpc('bank_apply_suggestion', { p_suggestion_id: id });
     if (error) return toast.error('Falha ao aceitar', { description: error.message });
     toast.success('Sugestão aplicada');
     await load();
   }, [load]);
 
   const reject = useCallback(async (id: string) => {
-    const { error } = await supabase.rpc('bank_reject_suggestion' as any, { p_suggestion_id: id });
+    const { error } = await supabase.rpc('bank_reject_suggestion', { p_suggestion_id: id });
     if (error) return toast.error('Falha ao rejeitar', { description: error.message });
     toast.success('Sugestão descartada');
     await load();

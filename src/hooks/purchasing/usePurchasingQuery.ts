@@ -38,7 +38,7 @@ export function usePurchasing() {
         taxes: o.tax_amount || 0, total: o.total_amount,
         paymentTerms: o.payment_terms, status: o.status, priority: o.priority,
         buyerId: o.buyer_id, buyerName: '', createdAt: o.created_at, updatedAt: o.updated_at
-      }));
+      })) as PurchaseOrder[];
     },
   });
 
@@ -64,11 +64,11 @@ export function usePurchasing() {
   });
 
   return {
-    suppliers: suppliersQuery.data || [],
+    suppliers: (suppliersQuery.data || []) as Supplier[],
     suppliersLoading: suppliersQuery.isLoading,
-    orders: ordersQuery.data || [],
+    orders: (ordersQuery.data || []) as PurchaseOrder[],
     ordersLoading: ordersQuery.isLoading,
-    quotations: quotationsQuery.data || [],
+    quotations: (quotationsQuery.data || []) as Quotation[],
     quotationsLoading: quotationsQuery.isLoading,
     
     createSupplier: createSupplierMutation.mutateAsync,
