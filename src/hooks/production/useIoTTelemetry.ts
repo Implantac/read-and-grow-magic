@@ -19,7 +19,7 @@ export function useIoTTelemetry(machineId?: string, limit = 100) {
 
   const fetchReadings = useCallback(async () => {
     setLoading(true);
-    let query = (supabase as any)
+    let query = supabase
       .from('iot_telemetry')
       .select('*')
       .order('created_at', { ascending: false })

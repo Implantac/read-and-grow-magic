@@ -20,7 +20,7 @@ export function useProductionSectors() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any).from('production_sectors').select('*').order('code');
+    const { data, error } = await supabase.from('production_sectors').select('*').order('code');
     if (error) { console.error(error); toast.error('Erro ao carregar setores'); }
     else setSectors(data || []);
     setLoading(false);
@@ -29,7 +29,7 @@ export function useProductionSectors() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const create = async (item: Partial<ProductionSector>) => {
-    const { error } = await (supabase as any).from('production_sectors').insert(item);
+    const { error } = await supabase.from('production_sectors').insert(item);
     if (error) { toast.error('Erro ao criar setor'); return false; }
     toast.success('Setor cadastrado');
     await fetch();
@@ -37,7 +37,7 @@ export function useProductionSectors() {
   };
 
   const update = async (id: string, updates: Partial<ProductionSector>) => {
-    const { error } = await (supabase as any).from('production_sectors').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
+    const { error } = await supabase.from('production_sectors').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
     if (error) { toast.error('Erro ao atualizar setor'); return false; }
     toast.success('Setor atualizado');
     await fetch();
@@ -45,7 +45,7 @@ export function useProductionSectors() {
   };
 
   const remove = async (id: string) => {
-    const { error } = await (supabase as any).from('production_sectors').delete().eq('id', id);
+    const { error } = await supabase.from('production_sectors').delete().eq('id', id);
     if (error) { toast.error('Erro ao excluir setor'); return; }
     toast.success('Setor excluído');
     await fetch();
