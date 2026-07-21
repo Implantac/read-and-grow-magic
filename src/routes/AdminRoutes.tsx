@@ -15,6 +15,7 @@ const DashboardEnginePage = lazy(() => import("../modules/admin/DashboardEngine"
 const SecurityAuditPage = lazy(() => import("../modules/admin/SecurityAudit"));
 const SystemManualPage = lazy(() => import("../modules/admin/systemManual/SystemManual"));
 const ModuleManualDetailPage = lazy(() => import("../modules/admin/systemManual/ModuleManualDetail"));
+const CriticalAuditLogPage = lazy(() => import("../modules/admin/CriticalAuditLog"));
 
 
 
@@ -40,6 +41,7 @@ export const AdminRoutes = [
   <Route key="adm-security-audit" path="seguranca/auditoria" element={adminOnly(<SecurityAuditPage />)} />,
   <Route key="adm-manual" path="manual" element={<SystemManualPage />} />,
   <Route key="adm-manual-detail" path="manual/:slug" element={<ModuleManualDetailPage />} />,
+  <Route key="adm-critical-audit" path="auditoria-critica" element={adminOnly(<CriticalAuditLogPage />)} />,
 ];
 
 

@@ -407,6 +407,7 @@ export const navigationSections: NavSection[] = [
           { title: 'Parâmetros', href: '/admin/parametros', icon: 'Sliders' },
           { title: 'Relatório Diário', href: '/admin/relatorio-diario', icon: 'FileText' },
           { title: 'Auditoria Cross-Módulos', href: '/admin/auditoria-cross', icon: 'Activity' },
+          { title: 'Auditoria Crítica (Imutável)', href: '/admin/auditoria-critica', icon: 'ShieldAlert' },
           { title: 'Metadata Engine', href: '/admin/metadata', icon: 'Database' },
           { title: 'Workflow Engine', href: '/admin/workflows', icon: 'GitBranch' },
           { title: 'Caixa de Workflows', href: '/workflows/inbox', icon: 'Inbox' },
