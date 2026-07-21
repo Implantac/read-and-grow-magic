@@ -20114,6 +20114,7 @@ export type Database = {
           lot_number: string | null
           notes: string | null
           product_code: string
+          product_id: string | null
           product_name: string
           status: string
         }
@@ -20129,6 +20130,7 @@ export type Database = {
           lot_number?: string | null
           notes?: string | null
           product_code: string
+          product_id?: string | null
           product_name: string
           status?: string
         }
@@ -20144,6 +20146,7 @@ export type Database = {
           lot_number?: string | null
           notes?: string | null
           product_code?: string
+          product_id?: string | null
           product_name?: string
           status?: string
         }
@@ -20153,6 +20156,13 @@ export type Database = {
             columns: ["conference_id"]
             isOneToOne: false
             referencedRelation: "wms_conference_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wms_conference_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -21004,6 +21014,10 @@ export type Database = {
       }
       wms_receiving_orders: {
         Row: {
+          branch_id: string | null
+          canal_operacional:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           company_id: string
           conference_type: string | null
           created_at: string
@@ -21019,8 +21033,13 @@ export type Database = {
           received_items: number
           status: string
           supplier: string
+          warehouse_id: string | null
         }
         Insert: {
+          branch_id?: string | null
+          canal_operacional?:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           company_id?: string
           conference_type?: string | null
           created_at?: string
@@ -21036,8 +21055,13 @@ export type Database = {
           received_items?: number
           status?: string
           supplier: string
+          warehouse_id?: string | null
         }
         Update: {
+          branch_id?: string | null
+          canal_operacional?:
+            | Database["public"]["Enums"]["canal_operacional"]
+            | null
           company_id?: string
           conference_type?: string | null
           created_at?: string
@@ -21053,8 +21077,17 @@ export type Database = {
           received_items?: number
           status?: string
           supplier?: string
+          warehouse_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "wms_receiving_orders_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wms_recommendations: {
         Row: {
@@ -22667,6 +22700,10 @@ export type Database = {
           _payment_method?: string
           _source?: string
         }
+        Returns: Json
+      }
+      finalize_receiving_conference: {
+        Args: { _conference_id: string }
         Returns: Json
       }
       fn_emit_automation_event: {
