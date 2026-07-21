@@ -10212,6 +10212,9 @@ export type Database = {
           created_at: string
           description: string
           due_at: string | null
+          escalated_at: string | null
+          escalated_from: string | null
+          escalated_to: string | null
           id: string
           module: string
           read: boolean
@@ -10228,6 +10231,9 @@ export type Database = {
           created_at?: string
           description: string
           due_at?: string | null
+          escalated_at?: string | null
+          escalated_from?: string | null
+          escalated_to?: string | null
           id?: string
           module?: string
           read?: boolean
@@ -10244,6 +10250,9 @@ export type Database = {
           created_at?: string
           description?: string
           due_at?: string | null
+          escalated_at?: string | null
+          escalated_from?: string | null
+          escalated_to?: string | null
           id?: string
           module?: string
           read?: boolean
@@ -22779,6 +22788,7 @@ export type Database = {
           type: string
         }[]
       }
+      escalate_overdue_alerts: { Args: never; Returns: number }
       eval_wf_condition: { Args: { cond: Json; ctx: Json }; Returns: boolean }
       evaluate_transaction_risk: {
         Args: {

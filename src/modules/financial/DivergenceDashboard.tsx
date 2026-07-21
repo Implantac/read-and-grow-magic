@@ -53,6 +53,8 @@ interface Notif {
   assigned_to: string | null;
   due_at: string | null;
   resolved_at: string | null;
+  escalated_at?: string | null;
+  escalated_from?: string | null;
 }
 
 interface CompanyUser {
@@ -374,6 +376,11 @@ export default function DivergenceDashboard() {
                             {isOverdue && (
                               <Badge variant="destructive" className="text-xs gap-1">
                                 <Clock className="h-3 w-3" /> Vencido
+                              </Badge>
+                            )}
+                            {n.escalated_at && (
+                              <Badge variant="destructive" className="text-xs gap-1">
+                                🚨 Escalonado
                               </Badge>
                             )}
                             {assignedName && (
