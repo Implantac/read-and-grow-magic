@@ -10217,6 +10217,7 @@ export type Database = {
           read: boolean
           resolved_at: string | null
           resolved_by: string | null
+          sla_warned_at: string | null
           title: string
           type: string
           user_id: string | null
@@ -10232,6 +10233,7 @@ export type Database = {
           read?: boolean
           resolved_at?: string | null
           resolved_by?: string | null
+          sla_warned_at?: string | null
           title: string
           type?: string
           user_id?: string | null
@@ -10247,6 +10249,7 @@ export type Database = {
           read?: boolean
           resolved_at?: string | null
           resolved_by?: string | null
+          sla_warned_at?: string | null
           title?: string
           type?: string
           user_id?: string | null
