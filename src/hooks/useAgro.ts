@@ -77,7 +77,7 @@ export function useCreateAgroFarm() {
     mutationFn: async (input: Partial<AgroFarm>) => {
       const { data, error } = await supabase
         .from('agro_farms' as any)
-        .insert(input as any)
+        .insert(input)
         .select()
         .single();
       if (error) throw error;
@@ -128,7 +128,7 @@ export function useCreateAgroField() {
     mutationFn: async (input: Partial<AgroField>) => {
       const { data, error } = await supabase
         .from('agro_fields' as any)
-        .insert(input as any)
+        .insert(input)
         .select()
         .single();
       if (error) throw error;
@@ -164,7 +164,7 @@ export function useCreateAgroSeason() {
     mutationFn: async (input: Partial<AgroSeason>) => {
       const { data, error } = await supabase
         .from('agro_seasons' as any)
-        .insert(input as any)
+        .insert(input)
         .select()
         .single();
       if (error) throw error;
@@ -200,7 +200,7 @@ export function useCreateAgroHarvest() {
     mutationFn: async (input: Partial<AgroHarvest>) => {
       const { data, error } = await supabase
         .from('agro_harvests' as any)
-        .insert(input as any)
+        .insert(input)
         .select()
         .single();
       if (error) throw error;

@@ -25,7 +25,7 @@ export function useConstructionProjects() {
   return useQuery({
     queryKey: ['construction_projects'],
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('construction_projects')
         .select('*')
         .order('created_at', { ascending: false });
@@ -39,7 +39,7 @@ export function useCreateConstructionProject() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: Partial<ConstructionProject>) => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('construction_projects')
         .insert(payload)
         .select()
@@ -59,7 +59,7 @@ export function useUpdateConstructionProject() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...patch }: Partial<ConstructionProject> & { id: string }) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('construction_projects')
         .update(patch)
         .eq('id', id);
@@ -77,7 +77,7 @@ export function useDeleteConstructionProject() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('construction_projects')
         .delete()
         .eq('id', id);

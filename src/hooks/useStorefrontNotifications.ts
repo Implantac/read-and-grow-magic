@@ -58,7 +58,7 @@ export function useToggleAutoAuthorizeNfce() {
     mutationFn: async ({ storefrontId, value }: { storefrontId: string; value: boolean }) => {
       const { error } = await supabase
         .from("storefronts")
-        .update({ auto_authorize_nfce: value } as any)
+        .update({ auto_authorize_nfce: value })
         .eq("id", storefrontId);
       if (error) throw error;
     },

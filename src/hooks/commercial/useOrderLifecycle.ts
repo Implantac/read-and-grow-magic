@@ -69,7 +69,7 @@ async function createStockReservations(order: OrderLike) {
     location: '',
   }));
 
-  const { error } = await supabase.from('stock_reservations').insert(reservations as any);
+  const { error } = await supabase.from('stock_reservations').insert(reservations);
   if (error) console.error('Error creating reservations:', error);
 }
 
@@ -92,7 +92,7 @@ async function createConferenceRecord(order: OrderLike) {
     checked_items: 0,
     divergent_items: 0,
     status: 'pending',
-  } as any).select().single();
+  }).select().single();
   if (error) { console.error('Error creating conference:', error); return; }
 
   // Create conference items
@@ -107,7 +107,7 @@ async function createConferenceRecord(order: OrderLike) {
       divergence: 0,
       status: 'pending',
     }));
-    await supabase.from('conference_record_items').insert(confItems as any);
+    await supabase.from('conference_record_items').insert(confItems);
   }
 }
 
@@ -127,7 +127,7 @@ async function createBillingEntry(order: OrderLike) {
     billed_amount: 0,
     billing_type: 'full',
     status: 'awaiting_billing',
-  } as any);
+  });
 }
 
 async function generateReceivablesFromBilling(order: OrderLike) {
@@ -181,7 +181,7 @@ async function generateReceivablesFromBilling(order: OrderLike) {
       installment_number: i + 1,
       total_installments: installmentCount,
       notes: `Gerado automaticamente do pedido ${order.number}`,
-    } as any);
+    });
   }
 }
 
@@ -203,13 +203,13 @@ async function createShipmentOrder(order: OrderLike) {
     total_weight: 0,
     total_value: order.total,
     expected_delivery: order.delivery_date,
-  } as any);
+  });
 }
 
 async function releaseStockReservations(orderId: string) {
   await supabase
     .from('stock_reservations')
-    .update({ status: 'released', updated_at: new Date().toISOString() } as any)
+    .update({ status: 'released', updated_at: new Date().toISOString() })
     .eq('order_id', orderId)
     .in('status', ['reserved', 'pending']);
 }
@@ -273,7 +273,7 @@ export function useOrderLifecycle() {
         // Small delay to let trigger create the history record first
         await new Promise(r => setTimeout(r, 200));
         await supabase.from('order_status_history')
-          .update({ observation, block_reason: blockReason, changed_by: changedBy } as any)
+          .update({ observation, block_reason: blockReason, changed_by: changedBy })
           .eq('order_id', orderId)
           .order('created_at', { ascending: false })
           .limit(1);

@@ -245,7 +245,7 @@ export function useCompleteAIAction() {
     mutationFn: async ({ id, result }: { id: string; result: string }) => {
       const { error } = await supabase
         .from('ai_daily_actions')
-        .update({ status: 'completed', completed_at: new Date().toISOString(), result } as any)
+        .update({ status: 'completed', completed_at: new Date().toISOString(), result })
         .eq('id', id);
       if (error) throw error;
     },
@@ -259,7 +259,7 @@ export function useActOnRecommendation() {
     mutationFn: async ({ id, result }: { id: string; result: string }) => {
       const { error } = await supabase
         .from('ai_recommendations')
-        .update({ status: 'acted', acted_at: new Date().toISOString(), result } as any)
+        .update({ status: 'acted', acted_at: new Date().toISOString(), result })
         .eq('id', id);
       if (error) throw error;
     },
@@ -273,7 +273,7 @@ export function useDismissInsight() {
     mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('ai_sales_insights')
-        .update({ status: 'dismissed', dismissed_at: new Date().toISOString() } as any)
+        .update({ status: 'dismissed', dismissed_at: new Date().toISOString() })
         .eq('id', id);
       if (error) throw error;
     },

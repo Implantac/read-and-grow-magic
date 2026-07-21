@@ -51,7 +51,7 @@ export function useCreateStockReservation() {
         status: 'reserved',
         reserved_qty: input.requested_qty,
         reserved_at: new Date().toISOString(),
-      } as any);
+      });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -80,7 +80,7 @@ export function useCreateConference() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (input: { order_id: string; conference_number: string; total_items: number }) => {
-      const { error } = await supabase.from('conference_records').insert(input as any);
+      const { error } = await supabase.from('conference_records').insert(input);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -114,7 +114,7 @@ export function useCreateBillingEntry() {
         ...input,
         pending_amount: input.amount,
         status: 'awaiting_billing',
-      } as any);
+      });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -129,7 +129,7 @@ export function useUpdateBillingStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status, ...rest }: { id: string; status: string; [key: string]: any }) => {
-      const { error } = await supabase.from('billing_queue').update({ status, ...rest, updated_at: new Date().toISOString() } as any).eq('id', id);
+      const { error } = await supabase.from('billing_queue').update({ status, ...rest, updated_at: new Date().toISOString() }).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -168,7 +168,7 @@ export function useCreateShipment() {
       freight_type?: string;
       expected_delivery?: string;
     }) => {
-      const { error } = await supabase.from('shipment_orders').insert(input as any);
+      const { error } = await supabase.from('shipment_orders').insert(input);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -183,7 +183,7 @@ export function useUpdateShipment() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...fields }: { id: string; [key: string]: any }) => {
-      const { error } = await supabase.from('shipment_orders').update({ ...fields, updated_at: new Date().toISOString() } as any).eq('id', id);
+      const { error } = await supabase.from('shipment_orders').update({ ...fields, updated_at: new Date().toISOString() }).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -218,7 +218,7 @@ export function useAdvancedOrderStatusUpdate() {
       if (observation || block_reason) {
         await supabase.from('order_status_history').update({
           observation, block_reason, changed_by,
-        } as any).eq('order_id', id).order('created_at', { ascending: false }).limit(1);
+        }).eq('order_id', id).order('created_at', { ascending: false }).limit(1);
       }
     },
     onSuccess: () => {
