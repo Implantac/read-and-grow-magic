@@ -71,7 +71,7 @@ export function useUpdateRouteStop() {
     mutationFn: async ({ id, updates }: { id: string; updates: RouteStopUpdate }) => {
       const { data, error } = await supabase
         .from('route_stops')
-        .update(updates)
+        .update(updates as any)
         .eq('id', id)
         .select()
         .single();

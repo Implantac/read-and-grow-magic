@@ -54,8 +54,8 @@ export function useUpsertICMSST() {
     mutationFn: async (rule: Partial<ICMSSTRule> & { name: string }) => {
       const { id, ...payload } = rule as any;
       const q = id
-        ? supabase.from('tax_icms_st_rules' as any).update(payload).eq('id', id).select().single()
-        : supabase.from('tax_icms_st_rules' as any).insert(payload).select().single();
+        ? supabase.from('tax_icms_st_rules' as any).update(payload as any).eq('id', id).select().single()
+        : supabase.from('tax_icms_st_rules' as any).insert(payload as any).select().single();
       const { data, error } = await q;
       if (error) throw error;
       return data;
@@ -85,8 +85,8 @@ export function useUpsertDIFAL() {
     mutationFn: async (rule: Partial<DIFALRule> & { name: string; uf_origin: string; uf_destination: string }) => {
       const { id, ...payload } = rule as any;
       const q = id
-        ? supabase.from('tax_difal_rules' as any).update(payload).eq('id', id).select().single()
-        : supabase.from('tax_difal_rules' as any).insert(payload).select().single();
+        ? supabase.from('tax_difal_rules' as any).update(payload as any).eq('id', id).select().single()
+        : supabase.from('tax_difal_rules' as any).insert(payload as any).select().single();
       const { data, error } = await q;
       if (error) throw error;
       return data;

@@ -61,7 +61,7 @@ export function useCreateRecurring() {
     mutationFn: async (payload: Partial<RecurringRow>) => {
       const { data, error } = await supabase
         .from('financial_recurring')
-        .insert(payload)
+        .insert(payload as any)
         .select()
         .single();
       if (error) throw error;

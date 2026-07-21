@@ -140,7 +140,7 @@ export function useUpdateMeasurement(projectId: string) {
     mutationFn: async ({ id, ...patch }: Partial<Measurement> & { id: string }) => {
       const { error } = await supabase
         .from('construction_measurements')
-        .update(patch)
+        .update(patch as any)
         .eq('id', id);
       if (error) throw error;
     },

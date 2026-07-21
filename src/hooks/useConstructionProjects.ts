@@ -41,7 +41,7 @@ export function useCreateConstructionProject() {
     mutationFn: async (payload: Partial<ConstructionProject>) => {
       const { data, error } = await supabase
         .from('construction_projects')
-        .insert(payload)
+        .insert(payload as any)
         .select()
         .single();
       if (error) throw error;
@@ -61,7 +61,7 @@ export function useUpdateConstructionProject() {
     mutationFn: async ({ id, ...patch }: Partial<ConstructionProject> & { id: string }) => {
       const { error } = await supabase
         .from('construction_projects')
-        .update(patch)
+        .update(patch as any)
         .eq('id', id);
       if (error) throw error;
     },

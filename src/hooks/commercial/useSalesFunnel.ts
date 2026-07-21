@@ -58,7 +58,7 @@ export function useCreateFunnelItem() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (item: Partial<DbFunnelItem>) => {
-      const { data, error } = await supabase.from('sales_funnel').insert(item).select().single();
+      const { data, error } = await supabase.from('sales_funnel').insert(item as any).select().single();
       if (error) throw error;
       return data;
     },
@@ -74,7 +74,7 @@ export function useUpdateFunnelItem() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<DbFunnelItem> & { id: string }) => {
-      const { data, error } = await supabase.from('sales_funnel').update(updates).eq('id', id).select().single();
+      const { data, error } = await supabase.from('sales_funnel').update(updates as any).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },

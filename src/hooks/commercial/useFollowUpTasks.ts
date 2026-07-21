@@ -42,7 +42,7 @@ export function useCreateFollowUp() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (task: Partial<FollowUpTask>) => {
-      const { error } = await supabase.from('follow_up_tasks').insert(task);
+      const { error } = await supabase.from('follow_up_tasks').insert(task as any);
       if (error) throw error;
     },
     onSuccess: () => {

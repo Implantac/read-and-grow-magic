@@ -205,7 +205,7 @@ export function useCreateOrder() {
 
 
 
-      const { error: itemsError } = await supabase.from('order_items').insert(items);
+      const { error: itemsError } = await supabase.from('order_items').insert(items as any);
       if (itemsError) {
         await supabase.from('orders').delete().eq('id', order.id);
         throw itemsError;
@@ -254,7 +254,7 @@ export function useUpdateOrderFields() {
       const payload = { ...fields, updated_at: new Date().toISOString() };
       const { error } = await supabase
         .from('orders')
-        .update(payload)
+        .update(payload as any)
         .eq('id', id);
       if (error) throw error;
     },
@@ -335,7 +335,7 @@ export function useDeleteOrder() {
 
               const { order_items, ...orderData } = deletedOrder;
               
-              const { data: restored, error: restError } = await supabase.from('orders').insert(orderData).select().single();
+              const { data: restored, error: restError } = await supabase.from('orders').insert(orderData as any).select().single();
               if (restError) throw restError;
 
               if (order_items && order_items.length > 0) {
@@ -343,7 +343,7 @@ export function useDeleteOrder() {
                   ...item,
                   order_id: restored.id
                 }));
-                const { error: itemsError } = await supabase.from('order_items').insert(restoredItems);
+                const { error: itemsError } = await supabase.from('order_items').insert(restoredItems as any);
                 if (itemsError) throw itemsError;
               }
 

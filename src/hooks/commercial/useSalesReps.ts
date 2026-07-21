@@ -58,7 +58,7 @@ export function useUpdateSalesRep() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<DbSalesRep> & { id: string }) => {
-      const { data, error } = await supabase.from('sales_reps').update(updates).eq('id', id).select().single();
+      const { data, error } = await supabase.from('sales_reps').update(updates as any).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },

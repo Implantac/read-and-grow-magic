@@ -59,7 +59,7 @@ export function useUpsertTaxRule() {
       if (id) {
         const { data, error } = await supabase
           .from('tax_rules' as any)
-          .update(payload)
+          .update(payload as any)
           .eq('id', id)
           .select()
           .single();
@@ -68,7 +68,7 @@ export function useUpsertTaxRule() {
       }
       const { data, error } = await supabase
         .from('tax_rules' as any)
-        .insert(payload)
+        .insert(payload as any)
         .select()
         .single();
       if (error) throw error;

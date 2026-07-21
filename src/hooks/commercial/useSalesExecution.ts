@@ -37,7 +37,7 @@ export function useCreateContactLog() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (log: Partial<ContactLog>) => {
-      const { data, error } = await supabase.from('sales_contact_logs').insert(log).select().single();
+      const { data, error } = await supabase.from('sales_contact_logs').insert(log as any).select().single();
       if (error) throw error;
       return data;
     },
