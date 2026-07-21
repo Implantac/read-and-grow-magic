@@ -3,6 +3,7 @@ import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { ModuleKPISection } from '@/components/dashboard/ModuleKPISection';
 import { ConsolidatedCharts } from '@/components/dashboard/ConsolidatedCharts';
 import { GlobalAlerts } from '@/components/dashboard/GlobalAlerts';
+import { CanalFilter } from '@/components/shared/CanalFilter';
 import { UsagePanel } from '@/components/plan/UsagePanel';
 import { RevenueChart } from '@/components/dashboard/RevenueChart';
 import { RecentActivities } from '@/components/dashboard/RecentActivities';
