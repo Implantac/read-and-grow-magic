@@ -195,6 +195,7 @@ export default function NFCePage() {
           ]}
           filename="nfce"
         />
+        <OfflinePDVIndicator />
         <Button className="gap-2" onClick={() => navigate('/comercial/pdv')}>
           <Plus className="h-4 w-4" />
           Nova Venda PDV
