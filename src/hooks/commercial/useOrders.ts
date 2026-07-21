@@ -183,10 +183,10 @@ export function useCreateOrder() {
       if (orderError) {
         // Loga metadados completos do Postgres (code/details/hint) para debug de futuros 409.
         console.error('[useCreateOrder] insert failed', {
-          code: (orderError as any).code,
+          code: orderError.code,
           message: orderError.message,
-          details: (orderError as any).details,
-          hint: (orderError as any).hint,
+          details: orderError.details,
+          hint: orderError.hint,
         });
         throw orderError;
       }
