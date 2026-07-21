@@ -37,7 +37,7 @@ export function useResolveAlert() {
     mutationFn: async ({ id, resolved_by }: { id: string; resolved_by: string }) => {
       const { error } = await supabase
         .from('commercial_alerts')
-        .update({ status: 'resolved', resolved_at: new Date().toISOString(), resolved_by } as any)
+        .update({ status: 'resolved', resolved_at: new Date().toISOString(), resolved_by })
         .eq('id', id);
       if (error) throw error;
     },

@@ -48,7 +48,7 @@ export function useCreateTimelineEvent() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (event: Partial<DbTimelineEvent>) => {
-      const { data, error } = await supabase.from('client_timeline').insert(event as any).select().single();
+      const { data, error } = await supabase.from('client_timeline').insert(event).select().single();
       if (error) throw error;
       return data;
     },

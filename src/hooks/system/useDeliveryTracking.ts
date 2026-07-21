@@ -29,7 +29,7 @@ export function useCreateTrackingEvent() {
       location?: string;
       registered_by?: string;
     }) => {
-      const { error } = await supabase.from('delivery_tracking').insert(input as any);
+      const { error } = await supabase.from('delivery_tracking').insert(input);
       if (error) throw error;
     },
     onSuccess: () => {
