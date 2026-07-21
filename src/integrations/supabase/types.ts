@@ -17733,6 +17733,78 @@ export type Database = {
           },
         ]
       }
+      storefront_notifications: {
+        Row: {
+          attempts: number
+          body: string | null
+          channel: string
+          company_id: string
+          created_at: string
+          event_type: string
+          id: string
+          last_error: string | null
+          order_id: string
+          payload: Json | null
+          recipient: string | null
+          sent_at: string | null
+          status: string
+          storefront_id: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          body?: string | null
+          channel?: string
+          company_id: string
+          created_at?: string
+          event_type: string
+          id?: string
+          last_error?: string | null
+          order_id: string
+          payload?: Json | null
+          recipient?: string | null
+          sent_at?: string | null
+          status?: string
+          storefront_id: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          body?: string | null
+          channel?: string
+          company_id?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          last_error?: string | null
+          order_id?: string
+          payload?: Json | null
+          recipient?: string | null
+          sent_at?: string | null
+          status?: string
+          storefront_id?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storefront_notifications_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "storefront_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "storefront_notifications_storefront_id_fkey"
+            columns: ["storefront_id"]
+            isOneToOne: false
+            referencedRelation: "storefronts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       storefront_order_items: {
         Row: {
           created_at: string
@@ -18052,6 +18124,7 @@ export type Database = {
       }
       storefronts: {
         Row: {
+          auto_authorize_nfce: boolean
           company_id: string
           contact_email: string | null
           contact_phone: string | null
@@ -18074,6 +18147,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          auto_authorize_nfce?: boolean
           company_id: string
           contact_email?: string | null
           contact_phone?: string | null
@@ -18096,6 +18170,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          auto_authorize_nfce?: boolean
           company_id?: string
           contact_email?: string | null
           contact_phone?: string | null
