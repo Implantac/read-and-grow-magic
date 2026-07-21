@@ -26,7 +26,8 @@ export const UserDialog = ({ open, onOpenChange, editingUser }: UserDialogProps)
     const role = formData.get('role') as UserRole;
     const phone = formData.get('phone') as string;
     const department = formData.get('department') as string;
-    const branch_id = formData.get('branch_id') as string;
+    const rawBranch = formData.get('branch_id') as string;
+    const branch_id = rawBranch && rawBranch !== 'none' ? rawBranch : '';
     
     try {
       if (editingUser) {
