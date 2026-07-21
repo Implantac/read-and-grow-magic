@@ -69,7 +69,7 @@ export function useCreateProduct() {
   const { currentCompany } = useEnterprise();
   return useSupabaseMutation(
     (product: Partial<DbProduct>) =>
-      productsService.create({ ...product, company_id: currentCompany?.id }),
+      productsService.create({ ...product, company_id: currentCompany?.id } as any),
     {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['products'] });
