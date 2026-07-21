@@ -19,7 +19,7 @@ export interface ReconcileParams {
 }
 
 export function useBillingStockReconcile(params: ReconcileParams) {
-  const { canal, lojaId } = useCanalStore();
+  const { canal, branchId: lojaId } = useCanalStore();
 
   return useQuery({
     queryKey: ['billing-stock-reconcile', params.from, params.to, canal, lojaId],
