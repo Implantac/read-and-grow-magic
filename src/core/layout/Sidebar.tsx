@@ -30,7 +30,7 @@ import {
   Percent, Globe, ScrollText, ArrowRightLeft,
   BellRing, RotateCw, AlertOctagon, GitBranch, Siren, Scissors,
   LogOut, User as UserIcon, HelpCircle, ChevronRight, Inbox, Heart,
-  Send, MessageSquare, Palette, BookOpenCheck
+  Send, MessageSquare, Palette, BookOpenCheck, Crown
 } from 'lucide-react';
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/base/tooltip';
@@ -40,7 +40,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutDashboard, Users, Wallet, FileCheck, Package, ShoppingCart,
-  Factory, Warehouse, Settings, UserCircle, ShoppingBag, ClipboardList,
+  Factory, Warehouse, Settings, UserCircle, ShoppingBag, ClipboardList, Crown,
   FileText, ArrowUpCircle, ArrowDownCircle, TrendingUp, CheckCircle,
   Receipt, BarChart3, Box, FolderTree, ArrowLeftRight, Calculator,
   Building2, FileSearch, ClipboardCheck, PackageMinus, Timer, PackagePlus,

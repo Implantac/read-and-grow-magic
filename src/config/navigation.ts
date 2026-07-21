@@ -125,6 +125,7 @@ export const navigationSections: NavSection[] = [
           { title: 'Painel Vendedor', href: '/comercial/vendedor', icon: 'Zap' },
           { title: 'Funil Comercial', href: '/comercial/funil', icon: 'Filter' },
           { title: 'Clientes', href: '/comercial/clientes', icon: 'UserCircle' },
+          { title: 'Perfil Comercial', href: '/comercial/perfil-clientes', icon: 'Crown' },
           { title: 'Representantes', href: '/comercial/representantes', icon: 'UserCheck' },
           
           { title: 'Pedidos', href: '/comercial/pedidos', icon: 'ClipboardList' },

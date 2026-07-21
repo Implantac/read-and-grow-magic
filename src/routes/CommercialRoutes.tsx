@@ -27,6 +27,7 @@ const MarginAnalyticsPage = lazy(() => import("../modules/commercial/MarginAnaly
 const SalesDeskPage = lazy(() => import("../modules/commercial/SalesDesk"));
 const O2CMonitorPage = lazy(() => import("../modules/commercial/O2CMonitor"));
 const Sales360Page = lazy(() => import("../modules/commercial/Sales360"));
+const ClientProfilesPage = lazy(() => import("../modules/commercial/ClientProfiles"));
 
 export const CommercialRoutes = [
   <Route key="comercial-index" index element={<Navigate to="dashboard" replace />} />,
@@ -35,6 +36,7 @@ export const CommercialRoutes = [
   <Route key="comercial-dashboard" path="dashboard" element={<CommercialDashboardPage />} />,
   <Route key="comercial-pdv" path="pdv" element={<SalesDeskPage />} />,
   <Route key="comercial-clientes" path="clientes" element={<ClientsPage />} />,
+  <Route key="comercial-perfil-clientes" path="perfil-clientes" element={<ClientProfilesPage />} />,
   
   <Route key="comercial-pedidos" path="pedidos" element={<OrdersPage />} />,
   <Route key="comercial-pedido-timeline" path="pedidos/:orderId/timeline" element={<OrderTimelinePage />} />,

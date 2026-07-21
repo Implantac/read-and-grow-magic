@@ -22,6 +22,7 @@ import {
   useCommerceTheme,
   useUpdateStorefrontStatus,
 } from "@/hooks/useCommerce";
+import { StorefrontNotificationsPanel } from "@/components/commerce/StorefrontNotificationsPanel";
 
 const STATUS_LABELS: Record<string, { label: string; variant: "default" | "secondary" | "outline" }> = {
   draft: { label: "Rascunho", variant: "outline" },
@@ -221,7 +222,50 @@ export default function CommerceStorefrontDetail() {
             </CardContent>
           </Card>
         </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm flex items-center gap-2">
+                <FileText className="h-4 w-4" /> NFC-e automática
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <p className="text-xs text-muted-foreground">
+                Ao ativar, o rascunho da NFC-e gerado no pagamento é enviado automaticamente à SEFAZ.
+              </p>
+              {(() => {
+                const autoNfce = Boolean((storefront as any).auto_authorize_nfce);
+                return (
+                  <div className="flex items-center gap-2">
+                    <Badge variant={autoNfce ? "default" : "outline"}>
+                      {autoNfce ? "Ativada" : "Desativada"}
+                    </Badge>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        const { supabase } = await import("@/integrations/supabase/client");
+                        await supabase
+                          .from("storefronts")
+                          .update({ auto_authorize_nfce: !autoNfce } as any)
+                          .eq("id", storefront.id);
+                        window.location.reload();
+                      }}
+                    >
+                      {autoNfce ? "Desativar" : "Ativar"}
+                    </Button>
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
+          <div className="lg:col-span-2">
+            <StorefrontNotificationsPanel />
+          </div>
+        </div>
       </PageContainer>
     </RoleGuard>
   );
 }
+
