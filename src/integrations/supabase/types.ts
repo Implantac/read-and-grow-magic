@@ -5291,6 +5291,9 @@ export type Database = {
           financial_out: number
           id: string
           net_flow: number
+          reopened_at: string | null
+          reopened_by: string | null
+          reopened_reason: string | null
           snapshot_date: string
           stock_in_cost: number
           stock_in_qty: number
@@ -5308,6 +5311,9 @@ export type Database = {
           financial_out?: number
           id?: string
           net_flow?: number
+          reopened_at?: string | null
+          reopened_by?: string | null
+          reopened_reason?: string | null
           snapshot_date: string
           stock_in_cost?: number
           stock_in_qty?: number
@@ -5325,6 +5331,9 @@ export type Database = {
           financial_out?: number
           id?: string
           net_flow?: number
+          reopened_at?: string | null
+          reopened_by?: string | null
+          reopened_reason?: string | null
           snapshot_date?: string
           stock_in_cost?: number
           stock_in_qty?: number
@@ -23131,6 +23140,10 @@ export type Database = {
       reinf_reopen_period: { Args: { p_period_id: string }; Returns: undefined }
       reopen_accounting_period: {
         Args: { _month: number; _year: number }
+        Returns: Json
+      }
+      reopen_fiscal_day: {
+        Args: { _company_id: string; _reason: string; _snapshot_date: string }
         Returns: Json
       }
       resolve_accounting_pair: {
