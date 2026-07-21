@@ -130,8 +130,9 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
 
   return (
     <EnterpriseContext.Provider value={{
-      currentTenant: currentTenant ?? { id: '00000000-0000-0000-0000-000000000000', name: 'Tenant Padrão' },
-      currentGroup: currentGroup ?? { id: '00000000-0000-0000-0000-000000000000', name: 'Grupo Padrão' },
+      // AUD-1: nunca expor sentinela de tenant/grupo — consumers devem tratar null enquanto isLoading.
+      currentTenant,
+      currentGroup,
       currentCompany,
       currentBranch,
       segment,
