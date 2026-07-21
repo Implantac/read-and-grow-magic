@@ -76,9 +76,6 @@ export interface CreateOrderInput {
 }
 
 export function useOrders() {
-  // Late import to avoid circular deps and keep this hook framework-agnostic.
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { useCanalStore } = require('@/stores/useCanalStore') as typeof import('@/stores/useCanalStore');
   const { canal, branchId } = useCanalStore();
   return useQuery({
     queryKey: ['orders', canal, branchId],
