@@ -28,6 +28,8 @@ import { PDVCustomerCard } from './pdv/PDVCustomerCard';
 import { PDVCustomerPicker } from './pdv/PDVCustomerPicker';
 import { PDVPaymentPanel } from './pdv/PDVPaymentPanel';
 import { PDVFinalizeConfirmDialog } from './pdv/PDVFinalizeConfirmDialog';
+import { PDVSessionBar } from './pdv/PDVSessionBar';
+import { PDVOpenSessionDialog, PDVCashMovementDialog } from './pdv/PDVCashDialogs';
 import { onlyDigits, type CartItem, type SplitPayment } from './pdv/types';
 
 interface CashSession {
