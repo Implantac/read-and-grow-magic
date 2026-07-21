@@ -2,12 +2,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { BaseService } from '../shared/baseService';
 
 /**
- * Service para gerenciamento de clientes.
- * Herda operações base e implementa lógicas específicas.
+ * Service consolidado para gerenciamento de clientes.
+ * Herda operações base (CRUD tipado) e adiciona buscas customizadas.
+ * AUD-5: unifica clientService + clientsService.
  */
-
-class ClientsService {
-  private base = new BaseService('clients');
+export class ClientsService extends BaseService<'clients'> {
+  constructor() {
+    super('clients');
+  }
 
   async getAll() {
     const { data, error } = await supabase
@@ -17,18 +19,8 @@ class ClientsService {
     if (error) throw error;
     return (data || []) as any[];
   }
-
-  async create(client: any) {
-    return this.base.create(client);
-  }
-
-  async update(id: string, client: any) {
-    return this.base.update(id, client);
-  }
-
-  async delete(id: string) {
-    return this.base.delete(id);
-  }
 }
 
 export const clientsService = new ClientsService();
+// Backwards-compat alias (será removido após deprecation window).
+export const clientService = clientsService;
