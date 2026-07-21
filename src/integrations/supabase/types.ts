@@ -22896,6 +22896,7 @@ export type Database = {
           period: string
         }[]
       }
+      get_user_branch_id: { Args: { _user_id: string }; Returns: string }
       get_user_branch_ids: { Args: { _user_id: string }; Returns: string[] }
       get_user_company_id: { Args: { _user_id: string }; Returns: string }
       get_user_role: {
@@ -22950,6 +22951,7 @@ export type Database = {
         Args: { _company_id: string; _delta?: number; _metric: string }
         Returns: number
       }
+      is_matriz_viewer: { Args: { _user_id: string }; Returns: boolean }
       is_system_admin: { Args: { _user_id: string }; Returns: boolean }
       manual_match_transaction: {
         Args: { p_bank_transaction_id: string; p_ledger_entry_id: string }
