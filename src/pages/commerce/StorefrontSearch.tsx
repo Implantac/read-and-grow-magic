@@ -1,33 +1,25 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Search, Star, SlidersHorizontal, X, ChevronRight, Store as StoreIcon, ShoppingCart, Loader2, ChevronLeft } from "lucide-react";
+import { Search, SlidersHorizontal, X, Star, Store as StoreIcon, ShoppingCart, Loader2 } from "lucide-react";
 import { Input } from "@/ui/base/input";
 import { Button } from "@/ui/base/button";
 import { Card, CardContent } from "@/ui/base/card";
 import { Badge } from "@/ui/base/badge";
 import { Skeleton } from "@/ui/base/skeleton";
-import { Slider } from "@/ui/base/slider";
-import { Checkbox } from "@/ui/base/checkbox";
 import { Label } from "@/ui/base/label";
-import { RadioGroup, RadioGroupItem } from "@/ui/base/radio-group";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/ui/base/sheet";
 import { EmptyState } from "@/shared/components/EmptyState";
 import {
   usePublicStorefrontBySlug,
   useStorefrontSearchItems,
   useStorefrontCategories,
-  type StorefrontSearchItem,
   type PublicCategory,
 } from "@/hooks/useStorefrontSearch";
-
-const BRL = (v: number, currency = "BRL") =>
-  new Intl.NumberFormat("pt-BR", { style: "currency", currency }).format(v);
-
-function priceOf(it: StorefrontSearchItem) {
-  return it.public_price ?? it.product.sale_price ?? 0;
-}
-
-type SortKey = "relevance" | "price_asc" | "price_desc" | "rating_desc" | "featured";
+import { FiltersPanel } from "./search/FiltersPanel";
+import { ProductCard } from "./search/ProductCard";
+import { PaginationControls } from "./search/PaginationControls";
+import { SearchSuggestions } from "./search/SearchSuggestions";
+import { BRL, priceOf, type SortKey, type ViewMode } from "./search/utils";
 
 export default function StorefrontSearch() {
   const { slug = "" } = useParams<{ slug: string }>();
@@ -43,29 +35,19 @@ export default function StorefrontSearch() {
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(
     new Set(searchParams.getAll("cat"))
   );
-  const [minRating, setMinRating] = useState<number>(
-    Number(searchParams.get("rating") ?? 0)
-  );
-  const [sort, setSort] = useState<SortKey>(
-    (searchParams.get("sort") as SortKey) ?? "relevance"
-  );
+  const [minRating, setMinRating] = useState<number>(Number(searchParams.get("rating") ?? 0));
+  const [sort, setSort] = useState<SortKey>((searchParams.get("sort") as SortKey) ?? "relevance");
   const [suggestOpen, setSuggestOpen] = useState(false);
 
   // Pagination / infinite scroll
-  type ViewMode = "pagination" | "infinite";
   const [viewMode, setViewMode] = useState<ViewMode>(
     (searchParams.get("view") as ViewMode) ?? "pagination"
   );
-  const [perPage, setPerPage] = useState<number>(
-    Number(searchParams.get("pp") ?? 12)
-  );
-  const [page, setPage] = useState<number>(
-    Math.max(1, Number(searchParams.get("page") ?? 1))
-  );
+  const [perPage, setPerPage] = useState<number>(Number(searchParams.get("pp") ?? 12));
+  const [page, setPage] = useState<number>(Math.max(1, Number(searchParams.get("page") ?? 1)));
   const [infiniteCount, setInfiniteCount] = useState<number>(perPage);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
-  // Price bounds derived from data
   const priceBounds = useMemo(() => {
     if (!items.length) return { min: 0, max: 1000 };
     const prices = items.map(priceOf);
@@ -77,7 +59,6 @@ export default function StorefrontSearch() {
     Number(searchParams.get("pmax") ?? priceBounds.max),
   ]);
 
-  // Sync price range when bounds change (first data load)
   useEffect(() => {
     if (!searchParams.get("pmin") && !searchParams.get("pmax")) {
       setPriceRange([priceBounds.min, priceBounds.max]);
@@ -85,7 +66,6 @@ export default function StorefrontSearch() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [priceBounds.min, priceBounds.max]);
 
-  // Persist filters to URL
   useEffect(() => {
     const params = new URLSearchParams();
     if (query) params.set("q", query);
@@ -97,13 +77,11 @@ export default function StorefrontSearch() {
     setSearchParams(params, { replace: true });
   }, [query, selectedCategories, minRating, sort, priceRange, priceBounds, setSearchParams]);
 
-  // Category hierarchy (parents + subcategories)
   const { parents, childrenByParent, catById } = useMemo(() => {
     const catById = new Map<string, PublicCategory>();
     categories.forEach((c) => catById.set(c.id, c));
     const parents: PublicCategory[] = [];
     const childrenByParent = new Map<string, PublicCategory[]>();
-    // Include as "parents" any category that: has no parent OR whose parent is not in used set
     const usedIds = new Set<string>();
     items.forEach((i) => i.product.category_id && usedIds.add(i.product.category_id));
     usedIds.forEach((id) => {
@@ -117,7 +95,6 @@ export default function StorefrontSearch() {
         parents.push(cat);
       }
     });
-    // Add parents of children too
     childrenByParent.forEach((_, parentId) => {
       const p = catById.get(parentId);
       if (p && !parents.find((x) => x.id === parentId)) parents.push(p);
@@ -126,16 +103,13 @@ export default function StorefrontSearch() {
     return { parents, childrenByParent, catById };
   }, [categories, items]);
 
-  // Apply filters
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let list = items.filter((it) => {
-      // Text query
       if (q) {
         const hay = `${it.product.name} ${it.product.description ?? ""} ${it.product.brand ?? ""} ${it.product.subcategory ?? ""}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
-      // Category
       if (selectedCategories.size > 0) {
         const cid = it.product.category_id;
         if (!cid) return false;
@@ -144,10 +118,8 @@ export default function StorefrontSearch() {
         const inParent = cat?.parent_id ? selectedCategories.has(cat.parent_id) : false;
         if (!inSelf && !inParent) return false;
       }
-      // Price
       const p = priceOf(it);
       if (p < priceRange[0] || p > priceRange[1]) return false;
-      // Rating
       if (minRating > 0 && (it.rating ?? 0) < minRating) return false;
       return true;
     });
@@ -165,28 +137,21 @@ export default function StorefrontSearch() {
       case "featured":
         list = [...list].sort((a, b) => Number(b.is_featured) - Number(a.is_featured));
         break;
-      case "relevance":
-      default:
-        // Default order already: featured first, then display_order
-        break;
     }
     return list;
   }, [items, query, selectedCategories, catById, priceRange, minRating, sort]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
 
-  // Reset page/infinite count when filters, sort, perPage, or view change
   useEffect(() => {
     setPage(1);
     setInfiniteCount(perPage);
   }, [query, selectedCategories, priceRange, minRating, sort, perPage, viewMode]);
 
-  // Clamp page to totalPages after filters change
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
   }, [page, totalPages]);
 
-  // Persist pagination state to URL
   useEffect(() => {
     const params = new URLSearchParams(searchParams);
     params.set("view", viewMode);
@@ -197,7 +162,6 @@ export default function StorefrontSearch() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewMode, perPage, page]);
 
-  // Visible items
   const visibleItems = useMemo(() => {
     if (viewMode === "infinite") {
       return filtered.slice(0, Math.min(infiniteCount, filtered.length));
@@ -208,7 +172,6 @@ export default function StorefrontSearch() {
 
   const hasMoreInfinite = viewMode === "infinite" && infiniteCount < filtered.length;
 
-  // IntersectionObserver for infinite scroll
   useEffect(() => {
     if (viewMode !== "infinite") return;
     const el = sentinelRef.current;
@@ -225,16 +188,11 @@ export default function StorefrontSearch() {
     return () => io.disconnect();
   }, [viewMode, infiniteCount, filtered.length, perPage]);
 
-  // Suggestions (top 5 by product name / category name match)
   const suggestions = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q || q.length < 2) return { products: [], cats: [] };
-    const products = items
-      .filter((i) => i.product.name.toLowerCase().includes(q))
-      .slice(0, 5);
-    const cats = parents
-      .filter((c) => c.name.toLowerCase().includes(q))
-      .slice(0, 3);
+    const products = items.filter((i) => i.product.name.toLowerCase().includes(q)).slice(0, 5);
+    const cats = parents.filter((c) => c.name.toLowerCase().includes(q)).slice(0, 3);
     return { products, cats };
   }, [items, parents, query]);
 
@@ -282,96 +240,25 @@ export default function StorefrontSearch() {
     );
   }
 
-  const FiltersPanel = (
-    <div className="space-y-6">
-      <div>
-        <h3 className="font-semibold mb-3 text-sm">Categorias</h3>
-        {parents.length === 0 ? (
-          <p className="text-xs text-muted-foreground">Sem categorias disponíveis.</p>
-        ) : (
-          <div className="space-y-3">
-            {parents.map((p) => {
-              const kids = childrenByParent.get(p.id) ?? [];
-              return (
-                <div key={p.id}>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <Checkbox
-                      checked={selectedCategories.has(p.id)}
-                      onCheckedChange={() => toggleCategory(p.id)}
-                    />
-                    <span className="text-sm font-medium">{p.name}</span>
-                  </label>
-                  {kids.length > 0 && (
-                    <div className="ml-6 mt-2 space-y-1">
-                      {kids.map((k) => (
-                        <label key={k.id} className="flex items-center gap-2 cursor-pointer">
-                          <Checkbox
-                            checked={selectedCategories.has(k.id)}
-                            onCheckedChange={() => toggleCategory(k.id)}
-                          />
-                          <span className="text-xs text-muted-foreground">{k.name}</span>
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      <div>
-        <h3 className="font-semibold mb-3 text-sm">Faixa de preço</h3>
-        <Slider
-          min={priceBounds.min}
-          max={priceBounds.max}
-          step={Math.max(1, Math.floor((priceBounds.max - priceBounds.min) / 100))}
-          value={priceRange}
-          onValueChange={(v) => setPriceRange([v[0], v[1]] as [number, number])}
-          className="mb-3"
-        />
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>{BRL(priceRange[0], store.currency)}</span>
-          <span>{BRL(priceRange[1], store.currency)}</span>
-        </div>
-      </div>
-
-      <div>
-        <h3 className="font-semibold mb-3 text-sm">Avaliação mínima</h3>
-        <RadioGroup
-          value={String(minRating)}
-          onValueChange={(v) => setMinRating(Number(v))}
-        >
-          {[0, 3, 4, 4.5].map((r) => (
-            <div key={r} className="flex items-center gap-2">
-              <RadioGroupItem value={String(r)} id={`r-${r}`} />
-              <Label htmlFor={`r-${r}`} className="text-sm flex items-center gap-1 cursor-pointer">
-                {r === 0 ? (
-                  "Qualquer"
-                ) : (
-                  <>
-                    <Star className="h-3.5 w-3.5 fill-current text-yellow-500" />
-                    {r}+
-                  </>
-                )}
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
-      </div>
-
-      {activeFilterCount > 0 && (
-        <Button variant="outline" size="sm" className="w-full" onClick={clearFilters}>
-          <X className="h-4 w-4 mr-1" /> Limpar filtros
-        </Button>
-      )}
-    </div>
+  const filtersPanel = (
+    <FiltersPanel
+      parents={parents}
+      childrenByParent={childrenByParent}
+      selectedCategories={selectedCategories}
+      toggleCategory={toggleCategory}
+      priceBounds={priceBounds}
+      priceRange={priceRange}
+      setPriceRange={setPriceRange}
+      minRating={minRating}
+      setMinRating={setMinRating}
+      currency={store.currency}
+      activeFilterCount={activeFilterCount}
+      clearFilters={clearFilters}
+    />
   );
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header
         className="border-b sticky top-0 z-40 bg-background/95 backdrop-blur"
         style={{ borderColor: store.primary_color + "20" }}
@@ -415,55 +302,17 @@ export default function StorefrontSearch() {
               </button>
             )}
 
-            {/* Suggestions dropdown */}
-            {suggestOpen && (suggestions.products.length > 0 || suggestions.cats.length > 0) && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-popover border rounded-md shadow-lg overflow-hidden z-50">
-                {suggestions.cats.length > 0 && (
-                  <div className="p-2 border-b">
-                    <p className="text-[10px] uppercase text-muted-foreground px-2 mb-1">Categorias</p>
-                    {suggestions.cats.map((c) => (
-                      <button
-                        key={c.id}
-                        onMouseDown={() => {
-                          toggleCategory(c.id);
-                          setQuery("");
-                        }}
-                        className="w-full flex items-center gap-2 text-left px-2 py-1.5 hover:bg-accent rounded text-sm"
-                      >
-                        <ChevronRight className="h-3 w-3" /> {c.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {suggestions.products.length > 0 && (
-                  <div className="p-2">
-                    <p className="text-[10px] uppercase text-muted-foreground px-2 mb-1">Produtos</p>
-                    {suggestions.products.map((p) => (
-                      <button
-                        key={p.id}
-                        onMouseDown={() => setQuery(p.product.name)}
-                        className="w-full flex items-center gap-3 text-left px-2 py-1.5 hover:bg-accent rounded"
-                      >
-                        {p.product.image_url ? (
-                          <img
-                            src={p.product.image_url}
-                            alt=""
-                            className="h-8 w-8 rounded object-cover"
-                          />
-                        ) : (
-                          <div className="h-8 w-8 rounded bg-muted" />
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm truncate">{p.product.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {BRL(priceOf(p), store.currency)}
-                          </p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+            {suggestOpen && (
+              <SearchSuggestions
+                products={suggestions.products}
+                cats={suggestions.cats}
+                currency={store.currency}
+                onSelectCategory={(id) => {
+                  toggleCategory(id);
+                  setQuery("");
+                }}
+                onSelectProductName={(name) => setQuery(name)}
+              />
             )}
           </div>
 
@@ -482,7 +331,7 @@ export default function StorefrontSearch() {
               <SheetHeader>
                 <SheetTitle>Filtros</SheetTitle>
               </SheetHeader>
-              <div className="mt-6">{FiltersPanel}</div>
+              <div className="mt-6">{filtersPanel}</div>
             </SheetContent>
           </Sheet>
 
@@ -499,10 +348,9 @@ export default function StorefrontSearch() {
       </header>
 
       <div className="container mx-auto px-4 py-6 grid lg:grid-cols-[260px_1fr] gap-6">
-        {/* Desktop filters */}
         <aside className="hidden lg:block">
           <Card>
-            <CardContent className="pt-6">{FiltersPanel}</CardContent>
+            <CardContent className="pt-6">{filtersPanel}</CardContent>
           </Card>
         </aside>
 
@@ -545,7 +393,9 @@ export default function StorefrontSearch() {
                 aria-label="Itens por página"
               >
                 {[12, 24, 36, 48].map((n) => (
-                  <option key={n} value={n}>{n}</option>
+                  <option key={n} value={n}>
+                    {n}
+                  </option>
                 ))}
               </select>
 
@@ -570,7 +420,6 @@ export default function StorefrontSearch() {
             </div>
           </div>
 
-          {/* Active filter chips */}
           {activeFilterCount > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
               {Array.from(selectedCategories).map((cid) => {
@@ -630,69 +479,16 @@ export default function StorefrontSearch() {
           ) : (
             <>
               <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-                {visibleItems.map((it) => {
-                  const price = priceOf(it);
-                  const compare = it.compare_at_price;
-                  const hasDiscount = compare && compare > price;
-                  return (
-                    <Card
-                      key={it.id}
-                      className="overflow-hidden group hover:shadow-lg transition-shadow"
-                    >
-                      <div className="aspect-square bg-muted relative overflow-hidden">
-                        {it.product.image_url ? (
-                          <img
-                            src={it.product.image_url}
-                            alt={it.product.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                            <StoreIcon className="h-12 w-12" />
-                          </div>
-                        )}
-                        {it.is_featured && (
-                          <Badge className="absolute top-2 left-2" style={{ backgroundColor: store.primary_color }}>
-                            Destaque
-                          </Badge>
-                        )}
-                        {hasDiscount && (
-                          <Badge variant="destructive" className="absolute top-2 right-2">
-                            -{Math.round(((compare! - price) / compare!) * 100)}%
-                          </Badge>
-                        )}
-                      </div>
-                      <CardContent className="p-3 space-y-1">
-                        <h3 className="font-medium text-sm line-clamp-2 min-h-[2.5rem]">
-                          {it.product.name}
-                        </h3>
-                        {it.rating != null && it.rating_count > 0 ? (
-                          <div className="flex items-center gap-1 text-xs">
-                            <Star className="h-3 w-3 fill-yellow-500 text-yellow-500" />
-                            <span className="font-medium">{it.rating.toFixed(1)}</span>
-                            <span className="text-muted-foreground">({it.rating_count})</span>
-                          </div>
-                        ) : (
-                          <div className="text-xs text-muted-foreground">Sem avaliações</div>
-                        )}
-                        <div className="flex items-baseline gap-2 pt-1">
-                          <span className="font-bold text-base">
-                            {BRL(price, store.currency)}
-                          </span>
-                          {hasDiscount && (
-                            <span className="text-xs text-muted-foreground line-through">
-                              {BRL(compare!, store.currency)}
-                            </span>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+                {visibleItems.map((it) => (
+                  <ProductCard
+                    key={it.id}
+                    item={it}
+                    primaryColor={store.primary_color}
+                    currency={store.currency}
+                  />
+                ))}
               </div>
 
-              {/* Infinite scroll sentinel + loading indicator */}
               {viewMode === "infinite" && (
                 <div className="mt-6 flex flex-col items-center gap-2" aria-live="polite">
                   {hasMoreInfinite ? (
@@ -711,63 +507,15 @@ export default function StorefrontSearch() {
                 </div>
               )}
 
-              {/* Pagination controls */}
               {viewMode === "pagination" && totalPages > 1 && (
-                <nav
-                  className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3"
-                  aria-label="Paginação de resultados"
-                >
-                  <p className="text-xs text-muted-foreground">
-                    Mostrando {(page - 1) * perPage + 1}
-                    {"–"}
-                    {Math.min(page * perPage, filtered.length)} de {filtered.length} · Página {page} de {totalPages}
-                  </p>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      disabled={page === 1}
-                      aria-label="Página anterior"
-                    >
-                      <ChevronLeft className="h-4 w-4 mr-1" />
-                      Anterior
-                    </Button>
-                    {(() => {
-                      const nodes: JSX.Element[] = [];
-                      const maxVisible = 5;
-                      let start = Math.max(1, page - Math.floor(maxVisible / 2));
-                      const end = Math.min(totalPages, start + maxVisible - 1);
-                      if (end - start + 1 < maxVisible) start = Math.max(1, end - maxVisible + 1);
-                      for (let i = start; i <= end; i++) {
-                        nodes.push(
-                          <Button
-                            key={i}
-                            variant={i === page ? "default" : "ghost"}
-                            size="sm"
-                            className="min-w-9"
-                            onClick={() => setPage(i)}
-                            aria-current={i === page ? "page" : undefined}
-                            aria-label={`Ir para página ${i}`}
-                          >
-                            {i}
-                          </Button>
-                        );
-                      }
-                      return nodes;
-                    })()}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={page === totalPages}
-                      aria-label="Próxima página"
-                    >
-                      Próximo
-                      <ChevronRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  </div>
-                </nav>
+                <PaginationControls
+                  page={page}
+                  totalPages={totalPages}
+                  perPage={perPage}
+                  total={filtered.length}
+                  setPage={setPage}
+                  goToPage={(n) => setPage(n)}
+                />
               )}
             </>
           )}
