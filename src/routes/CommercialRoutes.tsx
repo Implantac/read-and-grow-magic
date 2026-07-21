@@ -58,5 +58,6 @@ export const CommercialRoutes = [
   <Route key="comercial-automacao" path="automacao" element={<SalesAutomationPage />} />,
   <Route key="comercial-o2c-excecoes" path="o2c-excecoes" element={<O2CExceptionsPage />} />,
   <Route key="comercial-rentabilidade" path="rentabilidade" element={<MarginAnalyticsPage />} />,
+  <Route key="comercial-relatorio-canal" path="relatorio-canal" element={<SalesReportCanalPage />} />,
   <Route key="comercial-o2c-monitor" path="o2c-monitor" element={<O2CMonitorPage />} />,
 ];
