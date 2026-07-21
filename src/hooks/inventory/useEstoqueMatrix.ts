@@ -12,6 +12,7 @@ export interface EstoqueMatrixRow {
   branch_tipo: string | null;
   canal_operacional: 'VAREJO_PDV' | 'ATACADO_INDUSTRIA';
   quantity: number;
+  min_stock: number;
 }
 
 /**
@@ -30,7 +31,7 @@ export function useEstoqueMatrix(search = '') {
       let query = supabase
         .from('stock_balances')
         .select(
-          'product_id, product_code, product_name, branch_id, canal_operacional, quantity, branches(name, tipo)'
+          'product_id, product_code, product_name, branch_id, canal_operacional, quantity, branches(name, tipo), products(min_stock)'
         )
         .eq('company_id', companyId!)
         .limit(2000);
@@ -51,6 +52,7 @@ export function useEstoqueMatrix(search = '') {
         branch_tipo: r.branches?.tipo ?? null,
         canal_operacional: r.canal_operacional,
         quantity: Number(r.quantity ?? 0),
+        min_stock: Number(r.products?.min_stock ?? 0),
       })) as EstoqueMatrixRow[];
     },
   });
