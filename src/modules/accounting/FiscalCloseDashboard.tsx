@@ -5,7 +5,7 @@ import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { Lock, TrendingUp, TrendingDown } from 'lucide-react';
-import { formatCurrency } from '@/lib/formatters';
+import { formatBRL as formatCurrency } from '@/lib/formatters';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Skeleton } from '@/ui/base/skeleton';
 import { EmptyState } from '@/shared/components/EmptyState';
