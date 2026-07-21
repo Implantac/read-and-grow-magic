@@ -93,6 +93,21 @@ export const UserDialog = ({ open, onOpenChange, editingUser }: UserDialogProps)
             <Label htmlFor="phone">Telefone</Label>
             <Input id="phone" name="phone" defaultValue={editingUser?.phone} />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="branch_id">Filial de acesso</Label>
+            <Select name="branch_id" defaultValue={editingUser?.branchId || 'none'}>
+              <SelectTrigger><SelectValue placeholder="Selecione a filial" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">— Sem filial (apenas gestores da matriz veem tudo) —</SelectItem>
+                {branches.map((b) => (
+                  <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              Operadores/vendedores só enxergam dados da filial atribuída. Escolha <strong>Admin Matriz</strong> no perfil para visão consolidada de todas as filiais.
+            </p>
+          </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
             <Button type="submit" disabled={isInviting || isChangingRole}>
