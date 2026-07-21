@@ -33,7 +33,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 };
 
 export default function ConferencePage() {
-  const { records, loading, startConference, completeConference, fetchItems, checkItem, scanBarcode, createConference } = useWMSConference();
+  const { records, loading, startConference, completeConference, fetchItems, checkItem, scanBarcode, createConference, finalizeReceivingToLedger } = useWMSConference();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [detailOpen, setDetailOpen] = useState(false);
@@ -206,6 +206,11 @@ export default function ConferencePage() {
                             {rec.status === 'in_progress' && (
                               <DropdownMenuItem onClick={() => completeConference(rec.id)}>
                                 <CheckCircle className="mr-2 h-4 w-4" /> Concluir
+                              </DropdownMenuItem>
+                            )}
+                            {rec.referenceType === 'receiving' && (rec.status === 'in_progress' || rec.status === 'divergence' || rec.status === 'completed') && (
+                              <DropdownMenuItem onClick={() => finalizeReceivingToLedger(rec.id)}>
+                                <CheckCircle className="mr-2 h-4 w-4" /> Lançar no Ledger
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>

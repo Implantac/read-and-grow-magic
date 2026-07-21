@@ -221,6 +221,22 @@ export function useWMSConference() {
     await fetchRecords();
   };
 
+  /**
+   * Finaliza uma conferência de RECEBIMENTO gerando movimentações no ledger imutável.
+   * Requer que todos os itens conferidos (checked_qty > 0) tenham product_id vinculado.
+   */
+  const finalizeReceivingToLedger = async (id: string): Promise<boolean> => {
+    const { data, error } = await (supabase as any).rpc('finalize_receiving_conference', { _conference_id: id });
+    if (error) {
+      toast.error(error.message || 'Erro ao finalizar recebimento');
+      return false;
+    }
+    const items = (data as any)?.items_ledgered ?? 0;
+    toast.success(`Recebimento finalizado: ${items} item(ns) lançado(s) no ledger`);
+    await fetchRecords();
+    return true;
+  };
+
   useEffect(() => { fetchRecords(); }, [fetchRecords]);
-  return { records, loading, refetch: fetchRecords, fetchItems, createConference, checkItem, scanBarcode, startConference, completeConference };
+  return { records, loading, refetch: fetchRecords, fetchItems, createConference, checkItem, scanBarcode, startConference, completeConference, finalizeReceivingToLedger };
 }
