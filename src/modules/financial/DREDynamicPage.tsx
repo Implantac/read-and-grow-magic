@@ -7,7 +7,7 @@ import { Label } from '@/ui/base/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { FileBarChart } from 'lucide-react';
-import { useDREDynamic } from '@/hooks/accounting/useDREDynamic';
+import { useDREDynamic } from '@/hooks/accounting/useDRE';
 import { formatNumber } from '@/lib/formatters';
 
 const SECTION_LABELS: Record<string, string> = {
