@@ -27,7 +27,7 @@ export function useProductCosts() {
 
   const fetchCosts = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any).from('product_costs').select('*').order('product_name');
+    const { data, error } = await supabase.from('product_costs').select('*').order('product_name');
     if (error) { console.error(error); toast.error('Erro ao carregar custos'); }
     else setCosts(data || []);
     setLoading(false);
@@ -51,7 +51,7 @@ export function useProductCosts() {
       cost.operational_cost || 0,
       cost.sale_price || 0,
     );
-    const { error } = await (supabase as any).from('product_costs').insert({
+    const { error } = await supabase.from('product_costs').insert({
       ...cost, ...calc, last_calculated_at: new Date().toISOString(),
     });
     if (error) { toast.error('Erro ao criar custo'); return false; }
@@ -70,7 +70,7 @@ export function useProductCosts() {
       merged.operational_cost || 0,
       merged.sale_price || 0,
     );
-    const { error } = await (supabase as any).from('product_costs').update({
+    const { error } = await supabase.from('product_costs').update({
       ...updates, ...calc, last_calculated_at: new Date().toISOString(), updated_at: new Date().toISOString(),
     }).eq('id', id);
     if (error) { toast.error('Erro ao atualizar custo'); return; }
@@ -79,7 +79,7 @@ export function useProductCosts() {
   };
 
   const deleteCost = async (id: string) => {
-    const { error } = await (supabase as any).from('product_costs').delete().eq('id', id);
+    const { error } = await supabase.from('product_costs').delete().eq('id', id);
     if (error) { toast.error('Erro ao excluir custo'); return; }
     toast.success('Custo excluído');
     await fetchCosts();
