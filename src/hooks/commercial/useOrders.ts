@@ -75,13 +75,20 @@ export interface CreateOrderInput {
 }
 
 export function useOrders() {
+  // Late import to avoid circular deps and keep this hook framework-agnostic.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { useCanalStore } = require('@/stores/useCanalStore') as typeof import('@/stores/useCanalStore');
+  const { canal, branchId } = useCanalStore();
   return useQuery({
-    queryKey: ['orders'],
+    queryKey: ['orders', canal, branchId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q: any = supabase
         .from('orders')
         .select('*, order_items(*)')
         .order('created_at', { ascending: false });
+      if (canal !== 'CONSOLIDADO') q = q.eq('canal_operacional', canal);
+      if (branchId) q = q.eq('branch_id', branchId);
+      const { data, error } = await q;
       if (error) throw error;
       type OrderWithItems = DbOrder & { order_items?: DbOrderItem[] };
       return (data as OrderWithItems[]).map((o) => ({
