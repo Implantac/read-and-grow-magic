@@ -27,4 +27,5 @@ export const AccountingRoutes = [
   <Route key="acc-dash" path="dashboard" element={<AccountingDashboardPage />} />,
   <Route key="acc-painel" path="painel" element={<AccountingDashboardPage />} />,
   <Route key="acc-closing" path="fechamento" element={<PeriodClosingPage />} />,
+  <Route key="acc-fiscal-close" path="fechamento-diario" element={<FiscalCloseDashboardPage />} />,
 ];
