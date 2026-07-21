@@ -20,16 +20,16 @@ export function useBankTransactions() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await (supabase.from as any)('bank_transactions').select('*').order('date', { ascending: false });
+    const { data, error } = await supabase.from('bank_transactions').select('*').order('date', { ascending: false });
     if (error) { console.error('Fetch transactions error:', error); toast.error('Erro ao carregar transações bancárias'); }
-    else setTransactions((data as any) || []);
+    else setTransactions(data || []);
     setLoading(false);
   }, []);
 
   useEffect(() => { fetch(); }, [fetch]);
 
   const update = async (id: string, updates: Partial<BankTransactionRow>) => {
-    const { error } = await (supabase.from as any)('bank_transactions').update(updates).eq('id', id);
+    const { error } = await supabase.from('bank_transactions').update(updates).eq('id', id);
     if (error) { toast.error('Erro ao atualizar transação'); return; }
     await fetch();
   };
