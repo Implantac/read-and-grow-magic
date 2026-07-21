@@ -24,6 +24,7 @@ const GamificationPage = lazy(() => import("../modules/commercial/Gamification")
 const SalesAutomationPage = lazy(() => import("../modules/commercial/SalesAutomation"));
 const O2CExceptionsPage = lazy(() => import("../modules/commercial/O2CExceptions"));
 const MarginAnalyticsPage = lazy(() => import("../modules/commercial/MarginAnalytics"));
+const SalesReportCanalPage = lazy(() => import("../modules/commercial/SalesReportCanal"));
 const SalesDeskPage = lazy(() => import("../modules/commercial/SalesDesk"));
 const O2CMonitorPage = lazy(() => import("../modules/commercial/O2CMonitor"));
 const Sales360Page = lazy(() => import("../modules/commercial/Sales360"));
@@ -57,5 +58,6 @@ export const CommercialRoutes = [
   <Route key="comercial-automacao" path="automacao" element={<SalesAutomationPage />} />,
   <Route key="comercial-o2c-excecoes" path="o2c-excecoes" element={<O2CExceptionsPage />} />,
   <Route key="comercial-rentabilidade" path="rentabilidade" element={<MarginAnalyticsPage />} />,
+  <Route key="comercial-relatorio-canal" path="relatorio-canal" element={<SalesReportCanalPage />} />,
   <Route key="comercial-o2c-monitor" path="o2c-monitor" element={<O2CMonitorPage />} />,
 ];
