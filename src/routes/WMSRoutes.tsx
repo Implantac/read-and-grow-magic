@@ -41,6 +41,7 @@ const WavePlanningV2Page = lazy(() => import("../modules/wms/WavePlanningV2"));
 const EstoqueMatrixPage = lazy(() => import("../modules/wms/EstoqueMatrix"));
 const TransferenciasCanalPage = lazy(() => import("../modules/wms/TransferenciasCanal"));
 const StockReportCanalPage = lazy(() => import("../modules/wms/StockReportCanal"));
+const EstoqueAuditoriaPage = lazy(() => import("../modules/wms/EstoqueAuditoria"));
 
 export const WMSRoutes = [
   <Route key="wms-index" index element={<Navigate to="dashboard" replace />} />,
@@ -84,4 +85,5 @@ export const WMSRoutes = [
   <Route key="wms-matrix" path="matriz-estoque" element={<EstoqueMatrixPage />} />,
   <Route key="wms-transf-canal" path="transferencias-canal" element={<TransferenciasCanalPage />} />,
   <Route key="wms-stock-report-canal" path="relatorio-estoque-canal" element={<StockReportCanalPage />} />,
+  <Route key="wms-auditoria-estoque" path="auditoria-estoque" element={<EstoqueAuditoriaPage />} />,
 ];
