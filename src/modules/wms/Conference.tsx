@@ -208,6 +208,11 @@ export default function ConferencePage() {
                                 <CheckCircle className="mr-2 h-4 w-4" /> Concluir
                               </DropdownMenuItem>
                             )}
+                            {rec.referenceType === 'receiving' && (rec.status === 'in_progress' || rec.status === 'divergence' || rec.status === 'completed') && (
+                              <DropdownMenuItem onClick={() => finalizeReceivingToLedger(rec.id)}>
+                                <CheckCircle className="mr-2 h-4 w-4" /> Lançar no Ledger
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
