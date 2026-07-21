@@ -28,7 +28,7 @@ export function useWorkCenters() {
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
-  const create = async (item: Partial<WorkCenterRow>) => {
+  const create = async (item: { code: string; name: string } & Partial<WorkCenterRow>) => {
     const { error } = await supabase.from('work_centers').insert(item);
     if (error) { toast.error('Erro ao criar centro de trabalho'); return false; }
     toast.success('Centro de trabalho criado');
