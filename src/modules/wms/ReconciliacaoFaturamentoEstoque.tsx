@@ -66,15 +66,15 @@ export default function ReconciliacaoFaturamentoEstoque() {
   }, [data]);
 
   const exportCSV = () => {
-    const rows = filtered.map((r) => ({
-      codigo: r.product_code ?? '',
-      produto: r.product_name ?? '',
-      canal: r.canal_operacional ?? '',
-      qty_faturado: r.qty_faturado,
-      qty_saida_fisica: r.qty_saida_fisica,
-      divergencia: r.divergencia,
-    }));
-    downloadCSV(`reconciliacao-faturamento-estoque-${from}_${to}.csv`, toCSV(rows));
+    const csv = toCSV(filtered, [
+      { key: 'product_code', label: 'Código' },
+      { key: 'product_name', label: 'Produto' },
+      { key: 'canal_operacional', label: 'Canal' },
+      { key: 'qty_faturado', label: 'Qtd Faturada' },
+      { key: 'qty_saida_fisica', label: 'Saída Física' },
+      { key: 'divergencia', label: 'Divergência' },
+    ]);
+    downloadCSV(`reconciliacao-faturamento-estoque-${from}_${to}.csv`, csv);
   };
 
   return (
