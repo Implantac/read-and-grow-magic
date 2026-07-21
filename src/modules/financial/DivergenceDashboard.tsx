@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useState, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { PageContainer } from '@/shared/components/PageContainer';
@@ -6,11 +7,21 @@ import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
-import { AlertTriangle, ArrowRight, TrendingDown, Package, Banknote } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/ui/base/tabs';
+import {
+  AlertTriangle,
+  ArrowRight,
+  TrendingDown,
+  Package,
+  Banknote,
+  CheckCheck,
+  Check,
+} from 'lucide-react';
 import { Skeleton } from '@/ui/base/skeleton';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { toastSuccess, handleMutationError } from '@/lib/toastHelpers';
 
 interface Notif {
   id: string;
@@ -32,8 +43,12 @@ const ICON_BY_TITLE: Record<string, typeof Package> = {
   'Divergência bancária por canal': Banknote,
 };
 
+type FilterStatus = 'open' | 'resolved' | 'all';
+
 export default function DivergenceDashboard() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [filter, setFilter] = useState<FilterStatus>('open');
 
   const { data, isLoading } = useQuery({
     queryKey: ['divergence_notifications'],
@@ -58,6 +73,46 @@ export default function DivergenceDashboard() {
   const stockDiv = notifs.filter((n) => n.title.includes('faturamento'));
   const bankDiv = notifs.filter((n) => n.title.includes('bancária'));
 
+  const filtered = useMemo(() => {
+    if (filter === 'open') return notifs.filter((n) => !n.read);
+    if (filter === 'resolved') return notifs.filter((n) => n.read);
+    return notifs;
+  }, [notifs, filter]);
+
+  const markRead = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: true })
+        .in('id', ids);
+      if (error) throw error;
+    },
+    onSuccess: (_d, ids) => {
+      qc.invalidateQueries({ queryKey: ['divergence_notifications'] });
+      toastSuccess(
+        ids.length > 1 ? `${ids.length} alertas resolvidos` : 'Alerta resolvido',
+      );
+    },
+    onError: handleMutationError,
+  });
+
+  const reopen = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('notifications')
+        .update({ read: false })
+        .eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['divergence_notifications'] });
+      toastSuccess('Alerta reaberto');
+    },
+    onError: handleMutationError,
+  });
+
+  const openIds = notifs.filter((n) => !n.read).map((n) => n.id);
+
   return (
     <PageContainer>
       <PageHeader
@@ -81,7 +136,7 @@ export default function DivergenceDashboard() {
               </CardHeader>
               <CardContent>
                 <p className="text-3xl font-bold text-amber-500">{openCount}</p>
-                <p className="text-xs text-muted-foreground mt-1">Não lidos</p>
+                <p className="text-xs text-muted-foreground mt-1">Não resolvidos</p>
               </CardContent>
             </Card>
             <Card>
@@ -123,21 +178,46 @@ export default function DivergenceDashboard() {
           </div>
 
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
               <CardTitle className="flex items-center gap-2">
                 <TrendingDown className="h-5 w-5 text-amber-500" /> Histórico de alertas
               </CardTitle>
+              <div className="flex items-center gap-2">
+                <Tabs value={filter} onValueChange={(v) => setFilter(v as FilterStatus)}>
+                  <TabsList>
+                    <TabsTrigger value="open">Abertos ({openCount})</TabsTrigger>
+                    <TabsTrigger value="resolved">
+                      Resolvidos ({notifs.length - openCount})
+                    </TabsTrigger>
+                    <TabsTrigger value="all">Todos ({notifs.length})</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={openIds.length === 0 || markRead.isPending}
+                  onClick={() => markRead.mutate(openIds)}
+                  className="gap-1"
+                >
+                  <CheckCheck className="h-4 w-4" />
+                  Resolver todos
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              {notifs.length === 0 ? (
+              {filtered.length === 0 ? (
                 <EmptyState
                   icon={AlertTriangle}
-                  title="Sem divergências"
-                  description="Nenhum alerta de reconciliação foi gerado ainda."
+                  title={filter === 'open' ? 'Sem divergências abertas' : 'Nenhum alerta'}
+                  description={
+                    filter === 'open'
+                      ? 'Todas as divergências foram tratadas.'
+                      : 'Nenhum alerta corresponde ao filtro selecionado.'
+                  }
                 />
               ) : (
                 <div className="space-y-2">
-                  {notifs.map((n) => {
+                  {filtered.map((n) => {
                     const Icon = ICON_BY_TITLE[n.title] ?? AlertTriangle;
                     const route = ROUTE_BY_TITLE[n.title];
                     return (
@@ -145,13 +225,27 @@ export default function DivergenceDashboard() {
                         key={n.id}
                         className="flex items-start gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                       >
-                        <Icon className="h-5 w-5 text-amber-500 mt-0.5 shrink-0" />
+                        <Icon
+                          className={`h-5 w-5 mt-0.5 shrink-0 ${
+                            n.read ? 'text-muted-foreground' : 'text-amber-500'
+                          }`}
+                        />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="font-medium">{n.title}</p>
-                            {!n.read && <Badge variant="destructive" className="text-xs">Novo</Badge>}
+                            {!n.read ? (
+                              <Badge variant="destructive" className="text-xs">
+                                Aberto
+                              </Badge>
+                            ) : (
+                              <Badge variant="secondary" className="text-xs">
+                                Resolvido
+                              </Badge>
+                            )}
                           </div>
-                          <p className="text-sm text-muted-foreground mt-0.5">{n.description}</p>
+                          <p className="text-sm text-muted-foreground mt-0.5">
+                            {n.description}
+                          </p>
                           <p className="text-xs text-muted-foreground mt-1">
                             {formatDistanceToNow(new Date(n.created_at), {
                               addSuffix: true,
@@ -159,11 +253,38 @@ export default function DivergenceDashboard() {
                             })}
                           </p>
                         </div>
-                        {route && (
-                          <Button size="sm" variant="ghost" onClick={() => navigate(route)}>
-                            Abrir <ArrowRight className="h-3 w-3 ml-1" />
-                          </Button>
-                        )}
+                        <div className="flex items-center gap-1 shrink-0">
+                          {route && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => navigate(route)}
+                            >
+                              Abrir <ArrowRight className="h-3 w-3 ml-1" />
+                            </Button>
+                          )}
+                          {!n.read ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={markRead.isPending}
+                              onClick={() => markRead.mutate([n.id])}
+                              className="gap-1"
+                            >
+                              <Check className="h-3 w-3" />
+                              Resolver
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              disabled={reopen.isPending}
+                              onClick={() => reopen.mutate(n.id)}
+                            >
+                              Reabrir
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     );
                   })}
