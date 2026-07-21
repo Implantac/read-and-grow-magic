@@ -18,3 +18,7 @@ verify_jwt = false
 [functions.nps-automation-dispatch]
 verify_jwt = false
 
+[functions.notify-alert-assignee]
+verify_jwt = false
+
+
