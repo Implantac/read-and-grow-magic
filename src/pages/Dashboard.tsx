@@ -124,21 +124,24 @@ export default function Dashboard() {
             Visão geral • {activeCompany?.name}{activeBranch ? ` - ${activeBranch.name}` : ''}
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="text-[10px] bg-success/10 text-success border-success/20 gap-1">
-            <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> Auto-refresh 60s
-          </Badge>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="gap-2 text-xs"
-            aria-label={isRefreshing ? 'Atualizando dashboard' : 'Atualizar dashboard'}
-          >
-            <RefreshCw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} aria-hidden="true" />
-            Atualizar
-          </Button>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <CanalFilter />
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-[10px] bg-success/10 text-success border-success/20 gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" /> Auto-refresh 60s
+            </Badge>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="gap-2 text-xs"
+              aria-label={isRefreshing ? 'Atualizando dashboard' : 'Atualizar dashboard'}
+            >
+              <RefreshCw className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")} aria-hidden="true" />
+              Atualizar
+            </Button>
+          </div>
         </div>
       </header>
 
