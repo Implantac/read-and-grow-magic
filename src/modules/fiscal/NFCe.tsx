@@ -64,6 +64,7 @@ import { NFCeReturnDialog } from '@/components/fiscal/NFCeReturnDialog';
 import type { NFCe } from '@/types/fiscal';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
+import { OfflinePDVIndicator } from '@/components/pdv/OfflinePDVIndicator';
 import { KPICard } from '@/shared/components/KPICard';
 
 
