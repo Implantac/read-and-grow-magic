@@ -241,6 +241,7 @@ export const navigationSections: NavSection[] = [
           { title: 'DRE Dinâmica', href: '/financeiro/dre-dinamica', icon: 'BarChart3' },
           { title: 'Fluxo de Caixa', href: '/financeiro/fluxo', icon: 'TrendingUp' },
           { title: 'DRE (Ledger)', href: '/financeiro/dre', icon: 'LineChart' },
+          { title: 'Varejo × Atacado', href: '/financeiro/segmentado', icon: 'Split' },
           { title: 'Tesouraria', href: '/financeiro/tesouraria', icon: 'Building2' },
           { title: 'Adiantamentos', href: '/financeiro/adiantamentos', icon: 'Wallet' },
           { title: 'Centros de Custo', href: '/financeiro/centros-custo', icon: 'FolderTree' },
