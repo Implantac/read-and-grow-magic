@@ -122,7 +122,7 @@ export function useWMSConference() {
       status: 'pending',
     }));
 
-    const { error: itemsError } = await (supabase as any).from('wms_conference_items').insert(items);
+    const { error: itemsError } = await supabase.from('wms_conference_items').insert(items);
     if (itemsError) { toast.error('Erro ao criar itens'); return false; }
     
     toast.success('Conferência criada!');
