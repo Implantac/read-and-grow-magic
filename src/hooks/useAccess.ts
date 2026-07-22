@@ -27,7 +27,10 @@ export interface UseAccessInput {
   resource?: string;
   action?: string;
   role?: string;
+  /** Any-of roles: allowed if user has at least one. */
+  roles?: string[];
 }
+
 
 export type AccessDenyReason =
   | null
@@ -44,29 +47,33 @@ export interface UseAccessResult {
 }
 
 export function useAccess(input: UseAccessInput = {}): UseAccessResult {
-  const { module, resource, action, role } = input;
+  const { module, resource, action, role, roles } = input;
   const companyId = useEnterpriseStore((s) => s.activeCompanyId);
 
   // Eixo 1: permissão granular (resource/action) — reusa hook existente.
   const permission = usePermission(resource ?? '__noop__', action ?? '__noop__');
   const permissionActive = !!(resource && action);
 
-  // Eixo 2: role
+  // Eixo 2: role(s) — any-of. Combina `role` e `roles`.
+  const allRoles = [...(role ? [role] : []), ...(roles ?? [])];
+  const rolesKey = allRoles.slice().sort().join('|');
+
   const roleQuery = useQuery({
-    queryKey: ['useAccess', 'role', role],
-    enabled: !!role,
+    queryKey: ['useAccess', 'roles', rolesKey],
+    enabled: allRoles.length > 0,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return false;
-      const { data, error } = await supabase.rpc('has_role', {
-        _user_id: user.id,
-        _role: role as never,
-      });
-      if (error) return false;
-      return !!data;
+      const results = await Promise.all(
+        allRoles.map((r) =>
+          supabase.rpc('has_role', { _user_id: user.id, _role: r as never }),
+        ),
+      );
+      return results.some((res) => !!res.data && !res.error);
     },
   });
+
 
   // Eixo 3: módulo habilitado pelo plano ativo da empresa.
   const moduleQuery = useQuery({
@@ -96,8 +103,8 @@ export function useAccess(input: UseAccessInput = {}): UseAccessResult {
 
   const loading =
     (permissionActive && permission.loading) ||
-    (!!role && roleQuery.isLoading) ||
-    (!!module && (moduleQuery.isLoading || (!!module && !companyId)));
+    (allRoles.length > 0 && roleQuery.isLoading) ||
+    (!!module && (moduleQuery.isLoading || !companyId));
 
   if (loading) return { allowed: false, loading: true, reason: 'loading' };
 
@@ -108,8 +115,9 @@ export function useAccess(input: UseAccessInput = {}): UseAccessResult {
   }
   if (permissionActive && !permission.allowed)
     return { allowed: false, loading: false, reason: 'no-permission' };
-  if (role && !roleQuery.data)
+  if (allRoles.length > 0 && !roleQuery.data)
     return { allowed: false, loading: false, reason: 'no-role' };
 
   return { allowed: true, loading: false, reason: null };
 }
+

@@ -11,7 +11,7 @@ import {
   usePlugins, usePluginInstallations, useInstallPlugin, useUninstallPlugin, useTogglePlugin,
 } from "@/hooks/usePlugins";
 import { usePluginRatings, useToggleAutoUpdate } from "@/hooks/usePluginReviews";
-import { RoleGuard } from "@/components/auth/RoleGuard";
+import { AccessGuard } from "@/components/auth/AccessGuard";
 import { PluginRunnerDialog } from "@/components/plugins/PluginRunnerDialog";
 import { PluginVersionDialog } from "@/components/plugins/PluginVersionDialog";
 import { PluginReviewsDialog } from "@/components/plugins/PluginReviewsDialog";
@@ -79,7 +79,7 @@ export default function PluginMarketplace() {
     !!search || category !== "all" || price !== "all" || minRating > 0 || sort !== "popular";
 
   return (
-    <RoleGuard roles={["admin"]}>
+    <AccessGuard roles={["admin"]}>
       <PageContainer>
         <div className="flex items-start justify-between gap-3">
           <PageHeader
@@ -193,6 +193,6 @@ export default function PluginMarketplace() {
           />
         )}
       </PageContainer>
-    </RoleGuard>
+    </AccessGuard>
   );
 }
