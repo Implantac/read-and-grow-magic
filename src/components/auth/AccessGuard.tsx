@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useAccess, type UseAccessInput } from '@/hooks/useAccess';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@/ui/base/skeleton';
 
 interface AccessGuardProps extends UseAccessInput {
   children: ReactNode;
