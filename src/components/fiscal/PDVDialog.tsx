@@ -31,6 +31,8 @@ import { usePDVCart } from './pdv/usePDVCart';
 import { usePDVSplits } from './pdv/usePDVSplits';
 import { usePDVParked } from './pdv/usePDVParked';
 import { usePDVShortcuts } from './pdv/usePDVShortcuts';
+import { usePDVProductFilter, usePDVClientFilter } from './pdv/usePDVFilters';
+import { usePDVFinalize } from './pdv/usePDVFinalize';
 import { onlyDigits } from './pdv/types';
 
 interface PDVDialogProps {
@@ -79,7 +81,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
   const [customerDocument, setCustomerDocument] = useState('');
   const [showCustomerPicker, setShowCustomerPicker] = useState(false);
   const [customerQuery, setCustomerQuery] = useState('');
-  const [saving, setSaving] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [screenLocked, setScreenLocked] = useState(false);
   const [showPixDialog, setShowPixDialog] = useState<{ splitId: string; amount: number } | null>(null);
@@ -113,32 +114,8 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const term = search.trim().toLowerCase();
-  const filteredProducts = useMemo(() => {
-    let list = products;
-    if (selectedCategoryId) list = list.filter((p) => p.category_id === selectedCategoryId);
-    if (!term) return list.slice(0, 24);
-    return list
-      .filter(
-        (p) =>
-          p.name.toLowerCase().includes(term) ||
-          p.code.toLowerCase().includes(term) ||
-          (p.barcode || '').includes(term),
-      )
-      .slice(0, 24);
-  }, [products, term, selectedCategoryId]);
-
-  const filteredClients = useMemo(() => {
-    const q = customerQuery.trim().toLowerCase();
-    if (!q) return clients.slice(0, 12);
-    const digits = onlyDigits(q);
-    return clients
-      .filter((c) =>
-        c.name.toLowerCase().includes(q) ||
-        (digits && onlyDigits(c.document || '').includes(digits)) ||
-        (c.email || '').toLowerCase().includes(q),
-      )
-      .slice(0, 12);
-  }, [clients, customerQuery]);
+  const filteredProducts = usePDVProductFilter(products, term, selectedCategoryId);
+  const filteredClients = usePDVClientFilter(clients, customerQuery);
 
   const loyaltyPoints = customer ? Math.floor(total) : 0;
 
@@ -213,96 +190,18 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     toastSuccess('Cupom retomado.');
   };
 
-  const [showFinalizeConfirm, setShowFinalizeConfirm] = useState(false);
-
-  const handleFinalize = async (skipConfirm = false) => {
-    if (cart.length === 0) return;
-    if (!session) { toastError('Abra o caixa antes de finalizar uma venda.'); setShowOpenSession(true); return; }
-    if (splits.length === 0) { toastError('Adicione ao menos uma forma de pagamento.'); return; }
-    if (paidTotal + 0.001 < total) { toastError('Valor pago insuficiente.'); return; }
-
-    const fiadoInSplits = splits.filter((s) => s.method === 'credit').reduce((s, p) => s + p.amount, 0);
-    if (fiadoInSplits > 0 && !customer) {
-      toastError('Identifique o cliente antes de finalizar venda no fiado.');
-      setShowCustomerPicker(true);
-      return;
-    }
-
-    const HIGH_VALUE = 1000;
-    const HIGH_ITEMS = 20;
-    if (!skipConfirm && (total >= HIGH_VALUE || totalItems >= HIGH_ITEMS)) {
-      setShowFinalizeConfirm(true);
-      return;
-    }
-
-    setSaving(true);
-    const primary = splits.length === 1 ? splits[0].method : 'multiple';
-    const receiptSnapshot = {
-      items: cart.map((i) => ({
-        productCode: i.productCode,
-        productName: i.productName,
-        quantity: i.quantity,
-        unitPrice: i.unitPrice,
-        unit: i.unit,
-      })),
-      subtotal,
-      discount: discountValue,
-      total,
-      paid: paidTotal,
-      change,
-      splits: splits.map((s) => ({ method: s.method, amount: s.amount, installments: s.installments })),
-      customerName: customerName || undefined,
-      customerDocument: customerDocument || undefined,
-      loyaltyPoints,
-      terminalId: session.terminalId,
-      operatorName: session.operatorName,
-    };
-    try {
-      const emitResult = await onEmit({
-        items: cart,
-        paymentMethod: primary,
-        amountPaid: paidTotal,
-        discount: discountValue || undefined,
-        customerName: customerName || undefined,
-        customerDocument: customerDocument || undefined,
-        terminalId: session.terminalId,
-        operatorName: session.operatorName,
-      });
-      const cashPortion = splits.filter((s) => s.method === 'cash').reduce((s, p) => s + Math.min(p.amount, total), 0);
-      setSession((prev) => prev ? {
-        ...prev,
-        movements: [...prev.movements, { type: 'sale', amount: cashPortion, at: new Date().toISOString(), note: `Venda ${formatBRL(total)}` }],
-      } : prev);
-      const fiadoAmount = splits.filter((s) => s.method === 'credit').reduce((s, p) => s + p.amount, 0);
-      if (fiadoAmount > 0 && customer) {
-        try {
-          await updateClient.mutateAsync({
-            id: customer.id,
-            current_balance: Math.round(((customer.current_balance || 0) + fiadoAmount) * 100) / 100,
-          });
-        } catch { toastError('Falha ao debitar fiado do cliente.'); }
-      }
-      logAudit('sale.finalized', { total, methods: splits.map((s) => s.method), customer: customer?.id, fiado: fiadoAmount });
-
-      const emitData = (emitResult ?? {}) as { number?: string; accessKey?: string; protocol?: string };
-      const printed = openReceipt({
-        ...receiptSnapshot,
-        issuedAt: new Date(),
-        saleNumber: emitData.number,
-        accessKey: emitData.accessKey,
-        authorizationProtocol: emitData.protocol,
-      });
-      if (!printed) {
-        toastError('Popup bloqueado: libere a janela para imprimir o comprovante.');
-      }
-
-      clearAll();
-      setShowPayment(false);
-      onOpenChange(false);
-    } finally {
-      setSaving(false);
-    }
-  };
+  const { saving, showFinalizeConfirm, setShowFinalizeConfirm, handleFinalize } = usePDVFinalize({
+    cart, splits, total, totalItems, subtotal, discountValue, paidTotal, change,
+    loyaltyPoints, customer, customerName, customerDocument, session,
+    setSession,
+    setShowOpenSession,
+    setShowCustomerPicker,
+    setShowPayment,
+    clearAll,
+    onClose: () => onOpenChange(false),
+    onEmit,
+    updateClient,
+  });
 
   usePDVShortcuts({
     open,
