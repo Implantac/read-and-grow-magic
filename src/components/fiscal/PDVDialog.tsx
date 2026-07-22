@@ -513,89 +513,11 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     camera: 'Aponte a câmera para o QR Code ou código de barras',
   };
 
-  const openSession = () => {
-    if (openingAmount < 0) { toastError('Valor de abertura inválido.'); return; }
-    const s: CashSession = {
-      operatorName: 'Operador Sistema',
-      terminalId: 'PDV-01',
-      openedAt: new Date().toISOString(),
-      openingAmount: Math.round(openingAmount * 100) / 100,
-      movements: [],
-    };
-    setSession(s);
-    setShowOpenSession(false);
-    setOpeningAmount(0);
-    logAudit('session.open', { openingAmount: s.openingAmount });
-    toastSuccess('Caixa aberto com sucesso.');
-  };
-
-  // Fechamento com contagem cega
-  const closeSessionSummary: CashCloseSummary | null = useMemo(() => {
-    if (!session) return null;
-    const sales = session.movements.filter((m) => m.type === 'sale');
-    const sangria = session.movements.filter((m) => m.type === 'sangria').reduce((s, m) => s + m.amount, 0);
-    const suprimento = session.movements.filter((m) => m.type === 'suprimento').reduce((s, m) => s + m.amount, 0);
-    const totalSales = sales.reduce((s, m) => s + m.amount, 0);
-    return {
-      operatorName: session.operatorName,
-      terminalId: session.terminalId,
-      openedAt: session.openedAt,
-      openingAmount: session.openingAmount,
-      totalSales,
-      salesCount: sales.length,
-      sangria,
-      suprimento,
-      expectedCash: cashBalance,
-    };
-  }, [session, cashBalance]);
-
   const requestCloseSession = () => {
     if (!session) return;
     setShowCloseSession(true);
   };
 
-  const confirmCloseSession = (result: { countedAmount: number; difference: number }) => {
-    if (!session) return;
-    logAudit('session.close', {
-      closingBalance: cashBalance,
-      counted: result.countedAmount,
-      difference: result.difference,
-      movements: session.movements.length,
-    });
-    setSession(null);
-    setShowCloseSession(false);
-    toastSuccess(
-      Math.abs(result.difference) < 0.005
-        ? 'Caixa fechado sem divergência.'
-        : `Caixa fechado com ${result.difference > 0 ? 'sobra' : 'falta'} de ${formatBRL(Math.abs(result.difference))}.`,
-    );
-  };
-
-  const registerMovement = () => {
-    if (!showCashMovement || !session) return;
-    if (movementAmount <= 0) { toastError('Valor deve ser maior que zero.'); return; }
-    if (showCashMovement === 'sangria' && movementAmount > cashBalance) {
-      toastError('Sangria maior que o saldo em caixa.'); return;
-    }
-    setSession({
-      ...session,
-      movements: [...session.movements, {
-        type: showCashMovement,
-        amount: Math.round(movementAmount * 100) / 100,
-        at: new Date().toISOString(),
-        note: movementNote.trim() || undefined,
-      }],
-    });
-    logAudit(`cash.${showCashMovement}`, { amount: movementAmount, note: movementNote });
-    toastSuccess(`${showCashMovement === 'sangria' ? 'Sangria' : 'Suprimento'} registrado.`);
-    setShowCashMovement(null);
-    setMovementAmount(0);
-    setMovementNote('');
-  };
-
-  const sessionElapsed = session
-    ? Math.floor((Date.now() - new Date(session.openedAt).getTime()) / 60000)
-    : 0;
 
   const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (asPage) {
