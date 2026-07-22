@@ -48,7 +48,7 @@ export function useWMSConference() {
       .order('created_at', { ascending: false });
     
     if (error) { console.error(error); toast.error('Erro ao carregar conferências'); }
-    else setRecords((data || []).map((r: any) => ({
+    else setRecords((data || []).map((r) => ({
       id: r.id,
       conferenceNumber: r.conference_number,
       referenceType: r.reference_type,
