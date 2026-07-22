@@ -115,32 +115,8 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const term = search.trim().toLowerCase();
-  const filteredProducts = useMemo(() => {
-    let list = products;
-    if (selectedCategoryId) list = list.filter((p) => p.category_id === selectedCategoryId);
-    if (!term) return list.slice(0, 24);
-    return list
-      .filter(
-        (p) =>
-          p.name.toLowerCase().includes(term) ||
-          p.code.toLowerCase().includes(term) ||
-          (p.barcode || '').includes(term),
-      )
-      .slice(0, 24);
-  }, [products, term, selectedCategoryId]);
-
-  const filteredClients = useMemo(() => {
-    const q = customerQuery.trim().toLowerCase();
-    if (!q) return clients.slice(0, 12);
-    const digits = onlyDigits(q);
-    return clients
-      .filter((c) =>
-        c.name.toLowerCase().includes(q) ||
-        (digits && onlyDigits(c.document || '').includes(digits)) ||
-        (c.email || '').toLowerCase().includes(q),
-      )
-      .slice(0, 12);
-  }, [clients, customerQuery]);
+  const filteredProducts = usePDVProductFilter(products, term, selectedCategoryId);
+  const filteredClients = usePDVClientFilter(clients, customerQuery);
 
   const loyaltyPoints = customer ? Math.floor(total) : 0;
 
