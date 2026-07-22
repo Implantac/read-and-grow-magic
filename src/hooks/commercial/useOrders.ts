@@ -251,11 +251,11 @@ export function useUpdateOrderFields() {
   const qc = useQueryClient();
   const { toast } = useToast();
   return useMutation({
-    mutationFn: async ({ id, ...fields }: { id: string } & Record<string, any>) => {
-      const payload = { ...fields, updated_at: new Date().toISOString() };
+    mutationFn: async ({ id, ...fields }: { id: string } & TablesUpdate<'orders'>) => {
+      const payload: TablesUpdate<'orders'> = { ...fields, updated_at: new Date().toISOString() };
       const { error } = await supabase
         .from('orders')
-        .update(payload as any)
+        .update(payload)
         .eq('id', id);
       if (error) throw error;
     },
