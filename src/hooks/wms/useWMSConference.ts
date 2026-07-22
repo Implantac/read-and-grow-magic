@@ -76,7 +76,7 @@ export function useWMSConference() {
       .eq('conference_id', conferenceId);
     
     if (error) { console.error(error); return []; }
-    return (data || []).map((r: any) => ({
+    return (data || []).map((r) => ({
       id: r.id,
       conferenceId: r.conference_id,
       productCode: r.product_code,
