@@ -39,11 +39,11 @@ export function useCreateSalesRep() {
   const qc = useQueryClient();
   const { currentCompany } = useEnterprise();
   return useMutation({
-    mutationFn: async (rep: any) => {
+    mutationFn: async (rep: Omit<TablesInsert<'sales_reps'>, 'company_id'>) => {
       const { data, error } = await supabase.from('sales_reps').insert({
         ...rep,
-        company_id: currentCompany?.id
-      }).select().single();
+        company_id: currentCompany?.id,
+      } as TablesInsert<'sales_reps'>).select().single();
       if (error) throw error;
       return data;
     },
