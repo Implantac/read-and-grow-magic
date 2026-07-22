@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 
