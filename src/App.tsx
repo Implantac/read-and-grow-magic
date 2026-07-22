@@ -212,7 +212,9 @@ const App = () => (
                 <Route path="/upgrade" element={<Upgrade />} />
                 <Route path="/subscribe" element={<Subscribe />} />
 
-                <Route path="/comercial/*" element={<ModuleErrorBoundary moduleName="Comercial"><Routes>{CommercialRoutes}</Routes></ModuleErrorBoundary>} />
+                <Route element={<GatedOutlet module="comercial" />}>
+                  <Route path="/comercial/*" element={<ModuleErrorBoundary moduleName="Comercial"><Routes>{CommercialRoutes}</Routes></ModuleErrorBoundary>} />
+                </Route>
                 <Route
                   path="/financeiro/*"
                   element={
@@ -223,7 +225,9 @@ const App = () => (
                     </FeatureGate>
                   }
                 />
-                <Route path="/contabilidade/*" element={<ModuleErrorBoundary moduleName="Contábil"><Routes>{AccountingRoutes}</Routes></ModuleErrorBoundary>} />
+                <Route element={<GatedOutlet module="contabilidade" />}>
+                  <Route path="/contabilidade/*" element={<ModuleErrorBoundary moduleName="Contábil"><Routes>{AccountingRoutes}</Routes></ModuleErrorBoundary>} />
+                </Route>
                 <Route path="/contabil/*" element={<Navigate to="/contabilidade" replace />} />
                 <Route element={<GatedOutlet module="producao" />}>
                   <Route path="/producao/*" element={<ModuleErrorBoundary moduleName="Produção"><Routes>{ProductionRoutes}</Routes></ModuleErrorBoundary>} />
@@ -238,8 +242,11 @@ const App = () => (
                   <Route path="/fiscal/*" element={<ModuleErrorBoundary moduleName="Fiscal"><Routes>{FiscalRoutes}</Routes></ModuleErrorBoundary>} />
                 </Route>
                 {VerticalPackRoutes}
-                <Route path="/executive/*" element={<ModuleErrorBoundary moduleName="Executivo"><Routes>{ExecutiveRoutes}</Routes></ModuleErrorBoundary>} />
+                <Route element={<GatedOutlet module="executivo" />}>
+                  <Route path="/executive/*" element={<ModuleErrorBoundary moduleName="Executivo"><Routes>{ExecutiveRoutes}</Routes></ModuleErrorBoundary>} />
+                </Route>
                 <Route path="/relacionamento/*" element={<ModuleErrorBoundary moduleName="Relacionamento"><Routes>{RelacionamentoRoutes}</Routes></ModuleErrorBoundary>} />
+
                 </Route>
               </Route>
 
