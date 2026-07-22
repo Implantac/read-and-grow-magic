@@ -147,7 +147,7 @@ async function generateReceivablesFromBilling(order: OrderLike) {
       .select('company_id')
       .eq('id', order.client_id)
       .maybeSingle();
-    companyId = (c as any)?.company_id ?? null;
+    companyId = c?.company_id ?? null;
   }
   if (!companyId) {
     console.warn('[generateReceivablesFromBilling] company_id ausente; pulando geração', { orderId: order.id });
