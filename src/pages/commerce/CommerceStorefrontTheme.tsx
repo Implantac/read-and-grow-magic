@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/ui/base/select";
-import { RoleGuard } from "@/components/auth/RoleGuard";
+import { AccessGuard } from "@/components/auth/AccessGuard";
 import { Check, Sparkles } from "lucide-react";
 import {
   useStorefront,
@@ -50,7 +50,7 @@ export default function CommerceStorefrontTheme() {
   };
 
   return (
-    <RoleGuard roles={["admin", "manager"]}>
+    <AccessGuard roles={["admin", "manager"]}>
       <PageContainer>
         <PageHeader
           title="Trocar layout"
@@ -172,6 +172,6 @@ export default function CommerceStorefrontTheme() {
           </div>
         </div>
       </PageContainer>
-    </RoleGuard>
+    </AccessGuard>
   );
 }

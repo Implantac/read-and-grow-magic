@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/ui/base/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/base/table";
 import { Skeleton } from "@/ui/base/skeleton";
-import { RoleGuard } from "@/components/auth/RoleGuard";
+import { AccessGuard } from "@/components/auth/AccessGuard";
 import { ShieldAlert } from "lucide-react";
 import { EmptyState } from "@/shared/components/EmptyState";
 
@@ -170,8 +170,8 @@ function SecurityAuditInner() {
 
 export default function SecurityAudit() {
   return (
-    <RoleGuard roles={["admin", "manager"]}>
+    <AccessGuard roles={["admin", "manager"]}>
       <SecurityAuditInner />
-    </RoleGuard>
+    </AccessGuard>
   );
 }

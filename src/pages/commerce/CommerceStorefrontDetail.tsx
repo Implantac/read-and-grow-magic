@@ -6,7 +6,7 @@ import { Button } from "@/ui/base/button";
 import { Badge } from "@/ui/base/badge";
 import { Skeleton } from "@/ui/base/skeleton";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { RoleGuard } from "@/components/auth/RoleGuard";
+import { AccessGuard } from "@/components/auth/AccessGuard";
 import {
   Palette,
   Play,
@@ -66,7 +66,7 @@ export default function CommerceStorefrontDetail() {
   const st = STATUS_LABELS[storefront.status];
 
   return (
-    <RoleGuard roles={["admin", "manager"]}>
+    <AccessGuard roles={["admin", "manager"]}>
       <PageContainer>
         <PageHeader
           title={storefront.name}
@@ -265,7 +265,7 @@ export default function CommerceStorefrontDetail() {
           </div>
         </div>
       </PageContainer>
-    </RoleGuard>
+    </AccessGuard>
   );
 }
 
