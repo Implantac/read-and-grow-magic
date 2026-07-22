@@ -197,7 +197,7 @@ export function useWMSConference() {
   };
 
   const startConference = async (id: string, operator: string) => {
-    const { error } = await (supabase as any).from('wms_conference_records').update({
+    const { error } = await supabase.from('wms_conference_records').update({
       status: 'in_progress', operator, started_at: new Date().toISOString(),
     }).eq('id', id);
     if (error) { toast.error('Erro ao iniciar'); return; }
