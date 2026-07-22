@@ -11,7 +11,7 @@ import { useProducts } from '@/hooks/inventory/useProducts';
 import { useClients, type DbClient, useUpdateClient } from '@/hooks/commercial/useClients';
 import { useActiveCategories } from '@/hooks/inventory/useCategories';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
-import { openReceipt } from './pdvReceipt';
+
 import { PDVPixDialog } from './PDVPixDialog';
 import { PDVCloseSessionDialog } from './PDVCloseSessionDialog';
 import { PDVParkedDialog } from './PDVParkedDialog';
@@ -33,7 +33,7 @@ import { usePDVParked } from './pdv/usePDVParked';
 import { usePDVShortcuts } from './pdv/usePDVShortcuts';
 import { usePDVProductFilter, usePDVClientFilter } from './pdv/usePDVFilters';
 import { usePDVFinalize } from './pdv/usePDVFinalize';
-import { onlyDigits } from './pdv/types';
+
 
 interface PDVDialogProps {
   open: boolean;
