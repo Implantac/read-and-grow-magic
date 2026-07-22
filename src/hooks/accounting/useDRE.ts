@@ -1,5 +1,20 @@
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { dreService } from '@/services/accounting/dreService';
 import { useSupabaseQuery } from '@/hooks/shared/useSupabaseQuery';
+
+async function getCompanyId(): Promise<string> {
+  const { data: userRes } = await supabase.auth.getUser();
+  const userId = userRes.user?.id;
+  if (!userId) throw new Error('Não autenticado');
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('company_id')
+    .eq('id', userId)
+    .maybeSingle();
+  if (!profile?.company_id) throw new Error('Empresa não encontrada');
+  return profile.company_id;
+}
 
 export type DRESection =
   | 'revenue'
