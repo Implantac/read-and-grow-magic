@@ -36,9 +36,9 @@ export function useMDFes() {
   return useQuery({
     queryKey: ['mdfes'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('mdfe' as any).select('*').order('issue_date', { ascending: false }).limit(500);
+      const { data, error } = await supabase.from('mdfe').select('*').order('issue_date', { ascending: false }).limit(500);
       if (error) throw error;
-      return (data as any as MDFe[]) ?? [];
+      return (data ?? []) as unknown as MDFe[];
     },
   });
 }
@@ -46,9 +46,9 @@ export function useMDFes() {
 export function useCreateMDFe() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: any & { uf_origin: string; uf_destination: string }) => {
+    mutationFn: async (payload: Partial<MDFe> & { uf_origin: string; uf_destination: string }) => {
       const number = 'MDFE-' + Date.now().toString().slice(-8);
-      const { data, error } = await supabase.from('mdfe' as any).insert({ ...payload, number, status: 'draft' }).select().single();
+      const { data, error } = await supabase.from('mdfe').insert({ ...payload, number, status: 'draft' }).select().single();
       if (error) throw error;
       return data;
     },
@@ -66,7 +66,7 @@ export function useTransmitMDFe() {
     mutationFn: async (id: string) => {
       const access_key = Array.from({ length: 44 }, () => Math.floor(Math.random() * 10)).join('');
       const protocol = '1' + Date.now().toString().slice(-14);
-      const { error } = await supabase.from('mdfe' as any).update({
+      const { error } = await supabase.from('mdfe').update({
         status: 'authorized', access_key, protocol, authorization_date: new Date().toISOString(),
       }).eq('id', id);
       if (error) throw error;
@@ -83,7 +83,7 @@ export function useCloseMDFe() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('mdfe' as any).update({
+      const { error } = await supabase.from('mdfe').update({
         status: 'closed', closure_date: new Date().toISOString(),
       }).eq('id', id);
       if (error) throw error;
@@ -100,12 +100,12 @@ export function useAddMDFeDocument() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: { mdfe_id: string; document_type: 'nfe' | 'cte'; document_number: string; access_key?: string; document_value?: number; document_weight?: number; unloading_city?: string }) => {
-      const { error } = await supabase.from('mdfe_documents' as any).insert(payload as any);
+      const { error } = await supabase.from('mdfe_documents').insert(payload);
       if (error) throw error;
       // Atualiza totais
-      const { data: docs } = await supabase.from('mdfe_documents' as any).select('*').eq('mdfe_id', payload.mdfe_id);
-      const arr = (docs as any[]) ?? [];
-      await supabase.from('mdfe' as any).update({
+      const { data: docs } = await supabase.from('mdfe_documents').select('*').eq('mdfe_id', payload.mdfe_id);
+      const arr = ((docs ?? []) as Array<{ document_value?: number | null; document_weight?: number | null }>);
+      await supabase.from('mdfe').update({
         total_documents: arr.length,
         total_cargo_value: arr.reduce((s, d) => s + Number(d.document_value || 0), 0),
         total_weight: arr.reduce((s, d) => s + Number(d.document_weight || 0), 0),
