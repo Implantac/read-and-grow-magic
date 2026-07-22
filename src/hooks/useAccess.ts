@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { usePermission } from '@/hooks/usePermission';
+import { useAccessTelemetry } from '@/hooks/useAccessTelemetry';
 
 /**
  * AUD-3: hook unificado de acesso.
