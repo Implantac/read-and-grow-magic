@@ -193,71 +193,13 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     }
   }, [open, showPayment, inputMode, screenLocked]);
 
-  // Camera scanning
-  const stopCamera = () => {
-    if (scanRafRef.current) cancelAnimationFrame(scanRafRef.current);
-    scanRafRef.current = null;
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => t.stop());
-      streamRef.current = null;
-    }
-  };
+  // Camera scanning (extracted hook)
+  const { stopCamera } = useBarcodeCameraScanner({
+    inputMode, open, videoRef,
+    onValue: (v) => handleScanValue(v),
+    onFallback: () => setInputMode('scanner'),
+  });
 
-  useEffect(() => {
-    if (inputMode !== 'camera' || !open) {
-      stopCamera();
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const BD = (window as any).BarcodeDetector;
-        if (!BD) {
-          toastError('Câmera de códigos não é suportada neste navegador. Use um leitor USB.');
-          setInputMode('scanner');
-          return;
-        }
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' },
-        });
-        if (cancelled) { stream.getTracks().forEach((t) => t.stop()); return; }
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-        }
-        const detector = new BD({
-          formats: ['qr_code', 'ean_13', 'ean_8', 'code_128', 'code_39', 'upc_a', 'upc_e'],
-        });
-        let lastValue = '';
-        let lastAt = 0;
-        const tick = async () => {
-          if (!videoRef.current || cancelled) return;
-          try {
-            const codes = await detector.detect(videoRef.current);
-            if (codes && codes[0]?.rawValue) {
-              const v: string = codes[0].rawValue;
-              const now = Date.now();
-              if (v !== lastValue || now - lastAt > 1500) {
-                lastValue = v; lastAt = now;
-                handleScanValue(v);
-              }
-            }
-          } catch { /* transient */ }
-          scanRafRef.current = requestAnimationFrame(tick);
-        };
-        scanRafRef.current = requestAnimationFrame(tick);
-      } catch {
-        toastError('Não foi possível acessar a câmera.');
-        setInputMode('scanner');
-      }
-    })();
-    return () => { cancelled = true; stopCamera(); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputMode, open]);
-
-  useEffect(() => { if (!open) stopCamera(); }, [open]);
 
   const flashLine = (productId: string) => {
     setFlashId(productId);
