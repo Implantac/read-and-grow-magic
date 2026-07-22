@@ -206,7 +206,7 @@ export function useCreateOrder() {
 
 
 
-      const { error: itemsError } = await supabase.from('order_items').insert(items satisfies TablesInsert<'order_items'>[]);
+      const { error: itemsError } = await supabase.from('order_items').insert(items as TablesInsert<'order_items'>[]);
       if (itemsError) {
         await supabase.from('orders').delete().eq('id', order.id);
         throw itemsError;
