@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
-import { TrendingUp, ResponsiveContainerType } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine } from 'recharts';
 
 export function MarginTrendChart({ trend }: { trend: any[] }) {
