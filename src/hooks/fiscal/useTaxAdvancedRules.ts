@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
+
 export interface ICMSSTRule {
   id: string;
   name: string;
@@ -41,9 +42,9 @@ export function useICMSSTRules() {
   return useQuery({
     queryKey: ['icms_st_rules'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('tax_icms_st_rules' as any).select('*').order('priority', { ascending: false }).order('name');
+      const { data, error } = await supabase.from('tax_icms_st_rules').select('*').order('priority', { ascending: false }).order('name');
       if (error) throw error;
-      return (data as any as ICMSSTRule[]) ?? [];
+      return (data ?? []) as unknown as ICMSSTRule[];
     },
   });
 }
@@ -51,11 +52,11 @@ export function useICMSSTRules() {
 export function useUpsertICMSST() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (rule: any & { name: string }) => {
-      const { id, ...payload } = rule as any;
+    mutationFn: async (rule: Partial<ICMSSTRule> & { name: string }) => {
+      const { id, ...payload } = rule;
       const q = id
-        ? supabase.from('tax_icms_st_rules' as any).update(payload as any).eq('id', id).select().single()
-        : supabase.from('tax_icms_st_rules' as any).insert(payload as any).select().single();
+        ? supabase.from('tax_icms_st_rules').update(payload as TablesUpdate<'tax_icms_st_rules'>).eq('id', id).select().single()
+        : supabase.from('tax_icms_st_rules').insert(payload as TablesInsert<'tax_icms_st_rules'>).select().single();
       const { data, error } = await q;
       if (error) throw error;
       return data;
@@ -72,9 +73,9 @@ export function useDIFALRules() {
   return useQuery({
     queryKey: ['difal_rules'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('tax_difal_rules' as any).select('*').order('uf_origin').order('uf_destination');
+      const { data, error } = await supabase.from('tax_difal_rules').select('*').order('uf_origin').order('uf_destination');
       if (error) throw error;
-      return (data as any as DIFALRule[]) ?? [];
+      return (data ?? []) as unknown as DIFALRule[];
     },
   });
 }
@@ -82,11 +83,11 @@ export function useDIFALRules() {
 export function useUpsertDIFAL() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (rule: any & { name: string; uf_origin: string; uf_destination: string }) => {
-      const { id, ...payload } = rule as any;
+    mutationFn: async (rule: Partial<DIFALRule> & { name: string; uf_origin: string; uf_destination: string }) => {
+      const { id, ...payload } = rule;
       const q = id
-        ? supabase.from('tax_difal_rules' as any).update(payload as any).eq('id', id).select().single()
-        : supabase.from('tax_difal_rules' as any).insert(payload as any).select().single();
+        ? supabase.from('tax_difal_rules').update(payload as TablesUpdate<'tax_difal_rules'>).eq('id', id).select().single()
+        : supabase.from('tax_difal_rules').insert(payload as TablesInsert<'tax_difal_rules'>).select().single();
       const { data, error } = await q;
       if (error) throw error;
       return data;
@@ -98,3 +99,4 @@ export function useUpsertDIFAL() {
     onError: handleMutationError,
   });
 }
+
