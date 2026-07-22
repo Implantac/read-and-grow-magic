@@ -5,7 +5,7 @@ import { ProductCard } from "./ProductCard";
 import { PaginationControls } from "./PaginationControls";
 import type { StorefrontSearchItem } from "@/hooks/useStorefrontSearch";
 import type { ViewMode } from "./utils";
-import type { RefObject } from "react";
+import type { Dispatch, RefObject, SetStateAction } from "react";
 
 type Props = {
   loadingItems: boolean;
@@ -18,7 +18,7 @@ type Props = {
   viewMode: ViewMode;
   hasMoreInfinite: boolean;
   sentinelRef: RefObject<HTMLDivElement>;
-  page: number; totalPages: number; perPage: number; setPage: (n: number) => void;
+  page: number; totalPages: number; perPage: number; setPage: Dispatch<SetStateAction<number>>;
 };
 
 export function ResultsGrid({
