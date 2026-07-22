@@ -3,6 +3,7 @@ import type { BusinessRule, ModuleFoundation } from './foundation-types';
 const R = (rule: string, reason: string, severity: BusinessRule['severity'] = 'warning'): BusinessRule => ({ rule, reason, severity });
 
 export const CORE_FOUNDATION: Record<string, ModuleFoundation> = {
+  dashboard: {
     concept: 'O Dashboard não é um relatório: é um instrumento de decisão em tempo real. Cada cartão precisa ter dono, meta e ação esperada quando fica vermelho.',
     businessRules: [
       R('KPI sem meta configurada não deve exibir semáforo colorido.', 'Semáforo sem meta gera falso senso de urgência ou de conforto.', 'warning'),
