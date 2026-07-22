@@ -58,8 +58,8 @@ export function useSalesFunnel(stage?: string) {
 export function useCreateFunnelItem() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (item: any) => {
-      const { data, error } = await supabase.from('sales_funnel').insert(item as any).select().single();
+    mutationFn: async (item: TablesInsert<'sales_funnel'>) => {
+      const { data, error } = await supabase.from('sales_funnel').insert(item).select().single();
       if (error) throw error;
       return data;
     },
