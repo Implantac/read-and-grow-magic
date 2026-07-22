@@ -48,7 +48,7 @@ export function useWMSConference() {
       .order('created_at', { ascending: false });
     
     if (error) { console.error(error); toast.error('Erro ao carregar conferências'); }
-    else setRecords((data || []).map((r: any) => ({
+    else setRecords((data || []).map((r) => ({
       id: r.id,
       conferenceNumber: r.conference_number,
       referenceType: r.reference_type,
@@ -76,7 +76,7 @@ export function useWMSConference() {
       .eq('conference_id', conferenceId);
     
     if (error) { console.error(error); return []; }
-    return (data || []).map((r: any) => ({
+    return (data || []).map((r) => ({
       id: r.id,
       conferenceId: r.conference_id,
       productCode: r.product_code,
@@ -101,7 +101,7 @@ export function useWMSConference() {
   }) => {
     const confNumber = 'CONF-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
     
-    const { data: rec, error } = await (supabase as any).from('wms_conference_records').insert({
+    const { data: rec, error } = await supabase.from('wms_conference_records').insert({
       conference_number: confNumber,
       reference_type: data.reference_type,
       reference_number: data.reference_number,
@@ -122,7 +122,7 @@ export function useWMSConference() {
       status: 'pending',
     }));
 
-    const { error: itemsError } = await (supabase as any).from('wms_conference_items').insert(items);
+    const { error: itemsError } = await supabase.from('wms_conference_items').insert(items);
     if (itemsError) { toast.error('Erro ao criar itens'); return false; }
     
     toast.success('Conferência criada!');
@@ -140,7 +140,7 @@ export function useWMSConference() {
     const expected = Number(itemData?.expected_qty || 0);
     const divergence = checkedQty - expected;
 
-    const { error } = await (supabase as any).from('wms_conference_items').update({
+    const { error } = await supabase.from('wms_conference_items').update({
       checked_qty: checkedQty,
       divergence,
       status: 'checked',
@@ -178,7 +178,7 @@ export function useWMSConference() {
     const divergence = newQty - match.expectedQty;
     const newStatus = newQty >= match.expectedQty ? 'checked' : 'pending';
 
-    const { error } = await (supabase as any).from('wms_conference_items').update({
+    const { error } = await supabase.from('wms_conference_items').update({
       checked_qty: newQty,
       divergence,
       status: newStatus,
@@ -197,7 +197,7 @@ export function useWMSConference() {
   };
 
   const startConference = async (id: string, operator: string) => {
-    const { error } = await (supabase as any).from('wms_conference_records').update({
+    const { error } = await supabase.from('wms_conference_records').update({
       status: 'in_progress', operator, started_at: new Date().toISOString(),
     }).eq('id', id);
     if (error) { toast.error('Erro ao iniciar'); return; }
@@ -210,7 +210,7 @@ export function useWMSConference() {
     const divergences = items.filter(i => i.divergence !== 0).length;
     const checked = items.filter(i => i.status === 'checked').length;
 
-    const { error } = await (supabase as any).from('wms_conference_records').update({
+    const { error } = await supabase.from('wms_conference_records').update({
       status: divergences > 0 ? 'divergence' : 'completed',
       completed_at: new Date().toISOString(),
       checked_items: checked,
@@ -226,12 +226,12 @@ export function useWMSConference() {
    * Requer que todos os itens conferidos (checked_qty > 0) tenham product_id vinculado.
    */
   const finalizeReceivingToLedger = async (id: string): Promise<boolean> => {
-    const { data, error } = await (supabase as any).rpc('finalize_receiving_conference', { _conference_id: id });
+    const { data, error } = await supabase.rpc('finalize_receiving_conference', { _conference_id: id });
     if (error) {
       toast.error(error.message || 'Erro ao finalizar recebimento');
       return false;
     }
-    const items = (data as any)?.items_ledgered ?? 0;
+    const items = (data as { items_ledgered?: number } | null)?.items_ledgered ?? 0;
     toast.success(`Recebimento finalizado: ${items} item(ns) lançado(s) no ledger`);
     await fetchRecords();
     return true;

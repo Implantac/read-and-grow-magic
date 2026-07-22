@@ -54,11 +54,11 @@ export function useInventory() {
   });
 
   return {
-    products: (productsQuery.data || []) as any[],
+    products: productsQuery.data || [],
     productsLoading: productsQuery.isLoading,
-    categories: (categoriesQuery.data || []) as any[],
+    categories: categoriesQuery.data || [],
     categoriesLoading: categoriesQuery.isLoading,
-    movements: (movementsQuery.data || []) as any[],
+    movements: movementsQuery.data || [],
     movementsLoading: movementsQuery.isLoading,
     
     // Mutations
