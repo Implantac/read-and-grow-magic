@@ -81,7 +81,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
   const [customerDocument, setCustomerDocument] = useState('');
   const [showCustomerPicker, setShowCustomerPicker] = useState(false);
   const [customerQuery, setCustomerQuery] = useState('');
-  const [saving, setSaving] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [screenLocked, setScreenLocked] = useState(false);
   const [showPixDialog, setShowPixDialog] = useState<{ splitId: string; amount: number } | null>(null);
