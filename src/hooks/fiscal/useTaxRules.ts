@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export interface TaxRule {
@@ -41,12 +42,12 @@ export function useTaxRules() {
     queryKey: ['tax_rules'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('tax_rules' as any)
+        .from('tax_rules')
         .select('*')
         .order('priority', { ascending: false })
         .order('name');
       if (error) throw error;
-      return (data as any as TaxRule[]) ?? [];
+      return (data ?? []) as unknown as TaxRule[];
     },
   });
 }
@@ -54,12 +55,12 @@ export function useTaxRules() {
 export function useUpsertTaxRule() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (rule: any & { name: string }) => {
-      const { id, created_at, updated_at, ...payload } = rule as any;
+    mutationFn: async (rule: Partial<TaxRule> & { name: string }) => {
+      const { id, created_at, updated_at, ...payload } = rule;
       if (id) {
         const { data, error } = await supabase
-          .from('tax_rules' as any)
-          .update(payload as any)
+          .from('tax_rules')
+          .update(payload as TablesUpdate<'tax_rules'>)
           .eq('id', id)
           .select()
           .single();
@@ -67,8 +68,8 @@ export function useUpsertTaxRule() {
         return data;
       }
       const { data, error } = await supabase
-        .from('tax_rules' as any)
-        .insert(payload as any)
+        .from('tax_rules')
+        .insert(payload as TablesInsert<'tax_rules'>)
         .select()
         .single();
       if (error) throw error;
@@ -78,8 +79,7 @@ export function useUpsertTaxRule() {
       qc.invalidateQueries({ queryKey: ['tax_rules'] });
       toastSuccess('Regra fiscal salva');
     },
-    onError: (e: any) =>
-      toastError(e.message),
+    onError: (e: Error) => toastError(e.message),
   });
 }
 
@@ -87,17 +87,17 @@ export function useDeleteTaxRule() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('tax_rules' as any).delete().eq('id', id);
+      const { error } = await supabase.from('tax_rules').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['tax_rules'] });
       toastSuccess('Regra removida');
     },
-    onError: (e: any) =>
-      toastError(e.message),
+    onError: (e: Error) => toastError(e.message),
   });
 }
+
 
 export interface TaxCalculation {
   rule_id: string | null;
