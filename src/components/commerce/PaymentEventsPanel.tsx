@@ -1,37 +1,18 @@
 import { useMemo, useState, useEffect } from "react";
-import {
-  CheckCircle2,
-  ShieldAlert,
-  Webhook,
-  Filter,
-  X,
-  Search,
-  Inbox,
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { CheckCircle2, X, Search, Inbox, ArrowUpDown } from "lucide-react";
 import { Card, CardContent } from "@/ui/base/card";
 import { Badge } from "@/ui/base/badge";
 import { Button } from "@/ui/base/button";
 import { Input } from "@/ui/base/input";
 import { Label } from "@/ui/base/label";
-import { Checkbox } from "@/ui/base/checkbox";
 import { Skeleton } from "@/ui/base/skeleton";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/ui/base/popover";
 import { Separator } from "@/ui/base/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/ui/base/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/base/select";
 import { usePaymentEventsForStorefront } from "@/hooks/usePaymentEvents";
+import { MultiSelectPopover, FilterChip } from "./payment-events/FilterControls";
+import { EventItem } from "./payment-events/EventItem";
+import { PaginationBar } from "./payment-events/PaginationBar";
+import { WebhookInfoCard } from "./payment-events/WebhookInfoCard";
 
 type SortKey = "created_at" | "provider";
 type SortDir = "asc" | "desc";
@@ -46,22 +27,10 @@ const STATUS_OPTIONS = [
   { value: "expired", label: "Expirado" },
 ];
 
-interface OrderLite {
-  id: string;
-  order_number: string;
-}
+interface OrderLite { id: string; order_number: string; }
+interface Props { storefrontId: string; orders: OrderLite[]; projectRef?: string; }
 
-interface Props {
-  storefrontId: string;
-  orders: OrderLite[];
-  projectRef?: string;
-}
-
-export function PaymentEventsPanel({
-  storefrontId,
-  orders,
-  projectRef = "arcuhqdiydlvekanychw",
-}: Props) {
+export function PaymentEventsPanel({ storefrontId, orders, projectRef = "arcuhqdiydlvekanychw" }: Props) {
   const { data: events = [], isLoading } = usePaymentEventsForStorefront(storefrontId);
   const webhookUrl = `https://${projectRef}.supabase.co/functions/v1/psp-webhook`;
 
@@ -82,9 +51,10 @@ export function PaymentEventsPanel({
     return map;
   }, [orders]);
 
-  const availableProviders = useMemo(() => {
-    return Array.from(new Set(events.map((e) => e.provider))).sort();
-  }, [events]);
+  const availableProviders = useMemo(
+    () => Array.from(new Set(events.map((e) => e.provider))).sort(),
+    [events],
+  );
 
   const filtered = useMemo(() => {
     const q = orderQuery.trim().toLowerCase();
@@ -93,25 +63,16 @@ export function PaymentEventsPanel({
 
     return events.filter((e) => {
       if (providers.length > 0 && !providers.includes(e.provider)) return false;
-      if (statusBefore.length > 0) {
-        if (!e.status_before || !statusBefore.includes(e.status_before))
-          return false;
-      }
-      if (statusAfter.length > 0) {
-        if (!e.status_after || !statusAfter.includes(e.status_after))
-          return false;
-      }
+      if (statusBefore.length > 0 && (!e.status_before || !statusBefore.includes(e.status_before))) return false;
+      if (statusAfter.length > 0 && (!e.status_after || !statusAfter.includes(e.status_after))) return false;
       const ts = new Date(e.processed_at).getTime();
       if (fromTs !== null && ts < fromTs) return false;
       if (toTs !== null && ts > toTs) return false;
       if (q) {
-        const orderNumber = e.order_id
-          ? (orderIdToNumber.get(e.order_id) ?? "").toLowerCase()
-          : "";
+        const orderNumber = e.order_id ? (orderIdToNumber.get(e.order_id) ?? "").toLowerCase() : "";
         const rawId = (e.order_id ?? "").toLowerCase();
         const ext = (e.external_id ?? "").toLowerCase();
-        if (!orderNumber.includes(q) && !rawId.includes(q) && !ext.includes(q))
-          return false;
+        if (!orderNumber.includes(q) && !rawId.includes(q) && !ext.includes(q)) return false;
       }
       return true;
     });
@@ -121,9 +82,7 @@ export function PaymentEventsPanel({
     const arr = [...filtered];
     const dir = sortDir === "asc" ? 1 : -1;
     const cmp = (a: typeof arr[number], b: typeof arr[number], k: SortKey) => {
-      if (k === "created_at") {
-        return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * dir;
-      }
+      if (k === "created_at") return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * dir;
       return a.provider.localeCompare(b.provider, "pt-BR") * dir;
     };
     const secondary: SortKey = sortPrimary === "created_at" ? "provider" : "created_at";
@@ -132,58 +91,23 @@ export function PaymentEventsPanel({
   }, [filtered, sortPrimary, sortDir]);
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / perPage));
-  useEffect(() => {
-    if (page > totalPages) setPage(1);
-  }, [page, totalPages]);
-  useEffect(() => {
-    setPage(1);
-  }, [providers, statusBefore, statusAfter, dateFrom, dateTo, orderQuery, perPage, sortPrimary, sortDir]);
+  useEffect(() => { if (page > totalPages) setPage(1); }, [page, totalPages]);
+  useEffect(() => { setPage(1); }, [providers, statusBefore, statusAfter, dateFrom, dateTo, orderQuery, perPage, sortPrimary, sortDir]);
 
-  const paginated = useMemo(
-    () => sorted.slice((page - 1) * perPage, page * perPage),
-    [sorted, page, perPage],
-  );
+  const paginated = useMemo(() => sorted.slice((page - 1) * perPage, page * perPage), [sorted, page, perPage]);
 
   const activeFilters =
-    providers.length +
-    statusBefore.length +
-    statusAfter.length +
-    (dateFrom ? 1 : 0) +
-    (dateTo ? 1 : 0) +
-    (orderQuery.trim() ? 1 : 0);
+    providers.length + statusBefore.length + statusAfter.length +
+    (dateFrom ? 1 : 0) + (dateTo ? 1 : 0) + (orderQuery.trim() ? 1 : 0);
 
   function clearFilters() {
-    setProviders([]);
-    setStatusBefore([]);
-    setStatusAfter([]);
-    setDateFrom("");
-    setDateTo("");
-    setOrderQuery("");
+    setProviders([]); setStatusBefore([]); setStatusAfter([]);
+    setDateFrom(""); setDateTo(""); setOrderQuery("");
   }
 
   return (
     <div className="grid gap-4 lg:grid-cols-[360px_1fr]">
-      <Card>
-        <CardContent className="p-4 space-y-2">
-          <div className="flex items-center gap-2">
-            <Webhook className="h-5 w-5 text-primary" />
-            <h3 className="font-medium text-sm">Endpoint de webhook</h3>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Configure esta URL no painel do seu PSP (Mercado Pago, Asaas, Efí, Stripe, Pagar.me):
-          </p>
-          <code className="block break-all rounded bg-muted p-2 text-xs">{webhookUrl}</code>
-          <p className="text-xs text-muted-foreground">Headers exigidos:</p>
-          <code className="block rounded bg-muted p-2 text-xs">
-            X-Webhook-Secret: &lt;PSP_WEBHOOK_SECRET&gt;
-            <br />
-            X-Provider: mercadopago | asaas | efi | stripe | generic
-          </code>
-          <p className="text-[10px] text-muted-foreground">
-            O segredo já foi gerado e está armazenado como variável do backend. Cole-o no painel do PSP.
-          </p>
-        </CardContent>
-      </Card>
+      <WebhookInfoCard webhookUrl={webhookUrl} />
 
       <Card>
         <CardContent className="p-4">
@@ -192,89 +116,39 @@ export function PaymentEventsPanel({
               <CheckCircle2 className="h-4 w-4 text-primary" />
               Eventos de pagamento
               <Badge variant="outline" className="text-xs">
-                {sorted.length}
-                {sorted.length !== events.length && ` / ${events.length}`}
+                {sorted.length}{sorted.length !== events.length && ` / ${events.length}`}
               </Badge>
             </h3>
-            <div className="flex items-center gap-2">
-              {activeFilters > 0 && (
-                <Button
-                  variant="ghost"
-                  size="xs"
-                  onClick={clearFilters}
-                  className="text-xs h-8"
-                >
-                  <X className="h-3 w-3 mr-1" /> Limpar
-                </Button>
-              )}
-            </div>
+            {activeFilters > 0 && (
+              <Button variant="ghost" size="xs" onClick={clearFilters} className="text-xs h-8">
+                <X className="h-3 w-3 mr-1" /> Limpar
+              </Button>
+            )}
           </div>
 
-          {/* Filtros */}
           <div className="grid gap-2 md:grid-cols-2 mb-3">
             <div className="relative">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-              <Input
-                placeholder="Buscar por nº do pedido, ID ou external_id"
-                value={orderQuery}
-                onChange={(e) => setOrderQuery(e.target.value)}
-                className="h-9 pl-7 text-xs"
-              />
+              <Input placeholder="Buscar por nº do pedido, ID ou external_id" value={orderQuery} onChange={(e) => setOrderQuery(e.target.value)} className="h-9 pl-7 text-xs" />
             </div>
             <div className="flex gap-2">
-              <MultiSelectPopover
-                label="Provedor"
-                options={availableProviders.map((p) => ({ value: p, label: p }))}
-                selected={providers}
-                onChange={setProviders}
-              />
-              <MultiSelectPopover
-                label="Status antes"
-                options={STATUS_OPTIONS}
-                selected={statusBefore}
-                onChange={setStatusBefore}
-              />
-              <MultiSelectPopover
-                label="Status depois"
-                options={STATUS_OPTIONS}
-                selected={statusAfter}
-                onChange={setStatusAfter}
-              />
+              <MultiSelectPopover label="Provedor" options={availableProviders.map((p) => ({ value: p, label: p }))} selected={providers} onChange={setProviders} />
+              <MultiSelectPopover label="Status antes" options={STATUS_OPTIONS} selected={statusBefore} onChange={setStatusBefore} />
+              <MultiSelectPopover label="Status depois" options={STATUS_OPTIONS} selected={statusAfter} onChange={setStatusAfter} />
             </div>
             <div className="flex items-center gap-2 md:col-span-2">
-              <Label className="text-xs text-muted-foreground shrink-0">
-                Período:
-              </Label>
-              <Input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-                className="h-9 text-xs"
-                max={dateTo || undefined}
-              />
+              <Label className="text-xs text-muted-foreground shrink-0">Período:</Label>
+              <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-9 text-xs" max={dateTo || undefined} />
               <span className="text-xs text-muted-foreground">até</span>
-              <Input
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-                className="h-9 text-xs"
-                min={dateFrom || undefined}
-              />
+              <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-9 text-xs" min={dateFrom || undefined} />
             </div>
           </div>
 
-          {/* Chips de filtros ativos */}
           {activeFilters > 0 && (
             <div className="flex flex-wrap gap-1 mb-3">
-              {providers.map((p) => (
-                <FilterChip key={`p-${p}`} label={`Provedor: ${p}`} onRemove={() => setProviders(providers.filter((x) => x !== p))} />
-              ))}
-              {statusBefore.map((s) => (
-                <FilterChip key={`sb-${s}`} label={`Antes: ${s}`} onRemove={() => setStatusBefore(statusBefore.filter((x) => x !== s))} />
-              ))}
-              {statusAfter.map((s) => (
-                <FilterChip key={`sa-${s}`} label={`Depois: ${s}`} onRemove={() => setStatusAfter(statusAfter.filter((x) => x !== s))} />
-              ))}
+              {providers.map((p) => <FilterChip key={`p-${p}`} label={`Provedor: ${p}`} onRemove={() => setProviders(providers.filter((x) => x !== p))} />)}
+              {statusBefore.map((s) => <FilterChip key={`sb-${s}`} label={`Antes: ${s}`} onRemove={() => setStatusBefore(statusBefore.filter((x) => x !== s))} />)}
+              {statusAfter.map((s) => <FilterChip key={`sa-${s}`} label={`Depois: ${s}`} onRemove={() => setStatusAfter(statusAfter.filter((x) => x !== s))} />)}
               {dateFrom && <FilterChip label={`De: ${dateFrom}`} onRemove={() => setDateFrom("")} />}
               {dateTo && <FilterChip label={`Até: ${dateTo}`} onRemove={() => setDateTo("")} />}
               {orderQuery.trim() && <FilterChip label={`Busca: ${orderQuery}`} onRemove={() => setOrderQuery("")} />}
@@ -293,16 +167,11 @@ export function PaymentEventsPanel({
             <div className="py-8 text-center space-y-2">
               <Inbox className="h-8 w-8 text-muted-foreground mx-auto" />
               <p className="text-sm font-medium">Nenhum evento encontrado</p>
-              <p className="text-xs text-muted-foreground">
-                Não há eventos de pagamento que correspondam aos filtros selecionados.
-              </p>
-              <Button variant="outline" size="sm" onClick={clearFilters} className="mt-2">
-                Limpar filtros
-              </Button>
+              <p className="text-xs text-muted-foreground">Não há eventos de pagamento que correspondam aos filtros selecionados.</p>
+              <Button variant="outline" size="sm" onClick={clearFilters} className="mt-2">Limpar filtros</Button>
             </div>
           ) : (
             <>
-              {/* Sort controls */}
               <div className="flex items-center gap-2 flex-wrap mb-3 text-xs">
                 <ArrowUpDown className="h-3.5 w-3.5 text-muted-foreground" />
                 <Label className="text-xs text-muted-foreground">Ordenar por:</Label>
@@ -326,188 +195,24 @@ export function PaymentEventsPanel({
               </div>
 
               <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
-                {paginated.map((e) => {
-                  const orderNumber = e.order_id
-                    ? orderIdToNumber.get(e.order_id)
-                    : null;
-                  return (
-                    <div key={e.id} className="rounded border p-2.5 text-xs space-y-1.5">
-                      <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="text-[10px]">
-                            {e.provider}
-                          </Badge>
-                          {orderNumber && (
-                            <code className="text-[10px] text-muted-foreground">
-                              {orderNumber}
-                            </code>
-                          )}
-                        </div>
-                        <span className="text-muted-foreground text-[10px]">
-                          {new Date(e.created_at).toLocaleString("pt-BR")}
-                        </span>
-                      </div>
-                      <div className="font-medium">{e.event_type}</div>
-                      <div className="flex items-center gap-1 text-muted-foreground flex-wrap">
-                        {e.status_before && (
-                          <>
-                            <Badge variant="outline" className="text-[10px]">
-                              {e.status_before}
-                            </Badge>
-                            <span>→</span>
-                          </>
-                        )}
-                        <Badge
-                          variant={e.status_after === "paid" ? "default" : "outline"}
-                          className="text-[10px]"
-                        >
-                          {e.status_after ?? "—"}
-                        </Badge>
-                        {e.signature_valid === false && (
-                          <span className="ml-auto flex items-center gap-1 text-destructive">
-                            <ShieldAlert className="h-3 w-3" /> assinatura inválida
-                          </span>
-                        )}
-                      </div>
-                      {e.external_id && (
-                        <div className="text-[10px] text-muted-foreground font-mono truncate">
-                          ext: {e.external_id}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                {paginated.map((e) => (
+                  <EventItem key={e.id} event={e as any} orderNumber={e.order_id ? orderIdToNumber.get(e.order_id) : null} />
+                ))}
               </div>
 
-              {/* Pagination */}
-              <div className="flex items-center justify-between gap-2 flex-wrap mt-3 pt-3 border-t text-xs">
-                <div className="flex items-center gap-2">
-                  <Label className="text-xs text-muted-foreground">Por página:</Label>
-                  <Select value={String(perPage)} onValueChange={(v) => setPerPage(Number(v))}>
-                    <SelectTrigger className="h-8 w-20 text-xs"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      {PER_PAGE_OPTIONS.map((n) => (
-                        <SelectItem key={n} value={String(n)}>{n}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <span className="text-muted-foreground">
-                    {(page - 1) * perPage + 1}–{Math.min(page * perPage, sorted.length)} de {sorted.length}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8"
-                    disabled={page <= 1}
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    aria-label="Página anterior"
-                  >
-                    <ChevronLeft className="h-3.5 w-3.5" />
-                  </Button>
-                  <span className="text-xs px-2">
-                    Página {page} / {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8"
-                    disabled={page >= totalPages}
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    aria-label="Próxima página"
-                  >
-                    <ChevronRight className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              </div>
+              <PaginationBar
+                page={page}
+                totalPages={totalPages}
+                perPage={perPage}
+                total={sorted.length}
+                perPageOptions={PER_PAGE_OPTIONS}
+                onPageChange={setPage}
+                onPerPageChange={setPerPage}
+              />
             </>
           )}
         </CardContent>
       </Card>
     </div>
-  );
-}
-
-function MultiSelectPopover({
-  label,
-  options,
-  selected,
-  onChange,
-}: {
-  label: string;
-  options: Array<{ value: string; label: string }>;
-  selected: string[];
-  onChange: (v: string[]) => void;
-}) {
-  function toggle(v: string) {
-    if (selected.includes(v)) onChange(selected.filter((x) => x !== v));
-    else onChange([...selected, v]);
-  }
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="h-9 text-xs gap-1 flex-1 justify-start">
-          <Filter className="h-3 w-3" />
-          {label}
-          {selected.length > 0 && (
-            <Badge variant="secondary" className="ml-auto text-[10px] h-4 px-1">
-              {selected.length}
-            </Badge>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-56 p-2" align="start">
-        {options.length === 0 ? (
-          <p className="text-xs text-muted-foreground p-2">
-            Nenhuma opção disponível.
-          </p>
-        ) : (
-          <div className="space-y-1 max-h-64 overflow-y-auto">
-            {options.map((opt) => (
-              <label
-                key={opt.value}
-                className="flex items-center gap-2 rounded px-2 py-1.5 text-xs hover:bg-muted cursor-pointer"
-              >
-                <Checkbox
-                  checked={selected.includes(opt.value)}
-                  onCheckedChange={() => toggle(opt.value)}
-                />
-                <span className="capitalize">{opt.label}</span>
-              </label>
-            ))}
-          </div>
-        )}
-        {selected.length > 0 && (
-          <>
-            <Separator className="my-1" />
-            <Button
-              variant="ghost"
-              size="xs"
-              onClick={() => onChange([])}
-              className="w-full text-xs"
-            >
-              Limpar
-            </Button>
-          </>
-        )}
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-function FilterChip({ label, onRemove }: { label: string; onRemove: () => void }) {
-  return (
-    <Badge variant="secondary" className="text-[10px] gap-1 pr-1">
-      {label}
-      <button
-        onClick={onRemove}
-        className="rounded-sm hover:bg-background/50 p-0.5"
-        aria-label={`Remover filtro ${label}`}
-      >
-        <X className="h-2.5 w-2.5" />
-      </button>
-    </Badge>
   );
 }
