@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
+import type { TablesInsert } from '@/integrations/supabase/types';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export type RecurringFrequency = 'weekly' | 'biweekly' | 'monthly' | 'bimonthly' | 'quarterly' | 'semiannual' | 'annual';
