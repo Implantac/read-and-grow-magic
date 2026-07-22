@@ -59,11 +59,13 @@ export function useRecurringList(filters?: { kind?: RecurringKind; status?: Recu
 
 export function useCreateRecurring() {
   const qc = useQueryClient();
+  const companyId = useEnterpriseStore((s) => s.activeCompanyId);
   return useMutation({
-    mutationFn: async (payload: any) => {
+    mutationFn: async (payload: Omit<TablesInsert<'financial_recurring'>, 'company_id'>) => {
+      if (!companyId) throw new Error('Empresa não selecionada');
       const { data, error } = await supabase
         .from('financial_recurring')
-        .insert(payload as any)
+        .insert({ ...payload, company_id: companyId })
         .select()
         .single();
       if (error) throw error;
