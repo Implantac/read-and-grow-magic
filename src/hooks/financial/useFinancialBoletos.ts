@@ -51,14 +51,17 @@ export function useFinancialBoletos(filters?: { status?: string }) {
 
 export function useCreateBoleto() {
   const qc = useQueryClient();
+  const companyId = useEnterpriseStore((s) => s.activeCompanyId);
   return useMutation({
     mutationFn: async (input: { receivable_id?: string; client_id?: string; client_name?: string; amount: number; due_date: string; bank_account_id?: string; notes?: string }) => {
+      if (!companyId) throw new Error('Empresa não selecionada');
       const fake = mockBoleto(input.amount);
       const { data, error } = await supabase.from('financial_boletos').insert({
         ...input,
         ...fake,
         provider: 'mock',
         status: 'registered',
+        company_id: companyId,
       }).select().single();
       if (error) throw error;
       return data;
