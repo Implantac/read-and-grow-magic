@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { usePermission } from '@/hooks/usePermission';
+import { useAccessTelemetry } from '@/hooks/useAccessTelemetry';
 
 /**
  * AUD-3: hook unificado de acesso.
@@ -106,18 +107,22 @@ export function useAccess(input: UseAccessInput = {}): UseAccessResult {
     (allRoles.length > 0 && roleQuery.isLoading) ||
     (!!module && (moduleQuery.isLoading || !companyId));
 
-  if (loading) return { allowed: false, loading: true, reason: 'loading' };
-
-  if (module) {
-    if (!companyId) return { allowed: false, loading: false, reason: 'no-company' };
-    if (!moduleQuery.data?.enabled)
-      return { allowed: false, loading: false, reason: 'plan-missing-module' };
+  let result: UseAccessResult;
+  if (loading) {
+    result = { allowed: false, loading: true, reason: 'loading' };
+  } else if (module && !companyId) {
+    result = { allowed: false, loading: false, reason: 'no-company' };
+  } else if (module && !moduleQuery.data?.enabled) {
+    result = { allowed: false, loading: false, reason: 'plan-missing-module' };
+  } else if (permissionActive && !permission.allowed) {
+    result = { allowed: false, loading: false, reason: 'no-permission' };
+  } else if (allRoles.length > 0 && !roleQuery.data) {
+    result = { allowed: false, loading: false, reason: 'no-role' };
+  } else {
+    result = { allowed: true, loading: false, reason: null };
   }
-  if (permissionActive && !permission.allowed)
-    return { allowed: false, loading: false, reason: 'no-permission' };
-  if (allRoles.length > 0 && !roleQuery.data)
-    return { allowed: false, loading: false, reason: 'no-role' };
 
-  return { allowed: true, loading: false, reason: null };
+  useAccessTelemetry(input, result);
+  return result;
 }
 
