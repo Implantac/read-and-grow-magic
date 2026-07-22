@@ -79,42 +79,32 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
   const [installments, setInstallments] = useState(1);
   const [screenLocked, setScreenLocked] = useState(false);
 
-  // Cash session
-  const [session, setSession] = useState<CashSession | null>(() => {
-    try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch { return null; }
-  });
-  const [showOpenSession, setShowOpenSession] = useState(false);
-  const [showCashMovement, setShowCashMovement] = useState<null | 'sangria' | 'suprimento'>(null);
-  const [openingAmount, setOpeningAmount] = useState(0);
-  const [movementAmount, setMovementAmount] = useState(0);
-  const [movementNote, setMovementNote] = useState('');
+  // Cash session (extracted hook)
+  const {
+    session, setSession,
+    cashBalance, sessionElapsed,
+    showOpenSession, setShowOpenSession,
+    showCashMovement, setShowCashMovement,
+    openingAmount, setOpeningAmount,
+    movementAmount, setMovementAmount,
+    movementNote, setMovementNote,
+    showCloseSession, setShowCloseSession,
+    openSession,
+    closeSessionSummary,
+    confirmCloseSession,
+    registerMovement,
+  } = usePDVCashSession();
 
   // Novos gaps
   const [showPixDialog, setShowPixDialog] = useState<{ splitId: string; amount: number } | null>(null);
-  const [showCloseSession, setShowCloseSession] = useState(false);
   const [showParked, setShowParked] = useState(false);
   const [parkedList, setParkedList] = useState<ParkedSale[]>(() => loadParked());
   const refreshParked = useCallback(() => setParkedList(loadParked()), []);
 
   const searchRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const scanRafRef = useRef<number | null>(null);
   const [flashId, setFlashId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (session) localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    else localStorage.removeItem(SESSION_KEY);
-  }, [session]);
-
-  // Cash balance in drawer
-  const cashBalance = useMemo(() => {
-    if (!session) return 0;
-    return session.movements.reduce((sum, m) => {
-      if (m.type === 'sangria') return sum - m.amount;
-      return sum + m.amount;
-    }, session.openingAmount);
-  }, [session]);
 
   const term = search.trim().toLowerCase();
   const filteredProducts = useMemo(() => {
