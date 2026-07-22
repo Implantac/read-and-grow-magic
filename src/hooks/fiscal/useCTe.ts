@@ -42,9 +42,9 @@ export function useCTes() {
   return useQuery({
     queryKey: ['ctes'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('cte' as any).select('*').order('issue_date', { ascending: false }).limit(500);
+      const { data, error } = await supabase.from('cte').select('*').order('issue_date', { ascending: false }).limit(500);
       if (error) throw error;
-      return (data as any as CTe[]) ?? [];
+      return (data ?? []) as unknown as CTe[];
     },
   });
 }
@@ -52,14 +52,14 @@ export function useCTes() {
 export function useCreateCTe() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: any & { carrier_name: string; sender_name: string; recipient_name: string }) => {
+    mutationFn: async (payload: Partial<CTe> & { carrier_name: string; sender_name: string; recipient_name: string }) => {
       const number = 'CTE-' + Date.now().toString().slice(-8);
       const icms_base = payload.freight_value ?? 0;
       const icms_rate = payload.icms_rate ?? 12;
       const icms_value = (icms_base * icms_rate) / 100;
       const total = (payload.freight_value ?? 0);
       const { data, error } = await supabase
-        .from('cte' as any)
+        .from('cte')
         .insert({ ...payload, number, icms_base, icms_rate, icms_value, total, status: 'draft' })
         .select()
         .single();
@@ -80,7 +80,7 @@ export function useTransmitCTe() {
     mutationFn: async (id: string) => {
       const access_key = Array.from({ length: 44 }, () => Math.floor(Math.random() * 10)).join('');
       const protocol = '1' + Date.now().toString().slice(-14);
-      const { error } = await supabase.from('cte' as any).update({
+      const { error } = await supabase.from('cte').update({
         status: 'authorized', access_key, protocol, authorization_date: new Date().toISOString(),
       }).eq('id', id);
       if (error) throw error;
@@ -97,7 +97,7 @@ export function useCancelCTe() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
-      const { error } = await supabase.from('cte' as any).update({
+      const { error } = await supabase.from('cte').update({
         status: 'cancelled', cancellation_date: new Date().toISOString(), cancellation_reason: reason,
       }).eq('id', id);
       if (error) throw error;
