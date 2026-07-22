@@ -48,23 +48,29 @@ export function useSupplyStock() {
 
   const fetchSupplies = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any).from('supply_stock').select('*').order('name');
+    const { data, error } = await supabase.from('supply_stock').select('*').order('name');
     if (error) { console.error(error); toast.error('Erro ao carregar insumos'); }
-    else setSupplies(data || []);
+    else setSupplies((data || []) as SupplyItem[]);
     setLoading(false);
   }, []);
 
   const fetchMovements = useCallback(async () => {
-    const { data, error } = await (supabase as any).from('supply_movements').select('*').order('created_at', { ascending: false }).limit(200);
+    const { data, error } = await supabase.from('supply_movements').select('*').order('created_at', { ascending: false }).limit(200);
     if (error) console.error(error);
-    else setMovements(data || []);
+    else setMovements((data || []) as SupplyMovement[]);
   }, []);
 
   useEffect(() => { fetchSupplies(); fetchMovements(); }, [fetchSupplies, fetchMovements]);
 
   const createSupply = async (supply: Partial<SupplyItem>) => {
     const totalValue = (supply.current_quantity || 0) * (supply.unit_cost || 0);
-    const { error } = await (supabase as any).from('supply_stock').insert({ ...supply, total_value: totalValue } as any);
+    const { error } = await supabase.from('supply_stock').insert({
+      code: supply.code!,
+      name: supply.name!,
+      unit: supply.unit!,
+      ...supply,
+      total_value: totalValue,
+    });
     if (error) { toast.error('Erro ao criar insumo'); return false; }
     toast.success('Insumo cadastrado');
     await fetchSupplies();
@@ -72,13 +78,28 @@ export function useSupplyStock() {
   };
 
   const updateSupply = async (id: string, updates: Partial<SupplyItem>) => {
-    const { error } = await (supabase as any).from('supply_stock').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
+    const { error } = await supabase.from('supply_stock').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id);
     if (error) { toast.error('Erro ao atualizar insumo'); return; }
     await fetchSupplies();
   };
 
   const registerMovement = async (movement: Partial<SupplyMovement>) => {
-    const { error: movErr } = await (supabase as any).from('supply_movements').insert(movement as any);
+    const { error: movErr } = await supabase.from('supply_movements').insert({
+      supply_id: movement.supply_id!,
+      supply_code: movement.supply_code!,
+      supply_name: movement.supply_name!,
+      type: movement.type!,
+      direction: movement.direction!,
+      quantity: movement.quantity!,
+      unit_cost: movement.unit_cost ?? 0,
+      total_cost: movement.total_cost ?? 0,
+      production_order_id: movement.production_order_id ?? null,
+      production_order_number: movement.production_order_number ?? null,
+      document_number: movement.document_number ?? null,
+      operator: movement.operator ?? null,
+      reason: movement.reason ?? null,
+      notes: movement.notes ?? null,
+    });
     if (movErr) { toast.error('Erro ao registrar movimentação'); return false; }
 
     // Update supply stock
@@ -89,12 +110,12 @@ export function useSupplyStock() {
         : supply.current_quantity - (movement.quantity || 0);
       const newTotal = newQty * supply.unit_cost;
       const dateField = movement.direction === 'in' ? 'last_entry_date' : 'last_exit_date';
-      await (supabase as any).from('supply_stock').update({
+      await supabase.from('supply_stock').update({
         current_quantity: Math.max(0, newQty),
         total_value: Math.max(0, newTotal),
         [dateField]: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      } as any).eq('id', movement.supply_id);
+      }).eq('id', movement.supply_id!);
     }
 
     toast.success('Movimentação registrada');
