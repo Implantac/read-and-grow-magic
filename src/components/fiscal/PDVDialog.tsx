@@ -7,7 +7,7 @@ import {
 import { Button } from '@/ui/base/button';
 import { Dialog, DialogContent } from '@/ui/base/dialog';
 import { Badge } from '@/ui/base/badge';
-import { useProducts, type DbProduct } from '@/hooks/inventory/useProducts';
+import { useProducts } from '@/hooks/inventory/useProducts';
 import { useClients, type DbClient, useUpdateClient } from '@/hooks/commercial/useClients';
 import { useActiveCategories } from '@/hooks/inventory/useCategories';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
@@ -15,7 +15,7 @@ import { openReceipt } from './pdvReceipt';
 import { PDVPixDialog } from './PDVPixDialog';
 import { PDVCloseSessionDialog } from './PDVCloseSessionDialog';
 import { PDVParkedDialog } from './PDVParkedDialog';
-import { loadParked, parkSale, removeParked, type ParkedSale } from './pdvParkedStorage';
+import { parkSale } from './pdvParkedStorage';
 import { PDVCustomerCard } from './pdv/PDVCustomerCard';
 import { PDVCustomerPicker } from './pdv/PDVCustomerPicker';
 import { PDVPaymentPanel } from './pdv/PDVPaymentPanel';
@@ -27,7 +27,11 @@ import { PDVCartLines } from './pdv/PDVCartLines';
 import { PDVTotalsCard } from './pdv/PDVTotalsCard';
 import { usePDVCashSession, logAudit } from './pdv/usePDVCashSession';
 import { useBarcodeCameraScanner } from './pdv/useBarcodeCameraScanner';
-import { onlyDigits, type CartItem, type SplitPayment } from './pdv/types';
+import { usePDVCart } from './pdv/usePDVCart';
+import { usePDVSplits } from './pdv/usePDVSplits';
+import { usePDVParked } from './pdv/usePDVParked';
+import { usePDVShortcuts } from './pdv/usePDVShortcuts';
+import { onlyDigits } from './pdv/types';
 
 interface PDVDialogProps {
   open: boolean;
@@ -48,8 +52,6 @@ interface PDVDialogProps {
 
 type InputMode = 'search' | 'scanner' | 'camera';
 
-
-
 export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDialogProps) {
   const productsQuery = useProducts();
   const clientsQuery = useClients();
@@ -61,12 +63,17 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
   );
   const clients = useMemo(() => clientsQuery.data || [], [clientsQuery.data]);
 
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const cartApi = usePDVCart(products);
+  const {
+    cart, setCart, discount, setDiscount, discountType, setDiscountType,
+    flashId, addToCart, findByCode,
+    updateQty, setQty, setUnitPrice, removeFromCart,
+    subtotal, discountValue, total, totalItems, resetCart,
+  } = cartApi;
+
   const [search, setSearch] = useState('');
   const [inputMode, setInputMode] = useState<InputMode>('search');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const [discount, setDiscount] = useState(0);
-  const [discountType, setDiscountType] = useState<'value' | 'percent'>('value');
   const [customer, setCustomer] = useState<DbClient | null>(null);
   const [customerName, setCustomerName] = useState('');
   const [customerDocument, setCustomerDocument] = useState('');
@@ -74,12 +81,20 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
   const [customerQuery, setCustomerQuery] = useState('');
   const [saving, setSaving] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
-  const [splits, setSplits] = useState<SplitPayment[]>([]);
-  const [splitDrafts, setSplitDrafts] = useState<Record<string, string>>({});
-  const [installments, setInstallments] = useState(1);
   const [screenLocked, setScreenLocked] = useState(false);
+  const [showPixDialog, setShowPixDialog] = useState<{ splitId: string; amount: number } | null>(null);
 
-  // Cash session (extracted hook)
+  const {
+    splits, setSplits, splitDrafts, installments, setInstallments,
+    paidTotal, remaining, change, availableCredit,
+    addSplit, handleSplitAmountChange, commitSplitAmount, removeSplit, resetSplits,
+  } = usePDVSplits({
+    total,
+    customer,
+    onRequestCustomer: () => setShowCustomerPicker(true),
+    onOpenPix: (p) => setShowPixDialog(p),
+  });
+
   const {
     session, setSession,
     cashBalance, sessionElapsed,
@@ -89,22 +104,13 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     movementAmount, setMovementAmount,
     movementNote, setMovementNote,
     showCloseSession, setShowCloseSession,
-    openSession,
-    closeSessionSummary,
-    confirmCloseSession,
-    registerMovement,
+    openSession, closeSessionSummary, confirmCloseSession, registerMovement,
   } = usePDVCashSession();
 
-  // Novos gaps
-  const [showPixDialog, setShowPixDialog] = useState<{ splitId: string; amount: number } | null>(null);
-  const [showParked, setShowParked] = useState(false);
-  const [parkedList, setParkedList] = useState<ParkedSale[]>(() => loadParked());
-  const refreshParked = useCallback(() => setParkedList(loadParked()), []);
+  const { parkedList, refreshParked, showParked, setShowParked, discardParked } = usePDVParked();
 
   const searchRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [flashId, setFlashId] = useState<string | null>(null);
-
 
   const term = search.trim().toLowerCase();
   const filteredProducts = useMemo(() => {
@@ -134,48 +140,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
       .slice(0, 12);
   }, [clients, customerQuery]);
 
-  const subtotal = cart.reduce((s, i) => s + i.quantity * i.unitPrice - (i.itemDiscount || 0), 0);
-  const discountValue = discountType === 'percent'
-    ? Math.min(subtotal, (subtotal * discount) / 100)
-    : Math.min(subtotal, discount);
-  const total = Math.max(0, subtotal - discountValue);
-  const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
-  const paidTotal = splits.reduce((s, p) => s + p.amount, 0);
-  const remaining = Math.max(0, total - paidTotal);
-  const change = Math.max(0, paidTotal - total);
   const loyaltyPoints = customer ? Math.floor(total) : 0;
-
-  const addToCart = useCallback((product: Pick<DbProduct, 'id' | 'code' | 'name' | 'sale_price' | 'unit'>) => {
-    setCart((prev) => {
-      const existing = prev.find((i) => i.productId === product.id);
-      if (existing) {
-        return prev.map((i) =>
-          i.productId === product.id ? { ...i, quantity: i.quantity + 1 } : i,
-        );
-      }
-      return [
-        {
-          productCode: product.code,
-          productName: product.name,
-          productId: product.id,
-          quantity: 1,
-          unitPrice: product.sale_price,
-          unit: product.unit,
-        },
-        ...prev,
-      ];
-    });
-    setFlashId(product.id);
-    window.setTimeout(() => setFlashId((cur) => (cur === product.id ? null : cur)), 350);
-  }, []);
-
-  const findByCode = (raw: string): DbProduct | undefined => {
-    const val = raw.trim();
-    if (!val) return undefined;
-    return products.find(
-      (p) => p.barcode === val || p.code === val || p.code.toLowerCase() === val.toLowerCase(),
-    );
-  };
 
   const handleScanValue = (value: string) => {
     const prod = findByCode(value);
@@ -193,70 +158,19 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     }
   }, [open, showPayment, inputMode, screenLocked]);
 
-  // Camera scanning (extracted hook)
   const { stopCamera } = useBarcodeCameraScanner({
     inputMode, open, videoRef,
     onValue: (v) => handleScanValue(v),
     onFallback: () => setInputMode('scanner'),
   });
 
-
-  const flashLine = (productId: string) => {
-    setFlashId(productId);
-    window.setTimeout(() => setFlashId((cur) => (cur === productId ? null : cur)), 350);
-  };
-
-  const MAX_QTY = 9999;
-  const MAX_PRICE = 1_000_000;
-
-  const updateQty = (productId: string, delta: number) => {
-    setCart((prev) =>
-      prev
-        .map((i) => {
-          if (i.productId !== productId) return i;
-          const next = i.quantity + delta;
-          return { ...i, quantity: Math.min(MAX_QTY, Math.max(0, next)) };
-        })
-        .filter((i) => i.quantity > 0),
-    );
-    flashLine(productId);
-  };
-
-  const setQty = (productId: string, raw: number): boolean => {
-    if (!Number.isFinite(raw)) { toastError('Quantidade inválida.'); return false; }
-    if (raw < 0) { toastError('Quantidade não pode ser negativa.'); return false; }
-    if (raw > MAX_QTY) { toastError(`Quantidade máxima por item é ${MAX_QTY}.`); return false; }
-    const v = Math.floor(raw * 1000) / 1000;
-    setCart((prev) =>
-      v === 0
-        ? prev.filter((i) => i.productId !== productId)
-        : prev.map((i) => (i.productId === productId ? { ...i, quantity: v } : i)),
-    );
-    flashLine(productId);
-    return true;
-  };
-
-  const setUnitPrice = (productId: string, raw: number): boolean => {
-    if (!Number.isFinite(raw)) { toastError('Preço inválido.'); return false; }
-    if (raw < 0) { toastError('Preço unitário não pode ser negativo.'); return false; }
-    if (raw > MAX_PRICE) { toastError('Preço unitário acima do limite permitido.'); return false; }
-    const v = Math.round(raw * 100) / 100;
-    setCart((prev) => prev.map((i) => (i.productId === productId ? { ...i, unitPrice: v } : i)));
-    flashLine(productId);
-    return true;
-  };
-
-  const removeFromCart = (productId: string) => setCart((prev) => prev.filter((i) => i.productId !== productId));
-
-  const clearAll = () => {
-    setCart([]);
-    setDiscount(0);
-    setSplits([]);
+  const clearAll = useCallback(() => {
+    resetCart();
+    resetSplits();
     setCustomer(null);
     setCustomerName('');
     setCustomerDocument('');
-    setInstallments(1);
-  };
+  }, [resetCart, resetSplits]);
 
   const applyCustomer = (c: DbClient) => {
     setCustomer(c);
@@ -266,32 +180,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     toastSuccess(`Cliente vinculado: ${c.name}`);
   };
 
-  // Crédito (fiado) disponível para o cliente selecionado
-  const availableCredit = useMemo(() => {
-    if (!customer) return 0;
-    return Math.max(0, (customer.credit_limit || 0) - (customer.current_balance || 0));
-  }, [customer]);
-
-  const addSplit = (method: SplitPayment['method']) => {
-    const amount = Math.round(remaining * 100) / 100;
-    if (amount <= 0) { toastError('Total já foi pago.'); return; }
-
-    if (method === 'credit') {
-      if (!customer) { toastError('Selecione um cliente antes de vender no fiado.'); setShowCustomerPicker(true); return; }
-      const jaFiado = splits.filter((s) => s.method === 'credit').reduce((s, p) => s + p.amount, 0);
-      if (jaFiado + amount > availableCredit + 0.001) {
-        toastError(`Crédito insuficiente. Disponível: ${formatBRL(availableCredit - jaFiado)}`);
-        return;
-      }
-    }
-
-    const inst = method === 'credit_card' ? installments : undefined;
-    const id = crypto.randomUUID();
-    setSplits((prev) => [...prev, { id, method, amount, installments: inst }]);
-    if (method === 'pix') setShowPixDialog({ splitId: id, amount });
-  };
-
-  // Suspender / retomar cupom
   const suspendSale = () => {
     if (cart.length === 0) { toastError('Carrinho vazio.'); return; }
     parkSale({
@@ -320,53 +208,9 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     setCustomerDocument(p.customerDocument || '');
     const c = clients.find((cl) => cl.id === p.customerId);
     if (c) setCustomer(c);
-    removeParked(id); refreshParked(); setShowParked(false);
+    discardParked(id);
+    setShowParked(false);
     toastSuccess('Cupom retomado.');
-  };
-
-  const discardParked = (id: string) => { removeParked(id); refreshParked(); };
-
-  const updateSplitAmount = (id: string, raw: number) => {
-    if (!Number.isFinite(raw) || raw < 0) return; // silencioso: não bloqueia digitação
-    const v = Math.round(raw * 100) / 100;
-    setSplits((prev) => prev.map((p) => (p.id === id ? { ...p, amount: v } : p)));
-  };
-
-  // Aceita digitação livre (vazio, "12,", "12.5") sem quebrar o input controlado
-  const handleSplitAmountChange = (id: string, text: string) => {
-    // normaliza vírgula → ponto; aceita apenas dígitos e um separador decimal
-    const cleaned = text.replace(',', '.').replace(/[^0-9.]/g, '');
-    // impede múltiplos pontos
-    const parts = cleaned.split('.');
-    const normalized = parts.length > 2 ? `${parts[0]}.${parts.slice(1).join('')}` : cleaned;
-    setSplitDrafts((prev) => ({ ...prev, [id]: normalized }));
-    if (normalized === '' || normalized === '.') {
-      setSplits((prev) => prev.map((p) => (p.id === id ? { ...p, amount: 0 } : p)));
-      return;
-    }
-    const n = Number(normalized);
-    if (Number.isFinite(n) && n >= 0) {
-      setSplits((prev) => prev.map((p) => (p.id === id ? { ...p, amount: Math.round(n * 100) / 100 } : p)));
-    }
-  };
-
-  const commitSplitAmount = (id: string) => {
-    setSplitDrafts((prev) => {
-      if (!(id in prev)) return prev;
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    });
-  };
-
-  const removeSplit = (id: string) => {
-    setSplits((prev) => prev.filter((p) => p.id !== id));
-    setSplitDrafts((prev) => {
-      if (!(id in prev)) return prev;
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    });
   };
 
   const [showFinalizeConfirm, setShowFinalizeConfirm] = useState(false);
@@ -377,7 +221,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     if (splits.length === 0) { toastError('Adicione ao menos uma forma de pagamento.'); return; }
     if (paidTotal + 0.001 < total) { toastError('Valor pago insuficiente.'); return; }
 
-    // Trava definitiva: fiado exige cliente identificado (o valor iria "sumir" sem debitar do saldo)
     const fiadoInSplits = splits.filter((s) => s.method === 'credit').reduce((s, p) => s + p.amount, 0);
     if (fiadoInSplits > 0 && !customer) {
       toastError('Identifique o cliente antes de finalizar venda no fiado.');
@@ -385,7 +228,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
       return;
     }
 
-    // Confirmação para vendas de valor alto ou muitos itens — evita F10 duplo acidental
     const HIGH_VALUE = 1000;
     const HIGH_ITEMS = 20;
     if (!skipConfirm && (total >= HIGH_VALUE || totalItems >= HIGH_ITEMS)) {
@@ -393,13 +235,8 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
       return;
     }
 
-
-
-
-
     setSaving(true);
     const primary = splits.length === 1 ? splits[0].method : 'multiple';
-    // Snapshot para o comprovante (o clearAll limpa o estado depois)
     const receiptSnapshot = {
       items: cart.map((i) => ({
         productCode: i.productCode,
@@ -431,13 +268,11 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
         terminalId: session.terminalId,
         operatorName: session.operatorName,
       });
-      // Update cash drawer: only cash portion affects the drawer
       const cashPortion = splits.filter((s) => s.method === 'cash').reduce((s, p) => s + Math.min(p.amount, total), 0);
       setSession((prev) => prev ? {
         ...prev,
         movements: [...prev.movements, { type: 'sale', amount: cashPortion, at: new Date().toISOString(), note: `Venda ${formatBRL(total)}` }],
       } : prev);
-      // Fiado: debita do saldo do cliente (current_balance sobe = dívida cresce)
       const fiadoAmount = splits.filter((s) => s.method === 'credit').reduce((s, p) => s + p.amount, 0);
       if (fiadoAmount > 0 && customer) {
         try {
@@ -449,7 +284,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
       }
       logAudit('sale.finalized', { total, methods: splits.map((s) => s.method), customer: customer?.id, fiado: fiadoAmount });
 
-      // Emissão do comprovante (PDF + impressão) em nova janela
       const emitData = (emitResult ?? {}) as { number?: string; accessKey?: string; protocol?: string };
       const printed = openReceipt({
         ...receiptSnapshot,
@@ -470,31 +304,21 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     }
   };
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    if (!open || screenLocked) return;
-    const onKey = (e: KeyboardEvent) => {
-      const target = e.target as HTMLElement | null;
-      const typing = target && ['INPUT', 'TEXTAREA'].includes(target.tagName);
-      if (e.key === 'Escape' && !typing && !showPayment && search) { e.preventDefault(); setSearch(''); return; }
-      if (e.key === 'F9' && !typing) { e.preventDefault(); clearAll(); }
-      if (e.key === 'F10' && !typing) { e.preventDefault(); if (!showPayment && cart.length > 0) setShowPayment(true); else if (showPayment) handleFinalize(); }
-      // Bloqueio agora em Ctrl/Cmd+L para evitar acionamento acidental de F12 durante venda
-      if ((e.ctrlKey || e.metaKey) && (e.key === 'l' || e.key === 'L')) { e.preventDefault(); setScreenLocked(true); }
-      if (e.key === 'F7' && !typing && cart.length > 0) { e.preventDefault(); suspendSale(); }
-      if (e.key === 'F8' && !typing) { e.preventDefault(); setShowParked(true); }
-      if (!showPayment || typing) return;
-      if (e.key === 'F1') { e.preventDefault(); addSplit('cash'); }
-      if (e.key === 'F2') { e.preventDefault(); addSplit('credit_card'); }
-      if (e.key === 'F3') { e.preventDefault(); addSplit('debit_card'); }
-      if (e.key === 'F4') { e.preventDefault(); addSplit('pix'); }
-      if (e.key === 'F5') { e.preventDefault(); addSplit('voucher'); }
-      if (e.key === 'F6') { e.preventDefault(); addSplit('credit'); }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, showPayment, cart.length, screenLocked, remaining, installments]);
+  usePDVShortcuts({
+    open,
+    screenLocked,
+    showPayment,
+    cartLength: cart.length,
+    hasSearch: !!search,
+    onClearSearch: () => setSearch(''),
+    onClearAll: clearAll,
+    onGoToPayment: () => setShowPayment(true),
+    onFinalize: () => handleFinalize(),
+    onSuspend: suspendSale,
+    onOpenParked: () => setShowParked(true),
+    onLock: () => setScreenLocked(true),
+    onAddSplit: addSplit,
+  });
 
   const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -507,17 +331,10 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     }
   };
 
-  const placeholderByMode: Record<InputMode, string> = {
-    search: 'Buscar por nome, código ou EAN...',
-    scanner: 'Aponte o leitor e pressione ENTER',
-    camera: 'Aponte a câmera para o QR Code ou código de barras',
-  };
-
   const requestCloseSession = () => {
     if (!session) return;
     setShowCloseSession(true);
   };
-
 
   const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (asPage) {
@@ -541,7 +358,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
   return (
     <Shell>
       <>
-        {/* Lock overlay */}
         {screenLocked && (
           <div className="absolute inset-0 z-50 bg-background/95 backdrop-blur-xl flex flex-col items-center justify-center gap-6">
             <Lock className="h-16 w-16 text-primary" />
@@ -556,7 +372,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
         )}
 
         <div className="flex flex-col h-full">
-          {/* TOP BAR: session + operator */}
           <PDVSessionBar
             hasSession={!!session}
             cashBalance={cashBalance}
@@ -569,12 +384,8 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
             onOpenSession={() => setShowOpenSession(true)}
           />
 
-
-          {/* MAIN */}
           <div className="flex flex-1 min-h-0 flex-col lg:flex-row">
-            {/* LEFT: catalog + cart */}
             <div className="flex-1 flex flex-col border-b lg:border-b-0 lg:border-r bg-muted/10 min-w-0 min-h-0">
-
               <PDVCatalogPanel
                 inputMode={inputMode}
                 onChangeInputMode={setInputMode}
@@ -593,7 +404,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                 onPickProduct={addToCart}
               />
 
-              {/* Cart header */}
               <div className="px-6 pt-4 pb-2 flex items-center justify-between border-t mt-4">
                 <div className="flex items-center gap-2">
                   <ShoppingCart className="h-4 w-4 text-primary" />
@@ -626,15 +436,12 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                 onSetUnitPrice={setUnitPrice}
                 onRemove={removeFromCart}
               />
-
             </div>
 
-            {/* RIGHT: checkout */}
             <div className="w-full lg:w-[400px] xl:w-[460px] bg-muted/30 flex flex-col shrink-0 min-h-0">
               <div className="flex-1 overflow-y-auto p-6 space-y-5">
                 {!showPayment ? (
                   <>
-                    {/* Customer card */}
                     <PDVCustomerCard
                       customer={customer}
                       customerDocument={customerDocument}
@@ -645,7 +452,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                       onOpenPicker={() => setShowCustomerPicker(true)}
                     />
 
-
                     <PDVTotalsCard
                       subtotal={subtotal}
                       discount={discount}
@@ -655,7 +461,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                       onChangeDiscount={setDiscount}
                       onChangeDiscountType={setDiscountType}
                     />
-
                   </>
                 ) : (
                   <PDVPaymentPanel
@@ -673,11 +478,9 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                     onCommitSplitAmount={commitSplitAmount}
                     onRemoveSplit={removeSplit}
                   />
-
                 )}
               </div>
 
-              {/* Sticky footer */}
               <div className="border-t bg-background/80 backdrop-blur p-4 shrink-0">
                 {!showPayment ? (
                   <Button
@@ -714,7 +517,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
           </div>
         </div>
 
-        {/* Open session dialog */}
         <PDVOpenSessionDialog
           open={showOpenSession}
           openingAmount={openingAmount}
@@ -723,7 +525,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
           onConfirm={openSession}
         />
 
-        {/* Cash movement dialog */}
         <PDVCashMovementDialog
           type={showCashMovement}
           cashBalance={cashBalance}
@@ -735,8 +536,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
           onConfirm={registerMovement}
         />
 
-
-        {/* Customer picker dialog */}
         <PDVCustomerPicker
           open={showCustomerPicker}
           query={customerQuery}
@@ -746,8 +545,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
           onClose={() => setShowCustomerPicker(false)}
         />
 
-
-        {/* PIX QR dialog */}
         <PDVPixDialog
           open={!!showPixDialog}
           amount={showPixDialog?.amount || 0}
@@ -758,7 +555,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
           }}
         />
 
-        {/* Blind cash close */}
         <PDVCloseSessionDialog
           open={showCloseSession}
           summary={closeSessionSummary}
@@ -766,7 +562,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
           onClose={confirmCloseSession}
         />
 
-        {/* Parked sales */}
         <PDVParkedDialog
           open={showParked}
           parked={parkedList}
@@ -775,7 +570,6 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
           onDelete={discardParked}
         />
 
-        {/* Finalize confirm (alto valor / muitos itens) */}
         <PDVFinalizeConfirmDialog
           open={showFinalizeConfirm}
           total={total}
@@ -786,6 +580,5 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
         />
       </>
     </Shell>
-
   );
 }
