@@ -32,7 +32,7 @@ export function computeDerived(productionOrders: any[], salesOrders: any[] = [],
       acc[wc].totalQty += o.quantity - o.produced_quantity;
       return acc;
     }, {});
-  const workCenterData = Object.entries(workCenterLoad).map(([name, v]) => ({ name, ordens: v.count, pendente: v.totalQty }));
+  const workCenterData = Object.entries(workCenterLoad).map(([name, v]) => ({ name, ordens: (v as { count: number; totalQty: number }).count, pendente: (v as { count: number; totalQty: number }).totalQty }));
 
   const today = new Date();
   const delayedOPs = productionOrders.filter(o => {
