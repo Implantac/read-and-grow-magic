@@ -20,7 +20,7 @@ export function useNfeCertificates() {
   return useQuery({
     queryKey: ["nfe_certificates"],
     queryFn: async () => {
-      const { data, error } = await (supabase.from as any)("nfe_certificates").select("*")
+      const { data, error } = await supabase.from("nfe_certificates").select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as NfeCertificate[];
@@ -52,7 +52,7 @@ export function useSefazStatus(ambiente: 1 | 2 = 2) {
   return useQuery({
     queryKey: ["sefaz_status", ambiente],
     queryFn: async () => {
-      const { data, error } = await (supabase.from as any)("sefaz_status_uf")
+      const { data, error } = await supabase.from("sefaz_status_uf")
         .select("*").eq("environment", ambiente)
         .order("uf");
       if (error) throw error;
