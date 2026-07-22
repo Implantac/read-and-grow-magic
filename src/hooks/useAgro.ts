@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert } from '@/integrations/supabase/types';
 import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { toastSuccess, handleMutationError } from '@/lib/toastHelpers';
 
@@ -62,7 +63,7 @@ export function useAgroFarms() {
     enabled: !!companyId,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('agro_farms' as any)
+        .from('agro_farms')
         .select('*')
         .order('code');
       if (error) throw error;
@@ -76,8 +77,8 @@ export function useCreateAgroFarm() {
   return useMutation({
     mutationFn: async (input: any) => {
       const { data, error } = await supabase
-        .from('agro_farms' as any)
-        .insert(input as any)
+        .from('agro_farms')
+        .insert(input as TablesInsert<'agro_farms'>)
         .select()
         .single();
       if (error) throw error;
@@ -95,7 +96,7 @@ export function useDeleteAgroFarm() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('agro_farms' as any).delete().eq('id', id);
+      const { error } = await supabase.from('agro_farms').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -112,7 +113,7 @@ export function useAgroFields(farmId?: string) {
     enabled: !!farmId,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('agro_fields' as any)
+        .from('agro_fields')
         .select('*')
         .eq('farm_id', farmId!)
         .order('code');
@@ -127,8 +128,8 @@ export function useCreateAgroField() {
   return useMutation({
     mutationFn: async (input: any) => {
       const { data, error } = await supabase
-        .from('agro_fields' as any)
-        .insert(input as any)
+        .from('agro_fields')
+        .insert(input as TablesInsert<'agro_fields'>)
         .select()
         .single();
       if (error) throw error;
@@ -148,7 +149,7 @@ export function useAgroSeasons(fieldId?: string) {
     enabled: !!fieldId,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('agro_seasons' as any)
+        .from('agro_seasons')
         .select('*')
         .eq('field_id', fieldId!)
         .order('planting_date', { ascending: false });
@@ -163,8 +164,8 @@ export function useCreateAgroSeason() {
   return useMutation({
     mutationFn: async (input: any) => {
       const { data, error } = await supabase
-        .from('agro_seasons' as any)
-        .insert(input as any)
+        .from('agro_seasons')
+        .insert(input as TablesInsert<'agro_seasons'>)
         .select()
         .single();
       if (error) throw error;
@@ -184,7 +185,7 @@ export function useAgroHarvests(seasonId?: string) {
     enabled: !!seasonId,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('agro_harvests' as any)
+        .from('agro_harvests')
         .select('*')
         .eq('season_id', seasonId!)
         .order('harvest_date', { ascending: false });
@@ -199,8 +200,8 @@ export function useCreateAgroHarvest() {
   return useMutation({
     mutationFn: async (input: any) => {
       const { data, error } = await supabase
-        .from('agro_harvests' as any)
-        .insert(input as any)
+        .from('agro_harvests')
+        .insert(input as TablesInsert<'agro_harvests'>)
         .select()
         .single();
       if (error) throw error;

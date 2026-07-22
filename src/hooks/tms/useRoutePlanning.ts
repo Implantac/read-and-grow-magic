@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
-import type { Database } from '@/integrations/supabase/types';
+import type { Database, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 export type RouteStop = Database['public']['Tables']['route_stops']['Row'];
 export type RouteStopInsert = Database['public']['Tables']['route_stops']['Insert'];
@@ -70,8 +70,7 @@ export function useUpdateRouteStop() {
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: RouteStopUpdate }) => {
       const { data, error } = await supabase
-        .from('route_stops')
-        .update(updates as any)
+        .from('route_stops').update(updates as TablesUpdate<'route_stops'>)
         .eq('id', id)
         .select()
         .single();

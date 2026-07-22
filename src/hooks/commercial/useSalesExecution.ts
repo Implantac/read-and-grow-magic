@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { useMemo } from 'react';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
@@ -37,7 +38,7 @@ export function useCreateContactLog() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (log: any) => {
-      const { data, error } = await supabase.from('sales_contact_logs').insert(log as any).select().single();
+      const { data, error } = await supabase.from('sales_contact_logs').insert(log as TablesInsert<'sales_contact_logs'>).select().single();
       if (error) throw error;
       return data;
     },

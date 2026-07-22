@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
 export interface ConstructionProject {
@@ -41,7 +42,7 @@ export function useCreateConstructionProject() {
     mutationFn: async (payload: any) => {
       const { data, error } = await supabase
         .from('construction_projects')
-        .insert(payload as any)
+        .insert(payload as TablesInsert<'construction_projects'>)
         .select()
         .single();
       if (error) throw error;
@@ -60,8 +61,7 @@ export function useUpdateConstructionProject() {
   return useMutation({
     mutationFn: async ({ id, ...patch }: any & { id: string }) => {
       const { error } = await supabase
-        .from('construction_projects')
-        .update(patch as any)
+        .from('construction_projects').update(patch as TablesUpdate<'construction_projects'>)
         .eq('id', id);
       if (error) throw error;
     },

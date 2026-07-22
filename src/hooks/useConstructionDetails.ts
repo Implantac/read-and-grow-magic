@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
 export interface BudgetItem {
@@ -139,8 +140,7 @@ export function useUpdateMeasurement(projectId: string) {
   return useMutation({
     mutationFn: async ({ id, ...patch }: any & { id: string }) => {
       const { error } = await supabase
-        .from('construction_measurements')
-        .update(patch as any)
+        .from('construction_measurements').update(patch as TablesUpdate<'construction_measurements'>)
         .eq('id', id);
       if (error) throw error;
     },
