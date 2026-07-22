@@ -106,7 +106,7 @@ export function usePaymentSplits(settlementId?: string) {
     queryKey: ['financial_payment_split', settlementId],
     enabled: !!settlementId,
     queryFn: async () => {
-      const { data, error } = await (supabase.from as any)('financial_payment_split')
+      const { data, error } = await supabase.from('financial_payment_split')
         .select('*')
         .eq('settlement_id', settlementId!)
         .order('created_at');

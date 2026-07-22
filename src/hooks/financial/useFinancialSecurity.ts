@@ -53,7 +53,7 @@ export function useRiskProfiles(level?: string) {
   return useQuery({
     queryKey: ['financial_risk_profiles', level],
     queryFn: async () => {
-      let q = supabase.from('financial_risk_profiles' as any).select('*').order('risk_score', { ascending: false }).limit(100);
+      let q = supabase.from('financial_risk_profiles').select('*').order('risk_score', { ascending: false }).limit(100);
       if (level) q = q.eq('risk_level', level);
       const { data, error } = await q;
       if (error) throw error;
@@ -66,7 +66,7 @@ export function useSecurityLogs(filters?: { resolved?: boolean; severity?: strin
   return useQuery({
     queryKey: ['financial_security_logs', filters],
     queryFn: async () => {
-      let q = supabase.from('financial_security_logs' as any).select('*').order('created_at', { ascending: false }).limit(200);
+      let q = supabase.from('financial_security_logs').select('*').order('created_at', { ascending: false }).limit(200);
       if (filters?.resolved !== undefined) q = q.eq('resolved', filters.resolved);
       if (filters?.severity) q = q.eq('severity', filters.severity);
       const { data, error } = await q;
@@ -81,7 +81,7 @@ export function useFraudRules() {
   return useQuery({
     queryKey: ['financial_fraud_rules'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('financial_fraud_rules' as any).select('*').order('rule_key');
+      const { data, error } = await supabase.from('financial_fraud_rules').select('*').order('rule_key');
       if (error) throw error;
       return (data ?? []) as unknown as FraudRule[];
     },
@@ -92,7 +92,7 @@ export function useUpdateFraudRule() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...patch }: any & { id: string }) => {
-      const { error } = await supabase.from('financial_fraud_rules' as any).update(patch as any).eq('id', id);
+      const { error } = await supabase.from('financial_fraud_rules').update(patch as any).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -107,7 +107,7 @@ export function useResolveSecurityLog() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('financial_security_logs' as any)
+      const { error } = await supabase.from('financial_security_logs')
         .update({ resolved: true, resolved_at: new Date().toISOString() }).eq('id', id);
       if (error) throw error;
     },

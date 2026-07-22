@@ -39,7 +39,7 @@ export function useFinancialBoletos(filters?: { status?: string }) {
   return useQuery({
     queryKey: ['financial_boletos', filters],
     queryFn: async () => {
-      let q = supabase.from('financial_boletos' as any).select('*').order('due_date', { ascending: true });
+      let q = supabase.from('financial_boletos').select('*').order('due_date', { ascending: true });
       if (filters?.status && filters.status !== 'all') q = q.eq('status', filters.status);
       const { data, error } = await q.limit(500);
       if (error) throw error;
@@ -53,7 +53,7 @@ export function useCreateBoleto() {
   return useMutation({
     mutationFn: async (input: { receivable_id?: string; client_id?: string; client_name?: string; amount: number; due_date: string; bank_account_id?: string; notes?: string }) => {
       const fake = mockBoleto(input.amount);
-      const { data, error } = await supabase.from('financial_boletos' as any).insert({
+      const { data, error } = await supabase.from('financial_boletos').insert({
         ...input,
         ...fake,
         provider: 'mock',
@@ -74,7 +74,7 @@ export function useCancelBoleto() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('financial_boletos' as any).update({ status: 'cancelled' }).eq('id', id);
+      const { error } = await supabase.from('financial_boletos').update({ status: 'cancelled' }).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -91,7 +91,7 @@ export function useMarkBoletoPaid() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (params: { id: string; bank_account_id?: string }) => {
-      const { data: bol, error: e1 } = await supabase.from('financial_boletos' as any).select('*').eq('id', params.id).single();
+      const { data: bol, error: e1 } = await supabase.from('financial_boletos').select('*').eq('id', params.id).single();
       if (e1) throw e1;
       const boleto = bol as any;
       if (boleto.receivable_id) {
@@ -109,7 +109,7 @@ export function useMarkBoletoPaid() {
         });
         if (e2) throw e2;
       }
-      const { error: e3 } = await supabase.from('financial_boletos' as any).update({
+      const { error: e3 } = await supabase.from('financial_boletos').update({
         status: 'paid', paid_at: new Date().toISOString(), paid_amount: boleto.amount,
       }).eq('id', params.id);
       if (e3) throw e3;

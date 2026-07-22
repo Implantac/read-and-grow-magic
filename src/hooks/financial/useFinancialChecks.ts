@@ -33,7 +33,7 @@ export function useFinancialChecks(filters?: { status?: string; type?: string })
   return useQuery({
     queryKey: ['financial_checks', filters],
     queryFn: async () => {
-      let q = supabase.from('financial_checks' as any).select('*').order('due_date', { ascending: true });
+      let q = supabase.from('financial_checks').select('*').order('due_date', { ascending: true });
       if (filters?.status && filters.status !== 'all') q = q.eq('status', filters.status);
       if (filters?.type && filters.type !== 'all') q = q.eq('check_type', filters.type);
       const { data, error } = await q.limit(500);
@@ -47,7 +47,7 @@ export function useCreateCheck() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (input: any & { check_type: 'received' | 'issued'; check_number: string; amount: number }) => {
-      const { data, error } = await supabase.from('financial_checks' as any).insert(input as any).select().single();
+      const { data, error } = await supabase.from('financial_checks').insert(input as any).select().single();
       if (error) throw error;
       return data;
     },
@@ -65,7 +65,7 @@ export function useUpdateCheckStatus() {
     mutationFn: async ({ id, status, deposit_date }: { id: string; status: CheckStatus; deposit_date?: string }) => {
       const updates: any = { status };
       if (deposit_date) updates.deposit_date = deposit_date;
-      const { data, error } = await supabase.from('financial_checks' as any).update(updates as any).eq('id', id).select().single();
+      const { data, error } = await supabase.from('financial_checks').update(updates as any).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },
@@ -106,7 +106,7 @@ export function useDeleteCheck() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('financial_checks' as any).delete().eq('id', id);
+      const { error } = await supabase.from('financial_checks').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {

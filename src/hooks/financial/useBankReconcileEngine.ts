@@ -19,7 +19,7 @@ export function useBankReconcileEngine() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await (supabase.from as any)('bank_match_suggestions')
+    const { data, error } = await supabase.from('bank_match_suggestions')
       .select('*')
       .eq('status', 'pending')
       .order('score', { ascending: false })

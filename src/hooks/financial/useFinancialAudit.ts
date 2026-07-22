@@ -23,7 +23,7 @@ export function useFinancialAuditLogs() {
     queryKey: ['financial_audit_logs'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('financial_audit_logs' as any)
+        .from('financial_audit_logs')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(200);
@@ -59,7 +59,7 @@ export function useResolveAuditLog() {
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('financial_audit_logs' as any)
+        .from('financial_audit_logs')
         .update({ status: 'resolved', resolved_at: new Date().toISOString() })
         .eq('id', id);
       if (error) throw error;

@@ -72,7 +72,7 @@ export function useImportBankStatement() {
       if (!bankAccountId) throw new Error('Selecione uma conta bancária');
       // 1) Importação em lote (idempotente via RPC)
       const { data: importData, error: impErr } = await supabase.rpc(
-        'import_bank_statement_batch' as any,
+        'import_bank_statement_batch',
         {
           p_bank_account_id: bankAccountId,
           p_transactions: txs.map(t => ({
@@ -92,7 +92,7 @@ export function useImportBankStatement() {
 
       // 2) Match automático (ledger ↔ bank_transactions)
       const { data: matchData, error: matchErr } = await supabase.rpc(
-        'auto_match_bank_transactions' as any,
+        'auto_match_bank_transactions',
         { p_bank_account_id: bankAccountId, p_tolerance_days: 3 }
       );
       if (matchErr) throw matchErr;
@@ -116,7 +116,7 @@ export function useAutoMatch() {
   return useMutation({
     mutationFn: async (bankAccountId?: string) => {
       const { data, error } = await supabase.rpc(
-        'auto_match_bank_transactions' as any,
+        'auto_match_bank_transactions',
         { p_bank_account_id: bankAccountId ?? null, p_tolerance_days: 3 }
       );
       if (error) throw error;
