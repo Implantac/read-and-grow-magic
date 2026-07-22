@@ -37,7 +37,7 @@ export function useLatestHealthScore() {
     queryKey: ['financial_health_score'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('financial_health_scores' as any).select('*')
+        .from('financial_health_scores').select('*')
         .order('reference_date', { ascending: false }).limit(1).maybeSingle();
       if (error) throw error;
       return data as unknown as FinancialHealthScore | null;
@@ -50,7 +50,7 @@ export function usePredictiveAlerts() {
     queryKey: ['financial_predictive_alerts'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('financial_predictive_alerts' as any).select('*')
+        .from('financial_predictive_alerts').select('*')
         .eq('status', 'active').order('severity', { ascending: false }).limit(50);
       if (error) throw error;
       return (data ?? []) as unknown as PredictiveAlert[];

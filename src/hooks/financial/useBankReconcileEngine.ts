@@ -19,7 +19,7 @@ export function useBankReconcileEngine() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await (supabase.from as any)('bank_match_suggestions')
+    const { data, error } = await supabase.from('bank_match_suggestions')
       .select('*')
       .eq('status', 'pending')
       .order('score', { ascending: false })
@@ -38,7 +38,7 @@ export function useBankReconcileEngine() {
         p_bank_account_id: bankAccountId ?? null,
       });
       if (error) throw error;
-      const r = (data as any) || {};
+      const r = (data ?? {}) as { scanned?: number; auto_reconciled?: number; suggestions?: number };
       toast.success('Conciliação automática executada', {
         description: `${r.scanned ?? 0} varridas • ${r.auto_reconciled ?? 0} auto-conciliadas • ${r.suggestions ?? 0} sugestões`,
       });

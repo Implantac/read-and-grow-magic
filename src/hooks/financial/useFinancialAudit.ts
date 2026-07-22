@@ -23,7 +23,7 @@ export function useFinancialAuditLogs() {
     queryKey: ['financial_audit_logs'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('financial_audit_logs' as any)
+        .from('financial_audit_logs')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(200);
@@ -37,15 +37,14 @@ export function useFinancialAuditLogs() {
 export function useRunFinancialAudit() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (mode: 'light' | 'full' = 'light') => {
+    mutationFn: async (_mode: 'light' | 'full' = 'light') => {
       const { data, error } = await supabase.functions.invoke('financial-audit', {
         body: null,
-        method: 'POST' as any,
       });
       if (error) throw error;
       return data;
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: { result?: { issues_open?: number; auto_fixed?: number } } | null) => {
       qc.invalidateQueries({ queryKey: ['financial_audit_logs'] });
       const r = data?.result;
       toastSuccess('Auditoria executada', `${r?.issues_open ?? 0} problemas abertos · ${r?.auto_fixed ?? 0} auto-corrigidos`);
@@ -59,7 +58,7 @@ export function useResolveAuditLog() {
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('financial_audit_logs' as any)
+        .from('financial_audit_logs')
         .update({ status: 'resolved', resolved_at: new Date().toISOString() })
         .eq('id', id);
       if (error) throw error;

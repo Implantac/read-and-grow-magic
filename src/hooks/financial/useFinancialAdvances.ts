@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export interface FinancialAdvanceRow {
@@ -23,7 +24,7 @@ export function useFinancialAdvances(partyType?: 'client' | 'supplier') {
   return useQuery({
     queryKey: ['financial_advances', partyType],
     queryFn: async () => {
-      let q = (supabase.from as any)('financial_advances').select('*').order('received_date', { ascending: false });
+      let q = supabase.from('financial_advances').select('*').order('received_date', { ascending: false });
       if (partyType) q = q.eq('party_type', partyType);
       const { data, error } = await q;
       if (error) throw error;
@@ -34,13 +35,15 @@ export function useFinancialAdvances(partyType?: 'client' | 'supplier') {
 
 export function useCreateAdvance() {
   const qc = useQueryClient();
+  const companyId = useEnterpriseStore((s) => s.activeCompanyId);
   return useMutation({
     mutationFn: async (adv: Omit<FinancialAdvanceRow, 'id' | 'created_at' | 'used_amount' | 'remaining_amount' | 'status'>) => {
-      const { data, error } = await (supabase.from as any)('financial_advances').insert(adv).select().single();
+      if (!companyId) throw new Error('Empresa não selecionada');
+      const { data, error } = await supabase.from('financial_advances').insert({ ...adv, company_id: companyId }).select().single();
       if (error) throw error;
       // Lança no ledger
       if (data && adv.bank_account_id) {
-        await (supabase.from as any)('financial_ledger').insert({
+        await supabase.from('financial_ledger').insert({
           entry_date: adv.received_date,
           type: adv.party_type === 'client' ? 'inflow' : 'outflow',
           amount: adv.amount,
@@ -49,6 +52,7 @@ export function useCreateAdvance() {
           source: 'advance',
           source_id: data.id,
           payment_method: adv.payment_method,
+          company_id: companyId,
         });
       }
       return data;

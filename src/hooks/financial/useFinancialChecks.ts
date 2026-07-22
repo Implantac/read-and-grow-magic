@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import type { CheckStatus } from '@/types/financial';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
@@ -33,7 +35,7 @@ export function useFinancialChecks(filters?: { status?: string; type?: string })
   return useQuery({
     queryKey: ['financial_checks', filters],
     queryFn: async () => {
-      let q = supabase.from('financial_checks' as any).select('*').order('due_date', { ascending: true });
+      let q = supabase.from('financial_checks').select('*').order('due_date', { ascending: true });
       if (filters?.status && filters.status !== 'all') q = q.eq('status', filters.status);
       if (filters?.type && filters.type !== 'all') q = q.eq('check_type', filters.type);
       const { data, error } = await q.limit(500);
@@ -45,9 +47,11 @@ export function useFinancialChecks(filters?: { status?: string; type?: string })
 
 export function useCreateCheck() {
   const qc = useQueryClient();
+  const companyId = useEnterpriseStore((s) => s.activeCompanyId);
   return useMutation({
-    mutationFn: async (input: any & { check_type: 'received' | 'issued'; check_number: string; amount: number }) => {
-      const { data, error } = await supabase.from('financial_checks' as any).insert(input as any).select().single();
+    mutationFn: async (input: Omit<TablesInsert<'financial_checks'>, 'company_id'>) => {
+      if (!companyId) throw new Error('Empresa não selecionada');
+      const { data, error } = await supabase.from('financial_checks').insert({ ...input, company_id: companyId }).select().single();
       if (error) throw error;
       return data;
     },
@@ -63,9 +67,9 @@ export function useUpdateCheckStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status, deposit_date }: { id: string; status: CheckStatus; deposit_date?: string }) => {
-      const updates: any = { status };
+      const updates: TablesUpdate<'financial_checks'> = { status };
       if (deposit_date) updates.deposit_date = deposit_date;
-      const { data, error } = await supabase.from('financial_checks' as any).update(updates as any).eq('id', id).select().single();
+      const { data, error } = await supabase.from('financial_checks').update(updates).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },
@@ -106,7 +110,7 @@ export function useDeleteCheck() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('financial_checks' as any).delete().eq('id', id);
+      const { error } = await supabase.from('financial_checks').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
