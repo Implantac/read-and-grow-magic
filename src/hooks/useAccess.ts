@@ -27,7 +27,10 @@ export interface UseAccessInput {
   resource?: string;
   action?: string;
   role?: string;
+  /** Any-of roles: allowed if user has at least one. */
+  roles?: string[];
 }
+
 
 export type AccessDenyReason =
   | null
