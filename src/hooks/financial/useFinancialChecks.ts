@@ -67,9 +67,9 @@ export function useUpdateCheckStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status, deposit_date }: { id: string; status: CheckStatus; deposit_date?: string }) => {
-      const updates: any = { status };
+      const updates: TablesUpdate<'financial_checks'> = { status };
       if (deposit_date) updates.deposit_date = deposit_date;
-      const { data, error } = await supabase.from('financial_checks').update(updates as any).eq('id', id).select().single();
+      const { data, error } = await supabase.from('financial_checks').update(updates).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },
