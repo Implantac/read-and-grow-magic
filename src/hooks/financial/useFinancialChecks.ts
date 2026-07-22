@@ -47,9 +47,11 @@ export function useFinancialChecks(filters?: { status?: string; type?: string })
 
 export function useCreateCheck() {
   const qc = useQueryClient();
+  const companyId = useEnterpriseStore((s) => s.activeCompanyId);
   return useMutation({
-    mutationFn: async (input: any & { check_type: 'received' | 'issued'; check_number: string; amount: number }) => {
-      const { data, error } = await supabase.from('financial_checks').insert(input as any).select().single();
+    mutationFn: async (input: Omit<TablesInsert<'financial_checks'>, 'company_id'>) => {
+      if (!companyId) throw new Error('Empresa não selecionada');
+      const { data, error } = await supabase.from('financial_checks').insert({ ...input, company_id: companyId }).select().single();
       if (error) throw error;
       return data;
     },
