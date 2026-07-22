@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
 export interface ProductionSector {
@@ -29,7 +30,7 @@ export function useProductionSectors() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const create = async (item: Partial<ProductionSector>) => {
-    const { error } = await supabase.from('production_sectors').insert(item as any);
+    const { error } = await supabase.from('production_sectors').insert(item as TablesInsert<'production_sectors'>);
     if (error) { toast.error('Erro ao criar setor'); return false; }
     toast.success('Setor cadastrado');
     await fetch();
@@ -37,7 +38,7 @@ export function useProductionSectors() {
   };
 
   const update = async (id: string, updates: Partial<ProductionSector>) => {
-    const { error } = await supabase.from('production_sectors').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
+    const { error } = await supabase.from('production_sectors').update({ ...updates, updated_at: new Date().toISOString() } as TablesUpdate<'production_sectors'>).eq('id', id);
     if (error) { toast.error('Erro ao atualizar setor'); return false; }
     toast.success('Setor atualizado');
     await fetch();

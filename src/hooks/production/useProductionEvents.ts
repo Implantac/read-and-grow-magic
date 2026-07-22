@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 export interface ProductionEvent {
   id: string;
@@ -47,7 +48,7 @@ export function useProductionEvents(limit = 50) {
   }, [limit]);
 
   const emitEvent = useCallback(async (event: Partial<ProductionEvent>) => {
-    const { error } = await supabase.from('production_events').insert(event as any);
+    const { error } = await supabase.from('production_events').insert(event as TablesInsert<'production_events'>);
     if (error) console.error('Error emitting event:', error);
   }, []);
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
 export interface IndustrialAlert {
@@ -34,7 +35,7 @@ export function useIndustrialAlerts() {
   useEffect(() => { fetchAlerts(); }, [fetchAlerts]);
 
   const createAlert = async (alert: Partial<IndustrialAlert>) => {
-    const { error } = await supabase.from('industrial_alerts').insert(alert as any);
+    const { error } = await supabase.from('industrial_alerts').insert(alert as TablesInsert<'industrial_alerts'>);
     if (error) return false;
     await fetchAlerts();
     return true;
@@ -43,7 +44,7 @@ export function useIndustrialAlerts() {
   const resolveAlert = async (id: string) => {
     const { error } = await supabase.from('industrial_alerts').update({
       status: 'resolved', resolved_at: new Date().toISOString(),
-    } as any).eq('id', id);
+    } as TablesUpdate<'industrial_alerts'>).eq('id', id);
     if (error) { toast.error('Erro ao resolver alerta'); return; }
     toast.success('Alerta resolvido');
     await fetchAlerts();

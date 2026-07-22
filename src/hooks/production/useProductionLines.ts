@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
 export interface ProductionLine {
@@ -36,7 +37,7 @@ export function useProductionLines() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const create = async (item: Partial<ProductionLine>) => {
-    const { error } = await supabase.from('production_lines').insert(item as any);
+    const { error } = await supabase.from('production_lines').insert(item as TablesInsert<'production_lines'>);
     if (error) { toast.error('Erro ao criar linha'); return false; }
     toast.success('Linha cadastrada');
     await fetch();
@@ -44,7 +45,7 @@ export function useProductionLines() {
   };
 
   const update = async (id: string, updates: Partial<ProductionLine>) => {
-    const { error } = await supabase.from('production_lines').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
+    const { error } = await supabase.from('production_lines').update({ ...updates, updated_at: new Date().toISOString() } as TablesUpdate<'production_lines'>).eq('id', id);
     if (error) { toast.error('Erro ao atualizar linha'); return false; }
     toast.success('Linha atualizada');
     await fetch();

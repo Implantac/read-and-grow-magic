@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
 export interface TechnicalSheetRow {
@@ -25,14 +26,14 @@ export function useTechnicalSheets() {
     setLoading(true);
     const { data, error } = await supabase.from('product_technical_sheets').select('*').order('product_name');
     if (error) { console.error(error); toast.error('Erro ao carregar fichas técnicas'); }
-    else setSheets((data || []) as any);
+    else setSheets((data || []) as unknown as TechnicalSheetRow[]);
     setLoading(false);
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const create = async (item: Partial<TechnicalSheetRow>) => {
-    const { error } = await supabase.from('product_technical_sheets').insert(item as any);
+    const { error } = await supabase.from('product_technical_sheets').insert(item as TablesInsert<'product_technical_sheets'>);
     if (error) { toast.error('Erro ao criar ficha técnica'); return false; }
     toast.success('Ficha técnica criada');
     await fetchData();
@@ -40,7 +41,7 @@ export function useTechnicalSheets() {
   };
 
   const update = async (id: string, updates: Partial<TechnicalSheetRow>) => {
-    const { error } = await supabase.from('product_technical_sheets').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
+    const { error } = await supabase.from('product_technical_sheets').update({ ...updates, updated_at: new Date().toISOString() } as TablesUpdate<'product_technical_sheets'>).eq('id', id);
     if (error) { toast.error('Erro ao atualizar'); return; }
     toast.success('Ficha atualizada');
     await fetchData();

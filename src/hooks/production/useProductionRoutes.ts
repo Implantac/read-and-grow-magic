@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
 export interface ProductionRouteStep {
@@ -50,7 +51,7 @@ export function useProductionRoutes() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const create = async (item: Partial<ProductionRouteRow>) => {
-    const { error } = await supabase.from('production_routes').insert(item as any);
+    const { error } = await supabase.from('production_routes').insert(item as TablesInsert<'production_routes'>);
     if (error) { toast.error('Erro ao criar rota'); return false; }
     toast.success('Rota cadastrada');
     await fetch();
@@ -58,7 +59,7 @@ export function useProductionRoutes() {
   };
 
   const update = async (id: string, updates: Partial<ProductionRouteRow>) => {
-    const { error } = await supabase.from('production_routes').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
+    const { error } = await supabase.from('production_routes').update({ ...updates, updated_at: new Date().toISOString() } as TablesUpdate<'production_routes'>).eq('id', id);
     if (error) { toast.error('Erro ao atualizar rota'); return false; }
     toast.success('Rota atualizada');
     await fetch();
@@ -101,7 +102,7 @@ export function useProductionRouteSteps(routeId?: string) {
   useEffect(() => { fetch(); }, [fetch]);
 
   const addStep = async (step: Partial<ProductionRouteStep>) => {
-    const { error } = await supabase.from('production_route_steps').insert({ ...step, route_id: routeId } as any);
+    const { error } = await supabase.from('production_route_steps').insert({ ...step, route_id: routeId } as TablesInsert<'production_route_steps'>);
     if (error) { toast.error('Erro ao adicionar etapa'); return false; }
     toast.success('Etapa adicionada');
     await fetch();
@@ -111,7 +112,7 @@ export function useProductionRouteSteps(routeId?: string) {
   };
 
   const updateStep = async (id: string, updates: Partial<ProductionRouteStep>) => {
-    const { error } = await supabase.from('production_route_steps').update(updates as any).eq('id', id);
+    const { error } = await supabase.from('production_route_steps').update(updates as TablesUpdate<'production_route_steps'>).eq('id', id);
     if (error) { toast.error('Erro ao atualizar etapa'); return; }
     await fetch();
     await recalcTotalTime();
@@ -129,7 +130,7 @@ export function useProductionRouteSteps(routeId?: string) {
     if (!routeId) return;
     const { data } = await supabase.from('production_route_steps').select('setup_time_minutes, operation_time_minutes').eq('route_id', routeId);
     const total = (data || []).reduce((s: number, r: any) => s + (r.setup_time_minutes || 0) + (r.operation_time_minutes || 0), 0);
-    await supabase.from('production_routes').update({ total_time_minutes: total, updated_at: new Date().toISOString() } as any).eq('id', routeId);
+    await supabase.from('production_routes').update({ total_time_minutes: total, updated_at: new Date().toISOString() } as TablesUpdate<'production_routes'>).eq('id', routeId);
   };
 
   return { steps, loading, refetch: fetch, addStep, updateStep, removeStep };

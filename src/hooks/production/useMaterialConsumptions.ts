@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
 export interface MaterialConsumptionRow {
@@ -33,7 +34,7 @@ export function useMaterialConsumptions() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const update = async (id: string, updates: Partial<MaterialConsumptionRow>) => {
-    const { error } = await supabase.from('material_consumptions').update(updates as any).eq('id', id);
+    const { error } = await supabase.from('material_consumptions').update(updates as TablesUpdate<'material_consumptions'>).eq('id', id);
     if (error) { toast.error('Erro ao atualizar consumo'); return; }
     await fetch();
   };

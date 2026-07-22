@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
 export interface ProductionScheduleRow {
@@ -34,14 +35,14 @@ export function useProductionSchedule() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const create = async (schedule: Partial<ProductionScheduleRow>) => {
-    const { error } = await supabase.from('production_schedule').insert(schedule as any);
+    const { error } = await supabase.from('production_schedule').insert(schedule as TablesInsert<'production_schedule'>);
     if (error) { toast.error('Erro ao criar agendamento'); return; }
     toast.success('Agendamento criado');
     await fetchData();
   };
 
   const update = async (id: string, updates: Partial<ProductionScheduleRow>) => {
-    const { error } = await supabase.from('production_schedule').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
+    const { error } = await supabase.from('production_schedule').update({ ...updates, updated_at: new Date().toISOString() } as TablesUpdate<'production_schedule'>).eq('id', id);
     if (error) { toast.error('Erro ao atualizar agendamento'); return; }
     await fetchData();
   };

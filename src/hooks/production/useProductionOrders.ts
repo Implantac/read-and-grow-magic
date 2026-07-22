@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
 export interface ProductionOrderRow {
@@ -58,7 +59,7 @@ export function useProductionOrders() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const update = async (id: string, updates: Partial<ProductionOrderRow>) => {
-    const { error } = await supabase.from('production_orders').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
+    const { error } = await supabase.from('production_orders').update({ ...updates, updated_at: new Date().toISOString() } as TablesUpdate<'production_orders'>).eq('id', id);
     if (error) { toast.error('Erro ao atualizar ordem'); return; }
     toast.success('Ordem atualizada');
     await fetch();

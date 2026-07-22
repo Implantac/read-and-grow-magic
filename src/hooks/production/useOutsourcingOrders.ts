@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
 export interface OutsourcingOrderRow {
@@ -45,7 +46,7 @@ export function useOutsourcingOrders() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const create = async (order: Partial<OutsourcingOrderRow>) => {
-    const { error } = await supabase.from('outsourcing_orders').insert(order as any);
+    const { error } = await supabase.from('outsourcing_orders').insert(order as TablesInsert<'outsourcing_orders'>);
     if (error) { toast.error('Erro ao criar ordem de terceirização'); return false; }
     toast.success('Ordem de terceirização criada');
     await fetchData();
@@ -54,8 +55,7 @@ export function useOutsourcingOrders() {
 
   const update = async (id: string, updates: Partial<OutsourcingOrderRow>) => {
     const { error } = await supabase
-      .from('outsourcing_orders')
-      .update({ ...updates, updated_at: new Date().toISOString() } as any)
+      .from('outsourcing_orders').update({ ...updates, updated_at: new Date().toISOString() } as TablesUpdate<'outsourcing_orders'>)
       .eq('id', id);
     if (error) { toast.error('Erro ao atualizar'); return false; }
     toast.success('Ordem atualizada');
