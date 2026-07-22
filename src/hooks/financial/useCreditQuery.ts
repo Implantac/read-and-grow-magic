@@ -27,9 +27,9 @@ export function useCredit() {
   });
 
   return {
-    analyses: (analysesQuery.data || []) as any[],
+    analyses: analysesQuery.data ?? [],
     analysesLoading: analysesQuery.isLoading,
-    blocks: (blocksQuery.data || []) as any[],
+    blocks: blocksQuery.data ?? [],
     blocksLoading: blocksQuery.isLoading,
     
     updateAnalysis: updateAnalysisMutation.mutateAsync,
