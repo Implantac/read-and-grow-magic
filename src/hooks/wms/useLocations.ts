@@ -106,7 +106,7 @@ export function useLocations() {
       is_bulk_zone: payload.is_bulk_zone ?? false,
       temperature_range: payload.temperature_range || null,
       priority: payload.priority ?? 1,
-    } as any);
+    });
     if (error) return toast.error(error.message);
     toast.success('Zona criada');
     fetchAll();
