@@ -85,7 +85,7 @@ export function useLocations() {
       type: payload.type || null,
       manager: payload.manager || null,
       address: payload.address || null,
-    } as any);
+    });
     if (error) return toast.error(error.message);
     toast.success('Armazém criado');
     fetchAll();
