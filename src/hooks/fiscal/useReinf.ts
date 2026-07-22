@@ -72,12 +72,12 @@ export function useReinf() {
   const call = async (fn: 'reinf_open_period' | 'reinf_generate_r2010' | 'reinf_generate_r2020' | 'reinf_generate_r4020' | 'reinf_close_period', label: string) => {
     setBusy(true);
     try {
-      const { data, error } = await supabase.rpc(fn as any, { p_competencia: competencia });
+      const { data, error } = await supabase.rpc(fn, { p_competencia: competencia });
       if (error) throw error;
       toast.success(`${label} concluído`, { description: typeof data === 'number' ? `${data} evento(s)` : undefined });
       await load();
-    } catch (err: any) {
-      toast.error(`Falha em ${label}`, { description: err.message });
+    } catch (err) {
+      toast.error(`Falha em ${label}`, { description: (err as Error).message });
     } finally {
       setBusy(false);
     }
