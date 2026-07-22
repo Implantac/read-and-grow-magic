@@ -336,7 +336,7 @@ export function useDeleteOrder() {
 
               const { order_items, ...orderData } = deletedOrder;
               
-              const { data: restored, error: restError } = await supabase.from('orders').insert(orderData as any).select().single();
+              const { data: restored, error: restError } = await supabase.from('orders').insert(orderData as TablesInsert<'orders'>).select().single();
               if (restError) throw restError;
 
               if (order_items && order_items.length > 0) {
