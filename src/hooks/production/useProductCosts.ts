@@ -54,7 +54,7 @@ export function useProductCosts() {
     );
     const { error } = await supabase.from('product_costs').insert({
       ...cost, ...calc, last_calculated_at: new Date().toISOString(),
-    } as any);
+    } as TablesInsert<'product_costs'>);
     if (error) { toast.error('Erro ao criar custo'); return false; }
     toast.success('Custo cadastrado');
     await fetchCosts();
