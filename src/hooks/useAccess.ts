@@ -103,8 +103,8 @@ export function useAccess(input: UseAccessInput = {}): UseAccessResult {
 
   const loading =
     (permissionActive && permission.loading) ||
-    (!!role && roleQuery.isLoading) ||
-    (!!module && (moduleQuery.isLoading || (!!module && !companyId)));
+    (allRoles.length > 0 && roleQuery.isLoading) ||
+    (!!module && (moduleQuery.isLoading || !companyId));
 
   if (loading) return { allowed: false, loading: true, reason: 'loading' };
 
@@ -115,8 +115,9 @@ export function useAccess(input: UseAccessInput = {}): UseAccessResult {
   }
   if (permissionActive && !permission.allowed)
     return { allowed: false, loading: false, reason: 'no-permission' };
-  if (role && !roleQuery.data)
+  if (allRoles.length > 0 && !roleQuery.data)
     return { allowed: false, loading: false, reason: 'no-role' };
 
   return { allowed: true, loading: false, reason: null };
 }
+
