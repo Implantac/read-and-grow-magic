@@ -1,27 +1,19 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { formatBRL } from '@/lib/formatters';
 import {
-  Search, Plus, Minus, Trash2, ShoppingCart,
-  ChevronRight, Send, Keyboard, ScanLine,
-  Camera, CameraOff, Package, Lock, Unlock,
-  Percent, Loader2, AlertCircle,
-  Pause, Play, LayoutGrid, QrCode,
+  Trash2, ShoppingCart, ChevronRight, Send, Package, Lock, Unlock,
+  Loader2, AlertCircle, Pause, Play,
 } from 'lucide-react';
 import { Button } from '@/ui/base/button';
-import { Input } from '@/ui/base/input';
 import { Dialog, DialogContent } from '@/ui/base/dialog';
-import { Separator } from '@/ui/base/separator';
 import { Badge } from '@/ui/base/badge';
 import { useProducts, type DbProduct } from '@/hooks/inventory/useProducts';
 import { useClients, type DbClient, useUpdateClient } from '@/hooks/commercial/useClients';
-import { useActiveCategories, hashColor } from '@/hooks/inventory/useCategories';
-import { ScrollArea } from '@/ui/base/scroll-area';
-import { cn } from '@/lib/utils';
-import { toSafeNumber } from '@/lib/numericValidation';
+import { useActiveCategories } from '@/hooks/inventory/useCategories';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { openReceipt } from './pdvReceipt';
 import { PDVPixDialog } from './PDVPixDialog';
-import { PDVCloseSessionDialog, type CashCloseSummary } from './PDVCloseSessionDialog';
+import { PDVCloseSessionDialog } from './PDVCloseSessionDialog';
 import { PDVParkedDialog } from './PDVParkedDialog';
 import { loadParked, parkSale, removeParked, type ParkedSale } from './pdvParkedStorage';
 import { PDVCustomerCard } from './pdv/PDVCustomerCard';
@@ -31,15 +23,11 @@ import { PDVFinalizeConfirmDialog } from './pdv/PDVFinalizeConfirmDialog';
 import { PDVSessionBar } from './pdv/PDVSessionBar';
 import { PDVOpenSessionDialog, PDVCashMovementDialog } from './pdv/PDVCashDialogs';
 import { PDVCatalogPanel } from './pdv/PDVCatalogPanel';
+import { PDVCartLines } from './pdv/PDVCartLines';
+import { PDVTotalsCard } from './pdv/PDVTotalsCard';
+import { usePDVCashSession, logAudit } from './pdv/usePDVCashSession';
+import { useBarcodeCameraScanner } from './pdv/useBarcodeCameraScanner';
 import { onlyDigits, type CartItem, type SplitPayment } from './pdv/types';
-
-interface CashSession {
-  operatorName: string;
-  terminalId: string;
-  openedAt: string;
-  openingAmount: number;
-  movements: { type: 'sale' | 'sangria' | 'suprimento'; amount: number; at: string; note?: string }[];
-}
 
 interface PDVDialogProps {
   open: boolean;
@@ -60,16 +48,7 @@ interface PDVDialogProps {
 
 type InputMode = 'search' | 'scanner' | 'camera';
 
-const SESSION_KEY = 'pdv:session:v1';
-const AUDIT_KEY = 'pdv:audit:v1';
 
-const logAudit = (event: string, payload: Record<string, unknown> = {}) => {
-  try {
-    const arr = JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]');
-    arr.unshift({ event, at: new Date().toISOString(), ...payload });
-    localStorage.setItem(AUDIT_KEY, JSON.stringify(arr.slice(0, 500)));
-  } catch { /* noop */ }
-};
 
 export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDialogProps) {
   const productsQuery = useProducts();
