@@ -42,7 +42,7 @@ export function useCreateConstructionProject() {
     mutationFn: async (payload: any) => {
       const { data, error } = await supabase
         .from('construction_projects')
-        .insert(payload as any)
+        .insert(payload as TablesInsert<'construction_projects'>)
         .select()
         .single();
       if (error) throw error;

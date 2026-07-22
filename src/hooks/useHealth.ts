@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert } from '@/integrations/supabase/types';
 import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { toastSuccess, handleMutationError } from '@/lib/toastHelpers';
 
@@ -61,7 +62,7 @@ export function useHealthPatients() {
     enabled: !!companyId,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('health_patients' as any)
+        .from('health_patients')
         .select('*')
         .order('full_name');
       if (error) throw error;
@@ -75,8 +76,8 @@ export function useCreateHealthPatient() {
   return useMutation({
     mutationFn: async (input: any) => {
       const { data, error } = await supabase
-        .from('health_patients' as any)
-        .insert(input as any)
+        .from('health_patients')
+        .insert(input as TablesInsert<'health_patients'>)
         .select()
         .single();
       if (error) throw error;
@@ -94,7 +95,7 @@ export function useDeleteHealthPatient() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('health_patients' as any).delete().eq('id', id);
+      const { error } = await supabase.from('health_patients').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -113,7 +114,7 @@ export function useHealthProfessionals() {
     enabled: !!companyId,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('health_professionals' as any)
+        .from('health_professionals')
         .select('*')
         .order('full_name');
       if (error) throw error;
@@ -127,8 +128,8 @@ export function useCreateHealthProfessional() {
   return useMutation({
     mutationFn: async (input: any) => {
       const { data, error } = await supabase
-        .from('health_professionals' as any)
-        .insert(input as any)
+        .from('health_professionals')
+        .insert(input as TablesInsert<'health_professionals'>)
         .select()
         .single();
       if (error) throw error;
@@ -149,7 +150,7 @@ export function useHealthAppointments(patientId?: string) {
     queryKey: ['health_appointments', companyId, patientId ?? 'all'],
     enabled: !!companyId,
     queryFn: async () => {
-      let q = supabase.from('health_appointments' as any).select('*').order('scheduled_at', { ascending: false });
+      let q = supabase.from('health_appointments').select('*').order('scheduled_at', { ascending: false });
       if (patientId) q = q.eq('patient_id', patientId);
       const { data, error } = await q.limit(500);
       if (error) throw error;
@@ -163,8 +164,8 @@ export function useCreateHealthAppointment() {
   return useMutation({
     mutationFn: async (input: any) => {
       const { data, error } = await supabase
-        .from('health_appointments' as any)
-        .insert(input as any)
+        .from('health_appointments')
+        .insert(input as TablesInsert<'health_appointments'>)
         .select()
         .single();
       if (error) throw error;
@@ -183,7 +184,7 @@ export function useUpdateAppointmentStatus() {
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const { error } = await supabase
-        .from('health_appointments' as any)
+        .from('health_appointments')
         .update({ status })
         .eq('id', id);
       if (error) throw error;
@@ -203,7 +204,7 @@ export function useHealthRecords(patientId?: string) {
     enabled: !!patientId,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('health_records' as any)
+        .from('health_records')
         .select('*')
         .eq('patient_id', patientId!)
         .order('created_at', { ascending: false });
@@ -218,8 +219,8 @@ export function useCreateHealthRecord() {
   return useMutation({
     mutationFn: async (input: any) => {
       const { data, error } = await supabase
-        .from('health_records' as any)
-        .insert(input as any)
+        .from('health_records')
+        .insert(input as TablesInsert<'health_records'>)
         .select()
         .single();
       if (error) throw error;

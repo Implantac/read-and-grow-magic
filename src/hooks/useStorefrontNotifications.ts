@@ -23,7 +23,7 @@ export function useStorefrontNotifications(orderId?: string) {
     queryKey: ["commerce", "notifications", orderId ?? "all"],
     queryFn: async (): Promise<StorefrontNotification[]> => {
       let q = supabase
-        .from("storefront_notifications" as any)
+        .from("storefront_notifications")
         .select("*")
         .order("created_at", { ascending: false })
         .limit(200);
