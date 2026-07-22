@@ -90,16 +90,18 @@ export function useBillingStockReconcile(params: ReconcileParams) {
         map.set(k, cur);
       };
 
-      for (const doc of nfeR.data ?? []) {
-        for (const it of (doc as any).nfe_items ?? []) {
+      type DocItem = { product_id: string | null; product_code: string | null; product_name: string | null; quantity: number };
+      type DocRow = { branch_id: string | null; canal_operacional: string | null; nfe_items?: DocItem[]; nfce_items?: DocItem[] };
+      for (const doc of (nfeR.data ?? []) as DocRow[]) {
+        for (const it of doc.nfe_items ?? []) {
           if (!it.product_id) continue;
-          upsert(it.product_id, it.product_code, it.product_name, (doc as any).branch_id, (doc as any).canal_operacional, it.quantity, 'qty_faturado');
+          upsert(it.product_id, it.product_code, it.product_name, doc.branch_id, doc.canal_operacional, it.quantity, 'qty_faturado');
         }
       }
-      for (const doc of nfceR.data ?? []) {
-        for (const it of (doc as any).nfce_items ?? []) {
+      for (const doc of (nfceR.data ?? []) as DocRow[]) {
+        for (const it of doc.nfce_items ?? []) {
           if (!it.product_id) continue;
-          upsert(it.product_id, it.product_code, it.product_name, (doc as any).branch_id, (doc as any).canal_operacional, it.quantity, 'qty_faturado');
+          upsert(it.product_id, it.product_code, it.product_name, doc.branch_id, doc.canal_operacional, it.quantity, 'qty_faturado');
         }
       }
       for (const m of smR.data ?? []) {
