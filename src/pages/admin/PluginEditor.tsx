@@ -4,7 +4,7 @@ import { PageHeader } from "@/shared/components/PageHeader";
 import { Card, CardContent } from "@/ui/base/card";
 import { Code2 } from "lucide-react";
 
-import { RoleGuard } from "@/components/auth/RoleGuard";
+import { AccessGuard } from "@/components/auth/AccessGuard";
 import { PluginList } from "./plugin-editor/PluginList";
 import { PluginForm } from "./plugin-editor/PluginForm";
 import {
@@ -56,7 +56,7 @@ export default function PluginEditor() {
   };
 
   return (
-    <RoleGuard roles={["system_admin"]}>
+    <AccessGuard roles={["system_admin"]}>
       <PageContainer>
         <PageHeader
           title="Editor de Plugins"
@@ -99,6 +99,6 @@ export default function PluginEditor() {
           )}
         </div>
       </PageContainer>
-    </RoleGuard>
+    </AccessGuard>
   );
 }

@@ -1,6 +1,6 @@
 import { lazy } from 'react';
 import { Route } from 'react-router-dom';
-import { RoleGuard } from '@/components/auth/RoleGuard';
+import { AccessGuard } from '@/components/auth/AccessGuard';
 
 const UsersPage = lazy(() => import("../modules/admin/Users"));
 const CompaniesPage = lazy(() => import("../modules/admin/Companies"));
@@ -20,11 +20,11 @@ const CriticalAuditLogPage = lazy(() => import("../modules/admin/CriticalAuditLo
 
 
 const adminOnly = (el: JSX.Element) => (
-  <RoleGuard roles={["admin", "manager"]}>{el}</RoleGuard>
+  <AccessGuard roles={["admin", "manager"]}>{el}</AccessGuard>
 );
 
 const superOnly = (el: JSX.Element) => (
-  <RoleGuard roles={["admin", "system_admin"]}>{el}</RoleGuard>
+  <AccessGuard roles={["admin", "system_admin"]}>{el}</AccessGuard>
 );
 
 export const AdminRoutes = [

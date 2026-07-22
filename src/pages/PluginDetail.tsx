@@ -6,7 +6,7 @@ import { Button } from "@/ui/base/button";
 import { Skeleton } from "@/ui/base/skeleton";
 import { ArrowLeft, ExternalLink, Package } from "lucide-react";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { RoleGuard } from "@/components/auth/RoleGuard";
+import { AccessGuard } from "@/components/auth/AccessGuard";
 import {
   usePluginDetail,
   usePluginInstallations,
@@ -75,7 +75,7 @@ export default function PluginDetail() {
   }
 
   return (
-    <RoleGuard roles={["admin"]}>
+    <AccessGuard roles={["admin"]}>
       <PageContainer>
         <div className="flex items-center justify-between gap-3">
           <Button variant="ghost" size="sm" asChild>
@@ -187,6 +187,6 @@ export default function PluginDetail() {
           </div>
         )}
       </PageContainer>
-    </RoleGuard>
+    </AccessGuard>
   );
 }
