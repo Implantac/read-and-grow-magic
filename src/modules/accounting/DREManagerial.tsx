@@ -20,7 +20,7 @@ import {
   useDREManagerial,
   useDREManagerialEntries,
   type DREManagerialRow,
-} from '@/hooks/accounting/useDREManagerial';
+} from '@/hooks/accounting/useDRE';
 
 const SECTION_LABELS: Record<string, string> = {
   receita_bruta: 'Receita Bruta',
