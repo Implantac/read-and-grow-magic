@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
 export interface ProductionResource {
@@ -42,7 +43,7 @@ export function useProductionResources() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const create = async (item: Partial<ProductionResource>) => {
-    const { error } = await supabase.from('production_resources').insert(item as any);
+    const { error } = await supabase.from('production_resources').insert(item as TablesInsert<'production_resources'>);
     if (error) { toast.error('Erro ao criar recurso'); return false; }
     toast.success('Recurso cadastrado');
     await fetch();
@@ -50,7 +51,7 @@ export function useProductionResources() {
   };
 
   const update = async (id: string, updates: Partial<ProductionResource>) => {
-    const { error } = await supabase.from('production_resources').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
+    const { error } = await supabase.from('production_resources').update({ ...updates, updated_at: new Date().toISOString() } as TablesUpdate<'production_resources'>).eq('id', id);
     if (error) { toast.error('Erro ao atualizar recurso'); return false; }
     toast.success('Recurso atualizado');
     await fetch();

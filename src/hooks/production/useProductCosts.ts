@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
 export interface ProductCost {
@@ -72,7 +73,7 @@ export function useProductCosts() {
     );
     const { error } = await supabase.from('product_costs').update({
       ...updates, ...calc, last_calculated_at: new Date().toISOString(), updated_at: new Date().toISOString(),
-    } as any).eq('id', id);
+    } as TablesUpdate<'product_costs'>).eq('id', id);
     if (error) { toast.error('Erro ao atualizar custo'); return; }
     toast.success('Custo atualizado');
     await fetchCosts();

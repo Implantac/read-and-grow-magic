@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
 export interface WorkCenterRow {
@@ -29,7 +30,7 @@ export function useWorkCenters() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const create = async (item: { code: string; name: string } & Partial<WorkCenterRow>) => {
-    const { error } = await supabase.from('work_centers').insert(item as any);
+    const { error } = await supabase.from('work_centers').insert(item as TablesInsert<'work_centers'>);
     if (error) { toast.error('Erro ao criar centro de trabalho'); return false; }
     toast.success('Centro de trabalho criado');
     await fetchData();
@@ -37,7 +38,7 @@ export function useWorkCenters() {
   };
 
   const update = async (id: string, updates: Partial<WorkCenterRow>) => {
-    const { error } = await supabase.from('work_centers').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
+    const { error } = await supabase.from('work_centers').update({ ...updates, updated_at: new Date().toISOString() } as TablesUpdate<'work_centers'>).eq('id', id);
     if (error) { toast.error('Erro ao atualizar'); return; }
     toast.success('Atualizado');
     await fetchData();

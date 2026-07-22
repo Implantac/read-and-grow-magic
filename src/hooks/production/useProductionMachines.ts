@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
 export interface ProductionMachine {
@@ -42,7 +43,7 @@ export function useProductionMachines() {
   }, [fetchMachines]);
 
   const create = async (machine: Partial<ProductionMachine>) => {
-    const { error } = await supabase.from('production_machines').insert(machine as any);
+    const { error } = await supabase.from('production_machines').insert(machine as TablesInsert<'production_machines'>);
     if (error) { toast.error('Erro ao criar máquina'); return false; }
     toast.success('Máquina cadastrada');
     await fetchMachines();
@@ -50,7 +51,7 @@ export function useProductionMachines() {
   };
 
   const update = async (id: string, updates: Partial<ProductionMachine>) => {
-    const { error } = await supabase.from('production_machines').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
+    const { error } = await supabase.from('production_machines').update({ ...updates, updated_at: new Date().toISOString() } as TablesUpdate<'production_machines'>).eq('id', id);
     if (error) { toast.error('Erro ao atualizar máquina'); return; }
     await fetchMachines();
   };
