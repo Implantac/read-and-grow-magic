@@ -101,7 +101,7 @@ export function useWMSConference() {
   }) => {
     const confNumber = 'CONF-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.random().toString(36).slice(2, 6).toUpperCase();
     
-    const { data: rec, error } = await (supabase as any).from('wms_conference_records').insert({
+    const { data: rec, error } = await supabase.from('wms_conference_records').insert({
       conference_number: confNumber,
       reference_type: data.reference_type,
       reference_number: data.reference_number,
