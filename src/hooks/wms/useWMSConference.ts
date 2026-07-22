@@ -210,7 +210,7 @@ export function useWMSConference() {
     const divergences = items.filter(i => i.divergence !== 0).length;
     const checked = items.filter(i => i.status === 'checked').length;
 
-    const { error } = await (supabase as any).from('wms_conference_records').update({
+    const { error } = await supabase.from('wms_conference_records').update({
       status: divergences > 0 ? 'divergence' : 'completed',
       completed_at: new Date().toISOString(),
       checked_items: checked,
