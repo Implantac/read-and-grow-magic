@@ -22,19 +22,19 @@ export function useSpedFiles() {
   const fetchFiles = useCallback(async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from('sped_files' as any)
+      .from('sped_files')
       .select('id,type,period,start_date,end_date,total_records,total_value,generated_at')
       .order('generated_at', { ascending: false });
     if (error) { toast.error('Erro ao carregar arquivos SPED'); setLoading(false); return; }
-    setFiles((data || []).map((r: any) => ({
+    setFiles((data ?? []).map((r) => ({
       id: r.id,
-      type: r.type,
+      type: r.type as SpedFile['type'],
       period: r.period,
       startDate: r.start_date,
       endDate: r.end_date,
       content: '',
-      totalRecords: r.total_records,
-      totalValue: Number(r.total_value),
+      totalRecords: r.total_records ?? 0,
+      totalValue: Number(r.total_value ?? 0),
       generatedAt: r.generated_at,
     })));
     setLoading(false);
@@ -45,13 +45,13 @@ export function useSpedFiles() {
     setGenerating(true);
     try {
       const fnName = type === 'sped_fiscal' ? 'generate_sped_fiscal' : 'generate_sped_contribuicoes';
-      const { data, error } = await supabase.rpc(fnName as any, { p_start: startDate, p_end: endDate });
+      const { data, error } = await supabase.rpc(fnName, { p_start: startDate, p_end: endDate });
       if (error) throw error;
-      const row: any = Array.isArray(data) ? data[0] : data;
+      const row = (Array.isArray(data) ? data[0] : data) as { content?: string; total_records?: number; total_value?: number } | null;
       if (!row || !row.content) throw new Error('Sem retorno de conteúdo do servidor');
 
       const period = startDate.slice(0, 7);
-      const { error: insErr } = await supabase.from('sped_files' as any).insert({
+      const { error: insErr } = await supabase.from('sped_files').insert({
         type,
         period,
         start_date: startDate,
@@ -65,9 +65,10 @@ export function useSpedFiles() {
       toast.success(`${type === 'sped_fiscal' ? 'SPED Fiscal' : 'SPED Contribuições'} gerado com sucesso`);
       await fetchFiles();
       return true;
-    } catch (e: any) {
-      console.error('SPED Generation error:', e);
-      toast.error('Erro ao gerar SPED: ' + (e.message || 'Erro desconhecido'));
+    } catch (e) {
+      const err = e as Error;
+      console.error('SPED Generation error:', err);
+      toast.error('Erro ao gerar SPED: ' + (err.message || 'Erro desconhecido'));
       return false;
     } finally {
       setGenerating(false);
@@ -76,27 +77,27 @@ export function useSpedFiles() {
 
   const download = useCallback(async (id: string) => {
     const { data, error } = await supabase
-      .from('sped_files' as any)
+      .from('sped_files')
       .select('content,type,period')
       .eq('id', id)
       .single();
     if (error || !data) { toast.error('Erro ao baixar arquivo'); return; }
-    const row: any = data;
-    const blob = new Blob([row.content], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([data.content ?? ''], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${row.type}_${row.period}.txt`;
+    a.download = `${data.type}_${data.period}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   }, []);
 
   const remove = useCallback(async (id: string) => {
-    const { error } = await supabase.from('sped_files' as any).delete().eq('id', id);
+    const { error } = await supabase.from('sped_files').delete().eq('id', id);
     if (error) { toast.error('Erro ao excluir'); return; }
     toast.success('Arquivo excluído');
     await fetchFiles();
   }, [fetchFiles]);
+
 
   useEffect(() => { fetchFiles(); }, [fetchFiles]);
 
