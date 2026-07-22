@@ -8,7 +8,7 @@ import { Button } from "@/ui/base/button";
 import { Badge } from "@/ui/base/badge";
 import { Skeleton } from "@/ui/base/skeleton";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { RoleGuard } from "@/components/auth/RoleGuard";
+import { AccessGuard } from "@/components/auth/AccessGuard";
 import {
   Table,
   TableBody,
@@ -75,7 +75,7 @@ export default function StorefrontOrders() {
   const updateStatus = useUpdateOrderStatus();
 
   return (
-    <RoleGuard roles={["admin", "manager"]}>
+    <AccessGuard roles={["admin", "manager"]}>
       <PageContainer>
         <PageHeader
           title="Pedidos da loja"
@@ -202,6 +202,6 @@ export default function StorefrontOrders() {
           }))}
         />
       </PageContainer>
-    </RoleGuard>
+    </AccessGuard>
   );
 }

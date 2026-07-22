@@ -7,7 +7,7 @@ import { Button } from "@/ui/base/button";
 import { Badge } from "@/ui/base/badge";
 import { Skeleton } from "@/ui/base/skeleton";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { RoleGuard } from "@/components/auth/RoleGuard";
+import { AccessGuard } from "@/components/auth/AccessGuard";
 import {
   Store,
   Plus,
@@ -42,7 +42,7 @@ export default function CommerceStorefronts() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   return (
-    <RoleGuard roles={["admin", "manager"]}>
+    <AccessGuard roles={["admin", "manager"]}>
       <PageContainer>
         <PageHeader
           title="Minhas Lojas"
@@ -149,6 +149,6 @@ export default function CommerceStorefronts() {
           </div>
         )}
       </PageContainer>
-    </RoleGuard>
+    </AccessGuard>
   );
 }

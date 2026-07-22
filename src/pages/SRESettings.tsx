@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnterpriseStore } from "@/core/stores/useEnterpriseStore";
-import { RoleGuard } from "@/components/auth/RoleGuard";
+import { AccessGuard } from "@/components/auth/AccessGuard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { Input } from "@/ui/base/input";
 import { Label } from "@/ui/base/label";
@@ -210,8 +210,8 @@ function SRESettingsInner() {
 
 export default function SRESettings() {
   return (
-    <RoleGuard roles={["admin"]}>
+    <AccessGuard roles={["admin"]}>
       <SRESettingsInner />
-    </RoleGuard>
+    </AccessGuard>
   );
 }
