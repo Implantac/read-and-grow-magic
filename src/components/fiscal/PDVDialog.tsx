@@ -1,27 +1,19 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { formatBRL } from '@/lib/formatters';
 import {
-  Search, Plus, Minus, Trash2, ShoppingCart,
-  ChevronRight, Send, Keyboard, ScanLine,
-  Camera, CameraOff, Package, Lock, Unlock,
-  Percent, Loader2, AlertCircle,
-  Pause, Play, LayoutGrid, QrCode,
+  Trash2, ShoppingCart, ChevronRight, Send, Package, Lock, Unlock,
+  Loader2, AlertCircle, Pause, Play,
 } from 'lucide-react';
 import { Button } from '@/ui/base/button';
-import { Input } from '@/ui/base/input';
 import { Dialog, DialogContent } from '@/ui/base/dialog';
-import { Separator } from '@/ui/base/separator';
 import { Badge } from '@/ui/base/badge';
 import { useProducts, type DbProduct } from '@/hooks/inventory/useProducts';
 import { useClients, type DbClient, useUpdateClient } from '@/hooks/commercial/useClients';
-import { useActiveCategories, hashColor } from '@/hooks/inventory/useCategories';
-import { ScrollArea } from '@/ui/base/scroll-area';
-import { cn } from '@/lib/utils';
-import { toSafeNumber } from '@/lib/numericValidation';
+import { useActiveCategories } from '@/hooks/inventory/useCategories';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { openReceipt } from './pdvReceipt';
 import { PDVPixDialog } from './PDVPixDialog';
-import { PDVCloseSessionDialog, type CashCloseSummary } from './PDVCloseSessionDialog';
+import { PDVCloseSessionDialog } from './PDVCloseSessionDialog';
 import { PDVParkedDialog } from './PDVParkedDialog';
 import { loadParked, parkSale, removeParked, type ParkedSale } from './pdvParkedStorage';
 import { PDVCustomerCard } from './pdv/PDVCustomerCard';
@@ -31,15 +23,11 @@ import { PDVFinalizeConfirmDialog } from './pdv/PDVFinalizeConfirmDialog';
 import { PDVSessionBar } from './pdv/PDVSessionBar';
 import { PDVOpenSessionDialog, PDVCashMovementDialog } from './pdv/PDVCashDialogs';
 import { PDVCatalogPanel } from './pdv/PDVCatalogPanel';
+import { PDVCartLines } from './pdv/PDVCartLines';
+import { PDVTotalsCard } from './pdv/PDVTotalsCard';
+import { usePDVCashSession, logAudit } from './pdv/usePDVCashSession';
+import { useBarcodeCameraScanner } from './pdv/useBarcodeCameraScanner';
 import { onlyDigits, type CartItem, type SplitPayment } from './pdv/types';
-
-interface CashSession {
-  operatorName: string;
-  terminalId: string;
-  openedAt: string;
-  openingAmount: number;
-  movements: { type: 'sale' | 'sangria' | 'suprimento'; amount: number; at: string; note?: string }[];
-}
 
 interface PDVDialogProps {
   open: boolean;
@@ -60,16 +48,7 @@ interface PDVDialogProps {
 
 type InputMode = 'search' | 'scanner' | 'camera';
 
-const SESSION_KEY = 'pdv:session:v1';
-const AUDIT_KEY = 'pdv:audit:v1';
 
-const logAudit = (event: string, payload: Record<string, unknown> = {}) => {
-  try {
-    const arr = JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]');
-    arr.unshift({ event, at: new Date().toISOString(), ...payload });
-    localStorage.setItem(AUDIT_KEY, JSON.stringify(arr.slice(0, 500)));
-  } catch { /* noop */ }
-};
 
 export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDialogProps) {
   const productsQuery = useProducts();
@@ -100,42 +79,32 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
   const [installments, setInstallments] = useState(1);
   const [screenLocked, setScreenLocked] = useState(false);
 
-  // Cash session
-  const [session, setSession] = useState<CashSession | null>(() => {
-    try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); } catch { return null; }
-  });
-  const [showOpenSession, setShowOpenSession] = useState(false);
-  const [showCashMovement, setShowCashMovement] = useState<null | 'sangria' | 'suprimento'>(null);
-  const [openingAmount, setOpeningAmount] = useState(0);
-  const [movementAmount, setMovementAmount] = useState(0);
-  const [movementNote, setMovementNote] = useState('');
+  // Cash session (extracted hook)
+  const {
+    session, setSession,
+    cashBalance, sessionElapsed,
+    showOpenSession, setShowOpenSession,
+    showCashMovement, setShowCashMovement,
+    openingAmount, setOpeningAmount,
+    movementAmount, setMovementAmount,
+    movementNote, setMovementNote,
+    showCloseSession, setShowCloseSession,
+    openSession,
+    closeSessionSummary,
+    confirmCloseSession,
+    registerMovement,
+  } = usePDVCashSession();
 
   // Novos gaps
   const [showPixDialog, setShowPixDialog] = useState<{ splitId: string; amount: number } | null>(null);
-  const [showCloseSession, setShowCloseSession] = useState(false);
   const [showParked, setShowParked] = useState(false);
   const [parkedList, setParkedList] = useState<ParkedSale[]>(() => loadParked());
   const refreshParked = useCallback(() => setParkedList(loadParked()), []);
 
   const searchRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const scanRafRef = useRef<number | null>(null);
   const [flashId, setFlashId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (session) localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-    else localStorage.removeItem(SESSION_KEY);
-  }, [session]);
-
-  // Cash balance in drawer
-  const cashBalance = useMemo(() => {
-    if (!session) return 0;
-    return session.movements.reduce((sum, m) => {
-      if (m.type === 'sangria') return sum - m.amount;
-      return sum + m.amount;
-    }, session.openingAmount);
-  }, [session]);
 
   const term = search.trim().toLowerCase();
   const filteredProducts = useMemo(() => {
@@ -224,71 +193,13 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     }
   }, [open, showPayment, inputMode, screenLocked]);
 
-  // Camera scanning
-  const stopCamera = () => {
-    if (scanRafRef.current) cancelAnimationFrame(scanRafRef.current);
-    scanRafRef.current = null;
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => t.stop());
-      streamRef.current = null;
-    }
-  };
+  // Camera scanning (extracted hook)
+  const { stopCamera } = useBarcodeCameraScanner({
+    inputMode, open, videoRef,
+    onValue: (v) => handleScanValue(v),
+    onFallback: () => setInputMode('scanner'),
+  });
 
-  useEffect(() => {
-    if (inputMode !== 'camera' || !open) {
-      stopCamera();
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const BD = (window as any).BarcodeDetector;
-        if (!BD) {
-          toastError('Câmera de códigos não é suportada neste navegador. Use um leitor USB.');
-          setInputMode('scanner');
-          return;
-        }
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'environment' },
-        });
-        if (cancelled) { stream.getTracks().forEach((t) => t.stop()); return; }
-        streamRef.current = stream;
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-        }
-        const detector = new BD({
-          formats: ['qr_code', 'ean_13', 'ean_8', 'code_128', 'code_39', 'upc_a', 'upc_e'],
-        });
-        let lastValue = '';
-        let lastAt = 0;
-        const tick = async () => {
-          if (!videoRef.current || cancelled) return;
-          try {
-            const codes = await detector.detect(videoRef.current);
-            if (codes && codes[0]?.rawValue) {
-              const v: string = codes[0].rawValue;
-              const now = Date.now();
-              if (v !== lastValue || now - lastAt > 1500) {
-                lastValue = v; lastAt = now;
-                handleScanValue(v);
-              }
-            }
-          } catch { /* transient */ }
-          scanRafRef.current = requestAnimationFrame(tick);
-        };
-        scanRafRef.current = requestAnimationFrame(tick);
-      } catch {
-        toastError('Não foi possível acessar a câmera.');
-        setInputMode('scanner');
-      }
-    })();
-    return () => { cancelled = true; stopCamera(); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inputMode, open]);
-
-  useEffect(() => { if (!open) stopCamera(); }, [open]);
 
   const flashLine = (productId: string) => {
     setFlashId(productId);
@@ -602,89 +513,11 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
     camera: 'Aponte a câmera para o QR Code ou código de barras',
   };
 
-  const openSession = () => {
-    if (openingAmount < 0) { toastError('Valor de abertura inválido.'); return; }
-    const s: CashSession = {
-      operatorName: 'Operador Sistema',
-      terminalId: 'PDV-01',
-      openedAt: new Date().toISOString(),
-      openingAmount: Math.round(openingAmount * 100) / 100,
-      movements: [],
-    };
-    setSession(s);
-    setShowOpenSession(false);
-    setOpeningAmount(0);
-    logAudit('session.open', { openingAmount: s.openingAmount });
-    toastSuccess('Caixa aberto com sucesso.');
-  };
-
-  // Fechamento com contagem cega
-  const closeSessionSummary: CashCloseSummary | null = useMemo(() => {
-    if (!session) return null;
-    const sales = session.movements.filter((m) => m.type === 'sale');
-    const sangria = session.movements.filter((m) => m.type === 'sangria').reduce((s, m) => s + m.amount, 0);
-    const suprimento = session.movements.filter((m) => m.type === 'suprimento').reduce((s, m) => s + m.amount, 0);
-    const totalSales = sales.reduce((s, m) => s + m.amount, 0);
-    return {
-      operatorName: session.operatorName,
-      terminalId: session.terminalId,
-      openedAt: session.openedAt,
-      openingAmount: session.openingAmount,
-      totalSales,
-      salesCount: sales.length,
-      sangria,
-      suprimento,
-      expectedCash: cashBalance,
-    };
-  }, [session, cashBalance]);
-
   const requestCloseSession = () => {
     if (!session) return;
     setShowCloseSession(true);
   };
 
-  const confirmCloseSession = (result: { countedAmount: number; difference: number }) => {
-    if (!session) return;
-    logAudit('session.close', {
-      closingBalance: cashBalance,
-      counted: result.countedAmount,
-      difference: result.difference,
-      movements: session.movements.length,
-    });
-    setSession(null);
-    setShowCloseSession(false);
-    toastSuccess(
-      Math.abs(result.difference) < 0.005
-        ? 'Caixa fechado sem divergência.'
-        : `Caixa fechado com ${result.difference > 0 ? 'sobra' : 'falta'} de ${formatBRL(Math.abs(result.difference))}.`,
-    );
-  };
-
-  const registerMovement = () => {
-    if (!showCashMovement || !session) return;
-    if (movementAmount <= 0) { toastError('Valor deve ser maior que zero.'); return; }
-    if (showCashMovement === 'sangria' && movementAmount > cashBalance) {
-      toastError('Sangria maior que o saldo em caixa.'); return;
-    }
-    setSession({
-      ...session,
-      movements: [...session.movements, {
-        type: showCashMovement,
-        amount: Math.round(movementAmount * 100) / 100,
-        at: new Date().toISOString(),
-        note: movementNote.trim() || undefined,
-      }],
-    });
-    logAudit(`cash.${showCashMovement}`, { amount: movementAmount, note: movementNote });
-    toastSuccess(`${showCashMovement === 'sangria' ? 'Sangria' : 'Suprimento'} registrado.`);
-    setShowCashMovement(null);
-    setMovementAmount(0);
-    setMovementNote('');
-  };
-
-  const sessionElapsed = session
-    ? Math.floor((Date.now() - new Date(session.openedAt).getTime()) / 60000)
-    : 0;
 
   const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     if (asPage) {
@@ -785,74 +618,15 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                   </Button>
                 )}
               </div>
-              <ScrollArea className="flex-1 px-6 pb-4">
-                {cart.length === 0 ? (
-                  <div className="h-48 flex flex-col items-center justify-center text-muted-foreground border-2 border-dashed rounded-2xl opacity-40">
-                    <Package className="h-10 w-10 mb-2" />
-                    <p className="font-semibold text-sm">Nenhum produto adicionado</p>
-                    <p className="text-xs mt-1">Use busca, leitor ou câmera para incluir itens</p>
-                  </div>
-                ) : (
-                  <div className="space-y-1.5">
-                    {cart.map((item, idx) => (
-                      <div
-                        key={item.productId}
-                        className={cn(
-                          'flex items-center gap-3 bg-background p-2.5 rounded-lg border transition-all animate-in slide-in-from-left-2',
-                          flashId === item.productId
-                            ? 'border-primary ring-2 ring-primary/30 bg-primary/5'
-                            : 'hover:border-primary/40',
-                        )}
-                      >
-                        <div className="bg-primary/10 text-primary w-7 h-7 rounded-md flex items-center justify-center font-bold text-[11px] shrink-0">
-                          {cart.length - idx}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold truncate text-sm">{item.productName}</div>
-                          <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider truncate">
-                            {item.productCode} · {item.unit}
-                          </div>
-                        </div>
+              <PDVCartLines
+                cart={cart}
+                flashId={flashId}
+                onUpdateQty={updateQty}
+                onSetQty={setQty}
+                onSetUnitPrice={setUnitPrice}
+                onRemove={removeFromCart}
+              />
 
-                        <div className="w-24 shrink-0">
-                          <div className="relative">
-                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-muted-foreground">R$</span>
-                            <Input
-                              type="number" step="0.01" min={0} value={item.unitPrice}
-                              onChange={(e) => setUnitPrice(item.productId, toSafeNumber(e.target.value))}
-                              onFocus={(e) => e.currentTarget.select()}
-                              className="h-8 pl-7 pr-1 text-right font-bold tabular-nums text-xs"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-0.5 bg-muted/60 p-0.5 rounded-md shrink-0">
-                          <Button variant="ghost" size="icon" className="h-7 w-7 rounded bg-background" onClick={() => updateQty(item.productId, -1)}>
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <Input
-                            type="number" min={0} step="1" value={item.quantity}
-                            onChange={(e) => setQty(item.productId, toSafeNumber(e.target.value))}
-                            onFocus={(e) => e.currentTarget.select()}
-                            className="h-7 w-12 px-1 text-center font-bold tabular-nums border-none shadow-none focus-visible:ring-1 bg-background"
-                          />
-                          <Button variant="ghost" size="icon" className="h-7 w-7 rounded bg-background" onClick={() => updateQty(item.productId, 1)}>
-                            <Plus className="h-3 w-3" />
-                          </Button>
-                        </div>
-
-                        <div className="w-24 text-right shrink-0">
-                          <div className="text-[9px] uppercase text-muted-foreground font-bold">Total</div>
-                          <div className="font-black tabular-nums text-primary text-sm">{formatBRL(item.quantity * item.unitPrice)}</div>
-                        </div>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:bg-destructive/10 rounded-full shrink-0" onClick={() => removeFromCart(item.productId)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </ScrollArea>
             </div>
 
             {/* RIGHT: checkout */}
@@ -872,56 +646,16 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                     />
 
 
-                    {/* Totals */}
-                    <div className="rounded-xl bg-background border p-4 space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground font-bold text-xs uppercase">Subtotal</span>
-                        <span className="text-lg font-bold tabular-nums">{formatBRL(subtotal)}</span>
-                      </div>
-                      <div>
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="text-muted-foreground font-bold text-xs uppercase">Desconto</span>
-                          <div className="inline-flex bg-muted/60 rounded p-0.5">
-                            <button
-                              className={cn('px-2 py-0.5 text-[10px] font-bold rounded', discountType === 'value' ? 'bg-background shadow-sm' : 'text-muted-foreground')}
-                              onClick={() => setDiscountType('value')}
-                            >R$</button>
-                            <button
-                              className={cn('px-2 py-0.5 text-[10px] font-bold rounded', discountType === 'percent' ? 'bg-background shadow-sm' : 'text-muted-foreground')}
-                              onClick={() => setDiscountType('percent')}
-                            >%</button>
-                          </div>
-                        </div>
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-muted-foreground">
-                            {discountType === 'value' ? 'R$' : <Percent className="h-3 w-3" />}
-                          </span>
-                          <Input
-                            type="number" min={0} step="0.01"
-                            value={discount || ''}
-                            onChange={(e) => {
-                              const v = toSafeNumber(e.target.value);
-                              if (!Number.isFinite(v) || v < 0) { toastError('Desconto inválido.'); return; }
-                              if (discountType === 'percent' && v > 100) { toastError('Desconto máximo 100%.'); return; }
-                              if (discountType === 'value' && v > subtotal) { toastError('Desconto maior que subtotal.'); setDiscount(subtotal); return; }
-                              setDiscount(Math.round(v * 100) / 100);
-                            }}
-                            className="text-right font-bold h-10 pl-8 bg-background"
-                            placeholder="0,00"
-                          />
-                        </div>
-                        {discountValue > 0 && (
-                          <div className="text-right text-[10px] text-emerald-600 font-bold mt-1">− {formatBRL(discountValue)}</div>
-                        )}
-                      </div>
-                      <Separator />
-                      <div className="space-y-0.5">
-                        <div className="text-muted-foreground font-black text-[10px] uppercase tracking-widest">Total a pagar</div>
-                        <div className="text-4xl font-black text-primary tracking-tight tabular-nums leading-none">
-                          {formatBRL(total)}
-                        </div>
-                      </div>
-                    </div>
+                    <PDVTotalsCard
+                      subtotal={subtotal}
+                      discount={discount}
+                      discountType={discountType}
+                      discountValue={discountValue}
+                      total={total}
+                      onChangeDiscount={setDiscount}
+                      onChangeDiscountType={setDiscountType}
+                    />
+
                   </>
                 ) : (
                   <PDVPaymentPanel
