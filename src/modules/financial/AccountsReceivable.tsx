@@ -191,7 +191,7 @@ export default function AccountsReceivable() {
         accounts={filteredAccounts}
         now={now}
         onReceive={openReceiveDialog}
-        onView={(a) => { setSelectedAccount(a); setIsDetailOpen(true); }}
+        onView={(a) => { setSelectedAccount(a as typeof accounts[0]); setIsDetailOpen(true); }}
         onDelete={(id) => deleteMutation.mutate(id)}
       />
 
