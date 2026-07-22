@@ -74,8 +74,8 @@ export function useCreateFunnelItem() {
 export function useUpdateFunnelItem() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: any & { id: string }) => {
-      const { data, error } = await supabase.from('sales_funnel').update(updates as any).eq('id', id).select().single();
+    mutationFn: async ({ id, ...updates }: TablesUpdate<'sales_funnel'> & { id: string }) => {
+      const { data, error } = await supabase.from('sales_funnel').update(updates).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },
