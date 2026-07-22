@@ -35,9 +35,11 @@ export function useFinancialAdvances(partyType?: 'client' | 'supplier') {
 
 export function useCreateAdvance() {
   const qc = useQueryClient();
+  const companyId = useEnterpriseStore((s) => s.activeCompanyId);
   return useMutation({
     mutationFn: async (adv: Omit<FinancialAdvanceRow, 'id' | 'created_at' | 'used_amount' | 'remaining_amount' | 'status'>) => {
-      const { data, error } = await supabase.from('financial_advances').insert(adv).select().single();
+      if (!companyId) throw new Error('Empresa não selecionada');
+      const { data, error } = await supabase.from('financial_advances').insert({ ...adv, company_id: companyId }).select().single();
       if (error) throw error;
       // Lança no ledger
       if (data && adv.bank_account_id) {
@@ -50,6 +52,7 @@ export function useCreateAdvance() {
           source: 'advance',
           source_id: data.id,
           payment_method: adv.payment_method,
+          company_id: companyId,
         });
       }
       return data;
