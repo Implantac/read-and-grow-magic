@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/ui/base/toast';
 import { useSystemParameters } from '@/hooks/system/useSystemParameters';
@@ -205,7 +206,7 @@ export function useCreateOrder() {
 
 
 
-      const { error: itemsError } = await supabase.from('order_items').insert(items as any);
+      const { error: itemsError } = await supabase.from('order_items').insert(items as TablesInsert<'order_items'>[]);
       if (itemsError) {
         await supabase.from('orders').delete().eq('id', order.id);
         throw itemsError;
@@ -250,11 +251,11 @@ export function useUpdateOrderFields() {
   const qc = useQueryClient();
   const { toast } = useToast();
   return useMutation({
-    mutationFn: async ({ id, ...fields }: { id: string } & Record<string, any>) => {
-      const payload = { ...fields, updated_at: new Date().toISOString() };
+    mutationFn: async ({ id, ...fields }: { id: string } & TablesUpdate<'orders'>) => {
+      const payload: TablesUpdate<'orders'> = { ...fields, updated_at: new Date().toISOString() };
       const { error } = await supabase
         .from('orders')
-        .update(payload as any)
+        .update(payload)
         .eq('id', id);
       if (error) throw error;
     },
@@ -335,7 +336,7 @@ export function useDeleteOrder() {
 
               const { order_items, ...orderData } = deletedOrder;
               
-              const { data: restored, error: restError } = await supabase.from('orders').insert(orderData as any).select().single();
+              const { data: restored, error: restError } = await supabase.from('orders').insert(orderData as TablesInsert<'orders'>).select().single();
               if (restError) throw restError;
 
               if (order_items && order_items.length > 0) {
@@ -343,7 +344,7 @@ export function useDeleteOrder() {
                   ...item,
                   order_id: restored.id
                 }));
-                const { error: itemsError } = await supabase.from('order_items').insert(restoredItems as any);
+                const { error: itemsError } = await supabase.from('order_items').insert(restoredItems as TablesInsert<'order_items'>[]);
                 if (itemsError) throw itemsError;
               }
 

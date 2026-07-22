@@ -43,8 +43,9 @@ export function useClientProfiles() {
   return useQuery({
     queryKey: ["commercial", "client-profiles"],
     queryFn: async (): Promise<ClientProfile[]> => {
+      // intentional: `commercial_client_profiles` é uma view analítica ausente de types.ts
       const { data, error } = await supabase
-        .from("commercial_client_profiles" as any)
+        .from("commercial_client_profiles" as never)
         .select("*")
         .order("ltv", { ascending: false })
         .limit(1000);

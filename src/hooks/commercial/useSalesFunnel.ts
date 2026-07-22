@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export const FUNNEL_STAGES = [
@@ -57,8 +58,8 @@ export function useSalesFunnel(stage?: string) {
 export function useCreateFunnelItem() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (item: any) => {
-      const { data, error } = await supabase.from('sales_funnel').insert(item as any).select().single();
+    mutationFn: async (item: TablesInsert<'sales_funnel'>) => {
+      const { data, error } = await supabase.from('sales_funnel').insert(item).select().single();
       if (error) throw error;
       return data;
     },
@@ -73,8 +74,8 @@ export function useCreateFunnelItem() {
 export function useUpdateFunnelItem() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: any & { id: string }) => {
-      const { data, error } = await supabase.from('sales_funnel').update(updates as any).eq('id', id).select().single();
+    mutationFn: async ({ id, ...updates }: TablesUpdate<'sales_funnel'> & { id: string }) => {
+      const { data, error } = await supabase.from('sales_funnel').update(updates).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },

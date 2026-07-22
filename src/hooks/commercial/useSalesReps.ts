@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 
@@ -38,11 +39,11 @@ export function useCreateSalesRep() {
   const qc = useQueryClient();
   const { currentCompany } = useEnterprise();
   return useMutation({
-    mutationFn: async (rep: any) => {
+    mutationFn: async (rep: Omit<TablesInsert<'sales_reps'>, 'company_id'>) => {
       const { data, error } = await supabase.from('sales_reps').insert({
         ...rep,
-        company_id: currentCompany?.id
-      }).select().single();
+        company_id: currentCompany?.id,
+      } as TablesInsert<'sales_reps'>).select().single();
       if (error) throw error;
       return data;
     },
@@ -57,8 +58,8 @@ export function useCreateSalesRep() {
 export function useUpdateSalesRep() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: any & { id: string }) => {
-      const { data, error } = await supabase.from('sales_reps').update(updates as any).eq('id', id).select().single();
+    mutationFn: async ({ id, ...updates }: TablesUpdate<'sales_reps'> & { id: string }) => {
+      const { data, error } = await supabase.from('sales_reps').update(updates).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },
