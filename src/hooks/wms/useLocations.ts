@@ -130,7 +130,7 @@ export function useLocations() {
       max_weight: payload.max_weight ?? null,
       max_volume: payload.max_volume ?? null,
       abc_classification: payload.abc_classification || null,
-    } as any);
+    });
     if (error) return toast.error(error.message);
     toast.success('Endereço criado');
     fetchAll();
