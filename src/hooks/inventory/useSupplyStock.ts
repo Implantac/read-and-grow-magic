@@ -109,13 +109,11 @@ export function useSupplyStock() {
         ? supply.current_quantity + (movement.quantity || 0)
         : supply.current_quantity - (movement.quantity || 0);
       const newTotal = newQty * supply.unit_cost;
-      const dateField = movement.direction === 'in' ? 'last_entry_date' : 'last_exit_date';
-      await supabase.from('supply_stock').update({
-        current_quantity: Math.max(0, newQty),
-        total_value: Math.max(0, newTotal),
-        [dateField]: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }).eq('id', movement.supply_id!);
+      const nowIso = new Date().toISOString();
+      const payload = movement.direction === 'in'
+        ? { current_quantity: Math.max(0, newQty), total_value: Math.max(0, newTotal), last_entry_date: nowIso, updated_at: nowIso }
+        : { current_quantity: Math.max(0, newQty), total_value: Math.max(0, newTotal), last_exit_date: nowIso, updated_at: nowIso };
+      await supabase.from('supply_stock').update(payload).eq('id', movement.supply_id!);
     }
 
     toast.success('Movimentação registrada');
