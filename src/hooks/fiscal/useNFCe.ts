@@ -155,7 +155,7 @@ export function useNFCe() {
     const number = 'DEV-' + Date.now().toString().slice(-8);
 
     const { data: userRes } = await supabase.auth.getUser();
-    const { data: ret, error } = await (supabase.from('nfce_returns' as any) as any).insert({
+    const { data: ret, error } = await supabase.from('nfce_returns').insert({
       nfce_id: params.nfceId,
       number,
       reason: trimmed,
@@ -179,7 +179,7 @@ export function useNFCe() {
       unit_price: i.unitPrice,
       total: i.quantity * i.unitPrice,
     }));
-    await (supabase.from('nfce_return_items' as any) as any).insert(itemsPayload);
+    await supabase.from('nfce_return_items').insert(itemsPayload);
 
     // Recalcular status de devolução do cupom
     const { data: allReturns } = await (supabase
