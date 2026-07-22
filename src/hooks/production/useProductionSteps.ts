@@ -136,7 +136,7 @@ export function useProductionOrderSteps(productionOrderId?: string) {
       status: 'pending',
     }));
 
-    const { error } = await supabase.from('production_order_steps').insert(inserts as TablesInsert<'production_order_steps'>);
+    const { error } = await supabase.from('production_order_steps').insert(inserts as unknown as TablesInsert<'production_order_steps'>[]);
     if (error) { toast.error('Erro ao gerar etapas'); return; }
     toast.success(`${inserts.length} etapas geradas`);
     await fetchOrderSteps();
