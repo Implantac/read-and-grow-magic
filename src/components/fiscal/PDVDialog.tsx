@@ -31,6 +31,8 @@ import { usePDVCart } from './pdv/usePDVCart';
 import { usePDVSplits } from './pdv/usePDVSplits';
 import { usePDVParked } from './pdv/usePDVParked';
 import { usePDVShortcuts } from './pdv/usePDVShortcuts';
+import { usePDVProductFilter, usePDVClientFilter } from './pdv/usePDVFilters';
+import { usePDVFinalize } from './pdv/usePDVFinalize';
 import { onlyDigits } from './pdv/types';
 
 interface PDVDialogProps {
