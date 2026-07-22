@@ -140,7 +140,7 @@ export function useWMSConference() {
     const expected = Number(itemData?.expected_qty || 0);
     const divergence = checkedQty - expected;
 
-    const { error } = await (supabase as any).from('wms_conference_items').update({
+    const { error } = await supabase.from('wms_conference_items').update({
       checked_qty: checkedQty,
       divergence,
       status: 'checked',
