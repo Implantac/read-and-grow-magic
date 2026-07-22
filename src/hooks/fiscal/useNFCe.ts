@@ -182,19 +182,17 @@ export function useNFCe() {
     await supabase.from('nfce_return_items').insert(itemsPayload);
 
     // Recalcular status de devolução do cupom
-    const { data: allReturns } = await (supabase
-      .from('nfce_return_items' as any) as any)
+    const { data: allReturns } = await supabase.from('nfce_return_items')
       .select('quantity, nfce_item_id')
       .in('return_id', [ret.id]);
     void allReturns;
 
     // Somar total devolvido por cupom
-    const { data: sums } = await (supabase
-      .from('nfce_returns' as any) as any)
+    const { data: sums } = await supabase.from('nfce_returns')
       .select('refund_amount, status')
       .eq('nfce_id', params.nfceId)
       .eq('status', 'authorized');
-    const totalReturned = (sums || []).reduce((s: number, r: any) => s + Number(r.refund_amount || 0), 0);
+    const totalReturned = (sums ?? []).reduce((s: number, r: { refund_amount?: number | null }) => s + Number(r.refund_amount || 0), 0);
 
     const { data: nfceRow } = await supabase.from('nfce').select('total').eq('id', params.nfceId).single();
     const nfceTotal = Number(nfceRow?.total || 0);
