@@ -55,8 +55,7 @@ export function useOutsourcingOrders() {
 
   const update = async (id: string, updates: Partial<OutsourcingOrderRow>) => {
     const { error } = await supabase
-      .from('outsourcing_orders')
-      .update({ ...updates, updated_at: new Date().toISOString() } as any)
+      .from('outsourcing_orders').update({ ...updates, updated_at: new Date().toISOString() } as TablesUpdate<'outsourcing_orders'>)
       .eq('id', id);
     if (error) { toast.error('Erro ao atualizar'); return false; }
     toast.success('Ordem atualizada');

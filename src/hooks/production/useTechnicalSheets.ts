@@ -32,7 +32,7 @@ export function useTechnicalSheets() {
   useEffect(() => { fetchData(); }, [fetchData]);
 
   const create = async (item: Partial<TechnicalSheetRow>) => {
-    const { error } = await supabase.from('product_technical_sheets').insert(item as any);
+    const { error } = await supabase.from('product_technical_sheets').insert(item as TablesInsert<'product_technical_sheets'>);
     if (error) { toast.error('Erro ao criar ficha técnica'); return false; }
     toast.success('Ficha técnica criada');
     await fetchData();
@@ -40,7 +40,7 @@ export function useTechnicalSheets() {
   };
 
   const update = async (id: string, updates: Partial<TechnicalSheetRow>) => {
-    const { error } = await supabase.from('product_technical_sheets').update({ ...updates, updated_at: new Date().toISOString() } as any).eq('id', id);
+    const { error } = await supabase.from('product_technical_sheets').update({ ...updates, updated_at: new Date().toISOString() } as TablesUpdate<'product_technical_sheets'>).eq('id', id);
     if (error) { toast.error('Erro ao atualizar'); return; }
     toast.success('Ficha atualizada');
     await fetchData();
