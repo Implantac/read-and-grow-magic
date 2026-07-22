@@ -92,8 +92,8 @@ export function useFraudRules() {
 export function useUpdateFraudRule() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...patch }: any & { id: string }) => {
-      const { error } = await supabase.from('financial_fraud_rules').update(patch as any).eq('id', id);
+    mutationFn: async ({ id, ...patch }: TablesUpdate<'financial_fraud_rules'> & { id: string }) => {
+      const { error } = await supabase.from('financial_fraud_rules').update(patch).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
