@@ -11,7 +11,7 @@ import { useProducts } from '@/hooks/inventory/useProducts';
 import { useClients, type DbClient, useUpdateClient } from '@/hooks/commercial/useClients';
 import { useActiveCategories } from '@/hooks/inventory/useCategories';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
-import { openReceipt } from './pdvReceipt';
+
 import { PDVPixDialog } from './PDVPixDialog';
 import { PDVCloseSessionDialog } from './PDVCloseSessionDialog';
 import { PDVParkedDialog } from './PDVParkedDialog';
