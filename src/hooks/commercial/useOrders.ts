@@ -344,7 +344,7 @@ export function useDeleteOrder() {
                   ...item,
                   order_id: restored.id
                 }));
-                const { error: itemsError } = await supabase.from('order_items').insert(restoredItems as any);
+                const { error: itemsError } = await supabase.from('order_items').insert(restoredItems as TablesInsert<'order_items'>[]);
                 if (itemsError) throw itemsError;
               }
 
