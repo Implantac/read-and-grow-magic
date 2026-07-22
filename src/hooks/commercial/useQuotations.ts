@@ -59,10 +59,10 @@ export function useQuotations() {
         .select('*, quotation_items(*)')
         .order('date', { ascending: false });
       if (error) throw error;
-      return (data as any[]).map((q) => ({
+      return (data ?? []).map((q) => ({
         ...q,
-        items: q.quotation_items || [],
-      })) as DbQuotation[];
+        items: (q as { quotation_items?: unknown[] }).quotation_items ?? [],
+      })) as unknown as DbQuotation[];
     },
   });
 }
