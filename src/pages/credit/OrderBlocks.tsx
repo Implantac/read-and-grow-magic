@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Label } from '@/ui/base/label';
 import { Textarea } from '@/ui/base/textarea';
 import { Lock, Unlock, Search, AlertTriangle, CheckCircle } from 'lucide-react';
-import { Can } from '@/components/auth/Can';
+import { AccessGuard } from '@/components/auth/AccessGuard';
 import { EmptyState } from '@/shared/components/EmptyState';
 
 import { formatDate } from '@/lib/formatters';
@@ -95,11 +95,11 @@ export default function OrderBlocks() {
                   <TableCell>{b.released_by || '—'}</TableCell>
                   <TableCell>
                     {b.status === 'active' && (
-                      <Can resource="credit.blocks" action="manage">
+                      <AccessGuard resource="credit.blocks" action="manage">
                         <Button variant="outline" size="sm" onClick={() => setReleaseDialog(b)}>
                           <CheckCircle className="h-3 w-3 mr-1" />Liberar
                         </Button>
-                      </Can>
+                      </AccessGuard>
                     )}
                   </TableCell>
                 </TableRow>
