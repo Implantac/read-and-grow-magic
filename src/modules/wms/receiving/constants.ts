@@ -1,3 +1,6 @@
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+
 export const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   pending: { label: 'Pendente', variant: 'secondary' },
   in_progress: { label: 'Em Andamento', variant: 'default' },
@@ -7,9 +10,6 @@ export const statusConfig: Record<string, { label: string; variant: 'default' | 
 
 export function formatDate(date: string) {
   if (!date) return '-';
-  try {
-    const { format } = require('date-fns');
-    const { ptBR } = require('date-fns/locale');
-    return format(new Date(date), 'dd/MM/yyyy', { locale: ptBR });
-  } catch { return '-'; }
+  try { return format(new Date(date), 'dd/MM/yyyy', { locale: ptBR }); }
+  catch { return '-'; }
 }
