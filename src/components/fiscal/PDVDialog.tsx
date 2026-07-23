@@ -389,76 +389,50 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                     )}
                   </Button>
                 )}
-                <div className="mt-3 flex items-center justify-center gap-3 text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex-wrap">
-                  <span>F1 Dinh</span><span>F2 Créd</span><span>F3 Déb</span><span>F4 PIX</span><span>F5 Voucher</span><span>F6 Fiado</span>
-                  <span className="opacity-40">|</span>
-                  <span>F7 Suspender</span><span>F8 Retomar</span><span>F9 Limpar</span><span>F10 Finalizar</span><span>Ctrl+L Bloq</span>
-                </div>
+                <PDVShortcutsHint />
               </div>
             </div>
           </div>
         </div>
 
-        <PDVOpenSessionDialog
-          open={showOpenSession}
+        <PDVDialogsStack
+          showOpenSession={showOpenSession}
           openingAmount={openingAmount}
-          onChangeAmount={setOpeningAmount}
-          onCancel={() => setShowOpenSession(false)}
-          onConfirm={openSession}
-        />
-
-        <PDVCashMovementDialog
-          type={showCashMovement}
+          setOpeningAmount={setOpeningAmount}
+          setShowOpenSession={setShowOpenSession}
+          openSession={openSession}
+          showCashMovement={showCashMovement}
           cashBalance={cashBalance}
-          amount={movementAmount}
-          note={movementNote}
-          onChangeAmount={setMovementAmount}
-          onChangeNote={setMovementNote}
-          onCancel={() => setShowCashMovement(null)}
-          onConfirm={registerMovement}
-        />
-
-        <PDVCustomerPicker
-          open={showCustomerPicker}
-          query={customerQuery}
+          movementAmount={movementAmount}
+          movementNote={movementNote}
+          setMovementAmount={setMovementAmount}
+          setMovementNote={setMovementNote}
+          setShowCashMovement={setShowCashMovement}
+          registerMovement={registerMovement}
+          showCustomerPicker={showCustomerPicker}
+          customerQuery={customerQuery}
           filteredClients={filteredClients}
-          onQueryChange={setCustomerQuery}
-          onSelect={applyCustomer}
-          onClose={() => setShowCustomerPicker(false)}
-        />
-
-        <PDVPixDialog
-          open={!!showPixDialog}
-          amount={showPixDialog?.amount || 0}
-          onConfirm={() => setShowPixDialog(null)}
-          onCancel={() => {
-            if (showPixDialog) removeSplit(showPixDialog.splitId);
-            setShowPixDialog(null);
-          }}
-        />
-
-        <PDVCloseSessionDialog
-          open={showCloseSession}
-          summary={closeSessionSummary}
-          onCancel={() => setShowCloseSession(false)}
-          onClose={confirmCloseSession}
-        />
-
-        <PDVParkedDialog
-          open={showParked}
-          parked={parkedList}
-          onClose={() => setShowParked(false)}
-          onResume={resumeParked}
-          onDelete={discardParked}
-        />
-
-        <PDVFinalizeConfirmDialog
-          open={showFinalizeConfirm}
+          setCustomerQuery={setCustomerQuery}
+          applyCustomer={applyCustomer}
+          setShowCustomerPicker={setShowCustomerPicker}
+          showPixDialog={showPixDialog}
+          setShowPixDialog={setShowPixDialog}
+          removeSplit={removeSplit}
+          showCloseSession={showCloseSession}
+          closeSessionSummary={closeSessionSummary}
+          setShowCloseSession={setShowCloseSession}
+          confirmCloseSession={confirmCloseSession}
+          showParked={showParked}
+          parkedList={parkedList}
+          setShowParked={setShowParked}
+          resumeParked={resumeParked}
+          discardParked={discardParked}
+          showFinalizeConfirm={showFinalizeConfirm}
+          setShowFinalizeConfirm={setShowFinalizeConfirm}
+          handleFinalize={handleFinalize}
           total={total}
           totalItems={totalItems}
-          splitsCount={splits.length}
-          onCancel={() => setShowFinalizeConfirm(false)}
-          onConfirm={() => { setShowFinalizeConfirm(false); handleFinalize(true); }}
+          splitsLength={splits.length}
         />
       </>
     </Shell>
