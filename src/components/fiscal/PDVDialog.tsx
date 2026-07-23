@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { formatBRL } from '@/lib/formatters';
 import {
-  Trash2, ShoppingCart, ChevronRight, Send, Package, Lock, Unlock,
-  Loader2, AlertCircle, Pause, Play,
+  Trash2, ShoppingCart, ChevronRight, Send, Package, Loader2, AlertCircle, Pause, Play,
 } from 'lucide-react';
 import { Button } from '@/ui/base/button';
 import { Dialog, DialogContent } from '@/ui/base/dialog';
@@ -12,16 +10,10 @@ import { useClients, type DbClient, useUpdateClient } from '@/hooks/commercial/u
 import { useActiveCategories } from '@/hooks/inventory/useCategories';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 
-import { PDVPixDialog } from './PDVPixDialog';
-import { PDVCloseSessionDialog } from './PDVCloseSessionDialog';
-import { PDVParkedDialog } from './PDVParkedDialog';
 import { parkSale } from './pdvParkedStorage';
 import { PDVCustomerCard } from './pdv/PDVCustomerCard';
-import { PDVCustomerPicker } from './pdv/PDVCustomerPicker';
 import { PDVPaymentPanel } from './pdv/PDVPaymentPanel';
-import { PDVFinalizeConfirmDialog } from './pdv/PDVFinalizeConfirmDialog';
 import { PDVSessionBar } from './pdv/PDVSessionBar';
-import { PDVOpenSessionDialog, PDVCashMovementDialog } from './pdv/PDVCashDialogs';
 import { PDVCatalogPanel } from './pdv/PDVCatalogPanel';
 import { PDVCartLines } from './pdv/PDVCartLines';
 import { PDVTotalsCard } from './pdv/PDVTotalsCard';
@@ -33,6 +25,8 @@ import { usePDVParked } from './pdv/usePDVParked';
 import { usePDVShortcuts } from './pdv/usePDVShortcuts';
 import { usePDVProductFilter, usePDVClientFilter } from './pdv/usePDVFilters';
 import { usePDVFinalize } from './pdv/usePDVFinalize';
+import { PDVLockOverlay, PDVShortcutsHint } from './pdv/PDVLockOverlay';
+import { PDVDialogsStack } from './pdv/PDVDialogsStack';
 
 
 interface PDVDialogProps {
@@ -257,18 +251,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
   return (
     <Shell>
       <>
-        {screenLocked && (
-          <div className="absolute inset-0 z-50 bg-background/95 backdrop-blur-xl flex flex-col items-center justify-center gap-6">
-            <Lock className="h-16 w-16 text-primary" />
-            <div className="text-center">
-              <p className="text-2xl font-black uppercase tracking-widest">PDV Bloqueado</p>
-              <p className="text-sm text-muted-foreground mt-2">Aguardando reautenticação do operador</p>
-            </div>
-            <Button size="lg" onClick={() => setScreenLocked(false)} className="gap-2">
-              <Unlock className="h-4 w-4" /> Desbloquear
-            </Button>
-          </div>
-        )}
+        {screenLocked && <PDVLockOverlay onUnlock={() => setScreenLocked(false)} />}
 
         <div className="flex flex-col h-full">
           <PDVSessionBar
@@ -406,76 +389,50 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
                     )}
                   </Button>
                 )}
-                <div className="mt-3 flex items-center justify-center gap-3 text-[9px] font-bold text-muted-foreground uppercase tracking-widest flex-wrap">
-                  <span>F1 Dinh</span><span>F2 Créd</span><span>F3 Déb</span><span>F4 PIX</span><span>F5 Voucher</span><span>F6 Fiado</span>
-                  <span className="opacity-40">|</span>
-                  <span>F7 Suspender</span><span>F8 Retomar</span><span>F9 Limpar</span><span>F10 Finalizar</span><span>Ctrl+L Bloq</span>
-                </div>
+                <PDVShortcutsHint />
               </div>
             </div>
           </div>
         </div>
 
-        <PDVOpenSessionDialog
-          open={showOpenSession}
+        <PDVDialogsStack
+          showOpenSession={showOpenSession}
           openingAmount={openingAmount}
-          onChangeAmount={setOpeningAmount}
-          onCancel={() => setShowOpenSession(false)}
-          onConfirm={openSession}
-        />
-
-        <PDVCashMovementDialog
-          type={showCashMovement}
+          setOpeningAmount={setOpeningAmount}
+          setShowOpenSession={setShowOpenSession}
+          openSession={openSession}
+          showCashMovement={showCashMovement}
           cashBalance={cashBalance}
-          amount={movementAmount}
-          note={movementNote}
-          onChangeAmount={setMovementAmount}
-          onChangeNote={setMovementNote}
-          onCancel={() => setShowCashMovement(null)}
-          onConfirm={registerMovement}
-        />
-
-        <PDVCustomerPicker
-          open={showCustomerPicker}
-          query={customerQuery}
+          movementAmount={movementAmount}
+          movementNote={movementNote}
+          setMovementAmount={setMovementAmount}
+          setMovementNote={setMovementNote}
+          setShowCashMovement={setShowCashMovement}
+          registerMovement={registerMovement}
+          showCustomerPicker={showCustomerPicker}
+          customerQuery={customerQuery}
           filteredClients={filteredClients}
-          onQueryChange={setCustomerQuery}
-          onSelect={applyCustomer}
-          onClose={() => setShowCustomerPicker(false)}
-        />
-
-        <PDVPixDialog
-          open={!!showPixDialog}
-          amount={showPixDialog?.amount || 0}
-          onConfirm={() => setShowPixDialog(null)}
-          onCancel={() => {
-            if (showPixDialog) removeSplit(showPixDialog.splitId);
-            setShowPixDialog(null);
-          }}
-        />
-
-        <PDVCloseSessionDialog
-          open={showCloseSession}
-          summary={closeSessionSummary}
-          onCancel={() => setShowCloseSession(false)}
-          onClose={confirmCloseSession}
-        />
-
-        <PDVParkedDialog
-          open={showParked}
-          parked={parkedList}
-          onClose={() => setShowParked(false)}
-          onResume={resumeParked}
-          onDelete={discardParked}
-        />
-
-        <PDVFinalizeConfirmDialog
-          open={showFinalizeConfirm}
+          setCustomerQuery={setCustomerQuery}
+          applyCustomer={applyCustomer}
+          setShowCustomerPicker={setShowCustomerPicker}
+          showPixDialog={showPixDialog}
+          setShowPixDialog={setShowPixDialog}
+          removeSplit={removeSplit}
+          showCloseSession={showCloseSession}
+          closeSessionSummary={closeSessionSummary}
+          setShowCloseSession={setShowCloseSession}
+          confirmCloseSession={confirmCloseSession}
+          showParked={showParked}
+          parkedList={parkedList}
+          setShowParked={setShowParked}
+          resumeParked={resumeParked}
+          discardParked={discardParked}
+          showFinalizeConfirm={showFinalizeConfirm}
+          setShowFinalizeConfirm={setShowFinalizeConfirm}
+          handleFinalize={handleFinalize}
           total={total}
           totalItems={totalItems}
-          splitsCount={splits.length}
-          onCancel={() => setShowFinalizeConfirm(false)}
-          onConfirm={() => { setShowFinalizeConfirm(false); handleFinalize(true); }}
+          splitsLength={splits.length}
         />
       </>
     </Shell>
