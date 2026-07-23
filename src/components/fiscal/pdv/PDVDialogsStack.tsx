@@ -9,16 +9,16 @@ import { PDVOpenSessionDialog, PDVCashMovementDialog } from './PDVCashDialogs';
 interface Props {
   // Open session
   showOpenSession: boolean;
-  openingAmount: string;
-  setOpeningAmount: (v: string) => void;
+  openingAmount: number;
+  setOpeningAmount: (v: number) => void;
   setShowOpenSession: (v: boolean) => void;
   openSession: () => void;
   // Cash movement
   showCashMovement: 'suprimento' | 'sangria' | null;
   cashBalance: number;
-  movementAmount: string;
+  movementAmount: number;
   movementNote: string;
-  setMovementAmount: (v: string) => void;
+  setMovementAmount: (v: number) => void;
   setMovementNote: (v: string) => void;
   setShowCashMovement: (v: 'suprimento' | 'sangria' | null) => void;
   registerMovement: () => void;
