@@ -1,8 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { formatBRL } from '@/lib/formatters';
 import {
-  Trash2, ShoppingCart, ChevronRight, Send, Package, Lock, Unlock,
-  Loader2, AlertCircle, Pause, Play,
+  Trash2, ShoppingCart, ChevronRight, Send, Package, Loader2, AlertCircle, Pause, Play,
 } from 'lucide-react';
 import { Button } from '@/ui/base/button';
 import { Dialog, DialogContent } from '@/ui/base/dialog';
@@ -12,16 +10,10 @@ import { useClients, type DbClient, useUpdateClient } from '@/hooks/commercial/u
 import { useActiveCategories } from '@/hooks/inventory/useCategories';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 
-import { PDVPixDialog } from './PDVPixDialog';
-import { PDVCloseSessionDialog } from './PDVCloseSessionDialog';
-import { PDVParkedDialog } from './PDVParkedDialog';
 import { parkSale } from './pdvParkedStorage';
 import { PDVCustomerCard } from './pdv/PDVCustomerCard';
-import { PDVCustomerPicker } from './pdv/PDVCustomerPicker';
 import { PDVPaymentPanel } from './pdv/PDVPaymentPanel';
-import { PDVFinalizeConfirmDialog } from './pdv/PDVFinalizeConfirmDialog';
 import { PDVSessionBar } from './pdv/PDVSessionBar';
-import { PDVOpenSessionDialog, PDVCashMovementDialog } from './pdv/PDVCashDialogs';
 import { PDVCatalogPanel } from './pdv/PDVCatalogPanel';
 import { PDVCartLines } from './pdv/PDVCartLines';
 import { PDVTotalsCard } from './pdv/PDVTotalsCard';
@@ -33,6 +25,8 @@ import { usePDVParked } from './pdv/usePDVParked';
 import { usePDVShortcuts } from './pdv/usePDVShortcuts';
 import { usePDVProductFilter, usePDVClientFilter } from './pdv/usePDVFilters';
 import { usePDVFinalize } from './pdv/usePDVFinalize';
+import { PDVLockOverlay, PDVShortcutsHint } from './pdv/PDVLockOverlay';
+import { PDVDialogsStack } from './pdv/PDVDialogsStack';
 
 
 interface PDVDialogProps {
