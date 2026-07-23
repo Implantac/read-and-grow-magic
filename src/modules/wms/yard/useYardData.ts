@@ -61,7 +61,7 @@ export function useYardData() {
       if (status === 'docked') patch.docked_at = new Date().toISOString();
       if (status === 'finished' || status === 'cancelled') patch.finished_at = new Date().toISOString();
       if (dock_id !== undefined) patch.dock_id = dock_id;
-      const { error } = await supabase.from('yard_vehicles').update(patch).eq('id', id);
+      const { error } = await supabase.from('yard_vehicles').update(patch as never).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
