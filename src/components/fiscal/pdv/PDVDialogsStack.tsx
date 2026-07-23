@@ -37,7 +37,7 @@ interface Props {
   showCloseSession: boolean;
   closeSessionSummary: any;
   setShowCloseSession: (v: boolean) => void;
-  confirmCloseSession: () => void;
+  confirmCloseSession: (result: { countedAmount: number; difference: number }) => void;
   // Parked
   showParked: boolean;
   parkedList: any[];
