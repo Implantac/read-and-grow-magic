@@ -251,18 +251,7 @@ export function PDVDialog({ open, onOpenChange, onEmit, asPage = false }: PDVDia
   return (
     <Shell>
       <>
-        {screenLocked && (
-          <div className="absolute inset-0 z-50 bg-background/95 backdrop-blur-xl flex flex-col items-center justify-center gap-6">
-            <Lock className="h-16 w-16 text-primary" />
-            <div className="text-center">
-              <p className="text-2xl font-black uppercase tracking-widest">PDV Bloqueado</p>
-              <p className="text-sm text-muted-foreground mt-2">Aguardando reautenticação do operador</p>
-            </div>
-            <Button size="lg" onClick={() => setScreenLocked(false)} className="gap-2">
-              <Unlock className="h-4 w-4" /> Desbloquear
-            </Button>
-          </div>
-        )}
+        {screenLocked && <PDVLockOverlay onUnlock={() => setScreenLocked(false)} />}
 
         <div className="flex flex-col h-full">
           <PDVSessionBar
