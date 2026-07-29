@@ -1,5 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { isInternalCaller } from '../_shared/internal-secret.ts';
+import { requireAuth } from '../_shared/require-auth.ts';
 
 // Analisa comentário de uma resposta NPS via Lovable AI Gateway.
 // Extrai: sentiment (positive/neutral/negative), summary, categories[], keywords[].
@@ -9,11 +11,31 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') return json({ error: 'Método não permitido' }, 405);
   try {
     const { answer_id } = await req.json();
-    if (!answer_id) return json({ error: 'answer_id obrigatório' }, 400);
+    if (!answer_id || typeof answer_id !== 'string') return json({ error: 'answer_id obrigatório' }, 400);
 
     const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
-    const { data: ans } = await admin.from('nps_answers').select('id, score, category, comment').eq('id', answer_id).maybeSingle();
-    if (!ans || !ans.comment) return json({ ok: true, skipped: true });
+
+    // Autorização: chamada interna (nps-public-submit) OU usuário autenticado
+    // da mesma empresa dona da resposta.
+    let callerCompany: string | null = null;
+    const internal = await isInternalCaller(req, admin);
+    if (!internal) {
+      const auth = await requireAuth(req, { roles: ['admin', 'manager', 'operator'] });
+      if (!auth.ok) return json({ error: auth.message }, auth.status);
+      if (!auth.companyId) return json({ error: 'Forbidden' }, 403);
+      callerCompany = auth.companyId;
+    }
+
+    const { data: ans } = await admin
+      .from('nps_answers')
+      .select('id, score, category, comment, company_id')
+      .eq('id', answer_id)
+      .maybeSingle();
+    if (!ans) return json({ error: 'not_found' }, 404);
+    if (callerCompany && (ans as any).company_id !== callerCompany) {
+      return json({ error: 'Forbidden' }, 403);
+    }
+    if (!ans.comment) return json({ ok: true, skipped: true });
 
     const key = Deno.env.get('LOVABLE_API_KEY');
     if (!key) return json({ error: 'AI indisponível' }, 500);
@@ -45,7 +67,7 @@ Deno.serve(async (req) => {
     return json({ ok: true, ...parsed });
   } catch (e) {
     console.error(e);
-    return json({ error: String(e) }, 500);
+    return json({ error: 'Erro interno' }, 500);
   }
 });
 
