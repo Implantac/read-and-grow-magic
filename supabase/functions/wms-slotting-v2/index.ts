@@ -5,6 +5,7 @@
 //  - Weight/zone constraints (heavy → low pick_sequence; refrig → cold zone)
 //  - What-if simulation (mode=simulate returns suggestions without persisting)
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { requireAuth } from "../_shared/require-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -16,6 +17,14 @@ type Mode = "simulate" | "persist";
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
+  const auth = await requireAuth(req, { roles: ["admin", "manager"], allowCron: true });
+  if (!auth.ok) {
+    return new Response(JSON.stringify({ error: auth.message }), {
+      status: auth.status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   const admin = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
@@ -25,6 +34,15 @@ Deno.serve(async (req) => {
     const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
     const mode: Mode = body?.mode === "persist" ? "persist" : "simulate";
     let companyIds: string[] = body?.company_id ? [body.company_id] : [];
+    if (!auth.viaCron) {
+      if (!auth.companyId) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      companyIds = [auth.companyId];
+    }
     if (companyIds.length === 0) {
       const { data } = await admin.from("companies").select("id");
       companyIds = (data ?? []).map((c: any) => c.id);

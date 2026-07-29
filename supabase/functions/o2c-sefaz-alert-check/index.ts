@@ -1,6 +1,7 @@
 // Scheduled: computa taxa de falha SEFAZ nos últimos 7 dias por empresa e cria
 // commercial_alerts (severidade high) quando ultrapassa 10%.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
+import { requireAuth } from "../_shared/require-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -10,18 +11,36 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const auth = await requireAuth(req, { roles: ["admin", "manager"], allowCron: true });
+  if (!auth.ok) {
+    return new Response(JSON.stringify({ error: auth.message }), {
+      status: auth.status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
   const since = new Date(Date.now() - 7 * 86_400_000).toISOString();
-  const { data: events, error } = await supabase
+  let eventsQuery = supabase
     .from("cross_module_events")
     .select("company_id, event_type, created_at")
     .in("event_type", ["o2c.sefaz.ok", "o2c.sefaz.failed"])
     .gte("created_at", since)
     .limit(50_000);
+  if (!auth.viaCron) {
+    if (!auth.companyId) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    eventsQuery = eventsQuery.eq("company_id", auth.companyId);
+  }
+  const { data: events, error } = await eventsQuery;
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), {

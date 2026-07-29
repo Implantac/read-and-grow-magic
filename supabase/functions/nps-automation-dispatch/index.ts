@@ -3,6 +3,7 @@
 // Body opcional: { since?: string ISO }  — default: últimos 15 min.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+import { requireAuth } from '../_shared/require-auth.ts';
 
 // Mapeamento: nome do trigger na automação -> event_type no cross_module_events
 const TRIGGER_MAP: Record<string, string[]> = {
@@ -19,17 +20,35 @@ const TRIGGER_MAP: Record<string, string[]> = {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
+  const auth = await requireAuth(req, { roles: ['admin', 'manager'], allowCron: true });
+  if (!auth.ok) {
+    return new Response(JSON.stringify({ error: auth.message }), {
+      status: auth.status,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
     const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
     const body = (await req.json().catch(() => ({}))) as { since?: string };
     const since = body.since ?? new Date(Date.now() - 15 * 60 * 1000).toISOString();
 
     // Coleta eventos recentes ainda não processados por NPS
-    const { data: events } = await admin
+    let eventsQuery = admin
       .from('cross_module_events')
       .select('id, company_id, event_type, entity_id, payload, created_at')
       .gte('created_at', since)
       .limit(500);
+    if (!auth.viaCron) {
+      if (!auth.companyId) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      eventsQuery = eventsQuery.eq('company_id', auth.companyId);
+    }
+    const { data: events } = await eventsQuery;
 
     if (!events || events.length === 0) return json({ processed: 0 });
 

@@ -4,9 +4,18 @@
 // ForecastSnapshotHistory e pelo Cérebro Nativo para detectar desvios.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { requireAuth } from "../_shared/require-auth.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const auth = await requireAuth(req, { roles: ["admin", "manager"], allowCron: true });
+  if (!auth.ok) {
+    return new Response(JSON.stringify({ error: auth.message }), {
+      status: auth.status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   try {
     const admin = createClient(
@@ -17,10 +26,17 @@ Deno.serve(async (req) => {
     const now = new Date();
     const periodKey = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
 
-    const { data: companies, error: cErr } = await admin
-      .from("companies")
-      .select("id")
-      .eq("is_active", true);
+    let companiesQuery = admin.from("companies").select("id").eq("is_active", true);
+    if (!auth.viaCron) {
+      if (!auth.companyId) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      companiesQuery = companiesQuery.eq("id", auth.companyId);
+    }
+    const { data: companies, error: cErr } = await companiesQuery;
     if (cErr) throw cErr;
 
     const results: Array<{ company_id: string; ok: boolean; error?: string; snapshot_id?: string }> = [];
