@@ -1,6 +1,7 @@
 // WMS Slotting Engine — daily recompute
 // Generates slotting_suggestions per company based on ABC, distance and capacity.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { requireAuth } from "../_shared/require-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,6 +10,14 @@ const corsHeaders = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  const auth = await requireAuth(req, { roles: ["admin", "manager"], allowCron: true });
+  if (!auth.ok) {
+    return new Response(JSON.stringify({ error: auth.message }), {
+      status: auth.status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   const admin = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -20,6 +29,15 @@ Deno.serve(async (req) => {
     if (req.method === "POST") {
       const body = await req.json().catch(() => ({}));
       if (body?.company_id) companyIds = [body.company_id];
+    }
+    if (!auth.viaCron) {
+      if (!auth.companyId) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      companyIds = [auth.companyId];
     }
     if (companyIds.length === 0) {
       const { data } = await admin.from("companies").select("id");
