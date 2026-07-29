@@ -144,4 +144,4 @@ function escape(s: string) {
 }
 function safeParse(s: string) { try { return JSON.parse(s); } catch { return s; } }
 
-Deno.serve(instrument("notify-incident-email", handler, contextFromAuth));
+Deno.serve(instrument(handler, { source: "notify-incident-email", getContext: contextFromAuth }));
