@@ -1,5 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+import { requireAuth } from "../_shared/require-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,6 +10,20 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
+  const auth = await requireAuth(req, { roles: ["admin", "manager"], allowCron: true });
+  if (!auth.ok) {
+    return new Response(JSON.stringify({ error: auth.message }), {
+      status: auth.status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  if (!auth.viaCron && !auth.companyId) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const supabase = createClient(supabaseUrl, serviceKey);
@@ -17,13 +32,15 @@ Deno.serve(async (req) => {
     const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
     const limit: number = Math.min(Number(body.limit ?? 25), 100);
 
-    const { data: pending, error } = await supabase
+    let pendingQuery = supabase
       .from("storefront_notifications")
       .select("id, order_id, storefront_id, event_type, channel, recipient, subject, body, attempts")
       .eq("status", "pending")
       .lt("attempts", 5)
       .order("created_at", { ascending: true })
       .limit(limit);
+    if (auth.companyId) pendingQuery = pendingQuery.eq("company_id", auth.companyId);
+    const { data: pending, error } = await pendingQuery;
 
     if (error) throw error;
 
@@ -85,7 +102,8 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e: any) {
-    return new Response(JSON.stringify({ error: String(e?.message ?? e) }), {
+    console.error("[commerce-notify]", e);
+    return new Response(JSON.stringify({ error: "Erro interno" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

@@ -8601,6 +8601,24 @@ export type Database = {
         }
         Relationships: []
       }
+      internal_fn_secrets: {
+        Row: {
+          created_at: string
+          name: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          name: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          name?: string
+          value?: string
+        }
+        Relationships: []
+      }
       inventory_sessions: {
         Row: {
           abc_class: string | null
@@ -23009,6 +23027,7 @@ export type Database = {
         Args: { _company_id: string }
         Returns: string
       }
+      get_internal_fn_secret: { Args: never; Returns: string }
       get_operator_productivity: {
         Args: { p_days?: number }
         Returns: {
