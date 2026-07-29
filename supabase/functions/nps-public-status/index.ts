@@ -38,7 +38,8 @@ Deno.serve(async (req) => {
     return json({ status: 'pending' });
   } catch (e) {
     console.error('nps-public-status', e);
-    return json({ error: String(e) }, 500);
+    console.error('nps-public-status', e);
+    return json({ error: 'Erro interno' }, 500);
   }
 });
 

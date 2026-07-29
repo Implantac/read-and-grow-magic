@@ -114,7 +114,8 @@ Deno.serve(async (req) => {
     return json({ ok: true, category: ans.category });
   } catch (e) {
     console.error('nps-public-submit', e);
-    return json({ error: String(e) }, 500);
+    console.error('nps-public-submit', e);
+    return json({ error: 'Erro interno' }, 500);
   }
 });
 

@@ -30,7 +30,8 @@ Deno.serve(async (req) => {
 
     return json({ campaign, questions: questions ?? [], company, token });
   } catch (e) {
-    return json({ error: String(e) }, 500);
+    console.error('nps-public-get', e);
+    return json({ error: 'Erro interno' }, 500);
   }
 });
 
