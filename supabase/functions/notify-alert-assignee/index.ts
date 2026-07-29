@@ -1,6 +1,7 @@
 // Sprint Q — Notifica o responsável de um alerta de divergência
 // Envia e-mail quando um alerta é atribuído ou quando o SLA está próximo do vencimento.
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
+import { isInternalCaller, unauthorized } from "../_shared/internal-secret.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -32,6 +33,9 @@ async function sendEmail(to: string[], subject: string, html: string) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  // Somente chamadores internos (trigger pg_net, cron ou edge-to-edge).
+  if (!(await isInternalCaller(req))) return unauthorized(corsHeaders);
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,

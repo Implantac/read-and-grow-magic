@@ -1,6 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
 import { instrument, contextFromAuth } from "../_shared/observability.ts";
+import { isInternalCaller, unauthorized } from "../_shared/internal-secret.ts";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 const DEFAULT_FROM = Deno.env.get("INCIDENT_EMAIL_FROM") ?? "SRE Alerts <onboarding@resend.dev>";
@@ -26,6 +27,9 @@ function isWithinQuietHours(settings: any): boolean {
 
 async function handler(req: Request): Promise<Response> {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  // Somente chamadores internos (trigger pg_net, cron ou edge-to-edge).
+  if (!(await isInternalCaller(req))) return unauthorized(corsHeaders);
 
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
