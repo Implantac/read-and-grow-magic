@@ -3,6 +3,7 @@
 // Uses Lovable AI Gateway with gemini-3-flash-preview and returns a strict JSON.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { buildCanonicalMetrics, formatCanonicalBlock } from "../_shared/canonical-metrics.ts";
+import { requireAuth } from "../_shared/require-auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -64,6 +65,14 @@ async function callGateway(prompt: string, system: string): Promise<any> {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  const auth = await requireAuth(req);
+  if (!auth.ok) {
+    return new Response(JSON.stringify({ error: auth.message }), {
+      status: auth.status,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const body = (await req.json()) as Body;
     if (!body.entityKey) {
@@ -75,14 +84,16 @@ Deno.serve(async (req) => {
 
     const hint = ENTITY_HINTS[body.entityKey] ?? { agent: "CTO", hint: "Indicador genérico." };
     // Fonte única de verdade: injeta métricas canônicas quando temos companyId
+    // Escopo de tenant: ignora companyId do cliente, usa o da sessão.
+    const companyId = auth.companyId;
     let canonicalBlock = "";
-    if (body.companyId) {
+    if (companyId) {
       try {
         const admin = createClient(
           Deno.env.get("SUPABASE_URL")!,
           Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
         );
-        const canonical = await buildCanonicalMetrics(admin, body.companyId);
+        const canonical = await buildCanonicalMetrics(admin, companyId);
         canonicalBlock = "\n\n" + formatCanonicalBlock(canonical);
       } catch (e) {
         console.error("canonical metrics error:", e);
