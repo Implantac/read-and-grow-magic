@@ -1,5 +1,8 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret',
+};
 import { isInternalCaller } from '../_shared/internal-secret.ts';
 import { requireAuth } from '../_shared/require-auth.ts';
 

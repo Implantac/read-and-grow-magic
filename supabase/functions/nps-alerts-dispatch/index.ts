@@ -1,7 +1,10 @@
 // Avalia regras de alerta contra uma resposta NPS e cria notificações + envia e-mail.
 // Body: { company_id, answer_id }  (chamado internamente com service-role)
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors';
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-internal-secret, x-cron-secret',
+};
 import { isInternalCaller, unauthorized } from '../_shared/internal-secret.ts';
 
 const GATEWAY_URL = 'https://connector-gateway.lovable.dev/resend';
