@@ -13,6 +13,6 @@ export const QK = {
 };
 
 export function useCompanyId() {
-  const { currentCompany } = useEnterprise() as any;
-  return currentCompany?.id as string | undefined;
+  const { currentCompany } = useEnterprise();
+  return currentCompany?.id;
 }
