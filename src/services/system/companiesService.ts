@@ -1,17 +1,28 @@
 import { supabase } from '@/integrations/supabase/client';
 import { BaseService } from '../shared/baseService';
+import type { TablesUpdate } from '@/integrations/supabase/types';
 import type { Company, CompanyStatus } from '@/types/administration';
+
+export interface CompanyBranchRef {
+  id: string;
+  name: string;
+  code?: string;
+  companyId: string;
+}
+
+export type CompanyWithBranches = Company & { branches: CompanyBranchRef[] };
 
 export class CompaniesService extends BaseService<'companies'> {
   constructor() {
     super('companies');
   }
 
-  async getAllDetailed(): Promise<Company[]> {
+  async getAllDetailed(): Promise<CompanyWithBranches[]> {
     const data = await this.getAll({ orderBy: 'name', ascending: true });
-    
-    const allCompanies = (data || []).map(company => ({
+
+    const allCompanies: CompanyWithBranches[] = (data || []).map(company => ({
       id: company.id,
+
       name: company.name,
       tradeName: company.trade_name,
       cnpj: company.cnpj,
