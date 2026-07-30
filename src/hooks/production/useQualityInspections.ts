@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import type { TablesInsert } from "@/integrations/supabase/types";
 
 export interface QualityInspection {
   id: string;
@@ -27,7 +28,7 @@ export function useQualityInspections() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('quality_inspections')
       .select('*, production_orders(order_number), production_steps(name)')
       .order('inspection_date', { ascending: false });
@@ -45,7 +46,9 @@ export function useQualityInspections() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const create = async (inspection: Partial<QualityInspection>) => {
-    const { error } = await (supabase as any).from('quality_inspections').insert(inspection as any);
+    const { error } = await supabase
+      .from('quality_inspections')
+      .insert(inspection as TablesInsert<'quality_inspections'>);
     if (error) { toast.error('Erro ao registrar inspeção'); return false; }
     toast.success('Inspeção registrada');
     await fetch();

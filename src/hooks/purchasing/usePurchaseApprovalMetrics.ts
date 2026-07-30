@@ -42,10 +42,10 @@ export function usePurchaseApprovalMetrics(days = 30) {
     queryFn: async () => {
       const to = new Date();
       const from = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
-      const { data, error } = await supabase.rpc(
-        "purchase_approvals_metrics" as any,
-        { p_from: from.toISOString(), p_to: to.toISOString() }
-      );
+      const { data, error } = await supabase.rpc("purchase_approvals_metrics", {
+        p_from: from.toISOString(),
+        p_to: to.toISOString(),
+      });
       if (error) throw error;
       return data as unknown as ApprovalMetrics;
     },

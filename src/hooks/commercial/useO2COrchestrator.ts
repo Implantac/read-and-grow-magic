@@ -30,8 +30,9 @@ export function useO2COrchestrator(orderId: string | null) {
         body: { order_id: orderId },
       });
       if (fnErr) throw fnErr;
-      setRunId((data as any)?.run_id ?? null);
-      const results = ((data as any)?.results ?? []) as O2CStepEvent[];
+      const payload = (data ?? {}) as { run_id?: string; results?: O2CStepEvent[] };
+      setRunId(payload.run_id ?? null);
+      const results = payload.results ?? [];
       setEvents(results.map((r) => ({ ...r, at: new Date().toISOString() })));
     } catch (e: any) {
       setError(e?.message ?? 'Falha ao executar Order-to-Cash');

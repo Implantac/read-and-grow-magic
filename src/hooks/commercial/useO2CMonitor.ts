@@ -85,7 +85,7 @@ export function useO2CMonitor(windowDays = 7, sellerId?: string | null) {
           perStep[step].running += 1;
           runStarts.set(key, new Date(r.created_at).getTime());
         } else if (status === 'ok' || status === 'failed' || status === 'skipped') {
-          (perStep[step] as any)[status] += 1;
+          perStep[step][status] += 1;
           const startedAt = runStarts.get(key);
           if (startedAt) {
             perStep[step].durations.push(new Date(r.created_at).getTime() - startedAt);

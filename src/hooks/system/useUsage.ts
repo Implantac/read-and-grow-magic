@@ -49,7 +49,12 @@ export async function checkQuota(
     _metric: metric,
   });
   if (error) throw error;
-  const q = (data ?? {}) as any;
+  const q = (data ?? {}) as {
+    allowed?: boolean;
+    used?: number;
+    limit?: number | null;
+    remaining?: number | null;
+  };
   return {
     allowed: !!q.allowed,
     current: q.current ?? 0,
