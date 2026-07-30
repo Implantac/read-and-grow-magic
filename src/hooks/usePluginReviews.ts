@@ -5,11 +5,12 @@ import { handleMutationError, toastSuccess } from "@/lib/toastHelpers";
 export interface PluginReview {
   id: string;
   plugin_id: string;
-  user_id: string;
   rating: number;
   comment: string | null;
   created_at: string;
   updated_at: string;
+  /** True when the review belongs to the signed-in user. */
+  is_mine: boolean;
 }
 
 export interface PluginRatingSummary {
@@ -25,49 +26,43 @@ export function usePluginRatings() {
     queryKey: ["plugin_ratings_summary"],
     staleTime: 60_000,
     queryFn: async (): Promise<Record<string, PluginRatingSummary>> => {
-      const { data, error } = await supabase
-        .from("plugin_reviews")
-        .select("plugin_id, rating");
+      const { data, error } = await supabase.rpc("get_plugin_rating_summary");
       if (error) throw error;
       const map: Record<string, PluginRatingSummary> = {};
       (data ?? []).forEach((r) => {
-        const s = (map[r.plugin_id] ??= {
+        map[r.plugin_id] = {
           plugin_id: r.plugin_id,
-          avg: 0,
-          count: 0,
-          histogram: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
-        });
-        s.count += 1;
-        s.histogram[r.rating as 1 | 2 | 3 | 4 | 5] += 1;
-      });
-      Object.values(map).forEach((s) => {
-        const total = (Object.entries(s.histogram) as [string, number][]).reduce(
-          (acc, [k, v]) => acc + Number(k) * v,
-          0,
-        );
-        s.avg = s.count ? total / s.count : 0;
+          avg: Number(r.avg_rating ?? 0),
+          count: Number(r.review_count ?? 0),
+          histogram: {
+            1: Number(r.r1 ?? 0),
+            2: Number(r.r2 ?? 0),
+            3: Number(r.r3 ?? 0),
+            4: Number(r.r4 ?? 0),
+            5: Number(r.r5 ?? 0),
+          },
+        };
       });
       return map;
     },
   });
 }
 
-/** All reviews for one plugin, newest first. */
+/** All reviews for one plugin, newest first (anonymized — no author identity). */
 export function usePluginReviews(pluginId: string | null) {
   return useQuery({
     queryKey: ["plugin_reviews", pluginId],
     enabled: !!pluginId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("plugin_reviews")
-        .select("*")
-        .eq("plugin_id", pluginId!)
-        .order("created_at", { ascending: false });
+      const { data, error } = await supabase.rpc("get_plugin_reviews", {
+        p_plugin_id: pluginId!,
+      });
       if (error) throw error;
       return (data ?? []) as PluginReview[];
     },
   });
 }
+
 
 export function useUpsertPluginReview() {
   const qc = useQueryClient();
