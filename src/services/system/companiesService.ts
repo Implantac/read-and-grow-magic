@@ -1,17 +1,28 @@
 import { supabase } from '@/integrations/supabase/client';
 import { BaseService } from '../shared/baseService';
+import type { TablesUpdate } from '@/integrations/supabase/types';
 import type { Company, CompanyStatus } from '@/types/administration';
+
+export interface CompanyBranchRef {
+  id: string;
+  name: string;
+  code?: string;
+  companyId: string;
+}
+
+export type CompanyWithBranches = Company & { branches: CompanyBranchRef[] };
 
 export class CompaniesService extends BaseService<'companies'> {
   constructor() {
     super('companies');
   }
 
-  async getAllDetailed(): Promise<Company[]> {
+  async getAllDetailed(): Promise<CompanyWithBranches[]> {
     const data = await this.getAll({ orderBy: 'name', ascending: true });
-    
-    const allCompanies = (data || []).map(company => ({
+
+    const allCompanies: CompanyWithBranches[] = (data || []).map(company => ({
       id: company.id,
+
       name: company.name,
       tradeName: company.trade_name,
       cnpj: company.cnpj,
@@ -29,7 +40,10 @@ export class CompaniesService extends BaseService<'companies'> {
         zipCode: company.address_zip_code || '',
         country: 'Brasil'
       },
-      logo: company.settings && typeof company.settings === 'object' && 'logo_url' in company.settings ? (company.settings as any).logo_url : undefined,
+      logo:
+        company.settings && typeof company.settings === 'object' && 'logo_url' in company.settings
+          ? String((company.settings as Record<string, unknown>).logo_url ?? '') || undefined
+          : undefined,
       status: company.status as CompanyStatus,
       isHeadquarters: company.is_headquarters,
       parentCompanyId: company.parent_company_id,
@@ -39,27 +53,26 @@ export class CompaniesService extends BaseService<'companies'> {
       taxRegime: company.tax_regime,
       createdAt: company.created_at,
       updatedAt: company.updated_at,
-      branches: [] as any[],
+      branches: [],
     }));
 
     // Build hierarchy: root companies get their sub-companies as branches
     const rootCompanies = allCompanies.filter(c => !c.parentCompanyId || c.isHeadquarters);
-    
+
     rootCompanies.forEach(root => {
-      root.branches = allCompanies.filter(c => c.parentCompanyId === root.id);
+      const children: CompanyBranchRef[] = allCompanies
+        .filter(c => c.parentCompanyId === root.id)
+        .map(c => ({ id: c.id, name: c.name, companyId: root.id }));
+
       // If no sub-companies, add itself as a "Matriz" branch to ensure dropdown works
-      if (root.branches.length === 0) {
-        root.branches = [{
-          id: root.id,
-          name: 'Matriz',
-          code: '001',
-          companyId: root.id
-        }];
-      }
+      root.branches = children.length > 0
+        ? children
+        : [{ id: root.id, name: 'Matriz', code: '001', companyId: root.id }];
     });
 
-    return rootCompanies as any;
+    return rootCompanies;
   }
+
 
   async createDetailed(company: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) {
     return this.create({
@@ -86,7 +99,7 @@ export class CompaniesService extends BaseService<'companies'> {
   }
 
   async updateDetailed(id: string, company: Partial<Company>) {
-    const updateData: any = {};
+    const updateData: TablesUpdate<'companies'> = {};
     if (company.name) updateData.name = company.name;
     if (company.tradeName) updateData.trade_name = company.tradeName;
     if (company.cnpj) updateData.cnpj = company.cnpj;
@@ -105,8 +118,8 @@ export class CompaniesService extends BaseService<'companies'> {
     if (company.segment) updateData.segment = company.segment;
     if (company.subSegment) updateData.sub_segment = company.subSegment;
     if (company.companySize) updateData.company_size = company.companySize;
-    if (company.taxRegime) updateData.tax_regime = company.taxRegime;
-    
+    if (company.taxRegime) updateData.tax_regime = company.taxRegime as TablesUpdate<'companies'>['tax_regime'];
+
     return this.update(id, updateData);
   }
 }
@@ -114,7 +127,8 @@ export class CompaniesService extends BaseService<'companies'> {
 // Backward compatibility object
 export const companiesService = {
   getAll: () => new CompaniesService().getAllDetailed(),
-  create: (c: any) => new CompaniesService().createDetailed(c),
-  update: (id: string, c: any) => new CompaniesService().updateDetailed(id, c),
+  create: (c: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) => new CompaniesService().createDetailed(c),
+  update: (id: string, c: Partial<Company>) => new CompaniesService().updateDetailed(id, c),
   delete: (id: string) => new CompaniesService().delete(id),
 };
+
