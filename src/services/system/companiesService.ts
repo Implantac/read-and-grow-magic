@@ -99,7 +99,7 @@ export class CompaniesService extends BaseService<'companies'> {
   }
 
   async updateDetailed(id: string, company: Partial<Company>) {
-    const updateData: any = {};
+    const updateData: TablesUpdate<'companies'> = {};
     if (company.name) updateData.name = company.name;
     if (company.tradeName) updateData.trade_name = company.tradeName;
     if (company.cnpj) updateData.cnpj = company.cnpj;
@@ -118,8 +118,8 @@ export class CompaniesService extends BaseService<'companies'> {
     if (company.segment) updateData.segment = company.segment;
     if (company.subSegment) updateData.sub_segment = company.subSegment;
     if (company.companySize) updateData.company_size = company.companySize;
-    if (company.taxRegime) updateData.tax_regime = company.taxRegime;
-    
+    if (company.taxRegime) updateData.tax_regime = company.taxRegime as TablesUpdate<'companies'>['tax_regime'];
+
     return this.update(id, updateData);
   }
 }
@@ -127,7 +127,8 @@ export class CompaniesService extends BaseService<'companies'> {
 // Backward compatibility object
 export const companiesService = {
   getAll: () => new CompaniesService().getAllDetailed(),
-  create: (c: any) => new CompaniesService().createDetailed(c),
-  update: (id: string, c: any) => new CompaniesService().updateDetailed(id, c),
+  create: (c: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) => new CompaniesService().createDetailed(c),
+  update: (id: string, c: Partial<Company>) => new CompaniesService().updateDetailed(id, c),
   delete: (id: string) => new CompaniesService().delete(id),
 };
+
