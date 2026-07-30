@@ -28,6 +28,6 @@ export const dreService = {
       _channel: params.channel ?? null,
     });
     if (error) throw error;
-    return (data ?? []) as any[];
+    return (data ?? []) as unknown as Record<string, unknown>[];
   }
 };

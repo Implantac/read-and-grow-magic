@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { BaseService } from '../shared/baseService';
+import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 /**
  * Service consolidado para gerenciamento de clientes.
@@ -14,14 +15,14 @@ class ClientsService {
       .select('*')
       .order('name', { ascending: true });
     if (error) throw error;
-    return (data || []) as any[];
+    return (data || []) as Tables<'clients'>[];
   }
 
-  async create(client: any) {
+  async create(client: TablesInsert<'clients'>) {
     return this.base.create(client);
   }
 
-  async update(id: string, client: any) {
+  async update(id: string, client: TablesUpdate<'clients'>) {
     return this.base.update(id, client);
   }
 

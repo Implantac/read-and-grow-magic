@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { BaseService } from '../shared/baseService';
 import type { AccountPayable, AccountReceivable } from '@/types/financial';
+import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 class FinancialService extends BaseService<'financial_ledger'> {
   constructor() {
@@ -20,7 +21,7 @@ class FinancialService extends BaseService<'financial_ledger'> {
   async createReceivable(account: Partial<AccountReceivable>): Promise<AccountReceivable> {
     const { data, error } = await supabase
       .from('accounts_receivable')
-      .insert(account as any)
+      .insert(account as TablesInsert<'accounts_receivable'>)
       .select()
       .single();
     if (error) throw error;
@@ -30,7 +31,7 @@ class FinancialService extends BaseService<'financial_ledger'> {
   async updateReceivable(id: string, updates: Partial<AccountReceivable>): Promise<AccountReceivable> {
     const { data, error } = await supabase
       .from('accounts_receivable')
-      .update({ ...updates, updated_at: new Date().toISOString() } as any)
+      .update({ ...updates, updated_at: new Date().toISOString() } as TablesUpdate<'accounts_receivable'>)
       .eq('id', id)
       .select()
       .single();
@@ -59,7 +60,7 @@ class FinancialService extends BaseService<'financial_ledger'> {
   async createPayable(account: Partial<AccountPayable>): Promise<AccountPayable> {
     const { data, error } = await supabase
       .from('accounts_payable')
-      .insert(account as any)
+      .insert(account as TablesInsert<'accounts_payable'>)
       .select()
       .single();
     if (error) throw error;
@@ -69,7 +70,7 @@ class FinancialService extends BaseService<'financial_ledger'> {
   async updatePayable(id: string, updates: Partial<AccountPayable>): Promise<AccountPayable> {
     const { data, error } = await supabase
       .from('accounts_payable')
-      .update({ ...updates, updated_at: new Date().toISOString() } as any)
+      .update({ ...updates, updated_at: new Date().toISOString() } as TablesUpdate<'accounts_payable'>)
       .eq('id', id)
       .select()
       .single();
@@ -86,14 +87,14 @@ class FinancialService extends BaseService<'financial_ledger'> {
   }
 
   // Ledger
-  async getLedger(filters?: { from?: string; to?: string; bankAccountId?: string }): Promise<any[]> {
+  async getLedger(filters?: { from?: string; to?: string; bankAccountId?: string }): Promise<Tables<'financial_ledger'>[]> {
     let q = supabase.from('financial_ledger').select('*').order('entry_date', { ascending: false });
     if (filters?.from) q = q.gte('entry_date', filters.from);
     if (filters?.to) q = q.lte('entry_date', filters.to);
     if (filters?.bankAccountId) q = q.eq('bank_account_id', filters.bankAccountId);
     const { data, error } = await q.limit(1000);
     if (error) throw error;
-    return (data || []) as any[];
+    return (data || []) as Tables<'financial_ledger'>[];
   }
 
   // Payments
