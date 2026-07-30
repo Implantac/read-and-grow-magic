@@ -46,8 +46,10 @@ export function useQualityInspections() {
   useEffect(() => { fetch(); }, [fetch]);
 
   const create = async (inspection: Partial<QualityInspection>) => {
-    const { error } = // intentional: tabela quality_inspections ainda não presente nos tipos gerados
-      await (supabase as any).from('quality_inspections').insert(inspection);
+    // intentional: tabela quality_inspections ainda não presente nos tipos gerados
+    const { error } = await (supabase as any)
+      .from('quality_inspections')
+      .insert(inspection);
     if (error) { toast.error('Erro ao registrar inspeção'); return false; }
     toast.success('Inspeção registrada');
     await fetch();
