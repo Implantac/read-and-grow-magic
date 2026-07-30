@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import type { TablesInsert } from "@/integrations/supabase/types";
 
 export interface PurchaseApprovalRule {
   id: string;
@@ -13,15 +14,16 @@ export interface PurchaseApprovalRule {
   sla_hours: number;
 }
 
+export type PurchaseApprovalRuleUpsert =
+  TablesInsert<"purchase_approval_rules">;
+
 export function useScanApprovalsSLA() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.rpc(
-        "purchase_approvals_sla_scan" as any
-      );
+      const { data, error } = await supabase.rpc("purchase_approvals_sla_scan");
       if (error) throw error;
-      return data as { breached: number; pending: number };
+      return data as unknown as { breached: number; pending: number };
     },
     onSuccess: (res) => {
       qc.invalidateQueries({ queryKey: ["po_pending_approvals"] });
@@ -30,7 +32,7 @@ export function useScanApprovalsSLA() {
         `SLA verificado: ${res.breached} vencidas, ${res.pending} novas notificações.`
       );
     },
-    onError: (e: any) => toast.error(e.message ?? "Falha no scan de SLA"),
+    onError: (e: Error) => toast.error(e.message ?? "Falha no scan de SLA"),
   });
 }
 
@@ -39,7 +41,7 @@ export function usePurchaseApprovalRules() {
     queryKey: ["purchase_approval_rules"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("purchase_approval_rules" as any)
+        .from("purchase_approval_rules")
         .select("*")
         .order("level", { ascending: true });
       if (error) throw error;
@@ -51,10 +53,10 @@ export function usePurchaseApprovalRules() {
 export function useUpsertPurchaseApprovalRule() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (rule: any) => {
+    mutationFn: async (rule: PurchaseApprovalRuleUpsert) => {
       const { data, error } = await supabase
-        .from("purchase_approval_rules" as any)
-        .upsert(rule as any, { onConflict: "company_id,level" })
+        .from("purchase_approval_rules")
+        .upsert(rule, { onConflict: "company_id,level" })
         .select()
         .single();
       if (error) throw error;
@@ -64,7 +66,7 @@ export function useUpsertPurchaseApprovalRule() {
       qc.invalidateQueries({ queryKey: ["purchase_approval_rules"] });
       toast.success("Regra de alçada salva");
     },
-    onError: (e: any) => toast.error(e.message ?? "Falha ao salvar regra"),
+    onError: (e: Error) => toast.error(e.message ?? "Falha ao salvar regra"),
   });
 }
 
@@ -73,7 +75,7 @@ export function useDeletePurchaseApprovalRule() {
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("purchase_approval_rules" as any)
+        .from("purchase_approval_rules")
         .delete()
         .eq("id", id);
       if (error) throw error;
@@ -86,10 +88,9 @@ export function useSubmitPOForApproval() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (poId: string) => {
-      const { data, error } = await supabase.rpc(
-        "purchase_submit_for_approval" as any,
-        { p_po_id: poId }
-      );
+      const { data, error } = await supabase.rpc("purchase_submit_for_approval", {
+        p_po_id: poId,
+      });
       if (error) throw error;
       return data;
     },
@@ -98,7 +99,7 @@ export function useSubmitPOForApproval() {
       qc.invalidateQueries({ queryKey: ["po_pending_approvals"] });
       toast.success("Ordem enviada para aprovação");
     },
-    onError: (e: any) => toast.error(e.message ?? "Falha no envio"),
+    onError: (e: Error) => toast.error(e.message ?? "Falha no envio"),
   });
 }
 
@@ -126,14 +127,11 @@ export function useDecidePOApproval() {
       approve: boolean;
       comment?: string;
     }) => {
-      const { data, error } = await supabase.rpc(
-        "purchase_approval_decide" as any,
-        {
-          p_approval_id: args.approvalId,
-          p_approve: args.approve,
-          p_comment: args.comment ?? null,
-        }
-      );
+      const { data, error } = await supabase.rpc("purchase_approval_decide", {
+        p_approval_id: args.approvalId,
+        p_approve: args.approve,
+        p_comment: args.comment ?? null,
+      });
       if (error) throw error;
       return data;
     },
@@ -142,6 +140,6 @@ export function useDecidePOApproval() {
       qc.invalidateQueries({ queryKey: ["purchase_orders"] });
       toast.success("Decisão registrada");
     },
-    onError: (e: any) => toast.error(e.message ?? "Falha ao decidir"),
+    onError: (e: Error) => toast.error(e.message ?? "Falha ao decidir"),
   });
 }
