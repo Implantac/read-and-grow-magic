@@ -115,3 +115,22 @@ e **estruturalmente saudável** — a camada de aplicação passou nas auditoria
 O que impede produção **não é funcionalidade, é conformidade fiscal, garantia de regressão
 e cobrança**. Em ordem: certificado A1 real → blindagem das RPCs privilegiadas → testes
 E2E do fluxo do dinheiro → faturamento SaaS ativo.
+
+---
+
+## 8. Execução — SEC-DB (2026-07-30) ✅
+
+- **Validação de tenant em RPCs privilegiadas**: `dre_managerial`, `dre_managerial_entries`,
+  `check_credit`, `check_atp` e `increment_usage` agora exigem `can_access_company` do usuário
+  autenticado (chamadas internas via service role/cron seguem funcionando).
+- **Funções de gatilho fechadas**: `EXECUTE` revogado de `PUBLIC`/`anon`/`authenticated` em
+  `fn_profiles_guard_admin_update`, `prevent_profile_tenant_hijack`, `log_sales_audit`,
+  `sync_product_bom_ready`, `tg_notify_incident_email`, `wms_docks_sync_company_id`.
+- **`search_path` fixo**: 0 funções mutáveis restantes (`tg_touch_updated_at` corrigida).
+- **Policy permissiva**: `storefront_notifications_update` ganhou `WITH CHECK` de posse da loja
+  (antes `true`), impedindo mover notificação para outra loja.
+- **Linter**: 98 → 91 avisos. O restante são RPCs de negócio legitimamente chamadas pelo app,
+  todas com validação de tenant interna, e 1 INFO (`internal_fn_secrets`, sem policy por design).
+
+**Próximo item do caminho crítico:** E2E-CORE (Playwright do fluxo Pedido→WMS→Fiscal→Financeiro
+e RLS SQL em CI).
