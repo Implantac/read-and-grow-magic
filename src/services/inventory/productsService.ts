@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { DbProduct } from '@/hooks/inventory/useProducts';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 /**
  * Service para produtos com suporte a categorias.
@@ -11,14 +12,14 @@ export const productsService = {
       .select('*, categories(name)')
       .order('created_at', { ascending: false });
     if (error) throw error;
-    return (data as any[]).map((p) => ({
+    return (data ?? []).map((p) => ({
       ...p,
       category_name: p.categories?.name || '',
     })) as DbProduct[];
   },
 
   async create(product: Omit<DbProduct, 'id' | 'created_at' | 'updated_at' | 'category_name'>) {
-    const { data, error } = await supabase.from('products').insert(product as any).select().single();
+    const { data, error } = await supabase.from('products').insert(product as TablesInsert<'products'>).select().single();
     if (error) throw error;
     return data;
   },
@@ -26,7 +27,7 @@ export const productsService = {
   async update(id: string, product: Partial<DbProduct>) {
     const { data, error } = await supabase
       .from('products')
-      .update({ ...product, updated_at: new Date().toISOString() } as any)
+      .update({ ...product, updated_at: new Date().toISOString() } as TablesUpdate<'products'>)
       .eq('id', id)
       .select()
       .single();

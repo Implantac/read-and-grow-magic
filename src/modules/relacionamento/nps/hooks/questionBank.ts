@@ -10,7 +10,7 @@ export function useQuestionBank(params?: { category?: string; search?: string })
     enabled: !!companyId,
     queryFn: async () => {
       let q = supabase
-        .from('nps_question_bank' as any)
+        .from('nps_question_bank')
         .select('*')
         .or(`is_global.eq.true,company_id.eq.${companyId}`)
         .order('is_global', { ascending: false })
@@ -32,10 +32,10 @@ export function useSaveQuestionToBank() {
   return useMutation({
     mutationFn: async (input: { category: string; question_text: string; question_type: string; options?: any; required?: boolean; tags?: string[]; id?: string }) => {
       if (input.id) {
-        const { error } = await (supabase.from('nps_question_bank' as any) as any).update(input).eq('id', input.id);
+        const { error } = await (supabase.from('nps_question_bank') as any).update(input).eq('id', input.id);
         if (error) throw error;
       } else {
-        const { error } = await (supabase.from('nps_question_bank' as any) as any).insert({ ...input, company_id: companyId, is_global: false });
+        const { error } = await (supabase.from('nps_question_bank') as any).insert({ ...input, company_id: companyId, is_global: false });
         if (error) throw error;
       }
     },
@@ -48,7 +48,7 @@ export function useDeleteQuestionFromBank() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await (supabase.from('nps_question_bank' as any) as any).delete().eq('id', id);
+      const { error } = await (supabase.from('nps_question_bank') as any).delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['nps', 'question-bank'] }); toast.success('Removida'); },
@@ -62,7 +62,7 @@ export function useImportQuestionsFromBank() {
   return useMutation({
     mutationFn: async ({ campaign_id, bank_ids, start_order }: { campaign_id: string; bank_ids: string[]; start_order: number }) => {
       const { data: bank, error } = await supabase
-        .from('nps_question_bank' as any)
+        .from('nps_question_bank')
         .select('question_text,question_type,options,required')
         .in('id', bank_ids);
       if (error) throw error;

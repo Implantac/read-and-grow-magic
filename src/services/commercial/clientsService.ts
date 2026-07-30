@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { BaseService } from '../shared/baseService';
+import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 /**
  * Service consolidado para gerenciamento de clientes.
@@ -14,14 +15,30 @@ class ClientsService {
       .select('*')
       .order('name', { ascending: true });
     if (error) throw error;
-    return (data || []) as any[];
+    return (data || []) as Tables<'clients'>[];
   }
 
-  async create(client: any) {
-    return this.base.create(client);
+  async create(
+    client: Omit<TablesInsert<'clients'>, 'company_id'> & { company_id?: string },
+  ) {
+    const company_id = client.company_id ?? (await this.resolveCompanyId());
+    return this.base.create({ ...client, company_id });
   }
 
-  async update(id: string, client: any) {
+  private async resolveCompanyId(): Promise<string> {
+    const { data: auth } = await supabase.auth.getUser();
+    const userId = auth.user?.id;
+    if (!userId) throw new Error('Sessão expirada');
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('company_id')
+      .eq('id', userId)
+      .maybeSingle();
+    if (!profile?.company_id) throw new Error('Empresa não encontrada');
+    return profile.company_id;
+  }
+
+  async update(id: string, client: TablesUpdate<'clients'>) {
     return this.base.update(id, client);
   }
 

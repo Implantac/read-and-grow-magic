@@ -1,9 +1,18 @@
 import { supabase } from '@/integrations/supabase/client';
 import { DRESummaryRow, DRECategoryRow } from '@/hooks/accounting/useDRE';
 
+export interface DREDynamicRow {
+  section: string;
+  label?: string | null;
+  account_name?: string | null;
+  category_name?: string | null;
+  total: number;
+  [key: string]: unknown;
+}
+
 export const dreService = {
   async getSummary(from: string, to: string) {
-    const { data, error } = await supabase.rpc('get_dre_summary' as any, {
+    const { data, error } = await supabase.rpc('get_dre_summary', {
       _from: from,
       _to: to,
     });
@@ -12,7 +21,7 @@ export const dreService = {
   },
 
   async getDetailed(from: string, to: string) {
-    const { data, error } = await supabase.rpc('get_dre' as any, {
+    const { data, error } = await supabase.rpc('get_dre', {
       _from: from,
       _to: to,
     });
@@ -21,13 +30,13 @@ export const dreService = {
   },
 
   async getDynamic(params: { from: string; to: string; costCenterId?: string | null; channel?: string | null }) {
-    const { data, error } = await supabase.rpc('get_dre_dynamic' as any, {
+    const { data, error } = await supabase.rpc('get_dre_dynamic', {
       _from: params.from,
       _to: params.to,
       _cost_center_id: params.costCenterId ?? null,
       _channel: params.channel ?? null,
     });
     if (error) throw error;
-    return (data ?? []) as any[];
+    return (data ?? []) as unknown as DREDynamicRow[];
   }
 };

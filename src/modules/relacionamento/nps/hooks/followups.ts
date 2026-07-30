@@ -9,7 +9,7 @@ export function useNPSFollowups(status?: string) {
     queryKey: ['nps', 'followups', companyId, status ?? 'all'],
     enabled: !!companyId,
     queryFn: async () => {
-      let q = (supabase.from('nps_followups' as any) as any)
+      let q = (supabase.from('nps_followups') as any)
         .select('*, clients(name,email,phone,address_city), nps_campaigns(name)')
         .eq('company_id', companyId)
         .order('created_at', { ascending: false });
@@ -25,7 +25,7 @@ export function useUpdateFollowup() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, ...patch }: { id: string } & Record<string, any>) => {
-      const { error } = await (supabase.from('nps_followups' as any) as any).update(patch).eq('id', id);
+      const { error } = await (supabase.from('nps_followups') as any).update(patch).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['nps', 'followups'] }); toast.success('Follow-up atualizado'); },
