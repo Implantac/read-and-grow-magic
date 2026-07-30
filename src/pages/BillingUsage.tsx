@@ -309,6 +309,9 @@ export default function BillingUsage() {
           )}
         </CardContent>
       </Card>
+
+      <SubscriptionInvoicesCard />
     </PageContainer>
+
   );
 }
