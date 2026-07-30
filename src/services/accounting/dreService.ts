@@ -1,6 +1,14 @@
 import { supabase } from '@/integrations/supabase/client';
 import { DRESummaryRow, DRECategoryRow } from '@/hooks/accounting/useDRE';
 
+export interface DREDynamicRow {
+  section: string;
+  label?: string | null;
+  account_name?: string | null;
+  total: number;
+  [key: string]: unknown;
+}
+
 export const dreService = {
   async getSummary(from: string, to: string) {
     const { data, error } = await supabase.rpc('get_dre_summary', {
@@ -28,6 +36,6 @@ export const dreService = {
       _channel: params.channel ?? null,
     });
     if (error) throw error;
-    return (data ?? []) as unknown as Record<string, unknown>[];
+    return (data ?? []) as unknown as DREDynamicRow[];
   }
 };

@@ -18,7 +18,7 @@ class ClientsService {
     return (data || []) as Tables<'clients'>[];
   }
 
-  async create(client: TablesInsert<'clients'>) {
+  async create(client: Omit<TablesInsert<'clients'>, 'company_id'> & { company_id?: string }) {
     return this.base.create(client);
   }
 
