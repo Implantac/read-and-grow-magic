@@ -16,6 +16,8 @@ import {
   useDailyUsageSeries,
 } from "@/hooks/useBillingUsage";
 import { QuotaPanel } from "@/components/billing/QuotaPanel";
+import { SubscriptionInvoicesCard } from "@/components/billing/SubscriptionInvoicesCard";
+
 import {
   ResponsiveContainer,
   AreaChart,
@@ -309,6 +311,9 @@ export default function BillingUsage() {
           )}
         </CardContent>
       </Card>
+
+      <SubscriptionInvoicesCard />
     </PageContainer>
+
   );
 }

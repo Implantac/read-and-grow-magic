@@ -81,39 +81,42 @@ export default function Subscribe() {
     }
     setSubmitting(true);
     try {
-      const now = new Date();
-      const periodEnd = new Date(now);
-      if (cycle === 'annual') periodEnd.setFullYear(periodEnd.getFullYear() + 1);
-      else periodEnd.setMonth(periodEnd.getMonth() + 1);
-
-      const payload = {
-        company_id: currentCompany.id,
-        plan_id: selectedPlan.id,
-        status: selectedPlan.trial_days > 0 ? 'trialing' : 'active',
-        billing_cycle: cycle,
-        current_period_start: now.toISOString(),
-        current_period_end: periodEnd.toISOString(),
-        trial_end:
-          selectedPlan.trial_days > 0
-            ? new Date(now.getTime() + selectedPlan.trial_days * 86400000).toISOString()
-            : null,
-      };
-
-      const { error } = await supabase
-        .from('subscriptions')
-        .upsert(payload, { onConflict: 'company_id' });
+      const { data, error } = await supabase.functions.invoke('billing-checkout', {
+        body: {
+          plan_id: selectedPlan.id,
+          cycle,
+          return_url: window.location.origin,
+        },
+      });
       if (error) throw error;
 
+      if (data?.checkout_url) {
+        window.location.href = data.checkout_url as string;
+        return;
+      }
+
+      if (data?.activated) {
+        toast({
+          title: 'Plano ativado',
+          description: `Plano ${selectedPlan.name} liberado com sucesso.`,
+        });
+        await qc.invalidateQueries({ queryKey: ['current_plan'] });
+        await qc.invalidateQueries({ queryKey: ['subscription'] });
+        navigate('/dashboard');
+        return;
+      }
+
       toast({
-        title: 'Assinatura confirmada',
-        description: `Plano ${selectedPlan.name} ativado com sucesso.`,
+        title: 'Fatura gerada',
+        description:
+          (data?.message as string) ??
+          'A assinatura será ativada automaticamente após a confirmação do pagamento.',
       });
-      await qc.invalidateQueries({ queryKey: ['current_plan'] });
-      await qc.invalidateQueries({ queryKey: ['subscription'] });
-      navigate('/dashboard');
+      await qc.invalidateQueries({ queryKey: ['subscription_invoices'] });
+      navigate('/billing/consumo');
     } catch (err: any) {
       toast({
-        title: 'Não foi possível ativar a assinatura',
+        title: 'Não foi possível iniciar a assinatura',
         description: err?.message ?? 'Tente novamente em instantes.',
         variant: 'destructive',
       });
@@ -121,6 +124,7 @@ export default function Subscribe() {
       setSubmitting(false);
     }
   };
+
 
   const label = moduleParam ? moduleLabel(moduleParam) : '';
 

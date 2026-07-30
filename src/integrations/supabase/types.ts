@@ -18404,17 +18404,98 @@ export type Database = {
           },
         ]
       }
+      subscription_invoices: {
+        Row: {
+          amount: number
+          billing_cycle: string
+          checkout_url: string | null
+          company_id: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          due_date: string | null
+          external_customer_id: string | null
+          external_invoice_id: string | null
+          id: string
+          metadata: Json
+          paid_at: string | null
+          plan_id: string
+          provider: string
+          status: string
+          subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          billing_cycle?: string
+          checkout_url?: string | null
+          company_id: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          due_date?: string | null
+          external_customer_id?: string | null
+          external_invoice_id?: string | null
+          id?: string
+          metadata?: Json
+          paid_at?: string | null
+          plan_id: string
+          provider?: string
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          billing_cycle?: string
+          checkout_url?: string | null
+          company_id?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          due_date?: string | null
+          external_customer_id?: string | null
+          external_invoice_id?: string | null
+          id?: string
+          metadata?: Json
+          paid_at?: string | null
+          plan_id?: string
+          provider?: string
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_invoices_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_invoices_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           billing_cycle: string
+          cancel_at_period_end: boolean
           cancelled_at: string | null
           company_id: string
           created_at: string
           current_period_end: string
           current_period_start: string
+          external_customer_id: string | null
           external_gateway: string | null
           external_subscription_id: string | null
           id: string
+          last_payment_at: string | null
           plan_id: string
           status: string
           trial_end: string | null
@@ -18422,14 +18503,17 @@ export type Database = {
         }
         Insert: {
           billing_cycle?: string
+          cancel_at_period_end?: boolean
           cancelled_at?: string | null
           company_id: string
           created_at?: string
           current_period_end?: string
           current_period_start?: string
+          external_customer_id?: string | null
           external_gateway?: string | null
           external_subscription_id?: string | null
           id?: string
+          last_payment_at?: string | null
           plan_id: string
           status?: string
           trial_end?: string | null
@@ -18437,14 +18521,17 @@ export type Database = {
         }
         Update: {
           billing_cycle?: string
+          cancel_at_period_end?: boolean
           cancelled_at?: string | null
           company_id?: string
           created_at?: string
           current_period_end?: string
           current_period_start?: string
+          external_customer_id?: string | null
           external_gateway?: string | null
           external_subscription_id?: string | null
           id?: string
+          last_payment_at?: string | null
           plan_id?: string
           status?: string
           trial_end?: string | null
