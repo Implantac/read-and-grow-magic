@@ -2,6 +2,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { resolveNextStep, type Branch } from "@/lib/workflowConditions";
+import type { Json } from "@/integrations/supabase/types";
+// Converte estruturas tipadas do domínio para o tipo `Json` do Postgres.
+const toJson = (value: unknown): Json => value as Json;
+
 
 export interface WorkflowStep {
   key: string;
@@ -107,7 +111,7 @@ export function useWorkflowMutations() {
               name: payload.name,
               description: payload.description ?? null,
               target_entity: payload.target_entity,
-              steps: payload.steps as any,
+              steps: toJson(payload.steps),
               initial_step: payload.initial_step ?? payload.steps[0]?.key ?? null,
               is_active: payload.is_active ?? true,
             })
@@ -119,7 +123,7 @@ export function useWorkflowMutations() {
             name: payload.name,
             description: payload.description ?? null,
             target_entity: payload.target_entity,
-            steps: payload.steps as any,
+            steps: toJson(payload.steps),
             initial_step: payload.initial_step ?? payload.steps[0]?.key ?? null,
             is_active: payload.is_active ?? true,
             created_by: userId,
@@ -153,7 +157,7 @@ export function useWorkflowMutations() {
           .eq("id", payload.definition_id)
           .maybeSingle();
         if (defErr || !def) throw defErr ?? new Error("Workflow não encontrado");
-        const steps = (def.steps as any as WorkflowStep[]) ?? [];
+        const steps = (def.steps as unknown as WorkflowStep[]) ?? [];
         const initial = def.initial_step ?? steps[0]?.key ?? null;
         const { data: inst, error } = await supabase
           .from("workflow_instances")
@@ -218,7 +222,7 @@ export function useWorkflowMutations() {
             current_step: nextStep,
             status: payload.complete ? "completed" : "running",
             completed_at: payload.complete ? new Date().toISOString() : null,
-            context: mergedContext as any,
+            context: toJson(mergedContext),
           })
           .eq("id", payload.instance_id);
         if (uErr) throw uErr;
@@ -229,7 +233,7 @@ export function useWorkflowMutations() {
           to_step: nextStep,
           actor_id: userId,
           comment: payload.comment ?? null,
-          payload: (payload.contextPatch ?? {}) as any,
+          payload: toJson(payload.contextPatch ?? {}),
         });
       },
       onSuccess: () => {
