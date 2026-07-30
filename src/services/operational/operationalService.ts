@@ -1,10 +1,16 @@
 import { supabase } from '@/integrations/supabase/client';
+import type { Tables, TablesInsert } from '@/integrations/supabase/types';
+
+export type ShipmentOrder = Tables<'shipment_orders'>;
+export type DeliveryTrackingEvent = Tables<'delivery_tracking'>;
+export type DeliveryTrackingEventInput = TablesInsert<'delivery_tracking'>;
+export type BillingQueueItem = Tables<'billing_queue'>;
 
 export class OperationalService {
   private readonly supabase = supabase;
 
   // Shipment Orders
-  async getShipments(): Promise<any[]> {
+  async getShipments(): Promise<ShipmentOrder[]> {
     const { data, error } = await this.supabase
       .from('shipment_orders')
       .select('*')
@@ -23,9 +29,9 @@ export class OperationalService {
   }
 
   // Delivery Tracking
-  async getTrackingEvents(shipmentId: string): Promise<any[]> {
+  async getTrackingEvents(shipmentId: string): Promise<DeliveryTrackingEvent[]> {
     const { data, error } = await this.supabase
-      .from('delivery_tracking_events' as any)
+      .from('delivery_tracking')
       .select('*')
       .eq('shipment_id', shipmentId)
       .order('occurred_at', { ascending: true });
@@ -34,15 +40,15 @@ export class OperationalService {
     return data || [];
   }
 
-  async createTrackingEvent(event: any): Promise<void> {
+  async createTrackingEvent(event: DeliveryTrackingEventInput): Promise<void> {
     const { error } = await this.supabase
-      .from('delivery_tracking_events' as any)
+      .from('delivery_tracking')
       .insert(event);
     if (error) throw error;
   }
 
   // Operational Queues
-  async getBillingQueue(): Promise<any[]> {
+  async getBillingQueue(): Promise<BillingQueueItem[]> {
     const { data, error } = await this.supabase
       .from('billing_queue')
       .select('*');
