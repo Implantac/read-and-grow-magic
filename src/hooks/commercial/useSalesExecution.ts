@@ -4,7 +4,6 @@ import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { useMemo } from 'react';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
-import type { TablesInsert } from "@/integrations/supabase/types";
 // ── Contact Logs ──
 export interface ContactLog {
   id: string;

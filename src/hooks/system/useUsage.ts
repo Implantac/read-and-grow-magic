@@ -51,7 +51,7 @@ export async function checkQuota(
   if (error) throw error;
   const q = (data ?? {}) as {
     allowed?: boolean;
-    used?: number;
+    current?: number;
     limit?: number | null;
     remaining?: number | null;
   };
