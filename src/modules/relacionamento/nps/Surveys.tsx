@@ -7,6 +7,7 @@ import {
 } from './hooks';
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
+import type { Tables, TablesUpdate } from '@/integrations/supabase/types';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { Button } from '@/ui/base/button';
 import { Label } from '@/ui/base/label';
@@ -38,7 +39,7 @@ export default function Surveys() {
   const { data: campaigns = [] } = useNPSCampaigns();
   const [campaignId, setCampaignId] = useState<string | undefined>(undefined);
   const { data: questions = [], isLoading } = useNPSQuestions(campaignId);
-  const { currentCompany } = useEnterprise() as any;
+  const { currentCompany } = useEnterprise();
   const activeCompanyId = currentCompany?.id;
   const qc = useQueryClient();
 
@@ -100,15 +101,15 @@ export default function Surveys() {
   const reorder = useReorderQuestion();
 
   const updateQ = useMutation({
-    mutationFn: async ({ id, patch }: { id: string; patch: Record<string, any> }) => {
-      const { error } = await (supabase.from('nps_questions') as any).update(patch).eq('id', id);
+    mutationFn: async ({ id, patch }: { id: string; patch: TablesUpdate<'nps_questions'> }) => {
+      const { error } = await supabase.from('nps_questions').update(patch).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['nps'] }),
     onError: (e: any) => toast.error(e.message),
   });
 
-  const persistOrder = (ordered: any[]) => {
+  const persistOrder = (ordered: Tables<'nps_questions'>[]) => {
     ordered.forEach((q, i) => {
       if (q.order_index !== i) reorder.mutate({ id: q.id, order_index: i });
     });
@@ -117,7 +118,7 @@ export default function Surveys() {
   const move = (idx: number, dir: -1 | 1) => {
     const target = idx + dir;
     if (target < 0 || target >= questions.length) return;
-    persistOrder(arrayMove(questions as any[], idx, target));
+    persistOrder(arrayMove(questions, idx, target));
   };
 
   const sensors = useSensors(
@@ -128,10 +129,10 @@ export default function Surveys() {
   const onDragEnd = (e: DragEndEvent) => {
     const { active, over } = e;
     if (!over || active.id === over.id) return;
-    const oldIdx = (questions as any[]).findIndex((q) => q.id === active.id);
-    const newIdx = (questions as any[]).findIndex((q) => q.id === over.id);
+    const oldIdx = questions.findIndex((q) => q.id === active.id);
+    const newIdx = questions.findIndex((q) => q.id === over.id);
     if (oldIdx < 0 || newIdx < 0) return;
-    persistOrder(arrayMove(questions as any[], oldIdx, newIdx));
+    persistOrder(arrayMove(questions, oldIdx, newIdx));
   };
 
   const previewCampaign = async () => {
@@ -191,8 +192,8 @@ export default function Surveys() {
                 </p>
               )}
               <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-                <SortableContext items={(questions as any[]).map((q) => q.id)} strategy={verticalListSortingStrategy}>
-                  {(questions as any[]).map((q, i) => (
+                <SortableContext items={questions.map((q) => q.id)} strategy={verticalListSortingStrategy}>
+                  {questions.map((q, i) => (
                     <SortableQuestion
                       key={q.id}
                       q={q}

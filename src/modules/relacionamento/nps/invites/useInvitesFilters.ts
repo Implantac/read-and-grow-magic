@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import { PAGE_SIZE } from './parts';
+import type { NPSInvite } from './types';
 
 export function useInvitesFilters(
-  invites: any[],
+  invites: NPSInvite[],
   statusFilter: string,
   channelFilter: string,
   textFilter: string,
