@@ -22712,6 +22712,7 @@ export type Database = {
         }
         Returns: Json
       }
+      can_access_company: { Args: { _company_id: string }; Returns: boolean }
       check_atp: {
         Args: { _due_date?: string; _product_id: string; _qty: number }
         Returns: Json
