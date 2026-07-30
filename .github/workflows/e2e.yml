@@ -45,8 +45,14 @@ jobs:
           npm i -D --no-save @playwright/test@^1.48.0
           npx playwright install --with-deps chromium
 
+      - name: RLS static checks (SQL)
+        env:
+          RLS_CHECK_DATABASE_URL: ${{ secrets.RLS_CHECK_DATABASE_URL }}
+        run: node scripts/rls-static-check.mjs
+
       - name: Run Playwright suite
         run: npx playwright test --project=chromium
+
 
       - name: Upload Playwright report
         if: always()

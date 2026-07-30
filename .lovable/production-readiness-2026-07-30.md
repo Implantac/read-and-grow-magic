@@ -134,3 +134,28 @@ E2E do fluxo do dinheiro → faturamento SaaS ativo.
 
 **Próximo item do caminho crítico:** E2E-CORE (Playwright do fluxo Pedido→WMS→Fiscal→Financeiro
 e RLS SQL em CI).
+
+---
+
+## 9. Execução — E2E-CORE (2026-07-30) ✅
+
+- **`.lovable/e2e/_helpers.ts`** — login, coletor de erros de console/página (com lista de
+  ruídos ignorados) e `visit()` que exige `<main>` visível e ausência de ErrorBoundary/404.
+- **`core-flow.spec.ts`** — 11 etapas do Order-to-Cash em ordem cronológica
+  (Pedido → O2C → Separação → Embalagem → Expedição → Faturamento → Fiscal → AR →
+  Tesouraria → Movimentações → Auditoria de estoque) + teste de travessia sequencial.
+- **`purchasing.spec.ts`** — 8 etapas do Procure-to-Pay (Fornecedores → Cotações → Pedidos →
+  Aprovações → SLA → Recebimento → Conferência → AP).
+- **`checkout.spec.ts`** — backoffice de lojas/marketplace + vitrine pública anônima
+  (busca → produto → checkout), esta última condicionada à env `STOREFRONT_SLUG`.
+- **`smoke.ts` → `smoke.spec.ts`** — o smoke de 10 fluxos **não era executado** pelo
+  `testMatch` (`**/*.spec.ts`); agora entra na suíte de CI.
+- **RLS em CI** — `scripts/rls-static-check.mjs` roda todos os `.lovable/tests/*.sql` com
+  `ON_ERROR_STOP=1`; novo passo no workflow `e2e.yml` usando o secret
+  `RLS_CHECK_DATABASE_URL` (ausente → aviso, não quebra fork PRs).
+
+**Pendência conhecida:** os specs são de regressão de renderização/runtime (não mutam dados).
+Mutação ponta a ponta (criar pedido real → separar → faturar) exige tenant de teste dedicado
+com reset — planejado junto ao item OPS-READY.
+
+**Próximo item do caminho crítico:** BILLING-LIVE (PSP de assinatura + medição de uso).
