@@ -4,9 +4,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { publicSurveyUrl } from '../hooks';
 import { exportToCSV } from '@/lib/exportUtils';
 import type { BulkResult, BulkResultItem } from './parts';
+import type { NPSInvite } from './types';
 
 export function useInvitesActions(
-  invites: any[],
+  invites: NPSInvite[],
   setBulkResult: (r: BulkResult) => void,
   setSelectedInvites: (s: Set<string>) => void,
 ) {
@@ -123,7 +124,7 @@ export function useInvitesActions(
     }
   };
 
-  const exportCsv = (filteredInvites: any[]) => {
+  const exportCsv = (filteredInvites: NPSInvite[]) => {
     if (filteredInvites.length === 0) { toast.error('Sem dados para exportar'); return; }
     const rows = filteredInvites.map((i) => ({
       cliente: i.clients?.name ?? '',

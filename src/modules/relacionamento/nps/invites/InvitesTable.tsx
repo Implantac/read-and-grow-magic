@@ -6,10 +6,11 @@ import { Copy, Eye, Mail, MessageCircle, QrCode, RefreshCw, Trash2, ChevronLeft,
 import { toast } from 'sonner';
 import { publicSurveyUrl } from '../hooks';
 import { StatusBadge } from './parts';
+import type { NPSInvite } from './types';
 
 interface InvitesTableProps {
-  pageInvites: any[];
-  filteredInvites: any[];
+  pageInvites: NPSInvite[];
+  filteredInvites: NPSInvite[];
   currentPage: number;
   totalPages: number;
   pageSize: number;
@@ -49,7 +50,7 @@ export function InvitesTable({
             </tr>
           </thead>
           <tbody>
-            {pageInvites.map((i: any) => {
+            {pageInvites.map((i) => {
               const tk = tokensByInvite.get(i.id);
               const checked = selectedInvites.has(i.id);
               return (

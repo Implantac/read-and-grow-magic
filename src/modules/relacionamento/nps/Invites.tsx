@@ -23,7 +23,7 @@ export default function Invites() {
   const { data: campaigns = [], isLoading: campaignsLoading } = useNPSCampaigns();
   const [campaignId, setCampaignId] = useState<string | undefined>();
   useEffect(() => {
-    if (!campaignId && campaigns.length > 0) setCampaignId((campaigns[0] as any).id);
+    if (!campaignId && campaigns.length > 0) setCampaignId(campaigns[0].id);
   }, [campaigns, campaignId]);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [channelFilter, setChannelFilter] = useState<string>('all');
@@ -31,7 +31,7 @@ export default function Invites() {
   const [page, setPage] = useState(1);
   const { data: invites = [], isLoading } = useNPSInvites(campaignId);
   const generate = useGenerateInvites();
-  const { currentCompany } = useEnterprise() as any;
+  const { currentCompany } = useEnterprise();
   const activeCompanyId = currentCompany?.id;
 
   const [open, setOpen] = useState(false);
@@ -60,13 +60,13 @@ export default function Invites() {
   });
 
   const { filteredInvites, totalPages, currentPage, pageInvites, stats } = useInvitesFilters(
-    invites as any[], statusFilter, channelFilter, textFilter, page,
+    invites, statusFilter, channelFilter, textFilter, page,
   );
 
   const tokensByInvite = useTokensMap(pageInvites);
 
   const { revoke, sendInvites, resend, shareUrl, copyAllLinks, exportCsv, inviteNameById } =
-    useInvitesActions(invites as any[], setBulkResult, setSelectedInvites);
+    useInvitesActions(invites, setBulkResult, setSelectedInvites);
 
   const submit = () => {
     if (!campaignId || selectedClients.size === 0) return;
@@ -78,7 +78,7 @@ export default function Invites() {
 
   const toggleAllClientsVisible = (checked: boolean) => {
     const s = new Set(selectedClients);
-    (clients as any[]).forEach((c) => { if (checked) s.add(c.id); else s.delete(c.id); });
+    clients.forEach((c) => { if (checked) s.add(c.id); else s.delete(c.id); });
     setSelectedClients(s);
   };
 
@@ -257,7 +257,7 @@ export default function Invites() {
         setExpiresDays={setExpiresDays}
         search={search}
         setSearch={setSearch}
-        clients={clients as any[]}
+        clients={clients}
         selectedClients={selectedClients}
         setSelectedClients={setSelectedClients}
         toggleAllClientsVisible={toggleAllClientsVisible}

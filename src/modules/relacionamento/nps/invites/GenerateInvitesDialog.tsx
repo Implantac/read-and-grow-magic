@@ -7,6 +7,7 @@ import { Badge } from '@/ui/base/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Search, Send, RotateCcw } from 'lucide-react';
 import { CHANNELS } from './parts';
+import type { ClientPickerRow } from './types';
 
 interface GenerateInvitesDialogProps {
   open: boolean;
@@ -17,7 +18,7 @@ interface GenerateInvitesDialogProps {
   setExpiresDays: (n: number) => void;
   search: string;
   setSearch: (s: string) => void;
-  clients: any[];
+  clients: ClientPickerRow[];
   selectedClients: Set<string>;
   setSelectedClients: (s: Set<string>) => void;
   toggleAllClientsVisible: (v: boolean) => void;
@@ -60,7 +61,7 @@ export function GenerateInvitesDialog({
           {clients.length > 0 && (
             <label className="flex items-center gap-2 text-xs text-muted-foreground">
               <Checkbox
-                checked={clients.every((c: any) => selectedClients.has(c.id))}
+                checked={clients.every((c) => selectedClients.has(c.id))}
                 onCheckedChange={(v) => toggleAllClientsVisible(!!v)}
               />
               Selecionar todos os {clients.length} visíveis
@@ -68,7 +69,7 @@ export function GenerateInvitesDialog({
           )}
 
           <div className="max-h-64 overflow-y-auto border rounded">
-            {clients.map((c: any) => {
+            {clients.map((c) => {
               const hasEmail = !!c.email;
               const hasPhone = !!c.phone;
               const invalid = (channel === 'email' && !hasEmail) || ((channel === 'whatsapp' || channel === 'sms') && !hasPhone);
