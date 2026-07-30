@@ -23040,6 +23040,31 @@ export type Database = {
           tasks_completed: number
         }[]
       }
+      get_plugin_rating_summary: {
+        Args: never
+        Returns: {
+          avg_rating: number
+          plugin_id: string
+          r1: number
+          r2: number
+          r3: number
+          r4: number
+          r5: number
+          review_count: number
+        }[]
+      }
+      get_plugin_reviews: {
+        Args: { p_plugin_id: string }
+        Returns: {
+          comment: string
+          created_at: string
+          id: string
+          is_mine: boolean
+          plugin_id: string
+          rating: number
+          updated_at: string
+        }[]
+      }
       get_usage_summary: {
         Args: never
         Returns: {
