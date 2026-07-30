@@ -79,7 +79,11 @@ export function useImportQuestionsFromBank() {
       if (rows.length === 0) return;
       const { error: insErr } = await supabase.from('nps_questions').insert(rows);
       if (insErr) throw insErr;
-      await supabase.rpc('increment_nps_bank_usage', { p_ids: bank_ids });
+      // contador de uso é best-effort: não deve derrubar a importação
+      await supabase.rpc('increment_nps_bank_usage', { p_ids: bank_ids }).then(
+        () => undefined,
+        () => undefined,
+      );
     },
     onSuccess: (_, vars) => { qc.invalidateQueries({ queryKey: ['nps'] }); toast.success(`${vars.bank_ids.length} pergunta(s) importada(s)`); },
     onError: (e: any) => toast.error(e.message),
