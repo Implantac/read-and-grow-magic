@@ -5,6 +5,7 @@ export interface DREDynamicRow {
   section: string;
   label?: string | null;
   account_name?: string | null;
+  category_name?: string | null;
   total: number;
   [key: string]: unknown;
 }
