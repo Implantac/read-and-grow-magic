@@ -42,16 +42,11 @@ export function PluginReviewsDialog({ open, onOpenChange, pluginId, pluginName }
   const upsert = useUpsertPluginReview();
   const del = useDeletePluginReview();
 
-  const { data: currentUserId } = useQuery({
-    queryKey: ["auth_uid"],
-    queryFn: async () => (await supabase.auth.getUser()).data.user?.id ?? null,
-    staleTime: 5 * 60 * 1000,
-  });
-
   const myReview = useMemo(
-    () => (reviews ?? []).find((r) => r.user_id === currentUserId) ?? null,
-    [reviews, currentUserId],
+    () => (reviews ?? []).find((r) => r.is_mine) ?? null,
+    [reviews],
   );
+
 
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
