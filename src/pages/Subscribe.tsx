@@ -113,7 +113,7 @@ export default function Subscribe() {
           'A assinatura será ativada automaticamente após a confirmação do pagamento.',
       });
       await qc.invalidateQueries({ queryKey: ['subscription_invoices'] });
-      navigate('/billing-usage');
+      navigate('/billing/consumo');
     } catch (err: any) {
       toast({
         title: 'Não foi possível iniciar a assinatura',
