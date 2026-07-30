@@ -13,10 +13,10 @@ export function useCompanies() {
 
   useEffect(() => {
     if (query.data && query.data.length > 0) {
-      setCompanies(query.data as any);
+      const companies = query.data as unknown as Company[];
+      setCompanies(companies);
       if (!activeCompany) {
-        const firstCompany = query.data[0] as any;
-        setActiveCompany(firstCompany);
+        setActiveCompany(companies[0]);
       }
     }
 
