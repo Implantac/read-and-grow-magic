@@ -159,3 +159,16 @@ Mutação ponta a ponta (criar pedido real → separar → faturar) exige tenant
 com reset — planejado junto ao item OPS-READY.
 
 **Próximo item do caminho crítico:** BILLING-LIVE (PSP de assinatura + medição de uso).
+
+## Sprint BILLING-LIVE (30/07/2026)
+
+**Fechado**
+- Removida a ativação de plano pago pelo cliente: `subscriptions` não aceita mais INSERT/DELETE por `authenticated`; UPDATE limitado à coluna `cancel_at_period_end` para admins da própria empresa. Ativação/renovação só via service role.
+- Nova tabela `subscription_invoices` (fatura por empresa/plano/ciclo, provedor, ids externos, link de pagamento, vencimento, pagamento), RLS de leitura por empresa e índice único `(provider, external_invoice_id)` para idempotência.
+- Edge function `billing-checkout` (JWT + role admin): calcula o valor **no servidor** a partir de `plans`, cria a fatura e abre sessão Stripe Checkout quando `STRIPE_SECRET_KEY` existe; sem PSP, gera fatura pendente (modo manual). Planos de custo zero ativam direto.
+- Edge function `billing-webhook` (`verify_jwt = false`): valida assinatura Stripe (HMAC SHA-256 + janela de 5 min contra replay) ou `x-webhook-secret` genérico; trata `paid` / `failed` / `cancelled`, é idempotente e ativa a assinatura com período correto.
+- UI: `Subscribe.tsx` agora chama o checkout (redireciona ao PSP) e `Billing/Consumo` lista as faturas com link de pagamento.
+
+**Pendente (depende do cliente)**
+- Cadastrar `STRIPE_SECRET_KEY` e `STRIPE_WEBHOOK_SECRET` (ou `BILLING_WEBHOOK_SECRET` para outro PSP) e apontar o endpoint do provedor para `billing-webhook`.
+- Dunning/cobrança de inadimplência e emissão de NFS-e da assinatura.
