@@ -14,8 +14,23 @@ export interface PurchaseApprovalRule {
   sla_hours: number;
 }
 
-export type PurchaseApprovalRuleUpsert =
-  TablesInsert<"purchase_approval_rules">;
+export type PurchaseApprovalRuleUpsert = Omit<
+  TablesInsert<"purchase_approval_rules">,
+  "company_id"
+> & { company_id?: string };
+
+async function resolveCompanyId(): Promise<string> {
+  const { data: auth } = await supabase.auth.getUser();
+  const userId = auth.user?.id;
+  if (!userId) throw new Error("Sessão expirada");
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("company_id")
+    .eq("id", userId)
+    .maybeSingle();
+  if (!profile?.company_id) throw new Error("Empresa não encontrada");
+  return profile.company_id;
+}
 
 export function useScanApprovalsSLA() {
   const qc = useQueryClient();
@@ -54,9 +69,10 @@ export function useUpsertPurchaseApprovalRule() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (rule: PurchaseApprovalRuleUpsert) => {
+      const company_id = rule.company_id ?? (await resolveCompanyId());
       const { data, error } = await supabase
         .from("purchase_approval_rules")
-        .upsert(rule, { onConflict: "company_id,level" })
+        .upsert({ ...rule, company_id }, { onConflict: "company_id,level" })
         .select()
         .single();
       if (error) throw error;
