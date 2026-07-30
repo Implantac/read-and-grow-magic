@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { companiesService } from '@/services/system/companiesService';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import { Company } from '@/types/administration';
+import type { Company as StoreCompany } from '@/types';
 
 export function useCompanies() {
   const queryClient = useQueryClient();
@@ -13,10 +14,13 @@ export function useCompanies() {
 
   useEffect(() => {
     if (query.data && query.data.length > 0) {
-      setCompanies(query.data as any);
+      const companies = (query.data as unknown as Company[]).map((c) => ({
+        ...c,
+        branches: [],
+      })) as unknown as StoreCompany[];
+      setCompanies(companies);
       if (!activeCompany) {
-        const firstCompany = query.data[0] as any;
-        setActiveCompany(firstCompany);
+        setActiveCompany(companies[0]);
       }
     }
 

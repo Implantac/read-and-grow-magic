@@ -1,6 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import type { Json } from "@/integrations/supabase/types";
+// Converte estruturas tipadas do domínio para o tipo `Json` do Postgres.
+const toJson = (value: unknown): Json => value as Json;
+
 
 export type AutomationActionType =
   | "notification"
@@ -83,8 +87,8 @@ export function useAutomationMutations() {
               name: payload.name,
               description: payload.description ?? null,
               trigger_event: payload.trigger_event,
-              conditions: (payload.conditions ?? []) as any,
-              actions: payload.actions as any,
+              conditions: toJson(payload.conditions ?? []),
+              actions: toJson(payload.actions),
               is_active: payload.is_active ?? true,
             })
             .eq("id", payload.id);
@@ -95,8 +99,8 @@ export function useAutomationMutations() {
             name: payload.name,
             description: payload.description ?? null,
             trigger_event: payload.trigger_event,
-            conditions: (payload.conditions ?? []) as any,
-            actions: payload.actions as any,
+            conditions: toJson(payload.conditions ?? []),
+            actions: toJson(payload.actions),
             is_active: payload.is_active ?? true,
             created_by: userId,
           });

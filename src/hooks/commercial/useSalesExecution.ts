@@ -83,8 +83,8 @@ export function useDailyGoals(salesRepId?: string, date?: string) {
 export function useUpsertDailyGoal() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (goal: any) => {
-      const { data, error } = await supabase.from('sales_daily_goals').upsert(goal as any, { onConflict: 'sales_rep_id,goal_date' }).select().single();
+    mutationFn: async (goal: TablesInsert<'sales_daily_goals'>) => {
+      const { data, error } = await supabase.from('sales_daily_goals').upsert(goal, { onConflict: 'sales_rep_id,goal_date' }).select().single();
       if (error) throw error;
       return data;
     },

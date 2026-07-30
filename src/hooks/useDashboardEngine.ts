@@ -1,6 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import type { Json } from "@/integrations/supabase/types";
+// Converte estruturas tipadas do domínio para o tipo `Json` do Postgres.
+const toJson = (value: unknown): Json => value as Json;
+
 
 export interface DashboardWidget {
   id: string;
@@ -74,7 +78,7 @@ export function useDashboardMutations() {
             .update({
               name: payload.name,
               description: payload.description ?? null,
-              layout: (payload.layout ?? {}) as any,
+              layout: toJson(payload.layout ?? {}),
               role_scope: payload.role_scope ?? null,
               is_default: payload.is_default ?? false,
             })
@@ -85,7 +89,7 @@ export function useDashboardMutations() {
             company_id: companyId,
             name: payload.name,
             description: payload.description ?? null,
-            layout: (payload.layout ?? {}) as any,
+            layout: toJson(payload.layout ?? {}),
             role_scope: payload.role_scope ?? null,
             is_default: payload.is_default ?? false,
             created_by: userId,
@@ -120,8 +124,8 @@ export function useDashboardMutations() {
               title: payload.title,
               widget_type: payload.widget_type,
               data_source: payload.data_source,
-              config: (payload.config ?? {}) as any,
-              position: (payload.position ?? {}) as any,
+              config: toJson(payload.config ?? {}),
+              position: toJson(payload.position ?? {}),
             })
             .eq("id", payload.id);
           if (error) throw error;
@@ -132,8 +136,8 @@ export function useDashboardMutations() {
             title: payload.title,
             widget_type: payload.widget_type,
             data_source: payload.data_source,
-            config: (payload.config ?? {}) as any,
-            position: (payload.position ?? {}) as any,
+            config: toJson(payload.config ?? {}),
+            position: toJson(payload.position ?? {}),
           });
           if (error) throw error;
         }
