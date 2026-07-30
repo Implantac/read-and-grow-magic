@@ -1,6 +1,6 @@
 import { Link2, Mail, MessageCircle, QrCode } from 'lucide-react';
 import { Card, CardContent } from '@/ui/base/card';
-import { Badge } from '@/ui/base/badge';
+import { Badge, type BadgeProps } from '@/ui/base/badge';
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,7 +38,7 @@ export function KPI({ label, value, sub, tone = 'default' }: { label: string; va
 }
 
 export function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, { label: string; variant: any; className?: string }> = {
+  const map: Record<string, { label: string; variant: BadgeProps['variant']; className?: string }> = {
     pending: { label: 'Pendente', variant: 'secondary' },
     sent: { label: 'Enviado', variant: 'default' },
     opened: { label: 'Aberto', variant: 'default', className: 'bg-blue-500/20 text-blue-500 border-blue-500/30' },
@@ -51,7 +51,7 @@ export function StatusBadge({ status }: { status: string }) {
   return <Badge variant={s.variant} className={s.className}>{s.label}</Badge>;
 }
 
-export function useTokensMap(invites: any[]) {
+export function useTokensMap(invites: { id: string }[]) {
   const inviteIds = useMemo(() => invites.map((i) => i.id), [invites]);
   const { data } = useQuery({
     queryKey: ['nps', 'tokens', inviteIds.join(',')],
@@ -63,7 +63,7 @@ export function useTokensMap(invites: any[]) {
   });
   return useMemo(() => {
     const m = new Map<string, string>();
-    (data ?? []).forEach((t: any) => { if (t.invite_id) m.set(t.invite_id, t.token); });
+    (data ?? []).forEach((t) => { if (t.invite_id) m.set(t.invite_id, t.token); });
     return m;
   }, [data]);
 }

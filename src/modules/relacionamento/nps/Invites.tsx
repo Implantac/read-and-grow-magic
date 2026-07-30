@@ -84,12 +84,12 @@ export default function Invites() {
 
   const togglePageSelection = (checked: boolean) => {
     const s = new Set(selectedInvites);
-    pageInvites.forEach((i: any) => { if (checked) s.add(i.id); else s.delete(i.id); });
+    pageInvites.forEach((i) => { if (checked) s.add(i.id); else s.delete(i.id); });
     setSelectedInvites(s);
   };
 
   const selectedSendable = Array.from(selectedInvites).filter((id) => {
-    const inv = filteredInvites.find((i: any) => i.id === id);
+    const inv = filteredInvites.find((i) => i.id === id);
     return inv && ['pending', 'failed', 'bounced'].includes(inv.status) && inv.channel === 'email';
   });
 
@@ -125,7 +125,7 @@ export default function Invites() {
     if (ok) revoke.mutate([id]);
   };
 
-  const allPageChecked = pageInvites.length > 0 && pageInvites.every((i: any) => selectedInvites.has(i.id));
+  const allPageChecked = pageInvites.length > 0 && pageInvites.every((i) => selectedInvites.has(i.id));
 
   return (
     <div className="space-y-4">
@@ -173,7 +173,7 @@ export default function Invites() {
           <Label>Campanha</Label>
           <Select value={campaignId} onValueChange={(v) => { setCampaignId(v); setPage(1); }}>
             <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-            <SelectContent>{campaigns.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+            <SelectContent>{campaigns.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <div>

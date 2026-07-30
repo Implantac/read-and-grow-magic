@@ -6,7 +6,7 @@ import { Copy, Eye, Mail, MessageCircle, QrCode, RefreshCw, Trash2, ChevronLeft,
 import { toast } from 'sonner';
 import { publicSurveyUrl } from '../hooks';
 import { StatusBadge } from './parts';
-import type { NPSInvite } from './types';
+import type { InviteClient, NPSInvite } from './types';
 
 interface InvitesTableProps {
   pageInvites: NPSInvite[];
@@ -21,7 +21,7 @@ interface InvitesTableProps {
   allPageChecked: boolean;
   togglePageSelection: (v: boolean) => void;
   setQrUrl: (u: string) => void;
-  shareUrl: (token: string, ch: string, contact?: any) => void;
+  shareUrl: (token: string, ch: string, contact?: InviteClient | null) => void;
   resendMutate: (id: string) => void;
   resendPending: boolean;
   confirmRevokeOne: (id: string) => void;

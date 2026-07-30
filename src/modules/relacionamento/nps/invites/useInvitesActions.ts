@@ -5,6 +5,11 @@ import { publicSurveyUrl } from '../hooks';
 import { exportToCSV } from '@/lib/exportUtils';
 import type { BulkResult, BulkResultItem } from './parts';
 import type { NPSInvite } from './types';
+import { getErrorMessage } from './errors';
+
+/** Retorno da edge function `nps-send-invite`. */
+interface SendInviteResult { id: string; ok?: boolean; error?: string }
+interface SendInvitesResponse { sent?: number; failed?: number; results?: SendInviteResult[] }
 
 export function useInvitesActions(
   invites: NPSInvite[],
@@ -37,7 +42,7 @@ export function useInvitesActions(
       if (fail > 0) setBulkResult({ title: 'Resultado da revogação', items });
       setSelectedInvites(new Set());
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: unknown) => toast.error(getErrorMessage(e)),
   });
 
   const sendInvites = useMutation({
@@ -46,11 +51,11 @@ export function useInvitesActions(
       if (error) throw error;
       return data;
     },
-    onSuccess: (d: any) => {
+    onSuccess: (d: SendInvitesResponse | null) => {
       qc.invalidateQueries({ queryKey: ['nps'] });
       const sent = d?.sent ?? 0;
       const failed = d?.failed ?? 0;
-      const results: any[] = Array.isArray(d?.results) ? d.results : [];
+      const results: SendInviteResult[] = Array.isArray(d?.results) ? d!.results! : [];
       const items: BulkResultItem[] = results.map((r) => ({
         id: r.id, name: inviteNameById(r.id), ok: !!r.ok, error: r.error,
       }));
@@ -61,7 +66,7 @@ export function useInvitesActions(
       }
       setSelectedInvites(new Set());
     },
-    onError: (e: any) => toast.error(e.message ?? 'Erro ao enviar'),
+    onError: (e: unknown) => toast.error(getErrorMessage(e, 'Erro ao enviar')),
   });
 
   const resend = useMutation({
@@ -73,7 +78,7 @@ export function useInvitesActions(
       return data;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['nps'] }); toast.success('Convite reenviado'); },
-    onError: (e: any) => toast.error(e.message ?? 'Erro ao reenviar'),
+    onError: (e: unknown) => toast.error(getErrorMessage(e, 'Erro ao reenviar')),
   });
 
   const shareUrl = (token: string, ch: string, contact?: { email?: string | null; phone?: string | null; name?: string | null }) => {
@@ -100,7 +105,7 @@ export function useInvitesActions(
     const { data: tokens, error } = await supabase.from('nps_tokens').select('invite_id,token').in('invite_id', ids);
     if (error) { toast.error('Erro ao buscar tokens'); return; }
     const map = new Map<string, string>();
-    (tokens ?? []).forEach((t: any) => { if (t.invite_id) map.set(t.invite_id, t.token); });
+    (tokens ?? []).forEach((t) => { if (t.invite_id) map.set(t.invite_id, t.token); });
     const items: BulkResultItem[] = ids.map((id) => {
       const tk = map.get(id);
       return tk
@@ -139,7 +144,7 @@ export function useInvitesActions(
       aberto_em: i.opened_at ? new Date(i.opened_at).toLocaleString('pt-BR') : '',
       respondido_em: i.responded_at ? new Date(i.responded_at).toLocaleString('pt-BR') : '',
     }));
-    exportToCSV(rows as any, [
+    exportToCSV(rows, [
       { key: 'cliente', label: 'Cliente' },
       { key: 'email', label: 'E-mail' },
       { key: 'telefone', label: 'Telefone' },
