@@ -3,7 +3,7 @@ import { DRESummaryRow, DRECategoryRow } from '@/hooks/accounting/useDRE';
 
 export const dreService = {
   async getSummary(from: string, to: string) {
-    const { data, error } = await supabase.rpc('get_dre_summary' as any, {
+    const { data, error } = await supabase.rpc('get_dre_summary', {
       _from: from,
       _to: to,
     });
@@ -12,7 +12,7 @@ export const dreService = {
   },
 
   async getDetailed(from: string, to: string) {
-    const { data, error } = await supabase.rpc('get_dre' as any, {
+    const { data, error } = await supabase.rpc('get_dre', {
       _from: from,
       _to: to,
     });
@@ -21,7 +21,7 @@ export const dreService = {
   },
 
   async getDynamic(params: { from: string; to: string; costCenterId?: string | null; channel?: string | null }) {
-    const { data, error } = await supabase.rpc('get_dre_dynamic' as any, {
+    const { data, error } = await supabase.rpc('get_dre_dynamic', {
       _from: params.from,
       _to: params.to,
       _cost_center_id: params.costCenterId ?? null,

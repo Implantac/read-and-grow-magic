@@ -4,7 +4,7 @@ export const inventoryService = {
   // Products
   async getProducts() {
     const { data, error } = await supabase
-      .from('products' as any)
+      .from('products')
       .select('*, categories(name)')
       .order('name');
     if (error) throw error;
@@ -15,25 +15,25 @@ export const inventoryService = {
   },
 
   async createProduct(product: any) {
-    const { data, error } = await supabase.from('products' as any).insert(product).select().single();
+    const { data, error } = await supabase.from('products').insert(product).select().single();
     if (error) throw error;
     return data;
   },
 
   async updateProduct(id: string, updates: any) {
-    const { data, error } = await supabase.from('products' as any).update(updates).eq('id', id).select().single();
+    const { data, error } = await supabase.from('products').update(updates).eq('id', id).select().single();
     if (error) throw error;
     return data;
   },
 
   async deleteProduct(id: string) {
-    const { error } = await supabase.from('products' as any).delete().eq('id', id);
+    const { error } = await supabase.from('products').delete().eq('id', id);
     if (error) throw error;
   },
 
   // Categories
   async getCategories() {
-    const { data, error } = await supabase.from('categories' as any).select('*').order('name');
+    const { data, error } = await supabase.from('categories').select('*').order('name');
     if (error) throw error;
     return data || [];
   },

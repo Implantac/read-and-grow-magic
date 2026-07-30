@@ -52,7 +52,7 @@ export default function CycleCount() {
   async function load() {
     setLoading(true);
     const { data, error } = await supabase
-      .from("wms_inventory_counts" as any)
+      .from("wms_inventory_counts")
       .select("*")
       .order("scheduled_date", { ascending: false })
       .limit(200);
@@ -83,7 +83,7 @@ export default function CycleCount() {
       toastError("Informe o número do inventário");
       return;
     }
-    const { error } = await supabase.from("wms_inventory_counts" as any).insert({
+    const { error } = await supabase.from("wms_inventory_counts").insert({
       count_number: form.count_number,
       zone: form.zone || null,
       scheduled_date: form.scheduled_date,
@@ -104,7 +104,7 @@ export default function CycleCount() {
 
   async function start(id: string) {
     const { error } = await supabase
-      .from("wms_inventory_counts" as any)
+      .from("wms_inventory_counts")
       .update({ status: "in_progress", started_at: new Date().toISOString() } as any)
       .eq("id", id);
     if (error) return toastError("Erro ao iniciar", error.message);
@@ -114,7 +114,7 @@ export default function CycleCount() {
 
   async function complete(id: string, discrepancies: number) {
     const { error } = await supabase
-      .from("wms_inventory_counts" as any)
+      .from("wms_inventory_counts")
       .update({
         status: "completed",
         completed_at: new Date().toISOString(),

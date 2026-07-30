@@ -7,7 +7,7 @@ export class AccountingService {
   // Chart of Accounts
   async getChartOfAccounts(): Promise<ChartOfAccount[]> {
     const { data, error } = await this.supabase
-      .from('chart_of_accounts' as any)
+      .from('chart_of_accounts')
       .select('*')
       .order('code');
 
@@ -28,7 +28,7 @@ export class AccountingService {
   }
 
   async createAccount(account: Omit<ChartOfAccount, 'id'>): Promise<void> {
-    const { error } = await this.supabase.from('chart_of_accounts' as any).insert({
+    const { error } = await this.supabase.from('chart_of_accounts').insert({
       code: account.code,
       name: account.name,
       type: account.type,
@@ -43,14 +43,14 @@ export class AccountingService {
   }
 
   async deleteAccount(id: string): Promise<void> {
-    const { error } = await this.supabase.from('chart_of_accounts' as any).delete().eq('id', id);
+    const { error } = await this.supabase.from('chart_of_accounts').delete().eq('id', id);
     if (error) throw error;
   }
 
   // Journal Entries
   async getJournalEntries(): Promise<JournalEntry[]> {
     const { data, error } = await this.supabase
-      .from('journal_entries' as any)
+      .from('journal_entries')
       .select(`
         *,
         lines:journal_entry_lines(*)
@@ -83,7 +83,7 @@ export class AccountingService {
 
   async postJournalEntry(id: string): Promise<void> {
     const { error } = await this.supabase
-      .from('journal_entries' as any)
+      .from('journal_entries')
       .update({ status: 'posted' })
       .eq('id', id);
     

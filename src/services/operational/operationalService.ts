@@ -6,7 +6,7 @@ export class OperationalService {
   // Shipment Orders
   async getShipments(): Promise<any[]> {
     const { data, error } = await this.supabase
-      .from('shipment_orders' as any)
+      .from('shipment_orders')
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -16,7 +16,7 @@ export class OperationalService {
 
   async updateShipmentStatus(id: string, status: string): Promise<void> {
     const { error } = await this.supabase
-      .from('shipment_orders' as any)
+      .from('shipment_orders')
       .update({ status })
       .eq('id', id);
     if (error) throw error;
@@ -44,7 +44,7 @@ export class OperationalService {
   // Operational Queues
   async getBillingQueue(): Promise<any[]> {
     const { data, error } = await this.supabase
-      .from('billing_queue' as any)
+      .from('billing_queue')
       .select('*');
     if (error) throw error;
     return data || [];

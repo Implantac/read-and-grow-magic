@@ -45,13 +45,13 @@ export function NFCeReturnDialog({ nfce, open, onOpenChange, onConfirm }: Props)
     setRefundMethod('cash');
     setQty({});
     (async () => {
-      const { data } = await (supabase.from('nfce_returns' as any) as any)
+      const { data } = await (supabase.from('nfce_returns') as any)
         .select('id, status')
         .eq('nfce_id', nfce.id)
         .eq('status', 'authorized');
       const ids = (data || []).map((r: any) => r.id);
       if (ids.length === 0) { setAlreadyReturned({}); return; }
-      const { data: its } = await (supabase.from('nfce_return_items' as any) as any)
+      const { data: its } = await (supabase.from('nfce_return_items') as any)
         .select('nfce_item_id, quantity')
         .in('return_id', ids);
       const map: ReturnedMap = {};

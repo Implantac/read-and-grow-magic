@@ -25,7 +25,7 @@ export default function PeriodClosing() {
     queryKey: ['accounting_periods', year],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('accounting_periods' as any)
+        .from('accounting_periods')
         .select('*')
         .eq('year', year)
         .order('month');
@@ -36,7 +36,7 @@ export default function PeriodClosing() {
 
   const closeMutation = useMutation({
     mutationFn: async ({ y, m }: { y: number; m: number }) => {
-      const { data, error } = await supabase.rpc('close_accounting_period' as any, { _year: y, _month: m });
+      const { data, error } = await supabase.rpc('close_accounting_period', { _year: y, _month: m });
       if (error) throw error;
       return data;
     },
@@ -49,7 +49,7 @@ export default function PeriodClosing() {
 
   const reopenMutation = useMutation({
     mutationFn: async ({ y, m }: { y: number; m: number }) => {
-      const { data, error } = await supabase.rpc('reopen_accounting_period' as any, { _year: y, _month: m });
+      const { data, error } = await supabase.rpc('reopen_accounting_period', { _year: y, _month: m });
       if (error) throw error;
       return data;
     },

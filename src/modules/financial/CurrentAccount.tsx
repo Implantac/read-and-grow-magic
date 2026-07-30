@@ -117,7 +117,7 @@ export default function CurrentAccount() {
   const { data: clientRows = [], isLoading: loadingClients } = useQuery({
     queryKey: ['client_current_account'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('client_current_account' as any).select('*').limit(2000);
+      const { data, error } = await supabase.from('client_current_account').select('*').limit(2000);
       if (error) throw error;
       return (data || []).map((r: any) => ({
         party: r.client_name,
@@ -137,7 +137,7 @@ export default function CurrentAccount() {
   const { data: supplierRows = [], isLoading: loadingSuppliers } = useQuery({
     queryKey: ['supplier_current_account'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('supplier_current_account' as any).select('*').limit(2000);
+      const { data, error } = await supabase.from('supplier_current_account').select('*').limit(2000);
       if (error) throw error;
       return (data || []).map((r: any) => ({
         party: r.supplier_name,

@@ -9,7 +9,7 @@ export function useCSATCESMetrics() {
     enabled: !!companyId,
     queryFn: async () => {
       const { data, error } = await (supabase
-        .from('nps_answer_items' as any) as any)
+        .from('nps_answer_items') as any)
         .select('question_type,score,created_at')
         .eq('company_id', companyId!)
         .in('question_type', ['csat', 'ces'])

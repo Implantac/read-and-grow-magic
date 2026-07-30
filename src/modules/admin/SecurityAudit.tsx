@@ -50,7 +50,7 @@ function SecurityAuditInner() {
       const since = new Date();
       since.setDate(since.getDate() - Number(days));
       let q = supabase
-        .from("v_critical_audit_events" as any)
+        .from("v_critical_audit_events")
         .select("*")
         .gte("created_at", since.toISOString())
         .order("created_at", { ascending: false })
