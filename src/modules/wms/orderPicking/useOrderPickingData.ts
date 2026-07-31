@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { OrderRow } from './types';
+import type { OrderRow, ShipmentInfo, TrackingEvent } from './types';
 
 export function useOrdersForPicking() {
   return useQuery({
@@ -23,7 +23,7 @@ export function useOrdersForPicking() {
         .in('order_id', ids);
 
       const map = new Map<string, { reserved: number; picked: number; shipped: number }>();
-      (res || []).forEach((r: any) => {
+      (res || []).forEach((r) => {
         const cur = map.get(r.order_id) || { reserved: 0, picked: 0, shipped: 0 };
         if (r.status === 'reserved') cur.reserved += 1;
         if (r.status === 'picked') cur.picked += 1;
@@ -32,7 +32,7 @@ export function useOrdersForPicking() {
       });
 
       return (ordersData || [])
-        .map((o: any) => {
+        .map((o) => {
           const m = map.get(o.id) || { reserved: 0, picked: 0, shipped: 0 };
           let stage: OrderRow['stage'] = 'none';
           if (m.shipped > 0 && m.reserved === 0 && m.picked === 0) stage = 'shipped';
@@ -56,7 +56,7 @@ export function useShipmentInfo(orderNumber?: string) {
   return useQuery({
     queryKey: ['order-shipment', orderNumber],
     enabled: !!orderNumber,
-    queryFn: async () => {
+    queryFn: async (): Promise<{ shipment: ShipmentInfo | null; events: TrackingEvent[] }> => {
       const { data: ship } = await supabase
         .from('wms_shipments')
         .select('id, shipment_number, status, carrier, tracking_number, shipped_at, delivered_at')
@@ -64,13 +64,13 @@ export function useShipmentInfo(orderNumber?: string) {
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (!ship) return { shipment: null, events: [] as any[] };
+      if (!ship) return { shipment: null, events: [] };
       const { data: events } = await supabase
         .from('delivery_tracking')
         .select('id, event_type, description, location, registered_by, occurred_at')
         .eq('shipment_id', ship.id)
         .order('occurred_at', { ascending: false });
-      return { shipment: ship as any, events: (events || []) as any[] };
+      return { shipment: ship as ShipmentInfo, events: (events || []) as TrackingEvent[] };
     },
   });
 }

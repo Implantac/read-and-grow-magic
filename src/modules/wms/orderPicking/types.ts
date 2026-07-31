@@ -47,3 +47,19 @@ export interface StageForm {
   location: string;
   notes: string;
 }
+
+/** Retorno da RPC `wms_pick_order_stock` (jsonb). */
+export interface PickOrderResult {
+  lines_short?: number;
+  total_picked?: number;
+}
+
+/** Retorno da RPC `wms_ship_order` (jsonb). */
+export interface ShipOrderResult {
+  lines_shipped?: number;
+}
+
+/** Retorno da RPC `wms_update_shipment_stage` (jsonb). */
+export interface UpdateStageResult {
+  shipment_number?: string;
+}

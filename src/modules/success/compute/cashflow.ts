@@ -1,6 +1,7 @@
 import type { SuccessCashFlow90d } from "../types";
+import type { PayableRow, ReceivableRow } from "./inputs";
 
-export function buildCashflow(ar: any[], ap: any[], now: Date): SuccessCashFlow90d {
+export function buildCashflow(ar: ReceivableRow[], ap: PayableRow[], now: Date): SuccessCashFlow90d {
   const in30 = new Date(now.getTime() + 30 * 86400000).getTime();
   const in60 = new Date(now.getTime() + 60 * 86400000).getTime();
   const in90 = new Date(now.getTime() + 90 * 86400000).getTime();

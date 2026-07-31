@@ -32,12 +32,12 @@ export default function SalesReportCanal() {
 
   const branchName = useMemo(() => {
     const m = new Map<string, string>();
-    branches.forEach((b: any) => m.set(b.id, b.name));
+    branches.forEach((b) => m.set(b.id, b.name));
     return m;
   }, [branches]);
 
   const filtered = useMemo(() => {
-    return orders.filter((o: any) => {
+    return orders.filter((o) => {
       const d = o.created_at?.slice(0, 10) ?? '';
       if (from && d < from) return false;
       if (to && d > to) return false;
@@ -50,7 +50,7 @@ export default function SalesReportCanal() {
       varejoQtd = 0,
       atacadoTot = 0,
       atacadoQtd = 0;
-    for (const o of filtered as any[]) {
+    for (const o of filtered) {
       const t = Number(o.total ?? 0);
       if (o.canal_operacional === 'VAREJO_PDV') {
         varejoTot += t;
@@ -64,7 +64,7 @@ export default function SalesReportCanal() {
   }, [filtered]);
 
   const exportCSV = () => {
-    const rows = (filtered as any[]).map((o) => ({
+    const rows = filtered.map((o) => ({
       numero: o.number,
       data: o.created_at?.slice(0, 10),
       canal:
@@ -154,7 +154,7 @@ export default function SalesReportCanal() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(filtered as any[]).slice(0, 500).map((o) => (
+              {filtered.slice(0, 500).map((o) => (
                 <TableRow key={o.id}>
                   <TableCell className="font-mono">{o.number}</TableCell>
                   <TableCell>{o.created_at?.slice(0, 10)}</TableCell>

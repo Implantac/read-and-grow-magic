@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { BaseService } from '../shared/baseService';
+import type { CreateOrderInput } from '@/hooks/commercial/orders/types';
 
 export class OrderService extends BaseService<'orders'> {
   constructor() {
@@ -13,13 +14,13 @@ export class OrderService extends BaseService<'orders'> {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return (data as any[]).map((o) => ({
+    return (data ?? []).map((o) => ({
       ...o,
       items: o.order_items || [],
     }));
   }
 
-  async createOrder(input: any) {
+  async createOrder(input: CreateOrderInput) {
     const { data: lastOrder } = await supabase
       .from('orders')
       .select('number')
@@ -30,14 +31,17 @@ export class OrderService extends BaseService<'orders'> {
     const lastNum = lastOrder?.number?.replace('PED', '') || '0';
     const nextNum = `PED${String(parseInt(lastNum) + 1).padStart(4, '0')}`;
 
-    const subtotal = input.items.reduce((s: number, i: any) => s + (i.quantity * i.unit_price), 0);
-    const discount = input.items.reduce((s: number, i: any) => s + (i.discount || 0), 0);
+    const subtotal = input.items.reduce((s, i) => s + i.quantity * i.unit_price, 0);
+    const discount = input.items.reduce((s, i) => s + (i.discount || 0), 0);
     const shipping = input.shipping || 0;
     const total = subtotal - discount + shipping;
+
+    const company_id = await this.resolveCompanyId();
 
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
+        company_id,
         number: nextNum,
         client_id: input.client_id || null,
         client_name: input.client_name,
@@ -51,13 +55,13 @@ export class OrderService extends BaseService<'orders'> {
         total,
         notes: input.notes || null,
         status: 'pending',
-      } as any)
+      })
       .select()
       .single();
 
     if (orderError) throw orderError;
 
-    const items = input.items.map((item: any) => ({
+    const items = input.items.map((item) => ({
       order_id: order.id,
       product_id: item.product_id || null,
       product_name: item.product_name,
@@ -76,6 +80,21 @@ export class OrderService extends BaseService<'orders'> {
 
     return order;
   }
+
+  private async resolveCompanyId(): Promise<string> {
+    const { data: auth } = await supabase.auth.getUser();
+    const userId = auth.user?.id;
+    if (!userId) throw new Error('Sessão expirada');
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('company_id')
+      .eq('id', userId)
+      .maybeSingle();
+    if (!profile?.company_id) throw new Error('Empresa não encontrada');
+    return profile.company_id;
+  }
+
+
 
   async updateStatus(id: string, status: string) {
     return this.update(id, { status });
@@ -98,7 +117,7 @@ export class OrderService extends BaseService<'orders'> {
         original_order_id: id,
         order_data: order,
         expires_at: expiresAt
-      } as any)
+      })
       .select()
       .single();
 

@@ -6,6 +6,7 @@ import { buildProductInsights } from "./compute/products";
 import { buildSuppliers, buildCustomers, buildDelinquents } from "./compute/customers";
 import { buildHealth } from "./compute/health";
 import { buildRecommendations } from "./compute/recommendations";
+import type { SaleItem12mRow, SaleItem90Row } from "./compute/inputs";
 import type { SuccessData } from "./types";
 
 export type {
@@ -59,8 +60,8 @@ export function useSuccessData() {
       const products = productsRes.data ?? [];
       const stock = stockRes.data ?? [];
       const orders = ordersRes.data ?? [];
-      const saleItems90 = (saleItemsRes.data ?? []) as any[];
-      const saleItems12m = (saleItems12mRes.data ?? []) as any[];
+      const saleItems90 = (saleItemsRes.data ?? []) as unknown as SaleItem90Row[];
+      const saleItems12m = (saleItems12mRes.data ?? []) as unknown as SaleItem12mRow[];
       const purchaseOrders90 = poRes.data ?? [];
 
       const { revenue12m, revenueMonth, revenuePrevMonth, revenueYTD, revenueWeek, revenuePrevWeek } =

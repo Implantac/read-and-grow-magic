@@ -42,6 +42,9 @@ export interface DbOrder {
   estimated_cost?: number | null;
   estimated_tax?: number | null;
   estimated_margin_pct?: number | null;
+  /** Canal operacional multi-loja: VAREJO_PDV | ATACADO_INDUSTRIA */
+  canal_operacional?: string | null;
+  branch_id?: string | null;
   items?: DbOrderItem[];
 }
 
