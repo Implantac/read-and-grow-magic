@@ -1,7 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { QK, useCompanyId } from './_shared';
+
+export type NPSCampaignInput = Partial<TablesInsert<'nps_campaigns'>> & { name: string };
 
 export function useNPSCampaigns() {
   const companyId = useCompanyId();
@@ -20,7 +23,7 @@ export function useCreateCampaign() {
   const qc = useQueryClient();
   const companyId = useCompanyId();
   return useMutation({
-    mutationFn: async (input: Partial<any> & { name: string }) => {
+    mutationFn: async (input: NPSCampaignInput) => {
       let effectiveCompanyId = companyId;
       if (!effectiveCompanyId) {
         const { data: { user } } = await supabase.auth.getUser();
@@ -30,7 +33,11 @@ export function useCreateCampaign() {
         effectiveCompanyId = profile?.company_id ?? undefined;
       }
       if (!effectiveCompanyId) throw new Error('Empresa ativa não encontrada. Selecione uma empresa antes de criar campanhas.');
-      const { data, error } = await supabase.from('nps_campaigns').insert({ ...input, company_id: effectiveCompanyId } as any).select().single();
+      const { data, error } = await supabase
+        .from('nps_campaigns')
+        .insert({ ...input, company_id: effectiveCompanyId } as TablesInsert<'nps_campaigns'>)
+        .select()
+        .single();
       if (error) throw error;
       return data;
     },
@@ -38,19 +45,19 @@ export function useCreateCampaign() {
       qc.invalidateQueries({ queryKey: ['nps'] });
       toast.success('Campanha criada');
     },
-    onError: (e: any) => toast.error(e.message ?? 'Erro ao criar campanha'),
+    onError: (e: Error) => toast.error(e.message ?? 'Erro ao criar campanha'),
   });
 }
 
 export function useUpdateCampaign() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...patch }: { id: string } & Record<string, any>) => {
-      const { error } = await supabase.from('nps_campaigns').update(patch as any).eq('id', id);
+    mutationFn: async ({ id, ...patch }: { id: string } & TablesUpdate<'nps_campaigns'>) => {
+      const { error } = await supabase.from('nps_campaigns').update(patch).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['nps'] }),
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 }
 
@@ -62,6 +69,6 @@ export function useDeleteCampaign() {
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['nps'] }); toast.success('Campanha removida'); },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: Error) => toast.error(e.message),
   });
 }
