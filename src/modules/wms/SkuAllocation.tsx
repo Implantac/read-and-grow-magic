@@ -50,10 +50,11 @@ export default function SkuAllocationPage() {
     if (b.error) toast.error('Erro ao carregar saldos');
     if (l.error) toast.error('Erro ao carregar endereços');
     setBalances((b.data as Balance[]) || []);
-    setLocations(((l.data as any[]) || []).map(x => ({
-      id: x.id, code: x.code, zone_code: x.zone?.code, warehouse_code: x.zone?.warehouse?.code,
+    type LocRow = { id: string; code: string; zone?: { code?: string | null; warehouse?: { code?: string | null } | null } | null };
+    setLocations(((l.data ?? []) as unknown as LocRow[]).map((x) => ({
+      id: x.id, code: x.code, zone_code: x.zone?.code ?? undefined, warehouse_code: x.zone?.warehouse?.code ?? undefined,
     })));
-    setProducts((p.data as any[]) || []);
+    setProducts((p.data ?? []) as { id: string; code: string; name: string; unit: string | null }[]);
     setLoading(false);
   };
 
