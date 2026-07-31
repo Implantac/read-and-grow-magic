@@ -30,13 +30,13 @@ export function BankDialog({
   const delBank = useDeleteQuestionFromBank();
 
   const filtered = useMemo(
-    () => (bank as any[]).filter((q) => (tab === 'global' ? q.is_global : !q.is_global)),
+    () => bank.filter((q) => (tab === 'global' ? q.is_global : !q.is_global)),
     [bank, tab],
   );
 
   const categories = useMemo(() => {
     const s = new Set<string>();
-    (bank as any[]).forEach((q) => s.add(q.category));
+    bank.forEach((q) => { if (q.category) s.add(q.category); });
     return Array.from(s).sort();
   }, [bank]);
 
@@ -65,7 +65,7 @@ export function BankDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
+        <Tabs value={tab} onValueChange={(v) => setTab(v as 'global' | 'company')}>
           <TabsList>
             <TabsTrigger value="global">
               <Sparkles className="h-3.5 w-3.5 mr-1.5" /> Curadoria da plataforma

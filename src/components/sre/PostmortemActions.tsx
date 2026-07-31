@@ -48,7 +48,7 @@ export function PostmortemActions({ postmortemId }: { postmortemId: string }) {
   const add = async () => {
     if (!form.title) { toast.error('Título obrigatório'); return; }
     const { error } = await supabase.rpc('sre_postmortem_action_upsert', {
-      _id: null as any,
+      _id: null,
       _postmortem_id: postmortemId,
       _title: form.title,
       _description: null,
