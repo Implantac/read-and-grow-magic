@@ -62,38 +62,38 @@ export default function OrderTimeline() {
       const [order, history, prod, conf, nfes, ar] = await Promise.all([
         supabase.from('orders').select('*, clients(name)').eq('id', orderId!).maybeSingle(),
         supabase.from('order_status_history').select('*').eq('order_id', orderId!).order('created_at'),
-        supabase.from('production_orders').select('id, order_number, status, created_at, updated_at').eq('sales_order_id', orderId!).order('created_at') as any,
-        supabase.from('conference_records').select('id, code, status, created_at').eq('order_id', orderId!).order('created_at') as any,
-        supabase.from('nfe').select('id, numero, serie, status, data_emissao').eq('order_id', orderId!).order('data_emissao') as any,
-        supabase.from('accounts_receivable').select('id, document_number, status, due_date, amount, created_at').eq('order_id', orderId!).order('created_at') as any,
+        supabase.from('production_orders').select('id, order_number, status, created_at, updated_at').eq('sales_order_id', orderId!).order('created_at'),
+        supabase.from('conference_records').select('id, conference_number, status, created_at').eq('order_id', orderId!).order('created_at'),
+        supabase.from('nfe').select('id, number, series, status, issue_date').eq('order_id', orderId!).order('issue_date'),
+        supabase.from('accounts_receivable').select('id, invoice_number, status, due_date, amount, created_at').eq('order_id', orderId!).order('created_at'),
       ]);
 
       const events: TimelineEvent[] = [];
-      const o: any = order.data;
+      const o = order.data;
 
       if (o?.created_at) {
         events.push({
           key: 'created',
           at: o.created_at,
-          title: `Pedido ${o.number ?? o.order_number ?? ''} criado`,
+          title: `Pedido ${o.number ?? ''} criado`,
           subtitle: o.clients?.name ? `Cliente: ${o.clients.name}` : o.client_name || undefined,
           icon: ClipboardList,
           tone: 'primary',
         });
       }
 
-      (history.data ?? []).forEach((h: any) => {
+      (history.data ?? []).forEach((h) => {
         events.push({
           key: `hist-${h.id}`,
           at: h.created_at,
-          title: `Status: ${h.new_status ?? h.status ?? '—'}`,
-          subtitle: h.reason || h.notes || undefined,
+          title: `Status: ${h.to_status ?? '—'}`,
+          subtitle: h.observation || h.block_reason || undefined,
           icon: History,
           tone: 'info',
         });
       });
 
-      (prod.data ?? []).forEach((p: any) => {
+      (prod.data ?? []).forEach((p) => {
         events.push({
           key: `prod-${p.id}`,
           at: p.created_at,
@@ -104,33 +104,33 @@ export default function OrderTimeline() {
         });
       });
 
-      (conf.data ?? []).forEach((c: any) => {
+      (conf.data ?? []).forEach((c) => {
         events.push({
           key: `conf-${c.id}`,
           at: c.created_at,
-          title: `Conferência ${c.code ?? ''}`,
+          title: `Conferência ${c.conference_number ?? ''}`,
           subtitle: `Status: ${c.status ?? '—'}`,
           icon: PackageCheck,
           tone: 'info',
         });
       });
 
-      (nfes.data ?? []).forEach((n: any) => {
+      (nfes.data ?? []).forEach((n) => {
         events.push({
           key: `nfe-${n.id}`,
-          at: n.data_emissao ?? new Date().toISOString(),
-          title: `NF-e ${n.numero ?? ''} / série ${n.serie ?? ''}`,
+          at: n.issue_date ?? new Date().toISOString(),
+          title: `NF-e ${n.number ?? ''} / série ${n.series ?? ''}`,
           subtitle: `Status: ${n.status ?? '—'}`,
           icon: Receipt,
           tone: 'success',
         });
       });
 
-      (ar.data ?? []).forEach((r: any) => {
+      (ar.data ?? []).forEach((r) => {
         events.push({
           key: `ar-${r.id}`,
           at: r.created_at,
-          title: `Título a receber ${r.document_number ?? ''}`,
+          title: `Título a receber ${r.invoice_number ?? ''}`,
           subtitle: `R$ ${Number(r.amount ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} · Vence ${r.due_date ?? '—'} · ${r.status ?? ''}`,
           icon: Banknote,
           tone: 'success',
@@ -147,7 +147,7 @@ export default function OrderTimeline() {
     <PageContainer>
       <PageHeader
         title="Linha do tempo do pedido"
-        description={(data?.order as any)?.number ? `Pedido ${(data!.order as any).number}` : 'Rastreamento cross-módulo'}
+        description={data?.order?.number ? `Pedido ${data.order.number}` : 'Rastreamento cross-módulo'}
         actions={
           <Button asChild variant="outline" size="sm">
             <Link to="/comercial/pedidos">

@@ -69,6 +69,32 @@ export interface SalesRepStat {
   revenue: number;
 }
 
+export interface ExecutiveSWOTItem {
+  title: string;
+  description: string;
+  impact: 'high' | 'medium' | 'low';
+}
+
+export interface ExecutiveSWOTData {
+  strengths: ExecutiveSWOTItem[];
+  weaknesses: ExecutiveSWOTItem[];
+  opportunities: ExecutiveSWOTItem[];
+  threats: ExecutiveSWOTItem[];
+}
+
+export interface ExecutiveAutoAlert {
+  title: string;
+  description: string;
+  severity: string;
+}
+
+export interface ExecutiveProductMargin {
+  name: string;
+  revenue: number;
+  qty: number;
+  marginPct: number;
+}
+
 export interface ExecutiveDashboardData {
   kpis: ExecutiveKPIs;
   revenueByMonth: { month: string; revenue: number }[];
@@ -81,6 +107,11 @@ export interface ExecutiveDashboardData {
   consensus: Array<{ specialist: string; insight: string; status: string }>;
   alerts: ExecutiveAlert[];
   scenarios: any[];
+  autoAlerts?: ExecutiveAutoAlert[];
+  productMargins?: ExecutiveProductMargin[];
+  lowMarginProducts?: ExecutiveProductMargin[];
+  swot?: ExecutiveSWOTData;
+  data_status?: string;
   summary: { totalOrders: number; totalProducts: number; totalClients: number; productionOrders: number; funnelOpportunities: number };
 }
 

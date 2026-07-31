@@ -58,6 +58,12 @@ export interface DbProduct {
   iss_rate: number | null;
   service_duration_minutes: number | null;
   is_recurring: boolean | null;
+  // Classificação / rastreabilidade
+  item_kind: string | null;
+  requires_lot_tracking: boolean | null;
+  shelf_life_days: number | null;
+  storage_conditions: string | null;
+  multi_ean: string[] | null;
 }
 
 export function useProducts() {
