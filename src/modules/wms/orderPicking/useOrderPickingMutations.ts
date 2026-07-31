@@ -1,7 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
-import { STAGE_LABEL, type StageForm } from './types';
+import {
+  STAGE_LABEL,
+  type PickOrderResult,
+  type ShipOrderResult,
+  type StageForm,
+  type UpdateStageResult,
+} from './types';
+
+const errMessage = (err: unknown) => (err instanceof Error ? err.message : String(err));
 
 export function useOrderPickingMutations(stageForm: StageForm, onStageSuccess: () => void) {
   const qc = useQueryClient();
@@ -10,9 +18,9 @@ export function useOrderPickingMutations(stageForm: StageForm, onStageSuccess: (
     mutationFn: async (orderId: string) => {
       const { data, error } = await supabase.rpc('wms_pick_order_stock', { p_order_id: orderId });
       if (error) throw error;
-      return data as any;
+      return (data ?? {}) as PickOrderResult;
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data) => {
       const short = data?.lines_short || 0;
       if (short > 0) toastError(`Separação parcial: ${short} linha(s) sem saldo suficiente`);
       else toastSuccess(`Separação concluída — ${data?.total_picked || 0} unidade(s)`);
@@ -21,21 +29,21 @@ export function useOrderPickingMutations(stageForm: StageForm, onStageSuccess: (
       qc.invalidateQueries({ queryKey: ['stock_balances'] });
       qc.invalidateQueries({ queryKey: ['stock-reservations'] });
     },
-    onError: (err: any) => toastError(`Falha na separação: ${err.message}`),
+    onError: (err) => toastError(`Falha na separação: ${errMessage(err)}`),
   });
 
   const shipMut = useMutation({
     mutationFn: async (orderId: string) => {
       const { data, error } = await supabase.rpc('wms_ship_order', { p_order_id: orderId });
       if (error) throw error;
-      return data as any;
+      return (data ?? {}) as ShipOrderResult;
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data) => {
       toastSuccess(`Expedição registrada — ${data?.lines_shipped || 0} linha(s)`);
       qc.invalidateQueries({ queryKey: ['orders-for-picking'] });
       qc.invalidateQueries({ queryKey: ['stock-reservations'] });
     },
-    onError: (err: any) => toastError(`Falha na expedição: ${err.message}`),
+    onError: (err) => toastError(`Falha na expedição: ${errMessage(err)}`),
   });
 
   const stageMut = useMutation({
@@ -49,15 +57,15 @@ export function useOrderPickingMutations(stageForm: StageForm, onStageSuccess: (
         p_notes: stageForm.notes || null,
       });
       if (error) throw error;
-      return data as any;
+      return (data ?? {}) as UpdateStageResult;
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data) => {
       toastSuccess(`Expedição ${data?.shipment_number} → ${STAGE_LABEL[stageForm.stage]}`);
       qc.invalidateQueries({ queryKey: ['order-shipment'] });
       qc.invalidateQueries({ queryKey: ['orders-for-picking'] });
       onStageSuccess();
     },
-    onError: (err: any) => toastError(`Falha: ${err.message}`),
+    onError: (err) => toastError(`Falha: ${errMessage(err)}`),
   });
 
   return { pickMut, shipMut, stageMut };
