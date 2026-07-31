@@ -36,7 +36,7 @@ export default function SupplyStockPage() {
 
   const handleCreateSupply = async () => {
     if (!supplyForm.code || !supplyForm.name) return;
-    await createSupply(supplyForm as any);
+    await createSupply(supplyForm);
     setNewSupplyOpen(false);
     setSupplyForm({ code: '', name: '', unit: 'UN', current_quantity: 0, min_quantity: 0, max_quantity: 0, unit_cost: 0, supplier: '', location: '', category: '' });
   };
@@ -60,7 +60,7 @@ export default function SupplyStockPage() {
       document_number: movForm.document_number || null,
       operator: movForm.operator || null,
       reason: movForm.reason || null,
-    } as any);
+    });
     setMovementOpen(false);
     setMovForm({ supply_id: '', direction: 'in', quantity: 0, unit_cost: 0, production_order_id: '', reason: '', operator: '', document_number: '' });
   };

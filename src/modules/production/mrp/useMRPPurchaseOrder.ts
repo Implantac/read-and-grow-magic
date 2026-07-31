@@ -19,7 +19,7 @@ export function useMRPPurchaseOrder(materialNeeds: MaterialNeed[], supplies: any
       }, 0);
       const supplierName = deficits[0]?.supplier || 'A definir';
 
-      const { data: po, error: poErr } = await (supabase as any).from('purchase_orders').insert({
+      const { data: po, error: poErr } = await supabase.from('purchase_orders').insert({
         number: poNumber,
         supplier_name: supplierName,
         status: 'draft',
@@ -31,7 +31,7 @@ export function useMRPPurchaseOrder(materialNeeds: MaterialNeed[], supplies: any
 
       for (const m of deficits) {
         const supply = supplies.find(su => su.code === m.materialCode || su.name === m.materialName);
-        await (supabase as any).from('purchase_order_items').insert({
+        await supabase.from('purchase_order_items').insert({
           purchase_order_id: po.id,
           product_code: m.materialCode,
           product_name: m.materialName,

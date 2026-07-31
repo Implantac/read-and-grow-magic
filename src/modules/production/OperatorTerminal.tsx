@@ -169,7 +169,7 @@ export default function OperatorTerminalPage() {
         material_shortage: 'Falta de Material',
         safety: 'Segurança',
       };
-      await (supabase as any).from('industrial_alerts').insert({
+      await supabase.from('industrial_alerts').insert({
         alert_type: problemCategory,
         severity: problemCategory === 'machine_stop' ? 'critical' : 'high',
         title: `Problema reportado: ${titles[problemCategory] || problemCategory}`,
