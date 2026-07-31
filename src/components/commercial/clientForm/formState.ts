@@ -1,3 +1,4 @@
+import type { TablesInsert } from '@/integrations/supabase/types';
 import type { DbClient } from '@/hooks/commercial/useClients';
 import { validateCNPJ, validateCPF, validateEmail } from '@/lib/maskUtils';
 
@@ -66,7 +67,9 @@ export function validateClientForm(f: ClientForm): Record<string, string> {
   return e;
 }
 
-export function buildClientPayload(f: ClientForm): Record<string, unknown> {
+export type ClientPayload = Omit<TablesInsert<'clients'>, 'code' | 'company_id'>;
+
+export function buildClientPayload(f: ClientForm): ClientPayload {
   const isPJ = f.person_type === 'PJ';
   return {
     person_type: f.person_type,
