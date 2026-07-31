@@ -14,6 +14,9 @@ import { Lock, Unlock, Package, CheckCircle, Search, AlertTriangle } from 'lucid
 import { EmptyState } from '@/shared/components/EmptyState';
 import { format } from 'date-fns';
 
+type ReserveResult = { items_partial?: number; total_reserved?: number };
+type ReleaseResult = { released_qty?: number };
+
 interface OrderRow {
   id: string;
   number: string;
@@ -70,9 +73,9 @@ export default function OrderReservations() {
     mutationFn: async (orderId: string) => {
       const { data, error } = await supabase.rpc('wms_reserve_order_stock', { p_order_id: orderId });
       if (error) throw error;
-      return data as any;
+      return (data ?? {}) as ReserveResult;
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: ReserveResult) => {
       const partial = data?.items_partial || 0;
       if (partial > 0) {
         toastError(`Reserva parcial: ${partial} item(ns) sem saldo suficiente`);
@@ -83,22 +86,22 @@ export default function OrderReservations() {
       qc.invalidateQueries({ queryKey: ['stock_balances'] });
       qc.invalidateQueries({ queryKey: ['stock-reservations'] });
     },
-    onError: (err: any) => toastError(`Falha ao reservar: ${err.message}`),
+    onError: (err: Error) => toastError(`Falha ao reservar: ${err.message}`),
   });
 
   const releaseMut = useMutation({
     mutationFn: async (orderId: string) => {
       const { data, error } = await supabase.rpc('wms_release_order_reservation', { p_order_id: orderId });
       if (error) throw error;
-      return data as any;
+      return (data ?? {}) as ReleaseResult;
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: ReleaseResult) => {
       toastSuccess(`Reserva liberada — ${data?.released_qty || 0} unidade(s) devolvidas`);
       qc.invalidateQueries({ queryKey: ['orders-for-reservation'] });
       qc.invalidateQueries({ queryKey: ['stock_balances'] });
       qc.invalidateQueries({ queryKey: ['stock-reservations'] });
     },
-    onError: (err: any) => toastError(`Falha ao liberar: ${err.message}`),
+    onError: (err: Error) => toastError(`Falha ao liberar: ${err.message}`),
   });
 
   const filtered = orders.filter(
