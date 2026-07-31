@@ -1,8 +1,9 @@
 import type { HealthPillar, SuccessCashFlow90d, SuccessHealthBreakdown, SuccessProductInsight } from "../types";
+import type { ReceivableRow } from "./inputs";
 
 export function buildHealth(params: {
   productInsights: SuccessProductInsight[];
-  ar: any[];
+  ar: ReceivableRow[];
   cashflow: SuccessCashFlow90d;
   revenueMonth: number;
   revenuePrevMonth: number;

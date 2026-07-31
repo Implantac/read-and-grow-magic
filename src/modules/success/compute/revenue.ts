@@ -1,7 +1,8 @@
 import { monthKey, monthLabel } from "../helpers";
 import type { SuccessMonthlyRevenue } from "../types";
+import type { SaleRow } from "./inputs";
 
-export function buildRevenue12m(sales: any[], now: Date) {
+export function buildRevenue12m(sales: SaleRow[], now: Date) {
   const revMap = new Map<string, { d: Date; total: number }>();
   for (let i = 0; i < 12; i++) {
     const d = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1);

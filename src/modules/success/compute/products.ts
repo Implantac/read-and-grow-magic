@@ -21,16 +21,18 @@ export function buildProductInsights(
   for (const it of saleItems12m) {
     const code = String(it.product_code || "");
     if (!code) continue;
-    const t = new Date(it.sales?.date).getTime();
+    const t = new Date(it.sales?.date ?? "").getTime();
     if (!Number.isFinite(t)) continue;
     const cur = lastSaleMap.get(code);
     if (cur === undefined || t > cur) lastSaleMap.set(code, t);
   }
 
-  const productByCode = new Map(products.map((p) => [p.code, p]));
+  const productByCode = new Map<string, ProductRow>(
+    products.map((p) => [String(p.code ?? ""), p]),
+  );
 
   const productInsights: SuccessProductInsight[] = stock.map((s) => {
-    const p = productByCode.get(s.product_code) as any;
+    const p = productByCode.get(s.product_code);
     const sale = Number(p?.sale_price || 0);
     const cost = Number(p?.cost_price || 0);
     const margin = sale > 0 ? ((sale - cost) / sale) * 100 : 0;
@@ -70,7 +72,7 @@ export function buildProductInsights(
       sale_price: sale,
       cost_price: cost,
       capital_locked: capital,
-      subcategory: p?.subcategory,
+      subcategory: p?.subcategory ?? undefined,
       last_sale_at: lastIso,
       days_since_last_sale: daysSince,
       reasons,
@@ -84,10 +86,10 @@ export function buildProductInsights(
 
   const topMargin = productInsights
     .filter((p) => p.sale_price > 0 && p.sold_last_90d > 0)
-    .map((p) => ({ ...p, _impact: p.revenue_last_90d * (p.margin_pct / 100) }))
-    .sort((a: any, b: any) => b._impact - a._impact)
+    .map((p) => ({ insight: p, impact: p.revenue_last_90d * (p.margin_pct / 100) }))
+    .sort((a, b) => b.impact - a.impact)
     .slice(0, 6)
-    .map(({ _impact, ...p }: any) => p as SuccessProductInsight);
+    .map(({ insight }) => insight);
 
   const bestSellers = productInsights
     .filter((p) => p.sold_last_90d > 0)
@@ -102,13 +104,13 @@ export function buildProductInsights(
   // Subcategory aggregation
   const subMap = new Map<string, { skus: number; stock_qty: number; capital: number; sold: number; stagnant: number }>();
   for (const p of products) {
-    const sub = (p as any).subcategory || "Outros";
+    const sub = p.subcategory || "Outros";
     const cur = subMap.get(sub) || { skus: 0, stock_qty: 0, capital: 0, sold: 0, stagnant: 0 };
     cur.skus += 1;
     subMap.set(sub, cur);
   }
   for (const pi of productInsights) {
-    const prod = productByCode.get(pi.product_code) as any;
+    const prod = productByCode.get(pi.product_code);
     const sub = prod?.subcategory || "Outros";
     const cur = subMap.get(sub);
     if (!cur) continue;
