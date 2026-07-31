@@ -105,7 +105,7 @@ export function EnterpriseKPICard(props: EnterpriseKPICardProps) {
   const interactive = Boolean(entityKey || onClick);
 
   const iconEl =
-    typeof icon === "function" || (typeof icon === "object" && icon !== null && "render" in (icon as any))
+    typeof icon === "function" || (typeof icon === "object" && icon !== null && "render" in (icon as object))
       ? (() => {
           const I = icon as ElementType;
           return <I className="h-5 w-5" />;
@@ -140,7 +140,7 @@ export function EnterpriseKPICard(props: EnterpriseKPICardProps) {
         if (!interactive) return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          handleClick(e as any);
+          handleClick(e as unknown as React.MouseEvent<HTMLDivElement>);
         }
       }}
       className={cn(

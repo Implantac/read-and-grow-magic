@@ -14,8 +14,13 @@ import { FileText, Plus, CheckCircle2, Trash2, ListChecks, ChevronDown, ChevronR
 import { EmptyState } from '@/shared/components/EmptyState';
 import { PostmortemActions } from '@/components/sre/PostmortemActions';
 import { supabase } from '@/integrations/supabase/client';
+import type { Tables } from '@/integrations/supabase/types';
 import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { toast } from 'sonner';
+
+type PostmortemRow = Tables<'sre_postmortems'>;
+type IncidentOption = { id: string; title: string; severity: string; opened_at: string };
+type SloOption = { id: string; name: string; domain: string | null };
 
 interface Postmortem {
   id: string;
@@ -26,7 +31,7 @@ interface Postmortem {
   root_cause?: string;
   impact?: string;
   timeline?: string;
-  action_items: any[];
+  action_items: unknown[];
   incident_id?: string | null;
   slo_id?: string | null;
   published_at?: string | null;
@@ -40,8 +45,8 @@ export default function SREPostmortems() {
   const companyId = useEnterpriseStore(s => s.activeCompanyId);
   const [list, setList] = useState<Postmortem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [incidents, setIncidents] = useState<any[]>([]);
-  const [slos, setSlos] = useState<any[]>([]);
+  const [incidents, setIncidents] = useState<IncidentOption[]>([]);
+  const [slos, setSlos] = useState<SloOption[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: '', summary: '', impact: '', root_cause: '', timeline: '',
@@ -55,7 +60,7 @@ export default function SREPostmortems() {
       supabase.from('system_incidents').select('id,title,severity,opened_at').order('opened_at', { ascending: false }).limit(50),
       supabase.from('sre_slos').select('id,name,domain'),
     ]);
-    setList((pms ?? []) as any); setIncidents(inc ?? []); setSlos(sl ?? []);
+    setList(((pms ?? []) as PostmortemRow[]).map((p) => ({ ...p, action_items: Array.isArray(p.action_items) ? (p.action_items as unknown[]) : [] })) as Postmortem[]); setIncidents(inc ?? []); setSlos(sl ?? []);
     setLoading(false);
   };
   useEffect(() => { void load(); }, []);
@@ -99,7 +104,7 @@ export default function SREPostmortems() {
         <Button variant="outline" size="sm" onClick={async () => {
           const { data, error } = await supabase.rpc('sre_actions_notify_due');
           if (error) { toast.error(error.message); return; }
-          const n = (data as any)?.notifications_created ?? 0;
+          const n = (data as { notifications_created?: number } | null)?.notifications_created ?? 0;
           toast.success(`Varredura executada · ${n} notificações criadas`);
         }}><BellRing className="h-4 w-4 mr-2" /> Verificar prazos agora</Button>
       } />
