@@ -11,8 +11,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/ui/base/alert-dialog';
 
+import type { Tables } from '@/integrations/supabase/types';
 import { formatBRL, formatDateTime, formatNumber } from '@/lib/formatters';
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
+type AccountingPeriod = Tables<'accounting_periods'>;
+
 const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 
@@ -30,7 +33,7 @@ export default function PeriodClosing() {
         .eq('year', year)
         .order('month');
       if (error) throw error;
-      return data as any[];
+      return (data ?? []) as AccountingPeriod[];
     },
   });
 
@@ -61,10 +64,10 @@ export default function PeriodClosing() {
   });
 
   const monthsView = useMemo(() => {
-    const map = new Map(periods.map((p: any) => [p.month, p]));
+    const map = new Map(periods.map((p) => [p.month, p] as const));
     return monthNames.map((name, idx) => {
       const m = idx + 1;
-      const p = map.get(m) as any;
+      const p = map.get(m);
       return {
         month: m,
         name,

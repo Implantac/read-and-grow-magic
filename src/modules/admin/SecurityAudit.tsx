@@ -29,7 +29,7 @@ interface CriticalEvent {
 const ACTIONS = ["DELETE", "PERMISSION_CHANGE", "ROLE_CHANGE", "LOGIN_FAILED", "EXPORT"];
 const MODULES = ["financial", "permissions", "user_roles", "billing"];
 
-const levelColor = (action: string) => {
+const levelColor = (action: string): "destructive" | "secondary" | "outline" => {
   if (["DELETE", "ROLE_CHANGE", "PERMISSION_CHANGE"].includes(action)) return "destructive";
   if (action === "LOGIN_FAILED") return "secondary";
   return "outline";
@@ -60,7 +60,7 @@ function SecurityAuditInner() {
       const { data, error } = await q;
       if (!cancelled) {
         if (error) console.warn("[SecurityAudit]", error.message);
-        setRows((data as any) ?? []);
+        setRows((data ?? []) as unknown as CriticalEvent[]);
         setLoading(false);
       }
     })();
@@ -151,7 +151,7 @@ function SecurityAuditInner() {
                     {new Date(r.created_at).toLocaleString("pt-BR")}
                   </TableCell>
                   <TableCell><Badge variant="outline">{r.module}</Badge></TableCell>
-                  <TableCell><Badge variant={levelColor(r.action) as any}>{r.action}</Badge></TableCell>
+                  <TableCell><Badge variant={levelColor(r.action)}>{r.action}</Badge></TableCell>
                   <TableCell className="text-xs">
                     {r.entity_name ?? "—"}
                     {r.entity_id && <div className="text-muted-foreground">{r.entity_id.slice(0, 8)}…</div>}
