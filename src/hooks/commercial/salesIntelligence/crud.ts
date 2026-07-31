@@ -28,8 +28,8 @@ export function useOpportunities(status?: string) {
 export function useCreateOpportunity() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (item: any) => {
-      const { data, error } = await supabase.from('sales_opportunities').insert(item as OpportunityInsert).select().single();
+    mutationFn: async (item: OpportunityInsert) => {
+      const { data, error } = await supabase.from('sales_opportunities').insert(item).select().single();
       if (error) throw error;
       return data;
     },
@@ -44,8 +44,8 @@ export function useCreateOpportunity() {
 export function useUpdateOpportunity() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: any & { id: string }) => {
-      const { data, error } = await supabase.from('sales_opportunities').update({ ...updates, updated_at: new Date().toISOString() } as OpportunityUpdate).eq('id', id).select().single();
+    mutationFn: async ({ id, ...updates }: OpportunityUpdate & { id: string }) => {
+      const { data, error } = await supabase.from('sales_opportunities').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },
@@ -70,8 +70,8 @@ export function useFollowUps(status?: string) {
 export function useCreateFollowUp() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (item: any) => {
-      const { data, error } = await supabase.from('follow_ups').insert(item as FollowUpInsert).select().single();
+    mutationFn: async (item: FollowUpInsert) => {
+      const { data, error } = await supabase.from('follow_ups').insert(item).select().single();
       if (error) throw error;
       return data;
     },
@@ -86,8 +86,8 @@ export function useCreateFollowUp() {
 export function useUpdateFollowUp() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: any & { id: string }) => {
-      const { data, error } = await supabase.from('follow_ups').update({ ...updates, updated_at: new Date().toISOString() } as FollowUpUpdate).eq('id', id).select().single();
+    mutationFn: async ({ id, ...updates }: FollowUpUpdate & { id: string }) => {
+      const { data, error } = await supabase.from('follow_ups').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },
@@ -112,8 +112,8 @@ export function useCampaigns(status?: string) {
 export function useCreateCampaign() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (item: any) => {
-      const { data, error } = await supabase.from('sales_campaigns').insert(item as CampaignInsert).select().single();
+    mutationFn: async (item: CampaignInsert) => {
+      const { data, error } = await supabase.from('sales_campaigns').insert(item).select().single();
       if (error) throw error;
       return data;
     },
@@ -128,8 +128,8 @@ export function useCreateCampaign() {
 export function useUpdateCampaign() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: any & { id: string }) => {
-      const { data, error } = await supabase.from('sales_campaigns').update({ ...updates, updated_at: new Date().toISOString() } as CampaignUpdate).eq('id', id).select().single();
+    mutationFn: async ({ id, ...updates }: CampaignUpdate & { id: string }) => {
+      const { data, error } = await supabase.from('sales_campaigns').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id).select().single();
       if (error) throw error;
       return data;
     },

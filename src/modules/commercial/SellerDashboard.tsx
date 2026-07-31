@@ -117,12 +117,12 @@ export default function SellerDashboard() {
       subject: followUpData.subject,
       description: followUpData.description,
       scheduled_date: followUpData.scheduled_date,
-    } as any);
+    });
     setFollowUpOpen(false);
   };
 
   const completeFollowUp = async (id: string) => {
-    await updateFollowUp.mutateAsync({ id, status: 'completed', completed_at: new Date().toISOString() } as any);
+    await updateFollowUp.mutateAsync({ id, status: 'completed', completed_at: new Date().toISOString() });
   };
 
   if (loading) {

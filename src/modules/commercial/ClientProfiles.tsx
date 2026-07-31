@@ -103,7 +103,7 @@ export default function ClientProfiles() {
               onChange={(e) => setSearch(e.target.value)}
               className="md:max-w-sm"
             />
-            <Select value={tierFilter} onValueChange={(v) => setTierFilter(v as any)}>
+            <Select value={tierFilter} onValueChange={(v) => setTierFilter(v as ClientTier | "all")}>
               <SelectTrigger className="md:w-48"><SelectValue placeholder="Faixa" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as faixas</SelectItem>
@@ -112,7 +112,7 @@ export default function ClientProfiles() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={lifecycleFilter} onValueChange={(v) => setLifecycleFilter(v as any)}>
+            <Select value={lifecycleFilter} onValueChange={(v) => setLifecycleFilter(v as ClientLifecycle | "all")}>
               <SelectTrigger className="md:w-48"><SelectValue placeholder="Ciclo de vida" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todos os ciclos</SelectItem>
