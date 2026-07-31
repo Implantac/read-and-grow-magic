@@ -54,10 +54,10 @@ export function productToForm(product: DbProduct): ProductForm {
     iss_rate: product.iss_rate != null ? String(product.iss_rate) : '',
     service_duration_minutes: product.service_duration_minutes != null ? String(product.service_duration_minutes) : '',
     is_recurring: !!product.is_recurring,
-    requires_lot_tracking: !!(product as any).requires_lot_tracking,
-    shelf_life_days: (product as any).shelf_life_days != null ? String((product as any).shelf_life_days) : '',
-    storage_conditions: (product as any).storage_conditions ?? '',
-    multi_ean: Array.isArray((product as any).multi_ean) ? (product as any).multi_ean : [],
+    requires_lot_tracking: !!product.requires_lot_tracking,
+    shelf_life_days: product.shelf_life_days != null ? String(product.shelf_life_days) : '',
+    storage_conditions: product.storage_conditions ?? '',
+    multi_ean: Array.isArray(product.multi_ean) ? product.multi_ean : [],
     new_ean: '',
   };
 }
@@ -83,7 +83,7 @@ export function buildPayload(form: ProductForm): Partial<DbProduct> {
     shelf_life_days: form.shelf_life_days ? Number(form.shelf_life_days) : null,
     storage_conditions: form.storage_conditions || null,
     multi_ean: isCommerce ? form.multi_ean : [],
-  } as any;
+  };
 
   if (isService) {
     return {
