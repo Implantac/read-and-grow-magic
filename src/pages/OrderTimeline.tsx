@@ -62,14 +62,14 @@ export default function OrderTimeline() {
       const [order, history, prod, conf, nfes, ar] = await Promise.all([
         supabase.from('orders').select('*, clients(name)').eq('id', orderId!).maybeSingle(),
         supabase.from('order_status_history').select('*').eq('order_id', orderId!).order('created_at'),
-        supabase.from('production_orders').select('id, order_number, status, created_at, updated_at').eq('sales_order_id', orderId!).order('created_at') as any,
-        supabase.from('conference_records').select('id, code, status, created_at').eq('order_id', orderId!).order('created_at') as any,
-        supabase.from('nfe').select('id, numero, serie, status, data_emissao').eq('order_id', orderId!).order('data_emissao') as any,
-        supabase.from('accounts_receivable').select('id, document_number, status, due_date, amount, created_at').eq('order_id', orderId!).order('created_at') as any,
+        supabase.from('production_orders').select('id, order_number, status, created_at, updated_at').eq('sales_order_id', orderId!).order('created_at'),
+        supabase.from('conference_records').select('id, code, status, created_at').eq('order_id', orderId!).order('created_at'),
+        supabase.from('nfe').select('id, numero, serie, status, data_emissao').eq('order_id', orderId!).order('data_emissao'),
+        supabase.from('accounts_receivable').select('id, document_number, status, due_date, amount, created_at').eq('order_id', orderId!).order('created_at'),
       ]);
 
       const events: TimelineEvent[] = [];
-      const o: any = order.data;
+      const o = order.data;
 
       if (o?.created_at) {
         events.push({
@@ -82,7 +82,7 @@ export default function OrderTimeline() {
         });
       }
 
-      (history.data ?? []).forEach((h: any) => {
+      (history.data ?? []).forEach((h) => {
         events.push({
           key: `hist-${h.id}`,
           at: h.created_at,
@@ -93,7 +93,7 @@ export default function OrderTimeline() {
         });
       });
 
-      (prod.data ?? []).forEach((p: any) => {
+      (prod.data ?? []).forEach((p) => {
         events.push({
           key: `prod-${p.id}`,
           at: p.created_at,
@@ -104,7 +104,7 @@ export default function OrderTimeline() {
         });
       });
 
-      (conf.data ?? []).forEach((c: any) => {
+      (conf.data ?? []).forEach((c) => {
         events.push({
           key: `conf-${c.id}`,
           at: c.created_at,
@@ -115,7 +115,7 @@ export default function OrderTimeline() {
         });
       });
 
-      (nfes.data ?? []).forEach((n: any) => {
+      (nfes.data ?? []).forEach((n) => {
         events.push({
           key: `nfe-${n.id}`,
           at: n.data_emissao ?? new Date().toISOString(),
@@ -126,7 +126,7 @@ export default function OrderTimeline() {
         });
       });
 
-      (ar.data ?? []).forEach((r: any) => {
+      (ar.data ?? []).forEach((r) => {
         events.push({
           key: `ar-${r.id}`,
           at: r.created_at,
@@ -147,7 +147,7 @@ export default function OrderTimeline() {
     <PageContainer>
       <PageHeader
         title="Linha do tempo do pedido"
-        description={(data?.order as any)?.number ? `Pedido ${(data!.order as any).number}` : 'Rastreamento cross-módulo'}
+        description={data?.order?.number ? `Pedido ${data.order.number}` : 'Rastreamento cross-módulo'}
         actions={
           <Button asChild variant="outline" size="sm">
             <Link to="/comercial/pedidos">
