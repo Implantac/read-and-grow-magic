@@ -30,12 +30,12 @@ export function useCSATCESMetrics() {
         csat: {
           total: csat.length,
           media: Number(avg(csat).toFixed(2)),
-          satisfeitosPct: csat.length ? Math.round(csat.filter((r) => (r.score ?? 0) >= 4).length / csat.length * 100) : 0,
+          satisfeitosPct: csat.length ? Math.round(csat.filter((r) => (r.value_number ?? 0) >= 4).length / csat.length * 100) : 0,
         },
         ces: {
           total: ces.length,
           media: Number(avg(ces).toFixed(2)),
-          baixoEsforcoPct: ces.length ? Math.round(ces.filter((r) => (r.score ?? 0) <= 3).length / ces.length * 100) : 0,
+          baixoEsforcoPct: ces.length ? Math.round(ces.filter((r) => (r.value_number ?? 0) <= 3).length / ces.length * 100) : 0,
         },
       };
     },
