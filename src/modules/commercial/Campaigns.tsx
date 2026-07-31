@@ -55,13 +55,13 @@ export default function Campaigns() {
       end_date: formData.end_date,
       incentive_description: formData.incentive_description || null,
       status: 'draft',
-    } as any);
+    });
     setFormOpen(false);
     setFormData({ name: '', description: '', campaign_type: 'product_focus', goal_type: 'revenue', goal_value: '', start_date: '', end_date: '', incentive_description: '' });
   };
 
   const activateCampaign = async (id: string) => {
-    await updateCampaign.mutateAsync({ id, status: 'active' } as any);
+    await updateCampaign.mutateAsync({ id, status: 'active' });
   };
 
   if (isLoading) {
