@@ -79,10 +79,10 @@ export default function CrossDockingPage() {
       ]);
       if (rec.error) throw rec.error;
       if (res.error) throw res.error;
-      setReceiving((rec.data ?? []) as any);
-      setReservations((res.data ?? []) as any);
-    } catch (e: any) {
-      toast({ title: "Erro ao carregar dados", description: e.message, variant: "destructive" });
+      setReceiving((rec.data ?? []) as unknown as ReceivingItem[]);
+      setReservations((res.data ?? []) as unknown as Reservation[]);
+    } catch (e: unknown) {
+      toast({ title: "Erro ao carregar dados", description: e instanceof Error ? e.message : String(e), variant: "destructive" });
     } finally {
       setLoading(false);
     }
