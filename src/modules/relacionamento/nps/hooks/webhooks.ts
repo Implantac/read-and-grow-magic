@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { QK, useCompanyId } from './_shared';
 
-export type NPSWebhookInput = Partial<TablesInsert<'nps_webhooks'>> & { id?: string; url: string };
+export type NPSWebhookInput = Partial<TablesInsert<'nps_webhooks'>> & { id?: string };
 
 export function useNPSWebhooks() {
   const companyId = useCompanyId();
