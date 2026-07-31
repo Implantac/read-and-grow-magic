@@ -12,7 +12,7 @@ import { Label } from '@/ui/base/label';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { AlertTriangle, Clock, CheckCircle2, PhoneCall, Mail, MessageCircle } from 'lucide-react';
 
-const STATUSES = [
+const STATUSES: { v: string; label: string; variant: 'default' | 'destructive' | 'outline' | 'secondary' }[] = [
   { v: 'open', label: 'Aberto', variant: 'destructive' },
   { v: 'in_progress', label: 'Em andamento', variant: 'default' },
   { v: 'contacted', label: 'Contatado', variant: 'secondary' },
