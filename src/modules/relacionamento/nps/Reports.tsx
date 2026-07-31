@@ -90,6 +90,11 @@ export default function Reports() {
     return Array.from(map.values()).map((e) => ({ ...e, nps: e.total ? Math.round(((e.p - e.d) / e.total) * 100) : 0 })).sort((a, b) => a.month.localeCompare(b.month));
   }, [current]);
 
+  const exportRows = useMemo(
+    () => grouped.map(({ rows, ...rest }) => rest),
+    [grouped]
+  );
+
   const exportColumns = [
     { key: 'key', label: 'Chave' },
     { key: 'total', label: 'Total' },
@@ -109,8 +114,8 @@ export default function Reports() {
           <p className="text-sm text-muted-foreground">Comparativo período-a-período, drill-down por dimensão e exportações.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => exportToCSV(grouped as any, exportColumns, filename)}><Download className="mr-2 h-4 w-4" /> CSV</Button>
-          <Button variant="outline" onClick={() => exportToExcel(grouped as any, exportColumns, filename)}><FileSpreadsheet className="mr-2 h-4 w-4" /> Excel</Button>
+          <Button variant="outline" onClick={() => exportToCSV(exportRows, exportColumns, filename)}><Download className="mr-2 h-4 w-4" /> CSV</Button>
+          <Button variant="outline" onClick={() => exportToExcel(exportRows, exportColumns, filename)}><FileSpreadsheet className="mr-2 h-4 w-4" /> Excel</Button>
           <Button variant="outline" onClick={() => window.print()}><Printer className="mr-2 h-4 w-4" /> PDF</Button>
         </div>
       </div>
