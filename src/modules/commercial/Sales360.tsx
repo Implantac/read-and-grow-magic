@@ -56,7 +56,7 @@ export default function Sales360() {
   }, [orders, sellerId, cutoff]);
 
   const filteredAlerts = useMemo(() => {
-    return sellerId === 'all' ? alerts : alerts.filter((a: any) => a.seller_id === sellerId);
+    return sellerId === 'all' ? alerts : alerts.filter((a) => a.sales_rep_id === sellerId);
   }, [alerts, sellerId]);
 
   const kpis = useMemo(() => {
@@ -161,17 +161,17 @@ export default function Sales360() {
 
         <TabsContent value="agenda">
           <div className="grid gap-4 lg:grid-cols-2">
-            <NextActionsQueue clients={clients as any} sellerId={sellerId} />
+            <NextActionsQueue clients={clients} sellerId={sellerId} />
             <CommercialEffortHeatmap orders={filteredOrders} />
           </div>
         </TabsContent>
 
         <TabsContent value="metas">
-          <SalesTargetsRanking orders={filteredOrders} reps={reps as any} />
+          <SalesTargetsRanking orders={filteredOrders} reps={reps} />
         </TabsContent>
 
         <TabsContent value="forecast">
-          <ForecastVsActual reps={reps as any} />
+          <ForecastVsActual reps={reps} />
         </TabsContent>
 
 

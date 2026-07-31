@@ -235,7 +235,7 @@ export default function CommerceStorefrontDetail() {
                 Ao ativar, o rascunho da NFC-e gerado no pagamento é enviado automaticamente à SEFAZ.
               </p>
               {(() => {
-                const autoNfce = Boolean((storefront as any).auto_authorize_nfce);
+                const autoNfce = Boolean(storefront.auto_authorize_nfce);
                 return (
                   <div className="flex items-center gap-2">
                     <Badge variant={autoNfce ? "default" : "outline"}>
@@ -248,7 +248,7 @@ export default function CommerceStorefrontDetail() {
                         const { supabase } = await import("@/integrations/supabase/client");
                         await supabase
                           .from("storefronts")
-                          .update({ auto_authorize_nfce: !autoNfce } as any)
+                          .update({ auto_authorize_nfce: !autoNfce })
                           .eq("id", storefront.id);
                         window.location.reload();
                       }}
