@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import type { NPSFollowupRow } from './hooks/followupTypes';
 import { useNPSFollowups, useUpdateFollowup } from './hooks';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
