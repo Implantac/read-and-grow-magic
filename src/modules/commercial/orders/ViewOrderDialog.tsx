@@ -11,6 +11,7 @@ import { Separator } from '@/ui/base/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { getOrderStatusLabel, getPaymentMethodLabel } from '@/config/commercial';
+import type { OrderStatus, PaymentMethod } from '@/types/commercial';
 import type { DbOrder } from '@/hooks/commercial/useOrders';
 import { ApprovalBadge } from './ApprovalBadge';
 import { OrderStatusTimeline } from './OrderStatusTimeline';

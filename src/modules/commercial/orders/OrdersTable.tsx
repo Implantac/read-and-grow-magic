@@ -12,6 +12,7 @@ import {
 import { DataTable, type Column } from '@/shared/components/DataTable';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { getOrderStatusLabel, getPaymentMethodLabel } from '@/config/commercial';
+import type { OrderStatus, PaymentMethod } from '@/types/commercial';
 import type { DbOrder } from '@/hooks/commercial/useOrders';
 import { statusFlow } from './constants';
 import { MarginBadge } from './MarginBadge';
