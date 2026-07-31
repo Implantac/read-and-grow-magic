@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/ui/base/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/base/tabs";
 import { Plus, Trash2 } from "lucide-react";
-import type { AutomationAction, AutomationCondition } from "@/hooks/useAutomationEngine";
+import type { AutomationAction, AutomationActionType, AutomationCondition } from "@/hooks/useAutomationEngine";
 import { ACTION_TYPES, OPERATORS, TRIGGER_EVENTS, type FormState } from "./constants";
 
 interface Props {
