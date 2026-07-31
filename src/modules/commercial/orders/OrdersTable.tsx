@@ -41,7 +41,7 @@ export function OrdersTable({
       render: (v, row) => (
         <div>
           <p className="font-medium">{v as string}</p>
-          <p className="text-xs text-muted-foreground">{getPaymentMethodLabel(row.payment_method as any)}</p>
+          <p className="text-xs text-muted-foreground">{getPaymentMethodLabel(row.payment_method as PaymentMethod)}</p>
         </div>
       ),
     },
@@ -106,7 +106,7 @@ export function OrdersTable({
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onAdvance(order)} disabled={isDeletePending || isAdvancePending}>
                 <ArrowRight className="mr-2 h-4 w-4 text-primary" />
-                Avançar para {getOrderStatusLabel(nextStatus as any)}
+                Avançar para {getOrderStatusLabel(nextStatus as OrderStatus)}
               </DropdownMenuItem>
             </>
           )}

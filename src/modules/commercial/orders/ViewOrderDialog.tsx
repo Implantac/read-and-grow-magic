@@ -75,7 +75,7 @@ export function ViewOrderDialog({
                   <CreditCard className="mt-0.5 h-4 w-4 text-muted-foreground" />
                   <div>
                     <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Pagamento</p>
-                    <p className="text-sm font-medium">{getPaymentMethodLabel(order.payment_method as any)}</p>
+                    <p className="text-sm font-medium">{getPaymentMethodLabel(order.payment_method as PaymentMethod)}</p>
                     <p className="text-xs text-muted-foreground">{order.payment_condition}</p>
                   </div>
                 </div>
@@ -235,7 +235,7 @@ export function ViewOrderDialog({
                       onClick={() => { onAdvance(order); onOpenChange(false); }}
                     >
                       <ArrowRight className="h-3.5 w-3.5" />
-                      Avançar para {getOrderStatusLabel(statusFlow[order.status]! as any)}
+                      Avançar para {getOrderStatusLabel(statusFlow[order.status]! as OrderStatus)}
                     </Button>
                   )}
                 </div>

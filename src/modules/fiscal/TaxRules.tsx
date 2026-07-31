@@ -172,7 +172,7 @@ export default function TaxRulesPage() {
                <Label className="font-bold">Regime de Tributação:</Label>
                <Select
                   value={editing.tax_framework}
-                  onValueChange={(v) => setEditing({ ...editing, tax_framework: v as any })}
+                  onValueChange={(v) => setEditing({ ...editing, tax_framework: v as 'current' | 'reform_ibs_cbs' | 'hybrid' })}
                 >
                   <SelectTrigger className="w-[250px] bg-background">
                     <SelectValue />
