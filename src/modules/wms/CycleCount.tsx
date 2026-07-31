@@ -59,7 +59,7 @@ export default function CycleCount() {
     if (error) {
       toastError("Erro ao carregar inventários", error.message);
     } else {
-      setRows(data ?? []);
+      setRows((data ?? []) as CountRow[]);
     }
     setLoading(false);
   }
