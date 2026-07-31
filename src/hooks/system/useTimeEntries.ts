@@ -19,6 +19,8 @@ export interface TimeEntryRow {
   status: string;
   notes: string | null;
   work_center: string | null;
+  machine_id: string | null;
+  machine_name: string | null;
   created_at: string;
 }
 
