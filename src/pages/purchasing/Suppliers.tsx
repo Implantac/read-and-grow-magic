@@ -67,7 +67,7 @@ export default function SuppliersPage() {
         email: data.email || p.email,
         phone: data.telefone || p.phone,
         address: {
-          ...p.address as any,
+          ...p.address,
           street: data.logradouro,
           number: data.numero,
           complement: data.complemento,
