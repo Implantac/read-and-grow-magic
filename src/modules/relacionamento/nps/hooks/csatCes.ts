@@ -2,7 +2,11 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useCompanyId } from './_shared';
 
-type AnswerItemRow = { question_type: string | null; score: number | null; created_at: string };
+type AnswerItemRow = {
+  value_number: number | null;
+  created_at: string;
+  nps_questions: { question_type: string | null } | null;
+};
 
 export function useCSATCESMetrics() {
   const companyId = useCompanyId();
@@ -12,16 +16,16 @@ export function useCSATCESMetrics() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('nps_answer_items')
-        .select('question_type,score,created_at')
+        .select('value_number,created_at,nps_questions!inner(question_type)')
         .eq('company_id', companyId!)
-        .in('question_type', ['csat', 'ces'])
+        .in('nps_questions.question_type', ['csat', 'ces'])
         .order('created_at', { ascending: false })
         .limit(5000);
       if (error) throw error;
-      const rows = (data ?? []) as AnswerItemRow[];
-      const csat = rows.filter((r) => r.question_type === 'csat');
-      const ces = rows.filter((r) => r.question_type === 'ces');
-      const avg = (arr: AnswerItemRow[]) => arr.length ? arr.reduce((s, r) => s + (r.score ?? 0), 0) / arr.length : 0;
+      const rows = (data ?? []) as unknown as AnswerItemRow[];
+      const csat = rows.filter((r) => r.nps_questions?.question_type === 'csat');
+      const ces = rows.filter((r) => r.nps_questions?.question_type === 'ces');
+      const avg = (arr: AnswerItemRow[]) => arr.length ? arr.reduce((s, r) => s + (r.value_number ?? 0), 0) / arr.length : 0;
       return {
         csat: {
           total: csat.length,
