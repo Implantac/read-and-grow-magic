@@ -53,13 +53,13 @@ export class OrderService extends BaseService<'orders'> {
         total,
         notes: input.notes || null,
         status: 'pending',
-      } as any)
+      })
       .select()
       .single();
 
     if (orderError) throw orderError;
 
-    const items = input.items.map((item: any) => ({
+    const items = input.items.map((item) => ({
       order_id: order.id,
       product_id: item.product_id || null,
       product_name: item.product_name,
@@ -100,7 +100,7 @@ export class OrderService extends BaseService<'orders'> {
         original_order_id: id,
         order_data: order,
         expires_at: expiresAt
-      } as any)
+      })
       .select()
       .single();
 
