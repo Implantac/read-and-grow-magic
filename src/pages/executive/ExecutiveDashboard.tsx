@@ -79,10 +79,10 @@ export default function ExecutiveDashboard() {
   const insights = data?.insights || [];
   const alerts = data?.alerts || [];
   const scenarios = data?.scenarios || [];
-  const autoAlerts = (data as any)?.autoAlerts || [];
-  const productMargins = (data as any)?.productMargins || [];
-  const lowMarginProducts = (data as any)?.lowMarginProducts || [];
-  const dataStatus = (data as any)?.data_status;
+  const autoAlerts = data?.autoAlerts ?? [];
+  const productMargins = data?.productMargins ?? [];
+  const lowMarginProducts = data?.lowMarginProducts ?? [];
+  const dataStatus = data?.data_status;
   const isInsufficient = dataStatus === 'insufficient';
 
   return (
@@ -197,7 +197,7 @@ export default function ExecutiveDashboard() {
       {/* Proactive Auto-Alerts */}
       {autoAlerts.length > 0 && (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3" role="list" aria-label="Alertas automáticos">
-          {autoAlerts.map((alert: any, i: number) => (
+          {autoAlerts.map((alert, i) => (
             <Card key={i} className={cn('border-l-4', alertSeverityBorder[alert.severity] || 'border-l-muted')} role="listitem">
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-1">
@@ -325,7 +325,7 @@ export default function ExecutiveDashboard() {
 
         <TabsContent value="swot">
           <ExecutiveSWOT 
-            data={(data as any)?.swot} 
+            data={data?.swot} 
             isLoading={isLoading} 
           />
         </TabsContent>
