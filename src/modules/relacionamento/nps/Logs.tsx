@@ -55,7 +55,7 @@ export default function Logs() {
         <Card>
           <CardContent className="p-0">
             <div className="divide-y divide-border">
-              {(logs as any[]).map((l) => (
+              {logs.map((l) => (
                 <div key={l.id} className="p-3 hover:bg-muted/20">
                   <div className="flex items-start justify-between gap-3 cursor-pointer" onClick={() => setExpanded(expanded === l.id ? null : l.id)}>
                     <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -72,7 +72,7 @@ export default function Logs() {
                   )}
                 </div>
               ))}
-              {(logs as any[]).length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">Sem logs no filtro.</p>}
+              {logs.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">Sem logs no filtro.</p>}
             </div>
           </CardContent>
         </Card>

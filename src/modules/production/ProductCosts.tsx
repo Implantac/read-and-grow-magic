@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Label } from '@/ui/base/label';
 import { Textarea } from '@/ui/base/textarea';
-import { useProductCosts } from '@/hooks/production/useProductCosts';
+import { useProductCosts, type ProductCost } from '@/hooks/production/useProductCosts';
 import { KPICard } from '@/shared/components/KPICard';
 import { Plus, DollarSign, TrendingUp, AlertTriangle, Calculator, Search, Pencil, Trash2 } from 'lucide-react';
 import { Skeleton } from '@/ui/base/skeleton';
@@ -22,7 +22,7 @@ export default function ProductCostsPage() {
   const { costs, loading, createCost, updateCost, deleteCost, calculateCost, avgMargin, totalRevenue, totalCostSum, lowMarginProducts } = useProductCosts();
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingCost, setEditingCost] = useState<any>(null);
+  const [editingCost, setEditingCost] = useState<ProductCost | null>(null);
   const [form, setForm] = useState({
     product_code: '', product_name: '', raw_material_cost: 0, labor_rate_per_hour: 0,
     production_time_minutes: 0, operational_cost: 0, sale_price: 0, notes: '',
@@ -39,7 +39,7 @@ export default function ProductCostsPage() {
     setDialogOpen(true);
   };
 
-  const openEdit = (c: any) => {
+  const openEdit = (c: ProductCost) => {
     setEditingCost(c);
     setForm({
       product_code: c.product_code, product_name: c.product_name, raw_material_cost: c.raw_material_cost,
@@ -52,9 +52,9 @@ export default function ProductCostsPage() {
   const handleSave = async () => {
     if (!form.product_code || !form.product_name) return;
     if (editingCost) {
-      await updateCost(editingCost.id, form as any);
+      await updateCost(editingCost.id, form);
     } else {
-      await createCost(form as any);
+      await createCost(form);
     }
     setDialogOpen(false);
   };

@@ -45,8 +45,8 @@ export function RulesList({ rules, isLoading, onEdit, onHistory, onToggle, onRem
                     <p className="text-xs text-muted-foreground mt-0.5">{r.description}</p>
                   )}
                   <p className="text-xs text-muted-foreground mt-1">
-                    {(r.actions as any[]).length} ação(ões) ·{" "}
-                    {(r.conditions as any[]).length} condição(ões)
+                    {r.actions.length} ação(ões) ·{" "}
+                    {r.conditions.length} condição(ões)
                   </p>
                 </div>
                 <div className="flex items-center gap-2">

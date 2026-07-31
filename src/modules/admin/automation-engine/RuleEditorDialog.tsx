@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/ui/base/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/base/tabs";
 import { Plus, Trash2 } from "lucide-react";
-import type { AutomationAction, AutomationCondition } from "@/hooks/useAutomationEngine";
+import type { AutomationAction, AutomationActionType, AutomationCondition } from "@/hooks/useAutomationEngine";
 import { ACTION_TYPES, OPERATORS, TRIGGER_EVENTS, type FormState } from "./constants";
 
 interface Props {
@@ -118,7 +118,7 @@ export function RuleEditorDialog({ open, onOpenChange, form, setForm, workflowDe
                   <Label className="text-xs">Operador</Label>
                   <Select
                     value={c.operator}
-                    onValueChange={(v) => updateCondition(i, { operator: v as any })}
+                    onValueChange={(v) => updateCondition(i, { operator: v as AutomationCondition['operator'] })}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -153,7 +153,7 @@ export function RuleEditorDialog({ open, onOpenChange, form, setForm, workflowDe
             {form.actions.map((a, i) => (
               <div key={i} className="border rounded p-3 space-y-2">
                 <div className="flex gap-2 items-center">
-                  <Select value={a.type} onValueChange={(v) => updateAction(i, { type: v as any, config: {} })}>
+                  <Select value={a.type} onValueChange={(v) => updateAction(i, { type: v as AutomationActionType, config: {} })}>
                     <SelectTrigger className="w-56">
                       <SelectValue />
                     </SelectTrigger>
