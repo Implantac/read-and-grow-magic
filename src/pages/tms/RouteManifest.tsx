@@ -23,8 +23,8 @@ const RouteManifest = () => {
   const { data: stops = [], isLoading: stopsLoading } = useRouteStops(id);
   const { data: cost } = useRouteCost(id);
 
-  const carrier = carriers.find((c: any) => c.id === route?.carrierId);
-  const vehicle = vehicles.find((v: any) => v.id === route?.vehicleId);
+  const carrier = carriers.find((c) => c.id === route?.carrierId);
+  const vehicle = vehicles.find((v) => v.id === route?.vehicleId);
 
   const totals = useMemo(() => {
     const weight = stops.reduce((s, x) => s + Number(x.weight ?? 0), 0);
@@ -100,12 +100,12 @@ const RouteManifest = () => {
           </div>
           <div>
             <div className="text-xs uppercase text-muted-foreground">Transportadora</div>
-            <div className="font-medium">{(carrier as any)?.name ?? '—'}</div>
+            <div className="font-medium">{carrier?.name ?? '—'}</div>
           </div>
           <div>
             <div className="text-xs uppercase text-muted-foreground">Veículo</div>
             <div className="font-medium">
-              {(vehicle as any)?.plate ?? '—'} {(vehicle as any)?.model ? `· ${(vehicle as any).model}` : ''}
+              {vehicle?.plate ?? '—'} {vehicle?.model ? `· ${vehicle.model}` : ''}
             </div>
           </div>
           <div>
@@ -138,13 +138,13 @@ const RouteManifest = () => {
                 <td className="py-2 font-mono font-bold">{i + 1}</td>
                 <td className="py-2">{STOP_TYPE[s.stop_type] ?? s.stop_type}</td>
                 <td className="py-2">
-                  <div className="font-medium">{(s as any).customer_id ? `Cliente #${String((s as any).customer_id).slice(0, 8)}` : '—'}</div>
+                  <div className="font-medium">{s.customer_id ? `Cliente #${String(s.customer_id).slice(0, 8)}` : '—'}</div>
                   <div className="text-muted-foreground">{s.address ?? '—'}{s.city ? ` — ${s.city}/${s.state ?? ''}` : ''}</div>
                   {s.notes && <div className="text-muted-foreground italic mt-1">Obs: {s.notes}</div>}
                 </td>
                 <td className="py-2 text-right">{s.weight ? `${Number(s.weight).toLocaleString('pt-BR')} kg` : '—'}</td>
                 <td className="py-2 text-right">{s.volume ? Number(s.volume).toLocaleString('pt-BR') : '—'}</td>
-                <td className="py-2">{(s as any).planned_eta ? new Date((s as any).planned_eta).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</td>
+                <td className="py-2">{s.planned_eta ? new Date(s.planned_eta).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—'}</td>
                 <td className="py-2">
                   <div className="h-10 border-b border-dashed border-foreground/60"></div>
                 </td>

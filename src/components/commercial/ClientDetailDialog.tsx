@@ -33,10 +33,10 @@ export function ClientDetailDialog({ client, open, onOpenChange }: Props) {
   if (!client) return null;
 
   const clientOrders = allOrders
-    .filter(o => (o as any).client_id === client.id)
-    .sort((a, b) => new Date((b as any).date).getTime() - new Date((a as any).date).getTime());
-  const clientReceivables = allReceivables.filter(r => (r as any).client_id === client.id) as any[];
-  const clientFunnel = allFunnel.filter(f => (f as any).client_id === client.id && (f as any).status === 'open');
+    .filter(o => o.client_id === client.id)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  const clientReceivables = allReceivables.filter(r => r.client_id === client.id);
+  const clientFunnel = allFunnel.filter(f => f.client_id === client.id && f.status === 'open');
 
   const creditUsage = client.credit_limit > 0 ? (client.current_balance / client.credit_limit) * 100 : 0;
   const daysSinceLastPurchase = client.last_purchase_date ? differenceInDays(new Date(), new Date(client.last_purchase_date)) : null;

@@ -36,7 +36,7 @@ export default function Reports() {
   // Split by period + comparativo período-a-período
   const { current, previous } = useMemo(() => {
     const days = PERIOD_DAYS[period];
-    if (!days) return { current: answers, previous: [] as any[] };
+    if (!days) return { current: answers, previous: [] as typeof answers };
     const now = Date.now();
     const cutCurrent = now - days * 86400_000;
     const cutPrev = now - 2 * days * 86400_000;
@@ -138,7 +138,7 @@ export default function Reports() {
           </Select>
         </div>
         <div><Label>Agrupar por</Label>
-          <Select value={groupBy} onValueChange={(v) => setGroupBy(v as any)}>
+          <Select value={groupBy} onValueChange={(v) => setGroupBy(v as 'city' | 'segment' | 'category' | 'month')}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="month">Mês</SelectItem>

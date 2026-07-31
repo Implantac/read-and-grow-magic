@@ -68,24 +68,24 @@ export default function SalesFunnelPage() {
   };
 
   const markAsWon = async (item: DbFunnelItem) => {
-    await updateItem.mutateAsync({ id: item.id, status: 'won', won_date: new Date().toISOString() } as any);
+    await updateItem.mutateAsync({ id: item.id, status: 'won', won_date: new Date().toISOString() });
     toastSuccess('🏆 Oportunidade ganha!', item.title);
   };
 
   const markAsLost = async (item: DbFunnelItem) => {
-    await updateItem.mutateAsync({ id: item.id, status: 'lost', lost_date: new Date().toISOString() } as any);
+    await updateItem.mutateAsync({ id: item.id, status: 'lost', lost_date: new Date().toISOString() });
     toastSuccess('Oportunidade perdida', item.title);
   };
 
   const moveToNextStage = async (item: DbFunnelItem) => {
     const idx = KANBAN_STAGES.findIndex(s => s.value === item.stage);
     if (idx < KANBAN_STAGES.length - 1) {
-      await updateItem.mutateAsync({ id: item.id, stage: KANBAN_STAGES[idx + 1].value } as any);
+      await updateItem.mutateAsync({ id: item.id, stage: KANBAN_STAGES[idx + 1].value });
     }
   };
 
   const moveToStage = async (item: DbFunnelItem, targetStage: string) => {
-    await updateItem.mutateAsync({ id: item.id, stage: targetStage } as any);
+    await updateItem.mutateAsync({ id: item.id, stage: targetStage });
   };
 
   if (isLoading) {
