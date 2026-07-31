@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { BaseService } from '../shared/baseService';
+import type { CreateOrderInput } from '@/hooks/commercial/orders/types';
 
 export class OrderService extends BaseService<'orders'> {
   constructor() {
@@ -13,13 +14,13 @@ export class OrderService extends BaseService<'orders'> {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return (data as any[]).map((o) => ({
+    return (data ?? []).map((o) => ({
       ...o,
       items: o.order_items || [],
     }));
   }
 
-  async createOrder(input: any) {
+  async createOrder(input: CreateOrderInput) {
     const { data: lastOrder } = await supabase
       .from('orders')
       .select('number')
@@ -30,10 +31,11 @@ export class OrderService extends BaseService<'orders'> {
     const lastNum = lastOrder?.number?.replace('PED', '') || '0';
     const nextNum = `PED${String(parseInt(lastNum) + 1).padStart(4, '0')}`;
 
-    const subtotal = input.items.reduce((s: number, i: any) => s + (i.quantity * i.unit_price), 0);
-    const discount = input.items.reduce((s: number, i: any) => s + (i.discount || 0), 0);
+    const subtotal = input.items.reduce((s, i) => s + i.quantity * i.unit_price, 0);
+    const discount = input.items.reduce((s, i) => s + (i.discount || 0), 0);
     const shipping = input.shipping || 0;
     const total = subtotal - discount + shipping;
+
 
     const { data: order, error: orderError } = await supabase
       .from('orders')
