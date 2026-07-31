@@ -3,8 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import type { MaterialNeed } from './types';
+import type { SupplyItem } from '@/hooks/inventory/useSupplyStock';
 
-export function useMRPPurchaseOrder(materialNeeds: MaterialNeed[], supplies: any[]) {
+export function useMRPPurchaseOrder(materialNeeds: MaterialNeed[], supplies: SupplyItem[]) {
   const [generatingPO, setGeneratingPO] = useState(false);
 
   const handleGeneratePurchaseOrder = async () => {
@@ -43,7 +44,7 @@ export function useMRPPurchaseOrder(materialNeeds: MaterialNeed[], supplies: any
       }
 
       toast.success(`Pedido de compra ${poNumber} gerado com ${deficits.length} itens`);
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
       toast.error('Erro ao gerar pedido de compra');
     } finally {

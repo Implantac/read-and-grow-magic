@@ -103,7 +103,7 @@ export default function OperatorTerminalPage() {
       work_center: order.work_center || order.sector,
       machine_id: machine?.id || null,
       machine_name: machine?.name || null,
-    } as any);
+    });
     if (order.status === 'planned') {
       await updateOrder(order.id, { status: 'in_progress', start_date: new Date().toISOString() });
     }
