@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
+import type { TablesInsert } from '@/integrations/supabase/types';
 import { clientsService } from '@/services/commercial/clientsService';
 import { useSupabaseQuery, useSupabaseMutation } from '@/hooks/shared/useSupabaseQuery';
 import { toastSuccess, handleMutationError } from '@/lib/toastHelpers';
@@ -50,7 +51,7 @@ export function useClients() {
 export function useCreateClient() {
   const queryClient = useQueryClient();
   return useSupabaseMutation(
-    (client: Omit<DbClient, 'id' | 'created_at' | 'updated_at'>) => clientsService.create(client),
+    (client: Omit<TablesInsert<'clients'>, 'company_id'>) => clientsService.create(client),
     {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['clients'] });

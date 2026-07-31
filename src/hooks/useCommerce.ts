@@ -34,6 +34,7 @@ export interface Storefront {
   contact_email: string | null;
   contact_phone: string | null;
   settings: Record<string, unknown>;
+  auto_authorize_nfce: boolean;
   published_at: string | null;
   created_at: string;
   updated_at: string;
