@@ -47,7 +47,7 @@ export function FollowUpTab() {
   const upcomingTasks = tasks.filter(t => t.scheduled_date > today);
 
   const handleCreate = () => {
-    createFollowUp.mutate(newTask as any, {
+    createFollowUp.mutate(newTask, {
       onSuccess: () => { setShowCreate(false); setNewTask({ client_name: '', title: '', scheduled_date: today, action_type: 'call', priority: 'medium', channel: 'phone' }); }
     });
   };
