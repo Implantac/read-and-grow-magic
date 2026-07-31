@@ -61,7 +61,7 @@ export function useRFIDWMSRules() {
 
   const fetch = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any)
+    const { data, error } = await supabase
       .from('rfid_wms_rules')
       .select('*')
       .order('priority', { ascending: false });
@@ -78,7 +78,7 @@ export function useRFIDWMSRules() {
   }, []);
 
   const create = async (rule: RuleFormData) => {
-    const { error } = await (supabase as any).from('rfid_wms_rules').insert({
+    const { error } = await supabase.from('rfid_wms_rules').insert({
       name: rule.name, description: rule.description || null, enabled: rule.enabled,
       trigger_zone: rule.triggerZone || null, trigger_event_type: rule.triggerEventType,
       trigger_reader_code: rule.triggerReaderCode || null, wms_action: rule.wmsAction,
@@ -92,7 +92,7 @@ export function useRFIDWMSRules() {
   };
 
   const update = async (id: string, updates: Partial<WMSRule>) => {
-    const { error } = await (supabase as any).from('rfid_wms_rules').update({
+    const { error } = await supabase.from('rfid_wms_rules').update({
       name: updates.name, description: updates.description,
       enabled: updates.enabled, trigger_zone: updates.triggerZone || null,
       trigger_event_type: updates.triggerEventType, trigger_reader_code: updates.triggerReaderCode || null,
@@ -107,7 +107,7 @@ export function useRFIDWMSRules() {
   };
 
   const remove = async (id: string) => {
-    const { error } = await (supabase as any).from('rfid_wms_rules').delete().eq('id', id);
+    const { error } = await supabase.from('rfid_wms_rules').delete().eq('id', id);
     if (error) { toast.error('Erro ao excluir regra'); return false; }
     toast.success('Regra excluída!');
     await fetch();
@@ -115,7 +115,7 @@ export function useRFIDWMSRules() {
   };
 
   const toggleEnabled = async (id: string, enabled: boolean) => {
-    const { error } = await (supabase as any).from('rfid_wms_rules').update({ enabled }).eq('id', id);
+    const { error } = await supabase.from('rfid_wms_rules').update({ enabled }).eq('id', id);
     if (error) { toast.error('Erro ao alterar status'); return; }
     await fetch();
   };
