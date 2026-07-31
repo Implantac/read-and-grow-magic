@@ -54,8 +54,8 @@ export default function WMSAnalytics() {
 
       const shipRows = ship.data ?? [];
       const pickRows = pickAll.data ?? [];
-      const logRows = (logs.data ?? []) as any[];
-      const qRows = (qual.data ?? []) as any[];
+      const logRows = (logs.data ?? []) as Array<{ duration_seconds: number | null }>;
+      const qRows = (qual.data ?? []) as Array<{ decision: string | null }>;
 
       const completed = pickRows.filter((p: any) => p.status === "completed");
       const avgPickMin = completed.length
