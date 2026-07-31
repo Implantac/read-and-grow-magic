@@ -36,10 +36,12 @@ export class OrderService extends BaseService<'orders'> {
     const shipping = input.shipping || 0;
     const total = subtotal - discount + shipping;
 
+    const company_id = await this.resolveCompanyId();
 
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
+        company_id,
         number: nextNum,
         client_id: input.client_id || null,
         client_name: input.client_name,
