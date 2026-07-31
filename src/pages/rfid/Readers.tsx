@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import type { ReaderStatus } from '@/types/rfid';
 import { useRFID } from '@/hooks/system/useRFIDQuery';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
@@ -35,7 +36,7 @@ export default function RFIDReadersPage() {
       zone: form.zone || undefined, ipAddress: form.ipAddress || undefined,
       port: form.port ? Number(form.port) : undefined, model: form.model || undefined,
       manufacturer: form.manufacturer || undefined, antennaCount: Number(form.antennaCount),
-      status: form.status as any,
+      status: form.status as ReaderStatus,
     });
     setOpen(false);
     setForm({ code: '', name: '', location: '', zone: '', ipAddress: '', port: '', model: '', manufacturer: '', antennaCount: '1', status: 'active' });

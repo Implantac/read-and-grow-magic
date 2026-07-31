@@ -15,7 +15,8 @@ import { EmptyState } from '@/shared/components/EmptyState';
 import { toast } from 'sonner';
 
 import { formatNumber } from '@/lib/formatters';
-const statusColors: Record<string, string> = { available: 'default', in_transit: 'secondary', maintenance: 'destructive' };
+type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
+const statusColors: Record<string, BadgeVariant> = { available: 'default', in_transit: 'secondary', maintenance: 'destructive' };
 const statusLabels: Record<string, string> = { available: 'Disponível', in_transit: 'Em Trânsito', maintenance: 'Manutenção' };
 
 const Vehicles = () => {
@@ -84,7 +85,7 @@ const Vehicles = () => {
                 <TableCell className="capitalize">{v.vehicleType}</TableCell>
                 <TableCell>{v.driverName || '-'}</TableCell>
                 <TableCell>{formatNumber(v.maxWeight)}</TableCell>
-                <TableCell><Badge variant={statusColors[v.status] as any}>{statusLabels[v.status] || v.status}</Badge></TableCell>
+                <TableCell><Badge variant={statusColors[v.status] ?? 'outline'}>{statusLabels[v.status] || v.status}</Badge></TableCell>
                 <TableCell><Button variant="ghost" size="icon" onClick={() => openEdit(v)}><Pencil className="h-4 w-4" /></Button></TableCell>
               </TableRow>
             ))}

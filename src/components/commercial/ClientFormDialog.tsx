@@ -120,10 +120,10 @@ export function ClientFormDialog({ open, onOpenChange, client, totalClients }: P
 
     const payload = buildClientPayload(formData);
     if (client) {
-      updateClient.mutate({ id: client.id, ...payload } as any, { onSuccess: () => onOpenChange(false) });
+      updateClient.mutate({ id: client.id, ...payload }, { onSuccess: () => onOpenChange(false) });
     } else {
       const code = `CLI${String(totalClients + 1).padStart(3, '0')}-${Date.now().toString().slice(-4)}`;
-      createClient.mutate({ ...payload, code } as any, { onSuccess: () => onOpenChange(false) });
+      createClient.mutate({ ...payload, code }, { onSuccess: () => onOpenChange(false) });
     }
   };
 

@@ -61,8 +61,8 @@ export const StopRow = ({
           {stop.city ?? ''}{stop.state ? ` / ${stop.state}` : ''}
           {Number(stop.weight ?? 0) > 0 && ` · ${Number(stop.weight)} kg`}
           {stop.planned_eta && ` · ETA ${new Date(stop.planned_eta).toLocaleString('pt-BR')}`}
-          {(stop as any).time_window_start && (stop as any).time_window_end && (
-            ` · Janela ${String((stop as any).time_window_start).slice(0, 5)}–${String((stop as any).time_window_end).slice(0, 5)}`
+          {stop.time_window_start && stop.time_window_end && (
+            ` · Janela ${String(stop.time_window_start).slice(0, 5)}–${String(stop.time_window_end).slice(0, 5)}`
           )}
         </div>
       </div>

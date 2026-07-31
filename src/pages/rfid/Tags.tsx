@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRFID } from '@/hooks/system/useRFIDQuery';
+import type { TagType } from '@/types/rfid';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
@@ -38,7 +39,7 @@ export default function RFIDTagsPage() {
   const handleSubmit = async () => {
     if (!form.epc) return;
     await create({
-      epc: form.epc, tagType: form.tagType as any, productCode: form.productCode || undefined,
+      epc: form.epc, tagType: form.tagType as TagType, productCode: form.productCode || undefined,
       productName: form.productName || undefined, batch: form.batch || undefined,
       palletId: form.palletId || undefined, location: form.location || undefined,
     });

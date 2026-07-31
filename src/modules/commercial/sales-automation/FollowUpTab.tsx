@@ -12,7 +12,7 @@ const today = new Date().toISOString().split('T')[0];
 
 function FollowUpItem({ task, onComplete }: { task: any; onComplete: (p: { id: string; result: string }) => void }) {
   const channelIcons: Record<string, string> = { call: '📞', whatsapp: '💬', email: '📧', visit: '🏢', phone: '📞' };
-  const priorityColors: Record<string, string> = { high: 'destructive', medium: 'default', low: 'secondary' };
+  const priorityColors: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = { high: 'destructive', medium: 'default', low: 'secondary' };
 
   return (
     <div className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
@@ -24,7 +24,7 @@ function FollowUpItem({ task, onComplete }: { task: any; onComplete: (p: { id: s
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Badge variant={priorityColors[task.priority] as any}>{task.priority}</Badge>
+        <Badge variant={priorityColors[task.priority] ?? 'outline'}>{task.priority}</Badge>
         {task.suggested_message && <Badge variant="outline" className="text-xs"><Sparkles className="h-3 w-3 mr-1" />IA</Badge>}
         <Button size="sm" variant="ghost" onClick={() => onComplete({ id: task.id, result: 'Concluído' })}>
           <CheckCircle2 className="h-4 w-4" />
@@ -47,7 +47,7 @@ export function FollowUpTab() {
   const upcomingTasks = tasks.filter(t => t.scheduled_date > today);
 
   const handleCreate = () => {
-    createFollowUp.mutate(newTask as any, {
+    createFollowUp.mutate(newTask, {
       onSuccess: () => { setShowCreate(false); setNewTask({ client_name: '', title: '', scheduled_date: today, action_type: 'call', priority: 'medium', channel: 'phone' }); }
     });
   };

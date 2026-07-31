@@ -16,7 +16,8 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 
 const statusLabels: Record<string, string> = { planned: 'Planejada', in_transit: 'Em Trânsito', completed: 'Concluída', cancelled: 'Cancelada' };
-const statusColors: Record<string, string> = { planned: 'secondary', in_transit: 'default', completed: 'outline', cancelled: 'destructive' };
+type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
+const statusColors: Record<string, BadgeVariant> = { planned: 'secondary', in_transit: 'default', completed: 'outline', cancelled: 'destructive' };
 
 const Routes = () => {
   const { routes, routesLoading: loading, createRoute: create, updateRoute: update, carriers, vehicles } = useTMS();
@@ -83,7 +84,7 @@ const Routes = () => {
                 <TableCell>{r.plannedDate}</TableCell>
                 <TableCell>{r.driverName || '-'}</TableCell>
                 <TableCell>{r.completedStops}/{r.totalStops}</TableCell>
-                <TableCell><Badge variant={statusColors[r.status] as any}>{statusLabels[r.status] || r.status}</Badge></TableCell>
+                <TableCell><Badge variant={statusColors[r.status] ?? 'outline'}>{statusLabels[r.status] || r.status}</Badge></TableCell>
                 <TableCell>
                   <div className="flex gap-1">
                     <Button asChild size="sm" variant="ghost"><a href={`/tms/rotas/${r.id}/planejamento`}>Planejar</a></Button>
