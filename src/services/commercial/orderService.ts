@@ -81,6 +81,21 @@ export class OrderService extends BaseService<'orders'> {
     return order;
   }
 
+  private async resolveCompanyId(): Promise<string> {
+    const { data: auth } = await supabase.auth.getUser();
+    const userId = auth.user?.id;
+    if (!userId) throw new Error('Sessão expirada');
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('company_id')
+      .eq('id', userId)
+      .maybeSingle();
+    if (!profile?.company_id) throw new Error('Empresa não encontrada');
+    return profile.company_id;
+  }
+
+
+
   async updateStatus(id: string, status: string) {
     return this.update(id, { status });
   }
