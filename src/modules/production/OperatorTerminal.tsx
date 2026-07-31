@@ -11,6 +11,7 @@ import { useProductionOrders } from '@/hooks/production/useProductionOrders';
 import { useProductionSteps } from '@/hooks/production/useProductionSteps';
 import { useProductionMachines } from '@/hooks/production/useProductionMachines';
 import { supabase } from '@/integrations/supabase/client';
+import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 
 import { SuggestionCard } from './operator-terminal/SuggestionCard';
 import { StartProductionCard } from './operator-terminal/StartProductionCard';
@@ -103,7 +104,7 @@ export default function OperatorTerminalPage() {
       work_center: order.work_center || order.sector,
       machine_id: machine?.id || null,
       machine_name: machine?.name || null,
-    } as any);
+    });
     if (order.status === 'planned') {
       await updateOrder(order.id, { status: 'in_progress', start_date: new Date().toISOString() });
     }
@@ -169,7 +170,18 @@ export default function OperatorTerminalPage() {
         material_shortage: 'Falta de Material',
         safety: 'Segurança',
       };
-      await (supabase as any).from('industrial_alerts').insert({
+      const { data: { user } } = await supabase.auth.getUser();
+      let companyId = useEnterpriseStore.getState().activeCompanyId;
+      if (!companyId && user) {
+        const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user.id).maybeSingle();
+        companyId = profile?.company_id ?? null;
+      }
+      if (!companyId) {
+        toast.error('Empresa não identificada. Selecione uma empresa.');
+        return;
+      }
+      await supabase.from('industrial_alerts').insert({
+        company_id: companyId,
         alert_type: problemCategory,
         severity: problemCategory === 'machine_stop' ? 'critical' : 'high',
         title: `Problema reportado: ${titles[problemCategory] || problemCategory}`,
