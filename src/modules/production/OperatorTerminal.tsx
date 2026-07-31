@@ -11,6 +11,7 @@ import { useProductionOrders } from '@/hooks/production/useProductionOrders';
 import { useProductionSteps } from '@/hooks/production/useProductionSteps';
 import { useProductionMachines } from '@/hooks/production/useProductionMachines';
 import { supabase } from '@/integrations/supabase/client';
+import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 
 import { SuggestionCard } from './operator-terminal/SuggestionCard';
 import { StartProductionCard } from './operator-terminal/StartProductionCard';
