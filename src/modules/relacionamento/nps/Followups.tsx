@@ -34,7 +34,7 @@ export default function Followups() {
   const [form, setForm] = useState<any>({});
 
   const kpis = useMemo(() => {
-    const rows = followups as any[];
+    const rows = followups;
     return {
       total: rows.length,
       critical: rows.filter(r => r.priority === 'critical').length,
@@ -43,7 +43,7 @@ export default function Followups() {
     };
   }, [followups]);
 
-  const openEdit = (f: any) => {
+  const openEdit = (f: NPSFollowupRow) => {
     setEditing(f);
     setForm({
       status: f.status,
@@ -112,7 +112,7 @@ export default function Followups() {
                 </tr>
               </thead>
               <tbody>
-                {(followups as any[]).map(f => {
+                {followups.map(f => {
                   const overdue = f.due_date && new Date(f.due_date) < new Date() && !['resolved', 'lost'].includes(f.status);
                   return (
                     <tr key={f.id} className="border-t border-border hover:bg-muted/20">
@@ -129,7 +129,7 @@ export default function Followups() {
                         {f.due_date ? new Date(f.due_date).toLocaleDateString('pt-BR') : '—'}
                         {overdue && ' ⚠'}
                       </td>
-                      <td className="p-3"><Badge variant={(STATUSES.find(s => s.v === f.status)?.variant as any) ?? 'outline'}>{STATUSES.find(s => s.v === f.status)?.label ?? f.status}</Badge></td>
+                      <td className="p-3"><Badge variant={STATUSES.find(s => s.v === f.status)?.variant ?? 'outline'}>{STATUSES.find(s => s.v === f.status)?.label ?? f.status}</Badge></td>
                       <td className="p-3 text-right">
                         <div className="flex items-center justify-end gap-1">
                           {f.clients?.phone && (
@@ -155,7 +155,7 @@ export default function Followups() {
                     </tr>
                   );
                 })}
-                {(followups as any[]).length === 0 && (
+                {followups.length === 0 && (
                   <tr><td colSpan={7} className="p-8 text-center text-muted-foreground">Sem follow-ups nesse filtro.</td></tr>
                 )}
               </tbody>
