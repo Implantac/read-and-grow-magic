@@ -59,7 +59,7 @@ export default function CycleCount() {
     if (error) {
       toastError("Erro ao carregar inventários", error.message);
     } else {
-      setRows((data as any) ?? []);
+      setRows(data ?? []);
     }
     setLoading(false);
   }
@@ -91,7 +91,7 @@ export default function CycleCount() {
       items_count: Number(form.items_count) || 0,
       discrepancies: 0,
       status: "scheduled",
-    } as any);
+    });
     if (error) {
       toastError("Erro ao criar inventário", error.message);
       return;
@@ -105,7 +105,7 @@ export default function CycleCount() {
   async function start(id: string) {
     const { error } = await supabase
       .from("wms_inventory_counts")
-      .update({ status: "in_progress", started_at: new Date().toISOString() } as any)
+      .update({ status: "in_progress", started_at: new Date().toISOString() })
       .eq("id", id);
     if (error) return toastError("Erro ao iniciar", error.message);
     toastSuccess("Inventário iniciado");
@@ -119,7 +119,7 @@ export default function CycleCount() {
         status: "completed",
         completed_at: new Date().toISOString(),
         discrepancies: Math.max(0, Math.floor(discrepancies)),
-      } as any)
+      })
       .eq("id", id);
     if (error) return toastError("Erro ao concluir", error.message);
     toastSuccess("Inventário concluído");

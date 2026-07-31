@@ -24,7 +24,7 @@ export default function ProductionQueuePage() {
   const activeOrders = useMemo(() => {
     return orders
       .filter(o => ['planned', 'in_progress', 'paused'].includes(o.status))
-      .filter(o => sectorFilter === 'all' || o.work_center === sectorFilter || (o as any).sector === sectorFilter)
+      .filter(o => sectorFilter === 'all' || o.work_center === sectorFilter || o.sector === sectorFilter)
       .sort((a, b) => {
         const pw = (priorityWeight[b.priority] || 0) - (priorityWeight[a.priority] || 0);
         if (pw !== 0) return pw;
@@ -37,7 +37,7 @@ export default function ProductionQueuePage() {
       });
   }, [orders, sectorFilter]);
 
-  const sectors = [...new Set(orders.map(o => o.work_center || (o as any).sector).filter(Boolean))];
+  const sectors = [...new Set(orders.map(o => o.work_center || o.sector).filter(Boolean))];
   const today = new Date();
 
   const handleStart = async (op: any) => { await update(op.id, { status: 'in_progress', start_date: new Date().toISOString() }); };
@@ -88,12 +88,12 @@ export default function ProductionQueuePage() {
                       <TableCell className="font-bold text-muted-foreground">{idx + 1}</TableCell>
                       <TableCell className="font-mono font-medium">{o.order_number}</TableCell>
                       <TableCell>{o.product_name}</TableCell>
-                      <TableCell>{(o as any).client_name || '-'}</TableCell>
+                      <TableCell>{o.client_name || '-'}</TableCell>
                       <TableCell>{o.produced_quantity}/{o.quantity} {o.unit}</TableCell>
                       <TableCell><div className="flex items-center gap-2"><Progress value={pct} className="h-2 w-16" /><span className="text-xs">{pct.toFixed(0)}%</span></div></TableCell>
                       <TableCell><StatusBadge status={o.priority} type="priority" /></TableCell>
                       <TableCell><div className="flex items-center gap-1">{o.due_date ? format(new Date(o.due_date), 'dd/MM/yyyy') : '-'}{isDelayed && <AlertTriangle className="h-3 w-3 text-destructive" />}</div></TableCell>
-                      <TableCell>{o.work_center || (o as any).sector || '-'}</TableCell>
+                      <TableCell>{o.work_center || o.sector || '-'}</TableCell>
                       <TableCell><StatusBadge status={o.status} type="production" /></TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-1 justify-end">
