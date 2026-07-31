@@ -1,12 +1,13 @@
 import type { SuccessSupplierSpend, SuccessTopCustomer, SuccessDelinquent } from "../types";
+import type { PurchaseOrderRow, ReceivableRow, SaleRow } from "./inputs";
 
-export function buildSuppliers(purchaseOrders90: any[]): SuccessSupplierSpend[] {
+export function buildSuppliers(purchaseOrders90: PurchaseOrderRow[]): SuccessSupplierSpend[] {
   const supMap = new Map<string, { spend: number; orders: number }>();
   for (const po of purchaseOrders90) {
-    if ((po as any).status === "cancelled") continue;
-    const name = (po as any).supplier_name || "Sem fornecedor";
+    if (po.status === "cancelled") continue;
+    const name = po.supplier_name || "Sem fornecedor";
     const cur = supMap.get(name) || { spend: 0, orders: 0 };
-    cur.spend += Number((po as any).total || 0);
+    cur.spend += Number(po.total || 0);
     cur.orders += 1;
     supMap.set(name, cur);
   }
@@ -23,7 +24,7 @@ export function buildSuppliers(purchaseOrders90: any[]): SuccessSupplierSpend[] 
     .slice(0, 5);
 }
 
-export function buildCustomers(sales: any[], now: Date) {
+export function buildCustomers(sales: SaleRow[], now: Date) {
   const custMap = new Map<string, { client_id: string | null; client_name: string; total: number; orders: number; last: number }>();
   for (const s of sales) {
     const key = s.client_id || s.client_name || "N/A";
@@ -57,11 +58,11 @@ export function buildCustomers(sales: any[], now: Date) {
   return { topCustomers, inactiveTopCustomers, activeCustomers: custMap.size };
 }
 
-export function buildDelinquents(ar: any[], now: Date): SuccessDelinquent[] {
+export function buildDelinquents(ar: ReceivableRow[], now: Date): SuccessDelinquent[] {
   return ar
     .filter((r) => r.status !== "paid" && new Date(r.due_date).getTime() < now.getTime())
     .map((r) => ({
-      client_name: r.client_name,
+      client_name: r.client_name ?? "Cliente",
       amount: Number(r.amount || 0),
       days_overdue: Math.floor((now.getTime() - new Date(r.due_date).getTime()) / 86400000),
       invoice: r.invoice_number || "-",
