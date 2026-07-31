@@ -1,10 +1,11 @@
 import type { SuccessProductInsight, SuccessSubcategoryStock } from "../types";
+import type { ProductRow, SaleItem12mRow, SaleItem90Row, StockBalanceRow } from "./inputs";
 
 export function buildProductInsights(
-  products: any[],
-  stock: any[],
-  saleItems90: any[],
-  saleItems12m: any[],
+  products: ProductRow[],
+  stock: StockBalanceRow[],
+  saleItems90: SaleItem90Row[],
+  saleItems12m: SaleItem12mRow[],
   now: Date,
 ) {
   const soldQtyMap = new Map<string, number>();
