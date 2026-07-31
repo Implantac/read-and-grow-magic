@@ -44,7 +44,12 @@ export function useTimeEntries() {
     await fetch();
   };
 
-  const create = async (entry: Omit<TimeEntryRow, 'id' | 'created_at'>) => {
+  type NewTimeEntry = Omit<TimeEntryRow, 'id' | 'created_at' | 'machine_id' | 'machine_name'> & {
+  machine_id?: string | null;
+  machine_name?: string | null;
+};
+
+  const create = async (entry: NewTimeEntry) => {
     const company_id = useEnterpriseStore.getState().activeCompanyId;
     if (!company_id) { toast.error('Empresa não selecionada'); return; }
     const { error } = await supabase.from('time_entries').insert({ ...entry, company_id } as TablesInsert<'time_entries'>);

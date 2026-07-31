@@ -169,7 +169,18 @@ export default function OperatorTerminalPage() {
         material_shortage: 'Falta de Material',
         safety: 'Segurança',
       };
+      const { data: { user } } = await supabase.auth.getUser();
+      let companyId = useEnterpriseStore.getState().activeCompanyId;
+      if (!companyId && user) {
+        const { data: profile } = await supabase.from('profiles').select('company_id').eq('id', user.id).maybeSingle();
+        companyId = profile?.company_id ?? null;
+      }
+      if (!companyId) {
+        toast.error('Empresa não identificada. Selecione uma empresa.');
+        return;
+      }
       await supabase.from('industrial_alerts').insert({
+        company_id: companyId,
         alert_type: problemCategory,
         severity: problemCategory === 'machine_stop' ? 'critical' : 'high',
         title: `Problema reportado: ${titles[problemCategory] || problemCategory}`,
