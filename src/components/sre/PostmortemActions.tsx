@@ -39,8 +39,8 @@ export function PostmortemActions({ postmortemId }: { postmortemId: string }) {
       supabase.from('sre_postmortem_actions').select('*').eq('postmortem_id', postmortemId).order('created_at', { ascending: false }),
       supabase.from('profiles').select('id, name').limit(100),
     ]);
-    setItems((data ?? []) as any);
-    setUsers((profs ?? []) as any);
+    setItems((data ?? []) as unknown as Action[]);
+    setUsers((profs ?? []) as Array<{ id: string; name?: string | null }>);
     setLoading(false);
   };
   useEffect(() => { void load(); }, [postmortemId]);
