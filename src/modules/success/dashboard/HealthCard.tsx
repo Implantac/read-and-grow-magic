@@ -3,8 +3,9 @@ import { Badge } from "@/ui/base/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { Progress } from "@/ui/base/progress";
 import { cn } from "@/lib/utils";
+import type { HealthPillar, SuccessHealthBreakdown } from "@/modules/success/types";
 
-export function HealthCard({ health }: { health: any }) {
+export function HealthCard({ health }: { health: SuccessHealthBreakdown }) {
   return (
     <Card className="lg:col-span-2 border-primary/20 bg-gradient-to-br from-primary/5 via-transparent to-accent/5">
       <CardHeader>
@@ -40,11 +41,11 @@ export function HealthCard({ health }: { health: any }) {
               Como cada pilar contribui
             </p>
             <span className="text-[10px] text-muted-foreground">
-              Σ contribuições = {health.pillars.reduce((a: number, p: any) => a + p.contribution, 0).toFixed(1)} / 100
+              Σ contribuições = {health.pillars.reduce((a: number, p: HealthPillar) => a + p.contribution, 0).toFixed(1)} / 100
             </span>
           </div>
           <div className="space-y-2">
-            {health.pillars.map((p: any) => {
+            {health.pillars.map((p: HealthPillar) => {
               const barColor =
                 p.status === "good" ? "bg-emerald-500"
                 : p.status === "warn" ? "bg-amber-500"

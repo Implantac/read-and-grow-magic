@@ -3,12 +3,14 @@ import { Button } from '@/ui/base/button';
 import { AlertTriangle, ShieldCheck, Play } from 'lucide-react';
 import { differenceInDays, parseISO } from 'date-fns';
 import PCPIntelligencePanel from '@/components/production/PCPIntelligencePanel';
+import type { ActionSuggestion } from '@/lib/pcpServices';
+import type { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
 
 interface Props {
-  pcpIntel: any;
-  delayedOPs: any[];
+  pcpIntel: { suggestions: ActionSuggestion[]; summary: React.ComponentProps<typeof PCPIntelligencePanel>['summary'] };
+  delayedOPs: ProductionOrderRow[];
   today: Date;
-  onStatusChange: (op: any, newStatus: string) => void;
+  onStatusChange: (op: ProductionOrderRow, newStatus: string) => void;
 }
 
 export function AlertsTab({ pcpIntel, delayedOPs, today, onStatusChange }: Props) {
