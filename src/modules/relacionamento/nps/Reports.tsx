@@ -17,6 +17,7 @@ const COLORS = { promoter: '#10B981', passive: '#F59E0B', detractor: '#EF4444' }
 type AnswerRow = Tables<'nps_answers'> & {
   clients?: { name?: string | null; address_city?: string | null; segment?: string | null } | null;
   city?: string | null;
+  name?: string | null;
 };
 
 type Period = '30d' | '90d' | '180d' | '365d' | 'all';
