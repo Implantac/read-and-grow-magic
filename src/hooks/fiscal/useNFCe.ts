@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import type { NFCe, NFCeItem } from '@/types/fiscal';
+import type { NFCe, NFCeItem, NFCePaymentMethod } from '@/types/fiscal';
 
 export function useNFCe() {
   const [nfces, setNfces] = useState<NFCe[]>([]);
@@ -14,17 +14,22 @@ export function useNFCe() {
 
     const { data: itemsData } = await supabase.from('nfce_items').select('*');
     const itemsMap = new Map<string, NFCeItem[]>();
+    const toItem = (item: Record<string, unknown>): NFCeItem => ({
+      id: String(item.id),
+      productId: String(item.product_id ?? ''),
+      productCode: String(item.product_code ?? ''),
+      productName: String(item.product_name ?? ''),
+      ncm: String(item.ncm ?? ''),
+      cfop: String(item.cfop ?? ''),
+      unit: String(item.unit ?? 'UN'),
+      quantity: Number(item.quantity ?? 0),
+      unitPrice: Number(item.unit_price ?? 0),
+      discount: Number(item.discount ?? 0),
+      total: Number(item.total ?? 0),
+    });
     (itemsData || []).forEach((item) => {
       const arr = itemsMap.get(item.nfce_id) || [];
-      arr.push({
-        id: item.id,
-        productCode: item.product_code,
-        productName: item.product_name,
-        quantity: Number(item.quantity),
-        unitPrice: Number(item.unit_price),
-        total: Number(item.total),
-        unit: item.unit,
-      });
+      arr.push(toItem(item as unknown as Record<string, unknown>));
       itemsMap.set(item.nfce_id, arr);
     });
 
@@ -37,7 +42,7 @@ export function useNFCe() {
       accessKey: row.access_key || '',
       protocol: row.protocol || '',
       qrCode: row.qr_code || '',
-      paymentMethod: row.payment_method,
+      paymentMethod: row.payment_method as NFCePaymentMethod,
       terminalId: row.terminal_id || '',
       operatorId: row.operator_id || '',
       operatorName: row.operator_name || '',
