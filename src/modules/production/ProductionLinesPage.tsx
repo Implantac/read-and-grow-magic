@@ -201,7 +201,7 @@ export default function ProductionLinesPage() {
               <div className="space-y-1.5"><Label>Capacidade/Hora</Label><Input type="number" value={form.capacity_per_hour || 0} onChange={e => setForm({ ...form, capacity_per_hour: toSafeNumber(e.target.value) })} /></div>
               <div className="space-y-1.5"><Label>Responsável</Label><Input value={form.responsible || ''} onChange={e => setForm({ ...form, responsible: e.target.value })} /></div>
             </div>
-            <div className="space-y-1.5"><Label>Descrição</Label><Textarea value={(form as any).description || ''} onChange={e => setForm({ ...form, description: e.target.value } as any)} rows={2} /></div>
+            <div className="space-y-1.5"><Label>Descrição</Label><Textarea value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} rows={2} /></div>
             <div className="flex items-center gap-2">
               <Switch checked={form.is_active ?? true} onCheckedChange={v => setForm({ ...form, is_active: v })} />
               <Label>Linha ativa</Label>
