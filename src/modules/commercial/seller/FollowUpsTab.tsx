@@ -4,10 +4,12 @@ import { Calendar, CheckCircle, Mail, MessageSquare, PhoneCall } from 'lucide-re
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
+import type { DbFollowUp } from '@/hooks/commercial/useSalesIntelligence';
+import type { DbClient } from '@/hooks/commercial/useClients';
 
 interface FollowUpsTabProps {
-  followUps: any[];
-  clients: any[];
+  followUps: DbFollowUp[];
+  clients: DbClient[];
   onComplete: (id: string) => void;
 }
 

@@ -2,8 +2,9 @@ import { Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Progress } from '@/ui/base/progress';
 import { formatBRL } from '@/lib/formatters';
+import type { RepPerformance } from '@/hooks/commercial/useSalesIntelligence';
 
-export function RankingTab({ performances }: { performances: any[] }) {
+export function RankingTab({ performances }: { performances: RepPerformance[] }) {
   return (
     <Card>
       <CardHeader>

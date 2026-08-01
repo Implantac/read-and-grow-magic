@@ -4,11 +4,12 @@ import { Button } from '@/ui/base/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { formatBRL } from '@/lib/formatters';
 import type { ClientInsight } from '@/hooks/commercial/useSalesIntelligence';
+import type { DbClient } from '@/hooks/commercial/useClients';
 import { OPPORTUNITY_LABELS, RISK_CONFIG } from './constants';
 
 interface OpportunitiesTabProps {
   insights: ClientInsight[];
-  clients: any[];
+  clients: DbClient[];
   onOpenScript: (insight: ClientInsight) => void;
   onScheduleFollowUp: (insight: ClientInsight) => void;
 }

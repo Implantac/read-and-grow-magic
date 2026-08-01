@@ -5,10 +5,11 @@ import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
 import { Card, CardContent } from '@/ui/base/card';
 import { formatBRL } from '@/lib/formatters';
+import type { AIDailyAction, AIRecommendation } from '@/hooks/commercial/useAICommercial';
 
 interface AITabProps {
-  aiActions: any[];
-  aiRecs: any[];
+  aiActions: AIDailyAction[];
+  aiRecs: AIRecommendation[];
   runAIEngine: { mutate: (v: string) => void; isPending: boolean };
   completeAIAction: { mutate: (v: { id: string; result: string }) => void };
   actOnAIRec: { mutate: (v: { id: string; result: string }) => void };

@@ -1,11 +1,11 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/base/dialog';
-import type { ClientInsight } from '@/hooks/commercial/useSalesIntelligence';
+import type { ClientInsight, SalesScript } from '@/hooks/commercial/useSalesIntelligence';
 
 interface SalesScriptDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   scriptClient: ClientInsight | null;
-  salesScript: any;
+  salesScript: SalesScript | null;
 }
 
 export function SalesScriptDialog({ open, onOpenChange, scriptClient, salesScript }: SalesScriptDialogProps) {
@@ -27,7 +27,7 @@ export function SalesScriptDialog({ open, onOpenChange, scriptClient, salesScrip
             <div>
               <p className="text-xs font-medium text-muted-foreground mb-1">PONTOS-CHAVE</p>
               <ul className="space-y-1">
-                {salesScript.keyPoints.map((p: string, i: number) => (
+                {salesScript.keyPoints.map((p, i) => (
                   <li key={i} className="text-sm flex items-start gap-2"><span className="text-primary">•</span>{p}</li>
                 ))}
               </ul>
@@ -35,7 +35,7 @@ export function SalesScriptDialog({ open, onOpenChange, scriptClient, salesScrip
             <div>
               <p className="text-xs font-medium text-muted-foreground mb-1">OBJEÇÕES</p>
               <ul className="space-y-1">
-                {salesScript.objectionHandlers.map((o: string, i: number) => (
+                {salesScript.objectionHandlers.map((o, i) => (
                   <li key={i} className="text-xs bg-muted/50 p-2 rounded">{o}</li>
                 ))}
               </ul>
