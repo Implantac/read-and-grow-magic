@@ -7,6 +7,7 @@ import { DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/ui/bas
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { lookupCep, geocodeAddress } from '@/lib/geocode';
+import type { RouteStopInsert } from '@/hooks/tms/useRoutePlanning';
 
 export const StopDialog = ({
   routeId, nextSeq, onClose, onSubmit,
@@ -14,7 +15,7 @@ export const StopDialog = ({
   routeId: string;
   nextSeq: number;
   onClose: () => void;
-  onSubmit: (payload: any) => void;
+  onSubmit: (payload: Omit<RouteStopInsert, 'company_id'>) => void;
 }) => {
   const [form, setForm] = useState({
     address: '', city: '', state: '', zip_code: '',
