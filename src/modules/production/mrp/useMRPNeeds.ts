@@ -1,8 +1,10 @@
-import type { OrderLike, SheetLike, SupplyLike, MaterialItemLike } from '@/lib/pcp/types';
+import type { SheetLike, MaterialItemLike } from '@/lib/pcp/types';
+import type { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
+import type { SupplyItem } from '@/hooks/inventory/useSupplyStock';
 import { useMemo } from 'react';
 import type { MaterialNeed } from './types';
 
-export function useMRPNeeds(orders: OrderLike[], sheets: SheetLike[], supplies: SupplyLike[]) {
+export function useMRPNeeds(orders: ProductionOrderRow[], sheets: SheetLike[], supplies: SupplyItem[]) {
   const activeOPs = useMemo(
     () => orders.filter(o => ['planned', 'in_progress'].includes(o.status)),
     [orders]
