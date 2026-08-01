@@ -2,11 +2,14 @@ import { useMemo } from 'react';
 import { parseISO, differenceInDays } from 'date-fns';
 import { formatBRL } from '@/lib/formatters';
 import { KANBAN_COLUMNS } from '../constants';
+import type { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
+import type { OutsourcingOrderRow } from '@/hooks/production/useOutsourcingOrders';
+import type { KanbanColumn } from '../KanbanBoard';
 
 export function useKanbanSuggestions(params: {
-  orders: any[];
-  lateOutsourcing: any[];
-  columns: any[];
+  orders: ProductionOrderRow[];
+  lateOutsourcing: OutsourcingOrderRow[];
+  columns: KanbanColumn[];
   capacityLoad: Record<string, { name: string; capacity: number; allocated: number }>;
   wipMetrics: { totalCost: number; byColumn: Record<string, { count: number; qty: number; cost: number }> };
 }) {

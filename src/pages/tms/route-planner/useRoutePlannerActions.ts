@@ -5,13 +5,14 @@ import { toastSuccess, toastError, handleMutationError } from '@/lib/toastHelper
 import { geocodeAddress } from '@/lib/geocode';
 import { nearestNeighborTsp, checkTimeWindows } from '@/lib/tspOptimize';
 import { parseCsv, STOP_CSV_TEMPLATE } from '@/lib/csvImport';
+import type { RouteStop, RouteStopInsert } from '@/hooks/tms/useRoutePlanning';
 
-type Reorder = { mutate: (args: { routeId: string; ordered: string[] }, opts?: any) => void };
-type CreateStop = { mutateAsync: (payload: any) => Promise<any> };
+type Reorder = { mutate: (args: { routeId: string; ordered: string[] }, opts?: { onSuccess?: () => void; onError?: (e: unknown) => void }) => void };
+type CreateStop = { mutateAsync: (payload: Omit<RouteStopInsert, 'company_id'>) => Promise<unknown> };
 
 export function useRoutePlannerActions(params: {
   routeId?: string;
-  stops: any[];
+  stops: RouteStop[];
   depot?: { depot_latitude?: number | null; depot_longitude?: number | null } | null;
   createStop: CreateStop;
   reorder: Reorder;

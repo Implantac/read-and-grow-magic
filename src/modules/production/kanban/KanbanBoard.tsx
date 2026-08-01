@@ -6,7 +6,7 @@ import type { ProductionOrderRow } from '@/hooks/production/useProductionOrders'
 import type { OutsourcingOrderRow } from '@/hooks/production/useOutsourcingOrders';
 import type { useProductionTimeLogs } from '@/hooks/production/useProductionTimeLogs';
 
-type KanbanColumn = {
+export type KanbanColumn = {
   key: string;
   label: string;
   icon: React.ComponentType<{ className?: string }>;

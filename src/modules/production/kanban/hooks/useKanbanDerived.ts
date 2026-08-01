@@ -2,12 +2,13 @@ import { useMemo } from 'react';
 import { parseISO, differenceInDays } from 'date-fns';
 import type { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
 import type { OutsourcingOrderRow } from '@/hooks/production/useOutsourcingOrders';
+import type { WorkCenterRow } from '@/hooks/production/useWorkCenters';
 import { KANBAN_COLUMNS } from '../constants';
 
 export function useKanbanDerived(params: {
   orders: ProductionOrderRow[];
   outsourcingOrders: OutsourcingOrderRow[];
-  workCenters: any[];
+  workCenters: WorkCenterRow[];
   productCosts: Record<string, number>;
   wipLimits: Record<string, number>;
   searchTerm: string;

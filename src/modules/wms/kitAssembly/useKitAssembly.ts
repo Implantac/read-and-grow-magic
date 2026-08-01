@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Assembly, KitRow, Product } from "./types";
+import type { Assembly, KitComponent, KitRow, Product } from "./types";
 
 export function useKitAssembly() {
   const [kits, setKits] = useState<KitRow[]>([]);
@@ -23,12 +23,12 @@ export function useKitAssembly() {
     const productMap = new Map((prods ?? []).map((p) => [p.id, p]));
     setProducts(prods ?? []);
     setKits(
-      (kitData ?? []).map((k: any) => ({
+      (kitData ?? []).map((k): KitRow => ({
         ...k,
         parent: productMap.get(k.parent_product_id) ?? null,
         components: (comps ?? [])
-          .filter((c: any) => c.kit_id === k.id)
-          .map((c: any) => ({ ...c, product: productMap.get(c.component_product_id) ?? null })),
+          .filter((c) => c.kit_id === k.id)
+          .map((c): KitComponent => ({ ...c, product: productMap.get(c.component_product_id) ?? null })),
       })),
     );
     setAssemblies((asms ?? []) as Assembly[]);
