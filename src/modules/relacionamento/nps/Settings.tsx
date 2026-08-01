@@ -14,7 +14,11 @@ import { Plus, Trash2, Webhook, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import type { TablesInsert } from '@/integrations/supabase/types';
 
-type WebhookForm = { id?: string } & Partial<TablesInsert<'nps_webhooks'>>;
+type WebhookForm = { id?: string } & Omit<Partial<TablesInsert<'nps_webhooks'>>, 'events'> & { events?: string[] };
+
+function toEvents(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : [];
+}
 type AlertConfigForm = { id?: string } & Partial<TablesInsert<'nps_alerts_config'>>;
 
 const EVENTS = ['survey.created', 'invite.sent', 'survey.opened', 'survey.completed', 'customer.promoter', 'customer.passive', 'customer.detractor'];
@@ -74,7 +78,7 @@ export default function Settings() {
             <div key={w.id} className="flex items-center justify-between border-b border-border pb-2">
               <div>
                 <div className="font-medium">{w.name}</div>
-                <div className="text-xs text-muted-foreground">{w.url} · {(w.events ?? []).length} evento(s)</div>
+                <div className="text-xs text-muted-foreground">{w.url} · {toEvents(w.events).length} evento(s)</div>
               </div>
               <div className="flex items-center gap-2">
                 <Switch checked={w.active} onCheckedChange={(v) => saveWH.mutate({ id: w.id, active: v })} />
@@ -117,7 +121,7 @@ export default function Settings() {
               <div className="grid grid-cols-2 gap-1 mt-1">
                 {EVENTS.map(ev => (
                   <label key={ev} className="text-xs flex items-center gap-1">
-                    <input type="checkbox" checked={form.events?.includes(ev)} onChange={(e) => setForm({ ...form, events: e.target.checked ? [...(form.events ?? []), ev] : (form.events ?? []).filter((x: string) => x !== ev) })} />
+                    <input type="checkbox" checked={toEvents(form.events).includes(ev)} onChange={(e) => setForm({ ...form, events: e.target.checked ? [...toEvents(form.events), ev] : toEvents(form.events).filter((x) => x !== ev) })} />
                     {ev}
                   </label>
                 ))}
