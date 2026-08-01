@@ -52,14 +52,14 @@ export function useO2CExceptions() {
       if (orderIds.length === 0) return [];
 
       const [pickingRes, nfeRes, arRes] = await Promise.all([
-        supabase.from('wms_picking_orders').select('order_id').in('order_id', orderIds),
+        supabase.from('wms_picking_orders').select('sales_order_id').in('sales_order_id', orderIds),
         supabase.from('nfe').select('order_id').in('order_id', orderIds),
-        supabase.from('accounts_receivable').select('sale_id').in('sale_id', orderIds),
+        supabase.from('accounts_receivable').select('order_id').in('order_id', orderIds),
       ]);
 
-      const pickingSet = new Set((pickingRes.data ?? []).map((r) => r.order_id));
+      const pickingSet = new Set((pickingRes.data ?? []).map((r) => r.sales_order_id));
       const nfeSet = new Set((nfeRes.data ?? []).map((r) => r.order_id));
-      const arSet = new Set((arRes.data ?? []).map((r) => r.sale_id));
+      const arSet = new Set((arRes.data ?? []).map((r) => r.order_id));
 
       const out: O2CException[] = [];
       const advancedStatuses = ['confirmed', 'processing', 'separated', 'invoiced', 'shipped', 'delivered'];

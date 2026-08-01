@@ -45,6 +45,10 @@ export interface DbOrder {
   /** Canal operacional multi-loja: VAREJO_PDV | ATACADO_INDUSTRIA */
   canal_operacional?: string | null;
   branch_id?: string | null;
+  separation_status?: string | null;
+  production_status?: string | null;
+  billing_status?: string | null;
+  shipment_status?: string | null;
   items?: DbOrderItem[];
 }
 
