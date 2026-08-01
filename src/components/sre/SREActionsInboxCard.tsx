@@ -21,7 +21,7 @@ export function SREActionsInboxCard() {
   const load = async () => {
     setLoading(true);
     const { data, error } = await supabase.rpc('sre_postmortem_actions_inbox', { _only_mine: true });
-    if (!error) setRows((data ?? []) as any);
+    if (!error) setRows((data ?? []) as unknown as Row[]);
     setLoading(false);
   };
   useEffect(() => { void load(); }, []);

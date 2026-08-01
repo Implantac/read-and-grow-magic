@@ -73,8 +73,8 @@ export function ForecastVsActual({ reps }: Props) {
       byRepMap.set(r.id, { confirmed: r.confirmed, weighted: r.weighted, name: r.name || repIndex.get(r.id) || 'Sem nome' });
     });
     const targetMap = new Map<string, number>();
-    (targets as any[]).forEach((t) => {
-      const key = t.entity_id as string;
+    targets.forEach((t) => {
+      const key = t.entity_id;
       if (!key) return;
       targetMap.set(key, (targetMap.get(key) || 0) + Number(t.target_value || 0));
     });

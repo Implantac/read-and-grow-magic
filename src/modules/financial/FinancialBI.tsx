@@ -58,7 +58,7 @@ export default function FinancialBI() {
   const byCategory = useMemo(() => {
     const m = new Map<string, number>();
     ledger.filter(l => l.type === 'outflow').forEach(l => {
-      const cat = (l as any).category_name || l.source || 'Outros';
+      const cat = l.source || 'Outros';
       m.set(cat, (m.get(cat) ?? 0) + Number(l.amount));
     });
     return Array.from(m.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8);
