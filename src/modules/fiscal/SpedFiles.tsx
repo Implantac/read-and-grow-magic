@@ -43,7 +43,7 @@ export default function SpedFiles() {
           <CardContent className="pt-6 space-y-6">
             <div className="space-y-3">
               <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tipo de Arquivo</Label>
-              <Tabs value={type} onValueChange={(v) => setType(v as any)} className="w-full">
+              <Tabs value={type} onValueChange={(v) => setType(v as 'sped_fiscal' | 'sped_contribuicoes')} className="w-full">
                 <TabsList className="grid w-full grid-cols-2 h-12 bg-muted/50 p-1">
                   <TabsTrigger value="sped_fiscal" className="data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs px-2">FISCAL</TabsTrigger>
                   <TabsTrigger value="sped_contribuicoes" className="data-[state=active]:bg-background data-[state=active]:shadow-sm text-xs px-2">CONTRIB.</TabsTrigger>

@@ -5,7 +5,9 @@ import { useAIScores } from '@/hooks/commercial/useAICommercial';
 import { useCommercialAlerts } from '@/hooks/commercial/useCommercialAlerts';
 import { Loader2, MessageSquare } from 'lucide-react';
 
-const severityColors: Record<string, string> = { critical: 'destructive', high: 'destructive', medium: 'default', low: 'secondary' };
+type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
+
+const severityColors: Record<string, BadgeVariant> = { critical: 'destructive', high: 'destructive', medium: 'default', low: 'secondary' };
 
 export function AlertsTab() {
   const { data: alerts = [], isLoading } = useCommercialAlerts('active');
@@ -47,7 +49,7 @@ export function AlertsTab() {
                   <div className="font-medium text-sm">{a.title}</div>
                   <div className="text-xs text-muted-foreground">{a.description}</div>
                 </div>
-                <Badge variant={severityColors[a.severity] as any}>{a.severity}</Badge>
+                <Badge variant={severityColors[a.severity] ?? 'secondary'}>{a.severity}</Badge>
               </div>
             ))}
         </CardContent>

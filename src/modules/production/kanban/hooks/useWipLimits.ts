@@ -5,10 +5,10 @@ export function useWipLimits() {
   const [wipLimits, setWipLimits] = useState<Record<string, number>>({});
   useEffect(() => {
     (async () => {
-      const { data } = await (supabase as any).from('kanban_limits').select('*');
+      const { data } = await supabase.from('kanban_limits').select('column_name, wip_limit');
       if (data) {
         const map: Record<string, number> = {};
-        data.forEach((r: any) => { map[r.column_name] = r.wip_limit; });
+        data.forEach((r) => { map[r.column_name] = r.wip_limit; });
         setWipLimits(map);
       }
     })();

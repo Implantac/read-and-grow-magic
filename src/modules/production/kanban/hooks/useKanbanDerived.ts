@@ -71,7 +71,7 @@ export function useKanbanDerived(params: {
       load[wc.id] = { name: wc.name, capacity: wc.capacity, allocated: 0 };
     });
     orders.filter(o => ['planned', 'in_progress', 'waiting_material'].includes(o.status)).forEach(o => {
-      const wcId = (o as any).work_center_id;
+      const wcId = (o as { work_center_id?: string | null }).work_center_id;
       if (wcId && load[wcId]) load[wcId].allocated += o.quantity;
     });
     return load;

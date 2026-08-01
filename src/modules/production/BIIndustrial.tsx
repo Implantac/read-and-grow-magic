@@ -22,7 +22,7 @@ export default function BIIndustrialPage() {
     <PageContainer>
       <PageHeader title="📊 BI Industrial — Enterprise" description="Business Intelligence estratégico: Pareto, indicadores, custos e eficiência produtiva">
         <div className="flex items-center gap-2">
-          <Select value={period} onValueChange={v => setPeriod(v as any)}>
+          <Select value={period} onValueChange={v => setPeriod(v as '7' | '30' | '90')}>
             <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="7">7 dias</SelectItem>

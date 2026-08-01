@@ -30,7 +30,7 @@ export function useKanbanActions(params: {
 
   const moveOrder = useCallback(async (orderId: string, newStatus: string) => {
     const order = orders.find(o => o.id === orderId);
-    const wcId = order && (order as any).work_center_id;
+    const wcId = order && (order as { work_center_id?: string | null }).work_center_id;
     if (wcId && capacityLoad[wcId]) {
       const cl = capacityLoad[wcId];
       if (cl.allocated + (order?.quantity || 0) > cl.capacity) {
