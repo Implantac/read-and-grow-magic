@@ -1,4 +1,5 @@
 import { TabsContent } from '@/ui/base/tabs';
+import type { PaymentMethod } from '@/types/commercial';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { ShoppingCart } from 'lucide-react';
 import { format } from 'date-fns';
@@ -27,7 +28,7 @@ export function OrdersTab({ clientOrders }: { clientOrders: any[] }) {
                   <p className="text-xs text-muted-foreground">
                     {format(new Date(order.date), 'dd/MM/yyyy', { locale: ptBR })}
                     {order.items && ` • ${order.items.length} itens`}
-                    {' • '}{getPaymentMethodLabel(order.payment_method as any)}
+                    {' • '}{getPaymentMethodLabel(order.payment_method as PaymentMethod)}
                   </p>
                 </div>
               </div>

@@ -1,4 +1,5 @@
 import type { FilterField } from '@/shared/components/AdvancedFilters';
+import type { OrderStatus } from '@/types/commercial';
 
 export const filterFields: FilterField[] = [
   { key: 'status', label: 'Status', type: 'select', options: [
@@ -20,7 +21,7 @@ export const filterFields: FilterField[] = [
   { key: 'endDate', label: 'Data Final', type: 'date' },
 ];
 
-export const statusSteps = ['pending', 'confirmed', 'processing', 'separated', 'invoiced', 'shipped', 'delivered'];
+export const statusSteps: OrderStatus[] = ['pending', 'confirmed', 'processing', 'separated', 'invoiced', 'shipped', 'delivered'];
 
 export const statusFlow: Record<string, string | null> = {
   pending: 'confirmed', confirmed: 'processing', processing: 'separated',

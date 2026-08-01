@@ -7,6 +7,13 @@ import { formatBRL } from '@/lib/formatters';
 import { Sparkles, Check, X, Loader2 } from 'lucide-react';
 import { useBankReconcileEngine } from '@/hooks/financial/useBankReconcileEngine';
 
+interface ScoreBreakdown {
+  candidate_date?: string;
+  candidate_amount?: number;
+  date?: number;
+  description_similarity?: number;
+}
+
 export function AutoReconcilePanel() {
   const { suggestions, loading, running, runAuto, accept, reject } = useBankReconcileEngine();
 
@@ -50,7 +57,7 @@ export function AutoReconcilePanel() {
             </TableHeader>
             <TableBody>
               {suggestions.map((s) => {
-                const bd = (s.score_breakdown || {}) as any;
+                const bd = (s.score_breakdown || {}) as ScoreBreakdown;
                 return (
                   <TableRow key={s.id}>
                     <TableCell>

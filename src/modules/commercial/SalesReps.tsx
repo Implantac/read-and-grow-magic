@@ -158,7 +158,7 @@ export default function SalesRepsPage() {
   return (
     <PageContainer>
       <PageHeader title="Representantes Comerciais" description="Gestão de equipe, carteira e performance">
-        <ExportButton data={reps as any} columns={[
+        <ExportButton data={reps as unknown as Record<string, unknown>[]} columns={[
           { key: 'code', label: 'Código' }, { key: 'name', label: 'Nome' },
           { key: 'region', label: 'Região' }, { key: 'commission_rate', label: 'Comissão %' },
           { key: 'monthly_target', label: 'Meta Mensal' }, { key: 'status', label: 'Status' },

@@ -77,7 +77,7 @@ export default function BankStatementImport() {
           <Select value={bankAccountId} onValueChange={setBankAccountId}>
             <SelectTrigger className="max-w-md"><SelectValue placeholder="Selecione a conta..." /></SelectTrigger>
             <SelectContent>
-              {(bankAccounts as any[]).map((a: any) => (
+              {bankAccounts.map((a) => (
                 <SelectItem key={a.id} value={a.id}>{a.name} — {a.bank_name}</SelectItem>
               ))}
             </SelectContent>

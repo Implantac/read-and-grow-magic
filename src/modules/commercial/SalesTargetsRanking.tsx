@@ -32,7 +32,7 @@ export function SalesTargetsRanking({ orders, reps }: Props) {
     });
 
     const targetByRep = new Map<string, number>();
-    (targets as any[]).forEach((t) => {
+    targets.forEach((t) => {
       if (!t.entity_id || t.target_type !== 'revenue') return;
       targetByRep.set(t.entity_id, (targetByRep.get(t.entity_id) || 0) + Number(t.target_value || 0));
     });
