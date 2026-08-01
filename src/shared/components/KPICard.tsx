@@ -82,7 +82,7 @@ export function KPICard(props: KPICardProps) {
 
   // Support both ReactNode and ElementType (component reference)
   let iconElement: ReactNode;
-  if (typeof icon === 'function' || (typeof icon === 'object' && icon !== null && 'render' in (icon as any))) {
+  if (typeof icon === 'function' || (typeof icon === 'object' && icon !== null && 'render' in (icon as object))) {
     const IconComponent = icon as ElementType;
     iconElement = <IconComponent className="h-5 w-5" />;
   } else {
