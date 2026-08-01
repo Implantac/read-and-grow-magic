@@ -12,6 +12,9 @@ import { useOrderLifecycle } from '@/hooks/commercial/useOrderLifecycle';
 import { FileText, Clock, CheckCircle, DollarSign, Play, Ban } from 'lucide-react';
 import { format } from 'date-fns';
 import { formatBRL, formatNumber } from '@/lib/formatters';
+import type { Tables } from '@/integrations/supabase/types';
+
+type BillingQueueItem = Tables<'billing_queue'>;
 
 export default function BillingQueuePage() {
   const { data: items, isLoading } = useBillingQueue();
@@ -19,14 +22,14 @@ export default function BillingQueuePage() {
   const updateStatus = useUpdateBillingStatus();
   const lifecycle = useOrderLifecycle();
 
-  const statusCounts = (items || []).reduce((acc: Record<string, number>, i: any) => {
+  const statusCounts = (items || []).reduce((acc: Record<string, number>, i) => {
     acc[i.status] = (acc[i.status] || 0) + 1;
     return acc;
   }, {});
 
-  const totalPending = (items || []).filter((i: any) => i.status === 'awaiting_billing').reduce((s: number, i: any) => s + (i.pending_amount || 0), 0);
+  const totalPending = (items || []).filter((i) => i.status === 'awaiting_billing').reduce((s: number, i) => s + (i.pending_amount || 0), 0);
 
-  const handleBillFull = (item: any) => {
+  const handleBillFull = (item: BillingQueueItem) => {
     updateStatus.mutate({
       id: item.id,
       status: 'billed_full',
@@ -98,7 +101,7 @@ export default function BillingQueuePage() {
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow></TableHeader>
               <TableBody>
-                {items.map((item: any) => (
+                {items.map((item) => (
                   <TableRow key={item.id}>
                     <TableCell><StatusBadge status={item.status} type="order" /></TableCell>
                     <TableCell>{item.billing_type === 'full' ? 'Total' : 'Parcial'}</TableCell>
