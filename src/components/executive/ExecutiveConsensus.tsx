@@ -115,7 +115,7 @@ export function ExecutiveConsensus({ consensus = [] }: { consensus?: ConsensusIt
   
   const { data: dashboardData } = useExecutiveDashboard();
   
-  const brainConsensus = [
+  const brainConsensus: ConsensusItem[] = [
     ...brainRisks.map((r) => ({
       specialist: 'Risk Advisor',
       insight: `${r.titulo}: ${r.acao}`,
@@ -130,9 +130,9 @@ export function ExecutiveConsensus({ consensus = [] }: { consensus?: ConsensusIt
     }))
   ];
 
-  const dashboardConsensus = dashboardData?.consensus || [];
+  const dashboardConsensus: ConsensusItem[] = dashboardData?.consensus ?? [];
 
-  const items = [
+  const items: ConsensusItem[] = [
     ...brainConsensus,
     ...dashboardConsensus
   ];
