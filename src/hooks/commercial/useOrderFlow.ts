@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 import { handleMutationError, mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
+import type { TablesUpdate } from '@/integrations/supabase/types';
 // Order Status History
 export function useOrderStatusHistory(orderId?: string) {
   return useQuery({
@@ -128,7 +129,7 @@ export function useCreateBillingEntry() {
 export function useUpdateBillingStatus() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, status, ...rest }: { id: string; status: string; [key: string]: any }) => {
+    mutationFn: async ({ id, status, ...rest }: { id: string; status: string } & TablesUpdate<'billing_queue'>) => {
       const { error } = await supabase.from('billing_queue').update({ status, ...rest, updated_at: new Date().toISOString() }).eq('id', id);
       if (error) throw error;
     },
@@ -182,7 +183,7 @@ export function useCreateShipment() {
 export function useUpdateShipment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...fields }: { id: string; [key: string]: any }) => {
+    mutationFn: async ({ id, ...fields }: { id: string } & TablesUpdate<'shipment_orders'>) => {
       const { error } = await supabase.from('shipment_orders').update({ ...fields, updated_at: new Date().toISOString() }).eq('id', id);
       if (error) throw error;
     },
@@ -208,7 +209,7 @@ export function useAdvancedOrderStatusUpdate() {
       changed_by?: string;
       fulfillment_fields?: Record<string, string>;
     }) => {
-      const updatePayload: any = { status, updated_at: new Date().toISOString() };
+      const updatePayload: TablesUpdate<'orders'> = { status, updated_at: new Date().toISOString() };
       if (fulfillment_fields) Object.assign(updatePayload, fulfillment_fields);
       
       const { error } = await supabase.from('orders').update(updatePayload).eq('id', id);
