@@ -37,8 +37,8 @@ type InvokeError = {
 async function extractErrorBody(err: unknown): Promise<{ status?: number; body?: ErrorBody }> {
   const e = (err ?? {}) as InvokeError;
   try {
-    const resp: Response | undefined = err?.context?.response ?? err?.response;
-    if (!resp) return { status: err?.context?.status ?? err?.status };
+    const resp: Response | undefined = e.context?.response ?? e.response;
+    if (!resp) return { status: e.context?.status ?? e.status };
     const status = resp.status;
     try {
       const cloned = resp.clone();
