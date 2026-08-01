@@ -12,6 +12,7 @@ import { ExecutiveConsensus } from '@/components/executive/ExecutiveConsensus';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
+import { errorMessage } from '@/lib/errors';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { PendingDecisionsCard } from './brainCommand/PendingDecisionsCard';
@@ -56,12 +57,12 @@ export default function BrainCommandCenter() {
 
   const handleNotify = async () => {
     try {
-      const r: any = await notify.mutateAsync();
+      const r = (await notify.mutateAsync()) as { skipped?: boolean; ok?: boolean; sent?: number } | undefined;
       if (r?.skipped) toast.warning('Configure o secret BRAIN_WEBHOOK_URL para enviar alertas externos.');
       else if (r?.ok) toast.success(`${r.sent} alerta(s) enviado(s) ao canal externo.`);
       else toast.error('Falha ao enviar.');
-    } catch (e: any) {
-      toast.error(e?.message || 'Erro ao notificar');
+    } catch (e) {
+      toast.error(errorMessage(e) || 'Erro ao notificar');
     }
   };
 
@@ -104,7 +105,7 @@ export default function BrainCommandCenter() {
             {lastRun && <p className="text-xs text-muted-foreground">Atualizado {lastRun.created_at ? format(new Date(lastRun.created_at), "dd/MM 'às' HH:mm", { locale: ptBR }) : '—'} · {lastRun.decisions_count} decisões</p>}
             {kpisChave.length > 0 && (
               <div className="flex flex-wrap gap-2 pt-2">
-                {kpisChave.slice(0, 6).map((k: any, i: number) => (
+                {kpisChave.slice(0, 6).map((k: { nome?: string; valor?: string | number; status?: string }, i: number) => (
                   <Badge key={i} variant="outline" className="text-xs">
                     {k.status === 'critico' ? '🔴' : k.status === 'alerta' ? '⚠️' : '✅'} {k.nome}: <span className="ml-1 font-semibold">{k.valor}</span>
                   </Badge>
