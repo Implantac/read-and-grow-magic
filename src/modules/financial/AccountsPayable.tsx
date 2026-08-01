@@ -112,7 +112,7 @@ export default function AccountsPayable() {
     setFormData({ description: '', supplier: '', category: '', amount: '', dueDate: '', invoiceNumber: '', notes: '', installments: '1', costCenterId: '', expenseType: 'variable' });
   };
 
-  const openPayDialog = (account: any) => {
+  const openPayDialog = (account: AccountPayable) => {
     setSettlementTarget({
       source_type: 'payable',
       source_id: account.id,
