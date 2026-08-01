@@ -67,7 +67,7 @@ export function ProductFormDialog({ open, onOpenChange, product, categories }: P
     const payload = buildPayload(form);
     try {
       if (product) {
-        await updateProduct.mutateAsync({ id: product.id, ...payload } as any);
+        await updateProduct.mutateAsync({ id: product.id, ...payload });
       } else {
         await createProduct.mutateAsync(payload);
       }
