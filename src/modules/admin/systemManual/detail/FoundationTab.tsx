@@ -1,7 +1,8 @@
 import { Ban, Gauge, Link2, Target, XCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
+import type { ModuleFoundation } from '../foundation-types';
 
-export function FoundationTab({ foundation }: { foundation: any }) {
+export function FoundationTab({ foundation }: { foundation: ModuleFoundation }) {
   return (
     <div className="space-y-4 mt-4">
       <Card className="border-primary/30 bg-gradient-to-br from-primary/5 via-transparent to-transparent">
@@ -25,7 +26,7 @@ export function FoundationTab({ foundation }: { foundation: any }) {
           </CardHeader>
           <CardContent>
             <div className="grid gap-3 sm:grid-cols-2">
-              {foundation.keyMetrics.map((m: any, i: number) => (
+              {foundation.keyMetrics.map((m, i) => (
                 <div key={i} className="rounded-lg border p-3 bg-muted/20">
                   <p className="font-semibold text-sm">{m.name}</p>
                   <p className="text-xs text-muted-foreground mt-1"><span className="font-mono">{m.formula}</span></p>
@@ -46,7 +47,7 @@ export function FoundationTab({ foundation }: { foundation: any }) {
           </CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              {foundation.integrations.map((it: any, i: number) => (
+              {foundation.integrations.map((it, i) => (
                 <li key={i} className="grid sm:grid-cols-[180px_1fr] gap-1 sm:gap-4 text-sm border-b pb-2 last:border-0 last:pb-0">
                   <span className="font-semibold text-primary">{it.with}</span>
                   <span className="text-muted-foreground">{it.what}</span>
