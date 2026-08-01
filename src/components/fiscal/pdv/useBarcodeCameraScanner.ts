@@ -28,8 +28,7 @@ export function useBarcodeCameraScanner(params: {
     let cancelled = false;
     (async () => {
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const BD = (window as any).BarcodeDetector;
+        const BD = window.BarcodeDetector;
         if (!BD) {
           toastError('Câmera de códigos não é suportada neste navegador. Use um leitor USB.');
           onFallback();
