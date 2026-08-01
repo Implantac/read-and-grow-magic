@@ -1,6 +1,7 @@
 import { CheckCircle, XCircle } from 'lucide-react';
 import { getOrderStatusLabel } from '@/config/commercial';
 import { statusSteps } from './constants';
+import type { OrderStatus } from '@/types/commercial';
 
 export function OrderStatusTimeline({ currentStatus }: { currentStatus: string }) {
   if (currentStatus === 'cancelled') {
@@ -12,7 +13,7 @@ export function OrderStatusTimeline({ currentStatus }: { currentStatus: string }
     );
   }
 
-  const currentIdx = statusSteps.indexOf(currentStatus);
+  const currentIdx = statusSteps.indexOf(currentStatus as OrderStatus);
 
   return (
     <div className="flex items-center gap-1 overflow-x-auto py-2">
