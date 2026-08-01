@@ -1,7 +1,11 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
+import type { ProductNature } from '@/hooks/inventory/useProducts';
 
-export type ProductWithCategory = Tables<'products'> & { categoryName: string };
+export type ProductWithCategory = Omit<Tables<'products'>, 'product_nature'> & {
+  product_nature: ProductNature;
+  categoryName: string;
+};
 
 export const inventoryService = {
   // Products
@@ -14,6 +18,7 @@ export const inventoryService = {
     const rows = (data ?? []) as unknown as (Tables<'products'> & { categories: { name: string | null } | null })[];
     return rows.map((p) => ({
       ...p,
+      product_nature: (p.product_nature ?? 'commerce') as ProductNature,
       categoryName: p.categories?.name || '',
     }));
   },
