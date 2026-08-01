@@ -48,7 +48,7 @@ export default function AccountStatement() {
 
       <Card>
         <CardContent className="pt-6 grid gap-3 md:grid-cols-[160px_1fr_160px_160px]">
-          <Select value={entityType} onValueChange={(v: any) => { setEntityType(v); setEntityId(''); }}>
+          <Select value={entityType} onValueChange={(v) => { setEntityType(v as 'client' | 'supplier'); setEntityId(''); }}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="client">Cliente</SelectItem>
@@ -58,7 +58,7 @@ export default function AccountStatement() {
           <Select value={entityId || undefined} onValueChange={setEntityId}>
             <SelectTrigger><SelectValue placeholder={`Selecione um ${entityType === 'client' ? 'cliente' : 'fornecedor'}`} /></SelectTrigger>
             <SelectContent>
-              {list.filter((e: any) => e && e.id).map((e: any) => <SelectItem key={e.id} value={String(e.id)}>{e.name}</SelectItem>)}
+              {list.filter((e) => e && e.id).map((e) => <SelectItem key={e.id} value={String(e.id)}>{e.name}</SelectItem>)}
             </SelectContent>
           </Select>
           <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />

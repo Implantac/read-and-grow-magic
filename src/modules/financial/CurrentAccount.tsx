@@ -119,7 +119,7 @@ export default function CurrentAccount() {
     queryFn: async () => {
       const { data, error } = await supabase.from('client_current_account').select('*').limit(2000);
       if (error) throw error;
-      return (data || []).map((r: any) => ({
+      return (data || []).map((r: Record<string, unknown>) => ({
         party: r.client_name,
         party_id: r.client_id,
         document_id: r.document_id,
@@ -139,7 +139,7 @@ export default function CurrentAccount() {
     queryFn: async () => {
       const { data, error } = await supabase.from('supplier_current_account').select('*').limit(2000);
       if (error) throw error;
-      return (data || []).map((r: any) => ({
+      return (data || []).map((r: Record<string, unknown>) => ({
         party: r.supplier_name,
         document_id: r.document_id,
         description: r.description,

@@ -3,10 +3,11 @@ import { Button } from '@/ui/base/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Brain, RefreshCw, Sparkles } from 'lucide-react';
 import { formatBRL } from '@/lib/formatters';
+import type { AIDailyAction, AIRecommendation } from '@/hooks/commercial/useAICommercial';
 
 interface Props {
-  aiActions: any[];
-  aiRecs: any[];
+  aiActions: AIDailyAction[];
+  aiRecs: AIRecommendation[];
   onRefresh: () => void;
   isRefreshing: boolean;
 }

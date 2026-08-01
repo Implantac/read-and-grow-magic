@@ -9,6 +9,12 @@ export type RouteStop = Database['public']['Tables']['route_stops']['Row'];
 export type RouteStopInsert = Database['public']['Tables']['route_stops']['Insert'];
 export type RouteStopUpdate = Database['public']['Tables']['route_stops']['Update'];
 export type RouteCost = Database['public']['Tables']['route_costs']['Row'];
+export type RouteCostInsert = TablesInsert<'route_costs'>;
+export interface RouteFeasibility {
+  status: 'ok' | 'early' | 'late' | 'no-window' | 'no-geo';
+  arrivalMin?: number;
+  windowEndMin?: number | null;
+}
 
 export function useRouteStops(routeId?: string) {
   const qc = useQueryClient();
@@ -148,7 +154,7 @@ export function useRouteCost(routeId?: string) {
 export function useUpsertRouteCost() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: any & { route_id: string }) => {
+    mutationFn: async (payload: Omit<RouteCostInsert, 'company_id'> & { route_id: string }) => {
       const company_id = useEnterpriseStore.getState().activeCompanyId;
       if (!company_id) throw new Error('Empresa não selecionada');
       const { data, error } = await supabase

@@ -27,8 +27,8 @@ const LiveTracking = () => {
   const stats = useMemo(() => {
     const inTransit = routes.filter((r) => r.status === 'in_transit').length;
     const planned = routes.filter((r) => r.status === 'planned').length;
-    const totalStops = routes.reduce((s: number, r: any) => s + (r.total_stops ?? 0), 0);
-    const completedStops = routes.reduce((s: number, r: any) => s + (r.completed_stops ?? 0), 0);
+    const totalStops = routes.reduce((s, r) => s + (r.total_stops ?? 0), 0);
+    const completedStops = routes.reduce((s, r) => s + (r.completed_stops ?? 0), 0);
     return { inTransit, planned, totalStops, completedStops };
   }, [routes]);
 

@@ -1,10 +1,11 @@
 import { GripVertical } from 'lucide-react';
 import { StopRow } from './StopRow';
+import type { RouteStop, RouteFeasibility } from '@/hooks/tms/useRoutePlanning';
 
 type Props = {
-  stops: any[];
-  route: any;
-  feasibilityMap: Record<string, any>;
+  stops: RouteStop[];
+  route: unknown;
+  feasibilityMap: Record<string, RouteFeasibility>;
   dragIndex: number | null;
   overIndex: number | null;
   setDragIndex: (v: number | null) => void;

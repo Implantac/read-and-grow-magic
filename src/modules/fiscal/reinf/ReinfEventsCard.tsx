@@ -7,7 +7,7 @@ import { Download, FileX } from 'lucide-react';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { formatBRL } from '@/lib/formatters';
 import { toCsv, downloadCsv } from '@/lib/csv';
-import type { ReinfEvent } from '@/hooks/fiscal/useReinf';
+import type { ReinfEvent, ReinfPeriod } from '@/hooks/fiscal/useReinf';
 import {
   R2099_HEADERS, R4099_HEADERS,
   buildR2099Rows, buildR4099Rows,
@@ -19,7 +19,7 @@ interface Props {
   events: ReinfEvent[];
   loading: boolean;
   competencia: string;
-  currentPeriod: any;
+  currentPeriod: ReinfPeriod | undefined;
 }
 
 export function ReinfEventsCard({ events, loading, competencia, currentPeriod }: Props) {
@@ -92,7 +92,7 @@ export function ReinfEventsCard({ events, loading, competencia, currentPeriod }:
   );
 }
 
-function EventTable({ events, type }: { events: any[]; type: string }) {
+function EventTable({ events, type }: { events: ReinfEvent[]; type: string }) {
   if (events.length === 0) {
     return (
       <EmptyState

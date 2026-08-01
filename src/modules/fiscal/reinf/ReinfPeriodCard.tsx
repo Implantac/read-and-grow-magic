@@ -4,6 +4,7 @@ import { Input } from '@/ui/base/input';
 import { Label } from '@/ui/base/label';
 import { Badge } from '@/ui/base/badge';
 import { Calendar, FileText, Lock, Send, Sparkles, Unlock } from 'lucide-react';
+import type { ReinfPeriod } from '@/hooks/fiscal/useReinf';
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   aberto: 'secondary',
@@ -14,7 +15,7 @@ const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'o
 interface Props {
   competencia: string;
   setCompetencia: (v: string) => void;
-  currentPeriod: any;
+  currentPeriod: ReinfPeriod | undefined;
   busy: boolean;
   isClosed: boolean;
   eventsCount: number;

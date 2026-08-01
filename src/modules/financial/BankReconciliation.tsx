@@ -66,7 +66,7 @@ export default function BankReconciliation() {
     matchedEntryId: t.matched_entry_id || undefined,
   }));
 
-  const systemEntries: SystemEntry[] = (cashFlowRaw || []).map((e: any) => ({
+  const systemEntries: SystemEntry[] = (cashFlowRaw || []).map((e) => ({
     id: e.id, date: e.date, description: e.description, amount: Number(e.amount),
     type: e.type === 'income' ? 'income' : 'expense', reference: e.reference || '',
     category: e.category, status: 'pending' as ReconciliationStatus,

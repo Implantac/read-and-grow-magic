@@ -95,7 +95,7 @@ export default function Checks() {
             <div className="grid gap-3 py-2">
               <div className="grid gap-1.5">
                 <Label className="text-xs">Tipo</Label>
-                <Select value={form.check_type} onValueChange={(v: any) => setForm({ ...form, check_type: v })}>
+                <Select value={form.check_type} onValueChange={(v) => setForm({ ...form, check_type: v as 'received' | 'issued' })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="received">Recebido (de terceiros)</SelectItem>

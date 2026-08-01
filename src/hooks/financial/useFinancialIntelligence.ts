@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
+export type FinancialRecommendation = string | { priority?: string; msg?: string };
+
 export interface FinancialHealthScore {
   id: string;
   reference_date: string;
@@ -14,7 +16,7 @@ export interface FinancialHealthScore {
   current_ratio: number;
   cash_runway_days: number;
   delinquency_rate: number;
-  recommendations: string[];
+  recommendations: FinancialRecommendation[];
   details: Record<string, unknown> | null;
   created_at: string;
 }

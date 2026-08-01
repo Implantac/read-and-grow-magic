@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
@@ -11,7 +12,7 @@ import { Brain, Sparkles, CheckCircle, AlertTriangle, TrendingDown, Zap, Loader2
 import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 
-const severityConfig: Record<string, { color: string; icon: any }> = {
+const severityConfig: Record<string, { color: string; icon: LucideIcon }> = {
   low: { color: 'bg-info/15 text-info', icon: Zap },
   medium: { color: 'bg-warning/15 text-warning', icon: AlertTriangle },
   high: { color: 'bg-warning/15 text-warning', icon: AlertTriangle },
