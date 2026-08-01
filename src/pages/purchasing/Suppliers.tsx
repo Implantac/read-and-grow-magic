@@ -28,6 +28,16 @@ import { Supplier } from '@/types/purchasing';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { Building2 } from 'lucide-react';
 
+interface SupplierRow {
+  id: string; code: string; name: string; trade_name?: string; document: string;
+  document_type: Supplier['documentType']; email?: string | null; phone?: string | null;
+  cellphone?: string; status: Supplier['status']; category?: string | null;
+  payment_terms?: string | null; delivery_time?: number; rating?: number | string;
+  created_at: string; updated_at: string;
+  address_street?: string; address_number?: string; address_complement?: string;
+  address_neighborhood?: string; address_city?: string; address_state?: string; address_zip_code?: string;
+}
+
 const statusConfig: Record<string, { label: string; className: string }> = {
   active: { label: 'Ativo', className: 'bg-green-100 text-green-800' },
   inactive: { label: 'Inativo', className: 'bg-gray-100 text-gray-800' },
@@ -37,7 +47,7 @@ const statusConfig: Record<string, { label: string; className: string }> = {
 export default function SuppliersPage() {
   const { suppliers: rawSuppliers, suppliersLoading: loading, createSupplier } = usePurchasing();
   
-  const suppliers: Supplier[] = useMemo(() => (rawSuppliers || []).map((s) => ({
+  const suppliers: Supplier[] = useMemo(() => ((rawSuppliers || []) as unknown as SupplierRow[]).map((s) => ({
     id: s.id, code: s.code, name: s.name, tradeName: s.trade_name,
     document: s.document, documentType: s.document_type, email: s.email || '',
     phone: s.phone || '', cellphone: s.cellphone, status: s.status,

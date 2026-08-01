@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { ModuleKPISection } from '@/components/dashboard/ModuleKPISection';
@@ -181,7 +182,7 @@ export default function Dashboard() {
             title: ins.title,
             description: ins.description,
             impact: ins.impact_estimate,
-            priority: ins.severity,
+            priority: ins.severity as 'critical' | 'high' | 'medium' | 'low',
             module: ins.module,
           }))}
           onExecute={sendMessage}

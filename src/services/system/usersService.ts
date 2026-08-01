@@ -33,7 +33,7 @@ export interface ChangeRoleData {
   branch_id?: string | null;
 }
 
-async function callAdminUsers(action: string, params?: Record<string, unknown>) {
+async function callAdminUsers(action: string, params?: Record<string, unknown> | InviteUserData | ChangeRoleData) {
   const { data, error } = await supabase.functions.invoke('admin-users', {
     body: { action, ...params },
   });
@@ -56,7 +56,7 @@ export const usersService = {
       email: user.email || '',
       avatar: user.avatar_url,
       role: (user.role as UserRole) || 'viewer',
-      status: user.status || 'active',
+      status: (user.status as SystemUser['status']) || 'active',
       permissions: [],
       lastLogin: user.last_sign_in_at,
       createdAt: user.created_at || new Date().toISOString(),
