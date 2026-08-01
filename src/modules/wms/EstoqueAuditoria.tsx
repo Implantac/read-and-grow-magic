@@ -144,7 +144,7 @@ export default function EstoqueAuditoria() {
 
             <div>
               <Label>Canal</Label>
-              <Select value={canal} onValueChange={(v) => setCanal(v as any)}>
+              <Select value={canal} onValueChange={(v) => setCanal(v as 'ALL' | 'VAREJO_PDV' | 'ATACADO_INDUSTRIA')}>
                 <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="ALL">Todos</SelectItem>

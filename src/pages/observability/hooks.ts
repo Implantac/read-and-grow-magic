@@ -137,6 +137,7 @@ export function useAlertRuleMutations(companyId: string | null) {
   return { createRule, toggleRule, deleteRule };
 }
 
-export const sevColor: Record<string, string> = {
+export type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
+export const sevColor: Record<string, BadgeVariant> = {
   critical: "destructive", error: "destructive", warning: "secondary", info: "outline", debug: "outline",
 };

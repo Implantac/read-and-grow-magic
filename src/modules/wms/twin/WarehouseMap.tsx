@@ -5,6 +5,13 @@ import { Button } from "@/ui/base/button";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { MapPin } from "lucide-react";
 
+function evidenceText(evidence: unknown): string | undefined {
+  if (!evidence || typeof evidence !== 'object') return undefined;
+  const e = evidence as Record<string, unknown>;
+  const v = e.location ?? e.zone;
+  return typeof v === 'string' ? v : undefined;
+}
+
 interface LocationRow {
   id: string;
   code: string;
@@ -96,12 +103,12 @@ export default function WarehouseMap() {
       setLocs((l ?? []) as LocationRow[]);
       setMoves((m ?? []) as MovementRow[]);
       setRecs(
-        ((r ?? []) as any[]).map((row) => ({
+        (r ?? []).map((row) => ({
           id: row.id,
           type: row.type,
           severity: row.severity,
           title: row.title,
-          location: row.evidence?.location ?? row.evidence?.zone,
+          location: evidenceText(row.evidence),
         })),
       );
       setLoading(false);

@@ -43,7 +43,7 @@ export function EventsCard({
             {events.map((e) => (
               <div key={e.id} className="border rounded-md p-2 text-sm">
                 <div className="flex items-center gap-2">
-                  <Badge variant={sevColor[e.severity] as any} className="gap-1">
+                  <Badge variant={sevColor[e.severity] ?? 'outline'} className="gap-1">
                     {sevIcon(e.severity)} {e.severity}
                   </Badge>
                   <Badge variant="outline" className="text-xs">{e.source}</Badge>

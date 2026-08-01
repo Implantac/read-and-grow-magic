@@ -16,6 +16,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { toast } from 'sonner';
 
+type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
+
 interface Shift {
   id: string; company_id: string; domain: string; user_id: string;
   starts_at: string; ends_at: string; notes: string | null;
@@ -137,14 +139,14 @@ export default function SREOncall() {
                       const start = new Date(s.starts_at).getTime();
                       const end = new Date(s.ends_at).getTime();
                       const status = start <= now && end >= now ? 'Ativo' : start > now ? 'Futuro' : 'Encerrado';
-                      const variant = status === 'Ativo' ? 'default' : status === 'Futuro' ? 'secondary' : 'outline';
+                      const variant: BadgeVariant = status === 'Ativo' ? 'default' : status === 'Futuro' ? 'secondary' : 'outline';
                       return (
                         <TableRow key={s.id}>
                           <TableCell><Badge variant="outline">{s.domain}</Badge></TableCell>
                           <TableCell className="font-mono text-xs">{s.user_id.slice(0, 8)}…</TableCell>
                           <TableCell>{new Date(s.starts_at).toLocaleString('pt-BR')}</TableCell>
                           <TableCell>{new Date(s.ends_at).toLocaleString('pt-BR')}</TableCell>
-                          <TableCell><Badge variant={variant as any}>{status}</Badge></TableCell>
+                          <TableCell><Badge variant={variant}>{status}</Badge></TableCell>
                           <TableCell><Button size="icon" variant="ghost" onClick={() => removeShift(s.id)}><Trash2 className="h-4 w-4" /></Button></TableCell>
                         </TableRow>
                       );

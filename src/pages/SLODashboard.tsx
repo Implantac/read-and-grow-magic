@@ -16,6 +16,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/base/dial
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterpriseStore } from '@/core/stores/useEnterpriseStore';
 import { toast } from 'sonner';
+import type { Database } from '@/integrations/supabase/types';
+
+type TimelineRow = Database['public']['Functions']['sre_slo_incident_timeline']['Returns'][number];
 
 interface SloRow {
   id: string;
@@ -45,14 +48,14 @@ export default function SLODashboard() {
   const [target, setTarget] = useState(99.5);
   const [windowDays, setWindowDays] = useState(30);
   const [timelineSlo, setTimelineSlo] = useState<SloRow | null>(null);
-  const [timeline, setTimeline] = useState<any[]>([]);
+  const [timeline, setTimeline] = useState<TimelineRow[]>([]);
   const [timelineLoading, setTimelineLoading] = useState(false);
 
   const openTimeline = async (slo: SloRow) => {
     setTimelineSlo(slo); setTimelineLoading(true); setTimeline([]);
     const { data, error } = await supabase.rpc('sre_slo_incident_timeline', { _slo_id: slo.id, _days: 30 });
     if (error) toast.error(error.message);
-    setTimeline((data ?? []) as any[]);
+    setTimeline(data ?? []);
     setTimelineLoading(false);
   };
 
