@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
+import { errorMessage } from '@/lib/errors';
 
 export interface BudgetItem {
   id: string;
@@ -66,7 +67,7 @@ export function useBudgetItems(projectId: string) {
 export function useCreateBudgetItem(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: any) => {
+    mutationFn: async (payload: Omit<TablesInsert<'construction_budget_items'>, 'project_id'>) => {
       const { data, error } = await supabase
         .from('construction_budget_items')
         .insert({ ...payload, project_id: projectId })
@@ -79,7 +80,7 @@ export function useCreateBudgetItem(projectId: string) {
       qc.invalidateQueries({ queryKey: ['construction_budget_items', projectId] });
       toast.success('Item de orçamento adicionado');
     },
-    onError: (e: any) => toast.error(e?.message ?? 'Erro ao adicionar item'),
+    onError: (e: unknown) => toast.error(errorMessage(e, 'Erro ao adicionar item')),
   });
 }
 
@@ -94,7 +95,7 @@ export function useDeleteBudgetItem(projectId: string) {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['construction_budget_items', projectId] }),
-    onError: (e: any) => toast.error(e?.message ?? 'Erro ao remover item'),
+    onError: (e: unknown) => toast.error(errorMessage(e, 'Erro ao remover item')),
   });
 }
 
@@ -118,7 +119,7 @@ export function useMeasurements(projectId: string) {
 export function useCreateMeasurement(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: any) => {
+    mutationFn: async (payload: Omit<TablesInsert<'construction_measurements'>, 'project_id'>) => {
       const { data, error } = await supabase
         .from('construction_measurements')
         .insert({ ...payload, project_id: projectId })
@@ -131,21 +132,21 @@ export function useCreateMeasurement(projectId: string) {
       qc.invalidateQueries({ queryKey: ['construction_measurements', projectId] });
       toast.success('Medição registrada');
     },
-    onError: (e: any) => toast.error(e?.message ?? 'Erro ao registrar medição'),
+    onError: (e: unknown) => toast.error(errorMessage(e, 'Erro ao registrar medição')),
   });
 }
 
 export function useUpdateMeasurement(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...patch }: any & { id: string }) => {
+    mutationFn: async ({ id, ...patch }: TablesUpdate<'construction_measurements'> & { id: string }) => {
       const { error } = await supabase
-        .from('construction_measurements').update(patch as TablesUpdate<'construction_measurements'>)
+        .from('construction_measurements').update(patch)
         .eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['construction_measurements', projectId] }),
-    onError: (e: any) => toast.error(e?.message ?? 'Erro ao atualizar'),
+    onError: (e: unknown) => toast.error(errorMessage(e, 'Erro ao atualizar')),
   });
 }
 
@@ -170,7 +171,7 @@ export function useDiary(projectId: string) {
 export function useCreateDiaryEntry(projectId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: any) => {
+    mutationFn: async (payload: Omit<TablesInsert<'construction_diary'>, 'project_id'>) => {
       const { data, error } = await supabase
         .from('construction_diary')
         .insert({ ...payload, project_id: projectId })
@@ -183,6 +184,6 @@ export function useCreateDiaryEntry(projectId: string) {
       qc.invalidateQueries({ queryKey: ['construction_diary', projectId] });
       toast.success('Apontamento registrado');
     },
-    onError: (e: any) => toast.error(e?.message ?? 'Erro ao registrar apontamento'),
+    onError: (e: unknown) => toast.error(errorMessage(e, 'Erro ao registrar apontamento')),
   });
 }
