@@ -3,16 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { KPICard } from '@/shared/components/KPICard';
 import { PCPMetricsService, MRPService, ActionSuggestion } from '@/lib/pcpServices';
+import type { OrderLike, TimeEntryLike, CapacityLike, SheetLike, SupplyLike } from '@/lib/pcp/types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { Clock, Target, TrendingUp, AlertTriangle, Lightbulb, Gauge, CheckCircle, Factory, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface PCPKPIPanelProps {
-  orders: any[];
-  timeEntries: any[];
-  capacities: any[];
-  sheets?: any[];
-  supplies?: any[];
+  orders: OrderLike[];
+  timeEntries: TimeEntryLike[];
+  capacities: CapacityLike[];
+  sheets?: SheetLike[];
+  supplies?: SupplyLike[];
 }
 
 export default function PCPKPIPanel({ orders, timeEntries, capacities, sheets, supplies }: PCPKPIPanelProps) {

@@ -237,7 +237,7 @@ export function useLostClients() {
       const ninetyDaysAgo = new Date(Date.now() - 90 * 86400000).toISOString();
       const { data, error } = await supabase
         .from('clients')
-        .select('id, name, code, segment, total_purchases, avg_ticket, last_purchase_date, sales_rep_id, phone, email, abc_classification')
+        .select('id, name, trade_name, code, segment, total_purchases, avg_ticket, last_purchase_date, sales_rep_id, phone, cellphone, email, abc_classification')
         .eq('status', 'active')
         .lt('last_purchase_date', ninetyDaysAgo)
         .order('total_purchases', { ascending: false })

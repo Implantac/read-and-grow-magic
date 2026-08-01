@@ -93,7 +93,7 @@ function SmartQueueTab() {
         Fila ordenada automaticamente por urgência. O sistema decide a prioridade.
       </div>
       <div className="space-y-2">
-        {(queue || []).slice(0, 20).map((item: any, idx: number) => (
+        {(queue || []).slice(0, 20).map((item, idx: number) => (
           <Card key={item.id} className={`border-l-4 ${item.isOverdue ? 'border-l-destructive' : item.hasNoFollowUp ? 'border-l-amber-500' : 'border-l-primary'}`}>
             <CardContent className="py-3 flex items-center justify-between">
               <div className="flex-1 min-w-0">
@@ -198,7 +198,7 @@ function RankingTab() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {metrics.map((rep: any, i: number) => (
+          {metrics.map((rep, i: number) => (
             <TableRow key={rep.id}>
               <TableCell>
                 {i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i + 1}
@@ -233,8 +233,8 @@ function LostClientsTab() {
   if (isLoading) return <div className="animate-pulse h-40 bg-muted rounded" />;
   if (!clients?.length) return <p className="text-muted-foreground text-center py-8">Nenhum cliente sem compra há 90+ dias 🎉</p>;
 
-  const total = clients.reduce((s: number, c: any) => s + (c.total_purchases || 0), 0);
-  const avgDays = Math.round(clients.reduce((s: number, c: any) => s + (c.daysSinceLastPurchase || 0), 0) / clients.length);
+  const total = clients.reduce((s: number, c) => s + (c.total_purchases || 0), 0);
+  const avgDays = Math.round(clients.reduce((s: number, c) => s + (c.daysSinceLastPurchase || 0), 0) / clients.length);
 
   return (
     <div className="space-y-4">
@@ -258,7 +258,7 @@ function LostClientsTab() {
         <UserX className="h-4 w-4 text-destructive" /> Clientes sem compra há 90+ dias — contate via WhatsApp ou telefone
       </div>
       <div className="space-y-2">
-        {clients.map((c: any) => {
+        {clients.map((c) => {
           const phone = (c.cellphone || c.phone || '').replace(/\D/g, '');
           const whatsMsg = encodeURIComponent(`Olá ${c.trade_name || c.name}! Sentimos sua falta. Temos novidades que podem interessar. Posso te apresentar?`);
           return (

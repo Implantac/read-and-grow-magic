@@ -5,10 +5,11 @@ import { TrendingUp, TrendingDown, AlertTriangle, BarChart3 } from 'lucide-react
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/ui/base/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Cell } from 'recharts';
 import { fmt } from './ExecutiveKPICards';
+import type { ExecutiveProductMargin } from '@/hooks/ai/executive/types';
 
 interface Props {
-  productMargins: any[];
-  lowMarginProducts: any[];
+  productMargins: ExecutiveProductMargin[];
+  lowMarginProducts: (ExecutiveProductMargin & { cost?: number })[];
 }
 
 export function ExecutiveMarginsTab({ productMargins, lowMarginProducts }: Props) {
@@ -22,7 +23,7 @@ export function ExecutiveMarginsTab({ productMargins, lowMarginProducts }: Props
           <CardContent>
             {productMargins.length > 0 ? (
               <div className="space-y-3">
-                {productMargins.slice(0, 6).map((p: any, i: number) => (
+                {productMargins.slice(0, 6).map((p, i: number) => (
                   <div key={i} className="flex items-center gap-3">
                     <span className="text-xs font-bold text-muted-foreground w-5">{i + 1}.</span>
                     <div className="flex-1 min-w-0">
@@ -50,7 +51,7 @@ export function ExecutiveMarginsTab({ productMargins, lowMarginProducts }: Props
           <CardContent>
             {lowMarginProducts.length > 0 ? (
               <div className="space-y-3">
-                {lowMarginProducts.map((p: any, i: number) => (
+                {lowMarginProducts.map((p, i: number) => (
                   <div key={i} className="flex items-center gap-3">
                     <AlertTriangle className="h-4 w-4 text-orange-500 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
@@ -84,7 +85,7 @@ export function ExecutiveMarginsTab({ productMargins, lowMarginProducts }: Props
                 <YAxis dataKey="name" type="category" width={120} className="text-xs" tick={{ fontSize: 10 }} />
                 <ChartTooltip content={<ChartTooltipContent formatter={(v) => `${v}%`} />} />
                 <Bar dataKey="marginPct" radius={[0, 4, 4, 0]}>
-                  {productMargins.slice(0, 10).map((p: any, i: number) => (
+                  {productMargins.slice(0, 10).map((p, i: number) => (
                     <Cell key={i} fill={p.marginPct >= 30 ? 'hsl(var(--chart-1))' : p.marginPct >= 15 ? 'hsl(var(--chart-2))' : 'hsl(var(--destructive))'} />
                   ))}
                 </Bar>

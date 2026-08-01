@@ -2,7 +2,16 @@ import { Brain, AlertTriangle, Lightbulb, Target, CheckCircle2 } from 'lucide-re
 import { Badge } from '@/ui/base/badge';
 import { trendIcon, priorityColor, statusBadgeVariant, statusBorder } from './helpers';
 
-export function StructuredBlock({ structured, dataStatus }: { structured: any; dataStatus?: string }) {
+export interface CEOStructuredBrief {
+  veredicto?: string;
+  kpis?: { nome: string; valor: string | number; status?: string; trend?: string }[];
+  riscos?: { titulo: string; impacto?: string; acao?: string }[];
+  insights?: { titulo: string; descricao?: string; tipo?: string }[];
+  plano?: { metas?: string[]; acoes?: string[] };
+  decisoes?: { acao: string; prioridade?: string }[];
+}
+
+export function StructuredBlock({ structured, dataStatus }: { structured: CEOStructuredBrief; dataStatus?: string }) {
   return (
     <div className="space-y-4">
       {dataStatus === 'insufficient' && (
@@ -29,7 +38,7 @@ export function StructuredBlock({ structured, dataStatus }: { structured: any; d
 
       {structured.kpis?.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {structured.kpis.map((k: any, i: number) => (
+          {structured.kpis.map((k, i: number) => (
             <div key={i} className={`p-3 rounded-lg border bg-card border-l-4 ${statusBorder(k.status)}`}>
               <div className="text-[11px] text-muted-foreground flex items-center justify-between gap-1">
                 <span className="truncate">{k.nome}</span>
@@ -46,10 +55,10 @@ export function StructuredBlock({ structured, dataStatus }: { structured: any; d
         <div>
           <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
             <AlertTriangle className="h-4 w-4 text-destructive" />
-            Alertas Críticos ({structured.riscos.length})
+            Alertas Críticos ({(structured.riscos?.length ?? 0)})
           </h4>
           <div className="space-y-2">
-            {structured.riscos.map((r: any, i: number) => (
+            {structured.riscos.map((r, i: number) => (
               <div key={i} className="rounded-lg border-l-4 border-l-destructive bg-destructive/5 p-3">
                 <div className="text-sm font-semibold text-foreground">⚠️ {r.titulo}</div>
                 <div className="text-xs text-muted-foreground mt-1">
@@ -67,10 +76,10 @@ export function StructuredBlock({ structured, dataStatus }: { structured: any; d
       {(structured.insights?.length ?? 0) > 0 && (
         <div>
           <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
-            <Lightbulb className="h-4 w-4 text-primary" /> Insights ({structured.insights.length})
+            <Lightbulb className="h-4 w-4 text-primary" /> Insights ({(structured.insights?.length ?? 0)})
           </h4>
           <div className="grid md:grid-cols-2 gap-2">
-            {structured.insights.map((it: any, i: number) => {
+            {structured.insights.map((it, i: number) => {
               const tipoColor =
                 it.tipo === 'risco' ? 'border-l-destructive' :
                 it.tipo === 'oportunidade' ? 'border-l-success' :
@@ -124,7 +133,7 @@ export function StructuredBlock({ structured, dataStatus }: { structured: any; d
             <CheckCircle2 className="h-4 w-4 text-primary" /> Decisões Recomendadas
           </h4>
           <div className="space-y-1.5">
-            {structured.decisoes.map((d: any, i: number) => (
+            {structured.decisoes.map((d, i: number) => (
               <div key={i} className="text-sm p-2.5 rounded-lg border bg-card flex items-center justify-between gap-2">
                 <span className="flex items-center gap-2">
                   <span>{d.prioridade === 'alta' ? '🔴' : d.prioridade === 'media' ? '🟡' : '🟢'}</span>
