@@ -12,23 +12,26 @@ import { ptBR } from 'date-fns/locale';
 import { parameterCategoryConfig } from '@/config/administration';
 import { ParameterCategory } from '@/types/administration';
 import { useSystemParameters } from '@/hooks/system/useSystemParameters';
+import type { Tables } from '@/integrations/supabase/types';
+
+type ParameterRow = Tables<'system_parameters'>;
 
 interface ParametersTableProps {
-  parameters: any[];
-  onEdit: (param: any) => void;
+  parameters: ParameterRow[];
+  onEdit: (param: ParameterRow) => void;
 }
 
 export const ParametersTable = ({ parameters, onEdit }: ParametersTableProps) => {
   const { updateParameter } = useSystemParameters();
   const [showSensitive, setShowSensitive] = useState<Record<string, boolean>>({});
 
-  const handleReset = async (param: any) => {
+  const handleReset = async (param: ParameterRow) => {
     if (confirm(`Deseja restaurar o parâmetro ${param.name} para o valor padrão?`)) {
       await updateParameter({ code: param.code, value: param.default_value });
     }
   };
 
-  const renderValue = (param: any) => {
+  const renderValue = (param: ParameterRow) => {
     if (param.sensitive && !showSensitive[param.id]) {
       return '********';
     }

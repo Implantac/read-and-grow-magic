@@ -94,18 +94,18 @@ export function useProductionOrderSteps(productionOrderId?: string) {
       .order('sequence', { ascending: true });
     if (error) { console.error(error); toast.error('Erro ao carregar etapas da OP'); setLoading(false); return; }
 
-    const stepIds = Array.from(new Set((data || []).map((d: any) => d.step_id as string).filter(Boolean))) as string[];
-    let stepsMap = new Map<string, any>();
+    const stepIds = Array.from(new Set((data || []).map((d) => d.step_id as string).filter(Boolean))) as string[];
+    const stepsMap = new Map<string, { id: string; name: string; code: string; sector: string | null }>();
     if (stepIds.length > 0) {
       const { data: steps } = await supabase
         .from('production_steps')
         .select('id, name, code, sector')
         .in('id', stepIds);
-      (steps || []).forEach((s: any) => stepsMap.set(s.id, s));
+      (steps || []).forEach((s) => stepsMap.set(s.id, s));
     }
-    setOrderSteps((data || []).map((d: any) => {
+    setOrderSteps((data || []).map((d) => {
       const s = stepsMap.get(d.step_id);
-      return { ...d, step_name: s?.name, step_code: s?.code, step_sector: s?.sector };
+      return { ...d, step_name: s?.name, step_code: s?.code, step_sector: s?.sector ?? undefined } as ProductionOrderStep;
     }));
     setLoading(false);
   }, [productionOrderId]);
@@ -127,7 +127,7 @@ export function useProductionOrderSteps(productionOrderId?: string) {
 
     if (!stepsData || stepsData.length === 0) return;
 
-    const inserts = stepsData.map((s: any) => ({
+    const inserts = stepsData.map((s) => ({
       production_order_id: orderId,
       step_id: s.id,
       sequence: s.sequence,

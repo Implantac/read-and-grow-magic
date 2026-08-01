@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/ui/base/dial
 import { EmptyState } from '@/shared/components/EmptyState';
 import { Skeleton } from '@/ui/base/skeleton';
 import { useOperational } from '@/hooks/operational/useOperational';
+import type { ShipmentOrder, DeliveryTrackingEvent } from '@/services/operational/operationalService';
 import { Truck, Clock, CheckCircle, MapPin, Play, Eye } from 'lucide-react';
 
 import { format } from 'date-fns';
@@ -33,11 +34,11 @@ const SHIPMENT_TRANSITIONS: Record<string, string[]> = {
 
 export default function ShipmentPage() {
   const { shipments, shipmentsLoading: isLoading, updateShipmentStatus, getTracking, createTrackingEvent } = useOperational();
-  const [selectedShipment, setSelectedShipment] = useState<any>(null);
+  const [selectedShipment, setSelectedShipment] = useState<ShipmentOrder | null>(null);
   const { data: tracking } = getTracking(selectedShipment?.id);
 
 
-  const handleAdvance = (shipment: any, nextStatus: string) => {
+  const handleAdvance = (shipment: ShipmentOrder, nextStatus: string) => {
     updateShipmentStatus({ id: shipment.id, status: nextStatus });
     createTrackingEvent({
       shipment_id: shipment.id,
@@ -47,7 +48,7 @@ export default function ShipmentPage() {
   };
 
 
-  const statusCounts = (shipments || []).reduce((acc: Record<string, number>, s: any) => {
+  const statusCounts = (shipments || []).reduce((acc: Record<string, number>, s) => {
     acc[s.status] = (acc[s.status] || 0) + 1;
     return acc;
   }, {});
@@ -101,7 +102,7 @@ export default function ShipmentPage() {
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow></TableHeader>
               <TableBody>
-                {shipments.map((s: any) => {
+                {shipments.map((s: ShipmentOrder) => {
                   const sc = shipmentStatusConfig[s.status] || { label: s.status, color: '' };
                   const nextStatuses = SHIPMENT_TRANSITIONS[s.status] || [];
                   return (
@@ -149,7 +150,7 @@ export default function ShipmentPage() {
                 description="Eventos aparecerão à medida que a expedição avança."
                 compact
               />
-            ) : tracking.map((t: any) => (
+            ) : tracking.map((t: DeliveryTrackingEvent) => (
               <div key={t.id} className="flex gap-3 items-start">
                 <div className="mt-1 h-2 w-2 rounded-full bg-primary flex-shrink-0" />
                 <div>

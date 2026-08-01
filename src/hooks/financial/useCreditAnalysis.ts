@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert } from '@/integrations/supabase/types';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
 export function useCreditProfiles() {
@@ -35,7 +36,7 @@ export function useCreditProfileByClient(clientId: string | undefined) {
 export function useUpsertCreditProfile() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (profile: any) => {
+    mutationFn: async (profile: TablesInsert<'customer_credit_profiles'>) => {
       const { data, error } = await supabase
         .from('customer_credit_profiles')
         .upsert(profile, { onConflict: 'client_id' })
@@ -69,7 +70,7 @@ export function useOrderBlocks(orderId?: string) {
 export function useCreateOrderBlock() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (block: any) => {
+    mutationFn: async (block: TablesInsert<'order_blocks'>) => {
       const { data, error } = await supabase.from('order_blocks').insert(block).select().single();
       if (error) throw error;
       return data;
@@ -119,7 +120,7 @@ export function useCollectionActions(clientId?: string) {
 export function useCreateCollectionAction() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (action: any) => {
+    mutationFn: async (action: TablesInsert<'collection_actions'>) => {
       const { data, error } = await supabase.from('collection_actions').insert(action).select().single();
       if (error) throw error;
       return data;
@@ -146,7 +147,7 @@ export function useCreditPolicies() {
 export function useCreateCreditPolicy() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (policy: any) => {
+    mutationFn: async (policy: TablesInsert<'credit_policies'>) => {
       const { data, error } = await supabase.from('credit_policies').insert(policy).select().single();
       if (error) throw error;
       return data;

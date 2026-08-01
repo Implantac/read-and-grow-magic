@@ -11,7 +11,7 @@ export function OrderTimeline({ orderId }: { orderId: string }) {
 
   return (
     <div className="space-y-3">
-      {history.map((h: any) => (
+      {history.map((h) => (
         <div key={h.id} className="flex gap-3 items-start">
           <div className="mt-1 h-2 w-2 rounded-full bg-primary flex-shrink-0" />
           <div className="flex-1">

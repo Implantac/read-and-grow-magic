@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
 import { parseISO, differenceInDays } from 'date-fns';
 import type { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
+import type { OutsourcingOrderRow } from '@/hooks/production/useOutsourcingOrders';
 import { KANBAN_COLUMNS } from '../constants';
 
 export function useKanbanDerived(params: {
   orders: ProductionOrderRow[];
-  outsourcingOrders: any[];
+  outsourcingOrders: OutsourcingOrderRow[];
   workCenters: any[];
   productCosts: Record<string, number>;
   wipLimits: Record<string, number>;
@@ -35,7 +36,7 @@ export function useKanbanDerived(params: {
   }, [orders, searchTerm, sectorFilter, priorityFilter]);
 
   const outsourcingByOP = useMemo(() => {
-    const map: Record<string, any[]> = {};
+    const map: Record<string, OutsourcingOrderRow[]> = {};
     outsourcingOrders.forEach(oo => {
       if (!map[oo.production_order_id]) map[oo.production_order_id] = [];
       map[oo.production_order_id].push(oo);

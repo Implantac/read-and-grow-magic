@@ -6,6 +6,7 @@ import { Input } from '@/ui/base/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Search } from 'lucide-react';
 import { useOrders } from '@/hooks/commercial/useOrders';
+import type { DbOrder } from '@/hooks/commercial/orders/types';
 import { orderFlowStatuses } from '@/hooks/commercial/useOrderFlow';
 import { useOrderLifecycle } from '@/hooks/commercial/useOrderLifecycle';
 import { OrderTrackingKPIs } from '@/modules/operational/orderTracking/OrderTrackingKPIs';
@@ -17,8 +18,8 @@ export default function OrderTracking() {
   const { data: orders, isLoading } = useOrders();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
-  const [transitionDialog, setTransitionDialog] = useState<{ order: any; targetStatus: string } | null>(null);
+  const [selectedOrder, setSelectedOrder] = useState<DbOrder | null>(null);
+  const [transitionDialog, setTransitionDialog] = useState<{ order: DbOrder; targetStatus: string } | null>(null);
   const [observation, setObservation] = useState('');
   const lifecycle = useOrderLifecycle();
 
@@ -36,7 +37,7 @@ export default function OrderTracking() {
     return acc;
   }, {});
 
-  const handleTransition = (order: any, targetStatus: string) => {
+  const handleTransition = (order: DbOrder, targetStatus: string) => {
     if (targetStatus === 'blocked' || targetStatus === 'cancelled') {
       setTransitionDialog({ order, targetStatus });
       setObservation('');
