@@ -1,28 +1,28 @@
 import { Input } from '@/ui/base/input';
 import { Textarea } from '@/ui/base/textarea';
-import type { Question } from './types';
+import type { AnswerMap, AnswerValue, Question, QuestionOption } from './types';
 import { EMOJIS } from './types';
 
 interface Props {
   q: Question;
-  answers: Record<string, any>;
-  setAnswers: React.Dispatch<React.SetStateAction<Record<string, any>>>;
+  answers: AnswerMap;
+  setAnswers: React.Dispatch<React.SetStateAction<AnswerMap>>;
   touched: boolean;
   primary: string;
 }
 
 export function QuestionRenderer({ q, answers, setAnswers, touched, primary }: Props) {
   const val = answers[q.id];
-  const set = (v: any) => setAnswers((prev) => ({ ...prev, [q.id]: v }));
-  const rawOpts: any = q.options;
-  const optsArr: any[] = Array.isArray(rawOpts)
+  const set = (v: AnswerValue) => setAnswers((prev) => ({ ...prev, [q.id]: v }));
+  const rawOpts = q.options;
+  const optsArr: QuestionOption[] = Array.isArray(rawOpts)
     ? rawOpts
     : Array.isArray(rawOpts?.choices)
     ? rawOpts.choices
     : Array.isArray(rawOpts?.labels)
     ? rawOpts.labels
     : [];
-  const choices: Array<{ label: string; value: string }> = optsArr.map((o: any) =>
+  const choices: Array<{ label: string; value: string }> = optsArr.map((o) =>
     typeof o === 'string' || typeof o === 'number'
       ? { label: String(o), value: String(o) }
       : { label: String(o?.label ?? o?.value ?? ''), value: String(o?.value ?? o?.label ?? '') },
@@ -33,10 +33,11 @@ export function QuestionRenderer({ q, answers, setAnswers, touched, primary }: P
   const otherValues = new Set(choices.filter((o) => isOtherLabel(o.label)).map((o) => o.value));
   const currentOther: string = (answers[`${q.id}__other`] as string) ?? '';
   const setOther = (v: string) => setAnswers((prev) => ({ ...prev, [`${q.id}__other`]: v }));
-  const showOtherFor = (selected: string | string[]) => {
+  const showOtherFor = (selected: AnswerValue) => {
     if (otherValues.size === 0) return false;
     if (Array.isArray(selected)) return selected.some((s) => otherValues.has(s));
-    return otherValues.has(selected);
+    if (selected === undefined) return false;
+    return otherValues.has(String(selected));
   };
   const OtherField = ({ show }: { show: boolean }) =>
     show ? (
@@ -75,7 +76,7 @@ export function QuestionRenderer({ q, answers, setAnswers, touched, primary }: P
               aria-label={`${n} estrela${n > 1 ? 's' : ''}`}
               onClick={() => set(n)}
               className="text-3xl leading-none transition-transform hover:scale-110"
-              style={{ color: (val ?? 0) >= n ? primary : '#334155' }}
+              style={{ color: (typeof val === 'number' ? val : 0) >= n ? primary : '#334155' }}
             >
               ★
             </button>

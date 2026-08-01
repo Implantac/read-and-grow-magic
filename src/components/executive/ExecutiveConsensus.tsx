@@ -11,13 +11,14 @@ import {
   ChevronRight,
   Info
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBrainRuns } from '@/hooks/ai/useAIBrain';
 import { useExecutiveDashboard } from '@/hooks/ai/useExecutiveAI';
 import { ScrollArea } from '@/ui/base/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/base/tooltip';
 
-const moduleStatusMap: Record<string, { label: string; color: string; explanation: string; icon: any }> = {
+const moduleStatusMap: Record<string, { label: string; color: string; explanation: string; icon: LucideIcon }> = {
   commercial: { 
     label: 'Otimizado', 
     color: 'text-success', 
@@ -101,23 +102,27 @@ const fallbackConsensus = [
   }
 ];
 
-export function ExecutiveConsensus({ consensus = [] }: { consensus?: any[] }) {
+type ConsensusItem = { specialist: string; insight: string; status: string; module?: string };
+type BrainItem = { titulo?: string; acao?: string; modulo?: string };
+
+export function ExecutiveConsensus({ consensus = [] }: { consensus?: ConsensusItem[] }) {
   const { data: runs = [] } = useBrainRuns();
   const lastRun = runs[0];
   
-  const brainRisks = lastRun?.structured?.riscos || [];
-  const brainOpps = lastRun?.structured?.oportunidades || [];
+  const structured = (lastRun?.structured ?? {}) as { riscos?: BrainItem[]; oportunidades?: BrainItem[] };
+  const brainRisks: BrainItem[] = structured.riscos ?? [];
+  const brainOpps: BrainItem[] = structured.oportunidades ?? [];
   
   const { data: dashboardData } = useExecutiveDashboard();
   
-  const brainConsensus = [
-    ...brainRisks.map((r: any) => ({
+  const brainConsensus: ConsensusItem[] = [
+    ...brainRisks.map((r) => ({
       specialist: 'Risk Advisor',
       insight: `${r.titulo}: ${r.acao}`,
       status: 'alert',
       module: r.modulo || 'geral'
     })),
-    ...brainOpps.map((o: any) => ({
+    ...brainOpps.map((o) => ({
       specialist: 'Growth Strategist',
       insight: `${o.titulo}: ${o.acao}`,
       status: 'recommendation',
@@ -125,9 +130,9 @@ export function ExecutiveConsensus({ consensus = [] }: { consensus?: any[] }) {
     }))
   ];
 
-  const dashboardConsensus = dashboardData?.consensus || [];
+  const dashboardConsensus: ConsensusItem[] = dashboardData?.consensus ?? [];
 
-  const items = [
+  const items: ConsensusItem[] = [
     ...brainConsensus,
     ...dashboardConsensus
   ];

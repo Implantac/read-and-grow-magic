@@ -3,7 +3,7 @@ import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { Badge } from '@/ui/base/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
-import { useProductionOrders } from '@/hooks/production/useProductionOrders';
+import { useProductionOrders, type ProductionOrderRow } from '@/hooks/production/useProductionOrders';
 import { useOrders } from '@/hooks/commercial/useOrders';
 import { useOrderLifecycle } from '@/hooks/commercial/useOrderLifecycle';
 import { useTimeEntries } from '@/hooks/system/useTimeEntries';
@@ -47,7 +47,7 @@ export default function PCPPanel() {
     name: productionStatusConfig[k]?.label || k, value: v,
   }));
 
-  const onStatusChange = (op: any, newStatus: string) => handleStatusChange(op, newStatus, update, salesOrders || []);
+  const onStatusChange = (op: ProductionOrderRow, newStatus: string) => handleStatusChange(op, newStatus, update, salesOrders || []);
 
   return (
     <PageContainer loading={loading}>

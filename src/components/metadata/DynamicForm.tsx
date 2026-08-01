@@ -8,21 +8,27 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { parseNumericInput } from "@/lib/numericValidation";
 import type { CustomField } from "@/hooks/useCustomEntities";
 
+import type { Json } from "@/integrations/supabase/types";
+
+type FieldValue = Json | undefined;
+const asText = (v: FieldValue) => (v === null || v === undefined || typeof v === "object" ? "" : String(v));
+type SelectOption = { value: string; label: string };
+
 interface Props {
   fields: CustomField[];
-  initial?: Record<string, any>;
+  initial?: Record<string, FieldValue>;
   submitting?: boolean;
-  onSubmit: (data: Record<string, any>) => void;
+  onSubmit: (data: Record<string, FieldValue>) => void;
   onCancel?: () => void;
 }
 
 export function DynamicForm({ fields, initial, submitting, onSubmit, onCancel }: Props) {
-  const [values, setValues] = useState<Record<string, any>>(initial ?? {});
+  const [values, setValues] = useState<Record<string, FieldValue>>(initial ?? {});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => setValues(initial ?? {}), [initial]);
 
-  function set(key: string, v: any) {
+  function set(key: string, v: FieldValue) {
     setValues((s) => ({ ...s, [key]: v }));
   }
 
@@ -46,7 +52,7 @@ export function DynamicForm({ fields, initial, submitting, onSubmit, onCancel }:
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
-    const normalized: Record<string, any> = {};
+    const normalized: Record<string, FieldValue> = {};
     for (const f of fields) {
       let v = values[f.field_key];
       if (f.field_type === "number" && v !== "" && v !== undefined && v !== null) v = Number(v);
@@ -79,16 +85,16 @@ export function DynamicForm({ fields, initial, submitting, onSubmit, onCancel }:
   );
 }
 
-function FieldInput({ field, value, onChange }: { field: CustomField; value: any; onChange: (v: any) => void }) {
+function FieldInput({ field, value, onChange }: { field: CustomField; value: FieldValue; onChange: (v: FieldValue) => void }) {
   switch (field.field_type) {
     case "boolean":
       return <Switch checked={!!value} onCheckedChange={onChange} />;
     case "number":
-      return <Input id={field.field_key} type="number" value={value ?? ""} onChange={(e) => onChange(e.target.value)} />;
+      return <Input id={field.field_key} type="number" value={asText(value)} onChange={(e) => onChange(e.target.value)} />;
     case "date":
-      return <Input id={field.field_key} type="date" value={value ?? ""} onChange={(e) => onChange(e.target.value)} />;
+      return <Input id={field.field_key} type="date" value={asText(value)} onChange={(e) => onChange(e.target.value)} />;
     case "datetime":
-      return <Input id={field.field_key} type="datetime-local" value={value ?? ""} onChange={(e) => onChange(e.target.value)} />;
+      return <Input id={field.field_key} type="datetime-local" value={asText(value)} onChange={(e) => onChange(e.target.value)} />;
     case "json":
       return (
         <Textarea
@@ -102,10 +108,10 @@ function FieldInput({ field, value, onChange }: { field: CustomField; value: any
       );
     case "select": {
       const opts: Array<{ value: string; label: string }> = Array.isArray(field.options)
-        ? field.options.map((o: any) => typeof o === "string" ? { value: o, label: o } : o)
+        ? (field.options as unknown[]).map((o) => (typeof o === "string" ? { value: o, label: o } : (o as SelectOption)))
         : [];
       return (
-        <Select value={value ?? ""} onValueChange={onChange}>
+        <Select value={asText(value)} onValueChange={onChange}>
           <SelectTrigger><SelectValue placeholder="Selecione…" /></SelectTrigger>
           <SelectContent>
             {opts.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
@@ -114,8 +120,8 @@ function FieldInput({ field, value, onChange }: { field: CustomField; value: any
       );
     }
     case "multiselect": {
-      const opts: string[] = Array.isArray(field.options) ? field.options.map((o: any) => String(o?.value ?? o)) : [];
-      const arr: string[] = Array.isArray(value) ? value : [];
+      const opts: string[] = Array.isArray(field.options) ? (field.options as unknown[]).map((o) => String((o as SelectOption)?.value ?? o)) : [];
+      const arr: string[] = Array.isArray(value) ? value.map((x) => String(x)) : [];
       return (
         <div className="flex flex-wrap gap-2">
           {opts.map((o) => (
@@ -132,6 +138,6 @@ function FieldInput({ field, value, onChange }: { field: CustomField; value: any
       );
     }
     default:
-      return <Input id={field.field_key} value={value ?? ""} onChange={(e) => onChange(e.target.value)} />;
+      return <Input id={field.field_key} value={asText(value)} onChange={(e) => onChange(e.target.value)} />;
   }
 }
