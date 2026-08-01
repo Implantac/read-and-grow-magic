@@ -32,7 +32,7 @@ export function useAccounting() {
       queryClient.invalidateQueries({ queryKey: ['chart_of_accounts'] });
       toastSuccess('Conta contábil criada com sucesso');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error creating account:', error);
       toastError('Erro ao criar conta contábil');
     }
@@ -44,7 +44,7 @@ export function useAccounting() {
       queryClient.invalidateQueries({ queryKey: ['chart_of_accounts'] });
       toastSuccess('Conta contábil excluída com sucesso');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error deleting account:', error);
       toastError('Erro ao excluir conta contábil');
     }
@@ -56,7 +56,7 @@ export function useAccounting() {
       queryClient.invalidateQueries({ queryKey: ['journal_entries'] });
       toastSuccess('Lançamento postado com sucesso');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error posting entry:', error);
       toastError('Erro ao postar lançamento');
     }

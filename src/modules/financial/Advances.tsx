@@ -51,8 +51,8 @@ export default function Advances() {
   };
 
   const targetList = applyAdvance?.party_type === 'client'
-    ? receivables.filter((r: any) => r.status !== 'paid' && r.status !== 'cancelled' && r.client_id === applyAdvance.client_id)
-    : payables.filter((p: any) => p.status !== 'paid' && p.status !== 'cancelled');
+    ? receivables.filter((r) => r.status !== 'paid' && r.status !== 'cancelled' && r.client_id === applyAdvance.client_id)
+    : payables.filter((p) => p.status !== 'paid' && p.status !== 'cancelled');
 
   const submitApply = () => {
     if (!applyAdvance || !targetId) return;
@@ -167,7 +167,7 @@ export default function Advances() {
               <Select value={targetId} onValueChange={setTargetId}>
                 <SelectTrigger><SelectValue placeholder="Selecione um título em aberto" /></SelectTrigger>
                 <SelectContent>
-                  {targetList.map((t: any) => (
+                  {targetList.map((t) => (
                     <SelectItem key={t.id} value={t.id}>
                       {t.description} — {formatBRL(Number(t.open_amount ?? t.amount))}
                     </SelectItem>

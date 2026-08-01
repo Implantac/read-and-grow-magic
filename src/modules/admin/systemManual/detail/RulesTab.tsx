@@ -2,8 +2,9 @@ import { Clock, Lightbulb, Shield, Users } from 'lucide-react';
 import { Badge } from '@/ui/base/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
 import { SEVERITY_LABEL, SEVERITY_STYLE } from './constants';
+import type { ModuleFoundation } from '../foundation-types';
 
-export function RulesTab({ foundation }: { foundation: any }) {
+export function RulesTab({ foundation }: { foundation: ModuleFoundation }) {
   return (
     <div className="space-y-4 mt-4">
       <Card>
@@ -18,7 +19,7 @@ export function RulesTab({ foundation }: { foundation: any }) {
         </CardHeader>
         <CardContent>
           <ul className="space-y-3">
-            {foundation.businessRules.map((b: any, i: number) => (
+            {foundation.businessRules.map((b, i) => (
               <li key={i} className="rounded-lg border p-3">
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <p className="text-sm font-medium text-foreground">{b.rule}</p>
@@ -46,7 +47,7 @@ export function RulesTab({ foundation }: { foundation: any }) {
           </CardHeader>
           <CardContent>
             <div className="relative pl-6 border-l-2 border-primary/20 space-y-4">
-              {foundation.routines.map((r: any, i: number) => (
+              {foundation.routines.map((r, i) => (
                 <div key={i} className="relative">
                   <div className="absolute -left-[27px] top-1 h-3 w-3 rounded-full bg-primary ring-4 ring-background" />
                   <p className="text-xs uppercase tracking-wide font-semibold text-primary">{r.when}</p>

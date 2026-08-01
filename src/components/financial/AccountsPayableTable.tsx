@@ -7,16 +7,17 @@ import { StatusBadge } from '@/shared/components/StatusBadge';
 import { formatBRL, formatDate } from '@/lib/formatters';
 import { Badge } from '@/ui/base/badge';
 import { differenceInDays } from 'date-fns';
+import type { AccountPayable } from '@/types/financial';
 
 interface AccountsPayableTableProps {
-  accounts: any[];
+  accounts: AccountPayable[];
   selectedIds: Set<string>;
   onToggleOne: (id: string) => void;
   onToggleAll: () => void;
   allSelected: boolean;
-  onPay: (account: any) => void;
+  onPay: (account: AccountPayable) => void;
   onDelete: (id: string) => void;
-  onView: (account: any) => void;
+  onView: (account: AccountPayable) => void;
 }
 
 export function AccountsPayableTable({

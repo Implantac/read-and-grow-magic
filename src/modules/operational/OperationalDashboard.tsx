@@ -45,9 +45,9 @@ export default function OperationalDashboard() {
   const blockedOrders = allOrders.filter(o => o.status === 'blocked').length;
   const awaitingProduction = allOrders.filter(o => o.status === 'awaiting_production' || o.status === 'in_production').length;
   const awaitingSeparation = allOrders.filter(o => o.status === 'awaiting_separation' || o.status === 'in_separation').length;
-  const awaitingBilling = billingItems?.filter((i: any) => i.status === 'awaiting_billing').length || 0;
-  const pendingConference = conferences?.filter((c: any) => c.status === 'pending').length || 0;
-  const inTransit = shipments?.filter((s: any) => s.status === 'in_transit' || s.status === 'dispatched').length || 0;
+  const awaitingBilling = billingItems?.filter((i) => i.status === 'awaiting_billing').length || 0;
+  const pendingConference = conferences?.filter((c) => c.status === 'pending').length || 0;
+  const inTransit = shipments?.filter((s) => s.status === 'in_transit' || s.status === 'dispatched').length || 0;
 
   // Delayed orders (past delivery_date and not delivered/cancelled)
   const today = new Date();

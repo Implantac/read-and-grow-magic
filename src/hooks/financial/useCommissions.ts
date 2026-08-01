@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 export function useCommissionPolicies() {
   return useQuery({
@@ -47,7 +48,7 @@ export function useCommissionPayments(period?: string) {
 export function useCommissionMutations() {
   const queryClient = useQueryClient();
   const createPolicy = useMutation({
-    mutationFn: async (policy: any) => {
+    mutationFn: async (policy: TablesInsert<'commission_policies'>) => {
       const { data, error } = await supabase.from('commission_policies').insert(policy).select().single();
       if (error) throw error;
       return data;
@@ -60,7 +61,7 @@ export function useCommissionMutations() {
   });
 
   const updatePolicy = useMutation({
-    mutationFn: async ({ id, ...updates }: any) => {
+    mutationFn: async ({ id, ...updates }: { id: string } & TablesUpdate<'commission_policies'>) => {
       const { data, error } = await supabase.from('commission_policies').update(updates).eq('id', id).select().single();
       if (error) throw error;
       return data;
@@ -72,7 +73,7 @@ export function useCommissionMutations() {
   });
 
   const updateCommissionStatus = useMutation({
-    mutationFn: async ({ id, status, ...extra }: { id: string; status: string; [key: string]: any }) => {
+    mutationFn: async ({ id, status, ...extra }: { id: string; status: string } & TablesUpdate<'commissions'>) => {
       const { error } = await supabase.from('commissions').update({ status, ...extra, updated_at: new Date().toISOString() }).eq('id', id);
       if (error) throw error;
     },

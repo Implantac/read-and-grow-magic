@@ -26,7 +26,7 @@ export function NewAdvanceDialog() {
   const [notes, setNotes] = useState('');
 
   const list = partyType === 'client' ? clients : suppliers;
-  const selected: any = list.find((x: any) => x.id === entityId);
+  const selected = (list as Array<{ id: string; name?: string | null }>).find((x) => x.id === entityId);
   const partyName = selected?.name ?? '';
 
   const numericAmount = Number(amount.replace(',', '.')) || 0;
@@ -71,7 +71,7 @@ export function NewAdvanceDialog() {
         <div className="grid gap-4 py-2">
           <div className="grid gap-2">
             <Label>Tipo</Label>
-            <Select value={partyType} onValueChange={(v: any) => { setPartyType(v); setEntityId(''); }}>
+            <Select value={partyType} onValueChange={(v) => { setPartyType(v); setEntityId(''); }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="client">Adiantamento de cliente (entrada)</SelectItem>
@@ -84,7 +84,7 @@ export function NewAdvanceDialog() {
             <Select value={entityId} onValueChange={setEntityId}>
               <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
               <SelectContent>
-                {list.map((x: any) => (
+                {(list as Array<{ id: string; name?: string | null }>).map((x) => (
                   <SelectItem key={x.id} value={x.id}>{x.name}</SelectItem>
                 ))}
               </SelectContent>

@@ -86,7 +86,7 @@ export function useImportBankStatement() {
         }
       );
       if (impErr) throw impErr;
-      const row: any = Array.isArray(importData) ? importData[0] : importData;
+      const row = (Array.isArray(importData) ? importData[0] : importData) as { inserted?: number; skipped?: number } | null;
       const inserted = row?.inserted ?? 0;
       const skipped = row?.skipped ?? 0;
 
@@ -96,7 +96,7 @@ export function useImportBankStatement() {
         { p_bank_account_id: bankAccountId, p_tolerance_days: 3 }
       );
       if (matchErr) throw matchErr;
-      const mrow: any = Array.isArray(matchData) ? matchData[0] : matchData;
+      const mrow = (Array.isArray(matchData) ? matchData[0] : matchData) as { matched?: number } | null;
       const matched = mrow?.matched ?? 0;
 
       return { inserted, skipped, matched };
@@ -120,7 +120,7 @@ export function useAutoMatch() {
         { p_bank_account_id: bankAccountId ?? null, p_tolerance_days: 3 }
       );
       if (error) throw error;
-      const row: any = Array.isArray(data) ? data[0] : data;
+      const row = (Array.isArray(data) ? data[0] : data) as { matched?: number; total_pending?: number } | null;
       return { matched: row?.matched ?? 0, total: row?.total_pending ?? 0 };
     },
     onSuccess: (r) => {

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { errorMessage } from "@/lib/errors";
 
 export interface StorefrontNotification {
   id: string;
@@ -44,11 +45,11 @@ export function useDispatchNotifications() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: { processed?: number } | null) => {
       toast.success(`Notificações processadas: ${data?.processed ?? 0}`);
       qc.invalidateQueries({ queryKey: ["commerce", "notifications"] });
     },
-    onError: (e: any) => toast.error("Falha ao disparar notificações: " + (e?.message ?? e)),
+    onError: (e: unknown) => toast.error("Falha ao disparar notificações: " + errorMessage(e)),
   });
 }
 
@@ -66,6 +67,6 @@ export function useToggleAutoAuthorizeNfce() {
       toast.success("Preferência atualizada");
       qc.invalidateQueries({ queryKey: ["commerce", "storefronts"] });
     },
-    onError: (e: any) => toast.error("Erro: " + (e?.message ?? e)),
+    onError: (e: unknown) => toast.error("Erro: " + errorMessage(e)),
   });
 }

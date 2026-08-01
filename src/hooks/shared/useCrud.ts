@@ -35,7 +35,7 @@ export function useCrud<T extends TableName>(
           queryClient.invalidateQueries({ queryKey });
           toastSuccess(`${entityName} cadastrado com sucesso!`);
         },
-        onError: (error: any) => handleMutationError(error),
+        onError: (error: unknown) => handleMutationError(error),
       }
     );
   };
@@ -49,7 +49,7 @@ export function useCrud<T extends TableName>(
           queryClient.invalidateQueries({ queryKey });
           toastSuccess(`${entityName} atualizado com sucesso!`);
         },
-        onError: (error: any) => handleMutationError(error),
+        onError: (error: unknown) => handleMutationError(error),
       }
     );
   };
@@ -62,7 +62,7 @@ export function useCrud<T extends TableName>(
           queryClient.invalidateQueries({ queryKey });
           toastSuccess(`${entityName} excluído com sucesso!`);
         },
-        onError: (error: any) => handleMutationError(error),
+        onError: (error: unknown) => handleMutationError(error),
       }
     );
   };

@@ -12,6 +12,10 @@ import { Skeleton } from '@/ui/base/skeleton';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { Plus, Trash2, Webhook, Shield } from 'lucide-react';
 import { toast } from 'sonner';
+import type { TablesInsert } from '@/integrations/supabase/types';
+
+type WebhookForm = { id?: string } & Partial<TablesInsert<'nps_webhooks'>>;
+type AlertConfigForm = { id?: string } & Partial<TablesInsert<'nps_alerts_config'>>;
 
 const EVENTS = ['survey.created', 'invite.sent', 'survey.opened', 'survey.completed', 'customer.promoter', 'customer.passive', 'customer.detractor'];
 
@@ -26,7 +30,7 @@ export default function Settings() {
   });
 
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<any>({ name: '', url: '', secret: '', events: [], active: true });
+  const [form, setForm] = useState<WebhookForm>({ name: '', url: '', secret: '', events: [], active: true });
 
   const { data: alerts = [] } = useQuery({
     queryKey: ['nps-alerts-config', activeCompanyId],
@@ -38,12 +42,12 @@ export default function Settings() {
   });
 
   const saveAlert = useMutation({
-    mutationFn: async (input: any) => {
+    mutationFn: async (input: AlertConfigForm) => {
       if (input.id) {
-        const { error } = await supabase.from('nps_alerts_config').update(input).eq('id', input.id);
+        const { error } = await supabase.from('nps_alerts_config').update(input).eq('id', input.id!);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('nps_alerts_config').insert({ ...input, company_id: activeCompanyId });
+        const { error } = await supabase.from('nps_alerts_config').insert({ ...input, company_id: activeCompanyId! } as TablesInsert<'nps_alerts_config'>);
         if (error) throw error;
       }
     },
@@ -66,7 +70,7 @@ export default function Settings() {
           <Button size="sm" onClick={() => { setForm({ name: '', url: '', secret: '', events: [], active: true }); setOpen(true); }}><Plus className="h-3 w-3 mr-1" /> Novo</Button>
         </CardHeader>
         <CardContent className="space-y-2">
-          {isLoading ? <Skeleton className="h-20" /> : webhooks.map((w: any) => (
+          {isLoading ? <Skeleton className="h-20" /> : webhooks.map((w) => (
             <div key={w.id} className="flex items-center justify-between border-b border-border pb-2">
               <div>
                 <div className="font-medium">{w.name}</div>
@@ -91,7 +95,7 @@ export default function Settings() {
             <div><Label>Nota máxima</Label><Input type="number" value={alertForm.score_max} onChange={(e) => setAlertForm({ ...alertForm, score_max: Number(e.target.value) })} /></div>
             <div className="md:col-span-2 flex justify-end"><Button onClick={() => saveAlert.mutate(alertForm)}>Adicionar</Button></div>
           </div>
-          {alerts.map((a: any) => (
+          {alerts.map((a) => (
             <div key={a.id} className="flex items-center justify-between border-b border-border pb-2 text-sm">
               <div>{a.name} — notifica quando nota ≤ {a.score_max}</div>
               <Switch checked={a.active} onCheckedChange={(v) => saveAlert.mutate({ id: a.id, active: v })} />
