@@ -3,10 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Progress } from '@/ui/base/progress';
 import { Target, Zap, BarChart3, TrendingUp, TrendingDown } from 'lucide-react';
 import { formatBRL } from '@/lib/formatters';
+import type { useCommercialStats } from './useCommercialStats';
+import type { useCommercialInsights } from '@/hooks/commercial/useCommercialRules';
 
 interface Props {
-  stats: any;
-  insights: any;
+  stats: ReturnType<typeof useCommercialStats>;
+  insights: ReturnType<typeof useCommercialInsights>;
   clientsLen: number;
 }
 
