@@ -61,7 +61,7 @@ export async function generateOPFromOrder(order: any, lifecycle: any, refetch: (
     for (const item of items) {
       const opNumber = `OP-${format(new Date(), 'yyyyMMdd')}-${order.number}-${item.product_code}`;
       await supabase.from('production_orders').insert({
-        order_number: opNumber, product_id: item.product_id, product_code: item.product_code,
+        company_id: order.company_id, order_number: opNumber, product_id: item.product_id, product_code: item.product_code,
         product_name: item.product_name, quantity: item.quantity, produced_quantity: 0, unit: 'UN',
         status: 'planned', priority: order.priority || 'medium', due_date: order.delivery_date,
         notes: `Gerada do pedido ${order.number}`,
