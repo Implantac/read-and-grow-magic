@@ -25,8 +25,8 @@ const LiveTracking = () => {
   const { carriers, vehicles, carriersLoading, vehiclesLoading } = useTMS();
 
   const stats = useMemo(() => {
-    const inTransit = routes.filter((r: any) => r.status === 'in_transit').length;
-    const planned = routes.filter((r: any) => r.status === 'planned').length;
+    const inTransit = routes.filter((r) => r.status === 'in_transit').length;
+    const planned = routes.filter((r) => r.status === 'planned').length;
     const totalStops = routes.reduce((s: number, r: any) => s + (r.total_stops ?? 0), 0);
     const completedStops = routes.reduce((s: number, r: any) => s + (r.completed_stops ?? 0), 0);
     return { inTransit, planned, totalStops, completedStops };
@@ -61,7 +61,7 @@ const LiveTracking = () => {
         <EmptyState icon={Navigation} title="Nenhuma rota ativa" description="Planeje rotas ou aguarde motoristas iniciarem entregas para acompanhar em tempo real." />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {routes.map((r: any) => {
+          {routes.map((r) => {
             const pct = r.total_stops > 0 ? Math.round((r.completed_stops / r.total_stops) * 100) : 0;
             const badge = STATUS_BADGE[r.status] ?? { label: r.status, tone: 'bg-muted text-foreground' };
             return (

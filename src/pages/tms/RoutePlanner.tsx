@@ -25,6 +25,12 @@ import { RouteToolbar } from './route-planner/RouteToolbar';
 import { RouteCostCard } from './route-planner/RouteCostCard';
 import { StopsList } from './route-planner/StopsList';
 
+interface FeasibilityEntry {
+  status: 'ok' | 'early' | 'late' | 'no-window' | 'no-geo';
+  arrivalMin?: number;
+  windowEndMin?: number | null;
+}
+
 const RoutePlanner = () => {
   const { id } = useParams<{ id: string }>();
   const { routes, routesLoading } = useTMS();
@@ -88,25 +94,25 @@ const RoutePlanner = () => {
 
   const feasibilityMap = useMemo(() => {
     if (!stops.length || depot?.depot_latitude == null || depot?.depot_longitude == null) {
-      return {} as Record<string, { status: 'ok'|'early'|'late'|'no-window'|'no-geo'; arrivalMin?: number; windowEndMin?: number | null }>;
+      return {} as Record<string, FeasibilityEntry>;
     }
-    const geoPoints = stops.map((s: any) => ({
+    const geoPoints = stops.map((s) => ({
       id: s.id, latitude: s.latitude, longitude: s.longitude,
       timeWindowStart: s.time_window_start ?? null,
       timeWindowEnd: s.time_window_end ?? null,
       serviceMinutes: s.service_minutes ?? 10,
     }));
     const fz = checkTimeWindows(
-      stops.map((s: any) => s.id), geoPoints,
+      stops.map((s) => s.id), geoPoints,
       { lat: depot.depot_latitude as number, lng: depot.depot_longitude as number },
     );
-    const out: Record<string, any> = {};
+    const out: Record<string, FeasibilityEntry> = {};
     for (const r of fz.stops) out[r.id] = { status: r.status, arrivalMin: r.arrivalMin, windowEndMin: r.windowEndMin };
     return out;
   }, [stops, depot]);
 
   const lateCount = useMemo(
-    () => Object.values(feasibilityMap).filter((f: any) => f.status === 'late').length,
+    () => Object.values(feasibilityMap).filter((f) => f.status === 'late').length,
     [feasibilityMap],
   );
 
@@ -127,7 +133,7 @@ const RoutePlanner = () => {
     const target = index + dir;
     if (target < 0 || target >= next.length) return;
     [next[index], next[target]] = [next[target], next[index]];
-    reorder.mutate({ routeId: route.id, ordered: next.map((s: any) => s.id) });
+    reorder.mutate({ routeId: route.id, ordered: next.map((s) => s.id) });
   };
 
   const handleDrop = (target: number) => {
@@ -137,7 +143,7 @@ const RoutePlanner = () => {
     const next = [...stops];
     const [moved] = next.splice(dragIndex, 1);
     next.splice(target, 0, moved);
-    reorder.mutate({ routeId: route.id, ordered: next.map((s: any) => s.id) });
+    reorder.mutate({ routeId: route.id, ordered: next.map((s) => s.id) });
     setDragIndex(null); setOverIndex(null);
   };
 
