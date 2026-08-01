@@ -28,7 +28,7 @@ export default function SuperAdmin() {
     queryFn: async () => {
       const { data, error } = await supabase.from('subscriptions').select('*');
       if (error) throw error;
-      return data as any[];
+      return data ?? [];
     },
   });
 
@@ -37,7 +37,7 @@ export default function SuperAdmin() {
     queryFn: async () => {
       const { data, error } = await supabase.from('saas_invoices').select('*');
       if (error) throw error;
-      return data as any[];
+      return data ?? [];
     },
   });
 

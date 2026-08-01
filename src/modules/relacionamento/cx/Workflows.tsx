@@ -6,8 +6,9 @@ import { Badge } from '@/ui/base/badge';
 import { Input } from '@/ui/base/input';
 import { toast } from 'sonner';
 import { Workflow, Plus } from 'lucide-react';
+import type { Tables } from '@/integrations/supabase/types';
 
-type Row = { id: string; name: string; description: string; status: string; trigger: any; nodes: any[]; edges: any[]; updated_at: string };
+type Row = Pick<Tables<'cx_workflows'>, 'id' | 'name' | 'description' | 'status' | 'trigger' | 'nodes' | 'edges' | 'updated_at'>;
 
 export default function Workflows() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -17,7 +18,7 @@ export default function Workflows() {
     const { data, error } = await supabase.from('cx_workflows')
       .select('id, name, description, status, trigger, nodes, edges, updated_at')
       .order('updated_at', { ascending: false });
-    if (error) toast.error(error.message); else setRows((data as any) ?? []);
+    if (error) toast.error(error.message); else setRows(data ?? []);
   }
   useEffect(() => { load(); }, []);
 

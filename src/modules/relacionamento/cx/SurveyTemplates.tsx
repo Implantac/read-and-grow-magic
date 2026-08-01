@@ -4,8 +4,9 @@ import { Card } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { toast } from 'sonner';
 import { LayoutTemplate } from 'lucide-react';
+import type { Tables } from '@/integrations/supabase/types';
 
-type Row = { id: string; name: string; metric: string; description: string; questions: any[]; is_public: boolean };
+type Row = Pick<Tables<'cx_survey_templates'>, 'id' | 'name' | 'metric' | 'description' | 'questions' | 'is_public'>;
 
 export default function SurveyTemplates() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -17,7 +18,7 @@ export default function SurveyTemplates() {
         .from('cx_survey_templates')
         .select('id, name, metric, description, questions, is_public')
         .order('metric');
-      if (error) toast.error(error.message); else setRows((data as any) ?? []);
+      if (error) toast.error(error.message); else setRows(data ?? []);
       setLoading(false);
     })();
   }, []);
