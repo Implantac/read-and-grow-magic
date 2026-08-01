@@ -28,7 +28,7 @@ export default function HealthScores() {
       .select('id, client_id, score, tier, factors, computed_at, clients(name)')
       .order('score', { ascending: true })
       .limit(200);
-    if (error) toast.error(error.message); else setRows(data ?? []);
+    if (error) toast.error(error.message); else setRows((data ?? []) as unknown as Row[]);
     setLoading(false);
   }
   useEffect(() => { load(); }, []);

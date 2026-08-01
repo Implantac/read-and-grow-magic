@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { LayoutTemplate } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
-type Row = Pick<Tables<'cx_survey_templates'>, 'id' | 'name' | 'metric' | 'description' | 'questions' | 'is_public'>;
+type Row = Omit<Pick<Tables<'cx_survey_templates'>, 'id' | 'name' | 'metric' | 'description' | 'questions' | 'is_public'>, 'questions'> & { questions: unknown[] };
 
 export default function SurveyTemplates() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -18,7 +18,7 @@ export default function SurveyTemplates() {
         .from('cx_survey_templates')
         .select('id, name, metric, description, questions, is_public')
         .order('metric');
-      if (error) toast.error(error.message); else setRows(data ?? []);
+      if (error) toast.error(error.message); else setRows((data ?? []) as unknown as Row[]);
       setLoading(false);
     })();
   }, []);
