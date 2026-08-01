@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { errorMessage } from "@/lib/errors";
 import type { Json } from "@/integrations/supabase/types";
 // Converte estruturas tipadas do domínio para o tipo `Json` do Postgres.
 const toJson = (value: unknown): Json => value as Json;
@@ -16,13 +17,23 @@ export type AutomationActionType =
 
 export interface AutomationAction {
   type: AutomationActionType;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }
 
 export interface AutomationCondition {
   field: string;
   operator: "eq" | "neq" | "gt" | "lt" | "contains";
-  value: any;
+  value: string | number | boolean | null;
+}
+
+export interface AutomationRuleInput {
+  id?: string;
+  name: string;
+  description?: string | null;
+  trigger_event: string;
+  conditions?: AutomationCondition[];
+  actions: AutomationAction[];
+  is_active?: boolean;
 }
 
 export interface AutomationRule {
@@ -78,7 +89,7 @@ export function useAutomationMutations() {
   const qc = useQueryClient();
   return {
     save: useMutation({
-      mutationFn: async (payload: any & { name: string; trigger_event: string; actions: AutomationAction[] }) => {
+      mutationFn: async (payload: AutomationRuleInput) => {
         const { companyId, userId } = await ctx();
         if (payload.id) {
           const { error } = await supabase
@@ -111,7 +122,7 @@ export function useAutomationMutations() {
         toast.success("Regra salva");
         qc.invalidateQueries({ queryKey: ["automation_rules"] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(errorMessage(e)),
     }),
     remove: useMutation({
       mutationFn: async (id: string) => {
@@ -122,7 +133,7 @@ export function useAutomationMutations() {
         toast.success("Regra removida");
         qc.invalidateQueries({ queryKey: ["automation_rules"] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(errorMessage(e)),
     }),
     toggle: useMutation({
       mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
@@ -130,7 +141,7 @@ export function useAutomationMutations() {
         if (error) throw error;
       },
       onSuccess: () => qc.invalidateQueries({ queryKey: ["automation_rules"] }),
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(errorMessage(e)),
     }),
   };
 }
