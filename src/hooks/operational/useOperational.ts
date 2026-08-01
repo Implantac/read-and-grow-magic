@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { operationalService } from '@/services/operational/operationalService';
+import type { DeliveryTrackingEventInput } from '@/services/operational/operationalService';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 
 export function useOperational() {
@@ -16,7 +17,7 @@ export function useOperational() {
       queryClient.invalidateQueries({ queryKey: ['shipment_orders'] });
       toastSuccess('Status da expedição atualizado');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error updating shipment:', error);
       toastError('Erro ao atualizar expedição');
     }
@@ -31,11 +32,11 @@ export function useOperational() {
   });
 
   const createTrackingEventMutation = useMutation({
-    mutationFn: (event: any) => operationalService.createTrackingEvent(event),
+    mutationFn: (event: DeliveryTrackingEventInput) => operationalService.createTrackingEvent(event),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['delivery_tracking', variables.shipment_id] });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error creating tracking event:', error);
       toastError('Erro ao registrar evento de rastreio');
     }
