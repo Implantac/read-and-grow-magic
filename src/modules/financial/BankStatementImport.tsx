@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { errorMessage } from '@/lib/errors';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
@@ -43,8 +44,8 @@ export default function BankStatementImport() {
       }
       setParsed(txs);
       toastSuccess(`${txs.length} transações lidas`, 'Selecione a conta bancária e importe.');
-    } catch (e: any) {
-      toastError(e.message, undefined, 'Erro ao ler arquivo');
+    } catch (e) {
+      toastError(errorMessage(e), undefined, 'Erro ao ler arquivo');
     }
   }
 

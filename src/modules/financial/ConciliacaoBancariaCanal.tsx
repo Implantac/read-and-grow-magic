@@ -116,7 +116,7 @@ export default function ConciliacaoBancariaCanal() {
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas</SelectItem>
-              {accounts.map((a: any) => (
+              {accounts.map((a) => (
                 <SelectItem key={a.id} value={a.id}>{a.name} — {a.bank_name}</SelectItem>
               ))}
             </SelectContent>

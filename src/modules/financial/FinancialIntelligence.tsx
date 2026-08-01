@@ -111,12 +111,16 @@ export default function FinancialIntelligence() {
           <CardHeader><CardTitle className="text-base flex items-center gap-2"><TrendingUp className="h-4 w-4" />Recomendações da IA</CardTitle></CardHeader>
           <CardContent>
             <ul className="space-y-2">
-              {score!.recommendations.map((r: any, i: number) => (
-                <li key={i} className="text-sm flex gap-2">
-                  <Badge variant={r.priority === 'critical' || r.priority === 'high' ? 'destructive' : 'secondary'} className="text-[10px] uppercase">{r.priority}</Badge>
-                  <span>{r.msg}</span>
-                </li>
-              ))}
+              {score!.recommendations.map((r, i) => {
+                const priority = typeof r === 'string' ? 'info' : (r.priority ?? 'info');
+                const msg = typeof r === 'string' ? r : (r.msg ?? '');
+                return (
+                  <li key={i} className="text-sm flex gap-2">
+                    <Badge variant={priority === 'critical' || priority === 'high' ? 'destructive' : 'secondary'} className="text-[10px] uppercase">{priority}</Badge>
+                    <span>{msg}</span>
+                  </li>
+                );
+              })}
             </ul>
           </CardContent>
         </Card>
