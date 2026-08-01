@@ -14,7 +14,7 @@ export default function ReceivingPage() {
   const { orders, loading, refetch, update } = useWMSReceiving();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<ReceivingOrderView | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   const filteredOrders = orders.filter(order => {

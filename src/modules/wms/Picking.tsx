@@ -20,7 +20,7 @@ export default function PickingPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [startDialog, setStartDialog] = useState<string | null>(null);
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<PickingOrderView | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [scannedItems, setScannedItems] = useState<Record<string, number>>({});
   const [operator, setOperator] = useState('');

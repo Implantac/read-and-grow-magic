@@ -10,9 +10,9 @@ import type { PickingStatus } from '@/types/wms';
 import { statusConfig, priorityConfig } from './constants';
 
 interface Props {
-  orders: any[];
+  orders: PickingOrderView[];
   loading: boolean;
-  onOpenDetails: (order: any) => void;
+  onOpenDetails: (order: PickingOrderView) => void;
 }
 
 export function PickingTable({ orders, loading, onOpenDetails }: Props) {

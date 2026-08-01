@@ -18,8 +18,8 @@ import { statusConfig, priorityConfig } from './constants';
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  selectedOrder: any;
-  setSelectedOrder: Dispatch<SetStateAction<any>>;
+  selectedOrder: PickingOrderView | null;
+  setSelectedOrder: Dispatch<SetStateAction<PickingOrderView | null>>;
   scannedItems: Record<string, number>;
   setScannedItems: Dispatch<SetStateAction<Record<string, number>>>;
   onStart: () => void;
@@ -141,7 +141,7 @@ export function PickingDetailsDialog({
                     setScannedItems(prev => ({ ...prev, [product.code]: currentCount }));
 
                     if (selectedOrder.pickedItems < selectedOrder.itemsCount) {
-                      setSelectedOrder((prev: any) => ({
+                      setSelectedOrder((prev) => (prev && {
                         ...prev,
                         pickedItems: (prev.pickedItems || 0) + 1
                       }));

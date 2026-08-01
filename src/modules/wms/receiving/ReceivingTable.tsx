@@ -10,10 +10,10 @@ import { statusConfig, formatDate } from './constants';
 
 interface Props {
   loading: boolean;
-  orders: any[];
+  orders: ReceivingOrderView[];
   onStart: (id: string) => void;
   onComplete: (id: string) => void;
-  onOpenDetails: (order: any) => void;
+  onOpenDetails: (order: ReceivingOrderView) => void;
 }
 
 export function ReceivingTable({ loading, orders, onStart, onComplete, onOpenDetails }: Props) {

@@ -15,8 +15,8 @@ import { statusConfig, formatDate } from './constants';
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  order: any;
-  setOrder: (o: any) => void;
+  order: ReceivingOrderView | null;
+  setOrder: (o: ReceivingOrderView) => void;
   onStart: (id: string) => void;
   onComplete: (id: string) => void;
 }
