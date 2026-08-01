@@ -5,16 +5,17 @@ import { AlertTriangle, MapPin, Wifi, WifiOff } from 'lucide-react';
 import { BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { ZONE_COLORS } from './constants';
+import type { RFIDReader, RFIDTag } from '@/types/rfid';
 
 const tooltipStyle = { backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', fontSize: '12px' };
 
 interface Props {
   loading: boolean;
   eventsByZone: { name: string; value: number; fill: string }[];
-  readers: any[];
-  tags: any[];
-  offlineReaders: any[];
-  tagAlerts: any[];
+  readers: RFIDReader[];
+  tags: RFIDTag[];
+  offlineReaders: RFIDReader[];
+  tagAlerts: RFIDTag[];
 }
 
 export function ZonesRow({ loading, eventsByZone, readers, tags, offlineReaders, tagAlerts }: Props) {
