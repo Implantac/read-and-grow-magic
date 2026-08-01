@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Activity, TrendingUp, Clock, AlertTriangle, Target, Gauge, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toastError } from "@/lib/toastHelpers";
+import { errorMessage } from "@/lib/errors";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { Truck, ListChecks } from "lucide-react";
 
@@ -102,9 +103,9 @@ export default function WMSAnalytics() {
         tasksPerHour: Math.round(tasksPerHour * 10) / 10,
       });
       setShipments(shipRows.slice(0, 20));
-      setEvents(evts.data ?? []);
+      setEvents((evts.data ?? []) as EventRow[]);
     } catch (e) {
-      toastError("Falha ao carregar analytics", e?.message ?? "");
+      toastError("Falha ao carregar analytics", errorMessage(e));
     } finally {
       setLoading(false);
     }
