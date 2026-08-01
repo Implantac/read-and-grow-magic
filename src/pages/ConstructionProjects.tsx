@@ -76,7 +76,7 @@ function NewProjectDialog() {
             </div>
             <div>
               <Label>Status</Label>
-              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as any })}>
+              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as ConstructionProject['status'] })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {Object.entries(STATUS_LABELS).map(([k, v]) => (

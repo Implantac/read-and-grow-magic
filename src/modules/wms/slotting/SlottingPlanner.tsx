@@ -196,7 +196,7 @@ export default function SlottingPlanner() {
             {sim.preview && sim.preview.length > 0 && (
               <div className="text-xs text-muted-foreground">
                 Top {sim.preview.length} sugestões preview · principais razões:{" "}
-                {Array.from(new Set(sim.preview.map((p) => String((p.reason as any)?.rationale)))).join(", ")}
+                {Array.from(new Set(sim.preview.map((p) => String(p.reason?.rationale ?? "")))).join(", ")}
               </div>
             )}
             <Button size="sm" onClick={recompute} disabled={running} className="gap-2">
