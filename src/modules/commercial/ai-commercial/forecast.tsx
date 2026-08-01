@@ -50,9 +50,9 @@ export function ForecastSummary({ latestForecast }: { latestForecast: AIForecast
 }
 
 export function ForecastCard({ forecast }: { forecast: AIForecast }) {
-  const byRep = forecast.by_rep ? Object.entries(forecast.by_rep as Record<string, any>) : [];
-  const byRegion = forecast.by_region ? Object.entries(forecast.by_region as Record<string, number>) : [];
-  const bySegment = forecast.by_segment ? Object.entries(forecast.by_segment as Record<string, number>) : [];
+  const byRep = forecast.by_rep ? Object.entries(forecast.by_rep) : [];
+  const byRegion = forecast.by_region ? Object.entries(forecast.by_region) : [];
+  const bySegment = forecast.by_segment ? Object.entries(forecast.by_segment) : [];
 
   return (
     <Card>
@@ -83,7 +83,7 @@ export function ForecastCard({ forecast }: { forecast: AIForecast }) {
           <div>
             <h4 className="text-xs font-medium text-muted-foreground mb-2">Por Vendedor</h4>
             <div className="space-y-1">
-              {byRep.map(([id, data]: [string, any]) => (
+              {byRep.map(([id, data]) => (
                 <div key={id} className="flex items-center justify-between text-xs p-2 rounded bg-muted/30">
                   <span>{data.name || id.slice(0, 8)}</span>
                   <div className="flex gap-3">
@@ -101,7 +101,7 @@ export function ForecastCard({ forecast }: { forecast: AIForecast }) {
             <h4 className="text-xs font-medium text-muted-foreground mb-2">Por Região</h4>
             <div className="flex flex-wrap gap-2">
               {byRegion.map(([region, value]) => (
-                <Badge key={region} variant="secondary" className="text-xs">{region}: {formatBRL(value as number)}</Badge>
+                <Badge key={region} variant="secondary" className="text-xs">{region}: {formatBRL(value)}</Badge>
               ))}
             </div>
           </div>
@@ -112,7 +112,7 @@ export function ForecastCard({ forecast }: { forecast: AIForecast }) {
             <h4 className="text-xs font-medium text-muted-foreground mb-2">Por Segmento</h4>
             <div className="flex flex-wrap gap-2">
               {bySegment.map(([seg, value]) => (
-                <Badge key={seg} variant="outline" className="text-xs">{seg}: {formatBRL(value as number)}</Badge>
+                <Badge key={seg} variant="outline" className="text-xs">{seg}: {formatBRL(value)}</Badge>
               ))}
             </div>
           </div>

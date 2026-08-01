@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { resolveNextStep, type Branch } from "@/lib/workflowConditions";
 import type { Json } from "@/integrations/supabase/types";
+import { errorMessage } from "@/lib/errors";
 // Converte estruturas tipadas do domínio para o tipo `Json` do Postgres.
 const toJson = (value: unknown): Json => value as Json;
 

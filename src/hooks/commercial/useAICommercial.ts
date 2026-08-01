@@ -98,6 +98,18 @@ export interface AIPrediction {
   sales_funnel?: { id: string; title: string; stage: string; value: number };
 }
 
+export interface AIForecastRep {
+  name?: string;
+  confirmed?: number;
+  pipeline?: number;
+}
+
+export interface AIForecastFactors {
+  target_achievement_pct?: number;
+  daily_needed?: number;
+  [key: string]: unknown;
+}
+
 export interface AIForecast {
   id: string;
   period: string;
@@ -106,10 +118,10 @@ export interface AIForecast {
   best_case: number | null;
   worst_case: number | null;
   confidence: number | null;
-  by_rep: Json;
-  by_segment: Json;
-  by_region: Json;
-  factors: Json;
+  by_rep: Record<string, AIForecastRep> | null;
+  by_segment: Record<string, number> | null;
+  by_region: Record<string, number> | null;
+  factors: AIForecastFactors | null;
   created_at: string;
 }
 
