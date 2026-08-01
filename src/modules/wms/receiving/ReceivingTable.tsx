@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Truck, MoreHorizontal, PlayCircle, CheckCircle, Info, ShoppingCart } from 'lucide-react';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { statusConfig, formatDate } from './constants';
+import type { ReceivingOrderView } from '@/hooks/wms/useWMSOperations';
 
 interface Props {
   loading: boolean;
