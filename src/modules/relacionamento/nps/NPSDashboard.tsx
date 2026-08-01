@@ -33,11 +33,11 @@ export default function NPSDashboard() {
 
   const byCity = useMemo(() => {
     const map = new Map<string, number>();
-    answers.forEach((a: any) => { const c = a.clients?.address_city ?? a.city ?? 'N/D'; map.set(c, (map.get(c) ?? 0) + 1); });
+    answers.forEach((a) => { const c = a.clients?.address_city ?? a.city ?? 'N/D'; map.set(c, (map.get(c) ?? 0) + 1); });
     return Array.from(map.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8);
   }, [answers]);
 
-  const critical = answers.filter((a: any) => a.category === 'detractor').slice(0, 8);
+  const critical = answers.filter((a) => a.category === 'detractor').slice(0, 8);
   const lastAnswers = answers.slice(0, 6);
 
   const pieData = stats ? [
@@ -140,7 +140,7 @@ export default function NPSDashboard() {
           <CardHeader><CardTitle className="flex gap-2 items-center"><AlertTriangle className="h-4 w-4 text-red-500" /> Clientes críticos</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
             {critical.length === 0 && <p className="text-muted-foreground">Sem detratores no período.</p>}
-            {critical.map((a: any) => (
+            {critical.map((a) => (
               <div key={a.id} className="flex items-center justify-between border-b border-border pb-1">
                 <span className="truncate">{a.clients?.name ?? 'Cliente'}</span>
                 <Badge variant="destructive">{a.score}</Badge>
@@ -153,7 +153,7 @@ export default function NPSDashboard() {
       <Card>
         <CardHeader><CardTitle>Últimas respostas</CardTitle></CardHeader>
         <CardContent className="space-y-2">
-          {lastAnswers.map((a: any) => (
+          {lastAnswers.map((a) => (
             <div key={a.id} className="flex items-start gap-3 border-b border-border py-2 text-sm">
               <Badge className={a.category === 'promoter' ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/30' : a.category === 'detractor' ? 'bg-red-500/20 text-red-500 border-red-500/30' : 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30'}>
                 {a.score}
@@ -172,7 +172,13 @@ export default function NPSDashboard() {
   );
 }
 
-function KPI({ title, value, suffix, icon, accent }: any) {
+function KPI({ title, value, suffix, icon, accent }: {
+  title: string;
+  value: React.ReactNode;
+  suffix?: string;
+  icon?: React.ReactNode;
+  accent?: string;
+}) {
   return (
     <Card>
       <CardHeader className="pb-2 flex flex-row items-center justify-between">
@@ -186,7 +192,7 @@ function KPI({ title, value, suffix, icon, accent }: any) {
   );
 }
 
-function Megaphone(_p: any) { return <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 11l18-5v12L3 13v-2z"/></svg>; }
+function Megaphone() { return <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 11l18-5v12L3 13v-2z"/></svg>; }
 
 function npsColor(s: number) {
   if (s >= 50) return 'text-emerald-500';

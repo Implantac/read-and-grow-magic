@@ -8,13 +8,14 @@ import { Slider } from '@/ui/base/slider';
 import { SimulationService, SimulationScenario, SimulationResult, MRPService, ActionSuggestion } from '@/lib/pcpServices';
 import { FlaskConical, AlertTriangle, TrendingDown, TrendingUp, Lightbulb, Play, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { OrderLike, SheetLike, SupplyLike, CapacityLike } from '@/lib/pcp/types';
 
 import { formatNumber } from '@/lib/formatters';
 interface MRPSimulationProps {
-  orders: any[];
-  sheets: any[];
-  supplies: any[];
-  capacities: any[];
+  orders: OrderLike[];
+  sheets: SheetLike[];
+  supplies: SupplyLike[];
+  capacities: CapacityLike[];
 }
 
 export default function MRPSimulation({ orders, sheets, supplies, capacities }: MRPSimulationProps) {
@@ -36,11 +37,11 @@ export default function MRPSimulation({ orders, sheets, supplies, capacities }: 
         scenario = preset;
       } else {
         // Custom scenario
-        const sectors = [...new Set(capacities.map((c: any) => c.sector))];
+        const sectors = [...new Set(capacities.map((c) => c.sector))];
         scenario = {
           name: 'Cenário Personalizado',
           description: `Redução ${customShortage}% material + ${customCapacityChange}% capacidade`,
-          materialShortages: supplies.slice(0, 3).map((s: any) => ({ materialCode: s.code || s.name, reducePct: customShortage })),
+          materialShortages: supplies.slice(0, 3).map((s) => ({ materialCode: s.code || s.name, reducePct: customShortage })),
           capacityChange: sectors.map(s => ({ sector: s, changePct: customCapacityChange })),
         };
       }

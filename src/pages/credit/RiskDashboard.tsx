@@ -29,9 +29,9 @@ export default function RiskDashboard() {
   const analysisClients = profiles.filter(p => p.credit_status === 'analysis');
 
   const now = new Date();
-  const overdueReceivables = receivables.filter((r: any) => r.status !== 'paid' && new Date(r.due_date) < now);
-  const totalOverdue = overdueReceivables.reduce((s: number, r: any) => s + Number(r.amount), 0);
-  const totalOpen = receivables.filter((r: any) => r.status !== 'paid').reduce((s: number, r: any) => s + Number(r.amount), 0);
+  const overdueReceivables = receivables.filter((r) => r.status !== 'paid' && new Date(r.due_date) < now);
+  const totalOverdue = overdueReceivables.reduce((s, r) => s + Number(r.amount), 0);
+  const totalOpen = receivables.filter((r) => r.status !== 'paid').reduce((s, r) => s + Number(r.amount), 0);
 
   // Risk distribution for pie chart
   const riskDist = [
@@ -53,12 +53,12 @@ export default function RiskDashboard() {
   ];
   ranges.forEach(r => {
     const val = receivables
-      .filter((rc: any) => rc.status !== 'paid')
-      .filter((rc: any) => {
+      .filter((rc) => rc.status !== 'paid')
+      .filter((rc) => {
         const diff = Math.floor((now.getTime() - new Date(rc.due_date).getTime()) / 86400000);
         return diff >= r.min && diff <= r.max;
       })
-      .reduce((s: number, rc: any) => s + Number(rc.amount), 0);
+      .reduce((s, rc) => s + Number(rc.amount), 0);
     aging.push({ name: r.name, value: val });
   });
 

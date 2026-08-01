@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Activity, TrendingUp, Clock, AlertTriangle, Target, Gauge, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toastError } from "@/lib/toastHelpers";
+import { errorMessage } from "@/lib/errors";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { Truck, ListChecks } from "lucide-react";
 
@@ -25,14 +26,29 @@ type KPI = {
   tasksPerHour: number;
 };
 
+type ShipmentRow = {
+  id: string;
+  status: string | null;
+  carrier: string | null;
+  tracking_number: string | null;
+  scheduled_date: string | null;
+  shipped_at: string | null;
+  delivered_at: string | null;
+  created_at: string;
+};
+
+type EventRow = { id: string; event_type: string; created_at: string; payload: unknown };
+
+type PickingRow = { id: string; status: string | null; created_at: string; completed_at: string | null };
+
 const rangeToHours: Record<Range, number> = { "24h": 24, "7d": 24 * 7, "30d": 24 * 30 };
 
 export default function WMSAnalytics() {
   const [range, setRange] = useState<Range>("7d");
   const [loading, setLoading] = useState(false);
   const [kpi, setKpi] = useState<KPI | null>(null);
-  const [shipments, setShipments] = useState<any[]>([]);
-  const [events, setEvents] = useState<any[]>([]);
+  const [shipments, setShipments] = useState<ShipmentRow[]>([]);
+  const [events, setEvents] = useState<EventRow[]>([]);
 
   const since = useMemo(() => {
     const d = new Date();
@@ -52,21 +68,21 @@ export default function WMSAnalytics() {
         supabase.from("wms_events").select("id,event_type,created_at,payload").gte("created_at", since).order("created_at", { ascending: false }).limit(50),
       ]);
 
-      const shipRows = ship.data ?? [];
-      const pickRows = pickAll.data ?? [];
+      const shipRows = (ship.data ?? []) as ShipmentRow[];
+      const pickRows = (pickAll.data ?? []) as PickingRow[];
       const logRows = (logs.data ?? []) as Array<{ duration_seconds: number | null }>;
       const qRows = (qual.data ?? []) as Array<{ decision: string | null }>;
 
-      const completed = pickRows.filter((p: any) => p.status === "completed");
+      const completed = pickRows.filter((p) => p.status === "completed");
       const avgPickMin = completed.length
-        ? completed.reduce((acc: number, p: any) => {
+        ? completed.reduce((acc, p) => {
             if (!p.completed_at) return acc;
             return acc + (new Date(p.completed_at).getTime() - new Date(p.created_at).getTime()) / 60000;
           }, 0) / completed.length
         : 0;
 
-      const slaOn = shipRows.filter((s: any) => s.delivered_at && s.scheduled_date && new Date(s.delivered_at) <= new Date(s.scheduled_date)).length;
-      const slaLate = shipRows.filter((s: any) => s.delivered_at && s.scheduled_date && new Date(s.delivered_at) > new Date(s.scheduled_date)).length;
+      const slaOn = shipRows.filter((s) => s.delivered_at && s.scheduled_date && new Date(s.delivered_at) <= new Date(s.scheduled_date)).length;
+      const slaLate = shipRows.filter((s) => s.delivered_at && s.scheduled_date && new Date(s.delivered_at) > new Date(s.scheduled_date)).length;
 
       const qualFails = qRows.filter((q) => q.decision === "rejected" || q.decision === "quarantine").length;
       const accuracy = qRows.length ? Math.max(0, 100 - (qualFails / qRows.length) * 100) : 100;
@@ -78,7 +94,7 @@ export default function WMSAnalytics() {
         receivings: recv.data?.length ?? 0,
         shipments: shipRows.length,
         pickingsCompleted: completed.length,
-        pickingsPending: pickRows.filter((p: any) => p.status !== "completed" && p.status !== "cancelled").length,
+        pickingsPending: pickRows.filter((p) => p.status !== "completed" && p.status !== "cancelled").length,
         avgPickMinutes: Math.round(avgPickMin),
         slaOnTime: slaOn,
         slaLate,
@@ -87,9 +103,9 @@ export default function WMSAnalytics() {
         tasksPerHour: Math.round(tasksPerHour * 10) / 10,
       });
       setShipments(shipRows.slice(0, 20));
-      setEvents(evts.data ?? []);
-    } catch (e: any) {
-      toastError("Falha ao carregar analytics", e?.message ?? "");
+      setEvents((evts.data ?? []) as EventRow[]);
+    } catch (e) {
+      toastError("Falha ao carregar analytics", errorMessage(e));
     } finally {
       setLoading(false);
     }
