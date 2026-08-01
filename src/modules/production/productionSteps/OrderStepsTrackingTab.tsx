@@ -1,3 +1,5 @@
+import type { ProductionOrderStep } from '@/hooks/production/useProductionSteps';
+import type { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
 import { Card, CardContent } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Progress } from '@/ui/base/progress';
@@ -8,10 +10,10 @@ import { CheckCircle, Clock, Factory, Layers, Play, Plus, User } from 'lucide-re
 import { cn } from '@/lib/utils';
 
 interface Props {
-  activeOrders: any[];
+  activeOrders: ProductionOrderRow[];
   selectedOrderId: string;
   onSelectOrder: (id: string) => void;
-  orderSteps: any[];
+  orderSteps: ProductionOrderStep[];
   orderStepsLoading: boolean;
   onOpenGenerateForOrder: () => void;
   onStepStatusChange: (stepId: string, status: string) => void;

@@ -1,3 +1,4 @@
+import type { ProductionStep } from '@/hooks/production/useProductionSteps';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
@@ -6,9 +7,9 @@ import { EmptyState } from '@/shared/components/EmptyState';
 import { GripVertical, Layers, Pencil, Plus, Trash2 } from 'lucide-react';
 
 interface Props {
-  steps: any[];
+  steps: ProductionStep[];
   onNew: () => void;
-  onEdit: (s: any) => void;
+  onEdit: (s: ProductionStep) => void;
   onDelete: (id: string) => void;
 }
 
