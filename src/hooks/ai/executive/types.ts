@@ -103,6 +103,7 @@ export interface ExecutiveDashboardData {
   expenseByCategory: Record<string, number>;
   salesRepStats: SalesRepStat[];
   funnelByStage: Record<string, { count: number; value: number }>;
+  revenueByRegion?: Record<string, number>;
   insights: ExecutiveInsight[];
   consensus: Array<{ specialist: string; insight: string; status: string }>;
   alerts: ExecutiveAlert[];
