@@ -183,7 +183,7 @@ export default function ExecutiveDashboard() {
             title: ins.title,
             description: ins.description,
             impact: ins.impact_estimate,
-            priority: ins.severity,
+            priority: (ins.severity as 'critical' | 'high' | 'medium' | 'low'),
             module: ins.module
           }))}
           onExecute={sendMessage}
