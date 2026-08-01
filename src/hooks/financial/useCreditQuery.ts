@@ -16,13 +16,13 @@ export function useCredit() {
   });
 
   const updateAnalysisMutation = useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: any }) => creditService.updateAnalysis(id, updates),
+    mutationFn: ({ id, updates }: { id: string; updates: Record<string, unknown> }) => creditService.updateAnalysis(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['credit_analyses'] });
       toastSuccess('Análise de crédito atualizada');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao atualizar análise');
+    onError: (error: unknown) => {
+      toastError(error, 'Erro ao atualizar análise');
     }
   });
 

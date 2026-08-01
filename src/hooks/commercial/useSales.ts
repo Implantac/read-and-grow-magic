@@ -21,13 +21,14 @@ export function useSales() {
         .order('date', { ascending: false })
         .limit(1000);
       if (error) throw error;
-      return (data ?? []).map((o: any) => ({
+      type OrderRow = { id: string; client_id: string | null; date: string; total: number | string | null; status: string; order_items?: { product_id: string | null }[] | null };
+      return ((data ?? []) as OrderRow[]).map((o) => ({
         id: o.id,
         client_id: o.client_id ?? undefined,
         date: o.date,
         total: Number(o.total) || 0,
         status: o.status,
-        items: (o.order_items ?? []).map((i: any) => ({ product_id: i.product_id ?? undefined })),
+        items: (o.order_items ?? []).map((i) => ({ product_id: i.product_id ?? undefined })),
       }));
     },
     staleTime: 5 * 60 * 1000,

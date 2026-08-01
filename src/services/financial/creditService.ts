@@ -29,7 +29,7 @@ export const creditService = {
     return data || [];
   },
 
-  async updateAnalysis(id: string, updates: any) {
+  async updateAnalysis(id: string, updates: Record<string, unknown>) {
     const { data, error } = await supabase
       .from('customer_credit_profiles')
       .update(updates)

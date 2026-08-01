@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { mutationErrorHandler, toastSuccess } from '@/lib/toastHelpers';
 
 export function useSalesTargets(filters?: { period?: string; entityType?: string }) {
@@ -19,7 +20,7 @@ export function useSalesTargets(filters?: { period?: string; entityType?: string
 export function useSalesTargetMutations() {
   const queryClient = useQueryClient();
   const createTarget = useMutation({
-    mutationFn: async (target: any) => {
+    mutationFn: async (target: TablesInsert<'sales_targets'>) => {
       const { data, error } = await supabase.from('sales_targets').insert(target).select().single();
       if (error) throw error;
       return data;
@@ -32,7 +33,7 @@ export function useSalesTargetMutations() {
   });
 
   const updateTarget = useMutation({
-    mutationFn: async ({ id, ...updates }: any) => {
+    mutationFn: async ({ id, ...updates }: TablesUpdate<'sales_targets'> & { id: string }) => {
       const { data, error } = await supabase.from('sales_targets').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', id).select().single();
       if (error) throw error;
       return data;

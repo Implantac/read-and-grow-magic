@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import type { TablesUpdate } from '@/integrations/supabase/types';
 
 export interface Shipment {
   id: string;
@@ -36,7 +37,7 @@ export function useWMSShipments() {
       .order('created_at', { ascending: false });
     
     if (error) { console.error(error); toast.error('Erro ao carregar expedições'); }
-    else setShipments((data || []).map((r: any) => ({
+    else setShipments((data || []).map((r) => ({
       id: r.id, shipmentNumber: r.shipment_number, orderNumber: r.order_number,
       customerName: r.customer_name, carrier: r.carrier, carrierCode: r.carrier_code,
       trackingNumber: r.tracking_number, volumes: r.volumes, totalWeight: Number(r.total_weight),
@@ -64,7 +65,7 @@ export function useWMSShipments() {
     return true;
   };
 
-  const update = async (id: string, updates: any) => {
+  const update = async (id: string, updates: TablesUpdate<'wms_shipments'>) => {
     const { error } = await supabase.from('wms_shipments').update(updates).eq('id', id);
     if (error) { toast.error('Erro ao atualizar'); return false; }
     await fetch();
