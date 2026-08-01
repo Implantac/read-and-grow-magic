@@ -1,3 +1,5 @@
+import type { ProductionStep } from '@/hooks/production/useProductionSteps';
+import type { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
 import { Button } from '@/ui/base/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { Label } from '@/ui/base/label';
@@ -6,8 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 interface Props {
   open: boolean;
   onOpenChange: (o: boolean) => void;
-  activeOrders: any[];
-  activeSteps: any[];
+  activeOrders: ProductionOrderRow[];
+  activeSteps: ProductionStep[];
   generateOrderId: string;
   setGenerateOrderId: (id: string) => void;
   selectedStepIds: string[];

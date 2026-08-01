@@ -56,7 +56,7 @@ export default function Automations() {
 
       {isLoading ? <Skeleton className="h-40" /> : (
         <div className="space-y-2">
-          {automations.map((a: any) => (
+          {automations.map((a) => (
             <Card key={a.id}>
               <CardContent className="pt-4 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-3">
@@ -88,7 +88,7 @@ export default function Automations() {
             <div className="col-span-2"><Label>Campanha</Label>
               <Select value={form.campaign_id ?? ''} onValueChange={(v) => setForm({ ...form, campaign_id: v })}>
                 <SelectTrigger><SelectValue placeholder="Selecionar" /></SelectTrigger>
-                <SelectContent>{campaigns.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+                <SelectContent>{campaigns.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
             <div><Label>Gatilho</Label>

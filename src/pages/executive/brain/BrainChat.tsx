@@ -1,3 +1,4 @@
+import type { BrainChatMessage } from '@/hooks/ai/brain/types';
 import { useRef, useState, useEffect } from 'react';
 import { Brain, Send, ArrowDown, User2, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
@@ -9,7 +10,7 @@ import { cn } from '@/lib/utils';
 import { SUGGESTED_PROMPTS } from './constants';
 
 interface BrainChatProps {
-  messages: any[];
+  messages: BrainChatMessage[];
   loading: boolean;
   input: string;
   setInput: (v: string) => void;

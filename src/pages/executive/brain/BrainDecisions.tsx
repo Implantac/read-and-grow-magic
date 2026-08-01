@@ -1,3 +1,4 @@
+import type { BrainDecision } from '@/hooks/ai/brain/types';
 import { Brain, CheckCircle2, XCircle, Zap } from 'lucide-react';
 import { Card, CardContent } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
@@ -6,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { impactColor, statusLabel } from './constants';
 
 interface BrainDecisionsProps {
-  decisions: any[];
+  decisions: BrainDecision[];
   onApprove: (id: string, approve: boolean) => void;
   approvePending: boolean;
   onAnalyze: () => void;

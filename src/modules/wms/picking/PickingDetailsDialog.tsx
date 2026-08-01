@@ -14,12 +14,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { BarcodeScanner } from '@/components/wms/BarcodeScanner';
 import type { PickingStatus } from '@/types/wms';
 import { statusConfig, priorityConfig } from './constants';
+import type { PickingOrderView } from '@/hooks/wms/useWMSOperations';
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  selectedOrder: any;
-  setSelectedOrder: Dispatch<SetStateAction<any>>;
+  selectedOrder: PickingOrderView | null;
+  setSelectedOrder: Dispatch<SetStateAction<PickingOrderView | null>>;
   scannedItems: Record<string, number>;
   setScannedItems: Dispatch<SetStateAction<Record<string, number>>>;
   onStart: () => void;
@@ -141,7 +142,7 @@ export function PickingDetailsDialog({
                     setScannedItems(prev => ({ ...prev, [product.code]: currentCount }));
 
                     if (selectedOrder.pickedItems < selectedOrder.itemsCount) {
-                      setSelectedOrder((prev: any) => ({
+                      setSelectedOrder((prev) => (prev && {
                         ...prev,
                         pickedItems: (prev.pickedItems || 0) + 1
                       }));

@@ -1,3 +1,4 @@
+import { errorMessage } from '@/lib/errors';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -26,11 +27,11 @@ export function useGenerateInvites() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (d: any) => {
+    onSuccess: (d: { invites?: unknown[] } | null) => {
       qc.invalidateQueries({ queryKey: ['nps'] });
       toast.success(`${d?.invites?.length ?? 0} convite(s) gerados`);
     },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: unknown) => toast.error(errorMessage(e)),
   });
 }
 

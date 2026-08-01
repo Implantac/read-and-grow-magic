@@ -247,3 +247,7 @@ export function useWMSDashboardStats() {
   useEffect(() => { fetch(); }, [fetch]);
   return { stats, recentMovements, loading };
 }
+
+/** Views tipadas expostas para os componentes WMS */
+export type ReceivingOrderView = ReturnType<typeof mapReceiving>;
+export type PickingOrderView = ReturnType<typeof mapPicking>;

@@ -1,3 +1,4 @@
+import type { BrainDecision } from '@/hooks/ai/brain/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
 import { Badge } from '@/ui/base/badge';
@@ -6,7 +7,7 @@ import { AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
 import { impactColor } from './constants';
 
 interface Props {
-  pending: any[];
+  pending: BrainDecision[];
   onApprove: (id: string, approve: boolean) => void;
   approvePending: boolean;
 }

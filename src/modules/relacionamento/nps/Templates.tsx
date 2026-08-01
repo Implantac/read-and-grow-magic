@@ -1,3 +1,4 @@
+import type { NPSTemplateInput } from './hooks/templates';
 import { useState } from 'react';
 import { useNPSTemplates, useSaveTemplate } from './hooks';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
@@ -13,7 +14,7 @@ export default function Templates() {
   const { data: templates = [], isLoading } = useNPSTemplates();
   const save = useSaveTemplate();
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState<any>({ name: '', primary_color: '#FF9800', background_color: '#1A2234', font_family: 'Inter', logo_url: '', banner_url: '', footer_text: '' });
+  const [form, setForm] = useState<NPSTemplateInput>({ name: '', primary_color: '#FF9800', background_color: '#1A2234', font_family: 'Inter', logo_url: '', banner_url: '', footer_text: '' });
 
   const submit = () => save.mutate(form, { onSuccess: () => setOpen(false) });
 
@@ -29,7 +30,7 @@ export default function Templates() {
 
       {isLoading ? <Skeleton className="h-40" /> : (
         <div className="grid gap-3 md:grid-cols-3">
-          {templates.map((t: any) => (
+          {templates.map((t) => (
             <Card key={t.id}>
               <CardHeader className="pb-2 flex flex-row items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2"><Palette className="h-4 w-4" style={{ color: t.primary_color }} /> {t.name}</CardTitle>

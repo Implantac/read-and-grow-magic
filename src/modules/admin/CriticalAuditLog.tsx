@@ -69,20 +69,23 @@ export default function CriticalAuditLog() {
     stock: rows.filter(r => r.action === 'stock_adjustment').length,
   }), [rows]);
 
+  const asRecord = (value: Json | null): Record<string, Json> =>
+    value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+
   const describeChange = (r: AuditRow) => {
     if (r.action === 'price_change') {
-      const o = r.old_data || {}; const n = r.new_data || {};
+      const o = asRecord(r.old_data); const n = asRecord(r.new_data);
       const parts: string[] = [];
       if (o.sale_price !== n.sale_price) parts.push(`Venda: R$ ${Number(o.sale_price ?? 0).toFixed(2)} → R$ ${Number(n.sale_price ?? 0).toFixed(2)}`);
       if (o.cost_price !== n.cost_price) parts.push(`Custo: R$ ${Number(o.cost_price ?? 0).toFixed(2)} → R$ ${Number(n.cost_price ?? 0).toFixed(2)}`);
       return parts.join(' • ');
     }
     if (r.action === 'order_cancelled') {
-      return `Status: ${r.old_data?.status ?? '-'} → ${r.new_data?.status ?? '-'} • Total R$ ${Number(r.new_data?.total ?? 0).toFixed(2)}`;
+      return `Status: ${String(asRecord(r.old_data).status ?? '-')} → ${String(asRecord(r.new_data).status ?? '-')} • Total R$ ${Number(asRecord(r.new_data).total ?? 0).toFixed(2)}`;
     }
     if (r.action === 'stock_adjustment') {
-      const n = r.new_data || {};
-      return `${n.direction === 'in' ? '+' : '-'}${n.quantity} ${n.product_code ? `(${n.product_code})` : ''} ${n.reference ? ` • Ref: ${n.reference}` : ''}`;
+      const n = asRecord(r.new_data);
+      return `${n.direction === 'in' ? '+' : '-'}${String(n.quantity ?? '')} ${n.product_code ? `(${String(n.product_code)})` : ''} ${n.reference ? ` • Ref: ${String(n.reference)}` : ''}`;
     }
     return '';
   };

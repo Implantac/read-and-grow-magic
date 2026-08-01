@@ -1,3 +1,4 @@
+import type { BrainChatMessage } from '@/hooks/ai/brain/types';
 import { RefObject, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Button } from '@/ui/base/button';
@@ -8,7 +9,7 @@ import ReactMarkdown from 'react-markdown';
 import { AGENTS } from './constants';
 
 interface Props {
-  messages: any[];
+  messages: BrainChatMessage[];
   loading: boolean;
   input: string;
   setInput: (v: string) => void;
@@ -89,7 +90,7 @@ export function AgentChatCard({ messages, loading, input, setInput, agent, setAg
                   </div>
                   {m.actions && m.actions.length > 0 && (
                     <div className="mt-1 flex flex-col gap-1 max-w-[90%]" role="list" aria-label="Ações executadas">
-                      {m.actions.map((a: any, i: number) => (
+                      {m.actions.map((a, i: number) => (
                         <div
                           key={i}
                           role="listitem"

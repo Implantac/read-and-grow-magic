@@ -7,6 +7,7 @@ import { Brain, CheckCircle2, X, RefreshCw, ArrowRight, TrendingDown, FlaskConic
 import WMSKpiStrip from "../components/WMSKpiStrip";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { toast } from "sonner";
+import { errorMessage } from "@/lib/errors";
 
 type Engine = "v1" | "v2";
 interface SimResult {
@@ -85,8 +86,8 @@ export default function SlottingPlanner() {
       toast.success(`Engine ${engine.toUpperCase()} executado`);
       setSim(null);
       await load();
-    } catch (e: any) {
-      toast.error(e?.message || "Falha ao recalcular");
+    } catch (e: unknown) {
+      toast.error(errorMessage(e) || "Falha ao recalcular");
     } finally {
       setRunning(false);
     }
@@ -102,8 +103,8 @@ export default function SlottingPlanner() {
       const first = data?.result ? (Object.values(data.result)[0] as SimResult) : null;
       setSim(first);
       if (first) toast.success(`Simulação: ${first.generated} sugestões previstas`);
-    } catch (e: any) {
-      toast.error(e?.message || "Falha na simulação");
+    } catch (e: unknown) {
+      toast.error(errorMessage(e) || "Falha na simulação");
     } finally {
       setSimulating(false);
     }

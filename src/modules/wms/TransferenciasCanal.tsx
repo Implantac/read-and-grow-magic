@@ -179,7 +179,7 @@ function NewTransferDialog() {
   const removeItem = (id: string) => setItems((prev) => prev.filter((i) => i.product_id !== id));
 
   const productName = (id: string) => {
-    const p = products.find((x: any) => x.id === id);
+    const p = products.find((x) => x.id === id);
     return p ? `${p.code} — ${p.name}` : id;
   };
 
@@ -256,7 +256,7 @@ function NewTransferDialog() {
               <Select value={pickProduct} onValueChange={setPickProduct}>
                 <SelectTrigger className="flex-1"><SelectValue placeholder="Produto" /></SelectTrigger>
                 <SelectContent>
-                  {products.slice(0, 200).map((p: any) => (
+                  {products.slice(0, 200).map((p) => (
                     <SelectItem key={p.id} value={p.id}>{p.code} — {p.name}</SelectItem>
                   ))}
                 </SelectContent>

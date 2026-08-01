@@ -11,12 +11,13 @@ import { Truck, CheckCircle, Clock, PlayCircle, ShieldCheck, AlertCircle, Box, L
 import { BarcodeScanner } from '@/components/wms/BarcodeScanner';
 import { cn } from '@/lib/utils';
 import { statusConfig, formatDate } from './constants';
+import type { ReceivingOrderView } from '@/hooks/wms/useWMSOperations';
 
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  order: any;
-  setOrder: (o: any) => void;
+  order: ReceivingOrderView | null;
+  setOrder: (o: ReceivingOrderView) => void;
   onStart: (id: string) => void;
   onComplete: (id: string) => void;
 }

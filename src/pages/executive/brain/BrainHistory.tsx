@@ -1,3 +1,4 @@
+import type { BrainRun } from '@/hooks/ai/brain/types';
 import { Card, CardContent } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { format } from 'date-fns';
@@ -5,7 +6,7 @@ import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 
 interface BrainHistoryProps {
-  runs: any[];
+  runs: BrainRun[];
 }
 
 export function BrainHistory({ runs }: BrainHistoryProps) {

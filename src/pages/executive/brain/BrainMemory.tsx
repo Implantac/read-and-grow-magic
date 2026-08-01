@@ -1,11 +1,12 @@
+import type { BrainMemory } from '@/hooks/ai/brain/types';
 import { Search } from 'lucide-react';
 import { Card, CardContent } from '@/ui/base/card';
 import { Input } from '@/ui/base/input';
 import { Badge } from '@/ui/base/badge';
 
 interface BrainMemoryProps {
-  memories: any[];
-  filteredMemories: any[];
+  memories: BrainMemory[];
+  filteredMemories: BrainMemory[];
   memorySearch: string;
   setMemorySearch: (v: string) => void;
   memorySearchRef: React.RefObject<HTMLInputElement>;

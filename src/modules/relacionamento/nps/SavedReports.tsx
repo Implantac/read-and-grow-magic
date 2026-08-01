@@ -17,7 +17,27 @@ import { errorMessage } from '@/lib/errors';
 import type { Tables, TablesInsert } from '@/integrations/supabase/types';
 
 type NpsReport = Tables<'nps_reports'>;
-type NpsReportDraft = Partial<NpsReport> & Pick<TablesInsert<'nps_reports'>, 'name'>;
+
+interface NpsReportFilters {
+  description?: string;
+  group_by?: string;
+  period?: string;
+}
+
+interface NpsReportDraft extends NpsReportFilters {
+  id?: string;
+  name: string;
+}
+
+function readFilters(filters: NpsReport['filters']): NpsReportFilters {
+  if (!filters || typeof filters !== 'object' || Array.isArray(filters)) return {};
+  const f = filters as Record<string, unknown>;
+  return {
+    description: typeof f.description === 'string' ? f.description : undefined,
+    group_by: typeof f.group_by === 'string' ? f.group_by : undefined,
+    period: typeof f.period === 'string' ? f.period : undefined,
+  };
+}
 
 export default function SavedReports() {
   const { currentCompany } = useEnterprise();
@@ -38,11 +58,17 @@ export default function SavedReports() {
 
   const save = useMutation({
     mutationFn: async (input: NpsReportDraft) => {
+      const payload: TablesInsert<'nps_reports'> = {
+        name: input.name,
+        report_type: 'nps',
+        company_id: companyId!,
+        filters: { description: input.description ?? '', group_by: input.group_by ?? 'month', period: input.period ?? '180d' },
+      };
       if (input.id) {
-        const { error } = await supabase.from('nps_reports').update(input).eq('id', input.id!);
+        const { error } = await supabase.from('nps_reports').update(payload).eq('id', input.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('nps_reports').insert({ ...input, company_id: companyId! });
+        const { error } = await supabase.from('nps_reports').insert(payload);
         if (error) throw error;
       }
     },
@@ -72,29 +98,32 @@ export default function SavedReports() {
 
       {isLoading ? <p className="text-sm text-muted-foreground">Carregando…</p> : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {reports.map((r) => (
+          {reports.map((r) => {
+            const f = readFilters(r.filters);
+            return (
             <Card key={r.id}>
               <CardHeader>
                 <CardTitle className="text-base flex items-center justify-between">
                   {r.name}
                   <div className="flex gap-1">
-                    <Button size="icon" variant="ghost" onClick={() => { setEditing(r); setOpen(true); }}><Edit className="h-4 w-4" /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => { setEditing({ id: r.id, name: r.name, ...f }); setOpen(true); }}><Edit className="h-4 w-4" /></Button>
                     <Button size="icon" variant="ghost" onClick={() => del.mutate(r.id)}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                {r.description && <p className="text-xs text-muted-foreground">{r.description}</p>}
+                {f.description && <p className="text-xs text-muted-foreground">{f.description}</p>}
                 <div className="flex gap-2 flex-wrap">
-                  <Badge variant="outline">Agrupar: {r.group_by ?? 'month'}</Badge>
-                  <Badge variant="outline">Período: {r.period ?? '180d'}</Badge>
+                  <Badge variant="outline">Agrupar: {f.group_by ?? 'month'}</Badge>
+                  <Badge variant="outline">Período: {f.period ?? '180d'}</Badge>
                 </div>
                 <Button asChild size="sm" variant="outline" className="w-full">
                   <Link to="/relacionamento/nps/relatorios">Abrir no visualizador</Link>
                 </Button>
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
           {reports.length === 0 && <p className="text-sm text-muted-foreground col-span-full text-center py-8">Nenhum relatório salvo. Crie um para reutilizar configurações.</p>}
         </div>
       )}
@@ -135,7 +164,7 @@ export default function SavedReports() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-            <Button onClick={() => save.mutate(editing)} disabled={!editing?.name}>Salvar</Button>
+            <Button onClick={() => editing && save.mutate(editing)} disabled={!editing?.name}>Salvar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

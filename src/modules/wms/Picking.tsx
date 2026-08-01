@@ -5,7 +5,7 @@ import { ExportButton } from '@/shared/components/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { ClipboardList, Layers } from 'lucide-react';
-import { useWMSPicking } from '@/hooks/wms/useWMSOperations';
+import { useWMSPicking, type PickingOrderView } from '@/hooks/wms/useWMSOperations';
 import { format } from 'date-fns';
 import { PickingFilters } from './picking/PickingFilters';
 import { PickingKPIs } from './picking/PickingKPIs';
@@ -20,7 +20,7 @@ export default function PickingPage() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [startDialog, setStartDialog] = useState<string | null>(null);
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<PickingOrderView | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [scannedItems, setScannedItems] = useState<Record<string, number>>({});
   const [operator, setOperator] = useState('');
