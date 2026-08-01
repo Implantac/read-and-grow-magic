@@ -1,3 +1,4 @@
+import type { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
 import { Card, CardContent, CardHeader } from '@/ui/base/card';
 import { Input } from '@/ui/base/input';
 import { Button } from '@/ui/base/button';
