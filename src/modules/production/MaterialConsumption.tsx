@@ -60,7 +60,7 @@ export default function MaterialConsumptionPage() {
       return;
     }
     const order = orders.find(o => o.id === form.production_order_id);
-    const { error } = await (supabase as any).from('material_consumptions').insert({
+    const { error } = await supabase.from('material_consumptions').insert({
       production_order_id: form.production_order_id,
       order_number: order?.order_number || '',
       component_code: form.component_code,
