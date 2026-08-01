@@ -1,28 +1,28 @@
 import { Input } from '@/ui/base/input';
 import { Textarea } from '@/ui/base/textarea';
-import type { Question } from './types';
+import type { AnswerMap, AnswerValue, Question, QuestionOption } from './types';
 import { EMOJIS } from './types';
 
 interface Props {
   q: Question;
-  answers: Record<string, any>;
-  setAnswers: React.Dispatch<React.SetStateAction<Record<string, any>>>;
+  answers: AnswerMap;
+  setAnswers: React.Dispatch<React.SetStateAction<AnswerMap>>;
   touched: boolean;
   primary: string;
 }
 
 export function QuestionRenderer({ q, answers, setAnswers, touched, primary }: Props) {
   const val = answers[q.id];
-  const set = (v: any) => setAnswers((prev) => ({ ...prev, [q.id]: v }));
-  const rawOpts: any = q.options;
-  const optsArr: any[] = Array.isArray(rawOpts)
+  const set = (v: AnswerValue) => setAnswers((prev) => ({ ...prev, [q.id]: v }));
+  const rawOpts = q.options;
+  const optsArr: QuestionOption[] = Array.isArray(rawOpts)
     ? rawOpts
     : Array.isArray(rawOpts?.choices)
     ? rawOpts.choices
     : Array.isArray(rawOpts?.labels)
     ? rawOpts.labels
     : [];
-  const choices: Array<{ label: string; value: string }> = optsArr.map((o: any) =>
+  const choices: Array<{ label: string; value: string }> = optsArr.map((o) =>
     typeof o === 'string' || typeof o === 'number'
       ? { label: String(o), value: String(o) }
       : { label: String(o?.label ?? o?.value ?? ''), value: String(o?.value ?? o?.label ?? '') },
