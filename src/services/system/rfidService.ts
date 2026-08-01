@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
+import type { ReaderStatus, TagStatus, TagType, RFIDEventType } from '@/types/rfid';
 
 export const rfidService = {
   async getReaders() {
@@ -16,7 +17,7 @@ export const rfidService = {
       model: r.model, 
       manufacturer: r.manufacturer,
       antennaCount: r.antenna_count || 1, 
-      status: r.status,
+      status: r.status as ReaderStatus,
       lastHeartbeat: r.last_heartbeat, 
       createdAt: r.created_at, 
       updatedAt: r.updated_at,
@@ -29,14 +30,14 @@ export const rfidService = {
     return (data || []).map((r: Tables<'rfid_tags'>) => ({
       id: r.id, 
       epc: r.epc, 
-      tagType: r.tag_type, 
+      tagType: r.tag_type as TagType, 
       productId: r.product_id,
       productCode: r.product_code, 
       productName: r.product_name, 
       batch: r.batch,
       palletId: r.pallet_id, 
       location: r.location, 
-      status: r.status,
+      status: r.status as TagStatus,
       registeredAt: r.registered_at, 
       lastReadAt: r.last_read_at,
       createdAt: r.created_at, 
@@ -54,7 +55,7 @@ export const rfidService = {
       readerCode: r.reader_code,
       tagEpc: r.tag_epc, 
       tagId: r.tag_id, 
-      eventType: r.event_type,
+      eventType: r.event_type as RFIDEventType,
       rssi: r.rssi ? Number(r.rssi) : undefined, 
       antenna: r.antenna || 1,
       location: r.location, 

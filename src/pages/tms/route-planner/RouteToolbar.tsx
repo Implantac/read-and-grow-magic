@@ -6,7 +6,7 @@ import { StopDialog } from './StopDialog';
 import { buildGoogleMapsUrl, buildRouteGpx, downloadGpx } from '@/lib/routeExport';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import type { RouteStop, RouteStopInsert } from '@/hooks/tms/useRoutePlanning';
-import type { Tables } from '@/integrations/supabase/types';
+import type { DeliveryRoute } from '@/hooks/wms/useTMS';
 
 type Props = {
   fileInputRef: RefObject<HTMLInputElement>;
@@ -15,7 +15,7 @@ type Props = {
   computing: boolean;
   missingGeo: number;
   stops: RouteStop[];
-  route: Tables<'delivery_routes'> | undefined;
+  route: DeliveryRoute | undefined;
   depot: { depot_latitude: number | null; depot_longitude: number | null } | null | undefined;
   open: boolean;
   setOpen: (v: boolean) => void;
