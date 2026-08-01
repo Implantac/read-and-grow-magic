@@ -59,7 +59,7 @@ export default function Followups() {
 
   const save = () => {
     if (!editing) return;
-    const patch: any = { ...form };
+    const patch: TablesUpdate<'nps_followups'> = { ...form };
     if (form.status === 'contacted' && !editing.contacted_at) patch.contacted_at = new Date().toISOString();
     if ((form.status === 'resolved' || form.status === 'lost') && !editing.resolved_at) patch.resolved_at = new Date().toISOString();
     if (!patch.due_date) patch.due_date = null;
