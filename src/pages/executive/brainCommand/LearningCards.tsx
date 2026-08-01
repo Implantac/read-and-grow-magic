@@ -2,7 +2,39 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { Target, Database } from 'lucide-react';
 
-export function LearningCards({ learning }: { learning: any }) {
+export interface BrainCalibrationBucket {
+  bucket: string;
+  n: number;
+  declared: number;
+  actual: number;
+}
+
+export interface BrainMemoryItem {
+  id: string;
+  category: string | null;
+  key: string;
+  value: unknown;
+  importance: number | null;
+}
+
+export interface BrainLearning {
+  calibration: BrainCalibrationBucket[];
+  topMemories: BrainMemoryItem[];
+}
+
+export interface BrainRiskItem {
+  titulo: string;
+  impacto?: string;
+  acao?: string;
+}
+
+export interface BrainOpportunityItem {
+  titulo: string;
+  valor_estimado?: string;
+  acao?: string;
+}
+
+export function LearningCards({ learning }: { learning?: BrainLearning | null }) {
   if (!learning) return null;
   return (
     <div className="grid gap-4 lg:grid-cols-2">
