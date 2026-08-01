@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useGenerateCEOBrief, useExecuteDecisions, useAutoPilotRun, type CEOBriefResult } from '@/hooks/ai/useCEOBrief';
 import { formatDateTime } from '@/lib/formatters';
 import { normalizeKPI } from './ceoBrief/helpers';
+import type { CEOForecast, CEORisk, CEOPlanItem, CEODecision } from './ceoBrief/types';
 import { StructuredBlock } from './ceoBrief/StructuredBlock';
 import { ForecastKPIs } from './ceoBrief/ForecastKPIs';
 import { RisksList, PlanList, DecisionsList } from './ceoBrief/RisksPlanDecisions';
