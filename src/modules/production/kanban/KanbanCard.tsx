@@ -6,6 +6,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/ui/b
 import { priorityConfig } from '@/config/production';
 import type { useProductionTimeLogs } from '@/hooks/production/useProductionTimeLogs';
 import { formatElapsed } from '@/hooks/production/useProductionTimeLogs';
+import type { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
+import type { OutsourcingOrderRow } from '@/hooks/production/useOutsourcingOrders';
+import type { LucideIcon } from 'lucide-react';
+import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { format, parseISO, differenceInDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import {
@@ -14,12 +18,12 @@ import {
 } from 'lucide-react';
 
 interface KanbanCardProps {
-  order: any;
-  dragHandleProps: any;
+  order: ProductionOrderRow;
+  dragHandleProps: DraggableProvidedDragHandleProps | null | undefined;
   isDragging: boolean;
   columnKey: string;
   onMove: (id: string, status: string) => void;
-  outsourcingData?: any[];
+  outsourcingData?: OutsourcingOrderRow[];
   timeLogs: ReturnType<typeof useProductionTimeLogs>;
 }
 
@@ -30,7 +34,7 @@ const PRIORITY_INDICATOR: Record<string, string> = {
   low: 'border-l-gray-400',
 };
 
-const NEXT_ACTIONS: Record<string, { label: string; status: string; icon: any }[]> = {
+const NEXT_ACTIONS: Record<string, { label: string; status: string; icon: LucideIcon }[]> = {
   planned: [
     { label: 'Produzir', status: 'in_progress', icon: ArrowRight },
     { label: 'Aguardar Mat.', status: 'waiting_material', icon: PackageX },

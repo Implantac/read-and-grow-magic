@@ -3,6 +3,8 @@ import { Badge } from '@/ui/base/badge';
 import { cn } from '@/lib/utils';
 import { KanbanCard } from './KanbanCard';
 import type { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
+import type { OutsourcingOrderRow } from '@/hooks/production/useOutsourcingOrders';
+import type { useProductionTimeLogs } from '@/hooks/production/useProductionTimeLogs';
 
 type KanbanColumn = {
   key: string;
@@ -19,8 +21,8 @@ interface KanbanBoardProps {
   columns: KanbanColumn[];
   onDragEnd: (result: DropResult) => void;
   onMove: (orderId: string, newStatus: string) => Promise<void>;
-  outsourcingByOP: Record<string, any[]>;
-  timeLogs: any;
+  outsourcingByOP: Record<string, OutsourcingOrderRow[]>;
+  timeLogs: ReturnType<typeof useProductionTimeLogs>;
 }
 
 export function KanbanBoard({ columns, onDragEnd, onMove, outsourcingByOP, timeLogs }: KanbanBoardProps) {
