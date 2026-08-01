@@ -247,7 +247,7 @@ export default function ProductsPage() {
                   <div className="col-span-2"><Label className="text-muted-foreground">Nome</Label><p className="font-medium">{selectedProduct.name}</p></div>
                   <div className="col-span-2"><Label className="text-muted-foreground">Descrição</Label><p className="font-medium">{selectedProduct.description || '-'}</p></div>
                   <div><Label className="text-muted-foreground">Tipo</Label><div className="mt-1">{getTypeBadge(selectedProduct.type)}</div></div>
-                  <div><Label className="text-muted-foreground">Categoria</Label><p className="font-medium">{selectedProduct.categoryName}</p></div>
+                  <div><Label className="text-muted-foreground">Categoria</Label><p className="font-medium">{selectedProduct.category_name}</p></div>
                   <div><Label className="text-muted-foreground">Custo</Label><p className="font-medium">{formatBRL(selectedProduct.cost_price)}</p></div>
                   <div><Label className="text-muted-foreground">Preço de Venda</Label><p className="font-medium">{formatBRL(selectedProduct.sale_price)}</p></div>
                   <div><Label className="text-muted-foreground">Status</Label><div className="mt-1">{getStatusBadge(selectedProduct.status)}</div></div>

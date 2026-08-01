@@ -4,10 +4,10 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { WarModeService } from '@/lib/pcpServices';
 import { VALID_TRANSITIONS, STATUS_LABELS } from '../constants';
-import type { Tables, TablesUpdate } from '@/integrations/supabase/types';
-
-type ProductionOrderRow = Tables<'production_orders'>;
-type WorkCenterCapacity = { id: string; name?: string | null; capacity?: number | null; [key: string]: unknown };
+import type { TablesUpdate } from '@/integrations/supabase/types';
+import type { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
+import type { ProductionCapacityRow } from '@/hooks/production/useProductionCapacity';
+import type { PCPIntelligence } from '@/hooks/production/usePCPIntelligence';
 
 export function useKanbanActions(params: {
   orders: ProductionOrderRow[];
@@ -15,8 +15,8 @@ export function useKanbanActions(params: {
   refetch: () => Promise<void> | void;
   capacityLoad: Record<string, { name: string; capacity: number; allocated: number }>;
   wipLimits: Record<string, number>;
-  intelligence: Record<string, unknown> | null | undefined;
-  capacities: WorkCenterCapacity[];
+  intelligence: PCPIntelligence;
+  capacities: ProductionCapacityRow[];
 }) {
   const { orders, update, refetch, capacityLoad, wipLimits, intelligence, capacities } = params;
 
