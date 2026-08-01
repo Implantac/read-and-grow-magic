@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import type { FiscalReport } from '@/types/fiscal';
+import type { FiscalReport, FiscalReportType } from '@/types/fiscal';
 import type { Tables } from '@/integrations/supabase/types';
 
 export function useFiscalReports() {
@@ -15,12 +15,12 @@ export function useFiscalReports() {
 
     const mapped: FiscalReport[] = (data || []).map((row: Tables<'fiscal_reports'>) => ({
       id: row.id,
-      type: row.type,
+      type: row.type as FiscalReportType,
       name: row.name,
       period: row.period,
       startDate: row.start_date,
       endDate: row.end_date,
-      status: row.status,
+      status: row.status as FiscalReport['status'],
       totalNFe: row.total_nfe,
       totalNFCe: row.total_nfce,
       totalValue: Number(row.total_value),
