@@ -49,7 +49,7 @@ export function AlertsTab() {
                   <div className="font-medium text-sm">{a.title}</div>
                   <div className="text-xs text-muted-foreground">{a.description}</div>
                 </div>
-                <Badge variant={severityColors[a.severity] as any}>{a.severity}</Badge>
+                <Badge variant={severityColors[a.severity] ?? 'secondary'}>{a.severity}</Badge>
               </div>
             ))}
         </CardContent>
