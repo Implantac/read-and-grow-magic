@@ -16,7 +16,7 @@ type Props = {
   missingGeo: number;
   stops: RouteStop[];
   route: Tables<'delivery_routes'> | undefined;
-  depot: { lat: number; lng: number } | null;
+  depot: { depot_latitude: number | null; depot_longitude: number | null } | null | undefined;
   open: boolean;
   setOpen: (v: boolean) => void;
   reorderPending: boolean;
