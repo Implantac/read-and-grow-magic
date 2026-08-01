@@ -128,7 +128,7 @@ export class OrderService extends BaseService<'orders'> {
     return { order, archiveId: archiveData.id };
   }
 
-  async restoreOrder(archiveId: string, deletedOrder: any) {
+  async restoreOrder(archiveId: string, deletedOrder: Record<string, unknown> & { order_items?: Record<string, unknown>[] }) {
     const { data: archive, error: checkError } = await supabase
       .from('deleted_orders_archive')
       .select('*')
@@ -142,15 +142,15 @@ export class OrderService extends BaseService<'orders'> {
 
     const { order_items, ...orderData } = deletedOrder;
     
-    const { data: restored, error: restError } = await supabase.from('orders').insert(orderData).select().single();
+    const { data: restored, error: restError } = await supabase.from('orders').insert(orderData as never).select().single();
     if (restError) throw restError;
 
     if (order_items && order_items.length > 0) {
-      const restoredItems = order_items.map((item: any) => ({
+      const restoredItems = order_items.map((item) => ({
         ...item,
         order_id: restored.id
       }));
-      const { error: itemsError } = await supabase.from('order_items').insert(restoredItems);
+      const { error: itemsError } = await supabase.from('order_items').insert(restoredItems as never);
       if (itemsError) throw itemsError;
     }
 

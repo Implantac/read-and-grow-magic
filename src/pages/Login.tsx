@@ -10,6 +10,7 @@ import { Label } from '@/ui/base/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
 import { cn } from '@/lib/utils';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
+import { errorMessage } from '@/lib/errors';
 
 type View = 'login' | 'signup' | 'forgot';
 
@@ -43,8 +44,8 @@ export default function Login() {
       await signIn(email, password);
       toastSuccess('Bem-vindo!', 'Login realizado com sucesso');
       navigate(nextTarget);
-    } catch (error: any) {
-      toastError(error.message || 'Email ou senha inválidos', undefined, 'Erro de autenticação');
+    } catch (error: unknown) {
+      toastError(errorMessage(error, 'Email ou senha inválidos'), undefined, 'Erro de autenticação');
     }
     setIsLoading(false);
   };
@@ -64,7 +65,7 @@ export default function Login() {
       await signUp(email, password, name);
       toastSuccess('Solicitação recebida', 'Se o email for válido e ainda não estiver cadastrado, você receberá um link de confirmação.');
       setView('login');
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Mensagem genérica para evitar enumeração de usuários
       toastError('Não foi possível concluir o cadastro. Verifique os dados e tente novamente.', undefined, 'Erro ao criar conta');
     }

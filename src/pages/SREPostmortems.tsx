@@ -117,14 +117,14 @@ export default function SREPostmortems() {
             <Label>Incidente relacionado</Label>
             <Select value={form.incident_id} onValueChange={(v) => setForm({ ...form, incident_id: v })}>
               <SelectTrigger><SelectValue placeholder="Selecione (opcional)" /></SelectTrigger>
-              <SelectContent>{incidents.map((i: any) => <SelectItem key={i.id} value={i.id}>{i.title}</SelectItem>)}</SelectContent>
+              <SelectContent>{incidents.map((i) => <SelectItem key={i.id} value={i.id}>{i.title}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div>
             <Label>SLO impactado</Label>
             <Select value={form.slo_id} onValueChange={(v) => setForm({ ...form, slo_id: v })}>
               <SelectTrigger><SelectValue placeholder="Selecione (opcional)" /></SelectTrigger>
-              <SelectContent>{slos.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name} · {s.domain}</SelectItem>)}</SelectContent>
+              <SelectContent>{slos.map((s) => <SelectItem key={s.id} value={s.id}>{s.name} · {s.domain}</SelectItem>)}</SelectContent>
             </Select>
           </div>
           <div>

@@ -15,11 +15,39 @@ export interface TaxCalculationResult {
   total_taxes: number;
 }
 
+export interface TaxRuleLike {
+  origin_state?: string | null;
+  destination_state?: string | null;
+  ncm?: string | null;
+  icms_rate?: number | null;
+  icms_st_rate?: number | null;
+  ipi_rate?: number | null;
+  pis_rate?: number | null;
+  cofins_rate?: number | null;
+  cbs_rate?: number | null;
+  ibs_rate?: number | null;
+}
+
+export interface NFeXmlHeader {
+  number?: string | number;
+  series?: string | number;
+  issue_date?: string;
+  [key: string]: unknown;
+}
+
+export interface NFeXmlItem {
+  code?: string;
+  description?: string;
+  quantity?: number;
+  unit_price?: number;
+  [key: string]: unknown;
+}
+
 export const calculateTaxes = (
   item: { price: number; quantity: number; ncm?: string }, 
   origin: string, 
   destination: string, 
-  rules: any[],
+  rules: TaxRuleLike[],
   taxRegime: string = 'simples_nacional',
   regimeType: 'current' | 'hybrid' | 'reformed' = 'hybrid'
 ): TaxCalculationResult => {
@@ -66,7 +94,7 @@ export const calculateTaxes = (
   };
 };
 
-export const generateNFeXML = (header: any, items: any[]) => {
+export const generateNFeXML = (header: NFeXmlHeader, items: NFeXmlItem[]) => {
   return `<?xml version="1.0" encoding="UTF-8"?><infNFe chNFe="${Math.random().toString().slice(2, 46)}" versao="4.00">...</infNFe>`;
 };
 

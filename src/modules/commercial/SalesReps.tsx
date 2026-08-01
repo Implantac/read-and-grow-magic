@@ -89,7 +89,7 @@ export default function SalesRepsPage() {
 
   const handleSave = async () => {
     if (!formData.name || !formData.code) return toastError('Nome e código obrigatórios');
-    const payload: any = {
+    const payload = {
       name: formData.name, code: formData.code, email: formData.email || null,
       phone: formData.phone || null, region: formData.region || null,
       micro_region: formData.micro_region || null,
@@ -143,7 +143,7 @@ export default function SalesRepsPage() {
     )},
   ];
 
-  const renderActions = (_v: any, r: DbSalesRep) => (
+  const renderActions = (_v: unknown, r: DbSalesRep) => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
       <DropdownMenuContent>

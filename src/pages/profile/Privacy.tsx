@@ -4,6 +4,7 @@ import { Button } from "@/ui/base/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/base/card";
 import { Badge } from "@/ui/base/badge";
 import { toast } from "sonner";
+import { errorMessage } from "@/lib/errors";
 import { Download, Trash2, FileText, ShieldQuestion, Loader2 } from "lucide-react";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { PageContainer } from "@/shared/components/PageContainer";
@@ -72,8 +73,8 @@ export default function ProfilePrivacy() {
       URL.revokeObjectURL(url);
       toast.success("Dados exportados com sucesso");
       await load();
-    } catch (e: any) {
-      toast.error(e.message ?? "Falha ao exportar");
+    } catch (e: unknown) {
+      toast.error(errorMessage(e, "Falha ao exportar"));
     } finally {
       setExporting(false);
     }
@@ -88,8 +89,8 @@ export default function ProfilePrivacy() {
       if (error) throw error;
       toast.success(data?.message ?? "Conta anonimizada");
       setTimeout(() => supabase.auth.signOut(), 1500);
-    } catch (e: any) {
-      toast.error(e.message ?? "Falha ao excluir");
+    } catch (e: unknown) {
+      toast.error(errorMessage(e, "Falha ao excluir"));
     } finally {
       setDeleting(false);
     }

@@ -8,8 +8,15 @@ import type { LifecycleAction } from "@/components/plugins/PluginLifecycleDialog
 import type { ReviewsSummary } from "./useReviewsSummary";
 
 interface Props {
-  plugin: any;
-  installation: any | null;
+  plugin: {
+    name: string;
+    category?: string | null;
+    version?: string | null;
+    vendor?: string | null;
+    description?: string | null;
+    price_monthly: number;
+  };
+  installation: { status: string; auto_update: boolean } | null;
   summary: ReviewsSummary;
   onOpenReviews: () => void;
   onOpenRunner: () => void;

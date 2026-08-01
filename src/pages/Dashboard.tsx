@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { ModuleKPISection } from '@/components/dashboard/ModuleKPISection';
@@ -45,7 +46,7 @@ const emptyModulePerformance = [
   { name: 'Compras', value: 0, color: 'hsl(262, 83%, 58%)' },
 ];
 
-const verticalMap: Record<string, { label: string; icon: any; color: string; path: string; cta: string }> = {
+const verticalMap: Record<string, { label: string; icon: LucideIcon; color: string; path: string; cta: string }> = {
   textile:      { label: 'Indústria Têxtil',       icon: Factory,     color: 'purple',   path: '/vertical/textile',      cta: 'Acessar Dashboard Especializado →' },
   apparel:      { label: 'Confecção & Moda',       icon: Scissors,    color: 'orange',   path: '/vertical/apparel',      cta: 'Acessar Dashboard Especializado →' },
   pharma:       { label: 'Farmacêutico',           icon: ShieldCheck, color: 'blue',     path: '/vertical/pharma',       cta: 'Acessar Dashboard Especializado →' },
@@ -177,11 +178,11 @@ export default function Dashboard() {
       {/* Ações Recomendadas — destaque quando existir */}
       {insights.length > 0 && (
         <ExecutiveActionsPanel
-          actions={insights.slice(0, 3).map((ins: any) => ({
+          actions={insights.slice(0, 3).map((ins) => ({
             title: ins.title,
             description: ins.description,
             impact: ins.impact_estimate,
-            priority: ins.severity,
+            priority: ins.severity as 'critical' | 'high' | 'medium' | 'low',
             module: ins.module,
           }))}
           onExecute={sendMessage}
