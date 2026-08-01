@@ -15,6 +15,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Package, Lock, CheckCircle, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import type { TablesUpdate, Tables } from '@/integrations/supabase/types';
+
+type StockReservationRow = Tables<'stock_reservations'>;
 
 const reservationStatusConfig: Record<string, { label: string; color: string }> = {
   pending: { label: 'Pendente', color: 'bg-warning/10 text-warning' },
@@ -30,7 +33,7 @@ export default function SeparationQueue() {
   const lifecycle = useOrderLifecycle();
   const qc = useQueryClient();
   const updateReservationStatus = async (id: string, status: string, orderId?: string) => {
-    const updates: any = { status, updated_at: new Date().toISOString() };
+    const updates: TablesUpdate<'stock_reservations'> = { status, updated_at: new Date().toISOString() };
     if (status === 'picked') updates.picked_at = new Date().toISOString();
     const { error } = await supabase.from('stock_reservations').update(updates).eq('id', id);
     if (error) { toastError(error.message); return; }
@@ -44,7 +47,7 @@ export default function SeparationQueue() {
         .select('status')
         .eq('order_id', orderId);
 
-      const allPicked = orderReservations?.every((r: any) => r.status === 'picked');
+      const allPicked = orderReservations?.every((r) => r.status === 'picked');
       if (allPicked) {
         const order = (orders || []).find(o => o.id === orderId);
         if (order && (order.status === 'in_separation' || order.status === 'awaiting_separation')) {
@@ -59,13 +62,13 @@ export default function SeparationQueue() {
     }
   };
 
-  const statusCounts = (reservations || []).reduce((acc: Record<string, number>, r: any) => {
+  const statusCounts = (reservations || []).reduce((acc: Record<string, number>, r) => {
     acc[r.status] = (acc[r.status] || 0) + 1;
     return acc;
   }, {});
 
   // Group by order
-  const reservationsByOrder = (reservations || []).reduce((acc: Record<string, any[]>, r: any) => {
+  const reservationsByOrder = (reservations || []).reduce((acc: Record<string, StockReservationRow[]>, r) => {
     const oid = r.order_id || 'sem-pedido';
     if (!acc[oid]) acc[oid] = [];
     acc[oid].push(r);
@@ -122,7 +125,7 @@ export default function SeparationQueue() {
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow></TableHeader>
               <TableBody>
-                {reservations.map((r: any) => {
+                {reservations.map((r) => {
                   const sc = reservationStatusConfig[r.status] || { label: r.status, color: '' };
                   return (
                     <TableRow key={r.id}>
