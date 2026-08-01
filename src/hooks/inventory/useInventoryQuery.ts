@@ -1,44 +1,47 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { inventoryService } from '@/services/inventory/inventoryService';
+import { inventoryService, type ProductWithCategory } from '@/services/inventory/inventoryService';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
+import { errorMessage } from '@/lib/errors';
+import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 export function useInventory() {
   const queryClient = useQueryClient();
 
-  const productsQuery = useQuery<any[]>({
+  const productsQuery = useQuery<ProductWithCategory[]>({
     queryKey: ['inventory_products'],
     queryFn: () => inventoryService.getProducts(),
   });
 
-  const categoriesQuery = useQuery<any[]>({
+  const categoriesQuery = useQuery<Tables<'categories'>[]>({
     queryKey: ['inventory_categories'],
     queryFn: () => inventoryService.getCategories(),
   });
 
-  const movementsQuery = useQuery<any[]>({
+  const movementsQuery = useQuery<Tables<'stock_movements'>[]>({
     queryKey: ['inventory_movements'],
     queryFn: () => inventoryService.getMovements(),
   });
 
   const createProductMutation = useMutation({
-    mutationFn: (product: any) => inventoryService.createProduct(product),
+    mutationFn: (product: TablesInsert<'products'>) => inventoryService.createProduct(product),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory_products'] });
       toastSuccess('Produto cadastrado com sucesso');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao cadastrar produto');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao cadastrar produto'));
     }
   });
 
   const updateProductMutation = useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: any }) => inventoryService.updateProduct(id, updates),
+    mutationFn: ({ id, updates }: { id: string; updates: TablesUpdate<'products'> }) =>
+      inventoryService.updateProduct(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory_products'] });
       toastSuccess('Produto atualizado');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao atualizar produto');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao atualizar produto'));
     }
   });
 
@@ -48,8 +51,8 @@ export function useInventory() {
       queryClient.invalidateQueries({ queryKey: ['inventory_products'] });
       toastSuccess('Produto excluído');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao excluir produto');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao excluir produto'));
     }
   });
 
