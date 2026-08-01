@@ -176,14 +176,14 @@ export function RuleEditorDialog({ open, onOpenChange, form, setForm, workflowDe
                     <div>
                       <Label className="text-xs">Título</Label>
                       <Input
-                        value={a.config.title ?? ""}
+                        value={String(a.config.title ?? "")}
                         onChange={(e) => updateActionConfig(i, "title", e.target.value)}
                       />
                     </div>
                     <div>
                       <Label className="text-xs">Mensagem</Label>
                       <Input
-                        value={a.config.message ?? ""}
+                        value={String(a.config.message ?? "")}
                         onChange={(e) => updateActionConfig(i, "message", e.target.value)}
                       />
                     </div>
@@ -196,7 +196,7 @@ export function RuleEditorDialog({ open, onOpenChange, form, setForm, workflowDe
                       <Label className="text-xs">URL</Label>
                       <Input
                         placeholder="https://..."
-                        value={a.config.url ?? ""}
+                        value={String(a.config.url ?? "")}
                         onChange={(e) => updateActionConfig(i, "url", e.target.value)}
                       />
                     </div>
@@ -206,7 +206,7 @@ export function RuleEditorDialog({ open, onOpenChange, form, setForm, workflowDe
                         rows={2}
                         className="font-mono text-xs"
                         placeholder='{"Authorization":"Bearer ..."}'
-                        value={a.config.headers ?? ""}
+                        value={String(a.config.headers ?? "")}
                         onChange={(e) => updateActionConfig(i, "headers", e.target.value)}
                       />
                     </div>
@@ -217,7 +217,7 @@ export function RuleEditorDialog({ open, onOpenChange, form, setForm, workflowDe
                   <div>
                     <Label className="text-xs">Mensagem de log</Label>
                     <Input
-                      value={a.config.message ?? ""}
+                      value={String(a.config.message ?? "")}
                       onChange={(e) => updateActionConfig(i, "message", e.target.value)}
                     />
                   </div>
@@ -227,7 +227,7 @@ export function RuleEditorDialog({ open, onOpenChange, form, setForm, workflowDe
                   <div>
                     <Label className="text-xs">Workflow</Label>
                     <Select
-                      value={a.config.definition_id ?? ""}
+                      value={String(a.config.definition_id ?? "")}
                       onValueChange={(v) => updateActionConfig(i, "definition_id", v)}
                     >
                       <SelectTrigger>
