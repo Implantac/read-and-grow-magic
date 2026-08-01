@@ -7,7 +7,7 @@ import { Textarea } from '@/ui/base/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Truck, CheckCircle, Tag, Hand, PackageCheck } from 'lucide-react';
 import { format } from 'date-fns';
-import { STAGE_LABEL, type OrderRow, type ShipmentStage, type StageForm } from './types';
+import { STAGE_LABEL, type OrderRow, type ShipmentStage, type StageForm, type ShipmentInfo, type TrackingEvent } from './types';
 
 interface Props {
   open: boolean;

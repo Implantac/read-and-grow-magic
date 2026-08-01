@@ -7,6 +7,7 @@ import { Brain, CheckCircle2, X, RefreshCw, ArrowRight, TrendingDown, FlaskConic
 import WMSKpiStrip from "../components/WMSKpiStrip";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { toast } from "sonner";
+import { errorMessage } from "@/lib/errors";
 
 type Engine = "v1" | "v2";
 interface SimResult {
