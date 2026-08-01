@@ -58,7 +58,7 @@ export function DrillDownDrawer() {
     setRows(null);
     (async () => {
       try {
-        const q = supabase.from(entity.sourceTable as any).select("*").limit(20);
+        const q = supabase.from(entity.sourceTable).select("*").limit(20);
         const { data, error } = await q;
         if (cancelled) return;
         if (error) throw error;

@@ -6,6 +6,11 @@
  * copy ("what/why/what-now"). Adoption is opt-in — components that don't
  * declare a key simply won't get a drill-down button.
  */
+import type { Database } from "@/integrations/supabase/types";
+
+/** Nome de tabela válido no schema public. */
+export type PublicTableName = keyof Database["public"]["Tables"];
+
 export type EntityKey =
   | "revenue"
   | "gross_margin"
@@ -27,7 +32,7 @@ export interface EntityDefinition {
   /** Domain owner — used by the AI panel to route the analysis persona. */
   agent: "cfo" | "ceo" | "coo" | "cro";
   /** Table used for the raw drill-down list. */
-  sourceTable?: string;
+  sourceTable?: PublicTableName;
   /** SQL fragment for `order_by` on drill-down list. */
   orderBy?: string;
   /** Related tables the drawer can open in tabs. */
