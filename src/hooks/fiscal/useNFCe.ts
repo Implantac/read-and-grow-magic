@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import type { NFCe } from '@/types/fiscal';
+import type { NFCe, NFCeItem } from '@/types/fiscal';
 
 export function useNFCe() {
   const [nfces, setNfces] = useState<NFCe[]>([]);
@@ -13,8 +13,8 @@ export function useNFCe() {
     if (error) { console.error(error); toast.error('Erro ao carregar NFC-e'); setLoading(false); return; }
 
     const { data: itemsData } = await supabase.from('nfce_items').select('*');
-    const itemsMap = new Map<string, any[]>();
-    (itemsData || []).forEach((item: any) => {
+    const itemsMap = new Map<string, NFCeItem[]>();
+    (itemsData || []).forEach((item) => {
       const arr = itemsMap.get(item.nfce_id) || [];
       arr.push({
         id: item.id,
@@ -28,7 +28,7 @@ export function useNFCe() {
       itemsMap.set(item.nfce_id, arr);
     });
 
-    const mapped: NFCe[] = (data || []).map((row: any) => ({
+    const mapped: NFCe[] = (data || []).map((row) => ({
       id: row.id,
       number: row.number,
       series: row.series,

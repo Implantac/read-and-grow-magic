@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnterpriseStore } from "@/core/stores/useEnterpriseStore";
+import type { TablesInsert } from "@/integrations/supabase/types";
 
 export interface EduSchool {
   id: string;
