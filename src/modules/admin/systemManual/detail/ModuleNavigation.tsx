@@ -1,8 +1,9 @@
+import type { ModuleManual } from '../content-types';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Card, CardContent } from '@/ui/base/card';
 
-export function ModuleNavigation({ prevModule, nextModule }: { prevModule: any; nextModule: any }) {
+export function ModuleNavigation({ prevModule, nextModule }: { prevModule?: ModuleManual | null; nextModule?: ModuleManual | null }) {
   return (
     <Card className="mt-6">
       <CardContent className="p-4 flex items-center justify-between gap-3">

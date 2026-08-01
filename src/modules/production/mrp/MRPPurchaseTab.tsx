@@ -1,3 +1,4 @@
+import type { SupplyItem } from '@/hooks/inventory/useSupplyStock';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
@@ -8,7 +9,7 @@ import type { MaterialNeed } from './types';
 
 interface Props {
   materialNeeds: MaterialNeed[];
-  supplies: any[];
+  supplies: SupplyItem[];
   generatingPO: boolean;
   onGenerate: () => void;
 }

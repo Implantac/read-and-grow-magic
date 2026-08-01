@@ -1,7 +1,8 @@
+import type { ModuleManual } from '../content-types';
 import { Camera, Video } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
 
-export function MediaTab({ manual }: { manual: any }) {
+export function MediaTab({ manual }: { manual: ModuleManual }) {
   return (
     <div className="mt-4 space-y-4">
       <Card>
@@ -46,7 +47,7 @@ export function MediaTab({ manual }: { manual: any }) {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-2">
-              {manual.screenshots.map((s: any, i: number) => (
+              {manual.screenshots.map((s, i) => (
                 <div key={i} className="rounded-lg border border-dashed border-border p-4 bg-muted/20">
                   <div className="aspect-video bg-muted/50 rounded flex items-center justify-center mb-3">
                     <Camera className="h-8 w-8 text-muted-foreground/40" />

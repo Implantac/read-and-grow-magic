@@ -1,3 +1,4 @@
+import type { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
 import { Card, CardContent, CardHeader } from '@/ui/base/card';
 import { Input } from '@/ui/base/input';
 import { Button } from '@/ui/base/button';
@@ -12,13 +13,13 @@ import { format, differenceInDays, parseISO } from 'date-fns';
 import { Factory, Search, Play, Pause, CheckCircle, AlertTriangle } from 'lucide-react';
 
 interface Props {
-  filtered: any[];
+  filtered: ProductionOrderRow[];
   search: string;
   setSearch: (v: string) => void;
   statusFilter: string;
   setStatusFilter: (v: string) => void;
   today: Date;
-  onStatusChange: (op: any, newStatus: string) => void;
+  onStatusChange: (op: ProductionOrderRow, newStatus: string) => void;
 }
 
 export function OrdersTab({ filtered, search, setSearch, statusFilter, setStatusFilter, today, onStatusChange }: Props) {

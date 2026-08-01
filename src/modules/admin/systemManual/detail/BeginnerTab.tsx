@@ -1,7 +1,8 @@
+import type { BeginnerContent } from '../content-types';
 import { BookOpen, CheckCircle2, Lightbulb, ListChecks, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
 
-export function BeginnerTab({ beginner }: { beginner: any }) {
+export function BeginnerTab({ beginner }: { beginner: BeginnerContent }) {
   return (
     <div className="space-y-4 mt-4">
       <Card className="border-primary/30 bg-gradient-to-br from-primary/5 via-transparent to-transparent">
@@ -58,7 +59,7 @@ export function BeginnerTab({ beginner }: { beginner: any }) {
         </CardHeader>
         <CardContent>
           <dl className="space-y-3">
-            {beginner.glossary.map((g: any, i: number) => (
+            {beginner.glossary.map((g, i) => (
               <div key={i} className="grid sm:grid-cols-[140px_1fr] gap-1 sm:gap-4 pb-3 border-b last:border-0 last:pb-0">
                 <dt className="text-sm font-semibold text-primary">{g.term}</dt>
                 <dd className="text-sm text-muted-foreground">{g.definition}</dd>

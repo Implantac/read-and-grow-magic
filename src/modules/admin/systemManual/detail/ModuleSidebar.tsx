@@ -1,16 +1,17 @@
+import type { ModuleManual } from '../content-types';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, ExternalLink, Users } from 'lucide-react';
 import { Badge } from '@/ui/base/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Separator } from '@/ui/base/separator';
 
-export function ModuleSidebar({ manual }: { manual: any }) {
+export function ModuleSidebar({ manual }: { manual: ModuleManual }) {
   return (
     <aside className="space-y-4">
       <Card>
         <CardHeader><CardTitle className="text-sm">Atalhos do módulo</CardTitle></CardHeader>
         <CardContent className="space-y-2">
-          {manual.routes.map((r: any) => (
+          {manual.routes.map((r) => (
             <Link
               key={r.path}
               to={r.path}

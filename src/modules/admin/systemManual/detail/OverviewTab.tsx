@@ -1,7 +1,8 @@
+import type { ModuleManual } from '../content-types';
 import { Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 
-export function OverviewTab({ manual }: { manual: any }) {
+export function OverviewTab({ manual }: { manual: ModuleManual }) {
   return (
     <div className="space-y-4 mt-4">
       <Card>
@@ -17,7 +18,7 @@ export function OverviewTab({ manual }: { manual: any }) {
 
       {manual.sections.length > 0 && (
         <div className="space-y-4">
-          {manual.sections.map((s: any, i: number) => (
+          {manual.sections.map((s, i) => (
             <Card key={i}>
               <CardHeader><CardTitle className="text-base">{s.heading}</CardTitle></CardHeader>
               <CardContent className="space-y-2 text-sm text-muted-foreground leading-relaxed">

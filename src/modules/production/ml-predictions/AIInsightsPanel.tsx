@@ -28,7 +28,7 @@ export function AIInsightsPanel() {
     }
   };
 
-  const active = insights.filter((i: any) => i.status === 'active').slice(0, 10);
+  const active = insights.filter((i) => i.status === 'active').slice(0, 10);
 
   return (
     <>
@@ -39,7 +39,7 @@ export function AIInsightsPanel() {
         </Button>
       </div>
       <div className="space-y-3">
-        {active.map((insight: any) => (
+        {active.map((insight) => (
           <Card key={insight.id} className={cn('border-l-4', insight.severity === 'critical' ? 'border-l-destructive' : insight.severity === 'high' ? 'border-l-warning' : 'border-l-primary')}>
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-1">

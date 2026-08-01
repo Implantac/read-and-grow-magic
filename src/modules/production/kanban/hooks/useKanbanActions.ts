@@ -1,3 +1,4 @@
+import type { SequenceResult } from '../types';
 import { useCallback, useState } from 'react';
 import { type DropResult } from '@hello-pangea/dnd';
 import { toast } from 'sonner';
@@ -26,7 +27,7 @@ export function useKanbanActions(params: {
   const [warModeLoading, setWarModeLoading] = useState(false);
   const [recalculating, setRecalculating] = useState(false);
   const [sequenceOpen, setSequenceOpen] = useState(false);
-  const [sequenceResult, setSequenceResult] = useState<any>(null);
+  const [sequenceResult, setSequenceResult] = useState<SequenceResult | null>(null);
   const [sequenceLoading, setSequenceLoading] = useState(false);
   const [applyingSequence, setApplyingSequence] = useState(false);
   const [bottleneckData, setBottleneckData] = useState<BottleneckAnalysis | null>(null);
