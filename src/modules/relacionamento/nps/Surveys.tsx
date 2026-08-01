@@ -5,9 +5,10 @@ import {
   useSaveQuestionToBank,
   useReorderQuestion,
 } from './hooks';
+import { errorMessage } from '@/lib/errors';
 import { supabase } from '@/integrations/supabase/client';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
-import type { Tables, TablesUpdate } from '@/integrations/supabase/types';
+import type { Tables, TablesUpdate, TablesInsert } from '@/integrations/supabase/types';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { Button } from '@/ui/base/button';
 import { Label } from '@/ui/base/label';
@@ -44,12 +45,12 @@ export default function Surveys() {
   const qc = useQueryClient();
 
   const create = useMutation({
-    mutationFn: async (input: any) => {
+    mutationFn: async (input: TablesInsert<'nps_questions'>) => {
       const { error } = await supabase.from('nps_questions').insert({ ...input, company_id: activeCompanyId });
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['nps'] }); toast.success('Pergunta adicionada'); },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: unknown) => toast.error(errorMessage(e)),
   });
   const del = useMutation({
     mutationFn: async (id: string) => {
@@ -87,7 +88,7 @@ export default function Surveys() {
     setForm({ question_text: '', question_type: form.question_type, required: false, choices: '' });
   };
 
-  const saveCurrentToBank = (q: any) => {
+  const saveCurrentToBank = (q: Tables<'nps_questions'>) => {
     saveToBank.mutate({
       category: 'Personalizadas',
       question_text: q.question_text,
@@ -106,7 +107,7 @@ export default function Surveys() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['nps'] }),
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: unknown) => toast.error(errorMessage(e)),
   });
 
   const persistOrder = (ordered: Tables<'nps_questions'>[]) => {
@@ -174,7 +175,7 @@ export default function Surveys() {
         <Label>Campanha</Label>
         <Select value={campaignId} onValueChange={setCampaignId}>
           <SelectTrigger><SelectValue placeholder="Selecione uma campanha" /></SelectTrigger>
-          <SelectContent>{campaigns.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+          <SelectContent>{campaigns.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
         </Select>
       </div>
 

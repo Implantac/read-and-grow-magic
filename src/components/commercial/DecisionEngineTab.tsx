@@ -26,7 +26,7 @@ export default function DecisionEngineTab() {
   const hotLeads = scores.filter(s => s.score_numeric >= 80);
   const riskClients = scores.filter(s => s.churn_probability > 0.5);
   const dormant = scores.filter(s => (s.days_since_purchase || 0) > 90);
-  const pipelineValue = funnel.reduce((a: number, f: any) => a + (f.value || 0), 0);
+  const pipelineValue = funnel.reduce((a, f) => a + (f.value || 0), 0);
 
   const urgencyScore = useMemo(() => {
     const overdueWeight = overdue.length * 3;
@@ -46,9 +46,9 @@ export default function DecisionEngineTab() {
     aiMessage.mutate({
       action: 'generate_daily_plan',
       context: {
-        activeLeads: funnel.filter((f: any) => f.status === 'active').length,
+        activeLeads: funnel.filter((f) => f.status === 'active').length,
         hotLeads: hotLeads.length,
-        pendingProposals: funnel.filter((f: any) => f.stage === 'proposal').length,
+        pendingProposals: funnel.filter((f) => f.stage === 'proposal').length,
         riskClients: riskClients.length,
         dormantClients: dormant.length,
         overdueFollowUps: overdue.length,
