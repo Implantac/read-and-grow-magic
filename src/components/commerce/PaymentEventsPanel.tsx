@@ -196,7 +196,7 @@ export function PaymentEventsPanel({ storefrontId, orders, projectRef = "arcuhqd
 
               <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
                 {paginated.map((e) => (
-                  <EventItem key={e.id} event={e as any} orderNumber={e.order_id ? orderIdToNumber.get(e.order_id) : null} />
+                  <EventItem key={e.id} event={e} orderNumber={e.order_id ? orderIdToNumber.get(e.order_id) : null} />
                 ))}
               </div>
 

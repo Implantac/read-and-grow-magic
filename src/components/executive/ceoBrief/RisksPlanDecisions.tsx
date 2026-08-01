@@ -2,8 +2,9 @@ import { AlertTriangle, Target, Lightbulb, CheckCircle2, RefreshCw } from 'lucid
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
 import { impactColor } from './helpers';
+import type { CEORisk, CEOPlanItem, CEODecision } from './types';
 
-export function RisksList({ risks }: { risks: any[] }) {
+export function RisksList({ risks }: { risks: CEORisk[] }) {
   if (!risks.length) return null;
   return (
     <div>
@@ -17,7 +18,7 @@ export function RisksList({ risks }: { risks: any[] }) {
               <div className="text-sm font-medium">{r?.titulo ?? 'Risco'}</div>
               <div className="text-xs text-muted-foreground">{r?.detalhe ?? ''}</div>
             </div>
-            <Badge variant={impactColor(r?.impacto ?? 'baixo') as any}>{r?.impacto ?? 'baixo'}</Badge>
+            <Badge variant={impactColor(r?.impacto ?? 'baixo')}>{r?.impacto ?? 'baixo'}</Badge>
           </div>
         ))}
       </div>
@@ -25,7 +26,7 @@ export function RisksList({ risks }: { risks: any[] }) {
   );
 }
 
-export function PlanList({ plan }: { plan: any[] }) {
+export function PlanList({ plan }: { plan: CEOPlanItem[] }) {
   if (!plan.length) return null;
   return (
     <div>
@@ -49,7 +50,7 @@ export function PlanList({ plan }: { plan: any[] }) {
 
 export function DecisionsList({
   decisions, onApprove, isPending,
-}: { decisions: any[]; onApprove: () => void; isPending: boolean }) {
+}: { decisions: CEODecision[]; onApprove: () => void; isPending: boolean }) {
   if (!decisions.length) return null;
   return (
     <div>

@@ -9,7 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/base/tabs";
 import { Badge } from "@/ui/base/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { getEntity, type EntityKey } from "@/core/entityRegistry";
+import { getEntity, type EntityKey, type PublicTableName } from "@/core/entityRegistry";
 import { AIInsightPanel } from "./AIInsightPanel";
 import { Skeleton } from "@/ui/base/skeleton";
 import { EmptyState } from "./EmptyState";
@@ -17,6 +17,17 @@ import { formatBRL } from "@/lib/formatters";
 import { AuditTrailPanel } from "./AuditTrailPanel";
 import { Database, ListTree, History } from "lucide-react";
 
+
+/**
+ * O nome da tabela é resolvido em runtime pelo entityRegistry; um único ponto
+ * de acesso com superfície mínima evita a inferência profunda do supabase-js.
+ */
+type ListQuery = {
+  select: (cols: string) => { limit: (n: number) => Promise<{ data: unknown[] | null; error: unknown }> };
+};
+
+const dynamicList = (table: PublicTableName) =>
+  (supabase.from(table) as unknown as ListQuery).select("*").limit(20);
 
 export const DRILLDOWN_OPEN_EVENT = "drilldown:open";
 
@@ -58,8 +69,7 @@ export function DrillDownDrawer() {
     setRows(null);
     (async () => {
       try {
-        const q = supabase.from(entity.sourceTable as any).select("*").limit(20);
-        const { data, error } = await q;
+        const { data, error } = await dynamicList(entity.sourceTable);
         if (cancelled) return;
         if (error) throw error;
         setRows(data ?? []);

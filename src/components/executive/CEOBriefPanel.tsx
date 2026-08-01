@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useGenerateCEOBrief, useExecuteDecisions, useAutoPilotRun, type CEOBriefResult } from '@/hooks/ai/useCEOBrief';
 import { formatDateTime } from '@/lib/formatters';
 import { normalizeKPI } from './ceoBrief/helpers';
+import type { CEOForecast, CEORisk, CEOPlanItem, CEODecision } from './ceoBrief/types';
 import { StructuredBlock } from './ceoBrief/StructuredBlock';
 import { ForecastKPIs } from './ceoBrief/ForecastKPIs';
 import { RisksList, PlanList, DecisionsList } from './ceoBrief/RisksPlanDecisions';
@@ -93,11 +94,11 @@ export function CEOBriefPanel() {
         )}
 
         {data && (() => {
-          const forecast = data.forecast ?? { trend: 'neutral', previsao_proximo_mes: 0, ultimo_mes: 0, media_movel_6m: 0 } as any;
+          const forecast: CEOForecast = data.forecast ?? { trend: 'neutral', previsao_proximo_mes: 0, ultimo_mes: 0, media_movel_6m: 0 };
           const kpis = (data.kpis ?? []).map(normalizeKPI);
-          const risks = data.risks ?? [];
-          const plan = data.plan ?? [];
-          const decisions = data.decisions ?? [];
+          const risks = (data.risks ?? []) as CEORisk[];
+          const plan = (data.plan ?? []) as CEOPlanItem[];
+          const decisions = (data.decisions ?? []) as CEODecision[];
           const structured = data.ceo_structured ?? null;
 
           return (
