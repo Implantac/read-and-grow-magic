@@ -10,11 +10,16 @@ import { FlaskConical, AlertTriangle, TrendingDown, TrendingUp, Lightbulb, Play,
 import { cn } from '@/lib/utils';
 
 import { formatNumber } from '@/lib/formatters';
+type MRPOrderRow = Parameters<typeof SimulationService.presetScenarios>[0][number];
+type MRPSupplyRow = Parameters<typeof SimulationService.presetScenarios>[1][number];
+type MRPCapacityRow = Parameters<typeof SimulationService.presetScenarios>[2][number];
+type MRPSheetRow = Parameters<typeof SimulationService.simulate>[2][number];
+
 interface MRPSimulationProps {
-  orders: any[];
-  sheets: any[];
-  supplies: any[];
-  capacities: any[];
+  orders: MRPOrderRow[];
+  sheets: MRPSheetRow[];
+  supplies: MRPSupplyRow[];
+  capacities: MRPCapacityRow[];
 }
 
 export default function MRPSimulation({ orders, sheets, supplies, capacities }: MRPSimulationProps) {
@@ -36,11 +41,11 @@ export default function MRPSimulation({ orders, sheets, supplies, capacities }: 
         scenario = preset;
       } else {
         // Custom scenario
-        const sectors = [...new Set(capacities.map((c: any) => c.sector))];
+        const sectors = [...new Set(capacities.map((c) => c.sector))];
         scenario = {
           name: 'Cenário Personalizado',
           description: `Redução ${customShortage}% material + ${customCapacityChange}% capacidade`,
-          materialShortages: supplies.slice(0, 3).map((s: any) => ({ materialCode: s.code || s.name, reducePct: customShortage })),
+          materialShortages: supplies.slice(0, 3).map((s) => ({ materialCode: s.code || s.name, reducePct: customShortage })),
           capacityChange: sectors.map(s => ({ sector: s, changePct: customCapacityChange })),
         };
       }

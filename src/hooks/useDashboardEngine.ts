@@ -12,7 +12,7 @@ export interface DashboardWidget {
   widget_type: "kpi" | "line" | "bar" | "pie" | "table" | string;
   title: string;
   data_source: string;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   position: { x?: number; y?: number; w?: number; h?: number };
 }
 
@@ -21,10 +21,18 @@ export interface DashboardDefinition {
   company_id: string;
   name: string;
   description: string | null;
-  layout: Record<string, any>;
+  layout: Record<string, unknown>;
   role_scope: string[] | null;
   is_default: boolean;
 }
+
+export type DashboardPayload = Partial<DashboardDefinition> & { name: string };
+export type WidgetPayload = Partial<DashboardWidget> & {
+  dashboard_id: string;
+  title: string;
+  widget_type: string;
+  data_source: string;
+};
 
 async function ctx() {
   const { data: userRes } = await supabase.auth.getUser();
@@ -70,7 +78,7 @@ export function useDashboardMutations() {
   const qc = useQueryClient();
   return {
     saveDashboard: useMutation({
-      mutationFn: async (payload: any & { name: string }) => {
+      mutationFn: async (payload: DashboardPayload) => {
         const { companyId, userId } = await ctx();
         if (payload.id) {
           const { error } = await supabase
@@ -101,7 +109,7 @@ export function useDashboardMutations() {
         toast.success("Dashboard salvo");
         qc.invalidateQueries({ queryKey: ["dashboard_definitions"] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: Error) => toast.error(e.message),
     }),
     removeDashboard: useMutation({
       mutationFn: async (id: string) => {
@@ -112,10 +120,10 @@ export function useDashboardMutations() {
         toast.success("Dashboard removido");
         qc.invalidateQueries({ queryKey: ["dashboard_definitions"] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: Error) => toast.error(e.message),
     }),
     saveWidget: useMutation({
-      mutationFn: async (payload: any & { dashboard_id: string; title: string; widget_type: string; data_source: string }) => {
+      mutationFn: async (payload: WidgetPayload) => {
         const { companyId } = await ctx();
         if (payload.id) {
           const { error } = await supabase
@@ -146,7 +154,7 @@ export function useDashboardMutations() {
         toast.success("Widget salvo");
         qc.invalidateQueries({ queryKey: ["dashboard_widgets", vars.dashboard_id] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: Error) => toast.error(e.message),
     }),
     removeWidget: useMutation({
       mutationFn: async ({ id }: { id: string; dashboard_id: string }) => {
@@ -157,7 +165,7 @@ export function useDashboardMutations() {
         toast.success("Widget removido");
         qc.invalidateQueries({ queryKey: ["dashboard_widgets", vars.dashboard_id] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: Error) => toast.error(e.message),
     }),
   };
 }
