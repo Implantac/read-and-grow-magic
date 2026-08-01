@@ -72,7 +72,7 @@ export default function ProfilePrivacy() {
       URL.revokeObjectURL(url);
       toast.success("Dados exportados com sucesso");
       await load();
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast.error(e.message ?? "Falha ao exportar");
     } finally {
       setExporting(false);
@@ -88,7 +88,7 @@ export default function ProfilePrivacy() {
       if (error) throw error;
       toast.success(data?.message ?? "Conta anonimizada");
       setTimeout(() => supabase.auth.signOut(), 1500);
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast.error(e.message ?? "Falha ao excluir");
     } finally {
       setDeleting(false);

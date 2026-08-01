@@ -1,6 +1,21 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { SystemUser, UserRole } from '@/types/administration';
 
+interface AdminUserRow {
+  id: string;
+  name?: string | null;
+  email?: string | null;
+  avatar_url?: string | null;
+  role?: string | null;
+  status?: string | null;
+  last_sign_in_at?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  phone?: string | null;
+  department?: string | null;
+  branch_id?: string | null;
+}
+
 export interface InviteUserData {
   email: string;
   name: string;
@@ -18,7 +33,7 @@ export interface ChangeRoleData {
   branch_id?: string | null;
 }
 
-async function callAdminUsers(action: string, params?: any) {
+async function callAdminUsers(action: string, params?: Record<string, unknown>) {
   const { data, error } = await supabase.functions.invoke('admin-users', {
     body: { action, ...params },
   });
@@ -35,7 +50,7 @@ export const usersService = {
     const response = await callAdminUsers('list');
     if (!response?.data) return [];
     
-    return response.data.map((user: any) => ({
+    return (response.data as AdminUserRow[]).map((user) => ({
       id: user.id,
       name: user.name || '',
       email: user.email || '',
