@@ -71,7 +71,7 @@ export default function Checks() {
       due_date: form.due_date || null,
       notes: form.notes || null,
       status: form.check_type === 'received' ? 'received' : 'issued',
-    } as any, {
+    }, {
       onSuccess: () => { setOpen(false); setForm({ ...form, check_number: '', amount: '', notes: '' }); },
     });
   };

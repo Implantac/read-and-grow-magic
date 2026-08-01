@@ -58,7 +58,7 @@ export default function CTePage() {
   };
 
   const handleCreate = async () => {
-    await createCTe.mutateAsync(form as any);
+    await createCTe.mutateAsync(form);
     setOpen(false);
     setStep(0);
     setSelectedNFeId('');

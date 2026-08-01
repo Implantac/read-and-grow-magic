@@ -54,7 +54,7 @@ export default function MDFePage() {
   };
 
   const handleCreate = async () => {
-    await create.mutateAsync({ ...form, documents: selectedDocs } as any);
+    await create.mutateAsync({ ...form, documents: selectedDocs });
     setOpen(false);
     setStep(0);
     setSelectedDocs([]);

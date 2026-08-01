@@ -166,7 +166,7 @@ export default function RecurringPage() {
                   </div>
                   <Button
                     onClick={async () => {
-                      await create.mutateAsync(form as any);
+                      await create.mutateAsync(form);
                       setOpen(false);
                     }}
                     disabled={create.isPending || !form.description || !form.party_name || form.amount <= 0}

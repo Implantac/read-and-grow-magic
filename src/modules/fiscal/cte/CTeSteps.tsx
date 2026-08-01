@@ -4,6 +4,7 @@ import { Label } from '@/ui/base/label';
 import { Separator } from '@/ui/base/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Button } from '@/ui/base/button';
+import type { SmartSelectOption } from '@/modules/fiscal/types';
 import { SmartSelect } from '@/components/fiscal/SmartSelect';
 import { FileText, Search, Receipt, Calculator, ClipboardCheck, ChevronRight } from 'lucide-react';
 import { formatBRL } from '@/lib/formatters';
@@ -13,7 +14,7 @@ import type { CTeForm } from './constants';
 interface CommonProps { form: CTeForm; setForm: (f: CTeForm) => void; }
 
 export function StepImport({ nfeOptions, selectedNFeId, onImport, onSkip }: {
-  nfeOptions: any[]; selectedNFeId: string; onImport: (id: string) => void; onSkip: () => void;
+  nfeOptions: SmartSelectOption[]; selectedNFeId: string; onImport: (id: string) => void; onSkip: () => void;
 }) {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -26,7 +27,7 @@ export function StepImport({ nfeOptions, selectedNFeId, onImport, onSkip }: {
           <p className="text-sm text-muted-foreground max-w-xs mx-auto">Selecione uma nota autorizada para preencher os dados do transporte automaticamente</p>
         </div>
         <div className="max-w-md mx-auto px-4">
-          <SmartSelect options={nfeOptions as any} value={selectedNFeId} onChange={onImport} placeholder="Pesquisar NF-e por número ou cliente..." />
+          <SmartSelect options={nfeOptions} value={selectedNFeId} onChange={onImport} placeholder="Pesquisar NF-e por número ou cliente..." />
         </div>
         <Button variant="ghost" onClick={onSkip} className="text-primary hover:bg-primary/5">
           Pular importação e preencher manualmente <ChevronRight className="ml-1 h-4 w-4" />

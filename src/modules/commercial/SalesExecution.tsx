@@ -81,7 +81,7 @@ function SmartQueueTab() {
       funnel_id: selectedItem.id,
       ...contactForm,
       next_action_date: contactForm.next_action_date || null,
-    } as any, { onSuccess: () => setSelectedItem(null) });
+    }, { onSuccess: () => setSelectedItem(null) });
   };
 
   if (isLoading) return <div className="animate-pulse h-40 bg-muted rounded" />;
