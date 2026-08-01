@@ -4,15 +4,16 @@ import { Dialog, DialogTrigger } from '@/ui/base/dialog';
 import { CostDialog } from './CostDialog';
 import { CostLine } from './StopRow';
 import { fmtBRL } from './helpers';
+import type { RouteCost, RouteCostInsert } from '@/hooks/tms/useRoutePlanning';
 
 type Props = {
   routeId: string;
-  cost: any;
+  cost: RouteCost | null | undefined;
   totalCost: number;
   costPerKm: number;
   costOpen: boolean;
   setCostOpen: (v: boolean) => void;
-  onSubmit: (payload: any) => void;
+  onSubmit: (payload: Omit<RouteCostInsert, 'company_id'> & { route_id: string }) => void;
 };
 
 export function RouteCostCard({ routeId, cost, totalCost, costPerKm, costOpen, setCostOpen, onSubmit }: Props) {

@@ -1,3 +1,4 @@
+import type { Carrier } from '@/hooks/wms/useTMS';
 import { useState } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
@@ -30,7 +31,7 @@ const Carriers = () => {
     setDialogOpen(true);
   };
 
-  const openEdit = (c: any) => {
+  const openEdit = (c: Carrier) => {
     setEditing(c);
     setForm({ code: c.code, name: c.name, document: c.document, contact_name: c.contactName, phone: c.phone, email: c.email, address: c.address, notes: c.notes });
     setDialogOpen(true);

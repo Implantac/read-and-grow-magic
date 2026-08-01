@@ -1,3 +1,4 @@
+import type { Vehicle } from '@/hooks/wms/useTMS';
 import { useState } from 'react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
@@ -36,7 +37,7 @@ const Vehicles = () => {
     setDialogOpen(true);
   };
 
-  const openEdit = (v: any) => {
+  const openEdit = (v: Vehicle) => {
     setEditing(v);
     setForm({ carrier_id: v.carrierId, plate: v.plate, model: v.model, vehicle_type: v.vehicleType, max_weight: String(v.maxWeight), max_volume: String(v.maxVolume), driver_name: v.driverName, driver_phone: v.driverPhone });
     setDialogOpen(true);
