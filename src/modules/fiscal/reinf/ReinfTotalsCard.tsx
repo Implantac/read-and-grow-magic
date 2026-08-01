@@ -1,5 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/ui/base/card';
 import { formatBRL } from '@/lib/formatters';
+import type { ReinfPeriod } from '@/hooks/fiscal/useReinf';
+
+type ReinfTotals = NonNullable<ReinfPeriod['totals']>;
 
 function TotalBox({ label, value }: { label: string; value: string }) {
   return (
@@ -10,7 +13,7 @@ function TotalBox({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function ReinfTotalsCard({ totals }: { totals: any }) {
+export function ReinfTotalsCard({ totals }: { totals: ReinfTotals }) {
   return (
     <Card className="lg:col-span-2 shadow-lg border-primary/10">
       <CardHeader className="bg-primary/5 border-b">

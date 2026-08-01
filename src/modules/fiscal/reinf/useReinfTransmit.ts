@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { errorMessage } from '@/lib/errors';
 
 export function useReinfTransmit() {
   const [transmitting, setTransmitting] = useState(false);
@@ -29,8 +30,8 @@ export function useReinfTransmit() {
           description: data?.message || 'Certificado A1 ainda não configurado (Sprint 1.1).',
         });
       }
-    } catch (err: any) {
-      toast.error('Falha na transmissão', { description: err.message });
+    } catch (err) {
+      toast.error('Falha na transmissão', { description: errorMessage(err) });
     } finally {
       setTransmitting(false);
     }
