@@ -1,3 +1,4 @@
+import type { SequenceResult } from './types';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { ScrollArea } from '@/ui/base/scroll-area';
 import { Card, CardContent } from '@/ui/base/card';
@@ -10,7 +11,7 @@ import { ListOrdered, Shield } from 'lucide-react';
 interface SequenceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  result: any;
+  result: SequenceResult | null;
   applying: boolean;
   onApply: () => void;
 }
@@ -54,7 +55,7 @@ export function SequenceDialog({ open, onOpenChange, result, applying, onApply }
               <p className="text-sm font-medium">{result.summary}</p>
 
               <div className="space-y-1.5">
-                {result.sequence?.map((s: any) => (
+                {result.sequence?.map((s) => (
                   <div key={s.id} className={cn(
                     'p-2.5 rounded-lg text-xs flex items-center gap-3',
                     s.setup_change ? 'bg-warning/10 border border-warning/20' : 'bg-muted/50'

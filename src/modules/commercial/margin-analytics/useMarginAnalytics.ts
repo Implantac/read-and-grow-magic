@@ -1,7 +1,8 @@
+import type { DbOrder } from '@/hooks/commercial/useOrders';
 import { useMemo } from 'react';
 import { PERIODS } from './utils';
 
-export function useMarginAnalytics(allOrders: any[] | undefined, period: string) {
+export function useMarginAnalytics(allOrders: DbOrder[] | undefined, period: string) {
   const orders = useMemo(() => {
     if (!allOrders) return allOrders;
     const days = PERIODS[period]?.days;
@@ -41,7 +42,7 @@ export function useMarginAnalytics(allOrders: any[] | undefined, period: string)
     const bottom = sorted.slice(0, 5);
     const top = sorted.slice(-5).reverse();
 
-    const aggregate = (keyFn: (o: any) => string | null) => {
+    const aggregate = (keyFn: (o: DbOrder) => string | null) => {
       const map = new Map<string, { key: string; revenue: number; cost: number; tax: number; marginSum: number; count: number }>();
       for (const o of withSnap) {
         const k = keyFn(o);

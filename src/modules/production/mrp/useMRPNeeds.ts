@@ -1,7 +1,8 @@
+import type { OrderLike, SheetLike, SupplyLike, MaterialItemLike } from '@/lib/pcp/types';
 import { useMemo } from 'react';
 import type { MaterialNeed } from './types';
 
-export function useMRPNeeds(orders: any[], sheets: any[], supplies: any[]) {
+export function useMRPNeeds(orders: OrderLike[], sheets: SheetLike[], supplies: SupplyLike[]) {
   const activeOPs = useMemo(
     () => orders.filter(o => ['planned', 'in_progress'].includes(o.status)),
     [orders]
@@ -14,7 +15,7 @@ export function useMRPNeeds(orders: any[], sheets: any[], supplies: any[]) {
       const sheet = sheets.find(s => s.product_code === op.product_code || s.product_id === op.product_id);
       if (sheet && Array.isArray(sheet.materials)) {
         const remainingQty = Math.max(0, op.quantity - op.produced_quantity);
-        sheet.materials.forEach((mat: any) => {
+        sheet.materials.forEach((mat: MaterialItemLike) => {
           const code = mat.code || mat.componentCode || mat.material_code || '';
           const name = mat.name || mat.componentName || mat.material_name || code;
           const qtyPerUnit = mat.quantity || mat.qty || 0;
