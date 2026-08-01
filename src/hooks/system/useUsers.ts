@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usersService, InviteUserData, ChangeRoleData } from '@/services/system/usersService';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import type { SystemUser } from '@/types/administration';
+import { errorMessage } from '@/lib/errors';
 import { useAppStore } from '@/stores/useAppStore';
 
 export function useUsers() {
@@ -20,8 +21,8 @@ export function useUsers() {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       toastSuccess('Usuário convidado com sucesso');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao convidar usuário');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao convidar usuário'));
     }
   });
 
@@ -31,8 +32,8 @@ export function useUsers() {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       toastSuccess('Usuário excluído com sucesso');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao excluir usuário');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao excluir usuário'));
     }
   });
 
@@ -42,8 +43,8 @@ export function useUsers() {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       toastSuccess('Perfil atualizado com sucesso');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao atualizar perfil');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao atualizar perfil'));
     }
   });
 
@@ -54,8 +55,8 @@ export function useUsers() {
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
       toastSuccess(`Usuário ${variables.banned ? 'bloqueado' : 'desbloqueado'} com sucesso`);
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao alterar status do usuário');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao alterar status do usuário'));
     }
   });
 
@@ -64,8 +65,8 @@ export function useUsers() {
     onSuccess: () => {
       toastSuccess('Email de redefinição enviado com sucesso');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao enviar email de redefinição');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao enviar email de redefinição'));
     }
   });
 

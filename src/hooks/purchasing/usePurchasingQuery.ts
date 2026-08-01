@@ -2,6 +2,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { purchasingService } from '@/services/purchasing/purchasingService';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import type { PurchaseOrder, Quotation, Supplier } from '@/types/purchasing';
+import type { PurchaseOrderRow, PurchaseOrderItemRow } from '@/services/purchasing/purchasingService';
+import type { Tables, TablesInsert } from '@/integrations/supabase/types';
 
 export function usePurchasing() {
   const queryClient = useQueryClient();
@@ -10,7 +12,7 @@ export function usePurchasing() {
     queryKey: ['purchasing_suppliers'],
     queryFn: async () => {
       const data = await purchasingService.getSuppliers();
-      return (data || []).map((s: any) => ({
+      return (data || []).map((s: Tables<'suppliers'>) => ({
         id: s.id, code: s.code, name: s.name, tradeName: s.trade_name,
         document: s.document, documentType: s.document_type, email: s.email || '',
         phone: s.phone || '', cellphone: s.cellphone, status: s.status,
@@ -26,10 +28,10 @@ export function usePurchasing() {
     queryKey: ['purchasing_orders'],
     queryFn: async () => {
       const data = await purchasingService.getPurchaseOrders();
-      return (data || []).map((o: any) => ({
+      return (data || []).map((o: PurchaseOrderRow) => ({
         id: o.id, number: o.number, supplierId: o.supplier_id, supplierName: o.suppliers?.name || '',
         date: o.created_at, expectedDelivery: o.delivery_date, 
-        items: (o.items || []).map((i: any) => ({
+        items: (o.items || []).map((i: PurchaseOrderItemRow) => ({
           id: i.id, productId: i.product_id, productName: i.product_name, productCode: i.product_code,
           quantity: i.quantity, receivedQuantity: i.received_quantity || 0,
           unitPrice: i.unit_price, total: i.total_price, unit: i.unit
@@ -46,7 +48,7 @@ export function usePurchasing() {
     queryKey: ['purchasing_quotations'],
     queryFn: async () => {
       const data = await purchasingService.getQuotations();
-      return (data || []).map((q: any) => ({
+      return (data || []).map((q: Tables<'quotations'>) => ({
         id: q.id, number: q.number, title: q.title, description: q.description,
         date: q.created_at, deadline: q.deadline, items: q.items || [],
         suppliers: q.suppliers || [], status: q.status, priority: q.priority,
@@ -56,7 +58,7 @@ export function usePurchasing() {
   });
 
   const createSupplierMutation = useMutation({
-    mutationFn: (supplier: any) => purchasingService.createSupplier(supplier),
+    mutationFn: (supplier: TablesInsert<'suppliers'>) => purchasingService.createSupplier(supplier),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['purchasing_suppliers'] });
       toastSuccess('Fornecedor cadastrado com sucesso');
