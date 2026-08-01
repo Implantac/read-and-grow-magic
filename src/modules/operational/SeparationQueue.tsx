@@ -34,7 +34,7 @@ export default function SeparationQueue() {
   const qc = useQueryClient();
   const updateReservationStatus = async (id: string, status: string, orderId?: string) => {
     const updates: TablesUpdate<'stock_reservations'> = { status, updated_at: new Date().toISOString() };
-    if (status === 'picked') updates.picked_at = new Date().toISOString();
+    if (status === 'released' || status === 'cancelled') updates.released_at = new Date().toISOString();
     const { error } = await supabase.from('stock_reservations').update(updates).eq('id', id);
     if (error) { toastError(error.message); return; }
     toastSuccess(`Status atualizado para ${reservationStatusConfig[status]?.label || status}`);
