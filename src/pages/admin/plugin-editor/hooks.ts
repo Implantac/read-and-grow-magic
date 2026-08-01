@@ -1,4 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { errorMessage } from '@/lib/errors';
+import type { Json } from '@/integrations/supabase/types';
 import { supabase } from "@/integrations/supabase/client";
 import { handleMutationError, toastSuccess } from "@/lib/toastHelpers";
 import type { PluginDraft, PluginRow, PluginVersionRow } from "./types";
@@ -45,11 +47,11 @@ export function useSavePlugin(opts: {
     mutationFn: async () => {
       const { draft, manifestText, selectedId } = opts;
       if (!draft) throw new Error("Nenhum plugin selecionado");
-      let manifest: any = null;
+      let manifest: Json = null;
       try {
         manifest = manifestText.trim() ? JSON.parse(manifestText) : {};
-      } catch (e: any) {
-        throw new Error(`Manifest JSON inválido: ${e.message}`);
+      } catch (e) {
+        throw new Error(`Manifest JSON inválido: ${errorMessage(e)}`);
       }
       const payload = {
         key: draft.key.trim(),
@@ -122,11 +124,11 @@ export function usePublishVersion(opts: {
     mutationFn: async () => {
       const { pluginId, draft, manifestText } = opts;
       if (!pluginId || !draft) throw new Error("Salve o plugin antes de publicar uma versão");
-      let manifest: any = {};
+      let manifest: Json = {};
       try {
         manifest = manifestText.trim() ? JSON.parse(manifestText) : {};
-      } catch (e: any) {
-        throw new Error(`Manifest JSON inválido: ${e.message}`);
+      } catch (e) {
+        throw new Error(`Manifest JSON inválido: ${errorMessage(e)}`);
       }
       const changelog = window.prompt(`Changelog para versão ${draft.version}:`, "") ?? "";
       const { data: { user } } = await supabase.auth.getUser();

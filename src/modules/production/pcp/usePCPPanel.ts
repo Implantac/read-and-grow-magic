@@ -3,15 +3,23 @@ import { format, differenceInDays, parseISO, differenceInMinutes } from 'date-fn
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
 import { supabase } from '@/integrations/supabase/client';
 import { checkProductionCompletion } from '@/hooks/commercial/useOrderLifecycle';
+import { errorMessage } from '@/lib/errors';
+import type { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
+import type { TimeEntryRow } from '@/hooks/system/useTimeEntries';
+import type { DbOrder } from '@/hooks/commercial/useOrders';
+import type { useOrderLifecycle } from '@/hooks/commercial/useOrderLifecycle';
+
+type Lifecycle = ReturnType<typeof useOrderLifecycle>;
+type UpdateOP = (id: string, updates: Partial<ProductionOrderRow>) => Promise<void> | void;
 
 export function usePCPPanelState() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [generatingFor, setGeneratingFor] = useState<any>(null);
+  const [generatingFor, setGeneratingFor] = useState<DbOrder | null>(null);
   return { search, setSearch, statusFilter, setStatusFilter, generatingFor, setGeneratingFor };
 }
 
-export function computeDerived(productionOrders: any[], salesOrders: any[] = [], timeEntries: any[] = []) {
+export function computeDerived(productionOrders: ProductionOrderRow[], salesOrders: DbOrder[] = [], timeEntries: TimeEntryRow[] = []) {
   const statusCounts = productionOrders.reduce((acc: Record<string, number>, o) => {
     acc[o.status] = (acc[o.status] || 0) + 1;
     return acc;
@@ -54,7 +62,7 @@ export function computeDerived(productionOrders: any[], salesOrders: any[] = [],
   return { statusCounts, totalCapacity, ordersAwaitingProduction, workCenterData, today, delayedOPs, operatorData };
 }
 
-export async function generateOPFromOrder(order: any, lifecycle: any, refetch: () => Promise<any>, onDone: () => void) {
+export async function generateOPFromOrder(order: DbOrder, lifecycle: Lifecycle, refetch: () => Promise<void>, onDone: () => void) {
   const items = order.items || [];
   if (items.length === 0) { toastError('Pedido sem itens'); return; }
   try {
@@ -71,10 +79,10 @@ export async function generateOPFromOrder(order: any, lifecycle: any, refetch: (
     toastSuccess(`${items.length} OP(s) gerada(s) do pedido ${order.number}`);
     await refetch();
     onDone();
-  } catch (e: any) { toastError(e.message, undefined, 'Erro ao gerar OP'); }
+  } catch (e) { toastError(errorMessage(e), undefined, 'Erro ao gerar OP'); }
 }
 
-export async function handleStatusChange(op: any, newStatus: string, update: any, salesOrders: any[] = []) {
+export async function handleStatusChange(op: ProductionOrderRow, newStatus: string, update: UpdateOP, salesOrders: DbOrder[] = []) {
   await update(op.id, {
     status: newStatus,
     ...(newStatus === 'in_progress' ? { start_date: new Date().toISOString() } : {}),
