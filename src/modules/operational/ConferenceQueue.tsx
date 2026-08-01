@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { CheckCircle, Clock, AlertTriangle, ClipboardCheck, Play } from 'lucide-react';
 import { format } from 'date-fns';
+import type { TablesUpdate } from '@/integrations/supabase/types';
 
 export default function ConferenceQueue() {
   const { data: conferences, isLoading } = useConferenceRecords();
@@ -21,7 +22,7 @@ export default function ConferenceQueue() {
   const lifecycle = useOrderLifecycle();
   const qc = useQueryClient();
   const updateConferenceStatus = async (id: string, status: string, orderId?: string) => {
-    const updates: any = { status, updated_at: new Date().toISOString() };
+    const updates: TablesUpdate<'conference_records'> = { status, updated_at: new Date().toISOString() };
     if (status === 'in_progress') updates.started_at = new Date().toISOString();
     if (status === 'completed' || status === 'approved') {
       updates.completed_at = new Date().toISOString();
@@ -47,7 +48,7 @@ export default function ConferenceQueue() {
     }
   };
 
-  const statusCounts = (conferences || []).reduce((acc: Record<string, number>, c: any) => {
+  const statusCounts = (conferences || []).reduce((acc: Record<string, number>, c) => {
     acc[c.status] = (acc[c.status] || 0) + 1;
     return acc;
   }, {});
@@ -101,7 +102,7 @@ export default function ConferenceQueue() {
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow></TableHeader>
               <TableBody>
-                {conferences.map((c: any) => (
+                {conferences.map((c) => (
                   <TableRow key={c.id}>
                     <TableCell className="font-mono">{c.conference_number}</TableCell>
                     <TableCell><StatusBadge status={c.status} type="order" /></TableCell>

@@ -12,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/ui/base/avatar';
 import {
   User, Mail, Shield, Building2, MapPin, Phone, Save, Eye, EyeOff, Lock, Camera,
 } from 'lucide-react';
+import { errorMessage } from '@/lib/errors';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import { validateFile, MB } from '@/lib/fileValidation';
 
@@ -63,8 +64,8 @@ export default function ProfilePage() {
       await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id);
       setAvatarUrl(publicUrl);
       toastSuccess('Foto atualizada', 'Sua foto de perfil foi salva.');
-    } catch (err: any) {
-      toastError(err.message, undefined, 'Erro no upload');
+    } catch (err: unknown) {
+      toastError(errorMessage(err), undefined, 'Erro no upload');
     } finally {
       setUploading(false);
     }
@@ -82,8 +83,8 @@ export default function ProfilePage() {
       if (error) throw error;
       setUser({ ...user, name, email });
       toastSuccess('Perfil atualizado', 'Suas informações foram salvas com sucesso.');
-    } catch (err: any) {
-      toastError(err.message);
+    } catch (err: unknown) {
+      toastError(errorMessage(err));
     } finally {
       setSavingProfile(false);
     }
@@ -119,8 +120,8 @@ export default function ProfilePage() {
       setNewPassword('');
       setConfirmPassword('');
       toastSuccess('Senha alterada', 'Sua senha foi atualizada com sucesso.');
-    } catch (err: any) {
-      toastError(err.message);
+    } catch (err: unknown) {
+      toastError(errorMessage(err));
     } finally {
       setChangingPassword(false);
     }

@@ -14,6 +14,7 @@ import { Loader2, UserCheck2, Plus, Trash2 } from "lucide-react";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { errorMessage } from "@/lib/errors";
 
 type Delegation = {
   id: string;
@@ -81,7 +82,7 @@ export default function WorkflowDelegations() {
       setToUser(""); setReason(""); setEndsAt("");
       qc.invalidateQueries({ queryKey: ["workflow_delegations"] });
     },
-    onError: (e: any) => toast.error(e.message ?? "Erro ao criar"),
+    onError: (e: unknown) => toast.error(errorMessage(e) ?? "Erro ao criar"),
   });
 
   const toggleActive = useMutation({
@@ -90,7 +91,7 @@ export default function WorkflowDelegations() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["workflow_delegations"] }),
-    onError: (e: any) => toast.error(e.message ?? "Erro"),
+    onError: (e: unknown) => toast.error(errorMessage(e) ?? "Erro"),
   });
 
   const remove = useMutation({
@@ -99,7 +100,7 @@ export default function WorkflowDelegations() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["workflow_delegations"] }),
-    onError: (e: any) => toast.error(e.message ?? "Erro"),
+    onError: (e: unknown) => toast.error(errorMessage(e) ?? "Erro"),
   });
 
   return (
