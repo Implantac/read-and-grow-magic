@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { errorMessage } from "@/lib/errors";
+import type { Json } from "@/integrations/supabase/types";
 
 export type CustomFieldType =
   | "text"
@@ -34,9 +36,9 @@ export interface CustomField {
   field_type: string;
   is_required: boolean;
   is_unique: boolean;
-  default_value: any;
-  options: any;
-  validation: any;
+  default_value: Json;
+  options: Json;
+  validation: Json;
   help_text: string | null;
   display_order: number;
   is_active: boolean;
@@ -47,7 +49,7 @@ export interface CustomRecord {
   entity_id: string;
   company_id: string;
   branch_id: string | null;
-  data: Record<string, any>;
+  data: Record<string, Json>;
   created_by: string | null;
   updated_by: string | null;
   created_at: string;
@@ -136,7 +138,7 @@ export function useEntityMutations() {
         toast.success("Entidade criada");
         qc.invalidateQueries({ queryKey: ["custom_entities"] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(errorMessage(e)),
     }),
     remove: useMutation({
       mutationFn: async (id: string) => {
@@ -147,7 +149,7 @@ export function useEntityMutations() {
         toast.success("Entidade excluída");
         qc.invalidateQueries({ queryKey: ["custom_entities"] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(errorMessage(e)),
     }),
   };
 }
@@ -156,7 +158,7 @@ export function useFieldMutations(entityId: string | undefined) {
   const qc = useQueryClient();
   return {
     create: useMutation({
-      mutationFn: async (payload: { field_key: string; label: string; field_type: string; is_required?: boolean; is_unique?: boolean; help_text?: string; options?: any; display_order?: number }) => {
+      mutationFn: async (payload: { field_key: string; label: string; field_type: string; is_required?: boolean; is_unique?: boolean; help_text?: string; options?: Json; display_order?: number }) => {
         if (!entityId) throw new Error("Entidade obrigatória");
         const { companyId } = await currentCompanyId();
         const { error } = await supabase.from("custom_fields").insert({
@@ -177,7 +179,7 @@ export function useFieldMutations(entityId: string | undefined) {
         toast.success("Campo adicionado");
         qc.invalidateQueries({ queryKey: ["custom_fields", entityId] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(errorMessage(e)),
     }),
     remove: useMutation({
       mutationFn: async (id: string) => {
@@ -188,7 +190,7 @@ export function useFieldMutations(entityId: string | undefined) {
         toast.success("Campo removido");
         qc.invalidateQueries({ queryKey: ["custom_fields", entityId] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(errorMessage(e)),
     }),
   };
 }
@@ -251,7 +253,7 @@ export function useRelationshipMutations(entityId: string | undefined) {
         toast.success("Relacionamento criado");
         qc.invalidateQueries({ queryKey: ["custom_relationships", entityId] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(errorMessage(e)),
     }),
     update: useMutation({
       mutationFn: async (payload: {
@@ -273,7 +275,7 @@ export function useRelationshipMutations(entityId: string | undefined) {
         toast.success("Relacionamento atualizado");
         qc.invalidateQueries({ queryKey: ["custom_relationships", entityId] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(errorMessage(e)),
     }),
     remove: useMutation({
       mutationFn: async (id: string) => {
@@ -284,7 +286,7 @@ export function useRelationshipMutations(entityId: string | undefined) {
         toast.success("Relacionamento removido");
         qc.invalidateQueries({ queryKey: ["custom_relationships", entityId] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(errorMessage(e)),
     }),
   };
 
@@ -310,7 +312,7 @@ export function useRecordMutations(entityId: string | undefined) {
         toast.success("Registro criado");
         qc.invalidateQueries({ queryKey: ["custom_records", entityId] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(errorMessage(e)),
     }),
     update: useMutation({
       mutationFn: async ({ id, data }: { id: string; data: Record<string, any> }) => {
@@ -325,7 +327,7 @@ export function useRecordMutations(entityId: string | undefined) {
         toast.success("Registro atualizado");
         qc.invalidateQueries({ queryKey: ["custom_records", entityId] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(errorMessage(e)),
     }),
     remove: useMutation({
       mutationFn: async (id: string) => {
@@ -336,7 +338,7 @@ export function useRecordMutations(entityId: string | undefined) {
         toast.success("Registro excluído");
         qc.invalidateQueries({ queryKey: ["custom_records", entityId] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(errorMessage(e)),
     }),
   };
 }

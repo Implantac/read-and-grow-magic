@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { tmsService } from '@/services/operational/tmsService';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
+import { errorMessage } from '@/lib/errors';
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 
 export function useTMS() {
   const queryClient = useQueryClient();
@@ -27,24 +29,24 @@ export function useTMS() {
 
   // Carriers
   const createCarrierMutation = useMutation({
-    mutationFn: (carrier: any) => tmsService.createCarrier(carrier),
+    mutationFn: (carrier: TablesInsert<'carriers'>) => tmsService.createCarrier(carrier),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tms_carriers'] });
       toastSuccess('Transportadora criada com sucesso');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao criar transportadora');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao criar transportadora'));
     }
   });
 
   const updateCarrierMutation = useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: any }) => tmsService.updateCarrier(id, updates),
+    mutationFn: ({ id, updates }: { id: string; updates: TablesUpdate<'carriers'> }) => tmsService.updateCarrier(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tms_carriers'] });
       toastSuccess('Transportadora atualizada');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao atualizar transportadora');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao atualizar transportadora'));
     }
   });
 
@@ -54,54 +56,54 @@ export function useTMS() {
       queryClient.invalidateQueries({ queryKey: ['tms_carriers'] });
       toastSuccess('Transportadora excluída');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao excluir transportadora');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao excluir transportadora'));
     }
   });
 
   // Vehicles
   const createVehicleMutation = useMutation({
-    mutationFn: (vehicle: any) => tmsService.createVehicle(vehicle),
+    mutationFn: (vehicle: TablesInsert<'vehicles'>) => tmsService.createVehicle(vehicle),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tms_vehicles'] });
       toastSuccess('Veículo criado com sucesso');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao criar veículo');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao criar veículo'));
     }
   });
 
   const updateVehicleMutation = useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: any }) => tmsService.updateVehicle(id, updates),
+    mutationFn: ({ id, updates }: { id: string; updates: TablesUpdate<'vehicles'> }) => tmsService.updateVehicle(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tms_vehicles'] });
       toastSuccess('Veículo atualizado');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao atualizar veículo');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao atualizar veículo'));
     }
   });
 
   // Routes
   const createRouteMutation = useMutation({
-    mutationFn: (route: any) => tmsService.createRoute(route),
+    mutationFn: (route: TablesInsert<'delivery_routes'>) => tmsService.createRoute(route),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tms_routes'] });
       toastSuccess('Rota criada com sucesso');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao criar rota');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao criar rota'));
     }
   });
 
   const updateRouteMutation = useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: any }) => tmsService.updateRoute(id, updates),
+    mutationFn: ({ id, updates }: { id: string; updates: TablesUpdate<'delivery_routes'> }) => tmsService.updateRoute(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tms_routes'] });
       toastSuccess('Rota atualizada');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao atualizar rota');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao atualizar rota'));
     }
   });
 

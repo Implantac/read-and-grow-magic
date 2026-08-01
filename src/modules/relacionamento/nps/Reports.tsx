@@ -13,10 +13,15 @@ import { exportToCSV, exportToExcel } from '@/lib/exportUtils';
 
 const COLORS = { promoter: '#10B981', passive: '#F59E0B', detractor: '#EF4444' };
 
+type AnswerRow = NPSAnswer & {
+  clients?: { name?: string | null; address_city?: string | null; segment?: string | null } | null;
+  city?: string | null;
+};
+
 type Period = '30d' | '90d' | '180d' | '365d' | 'all';
 const PERIOD_DAYS: Record<Period, number | null> = { '30d': 30, '90d': 90, '180d': 180, '365d': 365, all: null };
 
-function computeNps(rows: any[]) {
+function computeNps(rows: AnswerRow[]) {
   const total = rows.length;
   const p = rows.filter((r) => r.category === 'promoter').length;
   const pas = rows.filter((r) => r.category === 'passive').length;
@@ -30,7 +35,7 @@ export default function Reports() {
   const [campaignId, setCampaignId] = useState<string | undefined>();
   const [groupBy, setGroupBy] = useState<'city' | 'segment' | 'category' | 'month'>('month');
   const [period, setPeriod] = useState<Period>('180d');
-  const [drill, setDrill] = useState<{ key: string; rows: any[] } | null>(null);
+  const [drill, setDrill] = useState<{ key: string; rows: AnswerRow[] } | null>(null);
   const { data: answers = [], isLoading } = useNPSAnswers(campaignId ?? null, 5000);
 
   // Split by period + comparativo período-a-período
@@ -40,8 +45,8 @@ export default function Reports() {
     const now = Date.now();
     const cutCurrent = now - days * 86400_000;
     const cutPrev = now - 2 * days * 86400_000;
-    const current = answers.filter((a: any) => new Date(a.responded_at).getTime() >= cutCurrent);
-    const previous = answers.filter((a: any) => {
+    const current = answers.filter((a: AnswerRow) => new Date(a.responded_at).getTime() >= cutCurrent);
+    const previous = answers.filter((a: AnswerRow) => {
       const t = new Date(a.responded_at).getTime();
       return t >= cutPrev && t < cutCurrent;
     });
@@ -53,8 +58,8 @@ export default function Reports() {
   const delta = currentStats.nps - previousStats.nps;
 
   const grouped = useMemo(() => {
-    const map = new Map<string, { key: string; rows: any[]; total: number; p: number; d: number; pas: number; nps: number }>();
-    current.forEach((a: any) => {
+    const map = new Map<string, { key: string; rows: AnswerRow[]; total: number; p: number; d: number; pas: number; nps: number }>();
+    current.forEach((a: AnswerRow) => {
       const key = groupBy === 'city' ? (a.clients?.address_city ?? a.city ?? 'N/D')
         : groupBy === 'segment' ? (a.clients?.segment ?? 'N/D')
         : groupBy === 'category' ? a.category
@@ -78,7 +83,7 @@ export default function Reports() {
 
   const trendData = useMemo(() => {
     const map = new Map<string, { month: string; total: number; p: number; d: number; nps: number }>();
-    current.forEach((a: any) => {
+    current.forEach((a: AnswerRow) => {
       const month = (a.responded_at ?? '').slice(0, 7);
       if (!month) return;
       const e = map.get(month) ?? { month, total: 0, p: 0, d: 0, nps: 0 };
@@ -126,7 +131,7 @@ export default function Reports() {
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas</SelectItem>
-              {campaigns.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+              {campaigns.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -224,7 +229,7 @@ export default function Reports() {
             <CardHeader><CardTitle className="text-base">Comparativo por {groupBy} (clique numa barra para drill-down)</CardTitle></CardHeader>
             <CardContent className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={grouped} onClick={(e: any) => {
+                <BarChart data={grouped} onClick={(e: { activeLabel?: string }) => {
                   const key = e?.activeLabel;
                   const g = grouped.find((x) => x.key === key);
                   if (g) setDrill({ key: g.key, rows: g.rows });
@@ -273,7 +278,7 @@ export default function Reports() {
         <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
           <SheetHeader><SheetTitle>Drill-down: {drill?.key}</SheetTitle></SheetHeader>
           <div className="mt-4 space-y-2">
-            {drill?.rows.map((r: any) => (
+            {drill?.rows.map((r) => (
               <div key={r.id} className="flex items-center justify-between p-3 rounded-md border border-border">
                 <div className="min-w-0">
                   <div className="text-sm font-medium truncate">{r.clients?.name ?? r.name ?? 'Anônimo'}</div>

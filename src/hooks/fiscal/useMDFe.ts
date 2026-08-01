@@ -46,9 +46,14 @@ export function useMDFes() {
 export function useCreateMDFe() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: Partial<MDFe> & { uf_origin: string; uf_destination: string }) => {
+    mutationFn: async (payload: Partial<MDFe> & { uf_origin: string; uf_destination: string; documents?: string[] }) => {
+      const { documents, ...rest } = payload;
       const number = 'MDFE-' + Date.now().toString().slice(-8);
-      const { data, error } = await supabase.from('mdfe').insert({ ...payload, number, status: 'draft' }).select().single();
+      const { data, error } = await supabase
+        .from('mdfe')
+        .insert({ ...rest, number, status: 'draft', total_documents: documents?.length ?? 0 })
+        .select()
+        .single();
       if (error) throw error;
       return data;
     },

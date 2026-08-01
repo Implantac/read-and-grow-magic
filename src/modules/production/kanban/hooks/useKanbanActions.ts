@@ -4,15 +4,19 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { WarModeService } from '@/lib/pcpServices';
 import { VALID_TRANSITIONS, STATUS_LABELS } from '../constants';
+import type { Tables, TablesUpdate } from '@/integrations/supabase/types';
+
+type ProductionOrderRow = Tables<'production_orders'>;
+type WorkCenterCapacity = { id: string; name?: string | null; capacity?: number | null; [key: string]: unknown };
 
 export function useKanbanActions(params: {
-  orders: any[];
-  update: (id: string, updates: any) => Promise<void>;
+  orders: ProductionOrderRow[];
+  update: (id: string, updates: TablesUpdate<'production_orders'>) => Promise<void>;
   refetch: () => Promise<void> | void;
   capacityLoad: Record<string, { name: string; capacity: number; allocated: number }>;
   wipLimits: Record<string, number>;
-  intelligence: any;
-  capacities: any[];
+  intelligence: Record<string, unknown> | null | undefined;
+  capacities: WorkCenterCapacity[];
 }) {
   const { orders, update, refetch, capacityLoad, wipLimits, intelligence, capacities } = params;
 
@@ -40,7 +44,7 @@ export function useKanbanActions(params: {
       }
     }
 
-    const updates: any = { status: newStatus };
+    const updates: TablesUpdate<'production_orders'> = { status: newStatus };
     if (newStatus === 'in_progress' || newStatus === 'outsourced') updates.start_date = updates.start_date || new Date().toISOString();
     if (newStatus === 'completed') updates.completed_date = new Date().toISOString();
     await update(orderId, updates);
@@ -82,7 +86,7 @@ export function useKanbanActions(params: {
       if (error) throw error;
       toast.success(`Prioridades recalculadas: ${data.ordersUpdated} OPs atualizadas`);
       await refetch();
-    } catch (e: any) {
+    } catch (e) {
       toast.error('Erro ao recalcular prioridades');
       console.error(e);
     } finally {
@@ -103,7 +107,7 @@ export function useKanbanActions(params: {
         summary: localResult.summary,
       });
       setWarModeOpen(true);
-    } catch (e: any) {
+    } catch (e) {
       toast.error('Erro ao executar Modo Guerra');
       console.error(e);
     } finally {
@@ -134,7 +138,7 @@ export function useKanbanActions(params: {
       if (error) throw error;
       setSequenceResult(data);
       setSequenceOpen(true);
-    } catch (e: any) {
+    } catch (e) {
       toast.error('Erro ao otimizar sequência');
       console.error(e);
     } finally {
@@ -165,7 +169,7 @@ export function useKanbanActions(params: {
       if (error) throw error;
       setBottleneckData(data);
       setBottleneckOpen(true);
-    } catch (e: any) {
+    } catch (e) {
       toast.error('Erro ao analisar gargalos');
       console.error(e);
     } finally {
