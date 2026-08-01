@@ -51,7 +51,18 @@ function SRESettingsInner() {
         .eq("company_id", companyId)
         .maybeSingle();
       if (error) console.error(error);
-      const row = (data as any) ?? emptySettings(companyId);
+      const row: SRESettingsRow = data
+        ? {
+            id: data.id,
+            company_id: data.company_id,
+            from_email: data.from_email,
+            extra_recipients: data.extra_recipients ?? [],
+            quiet_hours_start: data.quiet_hours_start,
+            quiet_hours_end: data.quiet_hours_end,
+            quiet_timezone: data.quiet_timezone ?? 'America/Sao_Paulo',
+            silence_weekends: data.silence_weekends ?? false,
+          }
+        : emptySettings(companyId);
       setS(row);
       setExtrasText((row.extra_recipients ?? []).join("\n"));
       setLoading(false);
