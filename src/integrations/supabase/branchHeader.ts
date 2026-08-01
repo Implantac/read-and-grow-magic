@@ -14,6 +14,8 @@ import { supabase } from './client';
 import { getActiveBranchId } from '@/core/stores/useEnterpriseStore';
 import { moduleLabel } from '@/lib/moduleLabels';
 
+type InvokeOptions = { headers?: Record<string, string>; [key: string]: unknown };
+
 let installed = false;
 let lastRedirectAt = 0;
 
@@ -70,7 +72,7 @@ function redirectToUpgrade(params: { module?: string; requiredPlan?: string; rea
   }
 }
 
-export async function handlePlanErrorResponse(err: any): Promise<boolean> {
+export async function handlePlanErrorResponse(err: unknown): Promise<boolean> {
   const { status, body } = await extractErrorBody(err);
   const moduleKey: string | undefined = body?.module;
   const requiredPlan: string | undefined = body?.required_plan ?? undefined;
@@ -136,13 +138,16 @@ export function installBranchHeaderInterceptor() {
   installed = true;
 
   const fns = supabase.functions as unknown as {
-    invoke: (name: string, options?: any) => Promise<any>;
+    invoke: (
+      name: string,
+      options?: InvokeOptions,
+    ) => Promise<{ data: unknown; error: unknown }>;
   };
   const originalInvoke = fns.invoke.bind(fns);
 
-  fns.invoke = async (name: string, options: any = {}) => {
+  fns.invoke = async (name: string, options: InvokeOptions = {}) => {
     const branchId = getActiveBranchId();
-    const headers = { ...(options.headers ?? {}) };
+    const headers: Record<string, string> = { ...(options.headers ?? {}) };
     if (branchId && !('x-branch-id' in headers) && !('X-Branch-Id' in headers)) {
       headers['x-branch-id'] = branchId;
     }
