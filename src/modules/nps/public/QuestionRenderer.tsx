@@ -76,7 +76,7 @@ export function QuestionRenderer({ q, answers, setAnswers, touched, primary }: P
               aria-label={`${n} estrela${n > 1 ? 's' : ''}`}
               onClick={() => set(n)}
               className="text-3xl leading-none transition-transform hover:scale-110"
-              style={{ color: (val ?? 0) >= n ? primary : '#334155' }}
+              style={{ color: (typeof val === 'number' ? val : 0) >= n ? primary : '#334155' }}
             >
               ★
             </button>
