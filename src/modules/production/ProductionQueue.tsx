@@ -9,7 +9,7 @@ import { Button } from '@/ui/base/button';
 import { Progress } from '@/ui/base/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
-import { useProductionOrders } from '@/hooks/production/useProductionOrders';
+import { useProductionOrders, type ProductionOrderRow } from '@/hooks/production/useProductionOrders';
 import { productionStatusConfig, priorityConfig } from '@/config/production';
 import { ListOrdered, AlertTriangle, Clock, Factory, Play, CheckCircle } from 'lucide-react';
 import { format, differenceInDays, parseISO } from 'date-fns';
@@ -40,8 +40,8 @@ export default function ProductionQueuePage() {
   const sectors = [...new Set(orders.map(o => o.work_center || o.sector).filter(Boolean))];
   const today = new Date();
 
-  const handleStart = async (op: any) => { await update(op.id, { status: 'in_progress', start_date: new Date().toISOString() }); };
-  const handleComplete = async (op: any) => { await update(op.id, { status: 'completed', completed_date: new Date().toISOString() }); };
+  const handleStart = async (op: ProductionOrderRow) => { await update(op.id, { status: 'in_progress', start_date: new Date().toISOString() }); };
+  const handleComplete = async (op: ProductionOrderRow) => { await update(op.id, { status: 'completed', completed_date: new Date().toISOString() }); };
 
   return (
     <PageContainer loading={loading}>

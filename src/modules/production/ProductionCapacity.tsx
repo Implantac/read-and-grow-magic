@@ -12,7 +12,7 @@ import { Label } from '@/ui/base/label';
 import { Switch } from '@/ui/base/switch';
 import { Progress } from '@/ui/base/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
-import { useProductionCapacity } from '@/hooks/production/useProductionCapacity';
+import { useProductionCapacity, type ProductionCapacityRow } from '@/hooks/production/useProductionCapacity';
 import { Plus, Pencil, Trash2, Gauge, Factory, Users, Clock } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -23,7 +23,7 @@ export default function ProductionCapacityPage() {
   const [form, setForm] = useState({ sector: '', machine: '', operator_name: '', shift: 'diurno', capacity_per_hour: 0, max_hours_per_day: 8, current_load_pct: 0, is_active: true, notes: '' });
 
   const openNew = () => { setEditing(null); setForm({ sector: '', machine: '', operator_name: '', shift: 'diurno', capacity_per_hour: 0, max_hours_per_day: 8, current_load_pct: 0, is_active: true, notes: '' }); setDialogOpen(true); };
-  const openEdit = (c: any) => { setEditing(c); setForm({ sector: c.sector, machine: c.machine || '', operator_name: c.operator_name || '', shift: c.shift, capacity_per_hour: c.capacity_per_hour, max_hours_per_day: c.max_hours_per_day, current_load_pct: c.current_load_pct, is_active: c.is_active, notes: c.notes || '' }); setDialogOpen(true); };
+  const openEdit = (c: ProductionCapacityRow) => { setEditing(c); setForm({ sector: c.sector, machine: c.machine || '', operator_name: c.operator_name || '', shift: c.shift, capacity_per_hour: c.capacity_per_hour, max_hours_per_day: c.max_hours_per_day, current_load_pct: c.current_load_pct, is_active: c.is_active, notes: c.notes || '' }); setDialogOpen(true); };
 
   const handleSave = async () => {
     if (!form.sector) return;
