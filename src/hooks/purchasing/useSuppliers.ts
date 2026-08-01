@@ -1,3 +1,5 @@
+import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
+import { errorMessage } from '@/lib/errors';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
@@ -17,7 +19,7 @@ export function useSuppliers() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (supplier: any) => {
+    mutationFn: async (supplier: TablesInsert<'suppliers'>) => {
       const { data, error } = await supabase.from('suppliers').insert(supplier).select().single();
       if (error) throw error;
       return data;
@@ -26,13 +28,13 @@ export function useSuppliers() {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       toastSuccess('Fornecedor criado com sucesso!');
     },
-    onError: (error: any) => {
-      toastError(error.message, undefined, 'Erro ao criar fornecedor');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error), undefined, 'Erro ao criar fornecedor');
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: TablesUpdate<'suppliers'> }) => {
       const { data, error } = await supabase
         .from('suppliers')
         .update({ ...updates, updated_at: new Date().toISOString() })
@@ -46,8 +48,8 @@ export function useSuppliers() {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       toastSuccess('Fornecedor atualizado com sucesso!');
     },
-    onError: (error: any) => {
-      toastError(error.message, undefined, 'Erro ao atualizar fornecedor');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error), undefined, 'Erro ao atualizar fornecedor');
     },
   });
 
@@ -60,8 +62,8 @@ export function useSuppliers() {
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
       toastSuccess('Fornecedor excluído com sucesso!');
     },
-    onError: (error: any) => {
-      toastError(error.message, undefined, 'Erro ao excluir fornecedor');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error), undefined, 'Erro ao excluir fornecedor');
     },
   });
 
@@ -69,8 +71,8 @@ export function useSuppliers() {
     suppliers: suppliersQuery.data || [], 
     loading: suppliersQuery.isLoading, 
     refetch: suppliersQuery.refetch, 
-    create: (s: any) => createMutation.mutateAsync(s), 
-    update: (id: string, u: any) => updateMutation.mutateAsync({ id, updates: u }), 
+    create: (s: TablesInsert<'suppliers'>) => createMutation.mutateAsync(s), 
+    update: (id: string, u: TablesUpdate<'suppliers'>) => updateMutation.mutateAsync({ id, updates: u }), 
     remove: (id: string) => deleteMutation.mutateAsync(id),
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,

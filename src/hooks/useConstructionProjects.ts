@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
+import { errorMessage } from '@/lib/errors';
 
 export interface ConstructionProject {
   id: string;
@@ -39,10 +40,10 @@ export function useConstructionProjects() {
 export function useCreateConstructionProject() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: any) => {
+    mutationFn: async (payload: TablesInsert<'construction_projects'>) => {
       const { data, error } = await supabase
         .from('construction_projects')
-        .insert(payload as TablesInsert<'construction_projects'>)
+        .insert(payload)
         .select()
         .single();
       if (error) throw error;
@@ -52,16 +53,16 @@ export function useCreateConstructionProject() {
       qc.invalidateQueries({ queryKey: ['construction_projects'] });
       toast.success('Obra criada com sucesso');
     },
-    onError: (e: any) => toast.error(e?.message ?? 'Erro ao criar obra'),
+    onError: (e: unknown) => toast.error(errorMessage(e, 'Erro ao criar obra')),
   });
 }
 
 export function useUpdateConstructionProject() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...patch }: any & { id: string }) => {
+    mutationFn: async ({ id, ...patch }: TablesUpdate<'construction_projects'> & { id: string }) => {
       const { error } = await supabase
-        .from('construction_projects').update(patch as TablesUpdate<'construction_projects'>)
+        .from('construction_projects').update(patch)
         .eq('id', id);
       if (error) throw error;
     },
@@ -69,7 +70,7 @@ export function useUpdateConstructionProject() {
       qc.invalidateQueries({ queryKey: ['construction_projects'] });
       toast.success('Obra atualizada');
     },
-    onError: (e: any) => toast.error(e?.message ?? 'Erro ao atualizar'),
+    onError: (e: unknown) => toast.error(errorMessage(e, 'Erro ao atualizar')),
   });
 }
 
@@ -87,6 +88,6 @@ export function useDeleteConstructionProject() {
       qc.invalidateQueries({ queryKey: ['construction_projects'] });
       toast.success('Obra removida');
     },
-    onError: (e: any) => toast.error(e?.message ?? 'Erro ao remover'),
+    onError: (e: unknown) => toast.error(errorMessage(e, 'Erro ao remover')),
   });
 }
