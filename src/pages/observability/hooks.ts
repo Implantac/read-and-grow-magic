@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { errorMessage } from "@/lib/errors";
+import type { TablesUpdate } from "@/integrations/supabase/types";
 import type { Health, SystemEvent, Incident, AlertRule } from "./types";
 
 export function useObservabilityData(companyId: string | null, sevFilter: string) {
@@ -78,12 +80,12 @@ export function useIncidentMutations(companyId: string | null) {
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Incidente registrado"); qc.invalidateQueries({ queryKey: ["system_incidents"] }); },
-    onError: (e: any) => toast.error(e.message ?? "Erro"),
+    onError: (e: unknown) => toast.error(errorMessage(e, "Erro")),
   });
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status, notes }: { id: string; status: Incident["status"]; notes?: string }) => {
-      const patch: any = { status };
+      const patch: TablesUpdate<"system_incidents"> = { status };
       if (status === "mitigating") patch.acknowledged_at = new Date().toISOString();
       if (status === "resolved") {
         patch.resolved_at = new Date().toISOString();
@@ -93,7 +95,7 @@ export function useIncidentMutations(companyId: string | null) {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["system_incidents"] }),
-    onError: (e: any) => toast.error(e.message ?? "Erro"),
+    onError: (e: unknown) => toast.error(errorMessage(e, "Erro")),
   });
 
   return { createIncident, updateStatus };
@@ -113,7 +115,7 @@ export function useAlertRuleMutations(companyId: string | null) {
       if (error) throw error;
     },
     onSuccess: () => { toast.success("Regra de alerta criada"); qc.invalidateQueries({ queryKey: ["alert_rules"] }); },
-    onError: (e: any) => toast.error(e.message ?? "Erro"),
+    onError: (e: unknown) => toast.error(errorMessage(e, "Erro")),
   });
 
   const toggleRule = useMutation({
@@ -122,7 +124,7 @@ export function useAlertRuleMutations(companyId: string | null) {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["alert_rules"] }),
-    onError: (e: any) => toast.error(e.message ?? "Erro"),
+    onError: (e: unknown) => toast.error(errorMessage(e, "Erro")),
   });
 
   const deleteRule = useMutation({
@@ -131,7 +133,7 @@ export function useAlertRuleMutations(companyId: string | null) {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["alert_rules"] }),
-    onError: (e: any) => toast.error(e.message ?? "Erro"),
+    onError: (e: unknown) => toast.error(errorMessage(e, "Erro")),
   });
 
   return { createRule, toggleRule, deleteRule };
