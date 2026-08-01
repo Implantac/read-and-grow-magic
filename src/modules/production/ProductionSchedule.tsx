@@ -10,7 +10,7 @@ import { Input } from '@/ui/base/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/ui/base/dialog';
-import { useProductionSchedule } from '@/hooks/production/useProductionSchedule';
+import { useProductionSchedule, type ProductionScheduleRow } from '@/hooks/production/useProductionSchedule';
 import { useProductionOrders } from '@/hooks/production/useProductionOrders';
 import { Calendar, Clock, Factory, Plus, AlertTriangle } from 'lucide-react';
 import { format, parseISO, isAfter } from 'date-fns';
@@ -46,7 +46,7 @@ export default function ProductionSchedulePage() {
     setShowCreate(false); setSelectedOrderId(''); setPlannedStart(''); setPlannedEnd(''); setSector('');
   };
 
-  const getStatusBadge = (s: any) => {
+  const getStatusBadge = (s: ProductionScheduleRow) => {
     const isLate = s.status !== 'completed' && isAfter(now, new Date(s.planned_end));
     if (isLate) return <Badge variant="destructive">Atrasado</Badge>;
     if (s.status === 'completed') return <Badge className="bg-success/15 text-success border-success/30">Concluído</Badge>;

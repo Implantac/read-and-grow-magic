@@ -7,7 +7,7 @@ import { differenceInMinutes, differenceInSeconds } from 'date-fns';
 import { toast } from 'sonner';
 
 import { useTimeEntries } from '@/hooks/system/useTimeEntries';
-import { useProductionOrders } from '@/hooks/production/useProductionOrders';
+import { useProductionOrders, type ProductionOrderRow } from '@/hooks/production/useProductionOrders';
 import { useProductionSteps } from '@/hooks/production/useProductionSteps';
 import { useProductionMachines } from '@/hooks/production/useProductionMachines';
 import { supabase } from '@/integrations/supabase/client';
@@ -139,7 +139,7 @@ export default function OperatorTerminalPage() {
       if (order) {
         const newProduced = order.produced_quantity + producedQty;
         const newRejected = order.rejected_quantity + rejectedQty;
-        const updates: any = {
+        const updates: Partial<ProductionOrderRow> = {
           produced_quantity: newProduced,
           rejected_quantity: newRejected,
           realized_time_minutes: order.realized_time_minutes + elapsedMin,

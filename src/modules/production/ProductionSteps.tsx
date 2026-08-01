@@ -5,7 +5,7 @@ import { KPICard } from '@/shared/components/KPICard';
 import { Button } from '@/ui/base/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { Skeleton } from '@/ui/base/skeleton';
-import { useProductionSteps, useProductionOrderSteps } from '@/hooks/production/useProductionSteps';
+import { useProductionSteps, useProductionOrderSteps, type ProductionStep, type ProductionOrderStep } from '@/hooks/production/useProductionSteps';
 import { useProductionOrders } from '@/hooks/production/useProductionOrders';
 import { ArrowRight, CheckCircle, Clock, Factory, Layers, Plus } from 'lucide-react';
 import { toast } from 'sonner';
@@ -54,7 +54,7 @@ export default function ProductionStepsPage() {
     setDialogOpen(true);
   };
 
-  const openEdit = (step: any) => {
+  const openEdit = (step: ProductionStep) => {
     setEditingStep(step);
     setForm({
       name: step.name,
@@ -100,7 +100,7 @@ export default function ProductionStepsPage() {
   };
 
   const handleStepStatusChange = async (stepId: string, newStatus: string) => {
-    const updates: any = { status: newStatus };
+    const updates: Partial<ProductionOrderStep> = { status: newStatus };
     if (newStatus === 'in_progress') updates.started_at = new Date().toISOString();
     if (newStatus === 'completed') updates.completed_at = new Date().toISOString();
     await updateOrderStep(stepId, updates);
