@@ -14,8 +14,8 @@ export interface FinancialHealthScore {
   current_ratio: number;
   cash_runway_days: number;
   delinquency_rate: number;
-  recommendations: any[];
-  details: any;
+  recommendations: string[];
+  details: Record<string, unknown> | null;
   created_at: string;
 }
 
@@ -59,15 +59,25 @@ export function usePredictiveAlerts() {
   });
 }
 
+export interface ComputeIntelligenceResult {
+  score?: { score?: number; grade?: string };
+  risks?: { alerts_created?: number };
+}
+
+export interface AutoReconcileResult {
+  matched?: number;
+  processed?: number;
+}
+
 export function useComputeIntelligence() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke('financial-intelligence?action=compute', { body: {} });
       if (error) throw error;
-      return data;
+      return data as ComputeIntelligenceResult;
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['financial_health_score'] });
       qc.invalidateQueries({ queryKey: ['financial_predictive_alerts'] });
       toastSuccess('Inteligência financeira atualizada', `Score: ${data?.score?.score ?? '-'} (${data?.score?.grade ?? '-'}) · ${data?.risks?.alerts_created ?? 0} novos alertas`);
@@ -82,9 +92,9 @@ export function useAutoReconcile() {
     mutationFn: async () => {
       const { data, error } = await supabase.functions.invoke('financial-intelligence?action=auto-reconcile', { body: {} });
       if (error) throw error;
-      return data;
+      return data as AutoReconcileResult;
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['bank_transactions'] });
       qc.invalidateQueries({ queryKey: ['financial_ledger'] });
       toastSuccess('Conciliação automática', `${data?.matched ?? 0} de ${data?.processed ?? 0} transações conciliadas`);
