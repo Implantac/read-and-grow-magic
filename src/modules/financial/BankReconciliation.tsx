@@ -62,7 +62,7 @@ export default function BankReconciliation() {
 
   const bankTransactions: BankTransaction[] = bankRaw.map((t) => ({
     id: t.id, date: t.date, description: t.description, amount: Number(t.amount),
-    type: t.type as any, bankReference: t.bank_reference || '', status: t.status as any,
+    type: t.type === 'credit' ? 'credit' : 'debit', bankReference: t.bank_reference || '', status: t.status as ReconciliationStatus,
     matchedEntryId: t.matched_entry_id || undefined,
   }));
 
