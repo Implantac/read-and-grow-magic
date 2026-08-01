@@ -45,7 +45,7 @@ export default function Surveys() {
   const qc = useQueryClient();
 
   const create = useMutation({
-    mutationFn: async (input: TablesInsert<'nps_questions'>) => {
+    mutationFn: async (input: Omit<TablesInsert<'nps_questions'>, 'company_id'>) => {
       const { error } = await supabase.from('nps_questions').insert({ ...input, company_id: activeCompanyId });
       if (error) throw error;
     },
