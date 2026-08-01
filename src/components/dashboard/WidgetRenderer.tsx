@@ -9,6 +9,12 @@ import {
 } from "recharts";
 import type { DashboardWidget } from "@/hooks/useDashboardEngine";
 
+type WidgetRow = Record<string, string | number | null>;
+type WidgetPayload =
+  | { value?: number; format?: string }
+  | WidgetRow[]
+  | null;
+
 const COLORS = ["#FF9800", "#1A2234", "#22c55e", "#3b82f6", "#a855f7", "#ef4444", "#06b6d4", "#eab308"];
 
 function formatValue(v: number, format?: string) {
@@ -26,7 +32,7 @@ export function WidgetRenderer({ widget }: { widget: DashboardWidget }) {
         body: { data_source: widget.data_source, config: widget.config ?? {} },
       });
       if (error) throw error;
-      return data as { type: string; data: any };
+      return data as { type: string; data: WidgetPayload };
     },
     staleTime: 60_000,
   });
@@ -53,11 +59,13 @@ export function WidgetRenderer({ widget }: { widget: DashboardWidget }) {
   );
 }
 
-function RenderByType({ type, payload, widget }: { type: string; payload: any; widget: DashboardWidget }) {
+function RenderByType({ type, payload, widget }: { type: string; payload: WidgetPayload; widget: DashboardWidget }) {
+  const rowsPayload = Array.isArray(payload) ? payload : [];
+  const scalar = (Array.isArray(payload) ? null : payload) as { value?: number; format?: string } | null;
   if (type === "scalar") {
     return (
       <div className="text-3xl font-bold">
-        {formatValue(Number(payload?.value ?? 0), payload?.format)}
+        {formatValue(Number(scalar?.value ?? 0), scalar?.format)}
       </div>
     );
   }
@@ -66,7 +74,7 @@ function RenderByType({ type, payload, widget }: { type: string; payload: any; w
     return (
       <ResponsiveContainer width="100%" height={220}>
         {isBar ? (
-          <BarChart data={payload}>
+          <BarChart data={rowsPayload}>
             <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
             <XAxis dataKey="date" fontSize={11} />
             <YAxis fontSize={11} />
@@ -74,7 +82,7 @@ function RenderByType({ type, payload, widget }: { type: string; payload: any; w
             <Bar dataKey="value" fill="#FF9800" />
           </BarChart>
         ) : (
-          <LineChart data={payload}>
+          <LineChart data={rowsPayload}>
             <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
             <XAxis dataKey="date" fontSize={11} />
             <YAxis fontSize={11} />
@@ -89,8 +97,8 @@ function RenderByType({ type, payload, widget }: { type: string; payload: any; w
     return (
       <ResponsiveContainer width="100%" height={220}>
         <PieChart>
-          <Pie data={payload} dataKey="value" nameKey="name" outerRadius={80} label>
-            {(payload as any[]).map((_, i) => (
+          <Pie data={rowsPayload} dataKey="value" nameKey="name" outerRadius={80} label>
+            {rowsPayload.map((_, i) => (
               <Cell key={i} fill={COLORS[i % COLORS.length]} />
             ))}
           </Pie>
@@ -100,7 +108,7 @@ function RenderByType({ type, payload, widget }: { type: string; payload: any; w
     );
   }
   if (type === "table") {
-    const rows = (payload as any[]) ?? [];
+    const rows = rowsPayload;
     if (!rows.length) return <p className="text-xs text-muted-foreground">Sem dados.</p>;
     const cols = Object.keys(rows[0]);
     return (
