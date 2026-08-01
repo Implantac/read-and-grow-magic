@@ -39,7 +39,7 @@ function ReportDetail({ data }: { data: DailyReportData }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.receivables_due_today.items.map((r: any) => (
+                {data.receivables_due_today.items.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell>{r.description}</TableCell>
                     <TableCell>{r.client_name}</TableCell>
@@ -67,7 +67,7 @@ function ReportDetail({ data }: { data: DailyReportData }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.receivables_overdue.items.map((r: any) => (
+                {data.receivables_overdue.items.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell>{r.description}</TableCell>
                     <TableCell>{r.client_name}</TableCell>
@@ -95,7 +95,7 @@ function ReportDetail({ data }: { data: DailyReportData }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.payables_due_today.items.map((r: any) => (
+                {data.payables_due_today.items.map((r) => (
                   <TableRow key={r.id}>
                     <TableCell>{r.description}</TableCell>
                     <TableCell>{r.supplier}</TableCell>
@@ -123,7 +123,7 @@ function ReportDetail({ data }: { data: DailyReportData }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.sales_summary.items.map((s: any) => (
+                {data.sales_summary.items.map((s) => (
                   <TableRow key={s.id}>
                     <TableCell className="font-mono">{s.number}</TableCell>
                     <TableCell>{s.client_name}</TableCell>

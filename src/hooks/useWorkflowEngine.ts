@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { resolveNextStep, type Branch } from "@/lib/workflowConditions";
 import type { Json } from "@/integrations/supabase/types";
+import { errorMessage } from "@/lib/errors";
 // Converte estruturas tipadas do domínio para o tipo `Json` do Postgres.
 const toJson = (value: unknown): Json => value as Json;
 
@@ -52,7 +53,7 @@ export interface WorkflowInstance {
   target_record_id: string | null;
   current_step: string | null;
   status: string;
-  context: any;
+  context: Json;
   started_by: string | null;
   completed_at: string | null;
   created_at: string;
@@ -102,7 +103,7 @@ export function useWorkflowMutations() {
   const qc = useQueryClient();
   return {
     saveDefinition: useMutation({
-      mutationFn: async (payload: any & { name: string; target_entity: string; steps: WorkflowStep[] }) => {
+      mutationFn: async (payload: { id?: string; description?: string | null; initial_step?: string | null; is_active?: boolean; name: string; target_entity: string; steps: WorkflowStep[] }) => {
         const { companyId, userId } = await currentCompanyId();
         if (payload.id) {
           const { error } = await supabase
@@ -135,7 +136,7 @@ export function useWorkflowMutations() {
         toast.success("Workflow salvo");
         qc.invalidateQueries({ queryKey: ["workflow_definitions"] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(errorMessage(e)),
     }),
     remove: useMutation({
       mutationFn: async (id: string) => {
@@ -146,10 +147,10 @@ export function useWorkflowMutations() {
         toast.success("Workflow excluído");
         qc.invalidateQueries({ queryKey: ["workflow_definitions"] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(errorMessage(e)),
     }),
     startInstance: useMutation({
-      mutationFn: async (payload: { definition_id: string; target_record_id?: string; context?: any }) => {
+      mutationFn: async (payload: { definition_id: string; target_record_id?: string; context?: Json }) => {
         const { companyId, userId } = await currentCompanyId();
         const { data: def, error: defErr } = await supabase
           .from("workflow_definitions")
@@ -188,7 +189,7 @@ export function useWorkflowMutations() {
         toast.success("Instância iniciada");
         qc.invalidateQueries({ queryKey: ["workflow_instances"] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(errorMessage(e)),
     }),
     advance: useMutation({
       mutationFn: async (payload: { instance_id: string; to_step?: string; comment?: string; complete?: boolean; contextPatch?: Record<string, unknown> }) => {
@@ -241,7 +242,7 @@ export function useWorkflowMutations() {
         qc.invalidateQueries({ queryKey: ["workflow_instances"] });
         qc.invalidateQueries({ queryKey: ["workflow_transitions"] });
       },
-      onError: (e: any) => toast.error(e.message),
+      onError: (e: unknown) => toast.error(errorMessage(e)),
     }),
   };
 }

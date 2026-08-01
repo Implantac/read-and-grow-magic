@@ -6,10 +6,16 @@ import { Badge } from "@/ui/base/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { cn } from "@/lib/utils";
 import { brl } from "./utils";
+import type { SuccessData } from "../types";
+
+type ProductsCustomersGridProps = Pick<
+  SuccessData,
+  "slowMoving" | "topMargin" | "bestSellers" | "subcategoryStock" | "topCustomers" | "topSuppliers" | "delinquents" | "totals"
+>;
 
 export function ProductsCustomersGrid({
   slowMoving, topMargin, bestSellers, subcategoryStock, topCustomers, topSuppliers, delinquents, totals,
-}: any) {
+}: ProductsCustomersGridProps) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       {/* Produtos sem giro */}
@@ -30,7 +36,7 @@ export function ProductsCustomersGrid({
         </CardHeader>
         <CardContent className="space-y-2">
           {slowMoving.length === 0 && <p className="text-sm text-muted-foreground">Todos os SKUs venderam nos últimos 90 dias. 🎉</p>}
-          {slowMoving.map((p: any) => (
+          {slowMoving.map((p) => (
             <div key={p.product_code} className="flex items-center justify-between border-b last:border-0 py-2 text-sm">
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{p.product_name}</p>
@@ -57,7 +63,7 @@ export function ProductsCustomersGrid({
         </CardHeader>
         <CardContent className="space-y-2">
           {topMargin.length === 0 && <p className="text-sm text-muted-foreground">Sem vendas nos últimos 90 dias.</p>}
-          {topMargin.map((p: any) => (
+          {topMargin.map((p) => (
             <div key={p.product_code} className="flex items-center justify-between border-b last:border-0 py-2 text-sm">
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{p.product_name}</p>
@@ -87,7 +93,7 @@ export function ProductsCustomersGrid({
         </CardHeader>
         <CardContent className="space-y-2">
           {bestSellers.length === 0 && <p className="text-sm text-muted-foreground">Sem vendas.</p>}
-          {bestSellers.map((p: any) => (
+          {bestSellers.map((p) => (
             <div key={p.product_code} className="flex items-center justify-between border-b last:border-0 py-2 text-sm">
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{p.product_name}</p>
@@ -108,7 +114,7 @@ export function ProductsCustomersGrid({
           <p className="text-[11px] text-muted-foreground">Giro e estagnação por categoria de confecção</p>
         </CardHeader>
         <CardContent className="space-y-2">
-          {subcategoryStock.slice(0, 6).map((s: any) => (
+          {subcategoryStock.slice(0, 6).map((s) => (
             <div key={s.subcategory} className="border-b last:border-0 py-2 text-sm">
               <div className="flex items-center justify-between gap-2">
                 <p className="truncate font-medium">{s.subcategory}</p>
@@ -142,7 +148,7 @@ export function ProductsCustomersGrid({
           <p className="text-[11px] text-muted-foreground">Volume de compra nos últimos 12 meses</p>
         </CardHeader>
         <CardContent className="space-y-2">
-          {topCustomers.map((c: any) => {
+          {topCustomers.map((c) => {
             const inactive = (c.last_purchase_days ?? 0) > 60;
             return (
               <div key={c.client_id ?? c.client_name} className="flex items-center justify-between border-b last:border-0 py-2 text-sm">
@@ -174,7 +180,7 @@ export function ProductsCustomersGrid({
         </CardHeader>
         <CardContent className="space-y-2">
           {topSuppliers.length === 0 && <p className="text-sm text-muted-foreground">Sem ordens de compra nos últimos 90d.</p>}
-          {topSuppliers.map((s: any) => (
+          {topSuppliers.map((s) => (
             <div key={s.supplier_name} className="border-b last:border-0 py-2 text-sm">
               <div className="flex items-center justify-between gap-2">
                 <p className="truncate font-medium">{s.supplier_name}</p>
@@ -201,7 +207,7 @@ export function ProductsCustomersGrid({
           {delinquents.length === 0 && (
             <p className="text-sm text-muted-foreground">Nenhum vencido. 🎉</p>
           )}
-          {delinquents.map((d: any, i: number) => (
+          {delinquents.map((d, i) => (
             <div key={i} className="flex items-center justify-between border-b last:border-0 py-2 text-sm">
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{d.client_name}</p>

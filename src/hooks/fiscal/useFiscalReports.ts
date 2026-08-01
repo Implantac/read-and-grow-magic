@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import type { FiscalReport } from '@/types/fiscal';
+import type { FiscalReport, FiscalReportType } from '@/types/fiscal';
+import type { Tables } from '@/integrations/supabase/types';
 
 export function useFiscalReports() {
   const [reports, setReports] = useState<FiscalReport[]>([]);
@@ -12,14 +13,14 @@ export function useFiscalReports() {
     const { data, error } = await supabase.from('fiscal_reports').select('*').order('created_at', { ascending: false });
     if (error) { console.error(error); toast.error('Erro ao carregar relatórios fiscais'); setLoading(false); return; }
 
-    const mapped: FiscalReport[] = (data || []).map((row: any) => ({
+    const mapped: FiscalReport[] = (data || []).map((row: Tables<'fiscal_reports'>) => ({
       id: row.id,
-      type: row.type,
+      type: row.type as FiscalReportType,
       name: row.name,
       period: row.period,
       startDate: row.start_date,
       endDate: row.end_date,
-      status: row.status,
+      status: row.status as FiscalReport['status'],
       totalNFe: row.total_nfe,
       totalNFCe: row.total_nfce,
       totalValue: Number(row.total_value),
@@ -56,11 +57,11 @@ export function useFiscalReports() {
     const nfes = nfeData || [];
     const nfces = nfceData || [];
 
-    const totalICMS = nfes.reduce((s: number, n: any) => s + Number(n.icms), 0);
-    const totalIPI = nfes.reduce((s: number, n: any) => s + Number(n.ipi), 0);
-    const totalPIS = nfes.reduce((s: number, n: any) => s + Number(n.pis), 0);
-    const totalCOFINS = nfes.reduce((s: number, n: any) => s + Number(n.cofins), 0);
-    const totalValue = nfes.reduce((s: number, n: any) => s + Number(n.total), 0) + nfces.reduce((s: number, n: any) => s + Number(n.total), 0);
+    const totalICMS = nfes.reduce((s, n) => s + Number(n.icms), 0);
+    const totalIPI = nfes.reduce((s, n) => s + Number(n.ipi), 0);
+    const totalPIS = nfes.reduce((s, n) => s + Number(n.pis), 0);
+    const totalCOFINS = nfes.reduce((s, n) => s + Number(n.cofins), 0);
+    const totalValue = nfes.reduce((s, n) => s + Number(n.total), 0) + nfces.reduce((s, n) => s + Number(n.total), 0);
 
     const { error } = await supabase.from('fiscal_reports').insert({
       type: reportData.type,
