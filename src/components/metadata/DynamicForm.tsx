@@ -8,7 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { parseNumericInput } from "@/lib/numericValidation";
 import type { CustomField } from "@/hooks/useCustomEntities";
 
-type FieldValue = string | number | boolean | string[] | Record<string, unknown> | null | undefined;
+import type { Json } from "@/integrations/supabase/types";
+
+type FieldValue = Json | undefined;
+const asText = (v: FieldValue) => (v === null || v === undefined || typeof v === "object" ? "" : String(v));
 type SelectOption = { value: string; label: string };
 
 interface Props {
@@ -87,11 +90,11 @@ function FieldInput({ field, value, onChange }: { field: CustomField; value: Fie
     case "boolean":
       return <Switch checked={!!value} onCheckedChange={onChange} />;
     case "number":
-      return <Input id={field.field_key} type="number" value={value ?? ""} onChange={(e) => onChange(e.target.value)} />;
+      return <Input id={field.field_key} type="number" value={asText(value)} onChange={(e) => onChange(e.target.value)} />;
     case "date":
-      return <Input id={field.field_key} type="date" value={value ?? ""} onChange={(e) => onChange(e.target.value)} />;
+      return <Input id={field.field_key} type="date" value={asText(value)} onChange={(e) => onChange(e.target.value)} />;
     case "datetime":
-      return <Input id={field.field_key} type="datetime-local" value={value ?? ""} onChange={(e) => onChange(e.target.value)} />;
+      return <Input id={field.field_key} type="datetime-local" value={asText(value)} onChange={(e) => onChange(e.target.value)} />;
     case "json":
       return (
         <Textarea
@@ -108,7 +111,7 @@ function FieldInput({ field, value, onChange }: { field: CustomField; value: Fie
         ? (field.options as unknown[]).map((o) => (typeof o === "string" ? { value: o, label: o } : (o as SelectOption)))
         : [];
       return (
-        <Select value={value ?? ""} onValueChange={onChange}>
+        <Select value={asText(value)} onValueChange={onChange}>
           <SelectTrigger><SelectValue placeholder="Selecione…" /></SelectTrigger>
           <SelectContent>
             {opts.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
@@ -118,7 +121,7 @@ function FieldInput({ field, value, onChange }: { field: CustomField; value: Fie
     }
     case "multiselect": {
       const opts: string[] = Array.isArray(field.options) ? (field.options as unknown[]).map((o) => String((o as SelectOption)?.value ?? o)) : [];
-      const arr: string[] = Array.isArray(value) ? value : [];
+      const arr: string[] = Array.isArray(value) ? value.map((x) => String(x)) : [];
       return (
         <div className="flex flex-wrap gap-2">
           {opts.map((o) => (
@@ -135,6 +138,6 @@ function FieldInput({ field, value, onChange }: { field: CustomField; value: Fie
       );
     }
     default:
-      return <Input id={field.field_key} value={value ?? ""} onChange={(e) => onChange(e.target.value)} />;
+      return <Input id={field.field_key} value={asText(value)} onChange={(e) => onChange(e.target.value)} />;
   }
 }
