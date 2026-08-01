@@ -179,7 +179,7 @@ export default function ExecutiveDashboard() {
 
       {insights.length > 0 && (
         <ExecutiveActionsPanel 
-          actions={insights.slice(0, 3).map((ins: any) => ({
+          actions={insights.slice(0, 3).map((ins) => ({
             title: ins.title,
             description: ins.description,
             impact: ins.impact_estimate,
@@ -274,7 +274,7 @@ export default function ExecutiveDashboard() {
             </CardContent></Card>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
-              {insights.map((ins: any) => {
+              {insights.map((ins) => {
                 const Icon = insightIcon[ins.insight_type] || Lightbulb;
                 return (
                   <Card key={ins.id} className="hover-lift">
