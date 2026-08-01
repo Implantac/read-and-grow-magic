@@ -24,7 +24,7 @@ export function ClientNPSPanel({ clientId }: { clientId: string | null | undefin
       </div>
       <div className="space-y-2">
         <h4 className="text-sm font-medium">Histórico</h4>
-        {history.map((a: any) => (
+        {history.map((a) => (
           <Card key={a.id}>
             <CardContent className="pt-3 space-y-1">
               <div className="flex items-center justify-between">
@@ -44,7 +44,7 @@ export function ClientNPSPanel({ clientId }: { clientId: string | null | undefin
   );
 }
 
-function KPI({ label, value, accent }: { label: string; value: any; accent?: string }) {
+function KPI({ label, value, accent }: { label: string; value: string | number; accent?: string }) {
   return (
     <Card>
       <CardContent className="pt-4 text-center">

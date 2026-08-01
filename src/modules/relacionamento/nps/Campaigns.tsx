@@ -1,3 +1,5 @@
+import type { Tables } from '@/integrations/supabase/types';
+import type { NPSCampaignInput } from './hooks/campaigns';
 import { useState } from 'react';
 import { useNPSCampaigns, useCreateCampaign, useUpdateCampaign, useDeleteCampaign } from './hooks';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
@@ -17,11 +19,11 @@ export default function Campaigns() {
   const update = useUpdateCampaign();
   const del = useDeleteCampaign();
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<any>(null);
-  const [form, setForm] = useState<any>({ name: '', description: '', title: 'Como avalia sua experiência?', subtitle: 'Sua opinião é essencial', message: '', primary_color: '#FF9800', survey_type: 'rnps', status: 'draft' });
+  const [editing, setEditing] = useState<Tables<'nps_campaigns'> | null>(null);
+  const [form, setForm] = useState<NPSCampaignInput>({ name: '', description: '', title: 'Como avalia sua experiência?', subtitle: 'Sua opinião é essencial', message: '', primary_color: '#FF9800', survey_type: 'rnps', status: 'draft' });
 
   const openNew = () => { setEditing(null); setForm({ name: '', description: '', title: 'Como avalia sua experiência?', subtitle: 'Sua opinião é essencial', message: '', primary_color: '#FF9800', survey_type: 'rnps', status: 'draft' }); setOpen(true); };
-  const openEdit = (c: any) => { setEditing(c); setForm(c); setOpen(true); };
+  const openEdit = (c: Tables<'nps_campaigns'>) => { setEditing(c); setForm(c); setOpen(true); };
 
   const submit = () => {
     if (editing) update.mutate({ id: editing.id, ...form }, { onSuccess: () => setOpen(false) });
@@ -40,7 +42,7 @@ export default function Campaigns() {
 
       {isLoading ? <Skeleton className="h-64" /> : (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {campaigns.map((c: any) => (
+          {campaigns.map((c) => (
             <Card key={c.id}>
               <CardHeader className="pb-2 flex flex-row justify-between items-start">
                 <div>
