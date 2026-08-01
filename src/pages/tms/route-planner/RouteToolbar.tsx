@@ -5,6 +5,8 @@ import { Clock, Download, ExternalLink, FileDown, Loader2, MapPin, Plus, Upload,
 import { StopDialog } from './StopDialog';
 import { buildGoogleMapsUrl, buildRouteGpx, downloadGpx } from '@/lib/routeExport';
 import { toastError, toastSuccess } from '@/lib/toastHelpers';
+import type { RouteStop, RouteStopInsert } from '@/hooks/tms/useRoutePlanning';
+import type { DeliveryRoute } from '@/hooks/wms/useTMS';
 
 type Props = {
   fileInputRef: RefObject<HTMLInputElement>;
@@ -12,9 +14,9 @@ type Props = {
   bulkGeocoding: boolean;
   computing: boolean;
   missingGeo: number;
-  stops: any[];
-  route: any;
-  depot: any;
+  stops: RouteStop[];
+  route: DeliveryRoute | undefined;
+  depot: { depot_latitude: number | null; depot_longitude: number | null } | null | undefined;
   open: boolean;
   setOpen: (v: boolean) => void;
   reorderPending: boolean;
@@ -23,7 +25,7 @@ type Props = {
   onBulkGeocode: () => void;
   onComputeEta: () => void;
   onOptimize: () => void;
-  onCreateStop: (payload: any) => void;
+  onCreateStop: (payload: Omit<RouteStopInsert, 'company_id'>) => void;
 };
 
 export function RouteToolbar(p: Props) {

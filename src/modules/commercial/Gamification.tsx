@@ -34,18 +34,18 @@ export default function GamificationPage() {
 
   const repMap = useMemo(() => {
     const m = new Map<string, string>();
-    reps.forEach((r: any) => m.set(r.id, r.name));
+    reps.forEach((r) => m.set(r.id, r.name));
     return m;
   }, [reps]);
 
   const getRepName = (id: string) => repMap.get(id) || id.slice(0, 8);
 
   // Stats
-  const totalPoints = points.reduce((s: number, p: any) => s + (p.points || 0), 0);
-  const todayPoints = points.filter((p: any) => {
+  const totalPoints = points.reduce((s, p) => s + (p.points || 0), 0);
+  const todayPoints = points.filter((p) => {
     const d = new Date(p.created_at).toDateString();
     return d === new Date().toDateString();
-  }).reduce((s: number, p: any) => s + (p.points || 0), 0);
+  }).reduce((s, p) => s + (p.points || 0), 0);
 
   const dailyMissions = missions.filter(m => m.mission_type === 'daily');
   const weeklyMissions = missions.filter(m => m.mission_type === 'weekly');
