@@ -17,7 +17,25 @@ import { moduleLabel } from '@/lib/moduleLabels';
 let installed = false;
 let lastRedirectAt = 0;
 
-async function extractErrorBody(err: any): Promise<{ status?: number; body?: any }> {
+type ErrorBody = {
+  error?: string;
+  module?: string;
+  required_plan?: string;
+  current_plan?: string;
+  metric?: string;
+  limit?: number;
+  resource?: string;
+  action?: string;
+};
+
+type InvokeError = {
+  status?: number;
+  response?: Response;
+  context?: { response?: Response; status?: number };
+};
+
+async function extractErrorBody(err: unknown): Promise<{ status?: number; body?: ErrorBody }> {
+  const e = (err ?? {}) as InvokeError;
   try {
     const resp: Response | undefined = err?.context?.response ?? err?.response;
     if (!resp) return { status: err?.context?.status ?? err?.status };
