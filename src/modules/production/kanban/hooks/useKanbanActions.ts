@@ -8,6 +8,7 @@ import type { TablesUpdate } from '@/integrations/supabase/types';
 import type { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
 import type { ProductionCapacityRow } from '@/hooks/production/useProductionCapacity';
 import type { PCPIntelligence } from '@/hooks/production/usePCPIntelligence';
+import type { BottleneckAnalysis } from '../BottleneckDialog';
 
 export function useKanbanActions(params: {
   orders: ProductionOrderRow[];
@@ -28,7 +29,7 @@ export function useKanbanActions(params: {
   const [sequenceResult, setSequenceResult] = useState<any>(null);
   const [sequenceLoading, setSequenceLoading] = useState(false);
   const [applyingSequence, setApplyingSequence] = useState(false);
-  const [bottleneckData, setBottleneckData] = useState<any>(null);
+  const [bottleneckData, setBottleneckData] = useState<BottleneckAnalysis | null>(null);
   const [bottleneckLoading, setBottleneckLoading] = useState(false);
   const [bottleneckOpen, setBottleneckOpen] = useState(false);
 
@@ -167,7 +168,7 @@ export function useKanbanActions(params: {
     try {
       const { data, error } = await supabase.functions.invoke('pcp-bottlenecks');
       if (error) throw error;
-      setBottleneckData(data);
+      setBottleneckData(data as BottleneckAnalysis);
       setBottleneckOpen(true);
     } catch (e) {
       toast.error('Erro ao analisar gargalos');

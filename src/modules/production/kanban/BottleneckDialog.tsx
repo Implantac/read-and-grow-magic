@@ -6,10 +6,38 @@ import { Button } from '@/ui/base/button';
 import { cn } from '@/lib/utils';
 import { Activity, AlertTriangle, Clock, Factory, PackageX } from 'lucide-react';
 
+export interface BottleneckWorkCenter {
+  name: string;
+  entries: number;
+  avgMinutes: number;
+  rejectRate: number;
+}
+
+export interface BottleneckStep {
+  name: string;
+  entries: number;
+  avgOverrunMin: number;
+}
+
+export interface BottleneckQueue {
+  name: string;
+  queueSize: number;
+}
+
+export interface BottleneckAnalysis {
+  summary: string;
+  totalEntriesAnalyzed: number;
+  totalStepsAnalyzed: number;
+  totalOrdersActive: number;
+  workCenterBottlenecks?: BottleneckWorkCenter[];
+  stepBottlenecks?: BottleneckStep[];
+  queueBottlenecks?: BottleneckQueue[];
+}
+
 interface BottleneckDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  data: any;
+  data: BottleneckAnalysis | null;
 }
 
 export function BottleneckDialog({ open, onOpenChange, data }: BottleneckDialogProps) {
@@ -50,13 +78,13 @@ export function BottleneckDialog({ open, onOpenChange, data }: BottleneckDialogP
                 </Card>
               </div>
 
-              {data.workCenterBottlenecks?.length > 0 && (
+              {(data.workCenterBottlenecks?.length ?? 0) > 0 && (
                 <div>
                   <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
                     <Factory className="h-4 w-4 text-destructive" /> Centros com Maior Tempo Médio
                   </h4>
                   <div className="space-y-1.5">
-                    {data.workCenterBottlenecks.map((b: any, i: number) => (
+                    {data.workCenterBottlenecks?.map((b, i) => (
                       <div key={i} className={cn(
                         'p-2.5 rounded-lg text-xs flex items-center justify-between',
                         i === 0 ? 'bg-destructive/10 border border-destructive/20' : 'bg-muted/50'
@@ -81,13 +109,13 @@ export function BottleneckDialog({ open, onOpenChange, data }: BottleneckDialogP
                 </div>
               )}
 
-              {data.stepBottlenecks?.length > 0 && (
+              {(data.stepBottlenecks?.length ?? 0) > 0 && (
                 <div>
                   <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
                     <AlertTriangle className="h-4 w-4 text-warning" /> Etapas que Excedem Estimativa
                   </h4>
                   <div className="space-y-1.5">
-                    {data.stepBottlenecks.map((s: any, i: number) => (
+                    {data.stepBottlenecks?.map((s, i) => (
                       <div key={i} className={cn(
                         'p-2.5 rounded-lg text-xs flex items-center justify-between',
                         i === 0 ? 'bg-warning/10 border border-warning/20' : 'bg-muted/50'
@@ -105,13 +133,13 @@ export function BottleneckDialog({ open, onOpenChange, data }: BottleneckDialogP
                 </div>
               )}
 
-              {data.queueBottlenecks?.length > 0 && (
+              {(data.queueBottlenecks?.length ?? 0) > 0 && (
                 <div>
                   <h4 className="text-sm font-semibold mb-2 flex items-center gap-1">
                     <PackageX className="h-4 w-4 text-primary" /> Filas por Setor/Status
                   </h4>
                   <div className="space-y-1.5">
-                    {data.queueBottlenecks.map((q: any, i: number) => (
+                    {data.queueBottlenecks?.map((q, i) => (
                       <div key={i} className="p-2.5 rounded-lg text-xs flex items-center justify-between bg-muted/50">
                         <span className="font-medium">{q.name}</span>
                         <Badge variant="outline" className="text-[10px]">{q.queueSize} OPs</Badge>
