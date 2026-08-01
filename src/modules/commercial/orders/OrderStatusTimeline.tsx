@@ -38,7 +38,7 @@ export function OrderStatusTimeline({ currentStatus }: { currentStatus: string }
                   isCurrent ? 'font-semibold text-primary' : isCompleted ? 'text-foreground' : 'text-muted-foreground'
                 }`}
               >
-                {getOrderStatusLabel(step as any)}
+                {getOrderStatusLabel(step)}
               </span>
             </div>
             {idx < statusSteps.length - 1 && (
