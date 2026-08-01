@@ -1,3 +1,4 @@
+import type { TablesUpdate } from '@/integrations/supabase/types';
 import { useMemo, useState } from 'react';
 import type { NPSFollowupRow } from './hooks/followupTypes';
 import { useNPSFollowups, useUpdateFollowup } from './hooks';
