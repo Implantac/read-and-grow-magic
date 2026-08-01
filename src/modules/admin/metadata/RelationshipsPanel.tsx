@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/base/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/ui/base/table";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { useCustomEntities, useCustomFields, useCustomRelationships, useRelationshipMutations } from "@/hooks/useCustomEntities";
+import { useCustomEntities, useCustomFields, useCustomRelationships, useRelationshipMutations, type CustomRelationship } from "@/hooks/useCustomEntities";
 import { RELATIONSHIP_TYPES, INVERSE_TYPE } from "./utils";
 
 export function RelationshipsPanel({ entityId }: { entityId: string }) {
@@ -42,7 +42,7 @@ export function RelationshipsPanel({ entityId }: { entityId: string }) {
 
   const openCreate = () => { resetForm(); setOpen(true); };
 
-  const openEdit = (r: any) => {
+  const openEdit = (r: CustomRelationship) => {
     setEditingId(r.id);
     setToEntityId(r.to_entity_id);
     setRelType(r.relationship_type);
@@ -61,15 +61,15 @@ export function RelationshipsPanel({ entityId }: { entityId: string }) {
     if (toEntityId === entityId) return "A entidade destino deve ser diferente da entidade atual.";
     if (!RELATIONSHIP_TYPES.some((t) => t.value === relType)) return "Tipo de relacionamento inválido.";
 
-    const fromKeys = new Set<string>(["id", ...fromFields.map((f: any) => f.field_key)]);
-    const toKeys = new Set<string>(["id", ...toFields.map((f: any) => f.field_key)]);
+    const fromKeys = new Set<string>(["id", ...fromFields.map((f) => f.field_key)]);
+    const toKeys = new Set<string>(["id", ...toFields.map((f) => f.field_key)]);
     if (!fromKeys.has(from)) return `Campo origem "${from}" não existe na entidade atual.`;
     if (toEntityId && toFields.length >= 0 && !toKeys.has(to)) return `Campo destino "${to}" não existe na entidade destino.`;
 
     if (relType === "many_to_one" && to !== "id") return "Para N:1, o campo destino deve ser a chave única (id) da entidade destino.";
     if (relType === "one_to_many" && from !== "id") return "Para 1:N, o campo origem deve ser a chave única (id) da entidade atual.";
 
-    const duplicate = rels.find((r: any) => {
+    const duplicate = rels.find((r) => {
       if (editingId && r.id === editingId) return false;
       const sameOutgoing =
         r.from_entity_id === entityId && r.to_entity_id === toEntityId &&
