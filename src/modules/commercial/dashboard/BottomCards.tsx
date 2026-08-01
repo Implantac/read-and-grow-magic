@@ -5,7 +5,12 @@ import { Progress } from '@/ui/base/progress';
 import { AlertTriangle, MapPin } from 'lucide-react';
 import { formatBRL } from '@/lib/formatters';
 
-export function TopRepsCard({ topReps }: { topReps: any[] }) {
+export interface TopRepItem { name: string; total: number; target: number; orders: number }
+export interface TopRegionItem { name: string; total: number; count: number }
+export interface StuckOrderItem { id: string; number: string | null; client_name: string | null; created_at: string }
+export interface DashboardAlertItem { id: string; severity: string | null; title: string; description?: string | null }
+
+export function TopRepsCard({ topReps }: { topReps: TopRepItem[] }) {
   return (
     <Card>
       <CardHeader><CardTitle className="text-sm font-medium">Top Representantes</CardTitle></CardHeader>
@@ -42,7 +47,7 @@ export function TopRepsCard({ topReps }: { topReps: any[] }) {
   );
 }
 
-export function TopRegionsCard({ regions }: { regions: any[] }) {
+export function TopRegionsCard({ regions }: { regions: TopRegionItem[] }) {
   return (
     <Card>
       <CardHeader><CardTitle className="text-sm font-medium flex items-center gap-2"><MapPin className="h-4 w-4" /> Top Regiões</CardTitle></CardHeader>
@@ -68,7 +73,7 @@ export function TopRegionsCard({ regions }: { regions: any[] }) {
   );
 }
 
-export function AlertsInsightsCard({ stuckOrders, alerts, openAlerts }: { stuckOrders: any[]; alerts: any[]; openAlerts: number }) {
+export function AlertsInsightsCard({ stuckOrders, alerts, openAlerts }: { stuckOrders: StuckOrderItem[]; alerts: DashboardAlertItem[]; openAlerts: number }) {
   return (
     <Card>
       <CardHeader>

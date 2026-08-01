@@ -11,6 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { EmptyState } from '@/shared/components/EmptyState';
 import { ShieldAlert, DollarSign, XCircle, Package, Search } from 'lucide-react';
 import { format } from 'date-fns';
+import type { LucideIcon } from 'lucide-react';
+import type { Json } from '@/integrations/supabase/types';
 import { ptBR } from 'date-fns/locale';
 
 interface AuditRow {
@@ -20,12 +22,12 @@ interface AuditRow {
   entity_name: string | null;
   entity_id: string | null;
   user_id: string | null;
-  old_data: any;
-  new_data: any;
+  old_data: Json | null;
+  new_data: Json | null;
   created_at: string;
 }
 
-const ACTION_META: Record<string, { label: string; icon: any; variant: 'default' | 'destructive' | 'secondary' | 'outline' }> = {
+const ACTION_META: Record<string, { label: string; icon: LucideIcon; variant: 'default' | 'destructive' | 'secondary' | 'outline' }> = {
   price_change: { label: 'Preço alterado', icon: DollarSign, variant: 'secondary' },
   order_cancelled: { label: 'Pedido cancelado', icon: XCircle, variant: 'destructive' },
   stock_adjustment: { label: 'Ajuste de estoque', icon: Package, variant: 'outline' },
