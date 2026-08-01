@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
+import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { useMemo } from 'react';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
@@ -37,8 +37,8 @@ export function useContactLogs(salesRepId?: string, dateFrom?: string) {
 export function useCreateContactLog() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (log: any) => {
-      const { data, error } = await supabase.from('sales_contact_logs').insert(log as TablesInsert<'sales_contact_logs'>).select().single();
+    mutationFn: async (log: TablesInsert<'sales_contact_logs'>) => {
+      const { data, error } = await supabase.from('sales_contact_logs').insert(log).select().single();
       if (error) throw error;
       return data;
     },
@@ -124,7 +124,7 @@ export function useSmartSalesQueue() {
     if (!funnelQuery.data) return [];
     const contactsByFunnel = new Map<string, { lastContact: string; hasNextAction: boolean; nextActionDate: string | null }>();
 
-    (contactsQuery.data || []).forEach((c: any) => {
+    (contactsQuery.data || []).forEach((c) => {
       if (!c.funnel_id) return;
       const existing = contactsByFunnel.get(c.funnel_id);
       if (!existing || c.created_at > existing.lastContact) {
@@ -136,7 +136,7 @@ export function useSmartSalesQueue() {
       }
     });
 
-    return funnelQuery.data.map((item: any) => {
+    return funnelQuery.data.map((item) => {
       const contact = contactsByFunnel.get(item.id);
       const daysSinceContact = contact
         ? Math.floor((Date.now() - new Date(contact.lastContact).getTime()) / 86400000)
@@ -161,13 +161,16 @@ export function useSmartSalesQueue() {
         lastContactDate: contact?.lastContact || null,
         nextActionDate: contact?.nextActionDate || null,
       };
-    }).sort((a: any, b: any) => b.priority - a.priority);
+    }).sort((a, b) => b.priority - a.priority);
   }, [funnelQuery.data, contactsQuery.data]);
 
   return { data: queue, isLoading: funnelQuery.isLoading || contactsQuery.isLoading };
 }
 
 // ── Rep Execution Metrics ──
+type RepLogRow = Pick<Tables<'sales_contact_logs'>, 'sales_rep_id' | 'result' | 'created_at' | 'duration_minutes' | 'next_action' | 'response_time_minutes'>;
+type RepFunnelRow = Pick<Tables<'sales_funnel'>, 'sales_rep_id' | 'value' | 'stage' | 'status' | 'created_at'>;
+
 export function useRepExecutionMetrics(dateFrom?: string) {
   return useQuery({
     queryKey: ['rep_execution_metrics', dateFrom],
@@ -179,36 +182,36 @@ export function useRepExecutionMetrics(dateFrom?: string) {
 
       if (!reps) return [];
 
-      const logsByRep = new Map<string, any[]>();
-      (logs || []).forEach((l: any) => {
+      const logsByRep = new Map<string, RepLogRow[]>();
+      (logs || []).forEach((l) => {
         if (!l.sales_rep_id) return;
         const arr = logsByRep.get(l.sales_rep_id) || [];
         arr.push(l);
         logsByRep.set(l.sales_rep_id, arr);
       });
 
-      const funnelByRep = new Map<string, any[]>();
-      (funnel || []).forEach((f: any) => {
+      const funnelByRep = new Map<string, RepFunnelRow[]>();
+      (funnel || []).forEach((f) => {
         if (!f.sales_rep_id) return;
         const arr = funnelByRep.get(f.sales_rep_id) || [];
         arr.push(f);
         funnelByRep.set(f.sales_rep_id, arr);
       });
 
-      return reps.map((rep: any) => {
+      return reps.map((rep) => {
         const repLogs = logsByRep.get(rep.id) || [];
         const repFunnel = funnelByRep.get(rep.id) || [];
         const totalContacts = repLogs.length;
-        const proposals = repLogs.filter((l: any) => l.result === 'proposal_sent').length;
-        const ordersPlaced = repLogs.filter((l: any) => l.result === 'order_placed').length;
-        const noFollowUp = repLogs.filter((l: any) => !l.next_action).length;
+        const proposals = repLogs.filter((l) => l.result === 'proposal_sent').length;
+        const ordersPlaced = repLogs.filter((l) => l.result === 'order_placed').length;
+        const noFollowUp = repLogs.filter((l) => !l.next_action).length;
         const avgResponseTime = repLogs.length > 0
-          ? repLogs.reduce((s: number, l: any) => s + (l.response_time_minutes || 0), 0) / repLogs.length
+          ? repLogs.reduce((s: number, l) => s + (l.response_time_minutes || 0), 0) / repLogs.length
           : 0;
         const daysInPeriod = Math.max(1, Math.ceil((Date.now() - new Date(from).getTime()) / 86400000));
         const contactsPerDay = totalContacts / daysInPeriod;
         const conversionRate = totalContacts > 0 ? (ordersPlaced / totalContacts) * 100 : 0;
-        const pipelineValue = repFunnel.filter((f: any) => f.status === 'active').reduce((s: number, f: any) => s + (f.value || 0), 0);
+        const pipelineValue = repFunnel.filter((f) => f.status === 'active').reduce((s: number, f) => s + (f.value || 0), 0);
 
         return {
           ...rep,
@@ -221,7 +224,7 @@ export function useRepExecutionMetrics(dateFrom?: string) {
           avgResponseTime: Math.round(avgResponseTime),
           pipelineValue,
         };
-      }).sort((a: any, b: any) => b.totalContacts - a.totalContacts);
+      }).sort((a, b) => b.totalContacts - a.totalContacts);
     },
   });
 }
@@ -240,7 +243,7 @@ export function useLostClients() {
         .order('total_purchases', { ascending: false })
         .limit(50);
       if (error) throw error;
-      return (data || []).map((c: any) => ({
+      return (data || []).map((c) => ({
         ...c,
         daysSinceLastPurchase: c.last_purchase_date
           ? Math.floor((Date.now() - new Date(c.last_purchase_date).getTime()) / 86400000)
