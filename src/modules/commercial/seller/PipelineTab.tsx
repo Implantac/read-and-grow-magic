@@ -6,10 +6,10 @@ import { KPICard } from '@/shared/components/KPICard';
 import { formatBRL } from '@/lib/formatters';
 import { getFunnelStageLabel } from './constants';
 import { EmptyState } from '@/shared/components/EmptyState';
-import type { DbOpportunity } from '@/hooks/commercial/useSalesIntelligence';
+import type { DbFunnelItem } from '@/hooks/commercial/useSalesFunnel';
 
 interface PipelineTabProps {
-  funnel: DbOpportunity[];
+  funnel: DbFunnelItem[];
   openFunnel: number;
   funnelValue: number;
   openAlerts: number;
