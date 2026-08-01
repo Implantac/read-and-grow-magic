@@ -1,3 +1,4 @@
+import type { BrainRun } from '@/hooks/ai/brain/types';
 import { Link } from 'react-router-dom';
 import { Brain, Zap, RefreshCw, Sparkles, AlertTriangle, Database, GraduationCap, Activity } from 'lucide-react';
 import { Button } from '@/ui/base/button';
@@ -9,7 +10,7 @@ import { saudeMap, type SaudeKey } from './constants';
 import { KpiTile } from './KpiTile';
 
 interface BrainHeroProps {
-  lastRun: any;
+  lastRun: BrainRun | null | undefined;
   pendingCount: number;
   criticalCount: number;
   autoExec: number;
