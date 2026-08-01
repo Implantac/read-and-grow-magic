@@ -5,7 +5,9 @@ import { useAIScores } from '@/hooks/commercial/useAICommercial';
 import { useCommercialAlerts } from '@/hooks/commercial/useCommercialAlerts';
 import { Loader2, MessageSquare } from 'lucide-react';
 
-const severityColors: Record<string, string> = { critical: 'destructive', high: 'destructive', medium: 'default', low: 'secondary' };
+type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
+
+const severityColors: Record<string, BadgeVariant> = { critical: 'destructive', high: 'destructive', medium: 'default', low: 'secondary' };
 
 export function AlertsTab() {
   const { data: alerts = [], isLoading } = useCommercialAlerts('active');
