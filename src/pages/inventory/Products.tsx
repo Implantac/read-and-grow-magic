@@ -35,26 +35,26 @@ export default function ProductsPage() {
   const [filters, setFilters] = useState<ProductFilters>({
     search: '', type: 'all', category: 'all', status: 'all',
   });
-  const [selectedProduct, setSelectedProduct] = useState<DbProduct | any>(null);
+  const [selectedProduct, setSelectedProduct] = useState<DbProduct | null>(null);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const filteredProducts = useMemo(() => {
-    return products.filter((product: any) => {
+    return products.filter((product) => {
       const matchesSearch = filters.search === '' ||
         product.name.toLowerCase().includes(filters.search.toLowerCase()) ||
         product.code.toLowerCase().includes(filters.search.toLowerCase());
       const matchesType = filters.type === 'all' || product.type === filters.type;
       const matchesCategory = filters.category === 'all' ||
-        categories.find((c: any) => c.id === product.category_id)?.name === filters.category;
+        categories.find((c) => c.id === product.category_id)?.name === filters.category;
       const matchesStatus = filters.status === 'all' || product.status === filters.status;
       return matchesSearch && matchesType && matchesCategory && matchesStatus;
     });
   }, [products, filters, categories]);
 
-  const activeProducts = products.filter((p: any) => p.status === 'active').length;
-  const totalValue = products.reduce((acc: number, p: any) => acc + (Number(p.cost_price) || 0) * (p.min_stock || 0), 0);
+  const activeProducts = products.filter((p) => p.status === 'active').length;
+  const totalValue = products.reduce((acc: number, p) => acc + (Number(p.cost_price) || 0) * (p.min_stock || 0), 0);
 
   const getStatusBadge = (status: string) => {
     const config = productStatusConfig.find((s) => s.value === status);
@@ -66,7 +66,7 @@ export default function ProductsPage() {
     return <Badge variant="outline" className={config?.color}>{config?.label || type}</Badge>;
   };
 
-  const handleOpenForm = (product?: any) => {
+  const handleOpenForm = (product?: DbProduct) => {
     setSelectedProduct(product || null);
     setIsFormOpen(true);
   };
@@ -109,7 +109,7 @@ export default function ProductsPage() {
       <div className="grid gap-4 md:grid-cols-4 mb-6">
         <KPICard title="Total de Produtos" value={products.length} icon={<Package className="h-5 w-5" />} subtitle={`${categories.length} categorias`} index={0} />
         <KPICard title="Produtos Ativos" value={activeProducts} icon={<Box className="h-5 w-5" />} accentColor="success" subtitle={`${products.length > 0 ? ((activeProducts / products.length) * 100).toFixed(0) : 0}% do total`} index={1} />
-        <KPICard title="Custo Médio" value={formatBRL(products.length > 0 ? products.reduce((acc: number, p: any) => acc + (Number(p.cost_price) || 0), 0) / products.length : 0)} icon={<FileText className="h-5 w-5" />} accentColor="info" index={2} />
+        <KPICard title="Custo Médio" value={formatBRL(products.length > 0 ? products.reduce((acc: number, p) => acc + (Number(p.cost_price) || 0), 0) / products.length : 0)} icon={<FileText className="h-5 w-5" />} accentColor="info" index={2} />
         <KPICard title="Valor Estimado" value={formatBRL(totalValue)} icon={<Package className="h-5 w-5" />} accentColor="warning" subtitle="Baseado no estoque mínimo" index={3} />
       </div>
 
@@ -144,7 +144,7 @@ export default function ProductsPage() {
               <SelectTrigger><SelectValue placeholder="Categoria" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Todas as categorias</SelectItem>
-                {categories.map((cat: any) => (
+                {categories.map((cat) => (
                   <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
                 ))}
               </SelectContent>
@@ -190,7 +190,7 @@ export default function ProductsPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredProducts.map((product: any) => (
+                filteredProducts.map((product) => (
                   <TableRow key={product.id}>
                     <TableCell className="font-medium">{product.code}</TableCell>
                     <TableCell>
