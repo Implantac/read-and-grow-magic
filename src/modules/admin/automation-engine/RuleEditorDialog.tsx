@@ -15,7 +15,7 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   form: FormState;
   setForm: React.Dispatch<React.SetStateAction<FormState>>;
-  workflowDefs: any[];
+  workflowDefs: Array<{ id: string; name: string; target_entity?: string | null }>;
   onSubmit: () => void;
 }
 
@@ -39,7 +39,7 @@ export function RuleEditorDialog({ open, onOpenChange, form, setForm, workflowDe
       ...f,
       actions: f.actions.map((a, idx) => (idx === i ? { ...a, ...patch } : a)),
     }));
-  const updateActionConfig = (i: number, key: string, value: any) =>
+  const updateActionConfig = (i: number, key: string, value: string | number | boolean | null) =>
     setForm((f) => ({
       ...f,
       actions: f.actions.map((a, idx) =>
@@ -237,7 +237,7 @@ export function RuleEditorDialog({ open, onOpenChange, form, setForm, workflowDe
                         {workflowDefs.length === 0 ? (
                           <SelectItem value="__none" disabled>Nenhum workflow disponível</SelectItem>
                         ) : (
-                          workflowDefs.map((d: any) => (
+                          workflowDefs.map((d) => (
                             <SelectItem key={d.id} value={d.id}>
                               {d.name} <span className="text-muted-foreground ml-2">({d.target_entity})</span>
                             </SelectItem>
