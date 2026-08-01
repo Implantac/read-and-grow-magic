@@ -8,18 +8,14 @@ import { Slider } from '@/ui/base/slider';
 import { SimulationService, SimulationScenario, SimulationResult, MRPService, ActionSuggestion } from '@/lib/pcpServices';
 import { FlaskConical, AlertTriangle, TrendingDown, TrendingUp, Lightbulb, Play, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { OrderLike, SheetLike, SupplyLike, CapacityLike } from '@/lib/pcp/types';
 
 import { formatNumber } from '@/lib/formatters';
-type MRPOrderRow = Parameters<typeof SimulationService.presetScenarios>[0][number];
-type MRPSupplyRow = Parameters<typeof SimulationService.presetScenarios>[1][number];
-type MRPCapacityRow = Parameters<typeof SimulationService.presetScenarios>[2][number];
-type MRPSheetRow = Parameters<typeof SimulationService.simulate>[2][number];
-
 interface MRPSimulationProps {
-  orders: MRPOrderRow[];
-  sheets: MRPSheetRow[];
-  supplies: MRPSupplyRow[];
-  capacities: MRPCapacityRow[];
+  orders: OrderLike[];
+  sheets: SheetLike[];
+  supplies: SupplyLike[];
+  capacities: CapacityLike[];
 }
 
 export default function MRPSimulation({ orders, sheets, supplies, capacities }: MRPSimulationProps) {
