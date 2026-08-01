@@ -97,13 +97,14 @@ export function useRoutePlannerActions(params: {
         const weight = r.weight_kg ? Number(r.weight_kg.replace(',', '.')) : null;
         try {
           await createStop.mutateAsync({
-            route_id: routeId, sequence: baseSeq + i + 1, customer_name: name,
-            address: r.address || null, city: r.city || null, state: r.state || null,
+            route_id: routeId, sequence: baseSeq + i + 1,
+            address: r.address || name,
+            city: r.city || null, state: r.state || null,
             zip_code: r.zip_code || null,
             latitude: Number.isFinite(lat as number) ? lat : null,
             longitude: Number.isFinite(lng as number) ? lng : null,
-            weight_kg: Number.isFinite(weight as number) ? weight : null,
-            notes: r.notes || null,
+            weight: Number.isFinite(weight as number) ? (weight as number) : 0,
+            notes: [name, r.notes].filter(Boolean).join(' — ') || null,
             time_window_start: r.time_window_start || null,
             time_window_end: r.time_window_end || null,
             status: 'pending',
