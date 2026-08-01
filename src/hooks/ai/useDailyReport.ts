@@ -1,15 +1,41 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
+import { errorMessage } from '@/lib/errors';
+
+export interface DailyReportTitle {
+  id: string;
+  description: string | null;
+  client_name?: string | null;
+  supplier?: string | null;
+  due_date?: string | null;
+  amount: number;
+}
+
+export interface DailyReportSale {
+  id: string;
+  number: string | null;
+  client_name: string | null;
+  status: string | null;
+  total: number;
+}
+
+export interface DailyReportCashEntry {
+  id: string;
+  description: string | null;
+  type: string | null;
+  amount: number;
+  date?: string | null;
+}
 
 export interface DailyReportData {
   report_date: string;
-  receivables_due_today: { count: number; total: number; items: any[] };
-  receivables_overdue: { count: number; total: number; items: any[] };
-  payables_due_today: { count: number; total: number; items: any[] };
-  payables_overdue: { count: number; total: number; items: any[] };
-  sales_summary: { count: number; total: number; items: any[] };
-  cash_flow: { income: number; expense: number; balance: number; entries: any[] };
+  receivables_due_today: { count: number; total: number; items: DailyReportTitle[] };
+  receivables_overdue: { count: number; total: number; items: DailyReportTitle[] };
+  payables_due_today: { count: number; total: number; items: DailyReportTitle[] };
+  payables_overdue: { count: number; total: number; items: DailyReportTitle[] };
+  sales_summary: { count: number; total: number; items: DailyReportSale[] };
+  cash_flow: { income: number; expense: number; balance: number; entries: DailyReportCashEntry[] };
   generated_at: string;
 }
 
@@ -49,8 +75,8 @@ export function useGenerateReport() {
       queryClient.invalidateQueries({ queryKey: ['daily_executive_reports'] });
       toastSuccess('Relatório gerado', 'O relatório executivo diário foi gerado com sucesso.');
     },
-    onError: (err: any) => {
-      toastError('Erro ao gerar relatório: ' + err.message);
+    onError: (err: unknown) => {
+      toastError('Erro ao gerar relatório: ' + errorMessage(err));
     },
   });
 }

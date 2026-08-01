@@ -1,3 +1,4 @@
+import type { Json } from '@/integrations/supabase/types';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
@@ -38,7 +39,7 @@ export interface AIRecommendation {
   title: string;
   description: string | null;
   explanation: string | null;
-  suggested_products: any;
+  suggested_products: Json;
   estimated_value: number;
   confidence: number;
   priority: string;
@@ -56,7 +57,7 @@ export interface AIInsight {
   description: string;
   explanation: string | null;
   severity: string;
-  data_points: any;
+  data_points: Json;
   suggested_actions: string[];
   status: string;
   created_at: string;
@@ -90,7 +91,7 @@ export interface AIPrediction {
   predicted_close_date: string | null;
   predicted_value: number;
   recommended_action: string | null;
-  key_factors: any;
+  key_factors: Json;
   explanation: string | null;
   created_at: string;
   clients?: { id: string; name: string; code: string };
@@ -105,10 +106,10 @@ export interface AIForecast {
   best_case: number | null;
   worst_case: number | null;
   confidence: number | null;
-  by_rep: any;
-  by_segment: any;
-  by_region: any;
-  factors: any;
+  by_rep: Json;
+  by_segment: Json;
+  by_region: Json;
+  factors: Json;
   created_at: string;
 }
 
