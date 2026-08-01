@@ -10,6 +10,7 @@ import { Label } from '@/ui/base/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
 import { cn } from '@/lib/utils';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
+import { errorMessage } from '@/lib/errors';
 
 type View = 'login' | 'signup' | 'forgot';
 
@@ -44,7 +45,7 @@ export default function Login() {
       toastSuccess('Bem-vindo!', 'Login realizado com sucesso');
       navigate(nextTarget);
     } catch (error: unknown) {
-      toastError(error.message || 'Email ou senha inválidos', undefined, 'Erro de autenticação');
+      toastError(errorMessage(error, 'Email ou senha inválidos'), undefined, 'Erro de autenticação');
     }
     setIsLoading(false);
   };
