@@ -4,7 +4,7 @@ import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
 import { ExportButton } from '@/shared/components/ExportButton';
 import { Package, Clock, PlayCircle, CheckCircle } from 'lucide-react';
-import { useWMSReceiving } from '@/hooks/wms/useWMSOperations';
+import { useWMSReceiving, type ReceivingOrderView } from '@/hooks/wms/useWMSOperations';
 import { formatDate } from './receiving/constants';
 import { ReceivingFilters } from './receiving/ReceivingFilters';
 import { ReceivingTable } from './receiving/ReceivingTable';

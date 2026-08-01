@@ -8,6 +8,7 @@ import { Progress } from '@/ui/base/progress';
 import { cn } from '@/lib/utils';
 import type { PickingStatus } from '@/types/wms';
 import { statusConfig, priorityConfig } from './constants';
+import type { PickingOrderView } from '@/hooks/wms/useWMSOperations';
 
 interface Props {
   orders: PickingOrderView[];

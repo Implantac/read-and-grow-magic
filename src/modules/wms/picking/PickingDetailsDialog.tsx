@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BarcodeScanner } from '@/components/wms/BarcodeScanner';
 import type { PickingStatus } from '@/types/wms';
 import { statusConfig, priorityConfig } from './constants';
+import type { PickingOrderView } from '@/hooks/wms/useWMSOperations';
 
 interface Props {
   open: boolean;

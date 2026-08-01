@@ -5,7 +5,7 @@ import { ExportButton } from '@/shared/components/ExportButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
 import { ClipboardList, Layers } from 'lucide-react';
-import { useWMSPicking } from '@/hooks/wms/useWMSOperations';
+import { useWMSPicking, type PickingOrderView } from '@/hooks/wms/useWMSOperations';
 import { format } from 'date-fns';
 import { PickingFilters } from './picking/PickingFilters';
 import { PickingKPIs } from './picking/PickingKPIs';
