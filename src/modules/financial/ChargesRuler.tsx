@@ -7,12 +7,14 @@ import { Badge } from '@/ui/base/badge';
 import { Switch } from '@/ui/base/switch';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { useChargeRules, useChargesLog, useRunChargesRuler, useToggleChargeRule } from '@/hooks/financial/useFinancialCharges';
-import { Play, Bell, AlertTriangle, AlertCircle } from 'lucide-react';
+import { Play, Bell, AlertTriangle, AlertCircle, type LucideIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatNumber } from '@/lib/formatters';
 
-const SEVERITY_BADGE: Record<string, { variant: any; icon: any; label: string }> = {
+type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
+
+const SEVERITY_BADGE: Record<string, { variant: BadgeVariant; icon: LucideIcon; label: string }> = {
   info: { variant: 'secondary', icon: Bell, label: 'Aviso' },
   warning: { variant: 'default', icon: AlertTriangle, label: 'Cobrança' },
   critical: { variant: 'destructive', icon: AlertCircle, label: 'Crítico' },

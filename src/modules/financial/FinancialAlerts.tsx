@@ -5,11 +5,13 @@ import { Button } from '@/ui/base/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { useFinancialAlerts, useDetectFinancialAlerts, useUpdateAlertStatus } from '@/hooks/financial/useFinancialAlerts';
-import { AlertTriangle, AlertCircle, Bell, Check, RefreshCw } from 'lucide-react';
+import { AlertTriangle, AlertCircle, Bell, Check, RefreshCw, type LucideIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-const SEVERITY: Record<string, { variant: any; icon: any }> = {
+type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
+
+const SEVERITY: Record<string, { variant: BadgeVariant; icon: LucideIcon }> = {
   info: { variant: 'secondary', icon: Bell },
   warning: { variant: 'default', icon: AlertTriangle },
   critical: { variant: 'destructive', icon: AlertCircle },
