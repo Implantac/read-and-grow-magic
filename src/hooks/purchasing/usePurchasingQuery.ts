@@ -20,7 +20,7 @@ export function usePurchasing() {
         rating: Number(s.rating), createdAt: s.created_at, updatedAt: s.updated_at,
         address: { street: s.address_street, number: s.address_number, complement: s.address_complement,
           neighborhood: s.address_neighborhood, city: s.address_city, state: s.address_state, zipCode: s.address_zip_code },
-      }));
+      })) as Supplier[];
     },
   });
 

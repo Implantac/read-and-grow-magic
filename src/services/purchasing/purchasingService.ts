@@ -1,21 +1,11 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables, TablesInsert } from '@/integrations/supabase/types';
 
-export type PurchaseOrderItemRow = {
-  id: string;
-  product_id: string | null;
-  product_name: string | null;
-  product_code: string | null;
-  quantity: number | null;
-  received_quantity: number | null;
-  unit_price: number | null;
-  total_price: number | null;
-  unit: string | null;
-};
+export type PurchaseOrderItemRow = Tables<'purchase_order_items'>;
 
 export type PurchaseOrderRow = Tables<'purchase_orders'> & {
   suppliers: { name: string | null } | null;
-  items?: PurchaseOrderItemRow[] | null;
+  purchase_order_items: PurchaseOrderItemRow[] | null;
 };
 
 export const purchasingService = {
@@ -36,7 +26,7 @@ export const purchasingService = {
   async getPurchaseOrders(): Promise<PurchaseOrderRow[]> {
     const { data, error } = await supabase
       .from('purchase_orders')
-      .select('*, suppliers(name)')
+      .select('*, suppliers(name), purchase_order_items(*)')
       .order('created_at', { ascending: false });
     if (error) throw error;
     return (data ?? []) as unknown as PurchaseOrderRow[];
