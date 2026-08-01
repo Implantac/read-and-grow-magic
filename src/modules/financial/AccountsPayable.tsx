@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/ui/base/label';
 import { Textarea } from '@/ui/base/textarea';
 import { financialCategories } from '@/config/financial';
-import { PaymentMethod } from '@/types/financial';
+import { PaymentMethod, type AccountPayable } from '@/types/financial';
 import { useAccountsPayable, useCreateAccountPayable, useUpdateAccountPayable, useDeleteAccountPayable } from '@/hooks/financial/useAccountsPayable';
 import { useCreatePaymentRecord } from '@/hooks/financial/usePaymentRecords';
 import { useBankAccounts } from '@/hooks/financial/useBankAccounts';
