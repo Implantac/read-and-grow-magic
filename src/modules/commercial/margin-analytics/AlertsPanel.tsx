@@ -3,10 +3,27 @@ import { Button } from '@/ui/base/button';
 import { Badge } from '@/ui/base/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { AlertTriangle, Bell, Check } from 'lucide-react';
+import type { UseMutationResult } from '@tanstack/react-query';
+
+export interface MarginAlert {
+  id: string;
+  title: string;
+  description?: string | null;
+  severity?: string | null;
+}
+
+interface AlertsPanelProps {
+  alerts?: MarginAlert[];
+  filteredAlerts: MarginAlert[];
+  severityFilter: string;
+  setSeverityFilter: (value: string) => void;
+  resolveAlert: UseMutationResult<unknown, unknown, string, unknown>;
+  resolveBulk: UseMutationResult<unknown, unknown, string[], unknown>;
+}
 
 export function AlertsPanel({
   alerts, filteredAlerts, severityFilter, setSeverityFilter, resolveAlert, resolveBulk,
-}: any) {
+}: AlertsPanelProps) {
   return (
     <Card className="mb-4 border-destructive/40 bg-destructive/5">
       <CardHeader className="flex flex-row items-center justify-between gap-3 flex-wrap">
@@ -28,7 +45,7 @@ export function AlertsPanel({
             size="sm"
             variant="outline"
             disabled={resolveBulk.isPending || filteredAlerts.length === 0}
-            onClick={() => resolveBulk.mutate(filteredAlerts.map((a: any) => a.id))}
+            onClick={() => resolveBulk.mutate(filteredAlerts.map((a) => a.id))}
           >
             <Check className="h-4 w-4 mr-1" /> Resolver todos
           </Button>
@@ -38,7 +55,7 @@ export function AlertsPanel({
         {filteredAlerts.length === 0 ? (
           <div className="text-xs text-muted-foreground py-2">Nenhum alerta para o filtro selecionado.</div>
         ) : (
-          filteredAlerts.map((a: any) => (
+          filteredAlerts.map((a) => (
             <div key={a.id} className="flex items-start gap-3 text-sm border-b border-border/40 last:border-0 pb-2 last:pb-0">
               <AlertTriangle className={`h-4 w-4 mt-0.5 shrink-0 ${a.severity === 'critical' ? 'text-destructive' : 'text-yellow-500'}`} />
               <div className="flex-1 min-w-0">

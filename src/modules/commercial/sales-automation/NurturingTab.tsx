@@ -19,11 +19,11 @@ export function NurturingTab() {
           <div className="text-xs text-muted-foreground">Sequências</div>
         </CardContent></Card>
         <Card><CardContent className="p-4 text-center">
-          <div className="text-2xl font-bold">{sequences.filter((s: any) => s.is_active).length}</div>
+          <div className="text-2xl font-bold">{sequences.filter((s) => s.is_active).length}</div>
           <div className="text-xs text-muted-foreground">Ativas</div>
         </CardContent></Card>
         <Card><CardContent className="p-4 text-center">
-          <div className="text-2xl font-bold">{sequences.reduce((a: number, s: any) => a + (s.total_enrolled || 0), 0)}</div>
+          <div className="text-2xl font-bold">{sequences.reduce((a: number, s) => a + (s.total_enrolled || 0), 0)}</div>
           <div className="text-xs text-muted-foreground">Leads em Nutrição</div>
         </CardContent></Card>
       </div>
@@ -43,7 +43,7 @@ export function NurturingTab() {
               </div>
             ) : (
               <div className="space-y-3">
-                {sequences.map((s: any) => (
+                {sequences.map((s) => (
                   <div key={s.id} className="flex items-center justify-between p-3 rounded-lg border">
                     <div>
                       <div className="font-medium text-sm">{s.name}</div>

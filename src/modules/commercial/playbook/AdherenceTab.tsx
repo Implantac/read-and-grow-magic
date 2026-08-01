@@ -2,13 +2,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { ScrollArea } from '@/ui/base/scroll-area';
 import { formatDate } from '@/lib/formatters';
 
+export interface PlaybookUsageLog {
+  id: string;
+  sales_rep_id?: string | null;
+  user_id?: string | null;
+  action_type?: string | null;
+  created_at: string;
+}
+
 interface Props {
-  usageLogs: any[];
+  usageLogs: PlaybookUsageLog[];
 }
 
 export function AdherenceTab({ usageLogs }: Props) {
   const totalLogs = usageLogs.length;
-  const uniqueUsers = new Set(usageLogs.map((l: any) => l.sales_rep_id || l.user_id)).size;
+  const uniqueUsers = new Set(usageLogs.map((l) => l.sales_rep_id || l.user_id)).size;
   const avg = totalLogs > 0 ? (totalLogs / Math.max(uniqueUsers, 1)).toFixed(1) : '0';
 
   return (
@@ -46,7 +54,7 @@ export function AdherenceTab({ usageLogs }: Props) {
               </p>
             ) : (
               <div className="space-y-2">
-                {usageLogs.slice(0, 50).map((log: any) => (
+                {usageLogs.slice(0, 50).map((log) => (
                   <div key={log.id} className="flex items-center justify-between text-sm p-2 rounded hover:bg-muted/50">
                     <span>{log.action_type === 'copy_script' ? '📋 Script copiado' : '👍 Objeção utilizada'}</span>
                     <span className="text-muted-foreground text-xs">{formatDate(log.created_at)}</span>
