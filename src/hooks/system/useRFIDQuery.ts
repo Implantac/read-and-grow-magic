@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import type { RFIDReader, RFIDTag } from '@/types/rfid';
+import { errorMessage } from '@/lib/errors';
 
 export function useRFID() {
   const queryClient = useQueryClient();
@@ -27,7 +28,7 @@ export function useRFID() {
 
   // Readers Mutations
   const createReaderMutation = useMutation({
-    mutationFn: async (reader: any) => {
+    mutationFn: async (reader: Partial<RFIDReader> & { code: string; name: string }) => {
       const { data, error } = await supabase.from('rfid_readers').insert({
         code: reader.code, 
         name: reader.name, 
@@ -47,8 +48,8 @@ export function useRFID() {
       queryClient.invalidateQueries({ queryKey: ['rfid_readers'] });
       toastSuccess('Leitor RFID cadastrado com sucesso');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao cadastrar leitor');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao cadastrar leitor'));
     }
   });
 
@@ -61,14 +62,14 @@ export function useRFID() {
       queryClient.invalidateQueries({ queryKey: ['rfid_readers'] });
       toastSuccess('Leitor RFID excluído');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao excluir leitor');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao excluir leitor'));
     }
   });
 
   // Tags Mutations
   const createTagMutation = useMutation({
-    mutationFn: async (tag: any) => {
+    mutationFn: async (tag: Partial<RFIDTag> & { epc: string }) => {
       const { data, error } = await supabase.from('rfid_tags').insert({
         epc: tag.epc, 
         tag_type: tag.tagType || 'product', 
@@ -87,8 +88,8 @@ export function useRFID() {
       queryClient.invalidateQueries({ queryKey: ['rfid_tags'] });
       toastSuccess('Tag RFID registrada com sucesso');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao registrar tag');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao registrar tag'));
     }
   });
 
@@ -101,8 +102,8 @@ export function useRFID() {
       queryClient.invalidateQueries({ queryKey: ['rfid_tags'] });
       toastSuccess('Tag RFID excluída');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao excluir tag');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao excluir tag'));
     }
   });
 
