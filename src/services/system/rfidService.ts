@@ -1,10 +1,11 @@
 import { supabase } from '@/integrations/supabase/client';
+import type { Tables } from '@/integrations/supabase/types';
 
 export const rfidService = {
   async getReaders() {
     const { data, error } = await supabase.from('rfid_readers').select('*').order('code');
     if (error) throw error;
-    return (data || []).map((r: any) => ({
+    return (data || []).map((r: Tables<'rfid_readers'>) => ({
       id: r.id, 
       code: r.code, 
       name: r.name, 
@@ -25,7 +26,7 @@ export const rfidService = {
   async getTags() {
     const { data, error } = await supabase.from('rfid_tags').select('*').order('created_at', { ascending: false });
     if (error) throw error;
-    return (data || []).map((r: any) => ({
+    return (data || []).map((r: Tables<'rfid_tags'>) => ({
       id: r.id, 
       epc: r.epc, 
       tagType: r.tag_type, 
@@ -47,7 +48,7 @@ export const rfidService = {
     const { data, error } = await supabase.from('rfid_events')
       .select('*').order('created_at', { ascending: false }).limit(limit);
     if (error) throw error;
-    return (data || []).map((r: any) => ({
+    return (data || []).map((r: Tables<'rfid_events'>) => ({
       id: r.id, 
       readerId: r.reader_id, 
       readerCode: r.reader_code,
