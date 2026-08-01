@@ -53,14 +53,14 @@ export default function OrderReservations() {
         .in('order_id', ids);
 
       const map = new Map<string, { reserved: number; pending: number }>();
-      (res || []).forEach((r: any) => {
+      (res || []).forEach((r) => {
         const cur = map.get(r.order_id) || { reserved: 0, pending: 0 };
         if (r.status === 'reserved') cur.reserved += 1;
         if (r.status === 'pending') cur.pending += 1;
         map.set(r.order_id, cur);
       });
 
-      return (ordersData || []).map((o: any) => {
+      return (ordersData || []).map((o) => {
         const m = map.get(o.id);
         let rs: OrderRow['reservation_status'] = 'none';
         if (m) rs = m.pending > 0 ? 'partial' : m.reserved > 0 ? 'reserved' : 'none';

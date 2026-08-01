@@ -15,7 +15,7 @@ interface Props {
   order: OrderRow | null;
   form: StageForm;
   setForm: (f: StageForm) => void;
-  shipmentInfo: { shipment: any; events: any[] } | undefined;
+  shipmentInfo: { shipment: ShipmentInfo | null; events: TrackingEvent[] } | undefined;
   onSubmit: () => void;
   submitting: boolean;
 }
@@ -84,7 +84,7 @@ export function TrackingDialog({ open, onOpenChange, order, form, setForm, shipm
           <div className="border-t pt-3">
             <Label className="mb-2 block">Histórico de eventos</Label>
             <div className="max-h-48 overflow-y-auto space-y-2">
-              {shipmentInfo.events.map((ev: any) => (
+              {shipmentInfo.events.map((ev) => (
                 <div key={ev.id} className="text-xs border-l-2 border-primary/50 pl-2 py-1">
                   <div className="font-medium">{ev.description}</div>
                   <div className="text-muted-foreground">
