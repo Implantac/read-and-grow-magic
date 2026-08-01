@@ -27,6 +27,8 @@ export interface PublicSurveyCampaign {
   title?: string | null;
   subtitle?: string | null;
   message?: string | null;
+  thanks_title?: string | null;
+  thanks_message?: string | null;
 }
 
 export interface PublicSurvey {
