@@ -3,13 +3,31 @@ import { supabase } from '@/integrations/supabase/client';
 import type { TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
 
+export interface TechnicalSheetStep {
+  name?: string;
+  description?: string;
+  work_center?: string;
+  time_minutes?: number;
+  [key: string]: unknown;
+}
+
+export interface TechnicalSheetMaterial {
+  code?: string;
+  componentCode?: string;
+  material_code?: string;
+  name?: string;
+  quantity?: number;
+  unit?: string;
+  [key: string]: unknown;
+}
+
 export interface TechnicalSheetRow {
   id: string;
   product_id: string | null;
   product_code: string;
   product_name: string;
-  steps: any[];
-  materials: any[];
+  steps: TechnicalSheetStep[];
+  materials: TechnicalSheetMaterial[];
   total_time_minutes: number;
   standard_cost: number;
   version: string;

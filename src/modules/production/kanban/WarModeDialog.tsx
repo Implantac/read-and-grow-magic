@@ -3,11 +3,12 @@ import { ScrollArea } from '@/ui/base/scroll-area';
 import { Badge } from '@/ui/base/badge';
 import { Button } from '@/ui/base/button';
 import { AlertTriangle, ArrowRight, Swords, Zap } from 'lucide-react';
+import type { WarModeResult } from '@/lib/pcp/warmode';
 
 interface WarModeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  result: any;
+  result: WarModeResult | null;
   loading: boolean;
   onConfirm: () => void;
 }
@@ -48,10 +49,10 @@ export function WarModeDialog({ open, onOpenChange, result, loading, onConfirm }
                     <Zap className="h-4 w-4 text-warning" /> Repriorização ({result.priorityChanges.length})
                   </h4>
                   <div className="space-y-1.5">
-                    {result.priorityChanges.map((c: any, i: number) => (
+                    {result.priorityChanges.map((c, i) => (
                       <div key={i} className="p-2 rounded-lg bg-muted text-xs flex items-center justify-between">
                         <div>
-                          <span className="font-mono font-medium">{c.order_number}</span>
+                          <span className="font-mono font-medium">{c.opNumber}</span>
                           <span className="text-muted-foreground ml-2">Score: {c.score}</span>
                           {c.factors?.length > 0 && (
                             <p className="text-[10px] text-muted-foreground mt-0.5">{c.factors.join(' · ')}</p>
@@ -76,7 +77,7 @@ export function WarModeDialog({ open, onOpenChange, result, loading, onConfirm }
                     <ArrowRight className="h-4 w-4 text-primary" /> Movimentações Sugeridas ({result.kanbanReorg.length})
                   </h4>
                   <div className="space-y-1.5">
-                    {result.kanbanReorg.map((r: any, i: number) => (
+                    {result.kanbanReorg.map((r, i) => (
                       <div key={i} className="p-2 rounded-lg bg-primary/5 text-xs flex items-center justify-between">
                         <div>
                           <span className="font-mono font-medium">{r.opNumber}</span>

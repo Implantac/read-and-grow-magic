@@ -5,10 +5,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Progress } from '@/ui/base/progress';
 import { cn } from '@/lib/utils';
 import type { MaterialNeed } from './types';
+import type { ProductionOrderRow } from '@/hooks/production/useProductionOrders';
+import type { TechnicalSheetMaterial, TechnicalSheetRow } from '@/hooks/production/useTechnicalSheets';
 
 interface Props {
-  activeOPs: any[];
-  sheets: any[];
+  activeOPs: ProductionOrderRow[];
+  sheets: TechnicalSheetRow[];
   materialNeeds: MaterialNeed[];
 }
 
@@ -39,7 +41,7 @@ export function MRPOpsTab({ activeOPs, sheets, materialNeeds }: Props) {
 
                 let opCoverage = 100;
                 if (sheet && Array.isArray(sheet.materials)) {
-                  sheet.materials.forEach((mat: any) => {
+                  sheet.materials.forEach((mat: TechnicalSheetMaterial) => {
                     const code = mat.code || mat.componentCode || mat.material_code || '';
                     const need = materialNeeds.find(n => n.materialCode === code);
                     if (need && need.coveragePct < opCoverage) opCoverage = need.coveragePct;

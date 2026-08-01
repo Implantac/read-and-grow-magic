@@ -11,17 +11,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Label } from '@/ui/base/label';
 import { Textarea } from '@/ui/base/textarea';
 import { Switch } from '@/ui/base/switch';
+import type { TechnicalSheetRow } from '@/hooks/production/useTechnicalSheets';
 import { useTechnicalSheets } from '@/hooks/production/useTechnicalSheets';
 import { Plus, FileText, Pencil, Trash2, Clock, DollarSign, Layers } from 'lucide-react';
 import { EmptyState } from '@/shared/components/EmptyState';
 
-interface StepEntry { name: string; time_minutes: number; sector: string; }
-interface MaterialEntry { name: string; quantity: number; unit: string; unit_cost: number; }
+interface StepEntry { name: string; time_minutes: number; sector: string; [key: string]: unknown; }
+interface MaterialEntry { name: string; quantity: number; unit: string; unit_cost: number; [key: string]: unknown; }
 
 export default function TechnicalSheetsPage() {
   const { sheets, loading, create, update, remove } = useTechnicalSheets();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<any>(null);
+  const [editing, setEditing] = useState<TechnicalSheetRow | null>(null);
   const [form, setForm] = useState({ product_code: '', product_name: '', version: '1.0', is_active: true, notes: '' });
   const [steps, setSteps] = useState<StepEntry[]>([]);
   const [materials, setMaterials] = useState<MaterialEntry[]>([]);

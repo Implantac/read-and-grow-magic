@@ -273,7 +273,7 @@ export function InventoryTurnoverChart({ stockLevels }: InventoryTurnoverChartPr
                   content={
                     <ChartTooltipContent
                       formatter={(value, name, item) => [
-                        `${value}x/ano (${item.payload.daysOfStock} dias) - ${formatCurrency(item.payload.totalValue)}`,
+                        `${value}x/ano (${item.payload.daysOfStock} dias) - ${formatCurrency(Number(item.payload?.totalValue ?? 0))}`,
                         'Giro',
                       ]}
                     />
@@ -316,7 +316,7 @@ export function InventoryTurnoverChart({ stockLevels }: InventoryTurnoverChartPr
                 content={
                   <ChartTooltipContent
                     formatter={(value, name, item) => [
-                      `${value}x/ano (${item.payload.count} itens, ${formatCurrency(item.payload.totalValue)})`,
+                      `${value}x/ano (${item.payload.count} itens, ${formatCurrency(Number(item.payload?.totalValue ?? 0))})`,
                       'Giro Médio',
                     ]}
                   />

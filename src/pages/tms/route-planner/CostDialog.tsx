@@ -3,16 +3,19 @@ import { Button } from '@/ui/base/button';
 import { Input } from '@/ui/base/input';
 import { Label } from '@/ui/base/label';
 import { DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/ui/base/dialog';
+import type { Tables, TablesInsert } from '@/integrations/supabase/types';
+
+type RouteCost = Tables<'route_costs'>;
 
 export const CostDialog = ({
   routeId, current, onClose, onSubmit,
 }: {
   routeId: string;
-  current: any;
+  current: Partial<RouteCost> | null;
   onClose: () => void;
-  onSubmit: (payload: any) => void;
+  onSubmit: (payload: Omit<TablesInsert<'route_costs'>, 'company_id'>) => void;
 }) => {
-  const toStr = (v: any) => (v == null ? '' : String(v));
+  const toStr = (v: unknown) => (v == null ? '' : String(v));
   const [form, setForm] = useState({
     fuel_liters: toStr(current?.fuel_liters),
     fuel_cost: toStr(current?.fuel_cost),
