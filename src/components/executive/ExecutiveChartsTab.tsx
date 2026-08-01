@@ -16,15 +16,15 @@ interface Props {
 export function ExecutiveChartsTab({ data }: Props) {
   const revenueByMonth = data?.revenueByMonth || [];
   const topClients = data?.topClients || [];
-  const growthTrends = (data as any)?.growthTrends || [];
+  const growthTrends = data?.growthTrends || [];
   const expenseByCategory = data?.expenseByCategory || {};
   const salesRepStats = data?.salesRepStats || [];
   const funnelByStage = data?.funnelByStage || {};
-  const revenueByRegion = (data as any)?.revenueByRegion || {};
+  const revenueByRegion = data?.revenueByRegion || {};
   const kpis = data?.kpis;
 
   const expenseData = Object.entries(expenseByCategory).map(([name, value]) => ({ name, value })).sort((a, b) => (b.value as number) - (a.value as number)).slice(0, 6);
-  const funnelData = Object.entries(funnelByStage).map(([stage, v]: any) => ({ stage, ...v }));
+  const funnelData = Object.entries(funnelByStage).map(([stage, v]) => ({ stage, ...v }));
   const regionData = Object.entries(revenueByRegion).map(([name, value]) => ({ name, value })).sort((a, b) => (b.value as number) - (a.value as number));
 
   return (

@@ -60,7 +60,7 @@ export default function QualityControlPage() {
       defect_category: form.defect_category || null,
       corrective_action: form.corrective_action || null,
       notes: form.notes || null,
-    } as any);
+    });
     setDialogOpen(false);
     setForm({ production_order_id: '', step_id: '', inspector: '', approved_quantity: 0, rejected_quantity: 0, defect_reason: '', defect_category: '', severity: 'minor', corrective_action: '', notes: '' });
   };

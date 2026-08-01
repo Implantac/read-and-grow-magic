@@ -1,9 +1,9 @@
 /** Minimal CSV export helper (client-side download). */
-export function toCSV<T extends Record<string, any>>(
+export function toCSV<T extends object>(
   rows: T[],
   columns: { key: keyof T | string; label: string }[]
 ): string {
-  const escape = (v: any) => {
+  const escape = (v: unknown) => {
     if (v === null || v === undefined) return '';
     const s = String(v);
     if (/[",;\n]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
@@ -11,7 +11,7 @@ export function toCSV<T extends Record<string, any>>(
   };
   const header = columns.map((c) => escape(c.label)).join(';');
   const body = rows
-    .map((r) => columns.map((c) => escape((r as any)[c.key])).join(';'))
+    .map((r) => columns.map((c) => escape(r[c.key as keyof T])).join(';'))
     .join('\n');
   return `${header}\n${body}`;
 }
