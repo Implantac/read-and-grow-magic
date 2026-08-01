@@ -1,5 +1,5 @@
 /** Minimal CSV export helper (client-side download). */
-export function toCSV<T extends Record<string, unknown>>(
+export function toCSV<T extends object>(
   rows: T[],
   columns: { key: keyof T | string; label: string }[]
 ): string {
