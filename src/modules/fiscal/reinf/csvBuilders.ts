@@ -76,7 +76,7 @@ export function buildR4020Rows(events: ReinfEvent[]): Record<string, string>[] {
       status: e.status,
     };
   });
-  const sum = (k: keyof ReinfEvent) => events.reduce((s, e) => s + num(e[k] as any), 0);
+  const sum = (k: keyof ReinfEvent) => events.reduce((s, e) => s + num(e[k]), 0);
   const totals = {
     bruto: sum('vr_bruto'), ir: sum('vr_ret_ir'), csll: sum('vr_ret_csll'),
     pis: sum('vr_ret_pis'), cofins: sum('vr_ret_cofins'),

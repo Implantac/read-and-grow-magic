@@ -125,7 +125,7 @@ export default function DashboardEngine() {
                         className="h-4 w-4 cursor-pointer text-muted-foreground absolute top-2 right-2 z-10"
                         onClick={() => removeWidget.mutate({ id: w.id, dashboard_id: activeId })}
                       />
-                      <WidgetRenderer widget={w as any} />
+                      <WidgetRenderer widget={w} />
                       <p className="text-[10px] text-muted-foreground mt-1 px-1">
                         <Badge variant="outline" className="text-[10px] mr-1">{w.widget_type}</Badge>
                         {w.data_source}

@@ -19,8 +19,7 @@ export function useBrainChat() {
       let payload = (data ?? {}) as { content?: string; actions?: BrainChatAction[]; error?: string; message?: string; required_plan?: string };
       if (error) {
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const resp = (error as any)?.context;
+          const resp = (error as { context?: { json?: () => Promise<Record<string, unknown>> } })?.context;
           if (resp && typeof resp.json === 'function') {
             payload = { ...(await resp.json()), ...payload };
           }

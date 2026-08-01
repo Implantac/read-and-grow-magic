@@ -87,7 +87,7 @@ export function NFeDetailsDialog({
                 {(['icms', 'ipi', 'pis', 'cofins'] as const).map((k) => (
                   <div key={k} className="rounded-lg border p-3">
                     <p className="text-xs text-muted-foreground">{k.toUpperCase()}</p>
-                    <p className="font-medium">{formatCurrency((nfe as any)[k])}</p>
+                    <p className="font-medium">{formatCurrency(nfe[k])}</p>
                   </div>
                 ))}
               </div>
