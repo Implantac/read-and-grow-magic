@@ -9,13 +9,13 @@ import { formatBRL } from '@/lib/formatters';
 const fmtShort = (v: number) => formatBRL(v);
 
 // Aplica filtros de canal operacional e filial em queries que suportam essas colunas.
-function withCanal<TQ extends { eq: (col: string, val: string) => TQ }>(
+function withCanal<TQ>(
   q: TQ,
   canal: CanalFilter,
   branchId: string | null,
   opts: { branch?: boolean; canal?: boolean } = {}
 ): TQ {
-  let r = q;
+  let r = q as { eq: (col: string, val: string) => unknown };
   const wantCanal = opts.canal !== false;
   const wantBranch = opts.branch !== false;
   if (wantCanal && canal !== 'CONSOLIDADO') r = r.eq('canal_operacional', canal);
@@ -83,7 +83,7 @@ export function useDashboardData() {
         // Logistics & Fleet Management
         supabase.from('carriers').select('id', { count: 'exact', head: true }).eq('company_id', companyId),
         // NPS answers (last 500)
-        supabase.from('nps_answers').select('score, ai_sentiment, comment, created_at').eq('company_id', companyId).order('created_at', { ascending: false }).limit(500),
+        supabase.from('nps_answers').select('score, sentiment, comment, created_at').eq('company_id', companyId).order('created_at', { ascending: false }).limit(500),
         // NPS invites (for response rate)
         supabase.from('nps_invites').select('id, responded_at').eq('company_id', companyId).limit(2000),
       ]);
@@ -151,7 +151,7 @@ export function useDashboardData() {
       const npsResponded = npsInvites.filter((i) => i.responded_at).length;
       const npsResponseRate = npsInvitesTotal > 0 ? Math.min(100, Math.round((npsResponded / npsInvitesTotal) * 100)) : 0;
       const npsCriticalComments = npsAnswers.filter((a) =>
-        ((a.score != null && a.score <= 4) || a.ai_sentiment === 'negative') && (a.comment || '').trim().length > 0
+        ((a.score != null && a.score <= 4) || a.sentiment === 'negative') && (a.comment || '').trim().length > 0
       ).length;
 
       // === ALERTS ===
