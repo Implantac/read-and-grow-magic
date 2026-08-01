@@ -1,8 +1,9 @@
 import { Badge } from '@/ui/base/badge';
 import { formatBRL } from '@/lib/formatters';
 import { trendIcon } from './helpers';
+import type { CEOForecast, CEOKPI } from './types';
 
-export function ForecastKPIs({ forecast, kpis }: { forecast: any; kpis: any[] }) {
+export function ForecastKPIs({ forecast, kpis }: { forecast: CEOForecast; kpis: CEOKPI[] }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       <div className="p-3 rounded-lg border bg-card">
