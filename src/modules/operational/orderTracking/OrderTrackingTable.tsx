@@ -8,16 +8,17 @@ import { formatNumber } from '@/lib/formatters';
 import { getAllowedTransitions } from '@/lib/orderFlowEngine';
 import { getOrderFlowStatus } from '@/hooks/commercial/useOrderFlow';
 import { OrderFlowBadge, OrderProgressBar } from './OrderFlowIndicators';
+import type { DbOrder } from '@/hooks/commercial/orders/types';
 
 interface Props {
   isLoading: boolean;
-  allOrders: any[] | undefined;
-  filtered: any[];
+  allOrders: DbOrder[] | undefined;
+  filtered: DbOrder[];
   search: string;
   statusFilter: string;
   onClearFilters: () => void;
-  onSelectOrder: (o: any) => void;
-  onTransition: (o: any, targetStatus: string) => void;
+  onSelectOrder: (o: DbOrder) => void;
+  onTransition: (o: DbOrder, targetStatus: string) => void;
   lifecyclePending: boolean;
 }
 
