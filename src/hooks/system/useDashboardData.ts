@@ -15,12 +15,13 @@ function withCanal<TQ>(
   branchId: string | null,
   opts: { branch?: boolean; canal?: boolean } = {}
 ): TQ {
-  let r = q as { eq: (col: string, val: string) => unknown };
+  type Filterable = { eq: (col: string, val: string) => Filterable };
+  let r = q as Filterable;
   const wantCanal = opts.canal !== false;
   const wantBranch = opts.branch !== false;
   if (wantCanal && canal !== 'CONSOLIDADO') r = r.eq('canal_operacional', canal);
   if (wantBranch && branchId) r = r.eq('branch_id', branchId);
-  return r;
+  return r as TQ;
 }
 
 export function useDashboardData() {
