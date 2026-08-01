@@ -1,8 +1,9 @@
+import type { ModuleManual } from '../content-types';
 import { HelpCircle } from 'lucide-react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/ui/base/accordion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 
-export function FaqTab({ manual }: { manual: any }) {
+export function FaqTab({ manual }: { manual: ModuleManual }) {
   return (
     <div className="mt-4">
       <Card>
@@ -13,7 +14,7 @@ export function FaqTab({ manual }: { manual: any }) {
         </CardHeader>
         <CardContent>
           <Accordion type="single" collapsible>
-            {manual.faq.map((f: any, i: number) => (
+            {manual.faq.map((f, i) => (
               <AccordionItem key={i} value={`faq-${i}`}>
                 <AccordionTrigger className="text-left">{f.q}</AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">{f.a}</AccordionContent>

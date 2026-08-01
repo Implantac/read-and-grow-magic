@@ -1,7 +1,8 @@
+import type { ModuleManual } from '../content-types';
 import { Lightbulb, ListChecks } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
 
-export function StepsTab({ manual }: { manual: any }) {
+export function StepsTab({ manual }: { manual: ModuleManual }) {
   return (
     <div className="mt-4">
       <Card>
@@ -13,7 +14,7 @@ export function StepsTab({ manual }: { manual: any }) {
         </CardHeader>
         <CardContent>
           <ol className="space-y-4">
-            {manual.steps.map((step: any, i: number) => (
+            {manual.steps.map((step, i) => (
               <li key={i} className="flex gap-4">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold text-sm">
                   {i + 1}

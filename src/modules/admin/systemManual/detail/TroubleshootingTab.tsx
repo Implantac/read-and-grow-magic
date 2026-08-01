@@ -1,7 +1,8 @@
+import type { ModuleManual } from '../content-types';
 import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 
-export function TroubleshootingTab({ manual }: { manual: any }) {
+export function TroubleshootingTab({ manual }: { manual: ModuleManual }) {
   return (
     <div className="mt-4">
       <Card>
@@ -11,7 +12,7 @@ export function TroubleshootingTab({ manual }: { manual: any }) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          {manual.troubleshooting.map((t: any, i: number) => (
+          {manual.troubleshooting.map((t, i) => (
             <div key={i} className="rounded-lg border p-3">
               <div className="flex items-start gap-2">
                 <AlertTriangle className="h-4 w-4 text-orange-500 shrink-0 mt-0.5" />
