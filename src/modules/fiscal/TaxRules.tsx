@@ -64,7 +64,7 @@ export default function TaxRulesPage() {
   };
   const save = async () => {
     if (!editing.name) return;
-    await upsert.mutateAsync(editing as any);
+    await upsert.mutateAsync(editing);
     setOpen(false);
   };
 

@@ -88,7 +88,7 @@ export default function FinancialHub() {
       payment_method: form.method,
       reference: null,
       notes: null,
-    } as any);
+    });
     setAction(null);
   };
 

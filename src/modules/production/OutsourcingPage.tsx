@@ -54,7 +54,7 @@ export default function OutsourcingPage() {
       order_number: orderNumber,
       total_cost: totalCostVal,
       supplier_id: form.supplier_id || null,
-    } as any);
+    });
     if (success) {
       await updateOP(form.production_order_id, { status: 'outsourced' });
       setShowCreateDialog(false);

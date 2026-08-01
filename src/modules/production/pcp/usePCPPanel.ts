@@ -65,7 +65,7 @@ export async function generateOPFromOrder(order: any, lifecycle: any, refetch: (
         product_name: item.product_name, quantity: item.quantity, produced_quantity: 0, unit: 'UN',
         status: 'planned', priority: order.priority || 'medium', due_date: order.delivery_date,
         notes: `Gerada do pedido ${order.number}`,
-      } as any);
+      });
     }
     lifecycle.mutate({ orderId: order.id, order, targetStatus: 'in_production', observation: `${items.length} OP(s) gerada(s)` });
     toastSuccess(`${items.length} OP(s) gerada(s) do pedido ${order.number}`);
