@@ -33,10 +33,11 @@ export function QuestionRenderer({ q, answers, setAnswers, touched, primary }: P
   const otherValues = new Set(choices.filter((o) => isOtherLabel(o.label)).map((o) => o.value));
   const currentOther: string = (answers[`${q.id}__other`] as string) ?? '';
   const setOther = (v: string) => setAnswers((prev) => ({ ...prev, [`${q.id}__other`]: v }));
-  const showOtherFor = (selected: string | string[]) => {
+  const showOtherFor = (selected: AnswerValue) => {
     if (otherValues.size === 0) return false;
     if (Array.isArray(selected)) return selected.some((s) => otherValues.has(s));
-    return otherValues.has(selected);
+    if (selected === undefined) return false;
+    return otherValues.has(String(selected));
   };
   const OtherField = ({ show }: { show: boolean }) =>
     show ? (
