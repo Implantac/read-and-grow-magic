@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { formatBRL } from '@/lib/formatters';
 import { toastError } from '@/lib/toastHelpers';
 import { openReceipt } from '../pdvReceipt';
-import { logAudit } from './usePDVCashSession';
+import { logAudit, type CashSession } from './usePDVCashSession';
 import type { DbClient } from '@/hooks/commercial/useClients';
 
 type CartLine = {
@@ -16,10 +16,18 @@ type CartLine = {
 
 type Split = { id: string; method: string; amount: number; installments?: number };
 
-type Session = {
+export type PDVEmitPayload = {
+  items: CartLine[];
+  paymentMethod: string;
+  amountPaid: number;
+  discount?: number;
+  customerName?: string;
+  customerDocument?: string;
   terminalId?: string;
   operatorName?: string;
 };
+
+export type PDVEmitResult = { number?: string; accessKey?: string; protocol?: string } | null | undefined;
 
 interface UsePDVFinalizeArgs {
   cart: CartLine[];
@@ -34,15 +42,15 @@ interface UsePDVFinalizeArgs {
   customer: DbClient | null;
   customerName: string;
   customerDocument: string;
-  session: Session | null;
-  setSession: (updater: (prev: any) => any) => void;
+  session: CashSession | null;
+  setSession: React.Dispatch<React.SetStateAction<CashSession | null>>;
   setShowOpenSession: (v: boolean) => void;
   setShowCustomerPicker: (v: boolean) => void;
   setShowPayment: (v: boolean) => void;
   clearAll: () => void;
   onClose: () => void;
-  onEmit: (data: any) => Promise<any>;
-  updateClient: { mutateAsync: (v: any) => Promise<any> };
+  onEmit: (data: PDVEmitPayload) => Promise<PDVEmitResult>;
+  updateClient: { mutateAsync: (v: { id: string; current_balance: number }) => Promise<unknown> };
 }
 
 export function usePDVFinalize(args: UsePDVFinalizeArgs) {
@@ -110,7 +118,7 @@ export function usePDVFinalize(args: UsePDVFinalizeArgs) {
         operatorName: session.operatorName,
       });
       const cashPortion = splits.filter((s) => s.method === 'cash').reduce((s, p) => s + Math.min(p.amount, total), 0);
-      setSession((prev: any) => prev ? {
+      setSession((prev) => prev ? {
         ...prev,
         movements: [...prev.movements, { type: 'sale', amount: cashPortion, at: new Date().toISOString(), note: `Venda ${formatBRL(total)}` }],
       } : prev);
