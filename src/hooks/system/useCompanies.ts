@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { companiesService } from '@/services/system/companiesService';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
 import { Company } from '@/types/administration';
+import { errorMessage } from '@/lib/errors';
 import type { Company as StoreCompany } from '@/types';
 
 export function useCompanies() {
@@ -32,8 +33,8 @@ export function useCompanies() {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
       toastSuccess('Empresa cadastrada com sucesso');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao cadastrar empresa');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao cadastrar empresa'));
     }
   });
 
@@ -43,8 +44,8 @@ export function useCompanies() {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
       toastSuccess('Empresa atualizada com sucesso');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao atualizar empresa');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao atualizar empresa'));
     }
   });
 
@@ -54,8 +55,8 @@ export function useCompanies() {
       queryClient.invalidateQueries({ queryKey: ['companies'] });
       toastSuccess('Empresa excluída com sucesso');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao excluir empresa');
+    onError: (error: unknown) => {
+      toastError(errorMessage(error, 'Erro ao excluir empresa'));
     }
   });
 
