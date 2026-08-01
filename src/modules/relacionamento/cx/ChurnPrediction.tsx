@@ -7,7 +7,11 @@ import { toast } from 'sonner';
 import { Loader2, Brain, AlertTriangle } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
-type Row = Pick<Tables<'cx_churn_predictions'>, 'id' | 'client_id' | 'probability' | 'risk_level' | 'reasons' | 'ai_summary' | 'suggested_actions' | 'predicted_at'> & { clients?: { name: string } | null };
+type Row = Omit<Pick<Tables<'cx_churn_predictions'>, 'id' | 'client_id' | 'probability' | 'risk_level' | 'reasons' | 'ai_summary' | 'suggested_actions' | 'predicted_at'>, 'reasons' | 'suggested_actions'> & {
+  reasons: string[];
+  suggested_actions: string[];
+  clients?: { name: string } | null;
+};
 
 const riskColor: Record<string, string> = {
   low: 'bg-emerald-500/20 text-emerald-500',
@@ -28,7 +32,7 @@ export default function ChurnPrediction() {
       .select('id, client_id, probability, risk_level, reasons, ai_summary, suggested_actions, predicted_at, clients(name)')
       .order('probability', { ascending: false })
       .limit(100);
-    if (error) toast.error(error.message); else setRows(data ?? []);
+    if (error) toast.error(error.message); else setRows((data ?? []) as unknown as Row[]);
     setLoading(false);
   }
   useEffect(() => { load(); }, []);

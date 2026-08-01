@@ -7,7 +7,11 @@ import { toast } from 'sonner';
 import { Loader2, FileText, Sparkles } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
-type Row = Pick<Tables<'cx_executive_summaries'>, 'id' | 'summary' | 'key_insights' | 'recommendations' | 'metrics' | 'period_start' | 'period_end' | 'created_at'>;
+type Row = Omit<Pick<Tables<'cx_executive_summaries'>, 'id' | 'summary' | 'key_insights' | 'recommendations' | 'metrics' | 'period_start' | 'period_end' | 'created_at'>, 'key_insights' | 'recommendations' | 'metrics'> & {
+  key_insights: string[];
+  recommendations: string[];
+  metrics: { nps?: number; total?: number; promoters?: number; detractors?: number } | null;
+};
 
 export default function ExecutiveSummary() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -17,7 +21,7 @@ export default function ExecutiveSummary() {
     const { data, error } = await supabase.from('cx_executive_summaries')
       .select('id, summary, key_insights, recommendations, metrics, period_start, period_end, created_at')
       .order('created_at', { ascending: false }).limit(5);
-    if (error) toast.error(error.message); else setRows(data ?? []);
+    if (error) toast.error(error.message); else setRows((data ?? []) as unknown as Row[]);
   }
   useEffect(() => { load(); }, []);
 
