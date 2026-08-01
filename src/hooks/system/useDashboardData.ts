@@ -9,18 +9,19 @@ import { formatBRL } from '@/lib/formatters';
 const fmtShort = (v: number) => formatBRL(v);
 
 // Aplica filtros de canal operacional e filial em queries que suportam essas colunas.
-function withCanal(
-  q: any,
+function withCanal<TQ>(
+  q: TQ,
   canal: CanalFilter,
   branchId: string | null,
   opts: { branch?: boolean; canal?: boolean } = {}
-): any {
-  let r = q;
+): TQ {
+  type Filterable = { eq: (col: string, val: string) => Filterable };
+  let r = q as Filterable;
   const wantCanal = opts.canal !== false;
   const wantBranch = opts.branch !== false;
   if (wantCanal && canal !== 'CONSOLIDADO') r = r.eq('canal_operacional', canal);
   if (wantBranch && branchId) r = r.eq('branch_id', branchId);
-  return r;
+  return r as TQ;
 }
 
 export function useDashboardData() {
@@ -83,7 +84,7 @@ export function useDashboardData() {
         // Logistics & Fleet Management
         supabase.from('carriers').select('id', { count: 'exact', head: true }).eq('company_id', companyId),
         // NPS answers (last 500)
-        supabase.from('nps_answers').select('score, ai_sentiment, comment, created_at').eq('company_id', companyId).order('created_at', { ascending: false }).limit(500),
+        supabase.from('nps_answers').select('score, sentiment, comment, created_at').eq('company_id', companyId).order('created_at', { ascending: false }).limit(500),
         // NPS invites (for response rate)
         supabase.from('nps_invites').select('id, responded_at').eq('company_id', companyId).limit(2000),
       ]);
@@ -143,15 +144,15 @@ export function useDashboardData() {
       const npsAnswers = npsAnswersRes.data || [];
       const npsInvites = npsInvitesRes.data || [];
       const npsTotal = npsAnswers.length;
-      const npsPromoters = npsAnswers.filter((a: any) => (a.score ?? -1) >= 9).length;
-      const npsDetractors = npsAnswers.filter((a: any) => a.score != null && a.score <= 6).length;
+      const npsPromoters = npsAnswers.filter((a) => (a.score ?? -1) >= 9).length;
+      const npsDetractors = npsAnswers.filter((a) => a.score != null && a.score <= 6).length;
       const npsPassives = Math.max(0, npsTotal - npsPromoters - npsDetractors);
       const npsScore = npsTotal > 0 ? Math.round(((npsPromoters - npsDetractors) / npsTotal) * 100) : 0;
       const npsInvitesTotal = npsInvites.length;
-      const npsResponded = npsInvites.filter((i: any) => i.responded_at).length;
+      const npsResponded = npsInvites.filter((i) => i.responded_at).length;
       const npsResponseRate = npsInvitesTotal > 0 ? Math.min(100, Math.round((npsResponded / npsInvitesTotal) * 100)) : 0;
-      const npsCriticalComments = npsAnswers.filter((a: any) =>
-        ((a.score != null && a.score <= 4) || a.ai_sentiment === 'negative') && (a.comment || '').trim().length > 0
+      const npsCriticalComments = npsAnswers.filter((a) =>
+        ((a.score != null && a.score <= 4) || a.sentiment === 'negative') && (a.comment || '').trim().length > 0
       ).length;
 
       // === ALERTS ===
@@ -276,7 +277,7 @@ export function useDashboardData() {
       ];
 
       // === RECENT ACTIVITIES ===
-      const recentActivities = (recentOrdersRes.data || []).map((o: any) => ({
+      const recentActivities = (recentOrdersRes.data || []).map((o) => ({
         id: o.number,
         description: `Pedido ${o.number} - ${o.client_name}`,
         value: formatBRL(Number(o.total)),

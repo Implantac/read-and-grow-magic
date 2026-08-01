@@ -10,6 +10,29 @@ import { Label } from '@/ui/base/label';
 import { Sparkles, ChevronDown, ChevronUp, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 
+type AnswerItem = {
+  id: string;
+  value_text: string | null;
+  value_number: number | null;
+  value_json: unknown;
+  nps_questions?: { question_text?: string | null; question_type?: string | null } | null;
+};
+type AnswerWithItems = {
+  id: string;
+  score: number | null;
+  category: string | null;
+  comment: string | null;
+  responded_at: string | null;
+  clients?: { name?: string | null; address_city?: string | null; segment?: string | null } | null;
+  nps_answer_items?: AnswerItem[] | null;
+  sentiment?: string | null;
+  ai_summary?: string | null;
+  ai_keywords?: unknown;
+  channel?: string | null;
+  device?: string | null;
+  city?: string | null;
+};
+
 export default function Responses() {
   const { data: campaigns = [] } = useNPSCampaigns();
   const [campaignId, setCampaignId] = useState<string | undefined>();
@@ -21,10 +44,10 @@ export default function Responses() {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const answers = allAnswers.slice(page * pageSize, page * pageSize + pageSize);
 
-  const formatItemValue = (it: any): { display: string; other?: string } => {
-    const vj = it.value_json;
+  const formatItemValue = (it: AnswerItem): { display: string; other?: string } => {
+    const vj = it.value_json as { other?: unknown; value?: unknown } | null;
     let other: string | undefined;
-    let value: any = it.value_text ?? it.value_number;
+    let value: unknown = it.value_text ?? it.value_number;
     if (vj && typeof vj === 'object') {
       if ('other' in vj && vj.other) other = String(vj.other);
       if ('value' in vj) value = vj.value;
@@ -57,14 +80,14 @@ export default function Responses() {
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todas</SelectItem>
-            {campaigns.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+            {campaigns.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
 
       {isLoading ? <Skeleton className="h-64" /> : (
         <div className="space-y-2">
-          {answers.map((a: any) => (
+          {answers.map((a: AnswerWithItems) => (
             <Card key={a.id}>
               <CardContent className="pt-4 space-y-2">
                 <div className="flex items-center justify-between gap-2">
@@ -73,26 +96,26 @@ export default function Responses() {
                     <span className="font-medium">{a.clients?.name ?? 'Cliente'}</span>
                     {a.sentiment && <Badge variant="outline" className="capitalize">{a.sentiment}</Badge>}
                   </div>
-                  <span className="text-xs text-muted-foreground">{new Date(a.responded_at).toLocaleString('pt-BR')}</span>
+                  <span className="text-xs text-muted-foreground">{new Date(a.responded_at ?? '').toLocaleString('pt-BR')}</span>
                 </div>
                 {a.comment && <p className="text-sm text-muted-foreground">"{a.comment}"</p>}
                 {a.ai_summary && <p className="text-xs italic text-primary flex gap-1 items-center"><Sparkles className="h-3 w-3" /> {a.ai_summary}</p>}
                 {Array.isArray(a.ai_keywords) && a.ai_keywords.length > 0 && (
-                  <div className="flex flex-wrap gap-1">{a.ai_keywords.map((k: string, i: number) => <Badge key={i} variant="secondary" className="text-xs">{k}</Badge>)}</div>
+                  <div className="flex flex-wrap gap-1">{a.ai_keywords.map((k, i) => <Badge key={i} variant="secondary" className="text-xs">{k}</Badge>)}</div>
                 )}
               {(() => {
                 const items = Array.isArray(a.nps_answer_items) ? a.nps_answer_items : [];
                 const others = items
-                  .map((it: any) => ({ it, parsed: formatItemValue(it) }))
-                  .filter((x: any) => x.parsed.other);
+                  .map((it: AnswerItem) => ({ it, parsed: formatItemValue(it) }))
+                  .filter((x) => x.parsed.other);
                 const isOpen = !!expanded[a.id];
                 return (
                   <>
                     {others.length > 0 && (
                       <div className="space-y-1 rounded-md border border-amber-500/30 bg-amber-500/5 p-2">
-                        {others.map(({ it, parsed }: any) => (
+                        {others.map(({ it, parsed }) => (
                           <div key={it.id} className="text-xs">
-                            <span className="text-muted-foreground">{it.nps_questions?.label ?? 'Pergunta'} — </span>
+                            <span className="text-muted-foreground">{it.nps_questions?.question_text ?? 'Pergunta'} — </span>
                             <Badge variant="outline" className="mr-1 text-[10px]">Outro</Badge>
                             <span className="text-foreground">"{parsed.other}"</span>
                           </div>
@@ -114,11 +137,11 @@ export default function Responses() {
                     </div>
                     {isOpen && items.length > 0 && (
                       <div className="mt-2 space-y-2 rounded-md border border-border bg-muted/30 p-3">
-                        {items.map((it: any) => {
+                        {items.map((it: AnswerItem) => {
                           const { display, other } = formatItemValue(it);
                           return (
                             <div key={it.id} className="text-xs space-y-0.5">
-                              <div className="font-medium text-foreground">{it.nps_questions?.label ?? 'Pergunta'}</div>
+                              <div className="font-medium text-foreground">{it.nps_questions?.question_text ?? 'Pergunta'}</div>
                               <div className="text-muted-foreground">{display || <span className="italic">— sem resposta —</span>}</div>
                               {other && (
                                 <div className="text-foreground">

@@ -75,10 +75,10 @@ export function useAgroFarms() {
 export function useCreateAgroFarm() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: any) => {
+    mutationFn: async (input: TablesInsert<'agro_farms'>) => {
       const { data, error } = await supabase
         .from('agro_farms')
-        .insert(input as TablesInsert<'agro_farms'>)
+        .insert(input)
         .select()
         .single();
       if (error) throw error;
@@ -126,16 +126,16 @@ export function useAgroFields(farmId?: string) {
 export function useCreateAgroField() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: any) => {
+    mutationFn: async (input: TablesInsert<'agro_fields'>) => {
       const { data, error } = await supabase
         .from('agro_fields')
-        .insert(input as TablesInsert<'agro_fields'>)
+        .insert(input)
         .select()
         .single();
       if (error) throw error;
       return data;
     },
-    onSuccess: (_d, vars: any) => {
+    onSuccess: (_d, vars) => {
       qc.invalidateQueries({ queryKey: ['agro_fields', vars.farm_id] });
       toastSuccess('Talhão cadastrado');
     },
@@ -162,16 +162,16 @@ export function useAgroSeasons(fieldId?: string) {
 export function useCreateAgroSeason() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: any) => {
+    mutationFn: async (input: TablesInsert<'agro_seasons'>) => {
       const { data, error } = await supabase
         .from('agro_seasons')
-        .insert(input as TablesInsert<'agro_seasons'>)
+        .insert(input)
         .select()
         .single();
       if (error) throw error;
       return data;
     },
-    onSuccess: (_d, vars: any) => {
+    onSuccess: (_d, vars) => {
       qc.invalidateQueries({ queryKey: ['agro_seasons', vars.field_id] });
       toastSuccess('Safra criada');
     },
@@ -198,16 +198,16 @@ export function useAgroHarvests(seasonId?: string) {
 export function useCreateAgroHarvest() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: any) => {
+    mutationFn: async (input: TablesInsert<'agro_harvests'>) => {
       const { data, error } = await supabase
         .from('agro_harvests')
-        .insert(input as TablesInsert<'agro_harvests'>)
+        .insert(input)
         .select()
         .single();
       if (error) throw error;
       return data;
     },
-    onSuccess: (_d, vars: any) => {
+    onSuccess: (_d, vars) => {
       qc.invalidateQueries({ queryKey: ['agro_harvests', vars.season_id] });
       toastSuccess('Colheita registrada');
     },

@@ -10,12 +10,14 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/ui/base/sheet';
 import { Download, Printer, FileSpreadsheet, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { LineChart, Line, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid } from 'recharts';
 import { exportToCSV, exportToExcel } from '@/lib/exportUtils';
+import type { Tables } from '@/integrations/supabase/types';
 
 const COLORS = { promoter: '#10B981', passive: '#F59E0B', detractor: '#EF4444' };
 
-type AnswerRow = NPSAnswer & {
+type AnswerRow = Tables<'nps_answers'> & {
   clients?: { name?: string | null; address_city?: string | null; segment?: string | null } | null;
   city?: string | null;
+  name?: string | null;
 };
 
 type Period = '30d' | '90d' | '180d' | '365d' | 'all';
@@ -229,8 +231,8 @@ export default function Reports() {
             <CardHeader><CardTitle className="text-base">Comparativo por {groupBy} (clique numa barra para drill-down)</CardTitle></CardHeader>
             <CardContent className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={grouped} onClick={(e: { activeLabel?: string }) => {
-                  const key = e?.activeLabel;
+                <BarChart data={grouped} onClick={(e) => {
+                  const key = String((e as { activeLabel?: string | number } | undefined)?.activeLabel ?? '');
                   const g = grouped.find((x) => x.key === key);
                   if (g) setDrill({ key: g.key, rows: g.rows });
                 }}>

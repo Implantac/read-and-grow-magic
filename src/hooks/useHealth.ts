@@ -74,10 +74,10 @@ export function useHealthPatients() {
 export function useCreateHealthPatient() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: any) => {
+    mutationFn: async (input: TablesInsert<'health_patients'>) => {
       const { data, error } = await supabase
         .from('health_patients')
-        .insert(input as TablesInsert<'health_patients'>)
+        .insert(input)
         .select()
         .single();
       if (error) throw error;
@@ -126,10 +126,10 @@ export function useHealthProfessionals() {
 export function useCreateHealthProfessional() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: any) => {
+    mutationFn: async (input: TablesInsert<'health_professionals'>) => {
       const { data, error } = await supabase
         .from('health_professionals')
-        .insert(input as TablesInsert<'health_professionals'>)
+        .insert(input)
         .select()
         .single();
       if (error) throw error;
@@ -162,10 +162,10 @@ export function useHealthAppointments(patientId?: string) {
 export function useCreateHealthAppointment() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: any) => {
+    mutationFn: async (input: TablesInsert<'health_appointments'>) => {
       const { data, error } = await supabase
         .from('health_appointments')
-        .insert(input as TablesInsert<'health_appointments'>)
+        .insert(input)
         .select()
         .single();
       if (error) throw error;
@@ -217,16 +217,16 @@ export function useHealthRecords(patientId?: string) {
 export function useCreateHealthRecord() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: any) => {
+    mutationFn: async (input: TablesInsert<'health_records'>) => {
       const { data, error } = await supabase
         .from('health_records')
-        .insert(input as TablesInsert<'health_records'>)
+        .insert(input)
         .select()
         .single();
       if (error) throw error;
       return data;
     },
-    onSuccess: (_d, vars: any) => {
+    onSuccess: (_d, vars) => {
       qc.invalidateQueries({ queryKey: ['health_records', vars.patient_id] });
       toastSuccess('Prontuário registrado');
     },
