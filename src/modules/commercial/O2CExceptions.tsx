@@ -61,7 +61,7 @@ export default function O2CExceptions() {
         <KPICard title="Sem NF-e" value={counts.invoiced_without_nfe || 0} icon={<FileWarning className="h-5 w-5" />} accentColor="accent" index={3} />
       </div>
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
+      <Tabs value={tab} onValueChange={(v) => setTab(v as 'all' | O2CExceptionType)}>
         <TabsList className="flex-wrap">
           <TabsTrigger value="all">Todas ({counts.all || 0})</TabsTrigger>
           <TabsTrigger value="confirmed_without_picking">Sem Picking ({counts.confirmed_without_picking || 0})</TabsTrigger>

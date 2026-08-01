@@ -155,7 +155,7 @@ export default function DigitalTwinPage() {
                 </div>
                 <div>
                   <label className="text-sm font-medium">Cenário</label>
-                  <Select value={scenario} onValueChange={v => setScenario(v as any)}>
+                  <Select value={scenario} onValueChange={v => setScenario(v as 'normal' | 'optimistic' | 'pessimistic')}>
                     <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="optimistic">🟢 Otimista (-15%)</SelectItem>
