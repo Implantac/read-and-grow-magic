@@ -13,13 +13,18 @@ import { Badge } from '@/ui/base/badge';
 import { Plus, Trash2, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
+import { errorMessage } from '@/lib/errors';
+import type { Tables, TablesInsert } from '@/integrations/supabase/types';
+
+type NpsReport = Tables<'nps_reports'>;
+type NpsReportDraft = Partial<NpsReport> & Pick<TablesInsert<'nps_reports'>, 'name'>;
 
 export default function SavedReports() {
   const { currentCompany } = useEnterprise();
   const companyId = currentCompany?.id as string | undefined;
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState<any | null>(null);
+  const [editing, setEditing] = useState<NpsReportDraft | null>(null);
 
   const { data: reports = [], isLoading } = useQuery({
     queryKey: ['nps', 'reports', companyId],
@@ -32,17 +37,17 @@ export default function SavedReports() {
   });
 
   const save = useMutation({
-    mutationFn: async (input: any) => {
+    mutationFn: async (input: NpsReportDraft) => {
       if (input.id) {
-        const { error } = await supabase.from('nps_reports').update(input).eq('id', input.id);
+        const { error } = await supabase.from('nps_reports').update(input).eq('id', input.id!);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('nps_reports').insert({ ...input, company_id: companyId });
+        const { error } = await supabase.from('nps_reports').insert({ ...input, company_id: companyId! });
         if (error) throw error;
       }
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['nps', 'reports'] }); setOpen(false); setEditing(null); toast.success('Relatório salvo'); },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: unknown) => toast.error(errorMessage(e)),
   });
 
   const del = useMutation({
@@ -67,7 +72,7 @@ export default function SavedReports() {
 
       {isLoading ? <p className="text-sm text-muted-foreground">Carregando…</p> : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {reports.map((r: any) => (
+          {reports.map((r) => (
             <Card key={r.id}>
               <CardHeader>
                 <CardTitle className="text-base flex items-center justify-between">
