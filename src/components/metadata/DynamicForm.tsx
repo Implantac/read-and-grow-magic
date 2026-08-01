@@ -8,21 +8,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { parseNumericInput } from "@/lib/numericValidation";
 import type { CustomField } from "@/hooks/useCustomEntities";
 
+type FieldValue = string | number | boolean | string[] | Record<string, unknown> | null | undefined;
+type SelectOption = { value: string; label: string };
+
 interface Props {
   fields: CustomField[];
-  initial?: Record<string, any>;
+  initial?: Record<string, FieldValue>;
   submitting?: boolean;
-  onSubmit: (data: Record<string, any>) => void;
+  onSubmit: (data: Record<string, FieldValue>) => void;
   onCancel?: () => void;
 }
 
 export function DynamicForm({ fields, initial, submitting, onSubmit, onCancel }: Props) {
-  const [values, setValues] = useState<Record<string, any>>(initial ?? {});
+  const [values, setValues] = useState<Record<string, FieldValue>>(initial ?? {});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => setValues(initial ?? {}), [initial]);
 
-  function set(key: string, v: any) {
+  function set(key: string, v: FieldValue) {
     setValues((s) => ({ ...s, [key]: v }));
   }
 
@@ -46,7 +49,7 @@ export function DynamicForm({ fields, initial, submitting, onSubmit, onCancel }:
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate()) return;
-    const normalized: Record<string, any> = {};
+    const normalized: Record<string, FieldValue> = {};
     for (const f of fields) {
       let v = values[f.field_key];
       if (f.field_type === "number" && v !== "" && v !== undefined && v !== null) v = Number(v);
@@ -79,7 +82,7 @@ export function DynamicForm({ fields, initial, submitting, onSubmit, onCancel }:
   );
 }
 
-function FieldInput({ field, value, onChange }: { field: CustomField; value: any; onChange: (v: any) => void }) {
+function FieldInput({ field, value, onChange }: { field: CustomField; value: FieldValue; onChange: (v: FieldValue) => void }) {
   switch (field.field_type) {
     case "boolean":
       return <Switch checked={!!value} onCheckedChange={onChange} />;
@@ -102,7 +105,7 @@ function FieldInput({ field, value, onChange }: { field: CustomField; value: any
       );
     case "select": {
       const opts: Array<{ value: string; label: string }> = Array.isArray(field.options)
-        ? field.options.map((o: any) => typeof o === "string" ? { value: o, label: o } : o)
+        ? (field.options as unknown[]).map((o) => (typeof o === "string" ? { value: o, label: o } : (o as SelectOption)))
         : [];
       return (
         <Select value={value ?? ""} onValueChange={onChange}>
@@ -114,7 +117,7 @@ function FieldInput({ field, value, onChange }: { field: CustomField; value: any
       );
     }
     case "multiselect": {
-      const opts: string[] = Array.isArray(field.options) ? field.options.map((o: any) => String(o?.value ?? o)) : [];
+      const opts: string[] = Array.isArray(field.options) ? (field.options as unknown[]).map((o) => String((o as SelectOption)?.value ?? o)) : [];
       const arr: string[] = Array.isArray(value) ? value : [];
       return (
         <div className="flex flex-wrap gap-2">

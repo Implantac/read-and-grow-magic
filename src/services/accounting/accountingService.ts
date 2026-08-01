@@ -1,5 +1,8 @@
 import { supabase } from '@/integrations/supabase/client';
+import type { Tables } from '@/integrations/supabase/types';
 import { ChartOfAccount, JournalEntry, BalanceSheetItem, DREItem } from '@/types/accounting';
+
+type JournalEntryRow = Tables<'journal_entries'> & { lines?: Tables<'journal_entry_lines'>[] };
 
 export class AccountingService {
   private readonly supabase = supabase;
@@ -13,7 +16,7 @@ export class AccountingService {
 
     if (error) throw error;
 
-    return (data || []).map((row: any) => ({
+    return (data || []).map((row: Tables<'chart_of_accounts'>) => ({
       id: row.id,
       code: row.code,
       name: row.name,
@@ -59,7 +62,7 @@ export class AccountingService {
 
     if (error) throw error;
 
-    return (data || []).map((row: any) => ({
+    return (data || []).map((row: JournalEntryRow) => ({
       id: row.id,
       number: row.number,
       date: row.date,
@@ -69,7 +72,7 @@ export class AccountingService {
       totalCredit: Number(row.total_credit),
       createdBy: row.created_by,
       createdAt: row.created_at,
-      lines: (row.lines || []).map((l: any) => ({
+      lines: (row.lines || []).map((l: Tables<'journal_entry_lines'>) => ({
         id: l.id,
         accountId: l.account_id,
         accountCode: l.account_code,
