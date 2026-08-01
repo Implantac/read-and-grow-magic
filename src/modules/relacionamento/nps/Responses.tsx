@@ -15,7 +15,7 @@ type AnswerItem = {
   value_text: string | null;
   value_number: number | null;
   value_json: unknown;
-  nps_questions?: { label?: string | null; type?: string | null } | null;
+  nps_questions?: { question_text?: string | null; question_type?: string | null } | null;
 };
 type AnswerWithItems = {
   id: string;
@@ -25,7 +25,12 @@ type AnswerWithItems = {
   responded_at: string | null;
   clients?: { name?: string | null; address_city?: string | null; segment?: string | null } | null;
   nps_answer_items?: AnswerItem[] | null;
-  [key: string]: unknown;
+  sentiment?: string | null;
+  ai_summary?: string | null;
+  ai_keywords?: unknown;
+  channel?: string | null;
+  device?: string | null;
+  city?: string | null;
 };
 
 export default function Responses() {
@@ -91,12 +96,12 @@ export default function Responses() {
                     <span className="font-medium">{a.clients?.name ?? 'Cliente'}</span>
                     {a.sentiment && <Badge variant="outline" className="capitalize">{a.sentiment}</Badge>}
                   </div>
-                  <span className="text-xs text-muted-foreground">{new Date(a.responded_at).toLocaleString('pt-BR')}</span>
+                  <span className="text-xs text-muted-foreground">{new Date(a.responded_at ?? '').toLocaleString('pt-BR')}</span>
                 </div>
                 {a.comment && <p className="text-sm text-muted-foreground">"{a.comment}"</p>}
                 {a.ai_summary && <p className="text-xs italic text-primary flex gap-1 items-center"><Sparkles className="h-3 w-3" /> {a.ai_summary}</p>}
                 {Array.isArray(a.ai_keywords) && a.ai_keywords.length > 0 && (
-                  <div className="flex flex-wrap gap-1">{a.ai_keywords.map((k: string, i: number) => <Badge key={i} variant="secondary" className="text-xs">{k}</Badge>)}</div>
+                  <div className="flex flex-wrap gap-1">{a.ai_keywords.map((k, i) => <Badge key={i} variant="secondary" className="text-xs">{k}</Badge>)}</div>
                 )}
               {(() => {
                 const items = Array.isArray(a.nps_answer_items) ? a.nps_answer_items : [];
@@ -110,7 +115,7 @@ export default function Responses() {
                       <div className="space-y-1 rounded-md border border-amber-500/30 bg-amber-500/5 p-2">
                         {others.map(({ it, parsed }) => (
                           <div key={it.id} className="text-xs">
-                            <span className="text-muted-foreground">{it.nps_questions?.label ?? 'Pergunta'} — </span>
+                            <span className="text-muted-foreground">{it.nps_questions?.question_text ?? 'Pergunta'} — </span>
                             <Badge variant="outline" className="mr-1 text-[10px]">Outro</Badge>
                             <span className="text-foreground">"{parsed.other}"</span>
                           </div>
@@ -136,7 +141,7 @@ export default function Responses() {
                           const { display, other } = formatItemValue(it);
                           return (
                             <div key={it.id} className="text-xs space-y-0.5">
-                              <div className="font-medium text-foreground">{it.nps_questions?.label ?? 'Pergunta'}</div>
+                              <div className="font-medium text-foreground">{it.nps_questions?.question_text ?? 'Pergunta'}</div>
                               <div className="text-muted-foreground">{display || <span className="italic">— sem resposta —</span>}</div>
                               {other && (
                                 <div className="text-foreground">
