@@ -9,11 +9,12 @@ import { getAllowedTransitions, ORDER_FLOW_STEPS, getFlowStepIndex } from '@/lib
 import { getOrderFlowStatus } from '@/hooks/commercial/useOrderFlow';
 import { OrderFlowBadge } from './OrderFlowIndicators';
 import { OrderTimeline } from './OrderTimeline';
+import type { DbOrder, DbOrderItem } from '@/hooks/commercial/orders/types';
 
 interface Props {
-  order: any | null;
+  order: (DbOrder & { items?: DbOrderItem[] }) | null;
   onClose: () => void;
-  onTransition: (o: any, targetStatus: string) => void;
+  onTransition: (o: DbOrder, targetStatus: string) => void;
   lifecyclePending: boolean;
 }
 
@@ -99,7 +100,7 @@ export function OrderDetailDialog({ order, onClose, onTransition, lifecyclePendi
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {(order.items || []).map((i: any) => (
+                    {(order.items || []).map((i) => (
                       <TableRow key={i.id}>
                         <TableCell className="font-mono">{i.product_code}</TableCell>
                         <TableCell>{i.product_name}</TableCell>
