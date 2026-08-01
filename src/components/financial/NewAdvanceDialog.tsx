@@ -71,7 +71,7 @@ export function NewAdvanceDialog() {
         <div className="grid gap-4 py-2">
           <div className="grid gap-2">
             <Label>Tipo</Label>
-            <Select value={partyType} onValueChange={(v) => { setPartyType(v); setEntityId(''); }}>
+            <Select value={partyType} onValueChange={(v) => { setPartyType(v as 'client' | 'supplier'); setEntityId(''); }}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="client">Adiantamento de cliente (entrada)</SelectItem>
