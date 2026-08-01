@@ -9,7 +9,8 @@ import { ClipboardCheck } from 'lucide-react';
 import { EmptyState } from '@/shared/components/EmptyState';
 
 const statusLabels: Record<string, string> = { pending: 'Pendente', delivered: 'Entregue', refused: 'Recusada', partial: 'Parcial' };
-const statusColors: Record<string, string> = { pending: 'secondary', delivered: 'default', refused: 'destructive', partial: 'outline' };
+type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
+const statusColors: Record<string, BadgeVariant> = { pending: 'secondary', delivered: 'default', refused: 'destructive', partial: 'outline' };
 
 const DeliveryProofPage = () => {
   const { proofs, proofsLoading: loading } = useTMS();
@@ -44,7 +45,7 @@ const DeliveryProofPage = () => {
                 <TableCell className="text-xs text-muted-foreground">
                   {p.latitude && p.longitude ? `${p.latitude.toFixed(4)}, ${p.longitude.toFixed(4)}` : '-'}
                 </TableCell>
-                <TableCell><Badge variant={statusColors[p.status] as any}>{statusLabels[p.status] || p.status}</Badge></TableCell>
+                <TableCell><Badge variant={statusColors[p.status] ?? 'outline'}>{statusLabels[p.status] || p.status}</Badge></TableCell>
               </TableRow>
             ))}
           </TableBody>
