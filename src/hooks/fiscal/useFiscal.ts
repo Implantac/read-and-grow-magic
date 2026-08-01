@@ -22,7 +22,7 @@ export function useFiscal() {
       queryClient.invalidateQueries({ queryKey: ['nfes'] });
       toastSuccess('NF-e autorizada com sucesso');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error transmitting NFe:', error);
       toastError('Erro ao transmitir NF-e');
     }
@@ -34,7 +34,7 @@ export function useFiscal() {
       queryClient.invalidateQueries({ queryKey: ['nfes'] });
       toastSuccess('NF-e cancelada com sucesso');
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
       console.error('Error cancelling NFe:', error);
       toastError('Erro ao cancelar NF-e');
     }

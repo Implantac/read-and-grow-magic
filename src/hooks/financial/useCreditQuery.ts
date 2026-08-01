@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { creditService } from '@/services/financial/creditService';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
+import type { TablesUpdate } from '@/integrations/supabase/types';
 
 export function useCredit() {
   const queryClient = useQueryClient();
@@ -16,13 +17,13 @@ export function useCredit() {
   });
 
   const updateAnalysisMutation = useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: any }) => creditService.updateAnalysis(id, updates),
+    mutationFn: ({ id, updates }: { id: string; updates: TablesUpdate<'customer_credit_profiles'> }) => creditService.updateAnalysis(id, updates),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['credit_analyses'] });
       toastSuccess('Análise de crédito atualizada');
     },
-    onError: (error: any) => {
-      toastError(error.message || 'Erro ao atualizar análise');
+    onError: (error: unknown) => {
+      toastError(error, 'Erro ao atualizar análise');
     }
   });
 

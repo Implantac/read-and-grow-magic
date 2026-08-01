@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEnterpriseStore } from "@/core/stores/useEnterpriseStore";
+import type { TablesInsert } from "@/integrations/supabase/types";
 
 export interface EduSchool {
   id: string;
@@ -114,7 +115,7 @@ export function useCreateSchool() {
   const qc = useQueryClient();
   const companyId = useEnterpriseStore((s) => s.activeCompanyId);
   return useMutation({
-    mutationFn: async (payload: any & { name: string }) => {
+    mutationFn: async (payload: Omit<TablesInsert<'edu_schools'>, 'company_id'> & { name: string }) => {
       if (!companyId) throw new Error("Sem empresa ativa");
       const { error } = await supabase
         .from("edu_schools")
@@ -151,7 +152,7 @@ export function useCreateStudent() {
   const qc = useQueryClient();
   const companyId = useEnterpriseStore((s) => s.activeCompanyId);
   return useMutation({
-    mutationFn: async (payload: any & { full_name: string }) => {
+    mutationFn: async (payload: Omit<TablesInsert<'edu_students'>, 'company_id'> & { full_name: string }) => {
       if (!companyId) throw new Error("Sem empresa ativa");
       const { error } = await supabase
         .from("edu_students")

@@ -91,7 +91,7 @@ export function useProductionRouteSteps(routeId?: string) {
       .eq('route_id', routeId)
       .order('sequence');
     if (error) { console.error(error); }
-    else setSteps((data || []).map((d: any) => ({
+    else setSteps((data || []).map((d) => ({
       ...d,
       sector_name: d.production_sectors?.name,
       resource_name: d.production_resources?.name,
@@ -129,7 +129,7 @@ export function useProductionRouteSteps(routeId?: string) {
   const recalcTotalTime = async () => {
     if (!routeId) return;
     const { data } = await supabase.from('production_route_steps').select('setup_time_minutes, operation_time_minutes').eq('route_id', routeId);
-    const total = (data || []).reduce((s: number, r: any) => s + (r.setup_time_minutes || 0) + (r.operation_time_minutes || 0), 0);
+    const total = (data || []).reduce((s: number, r: { setup_time_minutes: number | null; operation_time_minutes: number | null }) => s + (r.setup_time_minutes || 0) + (r.operation_time_minutes || 0), 0);
     await supabase.from('production_routes').update({ total_time_minutes: total, updated_at: new Date().toISOString() } as TablesUpdate<'production_routes'>).eq('id', routeId);
   };
 

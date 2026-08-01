@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import type { TablesUpdate } from '@/integrations/supabase/types';
 
 /**
  * Serviço de análise de crédito.
@@ -29,7 +30,7 @@ export const creditService = {
     return data || [];
   },
 
-  async updateAnalysis(id: string, updates: any) {
+  async updateAnalysis(id: string, updates: TablesUpdate<'customer_credit_profiles'>) {
     const { data, error } = await supabase
       .from('customer_credit_profiles')
       .update(updates)

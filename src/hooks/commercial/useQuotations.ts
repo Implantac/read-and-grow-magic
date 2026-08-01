@@ -116,7 +116,7 @@ export function useCreateQuotation() {
       qc.invalidateQueries({ queryKey: ['quotations'] });
       toastSuccess('Orçamento criado com sucesso!');
     },
-    onError: (e: any) => {
+    onError: (e: unknown) => {
       console.error('Error creating quotation:', e);
       handleMutationError(e);
     },
@@ -192,7 +192,7 @@ export function useConvertQuotationToOrder() {
       qc.invalidateQueries({ queryKey: ['orders'] });
       toastSuccess('Orçamento convertido em pedido com sucesso!');
     },
-    onError: (e: any) => {
+    onError: (e: unknown) => {
       console.error('Error converting quotation:', e);
       handleMutationError(e);
     },

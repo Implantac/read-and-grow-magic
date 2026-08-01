@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 import { handleMutationError, toastSuccess } from '@/lib/toastHelpers';
+import type { TablesUpdate } from '@/integrations/supabase/types';
 export interface FinancialAlertRow {
   id: string;
   alert_type: string;
@@ -17,7 +18,7 @@ export interface FinancialAlertRow {
   metric_value?: number | null;
   threshold_value?: number | null;
   reference_date?: string | null;
-  payload?: any;
+  payload?: Record<string, unknown> | null;
   created_at: string;
 }
 
@@ -58,10 +59,10 @@ export function useUpdateAlertStatus() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: 'acknowledged' | 'resolved' }) => {
-      const patch: any = { status };
+      const patch: { status: string; acknowledged_at?: string; resolved_at?: string } = { status };
       if (status === 'acknowledged') patch.acknowledged_at = new Date().toISOString();
       if (status === 'resolved') patch.resolved_at = new Date().toISOString();
-      const { error } = await supabase.from('financial_alerts').update(patch).eq('id', id);
+      const { error } = await supabase.from('financial_alerts').update(patch as TablesUpdate<'financial_alerts'>).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {

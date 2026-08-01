@@ -43,7 +43,7 @@ export function useResolveAlert() {
       toastSuccess('Alerta resolvido');
       qc.invalidateQueries({ queryKey: ['commercial_alerts'] });
     },
-    onError: (e: any) => toastError('Erro ao resolver alerta', e?.message),
+    onError: (e: unknown) => toastError(e, 'Erro ao resolver alerta'),
   });
 }
 
@@ -63,6 +63,6 @@ export function useResolveAlertsBulk() {
       toastSuccess(`${n} alerta(s) resolvido(s)`);
       qc.invalidateQueries({ queryKey: ['commercial_alerts'] });
     },
-    onError: (e: any) => toastError('Erro ao resolver alertas', e?.message),
+    onError: (e: unknown) => toastError(e, 'Erro ao resolver alertas'),
   });
 }
