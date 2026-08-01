@@ -23,7 +23,7 @@ export default function CommentClusters() {
     const { data, error } = await supabase.from('cx_comment_clusters')
       .select('id, total_comments, clusters, period_start, period_end, created_at')
       .order('created_at', { ascending: false }).limit(10);
-    if (error) toast.error(error.message); else setRows((data as any) ?? []);
+    if (error) toast.error(error.message); else setRows((data ?? []) as unknown as Row[]);
   }
   useEffect(() => { load(); }, []);
 

@@ -5,8 +5,9 @@ import { Card } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { toast } from 'sonner';
 import { Loader2, RefreshCw, Heart } from 'lucide-react';
+import type { Tables } from '@/integrations/supabase/types';
 
-type Row = { id: string; client_id: string; score: number; tier: string; factors: any; computed_at: string; clients?: { name: string } };
+type Row = Pick<Tables<'cx_health_scores'>, 'id' | 'client_id' | 'score' | 'tier' | 'factors' | 'computed_at'> & { clients?: { name: string } | null };
 
 const tierColor: Record<string, string> = {
   excellent: 'bg-emerald-500/20 text-emerald-500',
@@ -27,7 +28,7 @@ export default function HealthScores() {
       .select('id, client_id, score, tier, factors, computed_at, clients(name)')
       .order('score', { ascending: true })
       .limit(200);
-    if (error) toast.error(error.message); else setRows((data as any) ?? []);
+    if (error) toast.error(error.message); else setRows((data ?? []) as unknown as Row[]);
     setLoading(false);
   }
   useEffect(() => { load(); }, []);

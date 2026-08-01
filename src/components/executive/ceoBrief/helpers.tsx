@@ -13,10 +13,12 @@ export const trendIcon = (t?: string | null) => {
   return <Minus className="h-4 w-4 text-muted-foreground" />;
 };
 
-export const priorityColor = (p: string) =>
+export type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
+
+export const priorityColor = (p: string): BadgeVariant =>
   p === 'alta' ? 'destructive' : p === 'media' ? 'secondary' : 'outline';
 
-export const statusBadgeVariant = (s: string) =>
+export const statusBadgeVariant = (s: string): BadgeVariant =>
   s === 'critico' ? 'destructive' : s === 'alerta' ? 'secondary' : 'outline';
 
 export const statusBorder = (s: string) =>

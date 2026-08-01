@@ -25,8 +25,8 @@ export default function PublicNPS() {
   const [touched, setTouched] = useState(false);
   const [startedAt] = useState(() => Date.now());
 
-  const projectUrl = (import.meta as any).env.VITE_SUPABASE_URL;
-  const anon = (import.meta as any).env.VITE_SUPABASE_PUBLISHABLE_KEY;
+  const projectUrl = import.meta.env.VITE_SUPABASE_URL;
+  const anon = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
   useEffect(() => {
     (async () => {

@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 
 export default function SavedReports() {
-  const { currentCompany } = useEnterprise() as any;
+  const { currentCompany } = useEnterprise();
   const companyId = currentCompany?.id as string | undefined;
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);

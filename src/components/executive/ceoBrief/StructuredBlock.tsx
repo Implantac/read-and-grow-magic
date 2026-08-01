@@ -36,7 +36,7 @@ export function StructuredBlock({ structured, dataStatus }: { structured: any; d
                 {trendIcon(k.trend)}
               </div>
               <div className="text-lg font-bold mt-1 tabular-nums">{k.valor}</div>
-              <Badge variant={statusBadgeVariant(k.status) as any} className="mt-1 text-[10px]">{k.status}</Badge>
+              <Badge variant={statusBadgeVariant(k.status)} className="mt-1 text-[10px]">{k.status}</Badge>
             </div>
           ))}
         </div>
@@ -130,7 +130,7 @@ export function StructuredBlock({ structured, dataStatus }: { structured: any; d
                   <span>{d.prioridade === 'alta' ? '🔴' : d.prioridade === 'media' ? '🟡' : '🟢'}</span>
                   {d.acao}
                 </span>
-                <Badge variant={priorityColor(d.prioridade) as any} className="text-[10px] uppercase">{d.prioridade}</Badge>
+                <Badge variant={priorityColor(d.prioridade)} className="text-[10px] uppercase">{d.prioridade}</Badge>
               </div>
             ))}
           </div>
