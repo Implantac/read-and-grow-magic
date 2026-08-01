@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import type { NFCe, NFCeItem, NFCePaymentMethod } from '@/types/fiscal';
+import type { NFCe, NFCeItem, NFCePaymentMethod, NFCeStatus } from '@/types/fiscal';
 
 export function useNFCe() {
   const [nfces, setNfces] = useState<NFCe[]>([]);
@@ -38,7 +38,7 @@ export function useNFCe() {
       number: row.number,
       series: row.series,
       issueDate: row.issue_date,
-      status: row.status,
+      status: row.status as NFCeStatus,
       accessKey: row.access_key || '',
       protocol: row.protocol || '',
       qrCode: row.qr_code || '',
@@ -56,7 +56,7 @@ export function useNFCe() {
       authorizationDate: row.authorization_date,
       cancellationDate: row.cancellation_date,
       cancellationReason: row.cancellation_reason,
-      returnStatus: row.return_status || 'none',
+      returnStatus: (row.return_status || 'none') as NFCe['returnStatus'],
       items: itemsMap.get(row.id) || [],
       createdAt: row.created_at,
     }));
