@@ -28,7 +28,7 @@ import { Supplier } from '@/types/purchasing';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { Building2 } from 'lucide-react';
 
-const statusConfig: any = {
+const statusConfig: Record<string, { label: string; className: string }> = {
   active: { label: 'Ativo', className: 'bg-green-100 text-green-800' },
   inactive: { label: 'Inativo', className: 'bg-gray-100 text-gray-800' },
   blocked: { label: 'Bloqueado', className: 'bg-red-100 text-red-800' },
@@ -37,7 +37,7 @@ const statusConfig: any = {
 export default function SuppliersPage() {
   const { suppliers: rawSuppliers, suppliersLoading: loading, createSupplier } = usePurchasing();
   
-  const suppliers: Supplier[] = useMemo(() => (rawSuppliers || []).map((s: any) => ({
+  const suppliers: Supplier[] = useMemo(() => (rawSuppliers || []).map((s) => ({
     id: s.id, code: s.code, name: s.name, tradeName: s.trade_name,
     document: s.document, documentType: s.document_type, email: s.email || '',
     phone: s.phone || '', cellphone: s.cellphone, status: s.status,
