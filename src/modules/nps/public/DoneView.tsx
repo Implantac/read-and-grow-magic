@@ -3,8 +3,10 @@ import { Card, CardContent } from '@/ui/base/card';
 import { Progress } from '@/ui/base/progress';
 import { CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
 
+import type { PublicSurvey } from './types';
+
 interface Props {
-  survey: any;
+  survey: PublicSurvey | null;
   hasComment: boolean;
   token: string;
   projectUrl: string;

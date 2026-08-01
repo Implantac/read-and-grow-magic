@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { errorMessage } from '@/lib/errors';
 import { useCompanyId } from './_shared';
 import type { Json, TablesInsert } from '@/integrations/supabase/types';
 
@@ -41,7 +42,7 @@ export function useSaveQuestionToBank() {
       }
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['nps', 'question-bank'] }); toast.success('Pergunta salva na biblioteca'); },
-    onError: (e: any) => toast.error(e.message ?? 'Erro ao salvar'),
+    onError: (e: unknown) => toast.error(errorMessage(e, 'Erro ao salvar')),
   });
 }
 
@@ -53,7 +54,7 @@ export function useDeleteQuestionFromBank() {
       if (error) throw error;
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['nps', 'question-bank'] }); toast.success('Removida'); },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: unknown) => toast.error(errorMessage(e)),
   });
 }
 
@@ -86,6 +87,6 @@ export function useImportQuestionsFromBank() {
       );
     },
     onSuccess: (_, vars) => { qc.invalidateQueries({ queryKey: ['nps'] }); toast.success(`${vars.bank_ids.length} pergunta(s) importada(s)`); },
-    onError: (e: any) => toast.error(e.message),
+    onError: (e: unknown) => toast.error(errorMessage(e)),
   });
 }

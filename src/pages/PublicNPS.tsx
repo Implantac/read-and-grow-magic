@@ -5,7 +5,8 @@ import { Button } from '@/ui/base/button';
 import { Textarea } from '@/ui/base/textarea';
 import { Progress } from '@/ui/base/progress';
 import { Loader2, XCircle, ShieldCheck } from 'lucide-react';
-import type { Question } from '@/modules/nps/public/types';
+import type { AnswerMap, PublicSurvey, Question } from '@/modules/nps/public/types';
+import { errorMessage } from '@/lib/errors';
 import { QuestionRenderer } from '@/modules/nps/public/QuestionRenderer';
 import { DoneView } from '@/modules/nps/public/DoneView';
 import { ScoreSelector } from '@/modules/nps/public/ScoreSelector';
@@ -17,11 +18,11 @@ import { ScoreSelector } from '@/modules/nps/public/ScoreSelector';
 export default function PublicNPS() {
   const { token = '' } = useParams();
   const [state, setState] = useState<'loading' | 'ready' | 'submitting' | 'done' | 'error'>('loading');
-  const [survey, setSurvey] = useState<any>(null);
+  const [survey, setSurvey] = useState<PublicSurvey | null>(null);
   const [error, setError] = useState<string>('');
   const [score, setScore] = useState<number | null>(null);
   const [comment, setComment] = useState('');
-  const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [answers, setAnswers] = useState<AnswerMap>({});
   const [touched, setTouched] = useState(false);
   const [startedAt] = useState(() => Date.now());
 
@@ -38,8 +39,8 @@ export default function PublicNPS() {
         if (!resp.ok) throw new Error(json.error ?? 'Pesquisa indisponível');
         setSurvey(json);
         setState('ready');
-      } catch (e: any) {
-        setError(e.message ?? 'Erro');
+      } catch (e) {
+        setError(errorMessage(e, 'Erro'));
         setState('error');
       }
     })();
@@ -94,8 +95,8 @@ export default function PublicNPS() {
       const j = await resp.json();
       if (!resp.ok) throw new Error(j.error ?? 'Erro ao enviar');
       setState('done');
-    } catch (e: any) {
-      setError(e.message);
+    } catch (e) {
+      setError(errorMessage(e, 'Erro ao enviar'));
       setState('error');
     }
   };
@@ -123,7 +124,7 @@ export default function PublicNPS() {
   if (state === 'done')
     return <DoneView survey={survey} hasComment={comment.trim().length > 5} token={token} projectUrl={projectUrl} anon={anon} />;
 
-  const c = survey.campaign;
+  const c = survey!.campaign;
   const primary = c.primary_color ?? '#FF9800';
   const followUp =
     score !== null && score >= 9
@@ -136,8 +137,8 @@ export default function PublicNPS() {
     <div className="min-h-screen px-3 py-5 sm:p-6 md:p-8" style={{ background: '#0f172a', color: '#f1f5f9' }}>
       <div className="w-full max-w-[640px] mx-auto space-y-4 sm:space-y-5">
         <div className="text-center space-y-2 sm:space-y-3 px-1">
-          {(c.logo_url ?? survey.company?.logo_url) && (
-            <img src={c.logo_url ?? survey.company.logo_url} alt={survey.company?.name ?? 'Logo'} className="h-10 sm:h-12 mx-auto" />
+          {(c.logo_url ?? survey!.company?.logo_url) && (
+            <img src={c.logo_url ?? survey!.company?.logo_url} alt={survey!.company?.name ?? 'Logo'} className="h-10 sm:h-12 mx-auto" />
           )}
           <h1 className="text-xl sm:text-2xl font-bold leading-snug text-white">{c.title ?? 'Como avalia sua experiência?'}</h1>
           {c.subtitle && <p className="text-sm sm:text-base text-slate-200 leading-relaxed">{c.subtitle}</p>}
@@ -152,7 +153,7 @@ export default function PublicNPS() {
               score={score}
               setScore={setScore}
               primary={primary}
-              companyName={survey.company?.name ?? 'nossa empresa'}
+              companyName={survey!.company?.name ?? 'nossa empresa'}
               touched={touched}
             />
 
