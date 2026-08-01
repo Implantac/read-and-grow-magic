@@ -18,6 +18,7 @@ import { Phone, Plus, Search, AlertCircle, Clock, DollarSign } from 'lucide-reac
 import { EmptyState } from '@/shared/components/EmptyState';
 
 import { formatBRL, formatDate } from '@/lib/formatters';
+import type { TablesInsert } from '@/integrations/supabase/types';
 const actionLabels: Record<string, string> = {
   contact: 'Contato', promise: 'Promessa', renegotiation: 'Renegociação', agreement: 'Acordo', note: 'Observação', follow_up: 'Follow-up',
 };
@@ -29,12 +30,12 @@ export default function Collections() {
   const create = useCreateCollectionAction();
   const [search, setSearch] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [form, setForm] = useState<any>({});
+  const [form, setForm] = useState<Partial<TablesInsert<'collection_actions'>>>({});
 
   const clientMap = Object.fromEntries(clients.map(c => [c.id, c]));
 
-  const overdueReceivables = receivables.filter((r: any) => r.status === 'overdue' || (r.status === 'pending' && new Date(r.due_date) < new Date()));
-  const totalOverdue = overdueReceivables.reduce((s: number, r: any) => s + Number(r.amount), 0);
+  const overdueReceivables = receivables.filter((r) => r.status === 'overdue' || (r.status === 'pending' && new Date(r.due_date) < new Date()));
+  const totalOverdue = overdueReceivables.reduce((s: number, r) => s + Number(r.amount), 0);
   const openActions = actions.filter(a => a.status === 'open');
   const brokenPromises = actions.filter(a => a.action_type === 'promise' && a.promise_status === 'broken');
 
@@ -51,13 +52,13 @@ export default function Collections() {
   };
 
   const handleSave = () => {
-    create.mutate(form, { onSuccess: () => setDialogOpen(false) });
+    create.mutate(form as TablesInsert<'collection_actions'>, { onSuccess: () => setDialogOpen(false) });
   };
 
   // Aging calculation
   const aging = { upcoming: 0, d1_7: 0, d8_15: 0, d16_30: 0, d31_60: 0, d60plus: 0 };
   const now = new Date();
-  overdueReceivables.forEach((r: any) => {
+  overdueReceivables.forEach((r) => {
     const diff = Math.floor((now.getTime() - new Date(r.due_date).getTime()) / 86400000);
     if (diff <= 0) aging.upcoming += Number(r.amount);
     else if (diff <= 7) aging.d1_7 += Number(r.amount);

@@ -1,7 +1,39 @@
 import { useMemo } from 'react';
 import { startOfMonth, endOfMonth, isToday, subMonths, format, startOfDay, eachDayOfInterval, subDays } from 'date-fns';
 
-export function useCommercialStats(orders: any[], clients: any[], funnel: any[], reps: any[], alerts: any[], sales: any[]) {
+export interface CommercialStatsOrder {
+  date: string;
+  status: string;
+  total: number;
+  client_name: string;
+  delivery_date?: string | null;
+  sales_rep_name?: string | null;
+  canal_operacional?: string | null;
+}
+
+export interface CommercialStatsClient {
+  status?: string | null;
+  sales_rep_id?: string | null;
+}
+
+export interface CommercialStatsFunnel {
+  status: string;
+  value: number;
+}
+
+export interface CommercialStatsRep {
+  name: string;
+  monthly_target?: number | null;
+}
+
+export function useCommercialStats(
+  orders: CommercialStatsOrder[],
+  clients: CommercialStatsClient[],
+  funnel: CommercialStatsFunnel[],
+  reps: CommercialStatsRep[],
+  alerts: unknown[],
+  sales: unknown[],
+) {
   return useMemo(() => {
     const now = new Date();
     const monthStart = startOfMonth(now);
@@ -25,10 +57,10 @@ export function useCommercialStats(orders: any[], clients: any[], funnel: any[],
     const prevBilling = prevMonthOrders.reduce((s, o) => s + o.total, 0);
     const billingGrowth = prevBilling > 0 ? ((billingMonth - prevBilling) / prevBilling) * 100 : 0;
 
-    const byStatus = orders.reduce((acc, o) => {
+    const byStatus = orders.reduce<Record<string, number>>((acc, o) => {
       acc[o.status] = (acc[o.status] || 0) + 1;
       return acc;
-    }, {} as Record<string, number>);
+    }, {});
     const statusChartData = Object.entries(byStatus).map(([name, value]) => ({ name: getStatusLabel(name), value }));
 
     const overdueOrders = orders.filter(o =>
@@ -79,8 +111,8 @@ export function useCommercialStats(orders: any[], clients: any[], funnel: any[],
     const blockedClients = clients.filter(c => c.status === 'blocked').length;
     const noRepClients = clients.filter(c => !c.sales_rep_id).length;
 
-    const varejoOrders = ordersMonth.filter((o: any) => o.canal_operacional === 'VAREJO_PDV' && o.status !== 'cancelled');
-    const atacadoOrders = ordersMonth.filter((o: any) => o.canal_operacional === 'ATACADO_INDUSTRIA' && o.status !== 'cancelled');
+    const varejoOrders = ordersMonth.filter((o) => o.canal_operacional === 'VAREJO_PDV' && o.status !== 'cancelled');
+    const atacadoOrders = ordersMonth.filter((o) => o.canal_operacional === 'ATACADO_INDUSTRIA' && o.status !== 'cancelled');
     const varejoBilling = varejoOrders.reduce((s, o) => s + o.total, 0);
     const atacadoBilling = atacadoOrders.reduce((s, o) => s + o.total, 0);
 
