@@ -1,3 +1,4 @@
+import { errorMessage } from '@/lib/errors';
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -34,8 +35,8 @@ export function useO2COrchestrator(orderId: string | null) {
       setRunId(payload.run_id ?? null);
       const results = payload.results ?? [];
       setEvents(results.map((r) => ({ ...r, at: new Date().toISOString() })));
-    } catch (e: any) {
-      setError(e?.message ?? 'Falha ao executar Order-to-Cash');
+    } catch (e: unknown) {
+      setError(errorMessage(e) || 'Falha ao executar Order-to-Cash');
     } finally {
       setRunning(false);
     }
@@ -55,7 +56,7 @@ export function useO2COrchestrator(orderId: string | null) {
           filter: `entity_id=eq.${orderId}`,
         },
         (payload) => {
-          const row: any = payload.new;
+          const row = payload.new as { created_at?: string; payload?: { step?: string; status?: string; message?: string; data?: Record<string, unknown> } };
           const step = row?.payload?.step as O2CStepKey | undefined;
           const status = row?.payload?.status as O2CStepStatus | undefined;
           if (!step || !status) return;

@@ -7,6 +7,7 @@ import { Skeleton } from '@/ui/base/skeleton';
 import { toast } from 'sonner';
 import { useGenerateCEOBrief, useExecuteDecisions, useAutoPilotRun, type CEOBriefResult } from '@/hooks/ai/useCEOBrief';
 import { formatDateTime } from '@/lib/formatters';
+import { errorMessage } from '@/lib/errors';
 import { normalizeKPI } from './ceoBrief/helpers';
 import type { CEOForecast, CEORisk, CEOPlanItem, CEODecision } from './ceoBrief/types';
 import { StructuredBlock } from './ceoBrief/StructuredBlock';
@@ -25,10 +26,11 @@ export function CEOBriefPanel() {
         setData(res);
         toast.success('Análise da IA CEO gerada');
       },
-      onError: (e: any) => {
-        const msg = e?.message?.includes('429')
+      onError: (e: unknown) => {
+        const raw = errorMessage(e);
+        const msg = raw.includes('429')
           ? 'Limite de requisições. Aguarde alguns minutos.'
-          : e?.message?.includes('402')
+          : raw.includes('402')
           ? 'Créditos insuficientes. Adicione créditos em Configurações > Workspace.'
           : 'Erro ao gerar análise CEO.';
         toast.error(msg);
@@ -49,7 +51,7 @@ export function CEOBriefPanel() {
 
   const handleAutoPilot = () => {
     autoPilot.mutate(undefined, {
-      onSuccess: (res: any) => toast.success(res?.summary || 'AutoPilot executado'),
+      onSuccess: (res: { summary?: string } | null) => toast.success(res?.summary || 'AutoPilot executado'),
       onError: () => toast.error('Falha ao rodar AutoPilot'),
     });
   };

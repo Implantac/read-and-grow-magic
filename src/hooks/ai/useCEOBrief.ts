@@ -29,7 +29,7 @@ export interface CEOStructured {
 export interface CEOBriefResult {
   ceo_analysis: string;
   ceo_structured?: CEOStructured | null;
-  context: any;
+  context: Record<string, unknown>;
   kpis: CEOKPI[];
   forecast: CEOForecast;
   risks: CEORisk[];
@@ -79,7 +79,7 @@ export function useExecuteDecisions() {
         body: { action: 'execute_decisions', ...params },
       });
       if (error) throw error;
-      return data as { executed: number; results: any[] };
+      return data as { executed: number; results: Array<Record<string, unknown>> };
     },
   });
 }

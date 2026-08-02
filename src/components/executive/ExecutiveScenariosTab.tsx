@@ -2,9 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { fmt } from './ExecutiveKPICards';
+import type { ExecutiveScenario } from '@/hooks/ai/executive/types';
 
 interface Props {
-  scenarios: any[];
+  scenarios: ExecutiveScenario[];
 }
 
 export function ExecutiveScenariosTab({ scenarios }: Props) {

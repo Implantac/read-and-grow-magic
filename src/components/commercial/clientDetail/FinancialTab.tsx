@@ -5,8 +5,17 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { formatBRL } from '@/lib/formatters';
 
+interface ClientReceivable {
+  id: string;
+  description?: string | null;
+  invoice_number?: string | null;
+  due_date: string;
+  amount: number;
+  status: string;
+}
+
 interface Props {
-  clientReceivables: any[];
+  clientReceivables: ClientReceivable[];
   totalReceivable: number;
   overdueReceivable: number;
 }
@@ -32,7 +41,7 @@ export function FinancialTab({ clientReceivables, totalReceivable, overdueReceiv
         <p className="text-center text-sm text-muted-foreground py-6">Nenhum título encontrado</p>
       ) : (
         <div className="space-y-2 max-h-[300px] overflow-y-auto">
-          {clientReceivables.slice().sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()).map((r: any) => {
+          {clientReceivables.slice().sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime()).map((r) => {
             const isOverdue = r.status === 'pending' && new Date(r.due_date) < new Date();
             return (
               <div key={r.id} className={`flex items-center justify-between border rounded-lg px-4 py-2.5 ${isOverdue ? 'border-destructive/30 bg-destructive/5' : ''}`}>

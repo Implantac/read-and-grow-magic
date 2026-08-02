@@ -3,9 +3,11 @@ import { Badge } from '@/ui/base/badge';
 import { DialogDescription, DialogHeader, DialogTitle } from '@/ui/base/dialog';
 import { DiagnosticSheet } from './DiagnosticSheet';
 
+interface StepIssue { errors: string[]; warnings: string[] }
+
 interface Props {
-  allIssues: any;
-  validationByStep: any;
+  allIssues: { errors: { step: number; message: string }[]; warnings: { step: number; message: string }[]; total: number };
+  validationByStep: Record<number, StepIssue>;
   searchTerm: string;
   setSearchTerm: (v: string) => void;
   diagnosisFilter: 'all' | 'errors' | 'warnings';

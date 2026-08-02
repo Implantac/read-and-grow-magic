@@ -56,7 +56,7 @@ export function useBankChannelReconcile({ from, to, bankAccountId }: Params) {
         ledgerReconciled: 0, ledgerPending: 0, entries: 0,
       }));
 
-      (ledger || []).forEach((r: any) => {
+      (ledger || []).forEach((r) => {
         const key: CanalKey = (r.canal_operacional as CanalKey) || 'sem_canal';
         const row = map.get(key)!;
         const amt = Number(r.amount) || 0;
@@ -68,7 +68,7 @@ export function useBankChannelReconcile({ from, to, bankAccountId }: Params) {
       map.forEach((r) => { r.ledgerNet = r.ledgerInflow - r.ledgerOutflow; });
 
       let bankInflow = 0, bankOutflow = 0, bankMatched = 0, bankUnmatched = 0;
-      (bank || []).forEach((t: any) => {
+      (bank || []).forEach((t) => {
         const amt = Number(t.amount) || 0;
         if (t.type === 'credit' || t.type === 'inflow' || t.type === 'in') bankInflow += amt;
         else bankOutflow += amt;
