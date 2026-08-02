@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { Progress } from "@/ui/base/progress";
 import { cn } from "@/lib/utils";
 import { brl } from "./utils";
+import type { SuccessData } from "../types";
 
-export function MonthGoalCard({ monthGoal, monthDelta }: { monthGoal: any; monthDelta: number }) {
+export function MonthGoalCard({ monthGoal, monthDelta }: { monthGoal: SuccessData["monthGoal"]; monthDelta: number }) {
   return (
     <Card>
       <CardHeader>

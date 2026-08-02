@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
+import { errorMessage } from '@/lib/errors';
 
 export interface CnpjData {
   razao_social: string;
@@ -60,8 +61,8 @@ export function useCnpjLookup() {
         receita_status: data.descricao_situacao_cadastral || '',
         receita_status_date: data.data_situacao_cadastral || '',
       };
-    } catch (e: any) {
-      toastError(e.message || 'Verifique o número e tente novamente.', undefined, 'Erro ao consultar CNPJ');
+    } catch (e: unknown) {
+      toastError(errorMessage(e) || 'Verifique o número e tente novamente.', undefined, 'Erro ao consultar CNPJ');
       return null;
     } finally {
       setLoading(false);

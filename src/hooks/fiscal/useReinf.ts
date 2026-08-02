@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { errorMessage } from '@/lib/errors';
 
 export type ReinfPeriod = {
   id: string;
@@ -90,8 +91,8 @@ export function useReinf() {
       if (error) throw error;
       toast.success('Competência reaberta');
       await load();
-    } catch (err: any) {
-      toast.error('Falha ao reabrir', { description: err.message });
+    } catch (err: unknown) {
+      toast.error('Falha ao reabrir', { description: errorMessage(err) });
     } finally {
       setBusy(false);
     }

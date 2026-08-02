@@ -2,8 +2,9 @@ import { TrendingUp, Wallet, Users, ShoppingCart } from "lucide-react";
 import { Card, CardContent } from "@/ui/base/card";
 import { cn } from "@/lib/utils";
 import { brl } from "./utils";
+import type { SuccessData, SuccessCashFlow90d } from "../types";
 
-export function KpiRow({ totals, cashflow }: { totals: any; cashflow: any }) {
+export function KpiRow({ totals, cashflow }: { totals: SuccessData["totals"]; cashflow: SuccessCashFlow90d }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
       <Card>

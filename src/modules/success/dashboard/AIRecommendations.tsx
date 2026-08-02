@@ -3,8 +3,9 @@ import { Badge } from "@/ui/base/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { cn } from "@/lib/utils";
 import { RecIcon } from "./utils";
+import type { SuccessAIRecommendation } from "../types";
 
-export function AIRecommendations({ recommendations }: { recommendations: any[] }) {
+export function AIRecommendations({ recommendations }: { recommendations: SuccessAIRecommendation[] }) {
   return (
     <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
       <CardHeader>
