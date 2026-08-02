@@ -67,7 +67,7 @@ export function useRFIDWMSRules() {
       .order('priority', { ascending: false });
 
     if (error) { console.error(error); toast.error('Erro ao carregar regras'); }
-    else setRules((data || []).map((r: any) => ({
+    else setRules((data || []).map((r: Tables<'rfid_wms_rules'>) => ({
       id: r.id, name: r.name, description: r.description, enabled: r.enabled,
       triggerZone: r.trigger_zone, triggerEventType: r.trigger_event_type,
       triggerReaderCode: r.trigger_reader_code, wmsAction: r.wms_action,

@@ -13,7 +13,7 @@ export function useMovementsData() {
 
   const movements = useMemo<StockMovement[]>(
     () =>
-      (dbMovements || []).map((m: any) => ({
+      (dbMovements || []).map((m) => ({
         id: m.id,
         documentNumber: m.document_number,
         productId: m.product_id || '',
