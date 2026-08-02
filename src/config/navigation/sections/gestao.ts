@@ -31,6 +31,7 @@ export const gestaoSection: NavSection = {
         { title: 'Automation Engine', href: '/admin/automacoes', icon: 'Zap' },
         { title: 'Dashboard Engine', href: '/admin/dashboards', icon: 'LayoutDashboard' },
         { title: 'Auditoria de Segurança', href: '/admin/seguranca/auditoria', icon: 'ShieldAlert' },
+        { title: 'Privacidade (LGPD)', href: '/admin/privacidade', icon: 'ShieldCheck' },
         { title: 'Manual do Sistema', href: '/admin/manual', icon: 'BookOpenCheck' },
       ],
     },
