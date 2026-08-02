@@ -1,3 +1,20 @@
+import type { Json } from '@/integrations/supabase/types';
+
+export interface ExecutiveScenarioBranch {
+  revenue?: number | null;
+  profit?: number | null;
+  margin?: number | null;
+  description?: string | null;
+  key_actions?: string[];
+}
+
+export interface ExecutiveScenario {
+  optimistic?: ExecutiveScenarioBranch | null;
+  realistic?: ExecutiveScenarioBranch | null;
+  pessimistic?: ExecutiveScenarioBranch | null;
+  recommendations?: string[];
+}
+
 export interface ExecutiveKPIs {
   totalRevenue: number;
   totalCosts: number;
@@ -39,7 +56,7 @@ export interface ExecutiveInsight {
   title: string;
   description: string;
   explanation: string;
-  data_points: any;
+  data_points: Json;
   impact_estimate: string;
   recommended_actions: string[];
   module: string;
@@ -107,7 +124,7 @@ export interface ExecutiveDashboardData {
   insights: ExecutiveInsight[];
   consensus: Array<{ specialist: string; insight: string; status: string }>;
   alerts: ExecutiveAlert[];
-  scenarios: any[];
+  scenarios: ExecutiveScenario[];
   autoAlerts?: ExecutiveAutoAlert[];
   productMargins?: ExecutiveProductMargin[];
   lowMarginProducts?: ExecutiveProductMargin[];
