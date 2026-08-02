@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { Badge } from "@/ui/base/badge";
 import { MODULE_LABELS } from "@/lib/moduleLabels";
+import type { Plugin } from "@/hooks/usePlugins";
 
-export function CompatibilityCard({ plugin }: { plugin: any }) {
+export function CompatibilityCard({ plugin }: { plugin: Plugin }) {
   return (
     <Card>
       <CardHeader>

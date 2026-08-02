@@ -106,7 +106,7 @@ export default function Sales360() {
             <SelectTrigger className="w-[220px] h-9"><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos</SelectItem>
-              {reps.map((r: any) => (
+              {reps.map((r) => (
                 <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
               ))}
             </SelectContent>
@@ -198,7 +198,7 @@ export default function Sales360() {
                 <EmptyState title="Nenhum alerta aberto" description="Boa notícia — sem exceções no filtro atual." />
               ) : (
                 <div className="space-y-2">
-                  {filteredAlerts.slice(0, 20).map((a: any) => (
+                  {filteredAlerts.slice(0, 20).map((a) => (
                     <div key={a.id} className="flex items-center justify-between rounded-lg border p-3">
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">

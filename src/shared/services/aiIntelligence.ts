@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
  * Provedor de inteligência cross-módulo
  */
 
-export const askCorporateBrain = async (question: string, context: any) => {
+export const askCorporateBrain = async (question: string, context: Record<string, unknown>) => {
   const { data, error } = await supabase.functions.invoke('ai-brain', {
     body: { question, context }
   });
