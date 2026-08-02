@@ -13,7 +13,7 @@ export class FiscalService {
 
     if (error) throw error;
 
-    return (data || []).map((row: Record<string, string & number & null>) => ({
+    return (data || []).map((row) => ({
       id: row.id,
       number: row.number,
       series: row.series,

@@ -63,7 +63,7 @@ export const rfidService = {
       processed: r.processed,
       processedAt: r.processed_at, 
       actionTaken: r.action_taken,
-      metadata: r.metadata, 
+      metadata: (r.metadata ?? undefined) as Record<string, unknown> | undefined, 
       createdAt: r.created_at,
     }));
   }

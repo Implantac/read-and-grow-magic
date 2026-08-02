@@ -53,7 +53,7 @@ export interface RFIDEvent {
   processed: boolean;
   processedAt?: string;
   actionTaken?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: string;
 }
 
