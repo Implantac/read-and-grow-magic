@@ -3,21 +3,10 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Badge } from '@/ui/base/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
+import type { RFIDEvent } from '@/types/rfid';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 
-interface RFIDActionEvent {
-  id: string;
-  event_type?: string | null;
-  tag_epc?: string | null;
-  zone?: string | null;
-  reader_code?: string | null;
-  processed?: boolean | null;
-  wms_action?: string | null;
-  created_at?: string | null;
-  read_at?: string | null;
-}
-
-interface Props { events: RFIDActionEvent[]; }
+interface Props { events: RFIDEvent[]; }
 
 export function ActionLogTab({ events }: Props) {
   return (
