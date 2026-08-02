@@ -1,3 +1,5 @@
+import type { CashCloseSummary } from './usePDVCashSession';
+import type { ParkedSale } from './usePDVParked';
 import type { DbClient } from '@/hooks/commercial/useClients';
 import { PDVPixDialog } from '../PDVPixDialog';
 import { PDVCloseSessionDialog } from '../PDVCloseSessionDialog';
@@ -35,12 +37,12 @@ interface Props {
   removeSplit: (id: string) => void;
   // Close session
   showCloseSession: boolean;
-  closeSessionSummary: any;
+  closeSessionSummary: CashCloseSummary | null;
   setShowCloseSession: (v: boolean) => void;
   confirmCloseSession: (result: { countedAmount: number; difference: number }) => void;
   // Parked
   showParked: boolean;
-  parkedList: any[];
+  parkedList: ParkedSale[];
   setShowParked: (v: boolean) => void;
   resumeParked: (id: string) => void;
   discardParked: (id: string) => void;

@@ -87,7 +87,7 @@ export function RecordsPanel({ entityId }: { entityId: string }) {
   );
 }
 
-function FieldInput({ field, value, onChange }: { field: CustomField; value: any; onChange: (v: any) => void }) {
+function FieldInput({ field, value, onChange }: { field: CustomField; value: unknown; onChange: (v: unknown) => void }) {
   return (
     <div>
       <Label>
@@ -100,7 +100,7 @@ function FieldInput({ field, value, onChange }: { field: CustomField; value: any
         <Select value={value ?? ""} onValueChange={onChange}>
           <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
           <SelectContent>
-            {(Array.isArray(field.options) ? field.options : []).map((opt: any) => (
+            {(Array.isArray(field.options) ? field.options : []).map((opt) => (
               <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
             ))}
           </SelectContent>
