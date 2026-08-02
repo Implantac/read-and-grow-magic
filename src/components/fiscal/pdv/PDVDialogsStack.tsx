@@ -1,5 +1,5 @@
-import type { CashCloseSummary } from './usePDVCashSession';
-import type { ParkedSale } from './usePDVParked';
+import type { CashCloseSummary } from '../PDVCloseSessionDialog';
+import type { ParkedSale } from '../pdvParkedStorage';
 import type { DbClient } from '@/hooks/commercial/useClients';
 import { PDVPixDialog } from '../PDVPixDialog';
 import { PDVCloseSessionDialog } from '../PDVCloseSessionDialog';

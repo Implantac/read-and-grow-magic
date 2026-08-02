@@ -87,7 +87,7 @@ export function RecordsPanel({ entityId }: { entityId: string }) {
   );
 }
 
-function FieldInput({ field, value, onChange }: { field: CustomField; value: unknown; onChange: (v: unknown) => void }) {
+function FieldInput({ field, value, onChange }: { field: CustomField; value: string | number | boolean | null | undefined | Record<string, unknown>; onChange: (v: unknown) => void }) {
   return (
     <div>
       <Label>
@@ -97,10 +97,10 @@ function FieldInput({ field, value, onChange }: { field: CustomField; value: unk
       {field.field_type === "boolean" ? (
         <input type="checkbox" checked={!!value} onChange={(e) => onChange(e.target.checked)} className="ml-2" />
       ) : field.field_type === "select" ? (
-        <Select value={value ?? ""} onValueChange={onChange}>
+        <Select value={typeof value === "string" ? value : ""} onValueChange={onChange}>
           <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
           <SelectContent>
-            {(Array.isArray(field.options) ? field.options : []).map((opt) => (
+            {(Array.isArray(field.options) ? field.options : []).map((opt) => opt as { value: string; label: string }).map((opt) => (
               <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
             ))}
           </SelectContent>
@@ -121,7 +121,7 @@ function FieldInput({ field, value, onChange }: { field: CustomField; value: unk
               : field.field_type === "datetime" ? "datetime-local"
               : "text"
           }
-          value={value ?? ""}
+          value={typeof value === "string" || typeof value === "number" ? value : ""}
           onChange={(e) => onChange(field.field_type === "number" ? e.target.valueAsNumber : e.target.value)}
         />
       )}

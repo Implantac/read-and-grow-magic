@@ -56,7 +56,7 @@ export function useO2COrchestrator(orderId: string | null) {
           filter: `entity_id=eq.${orderId}`,
         },
         (payload) => {
-          const row = payload.new as { payload?: { step?: string; status?: string; message?: string } };
+          const row = payload.new as { created_at?: string; payload?: { step?: string; status?: string; message?: string; data?: Record<string, unknown> } };
           const step = row?.payload?.step as O2CStepKey | undefined;
           const status = row?.payload?.status as O2CStepStatus | undefined;
           if (!step || !status) return;
