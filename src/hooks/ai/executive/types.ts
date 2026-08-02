@@ -84,6 +84,8 @@ export interface SalesRepStat {
   name: string;
   orders: number;
   revenue: number;
+  avgTicket?: number;
+  discountPct?: number;
 }
 
 export interface ExecutiveSWOTItem {

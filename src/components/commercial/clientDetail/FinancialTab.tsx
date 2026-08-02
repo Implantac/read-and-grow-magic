@@ -8,6 +8,7 @@ import { formatBRL } from '@/lib/formatters';
 interface ClientReceivable {
   id: string;
   description?: string | null;
+  invoice_number?: string | null;
   due_date: string;
   amount: number;
   status: string;
