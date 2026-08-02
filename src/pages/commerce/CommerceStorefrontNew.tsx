@@ -23,6 +23,7 @@ import {
   type CommerceTheme,
 } from "@/hooks/useCommerce";
 import { toastError } from "@/lib/toastHelpers";
+import { storefrontDomain } from "@/config/env";
 
 const CATEGORY_LABELS: Record<string, string> = {
   all: "Todas as categorias",
@@ -122,7 +123,7 @@ export default function CommerceStorefrontNew() {
                 maxLength={40}
               />
               <p className="text-xs text-muted-foreground">
-                {slug || "minha-loja"}.usecommerce.com.br
+                {storefrontDomain(slug)}
               </p>
             </div>
             <div className="space-y-1">

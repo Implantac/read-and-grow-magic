@@ -8,6 +8,7 @@ import { Download, DollarSign, TrendingUp, TrendingDown, AlertCircle, BarChart3 
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
+import { REPORT_LIMIT } from '@/lib/queryLimits';
 
 const formatCurrency = (value: number) => formatBRLCompact(value);
 export default function FinancialReport() {
@@ -19,8 +20,8 @@ export default function FinancialReport() {
       setLoading(true);
       try {
         const [receivableRes, payableRes] = await Promise.all([
-          supabase.from('accounts_receivable').select('amount, status, due_date'),
-          supabase.from('accounts_payable').select('amount, status, due_date'),
+          supabase.from('accounts_receivable').select('amount, status, due_date').limit(REPORT_LIMIT),
+          supabase.from('accounts_payable').select('amount, status, due_date').limit(REPORT_LIMIT),
         ]);
 
         const receivables = receivableRes.data || [];

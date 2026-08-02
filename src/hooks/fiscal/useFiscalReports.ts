@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { FiscalReport, FiscalReportType } from '@/types/fiscal';
 import type { Tables } from '@/integrations/supabase/types';
+import { LIST_LIMIT, REPORT_LIMIT } from '@/lib/queryLimits';
 
 export function useFiscalReports() {
   const [reports, setReports] = useState<FiscalReport[]>([]);
@@ -10,7 +11,7 @@ export function useFiscalReports() {
 
   const fetchReports = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('fiscal_reports').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('fiscal_reports').select('*').order('created_at', { ascending: false }).limit(LIST_LIMIT);
     if (error) { console.error(error); toast.error('Erro ao carregar relatórios fiscais'); setLoading(false); return; }
 
     const mapped: FiscalReport[] = (data || []).map((row: Tables<'fiscal_reports'>) => ({
@@ -47,12 +48,14 @@ export function useFiscalReports() {
     const { data: nfeData } = await supabase.from('nfe').select('*')
       .gte('issue_date', reportData.startDate)
       .lte('issue_date', reportData.endDate)
-      .eq('status', 'authorized');
+      .eq('status', 'authorized')
+      .limit(REPORT_LIMIT);
 
     const { data: nfceData } = await supabase.from('nfce').select('*')
       .gte('issue_date', reportData.startDate)
       .lte('issue_date', reportData.endDate)
-      .eq('status', 'authorized');
+      .eq('status', 'authorized')
+      .limit(REPORT_LIMIT);
 
     const nfes = nfeData || [];
     const nfces = nfceData || [];

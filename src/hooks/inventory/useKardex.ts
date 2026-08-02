@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { ProductKardex, KardexEntry, MovementType } from '@/types/inventory';
+import { LEDGER_LIMIT } from '@/lib/queryLimits';
 
 export function useKardex(productId: string, startDate?: string, endDate?: string) {
   return useQuery({
@@ -26,6 +27,7 @@ export function useKardex(productId: string, startDate?: string, endDate?: strin
 
       if (startDate) query = query.gte('created_at', startDate);
       if (endDate) query = query.lte('created_at', endDate);
+      query = query.limit(LEDGER_LIMIT);
 
       const { data: movements, error: movementsError } = await query;
 

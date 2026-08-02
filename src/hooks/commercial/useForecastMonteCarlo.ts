@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { REPORT_LIMIT } from '@/lib/queryLimits';
 
 const STAGE_PROB: Record<string, number> = {
   lead: 0.10,
@@ -48,7 +49,8 @@ export function useForecastMonteCarlo(period: string, scenarios = 2000) {
         .from('orders')
         .select('total')
         .gte('date', startOfMonth)
-        .in('status', ['confirmed', 'approved', 'invoiced', 'delivered']);
+        .in('status', ['confirmed', 'approved', 'invoiced', 'delivered'])
+        .limit(REPORT_LIMIT);
 
       const confirmed = (orders ?? []).reduce((s, o) => s + (o.total || 0), 0);
       const deals = (pipeline ?? []).map((p) => ({

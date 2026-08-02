@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
+import { LEDGER_LIMIT } from '@/lib/queryLimits';
 
 type WmsMovementRow = Database['public']['Tables']['wms_movements']['Row'];
 type WmsMovementInsert = Database['public']['Tables']['wms_movements']['Insert'];
@@ -20,7 +21,7 @@ export function useWMSMovements() {
 
   const fetchMovements = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('wms_movements').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('wms_movements').select('*').order('created_at', { ascending: false }).limit(LEDGER_LIMIT);
     if (error) { console.error(error); toast.error('Erro ao carregar movimentações'); }
     else setMovements((data || []).map(mapWmsMovement));
     setLoading(false);
@@ -53,7 +54,7 @@ export function useStockMovements() {
 
   const fetchMovements = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase.from('stock_movements').select('*').order('created_at', { ascending: false });
+    const { data, error } = await supabase.from('stock_movements').select('*').order('created_at', { ascending: false }).limit(LEDGER_LIMIT);
     if (error) { console.error(error); toast.error('Erro ao carregar movimentações de estoque'); }
     else setMovements((data || []).map(mapStockMovement));
     setLoading(false);
