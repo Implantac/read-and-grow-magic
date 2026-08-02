@@ -23,6 +23,7 @@ import {
   useUpdateStorefrontStatus,
 } from "@/hooks/useCommerce";
 import { StorefrontNotificationsPanel } from "@/components/commerce/StorefrontNotificationsPanel";
+import { storefrontDomain } from "@/config/env";
 
 const STATUS_LABELS: Record<string, { label: string; variant: "default" | "secondary" | "outline" }> = {
   draft: { label: "Rascunho", variant: "outline" },
@@ -212,7 +213,7 @@ export default function CommerceStorefrontDetail() {
             </CardHeader>
             <CardContent>
               <code className="text-xs break-all">
-                {storefront.slug}.usecommerce.com.br
+                {storefrontDomain(storefront.slug)}
               </code>
               <p className="text-xs text-muted-foreground mt-1">
                 {storefront.status === "published"
