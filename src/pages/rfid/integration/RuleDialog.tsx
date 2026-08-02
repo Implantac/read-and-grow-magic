@@ -30,7 +30,7 @@ export function RuleDialog({ open, onClose, onSave, initial }: Props) {
     if (ok) onClose();
   };
 
-  const set = (k: keyof RuleFormData, v: any) => setForm(p => ({ ...p, [k]: v }));
+  const set = (k: keyof RuleFormData, v: RuleFormData[keyof RuleFormData]) => setForm(p => ({ ...p, [k]: v }));
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

@@ -24,7 +24,7 @@ export const useCanalStore = create<CanalState>()(
 );
 
 /** Apply the current canal filter to a Supabase query builder. */
-export function applyCanalFilter<Q extends { eq: (col: string, val: any) => Q }>(
+export function applyCanalFilter<Q extends { eq: (col: string, val: string) => Q }>(
   query: Q,
   canal: CanalFilter,
   branchId: string | null,

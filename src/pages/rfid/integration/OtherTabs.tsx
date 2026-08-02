@@ -3,9 +3,10 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Badge } from '@/ui/base/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
+import type { RFIDEvent } from '@/types/rfid';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 
-interface Props { events: any[]; }
+interface Props { events: RFIDEvent[]; }
 
 export function ActionLogTab({ events }: Props) {
   return (

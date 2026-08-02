@@ -1,3 +1,4 @@
+import { errorMessage } from "@/lib/errors";
 /**
  * Fase 1 — AI Insight Panel
  *
@@ -52,8 +53,8 @@ export function AIInsightPanel({ entityKey, value, delta, goal, horizon = "month
         if (err) throw err;
         if (data?.insight) setInsight(data.insight as AIInsight);
         else setError("empty");
-      } catch (e: any) {
-        if (!cancelled) setError(e?.message ?? "AI indisponível");
+      } catch (e: unknown) {
+        if (!cancelled) setError(errorMessage(e) || "AI indisponível");
       } finally {
         if (!cancelled) setLoading(false);
       }

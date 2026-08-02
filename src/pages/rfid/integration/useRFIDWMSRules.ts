@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import type { Tables } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { PackagePlus, PackageSearch, ArrowRightLeft, Layers } from 'lucide-react';
@@ -67,7 +68,7 @@ export function useRFIDWMSRules() {
       .order('priority', { ascending: false });
 
     if (error) { console.error(error); toast.error('Erro ao carregar regras'); }
-    else setRules((data || []).map((r: any) => ({
+    else setRules((data || []).map((r: Tables<'rfid_wms_rules'>) => ({
       id: r.id, name: r.name, description: r.description, enabled: r.enabled,
       triggerZone: r.trigger_zone, triggerEventType: r.trigger_event_type,
       triggerReaderCode: r.trigger_reader_code, wmsAction: r.wms_action,

@@ -1,8 +1,9 @@
 import { useMemo } from "react";
 import type { PriceFilter, SortMode } from "./constants";
+import type { Plugin } from "@/hooks/usePlugins";
 
 interface Args {
-  plugins: any[] | undefined;
+  plugins: Plugin[] | undefined;
   ratings: Record<string, { avg: number; count: number }> | undefined;
   search: string;
   category: string;

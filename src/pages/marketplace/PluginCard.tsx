@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader } from "@/ui/base/card";
 import { Badge } from "@/ui/base/badge";
 import { Button } from "@/ui/base/button";
 import { Switch } from "@/ui/base/switch";
+import type { Plugin } from "@/hooks/usePlugins";
 import {
   GitBranch, MessageSquare, PlayCircle, RefreshCw, Star, Trash2,
 } from "lucide-react";
@@ -15,7 +16,7 @@ interface InstallInfo {
 }
 
 interface Props {
-  plugin: any;
+  plugin: Plugin;
   install: InstallInfo | undefined;
   rating: { avg: number; count: number } | undefined;
   onOpenReviews: () => void;

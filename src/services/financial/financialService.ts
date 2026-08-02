@@ -98,7 +98,7 @@ class FinancialService extends BaseService<'financial_ledger'> {
   }
 
   // Payments
-  async createPayment(payment: any): Promise<any> {
+  async createPayment(payment: TablesInsert<'payment_records'>): Promise<Tables<'payment_records'>> {
     const { data, error } = await supabase
       .from('payment_records')
       .insert(payment)

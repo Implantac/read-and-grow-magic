@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { useInventory } from '@/hooks/inventory/useInventoryQuery';
+import type { Tables } from '@/integrations/supabase/types';
 import type {
   StockMovement,
   MovementType,
@@ -8,12 +9,14 @@ import type {
   MovementFilters,
 } from '@/types/inventory';
 
+type MovementRow = Tables<'stock_movements'> & { products?: { code?: string; name?: string } | null };
+
 export function useMovementsData() {
   const { movements: dbMovements, movementsLoading: loading } = useInventory();
 
   const movements = useMemo<StockMovement[]>(
     () =>
-      (dbMovements || []).map((m: any) => ({
+      (dbMovements || []).map((m: MovementRow) => ({
         id: m.id,
         documentNumber: m.document_number,
         productId: m.product_id || '',

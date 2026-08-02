@@ -22,7 +22,7 @@ import { usePurchasing } from '@/hooks/purchasing/usePurchasingQuery';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { FileSearch } from 'lucide-react';
 
-const priorityConfig: any = {
+const priorityConfig: Record<string, { label: string; className: string }> = {
   low: { label: 'Baixa', className: 'bg-gray-100 text-gray-800' },
   medium: { label: 'Média', className: 'bg-blue-100 text-blue-800' },
   high: { label: 'Alta', className: 'bg-orange-100 text-orange-800' },
