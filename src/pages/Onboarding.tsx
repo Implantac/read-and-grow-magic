@@ -10,6 +10,7 @@ import { Label } from '@/ui/base/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/ui/base/select';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
+import { errorMessage } from '@/lib/errors';
 
 // CNPJ: 14 dígitos numéricos (com ou sem máscara)
 const cnpjRegex = /^\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2}$/;
@@ -108,11 +109,11 @@ export default function Onboarding() {
       toastSuccess('Empresa criada!', 'Seu trial de 14 dias começou agora.');
       // Force reload so all stores rehydrate with new tenant context
       window.location.href = '/dashboard';
-    } catch (err: any) {
-      const msg =
-        err?.message?.includes('user_already_in_tenant')
-          ? 'Você já está vinculado a uma empresa.'
-          : err?.message || 'Não foi possível concluir o cadastro.';
+    } catch (err: unknown) {
+      const raw = errorMessage(err);
+      const msg = raw.includes('user_already_in_tenant')
+        ? 'Você já está vinculado a uma empresa.'
+        : raw || 'Não foi possível concluir o cadastro.';
       toastError(msg);
     } finally {
       setLoading(false);

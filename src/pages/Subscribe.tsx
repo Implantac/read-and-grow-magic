@@ -14,6 +14,7 @@ import { useCurrentPlan } from '@/hooks/system/useCurrentPlan';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { moduleLabel } from '@/lib/moduleLabels';
 import { useQueryClient } from '@tanstack/react-query';
+import { errorMessage } from '@/lib/errors';
 
 type Cycle = 'monthly' | 'annual';
 
@@ -114,10 +115,10 @@ export default function Subscribe() {
       });
       await qc.invalidateQueries({ queryKey: ['subscription_invoices'] });
       navigate('/billing/consumo');
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast({
         title: 'Não foi possível iniciar a assinatura',
-        description: err?.message ?? 'Tente novamente em instantes.',
+        description: errorMessage(err) || 'Tente novamente em instantes.',
         variant: 'destructive',
       });
     } finally {

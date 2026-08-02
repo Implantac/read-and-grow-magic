@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { errorMessage } from '@/lib/errors';
 
 export interface AIProductionInsight {
   id: string;
@@ -41,9 +42,9 @@ export function useAIProductionInsights() {
       if (error) throw error;
       toast.success('Insights gerados pela IA');
       await fetchData();
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
-      toast.error('Erro ao gerar insights: ' + (e.message || ''));
+      toast.error('Erro ao gerar insights: ' + errorMessage(e));
     }
     setGenerating(false);
   };

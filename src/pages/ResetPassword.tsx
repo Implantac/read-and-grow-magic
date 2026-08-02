@@ -7,6 +7,7 @@ import { Input } from '@/ui/base/input';
 import { Label } from '@/ui/base/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/ui/base/card';
 import { toastSuccess, toastError } from '@/lib/toastHelpers';
+import { errorMessage } from '@/lib/errors';
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -42,8 +43,8 @@ export default function ResetPassword() {
       if (error) throw error;
       toastSuccess('Senha atualizada!', 'Sua senha foi redefinida com sucesso.');
       navigate('/login');
-    } catch (error: any) {
-      toastError(error.message);
+    } catch (error: unknown) {
+      toastError(errorMessage(error));
     }
     setIsLoading(false);
   };

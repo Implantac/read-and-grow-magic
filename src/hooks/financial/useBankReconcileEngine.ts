@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { errorMessage } from '@/lib/errors';
 
 export type MatchSuggestion = {
   id: string;
@@ -44,8 +45,8 @@ export function useBankReconcileEngine() {
       });
       await load();
       return r;
-    } catch (err: any) {
-      toast.error('Falha na conciliação', { description: err.message });
+    } catch (err: unknown) {
+      toast.error('Falha na conciliação', { description: errorMessage(err) });
     } finally {
       setRunning(false);
     }

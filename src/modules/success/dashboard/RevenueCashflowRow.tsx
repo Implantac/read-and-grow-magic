@@ -2,8 +2,9 @@ import { TrendingUp, Wallet } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/ui/base/card";
 import { cn } from "@/lib/utils";
 import { brl, RevenueBarChart } from "./utils";
+import type { SuccessMonthlyRevenue, SuccessCashFlow90d } from "../types";
 
-export function RevenueCashflowRow({ revenue12m, cashflow }: { revenue12m: any; cashflow: any }) {
+export function RevenueCashflowRow({ revenue12m, cashflow }: { revenue12m: SuccessMonthlyRevenue[]; cashflow: SuccessCashFlow90d }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <Card className="lg:col-span-2">
