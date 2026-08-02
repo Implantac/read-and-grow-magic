@@ -114,3 +114,17 @@ Classificação das 85 funções `SECURITY DEFINER` executáveis por usuário lo
 
 **Resultado:** avisos do linter do banco **91 → 77**. As 71 restantes são RPCs de negócio
 legitimamente chamadas pelo front com escopo de empresa validado dentro da função.
+
+### LGPD-GA (concluído)
+Tela **Privacidade e Dados (LGPD)** em `/admin/privacidade` (`src/modules/admin/Privacidade.tsx`),
+ligada ao menu Administração:
+
+- **Exportação** (art. 18 II/V): chama `lgpd-export` e baixa o JSON do titular.
+- **Exclusão/anonimização** (art. 18 VI): confirmação por digitação "EXCLUIR" → `lgpd-delete`,
+  encerra sessão; documentos fiscais retidos 5 anos (art. 16 II).
+- **Consentimentos**: termos, política, marketing e telemetria — cada mudança grava nova linha
+  em `lgpd_consents` com versão e user-agent (trilha imutável).
+- **Histórico** de solicitações lido de `lgpd_data_requests`.
+
+Linter do banco: única pendência INFO restante é `internal_fn_secrets` (RLS sem policy —
+intencional: tabela acessível apenas por `service_role`).
