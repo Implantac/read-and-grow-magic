@@ -3,10 +3,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
 import { Skeleton } from '@/ui/base/skeleton';
 
+export interface RFIDEventLike {
+  id: string;
+  event_type?: string | null;
+  tag_epc?: string | null;
+  reader_code?: string | null;
+  zone?: string | null;
+  product_name?: string | null;
+  created_at?: string | null;
+  read_at?: string | null;
+}
+
 const typeLabels: Record<string, string> = { read: 'Leitura', entry: 'Entrada', exit: 'Saída', transfer: 'Transfer.', inventory: 'Inventário' };
 const typeColors: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = { read: 'secondary', entry: 'default', exit: 'destructive', transfer: 'outline', inventory: 'default' };
 
-export function RecentEvents({ loading, events }: { loading: boolean; events: any[] }) {
+export function RecentEvents({ loading, events }: { loading: boolean; events: RFIDEventLike[] }) {
   return (
     <Card>
       <CardHeader className="pb-2">

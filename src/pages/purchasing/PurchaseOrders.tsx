@@ -29,7 +29,7 @@ import { KPICard } from '@/shared/components/KPICard';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { ClipboardList } from 'lucide-react';
 
-const priorityConfig: any = {
+const priorityConfig: Record<string, { label: string; className: string }> = {
   low: { label: 'Baixa', className: 'bg-muted text-muted-foreground' },
   medium: { label: 'Média', className: 'bg-info/10 text-info' },
   high: { label: 'Alta', className: 'bg-warning/10 text-warning' },
