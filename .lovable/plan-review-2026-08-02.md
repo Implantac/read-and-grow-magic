@@ -90,3 +90,27 @@ foram **efetivamente executados** — a regressão apontada em 30/jul foi revert
 O que resta para produção é **externo ao código**: certificado fiscal, chave do PSP e um
 tenant de teste. A recomendação é não abrir novas frentes de funcionalidade até fechar
 os itens 1 a 3.
+
+---
+
+## 8. Execução pós-revisão
+
+### PERF-GUARD (concluído)
+`src/lib/queryLimits.ts` com `LIST_LIMIT` (500), `REPORT_LIMIT` (5000) e `LEDGER_LIMIT` (2000)
+aplicados às 14 consultas de alto volume; domínios das lojas movidos para `src/config/env.ts`.
+
+### DB-SURFACE — onda 1 (concluído)
+Classificação das 85 funções `SECURITY DEFINER` executáveis por usuário logado, cruzando
+`pg_proc` com as chamadas reais em `src/` e `supabase/functions/`:
+
+- **(a) mantidas** — RPCs de negócio chamadas pelo app, todas com validação de tenant interna.
+- **(b) mantidas por dependência de RLS** — `get_user_branch_id`, `is_matriz_viewer`
+  (referenciadas em políticas; revogar quebraria leitura).
+- **(c) fechadas** — EXECUTE revogado de `PUBLIC`/`anon`/`authenticated`, mantido só em
+  `service_role`: `calculate_difal`, `calculate_icms_st`, `can_access_company`,
+  `cx_ensure_default_weights`, `get_usage_summary`, `get_user_branch_ids`, `has_branch_access`,
+  `has_module_access`, `purchase_approval_sla_status`, `recompute_stock_balance`,
+  `sre_actions_due_scan`, `sre_current_oncall`, `sre_postmortems_by_slo`, `sre_runbooks_for_slo`.
+
+**Resultado:** avisos do linter do banco **91 → 77**. As 71 restantes são RPCs de negócio
+legitimamente chamadas pelo front com escopo de empresa validado dentro da função.
