@@ -10,6 +10,28 @@ import { useSalesFunnel } from '@/hooks/commercial/useSalesFunnel';
 import { useAISalesMessage } from '@/hooks/commercial/useFollowUpTasks';
 import { Brain, Flame, Phone, MessageSquare, AlertTriangle, TrendingUp, UserX, Zap, Target, Loader2, Sparkles, Copy, Clock } from 'lucide-react';
 
+interface AIPriorityAction {
+  action_type?: string;
+  urgency?: string;
+  order?: number;
+  title?: string;
+  reason?: string;
+  expected_impact?: string;
+  suggested_message?: string;
+}
+interface AIRecoveryTarget {
+  client_name?: string;
+  days_inactive?: number;
+  approach?: string;
+  message?: string;
+}
+interface AIDailyPlan {
+  summary?: string;
+  priority_actions?: AIPriorityAction[];
+  recovery_targets?: AIRecoveryTarget[];
+  tips?: string[];
+}
+
 const today = new Date().toISOString().split('T')[0];
 
 export default function DecisionEngineTab() {
@@ -18,7 +40,7 @@ export default function DecisionEngineTab() {
   const { data: alerts = [] } = useCommercialAlerts('active');
   const { data: funnel = [] } = useSalesFunnel();
   const aiMessage = useAISalesMessage();
-  const [aiPlan, setAiPlan] = useState<any>(null);
+  const [aiPlan, setAiPlan] = useState<AIDailyPlan | null>(null);
   const [loadingPlan, setLoadingPlan] = useState(false);
 
   const overdue = pendingTasks.filter(t => t.scheduled_date < today);
@@ -165,10 +187,10 @@ export default function DecisionEngineTab() {
               )}
 
               {/* Priority Actions */}
-              {aiPlan.priority_actions?.length > 0 && (
+              {(aiPlan.priority_actions?.length ?? 0) > 0 && (
                 <div className="space-y-2">
                   <h4 className="text-xs font-semibold uppercase text-muted-foreground">Ações Prioritárias</h4>
-                  {aiPlan.priority_actions.map((a: any, i: number) => {
+                  {aiPlan.priority_actions!.map((a: AIPriorityAction, i: number) => {
                     const urgencyColors: Record<string, string> = { critical: 'border-l-destructive', high: 'border-l-amber-500', medium: 'border-l-primary' };
                     const actionIcons: Record<string, typeof Phone> = { call: Phone, whatsapp: MessageSquare, proposal: Target };
                     const Icon = actionIcons[a.action_type] || Zap;
@@ -191,7 +213,7 @@ export default function DecisionEngineTab() {
                         {a.suggested_message && (
                           <div className="mt-2 p-2 rounded bg-muted/50 text-xs">
                             <p className="italic">"{a.suggested_message}"</p>
-                            <Button size="sm" variant="ghost" className="h-6 text-[10px] mt-1 px-2" onClick={() => navigator.clipboard.writeText(a.suggested_message)}>
+                            <Button size="sm" variant="ghost" className="h-6 text-[10px] mt-1 px-2" onClick={() => navigator.clipboard.writeText(a.suggested_message ?? '')}>
                               <Copy className="h-3 w-3 mr-1" />Copiar
                             </Button>
                           </div>
@@ -203,10 +225,10 @@ export default function DecisionEngineTab() {
               )}
 
               {/* Recovery Targets */}
-              {aiPlan.recovery_targets?.length > 0 && (
+              {(aiPlan.recovery_targets?.length ?? 0) > 0 && (
                 <div className="space-y-2">
                   <h4 className="text-xs font-semibold uppercase text-muted-foreground">♻️ Alvos de Recuperação</h4>
-                  {aiPlan.recovery_targets.map((r: any, i: number) => (
+                  {aiPlan.recovery_targets!.map((r: AIRecoveryTarget, i: number) => (
                     <div key={i} className="p-3 rounded-lg border border-destructive/20 bg-destructive/5">
                       <div className="flex items-center justify-between">
                         <div>
@@ -217,7 +239,7 @@ export default function DecisionEngineTab() {
                       {r.message && (
                         <div className="mt-2 p-2 rounded bg-muted/50 text-xs">
                           <p className="italic">"{r.message}"</p>
-                          <Button size="sm" variant="ghost" className="h-6 text-[10px] mt-1 px-2" onClick={() => navigator.clipboard.writeText(r.message)}>
+                          <Button size="sm" variant="ghost" className="h-6 text-[10px] mt-1 px-2" onClick={() => navigator.clipboard.writeText(r.message ?? '')}>
                             <Copy className="h-3 w-3 mr-1" />Copiar
                           </Button>
                         </div>
@@ -228,11 +250,11 @@ export default function DecisionEngineTab() {
               )}
 
               {/* Tips */}
-              {aiPlan.tips?.length > 0 && (
+              {(aiPlan.tips?.length ?? 0) > 0 && (
                 <div className="p-3 rounded-lg bg-muted/50">
                   <h4 className="text-xs font-semibold uppercase text-muted-foreground mb-2">💡 Dicas Estratégicas</h4>
                   <ul className="space-y-1">
-                    {aiPlan.tips.map((tip: string, i: number) => (
+                    {aiPlan.tips!.map((tip: string, i: number) => (
                       <li key={i} className="text-xs text-muted-foreground flex items-start gap-2">
                         <span className="text-primary">•</span> {tip}
                       </li>

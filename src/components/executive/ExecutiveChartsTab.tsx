@@ -167,7 +167,7 @@ export function ExecutiveChartsTab({ data }: Props) {
               <p className="text-xs text-muted-foreground text-center py-8">Sem dados de vendedores</p>
             ) : (
               <div className="space-y-3">
-                {salesRepStats.slice(0, 5).map((rep: any, i: number) => (
+                {salesRepStats.slice(0, 5).map((rep, i) => (
                   <div key={rep.id} className="flex items-center gap-3">
                     <span className="text-xs font-bold text-muted-foreground w-5">{i + 1}.</span>
                     <div className="flex-1 min-w-0">
@@ -189,7 +189,7 @@ export function ExecutiveChartsTab({ data }: Props) {
             </CardHeader>
             <CardContent>
               <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
-                {funnelData.map((f: any) => (
+                {funnelData.map((f) => (
                   <div key={f.stage} className="rounded-lg border p-3 text-center">
                     <p className="text-xs text-muted-foreground capitalize">{f.stage}</p>
                     <p className="text-lg font-bold">{f.count}</p>
