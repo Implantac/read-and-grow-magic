@@ -10,7 +10,10 @@ import { Switch } from '@/ui/base/switch';
 import { Label } from '@/ui/base/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { EmptyState } from '@/shared/components/EmptyState';
-import { ConfirmDialog } from '@/shared/components/ConfirmDialog';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/ui/base/alert-dialog';
 import { ShieldCheck, Download, Trash2, FileText, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
