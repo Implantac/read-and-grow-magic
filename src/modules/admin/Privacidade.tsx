@@ -269,23 +269,32 @@ export default function Privacidade() {
         </CardContent>
       </Card>
 
-      <ConfirmDialog
-        open={confirmOpen}
-        onOpenChange={(v) => { setConfirmOpen(v); if (!v) setConfirmText(''); }}
-        title="Excluir permanentemente seus dados?"
-        description="Esta ação anonimiza seu perfil, encerra todas as sessões e não pode ser desfeita. Digite EXCLUIR para confirmar."
-        confirmLabel={deleting ? 'Processando…' : 'Confirmar exclusão'}
-        variant="destructive"
-        onConfirm={handleDelete}
-        disabled={confirmText !== 'EXCLUIR' || deleting}
-      >
-        <Input
-          value={confirmText}
-          onChange={(e) => setConfirmText(e.target.value)}
-          placeholder="EXCLUIR"
-          aria-label="Confirmação de exclusão"
-        />
-      </ConfirmDialog>
+      <AlertDialog open={confirmOpen} onOpenChange={(v) => { setConfirmOpen(v); if (!v) setConfirmText(''); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir permanentemente seus dados?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação anonimiza seu perfil, encerra todas as sessões e não pode ser desfeita.
+              Digite EXCLUIR para confirmar.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <Input
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            placeholder="EXCLUIR"
+            aria-label="Confirmação de exclusão"
+          />
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={confirmText !== 'EXCLUIR' || deleting}
+              onClick={(e) => { e.preventDefault(); void handleDelete(); }}
+            >
+              {deleting ? 'Processando…' : 'Confirmar exclusão'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </PageContainer>
   );
 }
