@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useCanalStore } from '@/stores/useCanalStore';
+import { REPORT_LIMIT } from '@/lib/queryLimits';
 
 export interface ReconcileRow {
   product_id: string;
@@ -36,6 +37,7 @@ export function useBillingStockReconcile(params: ReconcileParams) {
         .lte('issue_date', toIso);
       if (canal !== 'CONSOLIDADO') nfeQ = nfeQ.eq('canal_operacional', canal);
       if (lojaId) nfeQ = nfeQ.eq('branch_id', lojaId);
+      nfeQ = nfeQ.limit(REPORT_LIMIT);
 
       // NFCe items (Varejo)
       let nfceQ = supabase
@@ -46,6 +48,7 @@ export function useBillingStockReconcile(params: ReconcileParams) {
         .lte('issue_date', toIso);
       if (canal !== 'CONSOLIDADO') nfceQ = nfceQ.eq('canal_operacional', canal);
       if (lojaId) nfceQ = nfceQ.eq('branch_id', lojaId);
+      nfceQ = nfceQ.limit(REPORT_LIMIT);
 
       // Stock movements OUT
       let smQ = supabase
@@ -56,6 +59,7 @@ export function useBillingStockReconcile(params: ReconcileParams) {
         .lte('created_at', toIso);
       if (canal !== 'CONSOLIDADO') smQ = smQ.eq('canal_operacional', canal);
       if (lojaId) smQ = smQ.eq('branch_id', lojaId);
+      smQ = smQ.limit(REPORT_LIMIT);
 
       const [nfeR, nfceR, smR] = await Promise.all([nfeQ, nfceQ, smQ]);
       if (nfeR.error) throw nfeR.error;

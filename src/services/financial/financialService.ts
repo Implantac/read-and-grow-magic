@@ -2,6 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BaseService } from '../shared/baseService';
 import type { AccountPayable, AccountReceivable } from '@/types/financial';
 import type { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
+import { LIST_LIMIT } from '@/lib/queryLimits';
 
 class FinancialService extends BaseService<'financial_ledger'> {
   constructor() {
@@ -13,7 +14,8 @@ class FinancialService extends BaseService<'financial_ledger'> {
     const { data, error } = await supabase
       .from('accounts_receivable')
       .select('*')
-      .order('due_date', { ascending: true });
+      .order('due_date', { ascending: true })
+      .limit(LIST_LIMIT);
     if (error) throw error;
     return (data || []) as AccountReceivable[];
   }
@@ -52,7 +54,8 @@ class FinancialService extends BaseService<'financial_ledger'> {
     const { data, error } = await supabase
       .from('accounts_payable')
       .select('*')
-      .order('due_date', { ascending: true });
+      .order('due_date', { ascending: true })
+      .limit(LIST_LIMIT);
     if (error) throw error;
     return (data || []) as AccountPayable[];
   }

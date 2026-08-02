@@ -9,6 +9,7 @@ import { Download, TrendingUp, ShoppingBag, Users, Target } from 'lucide-react';
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
+import { REPORT_LIMIT } from '@/lib/queryLimits';
 
 const formatCurrency = (value: number) => formatBRLCompact(value);
 export default function SalesReport() {
@@ -22,7 +23,8 @@ export default function SalesReport() {
       try {
         const { data, error } = await supabase
           .from('sales')
-          .select('total');
+          .select('total')
+          .limit(REPORT_LIMIT);
 
         if (error) throw error;
         const count = data?.length || 0;

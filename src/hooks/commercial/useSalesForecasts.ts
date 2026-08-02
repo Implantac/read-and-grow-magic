@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toastSuccess } from '@/lib/toastHelpers';
+import { LIST_LIMIT, REPORT_LIMIT } from '@/lib/queryLimits';
 
 const STAGE_WEIGHTS: Record<string, number> = {
   lead: 0.10,
@@ -15,7 +16,7 @@ export function useSalesForecasts(period?: string) {
   return useQuery({
     queryKey: ['sales-forecasts', period],
     queryFn: async () => {
-      let query = supabase.from('sales_forecasts').select('*').order('snapshot_date', { ascending: false });
+      let query = supabase.from('sales_forecasts').select('*').order('snapshot_date', { ascending: false }).limit(LIST_LIMIT);
       if (period) query = query.eq('period', period);
       const { data, error } = await query;
       if (error) throw error;
@@ -41,7 +42,8 @@ export function useForecastCalculation(period: string) {
         .from('orders')
         .select('total, status, sales_rep_name, sales_rep_id')
         .gte('date', startOfMonth)
-        .in('status', ['confirmed', 'approved', 'invoiced', 'delivered']);
+        .in('status', ['confirmed', 'approved', 'invoiced', 'delivered'])
+        .limit(REPORT_LIMIT);
 
       const confirmedValue = orders?.reduce((sum, o) => sum + (o.total || 0), 0) || 0;
 

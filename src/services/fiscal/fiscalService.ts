@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { NFe, NFCe } from '@/types/fiscal';
+import { LIST_LIMIT } from '@/lib/queryLimits';
 
 export class FiscalService {
   private readonly supabase = supabase;
@@ -9,7 +10,8 @@ export class FiscalService {
     const { data, error } = await this.supabase
       .from('nfe')
       .select('*')
-      .order('issue_date', { ascending: false });
+      .order('issue_date', { ascending: false })
+      .limit(LIST_LIMIT);
 
     if (error) throw error;
 

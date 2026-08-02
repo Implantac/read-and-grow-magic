@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { BaseService } from '../shared/baseService';
 import type { CreateOrderInput } from '@/hooks/commercial/orders/types';
+import { LIST_LIMIT } from '@/lib/queryLimits';
 
 export class OrderService extends BaseService<'orders'> {
   constructor() {
@@ -11,7 +12,8 @@ export class OrderService extends BaseService<'orders'> {
     const { data, error } = await supabase
       .from('orders')
       .select('*, order_items(*)')
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(LIST_LIMIT);
 
     if (error) throw error;
     return (data ?? []).map((o) => ({
