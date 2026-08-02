@@ -1,3 +1,4 @@
+import { errorMessage } from "@/lib/errors";
 /**
  * Fase 1 — AI Insight Panel
  *
