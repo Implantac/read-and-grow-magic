@@ -128,3 +128,14 @@ ligada ao menu Administração:
 
 Linter do banco: única pendência INFO restante é `internal_fn_secrets` (RLS sem policy —
 intencional: tabela acessível apenas por `service_role`).
+
+### OPS-READY (concluído — 03/08)
+- `.lovable/ops/runbooks.md`: 6 runbooks (fiscal, banco lento, webhook de cobrança, divergência de
+  estoque, RLS/acesso, PDV offline) + matriz de severidade e escalonamento.
+- `.lovable/ops/backup-restore.md`: política de backup/retenção, ensaio trimestral de restauração
+  com metas RTO 4 h / RPO 15 min e ordem de recuperação em desastre.
+- `scripts/load-test.mjs`: teste de carga sem dependências (p50/p90/p95/p99, erro, throughput),
+  falha o processo fora da meta (p95 ≤ 2 s, erro ≤ 0,5 %). Smoke local: p95 32 ms, 0 % de erro.
+
+Restam apenas os itens externos: chaves do PSP (BILLING-ON), certificado A1 (S6a) e tenant de
+teste para E2E mutante (E2E-MUT).
