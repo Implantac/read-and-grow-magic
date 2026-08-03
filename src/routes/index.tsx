@@ -1,4 +1,4 @@
-// prossiga
+// publique o projeto
 import { Route } from 'react-router-dom';
 import { lazy } from 'react';
 
