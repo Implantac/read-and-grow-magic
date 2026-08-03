@@ -6,7 +6,7 @@ const SecurityAudit = lazy(() => import("../modules/admin/SecurityAudit"));
 const CrossModuleAudit = lazy(() => import("../modules/admin/CrossModuleAudit"));
 
 /**
- * Verify that the Admin menu correctly links to the Privacidade (LGPD) and Auditing pages across all routes.
+ * Add an end-to-end test to verify that the Admin menu links to the Privacidade (LGPD) and Auditing pages correctly across all routes.
  */
 export const EvolutionAuditRoutes = [
   <Route key="maturity" path="evolucao/maturidade" element={<MaturityAudit />} />,
