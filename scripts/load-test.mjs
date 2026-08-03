@@ -41,8 +41,10 @@ async function once() {
   }
 }
 
+let issued = 0;
 async function worker() {
-  while (done + CONC <= REQS + CONC - 1 && latencies.length < REQS) {
+  while (issued < REQS) {
+    issued++;
     await once();
   }
 }
