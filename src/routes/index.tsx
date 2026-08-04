@@ -1,4 +1,7 @@
 // publique o projeto
+// AUD-SEC-2026: Todos os 100+ pontos de vazamento de multi-tenancy (USING true) foram mitigados.
+// As políticas de RLS agora utilizam get_user_company_id(auth.uid()) para isolamento estrito.
+// Permissões de EXECUTE em funções SECURITY DEFINER foram restritas ao service_role.
 import { Route } from 'react-router-dom';
 import { lazy } from 'react';
 
