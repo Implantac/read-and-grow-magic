@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
 import { useAuth } from '@/hooks/system/useAuth';
@@ -9,6 +10,7 @@ import { SEGMENTS } from '@/config/adaptive';
 import { navigationSections } from '@/config/navigation';
 import { TooltipProvider } from '@/ui/base/tooltip';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Input } from '@/ui/base/input';
 
 import { NavItemComponent } from './sidebar/NavItemComponent';
 import { CustomEntitiesNav } from './sidebar/CustomEntitiesNav';
@@ -25,12 +27,54 @@ export function Sidebar() {
   const { segment } = useEnterprise();
 
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) =>
       prev.includes(title) ? prev.filter((item) => item !== title) : [...prev, title]
     );
   };
+
+  const filteredSections = useMemo(() => {
+    if (!searchQuery.trim()) return navigationSections;
+
+    const query = searchQuery.toLowerCase().trim();
+    
+    return navigationSections.map(section => {
+      const filteredItems = section.items.filter(item => {
+        const matchesTitle = item.title.toLowerCase().includes(query);
+        const matchesHref = item.href.toLowerCase().includes(query);
+        const matchesChildren = item.children?.some(child => 
+          child.title.toLowerCase().includes(query) || 
+          child.href.toLowerCase().includes(query)
+        );
+        
+        return matchesTitle || matchesHref || matchesChildren;
+      });
+
+      if (filteredItems.length === 0) return null;
+      
+      return {
+        ...section,
+        items: filteredItems
+      };
+    }).filter(Boolean) as typeof navigationSections;
+  }, [searchQuery]);
+
+  // Auto-expand items when searching
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      const toExpand: string[] = [];
+      filteredSections.forEach(section => {
+        section.items.forEach(item => {
+          if (item.children && item.children.length > 0) {
+            toExpand.push(item.title);
+          }
+        });
+      });
+      setExpandedItems(prev => Array.from(new Set([...prev, ...toExpand])));
+    }
+  }, [searchQuery, filteredSections]);
 
   const isActive = (href: string) => location.pathname === href;
   const isParentActive = (href: string) => {
@@ -99,9 +143,24 @@ export function Sidebar() {
       >
         <SidebarHeader collapsed={sidebarCollapsed} />
 
+        {/* Search Bar */}
+        {!sidebarCollapsed && (
+          <div className="px-4 py-3 animate-fade-in">
+            <div className="relative group">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-sidebar-foreground/30 group-focus-within:text-primary transition-colors" />
+              <Input
+                placeholder="Buscar menu ou rota..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-8 pl-8 pr-2 bg-sidebar-foreground/[0.03] border-sidebar-border/50 text-[12px] focus-visible:ring-primary/30 placeholder:text-sidebar-foreground/20 rounded-lg transition-all"
+              />
+            </div>
+          </div>
+        )}
+
         {/* Navigation Content */}
-        <nav aria-label="Módulos do sistema" className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin px-3 py-4 space-y-6">
-          {navigationSections.filter((section) => {
+        <nav aria-label="Módulos do sistema" className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin px-3 py-2 space-y-6">
+          {filteredSections.filter((section) => {
             if (!segment) return true;
             const segmentConfig = SEGMENTS[segment] || SEGMENTS.general;
             const allowedSections = segmentConfig.allowedSections;
