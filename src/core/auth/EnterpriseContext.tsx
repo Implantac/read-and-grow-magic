@@ -88,11 +88,11 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
         const { data: hierarchyData, error: hierarchyError } = await supabase
           .from('vw_organizational_hierarchy')
           .select('*')
-          .limit(1)
           .maybeSingle();
 
         if (hierarchyError) {
           console.error('Error fetching hierarchy:', hierarchyError);
+          // Don't throw here, allow the UI to render with null tenant if it's a system page
         }
 
         const hierarchy = hierarchyData as HierarchyRow | null;
@@ -111,14 +111,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       }
     } catch (error: unknown) {
       const err = error as { message?: string; status?: number; name?: string };
-      const isAuthMissing =
-        err?.name === 'AuthSessionMissingError' ||
-        err?.message?.includes('Auth session missing') ||
-        err?.message?.includes('JWT') ||
-        err?.status === 401;
-      if (!isAuthMissing) {
-        console.error('Error loading enterprise context:', error);
-      }
+      console.error('Enterprise context error:', err);
     } finally {
       setIsLoading(false);
     }
