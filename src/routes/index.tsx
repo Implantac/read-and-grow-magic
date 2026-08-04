@@ -33,7 +33,14 @@
  * - **Correção**: Implementado `PERF-GUARD` com constantes de limite centralizadas e forçadas em hooks de alto volume.
  * - **Evidência**: `src/lib/queryLimits.ts` e integração em `useDRE.ts`, `useOrders.ts`.
  * 
+ * ### [MÉDIA] Ausência de Scoping por Filial em Reabastecimento
+ * - **Achado**: A tabela `replenishment_tasks` não possuía `branch_id`, dificultando a filtragem e RLS em operações multi-filial.
+ * - **Impacto**: Possível confusão operacional em empresas com múltiplos armazéns independentes.
+ * - **Correção**: Executada migração para adicionar `branch_id` e implementada ferramenta `SmartReplenishment` para balanceamento inteligente entre lojas.
+ * - **Evidência**: Migration 20260804 e novo componente `src/modules/wms/components/SmartReplenishment.tsx`.
+ * 
  * ## 3. CONFORMIDADE LGPD
+
  * 
  * - **Módulo de Privacidade**: Implementado em `src/modules/admin/Privacidade.tsx`.
  * - **Direitos do Titular**: Funcionalidades de Exportação (Portabilidade) e Exclusão/Anonimização validadas.

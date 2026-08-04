@@ -15342,6 +15342,7 @@ export type Database = {
       replenishment_tasks: {
         Row: {
           assigned_to: string | null
+          branch_id: string | null
           company_id: string
           completed_at: string | null
           created_at: string
@@ -15366,6 +15367,7 @@ export type Database = {
         }
         Insert: {
           assigned_to?: string | null
+          branch_id?: string | null
           company_id?: string
           completed_at?: string | null
           created_at?: string
@@ -15390,6 +15392,7 @@ export type Database = {
         }
         Update: {
           assigned_to?: string | null
+          branch_id?: string | null
           company_id?: string
           completed_at?: string | null
           created_at?: string
@@ -15413,6 +15416,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "replenishment_tasks_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "replenishment_tasks_product_id_fkey"
             columns: ["product_id"]
