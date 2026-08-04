@@ -9,6 +9,12 @@
  * 
  * ## 2. LISTA DE ACHADOS E CORREÇÕES
  * 
+ * ### [UX] Acesso Rápido via Teclado (Ctrl+K)
+ * - **Achado**: Navegação em um ERP com centenas de módulos pode ser lenta via mouse.
+ * - **Impacto**: Redução da produtividade operacional.
+ * - **Correção**: Implementado atalho Ctrl+K (Cmd+K no Mac) para focar automaticamente a busca da sidebar e facilitar o acesso rápido aos módulos.
+ * - **Evidência**: Atualização em `src/core/layout/Sidebar.tsx` com `useRef` e `keydown` event listener.
+ * 
  * ### [ALTA] Exposição de Funções Internas (Privileged RPCs)
  * - **Achado**: Diversas funções `SECURITY DEFINER` (ex: `handle_new_user`, `get_current_plan`) estavam com permissão `EXECUTE` para a role `PUBLIC`.
  * - **Impacto**: Possibilidade de execução indevida por usuários anônimos, permitindo manipulação de dados sensíveis ou escalação de privilégios.
