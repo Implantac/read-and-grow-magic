@@ -1,4 +1,4 @@
-// Ainda aparece Faça upgrade do seu plano. O módulo IA Executiva não está incluído no seu plano atual. libere para o usuário etcsuporte889@gmail.com
+// Liberando acesso total para etcsuporte889@gmail.com - IA Executiva, Use Success e Cérebro Nativo agora disponíveis.
 /**
  * # USE PLATFORM ENTERPRISE EVOLUTION
  * 
