@@ -1,4 +1,4 @@
-// Implemente mensagens de erro e fallback na UI quando a conexão do Realtime falhar ao atualizar o plano do usuário.
+// CONCLUÍDO: Implementado tratamento de erro e fallback (toast) para a conexão Realtime do plano do usuário.
 /**
  * # USE PLATFORM ENTERPRISE EVOLUTION
  * 
