@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/stores/useAppStore';
@@ -20,6 +20,7 @@ import { useMobileFocusTrap } from './sidebar/useMobileFocusTrap';
 
 export function Sidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { sidebarCollapsed: rawCollapsed, sidebarMobileOpen, setSidebarMobileOpen, user } = useAppStore();
   const isMobile = useIsMobile();
   const sidebarCollapsed = isMobile ? false : rawCollapsed;
@@ -28,6 +29,7 @@ export function Sidebar() {
 
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const toggleExpanded = (title: string) => {
@@ -60,6 +62,25 @@ export function Sidebar() {
         items: filteredItems
       };
     }).filter(Boolean) as typeof navigationSections;
+  }, [searchQuery]);
+
+  const flatItems = useMemo(() => {
+    const items: any[] = [];
+    filteredSections.forEach(section => {
+      section.items.forEach(item => {
+        items.push(item);
+        if (item.children && expandedItems.includes(item.title)) {
+          item.children.forEach(child => {
+            items.push({ ...child, isChild: true });
+          });
+        }
+      });
+    });
+    return items;
+  }, [filteredSections, expandedItems]);
+
+  useEffect(() => {
+    setSelectedIndex(-1);
   }, [searchQuery]);
 
   // Auto-expand items when searching
@@ -128,6 +149,28 @@ export function Sidebar() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [sidebarCollapsed]);
 
+  const handleSearchKeyDown = (e: React.KeyboardEvent) => {
+    if (flatItems.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSelectedIndex(prev => (prev < flatItems.length - 1 ? prev + 1 : prev));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSelectedIndex(prev => (prev > 0 ? prev - 1 : prev));
+    } else if (e.key === 'Enter' && selectedIndex >= 0) {
+      e.preventDefault();
+      const item = flatItems[selectedIndex];
+      if (item.href) {
+        navigate(item.href);
+        setSearchQuery('');
+        setSelectedIndex(-1);
+      } else if (item.children) {
+        toggleExpanded(item.title);
+      }
+    }
+  };
+
   return (
     <TooltipProvider delayDuration={0}>
       {/* Mobile backdrop */}
@@ -170,6 +213,7 @@ export function Sidebar() {
                   placeholder="Buscar menu ou rota... (Ctrl+K)"
                   value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
                 className="h-8 pl-8 pr-2 bg-sidebar-foreground/[0.03] border-sidebar-border/50 text-[12px] focus-visible:ring-primary/30 placeholder:text-sidebar-foreground/20 rounded-lg transition-all"
               />
             </div>
@@ -221,9 +265,11 @@ export function Sidebar() {
                       sidebarCollapsed={sidebarCollapsed}
                       isActive={isActive}
                       isParentActive={isParentActive}
-                      expandedItems={expandedItems}
-                      toggleExpanded={toggleExpanded}
-                    />
+                       expandedItems={expandedItems}
+                       toggleExpanded={toggleExpanded}
+                       selectedIndex={selectedIndex}
+                       flatItems={flatItems}
+                     />
                   ))}
                 </ul>
               </div>
