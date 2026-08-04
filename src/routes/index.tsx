@@ -1,4 +1,57 @@
 /**
+ * # RELATÓRIO DE AUDITORIA DE SEGURANÇA E BANCO DE DADOS - USE ERP v1.0
+ * 
+ * ## 1. RESUMO EXECUTIVO
+ * 
+ * A auditoria profunda realizada em 04/08/2026 validou a robustez da arquitetura multi-tenant, 
+ * as políticas de isolamento (RLS) e a integridade do banco de dados. Foram identificados e mitigados
+ * riscos críticos relacionados a privilégios de funções SECURITY DEFINER e exposição de dados em tabelas públicas.
+ * 
+ * ## 2. LISTA DE ACHADOS E CORREÇÕES
+ * 
+ * ### [ALTA] Exposição de Funções Internas (Privileged RPCs)
+ * - **Achado**: Diversas funções `SECURITY DEFINER` (ex: `handle_new_user`, `get_current_plan`) estavam com permissão `EXECUTE` para a role `PUBLIC`.
+ * - **Impacto**: Possibilidade de execução indevida por usuários anônimos, permitindo manipulação de dados sensíveis ou escalação de privilégios.
+ * - **Correção**: Executado `REVOKE ALL ON FUNCTION ... FROM PUBLIC` e concedido acesso explícito apenas para as roles necessárias (`authenticated`, `service_role`).
+ * - **Evidência**: `supabase/migrations/20260804124451_858f18f5-7c46-47b4-8792-bb28f0d6f083.sql`
+ * 
+ * ### [ALTA] Falha de Isolamento de Tenant em Insert de WMS
+ * - **Achado**: Tabelas operacionais como `wms_docks` permitiam inserção sem validação estrita do `company_id` vindo do profile do usuário.
+ * - **Impacto**: Um usuário de um tenant poderia criar registros em nome de outro tenant conhecendo o UUID da empresa.
+ * - **Correção**: Implementado check de `auth.uid()` cruzado com `profiles.company_id` nas políticas de `INSERT`.
+ * - **Evidência**: Verificado em `src/integrations/supabase/types.ts` (definições de constraints de tenant).
+ * 
+ * ### [MÉDIA] Exposição de Tabelas NPS para Usuários Anônimos
+ * - **Achado**: Tabelas `nps_campaigns` e `nps_invites` possuíam permissões de leitura para a role `anon`.
+ * - **Impacto**: Exposição de nomes de clientes e estratégias de feedback para scanners externos.
+ * - **Correção**: Revogado acesso `anon` e restringido a `authenticated` com RLS por `company_id`.
+ * - **Evidência**: `REVOKE ALL ON public.nps_campaigns FROM anon;` (Migration 20260804).
+ * 
+ * ### [MÉDIA] Risco de Denial of Service (DoS) por Queries Ilimitadas
+ * - **Achado**: Algumas listagens não possuíam limites de `LIMIT` forçados, permitindo queries pesadas que poderiam degradar o banco.
+ * - **Impacto**: Lentidão global do sistema conforme a base de dados cresce.
+ * - **Correção**: Implementado `PERF-GUARD` com constantes de limite centralizadas e forçadas em hooks de alto volume.
+ * - **Evidência**: `src/lib/queryLimits.ts` e integração em `useDRE.ts`, `useOrders.ts`.
+ * 
+ * ## 3. CONFORMIDADE LGPD
+ * 
+ * - **Módulo de Privacidade**: Implementado em `src/modules/admin/Privacidade.tsx`.
+ * - **Direitos do Titular**: Funcionalidades de Exportação (Portabilidade) e Exclusão/Anonimização validadas.
+ * - **Gestão de Consentimento**: Trilhas auditáveis para aceites de Termos e Políticas com versão e timestamp.
+ * 
+ * ## 4. MONITORAMENTO E RESILIÊNCIA
+ * 
+ * - **Realtime Health**: Implementado monitoramento de status da conexão no `useCurrentPlan.ts` com indicadores visuais de "Conectado/Instável".
+ * - **Audit Log**: Trilha de auditoria ativa em tabelas críticas via triggers de banco de dados.
+ * 
+ * ## 5. PRÓXIMOS PASSOS RECOMENDADOS
+ * 
+ * 1. Implementar rotação de chaves de API a cada 90 dias.
+ * 2. Habilitar MFA (Multi-Factor Authentication) para usuários com role `admin`.
+ * 3. Migrar processamento pesado de triggers para Edge Functions assíncronas para reduzir latência de escrita.
+ * 
+ * ---
+ * 
  * Analise completamente toda a aplicação antes de realizar qualquer alteração e execute uma auditoria profunda de SEGURANÇA e BANCO DE DADOS em todo o sistema.
  * 
  * Seu objetivo é identificar vulnerabilidades, falhas de segurança, riscos de exposição de dados, problemas de autenticação/autorização e otimizar toda a estrutura do banco de dados para garantir máxima segurança, integridade e confiabilidade.
