@@ -1,4 +1,4 @@
-// ok continue com as implementações
+// prossiga
 /**
  * # USE PLATFORM ENTERPRISE EVOLUTION
  * 
