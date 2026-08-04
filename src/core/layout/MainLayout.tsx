@@ -18,14 +18,12 @@ export function MainLayout() {
 
   // Handle auto-login if session exists but store is empty
   useEffect(() => {
-    if (!loading && !isAuthenticated && !user) {
-      // Small delay to ensure hooks are settled
-      const timer = setTimeout(() => {
-        if (!isAuthenticated) navigate('/login');
-      }, 500);
-      return () => clearTimeout(timer);
+    // Redireciona imediatamente se não houver loading e não estiver autenticado.
+    // O useAuth já cuida de atualizar o isAuthenticated no store.
+    if (!loading && !isAuthenticated) {
+      navigate('/login');
     }
-  }, [isAuthenticated, loading, navigate, user]);
+  }, [isAuthenticated, loading, navigate]);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');

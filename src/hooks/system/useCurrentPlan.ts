@@ -111,5 +111,10 @@ export function useHasModule(moduleKey: string): boolean | undefined {
   const { data, isLoading } = useCurrentPlan();
   if (isLoading) return undefined;
   if (!data) return false;
-  return data.allowed_modules?.includes(moduleKey) ?? false;
+  
+  // O RPC get_current_plan pode retornar um array ou um objeto único dependendo da versão.
+  const plan = Array.isArray(data) ? data[0] : data;
+  if (!plan) return false;
+
+  return plan.allowed_modules?.includes(moduleKey) ?? false;
 }
