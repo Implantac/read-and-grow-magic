@@ -22,6 +22,31 @@ export interface CurrentPlan {
  * Cacheado por 10 min para evitar churn.
  */
 export function useCurrentPlan() {
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    // Escuta mudanças em tempo real na tabela de assinaturas da empresa
+    const channel = supabase
+      .channel('plan-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'subscriptions'
+        },
+        () => {
+          // Invalida o cache do plano para forçar refetch quando a assinatura mudar
+          queryClient.invalidateQueries({ queryKey: ['current_plan'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
   return useQuery({
     queryKey: ['current_plan'],
     queryFn: async () => {
