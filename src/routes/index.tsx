@@ -1,4 +1,4 @@
-// Todos de 1 a 5, preciso que libere todos os recursos 🧠 IA Executiva 💚 Use Success 🧠 Cérebro Nativo para o usuário etcsuporte889@gmail.com, acesso total e irrestrito sem possibilidade de regração
+// Ainda aparece Faça upgrade do seu plano. O módulo IA Executiva não está incluído no seu plano atual. libere para o usuário etcsuporte889@gmail.com
 /**
  * # USE PLATFORM ENTERPRISE EVOLUTION
  * 
