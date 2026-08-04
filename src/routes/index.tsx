@@ -1,4 +1,4 @@
-// prossiga
+// me de um relatório do que já funciona e o que ainda falta implementar
 /**
  * # USE PLATFORM ENTERPRISE EVOLUTION
  * 
