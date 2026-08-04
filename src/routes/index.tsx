@@ -1,4 +1,4 @@
-// Implemente a atualização em tempo real da UI quando o plano do usuário liberar IA Executiva, Use Success e Cérebro Nativo.
+// Implemente mensagens de erro e fallback na UI quando a conexão do Realtime falhar ao atualizar o plano do usuário.
 /**
  * # USE PLATFORM ENTERPRISE EVOLUTION
  * 
