@@ -1,11 +1,11 @@
 import type { NavSection } from '../types';
 
 export const dashboardSection: NavSection = {
-  label: 'Dashboard',
+  label: 'Executivo & IA',
   items: [
-    { title: 'Dashboard', href: '/dashboard', icon: 'LayoutDashboard' },
-    { title: '🧠 IA Executiva', href: '/executive/executive', icon: 'Brain' },
-    { title: '💚 Use Success', href: '/success', icon: 'Heart' },
-    { title: '🧠 Cérebro Nativo', href: '/executive/brain', icon: 'Sparkles' },
+    { title: 'Dashboard Geral', href: '/dashboard', icon: 'LayoutDashboard' },
+    { title: 'IA Digital Director', href: '/executive/executive', icon: 'Brain' },
+    { title: 'Native Brain (Autopilot)', href: '/executive/brain', icon: 'Sparkles' },
+    { title: 'Use Success Portal', href: '/success', icon: 'Heart' },
   ],
 };
