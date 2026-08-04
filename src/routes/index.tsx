@@ -1,4 +1,4 @@
-// prossiga
+// prossiga-build
 /**
  * # USE PLATFORM ENTERPRISE EVOLUTION
  * 
