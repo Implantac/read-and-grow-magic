@@ -15,6 +15,7 @@ import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { moduleLabel } from '@/lib/moduleLabels';
 import { useQueryClient } from '@tanstack/react-query';
 import { errorMessage } from '@/lib/errors';
+import { RealtimeStatusIndicator } from '@/components/plan/RealtimeStatusIndicator';
 
 type Cycle = 'monthly' | 'annual';
 
@@ -138,9 +139,12 @@ export default function Subscribe() {
         >
           <ArrowLeft className="h-4 w-4" /> Voltar para planos
         </Link>
-        <h1 className="flex items-center gap-2 text-3xl font-bold">
-          <Sparkles className="h-7 w-7 text-primary" /> Confirmar assinatura
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="flex items-center gap-2 text-3xl font-bold">
+            <Sparkles className="h-7 w-7 text-primary" /> Confirmar assinatura
+          </h1>
+          <RealtimeStatusIndicator />
+        </div>
         <p className="mt-1 text-muted-foreground">
           Revise o plano escolhido e ative agora para liberar o acesso imediato.
         </p>
