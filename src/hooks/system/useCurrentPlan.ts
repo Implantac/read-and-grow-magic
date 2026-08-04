@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -26,6 +26,7 @@ export interface CurrentPlan {
 export function useCurrentPlan() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [realtimeStatus, setRealtimeStatus] = useState<'SUBSCRIBED' | 'CHANNEL_ERROR' | 'TIMED_OUT' | 'CLOSED' | 'SUBSCRIBING'>('SUBSCRIBING');
 
   useEffect(() => {
     // Escuta mudanças em tempo real na tabela de assinaturas da empresa
@@ -44,12 +45,13 @@ export function useCurrentPlan() {
         }
       )
       .subscribe((status) => {
+        setRealtimeStatus(status as any);
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
           console.error('Erro na conexão Realtime do plano:', status);
           toast({
             variant: "destructive",
             title: "Erro de Conexão",
-            description: "Não foi possível monitorar atualizações do plano em tempo real. Tente atualizar a página.",
+            description: "Não foi possível monitorar atualizações do plano em tempo real. O sistema continuará funcionando com dados em cache.",
           });
         }
       });
@@ -59,7 +61,7 @@ export function useCurrentPlan() {
     };
   }, [queryClient]);
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ['current_plan'],
     queryFn: async () => {
       const { data, error } = await supabase.rpc('get_current_plan');
@@ -70,6 +72,11 @@ export function useCurrentPlan() {
     staleTime: 10 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });
+
+  return {
+    ...query,
+    realtimeStatus
+  };
 }
 
 /**
