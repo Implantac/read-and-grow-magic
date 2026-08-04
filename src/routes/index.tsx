@@ -1,4 +1,4 @@
-// Implemente a atualização em tempo real da UI quando o plano do usuário liberar IA Executiva, Use Success e Cérebro Nativo.
+// CONCLUÍDO: Implementado tratamento de erro e fallback (toast) para a conexão Realtime do plano do usuário.
 /**
  * # USE PLATFORM ENTERPRISE EVOLUTION
  * 
