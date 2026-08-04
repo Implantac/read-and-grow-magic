@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -28,6 +28,7 @@ export function Sidebar() {
 
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) =>
@@ -111,6 +112,22 @@ export function Sidebar() {
     signOut().then(() => (window.location.href = '/login'));
   };
 
+  // Shortcut Ctrl+K to focus search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        if (sidebarCollapsed) {
+          useAppStore.getState().setSidebarCollapsed(false);
+        }
+        setTimeout(() => searchInputRef.current?.focus(), 100);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [sidebarCollapsed]);
+
   return (
     <TooltipProvider delayDuration={0}>
       {/* Mobile backdrop */}
@@ -148,9 +165,10 @@ export function Sidebar() {
           <div className="px-4 py-3 animate-fade-in">
             <div className="relative group">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-sidebar-foreground/30 group-focus-within:text-primary transition-colors" />
-              <Input
-                placeholder="Buscar menu ou rota..."
-                value={searchQuery}
+                <Input
+                  ref={searchInputRef}
+                  placeholder="Buscar menu ou rota... (Ctrl+K)"
+                  value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-8 pl-8 pr-2 bg-sidebar-foreground/[0.03] border-sidebar-border/50 text-[12px] focus-visible:ring-primary/30 placeholder:text-sidebar-foreground/20 rounded-lg transition-all"
               />
