@@ -10,6 +10,9 @@ import { Input } from '@/ui/base/input';
 import { Progress } from '@/ui/base/progress';
 import { RefreshCw, Search, ArrowRight, AlertTriangle, CheckCircle, Clock } from 'lucide-react';
 import { useReplenishmentTasks } from '@/hooks/wms/useReplenishmentTasks';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
+import { SmartReplenishment } from './components/SmartReplenishment';
+
 
 const statusConfig: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
   pending: { label: 'Pendente', variant: 'outline' },
