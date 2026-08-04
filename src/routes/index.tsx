@@ -1,4 +1,4 @@
-// prossiga
+// ok continue com as implementações o sistema precisa estar 100% funcional em todas as áreas
 /**
  * # USE PLATFORM ENTERPRISE EVOLUTION
  * 
