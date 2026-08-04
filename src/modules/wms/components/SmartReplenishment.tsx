@@ -37,29 +37,35 @@ export function SmartReplenishment() {
 
     Object.values(byProduct).forEach((p: any) => {
       const lowStockBranches = p.balances.filter((b: any) => b.quantity < p.min_stock);
-      const surplusBranches = p.balances.filter((b: any) => b.quantity > p.min_stock * 2); // Surplus = > 2x min
+      const surplusBranches = p.balances.filter((b: any) => b.quantity > p.min_stock * 1.5); // Threshold reduzido para 1.5x
 
       lowStockBranches.forEach((target: any) => {
         const needed = p.min_stock - target.quantity;
         
-        // Find best source (most surplus)
-        const source = surplusBranches.sort((a: any, b: any) => b.quantity - a.quantity)[0];
+        // Encontra a melhor fonte baseada no saldo disponível acima do mínimo
+        const source = surplusBranches
+          .map((s: any) => ({ ...s, availableSurplus: s.quantity - p.min_stock }))
+          .sort((a: any, b: any) => b.availableSurplus - a.availableSurplus)[0];
         
-        if (source && source.quantity > needed + p.min_stock) {
-          list.push({
-            id: `${p.id}-${source.branch_id}-${target.branch_id}`,
-            productId: p.id,
-            productCode: p.code,
-            productName: p.name,
-            sourceBranchId: source.branch_id,
-            sourceBranchName: source.branch_name,
-            targetBranchId: target.branch_id,
-            targetBranchName: target.branch_name,
-            currentSourceQty: source.quantity,
-            currentTargetQty: target.quantity,
-            suggestedQty: needed,
-            priority: needed > p.min_stock ? 'high' : 'medium',
-          });
+        if (source && source.availableSurplus > 0) {
+          const transferable = Math.min(needed, source.availableSurplus);
+          
+          if (transferable > 0) {
+            list.push({
+              id: `${p.id}-${source.branch_id}-${target.branch_id}`,
+              productId: p.id,
+              productCode: p.code,
+              productName: p.name,
+              sourceBranchId: source.branch_id,
+              sourceBranchName: source.branch_name,
+              targetBranchId: target.branch_id,
+              targetBranchName: target.branch_name,
+              currentSourceQty: source.quantity,
+              currentTargetQty: target.quantity,
+              suggestedQty: transferable,
+              priority: (target.quantity <= 0) ? 'critical' : (needed > p.min_stock * 0.5 ? 'high' : 'medium'),
+            });
+          }
         }
       });
     });
@@ -149,8 +155,10 @@ export function SmartReplenishment() {
                           <AlertTriangle className="h-3 w-3" /> Falta: {Math.abs(sug.currentTargetQty)}
                         </div>
                       </TableCell>
-                      <TableCell className="text-right font-bold text-primary">
-                        {sug.suggestedQty}
+                      <TableCell className="text-right font-bold">
+                        <Badge variant={sug.priority === 'critical' ? 'destructive' : sug.priority === 'high' ? 'warning' : 'secondary'}>
+                          {sug.suggestedQty}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <Button 
