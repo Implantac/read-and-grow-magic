@@ -1,4 +1,4 @@
-// Verificar se a liberação de IA Executiva, Use Success e Cérebro Nativo está sincronizada corretamente com o plano do usuário e atualiza a UI em tempo real.
+// Implemente a atualização em tempo real da UI quando o plano do usuário liberar IA Executiva, Use Success e Cérebro Nativo.
 /**
  * # USE PLATFORM ENTERPRISE EVOLUTION
  * 
