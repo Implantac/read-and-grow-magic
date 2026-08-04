@@ -85,14 +85,15 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
       if (userError) throw userError;
       if (user) {
         // Load hierarchy via the view (view types may not be in generated Database)
-        const supabaseAny = supabase as unknown as {
-          from: (rel: string) => ReturnType<typeof supabase.from>;
-        };
-        const { data: hierarchyData } = await supabaseAny
+        const { data: hierarchyData, error: hierarchyError } = await supabase
           .from('vw_organizational_hierarchy')
           .select('*')
           .limit(1)
-          .single();
+          .maybeSingle();
+
+        if (hierarchyError) {
+          console.error('Error fetching hierarchy:', hierarchyError);
+        }
 
         const hierarchy = hierarchyData as HierarchyRow | null;
         if (hierarchy) {
@@ -124,7 +125,7 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   };
 
   const setCompany = async (id: string) => {
-    const { data } = await supabase.from('companies').select('*').eq('id', id).single();
+    const { data } = await supabase.from('companies').select('*').eq('id', id).maybeSingle();
     if (data) applyCompany(data as CompanyRow);
   };
 
