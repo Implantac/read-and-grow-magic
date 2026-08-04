@@ -37,29 +37,35 @@ export function SmartReplenishment() {
 
     Object.values(byProduct).forEach((p: any) => {
       const lowStockBranches = p.balances.filter((b: any) => b.quantity < p.min_stock);
-      const surplusBranches = p.balances.filter((b: any) => b.quantity > p.min_stock * 2); // Surplus = > 2x min
+      const surplusBranches = p.balances.filter((b: any) => b.quantity > p.min_stock * 1.5); // Threshold reduzido para 1.5x
 
       lowStockBranches.forEach((target: any) => {
         const needed = p.min_stock - target.quantity;
         
-        // Find best source (most surplus)
-        const source = surplusBranches.sort((a: any, b: any) => b.quantity - a.quantity)[0];
+        // Encontra a melhor fonte baseada no saldo disponível acima do mínimo
+        const source = surplusBranches
+          .map((s: any) => ({ ...s, availableSurplus: s.quantity - p.min_stock }))
+          .sort((a: any, b: any) => b.availableSurplus - a.availableSurplus)[0];
         
-        if (source && source.quantity > needed + p.min_stock) {
-          list.push({
-            id: `${p.id}-${source.branch_id}-${target.branch_id}`,
-            productId: p.id,
-            productCode: p.code,
-            productName: p.name,
-            sourceBranchId: source.branch_id,
-            sourceBranchName: source.branch_name,
-            targetBranchId: target.branch_id,
-            targetBranchName: target.branch_name,
-            currentSourceQty: source.quantity,
-            currentTargetQty: target.quantity,
-            suggestedQty: needed,
-            priority: needed > p.min_stock ? 'high' : 'medium',
-          });
+        if (source && source.availableSurplus > 0) {
+          const transferable = Math.min(needed, source.availableSurplus);
+          
+          if (transferable > 0) {
+            list.push({
+              id: `${p.id}-${source.branch_id}-${target.branch_id}`,
+              productId: p.id,
+              productCode: p.code,
+              productName: p.name,
+              sourceBranchId: source.branch_id,
+              sourceBranchName: source.branch_name,
+              targetBranchId: target.branch_id,
+              targetBranchName: target.branch_name,
+              currentSourceQty: source.quantity,
+              currentTargetQty: target.quantity,
+              suggestedQty: transferable,
+              priority: (target.quantity <= 0) ? 'critical' : (needed > p.min_stock * 0.5 ? 'high' : 'medium'),
+            });
+          }
         }
       });
     });
@@ -71,9 +77,9 @@ export function SmartReplenishment() {
     createTransfer.mutate({
       origem_branch_id: sug.sourceBranchId,
       destino_branch_id: sug.targetBranchId,
-      canal_origem: 'ATACADO_INDUSTRIA', // Defaulting for now
+      canal_origem: sug.sourceBranchId === 'industria-main' ? 'ATACADO_INDUSTRIA' : 'VAREJO_PDV', // Ajuste dinâmico
       canal_destino: 'VAREJO_PDV',
-      observacoes: 'Reposição inteligente sugerida pelo sistema',
+      observacoes: `Reposição via IA: ${sug.sourceBranchName} -> ${sug.targetBranchName}`,
       itens: [{ product_id: sug.productId, quantidade: sug.suggestedQty }],
     }, {
       onSuccess: () => toast.success(`Transferência de ${sug.productName} solicitada!`),
@@ -88,8 +94,8 @@ export function SmartReplenishment() {
             <div className="flex items-center gap-2">
               <RefreshCw className="h-5 w-5 text-primary animate-spin-slow" />
               <div>
-                <CardTitle>Sugestões de Reposição</CardTitle>
-                <CardDescription>Algoritmo de balanceamento de estoque entre filiais</CardDescription>
+                <CardTitle>Sugestões de Reposição Inteligente</CardTitle>
+                <CardDescription>Análise preditiva de ruptura e surplus para balanceamento de malha</CardDescription>
               </div>
             </div>
             <Badge variant="outline" className="bg-background">IA Analítica Ativa</Badge>
@@ -149,8 +155,10 @@ export function SmartReplenishment() {
                           <AlertTriangle className="h-3 w-3" /> Falta: {Math.abs(sug.currentTargetQty)}
                         </div>
                       </TableCell>
-                      <TableCell className="text-right font-bold text-primary">
-                        {sug.suggestedQty}
+                      <TableCell className="text-right font-bold">
+                        <Badge variant={sug.priority === 'critical' ? 'destructive' : sug.priority === 'high' ? 'warning' : 'secondary'}>
+                          {sug.suggestedQty}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <Button 
