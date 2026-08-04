@@ -1,4 +1,4 @@
-// Liberando acesso total para etcsuporte889@gmail.com - IA Executiva, Use Success e Cérebro Nativo agora disponíveis.
+// ok continue com as implementações
 /**
  * # USE PLATFORM ENTERPRISE EVOLUTION
  * 
