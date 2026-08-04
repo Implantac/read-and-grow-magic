@@ -1,4 +1,4 @@
-// CONCLUÍDO: Adicionado indicador visual de status do Realtime na interface de Planos (Upgrade).
+// CONCLUÍDO: Adicionado indicador visual de status do Realtime nas páginas de Upgrade e Assinatura.
 /**
  * # USE PLATFORM ENTERPRISE EVOLUTION
  * 
