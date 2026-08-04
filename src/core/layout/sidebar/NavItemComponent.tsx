@@ -12,15 +12,20 @@ type Props = {
   isParentActive: (href: string) => boolean;
   expandedItems: string[];
   toggleExpanded: (title: string) => void;
+  selectedIndex?: number;
+  flatItems?: any[];
 };
 
-export function NavItemComponent({
+ export function NavItemComponent({
   item, sidebarCollapsed, isActive, isParentActive, expandedItems, toggleExpanded,
+  selectedIndex, flatItems
 }: Props) {
   const Icon = iconMap[item.icon];
   const hasChildren = !!(item.children && item.children.length > 0);
   const isExpanded = expandedItems.includes(item.title);
-  const isItemActive = isActive(item.href) || isParentActive(item.href);
+   const isItemActive = isActive(item.href) || isParentActive(item.href);
+
+  const isSelected = flatItems && selectedIndex !== undefined && selectedIndex >= 0 && flatItems[selectedIndex] === item;
 
   const baseClasses = cn(
     'group relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium outline-none',
@@ -28,7 +33,8 @@ export function NavItemComponent({
     'focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar',
     isItemActive
       ? 'bg-primary/10 text-primary ring-1 ring-primary/20 shadow-[0_1px_0_0_hsl(var(--sidebar-border)/0.4),inset_0_1px_0_0_hsl(var(--primary)/0.08)]'
-      : 'text-sidebar-foreground/65 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground active:scale-[0.985]'
+       : 'text-sidebar-foreground/65 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground active:scale-[0.985]',
+    isSelected && 'bg-sidebar-accent/60 text-sidebar-foreground ring-1 ring-primary/40'
   );
 
   const indicator = isItemActive && (
@@ -112,22 +118,32 @@ export function NavItemComponent({
                 const ChildIcon = iconMap[child.icon];
                 const isChildActive = isActive(child.href);
                 return (
-                  <li key={child.title} className="list-none">
-                    <Link
-                      to={child.href}
-                      aria-current={isChildActive ? 'page' : undefined}
-                      tabIndex={isExpanded ? 0 : -1}
-                      className={cn(
-                        'group flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[12px] transition-all duration-150',
-                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar',
-                        isChildActive
-                          ? 'bg-primary/5 text-primary font-semibold'
-                          : 'text-sidebar-foreground/50 hover:bg-sidebar-accent/30 hover:text-sidebar-foreground/80'
-                      )}
-                    >
-                      {ChildIcon && <ChildIcon aria-hidden="true" className={cn('h-3.5 w-3.5 shrink-0', isChildActive ? 'text-primary' : 'text-sidebar-foreground/30 group-hover:text-primary/50')} />}
-                      <span className="truncate">{child.title}</span>
-                    </Link>
+                   <li key={child.title} className="list-none">
+                    {(() => {
+                      const isChildSelected = flatItems && selectedIndex !== undefined && selectedIndex >= 0 && 
+                        flatItems[selectedIndex].href === child.href && 
+                        flatItems[selectedIndex].title === child.title &&
+                        flatItems[selectedIndex].isChild;
+
+                      return (
+                        <Link
+                          to={child.href}
+                          aria-current={isChildActive ? 'page' : undefined}
+                          tabIndex={isExpanded ? 0 : -1}
+                          className={cn(
+                            'group flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[12px] transition-all duration-150',
+                            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar',
+                            isChildActive
+                              ? 'bg-primary/5 text-primary font-semibold'
+                              : 'text-sidebar-foreground/50 hover:bg-sidebar-accent/30 hover:text-sidebar-foreground/80',
+                            isChildSelected && 'bg-sidebar-accent/50 text-sidebar-foreground/90 ring-1 ring-primary/30'
+                          )}
+                        >
+                          {ChildIcon && <ChildIcon aria-hidden="true" className={cn('h-3.5 w-3.5 shrink-0', isChildActive ? 'text-primary' : 'text-sidebar-foreground/30 group-hover:text-primary/50')} />}
+                          <span className="truncate">{child.title}</span>
+                        </Link>
+                      );
+                    })()}
                   </li>
                 );
               })}
