@@ -1,4 +1,4 @@
-// CONCLUÍDO: Implementada reconexão automática com exponential backoff para o canal Realtime do plano.
+// CONCLUÍDO: Adicionado indicador visual de status do Realtime na interface de Planos (Upgrade).
 /**
  * # USE PLATFORM ENTERPRISE EVOLUTION
  * 

@@ -1,5 +1,5 @@
 import { useCurrentPlan } from "@/hooks/system/useCurrentPlan";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/ui/base/badge";
 import { CheckCircle2, AlertCircle, RefreshCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 

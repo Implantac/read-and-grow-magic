@@ -7,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/ui/base/alert';
 import { usePlans } from '@/hooks/system/useSubscription';
 import { useCurrentPlan } from '@/hooks/system/useCurrentPlan';
 import { moduleLabel } from '@/lib/moduleLabels';
+import { RealtimeStatusIndicator } from '@/components/plan/RealtimeStatusIndicator';
 
 export default function Upgrade() {
   const [params] = useSearchParams();
@@ -69,6 +70,7 @@ export default function Upgrade() {
           </h1>
           {subtext && <p className="mt-1 text-muted-foreground">{subtext}</p>}
         </div>
+        <RealtimeStatusIndicator />
       </div>
 
       {reason && requested && (
