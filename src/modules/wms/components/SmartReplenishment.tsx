@@ -77,9 +77,9 @@ export function SmartReplenishment() {
     createTransfer.mutate({
       origem_branch_id: sug.sourceBranchId,
       destino_branch_id: sug.targetBranchId,
-      canal_origem: 'ATACADO_INDUSTRIA', // Defaulting for now
+      canal_origem: sug.sourceBranchId === 'industria-main' ? 'ATACADO_INDUSTRIA' : 'VAREJO_PDV', // Ajuste dinâmico
       canal_destino: 'VAREJO_PDV',
-      observacoes: 'Reposição inteligente sugerida pelo sistema',
+      observacoes: `Reposição via IA: ${sug.sourceBranchName} -> ${sug.targetBranchName}`,
       itens: [{ product_id: sug.productId, quantidade: sug.suggestedQty }],
     }, {
       onSuccess: () => toast.success(`Transferência de ${sug.productName} solicitada!`),
@@ -94,8 +94,8 @@ export function SmartReplenishment() {
             <div className="flex items-center gap-2">
               <RefreshCw className="h-5 w-5 text-primary animate-spin-slow" />
               <div>
-                <CardTitle>Sugestões de Reposição</CardTitle>
-                <CardDescription>Algoritmo de balanceamento de estoque entre filiais</CardDescription>
+                <CardTitle>Sugestões de Reposição Inteligente</CardTitle>
+                <CardDescription>Análise preditiva de ruptura e surplus para balanceamento de malha</CardDescription>
               </div>
             </div>
             <Badge variant="outline" className="bg-background">IA Analítica Ativa</Badge>
