@@ -1,4 +1,4 @@
-// ok continue com as implementações o sistema precisa estar 100% funcional em todas as áreas
+// Verificar se a liberação de IA Executiva, Use Success e Cérebro Nativo está sincronizada corretamente com o plano do usuário e atualiza a UI em tempo real.
 /**
  * # USE PLATFORM ENTERPRISE EVOLUTION
  * 
