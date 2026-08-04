@@ -1,5 +1,5 @@
 import { Suspense, useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAppStore } from '@/stores/useAppStore';
 import { useAuth } from '@/hooks/system/useAuth';
 import { Sidebar } from './Sidebar';
@@ -15,12 +15,15 @@ export function MainLayout() {
   const { isAuthenticated, sidebarCollapsed, theme, user } = useAppStore();
   const { loading } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  const isBypassPage = ['/upgrade', '/subscribe'].includes(pathname);
 
   // Handle auto-login if session exists but store is empty
   useEffect(() => {
     // Redireciona imediatamente se não houver loading e não estiver autenticado.
     // O useAuth já cuida de atualizar o isAuthenticated no store.
-    if (!loading && !isAuthenticated) {
+    if (!loading && !isAuthenticated && !isBypassPage) {
       navigate('/login');
     }
   }, [isAuthenticated, loading, navigate]);
@@ -55,7 +58,7 @@ export function MainLayout() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !isBypassPage) {
     return null;
   }
 
