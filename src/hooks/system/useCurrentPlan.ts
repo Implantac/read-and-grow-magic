@@ -31,7 +31,7 @@ export function useCurrentPlan() {
   useEffect(() => {
     let retryCount = 0;
     const maxRetries = 5;
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: number | undefined;
 
     const setupChannel = () => {
       const channel = supabase
@@ -60,7 +60,7 @@ export function useCurrentPlan() {
               const backoffDelay = Math.min(1000 * Math.pow(2, retryCount), 30000);
               retryCount++;
               
-              timeoutId = setTimeout(() => {
+              timeoutId = window.setTimeout(() => {
                 supabase.removeChannel(channel);
                 setupChannel();
               }, backoffDelay);
@@ -80,7 +80,7 @@ export function useCurrentPlan() {
     const channel = setupChannel();
 
     return () => {
-      if (timeoutId) clearTimeout(timeoutId);
+      if (timeoutId) window.clearTimeout(timeoutId);
       supabase.removeChannel(channel);
     };
   }, [queryClient, toast]);
