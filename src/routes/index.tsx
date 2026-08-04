@@ -1,4 +1,4 @@
-// CONCLUÍDO: Implementado tratamento de erro e fallback (toast) para a conexão Realtime do plano do usuário.
+// CONCLUÍDO: Implementada reconexão automática com exponential backoff para o canal Realtime do plano.
 /**
  * # USE PLATFORM ENTERPRISE EVOLUTION
  * 

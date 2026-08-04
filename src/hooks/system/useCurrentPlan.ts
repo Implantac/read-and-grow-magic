@@ -29,37 +29,61 @@ export function useCurrentPlan() {
   const [realtimeStatus, setRealtimeStatus] = useState<'SUBSCRIBED' | 'CHANNEL_ERROR' | 'TIMED_OUT' | 'CLOSED' | 'SUBSCRIBING'>('SUBSCRIBING');
 
   useEffect(() => {
-    // Escuta mudanças em tempo real na tabela de assinaturas da empresa
-    const channel = supabase
-      .channel('plan-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'subscriptions'
-        },
-        () => {
-          // Invalida o cache do plano para forçar refetch quando a assinatura mudar
-          queryClient.invalidateQueries({ queryKey: ['current_plan'] });
-        }
-      )
-      .subscribe((status) => {
-        setRealtimeStatus(status as any);
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.error('Erro na conexão Realtime do plano:', status);
-          toast({
-            variant: "destructive",
-            title: "Erro de Conexão",
-            description: "Não foi possível monitorar atualizações do plano em tempo real. O sistema continuará funcionando com dados em cache.",
-          });
-        }
-      });
+    let retryCount = 0;
+    const maxRetries = 5;
+    let timeoutId: NodeJS.Timeout;
+
+    const setupChannel = () => {
+      const channel = supabase
+        .channel('plan-updates')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'subscriptions'
+          },
+          () => {
+            queryClient.invalidateQueries({ queryKey: ['current_plan'] });
+          }
+        )
+        .subscribe((status) => {
+          setRealtimeStatus(status as any);
+          if (status === 'SUBSCRIBED') {
+            retryCount = 0;
+          }
+          
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            console.error(`Erro Realtime (status: ${status}). Tentativa ${retryCount + 1} de ${maxRetries}`);
+            
+            if (retryCount < maxRetries) {
+              const backoffDelay = Math.min(1000 * Math.pow(2, retryCount), 30000);
+              retryCount++;
+              
+              timeoutId = setTimeout(() => {
+                supabase.removeChannel(channel);
+                setupChannel();
+              }, backoffDelay);
+            } else {
+              toast({
+                variant: "destructive",
+                title: "Conexão Instável",
+                description: "Não foi possível restabelecer a conexão em tempo real. O sistema usará dados em cache.",
+              });
+            }
+          }
+        });
+
+      return channel;
+    };
+
+    const channel = setupChannel();
 
     return () => {
+      if (timeoutId) clearTimeout(timeoutId);
       supabase.removeChannel(channel);
     };
-  }, [queryClient]);
+  }, [queryClient, toast]);
 
   const query = useQuery({
     queryKey: ['current_plan'],
