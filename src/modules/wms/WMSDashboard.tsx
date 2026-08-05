@@ -16,6 +16,7 @@ import {
   BarChart3
 } from "lucide-react";
 import WMSKpiStrip from "./components/WMSKpiStrip";
+import { SmartReplenishment } from "./components/SmartReplenishment";
 
 export default function WMSDashboard() {
   return (
