@@ -172,6 +172,8 @@ export default function WMSDashboard() {
           </CardContent>
         </Card>
       </div>
+
+      <SmartReplenishment />
     </div>
   );
 }
