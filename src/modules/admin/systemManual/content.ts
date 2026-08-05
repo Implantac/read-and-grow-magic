@@ -1,12 +1,18 @@
-// Barrel: split into content-types, content-modules, content-beginner
-export type {
+import type {
   ManualStep,
-  ManualSection,
   ManualFAQ,
   ModuleManual,
   Difficulty,
   BeginnerContent,
 } from './content-types';
+
+export type {
+  ManualStep,
+  ManualFAQ,
+  ModuleManual,
+  Difficulty,
+  BeginnerContent,
+};
 
 export { MANUAL_MODULES, MANUAL_CATEGORIES } from './content-modules';
 export {
@@ -56,4 +62,3 @@ export const SYSTEM_MANUAL_SECTIONS: ManualSection[] = [
     modules: ['tms', 'rfid']
   }
 ];
-
