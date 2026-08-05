@@ -24,7 +24,7 @@
  * ### [ALTA] Falha de Isolamento de Tenant em Insert de WMS
  * - **Achado**: Tabelas operacionais como `wms_docks` permitiam inserção sem validação estrita do `company_id` vindo do profile do usuário.
  * - **Impacto**: Um usuário de um tenant poderia criar registros em nome de outro tenant conhecendo o UUID da empresa.
- * - **Correção**: Implementado check de `auth.uid()` cruzado com `profiles.company_id` nas políticas de `INSERT`.
+ * - **Correção**: Implementado check de `auth.uid()` cruzado with `profiles.company_id` nas políticas de `INSERT`.
  * - **Evidência**: Verificado em `src/integrations/supabase/types.ts` (definições de constraints de tenant).
  * 
  * ### [MÉDIA] Exposição de Tabelas NPS para Usuários Anônimos
@@ -46,7 +46,6 @@
  * - **Evidência**: Migration 20260804 e novo componente `src/modules/wms/components/SmartReplenishment.tsx`.
  * 
  * ## 3. CONFORMIDADE LGPD
-
  * 
  * - **Módulo de Privacidade**: Implementado em `src/modules/admin/Privacidade.tsx`.
  * - **Direitos do Titular**: Funcionalidades de Exportação (Portabilidade) e Exclusão/Anonimização validadas.
@@ -347,7 +346,7 @@
  * 
  * Regras de Negócio.......100/100
  * 
- * Integreções.............100/100
+ * Integrações.............100/100
  * 
  * Testabilidade...........100/100
  * 
