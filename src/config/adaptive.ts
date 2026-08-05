@@ -25,82 +25,82 @@ export interface SegmentConfig {
 export const SEGMENTS: Record<Segment, SegmentConfig> = {
   textile: {
     label: 'Indústria Têxtil',
-    allowedSections: ['Dashboard', 'Produção', 'Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+    allowedSections: ['Executivo & IA', 'Operacional & PCP', 'Supply Chain & WMS', 'Comercial & Vendas', 'Controladoria & Fiscal', 'Gestão & Admin', 'Pacotes Verticais'],
     recommendedModules: ['PCP', 'Engenharia', 'Qualidade', 'Custos', 'Têxtil']
   },
   apparel: {
     label: 'Confecção / Vestuário',
-    allowedSections: ['Dashboard', 'Produção', 'Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+    allowedSections: ['Executivo & IA', 'Operacional & PCP', 'Supply Chain & WMS', 'Comercial & Vendas', 'Controladoria & Fiscal', 'Gestão & Admin', 'Pacotes Verticais'],
     recommendedModules: ['PCP', 'PLM', 'Facções', 'Grades', 'Têxtil']
   },
   fio: {
     label: 'Fiação',
-    allowedSections: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+    allowedSections: ['Executivo & IA', 'Operacional & PCP', 'Supply Chain & WMS', 'Controladoria & Fiscal', 'Gestão & Admin', 'Pacotes Verticais'],
     recommendedModules: ['PCP', 'Misturas', 'Fardos', 'Fiação']
   },
   tecelagem: {
     label: 'Tecelagem',
-    allowedSections: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+    allowedSections: ['Executivo & IA', 'Operacional & PCP', 'Supply Chain & WMS', 'Controladoria & Fiscal', 'Gestão & Admin', 'Pacotes Verticais'],
     recommendedModules: ['PCP', 'Urdimento', 'Tingimento', 'Tecelagem']
   },
   pharma: {
     label: 'Farmacêutico',
-    allowedSections: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+    allowedSections: ['Executivo & IA', 'Operacional & PCP', 'Supply Chain & WMS', 'Controladoria & Fiscal', 'Gestão & Admin', 'Pacotes Verticais'],
     recommendedModules: ['GMP', 'CQ', 'Qualidade', 'Rastreabilidade', 'Farmacêutico']
   },
   animal_feed: {
     label: 'Fábrica de Ração',
-    allowedSections: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+    allowedSections: ['Executivo & IA', 'Operacional & PCP', 'Supply Chain & WMS', 'Controladoria & Fiscal', 'Gestão & Admin', 'Pacotes Verticais'],
     recommendedModules: ['Formulações', 'Bromatologia', 'PCP', 'Alimentos']
   },
   food_factory: {
     label: 'Indústria de Alimentos',
-    allowedSections: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão', 'Pacotes Verticais'],
+    allowedSections: ['Executivo & IA', 'Operacional & PCP', 'Supply Chain & WMS', 'Controladoria & Fiscal', 'Gestão & Admin', 'Pacotes Verticais'],
     recommendedModules: ['PCP', 'Qualidade', 'Rastreabilidade', 'Alimentos']
   },
   industry: {
     label: 'Indústria Geral',
-    allowedSections: ['Dashboard', 'Produção', 'Logística', 'Financeiro', 'Gestão', 'Operacional'],
+    allowedSections: ['Executivo & IA', 'Operacional & PCP', 'Supply Chain & WMS', 'Controladoria & Fiscal', 'Gestão & Admin'],
     recommendedModules: ['PCP', 'MRP', 'Engenharia', 'Manutenção']
   },
   distribution: {
     label: 'Distribuidora',
-    allowedSections: ['Dashboard', 'Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+    allowedSections: ['Executivo & IA', 'Supply Chain & WMS', 'Operacional & PCP', 'Comercial & Vendas', 'Controladoria & Fiscal', 'Gestão & Admin'],
     recommendedModules: ['WMS', 'TMS', 'Expedição', 'Vendas']
   },
   wholesaler: {
     label: 'Atacadista',
-    allowedSections: ['Dashboard', 'Logística', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+    allowedSections: ['Executivo & IA', 'Supply Chain & WMS', 'Operacional & PCP', 'Comercial & Vendas', 'Controladoria & Fiscal', 'Gestão & Admin'],
     recommendedModules: ['WMS', 'Vendas', 'CRM']
   },
   retail: {
     label: 'Varejo',
-    allowedSections: ['Dashboard', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+    allowedSections: ['Executivo & IA', 'Operacional & PCP', 'Comercial & Vendas', 'Controladoria & Fiscal', 'Gestão & Admin'],
     recommendedModules: ['PDV', 'CRM', 'Fidelidade', 'Vendas']
   },
   retail_chain: {
     label: 'Rede de Lojas',
-    allowedSections: ['Dashboard', 'Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Logística'],
+    allowedSections: ['Executivo & IA', 'Operacional & PCP', 'Comercial & Vendas', 'Controladoria & Fiscal', 'Gestão & Admin', 'Supply Chain & WMS'],
     recommendedModules: ['PDV', 'Transferências', 'Consignado', 'CRM']
   },
   franchise: {
     label: 'Franquia',
-    allowedSections: ['Dashboard', 'Operacional', 'Comercial', 'Financeiro', 'Gestão'],
+    allowedSections: ['Executivo & IA', 'Operacional & PCP', 'Comercial & Vendas', 'Controladoria & Fiscal', 'Gestão & Admin'],
     recommendedModules: ['PDV', 'Royalties', 'Consignado', 'CRM']
   },
   holding: {
     label: 'Holding / Grupo Empresarial',
-    allowedSections: ['Dashboard', 'Gestão', 'Financeiro', 'Comercial'],
+    allowedSections: ['Executivo & IA', 'Gestão & Admin', 'Controladoria & Fiscal', 'Comercial & Vendas'],
     recommendedModules: ['Consolidação', 'Auditoria', 'Executive']
   },
   services: {
     label: 'Prestação de Serviços',
-    allowedSections: ['Dashboard', 'Comercial', 'Financeiro', 'Gestão'],
+    allowedSections: ['Executivo & IA', 'Comercial & Vendas', 'Controladoria & Fiscal', 'Gestão & Admin'],
     recommendedModules: ['Projetos', 'Contratos', 'Faturamento']
   },
   general: {
     label: 'Geral / Outros',
-    allowedSections: ['Dashboard', 'Operacional', 'Comercial', 'Financeiro', 'Gestão', 'Logística', 'Produção'],
+    allowedSections: ['Executivo & IA', 'Operacional & PCP', 'Comercial & Vendas', 'Controladoria & Fiscal', 'Gestão & Admin', 'Supply Chain & WMS'],
     recommendedModules: ['Básico', 'Financeiro', 'Comercial']
   }
 };
