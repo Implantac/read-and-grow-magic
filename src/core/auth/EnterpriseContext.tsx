@@ -100,17 +100,33 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
 
         const hierarchy = hierarchyData as HierarchyRow | null;
         if (hierarchy) {
+          // Identify if the current unit is a branch or a company
+          const isBranch = hierarchy.level === 'filial';
+          const companyId = isBranch ? hierarchy.company_id : hierarchy.unit_id;
+
           const { data: company } = await supabase.from('companies')
             .select('*')
-            .eq('id', hierarchy.unit_id)
+            .eq('id', companyId)
             .single();
 
           if (company) {
             applyCompany(company as CompanyRow);
             setCurrentTenant({ id: hierarchy.tenant_id, name: hierarchy.tenant_name });
             setCurrentGroup({ id: hierarchy.enterprise_group_id, name: hierarchy.group_name });
+            
+            if (isBranch) {
+              setCurrentBranch({ id: hierarchy.unit_id, name: hierarchy.unit_name });
+            } else {
+              // Try to find if user has a default branch in their profile
+              const { data: profile } = await supabase.from('profiles').select('default_branch_id').eq('id', user.id).maybeSingle();
+              if (profile?.default_branch_id) {
+                const { data: branch } = await supabase.from('branches').select('id, name').eq('id', profile.default_branch_id).maybeSingle();
+                if (branch) setCurrentBranch(branch);
+              }
+            }
           }
         }
+
       }
     } catch (error: unknown) {
       const err = error as { message?: string; status?: number; name?: string };
