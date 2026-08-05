@@ -84,7 +84,7 @@ export default function WMSDashboardPage() {
               <Zap className="h-4 w-4 text-primary animate-pulse" /> IA & Insights
             </Button>
           </Link>
-          <Button variant="outline" size="icon" title="Atualizar dados">
+          <Button variant="outline" size="icon" title="Atualizar dados" onClick={() => window.location.reload()}>
             <Activity className="h-4 w-4" />
           </Button>
         </div>
