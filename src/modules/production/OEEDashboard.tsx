@@ -3,6 +3,7 @@ import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/ui/base/card';
 import { Badge } from '@/ui/base/badge';
+import { Button } from '@/ui/base/button';
 import { Progress } from '@/ui/base/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/ui/base/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/ui/base/tabs';
@@ -10,7 +11,8 @@ import { useProductionOrders } from '@/hooks/production/useProductionOrders';
 import { useProductionMachines } from '@/hooks/production/useProductionMachines';
 import { useProductionCapacity } from '@/hooks/production/useProductionCapacity';
 import { useTimeEntries } from '@/hooks/system/useTimeEntries';
-import { Gauge, Activity, ShieldCheck, TrendingUp, AlertTriangle, Target } from 'lucide-react';
+import { useOEEMetrics } from '@/hooks/production/useOEEMetrics';
+import { Gauge, Activity, ShieldCheck, TrendingUp, AlertTriangle, Target, RefreshCw } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, RadialBarChart, RadialBar, Legend, ComposedChart, Line, ReferenceLine } from 'recharts';
 import { cn } from '@/lib/utils';
 import { format, subDays, differenceInMinutes } from 'date-fns';
@@ -22,6 +24,7 @@ export default function OEEDashboard() {
   const { machines } = useProductionMachines();
   const { capacities } = useProductionCapacity();
   const { entries: timeEntries } = useTimeEntries();
+  const { metrics, loading: loadingMetrics, refetch: refetchMetrics } = useOEEMetrics();
 
   const oeeData = useMemo(() => {
     const totalMachines = machines.filter(m => m.active).length || 1;
@@ -134,7 +137,21 @@ export default function OEEDashboard() {
 
   return (
     <PageContainer>
-      <PageHeader title="📊 OEE — Overall Equipment Effectiveness" description="Disponibilidade × Performance × Qualidade = Eficiência Global | Six Big Losses | Tendências" />
+      <PageHeader 
+        title="📊 OEE — Overall Equipment Effectiveness" 
+        description="Disponibilidade × Performance × Qualidade = Eficiência Global | Six Big Losses | Tendências"
+      >
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => refetchMetrics()}
+          disabled={loadingMetrics}
+          className="gap-2"
+        >
+          <RefreshCw className={cn("h-4 w-4", loadingMetrics && "animate-spin")} />
+          Atualizar
+        </Button>
+      </PageHeader>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card className="md:col-span-1 border-2">

@@ -11268,6 +11268,67 @@ export type Database = {
           },
         ]
       }
+      oee_metrics: {
+        Row: {
+          availability: number
+          branch_id: string | null
+          company_id: string
+          id: string
+          machine_id: string | null
+          oee: number
+          performance: number
+          quality: number
+          sector: string | null
+          timestamp: string
+        }
+        Insert: {
+          availability: number
+          branch_id?: string | null
+          company_id: string
+          id?: string
+          machine_id?: string | null
+          oee: number
+          performance: number
+          quality: number
+          sector?: string | null
+          timestamp?: string
+        }
+        Update: {
+          availability?: number
+          branch_id?: string | null
+          company_id?: string
+          id?: string
+          machine_id?: string | null
+          oee?: number
+          performance?: number
+          quality?: number
+          sector?: string | null
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oee_metrics_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oee_metrics_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oee_metrics_machine_id_fkey"
+            columns: ["machine_id"]
+            isOneToOne: false
+            referencedRelation: "production_machines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       open_finance_connections: {
         Row: {
           access_token_encrypted: string | null
