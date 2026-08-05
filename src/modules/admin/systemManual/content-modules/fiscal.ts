@@ -1,39 +1,40 @@
-import { FileText } from 'lucide-react';
-import { commonScreens, type ModuleManual } from '../content-types';
+import { FileText, ShieldCheck, DollarSign, Wallet } from 'lucide-react';
+import type { ModuleManual } from '../content-types';
 
 export const FISCAL_MODULES: ModuleManual[] = [
   {
     slug: 'fiscal',
-    title: 'Fiscal',
+    title: 'Fiscal & Tributário',
     category: 'Fiscal',
     icon: FileText,
     short: 'NF-e/NFC-e, SPED, DIFAL, ICMS-ST e motor de cálculo tributário.',
     overview: [
-      'Emissão de documentos fiscais (NF-e 4.00, NFC-e), geração de SPED Fiscal/Contribuições, cálculo automático de tributos e importação de XML.',
+      'O módulo Fiscal é o coração legal da empresa. Ele automatiza a emissão de documentos (NF-e, NFC-e), calcula impostos em tempo real e gera as obrigações mensais (SPED).',
+      'Integra-se ao Comercial para faturamento e ao Financeiro para geração automática de títulos.'
     ],
     routes: [
       { label: 'Painel Fiscal', path: '/fiscal' },
+      { label: 'Certificado A1', path: '/fiscal/certificado' },
       { label: 'Regras Tributárias', path: '/fiscal/regras' },
-      { label: 'SPED', path: '/fiscal/sped' },
-      { label: 'Certificado', path: '/fiscal/certificado' },
+      { label: 'SPED', path: '/fiscal/sped' }
     ],
-    personas: ['Fiscal', 'Contábil'],
-    prerequisites: ['Certificado A1 instalado', 'CFOPs e CSTs configurados', 'Regime tributário definido'],
+    personas: ['Analista Fiscal', 'Contador', 'Gerente Financeiro'],
+    prerequisites: ['Certificado A1 (.pfx) ativo', 'Configuração de alíquotas por UF', 'Cadastro de NCM nos produtos'],
     steps: [
-      { title: 'Cadastrar certificado', description: 'Fiscal → Certificado → Upload do .pfx com senha. Válido para NF-e e Reinf.' },
-      { title: 'Configurar regras', description: 'Regras Tributárias por UF, CFOP, NCM. O motor aplica automaticamente nos pedidos.' },
-      { title: 'Importar XML de entrada', description: 'Fiscal → Importar XML. Revise itens, vincule produtos e confirme.' },
-      { title: 'Gerar SPED', description: 'SPED → selecione período → gerar TXT. Valide no PVA antes de transmitir.' },
+      { title: 'Configurar Certificado', description: 'Vá em Fiscal → Certificado. Faça upload do arquivo .pfx e informe a senha. Sem isso, a transmissão fica em modo simulado.' },
+      { title: 'Definir Regras de Imposto', description: 'Em Regras Tributárias, configure as alíquotas de ICMS, PIS e COFINS por estado e tipo de operação.' },
+      { title: 'Faturar Pedido', description: 'Ao aprovar um pedido no Comercial, clique em "Emitir NF-e". O sistema valida os dados e envia para a SEFAZ.' },
+      { title: 'Gerar Obrigações', description: 'No fim do mês, use a aba SPED para gerar os arquivos TXT para sua contabilidade.' }
     ],
     sections: [
-      { heading: 'Wizards guiados', paragraphs: ['Emissão em etapas com FiscalStepper, SmartSelect de NCM/CFOP e TaxSummaryCard para revisão antes do envio.'] },
+      { heading: 'Motor Tributário', paragraphs: ['O sistema calcula automaticamente Substituição Tributária e DIFAL com base no NCM do produto e UF do cliente.'] }
     ],
     faq: [
-      { q: 'Rejeição 999?', a: 'Erro genérico — abra o painel de status SEFAZ (sefaz_status_uf) e verifique operação da UF.' },
+      { q: 'O que é o modo Simulado?', a: 'É quando o sistema gera a nota mas não envia para o governo, usado para testes iniciais.' }
     ],
     troubleshooting: [
-      { problem: 'Certificado inválido', solution: 'Confirme validade e senha. Renove antes do vencimento — o sistema alerta 30 dias antes.' },
+      { problem: 'Rejeição de Assinatura', solution: 'Verifique se a senha do certificado A1 está correta e se ele não expirou.' }
     ],
-    screenshots: commonScreens(['Painel fiscal', 'Wizard NF-e', 'Importação XML']),
-  },
+    screenshots: []
+  }
 ];
