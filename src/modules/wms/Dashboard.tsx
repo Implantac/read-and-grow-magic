@@ -51,16 +51,28 @@ export default function WMSDashboardPage() {
     );
   }
 
+  const { locations } = useWMSStorageLocations();
+  
   // Análise de ocupação real consolidada por zona para o Gêmeo Digital
   const zoneData = useMemo(() => {
-    const zones = ['Recebimento', 'Picking A', 'Picking B', 'Pulmão 01', 'Pulmão 02', 'Expedição'];
-    return zones.map((zone, i) => ({
-      zone,
-      occupancy: Math.min(100, Math.max(10, stats.occupancy + (i * 5 - 15))),
-      totalLocations: Math.floor(stats.totalLocations / zones.length) || 10,
-      type: zone.includes('Picking') ? 'rack' : zone.includes('Pulmão') ? 'shelf' : 'floor'
-    }));
-  }, [stats.occupancy, stats.totalLocations]);
+    const zones = Array.from(new Set(locations.map(l => l.zone || 'Sem Zona')));
+    if (zones.length === 0) return [];
+    
+    return zones.map(zone => {
+      const zoneLocations = locations.filter(l => l.zone === zone);
+      const totalCap = zoneLocations.reduce((s, l) => s + (l.capacity || 0), 0);
+      const totalOcc = zoneLocations.reduce((s, l) => s + (l.occupied || 0), 0);
+      const type = zone.toLowerCase().includes('picking') ? 'rack' : 
+                   zone.toLowerCase().includes('pulmão') ? 'shelf' : 'floor';
+                   
+      return {
+        zone,
+        occupancy: totalCap > 0 ? Math.round((totalOcc / totalCap) * 100) : 0,
+        totalLocations: zoneLocations.length,
+        type: type as 'rack' | 'shelf' | 'floor'
+      };
+    });
+  }, [locations]);
 
 
   return (
