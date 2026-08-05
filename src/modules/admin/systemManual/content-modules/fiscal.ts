@@ -19,12 +19,13 @@ export const FISCAL_MODULES: ModuleManual[] = [
       { label: 'SPED', path: '/fiscal/sped' }
     ],
     personas: ['Analista Fiscal', 'Contador', 'Gerente Financeiro'],
-    prerequisites: ['Certificado A1 (.pfx) ativo', 'Configuração de alíquotas por UF', 'Cadastro de NCM nos produtos'],
+    prerequisites: ['Certificado A1 (.pfx) ativo', 'Configuração de alíquotas por UF', 'Cadastro de NCM nos produtos', 'Senha do Certificado armazenada no Secret Vault'],
     steps: [
-      { title: 'Configurar Certificado', description: 'Vá em Fiscal → Certificado. Faça upload do arquivo .pfx e informe a senha. Sem isso, a transmissão fica em modo simulado.' },
-      { title: 'Definir Regras de Imposto', description: 'Em Regras Tributárias, configure as alíquotas de ICMS, PIS e COFINS por estado e tipo de operação.' },
-      { title: 'Faturar Pedido', description: 'Ao aprovar um pedido no Comercial, clique em "Emitir NF-e". O sistema valida os dados e envia para a SEFAZ.' },
-      { title: 'Gerar Obrigações', description: 'No fim do mês, use a aba SPED para gerar os arquivos TXT para sua contabilidade.' }
+      { title: 'Upload p/ Fiscal Vault', description: 'Vá em Fiscal → Certificado. Faça upload do arquivo .pfx e informe a senha. O sistema valida a vigência e criptografa o arquivo no storage privado.' },
+      { title: 'Configurar Secret Vault', description: 'Para garantir segurança bancária, a senha do certificado deve ser configurada no cofre de segredos da plataforma (Secrets) com o nome sugerido no momento do upload.' },
+      { title: 'Definir Regras de Imposto', description: 'Em Regras Tributárias, configure as alíquotas de ICMS, PIS e COFINS por estado e tipo de operação. O motor fiscal usará isso para cálculo automático em cada pedido.' },
+      { title: 'Faturar Pedido', description: 'Ao aprovar um pedido no Comercial, clique em "Emitir NF-e". O sistema valida os dados, assina digitalmente e envia para a SEFAZ em tempo real.' },
+      { title: 'Gerar Obrigações', description: 'No fim do mês, use a aba SPED para gerar os arquivos TXT (ICMS/IPI e Contribuições) para sua contabilidade.' }
     ],
     sections: [
       { heading: 'Motor Tributário', paragraphs: ['O sistema calcula automaticamente Substituição Tributária e DIFAL com base no NCM do produto e UF do cliente.'] }

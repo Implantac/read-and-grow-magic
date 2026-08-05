@@ -23,7 +23,7 @@ export const OPERACIONAL_MODULES: ModuleManual[] = [
       { title: 'Cadastrar cliente', description: 'Vá em Comercial → Clientes → Novo. Informe CNPJ e o sistema busca dados via BrasilAPI.' },
       { title: 'Criar pedido', description: 'Em Pedidos → Novo, selecione cliente, adicione itens, revise impostos calculados automaticamente.' },
       { title: 'Acompanhar no pipeline', description: 'Arraste o card entre colunas (Prospect → Proposta → Fechado). Cada mudança é auditada.' },
-      { title: 'Faturar', description: 'Ao mover para "Faturamento", o sistema gera a NF-e e o AR automaticamente.', tip: 'Confira o CFOP sugerido pelo motor fiscal antes de emitir.' },
+      { title: 'Faturar', description: 'Ao mover para "Faturamento", o sistema gera a NF-e e o AR automaticamente.', tip: 'O markup automático configurado em Administração → Configurações Globais influencia o preço de venda sugerido.' },
     ],
     sections: [
       { heading: 'Automação com IA', paragraphs: ['O assistente de vendas sugere próximos passos, produtos complementares e detecta risco de churn.'] },
@@ -61,7 +61,7 @@ export const OPERACIONAL_MODULES: ModuleManual[] = [
       { title: 'Apontar produção', description: 'No terminal de chão de fábrica, operador aponta início/fim, quantidade e refugo.' },
     ],
     sections: [
-      { heading: 'OEE', paragraphs: ['Calculado automaticamente a partir dos apontamentos (Disponibilidade × Performance × Qualidade).'] },
+      { heading: 'OEE & Telemetria', paragraphs: ['Calculado automaticamente a partir dos apontamentos (Disponibilidade × Performance × Qualidade) e persistido historicamente para análise de tendências industriais.'] },
     ],
     faq: [{ q: 'MRP não sugere nada?', a: 'Verifique previsão de vendas e leadtime dos itens.' }],
     troubleshooting: [
@@ -76,7 +76,7 @@ export const OPERACIONAL_MODULES: ModuleManual[] = [
     icon: Warehouse,
     short: 'Recebimento, endereçamento, picking, packing e inventário rotativo.',
     overview: [
-      'Gestão de múltiplos CDs, entradas, put-away, ondas de picking, packing e expedição. Suporta RFID e coletores.',
+      'Gestão de múltiplos CDs, entradas, put-away, ondas de picking, packing e expedição. O Digital Twin em tempo real permite visualizar a ocupação de cada zona do armazém.',
     ],
     routes: [
       { label: 'Recebimento', path: '/wms/recebimento' },
@@ -93,6 +93,7 @@ export const OPERACIONAL_MODULES: ModuleManual[] = [
       { title: 'Expedir', description: 'Após packing, gere manifesto e vincule ao TMS.' },
     ],
     sections: [
+      { heading: 'WMS Operational Console', paragraphs: ['Console unificado que permite ao gestor visualizar em tempo real o status de Recebimento, Putaway, Picking e Packing em uma única tela.'] },
       { heading: 'Coletor mobile', paragraphs: ['Rota /coletor tem UI mobile-first otimizada para operação com scanner.'] },
     ],
     faq: [{ q: 'Divergência de estoque?', a: 'Rode inventário rotativo em WMS → Inventário. Ajustes geram trilha de auditoria.' }],
