@@ -8,14 +8,18 @@ type CompanyRow = Database['public']['Tables']['companies']['Row'];
 
 export interface TenantRef { id: string; name: string }
 export interface GroupRef { id: string; name: string }
-export interface BranchRef { id: string; name: string }
+export interface BranchRef { id: string; name: string; code?: string }
+
 
 interface HierarchyRow {
   tenant_id: string;
   tenant_name: string;
   enterprise_group_id: string;
   group_name: string;
+  company_id: string;
   unit_id: string;
+  unit_name: string;
+  level: string;
 }
 
 export type OperationType = string | { key: string; label?: string };
@@ -44,7 +48,8 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   const [currentTenant, setCurrentTenant] = useState<TenantRef | null>(null);
   const [currentGroup, setCurrentGroup] = useState<GroupRef | null>(null);
   const [currentCompany, setCurrentCompany] = useState<CompanyRow | null>(null);
-  const [currentBranch] = useState<BranchRef | null>(null);
+  const [currentBranch, setCurrentBranch] = useState<BranchRef | null>(null);
+
   const [segment, setSegment] = useState<Segment>('general');
   const [subSegment, setSubSegment] = useState<string>('');
   const [companySize, setCompanySize] = useState<string>('Pequeno');
@@ -97,17 +102,33 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
 
         const hierarchy = hierarchyData as HierarchyRow | null;
         if (hierarchy) {
+          // Identify if the current unit is a branch or a company
+          const isBranch = hierarchy.level === 'filial';
+          const companyId = isBranch ? hierarchy.company_id : hierarchy.unit_id;
+
           const { data: company } = await supabase.from('companies')
             .select('*')
-            .eq('id', hierarchy.unit_id)
+            .eq('id', companyId)
             .single();
 
           if (company) {
             applyCompany(company as CompanyRow);
             setCurrentTenant({ id: hierarchy.tenant_id, name: hierarchy.tenant_name });
             setCurrentGroup({ id: hierarchy.enterprise_group_id, name: hierarchy.group_name });
+            
+            if (isBranch) {
+              setCurrentBranch({ id: hierarchy.unit_id, name: hierarchy.unit_name });
+            } else {
+              // Try to find if user has a default branch in their profile
+              const { data: profile } = await supabase.from('profiles').select('default_branch_id').eq('id', user.id).maybeSingle();
+              if (profile?.default_branch_id) {
+                const { data: branch } = await supabase.from('branches').select('id, name').eq('id', profile.default_branch_id).maybeSingle();
+                if (branch) setCurrentBranch(branch);
+              }
+            }
           }
         }
+
       }
     } catch (error: unknown) {
       const err = error as { message?: string; status?: number; name?: string };

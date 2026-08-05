@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import WMSKpiStrip from "./components/WMSKpiStrip";
 import { SmartReplenishment } from "./components/SmartReplenishment";
+import WMSOperationalConsole from "./components/WMSOperationalConsole";
+
 
 export default function WMSDashboard() {
   return (
@@ -97,7 +99,10 @@ export default function WMSDashboard() {
         </Card>
       </div>
 
+      <WMSOperationalConsole />
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
+
         <Card className="lg:col-span-4">
           <CardHeader>
             <CardTitle>Fluxo de Logística Interna</CardTitle>
