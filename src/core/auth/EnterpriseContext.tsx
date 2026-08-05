@@ -16,6 +16,8 @@ interface HierarchyRow {
   enterprise_group_id: string;
   group_name: string;
   unit_id: string;
+  unit_name: string;
+  level: string;
 }
 
 export type OperationType = string | { key: string; label?: string };
