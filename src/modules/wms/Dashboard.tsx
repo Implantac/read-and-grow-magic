@@ -1,4 +1,6 @@
+import { useMemo } from 'react';
 import { useWMSDashboardStats } from '@/hooks/wms/useWMSOperations';
+
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
 import { KPICard } from '@/shared/components/KPICard';
