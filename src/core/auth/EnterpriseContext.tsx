@@ -46,7 +46,8 @@ export const EnterpriseProvider = ({ children }: { children: React.ReactNode }) 
   const [currentTenant, setCurrentTenant] = useState<TenantRef | null>(null);
   const [currentGroup, setCurrentGroup] = useState<GroupRef | null>(null);
   const [currentCompany, setCurrentCompany] = useState<CompanyRow | null>(null);
-  const [currentBranch] = useState<BranchRef | null>(null);
+  const [currentBranch, setCurrentBranch] = useState<BranchRef | null>(null);
+
   const [segment, setSegment] = useState<Segment>('general');
   const [subSegment, setSubSegment] = useState<string>('');
   const [companySize, setCompanySize] = useState<string>('Pequeno');
