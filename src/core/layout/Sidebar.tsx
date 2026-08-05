@@ -222,9 +222,11 @@ export function Sidebar() {
 
         {/* Navigation Content */}
         <nav aria-label="Módulos do sistema" className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin px-3 py-2 space-y-6">
-          {filteredSections.map((section, sectionIndex) => {
+          {(filteredSections || []).map((section, sectionIndex) => {
+            if (!section) return null;
+            
             const isVisible = !segment || !section.label || (
-              SEGMENTS[segment]?.allowedSections.includes(section.label)
+              SEGMENTS[segment]?.allowedSections?.includes(section.label) ?? true
             );
 
             if (!isVisible) return null;
