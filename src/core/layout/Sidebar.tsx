@@ -222,14 +222,15 @@ export function Sidebar() {
 
         {/* Navigation Content */}
         <nav aria-label="Módulos do sistema" className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin px-3 py-2 space-y-6">
-          {filteredSections.filter((section) => {
-            if (!segment) return true;
-            const segmentConfig = SEGMENTS[segment] || SEGMENTS.general;
-            const allowedSections = segmentConfig.allowedSections;
-            if (section.label && !allowedSections.includes(section.label)) return false;
-            return true;
-          }).map((section, sectionIndex) => (
-            section && (
+          {filteredSections.map((section, sectionIndex) => {
+            const isVisible = !segment || (
+              SEGMENTS[segment]?.allowedSections.includes(section.label || "") || 
+              !section.label // Always show sections without labels if any
+            );
+
+            if (!isVisible && segment) return null;
+
+            return section && (
               <div key={section.label || sectionIndex} className="space-y-2">
                 {!sidebarCollapsed && section.label && (
                   <div className="flex items-center justify-between px-3 mb-1">
@@ -248,9 +249,10 @@ export function Sidebar() {
                 <ul className="space-y-1">
                   {(section.items || []).filter((item) => {
                     if (!item) return false;
+                    
+                    // Segment-specific overrides
                     if (segment === 'services' && (item.title === 'Estoque' || item.title === 'Produção' || item.title === 'WMS')) return false;
-                    if (segment === 'retail' && item.title === 'WMS') return true;
-
+                    
                     if (section.label === 'Pacotes Verticais') {
                       if (segment === 'textile' && item.title !== 'Indústria Têxtil') return false;
                       if (segment === 'pharma' && item.title !== 'Farmacêutico') return false;
@@ -265,16 +267,16 @@ export function Sidebar() {
                       sidebarCollapsed={sidebarCollapsed}
                       isActive={isActive}
                       isParentActive={isParentActive}
-                       expandedItems={expandedItems}
-                       toggleExpanded={toggleExpanded}
-                       selectedIndex={selectedIndex}
-                       flatItems={flatItems}
-                     />
+                      expandedItems={expandedItems}
+                      toggleExpanded={toggleExpanded}
+                      selectedIndex={selectedIndex}
+                      flatItems={flatItems}
+                    />
                   ))}
                 </ul>
               </div>
-            )
-          ))}
+            );
+          })}
 
           <CustomEntitiesNav sidebarCollapsed={sidebarCollapsed} isActive={isActive} />
         </nav>
