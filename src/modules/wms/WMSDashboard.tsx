@@ -18,9 +18,12 @@ import {
 import WMSKpiStrip from "./components/WMSKpiStrip";
 import { SmartReplenishment } from "./components/SmartReplenishment";
 import WMSOperationalConsole from "./components/WMSOperationalConsole";
+import { useWMSDashboardStats } from "@/hooks/wms/useWMSOperations";
+import { Skeleton } from "@/ui/base/skeleton";
 
 
 export default function WMSDashboard() {
+  const { stats, loading } = useWMSDashboardStats();
   return (
     <div className="p-6 space-y-6 animate-fade-in">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -60,8 +63,12 @@ export default function WMSDashboard() {
             <Truck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12 / 15</div>
-            <p className="text-xs text-muted-foreground mt-1">3 recebimentos agendados</p>
+            {loading ? <Skeleton className="h-8 w-20" /> : (
+              <>
+                <div className="text-2xl font-bold">{stats.receiving} / 15</div>
+                <p className="text-xs text-muted-foreground mt-1">Status em tempo real</p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -71,30 +78,42 @@ export default function WMSDashboard() {
             <Layers className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">8 Ativas</div>
-            <p className="text-xs text-green-500 mt-1">42% concluídas</p>
+            {loading ? <Skeleton className="h-8 w-20" /> : (
+              <>
+                <div className="text-2xl font-bold">{stats.picking} Ativas</div>
+                <p className="text-xs text-green-500 mt-1">Monitoramento live</p>
+              </>
+            )}
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-amber-500">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Acuracidade de Inv.</CardTitle>
+            <CardTitle className="text-sm font-medium">Ocupação de Armazém</CardTitle>
             <ScanBarcode className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">99.8%</div>
-            <p className="text-xs text-muted-foreground mt-1">Último inventário: Ontem</p>
+            {loading ? <Skeleton className="h-8 w-20" /> : (
+              <>
+                <div className="text-2xl font-bold">{stats.occupancy}%</div>
+                <p className="text-xs text-muted-foreground mt-1">{stats.occupied} / {stats.capacity} un</p>
+              </>
+            )}
           </CardContent>
         </Card>
 
         <Card className="border-l-4 border-l-purple-500">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-sm font-medium">Sugestão Reabast.</CardTitle>
+            <CardTitle className="text-sm font-medium">Packing Pendente</CardTitle>
             <RefreshCw className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">15 Itens</div>
-            <p className="text-xs text-purple-500 mt-1">Risco de ruptura iminente</p>
+            {loading ? <Skeleton className="h-8 w-20" /> : (
+              <>
+                <div className="text-2xl font-bold">{stats.packing} Pedidos</div>
+                <p className="text-xs text-purple-500 mt-1">Aguardando checkout</p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
