@@ -21,6 +21,8 @@ export const gestaoSection: NavSection = {
         { title: 'Usuários & Permissões', href: '/admin/usuarios', icon: 'Users' },
         { title: 'Empresas & Filiais', href: '/admin/empresas', icon: 'Building' },
         { title: 'Parâmetros do Sistema', href: '/admin/parametros', icon: 'Sliders' },
+        { title: 'Configurações Globais', href: '/admin/configuracoes', icon: 'Settings' },
+
         { title: 'Workflow Engine', href: '/admin/workflows', icon: 'GitBranch' },
         { title: 'Privacidade (LGPD)', href: '/admin/privacidade', icon: 'ShieldCheck' },
         { title: 'Manual do Sistema', href: '/admin/manual', icon: 'BookOpenCheck' },

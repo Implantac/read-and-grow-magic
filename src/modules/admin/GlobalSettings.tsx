@@ -10,10 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Settings, Building2, Store, Truck, ShieldCheck, Save, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useCurrentCompany } from "@/hooks/system/useCurrentCompany";
+import { useEnterprise } from "@/core/auth/EnterpriseContext";
 
 export default function GlobalSettings() {
-  const { company, loading: loadingCompany } = useCurrentCompany();
+  const { currentCompany: company, isLoading: loadingCompany } = useEnterprise();
+
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState({
     business_model: 'hybrid', // wholesale, retail, hybrid
@@ -25,24 +26,21 @@ export default function GlobalSettings() {
   });
 
   useEffect(() => {
-    if (company?.metadata) {
-      setSettings(prev => ({ ...prev, ...(company.metadata as any)?.settings }));
+    if (company?.settings) {
+      setSettings(prev => ({ ...prev, ...(company.settings as any) }));
     }
   }, [company]);
+
 
   const handleSave = async () => {
     if (!company) return;
     setLoading(true);
     try {
-      const newMetadata = {
-        ...(company.metadata as any || {}),
-        settings
-      };
-
       const { error } = await supabase
         .from('companies')
-        .update({ metadata: newMetadata })
+        .update({ settings: settings as any })
         .eq('id', company.id);
+
 
       if (error) throw error;
       toast.success("Configurações globais atualizadas");
