@@ -1,9 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import type { Database } from '@/integrations/supabase/types';
 import { toast } from 'sonner';
-
-type OEEMetricsRow = Database['public']['Tables']['oee_metrics']['Row'];
 
 export interface OEEMetrics {
   availability: number;
@@ -21,17 +18,15 @@ export function useOEEMetrics() {
 
   const fetchMetrics = useCallback(async () => {
     setLoading(true);
-    // Tenta ler da tabela oee_metrics se existir, senão o backend via RPC
-    // Como a tabela pode não existir ainda no schema visível, usamos catch
     try {
-      const { data, error } = await supabase
-        .from('oee_metrics' as any)
+      // Cast to any to avoid TS checking for a table that might not be in types.ts yet
+      const { data, error } = await (supabase.from('oee_metrics' as any) as any)
         .select('*')
         .order('timestamp', { ascending: false })
         .limit(100);
 
       if (error) throw error;
-      setMetrics(data || []);
+      setMetrics((data || []) as OEEMetrics[]);
     } catch (e) {
       console.warn('Tabela oee_metrics não encontrada, métricas serão calculadas on-the-fly');
       setMetrics([]);
