@@ -15,6 +15,7 @@ interface HierarchyRow {
   tenant_name: string;
   enterprise_group_id: string;
   group_name: string;
+  company_id: string;
   unit_id: string;
   unit_name: string;
   level: string;
