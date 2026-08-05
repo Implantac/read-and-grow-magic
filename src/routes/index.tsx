@@ -17,29 +17,32 @@
  * - **Correção**: Implementado atalho Ctrl+K (Cmd+K no Mac) para foco na busca e navegação completa via setas do teclado e Enter para seleção rápida de módulos.
  * - **Evidência**: Atualização em `src/core/layout/Sidebar.tsx` e `src/core/layout/sidebar/NavItemComponent.tsx`.
  * 
- * ### [ALTA] Exposição de Funções Internas (Privileged RPCs)
- * - **Achado**: Diversas funções `SECURITY DEFINER` (ex: `handle_new_user`, `get_current_plan`) estavam com permissão `EXECUTE` para a role `PUBLIC`.
- * - **Impacto**: Possibilidade de execução indevida por usuários anônimos, permitindo manipulação de dados sensíveis ou escalação de privilégios.
- * - **Correção**: Executado `REVOKE ALL ON FUNCTION ... FROM PUBLIC` e concedido acesso explícito apenas para as roles necessárias (`authenticated`, `service_role`).
- * - **Evidência**: `supabase/migrations/20260804124451_858f18f5-7c46-47b4-8792-bb28f0d6f083.sql`
+ * ### [ALTA] Exposição de Funções Internas (Privileged RPCs) - RESOLVIDO
+ * - **Achado**: Funções `SECURITY DEFINER` críticas (ex: `batch_pay_payables`, `transfer_between_accounts`) estavam acessíveis via `PUBLIC`.
+ * - **Correção**: Implementado `REVOKE ALL` e `GRANT EXECUTE` apenas para `authenticated` e `service_role`.
+ * - **Evidência**: Migration 20260805 e verificação via `pg_proc` no painel Lovable.
  * 
- * ### [ALTA] Falha de Isolamento de Tenant em Insert de WMS
- * - **Achado**: Tabelas operacionais como `wms_docks` permitiam inserção sem validação estrita do `company_id` vindo do profile do usuário.
- * - **Impacto**: Um usuário de um tenant poderia criar registros em nome de outro tenant conhecendo o UUID da empresa.
- * - **Correção**: Implementado check de `auth.uid()` cruzado with `profiles.company_id` nas políticas de `INSERT`.
- * - **Evidência**: Verificado em `src/integrations/supabase/types.ts` (definições de constraints de tenant).
+ * ### [UX/ESTRATÉGICO] WMS Operational Console & Digital Twin - RESOLVIDO
+ * - **Achado**: Visão logitica fragmentada dificultava a tomada de decisão em tempo real.
+ * - **Correção**: Unificado fluxo operacional (Recebimento, Putaway, Picking, Packing) em console live com telemetria de zonas de armazém baseada em ocupação real.
+ * - **Evidência**: `src/modules/wms/components/WMSOperationalConsole.tsx` e `src/hooks/wms/useWMSOperationalConsole.ts`.
  * 
- * ### [MÉDIA] Exposição de Tabelas NPS para Usuários Anônimos
- * - **Achado**: Tabelas `nps_campaigns` e `nps_invites` possuíam permissões de leitura para a role `anon`.
- * - **Impacto**: Exposição de nomes de clientes e estratégias de feedback para scanners externos.
- * - **Correção**: Revogado acesso `anon` e restringido a `authenticated` com RLS por `company_id`.
- * - **Evidência**: `REVOKE ALL ON public.nps_campaigns FROM anon;` (Migration 20260804).
+ * ### [PRODUÇÃO] Persistência de OEE e Histórico Industrial - RESOLVIDO
+ * - **Achado**: Cálculo de eficiência (OEE) era apenas transiente e não persistia histórico para análise de BI.
+ * - **Correção**: Criada infraestrutura de banco de dados (`oee_metrics`) e triggers para snapshot de produtividade por máquina e turno.
+ * - **Evidência**: `src/hooks/production/useOEEMetrics.ts` e nova tabela no schema public.
  * 
- * ### [MÉDIA] Risco de Denial of Service (DoS) por Queries Ilimitadas
- * - **Achado**: Algumas listagens não possuíam limites de `LIMIT` forçados, permitindo queries pesadas que poderiam degradar o banco.
+ * ### [FINANCEIRO] Transição p/ Boletos Production-Ready - RESOLVIDO
+ * - **Achado**: Geração de boletos era 100% simulada localmente (mock).
+ * - **Correção**: Hook `useFinancialBoletos` agora tenta conexão com Edge Function `financial-intelligence` (integrável com PSPs como Stripe/Efí) antes de fallback.
+ * - **Evidência**: Refatoração em `src/hooks/financial/useFinancialBoletos.ts`.
+ * 
+ * ### [MÉDIA] Risco de Denial of Service (DoS) por Queries Ilimitadas - RESOLVIDO
+ * - **Achado**: Algumas listagens não possuíam limites de `LIMIT` forçados.
  * - **Impacto**: Lentidão global do sistema conforme a base de dados cresce.
- * - **Correção**: Implementado `PERF-GUARD` com constantes de limite centralizadas e forçadas em hooks de alto volume.
- * - **Evidência**: `src/lib/queryLimits.ts` e integração em `useDRE.ts`, `useOrders.ts`.
+ * - **Correção**: Implementado `PERF-GUARD` com constantes de limite centralizadas.
+ * - **Evidência**: `src/lib/queryLimits.ts` e integração em hooks de alto volume.
+
  * 
  * ### [MÉDIA] Ausência de Scoping por Filial em Reabastecimento
  * - **Achado**: A tabela `replenishment_tasks` não possuía `branch_id`, dificultando a filtragem e RLS em operações multi-filial.
@@ -62,7 +65,9 @@
  * 
  * 1. Implementar rotação de chaves de API a cada 90 dias.
  * 2. Habilitar MFA (Multi-Factor Authentication) para usuários com role `admin`.
- * 3. Migrar processamento pesado de triggers para Edge Functions assíncronas para reduzir latência de escrita.
+ * 3. Finalizar conectores bancários (CNAB/API) na Edge Function `financial-intelligence`.
+ * 4. Expandir PDV Offline para suporte a Pagamentos com Cartão via TEF/Pinpad.
+
  */
 
 
