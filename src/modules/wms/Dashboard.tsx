@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { useWMSDashboardStats } from '@/hooks/wms/useWMSOperations';
+import { useMemo, useEffect, useState } from 'react';
+import { useWMSDashboardStats, useWMSStorageLocations } from '@/hooks/wms/useWMSOperations';
 
 import { PageContainer } from '@/shared/components/PageContainer';
 import { PageHeader } from '@/shared/components/PageHeader';
