@@ -17,6 +17,8 @@ const SystemManualPage = lazy(() => import("../modules/admin/systemManual/System
 const ModuleManualDetailPage = lazy(() => import("../modules/admin/systemManual/ModuleManualDetail"));
 const CriticalAuditLogPage = lazy(() => import("../modules/admin/CriticalAuditLog"));
 const PrivacidadePage = lazy(() => import("../modules/admin/Privacidade"));
+const GlobalSettingsPage = lazy(() => import("../modules/admin/GlobalSettings"));
+
 
 
 
@@ -44,6 +46,8 @@ export const AdminRoutes = [
   <Route key="adm-manual-detail" path="manual/:slug" element={<ModuleManualDetailPage />} />,
   <Route key="adm-critical-audit" path="auditoria-critica" element={adminOnly(<CriticalAuditLogPage />)} />,
   <Route key="adm-privacidade" path="privacidade" element={<PrivacidadePage />} />,
+  <Route key="adm-config" path="configuracoes" element={adminOnly(<GlobalSettingsPage />)} />,
+
 ];
 
 
