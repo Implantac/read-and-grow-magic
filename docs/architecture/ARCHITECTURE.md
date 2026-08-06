@@ -1,21 +1,19 @@
-# Arquitetura do Sistema - READ & GROW
+# Mapa Arquitetural - READ & GROW
 Data: 2026-08-06
 
-## Stack Tecnológica
-- **Frontend**: React 18, Vite, Tailwind CSS, Shadcn UI
-- **Estado/Dados**: TanStack Query (React Query)
-- **Backend**: Lovable Cloud (Supabase)
-  - PostgreSQL (Banco de Dados)
-  - Edge Functions (Lógica de Servidor)
-  - RLS (Segurança de Linha)
-  - Auth (Autenticação)
+## Visão Geral
+Sistema ERP multi-tenant focado em automação industrial, logística (WMS) e inteligência financeira.
 
-## Domínios Principais
-- **Financial**: Gestão de contas a pagar/receber, conciliação e DRE.
-- **WMS**: Gestão de armazém, estoque, picking e packing.
-- **Fiscal**: Emissão de documentos fiscais (NF-e, NFC-e, CT-e).
-- **Relacionamento**: Gestão de NPS e experiência do cliente.
-- **Production**: Controle de ordens de produção e OEE.
+## Camadas de Responsabilidade
+1.  **Apresentação (UI)**: Componentes React em `src/modules` e `src/components`. Seguem o design system baseado em Shadcn/Tailwind.
+2.  **Estado & Sincronização**: TanStack Query para dados assíncronos e hooks nativos para estado local.
+3.  **Hooks de Dados**: Localizados em `src/hooks`, encapsulam as chamadas ao Supabase.
+4.  **Backend (Supabase/PostgreSQL)**:
+    *   **RLS**: Camada primária de segurança.
+    *   **Edge Functions**: Processamentos pesados (NF-e, Auditoria).
+    *   **Triggers**: Integridade de estoque e logs.
 
-## Fluxo de Dados Padronizado
-UI Components -> Custom Hooks (React Query) -> Supabase Client -> RLS Policies -> PostgreSQL Tables
+## Fluxos de Segurança
+- **Identidade**: Via Supabase Auth.
+- **Autorização**: Baseada em `profiles` + `user_roles`.
+- **Tenant**: Filtro mandatório por `company_id` em todas as tabelas transacionais.

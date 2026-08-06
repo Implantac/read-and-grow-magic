@@ -19,7 +19,7 @@ export function CheckinDialog({ onClose }: { onClose: () => void }) {
   const save = useMutation({
     mutationFn: async () => {
       if (!form.plate.trim()) throw new Error('Placa é obrigatória');
-      const { data: prof } = await supabase.from('profiles').select('company_id').maybeSingle();
+      const { data: prof } = await supabase.from('profiles').select('company_id').single();
       const companyId = prof?.company_id;
       if (!companyId) throw new Error('Empresa não identificada');
       const { error } = await supabase.from('yard_vehicles').insert({
