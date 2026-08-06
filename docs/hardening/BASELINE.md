@@ -9,7 +9,6 @@ Status: **FASE 0 CONCLUÍDA** | **FASE 1 EM ANDAMENTO**
 | 1 | Mapa Arquitetural | 🔄 Em Execução |
 | 2 | Segurança e Multi-tenant | 🔄 Em Execução |
 | 3 | RLS Hardening | ⏳ Planejado |
-| ... | ... | ... |
 | 9 | Estoque | 📝 Doc Iniciada |
 | 10 | Transações | 📝 Doc Iniciada |
 
@@ -18,14 +17,12 @@ Status: **FASE 0 CONCLUÍDA** | **FASE 1 EM ANDAMENTO**
 - Typecheck: Erros críticos em Commercial, Financial e Fiscal.
 - Auditoria RLS: 10 primeiras tabelas mapeadas em `docs/security/TENANT_MATRIX.md`.
 
+## Ações Executadas
+- [x] Criada estrutura de diretórios `docs/hardening`, `docs/architecture`, `docs/security`, `docs/testing`.
+- [x] Gerado `BASELINE.md`, `ARCHITECTURE.md`, `TENANT_MATRIX.md`.
+- [x] Iniciada tipagem de hooks críticos (`useFinancialAudit.ts`).
+- [x] Ajustada tipagem inicial em `SmartReplenishment.tsx`.
+
 ## Ações Imediatas
-1. Corrigir erros de tipagem em `src/hooks/financial/useFinancialAudit.ts` e `src/modules/wms/components/SmartReplenishment.tsx`.
-2. Mapear integralmente o `TENANT_MATRIX.md`.
-
-
-
-## Funcionalidades Críticas de Preservação
-- Geração de Boletos (Financial)
-- Emissão de NF-e (Fiscal)
-- Movimentação de Estoque (WMS)
-- Processamento de NPS (Relacionamento)
+1. Mapear integralmente o `TENANT_MATRIX.md`.
+2. Criar script de auditoria de IDOR para os endpoints principais.

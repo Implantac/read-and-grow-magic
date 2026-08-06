@@ -9,7 +9,7 @@ export interface AuditLog {
   category: string;
   check_name: string;
   description: string;
-  details: any;
+  details: Record<string, unknown> | null;
   affected_count: number;
   affected_amount: number;
   status: 'open' | 'resolved' | 'ignored' | 'auto_fixed';
