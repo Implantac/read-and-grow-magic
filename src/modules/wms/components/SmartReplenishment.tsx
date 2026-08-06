@@ -21,8 +21,9 @@ export function SmartReplenishment() {
     const list: any[] = [];
     
     // Group matrix by product
-    const byProduct = matrix.reduce((acc: any, curr) => {
+    const byProduct = matrix.reduce((acc: Record<string, any>, curr) => {
       if (!acc[curr.product_id]) {
+
         acc[curr.product_id] = {
           id: curr.product_id,
           code: curr.product_code,
