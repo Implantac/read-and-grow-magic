@@ -1,28 +1,23 @@
 # Baseline de Hardening - READ & GROW
 Data: 2026-08-06
-Status: **FASE 0 CONCLUÍDA** | **FASE 1 EM ANDAMENTO**
+Status: **FASE 1 CONCLUÍDA** | **FASE 2 EM ANDAMENTO**
 
 ## Status do Hardening
 | Fase | Descrição | Status |
 | :--- | :--- | :--- |
 | 0 | Baseline e Checkpoint | ✅ Concluído |
-| 1 | Mapa Arquitetural | 🔄 Em Execução |
+| 1 | Mapa Arquitetural | ✅ Concluído |
 | 2 | Segurança e Multi-tenant | 🔄 Em Execução |
 | 3 | RLS Hardening | ⏳ Planejado |
-| 9 | Estoque | 📝 Doc Iniciada |
-| 10 | Transações | 📝 Doc Iniciada |
-
-## Resultados de Verificação Inicial
-- Lint: ~100 erros de `any` (identificados em hooks e componentes).
-- Typecheck: Erros críticos em Commercial, Financial e Fiscal.
-- Auditoria RLS: 10 primeiras tabelas mapeadas em `docs/security/TENANT_MATRIX.md`.
+| 26 | Governança (DoD) | ✅ Concluído |
 
 ## Ações Executadas
-- [x] Criada estrutura de diretórios `docs/hardening`, `docs/architecture`, `docs/security`, `docs/testing`.
-- [x] Gerado `BASELINE.md`, `ARCHITECTURE.md`, `TENANT_MATRIX.md`.
-- [x] Iniciada tipagem de hooks críticos (`useFinancialAudit.ts`).
-- [x] Ajustada tipagem inicial em `SmartReplenishment.tsx`.
+- [x] Documentação de Arquitetura em `docs/architecture/ARCHITECTURE.md`.
+- [x] Definição de Governança em `docs/governance/DEFINITION_OF_DONE.md`.
+- [x] Padronização de UX em `docs/ux/COMPONENTS.md`.
+- [x] Limpeza de tipagem (`as any`) em hooks do WMS.
+- [x] Reforço de segurança em `CheckinDialog.tsx` (Single profile check).
 
 ## Ações Imediatas
-1. Mapear integralmente o `TENANT_MATRIX.md`.
-2. Criar script de auditoria de IDOR para os endpoints principais.
+1. Mapear integralmente as tabelas fiscais no `TENANT_MATRIX.md`.
+2. Auditar Edge Functions em `FASE 5`.
