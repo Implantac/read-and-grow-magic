@@ -1,6 +1,6 @@
 # Baseline de Hardening - READ & GROW
 Data: 2026-08-06
-Status: **FASE 1 CONCLUÍDA** | **FASE 2 EM ANDAMENTO**
+Status: **FASE 2 CONCLUÍDA** | **FASE 3 EM ANDAMENTO**
 
 ## Status do Hardening
 | Fase | Descrição | Status |
