@@ -1,0 +1,157 @@
+--- Auditing cte ---
+supabase/migrations/20260420132602_dd3868ff-65d1-44d6-b1e7-3573fb83b8b9.sql:CREATE POLICY "cte_select" ON public.cte FOR SELECT TO authenticated USING (true);
+supabase/migrations/20260420132602_dd3868ff-65d1-44d6-b1e7-3573fb83b8b9.sql:CREATE POLICY "cte_all" ON public.cte FOR ALL TO authenticated USING (true) WITH CHECK (true);
+supabase/migrations/20260420132602_dd3868ff-65d1-44d6-b1e7-3573fb83b8b9.sql:CREATE POLICY "cte_nfe_links_select" ON public.cte_nfe_links FOR SELECT TO authenticated USING (true);
+supabase/migrations/20260420132602_dd3868ff-65d1-44d6-b1e7-3573fb83b8b9.sql:CREATE POLICY "cte_nfe_links_all" ON public.cte_nfe_links FOR ALL TO authenticated USING (true) WITH CHECK (true);
+--- Auditing nfe ---
+supabase/migrations/20260308170828_66ea9fae-ab02-42cd-a926-0c27d0aee943.sql:CREATE POLICY "Auth users can read nfe" ON public.nfe FOR SELECT TO authenticated USING (true);
+supabase/migrations/20260308170828_66ea9fae-ab02-42cd-a926-0c27d0aee943.sql:CREATE POLICY "Auth users can insert nfe" ON public.nfe FOR INSERT TO authenticated WITH CHECK (true);
+supabase/migrations/20260308170828_66ea9fae-ab02-42cd-a926-0c27d0aee943.sql:CREATE POLICY "Auth users can update nfe" ON public.nfe FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+supabase/migrations/20260308170828_66ea9fae-ab02-42cd-a926-0c27d0aee943.sql:CREATE POLICY "Auth users can delete nfe" ON public.nfe FOR DELETE TO authenticated USING (true);
+supabase/migrations/20260308170828_66ea9fae-ab02-42cd-a926-0c27d0aee943.sql:CREATE POLICY "Auth users can read nfe_items" ON public.nfe_items FOR SELECT TO authenticated USING (true);
+supabase/migrations/20260308170828_66ea9fae-ab02-42cd-a926-0c27d0aee943.sql:CREATE POLICY "Auth users can insert nfe_items" ON public.nfe_items FOR INSERT TO authenticated WITH CHECK (true);
+supabase/migrations/20260308170828_66ea9fae-ab02-42cd-a926-0c27d0aee943.sql:CREATE POLICY "Auth users can update nfe_items" ON public.nfe_items FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+supabase/migrations/20260308170828_66ea9fae-ab02-42cd-a926-0c27d0aee943.sql:CREATE POLICY "Auth users can delete nfe_items" ON public.nfe_items FOR DELETE TO authenticated USING (true);
+supabase/migrations/20260410170035_44c2bd9b-3c4a-4590-a072-4becf01ba99a.sql:CREATE POLICY "Authenticated users can manage conference_records" ON public.conference_records FOR ALL TO authenticated USING (true) WITH CHECK (true);
+supabase/migrations/20260410170035_44c2bd9b-3c4a-4590-a072-4becf01ba99a.sql:CREATE POLICY "Authenticated users can manage conference_record_items" ON public.conference_record_items FOR ALL TO authenticated USING (true) WITH CHECK (true);
+supabase/migrations/20260411010955_1fc01093-4049-47b2-845c-bd13a6a41ece.sql:CREATE POLICY "wms_conference_public_read" ON public.wms_conference_records FOR SELECT USING (true);
+supabase/migrations/20260411010955_1fc01093-4049-47b2-845c-bd13a6a41ece.sql:CREATE POLICY "wms_conference_public_write" ON public.wms_conference_records FOR ALL USING (true) WITH CHECK (true);
+supabase/migrations/20260411010955_1fc01093-4049-47b2-845c-bd13a6a41ece.sql:CREATE POLICY "wms_conf_items_public_read" ON public.wms_conference_items FOR SELECT USING (true);
+supabase/migrations/20260411010955_1fc01093-4049-47b2-845c-bd13a6a41ece.sql:CREATE POLICY "wms_conf_items_public_write" ON public.wms_conference_items FOR ALL USING (true) WITH CHECK (true);
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:DROP POLICY IF EXISTS "wms_conf_items_public_read" ON public.wms_conference_items;
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:DROP POLICY IF EXISTS "wms_conf_items_public_write" ON public.wms_conference_items;
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:CREATE POLICY "Authenticated can read wms_conference_items"
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:CREATE POLICY "Authenticated can insert wms_conference_items"
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:CREATE POLICY "Authenticated can update wms_conference_items"
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:CREATE POLICY "Authenticated can delete wms_conference_items"
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:  FOR pol IN SELECT policyname FROM pg_policies WHERE schemaname='public' AND tablename='nfe' LOOP
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:    EXECUTE format('DROP POLICY IF EXISTS %I ON public.nfe', pol.policyname);
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:  FOR pol IN SELECT policyname FROM pg_policies WHERE schemaname='public' AND tablename='nfe_items' LOOP
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:    EXECUTE format('DROP POLICY IF EXISTS %I ON public.nfe_items', pol.policyname);
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:CREATE POLICY "Authenticated can read nfe" ON public.nfe FOR SELECT TO authenticated USING (true);
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:CREATE POLICY "Authenticated can insert nfe" ON public.nfe FOR INSERT TO authenticated WITH CHECK (true);
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:CREATE POLICY "Authenticated can update nfe" ON public.nfe FOR UPDATE TO authenticated USING (true);
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:CREATE POLICY "Authenticated can delete nfe" ON public.nfe FOR DELETE TO authenticated USING (true);
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:CREATE POLICY "Authenticated can read nfe_items" ON public.nfe_items FOR SELECT TO authenticated USING (true);
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:CREATE POLICY "Authenticated can insert nfe_items" ON public.nfe_items FOR INSERT TO authenticated WITH CHECK (true);
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:CREATE POLICY "Authenticated can update nfe_items" ON public.nfe_items FOR UPDATE TO authenticated USING (true);
+supabase/migrations/20260416200756_a5adc5c2-3040-47e4-a193-c61571384d0b.sql:CREATE POLICY "Authenticated can delete nfe_items" ON public.nfe_items FOR DELETE TO authenticated USING (true);
+supabase/migrations/20260417013732_6f614cec-b756-4712-b46a-6f900e422eb3.sql:DROP POLICY IF EXISTS "wms_conference_public_read" ON public.wms_conference_records;
+supabase/migrations/20260417013732_6f614cec-b756-4712-b46a-6f900e422eb3.sql:DROP POLICY IF EXISTS "wms_conference_public_write" ON public.wms_conference_records;
+supabase/migrations/20260417013732_6f614cec-b756-4712-b46a-6f900e422eb3.sql:CREATE POLICY "wms_conference_authenticated_read"
+supabase/migrations/20260417013732_6f614cec-b756-4712-b46a-6f900e422eb3.sql:CREATE POLICY "wms_conference_authenticated_insert"
+supabase/migrations/20260417013732_6f614cec-b756-4712-b46a-6f900e422eb3.sql:CREATE POLICY "wms_conference_authenticated_update"
+supabase/migrations/20260417013732_6f614cec-b756-4712-b46a-6f900e422eb3.sql:CREATE POLICY "wms_conference_authenticated_delete"
+supabase/migrations/20260420132602_dd3868ff-65d1-44d6-b1e7-3573fb83b8b9.sql:CREATE POLICY "cte_nfe_links_select" ON public.cte_nfe_links FOR SELECT TO authenticated USING (true);
+supabase/migrations/20260420132602_dd3868ff-65d1-44d6-b1e7-3573fb83b8b9.sql:CREATE POLICY "cte_nfe_links_all" ON public.cte_nfe_links FOR ALL TO authenticated USING (true) WITH CHECK (true);
+supabase/migrations/20260603142709_9662c924-b174-438b-991a-c285abdd5be0.sql:DROP POLICY IF EXISTS "Authenticated can read nfe" ON public.nfe;
+supabase/migrations/20260603142709_9662c924-b174-438b-991a-c285abdd5be0.sql:DROP POLICY IF EXISTS "Authenticated can insert nfe" ON public.nfe;
+supabase/migrations/20260603142709_9662c924-b174-438b-991a-c285abdd5be0.sql:DROP POLICY IF EXISTS "Authenticated can update nfe" ON public.nfe;
+supabase/migrations/20260603142709_9662c924-b174-438b-991a-c285abdd5be0.sql:DROP POLICY IF EXISTS "Authenticated can delete nfe" ON public.nfe;
+supabase/migrations/20260603142709_9662c924-b174-438b-991a-c285abdd5be0.sql:CREATE POLICY "nfe_role_select" ON public.nfe FOR SELECT TO authenticated
+supabase/migrations/20260603142709_9662c924-b174-438b-991a-c285abdd5be0.sql:CREATE POLICY "nfe_role_write" ON public.nfe FOR INSERT TO authenticated
+supabase/migrations/20260603142709_9662c924-b174-438b-991a-c285abdd5be0.sql:CREATE POLICY "nfe_role_update" ON public.nfe FOR UPDATE TO authenticated
+supabase/migrations/20260603142709_9662c924-b174-438b-991a-c285abdd5be0.sql:CREATE POLICY "nfe_role_delete" ON public.nfe FOR DELETE TO authenticated
+supabase/migrations/20260603153200_5e4f4239-0dff-441b-932b-f4e536970463.sql:DROP POLICY IF EXISTS "Authenticated users can manage conference_records" ON public.conference_records;
+supabase/migrations/20260603153200_5e4f4239-0dff-441b-932b-f4e536970463.sql:CREATE POLICY "conference_records_tenant_all" ON public.conference_records
+supabase/migrations/20260603153200_5e4f4239-0dff-441b-932b-f4e536970463.sql:DROP POLICY IF EXISTS "Authenticated users can manage conference_record_items" ON public.conference_record_items;
+supabase/migrations/20260603153200_5e4f4239-0dff-441b-932b-f4e536970463.sql:CREATE POLICY "conference_record_items_tenant_all" ON public.conference_record_items
+supabase/migrations/20260604131917_a857dde3-aee2-4b30-abf7-8b1de9bcfe2e.sql:DROP POLICY IF EXISTS "nfe_role_select" ON public.nfe;
+supabase/migrations/20260604131917_a857dde3-aee2-4b30-abf7-8b1de9bcfe2e.sql:DROP POLICY IF EXISTS "nfe_role_write" ON public.nfe;
+supabase/migrations/20260604131917_a857dde3-aee2-4b30-abf7-8b1de9bcfe2e.sql:DROP POLICY IF EXISTS "nfe_role_update" ON public.nfe;
+supabase/migrations/20260604131917_a857dde3-aee2-4b30-abf7-8b1de9bcfe2e.sql:DROP POLICY IF EXISTS "nfe_role_delete" ON public.nfe;
+supabase/migrations/20260604131917_a857dde3-aee2-4b30-abf7-8b1de9bcfe2e.sql:CREATE POLICY "nfe_select" ON public.nfe FOR SELECT TO authenticated
+supabase/migrations/20260604131917_a857dde3-aee2-4b30-abf7-8b1de9bcfe2e.sql:CREATE POLICY "nfe_insert" ON public.nfe FOR INSERT TO authenticated
+supabase/migrations/20260604131917_a857dde3-aee2-4b30-abf7-8b1de9bcfe2e.sql:CREATE POLICY "nfe_update" ON public.nfe FOR UPDATE TO authenticated
+supabase/migrations/20260604131917_a857dde3-aee2-4b30-abf7-8b1de9bcfe2e.sql:CREATE POLICY "nfe_delete" ON public.nfe FOR DELETE TO authenticated
+supabase/migrations/20260604132142_7975d030-d47c-4167-882f-d4bce5a4111d.sql:DROP POLICY IF EXISTS nfe_role_select ON public.nfe;
+supabase/migrations/20260604132142_7975d030-d47c-4167-882f-d4bce5a4111d.sql:DROP POLICY IF EXISTS nfe_role_write ON public.nfe;
+supabase/migrations/20260604132142_7975d030-d47c-4167-882f-d4bce5a4111d.sql:DROP POLICY IF EXISTS nfe_role_update ON public.nfe;
+supabase/migrations/20260604132142_7975d030-d47c-4167-882f-d4bce5a4111d.sql:DROP POLICY IF EXISTS nfe_role_delete ON public.nfe;
+supabase/migrations/20260604132142_7975d030-d47c-4167-882f-d4bce5a4111d.sql:CREATE POLICY nfe_role_select ON public.nfe FOR SELECT TO authenticated
+supabase/migrations/20260604132142_7975d030-d47c-4167-882f-d4bce5a4111d.sql:CREATE POLICY nfe_role_write ON public.nfe FOR INSERT TO authenticated
+supabase/migrations/20260604132142_7975d030-d47c-4167-882f-d4bce5a4111d.sql:CREATE POLICY nfe_role_update ON public.nfe FOR UPDATE TO authenticated
+supabase/migrations/20260604132142_7975d030-d47c-4167-882f-d4bce5a4111d.sql:CREATE POLICY nfe_role_delete ON public.nfe FOR DELETE TO authenticated
+supabase/migrations/20260709155718_b4088095-2b8f-46bd-82f7-93613c6527df.sql:CREATE POLICY "nfe_certs_select_tenant" ON public.nfe_certificates
+supabase/migrations/20260709155718_b4088095-2b8f-46bd-82f7-93613c6527df.sql:CREATE POLICY "nfe_certs_write_admin" ON public.nfe_certificates
+supabase/migrations/20260709155718_b4088095-2b8f-46bd-82f7-93613c6527df.sql:CREATE POLICY "nfe_events_select_tenant" ON public.nfe_events
+supabase/migrations/20260709155718_b4088095-2b8f-46bd-82f7-93613c6527df.sql:CREATE POLICY "nfe_events_write_roles" ON public.nfe_events
+--- Auditing nfce ---
+supabase/migrations/20260308170828_66ea9fae-ab02-42cd-a926-0c27d0aee943.sql:CREATE POLICY "Auth users can read nfce" ON public.nfce FOR SELECT TO authenticated USING (true);
+supabase/migrations/20260308170828_66ea9fae-ab02-42cd-a926-0c27d0aee943.sql:CREATE POLICY "Auth users can insert nfce" ON public.nfce FOR INSERT TO authenticated WITH CHECK (true);
+supabase/migrations/20260308170828_66ea9fae-ab02-42cd-a926-0c27d0aee943.sql:CREATE POLICY "Auth users can update nfce" ON public.nfce FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+supabase/migrations/20260308170828_66ea9fae-ab02-42cd-a926-0c27d0aee943.sql:CREATE POLICY "Auth users can delete nfce" ON public.nfce FOR DELETE TO authenticated USING (true);
+supabase/migrations/20260308170828_66ea9fae-ab02-42cd-a926-0c27d0aee943.sql:CREATE POLICY "Auth users can read nfce_items" ON public.nfce_items FOR SELECT TO authenticated USING (true);
+supabase/migrations/20260308170828_66ea9fae-ab02-42cd-a926-0c27d0aee943.sql:CREATE POLICY "Auth users can insert nfce_items" ON public.nfce_items FOR INSERT TO authenticated WITH CHECK (true);
+supabase/migrations/20260308170828_66ea9fae-ab02-42cd-a926-0c27d0aee943.sql:CREATE POLICY "Auth users can update nfce_items" ON public.nfce_items FOR UPDATE TO authenticated USING (true) WITH CHECK (true);
+supabase/migrations/20260308170828_66ea9fae-ab02-42cd-a926-0c27d0aee943.sql:CREATE POLICY "Auth users can delete nfce_items" ON public.nfce_items FOR DELETE TO authenticated USING (true);
+supabase/migrations/20260603142709_9662c924-b174-438b-991a-c285abdd5be0.sql:DROP POLICY IF EXISTS "Auth users can read nfce" ON public.nfce;
+supabase/migrations/20260603142709_9662c924-b174-438b-991a-c285abdd5be0.sql:DROP POLICY IF EXISTS "Auth users can insert nfce" ON public.nfce;
+supabase/migrations/20260603142709_9662c924-b174-438b-991a-c285abdd5be0.sql:DROP POLICY IF EXISTS "Auth users can update nfce" ON public.nfce;
+supabase/migrations/20260603142709_9662c924-b174-438b-991a-c285abdd5be0.sql:DROP POLICY IF EXISTS "Auth users can delete nfce" ON public.nfce;
+supabase/migrations/20260603142709_9662c924-b174-438b-991a-c285abdd5be0.sql:CREATE POLICY "nfce_role_select" ON public.nfce FOR SELECT TO authenticated
+supabase/migrations/20260603142709_9662c924-b174-438b-991a-c285abdd5be0.sql:CREATE POLICY "nfce_role_write" ON public.nfce FOR INSERT TO authenticated
+supabase/migrations/20260603142709_9662c924-b174-438b-991a-c285abdd5be0.sql:CREATE POLICY "nfce_role_update" ON public.nfce FOR UPDATE TO authenticated
+supabase/migrations/20260603142709_9662c924-b174-438b-991a-c285abdd5be0.sql:CREATE POLICY "nfce_role_delete" ON public.nfce FOR DELETE TO authenticated
+supabase/migrations/20260604131917_a857dde3-aee2-4b30-abf7-8b1de9bcfe2e.sql:DROP POLICY IF EXISTS "nfce_role_select" ON public.nfce;
+supabase/migrations/20260604131917_a857dde3-aee2-4b30-abf7-8b1de9bcfe2e.sql:DROP POLICY IF EXISTS "nfce_role_write" ON public.nfce;
+supabase/migrations/20260604131917_a857dde3-aee2-4b30-abf7-8b1de9bcfe2e.sql:DROP POLICY IF EXISTS "nfce_role_update" ON public.nfce;
+supabase/migrations/20260604131917_a857dde3-aee2-4b30-abf7-8b1de9bcfe2e.sql:DROP POLICY IF EXISTS "nfce_role_delete" ON public.nfce;
+supabase/migrations/20260604131917_a857dde3-aee2-4b30-abf7-8b1de9bcfe2e.sql:CREATE POLICY "nfce_select" ON public.nfce FOR SELECT TO authenticated
+supabase/migrations/20260604131917_a857dde3-aee2-4b30-abf7-8b1de9bcfe2e.sql:CREATE POLICY "nfce_insert" ON public.nfce FOR INSERT TO authenticated
+supabase/migrations/20260604131917_a857dde3-aee2-4b30-abf7-8b1de9bcfe2e.sql:CREATE POLICY "nfce_update" ON public.nfce FOR UPDATE TO authenticated
+supabase/migrations/20260604131917_a857dde3-aee2-4b30-abf7-8b1de9bcfe2e.sql:CREATE POLICY "nfce_delete" ON public.nfce FOR DELETE TO authenticated
+supabase/migrations/20260604132142_7975d030-d47c-4167-882f-d4bce5a4111d.sql:DROP POLICY IF EXISTS nfce_role_select ON public.nfce;
+supabase/migrations/20260604132142_7975d030-d47c-4167-882f-d4bce5a4111d.sql:DROP POLICY IF EXISTS nfce_role_write ON public.nfce;
+supabase/migrations/20260604132142_7975d030-d47c-4167-882f-d4bce5a4111d.sql:DROP POLICY IF EXISTS nfce_role_update ON public.nfce;
+supabase/migrations/20260604132142_7975d030-d47c-4167-882f-d4bce5a4111d.sql:DROP POLICY IF EXISTS nfce_role_delete ON public.nfce;
+supabase/migrations/20260604132142_7975d030-d47c-4167-882f-d4bce5a4111d.sql:CREATE POLICY nfce_role_select ON public.nfce FOR SELECT TO authenticated
+supabase/migrations/20260604132142_7975d030-d47c-4167-882f-d4bce5a4111d.sql:CREATE POLICY nfce_role_write ON public.nfce FOR INSERT TO authenticated
+supabase/migrations/20260604132142_7975d030-d47c-4167-882f-d4bce5a4111d.sql:CREATE POLICY nfce_role_update ON public.nfce FOR UPDATE TO authenticated
+supabase/migrations/20260604132142_7975d030-d47c-4167-882f-d4bce5a4111d.sql:CREATE POLICY nfce_role_delete ON public.nfce FOR DELETE TO authenticated
+supabase/migrations/20260703190538_7acfc507-f0b4-4ec1-9dc9-cab5d843400e.sql:CREATE POLICY "nfce_returns_select" ON public.nfce_returns
+supabase/migrations/20260703190538_7acfc507-f0b4-4ec1-9dc9-cab5d843400e.sql:CREATE POLICY "nfce_returns_insert" ON public.nfce_returns
+supabase/migrations/20260703190538_7acfc507-f0b4-4ec1-9dc9-cab5d843400e.sql:CREATE POLICY "nfce_returns_update" ON public.nfce_returns
+supabase/migrations/20260703190538_7acfc507-f0b4-4ec1-9dc9-cab5d843400e.sql:CREATE POLICY "nfce_returns_delete" ON public.nfce_returns
+supabase/migrations/20260703190538_7acfc507-f0b4-4ec1-9dc9-cab5d843400e.sql:CREATE POLICY "nfce_return_items_select" ON public.nfce_return_items
+supabase/migrations/20260703190538_7acfc507-f0b4-4ec1-9dc9-cab5d843400e.sql:CREATE POLICY "nfce_return_items_insert" ON public.nfce_return_items
+supabase/migrations/20260703190538_7acfc507-f0b4-4ec1-9dc9-cab5d843400e.sql:CREATE POLICY "nfce_return_items_update" ON public.nfce_return_items
+supabase/migrations/20260703190538_7acfc507-f0b4-4ec1-9dc9-cab5d843400e.sql:CREATE POLICY "nfce_return_items_delete" ON public.nfce_return_items
+supabase/migrations/20260709123258_6d1f77d1-ca59-4f71-8e2b-3a9082d6bbee.sql:DROP POLICY IF EXISTS nfce_returns_delete ON public.nfce_returns;
+supabase/migrations/20260709123258_6d1f77d1-ca59-4f71-8e2b-3a9082d6bbee.sql:CREATE POLICY nfce_returns_delete ON public.nfce_returns
+supabase/migrations/20260709150219_0e03996c-49cc-4906-a5d0-87b5a4a22762.sql:DROP POLICY IF EXISTS nfce_returns_insert ON public.nfce_returns;
+supabase/migrations/20260709150219_0e03996c-49cc-4906-a5d0-87b5a4a22762.sql:CREATE POLICY nfce_returns_insert
+supabase/migrations/20260709150219_0e03996c-49cc-4906-a5d0-87b5a4a22762.sql:DROP POLICY IF EXISTS nfce_returns_update ON public.nfce_returns;
+supabase/migrations/20260709150219_0e03996c-49cc-4906-a5d0-87b5a4a22762.sql:CREATE POLICY nfce_returns_update
+--- Auditing mdfe ---
+supabase/migrations/20260420132602_dd3868ff-65d1-44d6-b1e7-3573fb83b8b9.sql:CREATE POLICY "mdfe_select" ON public.mdfe FOR SELECT TO authenticated USING (true);
+supabase/migrations/20260420132602_dd3868ff-65d1-44d6-b1e7-3573fb83b8b9.sql:CREATE POLICY "mdfe_all" ON public.mdfe FOR ALL TO authenticated USING (true) WITH CHECK (true);
+supabase/migrations/20260420132602_dd3868ff-65d1-44d6-b1e7-3573fb83b8b9.sql:CREATE POLICY "mdfe_docs_select" ON public.mdfe_documents FOR SELECT TO authenticated USING (true);
+supabase/migrations/20260420132602_dd3868ff-65d1-44d6-b1e7-3573fb83b8b9.sql:CREATE POLICY "mdfe_docs_all" ON public.mdfe_documents FOR ALL TO authenticated USING (true) WITH CHECK (true);
+--- Auditing fiscal_tax_rules ---
+supabase/migrations/20260604143156_43facedc-22d0-4d44-adeb-abeb714c60d3.sql:DROP POLICY IF EXISTS "Users can manage their company's tax rules" ON public.fiscal_tax_rules;
+supabase/migrations/20260604143156_43facedc-22d0-4d44-adeb-abeb714c60d3.sql:CREATE POLICY "Users can manage their company's tax rules" ON public.fiscal_tax_rules
+--- Auditing sped_files ---
+supabase/migrations/20260419141206_fee56640-5d62-49c3-9715-41423c4afee6.sql:CREATE POLICY "Authenticated can view sped_files" ON public.sped_files
+supabase/migrations/20260419141206_fee56640-5d62-49c3-9715-41423c4afee6.sql:CREATE POLICY "Authenticated can insert sped_files" ON public.sped_files
+supabase/migrations/20260419141206_fee56640-5d62-49c3-9715-41423c4afee6.sql:CREATE POLICY "Authenticated can delete sped_files" ON public.sped_files
+--- Auditing tax_rules ---
+supabase/migrations/20260419140520_19b9fa07-8ef8-473b-84b0-5aaf60d35381.sql:CREATE POLICY "tax_rules_select_authenticated"
+supabase/migrations/20260419140520_19b9fa07-8ef8-473b-84b0-5aaf60d35381.sql:CREATE POLICY "tax_rules_insert_admin"
+supabase/migrations/20260419140520_19b9fa07-8ef8-473b-84b0-5aaf60d35381.sql:CREATE POLICY "tax_rules_update_admin"
+supabase/migrations/20260419140520_19b9fa07-8ef8-473b-84b0-5aaf60d35381.sql:CREATE POLICY "tax_rules_delete_admin"
+supabase/migrations/20260604121642_c516667c-a171-452f-a772-53fc84e2c22d.sql:DROP POLICY IF EXISTS "tax_rules_select_authenticated" ON public.tax_rules;
+supabase/migrations/20260604121642_c516667c-a171-452f-a772-53fc84e2c22d.sql:CREATE POLICY "tax_rules_tenant_select" ON public.tax_rules
+supabase/migrations/20260604143156_43facedc-22d0-4d44-adeb-abeb714c60d3.sql:DROP POLICY IF EXISTS "Users can manage their company's tax rules" ON public.fiscal_tax_rules;
+supabase/migrations/20260604143156_43facedc-22d0-4d44-adeb-abeb714c60d3.sql:CREATE POLICY "Users can manage their company's tax rules" ON public.fiscal_tax_rules
+supabase/migrations/20260604144558_887860f6-eacf-4fc1-8913-8c8c31fe5c72.sql:DROP POLICY IF EXISTS tax_rules_insert_admin ON public.tax_rules;
+supabase/migrations/20260604144558_887860f6-eacf-4fc1-8913-8c8c31fe5c72.sql:DROP POLICY IF EXISTS tax_rules_update_admin ON public.tax_rules;
+supabase/migrations/20260604144558_887860f6-eacf-4fc1-8913-8c8c31fe5c72.sql:DROP POLICY IF EXISTS tax_rules_delete_admin ON public.tax_rules;
+supabase/migrations/20260604144558_887860f6-eacf-4fc1-8913-8c8c31fe5c72.sql:CREATE POLICY tax_rules_insert_admin ON public.tax_rules FOR INSERT TO authenticated
+supabase/migrations/20260604144558_887860f6-eacf-4fc1-8913-8c8c31fe5c72.sql:CREATE POLICY tax_rules_update_admin ON public.tax_rules FOR UPDATE TO authenticated
+supabase/migrations/20260604144558_887860f6-eacf-4fc1-8913-8c8c31fe5c72.sql:CREATE POLICY tax_rules_delete_admin ON public.tax_rules FOR DELETE TO authenticated
+--- Auditing fiscal_documents ---
+supabase/migrations/20260604131547_3e08ef46-b76d-4c3a-b0c6-80c7174835f7.sql:CREATE POLICY "Fiscal docs access" ON public.fiscal_documents FOR ALL USING (company_id IN (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
+supabase/migrations/20260604143156_43facedc-22d0-4d44-adeb-abeb714c60d3.sql:DROP POLICY IF EXISTS "Fiscal docs access" ON public.fiscal_documents;
+supabase/migrations/20260604143156_43facedc-22d0-4d44-adeb-abeb714c60d3.sql:DROP POLICY IF EXISTS "Users can manage their company's fiscal docs" ON public.fiscal_documents;
+supabase/migrations/20260604143156_43facedc-22d0-4d44-adeb-abeb714c60d3.sql:CREATE POLICY "Users can manage their company's fiscal docs" ON public.fiscal_documents
