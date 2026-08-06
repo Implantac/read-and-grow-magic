@@ -1,0 +1,20 @@
+supabase/migrations/20260308221548_7c76a564-0a94-4f10-b6b9-b136b8951963.sql:SECURITY DEFINER
+supabase/migrations/20260308221548_7c76a564-0a94-4f10-b6b9-b136b8951963.sql:SECURITY DEFINER
+supabase/migrations/20260308221548_7c76a564-0a94-4f10-b6b9-b136b8951963.sql:SECURITY DEFINER
+supabase/migrations/20260308221548_7c76a564-0a94-4f10-b6b9-b136b8951963.sql:SECURITY DEFINER
+supabase/migrations/20260308192742_ecfa92e3-b85f-4962-9100-9f4195ccb526.sql:SECURITY DEFINER
+supabase/migrations/20260308192304_509e2120-2a06-46aa-8e09-1129f5c18b46.sql:SECURITY DEFINER
+supabase/migrations/20260308191312_c5f7163a-ef6d-4bd2-bf8d-01bad2188bc0.sql:SECURITY DEFINER
+supabase/migrations/20260413132128_2a829eae-b83c-4c86-9a87-1d7578b70858.sql:-- Create a security definer function to get user's company_id
+supabase/migrations/20260413132128_2a829eae-b83c-4c86-9a87-1d7578b70858.sql:SECURITY DEFINER
+supabase/migrations/20260413121903_3a52f846-2485-415b-84bc-dedd477e207f.sql:SECURITY DEFINER
+supabase/migrations/20260418034335_3ddffdd0-e78a-4236-917d-c1bbd1f41ad8.sql:RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+supabase/migrations/20260418034335_3ddffdd0-e78a-4236-917d-c1bbd1f41ad8.sql:) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+supabase/migrations/20260418034335_3ddffdd0-e78a-4236-917d-c1bbd1f41ad8.sql:) RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+supabase/migrations/20260418034335_3ddffdd0-e78a-4236-917d-c1bbd1f41ad8.sql:RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+supabase/migrations/20260418034335_3ddffdd0-e78a-4236-917d-c1bbd1f41ad8.sql:RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+supabase/migrations/20260417015743_e018907a-8aa7-4056-ac61-0896bf9b57f0.sql:SECURITY DEFINER
+supabase/migrations/20260417015743_e018907a-8aa7-4056-ac61-0896bf9b57f0.sql:STABLE SECURITY DEFINER
+supabase/migrations/20260417015743_e018907a-8aa7-4056-ac61-0896bf9b57f0.sql:SECURITY DEFINER
+supabase/migrations/20260308182712_0b8181a9-9786-41a7-ba33-3a27304ccd08.sql:SECURITY DEFINER
+supabase/migrations/20260418031103_70ace809-0d83-4df5-a772-187d196bb482.sql:LANGUAGE plpgsql SECURITY DEFINER SET search_path = public
