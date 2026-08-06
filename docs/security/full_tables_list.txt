@@ -1,0 +1,366 @@
+-- Only create tables/policies that don't exist yet
+-- for AI prompt audit logs
+IF NOT EXISTS public.accounting_periods
+IF NOT EXISTS public.ai_kpis
+IF NOT EXISTS public.ai_learning
+IF NOT EXISTS public.ai_production_insights
+IF NOT EXISTS public.ai_prompt_audit_logs
+IF NOT EXISTS public.bank_match_rules
+IF NOT EXISTS public.bank_match_suggestions
+IF NOT EXISTS public.bank_transactions
+IF NOT EXISTS public.bank_transfers
+IF NOT EXISTS public.branches
+IF NOT EXISTS public.carriers
+IF NOT EXISTS public.checking_tasks
+IF NOT EXISTS public.cross_module_events
+IF NOT EXISTS public.cte
+IF NOT EXISTS public.cte_nfe_links
+IF NOT EXISTS public.cx_churn_predictions
+IF NOT EXISTS public.cx_comment_clusters
+IF NOT EXISTS public.cx_executive_summaries
+IF NOT EXISTS public.cx_health_scores
+IF NOT EXISTS public.cx_health_weights
+IF NOT EXISTS public.cx_survey_templates
+IF NOT EXISTS public.cx_workflow_runs
+IF NOT EXISTS public.cx_workflows
+IF NOT EXISTS public.daily_fiscal_snapshots
+IF NOT EXISTS public.deleted_orders_archive
+IF NOT EXISTS public.delivery_proof
+IF NOT EXISTS public.delivery_routes
+IF NOT EXISTS public.distribution_centers
+IF NOT EXISTS public.edu_classes
+IF NOT EXISTS public.edu_enrollments
+IF NOT EXISTS public.edu_schools
+IF NOT EXISTS public.edu_students
+IF NOT EXISTS public.feature_flags
+IF NOT EXISTS public.financial_advance_transactions
+IF NOT EXISTS public.financial_advances
+IF NOT EXISTS public.financial_alerts
+IF NOT EXISTS public.financial_audit_logs
+IF NOT EXISTS public.financial_boletos
+IF NOT EXISTS public.financial_categories
+IF NOT EXISTS public.financial_category_suggestions
+IF NOT EXISTS public.financial_charges_log
+IF NOT EXISTS public.financial_charges_rules
+IF NOT EXISTS public.financial_checks
+IF NOT EXISTS public.financial_default_score
+IF NOT EXISTS public.financial_fraud_rules
+IF NOT EXISTS public.financial_health_scores
+IF NOT EXISTS public.financial_ledger
+IF NOT EXISTS public.financial_offsets
+IF NOT EXISTS public.financial_operations_log
+IF NOT EXISTS public.financial_payment_split
+IF NOT EXISTS public.financial_predictive_alerts
+IF NOT EXISTS public.financial_recurring
+IF NOT EXISTS public.financial_risk_profiles
+IF NOT EXISTS public.financial_security_logs
+IF NOT EXISTS public.financial_settlements
+IF NOT EXISTS public.fiscal_cfop_reference
+IF NOT EXISTS public.fiscal_documents
+IF NOT EXISTS public.fiscal_tax_rules
+IF NOT EXISTS public.internal_fn_secrets
+IF NOT EXISTS public.inventory_sessions
+IF NOT EXISTS public.kanban_limits
+IF NOT EXISTS public.loading_docks
+IF NOT EXISTS public.lot_migration_audit
+IF NOT EXISTS public.mdfe
+IF NOT EXISTS public.mdfe_documents
+IF NOT EXISTS public.nfce_return_items
+IF NOT EXISTS public.nfce_returns
+IF NOT EXISTS public.open_finance_connections
+IF NOT EXISTS public.order_stage_history
+IF NOT EXISTS public.picking_tasks
+IF NOT EXISTS public.picking_waves
+IF NOT EXISTS public.pix_charges
+IF NOT EXISTS public.pix_webhook_events
+IF NOT EXISTS public.plan_modules
+IF NOT EXISTS public.plugin_executions
+IF NOT EXISTS public.plugin_installations
+IF NOT EXISTS public.plugin_reviews
+IF NOT EXISTS public.plugin_versions
+IF NOT EXISTS public.plugins
+IF NOT EXISTS public.price_lists
+IF NOT EXISTS public.product_supplier_references
+IF NOT EXISTS public.product_technical_sheets
+IF NOT EXISTS public.production_capacity
+IF NOT EXISTS public.production_costs
+IF NOT EXISTS public.production_logs
+IF NOT EXISTS public.production_order_steps
+IF NOT EXISTS public.production_schedule
+IF NOT EXISTS public.production_steps
+IF NOT EXISTS public.purchase_approval_rules
+IF NOT EXISTS public.putaway_tasks
+IF NOT EXISTS public.reinf_events
+IF NOT EXISTS public.reinf_periods
+IF NOT EXISTS public.reinf_transmissions
+IF NOT EXISTS public.replenishment_tasks
+IF NOT EXISTS public.rfid_wms_rules
+IF NOT EXISTS public.route_costs
+IF NOT EXISTS public.route_stops
+IF NOT EXISTS public.slotting_profiles
+IF NOT EXISTS public.slotting_suggestions
+IF NOT EXISTS public.sped_files
+IF NOT EXISTS public.sre_oncall_shifts
+IF NOT EXISTS public.sre_postmortem_actions
+IF NOT EXISTS public.sre_runbooks
+IF NOT EXISTS public.sre_slos
+IF NOT EXISTS public.stock_balances
+IF NOT EXISTS public.stock_lots
+IF NOT EXISTS public.storefront_notifications
+IF NOT EXISTS public.subscription_invoices
+IF NOT EXISTS public.supplier_metrics
+IF NOT EXISTS public.system_events
+IF NOT EXISTS public.system_incidents
+IF NOT EXISTS public.system_metrics
+IF NOT EXISTS public.tax_difal_rules
+IF NOT EXISTS public.tax_icms_st_rules
+IF NOT EXISTS public.tax_rules
+IF NOT EXISTS public.tenants
+IF NOT EXISTS public.transferencias_canal
+IF NOT EXISTS public.transferencias_canal_itens
+IF NOT EXISTS public.vehicles
+IF NOT EXISTS public.warehouse_locations
+IF NOT EXISTS public.warehouse_zones
+IF NOT EXISTS public.warehouses
+IF NOT EXISTS public.wms_3pl_contracts
+IF NOT EXISTS public.wms_3pl_invoices
+IF NOT EXISTS public.wms_ai_insights
+IF NOT EXISTS public.wms_audit_log
+IF NOT EXISTS public.wms_conference_items
+IF NOT EXISTS public.wms_conference_records
+IF NOT EXISTS public.wms_events
+IF NOT EXISTS public.wms_kit_assemblies
+IF NOT EXISTS public.wms_kit_components
+IF NOT EXISTS public.wms_kits
+IF NOT EXISTS public.wms_kpi_cache
+IF NOT EXISTS public.wms_logs
+IF NOT EXISTS public.wms_packing_orders
+IF NOT EXISTS public.wms_quality_checks
+IF NOT EXISTS public.wms_recommendations
+IF NOT EXISTS public.wms_return_items
+IF NOT EXISTS public.wms_returns
+IF NOT EXISTS public.wms_shipments
+IF NOT EXISTS public.wms_task_logs
+IF NOT EXISTS public.wms_tasks
+IF NOT EXISTS public.workflow_approvals
+IF NOT EXISTS public.workflow_delegations
+IF NOT EXISTS public.workflow_triggers
+public.accounting_accounts
+public.accounting_entries
+public.accounting_items
+public.accounts_payable
+public.accounts_receivable
+public.agro_farms
+public.agro_fields
+public.agro_harvests
+public.agro_seasons
+public.ai_action_logs
+public.ai_brain_decisions
+public.ai_brain_memory
+public.ai_brain_runs
+public.ai_daily_actions
+public.ai_enterprise_memory
+public.ai_executive_alerts
+public.ai_executive_chat
+public.ai_executive_decisions
+public.ai_executive_insights
+public.ai_executive_scenarios
+public.ai_forecast_snapshots
+public.ai_opportunity_predictions
+public.ai_recommendations
+public.ai_sales_insights
+public.ai_sales_scores
+public.alert_rules
+public.automation_rules
+public.automation_runs
+public.bank_accounts
+public.billing_meters
+public.billing_periods
+public.billing_queue
+public.billing_usage_events
+public.cash_flow_entries
+public.categories
+public.chart_of_accounts
+public.client_timeline
+public.clients
+public.collection_actions
+public.commerce_themes
+public.commercial_alerts
+public.commission_payments
+public.commission_policies
+public.commission_rules
+public.commissions
+public.companies
+public.conference_record_items
+public.conference_records
+public.construction_budget_items
+public.construction_diary
+public.construction_measurements
+public.construction_projects
+public.cost_centers
+public.credit_audit_logs
+public.credit_policies
+public.crm_leads
+public.crm_opportunities
+public.crm_pipeline_stages
+public.crm_pipelines
+public.custom_entities
+public.custom_fields
+public.custom_records
+public.custom_relationships
+public.customer_credit_profiles
+public.daily_executive_reports
+public.dashboard_definitions
+public.dashboard_widgets
+public.delivery_tracking
+public.enterprise_groups
+public.enterprise_segments
+public.feed_formulas
+public.financial_alerts
+public.fiscal_documents
+public.fiscal_reports
+public.fiscal_rules
+public.follow_up_tasks
+public.follow_ups
+public.gamification_badge_awards
+public.gamification_badges
+public.gamification_challenge_participants
+public.gamification_challenges
+public.gamification_mission_progress
+public.gamification_missions
+public.gamification_points
+public.health_appointments
+public.health_patients
+public.health_professionals
+public.health_records
+public.holding_entities
+public.industrial_alerts
+public.iot_telemetry
+public.journal_entries
+public.journal_entry_lines
+public.lead_nurturing_enrollments
+public.lead_nurturing_sequences
+public.lgpd_consents
+public.lgpd_data_requests
+public.material_consumptions
+public.material_requirements
+public.nfce
+public.nfce_items
+public.nfe
+public.nfe_certificates
+public.nfe_events
+public.nfe_items
+public.notifications
+public.nps_alerts_config
+public.nps_answer_items
+public.nps_answers
+public.nps_automations
+public.nps_campaigns
+public.nps_followups
+public.nps_invites
+public.nps_logs
+public.nps_question_bank
+public.nps_questions
+public.nps_reports
+public.nps_templates
+public.nps_tokens
+public.nps_webhooks
+public.oee_metrics
+public.order_approvals
+public.order_blocks
+public.order_items
+public.order_status_history
+public.orders
+public.outsourcing_orders
+public.payment_records
+public.permissions
+public.pharma_lab_tests
+public.plan_features
+public.plans
+public.playbook_usage_logs
+public.product_costs
+public.product_materials
+public.production_bom
+public.production_events
+public.production_indicators
+public.production_lines
+public.production_machines
+public.production_orders
+public.production_orders_enterprise
+public.production_quality_checks
+public.production_resources
+public.production_route_steps
+public.production_routes
+public.production_sectors
+public.production_time_logs
+public.products
+public.profiles
+public.purchase_order_items
+public.purchase_orders
+public.quotation_items
+public.quotations
+public.renegotiation_items
+public.renegotiations
+public.retail_chain_stores
+public.rfid_events
+public.rfid_readers
+public.rfid_tags
+public.role_permissions
+public.saas_invoices
+public.sale_items
+public.sales
+public.sales_campaigns
+public.sales_contact_logs
+public.sales_daily_goals
+public.sales_forecasts
+public.sales_funnel
+public.sales_objections
+public.sales_opportunities
+public.sales_playbooks
+public.sales_reps
+public.sales_targets
+public.sefaz_status_uf
+public.seller_daily_targets
+public.shipment_items
+public.shipment_orders
+public.sre_postmortems
+public.sre_settings
+public.stock_movements
+public.stock_reservations
+public.storefront_order_items
+public.storefront_orders
+public.storefront_pages
+public.storefront_payment_events
+public.storefront_products
+public.storefronts
+public.subscriptions
+public.suppliers
+public.supply_movements
+public.supply_stock
+public.system_audit_logs
+public.system_parameters
+public.textile_weaving_orders
+public.textile_yarn_inventory
+public.time_entries
+public.usage_tracking
+public.user_permission_overrides
+public.whatsapp_templates
+public.wholesaler_routes
+public.wms_docks
+public.wms_inventory_counts
+public.wms_inventory_items
+public.wms_inventory_movements
+public.wms_movements
+public.wms_packing_orders
+public.wms_picking_items
+public.wms_picking_orders
+public.wms_receiving_items
+public.wms_receiving_orders
+public.wms_storage_locations
+public.wms_waves
+public.work_centers
+public.workflow_definitions
+public.workflow_instances
+public.workflow_transitions
+public.yard_appointments
+public.yard_vehicles
