@@ -1,0 +1,27 @@
+IF NOT EXISTS public.cte
+IF NOT EXISTS public.cte_nfe_links
+IF NOT EXISTS public.daily_fiscal_snapshots
+IF NOT EXISTS public.fiscal_cfop_reference
+IF NOT EXISTS public.fiscal_documents
+IF NOT EXISTS public.fiscal_tax_rules
+IF NOT EXISTS public.mdfe
+IF NOT EXISTS public.mdfe_documents
+IF NOT EXISTS public.nfce_return_items
+IF NOT EXISTS public.nfce_returns
+IF NOT EXISTS public.sped_files
+IF NOT EXISTS public.tax_difal_rules
+IF NOT EXISTS public.tax_icms_st_rules
+IF NOT EXISTS public.tax_rules
+IF NOT EXISTS public.wms_conference_items
+IF NOT EXISTS public.wms_conference_records
+public.conference_record_items
+public.conference_records
+public.fiscal_documents
+public.fiscal_reports
+public.fiscal_rules
+public.nfce
+public.nfce_items
+public.nfe
+public.nfe_certificates
+public.nfe_events
+public.nfe_items
