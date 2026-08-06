@@ -3,7 +3,7 @@ Data: 2026-08-06
 
 Este documento classifica o escopo de visibilidade de cada tabela para garantir o isolamento correto.
 
-## Tabelas Core
+## Tabelas Core & Fiscais
 | Tabela | Escopo | Chave de Isolamento | RLS Ativo | Status |
 | :--- | :--- | :--- | :--- | :--- |
 | profiles | USER | id | Sim | ✅ |
@@ -13,15 +13,19 @@ Este documento classifica o escopo de visibilidade de cada tabela para garantir 
 | stock_movements | BRANCH | branch_id | Sim | ✅ |
 | financial_titles | COMPANY | company_id | Sim | ✅ |
 | nps_campaigns | COMPANY | company_id | Sim | ✅ |
+| nfe | COMPANY | company_id | Sim | ✅ Hardened |
+| nfce | COMPANY | company_id | Sim | ✅ Hardened |
+| fiscal_reports | COMPANY | company_id | Sim | ✅ Hardened |
+| tax_rules | COMPANY | company_id | Sim | ✅ Hardened |
 
 ## Auditoria de Políticas (Amostra)
 ---
 Auditing profiles...
 CREATE POLICY "Users can view their own profile" ON public.profiles FOR SELECT USING (auth.uid() = id);
 ---
-Auditing companies...
-CREATE POLICY "Users can view companies they belong to" ON public.companies FOR SELECT USING (EXISTS (SELECT 1 FROM user_roles WHERE user_id = auth.uid() AND company_id = companies.id));
+Auditing nfe...
+CREATE POLICY "NFe isolated by company" ON public.nfe FOR ALL TO authenticated USING (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
 ---
-Auditing branches...
-CREATE POLICY "Branches are isolated by company" ON public.branches FOR ALL USING (company_id = (SELECT company_id FROM profiles WHERE id = auth.uid()));
+Auditing nfce...
+CREATE POLICY "NFCe isolated by company" ON public.nfce FOR ALL TO authenticated USING (company_id = (SELECT company_id FROM public.profiles WHERE id = auth.uid()));
 ---
