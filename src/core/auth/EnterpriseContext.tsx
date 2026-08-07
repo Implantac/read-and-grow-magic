@@ -8,7 +8,12 @@ type CompanyRow = Database['public']['Tables']['companies']['Row'];
 
 export interface TenantRef { id: string; name: string }
 export interface GroupRef { id: string; name: string }
-export interface BranchRef { id: string; name: string; code?: string }
+export interface BranchRef { 
+  id: string; 
+  name: string; 
+  code?: string; 
+  tipo?: 'FACTORY' | 'DISTRIBUTION_CENTER' | 'STORE';
+}
 
 
 interface HierarchyRow {
