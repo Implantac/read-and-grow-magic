@@ -57,7 +57,8 @@ const HardeningDashboard = () => {
     { id: '2C', title: 'Expedição & Última Milha', status: 'completed', description: 'Gestão de Romaneios, Tracking em Tempo Real, Last Mile.' },
     { id: '3', title: 'Inteligência Logística IA', status: 'completed', description: 'Otimização de Slotting, IA Preditiva, Cross-docking Dinâmico.' },
     { id: '4', title: 'Auditoria & Compliance (LGPD)', status: 'completed', description: 'Certificação de Segurança Proativa, Criptografia E2E, LGPD.' },
-    { id: '5', title: 'Expansão & Ecossistema', status: 'in_progress', description: 'Marketplace de Plugins, Multi-moeda, Expansão Global.' },
+    { id: '5', title: 'Expansão & Ecossistema', status: 'completed', description: 'Marketplace de Plugins, Multi-moeda, Expansão Global.' },
+    { id: 'FINAL', title: 'Modo Produção Live', status: 'in_progress', description: 'Certificado A1, Chaves PSP, Homologação SEFAZ.' },
   ];
 
   const operationalRequirements = [
