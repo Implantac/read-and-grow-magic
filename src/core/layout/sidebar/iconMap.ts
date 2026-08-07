@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Users, Wallet, FileCheck, Package, ShoppingCart,
-  Factory, Warehouse, Settings, UserCircle,
+  Factory, Warehouse, Settings, UserCircle, Monitor,
   ShoppingBag, ClipboardList, FileText, ArrowUpCircle, ArrowDownCircle,
   TrendingUp, CheckCircle, Receipt, BarChart3, Box, FolderTree,
   ArrowLeftRight, Calculator, Building2, FileSearch, ClipboardCheck,
@@ -21,7 +21,7 @@ import {
 
 export const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutDashboard, Users, Wallet, FileCheck, Package, ShoppingCart,
-  Factory, Warehouse, Settings, UserCircle, ShoppingBag, ClipboardList, Crown,
+  Factory, Warehouse, Settings, UserCircle, ShoppingBag, ClipboardList, Crown, Monitor,
   FileText, ArrowUpCircle, ArrowDownCircle, TrendingUp, CheckCircle,
   Receipt, BarChart3, Box, FolderTree, ArrowLeftRight, Calculator,
   Building2, FileSearch, ClipboardCheck, PackageMinus, Timer, PackagePlus,
