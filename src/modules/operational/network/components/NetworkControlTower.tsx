@@ -19,8 +19,6 @@ import { Skeleton } from "@/ui/base/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { complianceService } from "@/services/admin/complianceService";
 import { useEnterprise } from "@/core/auth/EnterpriseContext";
-import { Link } from "react-router-dom";
-import { Skeleton } from "@/ui/base/skeleton";
 
 export default function NetworkControlTower() {
   const { currentCompany } = useEnterprise();
