@@ -250,13 +250,8 @@ const App = () => (
                   <Route path="operacao" element={<Suspense fallback={<PageLoader />}><UnifiedSupplyChain /></Suspense>} />
                   <Route path="central" element={<Suspense fallback={<PageLoader />}><StoreCentral /></Suspense>} />
                 </Route>
+                <Route path="/operacional/rede/*" element={<ModuleErrorBoundary moduleName="Rede"><Routes>{NetworkRoutes}</Routes></ModuleErrorBoundary>} />
                 <Route path="/operacional/*" element={<ModuleErrorBoundary moduleName="Operacional"><Routes>{OperationalRoutes}</Routes></ModuleErrorBoundary>} />
-                <Route path="/operacional/rede/*">
-                  <Route path="control-tower" element={<NetworkControlTower />} />
-                  <Route path="pos" element={<PosTerminals />} />
-                  <Route path="transferencias" element={<StockTransfers />} />
-                  <Route path="ressuprimento" element={<ReplenishmentIntelligence />} />
-                </Route>
                 {MiscellaneousRoutes}
                 <Route element={<GatedOutlet module="fiscal" />}>
                   <Route path="/fiscal/*" element={<ModuleErrorBoundary moduleName="Fiscal"><Routes>{FiscalRoutes}</Routes></ModuleErrorBoundary>} />

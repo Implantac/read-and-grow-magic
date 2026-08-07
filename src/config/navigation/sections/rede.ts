@@ -12,7 +12,7 @@ export const redeOperacionalSection: NavSection = {
         { title: 'Terminais PDV', href: '/operacional/rede/pos', icon: 'Monitor' },
         { title: 'Transferências de Estoque', href: '/operacional/rede/transferencias', icon: 'Truck' },
         { title: 'Inteligência de Reposição', href: '/operacional/rede/ressuprimento', icon: 'Brain' },
-        { title: 'Torre de Controle', href: '/operacional/rede/control-tower', icon: 'Network' },
+        { title: 'Torre de Controle', href: '/operacional/rede/control-tower', icon: 'Layers' },
       ],
     },
   ],

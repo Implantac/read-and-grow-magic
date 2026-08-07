@@ -1,6 +1,6 @@
 import {
   LayoutDashboard, Users, Wallet, FileCheck, Package, ShoppingCart,
-  Factory, Warehouse, Settings, UserCircle,
+  Factory, Warehouse, Settings, UserCircle, Monitor,
   ShoppingBag, ClipboardList, FileText, ArrowUpCircle, ArrowDownCircle,
   TrendingUp, CheckCircle, Receipt, BarChart3, Box, FolderTree,
   ArrowLeftRight, Calculator, Building2, FileSearch, ClipboardCheck,
@@ -15,13 +15,13 @@ import {
   Bell, Repeat, TrendingDown, LineChart, AlertTriangle,
   ShieldAlert, Upload, QrCode, FileCheck2, FileDown,
   Percent, Globe, ScrollText, ArrowRightLeft,
-  BellRing, RotateCw, AlertOctagon, GitBranch, Siren, Scissors,
-  Inbox, Heart, Send, MessageSquare, Palette, BookOpenCheck, Crown, LayoutGrid, Split, FileBarChart,
+  BellRing, RotateCw, AlertOctagon, GitBranch, Siren, Scissors, Inbox, Heart,
+  Send, MessageSquare, Palette, BookOpenCheck, Crown, LayoutGrid, Split, FileBarChart, Navigation,
 } from 'lucide-react';
 
 export const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   LayoutDashboard, Users, Wallet, FileCheck, Package, ShoppingCart,
-  Factory, Warehouse, Settings, UserCircle, ShoppingBag, ClipboardList, Crown,
+  Factory, Warehouse, Settings, UserCircle, ShoppingBag, ClipboardList, Crown, Monitor,
   FileText, ArrowUpCircle, ArrowDownCircle, TrendingUp, CheckCircle,
   Receipt, BarChart3, Box, FolderTree, ArrowLeftRight, Calculator,
   Building2, FileSearch, ClipboardCheck, PackageMinus, Timer, PackagePlus,
@@ -35,5 +35,5 @@ export const iconMap: Record<string, React.ComponentType<{ className?: string }>
   Bell, Repeat, TrendingDown, LineChart, AlertTriangle, ShieldAlert, Upload, QrCode,
   FileCheck2, FileDown, Percent, Globe, ScrollText, ArrowRightLeft,
   BellRing, RotateCw, AlertOctagon, GitBranch, Siren, Scissors, Inbox, Heart,
-  Send, MessageSquare, Palette, BookOpenCheck, LayoutGrid, Split, FileBarChart,
+  Send, MessageSquare, Palette, BookOpenCheck, LayoutGrid, Split, FileBarChart, Navigation,
 };

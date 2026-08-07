@@ -8,15 +8,15 @@ export const comercialSection: NavSection = {
       href: '/comercial',
       icon: 'Users',
       children: [
-        { title: '🛒 Painel Único (PDV)', href: '/comercial/pdv', icon: 'ShoppingCart' },
+        { title: 'Painel Único (PDV)', href: '/comercial/pdv', icon: 'ShoppingCart' },
         { title: 'CRM Enterprise', href: '/comercial/crm', icon: 'Target' },
         { title: 'Dashboard Comercial', href: '/comercial/dashboard', icon: 'BarChart3' },
         { title: 'Funil de Vendas', href: '/comercial/funil', icon: 'Filter' },
         { title: 'Gestão de Pedidos', href: '/comercial/pedidos', icon: 'ClipboardList' },
         { title: 'Clientes', href: '/comercial/clientes', icon: 'UserCircle' },
         { title: 'Metas & Forecast', href: '/comercial/metas', icon: 'Target' },
-        { title: '🎮 Gamificação', href: '/comercial/gamificacao', icon: 'Trophy' },
-        { title: '🧠 IA Comercial', href: '/comercial/ia', icon: 'Brain' },
+        { title: 'Gamificação', href: '/comercial/gamificacao', icon: 'Trophy' },
+        { title: 'IA Comercial', href: '/comercial/ia', icon: 'Brain' },
       ],
     },
     {
