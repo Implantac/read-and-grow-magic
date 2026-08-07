@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { networkService } from '@/services/operational/network/networkService';
 import { useEnterprise } from '@/core/auth/EnterpriseContext';
 import { toast } from 'sonner';
+import type { TablesInsert } from '@/integrations/supabase/types';
 
 export function usePosTerminals(branchId?: string) {
   const { currentBranch } = useEnterprise();
@@ -28,7 +29,7 @@ export function useTransferOrders() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: { order: any, items: any[] }) => 
+    mutationFn: (data: { order: TablesInsert<'stock_transfer_orders'>, items: TablesInsert<'stock_transfer_items'>[] }) => 
       networkService.createTransferOrder(data.order, data.items),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stock_transfer_orders'] });
@@ -53,7 +54,7 @@ export function useReplenishmentPolicies() {
   });
 
   const upsertMutation = useMutation({
-    mutationFn: (policy: any) => networkService.upsertReplenishmentPolicy(policy),
+    mutationFn: (policy: TablesInsert<'replenishment_policies'>) => networkService.upsertReplenishmentPolicy(policy),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['replenishment_policies'] });
       toast.success('Política atualizada');
